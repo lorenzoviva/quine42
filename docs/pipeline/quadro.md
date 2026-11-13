@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 383 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 384 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -29,7 +29,7 @@ Aggiornato il 13/11/2026, epoca 383 (claude). Crediti: vedi `stato`.
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
-- **D54 (ADR-0188):** autore 13/11: 1 titolare = chi paga (il master; contro il consiglio), 2 4 8 sì; chiariti 3 (pausa ferma ciò che il mondo fa da sé, le risposte degli individui ai viandanti continuano), 6 (`mare`/`trattenuta`), 7 (inviti 7 giorni monouso); 5: proposta via di mezzo (direttive del master non filtrate, `metaBreak` locale sempre, Jev `text.fourthwall` manopola nei privati). Aspetto conferma di 3, 5, 6, 7, poi pianifico i 7 task.
+- **D54 (ADR-0188):** autore 13/11: 1 titolare = chi paga (il master), 2 4 7 8 sì; 3 la pausa ferma dialoghi fra individui, trame e luoghi nuovi (bozze), le risposte ai viandanti continuano; 6 riformulata: regione «riempitivo» che ripete sui luoghi nuovi un ambiente già esistente (mare, deserto…) senza chiamate, per indirizzare i viandanti. **Manca la 5** (via di mezzo proposta, richiesta di nuovo il 13/11). Poi pianifico i 7 task.
 
 ## Regole attive
 
@@ -38,5 +38,5 @@ Aggiornato il 13/11/2026, epoca 383 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **383 (claude):** D54 risposte parziali, chiarimenti in chat; integrato T361 (`0b0a5889`).
-- **381-382 (claude):** D52 e D53 chiuse, T361-T371 pianificati, T310b su fable.
+- **384 (claude):** D54: 3, 6 (riempitivo), 7 chiarite; manca la 5.
+- **383 (claude):** D54 risposte parziali; integrato T361 (`0b0a5889`).
