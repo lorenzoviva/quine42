@@ -755,9 +755,32 @@ export function consumptionRow(run, out, dopo, config = CONFIG) {
 }
 
 /**
+ * The effort levels of `agy`, in order: a model id ends with the one it runs at (`gemini-4-hydrogen-xhigh`). `extra` is
+ * `xhigh`, as for Claude's CLI. A model without such an ending has no level to choose (`gemini-pro-orchestrator-g1-pro`:
+ * «not adjustable» for `agy -p /effort`).
+ */
+const AGY_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max'];
+const AGY_SUFFIX = /-(low|medium|high|xhigh|max)$/;
+/** The levels an `agy` model has when `config.json` does not say (`livelli`): those of every model before Gemini 4 Hydrogen. */
+export const AGY_DEFAULT_LEVELS = ['low', 'medium', 'high'];
+
+/**
+ * The `agy` level of an effort on a model that has `livelli`: the highest one not over the effort, or its lowest. Never
+ * one the model does not have: `agy` refuses it (T360: `gemini-4-argon has no "xhigh" effort`).
+ */
+export function agyLevel(sforzo, livelli = AGY_DEFAULT_LEVELS) {
+  const rank = (l) => AGY_LEVELS.indexOf(l === 'extra' ? 'xhigh' : l);
+  const known = livelli.filter((l) => rank(l) >= 0).sort((a, b) => rank(a) - rank(b));
+  return known.filter((l) => rank(l) <= rank(sforzo)).at(-1) ?? known[0];
+}
+
+/**
  * Builds the CLI arguments for a task run on its provider, applying `sforzo`:
  * - `cmd: "claude"`: `--effort <level>` (`extra` mapped to `xhigh`).
- * - `cmd: "agy"`: replaces trailing `-(low|medium|high)` on `--model` with `-low`, `-medium` or `-high` (`high|extra|xhigh|max`).
+ * - `cmd: "agy"`: the level as the ending of the `--model` id, among the ones the model has (`livelli` in config.json, low,
+ *   medium and high if it does not say): `extra|xhigh|max` → `-xhigh` on Gemini 4 Hydrogen, `-high` on the others; a model
+ *   without an ending keeps its id. Never `--effort`: `agy` refuses it next to a model with an ending, and on the
+ *   Orchestrator (T360).
  */
 export function launchArgs(t, run = {}, { resume = Boolean(run.sessione), config = CONFIG } = {}) {
   const conf = config.providers[t.provider];
@@ -770,11 +793,10 @@ export function launchArgs(t, run = {}, { resume = Boolean(run.sessione), config
       if (idx >= 0) baseArgs[idx + 1] = cliEffort;
       else baseArgs.push('--effort', cliEffort);
     } else if (conf.cmd === 'agy') {
-      const suffix = sforzo === 'low' ? 'low' : sforzo === 'medium' ? 'medium' : 'high';
       const idx = baseArgs.indexOf('--model');
-      if (idx >= 0 && typeof baseArgs[idx + 1] === 'string' && /-(low|medium|high)$/.test(baseArgs[idx + 1])) {
-        baseArgs[idx + 1] = baseArgs[idx + 1].replace(/-(low|medium|high)$/, `-${suffix}`);
-      }
+      const model = idx >= 0 ? baseArgs[idx + 1] : undefined;
+      const level = agyLevel(sforzo, conf.livelli);
+      if (typeof model === 'string' && level && AGY_SUFFIX.test(model)) baseArgs[idx + 1] = model.replace(AGY_SUFFIX, `-${level}`);
     }
   }
   return resume

@@ -2468,3 +2468,158 @@ describe('i modelli di Claude distinti e lo sforzo (T255)', () => {
     expect(W.handleApi('POST', '/api/assegna', { id: 'T1', provider: 'haiku', stima: 1, sforzo: 'enorme' }, { repo }).status).toBe(400);
   });
 });
+
+describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrator (T360)', () => {
+  type Agy = Pipeline & {
+    launchArgs(t: unknown, run?: unknown, o?: { resume?: boolean; config?: unknown }): string[];
+    agyLevel(sforzo: string, livelli?: string[]): string;
+    AGY_DEFAULT_LEVELS: string[];
+    modelOf(provider: string, config?: unknown): string;
+    accountOf(provider: string, config?: unknown): string;
+  };
+  const A = () => P as unknown as Agy;
+  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  const NUOVI = ['hydrogen', 'orchestrator'];
+  const SFORZI = ['low', 'medium', 'high', 'extra', 'xhigh', 'max'];
+  const model = (provider: string, sforzo?: string, run: Record<string, unknown> = {}, cfg = config) => {
+    const a = A().launchArgs({ id: 'T1', provider, sforzo }, run, { resume: Boolean(run.sessione), config: cfg });
+    expect(a).not.toContain('--effort');
+    return a[a.indexOf('--model') + 1];
+  };
+  // `agy -p /usage` del 13/11/2026, dopo le micro-prove di T360.
+  const USAGE = [
+    'Gemini Models\tWeekly Limit Remaining\t98%\t2026-11-15T06:15:36Z',
+    'Gemini Models\tFive Hour Limit Remaining\t100%\t2026-11-13T23:03:49Z',
+    'Claude and GPT models\tWeekly Limit Remaining\t100%\t2026-11-20T18:03:49Z',
+    'Claude and GPT models\tFive Hour Limit Remaining\t100%\t2026-11-13T23:03:49Z',
+    'Gemini 4 Argon\tGemini 4 Argon Weekly Limit\t71%\t2026-11-17T21:39:05Z',
+  ].join('\n');
+  const countersOf = (p: string) => (P.parseUsage('gemini', USAGE) ?? []).filter((c) => new RegExp(config.providers[p].contatori).test(c.nome));
+
+  it('i provider nuovi su agy: modello, piani Pro e Ultra, tetto 1, nessun tetto della CLI sale, nessuno orchestra da solo', () => {
+    expect(config.providers.hydrogen).toMatchObject({ cmd: 'agy', modello: 'Gemini 4 Hydrogen', browser: false, abbonamento: 'google', orchestrabile: false });
+    expect(config.providers.orchestrator).toMatchObject({ cmd: 'agy', modello: 'Orchestrator (Argon)', browser: false, abbonamento: 'google', orchestrabile: false });
+    expect(config.providers.hydrogen.args).toContain('gemini-4-hydrogen-high');
+    expect(config.providers.orchestrator.args).toContain('gemini-pro-orchestrator-g1-pro');
+    for (const p of NUOVI) {
+      for (const piano of ['pro', 'ultra']) expect(config.piani.google[piano].disponibili).toContain(p);
+      expect(config.limiti.modello[p]).toBe(1);
+      expect(P.ceilingOf(p, config)).toBe(1);
+      expect(P.providerEnabled(p, config)).toBe(true);
+      expect(P.canOrchestrate(p, config)).toBe(false);
+      expect(P.providerHasBrowser(p, config)).toBe(false);
+    }
+    expect(config.limiti.provider).toEqual({ claude: 3, agy: 1 });
+    expect(A().modelOf('hydrogen', config)).toBe('Gemini 4 Hydrogen');
+    expect(A().modelOf('orchestrator', config)).toBe('Orchestrator (Argon)');
+    // Senza abbonamento Google non c'è nessuno dei due.
+    const senza = { ...structuredClone(config), abbonamenti: { ...config.abbonamenti, google: 'nessuno' } };
+    for (const p of NUOVI) expect(P.ceilingOf(p, senza)).toBe(0);
+  });
+
+  it('i contatori: Hydrogen su Gemini Models, Orchestrator su Gemini Models e su Gemini 4 Argon', () => {
+    expect(countersOf('hydrogen').map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h']);
+    expect(countersOf('orchestrator').map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h', 'Gemini 4 Argon settimana']);
+    // La settimana più bassa decide (Argon), la finestra delle 5 ore è quella di Gemini Models.
+    expect(P.computeBudget('orchestrator', config.providers.orchestrator, countersOf('orchestrator'))).toEqual({ residuo: 71, sessione: 100 });
+    expect(P.computeBudget('hydrogen', config.providers.hydrogen, countersOf('hydrogen'))).toEqual({ residuo: 98, sessione: 100 });
+    // Il contatore di Claude e GPT non ferma nessuno dei due.
+    for (const p of NUOVI) expect(new RegExp(config.providers[p].contatori).test('Claude and GPT models')).toBe(false);
+  });
+
+  it('i conti condivisi: Hydrogen con Gemini, Orchestrator con Argon; su agy un task alla volta, di qualunque modello', () => {
+    expect(A().accountOf('hydrogen', config)).toBe(A().accountOf('gemini', config));
+    expect(A().accountOf('orchestrator', config)).toBe(A().accountOf('argon', config));
+    expect(A().accountOf('orchestrator', config)).not.toBe(A().accountOf('hydrogen', config));
+    const small = { estimate: 1, priority: 10 };
+    const budget = { hydrogen: { residuo: 90, sessione: 100, slot: 1, tetto: 1 }, orchestrator: { residuo: 70, sessione: 100, slot: 1, tetto: 1 } };
+    for (const p of NUOVI) {
+      expect(P.fitsOn(p, small, { budget, live: [], config })).toBe(true);
+      expect(P.fitsOn(p, small, { budget, live: [{ provider: 'agy-opus', stima: 1 }], config })).toBe(false);
+    }
+    // Sotto la soglia, chi ha lo stesso conto dell'orchestratore non riprende.
+    const low = { threshold: 10, orchestrator: 'argon', left: 5, session: 5, resuming: true };
+    expect(P.capOf({ ...low, provider: 'orchestrator' })).toBe(0);
+    expect(P.capOf({ ...low, provider: 'hydrogen' })).toBe(1);
+  });
+
+  it('lo sforzo su Hydrogen: extra, xhigh e max diventano -xhigh, gli altri il loro livello', () => {
+    expect(model('hydrogen')).toBe('gemini-4-hydrogen-high');
+    expect(model('hydrogen', 'low')).toBe('gemini-4-hydrogen-low');
+    expect(model('hydrogen', 'medium')).toBe('gemini-4-hydrogen-medium');
+    expect(model('hydrogen', 'high')).toBe('gemini-4-hydrogen-high');
+    for (const s of ['extra', 'xhigh', 'max']) expect(model('hydrogen', s)).toBe('gemini-4-hydrogen-xhigh');
+    // Anche riprendendo la conversazione.
+    const ripresa = A().launchArgs({ id: 'T1', provider: 'hydrogen' }, { sessione: 'sid', sforzo: 'extra' }, { resume: true, config });
+    expect(ripresa[ripresa.indexOf('--model') + 1]).toBe('gemini-4-hydrogen-xhigh');
+    expect(ripresa).toEqual(expect.arrayContaining(['--conversation', 'sid']));
+    expect(ripresa).not.toContain('--effort');
+    // config.json non si tocca.
+    expect(config.providers.hydrogen.args).toContain('gemini-4-hydrogen-high');
+  });
+
+  it("gli altri modelli di agy restano a -high sopra high, e l'Orchestrator non prende suffissi", () => {
+    for (const [p, base] of [['gemini', 'gemini-3.8-flash'], ['argon', 'gemini-4-argon'], ['agy-opus', 'claude-opus-5-5'], ['agy-sonnet', 'claude-sonnet-5-5']]) {
+      for (const s of ['high', 'extra', 'xhigh', 'max']) expect(model(p, s)).toBe(`${base}-high`);
+      expect(model(p, 'low')).toBe(`${base}-low`);
+      expect(model(p, 'medium')).toBe(`${base}-medium`);
+    }
+    for (const s of [undefined, ...SFORZI]) expect(model('orchestrator', s)).toBe('gemini-pro-orchestrator-g1-pro');
+    // Un livello scritto per sbaglio sull'Orchestrator non lo cambia: il suo id non ha suffisso.
+    const sbagliato = structuredClone(config);
+    sbagliato.providers.orchestrator.livelli = ['low', 'high'];
+    expect(model('orchestrator', 'low', {}, sbagliato)).toBe('gemini-pro-orchestrator-g1-pro');
+  });
+
+  it('i livelli: mai uno che il modello non ha; senza livelli scritti, low, medium e high', () => {
+    expect(A().AGY_DEFAULT_LEVELS).toEqual(['low', 'medium', 'high']);
+    expect(SFORZI.map((s) => A().agyLevel(s))).toEqual(['low', 'medium', 'high', 'high', 'high', 'high']);
+    expect(SFORZI.map((s) => A().agyLevel(s, ['low', 'medium', 'high', 'xhigh']))).toEqual(['low', 'medium', 'high', 'xhigh', 'xhigh', 'xhigh']);
+    expect(A().agyLevel('max', ['low', 'medium', 'high', 'xhigh', 'max'])).toBe('max');
+    expect(A().agyLevel('low', ['high', 'xhigh'])).toBe('high');
+    // Livelli vuoti o sconosciuti: nessun livello, e l'id resta com'è.
+    expect(A().agyLevel('high', [])).toBeUndefined();
+    const vuoti = structuredClone(config);
+    vuoti.providers.hydrogen.livelli = [];
+    expect(model('hydrogen', 'max', {}, vuoti)).toBe('gemini-4-hydrogen-high');
+    // Senza `livelli` in config.json: come prima di T360.
+    const vecchio = structuredClone(config);
+    delete vecchio.providers.argon.livelli;
+    expect(model('argon', 'max', {}, vecchio)).toBe('gemini-4-argon-high');
+    // Ogni modello di agy in config.json gira a un livello che ha, e lo dice.
+    for (const [p, c] of Object.entries(config.providers) as [string, any][]) {
+      if (c.cmd !== 'agy') continue;
+      const id = c.args[c.args.indexOf('--model') + 1];
+      const fine = /-(low|medium|high|xhigh|max)$/.exec(id)?.[1];
+      if (fine) expect(c.livelli, p).toContain(fine);
+      else expect(c.livelli, p).toBeUndefined();
+    }
+  });
+
+  it("l'ordine dell'orchestratore: Orchestrator prima di Argon, Hydrogen prima di Gemini, accesi solo se spuntati", async () => {
+    const ordine: string[] = config.orchestra.ordine;
+    expect(ordine[0]).toBe('claude');
+    expect(ordine.indexOf('orchestrator')).toBeGreaterThan(0);
+    expect(ordine.indexOf('orchestrator')).toBeLessThan(ordine.indexOf('argon'));
+    expect(ordine.indexOf('hydrogen')).toBeGreaterThan(0);
+    expect(ordine.indexOf('hydrogen')).toBeLessThan(ordine.indexOf('gemini'));
+    for (const p of NUOVI) expect(config.orchestra.finestra[p]).toBeGreaterThan(0);
+    const spuntato = structuredClone(config);
+    for (const p of NUOVI) spuntato.providers[p].orchestrabile = true;
+    for (const p of NUOVI) expect(P.canOrchestrate(p, spuntato)).toBe(true);
+    // Non spuntati, si saltano: dopo Claude viene Argon, come prima.
+    const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/orchestra.mjs')).href;
+    const O = (await import(/* @vite-ignore */ url)) as { pickOrchestrator(order: string[], budget: unknown, threshold: number): string | undefined };
+    const pieno = { residuo: 90, sessione: 90 };
+    const budget = { claude: { residuo: 2, sessione: 2 }, orchestrator: pieno, argon: pieno, hydrogen: pieno, gemini: pieno };
+    expect(O.pickOrchestrator(ordine, budget, 10)).toBe('argon');
+  });
+
+  it('la pagina web offre i due modelli nuovi col loro nome', async () => {
+    const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href;
+    const W = (await import(/* @vite-ignore */ url)) as { renderHtml(): string };
+    const html = W.renderHtml();
+    expect(html).toContain('<option value="hydrogen">hydrogen (Gemini 4 Hydrogen)</option>');
+    expect(html).toContain('<option value="orchestrator">orchestrator (Orchestrator (Argon))</option>');
+  });
+});
