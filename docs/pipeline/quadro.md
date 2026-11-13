@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 362 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 363 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -21,9 +21,9 @@ Aggiornato il 13/11/2026, epoca 362 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T354 su Fable; T350 (dopo T349), T347 (fable high), T345, T352; bloccati T351, T354→T355 (non prima del 15/11), T356.
+0. **In corso/pronti:** T354 su Fable (in pausa per limite 5h fino a 08:01 UTC); pronti T350 (dopo T349), T356 (dopo T346), T347 (fable high), T345, T352; bloccati T351, T354→T355 (non prima del 15/11).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 04:20):** Claude settimana 81 %, 5h 63 % (reset 08:00 UTC); Fable settimana 72 %, 5h 62 %; Gemini 98 %; Argon 91 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (13/11 04:33 UTC):** Claude settimana 76 %, 5h 0 % (reset 07:59 UTC); Fable settimana 62 %, 5h 0 %; Gemini 98 %; Argon 91 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 362 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **363 (argon):** rotazione da Claude (finestra 5h a 0 %, reset 07:59 UTC); T354 su Fable in pausa fino alle 08:01 UTC.
 - **362 (claude):** T358 integrato (kernel 0.6.8); `node_modules/.bin` del base mancava (i worktree prendevano vitest 2.1.4): rifatto con `npm rebuild --ignore-scripts`.
-- **361 (claude):** T358 aveva ripreso la conversazione vecchia (0.6.7 senza T349): worktree e ramo tolti, riparte da capo per 0.6.8. T354 in corso su Fable.
