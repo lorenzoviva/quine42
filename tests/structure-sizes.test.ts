@@ -9,16 +9,19 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { habitableParts } from '../src/kernel/forms';
 import { compositionOf, partErrors, varietyError, type Composition } from '../src/mj/check';
 import { boxOf, classOf, densityFor, PARTS, partVoxels, STRUCTURE_SIDE, TILE, tilesOf, type SizeTier } from '../src/mj/classes';
-import { compileMjx } from '../src/mj/model';
+import { compileMjx, mjxIncludes, type MjxFiles } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
 
 const structure = classOf('structure')!;
 const SIZES: SizeTier[] = ['large', 'huge', 'gargantuan'];
 
+/** The files of the seed's models/ a program reads (the parts one lives in, T346), as the game gives them to the compiler. */
+const seedFiles = (xml: string): MjxFiles => mjxIncludes(xml, (f) => (fs.existsSync(`universe/models/${f}`) ? fs.readFileSync(`universe/models/${f}`, 'utf8') : undefined));
+
 /** A program at a size of the structures, at a seed: its parts and what it contains. */
 function at(xml: string, size: SizeTier, seed = 1) {
   const vpt = densityFor(structure, size);
-  const model = compileMjx(xml.replace(/(<sequence[^>]*?)\ssize="[^"]*"/, '$1'), { size: boxOf(structure, size) });
+  const model = compileMjx(xml.replace(/(<sequence[^>]*?)\ssize="[^"]*"/, '$1'), { size: boxOf(structure, size), files: seedFiles(xml) });
   const r = runMjx(model, seed, { deadline: 20_000 });
   expect(r.finished).toBe(true);
   const parts = habitableParts(r.grid, model.program.palette, vpt, partVoxels(vpt).storey.clear, 0, model.actions, seed);
@@ -82,8 +85,8 @@ describe('what fits: the same program at three sizes (T338)', () => {
   const kinds = (c: Composition) => Object.keys(c.byLetter).sort();
 
   for (const [name, adds] of [
-    // The farm: a house with its lean-to and hay; then the fence, its rails and the fields; then the barn and the sheep.
-    ['fattoria', [['f', 'L', 'G', 'g'], ['C', 'c', 'e', 'u']]],
+    // The farm (T346): a house with its lean-to and hay; then the fence's posts and rails and the fields; then the barn with its floor.
+    ['fattoria', [['p', 'L'], ['b']]],
     // The fort: a keep with its talus; then the curtain wall; then the towers on its corners, with their slate.
     ['forte', [['C'], ['c']]],
   ] as const) {

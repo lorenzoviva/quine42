@@ -1,0 +1,28 @@
+<!--
+Arrow slits (T346, ADR-0182): a part included with <import file="part-slits"/> after part-battlements, written by
+lab/banco/taglie/parti.mjs. Under the middle of every merlon of 5 (M) it opens a slit through the wall (the union "%": the letters of
+the walls that get slits, <union symbol="%" values="…"/> in your program wins over this one): one wide, 6 high, two cells under the
+top; regular because the merlons are. Its letter: U the slit (give U your colour). Alone it builds a tower from its origin with its
+merlons, so that it is validated on its own.
+-->
+<sequence values="BSMU#93#91#92#94" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
+  <union symbol="%" values="S"/>
+  <color symbol="U" value="2a2622" name="feritoie"/><color symbol="M" value="b2ac9f" name="merli di prova"/><color symbol="S" value="a39d90" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/>
+  <color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#94" hidden="True"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): a tower of 29 × 29 × 30 from S, with merlons of 5 and gaps of 3 along its top (from the corners). -->
+  <all in="S#93" out="*S" symmetry="(x)" steps="14"/>
+  <all in="S/#93" out="*/S" symmetry="(y)" steps="14"/>
+  <all in="B S" out="S *" steps="29"/>
+  <prl in="#93" out="B" steps="1"/>
+  <all in="BB BS" out="*#92 **"/>
+  <all in="#92#92/#92B" out="#94*/**"/>
+  <all in="#94#92#92#92#92#92#92#92#92" out="*#94#94#94#94#91#91#91#94"/>
+  <all in="#94#92" out="*#94" steps="2"/>
+  <prl in="#92" out="#91" steps="1"/>
+  <all in="B #94" out="#94 *" steps="5"/>
+  <prl><rule in="#91" out="B"/><rule in="#94" out="M"/></prl>
+
+  <!-- 1. Under the middle of every merlon of 5, two cells down, a slit of 6, through the wall. -->
+  <all in="BMMMMMB ***%*** ***%*** ***%*** ***%*** ***%*** ***%*** ***%*** ***%***" out="******* ******* ******* ***U*** ***U*** ***U*** ***U*** ***U*** ***U***"/>
+  <all in="[BU]U%" out="**U"/>
+</sequence>

@@ -13,7 +13,9 @@
 //   <color symbol="N" value="8b5a2b" part="gamba" hidden="True" glow="True"/>  recolours a letter
 //                                           (MarkovJunior's palette.xml syntax); `part` names a limb that
 //                                           moves when the figure walks; `hidden` keeps a marker out of the
-//                                           picture; `glow` makes it give light (flames, windows, neon)
+//                                           picture; `glow` makes it give light (flames, windows, neon);
+//                                           `area="pasture"` says what the letter marks on the ground of a
+//                                           structure, for whoever places people and animals (T346)
 //   <box|ellipsoid|cylinder|cone at="x y z" size="w d h" color="A" on="B"/>, <line at to r color/>
 //                                           solid shapes, `at` the centre of the base, z from the floor up
 //   <animation name="fiamma" frames="6">…</animation>  nodes run once per frame on the finished model,
@@ -53,6 +55,7 @@ import { hasPieces, Mj3Error, PARTS, PIECE_DEFAULTS, SHAPES, type ConvRule, type
 import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
 import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type NeighborSource, type TileSource, type WfcModel } from './wfc';
+import { AREA_RE } from './areas';
 import { isNoteLine, isSymbolCode, MAX_SYMBOLS, readSymbols, showSymbols, SymbolError, symbolName, symbolTokens } from './symbols';
 import { parseXml, XmlError, type XmlElement } from './xml';
 
@@ -545,6 +548,12 @@ class Compiler {
         alpha = 0.5;
       }
 
+      // The area of a structure the letter marks (T346, ADR-0182): a plain name, or it is dropped with a note.
+      let area: string | undefined = el.attrs.area?.trim();
+      if (area !== undefined && !AREA_RE.test(area)) {
+        this.mend(el, `area "${area}": un nome semplice (lettere minuscole, cifre e "-", fino a 24 caratteri): tolta`);
+        area = undefined;
+      }
       this.colors[sym] = {
         ...(value ? { color: `#${value.toLowerCase()}` } : {}),
         ...(el.attrs.name || el.attrs.comment ? { name: el.attrs.name ?? el.attrs.comment } : {}),
@@ -552,6 +561,7 @@ class Compiler {
         ...(/^true$/i.test(el.attrs.hidden ?? '') ? { hidden: true } : {}),
         ...(/^true$/i.test(el.attrs.glow ?? '') ? { glow: true } : {}),
         ...(alpha !== undefined ? { alpha } : {}),
+        ...(area ? { area } : {}),
       };
     } else if (el.name === 'sound') {
       if (this.file) {
@@ -1063,6 +1073,50 @@ function pad(a: string, b: string): [string, string] {
 
 const hasMap = (el: XmlElement): boolean => GRID_TAGS.has(el.name) || el.children.some(hasMap);
 
+/** The main root of a program's text (what is beside it, actions and worn sections, does not count), or undefined. */
+function mainRoot(xml: string): XmlElement | undefined {
+  try {
+    return parseXml(xml).find((r) => !ASIDE_TAGS.has(r.name));
+  } catch {
+    return undefined;
+  }
+}
+
+/** The product of the scales of every `map` of a program, in document order, as a fraction per axis; [1, 1] where there is none. */
+function mapProduct(el: XmlElement): Array<[number, number]> {
+  const out: Array<[number, number]> = [[1, 1], [1, 1], [1, 1]];
+  const walk = (e: XmlElement) => {
+    if (e.name === 'map') {
+      const scale = (e.attrs.scale ?? '').trim().split(/\s+/);
+      if (scale.length === 3)
+        scale.forEach((s, i) => {
+          const [n, d] = s.split('/').map(Number);
+          out[i] = [out[i][0] * (Number.isFinite(n) ? n : 1), out[i][1] * (Number.isFinite(d) ? d : 1)];
+        });
+    }
+    for (const c of e.children) walk(c);
+  };
+  walk(el);
+  return out;
+}
+
+/**
+ * Whether a program with `map` comes back to the scale of its root (T346, ADR-0182): a plan on a coarse grid (`scale="1/10 1/10 1"`),
+ * then the voxels (`scale="10 10 1"`). Such a program takes the box it is given, as one without `map`, and so serves every size; one
+ * that stays on another scale keeps its own box. The maps of a `wfc` do not count (its grid is its own).
+ */
+export function mapsBackToBox(program: string | XmlElement): boolean {
+  const root = typeof program === 'string' ? mainRoot(program) : program;
+  if (!root || !hasMap(root)) return false;
+  return mapProduct(root).every(([n, d]) => n === d);
+}
+
+/** Whether a program has a `map` or a `wfc` in its main root. */
+export const hasMapIn = (xml: string): boolean => {
+  const root = mainRoot(xml);
+  return !!root && hasMap(root);
+};
+
 /**
  * What a program infers: `field` and `observe` in its rule nodes, its animations and its actions (T334); the world takes them within
  * its ceilings (`worldNodeErrors`, T336).
@@ -1136,7 +1190,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
     const base = MJ_PALETTE[ch];
     const own = c.colors[ch];
     if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`il simbolo "${symbolName(ch)}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${symbolName(ch)}" value="rrggbb"/>`);
-    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}) };
+    palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}), ...(own?.area ? { area: own.area } : {}) };
   }
   for (const ch of Object.keys(c.colors)) if (!c.declared.has(ch)) c.warnings.push(`<color symbol="${symbolName(ch)}">: il simbolo non è in nessun values`);
   const unions: Record<string, string> = {};
@@ -1148,8 +1202,9 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   const ground = root.attrs.ground;
   // `soil` since the contract 0.4 (T308a); `suolo`, as the Sculptor still writes it until its prompts change (T310), is the same.
   const soil = root.attrs.soil ?? root.attrs.suolo;
-  // `base` counts voxels of the finished model: on the coarse grid of a `map` it would be another height.
-  if (soil && hasMap(root)) c.fail(root, 'suolo non vale con map: il suolo si conta in voxel del modello finito');
+  // `base` counts voxels of the finished model: on the coarse grid of a `map` it would be another height. A program whose maps come
+  // back to the box (a plan at 1/10, then ×10: T346, ADR-0182) keeps the scale of its root: its first map carries the soil down.
+  if (soil && hasMap(root) && !mapsBackToBox(root)) c.fail(root, 'suolo non vale con map: il suolo si conta in voxel del modello finito (salvo che le map tornino alla scatola)');
   return {
     name: root.attrs.name,
     ...(c.sound ? { sound: c.sound } : {}),

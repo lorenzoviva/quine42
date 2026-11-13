@@ -1,0 +1,28 @@
+<!--
+Battlements (T346, ADR-0182): a part included with <import file="part-battlements"/>, written by lab/banco/taglie/parti.mjs.
+On the edge of every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts
+merlons of 5 and gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the
+middle of a side the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.
+Alone it builds a tower from its origin and crowns it, so that it is validated on its own.
+-->
+<sequence values="BSM#90#91#93" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
+  <union symbol="+" values="S"/>
+  <color symbol="M" value="b2ac9f" name="merli"/><color symbol="S" value="a39d90" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/>
+  <color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): a tower of 29 × 29 × 30 from S, its top a platform. -->
+  <all in="S#93" out="*S" symmetry="(x)" steps="14"/>
+  <all in="S/#93" out="*/S" symmetry="(y)" steps="14"/>
+  <all in="B S" out="S *" steps="29"/>
+  <prl in="#93" out="B" steps="1"/>
+
+  <!-- 1. The crest: the air over the edge of every top (a top cell with air above and beside) is marked. -->
+  <all in="BB B+" out="*#90 **"/>
+  <!-- 2. A corner is a merlon; from it, along the crest, merlons of 5 and gaps of 3; the odd cells where two runs meet go to the merlons, the rest are gaps. -->
+  <all in="#90#90/#90B" out="M*/**"/>
+  <all in="M#90#90#90#90#90#90#90#90" out="*MMMM#91#91#91M"/>
+  <all in="M#90" out="*M" steps="2"/>
+  <prl in="#90" out="#91" steps="1"/>
+  <!-- 3. The merlons rise 6 in all; the gaps go. -->
+  <all in="B M" out="M *" steps="5"/>
+  <prl in="#91" out="B" steps="1"/>
+</sequence>

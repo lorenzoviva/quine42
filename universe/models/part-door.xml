@@ -1,0 +1,25 @@
+<!--
+The door (T346, ADR-0182): a part one lives in, included with <import file="part-door"/>, written by lab/banco/taglie/parti.mjs.
+The program that includes it writes the seed of the door with O: 11 wide, at the foot of a wall and through its whole thickness, on the
+layer of the floor. The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks
+(o). Its letters: O the door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls
+(<union symbol="+" values="…"/> in your program wins over this one). The actions that open and close it are yours
+(<action name="open"> on O and o). Alone it builds a wall from its origin and opens a door in it, so that it is validated on its own.
+-->
+<sequence values="BSOoN#93" size="45 8 44" symmetry="(xy)" origin="bottom" ground="#93">
+  <union symbol="+" values="S"/>
+  <color symbol="O" value="7a4a26" name="porta"/><color symbol="o" value="5e3a1e" name="asse scura"/><color symbol="N" value="6b4a2e" name="telaio"/>
+  <color symbol="S" value="a39d90" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): a wall of 41 × 2 × 40 from S, the seed of the door in the middle of it. -->
+  <all in="S#93" out="*S" symmetry="(x)" steps="20"/>
+  <all in="S/#93" out="*/S" symmetry="()" steps="1"/>
+  <all in="B S" out="S *" steps="39"/>
+  <one in="#93#93#93#93#93#93#93#93#93#93#93#93#93/SSSSSSSSSSSSS/SSSSSSSSSSSSS" out="*************/*OOOOOOOOOOO*/*OOOOOOOOOOO*" symmetry="()" steps="1"/>
+  <prl in="#93" out="B" steps="1"/>
+
+  <!-- 1. The door rises 30 through the wall; the lintel above it, the jambs at its sides; the planks. -->
+  <all in="+ O" out="O *" steps="29"/>
+  <all in="+ O" out="N *" steps="1"/>
+  <all in="O+" out="*N" steps="1"/>
+  <all in="OOO" out="*o*"/>
+</sequence>

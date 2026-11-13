@@ -5123,7 +5123,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: commit su `task/T347`; l'autore decide sull'ADR proposto. Sicurezza: nessuna superficie nuova (quelle che il progetto aprirà, inviti e pagamenti del master, elencate nel documento).
 
-### T346 · Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — `da fare` (dipende da T338, T339)
+### T346 · Strutture MJ: correzione dettagli, separazione animali e campi vari (passo 1 di D48) — `fatto` (`598dbeff`) (dipende da T338, T339)
 - Pipeline: fable · sforzo high · stima 5% · approvato · browser · priorità 4
 - Step: 30
 - Contesto: feedback dell'autore su T338 e T339 (10/11, testo intero in `docs/userchats/to-do-2026-11-10.md`, seconda richiesta) e D48 → D integrata (`docs/pipeline/domande/T337.md`, `lab/banco/metodo/README.md`). Nasce da T337, T338, T339: `dossier T337`, `dossier T338`, `dossier T339`. La forma che cambia con la taglia va bene; i difetti sono nei dettagli. **Riferimenti visivi dell'autore:** i più ricchi e piacevoli sono i modelli di T173 (`lab/banco/metodo/misure/conferma.png`, ma mobili e decorazioni sono dello Scenografo, T259), molto belli quelli di T337 (`lab/banco/metodo/misure/zone.png`); per varianza e dimensioni `lab/banco/pezzi/fattoria.png` e `lab/banco/taglie/fattoria-gargantuan.png`. La fattoria gargantuesca di T338 è meno bella di quella di T339: T338 ha l'architettura più completa (casa del pastore a due piani, fieno sotto la tettoia, come chiedeva il prompt), T339 i campi irregolari che si incastrano, il recinto irregolare e una forma che cambia molto col seme.
@@ -5131,6 +5131,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: controlli del banco (`banco-taglie.ts`, `banco-pezzi.ts`); verifica assenza animali nella griglia; porte e merli validati; typecheck e suite.
 - Browser: sì, foto aggiornate di forte e fattoria a tre taglie in `lab/banco/taglie/`.
 - Quando è fatto: commit su `task/T346`, foto del banco nel commit, kernel sale di Z se cambiano i controlli.
+- Esito: parti abitabili come sottoblocchi del seme inclusi con `<import>` e provati da soli; `area` e `areasOf`/`formAreas` (le strutture non disegnano animali, marcano le aree); `mapsBackToBox` (la `map` condivisa fra le taglie, con `soil`); `open` in `reachableStoreys` era già fatto da T336; fattoria e forte del banco rifatti (porte dal camminamento alle torri, merli regolari, feritoie ordinate, staccionata senza blocchi, fienile e casa di T338 con i campi di T339); kernel 0.6.6; suite 3017 verdi (il test `determinism.test.ts` è fallito una volta sotto carico con dev server e Chrome aperti, poi verde da solo e nell'intera suite), typecheck e build verdi. Non fatto: chi usa le aree per mettere persone e animali (Narratore/Scenografo), il prompt senza scheletro e il giro su Gemini (T354, T355), il tetto dei voxel (T356); una scala dal cortile al camminamento del forte. Non provato: lo Scultore su Gemini con le parti. Sicurezza: nessuna superficie nuova.
 
 ### T345 · La open beta senza pagamenti all'autore: OpenRouter, hosting esterno e self-hosting (studio e ADR proposto) — `da fare`
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5

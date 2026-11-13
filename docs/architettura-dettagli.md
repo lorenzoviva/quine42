@@ -935,6 +935,26 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   misure: le chiede lo Scultore a ciò che scrive. Le carte fatte a mano restano alla densità di prima (`boxUnderMaxSide`), dove sono
   misurati i loro tetti. Il banco: `lab/banco/taglie/` (fattoria e forte alle tre taglie, `npx vite-node
   lab/scripts/banco-taglie.ts`).
+- **Le parti abitabili come sottoblocchi del seme, le aree, le `map` che tornano** (ADR-0182, T346, passo 1 di D48): quattro programmi di
+  `universe/models/` che una struttura include con `<import file="part-…"/>` (ADR-0171) invece di riscriverli: `part-stair` (la scala da una
+  striscia `T` di 16 × 11 nell'aria sopra un pavimento, scritta da chi include con `symmetry="()"`: sale verso le x grandi due per uno, apre
+  il solaio sopra la striscia, riempie sotto; l'unione `=` sono i pavimenti), `part-door` (dal seme `O` di 11 scritto attraverso il muro al
+  piede: sale 30 attraverso l'unione `+` dei muri, architrave e stipiti `N`, assi `o`; le azioni `open`/`close` restano di chi include),
+  `part-battlements` (sul bordo di ogni cima piatta delle lettere `+`: merli di 5 e vuoti di 3, alti 6, regolari da ogni angolo), `part-slits`
+  (sotto il centro di ogni merlo di 5 una feritoia di 1 × 6 attraverso l'unione `%`). Il contratto: le lettere di chi include che la parte
+  legge e scrive (chi include dà i colori), le unioni che chi include ridefinisce (la sua vince), i marcatori `#90`-`#91` suoi. Da sola ogni
+  parte è un modello: la scena dall'origine (la lettera `S`, che un'inclusione non ha: quei nodi non fanno niente inclusi), `size`, `ground`,
+  la porta con le azioni per la scala, così il validatore la prova e `habitableParts` la misura; le scrive `lab/banco/taglie/parti.mjs`.
+  **Le aree** (`src/mj/areas.ts`): `area="pasture"` su una `<color>` (`AREA_RE`, anche nascosta: resta nella griglia senza vedersi);
+  `areasOf(grid, palette, vpt, base)` legge lo strato del suolo casella per casella (l'area con più celle, a parità la prima in ordine
+  alfabetico), `formAreas(form)` una volta per forma nel frame del modello (`Form.areas`, prima di `yaw`); una struttura non disegna persone
+  né animali, marca dove vanno, per il Narratore e lo Scenografo (un task loro). **Le `map` che tornano** (`mapsBackToBox` in `model.ts`): un
+  programma le cui `map` hanno prodotto di scala 1 su ogni asse (un piano a `1/10 1/10 1`, poi `10 10 1`) prende la scatola che gli si dà:
+  `shareableProgram`, `withSize`, `checkProgram` lo trattano come uno senza `map`, e `soil` vale (la prima `map` lo porta giù); la scala del
+  piano deve dividere le scatole. Il banco (`lab/banco/taglie/`): la fattoria col piano di T339 (cortile irregolare, strada, staccionata,
+  tracciati, appezzamenti a incastro, pascoli recintati con i cancelli a sbarre, il fienile a lato) e la casa di T338 (due piani, tettoia,
+  fieno); il forte con la cinta di 12 e il camminamento, le torri cave con la porta dal camminamento, merli e feritoie dalle parti; i
+  controlli `merlonRuns` e `animalLetters`, le aree per taglia, `--parti` per le parti da sole.
 
 <a id="taglie"></a>
 ## Le taglie
