@@ -2,14 +2,23 @@
 // a limited body, a daily cap in dollars. Two doors: the route /api/gemini, for the kernel in the browser of whoever
 // plays alone on this machine (loopback only, same origin), and `direct()`, for the worlds of many, which run in
 // a process of their own and ask this one over their channel (ADR-0110), with no route at all. The key never reaches the client bundle or the browser.
+// The explicit caches (T351, ADR-0186) pass here too: a write (`cachedContents`) only for a model whose storage has a price, its body
+// rebuilt field by field, a `ttl` up to EXPLICIT_CACHE.maxTtl, its tokens and their storage for the whole `ttl` held and spent against
+// the cap; a call may name only a cache this gate wrote, for its model, while it lives.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { billedModel, costOf, ESTIMATED, PRICES } from '../src/kernel/ai/prices';
+import { billedModel, cacheable, costOf, ESTIMATED, EXPLICIT_CACHE, PRICES } from '../src/kernel/ai/prices';
 
 const UPSTREAM = 'https://generativelanguage.googleapis.com/v1beta/models';
+const CACHE_UPSTREAM = 'https://generativelanguage.googleapis.com/v1beta/cachedContents';
+/** Explicit caches alive at once (T351): their storage is already in the cap, this keeps the list small. */
+export const MAX_LIVE_CACHES = 64;
+/** The shortest `ttl` a cache may ask (seconds). */
+const MIN_CACHE_TTL = 60;
+const CACHE_NAME = /^cachedContents\/[\w-]{1,128}$/;
 /** The largest real request is a long prompt with the Artist's sheet of four photographs, well under this. */
 export const MAX_BODY = 2 * 1024 * 1024;
 /** USD a day, unless `.env` says otherwise (GEMINI_TETTO_GIORNALIERO). */
@@ -20,6 +29,7 @@ const HELD_OUTPUT_TOKENS = 8192;
 export const STATUS_CAP = 402;
 
 const MODEL_IN_PATH = /\/models\/(gemini-[\w.-]+):generateContent$/;
+const CACHES_IN_PATH = /\/cachedContents$/;
 const LOOPBACK_HOST = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i;
 
 export interface GateOptions {
@@ -33,6 +43,8 @@ export interface GateOptions {
   fetchImpl?: typeof fetch;
   /** The day (ISO), in tests. */
   today?: () => string;
+  /** The clock in milliseconds (the lives of the explicit caches), in tests. */
+  now?: () => number;
 }
 
 export interface GateAnswer {
@@ -59,12 +71,16 @@ export class GeminiGate {
   private readonly cap: number;
   private readonly fetchImpl: typeof fetch;
   private readonly today: () => string;
+  private readonly now: () => number;
+  /** The explicit caches this gate wrote (T351): name → model and when it ends (milliseconds). */
+  private readonly caches = new Map<string, { model: string; until: number }>();
 
   constructor(private opts: GateOptions) {
     const cap = opts.dailyCap === undefined || opts.dailyCap === '' ? NaN : Number(opts.dailyCap);
     this.cap = Number.isFinite(cap) && cap >= 0 ? cap : DEFAULT_DAILY_CAP;
     this.fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
     this.today = opts.today ?? (() => new Date().toISOString().slice(0, 10));
+    this.now = opts.now ?? (() => Date.now());
     this.restore();
   }
 
@@ -109,6 +125,8 @@ export class GeminiGate {
     if (!this.allows(model)) return refusal(403, 'modello non ammesso');
     const bytes = Buffer.byteLength(body);
     if (bytes > MAX_BODY) return refusal(413, 'richiesta troppo grande');
+    const named = this.namedCacheRefusal(model, body);
+    if (named) return named;
     this.roll();
     const day = this.day;
     const hold = costOf(billedModel(model), { prompt: bytes / 4, output: HELD_OUTPUT_TOKENS }, day) ?? 0;
@@ -132,10 +150,98 @@ export class GeminiGate {
     }
   }
 
+  /** A call that names an explicit cache this gate did not write, for another model, or that has ended: refused here (T351). */
+  private namedCacheRefusal(model: string, body: string): GateAnswer | undefined {
+    if (!body.includes('cachedContent')) return undefined;
+    let name: unknown;
+    try {
+      name = JSON.parse(body)?.cachedContent;
+    } catch {
+      return undefined;
+    }
+    if (name === undefined) return undefined;
+    const c = typeof name === 'string' ? this.caches.get(name) : undefined;
+    if (c && this.now() < c.until && c.model === model) return undefined;
+    if (c && this.now() >= c.until) this.caches.delete(name as string);
+    return refusal(404, 'cache sconosciuta');
+  }
+
+  /** Explicit caches alive now. */
+  liveCaches(): number {
+    const now = this.now();
+    for (const [name, c] of this.caches) if (now >= c.until) this.caches.delete(name);
+    return this.caches.size;
+  }
+
+  /**
+   * The write of an explicit cache (T351): its model on the list and with a storage price, a `ttl` between MIN_CACHE_TTL and
+   * EXPLICIT_CACHE.maxTtl, only system instructions in text; the body is rebuilt from those fields alone. What it holds of the cap is
+   * its prompt and the storage for the whole `ttl`; what it spends, the tokens Google counted and their storage.
+   */
+  async writeCache(body: string, signal?: AbortSignal | null): Promise<GateAnswer> {
+    if (!this.opts.apiKey) return refusal(503, 'GEMINI_API_KEY mancante in .env');
+    if (Buffer.byteLength(body) > MAX_BODY) return refusal(413, 'richiesta troppo grande');
+    let req: any;
+    try {
+      req = JSON.parse(body);
+    } catch {
+      return refusal(400, 'corpo non leggibile');
+    }
+    const model = typeof req?.model === 'string' ? /^models\/(gemini-[\w.-]+)$/.exec(req.model)?.[1] : undefined;
+    if (!model || !this.allows(model)) return refusal(403, 'modello non ammesso');
+    this.roll();
+    const day = this.day;
+    if (!cacheable(model, day)) return refusal(403, 'modello senza cache esplicita');
+    const ttlMatch = typeof req.ttl === 'string' ? /^(\d{1,5})s$/.exec(req.ttl) : null;
+    const ttl = ttlMatch ? Number(ttlMatch[1]) : NaN;
+    if (!(ttl >= MIN_CACHE_TTL && ttl <= EXPLICIT_CACHE.maxTtl)) return refusal(400, 'durata non ammessa');
+    const parts: unknown = req.systemInstruction?.parts;
+    const texts = Array.isArray(parts) && parts.length && parts.every((p) => p && typeof p === 'object' && typeof p.text === 'string' && Object.keys(p).length === 1) ? parts.map((p) => String(p.text)) : undefined;
+    if (!texts) return refusal(400, 'solo istruzioni di sistema in testo');
+    if (this.liveCaches() >= MAX_LIVE_CACHES) return refusal(429, 'troppe cache vive');
+    const clean = JSON.stringify({ model: `models/${model}`, systemInstruction: { parts: [{ text: texts.join('') }] }, ttl: `${ttl}s` });
+    const hours = ttl / 3600;
+    const tokens = Buffer.byteLength(clean) / 4;
+    const hold = costOf(model, { prompt: tokens, output: 0, stored: tokens * hours }, day) ?? 0;
+    if (this.spent + this.held + hold > this.cap) return refusal(STATUS_CAP, 'tetto di spesa del giorno raggiunto');
+    this.held += hold;
+    let cost = hold;
+    try {
+      const upstream = await this.fetchImpl(CACHE_UPSTREAM, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.opts.apiKey },
+        body: clean,
+        ...(signal ? { signal } : {}),
+      });
+      const text = await upstream.text();
+      if (!upstream.ok) {
+        cost = 0;
+        return { status: upstream.status, text };
+      }
+      let j: any;
+      try {
+        j = JSON.parse(text);
+      } catch {
+        j = undefined;
+      }
+      const counted = Number(j?.usageMetadata?.totalTokenCount);
+      if (Number.isFinite(counted) && counted >= 0) cost = costOf(model, { prompt: counted, output: 0, stored: counted * hours }, day) ?? hold;
+      if (typeof j?.name === 'string' && CACHE_NAME.test(j.name)) this.caches.set(j.name, { model, until: this.now() + ttl * 1000 });
+      return { status: upstream.status, text };
+    } finally {
+      this.held -= hold;
+      this.spend(cost, day);
+    }
+  }
+
   /** The door of the worlds of many: a `fetch` for GeminiAiModels that goes to Google with no route. Undefined without a key. */
   direct(): typeof fetch | undefined {
     if (!this.available) return undefined;
     return (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (CACHES_IN_PATH.test(String(input))) {
+        const w = await this.writeCache(String(init?.body ?? ''), init?.signal);
+        return new Response(w.text, { status: w.status, headers: { 'Content-Type': 'application/json' } });
+      }
       const model = MODEL_IN_PATH.exec(String(input))?.[1] ?? '';
       const r = await this.forward(model, String(init?.body ?? ''), init?.signal);
       return new Response(r.text, { status: r.status, headers: { 'Content-Type': 'application/json' } });
@@ -256,11 +362,13 @@ export function geminiRoute(gate: GeminiGate): Connect.NextHandleFunction {
     const route = req.url.split('?')[0];
     if (route === '/api/gemini/status') return send(res, 200, { available: gate.available });
     const m = /^\/api\/gemini\/models\/(gemini-[\w.-]+):generateContent$/.exec(route);
-    if (!m || req.method !== 'POST') return send(res, 404, { error: { message: 'endpoint sconosciuto' } });
+    // The write of an explicit cache (T351): the same door, its own checks in the gate.
+    const caches = route === '/api/gemini/cachedContents';
+    if ((!m && !caches) || req.method !== 'POST') return send(res, 404, { error: { message: 'endpoint sconosciuto' } });
     // A form of another site cannot send this type without asking first.
     if (!/^application\/json\b/i.test(req.headers['content-type'] ?? '')) return send(res, 415, { error: { message: 'solo JSON' } });
     readBody(req)
-      .then((body) => gate.forward(m[1], body))
+      .then((body) => (m ? gate.forward(m[1], body) : gate.writeCache(body)))
       .then((answer) => send(res, answer.status, answer.text))
       .catch((e: Error) => {
         if (e instanceof TooLarge) {

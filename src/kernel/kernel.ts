@@ -34,7 +34,7 @@ import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoeffic
 import { BudgetError, type AiModels } from './ai/models';
 import type { DecisionModels } from './ai/decisions';
 import { billedModel, costOf } from './ai/prices';
-import { USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
+import { tokensOf, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
@@ -6156,7 +6156,7 @@ export class Kernel {
 
   private charge(r: CallRecord): void {
     // A model of Google's off the price list costs what the gate counts it for, the dearest, never nothing (V-024); the local ones are free.
-    const usd = costOf(billedModel(r.model), { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, r.day) ?? 0;
+    const usd = costOf(billedModel(r.model), tokensOf(r), r.day) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
     const payer = r.who || COMUNE;
