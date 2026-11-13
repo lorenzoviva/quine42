@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 387 (argon). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 390 (orchestrator). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -22,13 +22,13 @@ Aggiornato il 13/11/2026, epoca 387 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T310b (fable, sospeso al limite 5h, riprende alle 23:01 UTC / 00:01 CET). **Pronti:** T362, T370, T366 (fable, dopo T310b), T372, T374 (claude, fermi per 5h a 0 % fino alle 22:59 UTC); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset: niente spostamenti su claude per ora.
+0. **In corso:** T310b (fable, sospeso al limite 5h, riprende alle 04:01 UTC / 05:01 CET). **Pronti:** T362, T370, T366 (fable, dopo T310b), T372, T374, T378 (claude, fermi per 5h a 0 % fino alle 03:59 UTC / 04:59 CET); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset: niente spostamenti su claude per ora.
 1. **Da approvare dall'autore:** T369 (dopo).
-2. **Crediti (13/11 20:52 UTC):** Claude settimana 54 %, 5h 0 % (reset 22:59 UTC); Fable settimana 25 % (9 % effettivo); Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
+2. **Crediti (14/11 00:45 CET):** Claude settimana 46 %, 5h 0 % (reset 03:59 UTC / 04:59 CET); Fable settimana 8 %; Gemini/Hydrogen/Argon/Orchestrator 100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
 
-- **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
+- **D35 (piano di lancio):** in aggiornamento in T378 (open beta, OpenRouter/VPS, voce dell'autore e alternative alla PNL).
 
 ## Regole attive
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 387 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **387 (argon):** T310b sospeso al limite 5h (reset 22:59 UTC, riprende alle 23:01 UTC).
-- **385 (claude):** D54 chiusa (5: via di mezzo); pianificati T372-T377, T366 allargato.
+- **390 (orchestrator):** attivato `orchestrabile.orchestrator`; T310b ripreso alle 23:01 UTC e di nuovo sospeso al limite 5h (reset 03:59 UTC / 04:59 CET, riprende alle 04:01 UTC).
+- **388 (claude):** indicazioni dell'autore su D35; aperto T378 (claude, 4 %, approvato) per aggiornare `docs/lancio/piano.md`.
