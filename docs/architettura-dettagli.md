@@ -934,11 +934,12 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `pos.z`, che il kernel tiene dopo ogni tick (`settleHeights`) e che `free`/`free_real`/`floorAt` prendono (senza: il piano terra);
   il renderer taglia sopra il piano in cui si è.
 - **Le strutture che crescono** (ADR-0160, T156): la classe `structure` da Grande in su ha il prompt procedurale del banco (T182),
-  la parte di `prompts/agents/sculptor.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria:
-  lo scheletro è nel prompt, e offline è la risposta dei modelli locali (`skeletonOf`). Il programma non ha una `size` sua (`withoutSize`):
+  la parte di `prompts/agents/sculptor.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria
+  e, dal T354, senza scheletro (ADR-0183: il metodo e gli attrezzi, non un edificio da ricopiare); offline la risposta dei modelli locali è
+  `MOCK_STRUCTURE_PROGRAM` (`src/kernel/ai/mockStructure.ts`), la villetta scritta a mano come il prompt chiede. Il programma non ha una `size` sua (`withoutSize`):
   gira nella scatola della taglia di ogni voce. `checkProgram` lo prova a `STRUCTURE_SEEDS` semi alla sua taglia e al primo seme della
   successiva (`triedSizes`), verificando che vi siano almeno due piani raggiungibili a piedi dalla porta (`reachableStoreys`, ADR-0162), e dice dove cade (`failedAt`); la seconda richiesta (il difetto o la revisione dell'Artista) porta la traccia di
-  quel seme (`traceOf`, T179). L'id ha la taglia se non è Grande (`structureModel`: `struttura-<concetto>`, `struttura-<concetto>-huge`); un lotto indossa la voce
+  quel seme (`traceOf`, T179) e le viste in testo (`textViews`, T354). L'id ha la taglia se non è Grande (`structureModel`: `struttura-<concetto>`, `struttura-<concetto>-huge`); un lotto indossa la voce
   di prima senza suffisso finché la libreria non ha quella della sua taglia, salvo che sia un programma che scala a un'altra taglia
   (`Kernel.structureModelFor`): nulla di già scolpito cambia. Il
   `ModelDirector` dà a una taglia nuova il programma di un'altra (`shared`, senza chiamate) se è la stessa taglia (una voce di prima, senza
@@ -983,6 +984,30 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   tracciati, appezzamenti a incastro, pascoli recintati con i cancelli a sbarre, il fienile a lato) e la casa di T338 (due piani, tettoia,
   fieno); il forte con la cinta di 12 e il camminamento, le torri cave con la porta dal camminamento, merli e feritoie dalle parti; i
   controlli `merlonRuns` e `animalLetters`, le aree per taglia, `--parti` per le parti da sole.
+- **Lo Scultore delle strutture senza scheletro, a blocchi** (ADR-0183, T354, kernel 0.6.10, passo 2 di D48): il prompt dopo `<!-- strutture -->` non ha più
+  un programma da ricopiare (T337: lo scheletro era il 78-92 % di ogni programma, e ogni concetto dava lo stesso edificio) ma un metodo in tre
+  livelli dentro un programma solo: la composizione del concetto sul piano a un quinto (`map scale="1/5 1/5 1"`, una cella un quarto di
+  casella: 20, 30 e 40 celle di lato alle tre taglie; `soil` e `origin` portati giù dalla prima `map`), le altezze come colonne a passi dopo la
+  `map` che torna (`5 5 1`, un blocco di 5 × 5 per lettera del piano: un piano di 32, la striscia `T` della scala nell'aria sopra la sua zona),
+  la scala piena (le porte dove la strada tocca il piede del muro, le parti incluse dopo che le colonne sono salite, finestre, tetti, pulizia),
+  con gli attrezzi provati (il corpo da una linea per il centro e una moneta su una cella sola, l'ala, cortile e cinta, le torri sugli angoli
+  convessi, la via dal centro al fronte, `field` per «il più lontano dal portone», la zona della scala col pianerottolo, ciò che entra con i
+  pattern di terreno libero a `steps="1"`, gli anelli oltre il costruito misurati dal cortile verso fuori) e il divieto delle lettere delle parti
+  (`S`, `#90`-`#97`). **Le parti nella richiesta** (`partResources` in `sculptor.ts`, come `libraryResources`): per ogni `models/part-*.xml` il
+  primo paragrafo del commento in testa, il contratto per chi include. **Due blocchi** (`BLOCKS`): la prima richiesta chiede la composizione
+  sola (`isPlanOnly`: una `map` che non torna), il kernel la fa girare a tre semi e al primo della taglia successiva con il suolo letto come
+  `ground` (`planBlock`) e rimanda le piante in testo con quanto differiscono i semi; la seconda il programma intero con le piante davanti; una
+  risposta che già torna alla scatola si controlla come programma intero (offline una chiamata). Ciò che non passa torna con il motivo e il suo
+  significato (`withMeaning`), le viste in testo del seme caduto con pianta e altezze di altri due semi (`Checked.others`, che dopo una caduta
+  girano comunque fino al terzo) e la traccia (`traceOf`, ora con i file inclusi); la revisione dell'Artista porta anche le viste. **Le viste
+  in testo** (`src/mj/views.ts`, da `lab/banco/viste.ts` di T337, che le riesporta): `planView` (la lettera in cima a ogni colonna e le altezze in
+  cifre), `elevationView` (fronte, lato destro), `sectionView` (un taglio), `legend` (una lettera nascosta col solo nome della palette è
+  «marker»), `viewsText` (tutte, entro una larghezza; una griglia piatta dà solo la pianta), `sectionHeights`, `sideBySide`, `planDistance` (le
+  celle in cui la lettera in cima differisce, sulle celle costruite da almeno una, il terreno escluso). **La scala del seme è tollerante**:
+  `part-stair` prende i primi 16 voxel della striscia dal lato basso e rende il resto all'aria, apre il solaio di qualunque spessore, non chiede
+  aria sul lato basso; il contratto vuole dieci voxel liberi prima del primo gradino (il corpo sale in linea) e pavimento oltre il sedicesimo.
+  Il banco (`lab/banco/taglie/`): la villetta (`MOCK_STRUCTURE_PROGRAM`) e la rocca (`scultore-rocca.xml`) scritte a mano come lo Scultore,
+  con `--viste` il ritorno; nel laboratorio 3D accanto a fattoria e forte. Il giro su Gemini è T355.
 
 <a id="taglie"></a>
 ## Le taglie

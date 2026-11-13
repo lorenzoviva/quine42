@@ -3,6 +3,7 @@
 
 import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
+import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade' | 'bench';
@@ -161,9 +162,11 @@ for (const [file, xml] of Object.entries(pieced)) {
 // The bench of the sizes (T338, T346, lab/banco/taglie/): the farm and the fort that fit their size, each at its three sizes at 20
 // voxels a tile, with the seed's parts included. Only for the developers.
 const sized = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
-const SIZED: Record<string, string> = { fattoria: 'Fattoria', forte: 'Forte' };
+const SIZED: Record<string, string> = { fattoria: 'Fattoria', forte: 'Forte', 'scultore-rocca': 'Rocca, come la scrive lo Scultore (T354)', 'scultore-villetta': 'Villetta, come la scrive lo Scultore (la risposta offline, T354)' };
 const SIZES: Array<[string, string, Vec3]> = [['large', 'Grande, 5 × 5', [100, 100, 80]], ['huge', 'Enorme, 7,5 × 7,5', [150, 150, 120]], ['gargantuan', 'Gargantuesca, 10 × 10', [200, 200, 160]]];
-for (const [file, xml] of Object.entries(sized)) {
+// The offline answer of the Sculptor (T354, ADR-0183): the country house written as the prompt without a skeleton asks, from its constant.
+const sizedPrograms: Array<[string, string]> = [...Object.entries(sized), ...(import.meta.env.MODE !== 'production' ? [['scultore-villetta.xml', MOCK_STRUCTURE_PROGRAM] as [string, string]] : [])];
+for (const [file, xml] of sizedPrograms) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const name = SIZED[base];
   if (name) for (const [id, label, size] of SIZES) CATALOG.push({ id: `taglie:${base}-${id}`, name: `${name} che si adatta alla taglia (${label} caselle)`, role: 'structure', xml, vpt: 20, size, source: sourceOf(xml), sizes: true });

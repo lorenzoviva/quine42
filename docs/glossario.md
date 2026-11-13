@@ -1026,9 +1026,23 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Scultore
 - **Inglese**: `Sculptor`, `scultore`, `SculptorAiModels`
-- **Definizione**: l'agente che scrive i programmi dei modelli e le loro azioni.
+- **Definizione**: l'agente che scrive i programmi dei modelli e le loro azioni; le strutture grandi le scrive a blocchi, dal concetto, con le parti del seme (ADR-0183).
 - **Dove vive**: `src/kernel/agents/sculptor.ts`
 - **Da non usare**: `SculptorModels`
+
+### Viste in testo
+- **Inglese**: `viewsText`, `planView`, `elevationView`, `sectionView`, `legend`, `planDistance`, `textViews`
+- **Definizione**: ciò che lo Scultore «vede» di una griglia senza fotografie (ADR-0183): la pianta e le altezze dall'alto, il fronte e il lato destro, i tagli a ogni piano, la legenda delle lettere, quanto differiscono le piante di due semi; tornano dopo ogni blocco e con ogni difetto.
+- **Dove vive**: `src/mj/views.ts`, `src/kernel/agents/sculptor.ts`, `lab/banco/viste.ts`
+- **Da non usare**: «viste ASCII», «rendering testuale»
+- **Fermo**: nessuno.
+
+### Blocchi dello Scultore
+- **Inglese**: `BLOCKS`, `planBlock`, `isPlanOnly`, `withMeaning`
+- **Definizione**: le due richieste con cui lo Scultore scrive una struttura grande (ADR-0183): la composizione sul piano grezzo (il programma senza la seconda `map`), che il gioco fa girare a tre semi e alla taglia successiva e rimanda come piante in testo, poi il programma intero; ciò che non passa torna col motivo, il suo significato, le viste e la traccia.
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `universe/prompts/agents/sculptor.md`
+- **Da non usare**: «fasi», «round», «turni» (per queste richieste); «scheletro» (il programma del prompt di prima, tolto)
+- **Fermo**: nessuno.
 
 ### Fisico
 - **Inglese**: `Physicist`, `fisico`

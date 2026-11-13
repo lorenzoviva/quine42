@@ -1,9 +1,10 @@
 <!--
-Arrow slits (T346, ADR-0182): a part included with <import file="part-slits"/> after part-battlements, written by
-lab/banco/taglie/parti.mjs. Under the middle of every merlon of 5 (M) it opens a slit through the wall (the union "%": the letters of
-the walls that get slits, <union symbol="%" values="…"/> in your program wins over this one): one wide, 6 high, two cells under the
-top; regular because the merlons are. Its letter: U the slit (give U your colour). Alone it builds a tower from its origin with its
-merlons, so that it is validated on its own.
+Arrow slits (part-slits): a part included with <import file="part-slits"/> after part-battlements. Under the middle of every merlon of
+5 (M) it opens a slit through the wall (the union "%": the letters of the walls that get slits, <union symbol="%" values="…"/> in your
+program wins over this one): one wide, 6 high, two cells under the top; regular because the merlons are. Its letter: U the slit (give U
+your colour); #91, #92 and #94 its own markers.
+
+Alone it builds a tower from its origin with its merlons, so that it is validated on its own. Written by lab/banco/taglie/parti.mjs (T346, T354; ADR-0182, ADR-0183).
 -->
 <sequence values="BSMU#93#91#92#94" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="%" values="S"/>

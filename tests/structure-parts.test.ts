@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { checkProgram, shareableProgram, withSize } from '../src/kernel/agents/sculptor';
+import { MOCK_STRUCTURE_PROGRAM } from '../src/kernel/ai/mockStructure';
 import { formAreas, habitableParts, type Form } from '../src/kernel/forms';
 import { modelErrors } from '../src/kernel/validator';
 import { AREA_RE, areaNames, areasOf } from '../src/mj/areas';
@@ -39,6 +40,20 @@ describe('the parts one lives in, as sub-blocks of the seed (T346)', () => {
     expect(parts.storeys.length).toBe(2);
     expect(parts.doors).toEqual([{ width: 11, height: 30 }]);
   });
+
+  it('the stair takes the first 16 cells of a longer strip and gives the rest back (T354): the house of the Sculptor marks a zone of 20', () => {
+    const xml = MOCK_STRUCTURE_PROGRAM;
+    const m = compileMjx(xml, { size: boxOf(structure, 'large'), files: seedFiles(xml) });
+    const r = runMjx(m, 1, { deadline: 20_000 });
+    const k = r.grid.alphabet.indexOf('k');
+    const columns = new Set<number>();
+    for (let i = 0; i < r.grid.cells.length; i++) if (r.grid.cells[i] === k) columns.add(i % r.grid.X);
+    expect(columns.size).toBe(16);
+    const parts = habitableParts(r.grid, m.program.palette, TILE, partVoxels(TILE).storey.clear, 0, m.actions, 1);
+    expect(parts.storeys).toEqual([1, 33]);
+    // The contract of every part is the first paragraph of its comment, a blank line before the rest.
+    for (const id of PARTS) expect(read(id)).toMatch(/^<!--\n[\s\S]+?\n\n[\s\S]+?Written by lab\/banco\/taglie\/parti\.mjs/);
+  }, 60_000);
 
   it('the battlements are regular: merlons of five from every corner, and a slit under each of them', () => {
     for (const id of ['part-battlements', 'part-slits']) {

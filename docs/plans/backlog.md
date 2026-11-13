@@ -5211,7 +5211,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Dipende da: T346, T349 (integrati).
 - Esito: kernel 0.6.8 (`KERNEL_VERSION`, package.json, package-lock, universe.json); ADR-0182, la sua voce nell'indice degli ADR e `architettura-dettagli` dicono 0.6.8, ADR-0157 e ADR-0181 invariati, T349 tiene 0.6.7; il merge di `3d` non serviva (già contenuto); typecheck verde e suite intera verde coi turni (3046 passati, 1 saltato) sul ramo con T346, T348, T349 e T353, nessuna correzione necessaria, nessun cambio di comportamento. Da sistemare nella pipeline: il `node_modules` del worktree, collegato a `step8.2A-lab3d`, non ha `.bin`, quindi `npm test` prende il vitest 2.1.4 della cartella principale e non parte; la suite è girata con `node node_modules/vitest/vitest.mjs run`.
 
-### T359 · Integrare T354 nel base (conflitto di versione con T358 e T350: kernel 0.6.10) — `da fare`
+### T359 · Integrare T354 nel base (conflitto di versione con T358 e T350: kernel 0.6.10) — `fatto` (`d72a0557`)
 - Pipeline: argon · sforzo high · stima 1% · approvato · priorità 1
 - Step: 30
 - Contesto: `integra T354` (lo Scultore delle strutture senza scheletro, a blocchi col ritorno in testo, ADR-0183) ha trovato conflitti solo sulla versione (`package.json`, `src/kernel/version.ts`, `universe/universe.json`): T354 era partito da 0.6.6 portandola a 0.6.7, mentre in `3d` sono entrati T358 (0.6.8) e T350 (0.6.9). ADR-0183 è libero in `3d`. Nasce da T354: `dossier T354`, `dossier T350`, `dossier T358`.
@@ -5219,3 +5219,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera (`tests/determinism.test.ts` sotto carico si riprova da solo), typecheck e build coi turni.
 - Browser: no (T354 già verificato nel browser).
 - Quando è fatto: commit su `task/T359`, kernel 0.6.10; poi l'orchestratore integra T359 e `integra T354` toglie worktree e branch di T354.
+- Esito: `git merge task/T354` su `task/T359` (`d72a0557`); risolti i conflitti di versione portando il kernel a `0.6.10` in `src/kernel/version.ts`, `package.json`, `package-lock.json` e `universe/universe.json`; aggiornati a `0.6.10` i riferimenti alla versione di T354 in `docs/adr/0183-scultore-senza-scheletro-a-blocchi.md`, `docs/adr/README.md` (tolta anche la riga `0.6.6` duplicata di ADR-0182 dal merge automatico, lasciando `0.6.8` e invariati gli ADR precedenti) e `docs/architettura-dettagli.md`; typecheck, build e suite intera (205 file, 3068 passati, 1 saltato) verdi coi turni; sicurezza: nessuna superficie nuova.

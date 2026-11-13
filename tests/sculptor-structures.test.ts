@@ -1,18 +1,23 @@
-// The procedural prompt in the game's Sculptor (T156, ADR-0160): the large structures get the bench's prompt with its skeleton,
-// no box of their own, more seeds and the next size in the checks, the trace in the second request; one program serves two sizes.
+// The Sculptor of the large structures (T156, ADR-0160; T354, ADR-0183): the prompt without a skeleton (the composition from the
+// concept on a coarse plan, the parts of the seed), the requests in blocks with the views in text, no box of their own, more seeds and the
+// next size in the checks, the parts listed in the request; one program serves two sizes; offline the local models answer with the
+// country house written by hand as the prompt asks.
 
+import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
+import { MOCK_STRUCTURE_PROGRAM } from '../src/kernel/ai/mockStructure';
 import { emptyUsage, type AiModels, type TextCall } from '../src/kernel/ai/models';
 import { Council } from '../src/kernel/agents/council';
-import { checkProgram, procedural, sculpt, sculptorRole, shareableProgram, skeletonOf, STRUCTURE_SEEDS, STRUCTURES_MARK, triedSizes, withoutSize } from '../src/kernel/agents/sculptor';
+import { BLOCKS, checkProgram, filesOf, isPlanOnly, partResources, planBlock, procedural, sculpt, sculptorRole, shareableProgram, STRUCTURE_SEEDS, STRUCTURES_MARK, textViews, triedSizes, withMeaning, withoutSize } from '../src/kernel/agents/sculptor';
 import { modelSize, structureModel, structureSiblings } from '../src/kernel/modeldirector';
 import { entryBox } from '../src/kernel/forms';
 import { MODEL_RE } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
+import { mapsBackToBox } from '../src/mj/model';
 
 class Scripted implements AiModels {
   readonly name = 'scripted';
@@ -27,22 +32,29 @@ class Scripted implements AiModels {
 }
 
 const structure = classOf('structure')!;
-const skeleton = skeletonOf(sculptorRole(bundledFiles, true))!;
+const house = MOCK_STRUCTURE_PROGRAM;
+const seedFiles = (xml: string) => filesOf(xml, bundledFiles);
+/** The first block of the house: the program without its second map (the plan on the coarse grid). */
+const planOf = (xml: string) => {
+  const at = xml.search(/<map scale="\d+ \d+ \d+"/);
+  return xml.slice(0, at) + xml.slice(xml.lastIndexOf('</map>'));
+};
 
-describe('the procedural prompt of the structures (T156)', () => {
-  it('is the part of the prompt after the mark, with its skeleton; the other classes keep theirs', () => {
+describe('the prompt of the structures without a skeleton (T354)', () => {
+  it('is the part of the prompt after the mark: the method, no stock building; the other classes keep theirs', () => {
     const general = sculptorRole(bundledFiles);
     const structures = sculptorRole(bundledFiles, true);
     expect(bundledFiles['prompts/agents/sculptor.md']).toContain(STRUCTURES_MARK);
-    expect(general).not.toContain('The skeleton');
     expect(general).toContain('## Traps');
     expect(general).toContain('rock: 20×20×16');
     expect(structures).not.toContain('## Traps');
     expect(structures).not.toContain('@@');
-    // The game asks no cellar: its recipe stays on the bench.
-    expect(structures).not.toMatch(/cellar is a \*\*well/);
-    expect(skeleton).toMatch(/^<sequence values="B[^"]*" symmetry="\(xy\)" soil="E" origin="bottom">/);
-    expect(skeleton).not.toMatch(/\ssize="/);
+    expect(structures).toContain('## The method: three levels, one program');
+    expect(structures).toContain('## How to answer, block by block');
+    // No skeleton: no whole program to copy, only pieces of the toolbox (T337: a skeleton in the prompt is copied).
+    expect(structures).not.toMatch(/<sequence values="B[^"]*" symmetry="\(xy\)" soil="E" origin="bottom">\s*<union/);
+    expect(structures).not.toContain('The skeleton');
+    expect(structures).toContain('Never use S nor #90-#97');
   });
 
   it('holds for the large structures, from Large up', () => {
@@ -54,44 +66,106 @@ describe('the procedural prompt of the structures (T156)', () => {
     expect(triedSizes(structure, 'gargantuan')).toEqual(['gargantuan', 'huge']);
   });
 
-  it('checks the skeleton at every seed and at the next size, and says where a program falls', () => {
-    expect(checkProgram(skeleton, structure).error).toBeUndefined();
-    expect(checkProgram(skeleton, structure, 'huge').error).toBeUndefined();
+  it('lists the parts of the seed in the request, each with the contract at the top of its file', () => {
+    const parts = partResources(bundledFiles);
+    expect(parts.map((p) => /file="([^"]+)"/.exec(p)![1])).toEqual(['part-battlements', 'part-door', 'part-slits', 'part-stair']);
+    expect(parts.find((p) => p.includes('part-stair'))).toMatch(/union "=" is the letters of your floors and slabs/);
+    expect(parts.find((p) => p.includes('part-stair'))).not.toMatch(/Written by|Alone it builds/);
+    expect(parts.find((p) => p.includes('part-door'))).toMatch(/at least 11 wide/);
+    expect(partResources({ 'models/x.xml': '<sequence values="BW"/>' })).toEqual([]);
+  });
+
+  it('the offline answer passes the checks at every seed and at the next size, with the parts of the seed; a program that falls says where', () => {
+    const c = checkProgram(house, structure, undefined, seedFiles(house));
+    expect(c.error).toBeUndefined();
+    expect(c.others).toHaveLength(2);
+    expect(checkProgram(house, structure, 'huge', seedFiles(house)).error).toBeUndefined();
+    expect(mapsBackToBox(house)).toBe(true);
+    expect(shareableProgram(house)).toBe(true);
     const low = checkProgram('<sequence values="BW" origin="True"><one in="W B" out="B W"/><all in="B W" out="W *" steps="4"/></sequence>', structure);
     expect(low.error).toMatch(/^taglia Grande, seme 1: /);
     expect(low.failedAt).toEqual({ taglia: 'large', seed: 1 });
-  });
+  }, 120_000);
 
-  it('rejects a structure program when the stair does not reach the upper floor (T320)', () => {
-    // The skeleton without the stair rules: ground floor holds, second floor cannot be reached
-    const broken = skeleton
-      .replace('<all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>', '')
-      .replace('<all in="K B" out="* K" symmetry="()"/>', '');
-    const c = checkProgram(broken, structure);
+  it('rejects a structure program when the stair does not reach the upper floor (T320), and says what the measure means', () => {
+    const broken = house.replace('<import file="part-stair"/>', '');
+    const c = checkProgram(broken, structure, undefined, seedFiles(broken));
     expect(c.error).toBe('taglia Grande, seme 1: piani: 1 (serve ≥ 2)');
     expect(c.failedAt).toEqual({ taglia: 'large', seed: 1 });
-  });
+    expect(withMeaning(c.error!)).toMatch(/^taglia Grande, seme 1: piani: 1 \(serve ≥ 2\) — the covered storeys a body reaches on foot/);
+    expect(withMeaning('XML: riga 3')).toBe('XML: riga 3');
+    // The views of the seed that fell, with two other seeds beside it.
+    const v = textViews(c);
+    expect(v).toContain('### Seed 1 at large');
+    expect(v).toContain('Cut at z=11');
+    expect(v).toContain('### Seed 2: plan and heights');
+    expect(v).toContain('### Seed 3: plan and heights');
+    expect(v).toMatch(/How much the plans of the seeds differ: 0\.\d\d/);
+  }, 60_000);
 
-  it('writes no box into the program, sends no box programs as examples, and puts the trace in the second request', async () => {
+  it('the first block is a plan: the coarse grid runs at three seeds and at the next size, and comes back as plans', () => {
+    const plan = planOf(house);
+    expect(isPlanOnly(plan)).toBe(true);
+    expect(isPlanOnly(house)).toBe(false);
+    const made = planBlock(plan, structure, undefined, seedFiles(plan));
+    expect(made.error).toBeUndefined();
+    expect(made.text).toContain('### large, seed 1: grid 20×20×80');
+    expect(made.text).toContain('### large, seed 3');
+    expect(made.text).toContain('### huge, seed 1: grid 30×30×120');
+    expect(made.text).toContain('Plan (the letter of every cell)');
+    expect(made.text).not.toContain('Heights');
+    expect(made.text).toMatch(/w marker|w \w/);
+    expect(made.text).toMatch(/How much the plans of the seeds differ: 0\.\d\d/);
+    // A plan that does not run says so.
+    const bad = planBlock('<sequence values="BHE" soil="E" origin="bottom"><map scale="1/5 1/5 1" values="BHE"><rule in="E" out="E"/><all in="E" out="H"', structure);
+    expect(bad.error).toBeDefined();
+    expect(bad.text).toMatch(/^It does not run: large, seed 1: /);
+  }, 60_000);
+
+  it('asks in blocks: the composition, then the whole program with the plans back; what does not pass comes back with the views and the trace', async () => {
     const m = new Scripted((c, n) => {
-      if (c.task === 'model.sculpt') return n === 1 ? '<sequence values="BW" size="100 100 80" origin="True"><one in="W B" out="B W"/><all in="B W" out="W *" steps="4"/></sequence>' : skeleton;
+      if (c.task === 'model.sculpt') return n === 1 ? planOf(house) : n === 2 ? house.replace('<import file="part-stair"/>', '') : house;
       return JSON.stringify({ voto: 8, riconoscibile: true, problemi: [], consigli: [] });
     });
     const c = new Council(m, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
-    const r = await sculpt(c, { id: structureModel('una rocca', 'huge'), nome: 'una rocca', aspetto: 'una rocca di frontiera', classe: 'structure', taglia: 'huge' });
+    const r = await sculpt(c, { id: structureModel('una villetta', 'huge'), nome: 'una villetta', aspetto: 'una villetta con il giardino', classe: 'structure', taglia: 'huge' });
     expect(r).toBeDefined();
     const calls = m.calls.filter((x) => x.task === 'model.sculpt');
-    expect(calls).toHaveLength(2);
-    expect(calls[0].system).toContain('The skeleton');
+    expect(calls).toHaveLength(3);
+    expect(calls[0].system).toContain('## The method: three levels, one program');
     expect(calls[0].system).not.toContain('## Examples');
     expect(calls[0].system).not.toContain('## Traps');
+    expect(calls[0].prompt).toContain(`## ${BLOCKS.plan}`);
+    expect(calls[0].prompt).toMatch(/Parts of the seed the program includes with <import file="…"\/>/);
+    expect(calls[0].prompt).toContain('<import file="part-stair"/>');
     expect(calls[0].prompt).toMatch(/The same program also serves the size gargantuan/);
     expect(calls[0].prompt).toMatch(/a tile is 20 voxels, a step 4/);
     expect(calls[0].prompt).toMatch(/a door at least 11 × 30, a room at least 28 a side/);
-    expect(calls[1].prompt).toMatch(/It does not pass: taglia Enorme, seme 1: /);
-    expect(calls[1].prompt).toContain('node by node');
+    expect(calls[1].prompt).toContain('## Your program so far');
+    expect(calls[1].prompt).toContain('## What the game made of it');
+    expect(calls[1].prompt).toContain('### huge, seed 1: grid 30×30×120');
+    expect(calls[1].prompt).toContain(`## ${BLOCKS.whole}`);
+    expect(calls[2].prompt).toMatch(/It does not pass: taglia Enorme, seme 1: piani: 1 \(serve ≥ 2\) — the covered storeys/);
+    expect(calls[2].prompt).toContain('What the game made of it, in text:');
+    expect(calls[2].prompt).toContain('### Seed 1 at huge');
+    expect(calls[2].prompt).toContain('node by node');
     expect(r!.xml).not.toMatch(/<sequence[^>]*\ssize="/);
     expect(shareableProgram(r!.xml)).toBe(true);
+  }, 180_000);
+
+  it('an answer to the first block that is already a whole program is checked as such: offline, one call', async () => {
+    const m = new MockAiModels();
+    const c = new Council(m, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
+    const r = await sculpt(c, { id: structureModel('una casa', 'large'), nome: 'una casa', aspetto: 'una casa', classe: 'structure' }, undefined, { semplici: 1, revisione: false, giudizio: false });
+    expect(r).toBeDefined();
+    expect(r!.calls).toBe(1);
+    expect(r!.xml).toContain('<import file="part-stair"/>');
+  }, 120_000);
+
+  it('the bench keeps the fort written as the Sculptor writes it, and the kernel takes it too', () => {
+    const fort = fs.readFileSync('lab/banco/taglie/scultore-rocca.xml', 'utf8');
+    expect(fort).not.toMatch(/\ssize="/);
+    expect(checkProgram(fort, structure, undefined, seedFiles(fort)).error).toBeUndefined();
   }, 120_000);
 });
 
