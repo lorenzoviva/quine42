@@ -3,11 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 368 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 369 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43 aperto con T345 (in coda).
+- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (`e2ac9a0c`, studio `docs/design/open-beta.md`, ADR-0184 proposto) → D52 con 7 domande; i 10 task dello studio si pianificano dopo le risposte.
 - **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, in attesa fino al 15/11), tetto voxel (T356), scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
@@ -21,14 +21,15 @@ Aggiornato il 13/11/2026, epoca 368 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** nessun task in corso né da integrare dopo il riavvio (`12:25 UTC`). Pronti al reset 5h delle 12:59 UTC (13:59 ora locale): T356 e T347 su Fable; T345, T351 e T352 su Claude; T355 `in attesa` fino al 15/11 (D48 passo 3).
+0. **In corso/pronti:** T356 su Fable (dalle 13:04 UTC); pronti T347 (Fable), T351 e T352 (Claude); T355 `in attesa` fino al 15/11 (D48 passo 3).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 12:26 UTC):** Claude settimana 67 %, 5h 0 % (reset 12:59 UTC); Fable settimana 47 %, 5h 0 % (reset 12:59 UTC); Gemini 98 %; Argon 77 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h a 0 %).
+2. **Crediti (13/11 13:25 UTC):** Claude settimana 65 %, 5h 56 % (reset 18:00 UTC); Fable settimana 43 %, 5h 63 %; Gemini 98 %; Argon 76 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
 - **Approvazione proposte:** T310b (schema campi inglese).
+- **D52 (ADR-0184, open beta):** 7 domande di T345, tutte con consiglio «sì».
 
 ## Regole attive
 
@@ -37,5 +38,5 @@ Aggiornato il 13/11/2026, epoca 368 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **369 (claude):** lanciati T356 (Fable) e T345 (Claude); T345 integrato (`e2ac9a0c`), domande D52 all'autore.
 - **368 (argon):** riavvio dopo `ferma --ora` (12:25 UTC): nessun task in corso né da integrare; coda pronta per il reset 5h delle 12:59 UTC (13:59 ora locale).
-- **366 (argon):** T359 finito e integrato con T354 (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10); T355 messo `in attesa` fino al 15/11 (D48 passo 3); finestra 5h Claude/Fable a 0 % (reset 13:00 UTC).
