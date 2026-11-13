@@ -5089,7 +5089,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T353`, kernel sale di Z.
 - Esito: gli abiti degli individui dalla scheda (`indossa`, `wears`) o dal mestiere (`outfitOf`, senza chiamate; un mestiere senza capi non veste), segni nell'inventario (`dressInventory`), `EntityView.worn` sul filo e `worn` dello specchio, `wornZone` nella porta, due capi di mestiere nel seme, mock con `indossa`; ADR-0181, kernel 0.6.5, docs, glossario, lingua interna; 8 test nuovi, suite 3007/3007, typecheck e build verdi; manca: gli individui non si cambiano dopo l'individuazione, la scheda dell'Attore non dice gli abiti, gambe/piedi/mani; non provato: una scheda scritta da Gemini vero con `indossa`, multigiocatore nel browser (solo in test); sicurezza: nessuna superficie nuova (`EntityView.worn` esce solo come id letti dal kernel, niente entra dal client).
 
-### T354 · Lo Scultore delle strutture senza scheletro, a zone coi sottoblocchi (passo 2 di D48) — `da fare` (dipende da T346)
+### T354 · Lo Scultore delle strutture senza scheletro, a zone coi sottoblocchi (passo 2 di D48) — `fatto` (`064dedd3`) (dipende da T346)
 - Pipeline: fable · sforzo extra · stima 4% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D48 → D integrata (autore, 10/11): il prompt a zone senza scheletro (via C di T337, separazione 3,73) con le parti abitabili come sottoblocchi del seme inclusi con `<import>` (passo 1 = T346). `dossier T337`, `dossier T346`, `docs/pipeline/domande/T337.md`.
@@ -5097,6 +5097,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: banco `banco-taglie.ts`; suite e typecheck coi turni.
 - Browser: sì, foto del banco nel laboratorio 3D.
 - Quando è fatto: commit su `task/T354`, kernel sale di Z.
+- Esito: prompt delle strutture senza scheletro con il metodo a tre livelli sul piano a 1/5 e gli attrezzi provati; due blocchi col ritorno in testo (`planBlock`, `textViews`, `withMeaning`, `Checked.others`); le parti del seme nella richiesta (`partResources`, primo paragrafo del commento di ogni `part-*.xml`); viste in testo in `src/mj/views.ts`; `part-stair` tollerante (primi 16, pianerottolo, solai spessi); villetta offline (`MOCK_STRUCTURE_PROGRAM`) e rocca nel banco delle taglie, foto e `--viste`; voci nel laboratorio 3D; ADR-0183, kernel 0.6.7, fixture del motore aggiornato solo per `part-stair`; suite 3052 verdi, typecheck e build verdi. Non fatto: il giro su Gemini (T355), il tetto dei voxel (T356). Non provato: lo Scultore vero sul prompt nuovo. Sicurezza: nessuna superficie nuova.
 
 ### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `da fare` (dipende da T354)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
