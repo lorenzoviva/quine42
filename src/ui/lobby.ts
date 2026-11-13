@@ -27,6 +27,8 @@ export interface LobbyOptions {
   inCorso?: boolean;
   /** A game alone: only the settings, there is no ceiling, no recharge and nobody else (T247). */
   alone?: boolean;
+  /** Jev takes the closed decisions (ADR-0157): the estimate counts the models worn from the library (T349). */
+  decisions?: boolean;
   onRecharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
   /**
    * The master of a universe that may still bring cards (a clone before its first entry, T295, ADR-0170): what may come, and how it comes
@@ -108,7 +110,7 @@ export class LobbyScreen {
     const estimateLines = el('div', { class: 'note' });
     let read: () => AiSettings = () => ({});
     const showEstimate = () => {
-      const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai));
+      const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai), undefined, { decisions: !!this.opts.decisions });
       const budget = (read().maxText as number | undefined) ?? ai.maxText;
       estimateRow.textContent = `Stima oraria: circa ${usd(h.dollari)} (${h.chiamate} chiamate/ora). Budget sessione: ${budget} chiamate testo.`;
       estimateLines.replaceChildren(...h.righe.map((x) => el('div', {}, `· ${x.voce}: ${x.chiamate} → ${usd(x.dollari)}`)));

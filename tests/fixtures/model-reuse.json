@@ -1,0 +1,602 @@
+{
+ "source": "lab/banco/jev (T313): casi/decisioni.json, compito modello; le risposte di jev-1.13.0 del giro-1, variante base, da consumi.jsonl",
+ "cases": [
+  {
+   "id": "gatta-fienile",
+   "thing": {
+    "name": "Gatta del fienile",
+    "kind": "animale",
+    "description": "una gatta tigrata che caccia i topi nel fienile"
+   },
+   "class": "animal",
+   "accept": [
+    "animal"
+   ],
+   "jev": {
+    "model": "animal",
+    "fits": 0.73
+   }
+  },
+  {
+   "id": "lupo-grigio",
+   "thing": {
+    "name": "Lupo grigio",
+    "kind": "bestia",
+    "description": "un lupo magro dal pelo grigio"
+   },
+   "class": "beast",
+   "accept": [
+    "beast"
+   ],
+   "jev": {
+    "model": "beast",
+    "fits": 0.78
+   }
+  },
+  {
+   "id": "abete",
+   "thing": {
+    "name": "Abete",
+    "kind": "albero",
+    "description": "un abete alto e scuro, a punta"
+   },
+   "class": "tree",
+   "accept": [
+    "tree"
+   ],
+   "jev": {
+    "model": "tree",
+    "fits": 0.73
+   }
+  },
+  {
+   "id": "botte",
+   "thing": {
+    "name": "Botte di vino",
+    "kind": "mobile",
+    "description": "una botte di rovere cerchiata di ferro"
+   },
+   "class": "furniture",
+   "accept": [
+    "barile"
+   ],
+   "jev": {
+    "model": "barile",
+    "fits": 0.78
+   }
+  },
+  {
+   "id": "baule",
+   "thing": {
+    "name": "Baule del viaggiatore",
+    "kind": "mobile",
+    "description": "un baule di legno con il coperchio e le cinghie"
+   },
+   "class": "furniture",
+   "accept": [
+    "furniture"
+   ],
+   "jev": {
+    "model": "furniture",
+    "fits": 0.63
+   }
+  },
+  {
+   "id": "branda",
+   "thing": {
+    "name": "Branda del soldato",
+    "kind": "mobile",
+    "description": "un letto stretto di legno con una coperta"
+   },
+   "class": "furniture",
+   "accept": [
+    "letto"
+   ],
+   "jev": {
+    "model": "letto",
+    "fits": 0.8
+   }
+  },
+  {
+   "id": "banco-falegname",
+   "thing": {
+    "name": "Tavolo del falegname",
+    "kind": "mobile",
+    "description": "un banco da lavoro con la morsa e gli attrezzi"
+   },
+   "class": "furniture",
+   "accept": [
+    "banco"
+   ],
+   "jev": {
+    "model": "banco",
+    "fits": 0.87
+   }
+  },
+  {
+   "id": "fuoco-campo",
+   "thing": {
+    "name": "Fuoco da campo",
+    "kind": "mobile",
+    "description": "un fuoco acceso dentro un cerchio di pietre"
+   },
+   "class": "furniture",
+   "accept": [
+    "falo"
+   ],
+   "jev": {
+    "model": "falo",
+    "fits": 0.7
+   }
+  },
+  {
+   "id": "cartello-strada",
+   "thing": {
+    "name": "Cartello stradale",
+    "kind": "mobile",
+    "description": "un cartello di legno su un palo che indica il borgo"
+   },
+   "class": "furniture",
+   "accept": [
+    "cartello"
+   ],
+   "jev": {
+    "model": "cartello",
+    "fits": 0.76
+   }
+  },
+  {
+   "id": "fornaia",
+   "thing": {
+    "name": "Fornaia",
+    "kind": "persona",
+    "description": "una donna con il grembiule infarinato e le maniche rimboccate"
+   },
+   "class": "person",
+   "accept": [
+    "contadina"
+   ],
+   "jev": {
+    "model": "contadina",
+    "fits": 0.32
+   }
+  },
+  {
+   "id": "drago",
+   "thing": {
+    "name": "Drago di fuoco",
+    "kind": "bestia",
+    "description": "un drago enorme con le ali di cuoio e il fiato di fiamma"
+   },
+   "class": "beast",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "beast",
+    "fits": 0.13
+   }
+  },
+  {
+   "id": "mulino",
+   "thing": {
+    "name": "Mulino a vento",
+    "kind": "struttura",
+    "description": "un mulino di pietra con quattro grandi pale di tela"
+   },
+   "class": "structure",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "new",
+    "fits": 0.22
+   }
+  },
+  {
+   "id": "torre-avvistamento",
+   "thing": {
+    "name": "Torre di avvistamento",
+    "kind": "struttura",
+    "description": "una torre di pietra con una prigione sotto, dove le sentinelle guardano la strada"
+   },
+   "class": "structure",
+   "accept": [
+    "struttura-torre-di-guardia"
+   ],
+   "jev": {
+    "model": "struttura-torre-di-guardia",
+    "fits": 0.9
+   }
+  },
+  {
+   "id": "locanda-gallo",
+   "thing": {
+    "name": "Locanda del Gallo",
+    "kind": "struttura",
+    "description": "una locanda a graticcio con la cantina delle botti"
+   },
+   "class": "structure",
+   "accept": [
+    "struttura-locanda",
+    "struttura-locanda-del-cinghiale"
+   ],
+   "jev": {
+    "model": "struttura-locanda",
+    "fits": 0.73
+   }
+  },
+  {
+   "id": "fucina-villaggio",
+   "thing": {
+    "name": "Fucina del villaggio",
+    "kind": "struttura",
+    "description": "la bottega del fabbro, con l'incudine e il mantice"
+   },
+   "class": "structure",
+   "accept": [
+    "struttura-fucina",
+    "struttura-fucina-nanica"
+   ],
+   "jev": {
+    "model": "struttura-fucina",
+    "fits": 0.87
+   }
+  },
+  {
+   "id": "barca",
+   "thing": {
+    "name": "Barca a remi",
+    "kind": "cosa",
+    "description": "una barca di legno con due remi, tirata in secca"
+   },
+   "class": "furniture",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "new",
+    "fits": 0.16
+   }
+  },
+  {
+   "id": "statua-fondatore",
+   "thing": {
+    "name": "Statua del fondatore",
+    "kind": "monumento",
+    "description": "la statua di pietra di un uomo armato, sulla piazza"
+   },
+   "class": "monument",
+   "accept": [
+    "fantasy-statua-guardiano"
+   ],
+   "jev": {
+    "model": "fantasy-statua-guardiano",
+    "fits": 0.7
+   }
+  },
+  {
+   "id": "fontana-piazza",
+   "thing": {
+    "name": "Fontana della piazza",
+    "kind": "cosa",
+    "description": "una vecchia fontana di pietra con la vasca"
+   },
+   "class": "building",
+   "accept": [
+    "fantasy-fontana-antica"
+   ],
+   "jev": {
+    "model": "fantasy-fontana-antica",
+    "fits": 0.71
+   }
+  },
+  {
+   "id": "bancarella",
+   "thing": {
+    "name": "Banco del mercato",
+    "kind": "mobile",
+    "description": "un banco con il tendone dove si vendono verdure"
+   },
+   "class": "furniture",
+   "accept": [
+    "fantasy-bancarella-mercato"
+   ],
+   "jev": {
+    "model": "fantasy-bancarella-mercato",
+    "fits": 0.77
+   }
+  },
+  {
+   "id": "pentolone",
+   "thing": {
+    "name": "Pentolone della strega",
+    "kind": "mobile",
+    "description": "un grande pentolone di ferro che bolle sul fuoco"
+   },
+   "class": "furniture",
+   "accept": [
+    "fantasy-calderone-bollente"
+   ],
+   "jev": {
+    "model": "fantasy-calderone-bollente",
+    "fits": 0.78
+   }
+  },
+  {
+   "id": "espresso",
+   "thing": {
+    "name": "Macchina del caffè espresso",
+    "kind": "cosa",
+    "description": "La macchina del caffè di un bar: cromata, bollente, sbuffa vapore."
+   },
+   "class": "object",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "fantasy-calderone-bollente",
+    "fits": 0.16
+   }
+  },
+  {
+   "id": "motorino",
+   "thing": {
+    "name": "Motorino",
+    "kind": "cosa",
+    "description": "Un motorino rosso parcheggiato in seconda fila."
+   },
+   "class": "furniture",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "new",
+    "fits": 0.21
+   }
+  },
+  {
+   "id": "cabina-telefonica",
+   "thing": {
+    "name": "Cabina telefonica",
+    "kind": "cosa",
+    "description": "Una cabina telefonica a gettoni, di metallo e vetro."
+   },
+   "class": "building",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "building",
+    "fits": 0.21
+   }
+  },
+  {
+   "id": "roccia-muschio",
+   "thing": {
+    "name": "Roccia del torrente",
+    "kind": "roccia",
+    "description": "una roccia grande coperta di muschio verde"
+   },
+   "class": "rock",
+   "accept": [
+    "masso-muschioso"
+   ],
+   "jev": {
+    "model": "masso-muschioso",
+    "fits": 0.88
+   }
+  },
+  {
+   "id": "ciottolo",
+   "thing": {
+    "name": "Ciottolo",
+    "kind": "roccia",
+    "description": "un sasso piccolo e tondo"
+   },
+   "class": "pebble",
+   "accept": [
+    "pebble"
+   ],
+   "jev": {
+    "model": "pebble",
+    "fits": 0.83
+   }
+  },
+  {
+   "id": "rovo",
+   "thing": {
+    "name": "Rovo di more",
+    "kind": "cespuglio",
+    "description": "un cespuglio spinoso carico di more"
+   },
+   "class": "bush",
+   "accept": [
+    "cespuglio-con-bacche"
+   ],
+   "jev": {
+    "model": "cespuglio-con-bacche",
+    "fits": 0.8
+   }
+  },
+  {
+   "id": "pecora",
+   "thing": {
+    "name": "Pecora",
+    "kind": "animale",
+    "description": "una pecora bianca dal vello folto"
+   },
+   "class": "animal",
+   "accept": [
+    "new"
+   ],
+   "jev": {
+    "model": "animal",
+    "fits": 0.15
+   }
+  },
+  {
+   "id": "credenza-cucina",
+   "thing": {
+    "name": "Credenza della cucina",
+    "kind": "mobile",
+    "description": "una credenza di legno con le ante e i piatti in fila"
+   },
+   "class": "furniture",
+   "accept": [
+    "credenza"
+   ],
+   "jev": {
+    "model": "credenza",
+    "fits": 0.89
+   }
+  },
+  {
+   "id": "gabbia-uccelli",
+   "thing": {
+    "name": "Gabbia appesa",
+    "kind": "cosa",
+    "description": "una gabbia di ferro appesa a una catena, per i prigionieri"
+   },
+   "class": "monument",
+   "accept": [
+    "fantasy-gabbia-sospesa"
+   ],
+   "jev": {
+    "model": "fantasy-gabbia-sospesa",
+    "fits": 0.85
+   }
+  },
+  {
+   "id": "trono",
+   "thing": {
+    "name": "Trono del re",
+    "kind": "mobile",
+    "description": "un trono di pietra scolpita con lo schienale alto"
+   },
+   "class": "furniture",
+   "accept": [
+    "fantasy-trono-di-pietra"
+   ],
+   "jev": {
+    "model": "fantasy-trono-di-pietra",
+    "fits": 0.83
+   }
+  },
+  {
+   "id": "palma-dattero",
+   "thing": {
+    "name": "Palma da dattero",
+    "kind": "albero",
+    "description": "una palma alta con i datteri"
+   },
+   "class": "tree",
+   "accept": [
+    "palma"
+   ],
+   "jev": {
+    "model": "palma",
+    "fits": 0.77
+   }
+  },
+  {
+   "id": "casa-contadino",
+   "thing": {
+    "name": "Casa del contadino",
+    "kind": "edificio",
+    "description": "una casetta di campagna con l'orto e il fienile"
+   },
+   "class": "building",
+   "accept": [
+    "building",
+    "fattoria",
+    "structure"
+   ],
+   "jev": {
+    "model": "building",
+    "fits": 0.51
+   }
+  },
+  {
+   "id": "forbici-sarta",
+   "thing": {
+    "name": "Forbici da sarta",
+    "kind": "oggetto",
+    "description": "un paio di forbici di ferro per tagliare la stoffa"
+   },
+   "class": "object",
+   "accept": [
+    "forbici"
+   ],
+   "jev": {
+    "model": "forbici",
+    "fits": 0.89
+   }
+  },
+  {
+   "id": "pozzo-cortile",
+   "thing": {
+    "name": "Pozzo del cortile",
+    "kind": "cosa",
+    "description": "un pozzo di pietra con la carrucola"
+   },
+   "class": "building",
+   "accept": [
+    "pozzo"
+   ],
+   "jev": {
+    "model": "pozzo",
+    "fits": 0.78
+   }
+  },
+  {
+   "id": "altare-rune",
+   "thing": {
+    "name": "Altare delle rune",
+    "kind": "mobile",
+    "description": "un altare di pietra su cui si posano le rune"
+   },
+   "class": "furniture",
+   "accept": [
+    "fantasy-altare-runico"
+   ],
+   "jev": {
+    "model": "fantasy-altare-runico",
+    "fits": 0.77
+   }
+  },
+  {
+   "id": "libreria",
+   "thing": {
+    "name": "Scaffale dei libri dell'alchimista",
+    "kind": "mobile",
+    "description": "uno scaffale pieno di libri e di boccette"
+   },
+   "class": "furniture",
+   "accept": [
+    "fantasy-libreria-alchemica"
+   ],
+   "jev": {
+    "model": "fantasy-libreria-alchemica",
+    "fits": 0.71
+   }
+  },
+  {
+   "id": "cappella",
+   "thing": {
+    "name": "Cappella",
+    "kind": "struttura",
+    "description": "una piccola chiesa di quartiere con il campanile"
+   },
+   "class": "structure",
+   "accept": [
+    "struttura-santuario",
+    "new"
+   ],
+   "jev": {
+    "model": "struttura-santuario",
+    "fits": 0.44
+   }
+  }
+ ]
+}

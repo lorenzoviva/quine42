@@ -1170,6 +1170,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/ai/decisions.ts`, `src/kernel/agents/council.ts`, `CENSUS` (`via: 'decide'`), `server/typesafeProxy.ts`
 - **Da non usare**: «giudizio» (è dei modelli che scrivono: `action.judge`, `model.judge`)
 
+### Riuso dei modelli
+- **Inglese**: `reuse`, `model.reuse`, `reuseOptions`, `REUSE_CLASSES`
+- **Definizione**: la decisione chiusa che, prima di chiamare lo Scultore, sceglie un modello della libreria della stessa classe che mostra già ciò che manca (T349, ADR-0157); solo mobili, piante, rocce e strutture, mai persone. La regola è scolpirlo.
+- **Dove vive**: `src/kernel/modeldirector.ts` (`ModelDirector.reuse`), `CENSUS`
+- **Da non usare**: «riciclo», «modello condiviso» (è delle taglie di una struttura, `shared`, ADR-0160)
+
 ## Client, soldi e carte
 
 ### Client sottile

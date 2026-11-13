@@ -107,7 +107,7 @@ export class GenesisScreen {
       const c = r.coefficients as Coefficients;
       preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
       for (const s of sliders.values()) (s.nextElementSibling as HTMLElement).textContent = Number(s.value).toFixed(2);
-      const h = hourlyEstimate({ ...ai, ...r });
+      const h = hourlyEstimate({ ...ai, ...r }, undefined, { decisions: this.k.council.decisions !== this.k.council.localAiModels });
       estimate.replaceChildren(
         el('div', {}, `Un'ora di gioco costa circa ${usd(h.dollari)} (${h.chiamate} chiamate), con ${ai.maxText} chiamate al più per sessione.`),
         ...h.righe.map((x) => el('div', {}, `· ${x.voce} (${x.modo}): ${x.chiamate} → ${usd(x.dollari)}`)),

@@ -6,6 +6,7 @@
 // models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';
+import { JEV_MODEL } from './ai/decisions';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
@@ -245,6 +246,18 @@ const WEIGHT = { testo: { prompt: 3500, cached: 1500, output: 500 }, scultura: {
 const FORGE_CALLS = 5;
 const PACK_CALLS = 4;
 
+/**
+ * The reuse of the library before the Sculptor (T349, ADR-0157 §4.1), when Jev decides: the share of the models a world asks for that is
+ * of a class that may wear one of the library and has one to wear (`REUSE_ASKED`, measured on an offline Genesis by
+ * `lab/scripts/riuso-modelli.ts`), and the share of those Jev finds one that fits (`REUSE_HIT`, the middle of T325's 30-50 %: the bench's cases
+ * were chosen to be mostly reusable, 81 %, so they are not the world's). Their product is the share of the sculptures saved.
+ */
+export const REUSE_ASKED = 0.4;
+export const REUSE_HIT = 0.4;
+export const REUSE_SHARE = REUSE_ASKED * REUSE_HIT;
+/** Tokens of a `model.reuse` question: the thing and the library of its class (about 300 on an offline Genesis; more as the library grows). */
+const REUSE_WEIGHT = { prompt: 800, cached: 0, output: 0 };
+
 export interface HourLine {
   voce: string;
   modo: 'diretta' | 'indiretta' | 'non regolabile';
@@ -256,7 +269,7 @@ export interface HourLine {
  * What an hour of play usually costs with this configuration: the calls of every kind and their dollars, on the
  * prices of today. The budgets of `ai` (per session) cap what the world does by itself.
  */
-export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]; chiamate: number; dollari: number } {
+export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficients);
   const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
   const actor = repairActor(ai.actor);
@@ -292,8 +305,14 @@ export function hourlyEstimate(ai: AiConfig, date?: string): { righe: HourLine[]
   // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it.
   const gap = modelGap(c.models);
   const wanted = (kinds + fresh + packs * 2 + H.luoghi * 0.3) * (c.models > 0 ? 1 : 0);
-  const models = Math.min(wanted, Number.isFinite(gap) ? 3600 / (40 + gap) : 0, ai.maxModels ?? 40);
+  let models = Math.min(wanted, Number.isFinite(gap) ? 3600 / (40 + gap) : 0, ai.maxModels ?? 40);
   const plan = sculptPlan(c.reviews);
+  // With Jev (T349) a share of them wears a model of the library: asked once each, not sculpted nor judged.
+  const asked = opts.decisions ? models * REUSE_ASKED : 0;
+  if (opts.decisions) {
+    add('Riuso dei modelli della libreria (Jev)', 'diretta', asked, asked * (costOf(JEV_MODEL, REUSE_WEIGHT, date) ?? 0));
+    models -= asked * REUSE_HIT;
+  }
   // Half simple things, half figures and structures (a revision for half of them).
   const writes = models * (0.5 * plan.semplici + 0.5 * (1 + (plan.revisione ? 0.5 : 0)));
   const judges = plan.giudizio ? writes : 0;
