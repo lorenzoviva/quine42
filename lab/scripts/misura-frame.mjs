@@ -4,7 +4,11 @@
 // programs they ran, how long each took, how much of the window they were busy. In headless Chrome on the real GPU (a tab of Claude in
 // Chrome runs at about 1 Hz: `docs/architettura-dettagli.md#convalida-browser`). With a preview already serving the build:
 //
-//   node lab/scripts/misura-frame.mjs <port> [--secondi 8] [--chrome <chrome.exe>] [--json out.json]
+//   node lab/scripts/misura-frame.mjs <port> [--secondi 8] [--chrome <chrome.exe>] [--json out.json] [--modello <file.xml> --scatola 400,400,160]
+//
+// `--modello` (T356): after the cold load, the program of that file is put in the library at that box (as a structure at 20 voxels a tile,
+// straight into the repository: the validator's quality checks are not the question here) and worn by an entity beside the wanderer; the
+// frame is measured while the worker makes it and once it is drawn, from inside it.
 //
 // Nothing of the game changes: the probe wraps requestAnimationFrame, WebGL and Worker before the page, and the kernel's and the
 // renderer's methods from the console (`window.quine`, `window.view`), as an instance property over the prototype's. The wanderer's
@@ -333,6 +337,34 @@ try {
     await page.eval(RESET);
     await sleep(seconds * 1000);
     rows.push(summary(scene, await page.eval(TAKE)));
+  }
+  // A model of a given box beside the wanderer (T356): the frames while the worker makes it, then from inside it once drawn.
+  const modelFile = opt('modello');
+  if (modelFile) {
+    const box = (opt('scatola') ?? '400,400,160').split(',').map(Number);
+    const xml = fs.readFileSync(modelFile, 'utf8').replace(/<sequence /, `<sequence size="${box.join(' ')}" `);
+    await page.eval(RESET);
+    const made = await page.eval(`(async () => {
+      const k = window.quine; const xml = ${JSON.stringify(xml)};
+      const index = JSON.parse(k.repo.working['models/index.json']);
+      index['misura-modello'] = { class: 'structure', size: 'gargantuan', name: 'misura' };
+      k.repo.write('models/misura-modello.xml', xml);
+      k.repo.write('models/index.json', JSON.stringify(index, null, 1) + '\\n');
+      k.applyFiles({ ...k.repo.working });
+      const p = k.wandererPos(); const S = k.config.chunkSize; const x = p.x + ${box[0] / 40} + 2, y = p.y;
+      const t0 = performance.now();
+      k.ecs.spawn({ pos: { x, y }, glyph: { ch: '⌂', color: '#9a4632' }, body: { r: 0.5, solid: true }, form: { model: 'misura-modello', seed: 1, yaw: 0 }, structure: { concept: 'misura', class: 'structure', size: 'gargantuan' }, chunk: { key: Math.floor(x / S) + ',' + Math.floor(y / S) }, origin: { key: 'misura#s0' } });
+      let f; for (let i = 0; i < 240; i++) { f = k.forms.get('misura-modello', 1); if (f && f.status !== 'pending') break; await new Promise((r) => setTimeout(r, 250)); }
+      return { status: f && f.status, error: f && f.error, ms: Math.round(performance.now() - t0), x, y };
+    })()`);
+    console.log(`\nmodello ${modelFile} a ${box.join('×')}: ${made.status} in ${made.ms} ms${made.error ? ` (${made.error})` : ''}`);
+    rows.push({ ...summary(`il modello di ${box.join('×')} che arriva dal worker (${(made.ms / 1000).toFixed(1)} s)`, await page.eval(TAKE)), made });
+    // From inside it: the wanderer at its centre, the carpet still.
+    await page.eval(`(() => { const k = window.quine; k.carpet().active = false; Object.assign(k.wandererPos(), { x: ${made.x} - 3, y: ${made.y} + 6 }); })()`);
+    await settle(page, 60);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push(summary(`dentro il modello di ${box.join('×')}, disegnato`, await page.eval(TAKE)));
   }
   // Water: a hollow dug beside it, the flow measured while it moves.
   await page.eval(RESET);

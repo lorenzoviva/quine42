@@ -163,7 +163,8 @@ for (const [file, xml] of Object.entries(pieced)) {
 // voxels a tile, with the seed's parts included. Only for the developers.
 const sized = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 const SIZED: Record<string, string> = { fattoria: 'Fattoria', forte: 'Forte', 'scultore-rocca': 'Rocca, come la scrive lo Scultore (T354)', 'scultore-villetta': 'Villetta, come la scrive lo Scultore (la risposta offline, T354)' };
-const SIZES: Array<[string, string, Vec3]> = [['large', 'Grande, 5 × 5', [100, 100, 80]], ['huge', 'Enorme, 7,5 × 7,5', [150, 150, 120]], ['gargantuan', 'Gargantuesca, 10 × 10', [200, 200, 160]]];
+// The fourth box is past today's Gargantuan (T356): the same program at 20 × 20 tiles, what a lot of several places would hold.
+const SIZES: Array<[string, string, Vec3]> = [['large', 'Grande, 5 × 5', [100, 100, 80]], ['huge', 'Enorme, 7,5 × 7,5', [150, 150, 120]], ['gargantuan', 'Gargantuesca, 10 × 10', [200, 200, 160]], ['gargantuan-20', 'Gargantuesca a 20 × 20, T356', [400, 400, 160]]];
 // The offline answer of the Sculptor (T354, ADR-0183): the country house written as the prompt without a skeleton asks, from its constant.
 const sizedPrograms: Array<[string, string]> = [...Object.entries(sized), ...(import.meta.env.MODE !== 'production' ? [['scultore-villetta.xml', MOCK_STRUCTURE_PROGRAM] as [string, string]] : [])];
 for (const [file, xml] of sizedPrograms) {

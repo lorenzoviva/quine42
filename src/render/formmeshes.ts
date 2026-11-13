@@ -25,9 +25,13 @@ export interface FormMeshes {
   frames: MeshData[];
 }
 
-/** The body without its limbs and each limb round its joint, for a grid and the limbs of its rig (`limbs` undefined: one mesh, no rig). */
+/**
+ * The body without its limbs and each limb round its joint, for a grid and the limbs of its rig (`limbs` undefined: one mesh, no rig).
+ * A body stands on the ground: the faces that look down from the floor of its grid are never seen and are left out (T356); a limb keeps
+ * them, a foot swings up.
+ */
 function figureMeshes(g: VoxelGrid, pal: Record<string, PaletteEntry>, vpt: number, sway: boolean | undefined, limbs?: readonly Limb[]): Pick<FormMeshes, 'body' | 'limbs'> {
-  const mesh = (only?: (i: number) => boolean, pivot?: [number, number, number]) => meshVoxels(g, pal, { vpt, sway, ...(only ? { only } : {}), ...(pivot ? { pivot } : {}) });
+  const mesh = (only?: (i: number) => boolean, pivot?: [number, number, number]) => meshVoxels(g, pal, { vpt, sway, ...(only ? { only } : { underside: false }), ...(pivot ? { pivot } : {}) });
   if (!limbs) return { body: mesh(), limbs: [] };
   const moving = new Set<number>();
   for (const l of limbs) for (const c of l.cells) moving.add(c);
@@ -47,7 +51,7 @@ export function formMeshes(r: ReturnType<typeof runForm>, req: FormRequest): For
   const grid3 = { ...g, log: [] as number[], epoch: 0 };
   const figure = figureMeshes(g, pal, req.vpt, req.sway, req.rig ? rig(grid3, pal).limbs : undefined);
   const clip = r.model.animations[0];
-  const frames = clip ? clipFrames(grid3, clip, req.seed).map((f) => meshVoxels(f, pal, { vpt: req.vpt, sway: req.sway })) : [];
+  const frames = clip ? clipFrames(grid3, clip, req.seed).map((f) => meshVoxels(f, pal, { vpt: req.vpt, sway: req.sway, underside: false })) : [];
   return { ...figure, frames };
 }
 

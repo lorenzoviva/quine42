@@ -1,0 +1,418 @@
+[
+ {
+  "id": "taglie-fattoria",
+  "box": [
+   200,
+   200,
+   160
+  ],
+  "seme": 1,
+  "celle": 6400000,
+  "ms": 893,
+  "passi": 579,
+  "finito": true,
+  "picco": 74,
+  "resta": 109,
+  "mesh": {
+   "ms": 223,
+   "vertici": 548576,
+   "mb": 25.8
+  },
+  "piccoMesh": 77,
+  "meshFondo": {
+   "ms": 205,
+   "vertici": 684184,
+   "mb": 32.2
+  }
+ },
+ {
+  "id": "taglie-fattoria",
+  "box": [
+   400,
+   400,
+   160
+  ],
+  "seme": 1,
+  "celle": 25600000,
+  "ms": 1847,
+  "passi": 737,
+  "finito": true,
+  "picco": 98,
+  "resta": 214,
+  "mesh": {
+   "ms": 420,
+   "vertici": 934056,
+   "mb": 43.9
+  },
+  "piccoMesh": 129,
+  "meshFondo": {
+   "ms": 419,
+   "vertici": 1222824,
+   "mb": 57.5
+  }
+ },
+ {
+  "id": "taglie-fattoria",
+  "box": [
+   600,
+   600,
+   160
+  ],
+  "seme": 1,
+  "celle": 57600000,
+  "ms": 3394,
+  "passi": 764,
+  "finito": true,
+  "picco": 120,
+  "resta": 404,
+  "mesh": {
+   "ms": 797,
+   "vertici": 1712176,
+   "mb": 80.5
+  },
+  "piccoMesh": 165,
+  "meshFondo": {
+   "ms": 891,
+   "vertici": 3090232,
+   "mb": 145.2
+  }
+ },
+ {
+  "id": "taglie-fattoria",
+  "box": [
+   1000,
+   1000,
+   160
+  ],
+  "seme": 1,
+  "celle": 160000000,
+  "ms": 8282,
+  "passi": 1205,
+  "finito": true,
+  "picco": 297,
+  "resta": 1052,
+  "mesh": {
+   "ms": 1747,
+   "vertici": 3811804,
+   "mb": 179.2
+  },
+  "piccoMesh": 404,
+  "meshFondo": {
+   "ms": 2046,
+   "vertici": 5662040,
+   "mb": 266.1
+  }
+ },
+ {
+  "id": "taglie-forte",
+  "box": [
+   200,
+   200,
+   160
+  ],
+  "seme": 1,
+  "celle": 6400000,
+  "ms": 526,
+  "passi": 683,
+  "finito": true,
+  "picco": 68,
+  "resta": 112,
+  "mesh": {
+   "ms": 164,
+   "vertici": 370652,
+   "mb": 15.9
+  },
+  "piccoMesh": 74,
+  "meshFondo": {
+   "ms": 194,
+   "vertici": 412336,
+   "mb": 17.7
+  }
+ },
+ {
+  "id": "taglie-forte",
+  "box": [
+   400,
+   400,
+   160
+  ],
+  "seme": 1,
+  "celle": 25600000,
+  "ms": 881,
+  "passi": 783,
+  "finito": true,
+  "picco": 116,
+  "resta": 229,
+  "mesh": {
+   "ms": 328,
+   "vertici": 375852,
+   "mb": 16.2
+  },
+  "piccoMesh": 129,
+  "meshFondo": {
+   "ms": 357,
+   "vertici": 421936,
+   "mb": 18.1
+  }
+ },
+ {
+  "id": "taglie-forte",
+  "box": [
+   600,
+   600,
+   160
+  ],
+  "seme": 1,
+  "celle": 57600000,
+  "ms": 1405,
+  "passi": 883,
+  "finito": true,
+  "picco": 206,
+  "resta": 471,
+  "mesh": {
+   "ms": 587,
+   "vertici": 381052,
+   "mb": 16.4
+  },
+  "piccoMesh": 220,
+  "meshFondo": {
+   "ms": 601,
+   "vertici": 431536,
+   "mb": 18.6
+  }
+ },
+ {
+  "id": "taglie-forte",
+  "box": [
+   1000,
+   1000,
+   160
+  ],
+  "seme": 1,
+  "celle": 160000000,
+  "ms": 2622,
+  "passi": 1083,
+  "finito": true,
+  "picco": 431,
+  "resta": 1192,
+  "mesh": {
+   "ms": 1387,
+   "vertici": 391452,
+   "mb": 16.8
+  },
+  "piccoMesh": 431,
+  "meshFondo": {
+   "ms": 1392,
+   "vertici": 450736,
+   "mb": 19.4
+  }
+ },
+ {
+  "id": "scultore-rocca",
+  "box": [
+   200,
+   200,
+   160
+  ],
+  "seme": 1,
+  "celle": 6400000,
+  "ms": 664,
+  "passi": 489,
+  "finito": true,
+  "picco": 48,
+  "resta": 83,
+  "mesh": {
+   "ms": 187,
+   "vertici": 372376,
+   "mb": 16
+  },
+  "piccoMesh": 57,
+  "meshFondo": {
+   "ms": 205,
+   "vertici": 427760,
+   "mb": 18.4
+  }
+ },
+ {
+  "id": "scultore-rocca",
+  "box": [
+   400,
+   400,
+   160
+  ],
+  "seme": 1,
+  "celle": 25600000,
+  "ms": 1689,
+  "passi": 509,
+  "finito": true,
+  "picco": 77,
+  "resta": 186,
+  "mesh": {
+   "ms": 339,
+   "vertici": 388336,
+   "mb": 16.7
+  },
+  "piccoMesh": 83,
+  "meshFondo": {
+   "ms": 369,
+   "vertici": 459120,
+   "mb": 19.7
+  }
+ },
+ {
+  "id": "scultore-rocca",
+  "box": [
+   600,
+   600,
+   160
+  ],
+  "seme": 1,
+  "celle": 57600000,
+  "ms": 3277,
+  "passi": 529,
+  "finito": true,
+  "picco": 112,
+  "resta": 385,
+  "mesh": {
+   "ms": 619,
+   "vertici": 395120,
+   "mb": 17
+  },
+  "piccoMesh": 113,
+  "meshFondo": {
+   "ms": 712,
+   "vertici": 471904,
+   "mb": 20.3
+  }
+ },
+ {
+  "id": "scultore-rocca",
+  "box": [
+   1000,
+   1000,
+   160
+  ],
+  "seme": 1,
+  "celle": 160000000,
+  "ms": 8271,
+  "passi": 569,
+  "finito": true,
+  "picco": 244,
+  "resta": 1011,
+  "mesh": {
+   "ms": 1381,
+   "vertici": 408736,
+   "mb": 17.6
+  },
+  "piccoMesh": 262,
+  "meshFondo": {
+   "ms": 1409,
+   "vertici": 497520,
+   "mb": 21.4
+  }
+ },
+ {
+  "id": "scultore-villetta",
+  "box": [
+   200,
+   200,
+   160
+  ],
+  "seme": 1,
+  "celle": 6400000,
+  "ms": 714,
+  "passi": 558,
+  "finito": true,
+  "picco": 45,
+  "resta": 79,
+  "mesh": {
+   "ms": 165,
+   "vertici": 274200,
+   "mb": 12.9
+  },
+  "piccoMesh": 53,
+  "meshFondo": {
+   "ms": 161,
+   "vertici": 301328,
+   "mb": 14.2
+  }
+ },
+ {
+  "id": "scultore-villetta",
+  "box": [
+   400,
+   400,
+   160
+  ],
+  "seme": 1,
+  "celle": 25600000,
+  "ms": 1741,
+  "passi": 755,
+  "finito": true,
+  "picco": 81,
+  "resta": 209,
+  "mesh": {
+   "ms": 354,
+   "vertici": 477148,
+   "mb": 22.4
+  },
+  "piccoMesh": 87,
+  "meshFondo": {
+   "ms": 335,
+   "vertici": 516648,
+   "mb": 24.3
+  }
+ },
+ {
+  "id": "scultore-villetta",
+  "box": [
+   600,
+   600,
+   160
+  ],
+  "seme": 1,
+  "celle": 57600000,
+  "ms": 3386,
+  "passi": 1073,
+  "finito": true,
+  "picco": 138,
+  "resta": 407,
+  "mesh": {
+   "ms": 644,
+   "vertici": 813540,
+   "mb": 38.2
+  },
+  "piccoMesh": 140,
+  "meshFondo": {
+   "ms": 638,
+   "vertici": 869768,
+   "mb": 40.9
+  }
+ },
+ {
+  "id": "scultore-villetta",
+  "box": [
+   1000,
+   1000,
+   160
+  ],
+  "seme": 1,
+  "celle": 160000000,
+  "ms": 8771,
+  "passi": 2127,
+  "finito": true,
+  "picco": 298,
+  "resta": 1020,
+  "mesh": {
+   "ms": 1605,
+   "vertici": 1950236,
+   "mb": 91.7
+  },
+  "piccoMesh": 331,
+  "meshFondo": {
+   "ms": 1647,
+   "vertici": 2054968,
+   "mb": 96.6
+  }
+ }
+]

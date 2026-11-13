@@ -3,7 +3,7 @@
 // steps, whether it finished, the peak of resident memory over the process's baseline, the heap it leaves, and the meshes the worker
 // would make (`meshVoxels`: their time, their vertices, their bytes), which in the browser cost more than the program (T331).
 //
-//   npx vite-node lab/scripts/misura-tetto.ts -- [--solo id,id] [--lati 120,240,360,480] [--z 96] [--semi 1] [--json f] [--senza-mesh]
+//   npx vite-node lab/scripts/misura-tetto.ts -- [--solo id,id] [--lati 120,240,360,480] [--z 96] [--semi 1] [--json f] [--senza-mesh] [--senza-fondo]
 //   npx vite-node lab/scripts/misura-tetto.ts -- --uno <file.xml> <x> <y> <z> <seme> [--senza-pezzi] [--senza-mesh]   (one run, one line of JSON)
 //
 // `--senza-pezzi` runs a program's `<pieces>` as a plain `<sequence>` on the whole grid: the same rules, the grid not cut.
@@ -16,12 +16,21 @@ import { meshVoxels } from '../../src/mj/mesh';
 import { compileMjx, mjxIncludes } from '../../src/mj/model';
 import { FORM_LIMITS, FORM_PIECES } from '../../src/mj/run';
 import { senzaPezzi } from '../banco/pezzi/bordi';
+import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : undefined);
 
-/** The programs measured: the seed's procedural structures, the bench's references, the bench of the pieces (with and without them). */
-export const PROGRAMMI: Array<{ id: string; file: string; pezzi?: boolean }> = [
+/**
+ * The programs measured: the seed's procedural structures, the bench's references, the bench of the pieces (with and without them), and
+ * the structures that fit their size (T338, T346, T354: one program at 20 voxels a tile, the box of the size; T356 measures them past
+ * the Gargantuan box of 200, at 20, 30 and 50 tiles a side). `xml` is for a program that lives in a constant.
+ */
+export const PROGRAMMI: Array<{ id: string; file: string; pezzi?: boolean; xml?: string }> = [
+  { id: 'taglie-fattoria', file: 'lab/banco/taglie/fattoria.xml' },
+  { id: 'taglie-forte', file: 'lab/banco/taglie/forte.xml' },
+  { id: 'scultore-rocca', file: 'lab/banco/taglie/scultore-rocca.xml' },
+  { id: 'scultore-villetta', file: 'lab/banco/taglie/scultore-villetta.xml', xml: MOCK_STRUCTURE_PROGRAM },
   { id: 'forte-di-frontiera', file: 'universe/models/struttura-forte-di-frontiera.xml' },
   { id: 'locanda', file: 'universe/models/struttura-locanda.xml' },
   { id: 'tempio-della-luna', file: 'universe/models/struttura-tempio-della-luna.xml' },
@@ -49,20 +58,26 @@ export interface Misura {
   resta: number;
   pezzi?: number;
   pezzoLento?: number;
+  /** The mesh as the game makes it (without the faces under the floor, T356). */
   mesh?: { ms: number; vertici: number; mb: number };
+  /** The same with the underside, as before T356. */
+  meshFondo?: { ms: number; vertici: number; mb: number };
   errore?: string;
 }
 
-/** The files of models/ a program reads, from the folder it is in (the bench's programs read none today). */
+/** The files of models/ a program reads: from the folder it is in, else the seed's (the parts one lives in, T346). */
 function files(file: string, xml: string): Record<string, string> {
-  const dir = path.dirname(file);
-  return mjxIncludes(xml, (f) => (fs.existsSync(path.join(dir, f)) ? fs.readFileSync(path.join(dir, f), 'utf8') : undefined));
+  const dirs = [path.dirname(file), 'universe/models'];
+  return mjxIncludes(xml, (f) => {
+    const hit = dirs.map((d) => path.join(d, f)).find((p) => fs.existsSync(p));
+    return hit ? fs.readFileSync(hit, 'utf8') : undefined;
+  });
 }
 
 function uno(file: string, box: [number, number, number], seme: number, pezzi: boolean, mesh: boolean): Misura {
   const id = path.basename(file, '.xml');
   const base = { id, box, seme, celle: box[0] * box[1] * box[2] };
-  const raw = fs.readFileSync(file, 'utf8');
+  const raw = PROGRAMMI.find((p) => p.file === file)?.xml ?? fs.readFileSync(file, 'utf8');
   const xml = pezzi ? raw : senzaPezzi(raw);
   // As large as the run asks: the measure is where it breaks, not where the game refuses (the game's ceilings are in the table apart).
   const limits: GridLimits = { side: 4096, cells: 256_000_000, pieces: { ...FORM_PIECES, side: 4096, cells: 256_000_000, totalMs: 600_000 } };
@@ -86,11 +101,15 @@ function uno(file: string, box: [number, number, number], seme: number, pezzi: b
       ...(r.pieces ? { pezzi: r.pieces.length, pezzoLento: Math.max(...r.pieces.map((p) => p.ms)) } : {}),
     };
     if (mesh) {
-      const t1 = performance.now();
-      const md = meshVoxels(r.grid, m.program.palette, { vpt: 10 });
-      const bytes = md.positions.byteLength + md.normals.byteLength + md.colors.byteLength + md.indices.byteLength + (md.part?.byteLength ?? 0) + (md.alpha?.byteLength ?? 0) + (md.glow?.byteLength ?? 0);
-      out.mesh = { ms: Math.round(performance.now() - t1), vertici: md.positions.length / 3, mb: Math.round(bytes / 1e5) / 10 };
+      const misura = (underside: boolean) => {
+        const t1 = performance.now();
+        const md = meshVoxels(r.grid, m.program.palette, { vpt: 10, underside });
+        const bytes = md.positions.byteLength + md.normals.byteLength + md.colors.byteLength + md.indices.byteLength + (md.part?.byteLength ?? 0) + (md.alpha?.byteLength ?? 0) + (md.glow?.byteLength ?? 0);
+        return { ms: Math.round(performance.now() - t1), vertici: md.positions.length / 3, mb: Math.round(bytes / 1e5) / 10 };
+      };
+      out.mesh = misura(false);
       out.piccoMesh = Math.round((process.resourceUsage().maxRSS * 1024 - rss0) / 1e6);
+      if (!args.includes('--senza-fondo')) out.meshFondo = misura(true);
     }
     return out;
   } catch (e) {
@@ -109,15 +128,15 @@ if (args[0] === '--uno') {
   const righe: Misura[] = [];
   for (const p of PROGRAMMI) {
     if (solo && !solo.includes(p.id)) continue;
-    if (!fs.existsSync(p.file)) continue;
+    if (!p.xml && !fs.existsSync(p.file)) continue;
     for (const lato of lati)
       for (let seme = 1; seme <= semi; seme++) {
-        const child = spawnSync(process.execPath, ['--expose-gc', path.resolve('node_modules/vite-node/dist/cli.mjs'), __filename, '--', '--uno', p.file, String(lato), String(lato), String(Z), String(seme), ...(p.pezzi === false ? ['--senza-pezzi'] : []), ...(args.includes('--senza-mesh') ? ['--senza-mesh'] : [])], { encoding: 'utf8', maxBuffer: 1 << 26, timeout: 1_200_000 });
+        const child = spawnSync(process.execPath, ['--expose-gc', path.resolve('node_modules/vite-node/dist/cli.mjs'), __filename, '--', '--uno', p.file, String(lato), String(lato), String(Z), String(seme), ...(p.pezzi === false ? ['--senza-pezzi'] : []), ...(args.includes('--senza-mesh') ? ['--senza-mesh'] : []), ...(args.includes('--senza-fondo') ? ['--senza-fondo'] : [])], { encoding: 'utf8', maxBuffer: 1 << 26, timeout: 1_200_000 });
         const line = child.stdout.trim().split('\n').reverse().find((l) => l.startsWith('{'));
         const m: Misura = line ? { ...JSON.parse(line), id: p.id } : { id: p.id, box: [lato, lato, Z], seme, celle: lato * lato * Z, ms: 0, passi: 0, finito: false, picco: 0, resta: 0, errore: (child.stderr || 'nessuna risposta').trim().split('\n').slice(-3).join(' ').slice(0, 200) };
         righe.push(m);
         const gioco = lato > FORM_LIMITS.side || lato * lato * Z > FORM_LIMITS.cells ? ' (oltre FORM_LIMITS)' : '';
-        console.log(`${p.id.padEnd(22)} ${`${lato}×${lato}×${Z}`.padEnd(13)} ${(m.celle / 1e6).toFixed(1).padStart(5)} M celle ${String(m.ms).padStart(7)} ms ${m.finito ? 'finito ' : 'NO     '} picco ${String(m.picco).padStart(5)} MB${m.piccoMesh !== undefined ? ` (con la mesh ${m.piccoMesh})` : ''}${m.pezzi ? ` · ${m.pezzi} pezzi, il più lento ${m.pezzoLento} ms` : ''}${m.mesh ? ` · mesh ${m.mesh.ms} ms, ${(m.mesh.vertici / 1e6).toFixed(2)} M vertici, ${m.mesh.mb} MB` : ''}${m.errore ? ` · ${m.errore}` : ''}${gioco}`);
+        console.log(`${p.id.padEnd(22)} ${`${lato}×${lato}×${Z}`.padEnd(13)} ${(m.celle / 1e6).toFixed(1).padStart(5)} M celle ${String(m.ms).padStart(7)} ms ${m.finito ? 'finito ' : 'NO     '} picco ${String(m.picco).padStart(5)} MB${m.piccoMesh !== undefined ? ` (con la mesh ${m.piccoMesh})` : ''}${m.pezzi ? ` · ${m.pezzi} pezzi, il più lento ${m.pezzoLento} ms` : ''}${m.mesh ? ` · mesh ${m.mesh.ms} ms, ${(m.mesh.vertici / 1e6).toFixed(2)} M vertici, ${m.mesh.mb} MB` : ''}${m.meshFondo ? ` (col fondo ${(m.meshFondo.vertici / 1e6).toFixed(2)} M, ${m.meshFondo.mb} MB)` : ''}${m.errore ? ` · ${m.errore}` : ''}${gioco}`);
       }
   }
   const out = opt('json');

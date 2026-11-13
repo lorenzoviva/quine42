@@ -5109,7 +5109,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
 
-### T356 · Il tetto dei voxel delle strutture gargantuesche — `da fare` (dipende da T346)
+### T356 · Il tetto dei voxel delle strutture gargantuesche — `in attesa` (dipende da T346)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: l'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il tetto. T339 ha `<pieces>` (ADR-0178) e la misura di dove sta il tetto (la mesh, `FORM_LIMITS`, le scatole delle classi); T338 ha `STRUCTURE_SIDE` e `densityFor` (ADR-0179). `dossier T338`, `dossier T339`.
@@ -5117,6 +5117,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: `banco-pezzi.ts`, `banco-taglie.ts`; suite e typecheck coi turni.
 - Browser: sì, una fattoria gargantuesca nel laboratorio 3D e nel gioco, frame misurati.
 - Quando è fatto: commit su `task/T356`, kernel sale di Z.
+- Esito: fatto: misure del tetto a 20/30/50 caselle (il motore regge, la mesh era il tetto), `meshVoxels` in due passate su array tipizzati senza cambiare un vertice e con `underside: false` per le forme del gioco (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel laboratorio 3D e nel banco con foto, `misura-frame.mjs --modello`, ADR-0184, kernel 0.6.11; suite 3072 verdi, typecheck e build verdi. Non fatto: `STRUCTURE_SIDE` e le caselle della gargantuesca restano 200 e 10 × 10 perché una struttura di 20 caselle non ha un lotto (un luogo è 18, `claimSizes` la farebbe scendere): la domanda all'autore in `docs/pipeline/domande/T356.md` (raccomandato un lotto di 2 × 2 luoghi, 8-10 %); il validatore rifiuta la fattoria a 20 caselle per i pezzi staccati (48 %), regola da ripensare nel task del lotto; le 50 caselle a 20 voxel non entrano in un browser (160 MB di griglia, 180 MB di mesh). Non provato: lo Scultore su Gemini a 400. Sicurezza: nessuna superficie nuova (tetti di memoria del motore più alti a tempo invariato).
 
 ### T347 · La Campagna del Master: spese del master, universo privato su invito, ritmo della generazione e direttive al Concilio (studio e ADR proposto) — `da fare`
 - Pipeline: fable · sforzo high · stima 4% · approvato · priorità 5
