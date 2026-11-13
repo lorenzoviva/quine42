@@ -5072,13 +5072,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T351`, kernel sale di Z.
 - Esito: cache esplicita di Gemini 3.8 Flash per le istruzioni di sistema dell'Attore (`CACHED_AGENTS`, focus nel prompt, scheda fuori dal prefisso perché una cache per persona costa di più; `ExplicitCaches`: scritta alla seconda richiesta, ttl 1800 s, nominata fino a 150 s dalla fine, rifiuti non riprovati, cache sparita → chiamata intera una volta); `Price.storage` (0,50 $/M·h, 1,00 dal 2027) e `Tokens.stored` nei prezzi, riga `cache.write` nel registro (prompt al prezzo d'ingresso + conservazione per tutto il ttl, `Tally.stored`), pagata da `comune` (8i), addebito con `tokensOf`; varco: `GeminiGate.writeCache` (route `/api/gemini/cachedContents` e `direct()`; solo modelli con prezzo di conservazione, ttl 60-3600 s, corpo rifatto, tetto con la conservazione, ≤64 vive) e solo cache scritte da lui; riga della lobby; misura offline `prompt-tokens.ts --cache` → `lab/banco/jev/cache-attore.md` (−47 %, 0,16 $/h sulle righe dell'Attore, su 2 persone di una Genesi offline); ADR-0185, dettagli, glossario, AGENTS; kernel 0.6.11; typecheck e suite intera verdi (3080 test); non provato contro Gemini vero (che 3.8 Flash accetti la cache, soglia minima, costo della scrittura, prezzo di conservazione da pagine terze); sicurezza: una porta nuova nel varco della chiave (`cachedContents`) con i suoi limiti e quattro test V-002 in `tests/sicurezza/gemini.test.ts`, nessun dato nuovo verso il client.
 
-### T352 · La stima della lobby con i token misurati — `da fare`
+### T352 · La stima della lobby con i token misurati — `fatto` (`16832202`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 6
 - Contesto: D45.8 (autore, 10/11): la stima oraria della lobby (`coefficients.ts`, ADR-0085) usa token stimati; T325 li ha misurati con `countTokens` sulle richieste vere (`lab/scripts/jev-casi-d-uso.ts --contesto --conta`). `dossier T325`.
 - Cosa fare: aggiornare i token per compito della stima con le misure, con la data e il comando per rifarle.
 - Test: test dei coefficienti; suite e typecheck coi turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T352`, kernel sale di Z.
+- Esito: la stima oraria usa i token misurati da T325 per ogni compito (data e comando nel codice), un'ora a pieno dettaglio passa da ~1,04 $ a 1,42 $, kernel 0.6.12, commit 16832202; typecheck verde; suite intera senza rilancio dopo la correzione della versione del seme (3 test, ora verdi nei loro file), `carte-guaste` rosso nella suite intera e verde da solo, causa non dimostrata; restano stimate le uscite non misurate e `forge.fix`; l'Attore usa le misure del Narratore.
 
 ### T353 · Vestire gli individui: gli abiti dalla scheda o dal mestiere — `fatto` (`d830c45a`) (dipende da T290)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
