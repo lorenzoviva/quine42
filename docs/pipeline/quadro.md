@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 379 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -12,7 +12,7 @@ Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). Non provato contro TypeSafe vero né su traffico reale; mancano la stima nella lobby multigiocatore e l'archivio di sessione delle domande del viandante (D45.6); T352 pronto.
-- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 pronto (step 43).
+- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 con 8 domande; i 7 task dello studio (~25 % settimana) si pianificano dopo le risposte.
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva per massimizzare l'uso di Fable.
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
 - **Modelli specializzati di Antigravity (autore, 13/11):** T360 integrato (`703c838c`, ADR-0187): provider `hydrogen` (Gemini 4 Hydrogen, conto `gemini`) e `orchestrator` (Orchestrator (Argon), conto `argon`), in prova a tetto 1, senza browser, non orchestrabili senza la casella; sforzo come suffisso `-high|-xhigh`, mai `--effort` su agy. Non misurati: contatori e rapporti 5h/settimana (prime righe di `consumi.jsonl`).
@@ -22,7 +22,7 @@ Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** in corso T347 (Fable, campagna del master, lanciato 19:02 UTC); pronto T352 (Claude), aspetta la finestra 5h (88 %, reset 22:59 UTC); T355 `in attesa` fino al 15/11 (D48 passo 3).
+0. **In corso/pronti:** in corso T352 (Claude, medium, lanciato 19:12 UTC); T355 `in attesa` fino al 15/11 (D48 passo 3).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
 2. **Crediti (13/11 19:05 UTC):** Claude settimana 61 %, 5h 88 % (reset 22:59 UTC); Fable settimana 38 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %. Generatore acceso, fermo (avanzo negativo).
 
@@ -32,6 +32,7 @@ Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
 - **Approvazione proposte:** T310b (schema campi inglese).
 - **D52 (ADR-0184, open beta):** 7 domande di T345, tutte con consiglio «sì».
 - **D53 (ADR-0185, lotto gargantuesche da 20+ caselle):** domanda di T356 sul lotto per strutture da 20 caselle (raccomandata opzione 1: blocco di 2 × 2 luoghi, stima 8-10 %).
+- **D54 (ADR-0188, campagna del master):** 8 domande di T347, tutte con consiglio «sì» (titolare carte = chi chiede; anonimi locali nei pubblici; pausa ferma ciò che il mondo fa da sé; avviso HUD; `campaign.md` a sezioni; `mare`/`trattenuta`; inviti 7 giorni monouso; privato + verificatore ADR-0184 §8 in un task).
 
 ## Regole attive
 
@@ -40,5 +41,5 @@ Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **379 (claude):** integrato T347 (`c72f4617`, ADR-0188 proposto), D54 in chat; lanciato T352.
 - **377-378 (claude):** integrato T360 (`703c838c`, ADR-0187); spegnimento `ferma --dopo` alle 18:31 UTC, riavvio; lanciato T347 su Fable.
-- **374 (argon):** riavvio; pianificato e approvato T360 (adattamento della pipeline a Hydrogen e Orchestrator di Antigravity).
