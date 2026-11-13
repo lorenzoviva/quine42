@@ -9,14 +9,13 @@
 
 import type { Schema } from '../ai/models';
 import { hashStr } from '../rng';
-import { metaBreak } from '../fourthwall';
 import { normName } from '../content';
 import type { Manifest } from '../types';
 import { classOf, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
 import { internalComponents, internalName, internalValues } from '../internalNames';
 import { luaFor0_5 } from '../migrations';
 import { ownModelId } from '../modeldirector';
-import { AGENTS, wordsOf, type AgentId, type Council } from './council';
+import { AGENTS, type AgentId, type Council } from './council';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
 
@@ -352,15 +351,17 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   if (req.kind) concept.tipo = req.kind;
   c.say('narrator', 'propone', `«${concept.nome}» (${concept.tipo}): ${concept.descrizione}`);
   // Inside the world nothing knows of the Council's table; nor is anything made twice.
+  // The words metaBreak knows, then the four questions of `text.fourthwall` (T350): what breaks goes back to the Narrator with the reason.
+  const breaks = (x: Concept) => c.fourthWall(`${x.nome} ${x.descrizione} ${x.persona ?? ''} ${x.lore ?? ''}`, req.chi);
   for (let tries = 0; tries < 2; tries++) {
-    const meta = metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''} ${concept.lore ?? ''}`, wordsOf(c.files));
+    const meta = await breaks(concept);
     const dup = req.existingNames?.find((n) => normName(n) === normName(concept.nome));
     if (!meta && !dup) break;
     const why = meta ? `«${concept.nome}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.nome}» esiste già: crea qualcosa di diverso.`;
     c.say('kernel', 'scarta', why, 'narrator');
     concept = decided(await askConcept(why));
     if (req.kind) concept.tipo = req.kind;
-    if (tries === 1 && (metaBreak(`${concept.nome} ${concept.descrizione} ${concept.persona ?? ''}`) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narrator');
+    if (tries === 1 && ((await breaks(concept)) || req.existingNames?.some((n) => normName(n) === normName(concept.nome)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.nome}`, 'narrator');
   }
   // Buildings are environments (the Cartographer's layouts), never one-tile objects.
   if (isStructure(concept)) {

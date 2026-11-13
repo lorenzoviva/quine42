@@ -15,6 +15,11 @@ import type { CallRecord } from './usage';
 /** The models the gate lets through (fixed versions, never an alias that moves: ADR-0157 §1). Changing it means running the bench again (§7). */
 export const JEV_MODELS = ['jev-1.13.0', 'jev-1.14.0'] as const;
 export type JevModel = (typeof JEV_MODELS)[number];
+/**
+ * Whether TypeSafe keeps nothing of what it reads (D45.3): until it does, a decision whose state carries the free text of a wanderer
+ * (`freeText` in `CENSUS`: the guard, `text.guard`) never reaches Jev; the rule answers. Turning it on is a decision of the author.
+ */
+export const JEV_ZERO_RETENTION = false;
 /** The production model of today. */
 export const JEV_MODEL: JevModel = 'jev-1.13.0';
 /**

@@ -107,8 +107,11 @@ export const EFFECTS_GUIDE = [
 
 export async function judgeAction(c: Council, ctx: ActionContext, focus?: string[]): Promise<ActionJudgement> {
   const t = ctx.target;
+  // The guard (T350): the wanderer's words quoted, a note when they give orders or are not of the world.
+  const g = await c.guard('action', ctx.text);
   const prompt = [
-    `The wanderer, in front of «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tags ${t.tags.join(', ')}` : ''}${t.container ? '; it is a container' : ''}), writes: «${ctx.text}».`,
+    `The wanderer, in front of «${t.name}» (${t.kind}: ${t.description}${t.tags.length ? `; tags ${t.tags.join(', ')}` : ''}${t.container ? '; it is a container' : ''}), writes: «${g.quoted}».`,
+    g.note,
     `Carries: ${ctx.carrying.join(', ') || 'nothing'}. Holds: ${ctx.holding}. Under the thing: ${ctx.tile}. Place: ${ctx.place || 'unknown'}.`,
     ctx.transcended
       ? `The wanderer has transcended: they are a member of the Council and have seen the code of the world. Go along with what they want to do (as long as it does not destroy the universe, themselves or the laws of the game), choosing the effects that make it happen best.`
@@ -284,12 +287,16 @@ export interface CraftJudgement {
  * ingredient is really carried, and a possible recipe becomes a rule of the world (a known recipe).
  */
 export async function judgeCraft(c: Council, text: string, carrying: string[], known: string[], focus?: string[]): Promise<CraftJudgement> {
+  const g = await c.guard('craft', text);
   const prompt = [
-    `The wanderer wants to make: «${text}».`,
+    `The wanderer wants to make: «${g.quoted}».`,
+    g.note,
     `Carries: ${carrying.join(', ') || 'nothing'}.`,
     `Things that already exist in the world (use these names if the result is one of them): ${known.slice(0, 80).join(', ')}.`,
     `Can it be made with what they carry, by hand, believably? If so: "risultato" (name), "quantita", the "ingredienti" consumed and the "attrezzi" used, ONLY among the things they carry and with exact names; if the result does not exist yet, describe it. If not, "possibile" false and explain what is missing. Be as strict as a real craftsman.`,
-  ].join('\n\n');
+  ]
+    .filter(Boolean)
+    .join('\n\n');
   const r = await c.ask<{ possibile: boolean; racconto: string; risultato?: string; descrizione?: string; quantita?: number; ingredienti?: Array<{ oggetto: string; quantita: number }>; attrezzi?: string[] }>('narrator', 'craft.free', prompt, CRAFT_SCHEMA, {
     data: { text, carrying, known },
     temperature: 0.4,

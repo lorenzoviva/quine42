@@ -6,7 +6,7 @@
 // models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
 import { priceOf, costOf } from './ai/prices';
-import { JEV_MODEL } from './ai/decisions';
+import { JEV_MODEL, JEV_ZERO_RETENTION } from './ai/decisions';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
@@ -94,7 +94,7 @@ const GENESIS_ONCE = "una volta, alla Genesi: la lobby viene dopo; chi non vuole
  * coefficient; `non regolabile` is only the Genesis, with the reason in `nota` (a test holds this: T247). `via: 'decide'` is a closed
  * decision (ADR-0157): it goes to the layer of decisions (`ai/decisions.ts`, Jev), never to a model that writes, and only these tasks may.
  */
-export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; via?: 'decide'; nota?: string }> = [
+export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; via?: 'decide'; freeText?: true; nota?: string }> = [
   { compito: 'genesis.bible', agente: 'narrator', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.style', agente: 'artist', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.terrain', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
@@ -139,10 +139,20 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'sound.compose', agente: 'musician', modo: 'diretta', coefficiente: 'pieces', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },
   // The closed decisions (ADR-0157): the knob at 0 means today's rule, without a call.
   { compito: 'model.reuse', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', via: 'decide', nota: 'prima di scolpire: un modello che c’è già va bene? Una scelta, non un testo' },
+  // T350: the fourth wall on what the Council writes for the world, with `metaBreak` in front; the knob of the Council's sessions, as `review.fourthwall`.
+  { compito: 'text.fourthwall', agente: 'arbiter', modo: 'indiretta', coefficiente: 'sessions', via: 'decide', nota: 'ciò che il Concilio scrive per il mondo rompe la quarta parete? Quattro sì o no dopo il filtro di parole' },
+  // T350: the guard on what the wanderer writes (D45.5). Their free text: the rule answers until TypeSafe keeps nothing (D45.3).
+  { compito: 'text.guard', agente: 'arbiter', modo: 'diretta', coefficiente: 'words', via: 'decide', freeText: true, nota: 'ciò che scrive il viandante detta ordini, è senza senso o fuori dal mondo? Mai isolato: va al Narratore, che resta nel mondo' },
 ];
 
 /** The knob of a closed decision (ADR-0157), or undefined: a task the census does not name as a decision is never asked to the layer. */
 export const decisionKnob = (task: string): CoefficientKey | undefined => CENSUS.find((c) => c.compito === task && c.via === 'decide')?.coefficiente;
+
+/**
+ * Whether a decision's state carries the free text of a wanderer (D45.3): until TypeSafe offers zero retention (`JEV_ZERO_RETENTION`) such a
+ * call never leaves the kernel, the local models answer with the rule.
+ */
+export const freeTextDecision = (task: string): boolean => !JEV_ZERO_RETENTION && !!CENSUS.find((c) => c.compito === task && c.via === 'decide')?.freeText;
 
 /** The knobs the Council applies to a call itself (T247): what they do not let through goes to the local models. */
 export const RATIONED_KEYS: readonly CoefficientKey[] = ['chunks', 'words', 'looks', 'actions', 'magic', 'death', 'studio'];
@@ -257,6 +267,8 @@ export const REUSE_HIT = 0.4;
 export const REUSE_SHARE = REUSE_ASKED * REUSE_HIT;
 /** Tokens of a `model.reuse` question: the thing and the library of its class (about 300 on an offline Genesis; more as the library grows). */
 const REUSE_WEIGHT = { prompt: 800, cached: 0, output: 0 };
+/** Tokens of a `text.fourthwall` call: four questions (about 450), the world in a line and the text (T313's bench: 569 with a short text). */
+const WALL_WEIGHT = { prompt: 900, cached: 0, output: 0 };
 
 export interface HourLine {
   voce: string;
@@ -302,6 +314,11 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   }
   const plots = c.plots <= 0 ? 0 : H.giorni / Math.max(4, stretch(1, c.plots));
   add(COEFFICIENT_INFO.plots.nome, 'diretta', plots * 1.3, text(plots * 1.3));
+  // With Jev (T350), the fourth wall on what the Council writes for the world: a concept, an individual, a sheet, a plot; four questions each.
+  if (opts.decisions && c.sessions > 0) {
+    const walls = fresh + kinds + people + plots * 1.3;
+    add('Quarta parete sui testi nuovi (Jev)', 'indiretta', walls, walls * (costOf(JEV_MODEL, WALL_WEIGHT, date) ?? 0));
+  }
   // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it.
   const gap = modelGap(c.models);
   const wanted = (kinds + fresh + packs * 2 + H.luoghi * 0.3) * (c.models > 0 ? 1 : 0);

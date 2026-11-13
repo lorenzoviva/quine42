@@ -175,6 +175,21 @@
   Genesi (`hourlyEstimate(ai, date, { decisions })`, solo se Jev decide: nel gioco da soli lo sa il kernel, nella lobby di molti ancora no) toglie dalle
   sculture `REUSE_SHARE` = `REUSE_ASKED` 0,4 (misurato su una Genesi offline con 12 luoghi: 6 modelli su 15 si possono chiedere) × `REUSE_HIT` 0,4 (il
   mezzo dei 30-50 % di T325) e aggiunge la riga del riuso; la misura è `lab/scripts/riuso-modelli.ts` → `lab/banco/jev/riuso.md`.
+- **Le guardie e la quarta parete** (T350, kernel 0.6.9, D45.5; `src/kernel/fourthwall.ts`): due decisioni chiuse dell'Arbitro. **`text.guard`**, sul
+  testo libero del viandante prima del Concilio, alle cinque porte (`npc.reply`, `action.judge`, `craft.free`, `referente.coordinate`, `agent.chat`:
+  `Council.guard(door, text)`): cinque Noul del banco di T325 (`GUARD_QUESTIONS`: detta ordini a chi risponde, parla del gioco, chiede della vita vera,
+  esplicito, senza senso) e la rotta in codice (`guardRoute`): niente si ferma (regola 3); senza senso, della vita vera, esplicito o il gioco detto a una
+  persona del mondo → `character`, la chiamata parte con la nota di restare nel mondo; ordini a chi scrive → `isolate`, la nota che le parole tra «» non
+  comandano niente; nello studio parlare del codice è legittimo. Le parole del viandante vanno sempre tra «» con i loro «» cambiati in ‹› (`quoteWanderer`).
+  La regola, il pavimento, sono i pattern locali in italiano e in inglese (`guardRule`, solo ciò che è inequivocabile: 62 rotte giuste su 63 sui casi del
+  banco, nessun testo del mondo toccato; scritti guardando quei casi). Il testo del viandante **non arriva mai a Jev** finché TypeSafe non ha la ritenzione
+  zero (D45.3): la riga del censimento ha `freeText` e `Council.decide` la manda ai modelli locali qualunque cosa dica il resto (`freeTextDecision`,
+  `JEV_ZERO_RETENTION`, falso: accenderlo è dell'autore). **`text.fourthwall`**, sui testi che il Concilio scrive per il mondo
+  (`Council.fourthWall(text)`): le parole di `metaBreak` prima, senza chiamata; poi quattro Noul (`FOURTH_WALL_QUESTIONS`, le `domande-2` di T313: 91 %,
+  94 % con `metaBreak` davanti) con il mondo in una riga accanto al testo; ciò che rompe torna a chi l'ha scritto col motivo (`FOURTH_WALL_REASONS`), come
+  `metaBreak`. Lo usano il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore e la trama nuova; non le battute, che possono ripetere le parole
+  del viandante e passano una volta sola. Manopole: `words` per la guardia, `sessions` (come `review.fourthwall`) per la quarta parete; la stima con
+  `{ decisions }` aggiunge la riga della quarta parete (meno di mezzo centesimo l'ora).
 
 <a id="lobby"></a>
 ## La lobby multigiocatore
