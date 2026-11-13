@@ -5112,7 +5112,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
 
-### T356 · Il tetto dei voxel delle strutture gargantuesche — `in attesa` (dipende da T346)
+### T356 · Il tetto dei voxel delle strutture gargantuesche — `fatto` (`c21d13b3`)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: l'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il tetto. T339 ha `<pieces>` (ADR-0178) e la misura di dove sta il tetto (la mesh, `FORM_LIMITS`, le scatole delle classi); T338 ha `STRUCTURE_SIDE` e `densityFor` (ADR-0179). `dossier T338`, `dossier T339`.
@@ -5328,7 +5328,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: il banco dice quali compiti un modello aperto regge.
 
 ### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356)
-- Pipeline: fable · sforzo extra · stima 10% · approvato · browser · priorità 3
+- Pipeline: fable · sforzo extra · stima 10% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D53 chiusa (autore 13/11): opzione 1 di `docs/pipeline/domande/T356.md`, un lotto di 2 × 2 luoghi (36 × 36 caselle), con `STRUCTURE_SIDE` 500 invece di 400 perché il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 voxel, 25 caselle) ci deve stare. Misure e tetti in T356 (ADR-0185, `dossier T356`).
 - Cosa fare: il lotto che occupa quattro luoghi adiacenti (chi lo reclama, come si caricano e si salvano i quattro piani, varchi e sentieri della regola 10, le porte sul sentiero, `claimSizes` che non la fa scendere); `STRUCTURE_SIDE` 500 e la gargantuesca fino a 25 × 25 caselle; la regola del validatore che rifiuta la fattoria a 20 caselle per i pezzi staccati, ripensata; tempo, memoria e frame misurati col forte dell'autore (`misura-tetto.ts`, `misura-frame.mjs --modello`). ADR che chiude ADR-0185 sul lotto.
