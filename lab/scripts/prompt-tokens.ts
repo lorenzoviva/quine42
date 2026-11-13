@@ -128,7 +128,7 @@ async function roles(ref: string): Promise<void> {
 }
 
 /**
- * The Actor's explicit cache (T351, ADR-0185), offline: an offline Genesis, then the Actor's requests (`npc.reply` and `npc.dialogue`,
+ * The Actor's explicit cache (T351, ADR-0186), offline: an offline Genesis, then the Actor's requests (`npc.reply` and `npc.dialogue`,
  * with its sheet) for some people, recorded as they go to the models; the policy of the cache (ExplicitCaches, the real one) on a clock
  * at the pace of an hour of HOUR (the wanderer's words and the dialogues the lobby counts); tokens at T325's 3.26 characters each.
  * What the hour costs on 3.8 Flash without the cache and with it (its writes and storage included), and what it saves.

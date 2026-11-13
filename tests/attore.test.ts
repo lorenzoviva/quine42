@@ -118,7 +118,7 @@ describe("the Actor's option", () => {
     expect(reply.system).toContain('# The Actor');
     expect(reply.system).toContain('Canon of the runes');
     expect(reply.system).toContain('Lexicon of the world');
-    // The neighbourhood of the graph opens the prompt: the system is the stable prefix of the explicit cache (T351, ADR-0185).
+    // The neighbourhood of the graph opens the prompt: the system is the stable prefix of the explicit cache (T351, ADR-0186).
     expect(reply.prompt).toContain('What the world knows about this task');
     expect(reply.system).not.toContain('What the world knows about this task');
     expect(reply.cache).toBe(true);

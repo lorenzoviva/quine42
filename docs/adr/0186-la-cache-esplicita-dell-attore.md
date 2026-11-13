@@ -1,4 +1,4 @@
-# ADR-0185 — La cache esplicita dell'Attore: le sue istruzioni di sistema tenute da Gemini 3.8 Flash
+# ADR-0186 — La cache esplicita dell'Attore: le sue istruzioni di sistema tenute da Gemini 3.8 Flash
 
 Data: 2026-11-13 · Stato: **accettato** (T351, D45.7) · Riferimenti: ADR-0099 (il varco della chiave), ADR-0110 (i mondi senza segreti),
 ADR-0113 (chi paga si dice), ADR-0116 (l'Attore), ADR-0157 (Jev, l'ordine di D45), `lab/banco/jev/casi-d-uso.md` §4-7 (T325),

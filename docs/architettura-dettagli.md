@@ -190,7 +190,7 @@
   `metaBreak`. Lo usano il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore e la trama nuova; non le battute, che possono ripetere le parole
   del viandante e passano una volta sola. Manopole: `words` per la guardia, `sessions` (come `review.fourthwall`) per la quarta parete; la stima con
   `{ decisions }` aggiunge la riga della quarta parete (meno di mezzo centesimo l'ora).
-- **La cache esplicita dell'Attore** (ADR-0185, T351, kernel 0.6.11, D45.7): 3.8 Flash non usa la cache implicita (T325), così le istruzioni di
+- **La cache esplicita dell'Attore** (ADR-0186, T351, kernel 0.6.11, D45.7): 3.8 Flash non usa la cache implicita (T325), così le istruzioni di
   sistema dell'Attore vanno in una cache esplicita di Gemini. Gli agenti con la cache sono `CACHED_AGENTS` (`council.ts`, solo `actor`): per loro
   `Council.write` mette il focus del grafo in testa al prompt e chiede `TextCall.cache`; il prefisso (ruolo, principi, «Lingua», contesto) è lo
   stesso per ogni persona e ogni dialogo, la scheda resta nel prompt. `GeminiAiModels` usa la cache solo per un modello con il prezzo della

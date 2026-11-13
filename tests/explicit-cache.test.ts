@@ -11,7 +11,7 @@ import { buildGraph } from '../src/kernel/graph';
 import { hourlyEstimate } from '../src/kernel/coefficients';
 import type { FileMap } from '../src/kernel/types';
 
-// T351, ADR-0185: the Actor's system instructions in an explicit cache of Gemini 3.8 Flash. Offline: a fake Gemini, nothing leaves.
+// T351, ADR-0186: the Actor's system instructions in an explicit cache of Gemini 3.8 Flash. Offline: a fake Gemini, nothing leaves.
 
 const ACTOR = 'gemini-3.8-flash';
 const LONG = 'Sei l’Attore del mondo. '.repeat(400);

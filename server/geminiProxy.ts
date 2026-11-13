@@ -2,7 +2,7 @@
 // a limited body, a daily cap in dollars. Two doors: the route /api/gemini, for the kernel in the browser of whoever
 // plays alone on this machine (loopback only, same origin), and `direct()`, for the worlds of many, which run in
 // a process of their own and ask this one over their channel (ADR-0110), with no route at all. The key never reaches the client bundle or the browser.
-// The explicit caches (T351, ADR-0185) pass here too: a write (`cachedContents`) only for a model whose storage has a price, its body
+// The explicit caches (T351, ADR-0186) pass here too: a write (`cachedContents`) only for a model whose storage has a price, its body
 // rebuilt field by field, a `ttl` up to EXPLICIT_CACHE.maxTtl, its tokens and their storage for the whole `ttl` held and spent against
 // the cap; a call may name only a cache this gate wrote, for its model, while it lives.
 

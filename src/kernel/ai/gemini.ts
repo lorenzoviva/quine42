@@ -4,7 +4,7 @@
 // reported to the kernel's usage ledger (onCall). Reasoning is asked `low` unless a call says otherwise.
 // A request that times out, or whose connection fails, is NOT repeated: Gemini may have generated (and
 // billed) it anyway. Only an answer that says "try again" (429, 5xx) is repeated, a few times.
-// A call that asks for it (`cache`, the Actor's) names an explicit cache of its system instructions (T351, ADR-0185): the
+// A call that asks for it (`cache`, the Actor's) names an explicit cache of its system instructions (T351, ADR-0186): the
 // policy is in cache.ts, the write here (`cache.write` in the ledger, paid by the whole world: `comune`); a cache that is
 // gone sends the call whole, once.
 

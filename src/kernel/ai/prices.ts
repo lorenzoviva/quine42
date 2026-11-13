@@ -11,7 +11,7 @@ export interface Price {
   /** USD per million prompt tokens served from the cache. */
   cached: number;
   /**
-   * USD per million tokens kept an hour in an explicit cache (T351, ADR-0185): only the models that have it may hold one
+   * USD per million tokens kept an hour in an explicit cache (T351, ADR-0186): only the models that have it may hold one
    * (`ExplicitCaches`, the gate). Without it a model is never cached explicitly.
    */
   storage?: number;
@@ -39,7 +39,7 @@ export const PRICES: Record<string, Price> = {
 export const STORAGE_READ_ON = '2026-11-13';
 
 /**
- * The explicit cache of Gemini (T351, ADR-0185): a prefix (the system instructions) kept by Google for `ttl` seconds and named in
+ * The explicit cache of Gemini (T351, ADR-0186): a prefix (the system instructions) kept by Google for `ttl` seconds and named in
  * the calls that follow, which pay it at the `cached` price. Its write is billed here as prompt at the `input` price (the pages
  * do not agree on a fee for the write: never lower than it may be) and its storage for the whole `ttl` at the `storage` price,
  * paid when it is written. `ttl` is the most a cache lives: when it ends a new one is written, if it is still asked for.

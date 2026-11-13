@@ -1,6 +1,6 @@
 # La cache esplicita dell'Attore: quanto fa risparmiare (T351)
 
-ADR-0185. Le istruzioni di sistema dell'Attore (ruolo, principi, «Lingua», contesto del mondo) in una cache esplicita di Gemini 3.8 Flash,
+ADR-0186. Le istruzioni di sistema dell'Attore (ruolo, principi, «Lingua», contesto del mondo) in una cache esplicita di Gemini 3.8 Flash,
 che la cache implicita non serve (T325, [`casi-d-uso.md`](casi-d-uso.md) §4). Misura **offline**, senza chiamate:
 
 ```bash
@@ -27,7 +27,7 @@ T325 con `countTokens`); uscita 500 token a chiamata (come la stima del gioco); 
 | dollari con la cache (di cui scritture e conservazione 0.0123) | 0.1861 |
 | **risparmio** | **0.1647 $ (47 %)** |
 
-- **Un prefisso solo** per ogni persona e ogni dialogo: la scheda e il focus stanno nel prompt (ADR-0185 §1). Nei mondi veri il prefisso
+- **Un prefisso solo** per ogni persona e ogni dialogo: la scheda e il focus stanno nel prompt (ADR-0186 §1). Nei mondi veri il prefisso
   cambia quando cambiano le regole, il canone o il lessico: una scrittura in più ogni volta.
 - **Il risparmio è sull'ingresso**: 0,16 $ l'ora sulle righe dell'Attore, vicino alla stima di T325 (~0,22 $ con prefissi più lunghi:
   4.100 token qui su una Genesi offline, 5.400 negli universi di Claude Cloud). L'uscita e il ragionamento non cambiano.

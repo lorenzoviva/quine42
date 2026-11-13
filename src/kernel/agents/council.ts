@@ -19,7 +19,7 @@ import { languageBlock, languageOf } from '../language';
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
 /**
- * The agents whose system instructions go in an explicit cache of Gemini (T351, ADR-0185, D45.7): the Actor, on 3.8 Flash, which
+ * The agents whose system instructions go in an explicit cache of Gemini (T351, ADR-0186, D45.7): the Actor, on 3.8 Flash, which
  * showed no implicit cache (T325: 15 calls, none served); its focus goes in the prompt. The others stay on the implicit cache.
  */
 export const CACHED_AGENTS: ReadonlySet<AgentId> = new Set<AgentId>(['actor']);
@@ -433,7 +433,7 @@ export class Council {
       this.say('kernel', 'info', chi === COMUNE ? `Nessuno dei collegati ha crediti: la richiesta «${task}» viene gestita con i modelli locali.` : `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
     }
     const models = useLocal ? this.localAiModels : this.ai;
-    // An agent with an explicit cache (T351, ADR-0185): its system instructions are the stable prefix the cache keeps, the focus
+    // An agent with an explicit cache (T351, ADR-0186): its system instructions are the stable prefix the cache keeps, the focus
     // changes at every call and opens the prompt instead.
     const cache = CACHED_AGENTS.has(agent);
     const stable = [role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus), opts.system];

@@ -1,4 +1,4 @@
-// The explicit caches of Gemini (T351, ADR-0185): which stable prefix (the system instructions of a call that asks for it, today
+// The explicit caches of Gemini (T351, ADR-0186): which stable prefix (the system instructions of a call that asks for it, today
 // only the Actor's) has a cache at Google, until when, and when to write one. Only the policy is here; the write itself is the
 // model layer's (GeminiAiModels), the gate counts it against the day's cap (server/geminiProxy.ts).
 //

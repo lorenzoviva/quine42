@@ -253,7 +253,7 @@ export const HOUR = {
 /** Tokens of a typical call: text tasks, a program of the Sculptor, a judgement of the Artist (with its image). */
 const WEIGHT = { testo: { prompt: 3500, cached: 1500, output: 500 }, scultura: { prompt: 7000, cached: 2500, output: 3000 }, giudizio: { prompt: 3800, cached: 0, output: 300 } };
 /**
- * The Actor with its explicit cache (T351, ADR-0185): of a call, the share of the prompt its system instructions are (T325 measured 70 % of
+ * The Actor with its explicit cache (T351, ADR-0186): of a call, the share of the prompt its system instructions are (T325 measured 70 % of
  * the Actor's prompt as stable prefix), served at the cache price; the prefix the cache keeps (T325: about 5.400 tokens), written again
  * every `ttl` while the Actor plays, its storage paid for the whole `ttl`.
  */

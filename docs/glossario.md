@@ -1218,7 +1218,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Cache esplicita
 - **Inglese**: `ExplicitCaches`, `cache.write`, `cachedContent`, `cacheable`, `CACHED_AGENTS`, `EXPLICIT_CACHE`, `storage`, `stored`
-- **Definizione**: le istruzioni di sistema di un agente (oggi solo l'Attore) tenute da Gemini per una durata (`ttl`) e nominate dalle chiamate che seguono, che le pagano al prezzo della cache; la scrittura la paga il mondo (`comune`), con la conservazione per tutta la durata (T351, ADR-0185). Si scrive la seconda volta che lo stesso prefisso è chiesto.
+- **Definizione**: le istruzioni di sistema di un agente (oggi solo l'Attore) tenute da Gemini per una durata (`ttl`) e nominate dalle chiamate che seguono, che le pagano al prezzo della cache; la scrittura la paga il mondo (`comune`), con la conservazione per tutta la durata (T351, ADR-0186). Si scrive la seconda volta che lo stesso prefisso è chiesto.
 - **Dove vive**: `src/kernel/ai/cache.ts`, `src/kernel/ai/gemini.ts`, `src/kernel/ai/prices.ts`, `server/geminiProxy.ts` (`writeCache`)
 - **Da non usare**: «cache implicita» (è quella che Gemini fa da sé sul prefisso visto di recente), «contesto in cache»
 
