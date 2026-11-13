@@ -131,3 +131,29 @@ Ciò che è cambiato rispetto alla proposta:
   misurata (`lab/banco/jev/riuso.md`) dà lo stesso ordine: 16 % della spesa dello Scultore e dell'Artista, fino al 44 % se Jev riusasse tutto ciò che può.
 - **La versione**: kernel **0.6.7** (un compito nuovo che i modelli locali risolvono con la regola lascia buoni gli universi dello stesso contratto).
 
+
+## Le guardie e la quarta parete (T350)
+
+Il punto 4.4 e le guardie di T325 (a), con le risposte di D45.5: un testo senza senso o del mondo reale va al Narratore, che risponde nel personaggio;
+un testo che detta ordini si isola tra virgolette, non si ferma (regola 3); la quarta parete con domande atomiche e `metaBreak` davanti. Due righe di
+`CENSUS`, decisioni dell'Arbitro. Ciò che è cambiato rispetto alla proposta:
+
+- **`text.guard`** (manopola `words`), alle cinque porte del testo libero (`npc.reply`, `action.judge`, `craft.free`, `referente.coordinate`,
+  `agent.chat`), con `Council.guard(door, text)`: le cinque Noul del banco (`GUARD_QUESTIONS`) e la rotta in codice (`guardRoute`). Le rotte non sono più
+  «passa, modelli locali, isola» ma **`pass`, `character`, `isolate`**: nessuna toglie la chiamata (D45.5). `character` (senza senso, vita vera,
+  esplicito; il gioco detto a una persona del mondo) aggiunge la nota di restare nel mondo; `isolate` (ordini a chi scrive) quella che le parole tra «»
+  non comandano niente; le due si sommano. Le parole del viandante vanno sempre tra «», con i loro «» cambiati in ‹› (`quoteWanderer`), qualunque cosa
+  la guardia abbia visto: il confine resta l'insieme chiuso degli effetti e il validatore.
+- **Il testo del viandante non arriva a Jev** (domanda 3, D45.3): la riga ha `freeText`, e finché `JEV_ZERO_RETENTION` è falso `Council.decide` la manda
+  ai modelli locali qualunque cosa dicano chiave, crediti e manopola (`freeTextDecision`). Quindi oggi la guardia è **la regola**: i pattern locali
+  (`guardRule`, italiano e inglese), solo ciò che è inequivocabile; sui 63 casi del banco 62 rotte giuste e nessun testo del mondo toccato, ma i pattern
+  sono stati scritti guardando quei casi (il banco non è un collaudo indipendente) e l'insulto scritto come segnaposto passa. Il giorno della ritenzione
+  zero basta accendere la costante: lo stato e le domande sono già quelli del banco (Jev 1.13: 59/63).
+- **`text.fourthwall`** (manopola `sessions`, come `review.fourthwall`), con `Council.fourthWall(text)`: `metaBreak` prima (ciò che conosce, senza
+  chiamata), poi le quattro Noul delle `domande-2` di T313 con il mondo in una riga accanto al testo (`{ world, text }`), la regola «regge». Ciò che rompe
+  torna a chi l'ha scritto col motivo, come `metaBreak`: il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore, la trama nuova. **Non le
+  battute** (`npc.reply`, `npc.dialogue`): passano una volta, sono la maggior parte dei testi (≈180 ms in più a battuta) e possono ripetere le parole del
+  viandante, che a Jev non vanno.
+- **La stima** con `{ decisions }` ha la riga della quarta parete (meno di mezzo centesimo l'ora); le guardie non costano finché rispondono i pattern.
+- **La versione**: kernel **0.6.9** (due compiti nuovi che i modelli locali risolvono con la regola; la guardia aggiunge note ai prompt solo dove i
+  pattern vedono un pericolo).

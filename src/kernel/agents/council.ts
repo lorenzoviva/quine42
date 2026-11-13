@@ -6,9 +6,9 @@
 import { parseJson, type AiModels, type Schema, type Thinking } from '../ai/models';
 import { MockAiModels } from '../ai/mock';
 import { ruleDecisions, settleDecisions, type DecisionCall, type DecisionModels, type Decisions } from '../ai/decisions';
-import { decisionKnob } from '../coefficients';
+import { decisionKnob, freeTextDecision } from '../coefficients';
 import { COMUNE } from '../cards';
-import { COUNCIL_PRINCIPLES, lexiconWords } from '../fourthwall';
+import { COUNCIL_PRINCIPLES, FOURTH_WALL_QUESTIONS, FOURTH_WALL_REASONS, FOURTH_WALL_RULE, GUARD_HAZARDS, GUARD_QUESTIONS, guardNote, guardRoute, guardRule, lexiconWords, metaBreak, quoteWanderer, type FourthWallBreak, type GuardDoor, type GuardHazard, type GuardRoute } from '../fourthwall';
 import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
@@ -360,12 +360,44 @@ export class Council {
         return ruleDecisions(full);
       }
       const sealed = this.readOnly?.() !== undefined;
-      const local = sealed || (!!this.hasCredits && !this.hasCredits(chi)) || !!this.rationed?.(task);
+      // The free text of a wanderer stays here (D45.3): whatever else holds, the local models answer.
+      const local = freeTextDecision(task) || sealed || (!!this.hasCredits && !this.hasCredits(chi)) || !!this.rationed?.(task);
       return settleDecisions(full, await (local ? this.localAiModels : this.decisions).decide(full));
     } catch (e) {
       this.say('kernel', 'info', `«${task}»: ${(e as Error).message}; vale la regola`, undefined, task);
       return ruleDecisions(full);
     }
+  }
+
+  /**
+   * The guard on what a wanderer writes, before the Council reads it (T350, D45.5, a closed decision `text.guard`): the five hazards, the
+   * local patterns as the rule (`guardRule`), and while TypeSafe keeps what it reads the rule alone (D45.3). Nothing is stopped (rule 3):
+   * the call goes with the wanderer's words quoted so that they cannot close the quote, and with a note when the route is not `pass`.
+   */
+  async guard(door: GuardDoor, text: string, chi?: string): Promise<{ route: GuardRoute; hazards: GuardHazard[]; quoted: string; note: string }> {
+    const d = await this.decide('arbiter', 'text.guard', { state: { door, text }, questions: GUARD_QUESTIONS, rule: guardRule(text), ...(chi ? { chi } : {}) });
+    const seen = Object.fromEntries(GUARD_HAZARDS.map((h) => [h, d[h] === true])) as Record<GuardHazard, boolean>;
+    const hazards = GUARD_HAZARDS.filter((h) => seen[h]);
+    const route = guardRoute(door, seen);
+    // The route and the hazards, never the words (they are already in the feed of whoever asked).
+    if (route !== 'pass') this.say('kernel', 'info', `guardia (${hazards.join(', ')}): ${route === 'isolate' ? 'le parole del viandante vanno tra virgolette, nessun ordine' : 'il Concilio risponde dal mondo'}`, undefined, 'text.guard');
+    return { route, hazards, quoted: quoteWanderer(text), note: guardNote(door, seen) };
+  }
+
+  /**
+   * Whether a text the Council wrote for the world breaks the fourth wall (T350, ADR-0157 §4.4, a closed decision `text.fourthwall`): the
+   * words `metaBreak` knows first, without a call; then four atomic questions, the world in a line beside the text. What it says, for the
+   * feedback to whoever wrote it, or undefined. Only texts of the Council come here, never a wanderer's (D45.3).
+   */
+  async fourthWall(text: string, chi?: string): Promise<string | undefined> {
+    const files = this.files;
+    const hit = metaBreak(text, wordsOf(files), languageOf(files));
+    if (hit) return hit;
+    if (!text.trim()) return undefined;
+    const world = bibleHead(readBible(files)).slice(0, 600);
+    const d = await this.decide('arbiter', 'text.fourthwall', { state: { world, text: text.slice(0, 4000) }, questions: FOURTH_WALL_QUESTIONS, rule: FOURTH_WALL_RULE, ...(chi ? { chi } : {}) });
+    const broken = (Object.keys(FOURTH_WALL_QUESTIONS) as FourthWallBreak[]).filter((k) => d[k] === true);
+    return broken.length ? broken.map((k) => FOURTH_WALL_REASONS[k]).join(', ') : undefined;
   }
 
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {

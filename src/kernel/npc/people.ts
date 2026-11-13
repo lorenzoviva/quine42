@@ -6,7 +6,6 @@ import type { Id } from '../ecs';
 import { individuate, type Identity } from '../agents/content';
 import { wordsOf } from '../agents/council';
 import { npcSheet } from '../agents/minds';
-import { metaBreak } from '../fourthwall';
 import { slug as nodeSlug } from '../graph';
 import { italianName } from '../internalNames';
 import { addItem, newInventory, type Inventory } from '../inventory';
@@ -73,7 +72,7 @@ export class People {
         identity = await ask();
         // An individual of the world, not of the Council's table: once more if the fourth wall breaks,
         // or if the name is like someone else's.
-        if (metaBreak(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`, wordsOf(this.host.files()))) identity = await ask();
+        if (await this.host.council.fourthWall(`${identity.persona} ${identity.story ?? ''} ${identity.job ?? ''}`)) identity = await ask();
         else if (alike(identity.name).length) {
           this.host.council.say('kernel', 'scarta', `il nome «${identity.name}» è troppo simile a ${alike(identity.name).join(', ')}`, 'narrator', 'npc.individuate');
           identity = await ask([...alike(identity.name), identity.name]);
@@ -176,7 +175,7 @@ export class People {
           this.host.focusOn([name]),
           chi,
         );
-        if (!text || metaBreak(text, wordsOf(this.host.files()))) {
+        if (!text || (await this.host.council.fourthWall(text, chi))) {
           this.host.council.say('kernel', 'scarta', `la scheda di ${name} ${text ? 'rompe la quarta parete' : 'è vuota'}: l'Attore recita dalla persona`, 'narrator', 'npc.sheet');
           return undefined;
         }

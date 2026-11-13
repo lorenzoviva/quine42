@@ -83,6 +83,8 @@ const REPLY_SCHEMA: Schema = {
 export async function npcReply(c: Council, npc: NpcContext, wandererText: string, focus?: string[], by: Interpreter = NARRATOR_PLAYS): Promise<NpcReply> {
   const named = npc.wanderer && npc.wanderer !== 'Viandante' ? npc.wanderer : '';
   const history = npc.history.slice(-10).map((t) => `${t.who === 'player' ? named || 'Viandante' : npc.name}: ${t.text}`).join('\n');
+  // The guard (T350): the wanderer's words quoted, a note when they give orders or are not of the world.
+  const g = await c.guard('words', wandererText, npc.chi);
   const prompt = [
     `Play this character, in the first person, always staying in character.`,
     // The Actor plays from the Narrator's sheet (T157); the Narrator from the persona of the individual.
@@ -98,7 +100,8 @@ ${npc.memories}` : '',
 ${npc.secrets}` : '',
     `Facts you perceive: ${JSON.stringify(npc.facts)}`,
     history ? `Conversation so far:\n${history}` : 'The wanderer comes up to you for the first time.',
-    `The wanderer says: «${wandererText}»`,
+    `The wanderer says: «${g.quoted}»`,
+    g.note,
     `Answer in "dice" (1-3 sentences, in the language of the world, in the character's style). Choose "azione": segui (you go with them), resta (you stop), vaga (you go back to wandering), dai (you give them a thing you carry: put the exact name in "oggetto"), missione (you entrust them with the request you have for them, if you have one), nessuna. Do not invent things you do not carry. In "ricordo" what you will remember. Feelings grow slowly: "legame" only if the relationship really changes. You are a person of your world: you know nothing of games, code, computers or simulations (if the wanderer talks of them, you do not understand, or you think of oddities of your world).`,
   ]
     .filter(Boolean)
@@ -212,13 +215,15 @@ const REFERENTE_SCHEMA: Schema = {
  */
 export async function liaisonReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown }> {
   const past = history.slice(-8).map((t) => `${t.who === 'player' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
+  const g = await c.guard('studio', text);
   const r = await c.ask<{ risposta: string; incarico: string; richiesta?: string; bersaglio?: string; rifiuto?: string; rune?: unknown }>(
     'liaison',
     'referente.coordinate',
     [
       'The wanderer has transcended: they left the simulation and are a member of the Council. Listen to them on everything, with enthusiasm, except what would destroy the universe, themselves or the laws of the game.',
       past ? `Conversation so far:\n${past}` : '',
-      `The wanderer says: «${text}»`,
+      `The wanderer says: «${g.quoted}»`,
+      g.note,
       'Understand what they ask and hand it to the right team with "incarico": oggetto/cosa/personaggio (the Forge creates a module: a tool, a thing of the world, a kind of person), ambiente (the Cartographer creates a place and puts it on the map), regola (it becomes a rule of the world), riscolpisci (the Sculptor redoes the model of a person, a thing or an object: say which in "bersaglio"), oggetti (a pack of common things), meccanica (the Engineer adds a mechanic with its interface: slots for the equipment, a quiver, a sheet…), runa (you give them the runes they ask for: in "rune" the words of the code, one per rune, for example ["speed", "=", "3"]), musica (the Musician writes a piece for an environment or redoes the sound effect of a moment of the game), nessuno (if they only ask for information, or for credits: those the Council does not give). In "risposta" you answer, short and friendly, in the language of the world.',
     ]
       .filter(Boolean)
@@ -244,10 +249,12 @@ const AGENT_CHAT_SCHEMA: Schema = {
  */
 export async function agentReply(c: Council, agent: AgentId, history: Turn[], text: string): Promise<{ say: string; forge?: string }> {
   const past = history.slice(-8).map((t) => `${t.who === 'player' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
+  const g = await c.guard('studio', text);
   const prompt = [
     `The wanderer left the carpet and entered the archive of the corona, where the Council works on the code of the world. They reached you and talk to you. Answer as yourself (your role in the Council), in 1-3 sentences, in the language of the world: you can explain what you do, what is in the files, how the things of the world are made.`,
     past ? `Conversation so far:\n${past}` : '',
-    `The wanderer says: «${text}»`,
+    `The wanderer says: «${g.quoted}»`,
+    g.note,
     `If they ask you to create something (a character, a thing, a tool) and it makes sense for the world, accept and write the request in "richiesta_fucina"; otherwise leave it empty.`,
   ].filter(Boolean).join('\n\n');
   const r = await c.ask<{ risposta: string; richiesta_fucina?: string }>(agent, 'agent.chat', prompt, AGENT_CHAT_SCHEMA, { data: { agent, text, history }, temperature: 0.8 });

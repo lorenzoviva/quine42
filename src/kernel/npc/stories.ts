@@ -14,7 +14,7 @@ import { SOLO } from '../wandererIds';
 import type { NpcHost } from './host';
 import type { People } from './people';
 import type { Places } from './places';
-import { activeQuests, plotFromRaw, PLOTS_FILE, readPlots, reviewPlot, writePlots, type Plot } from './plots';
+import { activeQuests, plotFromRaw, plotText, PLOTS_FILE, readPlots, reviewPlot, writePlots, type Plot } from './plots';
 import { inferActivity, readPeople, societySummary } from './society';
 import type { Speech } from './speech';
 
@@ -91,7 +91,11 @@ export class Stories {
     // Narrator once, with the reasons; the second answer is repaired, or dropped if it cannot be.
     const attempt = async (feedback?: string) => {
       const raw = plotFromRaw(await weavePlot(this.host.council, societySummary(society, 20), places, recent, feedback, this.host.focusOn(society.people.slice(-20).map((p) => p.name))), this.host.day(), `trama-${this.host.worldStamp()}`);
-      return { titolo: raw.title, ...reviewPlot(raw, society, wordsOf(this.host.files())) };
+      const review = reviewPlot(raw, society, wordsOf(this.host.files()));
+      // What the words did not catch, the four questions of `text.fourthwall` (T350): a plot that breaks goes back to the Narrator.
+      const wall = review.plot ? await this.host.council.fourthWall(plotText(review.plot)) : undefined;
+      if (wall) return { titolo: raw.title, problems: [...review.problems, `rompe la quarta parete (${wall}): dentro il mondo nessuno sa di essere in un gioco`] };
+      return { titolo: raw.title, ...review };
     };
     let plot: Plot | undefined;
     try {

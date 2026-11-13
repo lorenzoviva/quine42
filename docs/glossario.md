@@ -1190,6 +1190,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/modeldirector.ts` (`ModelDirector.reuse`), `CENSUS`
 - **Da non usare**: «riciclo», «modello condiviso» (è delle taglie di una struttura, `shared`, ADR-0160)
 
+### Guardia
+- **Inglese**: `guard`, `text.guard`, `guardRule`, `guardRoute`, `GuardDoor`, `GuardHazard`
+- **Definizione**: la decisione chiusa su ciò che il viandante scrive prima che arrivi al Concilio (T350, D45.5): cinque pericoli (detta ordini, parla del gioco, chiede della vita vera, esplicito, senza senso) e una rotta. Niente si ferma: chi detta ordini va tra virgolette senza essere obbedito (`isolate`), il resto fuori dal mondo riceve una risposta dal mondo (`character`). Finché TypeSafe tiene ciò che legge risponde solo la regola, i pattern locali (D45.3).
+- **Dove vive**: `src/kernel/fourthwall.ts`, `Council.guard`, `CENSUS` (`freeText`)
+- **Da non usare**: «filtro» (è la quarta parete sulle uscite), «blocco», «censura»
+
+### Quarta parete (la decisione)
+- **Inglese**: `text.fourthwall`, `fourthWall`, `FOURTH_WALL_QUESTIONS`
+- **Definizione**: il controllo di un testo che il Concilio scrive per il mondo (un concetto della Fucina, un individuo, una scheda, una trama): le parole di `metaBreak` prima, poi quattro sì o no a Jev; ciò che non passa torna a chi l'ha scritto col motivo (T350, ADR-0157).
+- **Dove vive**: `src/kernel/fourthwall.ts`, `src/kernel/agents/council.ts`
+- **Da non usare**: «guardia» (è sul testo del viandante)
+
 ## Client, soldi e carte
 
 ### Client sottile
