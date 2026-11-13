@@ -4,7 +4,7 @@
 // Google's own usage page lags hours behind: this one is right after every call. Every call also has a payer
 // (`chi`, T36): the wanderer it was made for, or `comune` when the whole world asked for it.
 
-import { costOf, priceOf, PRICES_READ_ON } from './prices';
+import { costOf, priceOf, PRICES_READ_ON, type Tokens } from './prices';
 import { internalFields, internalSoloIn } from '../internalNames';
 
 /** One call as the model layer saw it. */
@@ -18,6 +18,11 @@ export interface CallRecord {
   output: number;
   /** Reasoning tokens, billed as output. */
   thoughts: number;
+  /**
+   * The write of an explicit cache (T351, task `cache.write`): its tokens times the hours Google keeps them, paid with the write at the
+   * storage price; the tokens themselves are in `prompt`.
+   */
+  stored?: number;
   /** Retries after 429 or a server error (the failed tries are not billed). */
   retries?: number;
   /** The call never got an answer: a timeout or a network error. It may still have been billed. */
@@ -34,6 +39,8 @@ export interface Tally {
   cached: number;
   output: number;
   thoughts: number;
+  /** Token-hours of explicit caches written (T351). */
+  stored: number;
   usd: number;
   retries: number;
   timeouts: number;
@@ -42,7 +49,7 @@ export interface Tally {
   unpriced: number;
 }
 
-export const emptyTally = (): Tally => ({ calls: 0, prompt: 0, cached: 0, output: 0, thoughts: 0, usd: 0, retries: 0, timeouts: 0, failures: 0, unpriced: 0 });
+export const emptyTally = (): Tally => ({ calls: 0, prompt: 0, cached: 0, output: 0, thoughts: 0, stored: 0, usd: 0, retries: 0, timeouts: 0, failures: 0, unpriced: 0 });
 
 /** world/usage.json */
 export interface UsageFile {
@@ -55,6 +62,9 @@ export interface UsageFile {
 }
 
 export const USAGE_FILE = 'world/usage.json';
+/** The tokens of a call as the prices read them: the storage of an explicit cache too (T351). */
+export const tokensOf = (r: CallRecord): Tokens => ({ prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts, ...(r.stored ? { stored: r.stored } : {}) });
+
 /** The payer of a call nobody in particular asked for (as COMUNE in cards.ts, which this layer does not import). */
 const COMMON = 'comune';
 
@@ -66,6 +76,7 @@ function add(t: Tally, r: CallRecord, usd: number | undefined): void {
   t.cached += r.cached;
   t.output += r.output;
   t.thoughts += r.thoughts;
+  t.stored += r.stored ?? 0;
   t.retries += r.retries ?? 0;
   if (r.failed === 'timeout') t.timeouts++;
   if (r.failed) t.failures++;
@@ -113,7 +124,7 @@ export class UsageLog {
 
   record(r: CallRecord): void {
     const day = r.day ?? today();
-    const usd = costOf(r.model, { prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts }, day);
+    const usd = costOf(r.model, tokensOf(r), day);
     add(((this.file.days[day] ??= {})[r.model] ??= {})[r.task] ??= emptyTally(), r, usd);
     add(this.session, r, usd);
     add((this.sessionByModel[r.model] ??= emptyTally()), r, usd);
@@ -178,7 +189,7 @@ export const usd = (v: number | undefined) => (v === undefined ? 'n.d.' : v < 0.
 /** One line for a panel: calls, tokens and dollars. */
 export function tallyLine(t: Tally): string {
   const k = (n: number) => (n >= 10_000 ? `${Math.round(n / 1000)}k` : String(n));
-  return `${t.calls} chiamate · ${usd(t.usd)}${t.unpriced ? ` (+${t.unpriced} senza prezzo)` : ''} · input ${k(t.prompt)}${t.cached ? ` (cache ${k(t.cached)})` : ''} · risposta ${k(t.output)} · ragionamento ${k(t.thoughts)}${t.timeouts ? ` · ${t.timeouts} scadute` : ''}${t.retries ? ` · ${t.retries} ripetute` : ''}`;
+  return `${t.calls} chiamate · ${usd(t.usd)}${t.unpriced ? ` (+${t.unpriced} senza prezzo)` : ''} · input ${k(t.prompt)}${t.cached ? ` (cache ${k(t.cached)})` : ''} · risposta ${k(t.output)} · ragionamento ${k(t.thoughts)}${t.stored ? ` · cache esplicita ${k(Math.round(t.stored))} token·ora` : ''}${t.timeouts ? ` · ${t.timeouts} scadute` : ''}${t.retries ? ` · ${t.retries} ripetute` : ''}`;
 }
 
 /** Whether a model has a price (estimated or published) on a day. */

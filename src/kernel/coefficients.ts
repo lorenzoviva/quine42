@@ -5,7 +5,7 @@
 // is rationed like the rest (T247, ADR-0133): the share of those requests the models answer, the others go to the local
 // models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
-import { priceOf, costOf } from './ai/prices';
+import { cacheable, costOf, EXPLICIT_CACHE, priceOf } from './ai/prices';
 import { JEV_MODEL, JEV_ZERO_RETENTION } from './ai/decisions';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
@@ -252,6 +252,13 @@ export const HOUR = {
 
 /** Tokens of a typical call: text tasks, a program of the Sculptor, a judgement of the Artist (with its image). */
 const WEIGHT = { testo: { prompt: 3500, cached: 1500, output: 500 }, scultura: { prompt: 7000, cached: 2500, output: 3000 }, giudizio: { prompt: 3800, cached: 0, output: 300 } };
+/**
+ * The Actor with its explicit cache (T351, ADR-0185): of a call, the share of the prompt its system instructions are (T325 measured 70 % of
+ * the Actor's prompt as stable prefix), served at the cache price; the prefix the cache keeps (T325: about 5.400 tokens), written again
+ * every `ttl` while the Actor plays, its storage paid for the whole `ttl`.
+ */
+export const ACTOR_CACHED_SHARE = 0.7;
+export const ACTOR_PREFIX_TOKENS = 5400;
 /** Calls of a Forge (concept, physics, code, review, and some repair), of an item pack. */
 const FORGE_CALLS = 5;
 const PACK_CALLS = 4;
@@ -287,7 +294,10 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   const actor = repairActor(ai.actor);
   const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
-  const played = (n: number) => n * (costOf(actor.on ? actor.model : ai.textModel, WEIGHT.testo, date) ?? 0);
+  // With the Actor's explicit cache (T351) the stable part of its prompt is paid at the cache price.
+  const actorCache = actor.on && cacheable(actor.model, date);
+  const playedWeight = actorCache ? { ...WEIGHT.testo, cached: Math.round(WEIGHT.testo.prompt * ACTOR_CACHED_SHARE) } : WEIGHT.testo;
+  const played = (n: number) => n * (costOf(actor.on ? actor.model : ai.textModel, playedWeight, date) ?? 0);
   const H = HOUR;
   const rows: HourLine[] = [];
   const add = (voce: string, modo: HourLine['modo'], chiamate: number, dollari: number) => rows.push({ voce, modo, chiamate: Math.round(chiamate * 10) / 10, dollari });
@@ -311,6 +321,13 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   if (actor.on) {
     const sheets = Math.min(people, (H.parole * c.words) / 2 + talks);
     add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));
+  }
+  // The explicit cache of the Actor (T351): written once a `ttl` while it plays, paid by everybody (`comune`).
+  if (actorCache && talks + H.parole * c.words > 0) {
+    const ttl = EXPLICIT_CACHE.ttl;
+    const writes = 3600 / ttl;
+    const write = costOf(actor.model, { prompt: ACTOR_PREFIX_TOKENS, output: 0, stored: (ACTOR_PREFIX_TOKENS * ttl) / 3600 }, date) ?? 0;
+    add("Cache dell'Attore (scrittura e conservazione)", 'non regolabile', writes, writes * write);
   }
   const plots = c.plots <= 0 ? 0 : H.giorni / Math.max(4, stretch(1, c.plots));
   add(COEFFICIENT_INFO.plots.nome, 'diretta', plots * 1.3, text(plots * 1.3));

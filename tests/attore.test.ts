@@ -118,7 +118,10 @@ describe("the Actor's option", () => {
     expect(reply.system).toContain('# The Actor');
     expect(reply.system).toContain('Canon of the runes');
     expect(reply.system).toContain('Lexicon of the world');
-    expect(reply.system).toContain('What the world knows about this task');
+    // The neighbourhood of the graph opens the prompt: the system is the stable prefix of the explicit cache (T351, ADR-0185).
+    expect(reply.prompt).toContain('What the world knows about this task');
+    expect(reply.system).not.toContain('What the world knows about this task');
+    expect(reply.cache).toBe(true);
     // A second line: no new sheet.
     await k.talk(a.id, 'E cosa fai di bello?');
     expect(models.of('npc.sheet')).toHaveLength(1);

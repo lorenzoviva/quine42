@@ -18,6 +18,12 @@ import { languageBlock, languageOf } from '../language';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
+/**
+ * The agents whose system instructions go in an explicit cache of Gemini (T351, ADR-0185, D45.7): the Actor, on 3.8 Flash, which
+ * showed no implicit cache (T325: 15 calls, none served); its focus goes in the prompt. The others stay on the implicit cache.
+ */
+export const CACHED_AGENTS: ReadonlySet<AgentId> = new Set<AgentId>(['actor']);
+
 export const AGENTS: Record<AgentId, { name: string; color: string; sigil: string }> = {
   narrator: { name: 'Narratore', color: '#ffcf5c', sigil: '✒' },
   cartographer: { name: 'Cartografo', color: '#7dd87d', sigil: '⌖' },
@@ -427,11 +433,16 @@ export class Council {
       this.say('kernel', 'info', chi === COMUNE ? `Nessuno dei collegati ha crediti: la richiesta «${task}» viene gestita con i modelli locali.` : `I crediti di ${chi} sono esauriti: la richiesta «${task}» viene gestita con i modelli locali.`, undefined, task);
     }
     const models = useLocal ? this.localAiModels : this.ai;
+    // An agent with an explicit cache (T351, ADR-0185): its system instructions are the stable prefix the cache keeps, the focus
+    // changes at every call and opens the prompt instead.
+    const cache = CACHED_AGENTS.has(agent);
+    const stable = [role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus), opts.system];
     return models.text({
       agent,
       task,
-      system: [role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus), opts.system, focus].filter(Boolean).join('\n\n'),
-      prompt,
+      system: [...stable, cache ? '' : focus].filter(Boolean).join('\n\n'),
+      prompt: cache && focus ? `${focus}\n\n${prompt}` : prompt,
+      ...(cache ? { cache } : {}),
       schema: opts.schema,
       images: opts.images,
       temperature: opts.temperature,

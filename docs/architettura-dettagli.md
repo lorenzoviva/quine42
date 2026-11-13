@@ -190,6 +190,20 @@
   `metaBreak`. Lo usano il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore e la trama nuova; non le battute, che possono ripetere le parole
   del viandante e passano una volta sola. Manopole: `words` per la guardia, `sessions` (come `review.fourthwall`) per la quarta parete; la stima con
   `{ decisions }` aggiunge la riga della quarta parete (meno di mezzo centesimo l'ora).
+- **La cache esplicita dell'Attore** (ADR-0185, T351, kernel 0.6.11, D45.7): 3.8 Flash non usa la cache implicita (T325), così le istruzioni di
+  sistema dell'Attore vanno in una cache esplicita di Gemini. Gli agenti con la cache sono `CACHED_AGENTS` (`council.ts`, solo `actor`): per loro
+  `Council.write` mette il focus del grafo in testa al prompt e chiede `TextCall.cache`; il prefisso (ruolo, principi, «Lingua», contesto) è lo
+  stesso per ogni persona e ogni dialogo, la scheda resta nel prompt. `GeminiAiModels` usa la cache solo per un modello con il prezzo della
+  conservazione (`cacheable`, `Price.storage`); la politica è `ExplicitCaches` (`src/kernel/ai/cache.ts`): si scrive alla seconda richiesta dello
+  stesso prefisso entro un `ttl` (`EXPLICIT_CACHE`: 1800 s, al più 3600, almeno 1024 token), si nomina fino a 150 s dalla fine (`CACHE_MARGIN`),
+  poi si riscrive alla chiamata seguente; un rifiuto non si riprova per un `ttl`; una chiamata che nomina una cache sparita riparte intera, una
+  volta. La scrittura è una riga `cache.write` del registro (`world/usage.json`): i token come prompt al prezzo d'ingresso e `stored` (token ×
+  ore) per tutto il `ttl` al prezzo della conservazione, pagata da `comune` (`CACHE_PAYER`); `tokensOf` porta una riga ai prezzi per il registro
+  e per l'addebito. Il varco: `GeminiGate.writeCache` (route `/api/gemini/cachedContents`, e `direct()` per i mondi di molti) accetta solo un
+  modello con prezzo di conservazione, un `ttl` da 60 a 3600 s e istruzioni in testo, rifà il corpo, conta scrittura e conservazione nel tetto
+  del giorno, tiene al più 64 cache vive; una chiamata può nominare solo una cache scritta da lui, per il suo modello, finché vive. La stima della
+  lobby paga il 70 % del prompt dell'Attore al prezzo della cache e aggiunge la riga «Cache dell'Attore». La misura offline:
+  `prompt-tokens.ts -- --cache` → `lab/banco/jev/cache-attore.md` (−47 % sulle righe dell'Attore, 0,16 $ l'ora).
 
 <a id="lobby"></a>
 ## La lobby multigiocatore

@@ -32,6 +32,11 @@ export interface TextCall {
   thinking?: Thinking;
   /** Who pays (T36): a wanderer's id, or `comune`. */
   chi?: string;
+  /**
+   * `system` is a stable prefix worth an explicit cache (T351, ADR-0185: the Actor's), where the model has one: whatever changes
+   * from a call to the next goes in `prompt`. The models without caches ignore it.
+   */
+  cache?: boolean;
 }
 
 /** Gemini 3 `thinkingLevel`; `off` sends nothing (the model's default). */

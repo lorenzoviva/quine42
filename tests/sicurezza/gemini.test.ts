@@ -251,3 +251,78 @@ describe('la rotta su HTTP vero, in locale', () => {
     }
   });
 });
+
+describe('le cache esplicite nel varco (T351)', () => {
+  const CACHED = 'gemini-3.8-flash';
+  const written = (tokens = 1_000_000, name = 'cachedContents/abc') => () => new Response(JSON.stringify({ name, usageMetadata: { totalTokenCount: tokens } }), { status: 200 });
+  const write = (o: Record<string, unknown> = {}) => JSON.stringify({ model: `models/${CACHED}`, systemInstruction: { parts: [{ text: 'istruzioni' }] }, ttl: '3600s', ...o });
+
+  it('V-002 una cache si scrive solo per un modello con il prezzo della conservazione, con una durata limitata e un corpo rifatto', async () => {
+    const { calls, impl } = upstream(written());
+    const g = gate(impl);
+    expect((await g.writeCache(write({ model: `models/${MODEL}` }))).status).toBe(403);
+    expect((await g.writeCache(write({ model: 'models/gemini-9-costosissimo' }))).status).toBe(403);
+    expect((await g.writeCache(write({ model: CACHED }))).status).toBe(403);
+    for (const ttl of ['3601s', '86400s', '10s', '1h', 3600, '-5s']) expect((await g.writeCache(write({ ttl }))).status, String(ttl)).toBe(400);
+    expect((await g.writeCache(write({ systemInstruction: { parts: [{ inlineData: { mimeType: 'image/png', data: 'QUJD' } }] } }))).status).toBe(400);
+    expect((await g.writeCache(write({ systemInstruction: { parts: [{ text: 'a', fileData: {} }] } }))).status).toBe(400);
+    expect((await g.writeCache('non json')).status).toBe(400);
+    expect(calls).toHaveLength(0);
+    // What reaches Google is only the model, the text and the ttl; the key only in the header.
+    expect((await g.writeCache(write({ contents: [{ role: 'user', parts: [{ text: 'altro' }] }], tools: [{}], displayName: 'x' }))).status).toBe(200);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('https://generativelanguage.googleapis.com/v1beta/cachedContents');
+    expect(JSON.parse(String(calls[0].init.body))).toEqual({ model: `models/${CACHED}`, systemInstruction: { parts: [{ text: 'istruzioni' }] }, ttl: '3600s' });
+    expect((calls[0].init.headers as Record<string, string>)['x-goog-api-key']).toBe(KEY);
+    expect(String(calls[0].init.body)).not.toContain(KEY);
+  });
+
+  it('V-002 la scrittura e la conservazione per tutta la durata stanno nel tetto del giorno', async () => {
+    const { calls, impl } = upstream(written(1_000_000));
+    const g = gate(impl, { dailyCap: 2 });
+    expect((await g.writeCache(write())).status).toBe(200);
+    // A million tokens: 0.75 $ written, 0.50 $ kept an hour.
+    expect(g.spentToday()).toBeCloseTo(1.25);
+    expect((await g.writeCache(write())).status).toBe(200);
+    expect((await g.writeCache(write())).status).toBe(402);
+    expect(calls).toHaveLength(2);
+    // Refused by Google: nothing spent.
+    const refused = gate(upstream(() => new Response('{}', { status: 400 })).impl);
+    expect((await refused.writeCache(write())).status).toBe(400);
+    expect(refused.spentToday()).toBe(0);
+    expect(refused.liveCaches()).toBe(0);
+  });
+
+  it('V-002 una chiamata nomina solo una cache scritta da questo varco, per il suo modello, finché vive', async () => {
+    let now = 0;
+    const { calls, impl } = upstream(written());
+    const g = gate(impl, { now: () => now });
+    const named = (name: string) => JSON.stringify({ cachedContent: name, contents: [] });
+    expect((await g.forward(CACHED, named('cachedContents/altrui'))).status).toBe(404);
+    expect(calls).toHaveLength(0);
+    await g.writeCache(write());
+    expect((await g.forward(CACHED, named('cachedContents/abc'))).status).toBe(200);
+    expect((await g.forward('gemini-4-argon', named('cachedContents/abc'))).status).toBe(404);
+    expect((await g.forward(CACHED, JSON.stringify({ cachedContent: 42 }))).status).toBe(404);
+    now = 3600 * 1000;
+    expect((await g.forward(CACHED, named('cachedContents/abc'))).status).toBe(404);
+    expect(g.liveCaches()).toBe(0);
+    // A prompt that only speaks of caches is not refused.
+    expect((await g.forward(CACHED, JSON.stringify({ contents: [{ parts: [{ text: 'cachedContent' }] }] }))).status).toBe(200);
+  });
+
+  it('V-002 la rotta e la porta dei mondi di molti portano la scrittura al varco, con gli stessi limiti', async () => {
+    const { calls, impl } = upstream(written(1000));
+    const g = gate(impl);
+    expect((await ask(g, { url: '/api/gemini/cachedContents', body: write() })).status).toBe(200);
+    expect((await ask(g, { url: '/api/gemini/cachedContents', body: write(), headers: { ...LOCAL, origin: 'https://altro.example' } })).status).toBe(403);
+    expect((await ask(g, { url: '/api/gemini/cachedContents', body: write(), address: '8.8.8.8' })).status).toBe(403);
+    expect((await ask(g, { url: '/api/gemini/cachedContents', method: 'GET' })).status).toBe(404);
+    expect((await ask(g, { url: '/api/gemini/cachedContents/abc', body: '{}' })).status).toBe(404);
+    expect(calls).toHaveLength(1);
+    const direct = g.direct()!;
+    expect((await direct('/api/gemini/cachedContents', { method: 'POST', body: write({ ttl: '99999s' }) })).status).toBe(400);
+    expect((await direct('/api/gemini/cachedContents', { method: 'POST', body: write() })).status).toBe(200);
+    expect(calls).toHaveLength(2);
+  });
+});
