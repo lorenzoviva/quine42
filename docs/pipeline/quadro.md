@@ -3,11 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 381 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 383 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (studio `docs/design/open-beta.md`, ADR-0184) → D52 chiusa il 13/11 (tutto sì tranne la 5: Jev resta acceso, OpenRouter dà anche i modelli di TypeSafe) → T361 modalità senza pagamenti, T362 adattatore OpenRouter + Jev (fable), T363 chiavi e turno comuni (fable), T364 «Collega OpenRouter» (browser), T365 costo carte, T366 inviti (in attesa D54), T367 pacchetto self-hosting, T368 «Come usiamo l'IA», T369 modelli locali (non approvato); T45f ora su VM con il pacchetto di T367.
+- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (studio `docs/design/open-beta.md`, ADR-0184) → D52 chiusa il 13/11 (tutto sì tranne la 5: Jev resta acceso, OpenRouter dà anche i modelli di TypeSafe) → T361 integrato (`0b0a5889`, ADR-0189: `QUINE_PAGAMENTI=spenti`, `/healthz`, V-035 chiusa; UI non provata nel browser), T362 adattatore OpenRouter + Jev (fable), T363 chiavi e turno comuni (fable), T364 «Collega OpenRouter» (browser), T365 costo carte, T366 inviti (in attesa D54), T367 pacchetto self-hosting, T368 «Come usiamo l'IA», T369 modelli locali (non approvato); T45f ora su VM con il pacchetto di T367.
 - **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. T356 integrato (`c21d13b3`, ADR-0185, kernel 0.6.11): tetto delle gargantuesche misurato a 20/30/50 caselle, `meshVoxels` in due passate su array tipizzati e `underside: false` (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel lab 3D e nel banco, `misura-frame.mjs --modello`; D53 chiusa il 13/11: T370 lotto 2 × 2 luoghi con `STRUCTURE_SIDE` 500 (fable), T371 il forte dell'autore come riferimento «ottima» (in attesa del forte finito): l'autore disegna a mano un forte 500 × 500 × 150 (25 caselle, `lab/mjx/models/handmade/forte-handmade.xml`), proposta opzione 1 con lato 500. Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, in attesa fino al 15/11), scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
@@ -22,14 +22,14 @@ Aggiornato il 13/11/2026, epoca 381 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T310b (fable), T361, T362, T370 (fable); poi T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** T310b (fable). **Pronti:** T362, T370 (fable, dopo T310b); poi T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset (previsto 14/11 15:00): niente spostamenti su claude per ora.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (13/11 19:25 UTC):** Claude settimana 59 %, 5h 61 % (reset 22:59 UTC); Fable settimana 34 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
 
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** in analisi dall'autore per i primi prerequisiti (D3.1 account HN/Reddit da subito).
-- **D54 (ADR-0188, campagna del master):** 8 domande di T347, tutte con consiglio «sì» (titolare carte = chi chiede; anonimi locali nei pubblici; pausa ferma ciò che il mondo fa da sé; avviso HUD; `campaign.md` a sezioni; `mare`/`trattenuta`; inviti 7 giorni monouso; privato + verificatore ADR-0184 §8 in un task).
+- **D54 (ADR-0188):** autore 13/11: 1 titolare = chi paga (il master; contro il consiglio), 2 4 8 sì; chiariti 3 (pausa ferma ciò che il mondo fa da sé, le risposte degli individui ai viandanti continuano), 6 (`mare`/`trattenuta`), 7 (inviti 7 giorni monouso); 5: proposta via di mezzo (direttive del master non filtrate, `metaBreak` locale sempre, Jev `text.fourthwall` manopola nei privati). Aspetto conferma di 3, 5, 6, 7, poi pianifico i 7 task.
 
 ## Regole attive
 
@@ -38,5 +38,5 @@ Aggiornato il 13/11/2026, epoca 381 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **380 (claude):** integrato T352 (`e28d73ce`, kernel 0.6.12); coda vuota.
-- **379 (claude):** integrato T347 (`c72f4617`, ADR-0188 proposto), D54 in chat; lanciato T352.
+- **383 (claude):** D54 risposte parziali, chiarimenti in chat; integrato T361 (`0b0a5889`).
+- **381-382 (claude):** D52 e D53 chiuse, T361-T371 pianificati, T310b su fable.
