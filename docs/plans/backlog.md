@@ -1658,6 +1658,7 @@ le risposte alle domande del piano.
 - Pipeline: claude · stima 6% · priorità 10
 - Step: 34
 - **In attesa (autore, 04/11): la fine della Fase I.** Allora servono le risposte di `docs/pipeline/domande/T45f.md`.
+- D52.3 (13/11): una VM di Compute Engine con il pacchetto di T367 (riga 8 del § 6 di `docs/design/open-beta.md`), Secret Manager, disco persistente; dipende anche da T367.
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
 - Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
@@ -4739,7 +4740,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Esito: prompt del Concilio in inglese (ruoli, tema e ambientazioni, principi, frammenti degli agenti e del kernel), lingua del mondo (`universe.json → language`, it se manca) e blocco «Lingua» di 128 token in ogni richiesta, valori degli schemi interni (riparazione dei valori italiani tenuta un contratto), quarta parete con tabelle it/en e test di frasi di prova e venti innocue per lingua, rilevatore della lingua, kernel 0.5.2, ADR-0164; token: testi fissi −6,9 %, richieste di una Genesi offline −3,3 %; prova a pagamento: ≈ 30 richieste invece delle ≈ 20 previste (luoghi in più aperti dal tappeto), ≈ 0,07 $, 156 testi del mondo, 0 in inglese, nessuno scarto né guasto; suite e typecheck verdi. Spezzato: T310b fa i nomi dei campi degli schemi in inglese, il tipo di legame come id, i valori interni ancora italiani (contratto nuovo) e le espressioni regolari di `lingue.md` §5; fr/es della quarta parete e controllo della lingua nel validatore restano a T239.
 
 ### T310b · L'inglese come lingua interna: i nomi dei campi degli schemi, il tipo di legame come id, i valori interni ancora italiani — `da fare` (dipende da T310)
-- Pipeline: claude · sforzo extra · stima 6% · priorità 4
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 4
 - Step: 42
 - Contesto: spezzato da T310 (kernel 0.5.2, ADR-0165): i prompt sono inglesi, ma i nomi dei campi degli schemi Gemini, il tipo di legame (testo, non id) e alcuni valori interni restano italiani; serve un contratto nuovo (0.6) con la sua migrazione. Nasce da T310: `dossier T310`, e da T308b: `dossier T308b`. Le regole: `docs/lingua-interna.md`, `src/kernel/internalNames.ts`.
 - Cosa fare: i campi degli schemi in inglese (schemi Gemini, `MockAiModels`, chi legge le risposte, con lettura dei campi di prima finché serve); il tipo di legame come id interno inglese, il nome nella lingua del mondo; i valori interni ancora italiani in inglese con la migrazione `0.5 → 0.6` in `migrations.ts` (pura, deterministica, piani idempotenti); le espressioni regolari di `docs/lingue.md` §5. fr/es della quarta parete e il controllo della lingua nel validatore restano a T239.
@@ -5247,3 +5248,81 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: commit su `task/T360` con codice, test, documentazione e ADR aggiornati e verdi.
 - Esito: provider `hydrogen` (`gemini-4-hydrogen-high`, contatore `^Gemini Models$`, conto di `gemini`, rapporto 5h/settimana 3,3 provvisorio) e `orchestrator` (`gemini-pro-orchestrator-g1-pro`, contatori `Gemini Models` + `Gemini 4 Argon`, conto di `argon`, rapporto 1 provvisorio), in prova a tetto 1, senza browser, non orchestrabili, nei piani Google Pro e Ultra, `limiti.provider` invariato; `livelli` per ogni provider agy e `agyLevel` in `launchArgs` (`extra|xhigh|max` → `-xhigh` su Hydrogen, `-high` sugli altri, nessun suffisso sull'Orchestrator, mai `--effort` su agy, che lo rifiuta); `orchestra.ordine` claude, orchestrator, argon, hydrogen, gemini, finestra 200 000 per i due nuovi; verificati su agy 1.5.8 l'elenco dei modelli, i livelli (`-p /model`), i rifiuti di `--effort` e `/usage`; cinque micro-prove in sola lettura (Hydrogen e Orchestrator 0 punti su ogni contatore, Argon da solo -1); `modelli.md` (1.1, 1.2, 1.3 nuova, 2, 4.2, 4.4, 4.5), `pianifica.md`, `orchestra.md`, README della pipeline, ADR-0187, `AGENTS.md`; test della pipeline (165), typecheck e suite intera (3092) verdi. Non misurato: su quale contatore pesano davvero Hydrogen e l'Orchestrator e i loro rapporti 5h/settimana (lo diranno le prime righe di `consumi.jsonl`), la finestra di contesto di Hydrogen; nessun task reale lanciato sui nuovi provider; il processo dell'orchestratore vede i provider nuovi solo dopo un riavvio. Sicurezza: nessuna superficie nuova.
+
+### T361 · Open beta: la modalità del server di produzione senza pagamenti — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 5
+- Step: 43
+- Contesto: D52 (autore, 13/11): confermate le scelte di T345 (ADR-0184), tranne la 5: **Jev non si spegne in open beta**, perché OpenRouter dà anche i modelli di TypeSafe. Riga 1 del § 6 di `docs/design/open-beta.md`. Nasce da T345: `dossier T345`.
+- Cosa fare: `QUINE_PAGAMENTI=spenti` (rotte di Stripe non montate, commissione forzata a 0, ricariche nascoste nel pannello `P` e nel sito), `productionProblems` di conseguenza, il controllo di salute; le decisioni chiuse restano accese (con `TYPESAFE_KEY` se detta, via OpenRouter quando c'è T362).
+- Test: `tests/sicurezza/produzione.test.ts` con e senza la modalità; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T361`; sicurezza nell'esito.
+
+### T362 · Open beta: l'adattatore OpenRouter (anche Jev) — `da fare`
+- Pipeline: fable · sforzo extra · stima 4% · approvato · priorità 5
+- Step: 43
+- Contesto: D52 e riga 2 del § 6 di `docs/design/open-beta.md` (ADR-0184). L'autore (13/11): OpenRouter fornisce anche i modelli di TypeSafe, quindi le decisioni chiuse (ADR-0157) passano di lì con la chiave del giocatore; vale ancora D45: il testo libero del viandante non va a Jev finché non c'è la ritenzione zero (verificare cosa dice OpenRouter per quei modelli). `dossier T345`, `dossier T348`.
+- Cosa fare: `OpenRouterAiModels` accanto a `GeminiAiModels` (schema convertito con `response_format` e `require_parameters`, ragionamento, immagini come `image_url`, `usage.cost` nel registro, 402/401/429, id fissi); le decisioni di Jev via OpenRouter (id del modello, prezzo, registro); § 1.7 dello studio e ADR-0184 aggiornati sulla risposta 5.
+- Test: offline con risposte registrate; Genesi offline uguale; una prova pagata piccola (una decina di chiamate, schema, immagini e una decisione di Jev) con una chiave OpenRouter dell'autore se c'è nel `.env`, altrimenti in `domande/T362.md`.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T362`, kernel sale di Z; sicurezza nell'esito.
+
+### T363 · Open beta: le chiavi dei giocatori sul server e il turno delle comuni — `da fare` (dipende da T361, T362)
+- Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 5
+- Step: 43
+- Contesto: D52 (PKCE principale, chiave incollata come ripiego; spese comuni a turno, «il master paga» come opzione di T347; l'anonimo con la sua chiave paga per sé e partecipa al turno). Riga 3 del § 6 e § 1.2-1.4, § 5 di `docs/design/open-beta.md`. `dossier T345`.
+- Cosa fare: il varco `OpenRouterGate`, le chiavi in memoria per uid (solo l'impronta SHA-256 altrove), la rotta del PKCE con lo scambio sul server (`gate`, ritmo, `state`), `chi` → chiave nel canale dei mondi, il turno delle comuni, il ledger come registro della spesa; le voci nel registro della sicurezza (§ 5, punti 1-3).
+- Test: due viandanti con due chiavi in un mondo di molti: ognuno paga le sue, le comuni si alternano; suite di sicurezza; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T363`, ADR e `AGENTS.md` (regola 9) aggiornati.
+
+### T364 · Open beta: «Collega OpenRouter» nel gioco e nel sito — `da fare` (dipende da T363)
+- Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
+- Step: 43
+- Contesto: riga 4 del § 6 di `docs/design/open-beta.md`. `dossier T363`.
+- Cosa fare: «Collega OpenRouter» nella lobby, nel pannello `P` e nel sito; lo stato della chiave (limite residuo da `/api/v1/key`), il tetto proposto, il ripiego dell'incolla; da soli sul PC il PKCE su `localhost` e il file accanto agli universi.
+- Test: suite e typecheck coi turni.
+- Browser: sì, il flusso intero (con un OpenRouter finto se non c'è la chiave dell'autore).
+- Quando è fatto: commit su `task/T364`.
+
+### T365 · Open beta: il costo di ogni carta — `da fare` (dipende da T362)
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 6
+- Step: 43
+- Contesto: riga 5 del § 6 di `docs/design/open-beta.md`, D49 (carte solo uso reale).
+- Cosa fare: il costo di ogni carta dalla chiamata che l'ha fatta, la provenienza del server.
+- Test: `allCards` mostra il costo; i test delle quote invariati; suite e typecheck coi turni.
+- Browser: non serve.
+- Quando è fatto: commit su `task/T365`, kernel sale di Z.
+
+### T366 · Open beta: il verificatore a inviti e gli universi privati — `in attesa` (D54)
+- Pipeline: fable · sforzo extra · stima 4% · priorità 5
+- Step: 43
+- Contesto: D52.7 (sì, insieme a T347); riga 6 del § 6 di `docs/design/open-beta.md` e lo studio di T347 (`docs/design/campagna-master.md`, ADR-0188 proposto). **Aspetta le risposte di D54.**
+- Cosa fare: il verificatore a inviti per il self-hosting (token firmati, scadenza, revoca, id che non si scontra con un uid), con gli universi privati di T347; voce nel registro della sicurezza (§ 5, punto 4).
+- Test: un server senza Firebase con due invitati; suite di sicurezza; suite e typecheck coi turni.
+- Quando è fatto: commit su `task/T366`.
+
+### T367 · Open beta: il pacchetto e la guida del self-hosting — `da fare` (dipende da T361, T363, T366)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
+- Step: 43
+- Contesto: D52.6 (solo Dockerfile per Railway, niente template nel marketplace); riga 7 del § 6 di `docs/design/open-beta.md`.
+- Cosa fare: `Dockerfile`, `docker-compose.yml` con `cloudflared` facoltativo, `.env.example` senza valori veri, l'immagine con l'etichetta del kernel, la guida (VM o VPS, Railway, Fly, PC di casa), il backup; voce di sicurezza (§ 5, punti 6-7).
+- Test: suite e typecheck coi turni.
+- Browser: sì, un mondo di molti in un container locale giocato da due browser.
+- Quando è fatto: commit su `task/T367`.
+
+### T368 · Open beta: la pagina «Come usiamo l'IA» — `da fare` (dipende da T363)
+- Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 7
+- Step: 43
+- Contesto: riga 9 del § 6 di `docs/design/open-beta.md`; è nella lista del piano di lancio (D35).
+- Cosa fare: la pagina del sito con OpenRouter, chi paga e dove va il testo (Jev incluso, D45).
+- Test: suite e typecheck coi turni.
+- Browser: sì, la pagina nel sito.
+- Quando è fatto: commit su `task/T368`.
+
+### T369 · (dopo) Un endpoint compatibile per modelli locali su RunPod o Vast.ai — `da fare` (dipende da T362)
+- Pipeline: claude · sforzo high · stima 4% · priorità 9
+- Step: 43
+- Contesto: riga 10 del § 6 di `docs/design/open-beta.md`; da approvare dall'autore quando servirà.
+- Cosa fare: l'endpoint solo dall'ambiente (SSRF, § 5 punto 5), un banco della qualità sui compiti del Concilio.
+- Quando è fatto: il banco dice quali compiti un modello aperto regge.
