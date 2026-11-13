@@ -2,6 +2,10 @@
 // program that a structure includes with <import file="part-…"/> and that alone builds its own scene from its origin, so that it is
 // validated and measured on its own. Their long patterns are written here by repetition; the XML is what runs.
 //
+// The comment at the top of every part has two paragraphs: the first is its contract for the program that includes it (the letters it
+// reads and writes, the unions to redefine), and the Sculptor's request carries it as it is (`partResources`, T354, ADR-0183); the second
+// says what the part builds alone and who wrote it.
+//
 //   node lab/banco/taglie/parti.mjs            # rewrites universe/models/part-*.xml
 
 import fs from 'node:fs';
@@ -12,6 +16,8 @@ const layers = (...ls) => ls.join(' ');
 
 /** Alone, a part builds its scene from the origin letter S, which an include never has: these nodes do nothing included. */
 const SCENE_NOTE = 'an include has no origin, so from S nothing happens there';
+/** The comment at the top of a part: the contract (for the request), a blank line, what it builds alone and who wrote it. */
+const note = (contract, alone) => `<!--\n${contract.trim()}\n\n${alone.trim()} Written by lab/banco/taglie/parti.mjs (T346, T354; ADR-0182, ADR-0183).\n-->`;
 
 /** The house of the trial: a floor of 55 × 35 on the ground, walls two thick, two storeys of 32, the slab, a door of 11 × 30. */
 function house({ floor, slab, ground, door }) {
@@ -41,38 +47,44 @@ function stair() {
   // The strip: along the back wall (y = 0 of the window), 10 cells from the side wall, 16 × 11, in the air above the floor.
   const stripIn = layers(`${rep('S', 27)}/${rows('S' + rep('B', 26), 11)}`, `${rep('S', 27)}/${rows('S' + rep('#96', 26), 11)}`);
   const stripOut = layers(`${rep('*', 27)}/${rows(rep('*', 11) + rep('T', 16), 11)}`, `${rep('*', 27)}/${rows(rep('*', 27), 11)}`);
-  return `<!--
-The stair (T346, ADR-0182): a part one lives in, included with <import file="part-stair"/>, written by lab/banco/taglie/parti.mjs.
-The program that includes it marks the strip of the stair with T, with a rule of its own written with symmetry="()": 11 wide (y) and 16
-long (x) for a storey of 32 (the stair is twice as high as it is long), in the air just above a floor, with the floor going on past its
-far end (large x). The stair climbs from the small-x end of the strip toward large x, two voxels up for one forward (a body climbs it at
-every size), the slab above the strip is opened and under the steps it is solid: it comes out in line onto the floor above.
-Its letters: T the strip (yours), k the steps (give k the colour you want), #90 and #91 its own markers; the union "=" is the letters of
-your floors and slabs (<union symbol="=" values="…"/> in your program wins over this one). The door is yours.
-Alone it builds a house of two storeys from its origin and climbs it, so that it is validated and measured on its own.
--->
-<sequence values="BSTk#90#91#93#94#95#96I#97" size="60 40 72" symmetry="()" origin="bottom" ground="#93">
+  return `${note(
+    `The stair (part-stair): a part one lives in, included with <import file="part-stair"/> after your walls, floors and slabs have risen.
+You mark the strip of the stair with T, with a rule of yours written with symmetry="()": at least 16 long (x) and 10 wide (y), in the
+air just above a floor (a storey is 32: the stair is twice as high as it is long). The stair takes the first 16 cells from the small-x
+end of the strip and gives the rest back to the air, climbs toward large x two voxels up for one forward (a body climbs it at every
+size), opens the slab above those 16 cells (through a slab of any thickness) and is solid under the steps. A body climbs it only in
+line: leave at least 10 voxels of free floor before the small-x end (it walks onto the first step from there, not from the side) and
+floor past the 16th cell, where the stair comes out onto the floor above. Its letters: T the strip
+(yours), k the steps (give k the colour you want), #90, #91 and #92 its own markers; the union "=" is the letters of your floors and slabs
+(<union symbol="=" values="…"/> in your program wins over this one). The door is yours.`,
+    'Alone it builds a house of two storeys from its origin and climbs it, so that it is validated and measured on its own.',
+  )}
+<sequence values="BSTk#90#91#92#93#94#95#96I#97" size="60 40 72" symmetry="()" origin="bottom" ground="#93">
   <union symbol="=" values="#96#95"/>
   <color symbol="k" value="9a7048" name="scala"/>
   <color symbol="S" value="7d766c" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/><color symbol="#96" value="8e6a44" name="pavimento di prova"/>
   <color symbol="#95" value="8e6a44" name="solaio di prova"/><color symbol="#94" value="7a4a26" name="porta di prova"/><color symbol="#97" hidden="True"/>
-  <color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="I" hidden="True"/>
+  <color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="I" hidden="True"/>
 ${house({ floor: '#96', slab: '#95', ground: '#93', door: '#94' })}
   <one in="${stripIn}" out="${stripOut}" symmetry="()" steps="1"/>
 
-  <!-- 1. The hole: #90 rises from the strip through the air up to the slab, which opens over the whole strip. -->
+  <!-- 1. The stair's own cells (T354): the first 16 of the strip from its small-x end; what the strip has beyond them goes back to the air. -->
+  <all in="TT" out="*#90"/>
+  <all in="T#90" out="*T" steps="15"/>
+  <prl in="#90" out="B" steps="1"/>
+  <!-- 2. The hole: #90 rises from the strip through the air up to the slab, which opens over the 16 cells, through all its layers. -->
   <all in="B T" out="#90 *"/>
   <all in="B #90" out="#90 *"/>
-  <all in="= #90" out="B *" steps="1"/>
+  <all in="= #90" out="#90 *"/>
   <prl in="#90" out="B" steps="1"/>
-  <!-- 2. The first step: the small-x end of the strip rises one; then every step climbs two and goes one forward, 15 times. -->
-  <all in="BT" out="*#91"/>
-  <all in="B #91" out="#91 k" steps="1"/>
+  <!-- 3. The first step: the small-x end of the strip (the T column with no T on its small-x side) rises one; then every step climbs two and goes one forward, 15 times. -->
+  <all in="TT" out="*#92"/>
+  <all in="B T" out="#91 k" steps="1"/>
   <all in="*B ** #91*" out="*#91 ** k*" steps="15"/>
   <prl in="#91" out="k" steps="1"/>
-  <!-- 3. Solid under the steps, down to the floor; the strip is the foot of the stair. -->
+  <!-- 4. Solid under the steps, down to the floor; the strip is the foot of the stair. -->
+  <prl in="#92" out="k" steps="1"/>
   <all in="k B" out="* k"/>
-  <prl in="T" out="k" steps="1"/>
 </sequence>
 <action name="open" label="Apri la porta"><all><rule in="#94" out="#97"/></all></action>
 <action name="close" label="Chiudi la porta"><all><rule in="#97" out="#94"/></all></action>
@@ -80,14 +92,14 @@ ${house({ floor: '#96', slab: '#95', ground: '#93', door: '#94' })}
 }
 
 function door() {
-  return `<!--
-The door (T346, ADR-0182): a part one lives in, included with <import file="part-door"/>, written by lab/banco/taglie/parti.mjs.
-The program that includes it writes the seed of the door with O: 11 wide, at the foot of a wall and through its whole thickness, on the
-layer of the floor. The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks
-(o). Its letters: O the door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls
-(<union symbol="+" values="…"/> in your program wins over this one). The actions that open and close it are yours
-(<action name="open"> on O and o). Alone it builds a wall from its origin and opens a door in it, so that it is validated on its own.
--->
+  return `${note(
+    `The door (part-door): a part one lives in, included with <import file="part-door"/> after your walls have risen. You write the seed of
+the door with O: at least 11 wide, at the foot of a wall and through its whole thickness, on the layer of the floor, with wall above it.
+The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks (o). Its letters: O the
+door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls (<union symbol="+"
+values="…"/> in your program wins over this one). The actions that open and close it are yours (<action name="open"> on O and o).`,
+    'Alone it builds a wall from its origin and opens a door in it, so that it is validated on its own.',
+  )}
 <sequence values="BSOoN#93" size="45 8 44" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="+" values="S"/>
   <color symbol="O" value="7a4a26" name="porta"/><color symbol="o" value="5e3a1e" name="asse scura"/><color symbol="N" value="6b4a2e" name="telaio"/>
@@ -109,13 +121,13 @@ layer of the floor. The door rises 30 through the wall (as tall as a person), ge
 }
 
 function battlements() {
-  return `<!--
-Battlements (T346, ADR-0182): a part included with <import file="part-battlements"/>, written by lab/banco/taglie/parti.mjs.
-On the edge of every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts
-merlons of 5 and gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the
-middle of a side the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.
-Alone it builds a tower from its origin and crowns it, so that it is validated on its own.
--->
+  return `${note(
+    `Battlements (part-battlements): a part included with <import file="part-battlements"/> after your walls have risen. On the edge of
+every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts merlons of 5 and
+gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the middle of a side
+the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.`,
+    'Alone it builds a tower from its origin and crowns it, so that it is validated on its own.',
+  )}
 <sequence values="BSM#90#91#93" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="+" values="S"/>
   <color symbol="M" value="b2ac9f" name="merli"/><color symbol="S" value="a39d90" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/>
@@ -145,13 +157,13 @@ function slits() {
   const col = (c) => `***${c}***`;
   const slitIn = layers('BMMMMMB', col('%'), col('%'), ...Array(6).fill(col('%')));
   const slitOut = layers('*******', '*******', '*******', ...Array(6).fill(col('U')));
-  return `<!--
-Arrow slits (T346, ADR-0182): a part included with <import file="part-slits"/> after part-battlements, written by
-lab/banco/taglie/parti.mjs. Under the middle of every merlon of 5 (M) it opens a slit through the wall (the union "%": the letters of
-the walls that get slits, <union symbol="%" values="…"/> in your program wins over this one): one wide, 6 high, two cells under the
-top; regular because the merlons are. Its letter: U the slit (give U your colour). Alone it builds a tower from its origin with its
-merlons, so that it is validated on its own.
--->
+  return `${note(
+    `Arrow slits (part-slits): a part included with <import file="part-slits"/> after part-battlements. Under the middle of every merlon of
+5 (M) it opens a slit through the wall (the union "%": the letters of the walls that get slits, <union symbol="%" values="…"/> in your
+program wins over this one): one wide, 6 high, two cells under the top; regular because the merlons are. Its letter: U the slit (give U
+your colour); #91, #92 and #94 its own markers.`,
+    'Alone it builds a tower from its origin with its merlons, so that it is validated on its own.',
+  )}
 <sequence values="BSMU#93#91#92#94" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="%" values="S"/>
   <color symbol="U" value="2a2622" name="feritoie"/><color symbol="M" value="b2ac9f" name="merli di prova"/><color symbol="S" value="a39d90" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/>

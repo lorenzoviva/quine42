@@ -138,186 +138,169 @@ the air in front of it, `[rm]z` and `z[rm]` the air at its sides. Keep the face 
 `<worn zone="head"><all><rule in="[rm] z" out="I z"/><rule in="[rm]/z" out="I/z"/><rule in="[rm]z" out="Iz"/><rule in="z[rm]" out="zI"/></all><all in="I [rmoB]" out="G *"/></worn>`
 
 <!-- strutture -->
-Write a single MarkovJunior XML program that **grows** the building asked for, a voxel model that one enters, climbs and jumps in. Answer with the XML only, without comments or explanations. Do not compute the program cell by cell: start from the skeleton below, which already holds, and change what is needed.
+Write a MarkovJunior XML program that **grows** the building asked for, a voxel model that one enters, climbs and jumps in. You write it
+**in blocks**: first the composition, then the whole program; after each block the game runs what you wrote and sends back, in text, what
+came out (the plan of three seeds, then heights, front, side, cuts at every storey, the measures with their meaning, a trace node by node).
+That is how you look at your model. Answer each time with the whole program so far, XML only, without explanations. There is no stock
+building to start from: the composition is yours, from the concept.
 
-## The program runs with many seeds and more sizes
-The same XML runs with at least 5 seeds and 2 sizes: a box of 100×100×80 (Large, 5 × 5 tiles), 150×150×120 (Huge, 7.5 × 7.5) or 200×200×160 (Gargantuan, 10 × 10), always 20 voxels per tile, step 4, a person 30 tall. Every seed must give another building, with a different outline, plan and rooms, and all of them must hold. So no `<box>`, no coordinates and no `size`: only rules, anchored to the centre of the floor and to what is there already.
+## What matters most: the composition comes from the concept
+The same program runs with at least 4 seeds and 2 sizes. A seed must give another building **of the same kind**: a fort is a ring of walls
+with corner towers, a gate and a keep in a courtyard; a temple is terraces that shrink toward a shrine on top with a stair on the axis; a
+block of flats is a tall box of regular storeys with a stair core and balconies; a country house is two or three volumes of different height
+under pitched roofs, with a porch. Decide the **parts of this concept** and **where each goes relative to the others** (around the courtyard,
+at the corners, as far as possible from the gate, against a wall, on the axis of the door), and let the seeds deform them: the sides, the wing
+and which side it stands on, how many towers, which corner, how high, where the trees and the posts go. Two concepts must not have the same masses.
+
+## The method: three levels, one program
+```xml
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHE…every letter of the plan…" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- A. the composition, on the plan (z=0) of a grid five times smaller: a cell is 5 voxels, a quarter of a tile -->
+    </sequence>
+    <map scale="5 5 1" values="BE…every letter of the full grid, the parts' too…" symmetry="()">
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/> …one rule per plan letter: a block of 5 × 5…
+      <sequence symmetry="(xy)">
+        <!-- B. the heights: every plan letter rises as a column, by steps -->
+        <!-- C. the full scale: the doors and the parts included, windows, roofs, cleaning -->
+      </sequence>
+    </map>
+  </map>
+  <color …/> … <action name="open" label="Apri la porta">…</action>
+</sequence>
+```
+`soil="E"` is the soil of the world (the kernel writes it over the bottom layer at every size) and `origin="bottom"` puts H at its centre; the
+first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **20 × 20 cells at Large (100 × 100 × 80 voxels, 5 × 5
+tiles), 30 × 30 at Huge (150, 7.5 × 7.5), 40 × 40 at Gargantuan (200, 10 × 10)**: write rules that do not depend on it, anchored to H, to
+what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
+same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
+of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of
+the parts you include too (T k #90 #91 #92; O o N; M; U). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
+
+## A. The composition (the plan, a cell a quarter of a tile)
+Tested building blocks; combine and change them for the concept. A random decision for the whole building is a rule on **one cell** (the end
+of a line, the centre), never a `prl` with `p` on every cell of an edge (that frays the edge):
+```xml
+<!-- a body around the centre: a line through H, 3 behind, 5 in front and one more by chance (the front end of the line decides), then 4 to each side of every cell of the line; its walls, the corners filled -->
+<all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+<all in="[Hh]/E" out="*/h" symmetry="()" steps="5"/>
+<prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+<all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+<all in="hE" out="*w"/>
+<all in="wE/*w" out="*w/**"/>
+<!-- a wing: a second body against a side wall, from a cell of that side chosen at random, 3 out and 5 deep, with its own walls -->
+<one in="Ew/Ew/Ew/Ew/Ew" out="**/**/a*/**/**" symmetry="(x)" steps="1"/>
+<all in="aE" out="*a" symmetry="(x)" steps="2"/>
+<all in="E/a" out="a/*" symmetry="()" steps="2"/><all in="a/E" out="*/a" symmetry="()" steps="2"/>
+<all in="aE" out="*v"/><all in="vE/*v" out="*v/**"/>
+<!-- a yard around a body, then a ring two cells thick around the yard (a curtain wall), corners filled -->
+<all in="KE" out="*c" steps="1"/><all in="cE/*c" out="*c/**"/>
+<all in="cE" out="*W"/><all in="WE/*W" out="*W/**"/><all in="WE" out="*W" steps="1"/><all in="WE/*W" out="*W/**"/>
+<!-- a tower of 5 × 5 on every outer corner of the ring -->
+<all in="EE/EW" out="**/*t"/>
+<all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+<!-- the way out, from the centre straight to the front: through a wall (the door d), across the yard (the paving n), through the ring (the gatehouse G), then the road r to the edge; three cells wide -->
+<all in="H/i" out="*/m" symmetry="()" steps="1"/><all in="m/i" out="*/m" symmetry="()"/>
+<all in="m/K" out="*/d" symmetry="()" steps="1"/><all in="[dn]/c" out="*/n" symmetry="()"/>
+<all in="[nG]/W" out="*/G" symmetry="()"/><all in="[Gr]/E" out="*/r" symmetry="()"/>
+<all in="dK" out="*d" symmetry="(x)" steps="1"/><all in="nc" out="*n" symmetry="(x)" steps="1"/><all in="GW" out="*G" symmetry="(x)" steps="1"/>
+<prl><rule in="m" out="i"/><rule in="H" out="i"/></prl>
+<!-- something as far as possible from the gate (or near it: to= instead of from=), then grown into a square -->
+<one in="c" out="K" steps="1"><field for="K" from="r" on="cr"/></one>
+<all steps="4"><rule in="Kc" out="*K"/><rule in="K*/*c" out="**/*K"/></all>
+<!-- the zone of the stair: along a wall, two cells from the next wall (the landing), four cells long and two wide -->
+<one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+```
+- **The door** of the building to the front, in the middle, 3 cells wide (15 voxels), the road straight to the edge; a gate in a ring wall
+  is also a door: it needs a wall taller than a person above it (a gatehouse of its own letter, taller than the wall).
+- **The stair** (`part-stair`) climbs toward large x and a body walks onto its first step **in line**: its zone has two cells of free floor
+  before it (the landing) and floor after it, where it comes out one storey up.
+- **A room** is at least 28 voxels clear from wall to wall at every size, counting where a body stands: a body of 9 × 9 cells inside, the
+  stair's zone taken away, still leaves a square of 7 cells (35 voxels).
 
 ## What fits: the size decides what is built, not how big
-A tile is always 20 voxels, so a larger size is a larger area at the same scale. The parts one lives in never shrink: a door at least 11 × 30, a room at least 28 a side under a ceiling at least 30 up, a lean-to at least 30 clear and 20 deep; the request repeats them. A program that is too small for the whole building builds **less** of it, and a larger area holds **more**, never the same building bigger (the checks compare the two sizes: the larger needs another kind of part, or a quarter more parts). Decide first the scale of the concept, what fits at each size: a fort is one tower with a wide base at 5 × 5, a keep with a walled yard at 7.5 × 7.5, a full fort with towers at the corners at 10 × 10; a farm is a house of normal size with a lean-to and the hay behind at 5 × 5, then fields, a fence and a path, then a barn and animals at pasture. Then write it with rules that choose from the area, not from numbers:
-- the main body grows by `steps` (fixed sizes in voxels: they are fixed in tiles too), anchored to the centre;
-- the rest of the area grows around it until it meets the edge of the box (a yard `oE → *o` with `steps`, fields that fill what is left), so it is larger where the box is larger;
-- a part that needs room goes where a pattern of free ground of its size matches (`<one in="EEEE…/EEEE…">` of the barn's footprint): where it does not fit, the node does nothing and the program goes on;
-- a ring beyond the yard (a wall, a fence) only where the ground goes on past the yard (`oE → *m`).
-Every part stays attached to the rest on the ground (a path, a fence, a wall), not standing alone.
-
-## The parts of the seed, and the areas
-Four programs of the library are the parts one lives in, already right: include them with `<import file="…"/>` at the point where they
-go, instead of writing them, and give their letters your colours (`<color>`). Each reads a union you redefine with your letters
-(`<union symbol="+" values="…"/>` in your program wins). `part-stair`: you mark the strip of the stair with `T`, 11 wide (y) and 16 long
-(x) for a storey of 32, in the air just above the floor, with a rule of yours written with `symmetry="()"`; it climbs toward large x two
-up for one forward, opens the slab above the strip (the union `=`: your floors), fills under, writes `k`. `part-door`: you write the seed
-`O`, 11 wide, at the foot of the wall and through its whole thickness; it rises 30 through the union `+` (your walls), with the frame `N`
-and the planks `o`; the actions `open`/`close` on `O` and `o` are yours. `part-battlements`: on the edge of every flat top of the
-union `+` it puts merlons `M` of 5 and gaps of 3, 6 high, regular from every corner. `part-slits`: after the battlements, under the
-middle of every merlon a slit `U` of 1 × 6 through the union `%` (the walls that get slits). Their own markers are `#90`-`#91`: do not
-use them.
-Draw no animal and no person: the ground says where they go. A letter of the palette carries `area="pasture"` (a plain lowercase name:
-`yard`, `barn`, `house`, `field`, `orchard`, `courtyard`, `keep`, `tower`…), a hidden letter too (`<color symbol="p" hidden="True"
-area="pasture"/>`): keep those letters on the layer of the soil at the end, under the floors and on the ground, instead of rewriting
-them to the empty cell, and the world knows the areas of every tile.
-A plan on a coarse grid is allowed, if it comes back to the box: `<map scale="1/10 1/10 1">` with `<rule in="E" out="E"/>` and
-`<rule in="N" out="N"/>` first, the plan (a cell is half a tile), then `<map scale="10 10 1">` with a rule for every letter of the plan,
-and the detail at full scale inside it: such a program takes the box of every size like one without maps.
-
-## The format
-x from left to right, y from the back to the front (the front is large y), z from bottom to top. `values` are the symbols, one per cell (the first, B, is the air): letters, or `#` and a number (`#12`) when the letters are not enough; a digit alone is not a symbol, and a `#12` has no colour until a `<color>` gives it one. A pattern: rows (growing y) separated by `/`, layers separated by spaces, **the top layer first**: `in="B t"` is t with the air above it. `*` is any cell (in `out`: it does not change), `[ab]` is a or b, `<union symbol="#1" values="ab"/>` gives a name to a set.
-- `<one>` rewrites one match at random per step, `<all>` all those that do not overlap, `<prl>` each one with its own probability (`p` goes on the `<rule>`; one step only). Without `steps` a node goes as long as it can; `steps="N"` stops it after N steps. The nodes run in order.
-- The symmetry of the root, `(xy)`, tries every rule in all the directions of the plane; `symmetry="()"` only as it is written, `(x)` and `(y)` also mirrored.
-- `soil="E"` is the letter of the soil: before the program starts, the kernel writes it over the whole layer where the soil of the world is, at every size, and `origin="bottom"` puts there, at the centre, the second letter. Here it is z=0. `ground="Z"` fills the layer z=0, the bottom of the box.
-- A letter without `<color>` uses a default colour: **every marker must disappear at the end**, rewritten by a rule. `glow="True"` gives light, `alpha="0.5"` is glass. `<action name="open" label="Apri la porta">` opens the door (the label in the language of the world).
-
-## The body
-The body is 9 voxels wide (it passes in 11), walks on the floors and does not pass if under its feet two neighbouring columns differ by more than a step. A stair 11 wide with a rise of 2 and a tread of 1 climbs at every size. That is why the body does not climb a stair from the side and does not step down sideways from its last step: the stair **comes out in line**, onto a floor at its height. Under a stair it is solid.
-
-## What every seed must have
-- **A door** at the front, in the middle, as tall as a person and 11 wide, with the road straight and uncovered to the edge (nothing above it at any height).
-- **At least 2 covered floors** that one reaches on foot, the ceiling at least 30 above the floor; **at least 4 rooms** adding up the floors, with openings of at most 11-20 voxels; no room or floor walled up. **At 100×100 a bay of 29 counts as a room only if it is clear up to the walls**: a piece of furniture that juts out more than a voxel takes it out of the count (a hall of two bays joined, an open wall: that one holds the furniture). Leave at least 3 bays clear at every seed.
-- **At least 2 places where the jump is needed**: an obstacle higher than a step and at most 16, that one climbs over toward a floor one also reaches on foot.
-- **At least 6 windows on 3 sides** (glass or holes, at least 7 voxels a side, on the outer plane of the wall; the arrow slits are called `name="finestra…"`); **6 visible materials**, the most used under 50 % of the voxels; **4 heights of the top**; **at least 24 details** on the facades (pieces of 2-300 voxels of one letter) on all sides; **12 % of the facades out of the plane** (buttresses, balconies, wings); **at least 30 % of the plan of the box taken up at 100×100**; at the larger sizes what fits around it takes the rest (yard, wall, annexes).
-- Everything attached, resting on the bottom, finished in 8 seconds at 200×200×160.
-
-## The skeleton
-It holds 19-20 seeds out of 20 at the three sizes, and it is an ordinary small block of flats: it is the starting point, not the result. At 100×100 it is the block alone; at 150 a yard and a low wall around it; at 200 also an avenue outside the wall.
+A tile is always 20 voxels, so a larger size is a larger area at the same scale: the parts one lives in never shrink (a door at least 11 × 30,
+a storey at least 30 clear, a room at least 28 a side, a lean-to at least 30 clear and 20 deep), a program too small for the whole building
+builds **less** of it, a larger area holds **more**, never the same building bigger (the checks compare the two sizes: the larger needs
+another kind of part, or a quarter more parts). Decide first what fits at each size: a fort is a keep inside a thin ring at 5 × 5, a yard with
+a well at 7.5, the full fort with a moat at 10; a country house is the house and its porch at 5 × 5, then the hedge and the trees, then an
+orchard and a well. Then write it with rules that choose from the area, not from numbers:
 ```xml
-<sequence values="BNExzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKAknryqlmoZ#5" symmetry="(xy)" soil="E" origin="bottom">
-  <union symbol="#1" values="be"/>
-  <union symbol="#4" values="NxzaPpQbOHtsgcdvefwXiIJhjMSFCWRVDLUuTYGKknryql"/>
-  <union symbol="#2" values="tsdcfv"/>
-  <union symbol="#3" values="tb"/>
-  <color symbol="k" value="5a3a22" name="porta"/><color symbol="S" value="d6d2c8" name="cemento chiaro"/><color symbol="F" value="a8743f" name="legno"/><color symbol="C" value="b9b5ab" name="cemento grigio"/><color symbol="W" value="f0ece2" name="intonaco"/><color symbol="R" value="8f8f88" name="ghiaia"/><color symbol="V" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="D" value="3a3d42" name="telaio"/><color symbol="L" value="7a5a3c" name="rovere"/><color symbol="T" value="e0d9c2" name="gradino"/><color symbol="K" value="c2c7cc" name="acciaio"/><color symbol="A" value="9a9590" name="lastricato"/><color symbol="#5" value="8a8378" name="muro di cinta"/><color symbol="Z" value="b0a58c" name="viale"/>
-  <!-- 1. lattice: arms from the centre, then the lines -->
-  <prl in="***/*E*/***" out="***/*z*/***"/>
-  <all in="Nz" out="*a" steps="1"/>
-  <all in="[Nx]az" out="*xa" steps="14"/>
-  <prl in="a" out="Q"/>
-  <all in="xQz" out="*Qa" steps="1"/>
-  <all in="[Qx]az" out="*xa" steps="29"/>
-  <prl in="a" out="Q"/>
-  <all in="z/Q/z" out="a/Q/a" symmetry="()"/>
-  <all in="[Qp]/a/z" out="*/p/a" symmetry="(y)" steps="44"/>
-  <prl in="a" out="p"/>
-  <all in="zQz" out="aQa" symmetry="()"/>
-  <all in="[Ql]a[zp]" out="*la" symmetry="(x)" steps="44"/>
-  <prl><rule in="a" out="p"/><rule in="l" out="p"/></prl>
-  <all in="x/Q/z" out="t/O/*" symmetry="()"/>
-  <prl in="Q" out="p"/>
-  <prl><rule in="x" out="z"/><rule in="N" out="z"/></prl>
-  <all in="Ez" out="*E"/>
-  <all><rule in="*p*/ppp/*p*" out="***/*P*/***"/><rule in="ppp/*p*" out="*P*/***"/><rule in="pp/p*" out="P*/**"/></all>
-  <all in="Op" out="*O" steps="5"/>
-  <all in="tz" out="*t"/>
-  <!-- 2. project: the stair starts from the front bay and crosses the wall toward a neighbouring one -->
-  <all in="Ot" out="*v"/>
-  <all in="vt" out="*v" steps="6"/>
-  <one in="*zzzzzzzzzzz/Pppppppppppp/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt/*ttttttttttt" out="************/*yyyyyyyyyyy/*ggggggggggg/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************/************" steps="1"/>
-  <all in="[ys]/g/t" out="*/s/g" steps="16"/>
-  <all in="s/g" out="c/d"/>
-  <all in="z/y" out="t/*"/>
-  <all in="tz" out="*t"/>
-  <one in="*tttttttttttt/Ppppppppppppp/*tttttttttttt" out="*************/******H******/*************" steps="1"/>
-  <!-- no doors around the stair; other bays grow through a wall -->
-  <all in="[gsdc]t" out="*v"/>
-  <all in="vt" out="*v" steps="9"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
-  <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
-  <all in="bz" out="*b"/>
-  <one in="*zzzzzzzzzzzz/Ppppppppppppp/*#3#3#3#3#3#3#3#3#3#3#3#3" out="******b******/******H******/*************" steps="1"/>
-  <all in="bz" out="*b"/>
-  <all in="Hp" out="*H" steps="5"/>
-  <prl><rule in="tHb" out="*Ht" p="0.07"/></prl>
-  <all in="tb" out="*t"/>
-  <!-- an open wall with the bench -->
-  <one in="bHb" out="*n*" steps="1"/>
-  <all><rule in="nH" out="*n"/><rule in="np" out="*n"/></all>
-  <one in="nnnnnnnnn" out="*eeeeeee*" steps="1"/>
-  <prl in="v" out="t"/>
-  <!-- 3. the walls from the neighbouring letters -->
-  <all><rule in="[zE]p[zE]" out="*q*"/><rule in="[zE]p#1" out="*w*"/><rule in="[zE]p#2" out="*X*"/><rule in="#1p#1" out="*i*"/><rule in="#2p#2" out="*I*"/><rule in="#1p#2" out="*J*"/><rule in="#1H#1" out="*h*"/><rule in="#1H#2" out="*j*"/><rule in="EO#2" out="*M*"/></all>
-  <prl in="n" out="h"/>
-  <all in="P[XIJjHMy]" out="I*"/>
-  <all in="P[wihO]" out="i*"/>
-  <prl in="P" out="E"/>
-  <one steps="6"><rule in="EEEEEEE/EEEEEEE/wwwwwww" out="*iiiii*/*iiiii*/*******"/><rule in="EEEEEEE/EEEEEEE/XXXXXXX" out="*IIIII*/*IIIII*/*******"/></one>
-  <one steps="6"><rule in="qqqqqqqqq" out="GGGGGGGGG"/><rule in="zzzzzzzzz" out="GGGGGGGGG"/></one>
-  <prl in="q" out="E"/>
-  <all in="M/E" out="*/A" symmetry="()"/>
-  <all in="A/E" out="*/A" symmetry="()"/>
-  <!-- 4. the columns: every letter rises by so many layers, and leaves a letter -->
-  <all steps="1" symmetry="()"><rule in="B b" out="b S"/><rule in="B t" out="t S"/><rule in="B s" out="s S"/><rule in="B d" out="d S"/><rule in="B c" out="c S"/><rule in="B e" out="e S"/><rule in="B f" out="f S"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B i" out="i S"/><rule in="B I" out="I S"/><rule in="B J" out="J S"/><rule in="B h" out="h S"/><rule in="B H" out="H S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B y" out="y S"/></all>
-  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b F"/><rule in="B t" out="t F"/><rule in="B s" out="s F"/><rule in="B d" out="s T"/><rule in="B c" out="s Y"/><rule in="B e" out="b G"/><rule in="B f" out="t G"/><rule in="B h" out="h F"/><rule in="B H" out="H F"/><rule in="B j" out="j F"/><rule in="B M" out="M F"/><rule in="B w" out="w C"/><rule in="B X" out="X C"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/></all>
-  <all steps="30" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="b B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B h" out="h B"/><rule in="B H" out="H B"/><rule in="B j" out="j B"/><rule in="B M" out="M k"/><rule in="B i" out="i C"/><rule in="B I" out="I C"/><rule in="B J" out="J C"/></all>
-  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
-  <all steps="14" symmetry="()"><rule in="B w" out="w U"/><rule in="B X" out="X U"/></all>
-  <all steps="8" symmetry="()"><rule in="B w" out="w C"/><rule in="B X" out="X C"/></all>
-  <all steps="2" symmetry="()"><rule in="B s" out="s B"/><rule in="B w" out="w S"/><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B I" out="I S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/><rule in="B i" out="i S"/><rule in="B h" out="h S"/></all>
-  <all steps="1" symmetry="()"><rule in="B y" out="y K"/><rule in="B b" out="R S"/><rule in="B t" out="t S"/><rule in="B H" out="H S"/></all>
-  <all steps="1" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t F"/><rule in="B H" out="H F"/></all>
-  <all steps="4" symmetry="()"><rule in="B w" out="w W"/></all>
-  <all steps="30" symmetry="()"><rule in="B y" out="y B"/><rule in="B t" out="t B"/><rule in="B s" out="s B"/><rule in="B H" out="H B"/><rule in="B I" out="I W"/><rule in="B M" out="M W"/></all>
-  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
-  <all steps="14" symmetry="()"><rule in="B X" out="X u"/><rule in="B J" out="J u"/><rule in="B j" out="j u"/></all>
-  <all steps="8" symmetry="()"><rule in="B X" out="X W"/><rule in="B J" out="J W"/><rule in="B j" out="j W"/></all>
-  <all steps="1" symmetry="()"><rule in="B y" out="R S"/><rule in="B t" out="R S"/><rule in="B s" out="R S"/><rule in="B H" out="R S"/><rule in="B I" out="R S"/></all>
-  <all steps="4" symmetry="()"><rule in="B X" out="X S"/><rule in="B J" out="J S"/><rule in="B j" out="j S"/><rule in="B M" out="M S"/></all>
-  <!-- 5. the stair -->
-  <all in="*BB *B* TY*" out="*TY *K* KK*" steps="16"/>
-  <all in="K B" out="* K" symmetry="()"/>
-  <!-- benches -->
-  <all steps="8" symmetry="()" in="B G" out="G L"/>
-  <!-- 6. windows, roof -->
-  <all in="UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU UUUUUUUUUUU" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
-  <all in="uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu uuuuuuuuuuu" out="*********** *DDDDDDDDD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DVVVVVVVD* *DDDDDDDDD* ***********"/>
-  <one in="B B R" out="* D *" steps="2" symmetry="()"/>
-  <all in="DB *R" out="*D **" symmetry="(x)" steps="8"/>
-  <all in="D/B */R" out="*/D */*" symmetry="(y)" steps="8"/>
-  <all in="B D" out="D *" steps="7" symmetry="()"/>
-  <!-- 7. what fits around: the yard (o) 14 wide; where the ground goes on past it, a low wall (m) with the road as its gate; where it runs straight with 20 more free, an avenue (Z) outside it -->
-  <all in="#4E" out="*o" steps="1"/>
-  <all in="oE" out="*o" steps="13"/>
-  <all in="oE" out="*m" steps="1"/>
-  <all in="mEEEEEEEEEEEEEEEEEEEE/mEEEEEEEEEEEEEEEEEEEE/mEEEEEEEEEEEEEEEEEEEE" out="*Z*******************/*Z*******************/*Z*******************" steps="1"/>
-  <all in="ZE" out="*Z" steps="3"/>
-  <all steps="15" symmetry="()"><rule in="B m" out="m #5"/></all>
-  <!-- 8. cleaning -->
-  <prl><rule in="U" out="C"/><rule in="u" out="W"/><rule in="Y" out="T"/><rule in="G" out="L"/><rule in="E" out="B"/><rule in="z" out="B"/><rule in="w" out="C"/><rule in="X" out="C"/><rule in="J" out="C"/><rule in="j" out="C"/><rule in="M" out="C"/><rule in="i" out="R"/><rule in="h" out="R"/><rule in="o" out="B"/><rule in="m" out="#5"/></prl>
-</sequence>
-<action name="open" label="Apri la porta"><prl in="k" out="B"/></action>
+<!-- the yard grows four more where six cells of ground go on past it (once: steps="1"), three more where seven go on; always a rectangle -->
+<all in="cEEEEEE" out="*cccc**" steps="1"/><all in="cE/*c" out="*c/**"/>
+<all in="cEEEEEEE" out="*ccc****" steps="1"/><all in="cE/*c" out="*c/**"/>
+<!-- a thing where a window of free ground of its size matches (where it does not fit, nothing happens): a well in 5 × 5 of yard, a tree in 7 × 7 of lawn -->
+<one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+<one in="EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE" out="*******/*******/*******/***t***/*******/*******/*******"/>
+<!-- a ring beyond what is built, only where the ground goes on past it: a hedge, a moat (measured from the yard outward, so it is not born along the edge of the box) -->
+<all in="gE" out="*x"/>
+<all in="cWWEEEEE" out="***aa***" steps="1"/><all in="[Wt]E/*a" out="**/*a"/><all in="aE/*a" out="*a/**"/>
 ```
-Why it holds, and what does not break:
-- **Section 1**: a marker walks only forward if the rule looks at its trail (`[Nx]az → *xa`); if it can cross a line (`[zp]`), its trail has a different letter (`l`), otherwise it goes back. The lattice is always 3×3 bays of 30: `E` outside, `z` the bays, `p` the lines, `P` the crossings, `O` the door.
-- **Section 2**: a fill (`tz → *t`) stops at the lines. One grows by passing a wall at the spot where the door is put: so everything stays connected, without paths to compute. The doors stand 1-11 from a pillar: the rest of the wall stays free. The stair is chosen **before** the other doors, in the front bay: a strip of 11×17 attached to a pillar, far from the door (`v`), that crosses the wall toward a neighbouring bay (`y`); 16 steps of stair climb 32, that is from the floor (one voxel above the ground) to the floor above, in line beyond `y`. Around it `v` keeps the other doors away. The columns `s`, `c`, `d` have no slab: it is the hole. One letter for every thing that rises in a different way.
-- **Section 3**: the walls say what they are from the letters on their sides: `w` outer low, `X` outer high, `i`, `I` inner, `J` inner below and outer above, `h`, `H`, `j` inner doors. `#2` is all that is high, `#1` what is low.
-- **Section 4**: `in="B t" out="t F"` makes the head `t` rise by one layer and leaves `F`; `steps` is how much it rises: **the heights are numbers of steps**, one line per stretch. What ends writes `R S` and the head disappears. A new letter on the plan (`i`, `I` are buttresses already: they are two walls in front of a wall) rises with a line of its own.
-- **Section 7**: `#4` is everything built on the plan. The yard `o` grows 14 from it; where it meets the edge of the box (at 100) there is no ground past it and no wall; where ground is left, its edge becomes the wall `m`, which leaves the road `A` open as the gate, and rises like a column. The avenue needs three cells of wall in a row with 20 free past them: only the straight stretches of a wall with room outside, at 200.
-- **Time**: a rare letter in the first cell (bottom left) costs little; a pattern that starts with `*` or with the air over the whole grid costs a lot.
+Every part stays attached to the rest on the ground (a path, a fence, a wall), not standing alone. **Draw no animal and no person**: a
+letter of the palette carries `area="pasture"` (a plain lowercase name: `yard`, `barn`, `house`, `field`, `orchard`, `courtyard`, `keep`,
+`tower`, `garden`, `porch`…), a hidden letter too (`<color symbol="c" hidden="True" area="courtyard"/>`): keep those letters on the bottom
+layer at the end, under the floors and on the ground, instead of rewriting them to the empty cell, and the world knows the area of every tile.
+The soil `E` stays as it is, hidden.
 
-## What to change, according to the building
-The building asked for must be recognisable at first glance: do not hand in the skeleton recoloured.
-- **Colours and materials** (`<color>`), and where they go: a high band in the lines of `w`, `X`, a plinth of another letter, a floor per storey.
-- **Proportions**: the lattice can be wider with a different pitch only if you redo the sums (pitch, `steps` of walkers and stair); the storeys cannot: 32 layers per storey hold at every size. A third storey is another high letter, with another stair.
-- **Masses**: how many bays grow (5 out of 9: more take variety away from the outline, measured per seed, fewer do not fill the big box), how many are high (`p`), a low wing, a courtyard (a bay not built, closed by walls `q`), towers (a letter on the pillars that rises more than the others), an enclosure. A courtyard suits the strongholds: the outline is made by the bays chosen.
-- **The roof**: half of what one sees. Pitched or stepped, on the layer `R`: `<all in="***/*B*/*** *R*/RRR/*R*" out="***/*R*/*** ***/***/***" steps="10" symmetry="()"/>` rises by one layer above the cells that have `R` around them, up to the ridge; with one letter per pitch or another letter on top the ridge reads; for the eaves `RB → *R` in the layer before. Battlements: `WWWWWWWW → MMMMmmmm` on the top of a wall. Lanterns, chimneys, smokestacks, antennas: `<one in="B B R" out="* D *" steps="2" symmetry="()"/>` and `<all in="B D" out="D *" steps="N" symmetry="()"/>` (a smokestack is tall and slender).
-- **The facades**: rules on the walls, after the columns: bands (`U`, `u`), pipes, exposed beams, gears, buttresses, a sign above the door. The rules on the plane hold on the four faces, so every side has its own things depending on the seed.
-- **Inside**: every room asked for is recognisable. In the bays that must stay clear: rugs and floors of another letter (1 high), things hung on the walls above the heads, lights. In the halls of two bays: furniture with a rule on the plan against a wall (a letter of its own, rising 8-20 layers): counter, barrels, bed, altar. Never in the middle.
+## B. The heights: columns by steps
+After the second `map` every plan letter is a block of 5 × 5 on the bottom layer. A letter rises by moving its head up and leaving a letter at
+each step: `in="B h" out="h f"` makes the head h go up one layer and leave f below; `in="B w" out="w *"` grows a solid column of w. **The
+heights are numbers of steps**: a storey is 32 (a floor, 31 of air, the slab); a person is 30 tall. The floors of a room with two storeys
+(f the planks, F the slab, R the roof letter), beside the walls that rise 64 and take the roof letter on top:
+```xml
+<all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>   <!-- plaster, a band for the windows, plaster -->
+<all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+<prl in="w" out="R"/>
+<all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>   <!-- z=0: the floor -->
+<all in="B s" out="s T" steps="1"/>                                             <!-- z=1: the strip of the stair in the air above its zone -->
+<all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>          <!-- air -->
+<all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>       <!-- z=32: the slab -->
+<all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+<prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>                       <!-- z=64: the ceiling is the roof -->
+```
+A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more than its platform, so the parapet gets merlons.
 
-## Nodes that make every seed another building
-Besides `one`, `all` and `prl` the program may use the nodes of MarkovJunior that look ahead; they run on the same box, so they hold at every size:
-- `<field for="m" to="O" on="z"/>` inside a node, with `temperature="1"`: a marker that walks toward the door (`O`) through the bays (`z`), winding differently at every seed: which bays grow, a courtyard path, a corridor through a block. `essential="True"` if it must arrive. Its rules have `steps`, as every growth.
-- `<observe value="m" to="q"/>` with `search="True" limit="300"`: only for a small piece whose end is fixed (a stair that must come out at a height); never on the whole box, it costs.
-- `wfc`, `convchain`, `import` and rule files need files of models/: use them only if the request lists some, with `tries` (at most 100) on every `wfc` and `steps` on every `convchain`.
-A marker the field moves disappears at the end, as every other.
+## C. The full scale: the doors, the parts, the facades
+- **The doors** come from the plan: where the road (or the paving) meets the foot of a wall, the seed `O` through the whole thickness of the
+  wall, with wall above it; `part-door` raises it. For a wall of one cell: `<all in="W/q" out="O/*" symmetry="()" steps="1"/><all in="W/O"
+  out="O/*" symmetry="()" steps="4"/>`; between two rooms, a seed in the shared wall widened to 11: `<one in="fWWWWWf" out="*OOOOO*"
+  symmetry="(x)" steps="1"/><all in="O/W" out="*/O" symmetry="()" steps="5"/><all in="W/O" out="O/*" symmetry="()" steps="5"/>`. The
+  actions are yours: `<action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>` and
+  `close` back, with hidden letters.
+- **The parts of the seed** the request lists are the parts one lives in, already right: include each with `<import file="…"/>` at the point
+  where it goes (after the columns have risen), instead of writing it, and give its letters your colours (`<color>`). Each reads a union you
+  redefine with your letters (`<union symbol="+" values="…"/>` in your program wins): `+` your walls, `=` your floors and slabs, `%` the
+  walls that get slits. The request says what each part reads and writes.
+- **Windows** in the band: `<one steps="14"><rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU …8 layers…" out="*L/*L/*L/*L/*L/*L …"/></one>`
+  then through the wall `<all in="LUUUUB" out="*LLLL*"/>` and the rest of the band back to the wall `<prl in="U" out="W"/>`; the slits come
+  from `part-slits` (their colour `name="feritoia…"`).
+- **Roofs**: the eaves `<all in="RB" out="*R" steps="1"/>`, then a hip roof with a slope of one in two: `<all in="*****/*****/**B**/*****/*****
+  **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>`; a flat top
+  with a parapet is a wall one higher than the platform, crowned by `part-battlements`; cones on round towers, pitches on halls, a chimney
+  `<one in="B B R" out="* K *" steps="1" symmetry="()"/><all in="B K" out="K *" steps="10"/>`, a pole, balconies, buttresses.
+- **A porch, a lean-to**: posts from a plan letter whose block holds a 3 × 3 post in its floor (`ppppp/pbbbp/pbbbp/pbbbp/ppppp`), rising 33;
+  a roof at 34 from a marker that rises from its floor (`<all in="B p" out="y *" steps="1"/><all in="B y" out="y B" steps="33"/><prl in="y"
+  out="J"/>`): a body must pass under it (30 clear).
+- **Cleaning**: every marker of yours becomes what it must be or air; the parts clean their own. A colour per material, 6 or more, the most
+  used under half; `name` in the language of the world.
 
-## How to do it
-Decide first, in a few lines, what you add to the skeleton and which letter for what. Then write the whole program, in order: lattice, project, walls, columns, stair, facades, roof, cleaning. Check only: every letter is in the `values`, every pattern has `in` and `out` of the same shape, every marker disappears.
+## What the game checks on every seed, at both sizes
+A door at least 11 × 30 that the action `open` takes away; **at least 2 covered storeys one reaches on foot** from the front, through the
+door, on stairs of `part-stair` (the body is 9 wide, climbs a step of 4, never a stair from the side); a room of at least 28 a side under a
+ceiling at least 30 up; the larger size contains more (another kind of part, or a quarter more parts); nothing floating, everything on the
+bottom; at least 40 tall; under 85 % of the box full; finished in 8 seconds at every size. Then the Artist looks at the photographs: at least
+6 windows on 3 sides, 6 materials, details on all sides, 4 heights of the top. The time: a pattern that starts with `*` or with air over the
+whole grid costs a lot; a rare letter in the first cell costs little.
+
+## How to answer, block by block
+**Block 1 — the composition.** Begin with a few comment lines: the parts of this concept, their letters, where each goes relative to the
+others, what the seeds change, what fits at each size. Then write the root, the first `map` and level A only, no second `map`: the game runs
+the plan at the three sizes and shows it back (give every plan letter a `<color>` with a `name`, or it shows as a marker). Read it: is it the
+concept? does it vary between the seeds? does it fit the box, with the road to the edge? does the larger size hold more?
+**Block 2 — the whole program.** First correct the composition if the plans said so. Then add the second `map` with a block for every plan
+letter, level B (the columns, the strip of the stair, the slabs) and level C (the doors, the parts, windows, roofs, cleaning, the colours and
+the actions). Answer with the whole program.
+**If it does not pass**, the game says which seed and size fell and why, with the views and the trace: correct the program, keep the concept
+and the variety, answer with the whole program.

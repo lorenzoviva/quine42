@@ -1,0 +1,114 @@
+<!--
+Frontier fort (rocca), written by hand as the Sculptor writes a structure from the prompt without a skeleton (T354, ADR-0183): the
+composition of the concept on a plan at a fifth of the scale (a cell is 5 voxels, a quarter of a tile), the map back to the box so that
+the same program serves Large, Huge and Gargantuan, the columns that rise by steps, the parts one lives in from the seed (part-door for
+the gate and the keep's door, part-stair, part-battlements, part-slits). A keep of two storeys with a platform and a parapet, a curtain
+wall two cells thick with a wall walk, a tower of 5 × 5 on every outer corner, a gatehouse taller than the wall on the front axis with
+the gate, the road to the edge; the yard a passage at Large, wide at Huge (where six cells of ground go on past it) with a well, wider at
+Gargantuan (seven more) with a moat around the curtain. The seeds change the well, the pole and the slits; the sizes change what fits.
+Plan letters: H the centre, i the floor of the keep, K its wall, s the zone of the stair, c the yard, n the paving of the way, W the
+curtain, t a tower, d the keep's door, G the gatehouse, m the way, r the road, Q the well, a the moat. Not S nor #90-#97: they belong to the parts.
+-->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEiKscnWtdGmrQa" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- A. The keep: 4 cells each way from the centre (9 × 9 inside); its wall, the corners filled. -->
+      <all in="[Hi]E" out="*i" symmetry="(x)" steps="4"/>
+      <all in="E/[Hi]" out="i/*" symmetry="()" steps="4"/>
+      <all in="[Hi]/E" out="*/i" symmetry="()" steps="4"/>
+      <all in="iE" out="*K"/>
+      <all in="KE/*K" out="*K/**"/>
+      <!-- The yard: one cell around the keep; where six more cells of ground go on past it, four more; where seven more go on, three more again; always a rectangle. -->
+      <all in="KE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEEE" out="*ccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <!-- The curtain: two cells thick around the yard, the corners filled; a tower of 5 × 5 on every outer corner. -->
+      <all in="cE" out="*W"/>
+      <all in="WE/*W" out="*W/**"/>
+      <all in="WE" out="*W" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+      <!-- The way out, from the centre straight to the front: through the keep's wall (its door d), across the yard (the paving n), through the curtain (the gatehouse G), three wide; the road r to the edge. -->
+      <all in="H/i" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/i" out="*/m" symmetry="()"/>
+      <all in="m/K" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/>
+      <all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <all in="dK" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="i"/><rule in="H" out="i"/></prl>
+      <!-- The zone of the stair in the keep: along the back wall, two cells from the left wall (the landing), four long and two wide. -->
+      <one in="KKKKKKK/Kiiiiii/Kiiiiii" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+      <!-- What fits in the yard: a well where 5 × 5 cells of yard are free. A moat two wide where five cells of ground go on past the curtain, hugging the towers; the road is its causeway. -->
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <all in="cWWEEEEE" out="***aa***" steps="1"/>
+      <all in="[Wt]E/*a" out="**/*a"/>
+      <all in="aE/*a" out="*a/**"/>
+    </sequence>
+    <!-- B. To the voxels: every cell five by five. -->
+    <map scale="5 5 1" values="BEiKscPWtgQAafFROoNkT#90#91#92MUY#20#21" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="i" out="iiiii/iiiii/iiiii/iiiii/iiiii"/>
+      <rule in="K" out="KKKKK/KKKKK/KKKKK/KKKKK/KKKKK"/>
+      <rule in="d" out="KKKKK/KKKKK/KKKKK/KKKKK/KKKKK"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="n" out="PPPPP/PPPPP/PPPPP/PPPPP/PPPPP"/>
+      <rule in="r" out="PPPPP/PPPPP/PPPPP/PPPPP/PPPPP"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="G" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="Q" out="BQQQB/QQAQQ/QAAAQ/QQAQQ/BQQQB"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <!-- C. The detail at full scale. -->
+      <sequence symmetry="(xy)">
+        <union symbol="+" values="KWtg"/>
+        <union symbol="=" values="F"/>
+        <union symbol="%" values="KWtg"/>
+        <!-- 1. The keep's walls rise 66 (a parapet one above the platform), the curtain 24, the towers and the gatehouse 40. -->
+        <all in="B K" out="K *" steps="65"/>
+        <all in="B W" out="W *" steps="23"/>
+        <all steps="39"><rule in="B t" out="t *"/><rule in="B g" out="g *"/></all>
+        <!-- The keep's floors: the planks at the bottom, the strip of the stair in the air above its zone, the slab at 32, the platform at 64. -->
+        <all steps="1"><rule in="B i" out="i f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B i" out="i B" steps="31"/>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B i" out="i F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B i" out="i B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="i" out="R"/><rule in="s" out="R"/></prl>
+        <!-- 2. The doors: the keep's where the paving meets the foot of its front wall, the gate where the road meets the gatehouse, each through the whole thickness; part-door raises them. -->
+        <all in="K/P" out="O/*" symmetry="()" steps="1"/>
+        <all in="K/O" out="O/*" symmetry="()" steps="4"/>
+        <all in="g/P" out="O/*" symmetry="()" steps="1"/>
+        <all in="g/O" out="O/*" symmetry="()" steps="9"/>
+        <import file="part-door"/>
+        <!-- 3. The stair: part-stair climbs the strip and opens the slab. -->
+        <import file="part-stair"/>
+        <!-- 4. Battlements on every top (the parapet of the keep, both edges of the curtain, the towers, the gatehouse), a slit under every merlon; a pole on the platform. -->
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+        <one in="B B R" out="* Y *" steps="1" symmetry="()"/>
+        <all in="B Y" out="Y *" steps="14"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="K" value="7d766c" name="pietra del mastio"/><color symbol="W" value="a39d90" name="mura"/><color symbol="t" value="8a8274" name="torre"/><color symbol="g" value="6e685e" name="corpo di guardia"/>
+  <color symbol="f" value="8e6a44" name="assito" area="keep"/><color symbol="F" value="7a5634" name="solaio"/><color symbol="R" value="97928a" name="terrazza"/>
+  <color symbol="O" value="6a4424" name="porta"/><color symbol="o" value="4e3218" name="borchie"/><color symbol="N" value="5a4a3a" name="telaio"/><color symbol="k" value="9a7048" name="scala"/>
+  <color symbol="M" value="b2ac9f" name="merli"/><color symbol="U" value="2a2622" name="feritoie"/><color symbol="P" value="a89c86" name="selciato"/>
+  <color symbol="Q" value="6e685e" name="pozzo"/><color symbol="A" value="3a78c8" name="acqua del pozzo"/><color symbol="a" value="4a6e8a" name="acqua del fossato"/><color symbol="Y" value="5a4a3a" name="asta"/>
+  <color symbol="c" hidden="True" name="cortile" area="courtyard"/><color symbol="E" hidden="True" name="prato"/>
+  <color symbol="H" hidden="True"/><color symbol="i" hidden="True"/><color symbol="s" hidden="True"/><color symbol="n" hidden="True"/><color symbol="d" hidden="True"/><color symbol="G" hidden="True"/><color symbol="m" hidden="True"/><color symbol="r" hidden="True"/><color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#20" hidden="True"/><color symbol="#21" hidden="True"/>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="#20" out="O"/><rule in="#21" out="o"/></all></action>
+</sequence>

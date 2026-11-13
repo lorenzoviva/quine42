@@ -8,9 +8,10 @@
 // enough, does not fill its box) and goes back with the reason while it does not pass.
 
 import type { Schema } from '../ai/models';
+import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
 import { analyse, compositionOf, partErrors, varietyError, type Composition } from '../../mj/check';
 import { boxOf, classOf, CLASSES, densityFor, growsByRules, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
-import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
+import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
 import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
@@ -18,6 +19,7 @@ import { pngDataUrl } from '../../mj/png';
 import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
+import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
 import { habitableParts } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
@@ -125,13 +127,12 @@ export function triedSizes(cls: AssetClass, taglia?: string): SizeTier[] {
 /** Seeds a procedural structure has in the world (`ModelInfo.seeds`): each is another building of the same kind. */
 export const STRUCTURE_SEEDS = 4;
 
-/** Where the structures' prompt begins in `prompts/agents/sculptor.md`: what comes before is for every other class. */
+/**
+ * Where the structures' prompt begins in `prompts/agents/sculptor.md`: what comes before is for every other class. The part after it has
+ * no skeleton (T354, ADR-0183: a program in the prompt is copied, and every concept came out the same building, T337): the method of the
+ * composition on a coarse plan, the parts of the seed, the blocks. Offline the Sculptor answers with `MOCK_STRUCTURE_PROGRAM`.
+ */
 export const STRUCTURES_MARK = '<!-- strutture -->';
-
-/** The skeleton of the structures' prompt (its first ```xml block): offline it is the Sculptor's answer. */
-export function skeletonOf(role: string): string | undefined {
-  return /```xml\s*([\s\S]*?)```/.exec(role)?.[1]?.trim();
-}
 
 /**
  * The Sculptor's instructions (prompts/agents/sculptor.md) with the scale, the classes, the sizes and the palette; for the
@@ -201,12 +202,14 @@ export function withoutSize(xml: string): string {
   return m && /\ssize="/.test(m[2]) ? xml.slice(0, m.index) + `<${m[1]}${m[2].replace(/\ssize="[^"]*"/, '')}>` + xml.slice(m.index + m[0].length) : xml;
 }
 
-interface Checked {
+export interface Checked {
   xml: string;
   /** Where a procedural program fell (the size and the seed): the trace looks there. */
   failedAt?: { taglia: SizeTier; seed: number };
   model?: MjxModel;
   result?: RunResult;
+  /** Other seeds of a procedural structure at its own size (T354): the views show their plans beside the one shown. */
+  others?: Array<{ seed: number; result: RunResult }>;
   /** What a procedural structure contains at this size (T338): a larger size must contain more. */
   composition?: Composition;
   error?: string;
@@ -236,6 +239,23 @@ export function libraryResources(files: FileMap): string[] {
   return out.sort().slice(0, 40);
 }
 
+/**
+ * The parts one lives in that a structure may include (T354, ADR-0183): the programs `models/part-*.xml` of the universe (the sub-blocks
+ * of the seed, ADR-0182), each with its contract for the program that includes it, the first paragraph of the comment at its top. One
+ * entry per part, for the request; empty if the universe has none.
+ */
+export function partResources(files: FileMap): string[] {
+  const out: string[] = [];
+  for (const [path, text] of Object.entries(files)) {
+    const name = /^models\/(part-[a-z0-9-]+)\.xml$/.exec(path);
+    if (!name || typeof text !== 'string') continue;
+    const comment = /^\s*<!--([\s\S]*?)-->/.exec(text)?.[1]?.trim();
+    const contract = comment?.split(/\n\s*\n/)[0]?.replace(/\s*\n\s*/g, ' ').trim();
+    out.push(`- <import file="${name[1]}"/>: ${contract || 'a part of the seed (no contract written at its top)'}`);
+  }
+  return out.sort();
+}
+
 /** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. `files` are the universe's (`filesOf`). */
 export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}): Checked {
   if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1, files);
@@ -245,18 +265,30 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
   const tries: Array<[SizeTier, number]> = [...Array.from({ length: STRUCTURE_SEEDS }, (_, i): [SizeTier, number] => [own, i + 1]), [next, 1]];
   let first: Checked | undefined;
   let other: Checked | undefined;
+  // The seeds that ran at the own size (T354): two others go back beside the one shown, so that the Sculptor sees whether the seeds vary;
+  // after a fall the seeds up to 3 still run for the views (not checked).
+  const ran = new Map<number, RunResult>();
+  const besides = (shown: number): Checked['others'] => {
+    for (let seed = 1; seed <= 3 && ran.size < 3; seed++) {
+      if (ran.has(seed)) continue;
+      const r = checkOnce(xml, cls, own, seed, files).result;
+      if (r) ran.set(seed, r);
+    }
+    return [...ran.entries()].filter(([seed]) => seed !== shown).slice(0, 2).map(([seed, result]) => ({ seed, result }));
+  };
   for (const [t, seed] of tries) {
     const c = checkOnce(xml, cls, t, seed, files);
     first ??= c;
     if (t === next) other = c;
-    if (c.error) return { ...c, xml, failedAt: { taglia: t, seed }, error: `taglia ${sizeOf(t)!.name}, seme ${seed}: ${c.error}` };
+    else if (c.result) ran.set(seed, c.result);
+    if (c.error) return { ...c, xml, failedAt: { taglia: t, seed }, error: `taglia ${sizeOf(t)!.name}, seme ${seed}: ${c.error}`, others: t === own ? besides(seed) : besides(0) };
   }
   // A larger size contains more, not the same drawn bigger (T338, ADR-0179): the first seed at the two sizes.
   const [small, large] = sizeRank(own) < sizeRank(next) ? [first!, other!] : [other!, first!];
   const [smallT, largeT] = sizeRank(own) < sizeRank(next) ? [own, next] : [next, own];
   const v = small.composition && large.composition && varietyError(small.composition, large.composition, sizeOf(smallT)!.name, sizeOf(largeT)!.name);
-  if (v) return { ...first!, xml, failedAt: { taglia: largeT, seed: 1 }, error: v };
-  return first!;
+  if (v) return { ...first!, xml, failedAt: { taglia: largeT, seed: 1 }, error: v, others: besides(1) };
+  return { ...first!, others: besides(1) };
 }
 
 /**
@@ -342,13 +374,100 @@ function bodyLine(cls: AssetClass, taglia?: string): string {
   ].join('\n');
 }
 
-/** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. */
-export function traceOf(c: Pick<Checked, 'xml' | 'failedAt'>, cls: AssetClass, taglia?: string): string | undefined {
+/** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. `files` are those it includes. */
+export function traceOf(c: Pick<Checked, 'xml' | 'failedAt'>, cls: AssetClass, taglia?: string, files: MjxFiles = {}): string | undefined {
   try {
-    return traceText(compileMjx(c.xml, { size: boxOf(cls, c.failedAt?.taglia ?? taglia) }), c.failedAt?.seed ?? 1, { deadline: 8_000 });
+    return traceText(compileMjx(c.xml, { size: boxOf(cls, c.failedAt?.taglia ?? taglia), ...(Object.keys(files).length ? { files } : {}) }), c.failedAt?.seed ?? 1, { deadline: 8_000, tetto: 2500, forma: 'nodes' });
   } catch {
     return undefined;
   }
+}
+
+/** How wide a view in text is, in characters: at 100 voxels a character is 2 × 2 cells, at 200 it is 4 × 4. */
+const VIEW_WIDTH = 50;
+
+/**
+ * What the Sculptor «sees» of a checked procedural program (T354, ADR-0183): the views of the seed shown (the one that fell, or the first)
+ * with the cuts at every storey, the plans and heights of two other seeds beside it, and how much the seeds differ. Empty if nothing ran.
+ */
+export function textViews(c: Pick<Checked, 'model' | 'result' | 'others' | 'failedAt'>): string {
+  if (!c.result || !c.model) return '';
+  const pal = c.model.program.palette;
+  const title = c.failedAt ? `Seed ${c.failedAt.seed} at ${c.failedAt.taglia}` : 'Seed 1';
+  const parts = [viewsText(c.result.grid, pal, title, { width: VIEW_WIDTH, sections: sectionHeights(c.result.grid) })];
+  for (const o of c.others ?? []) {
+    const p = planView(o.result.grid, pal, { width: VIEW_WIDTH });
+    parts.push(`### Seed ${o.seed}: plan and heights side by side\n\`\`\`\n${sideBySide(p.plan, p.heights)}\n\`\`\``);
+  }
+  const seeds = [c.result, ...(c.others ?? []).map((o) => o.result)];
+  if (seeds.length > 1) {
+    const d: number[] = [];
+    seeds.forEach((a, i) => seeds.slice(i + 1).forEach((b) => d.push(planDistance(a.grid, b.grid, pal))));
+    parts.push(`How much the plans of the seeds differ: ${(d.reduce((s, x) => s + x, 0) / d.length).toFixed(2)} (0 the same building, 1 nothing in common; a building that varies stays between 0.15 and 0.6).`);
+  }
+  return parts.join('\n');
+}
+
+/** What each measure of the checks means, for who reads only the reason (T354): the key is how the reason begins. */
+const MEANINGS: Array<[RegExp, string]> = [
+  [/^piani:/, 'the covered storeys a body reaches on foot from the front of the box, through the door the action open takes away, climbing stairs in line'],
+  [/^stanza:/, 'the largest square of covered floor where a body stands (the body counted), under a ceiling at least a storey up'],
+  [/^piano:/, 'the clear height from a floor to its ceiling where a body stands'],
+  [/^porta:/, 'the leaf the action open takes away: its width and its height'],
+  [/^varietà:/, 'what the larger size contains against the smaller: the kinds of parts (letters with a piece of 8 voxels or more) and the pieces'],
+  [/^riempie/, 'the share of the box that is full'],
+  [/^il programma non finisce/, 'the time at the largest size: every growth needs steps'],
+  [/^(non tocca terra|il corpo principale galleggia|pezzi staccati)/, 'everything must rest on the bottom and be attached to the main body'],
+  [/^troppo basso/, 'the height of the top against the box of the class'],
+];
+
+/** A reason of the checks with what it measures, where the measure is not plain. */
+export function withMeaning(error: string): string {
+  const bare = error.replace(/^taglia [^,]+, seme \d+: /, '');
+  const m = MEANINGS.find(([re]) => re.test(bare));
+  return m ? `${error} — ${m[1]}` : error;
+}
+
+/** The two requests of a procedural structure (T354, ADR-0183): the composition first, then the whole program. */
+export const BLOCKS = {
+  plan: 'Block 1 of 2: the composition. Begin with a few comment lines (the parts of this concept, their letters, where each goes relative to the others, what the seeds change, what fits at each size), then write the root, the first map and level A only: the plan on the coarse grid, no second map. Give every plan letter a <color> with a name. XML only.',
+  whole: 'Block 2 of 2: the whole program. First correct the composition if the plans say so (the concept, the variety between the seeds, the box, the road to the edge, what the larger size holds). Then add the second map with a block for every plan letter, the heights (the columns, the strip of the stair, the slabs) and the full scale (the doors, the parts included, windows, roofs, cleaning, the colours, the actions). Answer with the whole program.',
+};
+
+/** A program that is only a plan (T354): a `map` to a coarser grid without the one that comes back to the box. The answer to the first block. */
+export const isPlanOnly = (xml: string): boolean => hasMapIn(xml) && !mapsBackToBox(xml);
+
+/**
+ * What the game makes of a plan (the first block, T354): the plan runs with three seeds at the structure's size and with the first seed at
+ * the next, and the plans come back in text (the coarse grid as it is, every letter shown). The soil of the plan is its ground: a plan on a
+ * coarser grid has no voxels of the finished model to count the soil in. `error` says what did not run.
+ */
+export function planBlock(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}): { text: string; error?: string } {
+  const [own, next] = triedSizes(cls, taglia);
+  const src = withoutSize(xml).replace(/\ssoil="/, ' ground="');
+  const parts: string[] = [];
+  const errors: string[] = [];
+  const grids: Array<{ grid: RunResult['grid']; pal: Record<string, PaletteEntry> }> = [];
+  for (const [t, seed] of [[own, 1], [own, 2], [own, 3], [next, 1]] as Array<[SizeTier, number]>) {
+    try {
+      const model = compileMjx(src, { size: boxOf(cls, t), ...(Object.keys(files).length ? { files } : {}) });
+      const r = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
+      if (!r.finished) errors.push(`${t}, seed ${seed}: the plan does not finish in 8 seconds: every growth needs steps`);
+      const pal = model.program.palette;
+      if (t === own) grids.push({ grid: r.grid, pal });
+      parts.push(viewsText(r.grid, pal, `${t}, seed ${seed}`, { width: VIEW_WIDTH, hidden: true }));
+    } catch (e) {
+      errors.push(`${t}, seed ${seed}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`);
+      break;
+    }
+  }
+  if (grids.length > 1) {
+    const d: number[] = [];
+    grids.forEach((a, i) => grids.slice(i + 1).forEach((b) => d.push(planDistance(a.grid, b.grid, a.pal))));
+    parts.push(`How much the plans of the seeds differ: ${(d.reduce((s, x) => s + x, 0) / d.length).toFixed(2)} (0 the same building, 1 nothing in common; a building that varies stays between 0.15 and 0.6).`);
+  }
+  const error = errors.length ? errors.join('; ') : undefined;
+  return { text: [...(error ? [`It does not run: ${error}`] : []), ...parts].join('\n'), ...(error ? { error } : {}) };
 }
 
 export function modelFor(req: SculptRequest, cls: AssetClass, m: SculptorAiModels, today = new Date().toISOString().slice(0, 10)): string {
@@ -384,29 +503,53 @@ export async function judge(c: Council, req: SculptRequest, cls: AssetClass, che
 async function write(c: Council, req: SculptRequest, cls: AssetClass, model: string, previous?: { checked: Checked; critique: Critique }, retries = 2): Promise<{ checked?: Checked; calls: number; error?: string }> {
   const proc = procedural(cls, req.taglia);
   const role = sculptorRole(c.files, proc);
-  // The procedural prompt has its skeleton: the library's programs of sole boxes would teach the opposite (T156).
+  // The procedural prompt composes from the concept: the library's programs of sole boxes would teach the opposite (T156).
   const examples = proc ? [] : examplesFor(c.files, cls.id);
-  const traced = (k: Checked) => {
-    const t = proc ? traceOf(k, cls, req.taglia) : undefined;
-    return t ? `\nHere is what the program did when the game ran it, node by node:\n${t}` : '';
+  // What a procedural program did (the trace), and what the Sculptor «sees» of it (the views in text, T354): in every request that sends one back.
+  const seen = (k: Checked) => {
+    if (!proc) return '';
+    const v = textViews(k);
+    const t = traceOf(k, cls, req.taglia, filesOf(k.xml, c.files));
+    return `${v ? `\nWhat the game made of it, in text:\n${v}` : ''}${t ? `\nHere is what the program did when the game ran it, node by node:\n${t}` : ''}`;
   };
   const system = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : undefined;
   let prompt = describe(req, cls);
   const resources = libraryResources(c.files);
   if (resources.length) prompt += `\n\nFiles of models/ the program may read (wfc tileset or sample, convchain sample, rules with file/fin/fout):\n${resources.join('\n')}`;
+  // The parts one lives in (ADR-0182), with their contracts: a structure includes them instead of writing them (T354).
+  const parts = proc ? partResources(c.files) : [];
+  if (parts.length) prompt += `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`;
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {
-    prompt += `\n\nYour program:\n${previous.checked.xml}\nThe attached image shows it from four sides. The Artist gave it ${previous.critique.voto}/10.\nProblems: ${previous.critique.problemi.join('; ') || '—'}\nAdvice: ${previous.critique.consigli.join('; ') || '—'}${traced(previous.checked)}\nImprove it: answer with the whole program.`;
+    prompt += `\n\nYour program:\n${previous.checked.xml}\nThe attached image shows it from four sides. The Artist gave it ${previous.critique.voto}/10.\nProblems: ${previous.critique.problemi.join('; ') || '—'}\nAdvice: ${previous.critique.consigli.join('; ') || '—'}${seen(previous.checked)}\nImprove it: answer with the whole program.`;
     images.push(views(previous.checked));
   }
-  let last: Checked | undefined;
+  const call = async (p: string) => {
+    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? MOCK_STRUCTURE_PROGRAM : examples[0], ...(req.worn ? { worn: req.worn } : {}) } });
+    return extractXml(raw);
+  };
   let calls = 0;
-  for (let i = 0; i <= retries; i++) {
-    const p = i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${last!.error}${traced(last!)}\nFix it and answer with the whole program.`;
+  let first: string | undefined;
+  // A structure written in blocks (T354, ADR-0183): the composition on the coarse plan first, shown back as the plans of three seeds and
+  // of the next size; then the whole program. An answer that already maps back to the box is the whole program: it is checked as such.
+  if (proc && !previous && !req.previous) {
     calls++;
-    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? skeletonOf(role) : examples[0], ...(req.worn ? { worn: req.worn } : {}) } });
-    const xml = extractXml(raw);
+    const plan = await call(`${prompt}\n\n## ${BLOCKS.plan}`);
+    if (isPlanOnly(plan)) {
+      const made = planBlock(plan, cls, req.taglia, filesOf(plan, c.files));
+      calls++;
+      first = await call(`${prompt}\n\n## Your program so far\n${plan}\n\n## What the game made of it\n${made.text}\n\n## ${BLOCKS.whole}`);
+    } else first = plan;
+  }
+  let last: Checked | undefined;
+  for (let i = 0; i <= retries; i++) {
+    let xml: string;
+    if (i === 0 && first !== undefined) xml = first;
+    else {
+      calls++;
+      xml = await call(i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${proc ? withMeaning(last!.error!) : last!.error}${seen(last!)}\nFix it and answer with the whole program.`);
+    }
     last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files));
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');

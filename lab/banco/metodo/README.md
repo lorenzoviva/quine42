@@ -17,6 +17,10 @@ blocco al posto del «guardare»; un giro su forte, castello, tempio, palazzina 
   modello contro 0,2-1 $.
 - **Cosa portare nel prompt**: togliere lo scheletro, comporre per concetto sulla griglia grossa, il ritorno in testo; e le parti abitabili come
   sottoblocchi provati del seme, che lo Scultore include e non riscrive (§ 5, `docs/pipeline/domande/T337.md`). Gemini non si è potuto provare.
+- **Fatto dopo**: le parti come sottoblocchi del seme (T346, ADR-0182); il prompt del gioco senza scheletro, con gli attrezzi sul piano a 1/5
+  (le scatole di oggi non si dividono per 4), le parti del seme nella richiesta e i due blocchi col ritorno in testo, che ora sta nel kernel
+  (`src/mj/views.ts`, da `viste.ts` di qui; T354, ADR-0183); i programmi di prova scritti come lo Scultore in `lab/banco/taglie/`
+  (`scultore-villetta`, `scultore-rocca`). Il giro su Gemini è T355.
 
 ## 1. Perché convergono: la misura tra concetti e tra semi
 

@@ -1,11 +1,12 @@
 // Structures that fit their size (T338, ADR-0179): the parts one lives in keep their least measures in tiles at every size, a part
 // under its measure goes back to the Sculptor with the reason (the farm of 5 × 5 tiles of before: a house too small), and the same
-// program at a larger area contains more, not the same drawn bigger.
+// program at a larger area contains more, not the same drawn bigger. The programs tried: the bench's and those written as the Sculptor
+// writes them from the prompt without a skeleton (T354).
 
 import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { checkProgram, sculptorRole, skeletonOf } from '../src/kernel/agents/sculptor';
-import { bundledFiles } from '../src/kernel/bundle';
+import { checkProgram } from '../src/kernel/agents/sculptor';
+import { MOCK_STRUCTURE_PROGRAM } from '../src/kernel/ai/mockStructure';
 import { habitableParts } from '../src/kernel/forms';
 import { compositionOf, partErrors, varietyError, type Composition } from '../src/mj/check';
 import { boxOf, classOf, densityFor, PARTS, partVoxels, STRUCTURE_SIDE, TILE, tilesOf, type SizeTier } from '../src/mj/classes';
@@ -32,7 +33,7 @@ describe('the scale of the parts one lives in (T338)', () => {
   it('is written once in tiles, and the same in tiles at every density', () => {
     expect(PARTS.door).toEqual({ width: 0.55, height: 1.5 });
     expect(PARTS.room.side).toBe(1.4);
-    // At 20 voxels a tile: the door of the skeleton (11 × 30), its bays (30 a side) are just within.
+    // At 20 voxels a tile: a door of 11 × 30, a room of 28.
     expect(partVoxels(TILE)).toEqual({ door: { width: 11, height: 30 }, storey: { clear: 30 }, room: { side: 28 }, shelter: { clear: 30, depth: 20 } });
     // At a coarser density the voxels are fewer, the tiles the same (never under: rounded up).
     const coarse = partVoxels(12);
@@ -54,12 +55,12 @@ describe('the scale of the parts one lives in (T338)', () => {
     expect(partErrors({ rooms: [{ z: 1, room: 40, clear: 22 }], doors: [] }, TILE)[0]).toMatch(/^piano: .* 22 voxel .* 30/);
   });
 
-  it('measures the rooms, the storeys and the door of the skeleton within the scale', () => {
-    const skeleton = skeletonOf(sculptorRole(bundledFiles, true))!;
-    const m = at(skeleton, 'large');
+  it('measures the rooms, the storeys and the doors of the offline answer within the scale (T354)', () => {
+    const m = at(MOCK_STRUCTURE_PROGRAM, 'large');
     expect(m.parts.storeys.length).toBeGreaterThanOrEqual(2);
     expect(Math.max(...m.parts.rooms.map((r) => r.room))).toBeGreaterThanOrEqual(partVoxels(TILE).room.side);
-    expect(m.parts.doors).toEqual([{ width: 11, height: 30 }]);
+    // The front door, three cells of the plan wide, and the door between the wing and the body, widened to 11.
+    expect(m.parts.doors).toEqual(expect.arrayContaining([{ width: 15, height: 30 }, { width: 11, height: 30 }]));
     expect(m.errors).toEqual([]);
   }, 60_000);
 });
@@ -81,17 +82,20 @@ describe('the farm of 5 × 5 tiles of before (T338)', () => {
   }, 60_000);
 });
 
-describe('what fits: the same program at three sizes (T338)', () => {
+describe('what fits: the same program at three sizes (T338, T354)', () => {
   const kinds = (c: Composition) => Object.keys(c.byLetter).sort();
 
-  for (const [name, adds] of [
+  for (const [name, xml, adds] of [
     // The farm (T346): a house with its lean-to and hay; then the fence's posts and rails and the fields; then the barn with its floor.
-    ['fattoria', [['p', 'L'], ['b']]],
+    ['fattoria', fs.readFileSync('lab/banco/taglie/fattoria.xml', 'utf8'), [['p', 'L'], ['b']]],
     // The fort: a keep with its talus; then the curtain wall; then the towers on its corners, with their slate.
-    ['forte', [['C'], ['c']]],
+    ['forte', fs.readFileSync('lab/banco/taglie/forte.xml', 'utf8'), [['C'], ['c']]],
+    // As the Sculptor writes them (T354): the country house gets trees where seven cells of lawn are free, then a well; the fort a well in a
+    // yard of five, then a moat where five cells of ground go on past the curtain.
+    ['scultore-villetta', MOCK_STRUCTURE_PROGRAM, [['Y', 'C'], ['Q']]],
+    ['scultore-rocca', fs.readFileSync('lab/banco/taglie/scultore-rocca.xml', 'utf8'), [['Q'], ['a']]],
   ] as const) {
     it(`gives the ${name} of the bench other parts at every larger size, all of them within the scale`, () => {
-      const xml = fs.readFileSync(`lab/banco/taglie/${name}.xml`, 'utf8');
       const runs = SIZES.map((t) => at(xml, t));
       for (const r of runs) {
         expect(r.errors).toEqual([]);
@@ -107,14 +111,13 @@ describe('what fits: the same program at three sizes (T338)', () => {
   }
 
   it('sends back a program that draws the same building in a larger box', () => {
-    const skeleton = skeletonOf(sculptorRole(bundledFiles, true))!;
-    // The skeleton without what fits around it (its section 7) is the same block at every size.
-    const bare = skeleton.replace(/  <!-- 7\. what fits around[\s\S]*?(?=  <!-- 8\. cleaning -->)/, '');
-    expect(bare).not.toContain('#4E');
-    const c = checkProgram(bare, structure);
+    // The country house without what fits around it (the hedge, the well, the trees) is the same house at every size.
+    const bare = MOCK_STRUCTURE_PROGRAM.split('\n')
+      .filter((l) => !/out="\*x"|\*\*Q\*\*|\*\*\*t\*\*\*/.test(l))
+      .join('\n');
+    expect(bare).not.toContain('***t***');
+    const c = checkProgram(bare, structure, undefined, seedFiles(bare));
     expect(c.error).toMatch(/^varietà: alla taglia Enorme/);
     expect(c.failedAt).toEqual({ taglia: 'huge', seed: 1 });
-    // With it the skeleton adds a wall at 150 and an avenue at 200, and passes.
-    expect(checkProgram(skeleton, structure).error).toBeUndefined();
   }, 120_000);
 });
