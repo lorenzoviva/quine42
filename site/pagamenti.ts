@@ -5,6 +5,7 @@
 
 import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
 import { feePercent } from '../src/kernel/credits';
+import { rechargesAvailable } from '../src/ui/recharges';
 import type { Wallet } from '../server/wallet';
 
 /** What the checkout accepts (`/api/stripe/checkout`). */
@@ -135,7 +136,10 @@ class WalletPage {
     $('wallet-grid').hidden = false;
     const chosen = pickUniverse(list, new URLSearchParams(location.search).get('universo'), stored(UNIVERSE_KEY))!;
     this.universe.value = chosen;
-    this.stripeOn = await stripeAvailable();
+    this.stripeOn = await rechargesAvailable();
+    // Without payments (the open beta, ADR-0189) there is no top-up to offer: the panel goes, the balance and the ledgers stay.
+    $('topup-panel').hidden = !this.stripeOn;
+    if (!this.stripeOn) $('wallet-sub').textContent = '// UN CREDITO, UN DOLLARO · SU QUESTO SERVER NIENTE RICARICHE';
     const back = returnState(location.search);
     history.replaceState(null, '', `${location.pathname}${cleanSearch(location.search)}`);
     await this.load(chosen);
@@ -295,15 +299,6 @@ class WalletPage {
   private credited(w: Wallet, sessione: string | undefined): void {
     const p = w.pagamenti.find((x) => x.id === sessione) ?? w.pagamenti[0];
     alertBox('success', 'ACCREDITATO!', `+${formatCredits(p?.crediti ?? 0)}: il saldo è aggiornato.`);
-  }
-}
-
-async function stripeAvailable(): Promise<boolean> {
-  try {
-    const r = await fetch('/api/stripe/config', { cache: 'no-store' });
-    return r.ok && !!((await r.json()) as { available?: boolean }).available;
-  } catch {
-    return false;
   }
 }
 

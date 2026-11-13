@@ -1345,6 +1345,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `fee` (nei documenti e nella UI)
 - **Fermo**: `QUINE_COMMISSIONE`, `commissione` del protocollo e di `/api/crediti`.
 
+### Pagamenti spenti
+- **Inglese**: `paymentsOf`, `PAYMENTS`, `rechargesAvailable`
+- **Definizione**: la modalità del server senza incassi (la open beta): `QUINE_PAGAMENTI=spenti`, detto; niente rotte di Stripe, commissione 0, nessuna ricarica mostrata (ADR-0189).
+- **Dove vive**: `server/ledger.ts`, `server/production.ts`, `src/ui/recharges.ts`
+- **Da non usare**: «modalità beta», «senza Stripe» (nei documenti)
+- **Fermo**: `QUINE_PAGAMENTI`, i valori `accesi` e `spenti`.
+
+### Controllo di salute
+- **Inglese**: `HEALTH_PATH`, `health`
+- **Definizione**: la risposta del server di produzione a chi controlla che serva (un bilanciatore, il runtime di un container): `/healthz`, con qualunque `Host`, solo `ok` (ADR-0189).
+- **Dove vive**: `server/production.ts`
+- **Da non usare**: «health check» (nei documenti)
+- **Fermo**: `/healthz`.
+
 ### Tetto
 - **Inglese**: `tetto`, `sessionCap`, `setSessionCap`, `sessionCapOf`, `capBudgeted`, `addBudgetFromCap`
 - **Definizione**: quanto si può spendere al più, per sessione, per giorno o per universo.

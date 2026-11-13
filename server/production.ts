@@ -1,7 +1,8 @@
 // The production server (T133, ADR-0112): no Vite in it. It serves the build, and only the routes on the list below; it does not start without what
 // makes those routes safe with strangers: who verifies identities, the webhook's secret, the origins it answers for, a cap on the key's spending. The
 // Gemini route and the subscriptions' queue are not here: the first is for who plays alone on their own machine (the worlds call `direct()`),
-// the second runs a CLI on the machine it is served from. Every answer has the same headers.
+// the second runs a CLI on the machine it is served from. Every answer has the same headers. Without payments (`QUINE_PAGAMENTI=spenti`, the open beta,
+// ADR-0189) Stripe's routes are not on the list; the health check (`/healthz`) answers before the front door, with a word.
 
 import { createReadStream, existsSync, realpathSync, statSync } from 'node:fs';
 import http, { type IncomingMessage, type ServerResponse } from 'node:http';
@@ -13,7 +14,7 @@ import { isInternal, newSecret } from './access';
 import { accountHandler, accountSettings, type AccountSettings } from './account';
 import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
-import { grantCapOf, platformFeeOf } from './ledger';
+import { grantCapOf, PAYMENTS, paymentsOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
 import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
 import { stripeHandler, stripeSettings } from './stripe';
@@ -56,9 +57,14 @@ export function productionProblems(env: Record<string, string | undefined>): str
   if (!has('FIREBASE_API_KEY')) problems.push('FIREBASE_API_KEY: senza, nessun browser può accedere');
   // firebase-admin would take unsigned tokens.
   if (has('FIREBASE_AUTH_EMULATOR_HOST')) problems.push('FIREBASE_AUTH_EMULATOR_HOST: con l’emulatore un token senza firma varrebbe');
-  if (!has('STRIPE_WEBHOOK_SECRET')) problems.push('STRIPE_WEBHOOK_SECRET: senza, un pagamento non si può accreditare');
-  // A mock key charges nobody, and needs no webhook: for the tests.
-  if (/^mock(_|$)/.test(env.STRIPE_SECRET_KEY?.trim() ?? '')) problems.push('STRIPE_SECRET_KEY: una chiave finta non incassa nulla');
+  // The open beta (ADR-0189): with the payments off, said, Stripe's routes are not there, and neither are their secrets' reasons.
+  const payments = paymentsOf(env);
+  if (!payments) problems.push(`QUINE_PAGAMENTI: o «${PAYMENTS.on}» (il predefinito) o «${PAYMENTS.off}», scritto così`);
+  if (payments === 'on') {
+    if (!has('STRIPE_WEBHOOK_SECRET')) problems.push('STRIPE_WEBHOOK_SECRET: senza, un pagamento non si può accreditare (o QUINE_PAGAMENTI=spenti, la open beta)');
+    // A mock key charges nobody, and needs no webhook: for the tests.
+    if (/^mock(_|$)/.test(env.STRIPE_SECRET_KEY?.trim() ?? '')) problems.push('STRIPE_SECRET_KEY: una chiave finta non incassa nulla');
+  }
   const { origins, bad } = originsOf(env.QUINE_ORIGINI);
   if (bad.length) problems.push(`QUINE_ORIGINI: la voce ${bad.join(', ')} non è un’origine (https://nome, http solo per questa macchina)`);
   else if (!origins.length) problems.push('QUINE_ORIGINI: senza, non si sa per quali siti questo server risponde');
@@ -195,6 +201,24 @@ export const FRONT_RATES: FrontRates = {
 /** What reads or writes a universe whole; and the handmade cards: a write may run a program for seconds, a list reads every account's file (ADR-0161). */
 const HEAVY = /^\/api\/(universe\/[^/?]|handmade(\/|\?|$))/;
 const VIDEO_PIECE = /^\/api\/video\/[^/?]/;
+/**
+ * The health check (ADR-0189): a balancer or a container's runtime asks it by address, with any `Host` and no `Origin`, so it comes before the front
+ * door. It says only whether this server is serving: nothing of its configuration, its worlds or its universes, which a name that is not ours must not learn.
+ */
+export const HEALTH_PATH = '/healthz';
+
+/** The answer of the health check: a word, never cached; 503 once the server is stopping, so a balancer stops sending players to it. */
+function health(req: IncomingMessage, res: ServerResponse, serving: boolean): void {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.statusCode = 405;
+    res.setHeader('Allow', 'GET, HEAD');
+    return void res.end();
+  }
+  res.statusCode = serving ? 200 : 503;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.end(req.method === 'HEAD' ? undefined : serving ? 'ok' : 'in chiusura');
+}
 
 export interface ProductionOptions {
   env: Record<string, string | undefined>;
@@ -258,11 +282,13 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const videos = videoFolder(o.env);
   // Not a reason not to start: the site without videos is the site. The name, never the value.
   if (videos && !existsSync(videos)) console.warn('QUINE_VIDEO: la cartella non c’è, il sito resta senza video');
+  // Without payments (the open beta, ADR-0189) Stripe's routes are not mounted: a checkout, a webhook, even the config are not found.
+  const payments = paymentsOf(o.env) === 'on';
   const routes: Route[] = [
     // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
     universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
-    stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld }),
+    ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
     walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
     sessionList(accounts),
@@ -277,10 +303,12 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     res.statusCode = 500;
     res.end();
   };
+  let stopped: Promise<void> | undefined;
   const server = http.createServer((req, res) => {
     res.setHeader('Content-Security-Policy', policy);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'same-origin');
+    if ((req.url ?? '').split('?')[0] === HEALTH_PATH) return health(req, res, !stopped);
     const refused = frontDoorRefusal(req, origins);
     if (refused) {
       res.statusCode = 403;
@@ -324,7 +352,6 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   server.on('upgrade', (req: IncomingMessage, socket: Duplex) => {
     if (new URL(req.url ?? '/', 'http://localhost').pathname !== '/api/session') socket.destroy();
   });
-  let stopped: Promise<void> | undefined;
   return {
     server,
     stop: () =>

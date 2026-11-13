@@ -395,6 +395,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/typesafe.test.ts`, `tests/sicurezza/produzione.test.ts`, `tests/sicurezza/mondo.test.ts`, `tests/decisions.test.ts`
 - Esito: chiusa da T348 (ADR-0157), 12/11/2026, branch `task/T348`: le contromisure nascono con il varco.
 
+### V-035 · La open beta senza pagamenti e il controllo di salute
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `QUINE_PAGAMENTI` (`paymentsOf`, `platformFeeOf` in `server/ledger.ts`), `productionProblems` e le rotte di `createProductionServer` (`server/production.ts`), `vite.config.ts`, il controllo di salute `/healthz` (`HEALTH_PATH`), chi mostra le ricariche (`src/ui/recharges.ts`, il pannello `P`, la lobby, la modale dei crediti, `site/pagamenti.ts`, `site/profilo.ts`)
+- Proprietà violata: un server che non incassa non ha una porta per i pagamenti (né un webhook che accrediti, né un checkout) e non fa pagare una commissione su ciò che nessuno gli paga; lo spegnimento è detto e mai dedotto dall'assenza di un segreto, e un valore sbagliato non parte (regola 8h); il controllo di salute, l'unica risposta che arriva con un `Host` che non è dei nostri, non dice niente del server, dei mondi né degli universi, e non apre altro
+- Prova: test (T361)
+- Contromisura: `QUINE_PAGAMENTI=spenti` scritto (ogni altro valore che non sia `accesi` è un problema di `productionProblems`); spento, le rotte di Stripe non sono montate (404 anche `/api/stripe/config`), `STRIPE_WEBHOOK_SECRET` non è chiesto e `platformFeeOf` dà 0 qualunque cosa dica `QUINE_COMMISSIONE`, per le rotte e per i mondi; i client chiedono `/api/stripe/config` prima di mostrare una ricarica. `/healthz` prima della porta d'ingresso, solo quel percorso, solo `GET` e `HEAD`, la parola `ok` (503 `in chiusura` mentre si ferma), `Cache-Control: no-store`, le intestazioni di ogni risposta e nessun CORS
+- Task: T361
+- Test: `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T361 (ADR-0189), 13/11/2026, branch `task/T361`: le contromisure nascono con la modalità.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -435,6 +446,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-032 | — | — | `carte-mano.test.ts`, `serververo.test.ts` | il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts |
 | V-033 | — | — | `carte-portate.test.ts` | le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts |
 | V-034 | — | — | `typesafe.test.ts`, `produzione.test.ts`, `mondo.test.ts` | il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts |
+| V-035 | — | — | `produzione.test.ts` | la modalità senza pagamenti e il controllo di salute si provano sul server di produzione vero: tests/sicurezza/produzione.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

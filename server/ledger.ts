@@ -36,11 +36,26 @@ export function grantCapOf(env: Record<string, string | undefined>, hasAccounts:
   return hasAccounts ? 0 : DEFAULT_GRANT_CAP;
 }
 
+/** What `QUINE_PAGAMENTI` may say (ADR-0189): on, the default, as before; off, the open beta, said and never inferred from what is missing. */
+export const PAYMENTS = { on: 'accesi', off: 'spenti' } as const;
+
+/**
+ * Whether this server takes payments (ADR-0189): `QUINE_PAGAMENTI`, the server's alone. `undefined` for a value that is neither: the
+ * production server refuses to start on it (`productionProblems`), everyone else takes it as on, the way it was before the variable.
+ */
+export function paymentsOf(env: Record<string, string | undefined>): 'on' | 'off' | undefined {
+  const said = env.QUINE_PAGAMENTI?.trim().toLowerCase();
+  if (!said || said === PAYMENTS.on) return 'on';
+  return said === PAYMENTS.off ? 'off' : undefined;
+}
+
 /**
  * The platform fee, a fraction of the cost (ADR-0132): `QUINE_COMMISSIONE`, the server's alone. 0 is a fee (the beta's); what is not a
  * fraction from 0 up to, not including, 1 is the default: a typing slip must neither charge a player double nor take a price away.
+ * With the payments off it is 0 whatever the variable says (ADR-0189): a fee on what nobody pays here would be a cost shown and never paid.
  */
 export function platformFeeOf(env: Record<string, string | undefined>): number {
+  if (paymentsOf(env) === 'off') return 0;
   const said = Number(env.QUINE_COMMISSIONE);
   return env.QUINE_COMMISSIONE?.trim() && said >= 0 && said < 1 ? said : DEFAULT_PLATFORM_FEE;
 }
