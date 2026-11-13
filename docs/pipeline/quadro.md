@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 379 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 380 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -11,7 +11,7 @@ Aggiornato il 13/11/2026, epoca 379 (claude). Crediti: vedi `stato`.
 - **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. T356 integrato (`c21d13b3`, ADR-0185, kernel 0.6.11): tetto delle gargantuesche misurato a 20/30/50 caselle, `meshVoxels` in due passate su array tipizzati e `underside: false` (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel lab 3D e nel banco, `misura-frame.mjs --modello`; `STRUCTURE_SIDE` resta 200 in attesa di D53 (lotto per 20 caselle). Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, in attesa fino al 15/11), scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
-- **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). Non provato contro TypeSafe vero né su traffico reale; mancano la stima nella lobby multigiocatore e l'archivio di sessione delle domande del viandante (D45.6); T352 pronto.
+- **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). T352 integrato (`e28d73ce`, kernel 0.6.12): stima oraria della lobby coi token misurati da T325, un'ora a pieno dettaglio 1,42 $ (prima ~1,04), con l'Attore 1,68 $; restano stimate le uscite non misurate e `forge.fix`. Non provato contro TypeSafe vero né su traffico reale; manca l'archivio di sessione delle domande del viandante (D45.6). `tests/carte-guaste.test.ts` rosso nella suite intera e verde da solo (T352, causa non dimostrata): possibile instabilità sotto carico.
 - **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 con 8 domande; i 7 task dello studio (~25 % settimana) si pianificano dopo le risposte.
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva per massimizzare l'uso di Fable.
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
@@ -22,9 +22,9 @@ Aggiornato il 13/11/2026, epoca 379 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** in corso T352 (Claude, medium, lanciato 19:12 UTC); T355 `in attesa` fino al 15/11 (D48 passo 3).
+0. **In corso/pronti:** niente; T355 `in attesa` fino al 15/11 (D48 passo 3). Il resto aspetta D52, D53, D54 e l'approvazione di T310b.
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 19:05 UTC):** Claude settimana 61 %, 5h 88 % (reset 22:59 UTC); Fable settimana 38 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (13/11 19:25 UTC):** Claude settimana 59 %, 5h 61 % (reset 22:59 UTC); Fable settimana 34 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
 
 ## Attese dall'autore
 
@@ -41,5 +41,5 @@ Aggiornato il 13/11/2026, epoca 379 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **380 (claude):** integrato T352 (`e28d73ce`, kernel 0.6.12); coda vuota.
 - **379 (claude):** integrato T347 (`c72f4617`, ADR-0188 proposto), D54 in chat; lanciato T352.
-- **377-378 (claude):** integrato T360 (`703c838c`, ADR-0187); spegnimento `ferma --dopo` alle 18:31 UTC, riavvio; lanciato T347 su Fable.
