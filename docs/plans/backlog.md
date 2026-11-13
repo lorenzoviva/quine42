@@ -5201,10 +5201,10 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T357`, suite e typecheck verdi, kernel 0.6.6.
 - Esito: kernel 0.6.6 (`KERNEL_VERSION`, package.json, package-lock, universe.json); ADR-0157, la sua voce nell'indice degli ADR e `architettura-dettagli` dicono 0.6.6, ADR-0181 resta a 0.6.5, AGENTS non nominava la versione di T348 e resta com'era; suite (3030 passati, 1 saltato) e typecheck verdi coi turni sul ramo con T353 e T348, nessuna correzione necessaria; nessun cambio di comportamento.
 
-### T358 · Dopo T346: la versione del kernel e la suite insieme — `da fare`
+### T358 · Dopo T346 e T349: la versione del kernel e la suite insieme — `da fare`
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
-- Contesto: T346 (parti abitabili come sottoblocchi, aree delle strutture, `mapsBackToBox`; tocca `src/kernel/forms.ts` e `agents/sculptor.ts`) è stato integrato in `3d` (13/11) dicendo kernel 0.6.6, lo stesso numero che T357 aveva già dato a T353+T348: due incrementi di `Z` con lo stesso numero, e la suite non ha girato su T346 insieme a T353 e T348. `dossier T346`, `dossier T357`.
-- Cosa fare: portare il kernel a 0.6.7 (`KERNEL_VERSION`, `package.json`, `package-lock.json`, `universe.json`, i test che leggono la versione) e dirlo dove i documenti nominano la versione di T346 (i suoi ADR, l'indice degli ADR, `docs/architettura-dettagli.md`; ADR-0157 e ADR-0181 restano come sono); far girare suite intera e typecheck coi turni sul ramo che contiene tutti e tre e correggere ciò che si rompe dall'incontro (senza cambiarne il comportamento).
+- Contesto: T346 (parti abitabili come sottoblocchi, aree delle strutture, `mapsBackToBox`; tocca `src/kernel/forms.ts` e `agents/sculptor.ts`) è stato integrato in `3d` (13/11) dicendo kernel 0.6.6, lo stesso numero che T357 aveva già dato a T353+T348: due incrementi di `Z` con lo stesso numero, e la suite non ha girato su T346 insieme a T353 e T348. Poi T349 (`model.reuse`, ADR-0157) è stato integrato (13/11) dicendo kernel 0.6.7, senza T346. `dossier T346`, `dossier T357`, `dossier T349`.
+- Cosa fare: prima `git merge 3d` nel ramo del task (il worktree è nato prima di T349); poi portare il kernel a 0.6.8 (`KERNEL_VERSION`, `package.json`, `package-lock.json`, `universe.json`, i test che leggono la versione) e dirlo dove i documenti nominano la versione di T346 (i suoi ADR, l'indice degli ADR, `docs/architettura-dettagli.md`; ADR-0157 e ADR-0181 restano come sono, T349 tiene il suo 0.6.7); far girare suite intera e typecheck coi turni sul ramo che contiene T346, T348, T349 e T353 (`tests/determinism.test.ts` è instabile sotto carico, difetto noto di T43a: se fallisce solo lui, rifallo girare da solo) e correggere ciò che si rompe dall'incontro (senza cambiarne il comportamento).
 - Test: suite intera e typecheck coi turni.
-- Quando è fatto: commit su `task/T358`, suite e typecheck verdi, kernel 0.6.7.
-- Dipende da: T346 (integrato).
+- Quando è fatto: commit su `task/T358`, suite e typecheck verdi, kernel 0.6.8.
+- Dipende da: T346, T349 (integrati).
