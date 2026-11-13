@@ -2,7 +2,7 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
-- **D35 (T240 — Il piano di lancio, `docs/lancio/piano.md`; il testo di ogni voce è lì, col consiglio):**
+- **D35 (T240 — Il piano di lancio, `docs/lancio/piano.md`; il testo di ogni voce è lì, col consiglio). Autore 14/11: piano superato (open beta, OpenRouter, VPS) e voce dell'autore da ripensare → T378 lo aggiorna e riscrive le decisioni:**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, per usarli mesi prima del lancio (consiglio: sì, la voce più importante del piano).
   - **Senza consiglio, tuoi:** D5.1 10 ore a settimana di promozione?; D6.2 tetto della chiave il giorno del lancio (proposta 75 $, poi 15 $; i 10 $ al giorno non reggono il picco); D6.4 macchine e RAM il giorno del lancio (dopo la beta; 16 mondi ≈ 16 GB); D7.3 repository pubblico o in parte (cambia la licenza, segreti da ricontrollare).
   - **Obbligatoria:** D3.4 Partita IVA e dati nel piè di pagina prima di Stripe in produzione, con un commercialista (dal 10/11 in Fase VI: la open beta non incassa).
