@@ -4,7 +4,8 @@
 import { el } from './dom';
 
 export interface CreditDialogOptions {
-  onRecharge: () => Promise<void> | void;
+  /** Absent where this server takes no top-ups (the open beta, ADR-0189): no button, and the text does not offer one. */
+  onRecharge?: () => Promise<void> | void;
   onOffline: () => void;
   onAbandon: () => void;
 }
@@ -33,10 +34,11 @@ export class CreditExhaustedModal {
     this.statusEl = el('div', { class: 'modal-status' });
 
     const btnRecharge = el('button', { class: 'primary comic-btn arcade' }, 'Ricarica crediti');
+    btnRecharge.hidden = !opts.onRecharge;
     btnRecharge.onclick = async () => {
       this.statusEl.textContent = 'Apertura pagamento in corso…';
       try {
-        await this.opts.onRecharge();
+        await this.opts.onRecharge?.();
       } catch (e) {
         this.statusEl.textContent = `Errore: ${(e as Error).message}`;
       }
@@ -73,7 +75,9 @@ export class CreditExhaustedModal {
       info?.text ??
       (isCap
         ? 'Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby. Le richieste all’IA useranno i modelli locali.'
-        : 'Hai esaurito i tuoi crediti. Scegli se ricaricare il tuo saldo, continuare a giocare offline con i modelli locali o abbandonare la partita.');
+        : this.opts.onRecharge
+          ? 'Hai esaurito i tuoi crediti. Scegli se ricaricare il tuo saldo, continuare a giocare offline con i modelli locali o abbandonare la partita.'
+          : 'Hai esaurito i tuoi crediti. Scegli se continuare a giocare offline con i modelli locali o abbandonare la partita.');
     this.statusEl.textContent = '';
     this.root.hidden = false;
   }

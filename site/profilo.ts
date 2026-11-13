@@ -13,6 +13,7 @@ import { PROFILE_LIMITS, repairProfile, type Profile } from '../src/kernel/wande
 import { keepProfile } from '../src/session/socket';
 import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
 import { SKIN_EVENT, skinColor } from './skin-core';
+import { rechargesAvailable } from '../src/ui/recharges';
 
 export { formatCredits, pickUniverse, playLink };
 
@@ -187,6 +188,8 @@ class ProfilePage {
   private viewer?: AvatarViewer;
   private seed = 1;
   private cloak = DEFAULT_CLOAK;
+  /** Whether this server takes top-ups (ADR-0189): without, the profile does not send anyone to a top-up that is not there. */
+  private recharges = false;
   private name = $<HTMLInputElement>('profile-name');
   private intro = $<HTMLTextAreaElement>('profile-intro');
   private range = $<HTMLInputElement>('seed-range');
@@ -248,6 +251,7 @@ class ProfilePage {
     );
     const chosen = pickUniverse(list, new URLSearchParams(location.search).get('universo'), stored(UNIVERSE_KEY))!;
     this.universe.value = chosen;
+    this.recharges = await rechargesAvailable();
     await this.load(chosen);
   }
 
@@ -276,10 +280,14 @@ class ProfilePage {
     $('wanderer-name').textContent = p?.name ?? 'non ancora scelto';
     $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo universo';
     $('wallet-amount').textContent = formatCredits(v.crediti);
-    $('wallet-note').textContent = v.anonimo ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.' : 'Si ricarica dalla pagina dei crediti.';
+    $('wallet-note').textContent = v.anonimo
+      ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.'
+      : this.recharges
+        ? 'Si ricarica dalla pagina dei crediti.'
+        : 'Su questo server non si ricarica: a crediti esauriti si gioca con i modelli locali.';
     $('btn-link-google').hidden = v.account !== 'anonimo';
     const recharge = $<HTMLAnchorElement>('btn-recharge');
-    recharge.hidden = v.anonimo;
+    recharge.hidden = v.anonimo || !this.recharges;
     recharge.href = `./pagamenti.html?${new URLSearchParams({ universo: v.universo, ...(v.account === 'locale' ? { viandante: v.id } : {}) })}`;
     $<HTMLAnchorElement>('btn-play-universe').href = playLink(v.universo, v);
     $<HTMLAnchorElement>('nav-play').href = playLink(v.universo, v);

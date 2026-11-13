@@ -14,7 +14,8 @@ import { removeWhenFree } from './fixtures/removeWhenFree';
 import { buildServer } from '../../server/buildServer';
 import { contentSecurityPolicy } from '../../server/csp';
 import { activeHosts } from '../../server/session';
-import { buildFile, createProductionServer, frontDoorRefusal, originsOf, productionProblems, type ProductionServer } from '../../server/production';
+import { buildFile, createProductionServer, frontDoorRefusal, HEALTH_PATH, originsOf, productionProblems, type ProductionServer } from '../../server/production';
+import { paymentsOf, platformFeeOf } from '../../server/ledger';
 import type { AccountSettings } from '../../server/account';
 import { bundledFiles } from '../../src/kernel/bundle';
 import { HANDMADE_CONTRACT } from '../../src/kernel/handmade';
@@ -24,6 +25,8 @@ import type { ServerMsg } from '../../src/session/protocol';
 const SITE = 'https://gioco.example';
 const FAKE = { key: 'FINTA-chiave-gemini-t133', webhook: 'FINTO-segreto-webhook-t133', firebase: 'FINTA-chiave-firebase-t133', stripe: 'FINTA-chiave-stripe-t133' };
 const ENV = { FIREBASE_PROJECT_ID: 'prova', FIREBASE_API_KEY: FAKE.firebase, STRIPE_WEBHOOK_SECRET: FAKE.webhook, STRIPE_SECRET_KEY: FAKE.stripe, QUINE_ORIGINI: SITE };
+/** The open beta (T361, ADR-0189): the payments off, said; nothing of Stripe. */
+const BETA: Record<string, string> = { FIREBASE_PROJECT_ID: 'prova', FIREBASE_API_KEY: FAKE.firebase, QUINE_ORIGINI: SITE, QUINE_PAGAMENTI: 'spenti' };
 
 describe('non parte senza configurazione', () => {
   const said = (env: Record<string, string | undefined>) => productionProblems(env).join('\n');
@@ -61,6 +64,42 @@ describe('non parte senza configurazione', () => {
     expect(said({ ...ENV, TYPESAFE_KEY: FAKE.key, TYPESAFE_TETTO_GIORNALIERO: 'molto' })).toContain('TYPESAFE_TETTO_GIORNALIERO');
     expect(said({ ...ENV, TYPESAFE_KEY: FAKE.key })).not.toContain(FAKE.key);
     expect(productionProblems({ ...ENV, TYPESAFE_KEY: FAKE.key, TYPESAFE_TETTO_GIORNALIERO: '1' })).toEqual([]);
+  });
+
+  it('V-035 senza pagamenti, detto: niente segreti di Stripe da chiedere; il resto come prima', () => {
+    expect(productionProblems(BETA)).toEqual([]);
+    expect(productionProblems({ ...BETA, QUINE_PAGAMENTI: ' Spenti ' })).toEqual([]);
+    // A mock key charges nobody, and here no route would use it.
+    expect(productionProblems({ ...BETA, STRIPE_SECRET_KEY: 'mock_prova' })).toEqual([]);
+    for (const name of ['FIREBASE_PROJECT_ID', 'FIREBASE_API_KEY', 'QUINE_ORIGINI']) {
+      const env = { ...BETA };
+      delete env[name];
+      expect(said(env), name).toContain(name);
+    }
+    expect(said({ ...BETA, FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' })).toContain('FIREBASE_AUTH_EMULATOR_HOST');
+    expect(said({ ...BETA, GEMINI_API_KEY: FAKE.key })).toContain('GEMINI_TETTO_GIORNALIERO');
+    // Jev stays on in the open beta (D52): with its key, a cap, as everywhere.
+    expect(said({ ...BETA, TYPESAFE_KEY: FAKE.key })).toContain('TYPESAFE_TETTO_GIORNALIERO');
+    expect(productionProblems({ ...BETA, TYPESAFE_KEY: FAKE.key, TYPESAFE_TETTO_GIORNALIERO: '1' })).toEqual([]);
+  });
+
+  it('V-035 spento va detto: l’assenza dei segreti non spegne niente, e un valore che non è dei due non parte', () => {
+    const env: Record<string, string | undefined> = { ...BETA };
+    delete env.QUINE_PAGAMENTI;
+    expect(said(env)).toContain('STRIPE_WEBHOOK_SECRET');
+    expect(said({ ...ENV, QUINE_PAGAMENTI: 'accesi' })).toBe('');
+    for (const slip of ['spento', 'off', 'no', '0']) {
+      expect(paymentsOf({ QUINE_PAGAMENTI: slip }), slip).toBeUndefined();
+      expect(said({ ...BETA, QUINE_PAGAMENTI: slip }), slip).toContain('QUINE_PAGAMENTI');
+    }
+    expect(said({ ...BETA, QUINE_PAGAMENTI: FAKE.key })).not.toContain(FAKE.key);
+  });
+
+  it('V-035 senza pagamenti la commissione è 0, qualunque cosa dica QUINE_COMMISSIONE', () => {
+    expect(platformFeeOf({ QUINE_COMMISSIONE: '0.2' })).toBe(0.2);
+    expect(platformFeeOf({ QUINE_COMMISSIONE: '0.2', QUINE_PAGAMENTI: 'spenti' })).toBe(0);
+    expect(platformFeeOf({ QUINE_PAGAMENTI: 'spenti' })).toBe(0);
+    expect(platformFeeOf({ QUINE_COMMISSIONE: '0.2', QUINE_PAGAMENTI: 'accesi' })).toBe(0.2);
   });
 
   it('V-014 le origini: https, o http solo per questa macchina; niente percorsi, jolly, credenziali', () => {
@@ -301,6 +340,52 @@ describe('il server vero', () => {
     const read = await ask('/api/universe/prova');
     expect(Object.keys(JSON.parse(read.text).files).filter((p) => p.startsWith('prompts/'))).toEqual([]);
   });
+
+  it('V-035 il controllo di salute: con qualunque nome e da qualunque indirizzo, solo una parola, mai in cache', async () => {
+    for (const headers of [{}, { Host: '10.0.0.7:8080' }, { Host: 'altro.example' }] as Array<Record<string, string>>) {
+      const r = await ask(HEALTH_PATH, { headers });
+      expect([r.status, r.text], JSON.stringify(headers)).toEqual([200, 'ok']);
+      expect(r.headers['cache-control']).toBe('no-store');
+      expect(r.headers['content-security-policy']).toBe(contentSecurityPolicy(accounts.config));
+      expect(Object.keys(r.headers).filter((h) => h.startsWith('access-control-'))).toEqual([]);
+    }
+    expect((await ask(`${HEALTH_PATH}?x=1`)).text).toBe('ok');
+    const head = await ask(HEALTH_PATH, { method: 'HEAD', headers: { Host: 'altro.example' } });
+    expect([head.status, head.text]).toEqual([200, '']);
+    expect((await ask(HEALTH_PATH, { method: 'POST', headers: { Host: 'altro.example' } })).status).toBe(405);
+    // Only that path: what is next to it is the front door's, as before.
+    expect((await ask(`${HEALTH_PATH}/x`, { headers: { Host: 'altro.example' } })).status).toBe(403);
+    expect((await ask('/api/healthz', { headers: { Host: 'altro.example' } })).status).toBe(403);
+  });
+
+  it('V-035 senza pagamenti (la open beta): le rotte di Stripe non ci sono, la commissione è 0, il resto risponde', async () => {
+    makeUniverse('beta');
+    const beta = createProductionServer({ env: { ...BETA, QUINE_COMMISSIONE: '0.2' }, dist, worldProgram: built.world, universesDir: universes(), accounts });
+    await new Promise<void>((r) => beta.server.listen(0, '127.0.0.1', r));
+    const to = (beta.server.address() as AddressInfo).port;
+    try {
+      const json = { 'Content-Type': 'application/json' };
+      for (const [target, o] of [
+        ['/api/stripe/config', {}],
+        ['/api/stripe/checkout', { method: 'POST', headers: { ...json, Authorization: 'Bearer vero-pagante' }, body: JSON.stringify({ universo: 'beta', wandererId: 'x', crediti: 5 }) }],
+        ['/api/stripe/webhook', { method: 'POST', headers: { 'stripe-signature': 't=1,v1=00' }, body: '{}' }],
+      ] as const) {
+        const r = await ask(target, { ...o, to });
+        expect(r.status, target).toBe(404);
+      }
+      expect((await ask('/api/universe', { to })).status).toBe(200);
+      expect((await ask('/api/account', { to })).status).toBe(200);
+      expect((await ask('/api/crediti?universo=beta', { to })).status).toBe(401);
+      const wallet = await ask('/api/crediti?universo=beta', { to, headers: { Authorization: 'Bearer vero-pagante' } });
+      expect(wallet.status).toBe(200);
+      expect(JSON.parse(wallet.text).portafoglio.commissione).toBe(0);
+      expect((await ask(HEALTH_PATH, { to, headers: { Host: 'altro.example' } })).text).toBe('ok');
+      // With the payments on, the same wallet has the fee the environment says: the mode is what changed it.
+      expect(JSON.parse((await ask('/api/crediti?universo=beta', { headers: { Authorization: 'Bearer vero-pagante' } })).text).portafoglio.commissione).toBe(0.01);
+    } finally {
+      await beta.stop();
+    }
+  }, 60000);
 
   it('V-030 le carte fatte a mano: spente rifiutano; accese, il programma lo controlla il programma dei mondi in un processo suo, al ritmo delle rotte pesanti', async () => {
     const json = { Authorization: 'Bearer vero-alice', 'Content-Type': 'application/json' };

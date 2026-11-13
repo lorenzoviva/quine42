@@ -15,7 +15,7 @@ import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
 import { wandererRoute } from './server/wanderer';
 import { testWorkers } from './server/testWorkers';
 import { walletRoute } from './server/wallet';
-import { grantCapOf, platformFeeOf } from './server/ledger';
+import { grantCapOf, paymentsOf, platformFeeOf } from './server/ledger';
 import { videoFolder, videoRoute } from './server/video';
 import { betaGuide, guidePage, labsOn, labsPage } from './server/betaGuide';
 import { handmadeRoute } from './server/handmade';
@@ -49,7 +49,8 @@ export default defineConfig(({ mode }) => {
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
       universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()) }),
       accountRoute(accounts),
-      stripeRoute({
+      // Without payments (the open beta, ADR-0189) not even here: the game and the site see what the production server would show.
+      paymentsOf(env) !== 'off' && stripeRoute({
         settings: stripeSettings(env),
         accounts,
         universesDir,

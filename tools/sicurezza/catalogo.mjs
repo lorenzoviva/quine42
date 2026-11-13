@@ -784,4 +784,5 @@ export const UNCOVERED = {
   'V-032': 'il nome di una carta si prova sulle sue funzioni: tests/sicurezza/carte-mano.test.ts',
   'V-033': 'le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts',
   'V-034': 'il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts',
+  'V-035': 'la modalità senza pagamenti e il controllo di salute si provano sul server di produzione vero: tests/sicurezza/produzione.test.ts',
 };

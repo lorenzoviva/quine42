@@ -26,6 +26,7 @@ import { accountWanderer } from './session/account';
 import { ProfilePanel } from './ui/profile';
 import { LobbyScreen, type LobbyResult } from './ui/lobby';
 import { CreditExhaustedModal } from './ui/creditdialog';
+import { rechargesAvailable } from './ui/recharges';
 import { Sfx } from './audio/sfx';
 import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
 import { SoundRenders } from './audio/renders';
@@ -140,6 +141,8 @@ async function main() {
   const snap = client ? await client.load() : undefined;
   const snapFiles = snap?.files;
   const many = !!snapFiles && readConfig(snapFiles).config.game?.mode === 'multiplayer';
+  // Whether this server takes top-ups (ADR-0189): without payments (the open beta) no button of the lobby, the panel P or the credits' modal leads to one.
+  const recharges = many && (await rechargesAvailable());
   let lobbyChoice: LobbyResult | undefined;
   if (many && snapFiles && !params.has('skip')) {
     loading.hidden = true;
@@ -164,7 +167,7 @@ async function main() {
       credits,
       isAnonymous: isAnon,
       inCorso: !!seen?.viandante?.inCorso,
-      onRecharge: async (amount: number) => {
+      onRecharge: !recharges ? undefined : async (amount: number) => {
         const token = account?.token;
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
@@ -228,7 +231,7 @@ async function main() {
           linkGoogle: () => account!.linkGoogle(),
           signOut: () => account!.signOut(),
           crediti: () => kernel.creditsOf(),
-          recharge: async (amount: number) => {
+          recharge: !recharges ? undefined : async (amount: number) => {
             const token = account?.token;
             const res = await fetch('/api/stripe/checkout', {
               method: 'POST',
@@ -249,7 +252,7 @@ async function main() {
   // Credit exhaustion modal in multiplayer (T45d): recharge, offline, or abandon
   const creditModal = thin
     ? new CreditExhaustedModal({
-        onRecharge: async () => {
+        onRecharge: !recharges ? undefined : async () => {
           const id = kernel.wanderer().id;
           const token = account?.token;
           const res = await fetch('/api/stripe/checkout', {

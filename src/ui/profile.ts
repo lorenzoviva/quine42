@@ -79,7 +79,12 @@ export class ProfilePanel {
     row.append(out);
     container.append(row);
 
-    // If not anonymous and recharge is available, show credit balance and Stripe top-up presets (T45e)
+    // If not anonymous, the credit balance; with the top-ups of this server, also Stripe's presets (T45e). Without payments (the open beta,
+    // ADR-0189) the balance stays and no button leads to a top-up that is not there.
+    if (!a.anonimo && a.crediti && !a.recharge) {
+      const balanceEl = el('div', { class: 'saldo comic-badge yellow' }, `Saldo crediti: $${a.crediti().toFixed(2)}`);
+      container.append(el('div', { class: 'row ricarica' }, balanceEl, el('div', { class: 'label' }, 'Su questo server non si ricarica: a crediti esauriti, i modelli locali.')));
+    }
     if (!a.anonimo && a.crediti && a.recharge) {
       const creditsRow = el('div', { class: 'row ricarica' });
       const balanceEl = el('div', { class: 'saldo comic-badge yellow' }, `Saldo crediti: $${a.crediti().toFixed(2)}`);
