@@ -12,6 +12,36 @@ import { modelGap, sculptPlan } from './coefficients';
 import { hashStr, hex } from './rng';
 import { italianName } from './internalNames';
 import { sameName } from './bring';
+import type { DecisionQuestion } from './ai/decisions';
+
+/**
+ * The classes whose missing models may wear one of the library before the Sculptor is asked (T349, ADR-0157 §4.1, D45.2): furniture,
+ * plants, rocks and structures. Never people, nor animals and beasts (the bench's wrong guesses were there: the wolf for the dragon, the cat
+ * for the sheep), nor small objects, which already share the common shapes.
+ */
+export const REUSE_CLASSES: readonly string[] = ['furniture', 'tree', 'bush', 'rock', 'pebble', 'monument', 'building', 'structure'];
+/** The option «none of them»: a new model is sculpted. A library model with this id is never an option. */
+export const REUSE_NEW = 'new';
+/** At most this many models of the library in a question: the same class and size seldom have more, and a long list confuses a choice. */
+export const REUSE_MAX_OPTIONS = 48;
+/** Today's rule, the floor (ADR-0157 §3): nothing in the library fits, the Sculptor writes it. */
+export const REUSE_RULE = { model: REUSE_NEW, fits: false };
+
+/**
+ * The questions of `model.reuse`, as the bench asked them (`lab/banco/jev/domande.ts → modello`): a Choice among the library and its
+ * companion Noul. The choice counts only when the Noul says yes: alone, Jev picks the nearest model even when it does not fit; with the
+ * companion the bench had no wrong reuse (T313: 97 %).
+ */
+export function reuseQuestions(library: Array<{ id: string; name: string }>, cls: string): Record<string, DecisionQuestion> {
+  return {
+    model: {
+      type: 'choice',
+      instructions: 'Which model of `library` can show `thing` in the world well enough: the same kind of thing with a similar shape, so that nobody would find it odd? Choose `new` if none of them can.',
+      criteria: { ...Object.fromEntries(library.map((m) => [m.id, `${m.name} [${cls}]`])), [REUSE_NEW]: 'None of the models looks like it: a new model is needed.' },
+    },
+    fits: { type: 'noul', instructions: 'Is there a model in `library` that shows `thing` well enough (the same kind of thing, a similar shape)?' },
+  };
+}
 
 /**
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
@@ -58,12 +88,16 @@ export const structureSiblings = (concept: string): string[] => [...new Set([str
  * (T295); a model that came with the cards keeps the card it came with.
  */
 const SCULPTED = { task: 'model.sculpt', author: 'sculptor' };
+/** A model of the library worn by another request (T349): a card of the world as well, which the decision brought. */
+const REUSED = { task: 'model.reuse', author: 'sculptor' };
 
 export class ModelDirector {
   private busy = false;
   private used = 0;
   private skip = new Set<string>();
   private stopped = false;
+  /** The models this session wore from the library instead of sculpting them (T349). */
+  reusedCount = 0;
   /** World time before which no model starts (T45b: the pause of the coefficient of models). */
   private nextAt = 0;
 
@@ -134,18 +168,71 @@ export class ModelDirector {
    * size (an entry of before, without the suffix) or if it scales (no box of its own); no call. Undefined if it has to be sculpted.
    */
   shared(req: SculptRequest): { xml: string; info: ModelInfo } | undefined {
+    for (const id of req.shareWith ?? []) {
+      const s = this.wearable(req, id);
+      if (s) return s;
+    }
+    return undefined;
+  }
+
+  /**
+   * Whether the library's model `id` can be worn by a request as it is (ADR-0160): the same class, and the same size or a program that
+   * scales to the request's. Its program and the entry it would have; undefined if not.
+   */
+  private wearable(req: SculptRequest, id: string): { xml: string; info: ModelInfo } | undefined {
     const k = this.k;
     const cls = classOf(req.classe);
     if (!cls) return undefined;
     const own = (t?: string) => sizeOf(t)?.id ?? cls.taglia;
-    for (const id of req.shareWith ?? []) {
-      const info = k.forms.info(id), xml = k.files[`models/${id}.xml`];
-      if (!info || !xml || info.class !== req.classe) continue;
-      const { size: _s, vpt: _v, ...rest } = info;
-      if (own(info.size) === own(req.taglia)) return { xml, info };
-      if (procedural(cls, req.taglia) && procedural(cls, info.size) && shareableProgram(xml)) return { xml, info: { ...rest, ...modelSize(req), name: req.nome } };
-    }
+    const info = k.forms.info(id), xml = k.files[`models/${id}.xml`];
+    if (!info || !xml || info.class !== req.classe) return undefined;
+    const { size: _s, vpt: _v, ...rest } = info;
+    if (own(info.size) === own(req.taglia)) return { xml, info };
+    if (procedural(cls, req.taglia) && procedural(cls, info.size) && shareableProgram(xml)) return { xml, info: { ...rest, ...modelSize(req), name: req.nome } };
     return undefined;
+  }
+
+  /**
+   * The library models a request may wear instead of being sculpted (T349): only for the classes of `REUSE_CLASSES`; the same class and a
+   * size it runs at, usable (not an isolated card), not a sound nor a model of the studio, not the request itself; at most
+   * `REUSE_MAX_OPTIONS`, the generic of the class first.
+   */
+  reuseOptions(req: SculptRequest): Array<{ id: string; name: string }> {
+    // A request to sculpt again (what it had, what is wished: maybe a wanderer's words) and a thing worn or tinted are the Sculptor's.
+    if (!REUSE_CLASSES.includes(req.classe) || req.previous !== undefined || req.desiderio !== undefined || req.worn || req.tinta) return [];
+    const k = this.k;
+    const out: Array<{ id: string; name: string; xml: string }> = [];
+    for (const [id, info] of Object.entries(k.forms.models())) {
+      if (id === req.id || id === REUSE_NEW || info.class !== req.classe || info.sound || /^(corona-|schermo-|circuito-)/.test(id)) continue;
+      const s = k.forms.usable(id) ? this.wearable(req, id) : undefined;
+      if (s) out.push({ id, name: info.name ?? id, xml: s.xml });
+    }
+    out.sort((a, b) => Number(GENERIC.has(b.id)) - Number(GENERIC.has(a.id)) || a.id.localeCompare(b.id));
+    // A program worn under more ids (what was reused, a card's copies) is one option: the first.
+    const seen = new Set<string>();
+    return out.filter((o) => !seen.has(o.xml) && !!seen.add(o.xml)).slice(0, REUSE_MAX_OPTIONS).map(({ id, name }) => ({ id, name }));
+  }
+
+  /**
+   * Before the Sculptor (T349, ADR-0157 §4.1): does a model of the library already show this? A closed decision (`model.reuse`): the thing
+   * as the world describes it (data of the world, never what a wanderer wrote: D45.3), the options of `reuseOptions`; a model is worn
+   * only if the companion Noul says it fits. Today's rule is the floor: none fits, the Sculptor writes it. True if one was put in the
+   * library under the request's id (its program copied, as for the cards: the same program, another entry).
+   */
+  async reuse(req: SculptRequest): Promise<boolean> {
+    const options = this.reuseOptions(req);
+    if (!options.length) return false;
+    const k = this.k;
+    const thing = { name: req.nome, kind: classOf(req.classe)?.name ?? req.classe, description: req.aspetto, ...(req.taglia ? { size: req.taglia } : {}), ...(req.contesto ? { where: req.contesto } : {}) };
+    const d = await k.council.decide('sculptor', 'model.reuse', { state: { thing, library: options.map((o) => ({ id: o.id, name: o.name })) }, questions: reuseQuestions(options, req.classe), rule: REUSE_RULE });
+    const chosen = d.fits === true && typeof d.model === 'string' && d.model !== REUSE_NEW ? d.model : undefined;
+    const s = chosen && options.some((o) => o.id === chosen) ? this.wearable(req, chosen) : undefined;
+    if (!s) return false;
+    const { brought: _b, advice: _a, problems: _p, ...info } = s.info;
+    if (!k.addModel(req.id, s.xml, { ...info, name: req.nome }, `scultore: ${req.nome}, come «${s.info.name ?? chosen}» (${chosen}) della libreria`, REUSED)) return false;
+    this.reusedCount++;
+    k.council.say('sculptor', 'info', `«${req.nome}» veste «${s.info.name ?? chosen}» della libreria: niente da scolpire`, undefined, 'model.reuse');
+    return true;
   }
 
   /**
@@ -185,12 +272,16 @@ export class ModelDirector {
     if (req) void this.make(req);
   }
 
-  /** Sculpts a model now and puts it in the library (true if it did). */
+  /**
+   * Sculpts a model now and puts it in the library (true if it did). First the library is asked (`reuse`, T349): a model worn as it is
+   * costs no sculpture, does not count in `ai.maxModels` and starts no pause.
+   */
   async make(req: SculptRequest): Promise<boolean> {
     this.busy = true;
-    this.used++;
     const cls = classOf(req.classe);
     try {
+      if (await this.reuse(req)) return true;
+      this.used++;
       const coef = this.k.coefficients();
       const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.reviews));
       this.nextAt = this.k.time + modelGap(coef.models);

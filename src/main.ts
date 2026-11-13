@@ -456,7 +456,7 @@ async function main() {
   };
   // Alone (T247): the same lobby, without what is about other people; it comes back with every new load of the page, which is what ends a match alone.
   const enterAlone = async () => {
-    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true });
+    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels });
     const chosen = soloLobby.open();
     syncFocus();
     const choice = await chosen;

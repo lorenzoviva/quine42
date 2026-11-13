@@ -162,6 +162,19 @@
   `v1/systemone`) solo da questa macchina e dalla stessa origine, nel server di sviluppo e nella preview, mai in quello di produzione; i mondi di molti
   chiedono per il canale (`op: 'typesafe'`, `direct()`). Ogni chiamata va nel registro dei consumi sotto il suo modello e compito, al prezzo di
   `DECISION_PRICES` (`prices.ts`: 0,042 $ al milione di token in ingresso, la risposta gratis), e si addebita come le altre.
+- **Il riuso dei modelli, `model.reuse`** (T349, kernel 0.6.7, la prima decisione accesa): prima di chiamare lo Scultore il `ModelDirector` chiede se un
+  modello della libreria mostra già ciò che manca (`reuse`, in `make`). Solo per le classi di `REUSE_CLASSES` (mobili, alberi, cespugli, rocce, sassi,
+  monumenti, edifici, strutture: mai persone, animali, bestie e oggetti piccoli, D45.2), mai per una richiesta di riscolpire (`previous`, `desiderio`: possono
+  essere parole del viandante), un capo da indossare o una forma comune tinta. Le opzioni (`reuseOptions`) sono i modelli della stessa classe che la
+  richiesta può indossare così come sono (la stessa taglia, o un programma che scala: `wearable`, lo stesso controllo di `shared`), usabili, non suoni né
+  studio, un'opzione per programma, il generico della classe per primo, al più 48; senza opzioni non si chiede. Lo stato è la cosa come il mondo la descrive
+  (nome, classe, aspetto, taglia, luogo) e la libreria (id e nome); le domande sono quelle del banco: una Choice fra la libreria e `new`, e la **Noul
+  compagna** `fits`: si riusa solo se dice sì (T313: senza, Jev sceglie il più vicino anche quando non va). La regola, il pavimento, è `{ model: new,
+  fits: false }`: si scolpisce. Un riuso copia il programma sotto l'id della richiesta (come le carte portate) con il nome della richiesta, è una carta del
+  mondo (`model.reuse` è un compito comune, `cards.ts`), non conta in `ai.maxModels` e non fa partire la pausa della manopola. **La stima** della lobby e della
+  Genesi (`hourlyEstimate(ai, date, { decisions })`, solo se Jev decide: nel gioco da soli lo sa il kernel, nella lobby di molti ancora no) toglie dalle
+  sculture `REUSE_SHARE` = `REUSE_ASKED` 0,4 (misurato su una Genesi offline con 12 luoghi: 6 modelli su 15 si possono chiedere) × `REUSE_HIT` 0,4 (il
+  mezzo dei 30-50 % di T325) e aggiunge la riga del riuso; la misura è `lab/scripts/riuso-modelli.ts` → `lab/banco/jev/riuso.md`.
 
 <a id="lobby"></a>
 ## La lobby multigiocatore

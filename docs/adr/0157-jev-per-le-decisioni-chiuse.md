@@ -111,3 +111,23 @@ Il varco e lo strato, senza ancora un compito che li usi (il primo lo accende T3
 - **Sicurezza**: la voce V-034 del registro (`tests/sicurezza/typesafe.test.ts`).
 - **La versione**: kernel **0.6.6**. T348 aveva portato il kernel a 0.6.5 come T353 (ADR-0181), integrato prima; T357 dà al varco e allo strato
   l'incremento successivo e fa girare la suite sui due insieme.
+
+## Il riuso dei modelli (T349)
+
+La prima decisione accesa, `model.reuse` (punto 4.1), nel `ModelDirector` prima dello Scultore. Le classi (domanda 2): **mobili, piante, rocce e
+strutture**, cioè `furniture`, `tree`, `bush`, `rock`, `pebble`, `monument`, `building`, `structure` (`REUSE_CLASSES`); non le persone, e nemmeno animali e
+bestie (gli errori del banco senza la Noul compagna erano lì: il lupo per il drago, il gatto per la pecora) né gli oggetti piccoli, che hanno già le forme comuni.
+Ciò che è cambiato rispetto alla proposta:
+
+- **Le opzioni sono della stessa classe** e di una taglia che il modello regge (o un programma che scala), non tutta la libreria come nel banco: lo stato
+  scende da ~3400 a ~300 token e un modello di un'altra classe, che girerebbe nella scatola sbagliata, non si può scegliere. Sui 30 casi del banco di
+  queste classi, con le risposte registrate di `jev-1.13.0` (`tests/fixtures/model-reuse.json`), il riuso è giusto in 30 su 30 e mai sbagliato.
+- **Il generico della classe è un'opzione** (il primo): scegliere lui è «la *Classification using confidence*» di T325, il generico invece di scolpire.
+- **Mai per una richiesta di riscolpire** (`previous`, `desiderio`): il desiderio può essere testo del viandante (D45.3), e chi chiede di riscolpire vuole
+  un modello nuovo.
+- **Un riuso copia il programma** sotto l'id della richiesta, come le carte portate (ADR-0170): una carta del mondo (`model.reuse` è comune), fuori da
+  `ai.maxModels` e dalla pausa della manopola `models`.
+- **La stima** toglie dalle sculture il 16 % (`REUSE_ASKED` 0,4 misurato su una Genesi offline × `REUSE_HIT` 0,4 di T325) quando Jev decide; la Genesi offline
+  misurata (`lab/banco/jev/riuso.md`) dà lo stesso ordine: 16 % della spesa dello Scultore e dell'Artista, fino al 44 % se Jev riusasse tutto ciò che può.
+- **La versione**: kernel **0.6.7** (un compito nuovo che i modelli locali risolvono con la regola lascia buoni gli universi dello stesso contratto).
+
