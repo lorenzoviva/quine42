@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 363 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 365 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -11,7 +11,7 @@ Aggiornato il 13/11/2026, epoca 363 (argon). Crediti: vedi `stato`.
 - **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. Mancano: aree usate da Narratore/Scenografo, Scultore su Gemini (T354, T355), tetto voxel (T356), scala cortile→camminamento del forte. T358 integrato (`2342957e`): kernel 0.6.8 con T346+T349, suite verde (3046).
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
-- **Jev nel gioco (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (13/11, `model.reuse` nel `ModelDirector`, −16 % sculture stimato, kernel 0.6.7 senza T346); non provato contro TypeSafe vero; manca la stima nella lobby multigiocatore; segue T350.
+- **Jev nel gioco (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute). Non provato contro TypeSafe vero né su traffico reale; manca la stima nella lobby multigiocatore; segue T351.
 - **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → proposto T347 (step 43).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva da giovedì per massimizzare il reset di Fable (portare Fable a 100% con altri <50%, poi reset).
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
@@ -21,9 +21,9 @@ Aggiornato il 13/11/2026, epoca 363 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** T354 su Fable (in pausa per limite 5h fino a 08:01 UTC); pronti T350 (dopo T349), T356 (dopo T346), T347 (fable high), T345, T352; bloccati T351, T354→T355 (non prima del 15/11).
+0. **In corso/pronti:** T354 in corso su Fable (nel turno test); pronti T356 (dopo T346), T347 (fable high), T345, T351 (dopo T350), T352; bloccato T355 (dopo T354, non prima del 15/11).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 04:33 UTC):** Claude settimana 76 %, 5h 0 % (reset 07:59 UTC); Fable settimana 62 %, 5h 0 %; Gemini 98 %; Argon 91 %; agy 100 %. Generatore acceso, fermo (avanzo negativo).
+2. **Crediti (13/11 08:37 UTC):** Claude settimana 68 %, 5h 2 % (reset 13:00 UTC); Fable settimana 47 %, 5h 2 % (reset 12:59 UTC); Gemini 98 %; Argon 90 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h al 2 %).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 363 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **363 (argon):** rotazione da Claude (finestra 5h a 0 %, reset 07:59 UTC); T354 su Fable in pausa fino alle 08:01 UTC.
-- **362 (claude):** T358 integrato (kernel 0.6.8); `node_modules/.bin` del base mancava (i worktree prendevano vitest 2.1.4): rifatto con `npm rebuild --ignore-scripts`.
+- **365 (argon):** T350 integrato (`2e733d0e`, kernel 0.6.9); T351 sbloccato; T354 in corso su Fable; finestra 5h Claude/Fable al 2 % (reset 13:00 UTC).
+- **364 (claude):** ripreso T354 su Fable e lanciato T350 su Claude al reset delle 08:00 UTC.
