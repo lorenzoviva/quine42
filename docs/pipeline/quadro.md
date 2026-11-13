@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 366 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 368 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -21,9 +21,9 @@ Aggiornato il 13/11/2026, epoca 366 (argon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** pronti su Claude/Fable al reset 5h delle 13:00 UTC (14:00 ora locale): T356 e T347 su Fable; T345, T351 e T352 su Claude; T355 messo `in attesa` fino al 15/11 (D48 passo 3).
+0. **In corso/pronti:** nessun task in corso né da integrare dopo il riavvio (`12:25 UTC`). Pronti al reset 5h delle 12:59 UTC (13:59 ora locale): T356 e T347 su Fable; T345, T351 e T352 su Claude; T355 `in attesa` fino al 15/11 (D48 passo 3).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 09:05 UTC):** Claude settimana 67 %, 5h 0 % (reset 13:00 UTC); Fable settimana 47 %, 5h 0 % (reset 13:00 UTC); Gemini 98 %; Argon 79 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h a 0 %).
+2. **Crediti (13/11 12:26 UTC):** Claude settimana 67 %, 5h 0 % (reset 12:59 UTC); Fable settimana 47 %, 5h 0 % (reset 12:59 UTC); Gemini 98 %; Argon 77 %; agy 100 %. Generatore acceso, fermo (avanzo negativo / 5h a 0 %).
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 366 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **368 (argon):** riavvio dopo `ferma --ora` (12:25 UTC): nessun task in corso né da integrare; coda pronta per il reset 5h delle 12:59 UTC (13:59 ora locale).
 - **366 (argon):** T359 finito e integrato con T354 (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10); T355 messo `in attesa` fino al 15/11 (D48 passo 3); finestra 5h Claude/Fable a 0 % (reset 13:00 UTC).
-- **365 (argon):** T350 integrato (`2e733d0e`, kernel 0.6.9); T354 finito e verificato nel browser (`064dedd3`), aperto T359 su Argon (p1, 1 %) per integrarlo nel base a kernel 0.6.10.
