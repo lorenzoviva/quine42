@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 385 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 387 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -22,9 +22,9 @@ Aggiornato il 13/11/2026, epoca 385 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T310b (fable). **Pronti:** T362, T370, T366 (fable, dopo T310b), T372, T374 (claude); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset (previsto 14/11 15:00): niente spostamenti su claude per ora.
+0. **In corso:** T310b (fable, sospeso al limite 5h, riprende alle 23:01 UTC / 00:01 CET). **Pronti:** T362, T370, T366 (fable, dopo T310b), T372, T374 (claude, fermi per 5h a 0 % fino alle 22:59 UTC); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11. Fable si esaurisce prima del reset: niente spostamenti su claude per ora.
 1. **Da approvare dall'autore:** T369 (dopo).
-2. **Crediti (13/11 19:25 UTC):** Claude settimana 59 %, 5h 61 % (reset 22:59 UTC); Fable settimana 34 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
+2. **Crediti (13/11 20:52 UTC):** Claude settimana 54 %, 5h 0 % (reset 22:59 UTC); Fable settimana 25 % (9 % effettivo); Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %.
 
 ## Attese dall'autore
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 385 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **387 (argon):** T310b sospeso al limite 5h (reset 22:59 UTC, riprende alle 23:01 UTC).
 - **385 (claude):** D54 chiusa (5: via di mezzo); pianificati T372-T377, T366 allargato.
-- **384 (claude):** D54: 3, 6 (riempitivo), 7 chiarite; manca la 5.
