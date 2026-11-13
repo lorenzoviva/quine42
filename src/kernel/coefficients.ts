@@ -250,8 +250,66 @@ export const HOUR = {
   sguardi: 10,
 };
 
-/** Tokens of a typical call: text tasks, a program of the Sculptor, a judgement of the Artist (with its image). */
-const WEIGHT = { testo: { prompt: 3500, cached: 1500, output: 500 }, scultura: { prompt: 7000, cached: 2500, output: 3000 }, giudizio: { prompt: 3800, cached: 0, output: 300 } };
+/**
+ * The tokens of a call, task by task, measured (T352, from T325): `prompt` the whole input (`countTokens` of Gemini on the requests of
+ * 733 real calls rebuilt in neapolis, orichalcum, sidera and valmora), `prefix` its stable part (what the implicit cache may serve),
+ * `output` the answer with the thinking where the walk measured it (`measured`), else the old guess (500, 3000 for a program, 300 for a
+ * judgement). To measure them again: `npx vite-node lab/scripts/jev-casi-d-uso.ts -- --contesto --conta` (free), then `-- --rapporto`;
+ * the numbers are in `lab/banco/jev/casi-d-uso/riepilogo.md`, «Compito per compito» and «Un'ora di gioco».
+ */
+export const TOKENS_MEASURED = '2026-11-06';
+export interface CallTokens {
+  prompt: number;
+  prefix: number;
+  output: number;
+  measured?: boolean;
+}
+export const CALL_TOKENS: Record<string, CallTokens> = {
+  'chunk.plan': { prompt: 7793, prefix: 5595, output: 964, measured: true },
+  'council.session': { prompt: 8042, prefix: 7362, output: 500 },
+  'forge.concept': { prompt: 9354, prefix: 8152, output: 500 },
+  'forge.physics': { prompt: 2807, prefix: 2283, output: 500 },
+  'forge.code': { prompt: 4597, prefix: 4138, output: 500 },
+  'forge.review': { prompt: 7877, prefix: 7359, output: 500 },
+  /** Not in the walk: the old guess. */
+  'forge.fix': { prompt: 3500, prefix: 0, output: 500 },
+  'content.items': { prompt: 9405, prefix: 8157, output: 500 },
+  'content.physics': { prompt: 2460, prefix: 2253, output: 500 },
+  'content.review': { prompt: 7453, prefix: 7328, output: 500 },
+  'content.recipes': { prompt: 9124, prefix: 8186, output: 500 },
+  'content.define': { prompt: 8781, prefix: 8197, output: 500 },
+  'npc.individuate': { prompt: 8529, prefix: 5762, output: 2132, measured: true },
+  'npc.dialogue': { prompt: 6679, prefix: 5762, output: 500 },
+  'npc.reply': { prompt: 7358, prefix: 5762, output: 842, measured: true },
+  'npc.sheet': { prompt: 7131, prefix: 5941, output: 500 },
+  'plot.weave': { prompt: 8714, prefix: 5941, output: 500 },
+  'action.judge': { prompt: 8632, prefix: 6179, output: 756, measured: true },
+  'text.examine': { prompt: 7380, prefix: 6124, output: 500 },
+  'model.sculpt': { prompt: 8997, prefix: 4678, output: 3000 },
+  /** With the photo (about 1.100 tokens). */
+  'model.judge': { prompt: 2876, prefix: 1548, output: 300 },
+  'sound.compose': { prompt: 5597, prefix: 2388, output: 3000 },
+};
+/**
+ * The share of the stable prefix the implicit cache serves in a session (T325: about 0,6 with calls of mixed sessions, all of it warm; never
+ * all, so the estimate takes the mixed one), and the models that served nothing from it (3.8 Flash, ten calls in a row).
+ */
+export const IMPLICIT_CACHE_SHARE = 0.6;
+export const NO_IMPLICIT_CACHE: ReadonlySet<string> = new Set(['gemini-3.8-flash']);
+/** The calls of a Forge, of an item pack: their tokens are the mean of their tasks. */
+const FORGE_TASKS = ['forge.concept', 'forge.physics', 'forge.code', 'forge.review', 'forge.fix'];
+const PACK_TASKS = ['content.items', 'content.physics', 'content.review', 'content.recipes'];
+
+/** The dollars of one call of a task (or the mean of some tasks) on a model; `cachedShare` of the prompt at the cache price instead (the Actor's explicit cache). */
+export function callCost(model: string, tasks: string | string[], date?: string, cachedShare?: number): number {
+  const list = typeof tasks === 'string' ? [tasks] : tasks;
+  const costs = list.map((t) => {
+    const w = CALL_TOKENS[t];
+    const cached = cachedShare !== undefined ? Math.round(w.prompt * cachedShare) : NO_IMPLICIT_CACHE.has(model) ? 0 : Math.round(w.prefix * IMPLICIT_CACHE_SHARE);
+    return costOf(model, { prompt: w.prompt, cached, output: w.output }, date) ?? 0;
+  });
+  return costs.reduce((a, b) => a + b, 0) / costs.length;
+}
 /**
  * The Actor with its explicit cache (T351, ADR-0186): of a call, the share of the prompt its system instructions are (T325 measured 70 % of
  * the Actor's prompt as stable prefix), served at the cache price; the prefix the cache keeps (T325: about 5.400 tokens), written again
@@ -292,35 +350,34 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   const c = repairCoefficients(ai.coefficients);
   const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
   const actor = repairActor(ai.actor);
-  const text = (n: number) => n * (costOf(ai.textModel, WEIGHT.testo, date) ?? 0);
+  const text = (n: number, task: string | string[]) => n * callCost(ai.textModel, task, date);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
   // With the Actor's explicit cache (T351) the stable part of its prompt is paid at the cache price.
   const actorCache = actor.on && cacheable(actor.model, date);
-  const playedWeight = actorCache ? { ...WEIGHT.testo, cached: Math.round(WEIGHT.testo.prompt * ACTOR_CACHED_SHARE) } : WEIGHT.testo;
-  const played = (n: number) => n * (costOf(actor.on ? actor.model : ai.textModel, playedWeight, date) ?? 0);
+  const played = (n: number, task: string) => n * callCost(actor.on ? actor.model : ai.textModel, task, date, actorCache ? ACTOR_CACHED_SHARE : undefined);
   const H = HOUR;
   const rows: HourLine[] = [];
   const add = (voce: string, modo: HourLine['modo'], chiamate: number, dollari: number) => rows.push({ voce, modo, chiamate: Math.round(chiamate * 10) / 10, dollari });
   const per = (base: number, k: number) => (Number.isFinite(stretch(base, k)) ? H.luoghi / stretch(base, k) : 0);
 
-  add(COEFFICIENT_INFO.chunks.nome, 'diretta', H.luoghi * c.chunks, text(H.luoghi * c.chunks));
+  add(COEFFICIENT_INFO.chunks.nome, 'diretta', H.luoghi * c.chunks, text(H.luoghi * c.chunks, 'chunk.plan'));
   const sessions = per(12, c.sessions);
-  add(COEFFICIENT_INFO.sessions.nome, 'diretta', sessions * (1 + FORGE_CALLS / 2), text(sessions * (1 + FORGE_CALLS / 2)));
+  add(COEFFICIENT_INFO.sessions.nome, 'diretta', sessions * (1 + FORGE_CALLS / 2), text(sessions, 'council.session') + text((sessions * FORGE_CALLS) / 2, FORGE_TASKS));
   const packs = Math.min(per(10, c.packs), ai.maxPacks ?? 4);
-  add(COEFFICIENT_INFO.packs.nome, 'indiretta', packs * PACK_CALLS, text(packs * PACK_CALLS));
+  add(COEFFICIENT_INFO.packs.nome, 'indiretta', packs * PACK_CALLS, text(packs * PACK_CALLS, PACK_TASKS));
   const kinds = Math.min(per(7, c.inhabitants), ai.maxCast ?? 3);
-  add(COEFFICIENT_INFO.inhabitants.nome, 'indiretta', kinds * FORGE_CALLS, text(kinds * FORGE_CALLS));
+  add(COEFFICIENT_INFO.inhabitants.nome, 'indiretta', kinds * FORGE_CALLS, text(kinds * FORGE_CALLS, FORGE_TASKS));
   const fresh = Math.min(H.luoghi * H.nuovi * c.entities, ai.maxForges);
-  const things = fresh * FORGE_CALLS + H.luoghi * H.ignoti * c.entities;
-  add(COEFFICIENT_INFO.entities.nome, 'indiretta', things, text(things));
+  const unknown = H.luoghi * H.ignoti * c.entities;
+  add(COEFFICIENT_INFO.entities.nome, 'indiretta', fresh * FORGE_CALLS + unknown, text(fresh * FORGE_CALLS, FORGE_TASKS) + text(unknown, 'content.define'));
   const people = H.luoghi * H.persone * c.people;
-  add(COEFFICIENT_INFO.people.nome, 'indiretta', people * 1.2, text(people * 1.2));
+  add(COEFFICIENT_INFO.people.nome, 'indiretta', people * 1.2, text(people * 1.2, 'npc.individuate'));
   const talks = c.dialogues <= 0 ? 0 : (H.vicini / (40 / c.dialogues)) * Math.min(1, c.people * 1.5);
-  add(COEFFICIENT_INFO.dialogues.nome, 'diretta', talks, played(talks));
+  add(COEFFICIENT_INFO.dialogues.nome, 'diretta', talks, played(talks, 'npc.dialogue'));
   // The Actor's sheets: one per individual heard for the first time (a conversation, a dialogue), never more than the people met.
   if (actor.on) {
     const sheets = Math.min(people, (H.parole * c.words) / 2 + talks);
-    add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets));
+    add("Schede dei personaggi (l'Attore acceso)", 'indiretta', sheets, text(sheets, 'npc.sheet'));
   }
   // The explicit cache of the Actor (T351): written once a `ttl` while it plays, paid by everybody (`comune`).
   if (actorCache && talks + H.parole * c.words > 0) {
@@ -330,7 +387,7 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
     add("Cache dell'Attore (scrittura e conservazione)", 'non regolabile', writes, writes * write);
   }
   const plots = c.plots <= 0 ? 0 : H.giorni / Math.max(4, stretch(1, c.plots));
-  add(COEFFICIENT_INFO.plots.nome, 'diretta', plots * 1.3, text(plots * 1.3));
+  add(COEFFICIENT_INFO.plots.nome, 'diretta', plots * 1.3, text(plots * 1.3, 'plot.weave'));
   // With Jev (T350), the fourth wall on what the Council writes for the world: a concept, an individual, a sheet, a plot; four questions each.
   if (opts.decisions && c.sessions > 0) {
     const walls = fresh + kinds + people + plots * 1.3;
@@ -350,17 +407,17 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   // Half simple things, half figures and structures (a revision for half of them).
   const writes = models * (0.5 * plan.semplici + 0.5 * (1 + (plan.revisione ? 0.5 : 0)));
   const judges = plan.giudizio ? writes : 0;
-  const sculptCost = models * (0.5 * plan.semplici * (costOf(sc.simple, WEIGHT.scultura, date) ?? 0) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * (costOf(sc.figure, WEIGHT.scultura, date) ?? 0));
+  const sculptCost = models * (0.5 * plan.semplici * callCost(sc.simple, 'model.sculpt', date) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * callCost(sc.figure, 'model.sculpt', date));
   add(COEFFICIENT_INFO.models.nome, 'diretta', writes, sculptCost);
-  add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * (costOf(sc.artist, WEIGHT.giudizio, date) ?? 0));
+  add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * callCost(sc.artist, 'model.judge', date));
   // The Musician: a program for each environment that has none, a third of them sent back once.
   const pause = pieceGap(c.pieces);
   const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxPieces ?? 8) * 1.34 : 0;
-  add(COEFFICIENT_INFO.pieces.nome, 'diretta', pieces, pieces * (costOf(sc.musician, WEIGHT.scultura, date) ?? 0));
+  add(COEFFICIENT_INFO.pieces.nome, 'diretta', pieces, pieces * callCost(sc.musician, 'sound.compose', date));
   // What the wanderer asks: the share of it the knobs let through to the models.
-  add(COEFFICIENT_INFO.words.nome, 'diretta', H.parole * c.words, played(H.parole * c.words));
-  add(COEFFICIENT_INFO.actions.nome, 'diretta', H.azioni * c.actions, text(H.azioni * c.actions));
-  add(COEFFICIENT_INFO.looks.nome, 'diretta', H.sguardi * c.looks, text(H.sguardi * c.looks));
+  add(COEFFICIENT_INFO.words.nome, 'diretta', H.parole * c.words, played(H.parole * c.words, 'npc.reply'));
+  add(COEFFICIENT_INFO.actions.nome, 'diretta', H.azioni * c.actions, text(H.azioni * c.actions, 'action.judge'));
+  add(COEFFICIENT_INFO.looks.nome, 'diretta', H.sguardi * c.looks, text(H.sguardi * c.looks, 'text.examine'));
   // The lives of the people (T245a): their tasks come with T245g-T245i; until then a row with no call, whatever the knob says.
   add(COEFFICIENT_INFO.lives.nome, 'diretta', 0, 0);
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };

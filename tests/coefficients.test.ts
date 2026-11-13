@@ -6,7 +6,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { readConfig } from '../src/kernel/universe';
-import { CENSUS, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, LOW_DETAIL, modelGap, onBeat, repairCoefficients, sculptPlan, stretch } from '../src/kernel/coefficients';
+import { CALL_TOKENS, callCost, CENSUS, COEFFICIENT_KEYS, NO_IMPLICIT_CACHE, TOKENS_MEASURED, FULL_DETAIL, hourlyEstimate, LOW_DETAIL, modelGap, onBeat, repairCoefficients, sculptPlan, stretch } from '../src/kernel/coefficients';
 import { sculpt } from '../src/kernel/agents/sculptor';
 
 const DT = 1 / 60;
@@ -86,6 +86,22 @@ describe('the coefficients of generation (T45b)', () => {
     }
     expect(CENSUS.length).toBe(45);
     expect(new Set(CENSUS.map((c) => c.compito)).size).toBe(45);
+  });
+
+  it('the tokens of the estimate are the measured ones (T352): every task of the census it counts, a prefix inside the prompt', () => {
+    expect(TOKENS_MEASURED).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const tasks = new Set(CENSUS.map((c) => c.compito));
+    for (const [task, w] of Object.entries(CALL_TOKENS)) {
+      expect(tasks.has(task), task).toBe(true);
+      expect(w.prefix).toBeLessThanOrEqual(w.prompt);
+      expect(w.prompt).toBeGreaterThan(0);
+    }
+    // The narrative requests weigh what T325 measured, about twice the old guess of 3.500 tokens.
+    expect(CALL_TOKENS['npc.reply'].prompt).toBeGreaterThan(7000);
+    // A model without the implicit cache pays the whole prompt; the Actor's explicit cache pays its share at the cache price.
+    expect(NO_IMPLICIT_CACHE.has('gemini-3.8-flash')).toBe(true);
+    expect(callCost('gemini-3.8-flash', 'npc.reply', '2026-11-13')).toBeGreaterThan(callCost('gemini-3.8-flash', 'npc.reply', '2026-11-13', 0.7));
+    expect(callCost('gemini-3.1-flash-lite', ['forge.concept', 'forge.code'])).toBeCloseTo((callCost('gemini-3.1-flash-lite', 'forge.concept') + callCost('gemini-3.1-flash-lite', 'forge.code')) / 2, 12);
   });
 
   it('an hour of «Low Detail» costs a fraction of the full one', () => {
