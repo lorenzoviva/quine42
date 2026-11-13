@@ -5099,8 +5099,9 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T354`, kernel sale di Z.
 - Esito: prompt delle strutture senza scheletro con il metodo a tre livelli sul piano a 1/5 e gli attrezzi provati; due blocchi col ritorno in testo (`planBlock`, `textViews`, `withMeaning`, `Checked.others`); le parti del seme nella richiesta (`partResources`, primo paragrafo del commento di ogni `part-*.xml`); viste in testo in `src/mj/views.ts`; `part-stair` tollerante (primi 16, pianerottolo, solai spessi); villetta offline (`MOCK_STRUCTURE_PROGRAM`) e rocca nel banco delle taglie, foto e `--viste`; voci nel laboratorio 3D; ADR-0183, kernel 0.6.7, fixture del motore aggiornato solo per `part-stair`; suite 3052 verdi, typecheck e build verdi. Non fatto: il giro su Gemini (T355), il tetto dei voxel (T356). Non provato: lo Scultore vero sul prompt nuovo. Sicurezza: nessuna superficie nuova.
 
-### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `da fare` (dipende da T354)
+### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `in attesa` (dipende da T354)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
+- Attesa (13/11, epoca 366): D48 passo 3 (autore, 10/11): non prima del 15/11 (crediti di Gemini).
 - Step: 30
 - Contesto: D48 passo 3 (autore, 10/11): non prima del 15/11 (crediti di Gemini); le prove costano (CLAUDE.md). `dossier T354`.
 - Cosa fare: forte e fattoria a tre taglie e due semi scritti da Gemini col prompt di T354, costo per modello, foto, confronto con T337-T339; lo Scultore del gioco passa al prompt nuovo solo se il banco regge, altrimenti una domanda all'autore.
