@@ -1,6 +1,6 @@
 {
   "name": "quine42",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "private": true,
   "description": "QUINE42 — un mondo in 3D fatto del proprio codice sorgente.",
   "type": "module",

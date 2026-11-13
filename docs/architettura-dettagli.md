@@ -948,7 +948,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   misure: le chiede lo Scultore a ciò che scrive. Le carte fatte a mano restano alla densità di prima (`boxUnderMaxSide`), dove sono
   misurati i loro tetti. Il banco: `lab/banco/taglie/` (fattoria e forte alle tre taglie, `npx vite-node
   lab/scripts/banco-taglie.ts`).
-- **Le parti abitabili come sottoblocchi del seme, le aree, le `map` che tornano** (ADR-0182, T346, passo 1 di D48): quattro programmi di
+- **Le parti abitabili come sottoblocchi del seme, le aree, le `map` che tornano** (ADR-0182, T346, kernel 0.6.8, passo 1 di D48): quattro programmi di
   `universe/models/` che una struttura include con `<import file="part-…"/>` (ADR-0171) invece di riscriverli: `part-stair` (la scala da una
   striscia `T` di 16 × 11 nell'aria sopra un pavimento, scritta da chi include con `symmetry="()"`: sale verso le x grandi due per uno, apre
   il solaio sopra la striscia, riempie sotto; l'unione `=` sono i pavimenti), `part-door` (dal seme `O` di 11 scritto attraverso il muro al

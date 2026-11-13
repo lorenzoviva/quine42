@@ -68,7 +68,7 @@ mette persone e animali dove vanno**: il programma disegnava le pecore.
 
 ## Conseguenze
 
-- `KERNEL_VERSION` `0.6.6`: gli universi della `0.6` restano buoni; i programmi di prima non hanno `area` né `map` che tornano, e il
+- `KERNEL_VERSION` `0.6.8` (T346 aveva detto `0.6.6`, lo stesso numero già dato da T357 a T348 e T353; T349 era stato integrato come `0.6.7`; T358 li mette insieme): gli universi della `0.6` restano buoni; i programmi di prima non hanno `area` né `map` che tornano, e il
   compilato non cambia (`tests/mj-engine-determinism.test.ts`). Quattro file nuovi in `universe/models/`, con la loro voce nell'indice (classe `structure`, la
   scatola loro: la libreria vuole ogni programma descritto) e validati come il resto; nessun lotto li chiede per id.
 - Il prompt dello Scultore delle strutture sa delle quattro parti e delle aree (una riga ciascuna); il prompt senza scheletro è T354.
