@@ -13,7 +13,8 @@ node lab/banco/taglie/parti.mjs                                                 
 node lab/banco/taglie/genera.mjs                                                    # riscrive fattoria.xml e forte.xml
 npx vite-node lab/scripts/banco-taglie.ts -- --parti --foto                         # le quattro parti da sole: validatore, misure, parti.png
 npx vite-node lab/scripts/banco-taglie.ts -- --semi 2 --foto --json lab/banco/taglie/misure.json
-npx vite-node lab/scripts/banco-taglie.ts -- --misura --semi 2                      # le strutture del seme e lo scheletro
+npx vite-node lab/scripts/banco-taglie.ts -- --misura --semi 2                      # le strutture del seme e la risposta offline dello Scultore
+npx vite-node lab/scripts/banco-taglie.ts -- --solo scultore-villetta,scultore-rocca --semi 2 --viste   # i programmi scritti come lo Scultore (T354) e il ritorno in testo
 ```
 
 ## In breve
@@ -36,7 +37,7 @@ npx vite-node lab/scripts/banco-taglie.ts -- --misura --semi 2                  
 
 | parte | contratto | da sola |
 |---|---|---|
-| `part-stair` | chi include marca la striscia `T` (16 × 11 nell'aria sopra un pavimento, con `symmetry="()"`); sale verso le x grandi 2 per 1, apre il solaio (unione `=`, i pavimenti), riempie sotto, scrive `k` | una casa di 55 × 35 a due piani con la porta: piani raggiunti 1 e 33, porta 11 × 30, 0,19 s |
+| `part-stair` | chi include marca la striscia `T` (almeno 16 × 10 nell'aria sopra un pavimento, con `symmetry="()"`, dieci voxel di pavimento libero prima: il corpo sale in linea); prende i primi 16 dal lato basso e rende il resto all'aria (T354), sale verso le x grandi 2 per 1, apre il solaio (unione `=`, i pavimenti, di qualunque spessore), riempie sotto, scrive `k` | una casa di 55 × 35 a due piani con la porta: piani raggiunti 1 e 33, porta 11 × 30, 0,19 s |
 | `part-door` | chi include scrive il seme `O` di 11 attraverso il muro al piede; sale 30 attraverso l'unione `+` (i muri), architrave e stipiti `N`, assi `o`; le azioni `open`/`close` sono di chi include | un muro di 41 × 2 × 40 con la porta |
 | `part-battlements` | sul bordo di ogni cima piatta delle lettere `+`: merli `M` di 5 e vuoti di 3, alti 6, regolari da ogni angolo | una torre di 29 × 29: 16 merli, tutti di 5 |
 | `part-slits` | dopo i merli: sotto il centro di ogni merlo di 5 una feritoia `U` di 1 × 6 attraverso l'unione `%` | la stessa torre: 16 feritoie |
@@ -84,14 +85,46 @@ sulle file seminate, gli ortaggi, gli alberi, il comignolo. Le aree: `house`, `s
 Le foto sono del seme 1, i quattro lati (davanti, destra, dietro, sinistra), a cartone. Le misure intere sono in `misure.json`; i merli
 per lunghezza (`merlonRuns`) dicono che quasi tutti sono di 5, i pochi di 3-4 stanno agli angoli e dove due corse si incontrano.
 
+## Come li scrive lo Scultore (T354, ADR-0183)
+
+Due programmi scritti a mano **come lo Scultore li scrive dal prompt senza scheletro** (passo 2 di D48): niente pattern lunghi scritti per
+ripetizione, la composizione del concetto sul piano a un quinto (`map scale="1/5 1/5 1"`, una cella un quarto di casella: 20, 30 e 40 celle
+di lato alle tre taglie), la `map` che torna alla scatola (`5 5 1`, un blocco di 5 × 5 per lettera), le altezze come colonne a passi, le parti
+del seme incluse. La villetta è anche la risposta offline dei modelli locali (`MOCK_STRUCTURE_PROGRAM` in `src/kernel/ai/mockStructure.ts`);
+la rocca è `scultore-rocca.xml`. Scrivendoli si è visto ciò che il prompt deve dire: una moneta per tutta la casa è una regola su una cella
+sola (la fine della linea per il centro), non `p` su ogni cella del bordo; una crescita «dove il terreno continua» vuole `steps="1"`, se no si
+ripete da un lato solo finché c'è terreno; la scala si sale solo in linea, quindi la sua zona lascia dieci voxel liberi prima del primo
+gradino (e `part-stair` ora prende i primi 16 di una striscia più lunga); la lettera `S` è la scena delle parti e chi include non la usa.
+
+| programma | taglia | cosa contiene (seme 1) | parti (tipi) | tempo a seme |
+|---|---|---|---|---|
+| villetta | Grande | il corpo a due piani (interno 45 × 45-50, stanza 36, porta 15 × 30, la scala), il tetto a padiglione col comignolo, l'ala a un piano con la porta di 11 × 30 verso la casa, il portico con i pali e il tetto, il giardino con la siepe dove entra | 44-45 (15) | 0,3 s |
+| | Enorme | + gli alberi dove sette celle di prato sono libere oltre la siepe, la siepe intera | 59-65 (17) | 0,5 s |
+| | Gargantuesca | + il pozzo dove undici celle sono libere, più alberi | 102-111 (18) | 0,8-1,1 s |
+| rocca | Grande | il mastio di 55 a due piani con la terrazza, il parapetto merlato e una feritoia sotto ogni merlo, la cinta di 10 con due merlature, le torri di 25 sugli angoli, il corpo di guardia più alto della cinta col portone, la porta del mastio, la strada; il cortile un passaggio | 92 (15) | 0,2-0,3 s |
+| | Enorme | + il cortile di 25 (dove sei celle di terreno continuano) con il pozzo | 106 (16) | 0,4-0,5 s |
+| | Gargantuesca | + il cortile di 40 (altre sette celle) e il fossato attorno alla cinta, con la strada che lo attraversa | 119 (17) | 0,9 s |
+
+Entrambi passano `checkProgram` a Grande (4 semi e Enorme) e a Enorme (4 semi e Gargantuesca): due piani raggiunti a piedi (1 e 33), stanza
+36, porte 15 × 30 e 11 × 30, una parte nuova a ogni taglia più grande. Con `--viste` il banco stampa ciò che lo Scultore riceve: il ritorno
+del primo blocco (le piante grezze di tre semi e della taglia successiva, ≈ 1 000 token a Grande) e le viste del programma intero (pianta,
+altezze, fronte, lato, tre tagli, le piante di altri due semi, ≈ 8 000 token; la traccia che le accompagna sta entro 2 500).
+
+![la villetta Grande](scultore-villetta-large.png)
+![la villetta Enorme](scultore-villetta-huge.png)
+![la villetta Gargantuesca](scultore-villetta-gargantuan.png)
+![la rocca Grande](scultore-rocca-large.png)
+![la rocca Enorme](scultore-rocca-huge.png)
+![la rocca Gargantuesca](scultore-rocca-gargantuan.png)
+
 ## Costo
 
-Nessuna chiamata ai modelli: i programmi sono scritti a mano (`genera.mjs`, `parti.mjs`). Un giro del forte costa 0,15-0,45 s a seme,
+Nessuna chiamata ai modelli: i programmi sono scritti a mano (`genera.mjs`, `parti.mjs`; la villetta e la rocca di T354 direttamente). Un giro del forte costa 0,15-0,45 s a seme,
 uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla successiva) 1,4-2 s con le parti incluse.
 
 ## Ciò che non c'è ancora
 
-- **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: T354 (il prompt) e T355 (il giro).
+- **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: il prompt è fatto (T354, ADR-0183), il giro sul banco è T355.
 - **Chi mette persone e animali nelle aree**: le aree sono lette (`formAreas`), nessuno le usa ancora; il Narratore e lo Scenografo (T259)
   le riceveranno in un task loro.
 - **La fattoria di 50 × 50** e il tetto dei voxel delle gargantuesche: T356.

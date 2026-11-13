@@ -1,10 +1,11 @@
 <!--
-The door (T346, ADR-0182): a part one lives in, included with <import file="part-door"/>, written by lab/banco/taglie/parti.mjs.
-The program that includes it writes the seed of the door with O: 11 wide, at the foot of a wall and through its whole thickness, on the
-layer of the floor. The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks
-(o). Its letters: O the door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls
-(<union symbol="+" values="…"/> in your program wins over this one). The actions that open and close it are yours
-(<action name="open"> on O and o). Alone it builds a wall from its origin and opens a door in it, so that it is validated on its own.
+The door (part-door): a part one lives in, included with <import file="part-door"/> after your walls have risen. You write the seed of
+the door with O: at least 11 wide, at the foot of a wall and through its whole thickness, on the layer of the floor, with wall above it.
+The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks (o). Its letters: O the
+door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls (<union symbol="+"
+values="…"/> in your program wins over this one). The actions that open and close it are yours (<action name="open"> on O and o).
+
+Alone it builds a wall from its origin and opens a door in it, so that it is validated on its own. Written by lab/banco/taglie/parti.mjs (T346, T354; ADR-0182, ADR-0183).
 -->
 <sequence values="BSOoN#93" size="45 8 44" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="+" values="S"/>

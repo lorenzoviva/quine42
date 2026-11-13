@@ -1,11 +1,13 @@
-// The bench of the structures that fit their size (T338, T346, lab/banco/taglie/README.md): what the parts one lives in measure (doors,
-// storeys, rooms: `habitableParts`), what a structure contains (`compositionOf`), the areas its ground marks (`areasOf`) at three
+// The bench of the structures that fit their size (T338, T346, T354, lab/banco/taglie/README.md): what the parts one lives in measure
+// (doors, storeys, rooms: `habitableParts`), what a structure contains (`compositionOf`), the areas its ground marks (`areasOf`) at three
 // sizes, with the checks of the kernel (`partErrors`, `varietyError`, `checkProgram` with the seed's parts included), the regularity
-// of the battlements, that no animal is drawn, the time and the photos from four sides; and the seed's parts alone (`--parti`).
+// of the battlements, that no animal is drawn, the time and the photos from four sides; the seed's parts alone (`--parti`); and the
+// programs written by hand as the Sculptor writes them from the prompt without a skeleton (T354: the country house the local models answer
+// with, `MOCK_STRUCTURE_PROGRAM`, and the fort `scultore-rocca.xml`), with the views in text the Sculptor gets back (`--viste`).
 //
-//   npx vite-node lab/scripts/banco-taglie.ts -- --misura [--semi 2]                 # the seed's structures and the skeleton, at their boxes
+//   npx vite-node lab/scripts/banco-taglie.ts -- --misura [--semi 2]                 # the seed's structures and the offline answer, at their boxes
 //   npx vite-node lab/scripts/banco-taglie.ts -- --parti [--foto]                     # part-stair, part-door, part-battlements, part-slits alone
-//   npx vite-node lab/scripts/banco-taglie.ts -- [--semi 2] [--solo fattoria,forte] [--foto] [--json lab/banco/taglie/misure.json]
+//   npx vite-node lab/scripts/banco-taglie.ts -- [--semi 2] [--solo fattoria,forte,scultore-villetta,scultore-rocca] [--foto] [--viste] [--json lab/banco/taglie/misure.json]
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,7 +19,8 @@ import { cartoonRender, render, sheet } from '../../src/mj/photo';
 import { runMjx } from '../../src/mj/run';
 import { areasOf } from '../../src/mj/areas';
 import { vptOf, entryBox, habitableParts, type ModelInfo } from '../../src/kernel/forms';
-import { checkProgram, sculptorRole, skeletonOf } from '../../src/kernel/agents/sculptor';
+import { checkProgram, planBlock, textViews } from '../../src/kernel/agents/sculptor';
+import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { modelErrors } from '../../src/kernel/validator';
 import { png } from './png';
 
@@ -34,8 +37,8 @@ function misura(): void {
   const index = JSON.parse(fs.readFileSync('universe/models/index.json', 'utf8')) as Record<string, ModelInfo>;
   const ids = Object.keys(index).filter((id) => index[id].class === 'structure');
   const prog: Array<[string, string, ModelInfo]> = ids.map((id) => [id, fs.readFileSync(`universe/models/${id}.xml`, 'utf8'), index[id]]);
-  const role = sculptorRole({ 'prompts/agents/sculptor.md': fs.readFileSync('universe/prompts/agents/sculptor.md', 'utf8') }, true);
-  prog.push(['scheletro', skeletonOf(role)!, { class: 'structure' } as ModelInfo]);
+  // The offline answer of the Sculptor (T354): the country house written as the prompt without a skeleton asks.
+  prog.push(['offline', MOCK_STRUCTURE_PROGRAM, { class: 'structure' } as ModelInfo]);
   for (const [id, xml, info] of prog) {
     const vpt = vptOf(info);
     const box = entryBox(STRUCTURE, info);
@@ -83,10 +86,13 @@ function parti(): void {
   }
 }
 
-/** The programs of the bench, at the three sizes a structure that grows by rules has (Large, Huge, Gargantuan). */
-const BANCHI = [
-  { id: 'fattoria', file: 'lab/banco/taglie/fattoria.xml', merli: undefined as string | undefined },
-  { id: 'forte', file: 'lab/banco/taglie/forte.xml', merli: 'M' as string | undefined },
+/** The programs of the bench, at the three sizes a structure that grows by rules has (Large, Huge, Gargantuan): a file, or the text itself. */
+const BANCHI: Array<{ id: string; file?: string; xml?: string; merli?: string }> = [
+  { id: 'fattoria', file: 'lab/banco/taglie/fattoria.xml' },
+  { id: 'forte', file: 'lab/banco/taglie/forte.xml', merli: 'M' },
+  // As the Sculptor writes them from the prompt without a skeleton (T354): the plan at a fifth, the parts included.
+  { id: 'scultore-villetta', xml: MOCK_STRUCTURE_PROGRAM },
+  { id: 'scultore-rocca', file: 'lab/banco/taglie/scultore-rocca.xml', merli: 'M' },
 ];
 const TAGLIE: SizeTier[] = ['large', 'huge', 'gargantuan'];
 
@@ -95,7 +101,7 @@ function banco(): void {
   const out: Record<string, unknown> = {};
   fs.mkdirSync(DIR, { recursive: true });
   for (const b of BANCHI.filter((x) => !solo || solo.includes(x.id))) {
-    const xml = fs.readFileSync(b.file, 'utf8');
+    const xml = b.xml ?? fs.readFileSync(b.file!, 'utf8');
     const files = seedFiles(xml);
     const righe: Record<string, unknown> = {};
     const prima: Record<string, Composition> = {};
@@ -135,6 +141,18 @@ function banco(): void {
     const t0 = performance.now();
     const c = checkProgram(xml.replace(/\ssize="[^"]*"/, ''), STRUCTURE, 'large', files);
     console.log(`   checkProgram (grande, ${Math.round(performance.now() - t0)} ms): ${c.error ?? 'passa'}`);
+    // What the Sculptor gets back (T354): the plans of the first block (the program without its second map) and the views of the whole.
+    if (args.includes('--viste')) {
+      const at = xml.search(/<map scale="\d+ \d+ \d+"/);
+      const end = xml.lastIndexOf('</map>');
+      const plan = at >= 0 && end > at ? xml.slice(0, at) + xml.slice(end) : undefined;
+      if (plan) {
+        const made = planBlock(plan, STRUCTURE, 'large', files);
+        console.log(`   il ritorno del primo blocco (${Math.round(made.text.length / 3.5)} token stimati)${made.error ? `: ${made.error}` : ''}:\n${made.text.split('\n').map((l) => `      ${l}`).join('\n')}`);
+      }
+      const v = textViews(c);
+      console.log(`   le viste del programma intero (${Math.round(v.length / 3.5)} token stimati):\n${v.split('\n').map((l) => `      ${l}`).join('\n')}`);
+    }
     out[b.id] = { taglie: righe, controllo: c.error ?? 'passa', foto, aree: Object.fromEntries(TAGLIE.map((t) => [t, (righe[t] as Giro[])[0].aree])) };
   }
   const json = opt('json');

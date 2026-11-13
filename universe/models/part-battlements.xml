@@ -1,9 +1,10 @@
 <!--
-Battlements (T346, ADR-0182): a part included with <import file="part-battlements"/>, written by lab/banco/taglie/parti.mjs.
-On the edge of every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts
-merlons of 5 and gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the
-middle of a side the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.
-Alone it builds a tower from its origin and crowns it, so that it is validated on its own.
+Battlements (part-battlements): a part included with <import file="part-battlements"/> after your walls have risen. On the edge of
+every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts merlons of 5 and
+gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the middle of a side
+the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.
+
+Alone it builds a tower from its origin and crowns it, so that it is validated on its own. Written by lab/banco/taglie/parti.mjs (T346, T354; ADR-0182, ADR-0183).
 -->
 <sequence values="BSM#90#91#93" size="33 33 40" symmetry="(xy)" origin="bottom" ground="#93">
   <union symbol="+" values="S"/>
