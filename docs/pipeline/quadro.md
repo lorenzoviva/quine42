@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 360 (claude). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 361 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -37,5 +37,5 @@ Aggiornato il 13/11/2026, epoca 360 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **361 (claude):** T358 aveva ripreso la conversazione vecchia (0.6.7 senza T349): worktree e ramo tolti, riparte da capo per 0.6.8. T354 in corso su Fable.
 - **360 (claude):** T349 integrato; T358 interrotto e riscritto per 0.6.8 (T349 aveva preso 0.6.7).
-- **359 (claude):** T346 integrato; T358 creato (0.6.7 dopo T346).
