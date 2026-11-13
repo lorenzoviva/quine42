@@ -1,4 +1,4 @@
-// The faces under the floor of a form (T356, ADR-0184): a body stands on the ground, so the worker leaves out the faces that look
+// The faces under the floor of a form (T356, ADR-0185): a body stands on the ground, so the worker leaves out the faces that look
 // down from z = 0 of its grid (half the mesh of a large flat structure); a limb keeps them, a foot swings up and shows its sole.
 
 import { describe, expect, it } from 'vitest';

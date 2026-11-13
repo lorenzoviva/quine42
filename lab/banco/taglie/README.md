@@ -117,7 +117,7 @@ altezze, fronte, lato, tre tagli, le piante di altri due semi, ≈ 8 000 token; 
 ![la rocca Enorme](scultore-rocca-huge.png)
 ![la rocca Gargantuesca](scultore-rocca-gargantuan.png)
 
-## Il tetto delle gargantuesche (T356, ADR-0184)
+## Il tetto delle gargantuesche (T356, ADR-0185)
 
 L'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il
 tetto, a 20-50 caselle. Dove sta il tetto, misurato sui quattro programmi di qui (con le parti del seme incluse), alti 160, ognuno in un
@@ -173,7 +173,7 @@ uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla
 - **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: il prompt è fatto (T354, ADR-0183), il giro sul banco è T355.
 - **Chi mette persone e animali nelle aree**: le aree sono lette (`formAreas`), nessuno le usa ancora; il Narratore e lo Scenografo (T259)
   le riceveranno in un task loro.
-- **Il lotto di una gargantuesca di 20 caselle** (il tetto dei voxel è misurato e pronto, T356, ADR-0184): la domanda all'autore in
+- **Il lotto di una gargantuesca di 20 caselle** (il tetto dei voxel è misurato e pronto, T356, ADR-0185): la domanda all'autore in
   `docs/pipeline/domande/T356.md`; la fattoria di 50 × 50 a 20 voxel per casella non entra in un browser (160 milioni di celle).
 - **La varietà degli appezzamenti a 10 × 10**: in 20 celle restano 2-5 celle di campo attorno al cortile, quindi pochi tracciati e due o
   tre tipi di appezzamento per seme; la varianza dei campi di T339 vuole l'area di T356.

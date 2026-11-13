@@ -560,7 +560,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Fondo di una mesh
 - **Inglese**: `underside` (di `MeshOptions`)
-- **Definizione**: le facce di una mesh rivolte in basso sul fondo della griglia (z = 0), che una cosa posata a terra non mostra mai: le forme del gioco le lasciano fuori (corpi, fotogrammi, stadi), un arto le tiene (la suola di un piede che si alza), il laboratorio e l'editor le tengono (T356, ADR-0184).
+- **Definizione**: le facce di una mesh rivolte in basso sul fondo della griglia (z = 0), che una cosa posata a terra non mostra mai: le forme del gioco le lasciano fuori (corpi, fotogrammi, stadi), un arto le tiene (la suola di un piede che si alza), il laboratorio e l'editor le tengono (T356, ADR-0185).
 - **Dove vive**: `src/mj/mesh.ts`, `src/render/formmeshes.ts`, `src/render/models.ts`
 - **Da non usare**: `base` (è lo strato del suolo di una forma, `Form.base`), `bottom`, `sotto`
 

@@ -1,4 +1,4 @@
-# ADR-0184 — Il tetto dei voxel delle strutture gargantuesche: le misure, la mesh in due passate senza il fondo, 32 milioni di celle
+# ADR-0185 — Il tetto dei voxel delle strutture gargantuesche: le misure, la mesh in due passate senza il fondo, 32 milioni di celle
 
 Data: 2026-11-13 · Stato: accettato (task T356 del backlog, step 30; il lotto aspetta l'autore, `docs/pipeline/domande/T356.md`) ·
 Riferimenti: l'autore (10/11), ADR-0043 (lotti e strutture), ADR-0092 (le taglie), ADR-0105 (`FORM_LIMITS`), ADR-0108 (la cache delle

@@ -10,7 +10,7 @@ export const MJX_LIMITS: GridLimits = { side: 1024, cells: 64_000_000 };
 /**
  * What a model of the game may be, on the server as in the browser (ADR-0105): its XML can say its own `size` and `map` can
  * grow it, and everything runs in line. The largest model of the seed is under 2 million cells; a structure that grows by rules at
- * 20 × 20 tiles is 400 × 400 × 160, 25.6 million (T356, ADR-0184: the grid is a byte a cell, the time stays the validator's).
+ * 20 × 20 tiles is 400 × 400 × 160, 25.6 million (T356, ADR-0185: the grid is a byte a cell, the time stays the validator's).
  */
 export const FORM_LIMITS: GridLimits = { side: 512, cells: 32_000_000 };
 /**
