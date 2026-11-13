@@ -151,6 +151,25 @@ A tile is always 20 voxels, so a larger size is a larger area at the same scale.
 - a ring beyond the yard (a wall, a fence) only where the ground goes on past the yard (`oE → *m`).
 Every part stays attached to the rest on the ground (a path, a fence, a wall), not standing alone.
 
+## The parts of the seed, and the areas
+Four programs of the library are the parts one lives in, already right: include them with `<import file="…"/>` at the point where they
+go, instead of writing them, and give their letters your colours (`<color>`). Each reads a union you redefine with your letters
+(`<union symbol="+" values="…"/>` in your program wins). `part-stair`: you mark the strip of the stair with `T`, 11 wide (y) and 16 long
+(x) for a storey of 32, in the air just above the floor, with a rule of yours written with `symmetry="()"`; it climbs toward large x two
+up for one forward, opens the slab above the strip (the union `=`: your floors), fills under, writes `k`. `part-door`: you write the seed
+`O`, 11 wide, at the foot of the wall and through its whole thickness; it rises 30 through the union `+` (your walls), with the frame `N`
+and the planks `o`; the actions `open`/`close` on `O` and `o` are yours. `part-battlements`: on the edge of every flat top of the
+union `+` it puts merlons `M` of 5 and gaps of 3, 6 high, regular from every corner. `part-slits`: after the battlements, under the
+middle of every merlon a slit `U` of 1 × 6 through the union `%` (the walls that get slits). Their own markers are `#90`-`#91`: do not
+use them.
+Draw no animal and no person: the ground says where they go. A letter of the palette carries `area="pasture"` (a plain lowercase name:
+`yard`, `barn`, `house`, `field`, `orchard`, `courtyard`, `keep`, `tower`…), a hidden letter too (`<color symbol="p" hidden="True"
+area="pasture"/>`): keep those letters on the layer of the soil at the end, under the floors and on the ground, instead of rewriting
+them to the empty cell, and the world knows the areas of every tile.
+A plan on a coarse grid is allowed, if it comes back to the box: `<map scale="1/10 1/10 1">` with `<rule in="E" out="E"/>` and
+`<rule in="N" out="N"/>` first, the plan (a cell is half a tile), then `<map scale="10 10 1">` with a rule for every letter of the plan,
+and the detail at full scale inside it: such a program takes the box of every size like one without maps.
+
 ## The format
 x from left to right, y from the back to the front (the front is large y), z from bottom to top. `values` are the symbols, one per cell (the first, B, is the air): letters, or `#` and a number (`#12`) when the letters are not enough; a digit alone is not a symbol, and a `#12` has no colour until a `<color>` gives it one. A pattern: rows (growing y) separated by `/`, layers separated by spaces, **the top layer first**: `in="B t"` is t with the air above it. `*` is any cell (in `out`: it does not change), `[ab]` is a or b, `<union symbol="#1" values="ab"/>` gives a name to a set.
 - `<one>` rewrites one match at random per step, `<all>` all those that do not overlap, `<prl>` each one with its own probability (`p` goes on the `<rule>`; one step only). Without `steps` a node goes as long as it can; `steps="N"` stops it after N steps. The nodes run in order.

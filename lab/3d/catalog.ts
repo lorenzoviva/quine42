@@ -32,6 +32,8 @@ export interface Entry {
   files?: Record<string, string>;
   /** A large model of the bench of the grid in pieces (T339, lab/banco/pezzi/): only for the developers. */
   pieces?: boolean;
+  /** A structure of the bench of the sizes (T338, T346, lab/banco/taglie/) at one of its three sizes: only for the developers. */
+  sizes?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -42,7 +44,9 @@ const ruleFiles = import.meta.glob('../mjx/models/*.txt', { query: '?raw', impor
  * For the developers also the original's tilesets, rule files and samples as text (T335, lab/mjx/official/resources/: empty in the
  * players' build), so a program written in the lab may use them too; the lab's own files win.
  */
-export const LAB_FILES: Readonly<Record<string, string>> = { ...OFFICIAL_FILES, ...Object.fromEntries(Object.entries({ ...files, ...ruleFiles }).map(([k, v]) => [k.replace(/^.*\//, ''), v])) };
+// The seed's parts one lives in (T346, ADR-0182): what the structures of the bench of the sizes include; for the developers.
+const seedParts = (import.meta.env.MODE !== 'production' ? import.meta.glob('../../universe/models/part-*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+export const LAB_FILES: Readonly<Record<string, string>> = { ...OFFICIAL_FILES, ...Object.fromEntries(Object.entries({ ...seedParts, ...files, ...ruleFiles }).map(([k, v]) => [k.replace(/^.*\//, ''), v])) };
 /** The files of the lab's models/ a program reads, imports of imports too. */
 export const labIncludes = (xml: string): Record<string, string> => mjxIncludes(xml, (f) => LAB_FILES[f]);
 /** `files` for compileMjx, only if the program reads any. */
@@ -154,6 +158,17 @@ for (const [file, xml] of Object.entries(pieced)) {
   if (p) CATALOG.push({ id: `pezzi:${base}`, name: p.name, role: 'structure', xml, vpt: p.vpt, size: p.size, source: sourceOf(xml), pieces: true });
 }
 
+// The bench of the sizes (T338, T346, lab/banco/taglie/): the farm and the fort that fit their size, each at its three sizes at 20
+// voxels a tile, with the seed's parts included. Only for the developers.
+const sized = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+const SIZED: Record<string, string> = { fattoria: 'Fattoria', forte: 'Forte' };
+const SIZES: Array<[string, string, Vec3]> = [['large', 'Grande, 5 × 5', [100, 100, 80]], ['huge', 'Enorme, 7,5 × 7,5', [150, 150, 120]], ['gargantuan', 'Gargantuesca, 10 × 10', [200, 200, 160]]];
+for (const [file, xml] of Object.entries(sized)) {
+  const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const name = SIZED[base];
+  if (name) for (const [id, label, size] of SIZES) CATALOG.push({ id: `taglie:${base}-${id}`, name: `${name} che si adatta alla taglia (${label} caselle)`, role: 'structure', xml, vpt: 20, size, source: sourceOf(xml), sizes: true });
+}
+
 // Hand drawn models
 const handmade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 for (const [file, xml] of Object.entries(handmade)) {
@@ -188,11 +203,12 @@ export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && ['prop', 'structure'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && ['prop', 'structure'].includes(e.role)],
   ...(DEV_TOOLS
     ? ([
       ['MarkovJunior (originali)', (e) => e.role === 'official'],
       ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
+      ['Banco: strutture che si adattano alla taglia (T338, T346)', (e) => !!e.sizes],
       ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
       ['Modelli dell\'editor', (e) => !!e.handmade],
       ['Modelli del banco', (e) => !!e.bench],

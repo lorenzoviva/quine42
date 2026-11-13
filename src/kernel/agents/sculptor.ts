@@ -11,7 +11,7 @@ import type { Schema } from '../ai/models';
 import { analyse, compositionOf, partErrors, varietyError, type Composition } from '../../mj/check';
 import { boxOf, classOf, CLASSES, densityFor, growsByRules, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type RunResult, type Vec3 } from '../../mj/engine';
-import { compileMjx, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
+import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
 import { cartoonRender, render, sheet, type RenderOptions } from '../../mj/photo';
 import { pngDataUrl } from '../../mj/png';
@@ -177,8 +177,11 @@ export function extractXml(raw: string): string {
   return a >= 0 && b > a ? s.slice(a, b + 1).trim() : s.trim();
 }
 
-/** Programs that `map` up from a coarse grid (structures). */
-const scales = (xml: string) => /<map\b/.test(xml);
+/**
+ * Programs that `map` to another scale and stay there (the box is the root's own); one whose maps come back to the box (a plan at
+ * 1/10, then ×10: T346, ADR-0182) takes the box it is given, like a program without `map`.
+ */
+const scales = (xml: string) => hasMapIn(xml) && !mapsBackToBox(xml);
 
 /** Writes the class's box into the program's root, so that the library runs it as it was judged. */
 export function withSize(xml: string, box: Vec3): string {
@@ -189,7 +192,7 @@ export function withSize(xml: string, box: Vec3): string {
   return xml.slice(0, m.index) + `<${m[1]}${attrs}>` + xml.slice(m.index + m[0].length);
 }
 
-/** A program without a box of its own and without `map`: the library runs it in the box of each entry's size (ADR-0160). */
+/** A program without a box of its own, and without a `map` that leaves the box's scale: the library runs it in the box of each entry's size (ADR-0160, ADR-0182). */
 export const shareableProgram = (xml: string): boolean => !scales(xml) && !/\ssize="/.test(/<(?!!)[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '');
 
 /** The root without its `size`: a procedural program takes the box it is given. */

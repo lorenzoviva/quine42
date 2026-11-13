@@ -980,5 +980,25 @@
   "name": "Torre di guardia del passo, con la segreta",
   "author": "procedurale, a mano (Claude Cloud, catalogo delle strutture, T269)",
   "cellar": 1
+ },
+ "part-stair": {
+  "class": "structure",
+  "name": "Parte: la scala (da sola, la casa di prova)",
+  "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
+ },
+ "part-door": {
+  "class": "structure",
+  "name": "Parte: la porta (da sola, il muro di prova)",
+  "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
+ },
+ "part-battlements": {
+  "class": "structure",
+  "name": "Parte: i merli (da soli, la torre di prova)",
+  "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
+ },
+ "part-slits": {
+  "class": "structure",
+  "name": "Parte: le feritoie (da sole, la torre di prova)",
+  "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
  }
 }

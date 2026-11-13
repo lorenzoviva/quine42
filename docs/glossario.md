@@ -379,6 +379,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `include` (nei documenti: è l'azione), `sottoprogramma`, `percorso` (un file si nomina, non si cerca)
 - **Fermo**: il nodo `<import>` e il suo attributo `file`.
 
+### Parte abitabile
+- **Inglese**: `PARTS`, `partVoxels`, `habitableParts`, `partErrors`
+- **Definizione**: ciò di una struttura in cui si vive e si passa: la porta, il piano, la stanza, la tettoia, con le misure minime in caselle di ADR-0179; dal T346 la scala, la porta, i merli e le feritoie sono anche **sottoblocchi del seme**, programmi di `models/` che una struttura include con `<import file="part-…"/>` invece di riscriverli, con il loro contratto (le lettere che leggono e scrivono, le unioni `+ = %` che chi include ridefinisce) e che da soli sono modelli che si validano (ADR-0182).
+- **Dove vive**: `universe/models/`, `lab/banco/taglie/parti.mjs`, `src/mj/classes.ts`, `src/kernel/forms.ts`
+- **Da non usare**: `componente` (è dell'ECS), `blocco` (le strutture a blocchi di ADR-0032), `modulo` (è un modulo dell'universo)
+- **Fermo**: i nomi `part-<nome>` dei file, l'attributo `file` di `<import>`.
+
+### Area di un modello
+- **Inglese**: `area`, `areasOf`, `areaNames`, `formAreas`, `AreaMap`, `AREA_RE`
+- **Definizione**: ciò che il programma di una struttura dice del suo suolo, casella per casella, per chi vi mette persone e animali: una lettera della palette porta `area="pasture"` (un nome semplice minuscolo), anche nascosta; ogni casella è dell'area con più celle sullo strato del suolo (ADR-0182). Una struttura non disegna animali né persone: marca dove vanno.
+- **Dove vive**: `src/mj/areas.ts`, `src/mj/model.ts`, `src/kernel/forms.ts`
+- **Da non usare**: `zona` (è l'area di 56 × 56 luoghi, o del corpo), `regione` (è dell'atlante)
+- **Fermo**: l'attributo `area` di `<color>`.
+
 ### File di regole
 - **Inglese**: `fin`, `fout`, `file`, `ruleFileErrors`, `patternText`
 - **Definizione**: un file di testo di `models/` (`<nome>.txt`) con un lato di una regola (`fin`, `fout`) o i due separati da una riga `->` (`file`), nella stessa sintassi del testo di `<in>` e `<out>` (ADR-0171). Solo lettere, mai immagini.

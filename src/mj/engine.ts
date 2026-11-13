@@ -196,6 +196,11 @@ export interface PaletteEntry {
   glow?: boolean;
   /** Translucent voxel (e.g. glass, water): alpha value between 0 and 1. */
   alpha?: number;
+  /**
+   * The area of a structure this letter marks on its ground layer (T346, ADR-0182): `pasture`, `yard`, `barn`… for whoever places
+   * people and animals; a plain lowercase name (`AREA_RE` in areas.ts). Hidden letters may carry it: they stay in the grid unseen.
+   */
+  area?: string;
 }
 
 export interface Program3 {

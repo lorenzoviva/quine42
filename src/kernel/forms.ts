@@ -8,6 +8,7 @@
 // and for actions. A form that is not ready yet is simply not there: the entity blocks by its radius.
 
 import type { SoundPurpose } from '../mj/sound';
+import { areasOf, type AreaMap } from '../mj/areas';
 import { boxOf, classOf, CLASSES, growsByRules, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
@@ -166,11 +167,24 @@ export interface Form {
   vpt: number;
   /** Ready, and nothing of it at body height: a body walks through it (T296: a solid thing that wears it stops nobody). */
   footless?: boolean;
+  /** The areas its program marks on its ground, in its own tiles (T346, ADR-0182), read once by `formAreas`. */
+  areas?: AreaMap;
   /**
    * Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. `arrived` runs as soon as they
    * are here: the runner may let go of them at the next arrival, before whoever draws comes back.
    */
   remake?: (arrived?: () => void) => void;
+}
+
+/**
+ * The areas a form's program marks on its ground (T346, ADR-0182): `pasture`, `yard`, `barn`… each with its tiles in the model's own
+ * frame (x, y from its corner, before `yaw`; `toLocal` turns a world offset into it), for whoever places people and animals in a
+ * structure. Empty until the form is ready, or when the program marks none; read once per form.
+ */
+export function formAreas(f: Form): AreaMap {
+  if (f.areas) return f.areas;
+  if (!f.result) return {};
+  return (f.areas = areasOf(f.result.grid, f.result.palette, f.vpt, f.base));
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
