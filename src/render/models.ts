@@ -138,7 +138,7 @@ export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeo
   let g = changed.get(key);
   if (!g) {
     const grid = instanceGrid(k.forms, f, done);
-    changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: f.vpt }))));
+    changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: f.vpt, underside: false }))));
     shared.add(g);
   }
   return g;
@@ -180,7 +180,7 @@ export function stagedBody(k: Kernel, f: Form, done: string[], stadio: number): 
   if (!g) {
     const grid = done.length ? instanceGrid(k.forms, f, done) : f.result!.grid;
     const s = stageGrid(grid, f.result!.palette, stadio, { base: f.base, vpt: f.vpt, site: true });
-    staged.set(key, (g = geometry(meshVoxels(s.grid, s.palette, { vpt: f.vpt }))));
+    staged.set(key, (g = geometry(meshVoxels(s.grid, s.palette, { vpt: f.vpt, underside: false }))));
     shared.add(g);
   }
   return g;

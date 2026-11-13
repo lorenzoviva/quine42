@@ -8,6 +8,7 @@
 //   npx vite-node lab/scripts/banco-taglie.ts -- --misura [--semi 2]                 # the seed's structures and the offline answer, at their boxes
 //   npx vite-node lab/scripts/banco-taglie.ts -- --parti [--foto]                     # part-stair, part-door, part-battlements, part-slits alone
 //   npx vite-node lab/scripts/banco-taglie.ts -- [--semi 2] [--solo fattoria,forte,scultore-villetta,scultore-rocca] [--foto] [--viste] [--json lab/banco/taglie/misure.json]
+//   npx vite-node lab/scripts/banco-taglie.ts -- --venti [--solo fattoria] [--foto]   # the same programs at 20 × 20 tiles (400 × 400 × 160), past the Gargantuan box of today (T356)
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -131,6 +132,20 @@ function banco(): void {
         const mappa = Array.from({ length: ty }, () => Array(tx).fill('.'));
         for (const [i, name] of names.entries()) for (const [x, y] of aree[name]) mappa[y][x] = name[0].toUpperCase() === name[0] ? name[0] : String.fromCharCode(97 + i);
         console.log(`   aree (${names.map((n, i) => `${String.fromCharCode(97 + i)} ${n}`).join(', ')}):\n      ${mappa.map((r) => r.join('')).join('\n      ')}`);
+      }
+    }
+    // Past today's Gargantuan box (T356): the same program at 20 × 20 tiles, what a lot of several places would hold; seed 1, photo and areas.
+    if (args.includes('--venti')) {
+      const box: [number, number, number] = [400, 400, 160];
+      const model = compileMjx(xml, { size: box, files });
+      const g = giro(model, 20, 1);
+      console.log(`${b.id} · 20 × 20 caselle (${box.join('×')})`);
+      console.log(`   ${riga(g, 20)}`);
+      righe['gargantuan-20'] = [(({ grid: _g, ...rest }) => rest)(g)];
+      if (args.includes('--foto')) {
+        const lati = [0, 1, 2, 3].map((v) => render(g.grid, model.program.palette, v, cartoonRender(1)));
+        fs.writeFileSync(path.join(DIR, `${b.id}-gargantuan-20.png`), png(sheet(lati, 1, 8, [112, 150, 84])));
+        foto.push(`${b.id}-gargantuan-20.png`);
       }
     }
     for (let i = 1; i < TAGLIE.length; i++) {

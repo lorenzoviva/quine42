@@ -41,6 +41,8 @@ export interface MeshOptions {
   /** Voxel coordinates that become the mesh's origin (default: the centre of the floor). */
   pivot?: [number, number, number];
   sway?: boolean;
+  /** Draw the faces that look down from the floor of the grid (z = 0); default yes. The game's forms stand on the ground and leave them out (T356). */
+  underside?: boolean;
 }
 
 const lin = (c: number) => Math.pow(c / 255, 2.2);
@@ -131,12 +133,31 @@ const FACES: Array<{ n: [number, number, number]; corners: Array<[number, number
   { n: [0, 0, -1], corners: [[0, 1, 0], [1, 1, 0], [1, 0, 0], [0, 0, 0]] },
 ];
 
+/** Per face and corner, the two offsets (along the face's tangent axes) of the neighbours the ambient occlusion looks at. */
+const AO: Array<Array<[[number, number, number], [number, number, number]]>> = FACES.map((f) => {
+  const t = [0, 1, 2].filter((a) => f.n[a] === 0);
+  return f.corners.map(([cx, cy, cz]) => {
+    const d = [cx * 2 - 1, cy * 2 - 1, cz * 2 - 1];
+    const a1: [number, number, number] = [0, 0, 0], a2: [number, number, number] = [0, 0, 0];
+    a1[t[0]] = d[t[0]];
+    a2[t[1]] = d[t[1]];
+    return [a1, a2];
+  });
+});
+
 const hash = (x: number, y: number, z: number) => {
   let h = (x * 374761393 + y * 668265263 + z * 2147483647) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 };
 
+/**
+ * Voxels → triangles, in two passes (T356): the first counts the faces that touch the empty, the second writes them into arrays of
+ * their final size. The same quads, vertices, colours and winding as before, in the same order (the fingerprints of the seed's models do
+ * not change); without the arrays of numbers that grew by push, whose peak was eight times the mesh (the farm of 20 × 20 tiles: 440 MB
+ * in Node for 57 MB of mesh). `underside: false` leaves out the faces that look down from the floor of the grid (z = 0), which a thing
+ * standing on the ground never shows: half the mesh of a large flat structure.
+ */
 export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, o: MeshOptions): MeshData {
   const { X, Y, Z, cells } = g;
   const XY = X * Y;
@@ -144,15 +165,30 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
   const glows = g.alphabet.map((ch) => !!palette[ch]?.glow);
   const alphas = alphaTable(g.alphabet, palette);
   const parts = partTable(g.alphabet, palette);
+  const only = o.only;
+  const underside = o.underside !== false;
   const solid = (x: number, y: number, z: number) => {
     if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return false;
     const i = x + y * X + z * XY;
-    return colors[cells[i]] !== null && (!o.only || o.only(i));
+    return colors[cells[i]] !== null && (!only || only(i));
   };
   const cellAt = (x: number, y: number, z: number): number => {
     if (x < 0 || y < 0 || z < 0 || x >= X || y >= Y || z >= Z) return 0;
     const i = x + y * X + z * XY;
-    return (!o.only || o.only(i)) ? cells[i] : 0;
+    return !only || only(i) ? cells[i] : 0;
+  };
+  /** Whether a face of a cell is drawn: it touches the empty, or glass against something else; never under the floor if not asked. */
+  const drawn = (x: number, y: number, z: number, cell: number, alphaVal: number, f: number): boolean => {
+    const [nx, ny, nz] = FACES[f].n;
+    if (!underside && nz < 0 && z === 0) return false;
+    const nCell = cellAt(x + nx, y + ny, z + nz);
+    if (colors[nCell] !== null && nCell !== 0) {
+      const nAlpha = alphas[nCell];
+      // Both opaque: a hidden inner face. Both translucent and of one material: an inner face too.
+      if (alphaVal >= 1.0 && nAlpha >= 1.0) return false;
+      if (alphaVal < 1.0 && nAlpha < 1.0 && cell === nCell) return false;
+    }
+    return true;
   };
   const s = 1 / o.vpt;
   const [px, py, pz] = o.pivot ?? [X / 2, Y / 2, 0];
@@ -162,92 +198,109 @@ export function meshVoxels(g: VoxelGrid, palette: Record<string, PaletteEntry>, 
     top = Math.floor(i / XY) + 1;
     break;
   }
-  const pos: number[] = [];
-  const nor: number[] = [];
-  const col: number[] = [];
-  const sw: number[] = [];
-  const gl: number[] = [];
-  const al: number[] = [];
-  const pa: number[] = [];
+  // Pass 1: how many faces, opaque and translucent; whether anything glows or lets light through (as a cell, drawn or not).
+  let nOpaque = 0, nTrans = 0;
   let glowing = false;
   let hasTranslucent = false;
-  const opaqueIdx: number[] = [];
-  const translucentIdx: number[] = [];
+  for (let z = 0; z < Z; z++)
+    for (let y = 0; y < Y; y++)
+      for (let x = 0; x < X; x++) {
+        const i = x + y * X + z * XY;
+        const cell = cells[i];
+        if (!colors[cell] || (only && !only(i))) continue;
+        if (glows[cell]) glowing = true;
+        const alphaVal = alphas[cell];
+        if (alphaVal < 1.0) hasTranslucent = true;
+        for (let f = 0; f < 6; f++) if (drawn(x, y, z, cell, alphaVal, f)) alphaVal < 1.0 ? nTrans++ : nOpaque++;
+      }
+  const faces = nOpaque + nTrans;
+  const V = faces * 4;
+  const positions = new Float32Array(V * 3);
+  const normals = new Float32Array(V * 3);
+  const col = new Float32Array(V * 3);
+  const part = new Uint8Array(V);
+  const sway = o.sway ? new Float32Array(V) : undefined;
+  const glow = glowing ? new Float32Array(V) : undefined;
+  const alpha = hasTranslucent ? new Float32Array(V) : undefined;
+  const indices = new Uint32Array(faces * 6);
+  // Pass 2: the vertices in scan order, the indices of the opaque faces first and those of the translucent after.
+  let v = 0;
+  let io = 0, it = nOpaque * 6;
+  const light4 = [0, 0, 0, 0];
   for (let z = 0; z < Z; z++)
     for (let y = 0; y < Y; y++)
       for (let x = 0; x < X; x++) {
         const i = x + y * X + z * XY;
         const cell = cells[i];
         const c = colors[cell];
-        if (!c || (o.only && !o.only(i))) continue;
+        if (!c || (only && !only(i))) continue;
         const grain = 0.93 + 0.1 * hash(x, y, z);
-        const glow = glows[cell];
-        if (glow) glowing = true;
+        const isGlow = glows[cell];
         const alphaVal = alphas[cell];
-        if (alphaVal < 1.0) hasTranslucent = true;
-
-        for (const f of FACES) {
-          const [nx, ny, nz] = f.n;
-          const nCell = cellAt(x + nx, y + ny, z + nz);
-          const nSolid = colors[nCell] !== null && nCell !== 0;
-
-          if (nSolid) {
-            const nAlpha = alphas[nCell];
-            // If both are opaque -> cull hidden internal face
-            if (alphaVal >= 1.0 && nAlpha >= 1.0) continue;
-            // If both are translucent and of identical material -> cull internal face
-            if (alphaVal < 1.0 && nAlpha < 1.0 && cell === nCell) continue;
-          }
-
-          const base = pos.length / 3;
-          for (const [cx, cy, cz] of f.corners) {
+        const flat = isGlow || alphaVal < 1.0;
+        for (let f = 0; f < 6; f++) {
+          if (!drawn(x, y, z, cell, alphaVal, f)) continue;
+          const face = FACES[f];
+          const [nx, ny, nz] = face.n;
+          const ox = x + nx, oy = y + ny, oz = z + nz;
+          const base = v;
+          for (let k = 0; k < 4; k++) {
+            const [cx, cy, cz] = face.corners[k];
             // Ambient occlusion: the two side neighbours and the corner, in front of the face.
-            const ox = x + nx, oy = y + ny, oz = z + nz;
-            const d = [cx * 2 - 1, cy * 2 - 1, cz * 2 - 1];
-            const t = [0, 1, 2].filter((a) => f.n[a] === 0);
-            const a1 = [0, 0, 0], a2 = [0, 0, 0];
-            a1[t[0]] = d[t[0]];
-            a2[t[1]] = d[t[1]];
+            const [a1, a2] = AO[f][k];
             const s1 = solid(ox + a1[0], oy + a1[1], oz + a1[2]);
             const s2 = solid(ox + a2[0], oy + a2[1], oz + a2[2]);
             const sc = solid(ox + a1[0] + a2[0], oy + a1[1] + a2[1], oz + a1[2] + a2[2]);
             const occ = s1 && s2 ? 3 : (s1 ? 1 : 0) + (s2 ? 1 : 0) + (sc ? 1 : 0);
-            const light = glow || alphaVal < 1.0 ? grain : (1 - occ * 0.17) * grain;
+            const light = flat ? grain : (1 - occ * 0.17) * grain;
             const vx = x + cx, vy = y + cy, vz = z + cz;
-            pos.push((vx - px) * s, (vz - pz) * s, (vy - py) * s);
-            nor.push(nx, nz, ny);
-            gl.push(glow ? 1 : 0);
-            al.push(alphaVal);
-            pa.push(parts[cell]);
-            col.push(c[0] * light, c[1] * light, c[2] * light);
-            if (o.sway) {
+            const p3 = v * 3;
+            positions[p3] = (vx - px) * s;
+            positions[p3 + 1] = (vz - pz) * s;
+            positions[p3 + 2] = (vy - py) * s;
+            normals[p3] = nx;
+            normals[p3 + 1] = nz;
+            normals[p3 + 2] = ny;
+            const r = c[0] * light, gr = c[1] * light;
+            col[p3] = r;
+            col[p3 + 1] = gr;
+            col[p3 + 2] = c[2] * light;
+            light4[k] = r + gr;
+            part[v] = parts[cell];
+            if (glow) glow[v] = isGlow ? 1 : 0;
+            if (alpha) alpha[v] = alphaVal;
+            if (sway) {
               const h = Math.max(0, vz / top - 0.25) / 0.75;
-              sw.push(h * h);
+              sway[v] = h * h;
             }
+            v++;
           }
           // The diagonal that keeps the occlusion smooth. Swapping y and z mirrors the corners, so the
           // triangles go round the other way to face out in three.js.
-          const l0 = col[(base) * 3] + col[(base) * 3 + 1];
-          const l2 = col[(base + 2) * 3] + col[(base + 2) * 3 + 1];
-          const l1 = col[(base + 1) * 3] + col[(base + 1) * 3 + 1];
-          const l3 = col[(base + 3) * 3] + col[(base + 3) * 3 + 1];
-          const targetIdx = alphaVal < 1.0 ? translucentIdx : opaqueIdx;
-          if (l0 + l2 >= l1 + l3) targetIdx.push(base, base + 2, base + 1, base, base + 3, base + 2);
-          else targetIdx.push(base + 1, base + 3, base + 2, base + 1, base, base + 3);
+          let at = alphaVal < 1.0 ? it : io;
+          if (light4[0] + light4[2] >= light4[1] + light4[3]) {
+            indices[at++] = base; indices[at++] = base + 2; indices[at++] = base + 1;
+            indices[at++] = base; indices[at++] = base + 3; indices[at++] = base + 2;
+          } else {
+            indices[at++] = base + 1; indices[at++] = base + 3; indices[at++] = base + 2;
+            indices[at++] = base + 1; indices[at++] = base; indices[at++] = base + 3;
+          }
+          if (alphaVal < 1.0) it = at;
+          else io = at;
         }
       }
-  const allIndices = hasTranslucent ? [...opaqueIdx, ...translucentIdx] : opaqueIdx;
   return {
-    positions: new Float32Array(pos),
-    normals: new Float32Array(nor),
-    colors: new Float32Array(col),
-    indices: new Uint32Array(allIndices),
-    part: Uint8Array.from(pa),
-    ...(o.sway ? { sway: new Float32Array(sw) } : {}),
-    ...(glowing ? { glow: new Float32Array(gl) } : {}),
-    ...(hasTranslucent ? { alpha: new Float32Array(al), opaqueCount: opaqueIdx.length } : {}),
+    positions,
+    normals,
+    colors: col,
+    indices,
+    part,
+    ...(sway ? { sway } : {}),
+    ...(glow ? { glow } : {}),
+    ...(alpha ? { alpha, opaqueCount: nOpaque * 6 } : {}),
   };
 }
+
 
 /**
  * What one can stand on: per voxel column, how many voxels of solid start at the floor and go up without

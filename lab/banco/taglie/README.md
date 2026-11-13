@@ -117,6 +117,52 @@ altezze, fronte, lato, tre tagli, le piante di altri due semi, ≈ 8 000 token; 
 ![la rocca Enorme](scultore-rocca-huge.png)
 ![la rocca Gargantuesca](scultore-rocca-gargantuan.png)
 
+## Il tetto delle gargantuesche (T356, ADR-0184)
+
+L'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il
+tetto, a 20-50 caselle. Dove sta il tetto, misurato sui quattro programmi di qui (con le parti del seme incluse), alti 160, ognuno in un
+processo suo (`lab/scripts/misura-tetto.ts`, `misure/tetto.json`): il tempo del programma, il picco di memoria residente prima della mesh e
+con la mesh, la mesh come la fa il worker ora (senza le facce sul fondo) e come la faceva prima (col fondo). Si rifà con:
+
+```bash
+npx vite-node lab/scripts/misura-tetto.ts -- --solo taglie-fattoria,taglie-forte,scultore-rocca,scultore-villetta --lati 200,400,600,1000 --z 160 --json lab/banco/taglie/misure/tetto.json
+npx vite-node lab/scripts/banco-taglie.ts -- --venti --foto --solo fattoria,scultore-villetta --semi 1   # le foto a 20 × 20 caselle
+```
+
+| programma | 200 (10 caselle, 6,4 M celle) | 400 (20 caselle, 25,6 M) | 600 (30 caselle, 57,6 M) | 1000 (50 caselle, 160 M) |
+|---|---|---|---|---|
+| fattoria | 0,89 s · 74 MB · mesh 0,55 M vertici, 26 MB (col fondo 0,68 M, 32) | 1,85 s · 98 MB · **0,93 M, 44 MB** (1,22 M, 57,5) | 3,4 s · 120 MB · 1,71 M, 80 MB (3,09 M, 145) | 8,3 s · 297 MB · 3,81 M, 179 MB (5,66 M, 266) |
+| forte | 0,53 s · 68 MB · 0,37 M, 16 MB (0,41 M, 18) | 0,88 s · 116 MB · 0,38 M, 16 MB (0,42 M, 18) | 1,4 s · 206 MB · 0,38 M, 16 MB | 2,6 s · 431 MB · 0,39 M, 17 MB |
+| rocca (Scultore) | 0,66 s · 48 MB · 0,37 M, 16 MB (0,43 M, 18) | 1,7 s · 77 MB · 0,39 M, 17 MB (0,46 M, 20) | 3,3 s · 112 MB · 0,40 M, 17 MB | 8,3 s · 244 MB · 0,41 M, 18 MB |
+| villetta (Scultore) | 0,71 s · 45 MB · 0,27 M, 13 MB (0,30 M, 14) | 1,7 s · 81 MB · 0,48 M, 22 MB (0,52 M, 24) | 3,4 s · 138 MB · 0,81 M, 38 MB (0,87 M, 41) | 8,8 s · 298 MB · 1,95 M, 92 MB (2,05 M, 97) |
+
+- **Il motore regge anche le 50 caselle** (8-9 s per chi riempie l'area, 2,6 per il forte che non la riempie); a 20 caselle 1,8 s.
+- **La mesh era il tetto, in due modi.** Gli array di numeri che crescevano a `push` facevano un picco di otto volte la mesh (541 MB per la
+  fattoria a 400, 2,1 GB a 1000): `meshVoxels` ora conta le facce e scrive array tipizzati della misura finale, stessi vertici e stesso ordine
+  (il picco della fattoria a 400 è 129 MB con la mesh, la mesh si fa in 420 ms invece di 859). E metà delle facce di una struttura piatta
+  erano il fondo (le facce rivolte in basso a z = 0, che nessuno vede da sopra): le forme del gioco le lasciano fuori (`underside: false`):
+  −24 % di mesh a 10 caselle, −48 % a 20, −56 % a 50. Un `WorkerRunner` tiene 128 MB per tutte le forme (ADR-0108): la fattoria a 20
+  caselle ne prende un terzo, a 30 più della metà, a 50 non entra.
+- **I tetti delle celle**: `FORM_LIMITS` da 8 a 32 milioni di celle (la scatola delle 20 caselle è 25,6), `FORM_PIECES` 64, `MJX_LIMITS` 64.
+- **Il lotto manca**: un luogo è 18 caselle e una taglia scende alla più grande che entra nel suo lotto (`claimSizes`); `STRUCTURE_SIDE`
+  resta 200 finché l'autore non dice come è fatto il lotto di una gargantuesca di 20 caselle (`docs/pipeline/domande/T356.md`).
+
+A 20 × 20 caselle (seme 1) la fattoria ha 1818 parti: la casa, il fienile, la tettoia, 83 caselle di campi e **217 di pascoli** recintati
+con i cancelli, 92 di cortile; `checkProgram` passa. La villetta 455 parti (gli alberi e il pozzo nel giardino che cresce fino al bordo).
+Nel laboratorio 3D sono la quarta voce di ogni programma del banco («Gargantuesca a 20 × 20, T356»).
+
+**Nel browser** (Chrome headless sulla GPU vera, `lab/scripts/misura-frame.mjs 4421 --modello lab/banco/taglie/fattoria.xml --scatola 400,400,160`,
+`misure/frame.json`, RTX 2070): la fattoria a 400 × 400 × 160 arriva dal worker in 2,0-2,4 s (programma e mesh); dentro la fattoria disegnata il
+frame sta in 3,2 ms di JS (tick 3,3, disegno 3,1) e 2,9 ms di GPU con 2,96 milioni di triangoli (il luogo pieno senza di lei: 5,2 ms, GPU 4,0,
+3,39 milioni); nessun long task. Nel laboratorio 3D (`browser/fattoria-20-laboratorio.jpg`) la costruisce in 2,2 s; nel gioco
+(`browser/fattoria-20-nel-gioco.jpg`, messa nella libreria dalla console e indossata da un'entità accanto al viandante) blocca con la sua impronta
+e si cammina fra i campi. **Il validatore la rifiuta** com'è: «pezzi staccati: 48 % dei voxel non è attaccato al corpo principale (7 pezzi)», i
+recinti dei pascoli e i campi lontani dalla casa; a 10 caselle passa. Una struttura di 20 caselle è un insieme (casa, fienile, campi, recinti), non
+un corpo solo: la regola dei pezzi staccati va ripensata per le strutture che crescono a regole quando avranno il lotto.
+
+![la fattoria a 20 × 20 caselle](fattoria-gargantuan-20.png)
+![la villetta a 20 × 20 caselle](scultore-villetta-gargantuan-20.png)
+
 ## Costo
 
 Nessuna chiamata ai modelli: i programmi sono scritti a mano (`genera.mjs`, `parti.mjs`; la villetta e la rocca di T354 direttamente). Un giro del forte costa 0,15-0,45 s a seme,
@@ -127,7 +173,8 @@ uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla
 - **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: il prompt è fatto (T354, ADR-0183), il giro sul banco è T355.
 - **Chi mette persone e animali nelle aree**: le aree sono lette (`formAreas`), nessuno le usa ancora; il Narratore e lo Scenografo (T259)
   le riceveranno in un task loro.
-- **La fattoria di 50 × 50** e il tetto dei voxel delle gargantuesche: T356.
+- **Il lotto di una gargantuesca di 20 caselle** (il tetto dei voxel è misurato e pronto, T356, ADR-0184): la domanda all'autore in
+  `docs/pipeline/domande/T356.md`; la fattoria di 50 × 50 a 20 voxel per casella non entra in un browser (160 milioni di celle).
 - **La varietà degli appezzamenti a 10 × 10**: in 20 celle restano 2-5 celle di campo attorno al cortile, quindi pochi tracciati e due o
   tre tipi di appezzamento per seme; la varianza dei campi di T339 vuole l'area di T356.
 - **Le torri del forte** hanno la porta dal camminamento ma il camminamento non ha una scala dal cortile: la cinta si raggiunge dalle

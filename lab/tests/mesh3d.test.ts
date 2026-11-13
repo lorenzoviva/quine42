@@ -40,3 +40,29 @@ describe('sandbox meshes (lab/3d/mesh.ts)', () => {
     expect([...footprint(grid(2, 2, 4, (x, _y, z) => (x === 1 && z === 2 ? 1 : 0)), palette, 1, 3)]).toEqual([0, 1, 0, 1]);
   });
 });
+
+describe('the faces under the floor (T356)', () => {
+  it('leaves out the faces that look down from z = 0 when asked, and only those', () => {
+    const slab = grid(2, 1, 1, () => 1);
+    expect(meshVoxels(slab, palette, { vpt: 1 }).indices.length / 6).toBe(10);
+    const m = meshVoxels(slab, palette, { vpt: 1, underside: false });
+    expect(m.indices.length / 6).toBe(8);
+    // No normal points down (three.js y) in what is left; the vertex count follows the faces.
+    for (let i = 1; i < m.normals.length; i += 3) expect(m.normals[i]).toBeGreaterThanOrEqual(0);
+    expect(m.positions.length / 3).toBe(32);
+    // A slab one voxel up keeps its underside: it is not on the floor.
+    expect(meshVoxels(grid(2, 1, 2, (_x, _y, z) => (z === 1 ? 1 : 0)), palette, { vpt: 1, underside: false }).indices.length / 6).toBe(10);
+  });
+
+  it('keeps the opaque faces first and the glass after, in two passes as in one', () => {
+    const pal = { A: { color: '#808080' }, v: { color: '#29adff', alpha: 0.4 } };
+    const g: VoxelGrid = { X: 2, Y: 1, Z: 1, cells: new Uint8Array([1, 2]), alphabet: ['.', 'A', 'v'] };
+    const m = meshVoxels(g, pal, { vpt: 1 });
+    // The opaque voxel: 5 faces out plus the one against the glass; the glass: 5 out plus the one against the opaque.
+    expect(m.opaqueCount).toBe(6 * 6);
+    expect(m.indices.length).toBe(12 * 6);
+    expect(m.alpha!.length).toBe(48);
+    for (let t = 0; t < m.opaqueCount!; t++) expect(m.alpha![m.indices[t]]).toBe(1);
+    for (let t = m.opaqueCount!; t < m.indices.length; t++) expect(m.alpha![m.indices[t]]).toBeCloseTo(0.4);
+  });
+});
