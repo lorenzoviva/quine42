@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 374 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 378 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -15,15 +15,16 @@ Aggiornato il 13/11/2026, epoca 374 (argon). Crediti: vedi `stato`.
 - **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 pronto (step 43).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva per massimizzare l'uso di Fable.
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
+- **Modelli specializzati di Antigravity (autore, 13/11):** T360 integrato (`703c838c`, ADR-0187): provider `hydrogen` (Gemini 4 Hydrogen, conto `gemini`) e `orchestrator` (Orchestrator (Argon), conto `argon`), in prova a tetto 1, senza browser, non orchestrabili senza la casella; sforzo come suffisso `-high|-xhigh`, mai `--effort` su agy. Non misurati: contatori e rapporti 5h/settimana (prime righe di `consumi.jsonl`).
 - **Carte fatte a mano (step 41):** T293-T296 integrati (kernel 0.5.8).
 - **NPC coeso (step 39):** T327, T332 integrati (kernel 0.5.4) → T245g-i.
 - **Nodi MJ (step 30):** T333-T339 integrati (kernel 0.6.3, ADR-0171..0179).
 
 ## Pronti e priorità
 
-0. **In corso/pronti:** pronti T360 (Claude, extra 3% p0: nuovi modelli specializzati di Antigravity `gemini-4-hydrogen` e `Orchestrator`), T347 (Fable) e T352 (Claude), in partenza col reset 5h delle 18:00 UTC (19:00 ora locale); T355 `in attesa` fino al 15/11 (D48 passo 3).
+0. **In corso/pronti:** in corso T347 (Fable, campagna del master, lanciato 19:02 UTC); pronto T352 (Claude), aspetta la finestra 5h (88 %, reset 22:59 UTC); T355 `in attesa` fino al 15/11 (D48 passo 3).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 17:31 UTC):** Claude settimana 62 %, 5h 5 % (reset 18:00 UTC); Fable settimana 38 %, 5h 5 % (reset 18:00 UTC); Gemini 98 %; Argon 76 %; agy 100 %. Generatore acceso, fermo (finestra 5h al 5 %, avanzo negativo).
+2. **Crediti (13/11 19:05 UTC):** Claude settimana 61 %, 5h 88 % (reset 22:59 UTC); Fable settimana 38 %; Gemini/Hydrogen 98 % (reset 15/11); Argon 71 %; agy Claude 100 %. Generatore acceso, fermo (avanzo negativo).
 
 ## Attese dall'autore
 
@@ -39,5 +40,5 @@ Aggiornato il 13/11/2026, epoca 374 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **374 (argon):** riavvio dopo spegnimento delle 17:00 UTC; pianificato e approvato T360 (Claude, extra 3% p0: adattamento della pipeline a `gemini-4-hydrogen-{low,medium,high,xhigh}` e `gemini-pro-orchestrator-g1-pro` di Antigravity); pronti T360, T347 (Fable) e T352 (Claude).
-- **372 (argon):** integrato T351 (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso dell'Attore); in attesa del reset 5h (18:00 UTC) per T347 e T352.
+- **377-378 (claude):** integrato T360 (`703c838c`, ADR-0187); spegnimento `ferma --dopo` alle 18:31 UTC, riavvio; lanciato T347 su Fable.
+- **374 (argon):** riavvio; pianificato e approvato T360 (adattamento della pipeline a Hydrogen e Orchestrator di Antigravity).
