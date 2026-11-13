@@ -4740,7 +4740,7 @@ Nasce da T307a e T299: `dossier T307a`, `dossier T299`. `integra T307a` si è fe
 - Esito: prompt del Concilio in inglese (ruoli, tema e ambientazioni, principi, frammenti degli agenti e del kernel), lingua del mondo (`universe.json → language`, it se manca) e blocco «Lingua» di 128 token in ogni richiesta, valori degli schemi interni (riparazione dei valori italiani tenuta un contratto), quarta parete con tabelle it/en e test di frasi di prova e venti innocue per lingua, rilevatore della lingua, kernel 0.5.2, ADR-0164; token: testi fissi −6,9 %, richieste di una Genesi offline −3,3 %; prova a pagamento: ≈ 30 richieste invece delle ≈ 20 previste (luoghi in più aperti dal tappeto), ≈ 0,07 $, 156 testi del mondo, 0 in inglese, nessuno scarto né guasto; suite e typecheck verdi. Spezzato: T310b fa i nomi dei campi degli schemi in inglese, il tipo di legame come id, i valori interni ancora italiani (contratto nuovo) e le espressioni regolari di `lingue.md` §5; fr/es della quarta parete e controllo della lingua nel validatore restano a T239.
 
 ### T310b · L'inglese come lingua interna: i nomi dei campi degli schemi, il tipo di legame come id, i valori interni ancora italiani — `da fare` (dipende da T310)
-- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 4
+- Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 4
 - Step: 42
 - Contesto: spezzato da T310 (kernel 0.5.2, ADR-0165): i prompt sono inglesi, ma i nomi dei campi degli schemi Gemini, il tipo di legame (testo, non id) e alcuni valori interni restano italiani; serve un contratto nuovo (0.6) con la sua migrazione. Nasce da T310: `dossier T310`, e da T308b: `dossier T308b`. Le regole: `docs/lingua-interna.md`, `src/kernel/internalNames.ts`.
 - Cosa fare: i campi degli schemi in inglese (schemi Gemini, `MockAiModels`, chi legge le risposte, con lettura dei campi di prima finché serve); il tipo di legame come id interno inglese, il nome nella lingua del mondo; i valori interni ancora italiani in inglese con la migrazione `0.5 → 0.6` in `migrations.ts` (pura, deterministica, piani idempotenti); le espressioni regolari di `docs/lingue.md` §5. fr/es della quarta parete e il controllo della lingua nel validatore restano a T239.
@@ -5326,3 +5326,20 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: riga 10 del § 6 di `docs/design/open-beta.md`; da approvare dall'autore quando servirà.
 - Cosa fare: l'endpoint solo dall'ambiente (SSRF, § 5 punto 5), un banco della qualità sui compiti del Concilio.
 - Quando è fatto: il banco dice quali compiti un modello aperto regge.
+
+### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356)
+- Pipeline: fable · sforzo extra · stima 10% · approvato · browser · priorità 3
+- Step: 30
+- Contesto: D53 chiusa (autore 13/11): opzione 1 di `docs/pipeline/domande/T356.md`, un lotto di 2 × 2 luoghi (36 × 36 caselle), con `STRUCTURE_SIDE` 500 invece di 400 perché il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 voxel, 25 caselle) ci deve stare. Misure e tetti in T356 (ADR-0185, `dossier T356`).
+- Cosa fare: il lotto che occupa quattro luoghi adiacenti (chi lo reclama, come si caricano e si salvano i quattro piani, varchi e sentieri della regola 10, le porte sul sentiero, `claimSizes` che non la fa scendere); `STRUCTURE_SIDE` 500 e la gargantuesca fino a 25 × 25 caselle; la regola del validatore che rifiuta la fattoria a 20 caselle per i pezzi staccati, ripensata; tempo, memoria e frame misurati col forte dell'autore (`misura-tetto.ts`, `misura-frame.mjs --modello`). ADR che chiude ADR-0185 sul lotto.
+- Test: lotto su quattro luoghi connesso, salvato e ricaricato; suite e typecheck coi turni.
+- Browser: sì, il forte dell'autore come gargantuesca in un mondo vero, attraversato a piedi fra i quattro luoghi, frame misurati.
+- Quando è fatto: commit su `task/T370`, kernel sale (di `Y` se cambia il formato dei piani).
+
+### T371 · Il forte dell'autore come riferimento della qualità «ottima» — `in attesa` (dipende da T370; l'autore avvisa quando il forte è finito)
+- Pipeline: fable · sforzo extra · stima 5% · approvato · browser · priorità 5
+- Step: 30
+- Contesto: D53 (autore 13/11): il forte disegnato a mano (`lab/mjx/models/handmade/forte-handmade.xml`, `docs/img/castello-gargantuan-handmade.png`: cortili come unioni di rettangoli, mura irregolari con torri agli angoli, mastio su più piani) fissa lo standard della qualità «ottima». Non ci si aspetta che i modelli di oggi lo raggiungano: è il riferimento.
+- Cosa fare: il forte al posto del forte di T339 come riferimento del banco (`lab/banco/taglie/`, `lab/banco/riferimento/`) e dello Scultore (esempio o metro nel prompt delle strutture, ADR-0183, senza superare i token misurati), con foto e viste in testo; una scala di giudizio nel banco che dica quanto un programma scritto da Gemini gli si avvicina.
+- Browser: sì, foto del forte nel laboratorio 3D.
+- Quando è fatto: commit su `task/T371`.
