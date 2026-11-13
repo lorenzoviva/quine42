@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 13/11/2026, epoca 372 (argon). Crediti: vedi `stato`.
+Aggiornato il 13/11/2026, epoca 374 (argon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 13/11/2026, epoca 372 (argon). Crediti: vedi `stato`.
 
 0. **In corso/pronti:** nessuno in corso; pronti T347 (Fable) e T352 (Claude), in attesa del reset 5h delle 18:00 UTC (19:00 ora locale); T355 `in attesa` fino al 15/11 (D48 passo 3).
 1. **Da approvare dall'autore:** T310b (lingua interna campi schemi, extra 6% p4).
-2. **Crediti (13/11 13:58 UTC):** Claude settimana 62 %, 5h 5 % (reset 18:00 UTC); Fable settimana 38 %, 5h 5 % (reset 18:00 UTC); Gemini 98 %; Argon 77 %; agy 100 %. Generatore acceso, fermo (finestra 5h al 5 %, avanzo negativo).
+2. **Crediti (13/11 17:31 UTC):** Claude settimana 62 %, 5h 5 % (reset 18:00 UTC); Fable settimana 38 %, 5h 5 % (reset 18:00 UTC); Gemini 98 %; Argon 76 %; agy 100 %. Generatore acceso, fermo (finestra 5h al 5 %, avanzo negativo).
 
 ## Attese dall'autore
 
@@ -39,5 +39,5 @@ Aggiornato il 13/11/2026, epoca 372 (argon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **374 (argon):** riavvio dopo spegnimento delle 17:00 UTC (`ferma --ora`, nessun task in corso né da integrare); pronti T347 (Fable) e T352 (Claude) in attesa del reset 5h delle 18:00 UTC.
 - **372 (argon):** integrato T351 (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso dell'Attore); in attesa del reset 5h (18:00 UTC) per T347 e T352.
-- **371 (argon):** integrato T356 (`c21d13b3`, ADR-0185, kernel 0.6.11), domanda D53 all'autore sul lotto delle gargantuesche; T351 in corso su Claude.
