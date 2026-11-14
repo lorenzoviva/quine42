@@ -5450,3 +5450,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (T374 è già stato verificato nel browser).
 - Quando è fatto: commit su `task/T381`, kernel 0.7.2; poi l'orchestratore integra T381 e `integra T374` toglie worktree e branch di T374. Sicurezza: V-037 (rinumerata da V-036 di T374), nessuna superficie nuova oltre quella.
 - Esito: T374 unito in task/T381 (merge 255c799d): nel registro e nel catalogo della sicurezza restano entrambe le voci, V-036 di T372 e le direttive di T374 rinumerate a V-037 (scheda, tabella, catalogo, `tests/sicurezza/direttive.test.ts`, ADR-0191, AGENTS.md, architettura-dettagli); kernel 0.7.2 (version.ts, package.json, package-lock.json, universe.json, punto 8 di ADR-0191 e la sua riga nell'indice), ADR precedenti invariati, ADR-0191 libero; typecheck, build e suite intera (3141 passati, 1 saltato) verdi nei turni. Manca ancora, come già detto da T374, la manopola di Jev negli universi privati (arriva con T366). Sicurezza: V-037 (rinumerata da V-036 di T374), nessuna superficie nuova oltre quella.
+
+### T383 · Integrare T366 nel base (conflitto con T362: ADR-0193 → ADR-0194, kernel 0.7.5) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Step: 43
+- Contesto: `integra T366` (universo privato con ospiti e inviti, verificatore a inviti `QUINE_ACCOUNT=inviti`, V-038, kernel 0.7.4, ADR-0193) ha trovato conflitti in `AGENTS.md`: nel frattempo è entrato T362 (adattatore OpenRouter), che ha già preso ADR-0193 e il kernel 0.7.4. Nasce da T366: `dossier T366`, `dossier T362`.
+- Cosa fare: nel worktree `git merge task/T366`; in `AGENTS.md` (e ovunque ci sia un conflitto) tenere entrambe le aggiunte; l'ADR di T366 rinumerato a `ADR-0194` (file, titolo, indice degli ADR, ogni rimando di T366 in `AGENTS.md`, `docs/architettura-dettagli.md`, test, registro della sicurezza, codice), controllando che 0194 sia libero; kernel a `0.7.5` in `src/kernel/version.ts`, `package.json`, `package-lock.json`, `universe/universe.json`, coi riferimenti di T366 a `0.7.4` portati a `0.7.5` senza toccare quelli di T362 né gli ADR di prima; V-038 resta se libera; typecheck, build e suite intera coi turni.
+- Test: suite intera, typecheck e build coi turni.
+- Browser: no (T366 è già stato verificato nel browser).
+- Quando è fatto: commit su `task/T383`, kernel 0.7.5; poi l'orchestratore integra T383 e `integra T366` toglie worktree e branch di T366. Sicurezza: V-038 di T366, nessuna superficie nuova oltre quella.
