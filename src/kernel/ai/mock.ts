@@ -324,6 +324,21 @@ export class MockAiModels implements AiModels, DecisionModels {
       case 'referente.coordinate': {
         const t = String(d.text ?? '');
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { reply: 'Questo no.', task: 'none', refusal: "distruggerebbe l'universo" };
+        // A directive of the master (T374): how the world is made from now on, for the team its words name.
+        if (/direttiva|d'ora in (poi|avanti)|da ora in poi/i.test(t)) {
+          const section = /nom[ei] dei luoghi|luogh|region|mappa|villagg|città/i.test(t)
+            ? 'cartographer'
+            : /aspetto|forma|colore|modell|case di|pietra|legno/i.test(t)
+              ? 'sculptor-artist'
+              : /musica|suon|canzon/i.test(t)
+                ? 'musician'
+                : /codice|meccanic|fisica|peso/i.test(t)
+                  ? 'engineer-physicist'
+                  : /storia|storie|trama|personagg|parla|dialog|gente/i.test(t)
+                    ? 'narrator'
+                    : 'all';
+          return { reply: 'La scrivo fra le direttive.', task: 'directive', section, request: t.replace(/^.*?(direttiva|d'ora in (poi|avanti)|da ora in poi)\s*:?\s*/i, '') || t };
+        }
         if (/riscolp/i.test(t)) return { reply: 'Lo dico allo Scultore.', task: 'resculpt', target: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], request: t };
         if (/\brun[ae]\b/i.test(t)) return { reply: 'Eccole.', task: 'rune', runes: [t.replace(/.*\brun[ae]\s+/i, '')] };
         if (/musica|brano|canzone|melodia/i.test(t)) return { reply: 'Lo porto al Musicista.', task: 'music', request: t };

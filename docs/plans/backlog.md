@@ -5426,7 +5426,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì; se non si può, `BROWSER: da verificare`.
 - Quando è fatto: esito con ciò che si vede e le catture; commit su `task/T380` se ci sono file. Sicurezza: nessuna superficie nuova.
 
-### T381 · Integrare T374 nel base (conflitto con T372: V-036 → V-037, kernel 0.7.2) — `da fare`
+### T381 · Integrare T374 nel base (conflitto con T372: V-036 → V-037, kernel 0.7.2) — `fatto` (`255c799d`)
 - Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
 - Step: 43
 - Contesto: `integra T374` (le direttive del master, `world/campaign.md` a sezioni, ADR-0191, V-036, kernel 0.7.1) ha trovato conflitti in `docs/sicurezza/registro.md` e `tools/sicurezza/catalogo.mjs`: nel frattempo è entrato T372 via T379 (il master paga, ADR-0188, V-036 già presa, kernel 0.7.1). Nasce da T374: `dossier T374`, `dossier T379`.
@@ -5434,3 +5434,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera, typecheck e build coi turni.
 - Browser: no (T374 è già stato verificato nel browser).
 - Quando è fatto: commit su `task/T381`, kernel 0.7.2; poi l'orchestratore integra T381 e `integra T374` toglie worktree e branch di T374. Sicurezza: V-037 (rinumerata da V-036 di T374), nessuna superficie nuova oltre quella.
+- Esito: T374 unito in task/T381 (merge 255c799d): nel registro e nel catalogo della sicurezza restano entrambe le voci, V-036 di T372 e le direttive di T374 rinumerate a V-037 (scheda, tabella, catalogo, `tests/sicurezza/direttive.test.ts`, ADR-0191, AGENTS.md, architettura-dettagli); kernel 0.7.2 (version.ts, package.json, package-lock.json, universe.json, punto 8 di ADR-0191 e la sua riga nell'indice), ADR precedenti invariati, ADR-0191 libero; typecheck, build e suite intera (3141 passati, 1 saltato) verdi nei turni. Manca ancora, come già detto da T374, la manopola di Jev negli universi privati (arriva con T366). Sicurezza: V-037 (rinumerata da V-036 di T374), nessuna superficie nuova oltre quella.
