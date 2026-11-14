@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 399 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** —. **Pronti:** T362, T370, T366 (fable, fermo fino al reset 19/11 16:00 CET; claude esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** —. **Pronti su claude (spostati da fable, fermo fino al 19/11, sforzo extra):** T366, T362, T370; poi T373→T375→T377; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 

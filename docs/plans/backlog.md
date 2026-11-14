@@ -5261,7 +5261,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: `QUINE_PAGAMENTI=spenti` (detto, un altro valore non parte): rotte di Stripe non montate in produzione e in sviluppo, `STRIPE_WEBHOOK_SECRET` non chiesto, commissione forzata a 0, ricariche nascoste nella lobby, nel pannello `P`, nella finestra dei crediti esauriti, nella pagina dei crediti e nel profilo del sito; Jev resta con la sua chiave (D52); `/healthz` prima della porta d'ingresso (qualunque `Host`, solo `ok`, 503 in chiusura); ADR-0189, AGENTS.md (8h, `.env`), architettura, glossario; test in `tests/sicurezza/produzione.test.ts` con e senza la modalità; `QUINE_TETTO_RICARICHE` invariato (unica fonte di crediti finché non c'è OpenRouter); non provati il 503 in chiusura né la UI nel browser (il task non lo chiede); sicurezza: voce V-035 (modalità senza pagamenti e controllo di salute), chiusa con i test.
 
 ### T362 · Open beta: l'adattatore OpenRouter (anche Jev) — `da fare`
-- Pipeline: fable · sforzo extra · stima 4% · approvato · priorità 5
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
 - Step: 43
 - Contesto: D52 e riga 2 del § 6 di `docs/design/open-beta.md` (ADR-0184). L'autore (13/11): OpenRouter fornisce anche i modelli di TypeSafe, quindi le decisioni chiuse (ADR-0157) passano di lì con la chiave del giocatore; vale ancora D45: il testo libero del viandante non va a Jev finché non c'è la ritenzione zero (verificare cosa dice OpenRouter per quei modelli). `dossier T345`, `dossier T348`.
 - Cosa fare: `OpenRouterAiModels` accanto a `GeminiAiModels` (schema convertito con `response_format` e `require_parameters`, ragionamento, immagini come `image_url`, `usage.cost` nel registro, 402/401/429, id fissi); le decisioni di Jev via OpenRouter (id del modello, prezzo, registro); § 1.7 dello studio e ADR-0184 aggiornati sulla risposta 5.
@@ -5297,7 +5297,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T365`, kernel sale di Z.
 
 ### T366 · Open beta e campagna: il verificatore a inviti e gli universi privati — `da fare`
-- Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 5
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 43
 - Contesto: D52.7 (sì, insieme a T347); riga 6 del § 6 di `docs/design/open-beta.md` e lo studio di T347 (`docs/design/campagna-master.md`, ADR-0188). D54 chiusa il 13/11: **7** inviti di 7 giorni, un uso, token mostrato una volta; **8** universo privato e verificatore a inviti in questo task solo (è anche la riga 2 del § 6 di `campagna-master.md`, che non diventa un task a parte).
 - Cosa fare: il verificatore a inviti per il self-hosting (token firmati, scadenza, revoca, id che non si scontra con un uid) e l'universo privato della campagna: `universes/.campaign/`, ospiti e inviti, `admit`, `guestOf` sulle letture e sull'elenco (404 per chi non è ospite), la rotta `guests` solo del master, la console; voci nel registro della sicurezza (§ 5 punto 4 di `open-beta.md`, § 7 punti 2-5 di `campagna-master.md`).
@@ -5331,7 +5331,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: il banco dice quali compiti un modello aperto regge.
 
 ### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356)
-- Pipeline: fable · sforzo extra · stima 10% · approvato · browser · priorità 5
+- Pipeline: claude · sforzo extra · stima 10% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D53 chiusa (autore 13/11): opzione 1 di `docs/pipeline/domande/T356.md`, un lotto di 2 × 2 luoghi (36 × 36 caselle), con `STRUCTURE_SIDE` 500 invece di 400 perché il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 voxel, 25 caselle) ci deve stare. Misure e tetti in T356 (ADR-0185, `dossier T356`).
 - Cosa fare: il lotto che occupa quattro luoghi adiacenti (chi lo reclama, come si caricano e si salvano i quattro piani, varchi e sentieri della regola 10, le porte sul sentiero, `claimSizes` che non la fa scendere); `STRUCTURE_SIDE` 500 e la gargantuesca fino a 25 × 25 caselle; la regola del validatore che rifiuta la fattoria a 20 caselle per i pezzi staccati, ripensata; tempo, memoria e frame misurati col forte dell'autore (`misura-tetto.ts`, `misura-frame.mjs --modello`). ADR che chiude ADR-0185 sul lotto.
