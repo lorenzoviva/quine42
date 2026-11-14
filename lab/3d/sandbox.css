@@ -145,3 +145,122 @@ button:hover {
     max-width: calc(100% - 24px);
   }
 }
+
+/* ================================================================== The sandbox by touch and on a small screen (T389) */
+/* The stick and the touch hint only with a coarse pointer or a small screen (lab/touch.ts, COMPACT_QUERY); the panel,
+   there, closed until «☰ Pannello» and then a sheet over the scene. Over it, with a mouse, nothing changes. */
+#prompt {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+#prompt[hidden] {
+  display: none;
+}
+#panel-toggle,
+.keys-touch,
+.lab-stick {
+  display: none;
+}
+.lab-stick {
+  position: fixed;
+  left: 22px;
+  bottom: 22px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(18, 20, 28, 0.45);
+  border: 2px solid rgba(226, 176, 74, 0.55);
+  touch-action: none;
+  z-index: 4;
+}
+.lab-stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 50%;
+  background: rgba(226, 176, 74, 0.75);
+  pointer-events: none;
+}
+#view {
+  touch-action: none;
+}
+@media (pointer: coarse) {
+  .lab-stick {
+    display: block;
+  }
+  #hud .keys {
+    display: none;
+  }
+  .keys-touch {
+    display: block;
+  }
+}
+@media (max-width: 900px), (max-height: 520px) {
+  .lab-stick {
+    display: block;
+  }
+  #hud {
+    left: 8px;
+    top: 8px;
+    max-width: calc(100% - 150px);
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  #hud .keys {
+    display: none;
+  }
+  .keys-touch {
+    display: block;
+  }
+  #panel-toggle {
+    display: block;
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 6;
+    min-height: 38px;
+    padding: 6px 12px;
+    background: var(--panel);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  #panel {
+    display: none;
+    top: 54px;
+    right: 8px;
+    bottom: 8px;
+    left: auto;
+    width: min(380px, calc(100% - 16px));
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    z-index: 5;
+  }
+  body.panel-open #panel {
+    display: block;
+  }
+  body.panel-open #hud,
+  body.panel-open .lab-stick {
+    display: none;
+  }
+  #panel button {
+    min-height: 34px;
+  }
+  #ins-xml {
+    height: 200px;
+  }
+  #prompt {
+    bottom: 24px;
+    left: auto;
+    right: 16px;
+    transform: none;
+    min-height: 48px;
+    padding: 10px 18px;
+    font-size: 15px;
+  }
+}

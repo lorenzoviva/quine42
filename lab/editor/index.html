@@ -24,6 +24,8 @@
             <select id="preset-select" title="Scegli un modello preimpostato"></select>
           </div>
 
+          <!-- On a small screen (T389) the seed and the voxels per tile go in this menu; on a desktop it is not there (display: contents) -->
+          <div class="header-more" id="header-more">
           <div class="tool-group">
             <span class="tool-label">Seme</span>
             <input
@@ -44,6 +46,7 @@
               <option value="8">8 vpt</option>
             </select>
           </div>
+          </div>
 
           <button id="btn-run" class="btn-primary" title="Esegui il programma (Ctrl+Enter)">▶ Esegui</button>
 
@@ -51,15 +54,19 @@
             <span class="dot"></span>
             <span id="status-text">Valido</span>
           </div>
+
+          <button id="btn-pane-toggle" class="compact-only btn-pane-toggle" title="L’anteprima o il programma XML" aria-controls="pane-code">&lt;/&gt; XML</button>
+          <button id="btn-header-more" class="compact-only" title="Seme e voxel per casella" aria-controls="header-more" aria-expanded="false">⋯</button>
         </div>
       </header>
 
-      <main id="main-split">
+      <main id="main-split" data-pane="view">
         <!-- Left Pane: Code Editor -->
         <section id="pane-code" aria-label="Editor di codice MarkovJunior">
           <div class="editor-toolbar">
             <span id="cursor-pos">Riga 1, Col 1</span>
-            <div class="editor-toolbar-actions">
+            <button id="btn-code-more" class="compact-only" title="Metodi, filtro, WFC, formatta, copia, esporta" aria-controls="code-actions" aria-expanded="false">Strumenti ▾</button>
+            <div class="editor-toolbar-actions" id="code-actions">
               <button id="btn-open-rules" class="btn-rule-tool" title="Menu sostituzione e metodi MarkovJunior (Alt+R)">⚡ Metodi MJ</button>
               <button id="btn-open-filter" class="btn-filter-tool" title="Editor visivo filtri In/Out multi-dimensione">▦ Filtro 3D</button>
               <button id="btn-open-wfc" class="btn-wfc-tool" title="Configurazione guidata WFC (Alt+W)">🧩 WFC</button>
@@ -99,6 +106,14 @@
 
         <!-- Right Pane: 3D Viewport -->
         <section id="pane-view" aria-label="Viewport di rendering 3D">
+          <!-- On a small screen (T389): the bars over the preview open one at a time from here -->
+          <div id="compact-dock" class="compact-dock" aria-label="Pannelli dell’anteprima">
+            <button data-open="cad" aria-controls="cad-toolbar" title="Strumenti CAD">✎ CAD</button>
+            <button data-open="palette" aria-controls="cad-palette-bar" title="Palette e materiale">🎨 Colori</button>
+            <button data-open="hud" title="Camera, griglia, aspetto">👁 Vista</button>
+            <button data-open="timeline" aria-controls="playback-bar" title="Riproduzione e timeline">⏯ Tempo</button>
+            <button id="btn-dock-center" title="Centra la camera sul modello">⌖</button>
+          </div>
           <!-- Viewport Top Bars (CAD Tools & Camera HUD on two rows) -->
           <div class="viewport-top-bars">
             <!-- CAD Tools Bar -->
@@ -302,6 +317,7 @@
           <div id="viewport-info" class="viewport-info">Caricamento modello…</div>
           <div id="viewport-coords" class="viewport-coords">Puntatore: (0, 0, 0)</div>
           <div class="viewport-hints">Click sx: azione CAD / seleziona · Click dx: orbita · Rotella: zoom · Shift+drag: sposta</div>
+          <div class="viewport-hints-touch">Un dito: orbita · due dita: zoom · tocco: azione CAD</div>
 
           <div id="loading-overlay" class="hidden">
             <div class="spinner"></div>

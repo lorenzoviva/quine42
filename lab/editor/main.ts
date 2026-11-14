@@ -19,6 +19,7 @@ import { Bloom } from '../../src/render/bloom';
 import { CARTOON, PHASES } from '../../src/render/cartoon';
 import { glowing } from '../../src/render/materials';
 import { bindLookButton, LabLook } from '../look';
+import { attachPreviewTouch, COMPACT_QUERY } from '../touch';
 import type { MeshData } from '../../src/mj/mesh';
 import {
   type CadShape,
@@ -285,6 +286,8 @@ const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
 canvas.addEventListener('pointerdown', (e) => {
+  // The fingers have their own gestures (T389, attachPreviewTouch below)
+  if (e.pointerType === 'touch') return;
   e.preventDefault();
   dragStart = { x: e.clientX, y: e.clientY };
   dragPrev = { x: e.clientX, y: e.clientY };
@@ -306,6 +309,7 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 
 canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'touch') return;
   // Always update raycasting & hover readout when cursor is over viewport
   handlePointerHover(e);
 
@@ -328,6 +332,7 @@ canvas.addEventListener('pointermove', (e) => {
 });
 
 const endDrag = (e: PointerEvent) => {
+  if (e.pointerType === 'touch') return;
   const dist = Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y);
   const wasClick = dist < 8 && e.button === 0;
   isDragging = false;
@@ -354,6 +359,20 @@ canvas.addEventListener(
   { passive: false },
 );
 
+// By touch (T389): one finger orbits as the left button dragged, two pinch as the wheel, a tap is the click of the CAD tool.
+attachPreviewTouch(canvas, {
+  orbit: (dx, dy) => {
+    cam.yaw -= dx * 0.007;
+    cam.pitch = THREE.MathUtils.clamp(cam.pitch + dy * 0.005, 0.05, 1.55);
+  },
+  zoom: (factor) => (cam.dist = THREE.MathUtils.clamp(cam.dist * factor, 1.2, 80)),
+  tap: (x, y) => {
+    const at = new PointerEvent('pointerup', { clientX: x, clientY: y, pointerType: 'touch' });
+    handlePointerHover(at);
+    handleCanvasClick(at);
+  },
+});
+
 function fitCameraToMesh(box: THREE.Box3) {
   const center = new THREE.Vector3();
   box.getCenter(center);
@@ -361,7 +380,8 @@ function fitCameraToMesh(box: THREE.Box3) {
   const size = new THREE.Vector3();
   box.getSize(size);
   const maxDim = Math.max(size.x, size.y, size.z, 0.5);
-  cam.dist = maxDim * 2.5;
+  // A screen taller than wide (a phone upright, T389): the field of view is vertical, the model must fit across too
+  cam.dist = (maxDim * 2.5) / Math.min(1, Math.max(camera.aspect, 0.3));
 }
 
 // ------------------------------------------------------------------ Resize Handling
@@ -3604,6 +3624,64 @@ if (defaultEntry) {
 
 updateViewportSize();
 
+// ------------------------------------------------------------------ The editor on a small screen (T389)
+// Under COMPACT_QUERY the CSS shows one pane at a time (the preview first) and keeps the bars over the preview closed:
+// these buttons switch the pane and open one bar, or a menu, at a time. On a desktop they are not drawn.
+
+const compact = matchMedia(COMPACT_QUERY);
+const mainSplit = $('main-split');
+const paneToggle = $('btn-pane-toggle');
+function showPane(pane: 'view' | 'code'): void {
+  mainSplit.dataset.pane = pane;
+  paneToggle.textContent = pane === 'view' ? '</> XML' : '◧ 3D';
+  paneToggle.classList.toggle('active', pane === 'code');
+  updateViewportSize();
+}
+paneToggle.addEventListener('click', () => showPane(mainSplit.dataset.pane === 'code' ? 'view' : 'code'));
+// Running the program shows what it made
+$('btn-run').addEventListener('click', () => {
+  if (compact.matches) showPane('view');
+});
+
+/** A button that opens and closes a menu: one open at a time, a touch elsewhere closes it. */
+const menus: Array<{ button: HTMLElement; menu: HTMLElement }> = [];
+function bindMenu(button: HTMLElement, menu: HTMLElement): void {
+  menus.push({ button, menu });
+  button.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = !menu.classList.contains('open');
+    closeMenus();
+    menu.classList.toggle('open', open);
+    button.setAttribute('aria-expanded', String(open));
+  });
+}
+function closeMenus(): void {
+  for (const m of menus) {
+    m.menu.classList.remove('open');
+    m.button.setAttribute('aria-expanded', 'false');
+  }
+}
+bindMenu($('btn-header-more'), $('header-more'));
+bindMenu($('btn-code-more'), $('code-actions'));
+document.addEventListener('pointerdown', (e) => {
+  if (!menus.some((m) => m.menu.contains(e.target as Node) || m.button.contains(e.target as Node))) closeMenus();
+});
+// A tool of the code menu, once chosen, closes it
+$('code-actions').addEventListener('click', (e) => {
+  if ((e.target as HTMLElement).closest('button')) closeMenus();
+});
+
+const paneView = $('pane-view');
+const dock = $('compact-dock');
+for (const b of dock.querySelectorAll<HTMLButtonElement>('button[data-open]')) {
+  b.addEventListener('click', () => {
+    const open = paneView.dataset.open === b.dataset.open ? '' : b.dataset.open!;
+    paneView.dataset.open = open;
+    for (const o of dock.querySelectorAll('button[data-open]')) o.classList.toggle('active', (o as HTMLElement).dataset.open === open);
+  });
+}
+$('btn-dock-center').addEventListener('click', () => $('btn-cam-reset').click());
+
 void startCards({
   lab: 'editor',
   kind: 'model',
@@ -3615,3 +3693,6 @@ void startCards({
     void triggerBuild();
   },
 }).then((bar) => (cards = bar));
+
+// For the console (and the check by touch, T389): the camera of the preview.
+(window as unknown as { editor: unknown }).editor = { cam };

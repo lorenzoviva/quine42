@@ -11,9 +11,13 @@
     <div id="hud">
       <b>RUNE · sandbox 3D</b> — tutto ciò che vedi è generato da programmi MarkovJunior
       <div class="keys">WASD muovi · Shift corri · Q/R ruota · rotella zoom · tasto destro trascina: orbita · E agisci · clic su un modello: ispeziona</div>
+      <div class="keys-touch">levetta: muovi · un dito: orbita · due dita: zoom · tocco su un modello: ispeziona</div>
       <div id="status">preparo il mondo…</div>
     </div>
-    <div id="prompt" hidden></div>
+    <button id="prompt" type="button" hidden></button>
+    <!-- On a small screen (T389): the panel opens from here, the stick walks -->
+    <button id="panel-toggle" type="button" aria-controls="panel" aria-expanded="false" title="Mondo, carte, modelli, ispettore">☰ Pannello</button>
+    <div id="stick-host"></div>
     <aside id="panel">
       <section>
         <h2>Mondo</h2>

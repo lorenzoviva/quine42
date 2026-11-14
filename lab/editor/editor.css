@@ -2783,3 +2783,270 @@ button.btn-primary:hover {
 
 
 
+
+/* ================================================================== The editor on a small screen (T389) */
+/* Under 900 px of width or 520 of height (lab/touch.ts, COMPACT_QUERY): one pane at a time, the preview first and whole;
+   the XML from the header; the bars over the preview closed, one open at a time from the dock; the tools in menus.
+   Over it nothing changes: the buttons of this layout are not drawn and the menu of the header is `display: contents`. */
+
+.compact-only,
+.compact-dock,
+.viewport-hints-touch {
+  display: none;
+}
+
+.header-more {
+  display: contents;
+}
+
+@media (max-width: 900px), (max-height: 520px) {
+  .compact-only {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* The header: the model, Esegui, the state, XML and the menu */
+  header {
+    position: relative;
+    height: 44px;
+    padding: 0 8px;
+    gap: 8px;
+  }
+  .brand-badge,
+  .header-tools > .tool-group > .tool-label,
+  #status-text {
+    display: none;
+  }
+  .brand h1 {
+    font-size: 13px;
+  }
+  .header-tools {
+    flex: 1;
+    min-width: 0;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .header-tools > .tool-group {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  #preset-select {
+    min-width: 96px;
+    max-width: 38vw;
+  }
+  .header-tools button,
+  .header-tools select {
+    min-height: 34px;
+    white-space: nowrap;
+  }
+  .header-more {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+  .header-more.open {
+    display: flex;
+  }
+  .header-more .tool-label {
+    display: inline;
+    min-width: 4em;
+  }
+  .btn-pane-toggle.active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* One pane at a time, as large as the screen */
+  #splitter {
+    display: none;
+  }
+  #pane-code {
+    width: 100% !important;
+    min-width: 0;
+    max-width: none;
+    border-right: 0;
+  }
+  #main-split[data-pane='view'] #pane-code,
+  #main-split[data-pane='code'] #pane-view {
+    display: none;
+  }
+
+  /* The tools of the code: in a menu */
+  .editor-toolbar {
+    position: relative;
+    height: 40px;
+  }
+  .editor-toolbar-actions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px;
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+  .editor-toolbar-actions.open {
+    display: flex;
+  }
+  .editor-toolbar button {
+    padding: 7px 12px;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  /* The preview: the dock on top, the bars below it, one at a time */
+  .compact-dock {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    z-index: 8;
+    pointer-events: none;
+  }
+  .compact-dock button {
+    pointer-events: auto;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 13px;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .compact-dock button.active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .viewport-top-bars {
+    top: 52px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    justify-content: flex-start;
+  }
+  .viewport-top-bars .cad-toolbar,
+  .viewport-top-bars .viewport-hud {
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto;
+    flex-wrap: wrap;
+  }
+  .cad-tool-group {
+    flex-wrap: wrap;
+  }
+  .cad-size-group {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .cad-tool-btn,
+  .viewport-hud button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  #pane-view:not([data-open='cad']) .cad-toolbar,
+  #pane-view:not([data-open='hud']) .viewport-hud,
+  #pane-view:not([data-open='palette']) .cad-palette-bar,
+  #pane-view:not([data-open='timeline']) .playback-bar {
+    display: none;
+  }
+  #pane-view[data-open='timeline'] .playback-bar.hidden {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+  .cad-palette-bar,
+  .playback-bar {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    top: auto;
+    flex-wrap: wrap;
+    max-height: calc(100% - 60px);
+    overflow: auto;
+  }
+  .cad-inspector {
+    top: 52px;
+    right: 8px;
+    width: min(250px, calc(100% - 16px));
+    max-height: calc(100% - 60px);
+    overflow: auto;
+  }
+  .viewport-hints,
+  .viewport-coords {
+    display: none;
+  }
+  .viewport-info {
+    bottom: 8px;
+    left: 8px;
+    max-width: calc(100% - 16px);
+  }
+  .viewport-hints-touch {
+    display: block;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+    pointer-events: none;
+    background: rgba(12, 14, 20, 0.7);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  #pane-view[data-open] .viewport-hints-touch,
+  #pane-view[data-open] .viewport-info {
+    display: none;
+  }
+  #pane-view[data-open=''] .viewport-info {
+    display: block;
+  }
+  #btn-dock-center {
+    min-width: 40px;
+    justify-content: center;
+  }
+  #pane-view[data-open=''] .viewport-hints-touch {
+    display: block;
+  }
+
+  /* The dialogs: the whole screen */
+  .modal-backdrop {
+    padding: 6px;
+  }
+  .modal-dialog {
+    max-height: 100%;
+  }
+}
+
+/* A phone upright: the hint over the information, not beside it; the name of the lab gives its place to the model */
+@media (max-width: 520px) {
+  .brand {
+    display: none;
+  }
+  .viewport-hints-touch {
+    bottom: 44px;
+    left: 8px;
+    right: auto;
+  }
+}

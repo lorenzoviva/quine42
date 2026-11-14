@@ -16,6 +16,7 @@ import { aerial, CARTOON } from '../../src/render/cartoon';
 import { glowing, U, windy } from '../../src/render/materials';
 import { bindLookButton, LabLook } from '../look';
 import { startCardsList } from './cards';
+import { attachPreviewTouch, COMPACT_QUERY, mountStick } from '../touch';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -540,6 +541,8 @@ addEventListener('keyup', (e) => keys.delete(e.code));
 let drag: { x: number; y: number } | null = null;
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('pointerdown', (e) => {
+  // The fingers have their own gestures (T389, below)
+  if (e.pointerType === 'touch') return;
   if (e.button === 2 || e.button === 1) drag = { x: e.clientX, y: e.clientY };
   else pick(e);
 });
@@ -554,12 +557,38 @@ addEventListener('pointermove', (e) => {
 canvas.addEventListener('wheel', (e) => (cam.dist = THREE.MathUtils.clamp(cam.dist * (e.deltaY > 0 ? 1.12 : 0.89), 2.5, 45)), { passive: true });
 
 const ray = new THREE.Raycaster();
-function pick(e: PointerEvent) {
+function pick(e: { clientX: number; clientY: number }) {
   const r = canvas.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
   const hit = ray.intersectObjects(world.children, true).find((h) => h.object.userData.thing);
   if (hit) inspect(hit.object.userData.thing.entry, hit.object.userData.thing.asset.seed);
+  return !!hit;
 }
+
+// ------------------------------------------------------------------ by touch, and on a small screen (T389)
+// The fingers on the scene: one orbits as the right button dragged, two pinch as the wheel, a tap inspects what it touches.
+// The stick holds WASD; the prompt of an action is a button. Under COMPACT_QUERY the panel is closed until asked for.
+
+const compact = matchMedia(COMPACT_QUERY);
+const panelToggle = $('panel-toggle');
+function openPanel(open: boolean): void {
+  document.body.classList.toggle('panel-open', open);
+  panelToggle.setAttribute('aria-expanded', String(open));
+  panelToggle.textContent = open ? '✕ Chiudi' : '☰ Pannello';
+}
+panelToggle.addEventListener('click', () => openPanel(!document.body.classList.contains('panel-open')));
+attachPreviewTouch(canvas, {
+  orbit: (dx, dy) => {
+    cam.yawGoal -= dx * 0.006;
+    cam.yaw = cam.yawGoal;
+    cam.pitch = THREE.MathUtils.clamp(cam.pitch + dy * 0.004, 0.2, 1.45);
+  },
+  zoom: (factor) => (cam.dist = THREE.MathUtils.clamp(cam.dist * factor, 2.5, 45)),
+  tap: (x, y) => {
+    if (pick({ clientX: x, clientY: y }) && compact.matches) openPanel(true);
+  },
+});
+mountStick($('stick-host'), keys);
 
 function resize() {
   const w = innerWidth, h = innerHeight;
@@ -601,6 +630,10 @@ function light() {
 
 let near: { t: Entity; a: { name: string; label: string } } | undefined;
 const prompt = $('prompt');
+// The prompt of an action is a button too: the E of a finger
+prompt.addEventListener('click', () => {
+  if (near) doAction(near.t, near.a.name);
+});
 let last = performance.now();
 let frameClock = 0;
 let fps = 0;
@@ -763,6 +796,8 @@ async function info() {
 
 /** Puts the inspected model in front of the wanderer (replacing the one there). */
 async function show(grow: boolean) {
+  // On a small screen the panel would cover what is put in front of the wanderer
+  if (compact.matches) openPanel(false);
   if (!current || !player) return;
   const a = await asset(current.e, current.seed, current.xml);
   if (typeof a === 'string') {
@@ -833,4 +868,4 @@ listModels();
 void buildWorld(7);
 requestAnimationFrame(tick);
 // For the console: the sandbox's state.
-(window as unknown as { sandbox: unknown }).sandbox = { things: () => things, scene, CATALOG, asset, blocked, floorAt, local, step, doAction, actionFor };
+(window as unknown as { sandbox: unknown }).sandbox = { things: () => things, player: () => player, cam, camera, scene, CATALOG, asset, blocked, floorAt, local, step, doAction, actionFor };
