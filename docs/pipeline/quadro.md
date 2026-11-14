@@ -3,11 +3,11 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 404 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 405 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
-- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (studio `docs/design/open-beta.md`, ADR-0184) → D52 chiusa il 13/11 (tutto sì tranne la 5: Jev resta acceso, OpenRouter dà anche i modelli di TypeSafe) → T361 integrato (`0b0a5889`, ADR-0189: `QUINE_PAGAMENTI=spenti`, `/healthz`, V-035 chiusa; UI non provata nel browser), T362 integrato (ADR-0193, kernel 0.7.4: `OpenRouterAiModels` e Jev via OpenRouter con ZDR, costo detto nel registro; non cablato, non provato con chiave vera → D55), T363 chiavi e turno comuni (fable), T364 «Collega OpenRouter» (browser), T365 costo carte (fatto: `usd` e `server` nel timbro delle carte; anche lui dice ADR-0194 e kernel 0.7.5 → si integra dopo T383, probabile conflitto sulla versione), T366 inviti (fatto e visto nel browser, in integrazione via T383: ADR-0194, kernel 0.7.5), T367 pacchetto self-hosting, T368 «Come usiamo l'IA», T369 modelli locali (non approvato); T45f ora su VM con il pacchetto di T367.
+- **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (studio `docs/design/open-beta.md`, ADR-0184) → D52 chiusa il 13/11 (tutto sì tranne la 5: Jev resta acceso, OpenRouter dà anche i modelli di TypeSafe) → T361 integrato (`0b0a5889`, ADR-0189: `QUINE_PAGAMENTI=spenti`, `/healthz`, V-035 chiusa; UI non provata nel browser), T362 integrato (ADR-0193, kernel 0.7.4: `OpenRouterAiModels` e Jev via OpenRouter con ZDR, costo detto nel registro; non cablato, non provato con chiave vera → D55), T363 chiavi e turno comuni (fable), T364 «Collega OpenRouter» (browser), T365 costo carte (integrato via T384, kernel 0.7.6, ADR-0195: `usd` e `server` nel timbro; nessuna UI mostra il costo), T366 inviti (fatto e visto nel browser, in integrazione via T383: ADR-0194, kernel 0.7.5), T367 pacchetto self-hosting, T368 «Come usiamo l'IA», T369 modelli locali (non approvato); T45f ora su VM con il pacchetto di T367.
 - **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. T356 integrato (`c21d13b3`, ADR-0185, kernel 0.6.11): tetto delle gargantuesche misurato a 20/30/50 caselle, `meshVoxels` in due passate su array tipizzati e `underside: false` (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel lab 3D e nel banco, `misura-frame.mjs --modello`; D53 chiusa il 13/11: T370 lotto 2 × 2 luoghi con `STRUCTURE_SIDE` 500 (fable), T371 il forte dell'autore come riferimento «ottima» (in attesa del forte finito): l'autore disegna a mano un forte 500 × 500 × 150 (25 caselle, `lab/mjx/models/handmade/forte-handmade.xml`), proposta opzione 1 con lato 500. Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, in attesa fino al 15/11), scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 404 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T384 (integra T365: conflitti in `server/session.ts`, `src/session/host.ts`; ADR-0195, kernel 0.7.6). T366 integrato via T383 (`ef5d6e2c`, kernel 0.7.5, ADR-0194). **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T370, T363, T373; poi T375→T377; T363→T364/T367/T368. T355 `in attesa` fino al 15/11.
+0. **In corso:** T373. T366 integrato via T383 (`ef5d6e2c`, kernel 0.7.5, ADR-0194); T365 integrato via T384 (`eab7a702`, kernel 0.7.6, ADR-0195). **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T370, T363, T373; poi T375→T377; T363→T364/T367/T368. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -40,5 +40,5 @@ Aggiornato il 14/11/2026, epoca 404 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **405 (claude):** T384 e T365 integrati (kernel 0.7.6, ADR-0195).
 - **404 (claude):** T383 e T366 integrati (kernel 0.7.5); T365 in conflitto → T384.
-- **403 (claude):** `docs/fasi.md` riallineata al backlog (`d6002d52`).
