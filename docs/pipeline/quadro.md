@@ -3,12 +3,12 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 421 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 422 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - **Sei fasi (autore, 10/11):** I kernel 0.9.0, II closed beta, III kernel 1.0.0, **IV open beta** (OpenRouter, hosting esterno e self-hosting, niente partita IVA ora), V raffinamento, VI produzione (Stripe, quote carte). Step 43: T345 integrato (studio `docs/design/open-beta.md`, ADR-0184) → D52 chiusa il 13/11 (tutto sì tranne la 5: Jev resta acceso, OpenRouter dà anche i modelli di TypeSafe) → T361 integrato (`0b0a5889`, ADR-0189: `QUINE_PAGAMENTI=spenti`, `/healthz`, V-035 chiusa; UI non provata nel browser), T362 integrato (ADR-0193, kernel 0.7.4: `OpenRouterAiModels` e Jev via OpenRouter con ZDR, costo detto nel registro; non cablato, non provato con chiave vera → D55), T363 integrato il 14/11 (kernel 0.7.8, ADR-0197, V-040: `OpenRouterGate`, chiavi dei giocatori in memoria via PKCE, turno di chi paga; non cablato nel gioco/sito → T364, non provato contro OpenRouter vero), T364 «Collega OpenRouter» (browser), T365 costo carte (integrato via T384, kernel 0.7.6, ADR-0195: `usd` e `server` nel timbro; nessuna UI mostra il costo), T366 inviti (fatto e visto nel browser, in integrazione via T383: ADR-0194, kernel 0.7.5), T367 pacchetto self-hosting, T368 «Come usiamo l'IA», T369 modelli locali (non approvato); T45f ora su VM con il pacchetto di T367.
-- **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. T356 integrato (`c21d13b3`, ADR-0185, kernel 0.6.11): tetto delle gargantuesche misurato a 20/30/50 caselle, `meshVoxels` in due passate su array tipizzati e `underside: false` (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel lab 3D e nel banco, `misura-frame.mjs --modello`; D53 chiusa il 13/11: T370 lotto 2 × 2 luoghi con `STRUCTURE_SIDE` 500 (fable), T371 il forte dell'autore come riferimento «ottima» (in attesa del forte finito): l'autore disegna a mano un forte 500 × 500 × 150 (25 caselle, `lab/mjx/models/handmade/forte-handmade.xml`), proposta opzione 1 con lato 500. Mancano: aree usate da Narratore/Scenografo, giro dello Scultore su Gemini (T355, in attesa fino al 15/11), scala cortile→camminamento del forte.
+- **Nuovo generatore MJ (autore, 10/11):** T346 integrato (`598dbeff`): parti abitabili come sottoblocchi `<import>`, aree delle strutture, `mapsBackToBox`, fattoria e forte del banco rifatti. T354 e T359 integrati (`a19c8fca`, `65402d74`, ADR-0183, kernel 0.6.10): prompt strutture senza scheletro a 3 livelli sul piano a 1/5, due blocchi col ritorno in testo, parti del seme nella richiesta, `part-stair` tollerante, villetta e rocca nel banco e nel lab 3D. T356 integrato (`c21d13b3`, ADR-0185, kernel 0.6.11): tetto delle gargantuesche misurato a 20/30/50 caselle, `meshVoxels` in due passate su array tipizzati e `underside: false` (fattoria a 400: mesh 57 → 44 MB, picco 541 → 129 MB), `FORM_LIMITS` 32 M, `FORM_PIECES` 64 M, `MJX_LIMITS` 64 M, quarta scatola 20 × 20 nel lab 3D e nel banco, `misura-frame.mjs --modello`; D53 chiusa il 13/11: T370 lotto 2 × 2 luoghi con `STRUCTURE_SIDE` 500 (fable), T371 il forte dell'autore come riferimento «ottima» (in attesa del forte finito): l'autore disegna a mano un forte 500 × 500 × 150 (25 caselle, `lab/mjx/models/handmade/forte-handmade.xml`), proposta opzione 1 con lato 500. T355 integrato (giro Gemini, 3,26 $: 3.8 Flash a Grande 0/6, Argon 5/6 Enorme e 1/2 Grande, fattorie fortificate) → D57. Mancano: aree usate da Narratore/Scenografo, scala cortile→camminamento del forte.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). T352 integrato (`e28d73ce`, kernel 0.6.12): stima oraria della lobby coi token misurati da T325, un'ora a pieno dettaglio 1,42 $ (prima ~1,04), con l'Attore 1,68 $; restano stimate le uscite non misurate e `forge.fix`. Non provato contro TypeSafe vero né su traffico reale; manca l'archivio di sessione delle domande del viandante (D45.6). `tests/carte-guaste.test.ts` rosso nella suite intera e verde da solo (T352, causa non dimostrata): possibile instabilità sotto carico.
@@ -23,11 +23,13 @@ Aggiornato il 14/11/2026, epoca 421 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T355. T386 integrato (`0462b999`). **Pronti su claude:** T364, T367, T368, T370, T387→T388/T389→T390; poi T375→T377.
+0. **In corso:** nessuno. T355 integrato (in attesa di D57). **Pronti su claude:** T364, T367, T368, T370, T387→T388/T389→T390; poi T375→T377.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 13:23 CET):** Claude settimana 34 %, 5h 29 % (reset 14:59); Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
+
+- **D57 (T355):** Scultore delle strutture procedurali: consiglio 1 (Argon a ogni taglia + task che ripara prompt e ritorno, poi giro anche con Flash).
 
 - **D55 (T362):** prova pagata OpenRouter (chiave da creare), testo del viandante a Jev via OpenRouter (consiglio B), prezzo 3.5 Flash (consiglio sì).
 
@@ -40,5 +42,5 @@ Aggiornato il 14/11/2026, epoca 421 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **421 (claude):** D56 chiusa (tutto come proposto, titolare Lorenzo Vaccaro); T386 integrato.
-- **420 (claude):** T363 integrato; D56 aperta (T386).
+- **422 (claude):** T355 integrato; D57 aperta.
+- **421 (claude):** D56 chiusa (titolare Lorenzo Vaccaro); T386 integrato.
