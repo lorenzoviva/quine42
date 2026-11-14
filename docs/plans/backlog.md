@@ -5495,3 +5495,42 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessun codice; `npm test` non serve. Controllare che i link della licenza rispondano.
 - Browser: no.
 - Quando è fatto: commit su `task/T386` con `LICENSE.md` (e `package.json` se cambia) e le domande scritte; l'autore approva il testo prima dell'integrazione. Sicurezza: nessuna superficie nuova.
+
+### T387 · Il gioco al tocco: muoversi, orbitare, zoomare e i comandi di gioco su un telefono — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Step: 43
+- Contesto: l'autore ha provato il gioco da telefono (14/11, preview sulla rete di casa, in orizzontale): il sito si vede bene, ma nel gioco funzionano solo il click sinistro e il destro (pressione lunga); zoom, orbita, movimento e i comandi di gioco (tasti) no. L'interfaccia di testo si apre e la tastiera compare. Oggi nel gioco non c'è nessun gestore del tocco (`touchstart`/`pointerType` solo in `site/carte.ts`). Fase IV (open beta): chi entra da telefono deve poter giocare.
+- Cosa fare: (1) movimento con un joystick virtuale (in basso a sinistra, solo con un puntatore `touch`, mai su desktop) che produce gli stessi assi di WASD in `src/kernel/input.ts`, senza un percorso nuovo nel kernel (in multigiocatore passa dagli stessi tasti, `keys`, ADR-0139); (2) orbita con il trascinamento a un dito fuori dai pannelli e zoom con il pizzico a due dita, sugli stessi parametri della camera di rotella e tasto destro (`render/renderer.ts`), con i limiti di oggi; il tocco breve resta il click, la pressione lunga il destro; (3) i comandi di gioco che oggi sono solo tasti (E interagisci, T pronuncia, inventario, borsa delle rune, chat, mappa, `,` `.` e gli altri del pannello dei controlli) come pulsanti a scomparsa in basso a destra, i più usati sempre visibili e il resto in un menu; (4) niente zoom della pagina né scorrimento col doppio tocco sopra la scena (`touch-action`, `viewport`), la tastiera virtuale non copre il campo di testo. Leggere prima `#convalida-browser` e `#mondo3d`.
+- Test: un test sulla traduzione joystick → assi e pizzico → zoom (funzioni pure); suite e typecheck verdi.
+- Browser: sì. Chrome con una finestra stretta e gli eventi di tocco simulati (`TouchEvent`/`PointerEvent` con `pointerType: 'touch'` dalla console): il viandante si muove, la camera orbita e zooma, E apre un contenitore, T pronuncia; screenshot in orizzontale a 844 × 390. Desktop invariato (screenshot). La prova sul telefono vero la fa l'autore: scrivere nell'esito come avviare la preview sulla rete (`--host`).
+- Quando è fatto: commit su `task/T387`, esito con cosa è provato e cosa no. Sicurezza: nessuna superficie nuova (solo client).
+
+### T388 · L'HUD su un telefono: meno ingombro, le istruzioni in un aiuto, «gira il telefono» in verticale — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): l'HUD è troppo affollato per lo schermo; in verticale non c'è spazio per l'interfaccia. Le istruzioni con i controlli in basso occupano spazio che manca. Dipende da T387 per i pulsanti del tocco (lo spazio va diviso con loro).
+- Cosa fare: (1) in verticale su uno schermo piccolo (puntatore grossolano e lato corto sotto una soglia) una schermata a tutto schermo «Gira il telefono» (testo nella lingua dell'interfaccia, un'icona), il gioco in pausa grafica dietro; (2) in orizzontale su schermo piccolo l'HUD ridotto: le istruzioni dei controlli tolte dal fondo e messe in una finestrella di aiuto aperta da un pulsante «?» (anche su desktop il pulsante c'è; su desktop le istruzioni restano dove sono se c'è spazio), pannelli e messaggi (`#topleft`, `#messages`, `#quests`, la frase, la borsa) più piccoli o richiudibili, nulla sopra il joystick e i pulsanti di T387; (3) solo CSS e il DOM di `src/ui/` (`hud.ts`, `src/style.css`), con i token del tema (`--space-*`, `--text-*`), niente valori sparsi.
+- Test: typecheck e suite verdi; `tests/theme.test.ts` se tocca il tema.
+- Browser: sì. Screenshot a 844 × 390 (orizzontale) e 390 × 844 (verticale: la schermata di rotazione), e su desktop invariato; la finestra d'aiuto si apre e chiude. Prova sul telefono vero dell'autore dopo.
+- Dipende da T387.
+- Quando è fatto: commit su `task/T388` con gli screenshot descritti nell'esito. Sicurezza: nessuna superficie nuova.
+
+### T389 · I laboratori MJ dei voxel su un telefono: la preview visibile, lo zoom, gli strumenti nei menu — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 3
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): il laboratorio MJ dei voxel è difficile da usare, tutto compresso, la preview non si vede affatto e non si può zoomare; i pulsanti affollano l'interfaccia. Le pagine dei giocatori sono la sandbox 3D `/lab/3d/` e l'editor `/lab/editor/` (con la barra delle carte fatte a mano, `lab/handmade/`, ADR-0169): sistemarle entrambe, prima quella che la pagina `site/laboratori.html` apre per prima. Dipende da T387 per i gesti del tocco (riusare le stesse funzioni di orbita e pizzico se si può importarle senza che `src/` importi `lab/`).
+- Cosa fare: (1) su schermo stretto un layout a schede o a pannelli richiudibili: la preview 3D occupa lo spazio principale e ha una misura vera (oggi non si vede), l'XML e gli altri pannelli si aprono sopra o accanto a richiesta; (2) orbita a un dito e zoom a pizzico sulla preview; (3) gli strumenti (pulsanti) raggruppati in menu a tendina o a scomparsa, i 3-4 più usati visibili; (4) su desktop nessuna perdita di funzioni (stesso layout o il nuovo solo sotto una larghezza).
+- Test: typecheck e suite verdi.
+- Browser: sì. Screenshot di entrambe le pagine a 844 × 390, 390 × 844 e desktop; la preview si vede, ruota e zooma con tocchi simulati; un programma si esegue e si salva come bozza.
+- Dipende da T387.
+- Quando è fatto: commit su `task/T389`, esito con gli screenshot descritti. Sicurezza: nessuna superficie nuova (pagine dei laboratori, nessuna rotta nuova).
+
+### T390 · Il SoundLab su un telefono: UX da rifinire — `da fare`
+- Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 4
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): il SoundLab (`/lab/suono/`, T222) va meglio del laboratorio dei voxel ma ha margine di miglioramento nell'UX. Nessun difetto preciso detto: il task li trova e li corregge con lo stesso criterio di T389 (contenuto principale grande, strumenti nei menu, tocco).
+- Cosa fare: aprire la pagina a 844 × 390 e 390 × 844, elencare ciò che è stretto, illeggibile o non toccabile (piano roll a trascinamento col dito, manopole, preset, volume e muto per traccia, editor XML), correggere i più gravi con pannelli richiudibili e menu, riusando ciò che T389 introduce; scrivere nell'esito ciò che resta.
+- Test: typecheck e `tests/soundlab.test.ts` verdi.
+- Browser: sì, screenshot prima e dopo alle due misure e su desktop.
+- Dipende da T389.
+- Quando è fatto: commit su `task/T390` con l'elenco dei difetti e quelli corretti. Sicurezza: nessuna superficie nuova.
