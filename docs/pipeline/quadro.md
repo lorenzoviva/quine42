@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 439 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 441 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -30,12 +30,10 @@ Aggiornato il 14/11/2026, epoca 439 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D59 (T364):** la chiave OpenRouter da soli sul PC salvata in chiaro in `universes/.keys/openrouter.json` (solo dev/preview, solo loopback), eccezione alla regola 9 «mai su disco». Consiglio: tenerla (comodità in locale, nessuna esposizione in produzione).
-
-- **D58 (T391, integrato `7c8588a6`, kernel 0.7.9: Carbon e Hydrogen in `prices.ts`, giro su Claude preparato):** Carbon 4/12 a 0,75 $ per riuscita, Hydrogen 4/12 a 0,68 $, Argon 6/8 a 0,37 $; consiglio 1 (Argon a ogni taglia, provvisorio fino a T392).
+- **D58 (riformulata, epoca 441):** fino a T392 lo Scultore usa Argon a ogni taglia? (oggi 3.8 Flash a Grande, 0/6). Consiglio sì; riparazione del prompt dopo T392.
 - **D57 (T355):** sospesa dall'autore (14/11): prima T391 confronta Carbon, Hydrogen, Sonnet 5.5, Opus 5.5 con Argon a costo per struttura riuscita (tetto 10 $); per i due Claude serve la chiave OpenRouter (D55). Diviso (autore 14/11): T391 fa Carbon e Hydrogen e prepara il comando; **T392** (Sonnet, Opus, Fable sull'abbonamento) lo lanci a mano dopo il reset di Claude del 19/11 (16:59 CET), **da solo**: aspetta che non ci sia niente in corso, sospendi gli altri provider e non lanciare altri task finché non finisce.
 
-- **D55 (T362):** prova pagata OpenRouter (chiave da creare), testo del viandante a Jev via OpenRouter (consiglio B), prezzo 3.5 Flash (consiglio sì).
+- **D55 (T362):** chiave OpenRouter: la mette l’autore (prova a poche chiamate, giri dello Scultore con le chiavi dirette). Restano 2) testo del viandante a Jev solo via OpenRouter ZDR, 3) prezzo 3.5 Flash 1,50/9,00: consiglio sì a entrambe.
 
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
