@@ -85,3 +85,52 @@
 .hm-box [hidden] {
   display: none !important;
 }
+/* On a small screen (T389, the labs' COMPACT_QUERY in lab/touch.ts): one row with the state and «Salva»; the rest from «⋯» */
+.hm-more {
+  display: none;
+}
+@media (max-width: 900px), (max-height: 520px) {
+  .hm-bar {
+    flex-wrap: nowrap;
+    padding: 4px 8px;
+  }
+  .hm-box.hm-open .hm-bar {
+    flex-wrap: wrap;
+  }
+  .hm-state {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .hm-box:not(.hm-open) .hm-name,
+  .hm-box:not(.hm-open) .hm-model,
+  .hm-box:not(.hm-open) .hm-new,
+  .hm-box:not(.hm-open) .hm-home {
+    display: none;
+  }
+  .hm-box.hm-open .hm-name {
+    width: 100%;
+    order: 10;
+  }
+  .hm-box.hm-open .hm-model {
+    order: 11;
+  }
+  .hm-box.hm-open .hm-new,
+  .hm-box.hm-open .hm-home {
+    order: 12;
+    margin-left: 0;
+  }
+  .hm-more {
+    display: inline-block;
+  }
+  .hm-dirty {
+    white-space: nowrap;
+  }
+  .hm-box button,
+  .hm-box select,
+  .hm-box input {
+    min-height: 32px;
+  }
+}

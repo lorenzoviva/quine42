@@ -118,12 +118,15 @@ export async function startCards(host: CardsHost): Promise<CardsBar | undefined>
   const dirty = el('span', { class: 'hm-dirty', hidden: '', title: 'Le modifiche restano su questa macchina finché non salvi' }, '● non salvato');
   const login = el('span', { class: 'hm-login', hidden: '' });
   const home = el('a', { class: 'hm-home', href: '/site/laboratori.html', title: 'I laboratori e le tue carte' }, 'Le tue carte');
+  // On a small screen (T389) the name, the class, the size and the links open from here; on a desktop it is not drawn
+  const more = el('button', { class: 'hm-more', type: 'button', title: 'Nome, classe e taglia della carta', 'aria-expanded': 'false' }, '⋯');
   const errors = el('ul', { class: 'hm-errors', hidden: '', 'aria-live': 'polite' });
   const modelOnly = el('span', { class: 'hm-model' }, cls, size);
-  const bar = el('div', { class: 'hm-bar', role: 'region', 'aria-label': 'Carta fatta a mano' }, badge, state, name, modelOnly, saveBtn, asNew, dirty, login, home);
+  const bar = el('div', { class: 'hm-bar', role: 'region', 'aria-label': 'Carta fatta a mano' }, badge, state, name, modelOnly, saveBtn, asNew, dirty, login, home, more);
   const box = el('div', { class: 'hm-box' }, bar, errors);
   if (host.kind === 'sound') modelOnly.hidden = true;
   host.mount.prepend(box);
+  more.onclick = () => more.setAttribute('aria-expanded', String(box.classList.toggle('hm-open')));
 
   const say = (text: string) => (state.textContent = text);
   const showErrors = (list: string[]) => {
