@@ -37,7 +37,8 @@ export default defineConfig(({ mode }) => {
   // How the worlds of this process prove themselves to the store (T120, ADR-0102): only in memory, a new one at every start.
   const internal = newSecret();
   // The only holder of the keys of OpenRouter (T363, ADR-0197): the players' in memory, the server's from `.env` with its cap; the worlds hear who holds one.
-  const openrouter = new OpenRouterGate({ apiKey: env.OPENROUTER_API_KEY, dailyCap: env.OPENROUTER_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'openrouterSpend') });
+  // Alone on this machine (T364) a key linked from here is also kept beside the universes, as .env keeps the server's: never in production.
+  const openrouter = new OpenRouterGate({ apiKey: env.OPENROUTER_API_KEY, dailyCap: env.OPENROUTER_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'openrouterSpend'), keysFile: path.join(serverPath(universesDir, 'keys'), 'openrouter.json') });
   openrouter.onChange = (keys) => void tellKeys(keys);
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
@@ -50,7 +51,8 @@ export default defineConfig(({ mode }) => {
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
       typesafeProxy(typesafe),
-      openrouterProxy(openrouter, { accounts, internal }),
+      // The worlds go through OpenRouter with the players' keys where who hosts gave its key, or has none of Google (worldsPayWith): the lobby offers the link there.
+      openrouterProxy(openrouter, { accounts, internal }, () => openrouter.serverKey || !gemini.available),
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
       universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()), worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
       accountRoute(accounts),

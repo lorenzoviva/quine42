@@ -14,6 +14,8 @@ import { keepProfile } from '../src/session/socket';
 import { $, alertBox, formatCredits, hideAlert, initNav, pageLogin, pageSignOut, pickUniverse, playLink, universes, UNIVERSE_KEY, store, stored, type Who } from './shared';
 import { SKIN_EVENT, skinColor } from './skin-core';
 import { rechargesAvailable } from '../src/ui/recharges';
+import { OpenRouterLink, openRouterBox } from '../src/ui/openrouter';
+import { WANDERER_HEADER } from '../src/kernel/universes';
 
 export { formatCredits, pickUniverse, playLink };
 
@@ -358,7 +360,19 @@ class ProfilePage {
 async function start(): Promise<void> {
   initNav();
   const who = await pageLogin($('profile-grid'));
-  if (who) await new ProfilePage(who).start();
+  if (who) {
+    await new ProfilePage(who).start();
+    await showKeyLink(who);
+  }
+}
+
+/** «Collega OpenRouter» (T364): the wanderer's key, where this server has the route; the way back of the flow lands here and finishes. */
+async function showKeyLink(who: Who): Promise<void> {
+  const link = new OpenRouterLink(async (): Promise<Record<string, string>> => (who.signed ? { Authorization: `Bearer ${await who.signed.freshToken()}` } : who.localId ? { [WANDERER_HEADER]: who.localId } : {}));
+  if (!(await link.status())) return;
+  const slot = $('openrouter-slot');
+  slot.replaceChildren(openRouterBox(link));
+  slot.hidden = false;
 }
 
 if (typeof document !== 'undefined' && document.getElementById('profile-grid')) {

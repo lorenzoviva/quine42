@@ -30,6 +30,8 @@ export const SERVER_FOLDERS = {
   campaign: ['.campaign'],
   /** The identities the invite verifier made, for a server without Firebase (ADR-0184 §8, ADR-0194, `invites.ts`). */
   identities: ['.identities.json'],
+  /** The keys of OpenRouter linked alone on this machine (T364, ADR-0197): only the development server and the preview, never production. */
+  keys: ['.keys'],
 } as const satisfies Record<string, readonly [string, string?]>;
 
 export type ServerFolder = keyof typeof SERVER_FOLDERS;

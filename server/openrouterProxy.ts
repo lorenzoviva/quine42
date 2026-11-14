@@ -7,6 +7,9 @@
 // turn of the commons as the kernel sorts it) and are told whose key answered (`x-quine-paid-by`). A 402 of OpenRouter puts that key out of the
 // turn (exhausted) and the call goes to the next; a 401 forgets the key. The server's key alone has a daily cap in dollars; a player's has the limit
 // OpenRouter gives it and the ceiling of the lobby, held in the world.
+// Whoever plays alone on this machine (T364): a key linked from this machine may also be kept in a file beside the universes (`universes/.keys/`,
+// `keysFile`), so that it outlives a restart as `.env` does; only the development server and the preview give the file, never production. What
+// the player sees of a key is its fingerprint and what OpenRouter says of its limit (`GET /api/v1/key`: limit, remaining, usage), asked here.
 
 import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
@@ -17,12 +20,14 @@ import { accessRefusal, MAX_BODY, readBody, STATUS_CAP, TooLarge } from './gemin
 import { callerOf, isJson, type Access } from './access';
 import { Rates, type Pace } from './rates';
 import { costOf } from '../src/kernel/ai/prices';
-import { OPENROUTER_API, OPENROUTER_JEV, OPENROUTER_MODELS, PAID_BY_HEADER, PAYERS_HEADER, reportedCost } from '../src/kernel/ai/openrouter';
+import { type KeyLimits, OPENROUTER_API, OPENROUTER_JEV, OPENROUTER_MODELS, PAID_BY_HEADER, PAYERS_HEADER, reportedCost } from '../src/kernel/ai/openrouter';
 import { JEV_MAX_BODY, JEV_MAX_QUESTIONS } from '../src/kernel/ai/decisions';
+import { writeAtomic } from './lockedFile';
 import { validWandererId } from '../src/kernel/wandererIds';
 import type { KeyHolders, KeyPolicy } from '../src/kernel/credits';
 
 export { PAID_BY_HEADER, PAYERS_HEADER };
+export type { KeyLimits };
 /** USD a day for the server's key, unless `.env` says otherwise (OPENROUTER_TETTO_GIORNALIERO). */
 export const DEFAULT_OPENROUTER_CAP = 10;
 /** What a call in flight holds of the cap, besides its prompt. */
@@ -34,6 +39,8 @@ export const FLOWS_PER_WANDERER = 4;
 export const KEY_PACE: Pace = { burst: 6, perSecond: 1 / 30 };
 /** Calls per key owner: a world that asks in somebody's name is contained here as `heavy` contains a wanderer (ADR-0107); far above a game. */
 export const CALL_PACE: Pace = { burst: 120, perSecond: 2 };
+/** How long what OpenRouter said of a key's limit is told again without asking (ms). */
+export const LIMITS_TTL = 60 * 1000;
 /** A key of OpenRouter as it is written (`sk-or-v1-…`): anything else is not kept. */
 const KEY_RE = /^sk-or-[A-Za-z0-9_-]{8,256}$/;
 /** An authorization code and a verifier (RFC 7636: 43 to 128 of these characters). */
@@ -62,6 +69,11 @@ export interface OpenRouterGateOptions {
   now?: () => number;
   /** Calls per key owner; the default is CALL_PACE. */
   callPace?: Pace;
+  /**
+   * Alone on this machine (T364): the file beside the universes where the keys linked from this machine are kept across restarts
+   * (`universes/.keys/openrouter.json`). Only the development server and the preview give it; the production server never.
+   */
+  keysFile?: string;
 }
 
 export interface OpenRouterAnswer {
@@ -136,6 +148,28 @@ interface HeldKey {
   key: string;
   fingerprint: string;
   exhausted: boolean;
+  /** Kept in the file beside the universes (alone on this machine, T364). */
+  kept?: boolean;
+  /** What OpenRouter last said of its limit, and when. */
+  limits?: { at: number; view: KeyLimits };
+}
+
+const finite = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+/** What `GET /api/v1/key` answered, read field by field: undefined if it is not one. */
+export function readKeyLimits(j: unknown): KeyLimits | undefined {
+  const d = j && typeof j === 'object' ? (j as { data?: unknown }).data : undefined;
+  if (!d || typeof d !== 'object') return undefined;
+  const r = d as Record<string, unknown>;
+  const label = typeof r.label === 'string' ? r.label.slice(0, 100) : undefined;
+  return {
+    ...(label ? { label } : {}),
+    limit: finite(r.limit),
+    remaining: finite(r.limit_remaining),
+    usage: finite(r.usage) ?? 0,
+    reset: typeof r.limit_reset === 'string' && /^(daily|weekly|monthly)$/.test(r.limit_reset) ? r.limit_reset : null,
+    freeTier: r.is_free_tier === true,
+  };
 }
 
 export class OpenRouterGate {
@@ -161,6 +195,7 @@ export class OpenRouterGate {
     this.now = opts.now ?? (() => Date.now());
     this.calls = new Rates(opts.callPace ?? CALL_PACE, () => this.now());
     this.restore();
+    this.restoreKeys();
   }
 
   /** Whether who hosts gave this server a key of its own. */
@@ -187,20 +222,54 @@ export class OpenRouterGate {
     return { holders: holders.sort(), exhausted: exhausted.sort() };
   }
 
-  /** Keeps a key for a wanderer (pasted, or exchanged): its fingerprint back, never the key. A key that is not one is not kept. */
-  setKey(id: string, key: unknown): { fingerprint: string } | { error: string; status: number } {
+  /**
+   * Keeps a key for a wanderer (pasted, or exchanged): its fingerprint back, never the key. A key that is not one is not kept. With `keep`
+   * (who linked it is on this machine) and the file of this server alone (`keysFile`), it is also written there.
+   */
+  setKey(id: string, key: unknown, keep = false): { fingerprint: string } | { error: string; status: number } {
     if (typeof key !== 'string' || !KEY_RE.test(key)) return { status: 400, error: 'non è una chiave di OpenRouter' };
     const fingerprint = keyFingerprint(key);
-    this.keys.set(id, { key, fingerprint, exhausted: false });
+    const kept = keep && !!this.opts.keysFile;
+    const was = this.keys.get(id)?.kept;
+    this.keys.set(id, { key, fingerprint, exhausted: false, ...(kept ? { kept } : {}) });
+    if (kept || was) this.saveKeys();
     this.changed();
     return { fingerprint };
   }
 
-  /** Forgets a wanderer's key: true if there was one. */
+  /** Forgets a wanderer's key, in memory and in the file: true if there was one. */
   forgetKey(id: string): boolean {
-    const had = this.keys.delete(id);
-    if (had) this.changed();
-    return had;
+    const k = this.keys.get(id);
+    if (!k) return false;
+    this.keys.delete(id);
+    if (k.kept) this.saveKeys();
+    this.changed();
+    return true;
+  }
+
+  /**
+   * What OpenRouter says of a wanderer's key (`GET /api/v1/key`, with the key, from here): its limit, what is left, what it spent. Told again
+   * for a minute without asking; a 401 forgets the key (revoked). Undefined without a key; an error when OpenRouter did not say.
+   */
+  async keyLimits(id: string): Promise<KeyLimits | { error: string; status: number } | undefined> {
+    const k = this.keys.get(id);
+    if (!k) return undefined;
+    const now = this.now();
+    if (k.limits && now - k.limits.at < LIMITS_TTL) return k.limits.view;
+    let upstream: Response;
+    try {
+      upstream = await this.fetchImpl(`${OPENROUTER_API}/v1/key`, { method: 'GET', headers: this.headers(k.key) });
+    } catch {
+      return { status: 502, error: 'OpenRouter non raggiungibile' };
+    }
+    if (upstream.status === 401) {
+      if (this.keys.get(id) === k) this.forgetKey(id);
+      return undefined;
+    }
+    const view = upstream.ok ? readKeyLimits(await upstream.json().catch(() => undefined)) : undefined;
+    if (!view) return { status: 502, error: 'OpenRouter non ha detto il limite della chiave' };
+    k.limits = { at: now, view };
+    return view;
   }
 
   /** Begins a PKCE flow for a wanderer: the `state` the browser sends to OpenRouter and brings back with the code. */
@@ -233,7 +302,7 @@ export class OpenRouterGate {
    * The exchange of a PKCE flow (https://openrouter.ai/docs/guides/overview/auth/oauth): the code and the verifier the browser brought, with
    * the `state` this gate gave it, go to OpenRouter from here, and the key that comes back stays here. The browser gets the fingerprint.
    */
-  async exchange(id: string, said: { code?: unknown; verifier?: unknown; state?: unknown }): Promise<{ fingerprint: string } | { error: string; status: number }> {
+  async exchange(id: string, said: { code?: unknown; verifier?: unknown; state?: unknown }, keep = false): Promise<{ fingerprint: string } | { error: string; status: number }> {
     const code = said?.code;
     const verifier = said?.verifier;
     if (typeof code !== 'string' || !CODE_RE.test(code) || typeof verifier !== 'string' || !VERIFIER_RE.test(verifier)) return { status: 400, error: 'codice o verifier non validi' };
@@ -257,7 +326,7 @@ export class OpenRouterGate {
     }
     const key = j && typeof j === 'object' ? (j as { key?: unknown }).key : undefined;
     if (!upstream.ok || typeof key !== 'string') return { status: upstream.ok ? 502 : 400, error: upstream.ok ? 'OpenRouter non ha dato una chiave' : 'OpenRouter ha rifiutato il codice: ricomincia' };
-    return this.setKey(id, key);
+    return this.setKey(id, key, keep);
   }
 
   /** USD the server's key spent today, what is in flight excluded. */
@@ -284,9 +353,8 @@ export class OpenRouterGate {
       const upstream = await this.fetchImpl(url, { method: 'POST', headers: this.headers(k.key), body: req.body, ...(signal ? { signal } : {}) });
       const text = await upstream.text();
       if (upstream.status === 401) {
-        // Revoked, or never good: nothing more on it, and the next of the turn pays.
-        this.keys.delete(id);
-        this.changed();
+        // Revoked, or never good: nothing more on it (nor in the file), and the next of the turn pays.
+        this.forgetKey(id);
         continue;
       }
       if (upstream.status === 402) {
@@ -376,6 +444,37 @@ export class OpenRouterGate {
     this.save();
   }
 
+  /** The keys linked alone on this machine, from the file beside the universes: each read as a key, the rest left out. */
+  private restoreKeys(): void {
+    const file = this.opts.keysFile;
+    if (!file) return;
+    let j: unknown;
+    try {
+      j = JSON.parse(fs.readFileSync(file, 'utf8'));
+    } catch {
+      return;
+    }
+    const said = j && typeof j === 'object' ? (j as { keys?: unknown }).keys : undefined;
+    if (!said || typeof said !== 'object' || Array.isArray(said)) return;
+    for (const [id, key] of Object.entries(said as Record<string, unknown>)) {
+      if (validWandererId(id) && typeof key === 'string' && KEY_RE.test(key)) this.keys.set(id, { key, fingerprint: keyFingerprint(key), exhausted: false, kept: true });
+    }
+  }
+
+  /** Writes the kept keys whole (a temporary file, then a rename); a failure is said without a key, and the key stays in memory. */
+  private saveKeys(): void {
+    const file = this.opts.keysFile;
+    if (!file) return;
+    const keys: Record<string, string> = {};
+    for (const [id, k] of this.keys) if (k.kept) keys[id] = k.key;
+    try {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      writeAtomic(file, JSON.stringify({ keys }, null, 1) + '\n');
+    } catch (e) {
+      console.warn(`chiavi di OpenRouter non salvate accanto agli universi: ${(e as NodeJS.ErrnoException)?.code ?? 'errore'}`);
+    }
+  }
+
   private restore(): void {
     this.roll();
     const file = this.opts.ledgerFile;
@@ -432,6 +531,8 @@ export interface OpenRouterRouteOptions {
   models?: boolean;
   /** For the tests: only by code. */
   keyPace?: Pace;
+  /** Whether the worlds of many of this server pay through OpenRouter (T364): told to the lobby, which offers the link only there. */
+  worlds?: () => boolean;
 }
 
 /**
@@ -483,17 +584,25 @@ export function openrouterRoute(gate: OpenRouterGate, o: OpenRouterRouteOptions)
         if (door === 'status') {
           if (method !== 'GET') return send(res, 405, { error: 'solo GET' });
           const own = !who.server && who.id ? gate.keyOf(who.id) : undefined;
-          return send(res, 200, { available: gate.serverKey || (!!own && !own.exhausted), linked: !!own, server: gate.serverKey, ...(own ? { fingerprint: own.fingerprint, exhausted: own.exhausted } : {}) });
+          return send(res, 200, { available: gate.serverKey || (!!own && !own.exhausted), linked: !!own, server: gate.serverKey, ...(o.worlds ? { worlds: o.worlds() } : {}), ...(own ? { fingerprint: own.fingerprint, exhausted: own.exhausted } : {}) });
         }
         // A key is a wanderer's: the world of this server, and whoever has no id, link nothing.
         if (who.server || !who.id) return send(res, 403, { error: 'per collegare una chiave serve un account' });
+        // What OpenRouter says of the key (T364): its limit and what is left, never the key; asked at most once a minute, outside the doors' pace.
+        if (door === 'key' && method === 'GET') {
+          if (!gate.keyOf(who.id)) return send(res, 200, { linked: false });
+          const limits = await gate.keyLimits(who.id);
+          const still = gate.keyOf(who.id);
+          if (!still) return send(res, 200, { linked: false, forgotten: true });
+          return send(res, 200, { linked: true, fingerprint: still.fingerprint, exhausted: still.exhausted, ...(limits && !('error' in limits) ? { limits } : limits ? { limitsError: limits.error } : {}) });
+        }
         if (!keyRate.take(who.id)) return send(res, 429, { error: 'troppe richieste: riprova tra poco' });
         if (door === 'begin') {
           if (method !== 'POST') return send(res, 405, { error: 'solo POST' });
           return send(res, 200, gate.beginFlow(who.id));
         }
         if (method === 'DELETE') return send(res, 200, { forgotten: gate.forgetKey(who.id) });
-        if (method !== 'POST') return send(res, 405, { error: 'solo POST o DELETE' });
+        if (method !== 'POST') return send(res, 405, { error: 'solo GET, POST o DELETE' });
         if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
         let said: Record<string, unknown>;
         try {
@@ -508,7 +617,8 @@ export function openrouterRoute(gate: OpenRouterGate, o: OpenRouterRouteOptions)
           return send(res, 400, { error: 'corpo non leggibile' });
         }
         // The fallback: a key pasted by the player (ADR-0184 punto 2); the main way: the code and the verifier of the flow begun here.
-        const r = 'key' in said ? gate.setKey(who.id, said.key) : await gate.exchange(who.id, said);
+        // Alone on this machine (T364) the key is also kept in the file beside the universes, where this server has one (never production).
+        const r = 'key' in said ? gate.setKey(who.id, said.key, who.local) : await gate.exchange(who.id, said, who.local);
         if ('error' in r) return send(res, r.status, { error: r.error });
         send(res, 200, { linked: true, fingerprint: r.fingerprint });
       } catch (e) {
@@ -519,8 +629,8 @@ export function openrouterRoute(gate: OpenRouterGate, o: OpenRouterRouteOptions)
   };
 }
 
-export function openrouterProxy(gate: OpenRouterGate, access: Access): Plugin {
-  const handler = openrouterRoute(gate, { access, models: true });
+export function openrouterProxy(gate: OpenRouterGate, access: Access, worlds?: () => boolean): Plugin {
+  const handler = openrouterRoute(gate, { access, models: true, ...(worlds ? { worlds } : {}) });
   return {
     name: 'quine-openrouter-proxy',
     configureServer(server) {

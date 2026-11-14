@@ -16,6 +16,7 @@ import { checkKernelVersion, KERNEL_VERSION } from '../kernel/version';
 import type { BringAnswer, BringRef, KinView } from '../kernel/bring';
 import { CardChoicePanel } from './cardchoice';
 import { el } from './dom';
+import { openRouterBox, PROPOSED_LIMIT, type OpenRouterLink } from './openrouter';
 
 export interface LobbyOptions {
   name: string;
@@ -36,6 +37,11 @@ export interface LobbyOptions {
    * (the store, on the disk: the world reads it when it starts). The cards come with «Entra nel mondo», before entering.
    */
   cards?: { load: () => Promise<KinView | undefined>; bring: (refs: BringRef[]) => Promise<BringAnswer>; has: (id: string) => boolean };
+  /**
+   * «Collega OpenRouter» (T364, ADR-0197): the route of this tab's key. In a game of many it shows where the worlds of this server pay
+   * through OpenRouter and the wanderer pays for themselves; alone, where the game has no key of Google. The ceiling is the proposed limit.
+   */
+  openrouter?: OpenRouterLink;
 }
 
 export interface LobbyResult {
@@ -332,6 +338,17 @@ export class LobbyScreen {
 
     const statusEl = el('div', { class: 'lobby-status' });
 
+    // The player's key of OpenRouter (T364): asked of the server, shown only where it pays something (the worlds go through OpenRouter, or alone).
+    const keyBlock = el('div', { class: 'lobby-section openrouter-settings', hidden: '' });
+    const link = this.opts.openrouter;
+    if (link && ownPurse) {
+      void link.status().then((st) => {
+        if (!st || (!alone && !st.worlds)) return;
+        keyBlock.replaceChildren(openRouterBox(link, { proposed: () => (alone ? PROPOSED_LIMIT : Number(capInput.value) || PROPOSED_LIMIT), alone }));
+        keyBlock.hidden = false;
+      });
+    }
+
     const wandererBlock = el(
       'div',
       { class: 'lobby-section wanderer-settings' },
@@ -474,7 +491,9 @@ export class LobbyScreen {
       masterBlock,
       ...(choice ? [choice.root] : []),
       ...(minimumsBlock ? [minimumsBlock] : []),
-      ...(alone ? [] : [wandererBlock, cardsBlock]),
+      ...(alone ? [] : [wandererBlock]),
+      keyBlock,
+      ...(alone ? [] : [cardsBlock]),
       statusEl,
       actions,
     );

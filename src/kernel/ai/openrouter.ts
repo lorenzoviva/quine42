@@ -28,6 +28,19 @@ export const PAYERS_HEADER = 'x-quine-payers';
 /** The header with which the gate says whose key answered: a wanderer's id; absent on the server's key. */
 export const PAID_BY_HEADER = 'x-quine-paid-by';
 
+/** What OpenRouter says (T364) of a key's limit (`GET /api/v1/key`), in dollars: never the key. `limit` and `remaining` are null for a key without a limit. */
+export interface KeyLimits {
+  label?: string;
+  limit: number | null;
+  remaining: number | null;
+  /** Dollars spent on the key, ever. */
+  usage: number;
+  /** When the limit starts again (`daily`, `weekly`, `monthly`), null if never. */
+  reset: string | null;
+  /** Whether the account never bought credits. */
+  freeTier: boolean;
+}
+
 /** Whose keys may pay a call asked by `chi`, in order (T363): what the kernel decides; empty, the server's key. */
 export type KeyPayers = (chi: string) => string[];
 

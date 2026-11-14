@@ -460,6 +460,7 @@ Modello di una voce:
 - Task: T363
 - Test: `tests/sicurezza/openrouter.test.ts`, `tests/openrouter-keys.test.ts`
 - Esito: chiusa da T363 (ADR-0197), 14/11/2026, branch `task/T363`: le contromisure nascono con il varco.
+- Aggiornamento (T364, ADR-0200): superficie in più, il collegamento dalle pagine (`src/ui/openrouter.ts`: il verifier nel `sessionStorage` della scheda, mai una chiave; il ritorno toglie codice e state dall'indirizzo e confronta lo state della scheda), la porta `GET /api/openrouter/key` (il limite letto da `GET /api/v1/key` dal server, campo per campo, mai la chiave; detto di nuovo per un minuto, così una pagina che chiede di continuo non moltiplica le chiamate a OpenRouter), `status.worlds`, e **da soli sul PC** il file `universes/.keys/openrouter.json`: lo dà al varco solo `vite.config.ts` (sviluppo e preview, mai `server/production.ts`), ci va solo una chiave collegata da un chiamante `local`, ogni voce si rilegge controllata, esce quando si scollega o è revocata; `universes/` non si serve (ADR-0109). Test: `tests/openrouter-link.test.ts`. La proprietà resta: sul server di produzione una chiave di un giocatore non tocca il disco.
 
 ## Le prove dell'autore
 
