@@ -7,12 +7,13 @@ import { AIR, type PaletteEntry } from '../../src/mj/engine';
 import { symbolName } from '../../src/mj/symbols';
 import { pitchOf, SCALES, soundPrograms, type Instrument, type SoundSettings, type SoundTrack } from '../../src/mj/sound';
 import { escapeHtml, highlightXml } from '../editor/syntax';
-import { brushFor, leadComment, letterAt, levels, noteName, paintCell, retouchCount, rollCell, ROLL, seedNote, setSoundAttr, setTrackVolume, stepSlice, wavBytes, withSeedNote, type GridData } from './logic';
+import { brushFor, isSoundPane, leadComment, letterAt, levels, noteName, paintCell, retouchCount, rollCell, ROLL, seedNote, setSoundAttr, setTrackVolume, SOUND_PANES, stepSlice, wavBytes, withSeedNote, type GridData, type SoundPane } from './logic';
 import { LoopPlayer } from './player';
 import { VoxelView, type VoxelStyle } from './voxels';
 import type { RunReply, SoundReply, SoundRequest } from './worker';
 import { startCards, type CardsBar } from '../handmade/bar';
 import { sourceFromSearch } from '../handmade/logic';
+import { COMPACT_QUERY } from '../touch';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const DRAFT_KEY = 'quine.soundlab.bozza';
@@ -206,7 +207,9 @@ function audition(c: { x: number; y: number; z: number }, letter: string): void 
 function togglePlay(): void {
   playWanted = !playWanted;
   const b = $('play');
-  b.textContent = playWanted ? '⏸ Ferma' : '▶ Suona';
+  // The icon and the word apart: on a small screen the word is not drawn (T390)
+  b.querySelector('.icon')!.textContent = playWanted ? '⏸' : '▶';
+  b.querySelector('.label')!.textContent = playWanted ? ' Ferma' : ' Suona';
   b.classList.toggle('on', playWanted);
   if (!playWanted) return player.stop();
   player.unlock();
@@ -720,11 +723,65 @@ function bindRoll(): void {
       gridChanged();
     }
   });
-  c.addEventListener('pointerup', () => {
+  const end = () => {
     stroke = undefined;
     if (touched) writeRetouches();
     touched = false;
+  };
+  c.addEventListener('pointerup', end);
+  // A finger the browser takes back (a gesture of the system) ends the stroke as lifting it would (T390)
+  c.addEventListener('pointercancel', end);
+  // A roll that changes size (a phone turned, a pane shown, T390) is drawn again at its new size
+  new ResizeObserver(() => (rollDirty = true)).observe(c);
+}
+
+// ---- the SoundLab on a small screen (T390) ----
+// Under COMPACT_QUERY the CSS shows one pane at a time (SOUND_PANES: the roll first) and the header in one row: these are its tabs,
+// and the menu «⋯» where the less used tools of the header go. Over the threshold they are not drawn and the header is as it was.
+
+const compact = matchMedia(COMPACT_QUERY);
+
+function showPane(pane: SoundPane): void {
+  $('main').dataset.pane = pane;
+  for (const b of $('panes').querySelectorAll<HTMLElement>('button[data-pane]')) b.classList.toggle('on', b.dataset.pane === pane);
+  rollDirty = true;
+}
+
+function bindCompact(): void {
+  for (const b of $('panes').querySelectorAll<HTMLElement>('button[data-pane]')) {
+    const pane = b.dataset.pane;
+    if (isSoundPane(pane)) b.addEventListener('click', () => showPane(pane));
+  }
+  // The tools that go into «⋯», each with a mark where it was: the developers' ones are gone in the players' build.
+  const menu = $('header-more');
+  const items = [$('seed').closest('label'), $('dice'), $('once'), $('scope'), $('open'), $('save'), $('dirty'), $('copy'), $('wav'), $('wav-loop').closest('label')].filter(
+    (e): e is HTMLElement => e instanceof HTMLElement,
+  );
+  const marks = items.map((el) => {
+    const mark = document.createComment('');
+    el.before(mark);
+    return mark;
   });
+  const button = $('more');
+  const close = () => {
+    menu.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+  };
+  const place = () => {
+    if (compact.matches) menu.append(...items);
+    else items.forEach((el, i) => marks[i].after(el));
+    close();
+    rollDirty = true;
+  };
+  button.addEventListener('click', (e) => {
+    e.stopPropagation();
+    button.setAttribute('aria-expanded', String(menu.classList.toggle('open')));
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (!menu.contains(e.target as Node) && !button.contains(e.target as Node)) close();
+  });
+  compact.addEventListener('change', place);
+  place();
 }
 
 function bindAll(): void {
@@ -863,6 +920,7 @@ function bindAll(): void {
 function start(): void {
   bindAll();
   if (!DEV_TOOLS) for (const id of ['open', 'save', 'dirty']) $(id).remove();
+  bindCompact();
   $<HTMLButtonElement>('undo').disabled = true;
   let draft: { xml?: string; seed?: number; fileName?: string; savedText?: string } = {};
   try {
@@ -931,6 +989,13 @@ start();
   get settings() {
     return settings;
   },
+  /** The pane shown on a small screen (T390): one of SOUND_PANES. */
+  get pane() {
+    return $('main').dataset.pane;
+  },
+  showPane: (pane: string) => isSoundPane(pane) && showPane(pane),
+  panes: SOUND_PANES,
+  voxels,
   load: (text: string, name = 'prova.xml') => loadProgram(text, name),
   /** A grid from elsewhere (the mockup's, to compare): it is heard, and the program's text does not change. */
   hear(g: GridData) {
