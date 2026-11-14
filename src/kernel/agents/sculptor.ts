@@ -77,29 +77,30 @@ export interface SculptRequest {
 /** Where a thing is worn, as the request says it. */
 const WORN_ON: Record<WornZone, string> = { head: 'on the head', torso: 'on the torso', back: 'on the back' };
 
+/** The Artist's critique of a model (English fields since T310b, the same as `models/index.json` keeps: `score`, `problems`, `advice`). */
 export interface Critique {
-  voto: number;
-  riconoscibile: boolean;
-  problemi: string[];
-  consigli: string[];
+  score: number;
+  recognizable: boolean;
+  problems: string[];
+  advice: string[];
 }
 
 export interface SculptResult {
   xml: string;
   model: string;
-  voto?: number;
+  score?: number;
   calls: number;
 }
 
 const CRITIQUE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    voto: { type: 'INTEGER', description: '0-10' },
-    riconoscibile: { type: 'BOOLEAN' },
-    problemi: { type: 'ARRAY', items: { type: 'STRING' } },
-    consigli: { type: 'ARRAY', items: { type: 'STRING' } },
+    score: { type: 'INTEGER', description: '0-10' },
+    recognizable: { type: 'BOOLEAN' },
+    problems: { type: 'ARRAY', items: { type: 'STRING' } },
+    advice: { type: 'ARRAY', items: { type: 'STRING' } },
   },
-  required: ['voto', 'riconoscibile', 'problemi', 'consigli'],
+  required: ['score', 'recognizable', 'problems', 'advice'],
 };
 
 const classLine = (c: AssetClass) => {
@@ -485,10 +486,10 @@ export async function judge(c: Council, req: SculptRequest, cls: AssetClass, che
       data: { request: req },
     });
     return {
-      voto: Math.max(0, Math.min(10, Math.round(Number(raw.voto) || 0))),
-      riconoscibile: raw.riconoscibile === true,
-      problemi: Array.isArray(raw.problemi) ? raw.problemi.map(String) : [],
-      consigli: Array.isArray(raw.consigli) ? raw.consigli.map(String) : [],
+      score: Math.max(0, Math.min(10, Math.round(Number(raw.score) || 0))),
+      recognizable: raw.recognizable === true,
+      problems: Array.isArray(raw.problems) ? raw.problems.map(String) : [],
+      advice: Array.isArray(raw.advice) ? raw.advice.map(String) : [],
     };
   } catch (e) {
     c.say('artist', 'errore', `non riesce a guardare «${req.nome}»: ${(e as Error).message}`, undefined, 'model.judge');
@@ -522,7 +523,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {
-    prompt += `\n\nYour program:\n${previous.checked.xml}\nThe attached image shows it from four sides. The Artist gave it ${previous.critique.voto}/10.\nProblems: ${previous.critique.problemi.join('; ') || '—'}\nAdvice: ${previous.critique.consigli.join('; ') || '—'}${seen(previous.checked)}\nImprove it: answer with the whole program.`;
+    prompt += `\n\nYour program:\n${previous.checked.xml}\nThe attached image shows it from four sides. The Artist gave it ${previous.critique.score}/10.\nProblems: ${previous.critique.problems.join('; ') || '—'}\nAdvice: ${previous.critique.advice.join('; ') || '—'}${seen(previous.checked)}\nImprove it: answer with the whole program.`;
     images.push(views(previous.checked));
   }
   const call = async (p: string) => {
@@ -578,7 +579,7 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
     calls += w.calls;
     if (w.checked) candidates.push({ checked: w.checked, critique: plan.giudizio ? await judge(c, req, cls, w.checked, m.artist) : undefined });
   }
-  if (plan.revisione && cat !== 'simple' && candidates[0]?.critique && candidates[0].critique.voto < 7) {
+  if (plan.revisione && cat !== 'simple' && candidates[0]?.critique && candidates[0].critique.score < 7) {
     const w = await write(c, req, cls, model, { checked: candidates[0].checked, critique: candidates[0].critique }, 1);
     calls += w.calls;
     if (w.checked) candidates.push({ checked: w.checked, critique: await judge(c, req, cls, w.checked, m.artist) });
@@ -587,13 +588,13 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
     c.say('sculptor', 'errore', `«${req.nome}»: nessun programma valido`, undefined, 'model.sculpt');
     return undefined;
   }
-  const best = candidates.reduce((a, b) => ((b.critique?.voto ?? -1) > (a.critique?.voto ?? -1) ? b : a));
-  const voto = best.critique?.voto;
+  const best = candidates.reduce((a, b) => ((b.critique?.score ?? -1) > (a.critique?.score ?? -1) ? b : a));
+  const score = best.critique?.score;
   // A procedural structure keeps no box of its own: every size that shares it runs it in its own (ADR-0160).
   const place = (x: string) => (procedural(cls, req.taglia) ? withoutSize(x) : withSize(x, boxOf(cls, req.taglia)));
-  if (best.critique) c.say('artist', voto !== undefined && voto >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${voto}/10${best.critique.problemi.length ? ` — ${best.critique.problemi[0]}` : ''}`, 'sculptor', 'model.judge');
-  const xml = `<!-- ${req.nome}: sculpted by ${model} (step 9)${voto !== undefined ? `, the Artist's vote ${voto}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
-  return { xml, model, voto, calls };
+  if (best.critique) c.say('artist', score !== undefined && score >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${score}/10${best.critique.problems.length ? ` — ${best.critique.problems[0]}` : ''}`, 'sculptor', 'model.judge');
+  const xml = `<!-- ${req.nome}: sculpted by ${model} (step 9)${score !== undefined ? `, the Artist's vote ${score}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
+  return { xml, model, score, calls };
 }
 
 // Actions as rules (ADR-0044): what the wanderer does to an entity that changes its shape (it opens, cracks,

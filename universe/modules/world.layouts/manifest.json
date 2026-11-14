@@ -8,7 +8,7 @@
     "village": {
       "name": "Borgo",
       "description": "case di pietra con porte sulla strada, orti e cortili",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -61,7 +61,7 @@
     "woods": {
       "name": "Bosco",
       "description": "alberi fitti con radure e sentieri di animali",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -91,7 +91,7 @@
     "fields": {
       "name": "Campi",
       "description": "appezzamenti coltivati divisi da viottoli, un capanno",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -131,7 +131,7 @@
     "ruins": {
       "name": "Rovine",
       "description": "colonne spezzate e muri crollati di un edificio dimenticato",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -171,7 +171,7 @@
     "inn": {
       "name": "Locanda",
       "description": "un grande edificio con sala comune e stanze, cortile intorno",
-      "environment": "interno",
+      "environment": "indoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -210,7 +210,7 @@
     "castle": {
       "name": "Castello",
       "description": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -228,9 +228,9 @@
             "type": "stamp",
             "shape": "castle",
             "codes": {
-              "muro": "b",
-              "pavimento": "l",
-              "ponte": "z"
+              "wall": "b",
+              "floor": "l",
+              "bridge": "z"
             }
           }
         ]
@@ -239,7 +239,7 @@
     "fortress": {
       "name": "Fortezza",
       "description": "una fortezza a doppia cinta di mura, con caserma interna",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -257,8 +257,8 @@
             "type": "stamp",
             "shape": "fortress",
             "codes": {
-              "muro": "b",
-              "pavimento": "l"
+              "wall": "b",
+              "floor": "l"
             }
           }
         ]
@@ -267,7 +267,7 @@
     "huts": {
       "name": "Villaggio di capanne",
       "description": "capanne di paglia sparse attorno a un pozzo",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -289,8 +289,8 @@
             "type": "stamp",
             "shape": "huts",
             "codes": {
-              "muro": "a",
-              "pavimento": "f"
+              "wall": "a",
+              "floor": "f"
             },
             "count": 5
           }
@@ -300,7 +300,7 @@
     "stables": {
       "name": "Maneggio",
       "description": "recinti di staccionata per cavalli, una stalla",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -318,7 +318,7 @@
             "type": "stamp",
             "shape": "pen",
             "codes": {
-              "recinto": "c"
+              "fence": "c"
             },
             "count": 2
           }
@@ -328,7 +328,7 @@
     "barracks": {
       "name": "Caserma",
       "description": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -346,15 +346,15 @@
             "type": "stamp",
             "shape": "barracks",
             "codes": {
-              "muro": "b",
-              "pavimento": "l"
+              "wall": "b",
+              "floor": "l"
             }
           },
           {
             "type": "stamp",
             "shape": "pen",
             "codes": {
-              "recinto": "c"
+              "fence": "c"
             }
           }
         ]
@@ -363,20 +363,20 @@
     "dungeon": {
       "name": "Sotterraneo",
       "description": "cunicoli e stanze scavati nella roccia, umidi e bui",
-      "environment": "interno",
+      "environment": "indoor",
       "program": {
         "type": "stamp",
         "shape": "dungeon",
         "codes": {
-          "roccia": "k",
-          "pavimento": "l"
+          "rock": "k",
+          "floor": "l"
         }
       }
     },
     "wizard_tower": {
       "name": "Torre del mago",
       "description": "una torre rotonda di pietra in una radura silenziosa",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -394,8 +394,8 @@
             "type": "stamp",
             "shape": "tower",
             "codes": {
-              "muro": "b",
-              "pavimento": "l"
+              "wall": "b",
+              "floor": "l"
             }
           }
         ]
@@ -404,7 +404,7 @@
     "dragon_lair": {
       "name": "Tana del drago",
       "description": "una caverna nella montagna, con pozze di lava e ossa sparse",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -422,8 +422,8 @@
             "type": "stamp",
             "shape": "lair",
             "codes": {
-              "roccia": "k",
-              "terreno": "s"
+              "rock": "k",
+              "ground": "s"
             }
           },
           {
@@ -442,7 +442,7 @@
     "temple": {
       "name": "Tempio",
       "description": "un tempio di pietra con colonne, in cima a una scalinata",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -460,8 +460,8 @@
             "type": "stamp",
             "shape": "temple",
             "codes": {
-              "muro": "b",
-              "pavimento": "l"
+              "wall": "b",
+              "floor": "l"
             }
           }
         ]
@@ -470,7 +470,7 @@
     "pyramid": {
       "name": "Piramide",
       "description": "una piramide di pietra nel deserto, con una camera segreta",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -488,8 +488,8 @@
             "type": "stamp",
             "shape": "pyramid",
             "codes": {
-              "muro": "b",
-              "pavimento": "l"
+              "wall": "b",
+              "floor": "l"
             }
           },
           {
@@ -508,7 +508,7 @@
     "desert": {
       "name": "Deserto",
       "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -538,7 +538,7 @@
     "jungle": {
       "name": "Giungla",
       "description": "una giungla fitta, umida, con radure e sentieri di animali",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -568,7 +568,7 @@
     "mountains": {
       "name": "Montagne",
       "description": "pareti di roccia, passi stretti e neve sulle cime",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -608,7 +608,7 @@
     "lake": {
       "name": "Lago",
       "description": "un lago tranquillo tra i canneti",
-      "environment": "esterno",
+      "environment": "outdoor",
       "program": {
         "type": "sequence",
         "children": [
@@ -638,7 +638,7 @@
     "brick_village": {
       "name": "Borgo di mattoni",
       "description": "case di mattoni rossi strette attorno a una piazza",
-      "environment": "misto",
+      "environment": "mixed",
       "program": {
         "type": "sequence",
         "children": [
@@ -656,8 +656,8 @@
             "type": "stamp",
             "shape": "house",
             "codes": {
-              "muro": "q",
-              "pavimento": "f"
+              "wall": "q",
+              "floor": "f"
             },
             "count": 4
           },

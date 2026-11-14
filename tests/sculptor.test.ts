@@ -37,7 +37,7 @@ describe('the Sculptor', () => {
     const m = new Scripted((c) => {
       if (c.task === 'model.sculpt') return ++sculpts === 1 ? FLOATING : `Ecco:\n\`\`\`xml\n${ROCK(sculpts === 2 ? 10 : 14)}\n\`\`\``;
       // The Artist prefers the taller rock (it sees it in the photographs).
-      return JSON.stringify({ voto: /box/.test(c.prompt) && c.images?.length === 1 ? (sculpts === 2 ? 5 : 8) : 0, riconoscibile: true, problemi: [], consigli: [] });
+      return JSON.stringify({ score: /box/.test(c.prompt) && c.images?.length === 1 ? (sculpts === 2 ? 5 : 8) : 0, recognizable: true, problems: [], advice: [] });
     });
     const c = new Council(m, () => ({ files: bundledFiles, palette: {}, catalog: [] }));
     const r = await sculpt(c, { id: 'masso-rosso', nome: 'Masso rosso', aspetto: 'un masso rossiccio', classe: 'rock' });
@@ -55,7 +55,7 @@ describe('the Sculptor', () => {
     const judges = m.calls.filter((x) => x.task === 'model.judge');
     expect(judges).toHaveLength(2);
     expect(judges.every((x) => x.model === DEFAULT_SCULPTORS.artist && x.images?.[0].startsWith('data:image/png;base64,'))).toBe(true);
-    expect(r!.voto).toBe(8);
+    expect(r!.score).toBe(8);
     expect(r!.xml).toContain('size="16 16 14"');
     expect(r!.xml).toMatch(/^<!-- Masso rosso: sculpted by gemini-3\.1-flash-lite .* 8\/10 -->/);
     expect(r!.xml).toContain('size="20 20 16"');

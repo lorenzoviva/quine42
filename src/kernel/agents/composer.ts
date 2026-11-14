@@ -47,26 +47,27 @@ export interface Composed {
   calls: number;
 }
 
+/** The Musician's answer as its schema says it (English fields since T310b; one of before reaches here ported by `internalAnswer`). */
 interface Answer {
-  nome?: unknown;
-  programma?: unknown;
-  uso?: unknown;
-  ambienti?: unknown;
-  momenti?: unknown;
-  effetto?: unknown;
+  name?: unknown;
+  program?: unknown;
+  use?: unknown;
+  environments?: unknown;
+  moments?: unknown;
+  effect?: unknown;
 }
 
 const COMPOSE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: 'what the people of the world would call it, in the language of the world: two or three words' },
-    programma: { type: 'STRING', description: 'the whole program, in XML, with <sound> in the root' },
-    uso: { type: 'STRING', enum: ['music', 'effect'], description: 'music or effect' },
-    ambienti: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for music: the environments it plays in, from the list' },
-    momenti: { type: 'ARRAY', items: { type: 'STRING', enum: DAY_MOMENTS }, description: 'for music: when it plays; empty, always' },
-    effetto: { type: 'STRING', description: 'for an effect: which one, from the list' },
+    name: { type: 'STRING', description: 'what the people of the world would call it, in the language of the world: two or three words' },
+    program: { type: 'STRING', description: 'the whole program, in XML, with <sound> in the root' },
+    use: { type: 'STRING', enum: ['music', 'effect'], description: 'music or effect' },
+    environments: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for music: the environments it plays in, from the list' },
+    moments: { type: 'ARRAY', items: { type: 'STRING', enum: DAY_MOMENTS }, description: 'for music: when it plays; empty, always' },
+    effect: { type: 'STRING', description: 'for an effect: which one, from the list' },
   },
-  required: ['nome', 'programma', 'uso'],
+  required: ['name', 'program', 'use'],
 };
 
 /** Hand-written programs to learn from, by use: the first the universe still has. */
@@ -103,17 +104,17 @@ const namesIn = (xml: string): string[] => [...xml.matchAll(/\sname="([^"]*)"/g)
 
 /** What an answer is for, or why it cannot be: what the kernel decided wins, what the world cannot name is dropped. */
 export function purposeOf(a: Answer, req: ComposeRequest, world: ComposeWorld): { suono?: SoundPurpose; error?: string } {
-  const uso = req.uso ?? (typeof a.uso === 'string' && internalName('suoni', a.uso) === 'effect' ? 'effect' : 'music');
+  const uso = req.uso ?? (typeof a.use === 'string' && internalName('suoni', a.use) === 'effect' ? 'effect' : 'music');
   if (uso === 'effect') {
-    const effect = typeof a.effetto === 'string' ? a.effetto.trim() : '';
-    if (!world.effetti.includes(effect)) return { error: `un effetto risponde a un momento del gioco: "effetto" è uno tra ${world.effetti.join(', ')}` };
+    const effect = typeof a.effect === 'string' ? a.effect.trim() : '';
+    if (!world.effetti.includes(effect)) return { error: `un effetto risponde a un momento del gioco: "effect" è uno tra ${world.effetti.join(', ')}` };
     return { suono: { use: uso, effects: [effect] } };
   }
   // An environment of the seed by its Italian id of the contract 0.1 is the one it became (T307a; the prompts are English since T310, the repair stays a contract more).
-  const named = req.ambienti ?? stringsIn(Array.isArray(a.ambienti) ? a.ambienti.map((x) => (typeof x === 'string' && !world.ambienti.includes(x) ? internalName('ambienti', x) : x)) : a.ambienti, world.ambienti);
+  const named = req.ambienti ?? stringsIn(Array.isArray(a.environments) ? a.environments.map((x) => (typeof x === 'string' && !world.ambienti.includes(x) ? internalName('ambienti', x) : x)) : a.environments, world.ambienti);
   const ambienti = !named.length && world.qui ? [world.qui] : named;
-  if (!ambienti.length) return { error: `"ambienti" nomina almeno uno tra ${world.ambienti.join(', ')}` };
-  const momenti = req.momenti ?? stringsIn(Array.isArray(a.momenti) ? a.momenti.map((x) => (typeof x === 'string' ? internalName('momenti', x) : x)) : a.momenti, DAY_PHASES);
+  if (!ambienti.length) return { error: `"environments" nomina almeno uno tra ${world.ambienti.join(', ')}` };
+  const momenti = req.momenti ?? stringsIn(Array.isArray(a.moments) ? a.moments.map((x) => (typeof x === 'string' ? internalName('momenti', x) : x)) : a.moments, DAY_PHASES);
   return { suono: { use: uso, environments: ambienti, ...(momenti.length ? { moments: momenti } : {}) } };
 }
 
@@ -167,10 +168,10 @@ export async function compose(c: Council, req: ComposeRequest, world: ComposeWor
       c.say('kernel', 'scarta', `«${req.nome ?? 'brano'}»: ${last.error}`, 'musician', COMPOSE_TASK);
       continue;
     }
-    const xml = typeof a.programma === 'string' ? a.programma.trim() : '';
-    const nome = req.nome ?? (typeof a.nome === 'string' ? a.nome.trim() : '');
+    const xml = typeof a.program === 'string' ? a.program.trim() : '';
+    const nome = req.nome ?? (typeof a.name === 'string' ? a.name.trim() : '');
     const { suono, error } = purposeOf(a, req, world);
-    const errors = error ? [error] : !nome ? ['manca "nome"'] : scoreErrors('models/sound-test.xml', xml, nome, suono!.use, words);
+    const errors = error ? [error] : !nome ? ['manca "name"'] : scoreErrors('models/sound-test.xml', xml, nome, suono!.use, words);
     if (!errors.length) return { nome, xml, suono: suono!, model, calls };
     last = { xml, error: errors.join('; ') };
     c.say('kernel', 'scarta', `«${nome || 'brano'}»: ${last.error.slice(0, 160)}`, 'musician', COMPOSE_TASK);

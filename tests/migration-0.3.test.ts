@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../src/kernel/bundle';
-import { INTERNAL_NAMES, internalCardId, internalJobProgram, internalModelId0_3 } from '../src/kernel/internalNames';
+import { INTERNAL_NAMES, internalAnswer, internalCardId, internalJobProgram, internalModelId0_3 } from '../src/kernel/internalNames';
 import { luaFor0_3, migratePlanRecord, migrateUniverse, MIGRATIONS } from '../src/kernel/migrations';
 import { prepareUniverse, SEED_FILE } from '../src/kernel/universes';
 import { checkKernelVersion, KERNEL_VERSION } from '../src/kernel/version';
@@ -96,12 +96,12 @@ describe('the migration 0.2 → 0.3: a universe of 0.2, file by file', () => {
   const { files, applied } = migrateUniverse(before, TO_0_3);
 
   it('is the second migration of the chain, and it says what it does', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.2→0\.3: /);
     expect(json(files['universe.json'])).toMatchObject({ kernel: TO_0_3, kernels: { from: '0.3' } });
     expect(checkKernelVersion(json(files['universe.json']).kernel, TO_0_3, json(files['universe.json']).kernels).ok).toBe(true);
-    expect(migrateUniverse(before).applied.map((a) => a.slice(0, 8))).toEqual(['0.2→0.3:', '0.3→0.4:', '0.4→0.5:', '0.5→0.6:']);
+    expect(migrateUniverse(before).applied.map((a) => a.slice(0, 8))).toEqual(['0.2→0.3:', '0.3→0.4:', '0.4→0.5:', '0.5→0.6:', '0.6→0.7:']);
   });
 
   it('is deterministic: the same files give the same files, and a ported universe stays as it is', () => {
@@ -219,7 +219,8 @@ describe('what the Council still writes in Italian, until its prompts change (T3
     const files = universe02();
     expect(readPeople(files).people[0]).toMatchObject({ species: 'person', gender: 'female', routine: [{ when: 'morning', where: 'work', activity: 'hoe' }, { when: 'night', where: 'home', activity: 'sleep' }] });
     expect(readPlots(files)[0]).toMatchObject({ state: 'active', quest: { state: 'accepted', goal: { type: 'bring' } } });
-    const p = plotFromRaw({ titolo: 'T', tappe: [{ chi: 'Ada', giorno: 1, momento: 'notte', dove: 'piazza', cosa: 'x' }], missione: { da: 'Ada', tipo: 'parla', a: 'Bruno' } }, 0, 't');
+    // The Narrator's answer with the fields of before reaches plotFromRaw through Council.ask (internalAnswer, T310b).
+    const p = plotFromRaw(internalAnswer({ titolo: 'T', tappe: [{ chi: 'Ada', giorno: 1, momento: 'notte', dove: 'piazza', cosa: 'x' }], missione: { da: 'Ada', tipo: 'parla', a: 'Bruno' } }), 0, 't');
     expect(p).toMatchObject({ state: 'active', beats: [{ moment: 'night', where: 'square' }], quest: { state: 'offered', goal: { type: 'talk' } } });
   });
 
@@ -247,9 +248,9 @@ describe('what the Council still writes in Italian, until its prompts change (T3
   });
 
   it('the Musician\'s answer: its use and its moments', () => {
-    const r = purposeOf({ uso: 'musica', ambienti: ['castle'], momenti: ['sera', 'notte'] }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] });
+    const r = purposeOf({ use: 'musica', environments: ['castle'], moments: ['sera', 'notte'] }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] });
     expect(r.suono).toEqual({ use: 'music', environments: ['castle'], moments: ['evening', 'night'] });
-    expect(purposeOf({ uso: 'effetto', effetto: 'rune' }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] }).suono).toEqual({ use: 'effect', effects: ['rune'] });
+    expect(purposeOf({ use: 'effetto', effect: 'rune' }, { richiesta: 'x' }, { ambienti: ['castle'], effetti: ['rune'] }).suono).toEqual({ use: 'effect', effects: ['rune'] });
   });
 
   it('the ids of the cards and of the models', () => {
@@ -290,7 +291,7 @@ describe('the seed of today (0.4: the values of 0.3 under the fields of 0.4)', (
       walk(JSON.parse(text));
     }
     expect(bad).toEqual([]);
-    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.6' } });
+    expect(json(bundledFiles['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.7' } });
   });
 
   it('sys.work says its outcomes in English, and the cases of the bench still point at its lines', () => {

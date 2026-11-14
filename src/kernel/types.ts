@@ -120,9 +120,9 @@ export interface ItemDef {
   actions?: ActionDef[];
   /** Module with custom logic (on_use / on_action), if any. */
   module?: string;
-  /** What wearing or wielding it gives (difesa, attacco, velocita, peso, luce, calore…): mechanics read it. */
+  /** What wearing or wielding it gives (defense, attack, speed, weight, light, warmth…; ids since T310b, `bonus`): mechanics read it. */
   bonus?: Record<string, number>;
-  /** Where it is worn or held (testa, corpo, gambe, piedi, mani, arma, scudo, anello…), for slots. */
+  /** Where it is worn or held (head, torso, legs, feet, hands, weapon, shield, ring…; ids since T310b, `posti`), for slots. */
   slot?: string;
 }
 
@@ -136,7 +136,7 @@ export interface UiElement {
   /** Slot id, or the action a button sends to on_ui. */
   id?: string;
   label?: string;
-  /** Slot: what fits (item slot names, categories or tags: "testa", "clothing", "weapon"). */
+  /** Slot: what fits (places of the things, categories or tags: "head", "clothing", "weapon"). */
   accepts?: string[];
   /** Bar/text: a field of a player component, "componente.campo" (e.g. "needs.health"). */
   field?: string;
@@ -178,7 +178,8 @@ export interface LootTable {
 export interface EnvironmentDef {
   name: string;
   description: string;
-  environment: 'esterno' | 'interno' | 'misto';
+  /** Outdoor, indoor or mixed (ids since T310b, `tipi-ambiente`). */
+  environment: 'outdoor' | 'indoor' | 'mixed';
   program: import('./mj').MjNode;
 }
 

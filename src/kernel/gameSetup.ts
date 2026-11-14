@@ -58,8 +58,8 @@ export interface DeathVerdict {
   story: string;
   /** The wanderer loses everything they carry (and their conditions). */
   loseAll: boolean;
-  /** Where they wake up: where they fell, or the square. */
-  restart: 'qui' | 'piazza';
+  /** Where they wake up: where they fell, or the square (ids since T310b, `ripartenza`). */
+  restart: 'here' | 'square';
   /** Effects of the closed set (validated by the kernel): what else is lost. */
   effects: unknown[];
 }
@@ -67,19 +67,19 @@ export interface DeathVerdict {
 export function fallbackDeath(level: number, carried: Array<{ name: string; count: number }>): DeathVerdict {
   switch (level) {
     case 0:
-      return { story: 'Ti rialzi nel punto della caduta. Hai ancora tutto con te.', loseAll: false, restart: 'qui', effects: [] };
+      return { story: 'Ti rialzi nel punto della caduta. Hai ancora tutto con te.', loseAll: false, restart: 'here', effects: [] };
     case 1:
-      return { story: 'Riapri gli occhi nella piazza. Le tue cose sono ancora con te.', loseAll: false, restart: 'piazza', effects: [] };
+      return { story: 'Riapri gli occhi nella piazza. Le tue cose sono ancora con te.', loseAll: false, restart: 'square', effects: [] };
     case 2:
       return {
         story: 'Riapri gli occhi nella piazza. Metà di ciò che portavi è andata perduta.',
         loseAll: false,
-        restart: 'piazza',
+        restart: 'square',
         effects: carried.filter((c) => c.count >= 2).map((c) => ({ type: 'consume', item: c.name, quantity: Math.floor(c.count / 2) })),
       };
     case 4:
-      return { story: 'Riapri gli occhi nella piazza. Non ti resta niente, nemmeno ciò che avevi imparato a essere.', loseAll: true, restart: 'piazza', effects: [] };
+      return { story: 'Riapri gli occhi nella piazza. Non ti resta niente, nemmeno ciò che avevi imparato a essere.', loseAll: true, restart: 'square', effects: [] };
     default:
-      return { story: 'Riapri gli occhi nella piazza. È un nuovo giorno, e una nuova vita.', loseAll: true, restart: 'piazza', effects: [] };
+      return { story: 'Riapri gli occhi nella piazza. È un nuovo giorno, e una nuova vita.', loseAll: true, restart: 'square', effects: [] };
   }
 }

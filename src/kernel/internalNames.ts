@@ -10,8 +10,8 @@
 /** What a name touches: a file of the universe, a message between client and server, the Lua of the modules, a prompt, only TypeScript. */
 export type NameReach = 'disco' | 'filo' | 'lua' | 'prompt' | 'codice';
 
-/** The task that applies the rename, and with it the contract of the kernel (ADR-0136): 0.2, 0.3, 0.4, 0.5. */
-export type NameStep = 'T307a' | 'T307b' | 'T308a' | 'T308b';
+/** The task that applies the rename, and with it the contract of the kernel (ADR-0136): 0.2, 0.3, 0.4, 0.5, 0.7 (0.6 is T342's, the symbols of the programs). */
+export type NameStep = 'T307a' | 'T307b' | 'T308a' | 'T308b' | 'T310b';
 
 export interface NameDomain {
   id: string;
@@ -828,7 +828,197 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     names: { 'world.impresa': 'world.venture', 'world.impresa_porta': 'world.venture_bring', morte: 'death', 'deposito:': 'deposit:', cantiere: 'worksite', porta: 'bring' },
     note: '`cantiere` è il pannello di `sys.work` e `porta` il suo pulsante; `deposito:` la chiave del deposito di un luogo nel magazzino di `sys.work`; il resto dell’API (hook, `world.player`) è già inglese',
   }),
+  // --- T310b: the values the Council's schemas still listed in Italian, and the fields of its answers (contract 0.7) --------------------
+  d({
+    id: 'dove-piano',
+    title: '«Dove» di una cosa in un piano (dentro o fuori i lotti)',
+    kind: 'values',
+    where: ['src/kernel/agents/cartography.ts (Where, WHERE)', 'src/kernel/kernel.ts (placeEntities)', 'maps/*.json → objects[].where, fresh[].where'],
+    reach: ['disco', 'filo', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { dentro: 'inside', fuori: 'outside', ovunque: 'anywhere' },
+    note: 'non è il «dove» della routine (`dove`, T307b): quello dice un posto della vita di un individuo, questo se una cosa sta dentro i lotti o fuori',
+  }),
+  d({
+    id: 'tipi-ambiente',
+    title: 'Tipi di ambiente (all’aperto, al chiuso, misto)',
+    kind: 'values',
+    where: ['src/kernel/types.ts (EnvironmentDef.environment)', 'src/kernel/agents/cartography.ts', 'manifest → layouts[].environment'],
+    reach: ['disco', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { esterno: 'outdoor', interno: 'indoor', misto: 'mixed' },
+  }),
+  d({
+    id: 'direzioni',
+    title: 'Direzioni della bussola',
+    kind: 'values',
+    where: ['src/kernel/atlas.ts (COMPASS, direction, directionVector)', 'src/kernel/agents/cartography.ts (REGION_SCHEMA)'],
+    reach: ['prompt', 'codice'],
+    lang: 'en',
+    step: 'T310b',
+    names: { nord: 'north', 'nord-est': 'north-east', est: 'east', 'sud-est': 'south-east', sud: 'south', 'sud-ovest': 'south-west', ovest: 'west', 'nord-ovest': 'north-west', qui: 'here' },
+    note: 'nel testo del mondo la direzione si dice nella sua lingua (`directionWord`); il Cartografo la scrive come id',
+  }),
+  d({
+    id: 'tipi-fucina',
+    title: 'Tipi di ciò che la Fucina crea',
+    kind: 'values',
+    where: ['src/kernel/agents/forge.ts (Concept.type, ForgeRequest.kind)', 'src/kernel/agents/genesis.ts (CastEntry.type)', 'src/kernel/kernel.ts (forgeModule)'],
+    reach: ['prompt', 'codice'],
+    lang: 'en',
+    step: 'T310b',
+    names: { npc: 'npc', oggetto: 'object', strumento: 'item' },
+    note: 'un `item` va nell’inventario (`kind: item` del manifest), un `object` sta nel mondo; i prefissi degli id (`npc.`, `obj.`, `item.`) non cambiano',
+  }),
+  d({
+    id: 'azioni-npc',
+    title: 'Azioni di un individuo in un dialogo e modi della sua mente (`mind.mode`)',
+    kind: 'values',
+    where: ['src/kernel/agents/minds.ts (NPC_ACTIONS)', 'src/kernel/npc/model.ts (Mind.mode)', 'universe/modules/sys.follow, sys.wander, sys.work (logic.lua)', 'manifest → components.mind.mode, cases'],
+    reach: ['disco', 'lua', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { nessuna: 'none', segui: 'follow', resta: 'stay', vaga: 'wander', dai: 'give', missione: 'quest' },
+    note: '`wander`, `follow` e `stay` sono anche i modi della mente che Lua legge (`mind.mode`)',
+  }),
+  d({
+    id: 'incarichi',
+    title: 'Incarichi del Referente e interventi della sessione del Concilio',
+    kind: 'values',
+    where: ['src/kernel/agents/minds.ts (REFERENTE_SCHEMA)', 'src/kernel/agents/effects.ts (SESSION_SCHEMA, councilSession)', 'src/kernel/kernel.ts (liaison, councilSession)'],
+    reach: ['prompt', 'codice'],
+    lang: 'en',
+    step: 'T310b',
+    names: {
+      nessuno: 'none', oggetti: 'items', abitante: 'inhabitant', cosa: 'thing', meccanica: 'mechanic', runa: 'rune', oggetto: 'item', personaggio: 'character',
+      ambiente: 'environment', regola: 'rule', riscolpisci: 'resculpt', musica: 'music',
+    },
+    note: '`oggetto` del Referente è uno strumento (`item`, come lo crea la Fucina), `cosa` una cosa del mondo (`object` per la Fucina)',
+  }),
+  d({
+    id: 'posti',
+    title: 'Posti degli oggetti (dove si indossano o si impugnano)',
+    kind: 'values',
+    where: ['src/kernel/agents/content.ts (ITEM_SCHEMA.slot)', 'src/kernel/wearing.ts (SLOT_ZONES)', 'src/mj/hold.ts (SLOT_MOUNTS)', 'manifest → items[].slot, ui.elements[].accepts', 'prompt dell’Ingegnere'],
+    reach: ['disco', 'lua', 'filo', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { testa: 'head', corpo: 'torso', gambe: 'legs', piedi: 'feet', mani: 'hands', arma: 'weapon', scudo: 'shield', anello: 'ring', collo: 'neck', schiena: 'back' },
+    note: 'gli id degli slot di un pannello (`ui.elements[].id`) sono parole del modulo, come le sue azioni: non cambiano; cambiano i posti delle cose e ciò che uno slot accetta',
+  }),
+  d({
+    id: 'ruoli-timbri',
+    title: 'Ruoli dei codici di un timbro (`codes`)',
+    kind: 'values',
+    where: ['src/kernel/stamps.ts (StampCodes, STAMP_ROLES)', 'src/kernel/mj.ts (stamp)', 'manifest → layouts[].program (stamp.codes)', 'prompt del Cartografo'],
+    reach: ['disco', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { muro: 'wall', pavimento: 'floor', porta: 'door', acqua: 'water', ponte: 'bridge', terreno: 'ground', strada: 'road', roccia: 'rock', recinto: 'fence' },
+  }),
+  d({
+    id: 'interazioni',
+    title: 'Interazioni di un concetto della Fucina',
+    kind: 'values',
+    where: ['src/kernel/agents/forge.ts (Concept.interaction)'],
+    reach: ['prompt', 'codice'],
+    lang: 'en',
+    step: 'T310b',
+    names: { parla: 'talk', leggi: 'read', usa: 'use', nessuna: 'none' },
+    note: 'nel manifest diventano `interaction.type` (`talk`, `read`, `lua`), già inglesi',
+  }),
+  d({
+    id: 'comandi',
+    title: 'Comandi di uno strumento (`item.controls`)',
+    kind: 'values',
+    where: ['src/kernel/agents/forge.ts (Concept.controls[].action, requiredHooks)', 'manifest → item.controls (chiavi)'],
+    reach: ['disco', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { usa: 'use', azione: 'action' },
+  }),
+  d({
+    id: 'ripartenza',
+    title: 'Dove si riapre gli occhi dopo la morte',
+    kind: 'values',
+    where: ['src/kernel/agents/effects.ts (DEATH_SCHEMA)', 'src/kernel/gameSetup.ts (fallbackDeath)', 'src/kernel/kernel.ts'],
+    reach: ['prompt', 'codice'],
+    lang: 'en',
+    step: 'T310b',
+    names: { qui: 'here', piazza: 'square' },
+    note: 'le stesse parole dell’avviso sul filo (`valori-filo`)',
+  }),
+  d({
+    id: 'bonus',
+    title: 'Bonus di una cosa indossata o impugnata',
+    kind: 'values',
+    where: ['src/kernel/agents/content.ts (ITEM_SCHEMA.bonus)', 'src/kernel/kernel.ts (item_bonus)', 'manifest → items[].bonus (chiavi)', 'Lua: items.bonus(id, nome)', 'prompt dell’Ingegnere'],
+    reach: ['disco', 'lua', 'prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: { difesa: 'defense', attacco: 'attack', velocita: 'speed', peso: 'weight', luce: 'light', calore: 'warmth' },
+  }),
+  d({
+    id: 'campi-risposte',
+    title: 'Campi delle risposte del Concilio (gli schemi delle richieste)',
+    kind: 'fields',
+    where: ['src/kernel/agents/*.ts (gli schemi)', 'src/kernel/ai/mock.ts', 'src/kernel/agents/council.ts (ask: internalAnswer)'],
+    reach: ['prompt'],
+    lang: 'en',
+    step: 'T310b',
+    names: {
+      nome: 'name', descrizione: 'description', testo: 'text', titolo: 'title', racconto: 'story', possibile: 'possible', dice: 'say', azione: 'action',
+      oggetto: 'item', umore: 'mood', oggetti_citati: 'mentioned', ricordo: 'memory', importanza: 'weight', legame: 'bond', scheda: 'sheet', risposta: 'reply',
+      incarico: 'task', richiesta: 'request', bersaglio: 'target', rifiuto: 'refusal', richiesta_fucina: 'forge_request', battute: 'lines', chi: 'who',
+      ricordo_a: 'memory_a', ricordo_b: 'memory_b', mistero: 'mystery', coinvolti: 'involved', tappe: 'beats', giorno: 'day', momento: 'moment', dove: 'where',
+      cosa: 'what', battuta: 'line', indizio: 'clue', missione: 'quest', da: 'from', tipo: 'type', a: 'to', luogo: 'place', ricompensa: 'reward',
+      categoria: 'category', peso: 'weight', pila: 'stack', effetti: 'effects', fame: 'hunger', sete: 'thirst', energia: 'energy', salute: 'health',
+      impugnabile: 'equippable', contenitore: 'container', posto: 'slot', aspetto: 'look', forma: 'shape', correzioni: 'fixes', nota: 'note',
+      approvato: 'approved', problemi: 'problems', agente: 'agent', problema: 'problem', ricette: 'recipes', ingredienti: 'inputs', quantita: 'quantity',
+      attrezzi: 'tools', risultato: 'result', bottino: 'loot', tabella: 'table', voci: 'entries', porta: 'carries', indossa: 'wears', mestiere: 'job',
+      genere: 'gender', eta: 'age', famiglia: 'family', quando: 'when', fa: 'does', ambiente: 'environment', modulo: 'module', a_terra: 'ground',
+      nuovi: 'fresh', concetto: 'concept', rune: 'runes', strutture: 'structures', taglia: 'size', ambienti: 'environments', programma_json: 'program_json',
+      direzione: 'direction', distanza: 'distance', raggio: 'radius', usa_ambiente: 'reuse', nuovi_terreni: 'new_terrains', codice: 'code', colore: 'color',
+      strato: 'layer', solido: 'solid', interno: 'indoor', regione: 'region', tono: 'tone', sintesi: 'summary', luoghi: 'places', personaggi: 'characters',
+      fatti: 'facts', misteri: 'mysteries', usanze: 'customs', stile: 'style', forme: 'shapes', luce: 'light', regole: 'rules', protagonista: 'protagonist',
+      case_comuni: 'common_houses', terreni: 'terrains', velocita: 'speed', tetto: 'roof', moduli: 'modules', classe: 'class', contesto: 'context',
+      rarita: 'rarity', interazione: 'interaction', comandi: 'controls', unico: 'unique', azioni: 'actions', etichetta: 'label', richiede: 'requires',
+      capienza: 'capacity', spingibile: 'pushable', massa: 'mass', attrito: 'friction', impilabile: 'stackable', max_pila: 'max_stack',
+      equipaggiabile: 'equippable', componenti_json: 'components_json', spiegazione: 'reason', ripetibile: 'repeatable', serve: 'requires', costo: 'cost',
+      runa_nuova: 'new_rune', glifo: 'glyph', elemento: 'element', canone: 'canon', valutazione: 'assessment', intervento: 'action', perde_tutto: 'lose_all',
+      ripartenza: 'restart', viandante_json: 'wanderer_json', passi: 'steps', verso: 'toward', secondi: 'seconds', durata: 'duration', guarda: 'watch',
+      righe: 'lines', pannello: 'panel', elementi: 'elements', accetta: 'accepts', campo: 'field', logica: 'logic', casi: 'cases', voto: 'score',
+      riconoscibile: 'recognizable', consigli: 'advice', programma: 'program', uso: 'use', momenti: 'moments', effetto: 'effect', ritira: 'withdraw',
+      motivo: 'reason',
+    },
+    note:
+      'una tabella sola per ogni risposta, letta a ogni profondità (`internalAnswer`): la stessa parola italiana vale lo stesso in ogni schema. Tre non ci sono perché cambiano senso: `storia` è `history` nella bibbia e `story` in una persona, `oggetti` sono `items` di un pacchetto e `objects` di un piano, `tag` è l’elenco `tags` di una cosa e il `tag` di una voce di bottino; li legge ciascun lettore',
+  }),
 ];
+
+/**
+ * A Council's answer (parsed JSON) with the fields of its schema in English (T310b, contract 0.7): every key the table `campi-risposte`
+ * names, at any depth, so an answer written with the Italian fields of before (a local model, a recorded one) still reads. A key whose
+ * English name is there already gives way to it. `storia`, `oggetti` and `tag` are not in the table (they change meaning from one
+ * schema to another): each reader takes its own. Strings (programs, `components_json`) are not touched.
+ */
+export function internalAnswer<T>(raw: T): T {
+  const names = INTERNAL_NAMES.find((x) => x.id === 'campi-risposte')!.names;
+  const port = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(port);
+    if (!isRecord(v)) return v;
+    const out: Record<string, unknown> = {};
+    for (const [k, x] of Object.entries(v)) {
+      const key = Object.hasOwn(names, k) ? names[k] : k;
+      if (key !== k && Object.hasOwn(v, key)) continue;
+      out[key] = port(x);
+    }
+    return out;
+  };
+  return port(raw) as T;
+}
 
 /** The internal name of an Italian value of a domain; the value itself when the table does not name it (already internal, or content). */
 export function internalName(domain: string, value: string): string {

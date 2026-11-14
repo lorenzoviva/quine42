@@ -28,7 +28,7 @@ const domain = (id: string): NameDomain => {
 };
 const keys = (id: string) => Object.keys(domain(id).names);
 /** The names a domain has in the code: the internal ones when its step is done (T307a, T307b), the Italian ones of today otherwise. */
-const DONE = new Set(['T307a', 'T307b', 'T308a', 'T308b']);
+const DONE = new Set(['T307a', 'T307b', 'T308a', 'T308b', 'T310b']);
 const inCode = (id: string) => (DONE.has(domain(id).step) ? Object.values(domain(id).names) : keys(id));
 
 function seedManifests(): Array<Record<string, unknown>> {

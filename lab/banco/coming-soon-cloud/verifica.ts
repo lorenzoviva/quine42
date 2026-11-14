@@ -101,7 +101,7 @@ export function checkRunes(files: FileMap, words: string[]): { errori: string[];
   const accepted: Record<string, MagicRune> = {};
   for (const [token, r] of Object.entries(runes)) {
     const canonLine = canon.split('\n').find((l) => l.includes(`«${token}»`));
-    const v = validateNewRune({ token, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description, canone: canonLine?.replace(/^-\s*/, '') }, accepted, words);
+    const v = validateNewRune({ token, name: r.name, glyph: r.glyph, color: r.color, element: r.element, description: r.description, canon: canonLine?.replace(/^-\s*/, '') }, accepted, words);
     if (v.errors.length) errori.push(...v.errors.map((e) => `runa «${token}»: ${e}`));
     else {
       if (v.rune!.rune.glyph !== r.glyph) errori.push(`runa «${token}»: il segno «${r.glyph}» non è libero, il validatore darebbe «${v.rune!.rune.glyph}»`);

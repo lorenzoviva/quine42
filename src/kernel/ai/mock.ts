@@ -119,29 +119,27 @@ export class MockAiModels implements AiModels, DecisionModels {
     switch (call.task) {
       case 'chunk.plan':
         return this.plan(d as PlanContext);
-      case 'chunk.survey':
-        return { griglia: d.grid, note: 'nessuna differenza' };
       case 'forge.concept':
         return this.concept((d.request ?? { prompt: call.prompt }) as ForgeRequest);
       case 'forge.physics':
-        return this.physics((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'object' }) as Concept);
+        return this.physics((d.concept ?? { name: 'Cosa', type: 'object', description: call.prompt, look: call.prompt, class: 'object' }) as Concept);
       case 'forge.code':
-        return { logic: this.code((d.concept ?? { nome: 'Cosa', tipo: 'oggetto', descrizione: call.prompt, aspetto: call.prompt, classe: 'object' }) as Concept), componenti_json: '{}' };
+        return { logic: this.code((d.concept ?? { name: 'Cosa', type: 'object', description: call.prompt, look: call.prompt, class: 'object' }) as Concept), components_json: '{}' };
       case 'forge.fix':
         return { logic: `-- ${d.manifest?.name ?? 'modulo'}: riparato offline.\nlocal M = {}\n\nreturn M\n` };
       case 'forge.review':
       case 'genesis.review':
-        return { approvato: true, problemi: [] };
+        return { approved: true, problems: [] };
       case 'craft.judge':
-        return { possibile: false, spiegazione: 'Le provi in ogni modo, ma non succede nulla.' };
+        return { possible: false, reason: 'Le provi in ogni modo, ma non succede nulla.' };
       case 'npc.reply':
         return this.reply(d.npc as NpcContext, String(d.wandererText ?? ''));
       case 'text.read':
-        return { testo: this.sign(d.facts ?? {}, d.what?.name ?? '') };
+        return { text: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':
-        return { misteri: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], titolo: 'Il Regno di Valmora', tono: 'concreto e caldo', sintesi: 'Un regno quieto di prati, boschi e borghi.', storia: '', luoghi: ['Piazza di Valmora'], personaggi: ['Abitanti di Valmora'], fatti: ['Il pane del forno di piazza è famoso in tutto il regno.'], usanze: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
+        return { mysteries: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], title: 'Il Regno di Valmora', tone: 'concreto e caldo', summary: 'Un regno quieto di prati, boschi e borghi.', history: '', places: ['Piazza di Valmora'], characters: ['Abitanti di Valmora'], facts: ['Il pane del forno di piazza è famoso in tutto il regno.'], customs: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
       case 'genesis.style':
-        return { stile: 'voxel medievale, semplice e caldo', forme: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], luce: 'diurna morbida', regole: ['niente testo'], protagonista: 'un viandante incappucciato' };
+        return { style: 'voxel medievale, semplice e caldo', shapes: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], light: 'diurna morbida', rules: ['niente testo'], protagonist: 'un viandante incappucciato' };
       case 'model.sculpt': {
         // Offline the Sculptor answers with the library's hand-written program of the class; without one, a program of the nodes of
         // T333-T336 (a field leads a walker to its goal, the rule written in <in>/<out> children), which holds in every box but a procedural one.
@@ -153,8 +151,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         // Offline the Musician plays the library's hand-written program a little faster or slower: it passes every check, and it is not the same text.
         const r = d.request ?? {};
         const n = hashStr(String(r.richiesta));
-        const programma = String(d.example ?? '').replace(/bpm="(\d+)"/, (_, b) => `bpm="${Number(b) + (n % 13) - 6}"`);
-        return { nome: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, programma, uso: r.uso ?? 'musica', ambienti: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a) || String(r.richiesta).includes(italianName('ambienti', a))), momenti: r.momenti ?? [] };
+        const program = String(d.example ?? '').replace(/bpm="(\d+)"/, (_, b) => `bpm="${Number(b) + (n % 13) - 6}"`);
+        return { name: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, program, use: r.uso ?? 'music', environments: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a) || String(r.richiesta).includes(italianName('ambienti', a))), moments: r.momenti ?? [] };
       }
       case 'model.action': {
         // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).
@@ -165,66 +163,66 @@ export class MockAiModels implements AiModels, DecisionModels {
         return `<action name="${r.azione}" label="${r.etichetta}"><prl in="${ls[0]?.lettera ?? 'C'}" out="${to}" p="0.3" steps="1"/></action>`;
       }
       case 'model.judge':
-        return { voto: 7, riconoscibile: true, problemi: [], consigli: [] };
+        return { score: 7, recognizable: true, problems: [], advice: [] };
       case 'genesis.terrain':
         return {
-          terreni: [
-            { codice: 'g', nome: 'pascolo', descrizione: 'erba rasa da pecore', colore: '#6aa84f', strato: 'ground', solido: false, velocita: 1 },
-            { codice: 'p', nome: 'tratturo', descrizione: 'terra battuta dalle greggi', colore: '#c8a868', strato: 'ground', solido: false, velocita: 1.1 },
-            { codice: 't', nome: 'macchia', descrizione: 'cespugli e querce basse', colore: '#2f6a2a', strato: 'vegetation', solido: true, velocita: 1 },
-            { codice: 'w', nome: 'torrente', descrizione: 'acqua fredda tra i sassi', colore: '#3a78c8', strato: 'liquid', solido: true, velocita: 1 },
-            { codice: 'r', nome: 'pietraia', descrizione: 'massi calcarei', colore: '#9a9a92', strato: 'rock', solido: true, velocita: 1 },
-            { codice: 'h', nome: 'muro a secco', descrizione: 'pietre sovrapposte', colore: '#8a7a62', strato: 'wall', solido: true, velocita: 1 },
-            { codice: 'f', nome: 'pavimento di cotto', descrizione: 'mattonelle rosse', colore: '#b06a4a', strato: 'floor', solido: false, velocita: 1 },
-            { codice: 'd', nome: 'uscio', descrizione: 'porta di castagno', colore: '#d8a040', strato: 'door', solido: false, velocita: 1 },
-            { codice: 'm', nome: 'orto', descrizione: 'solchi di terra coltivata', colore: '#6e5434', strato: 'ground', solido: false, velocita: 0.8 },
-            { codice: 's', nome: 'sabbia', descrizione: 'sabbia dorata', colore: '#d8c27a', strato: 'ground', solido: false, velocita: 0.85 },
-            { codice: 'j', nome: 'boscaglia', descrizione: 'intrico di rovi e liane', colore: '#1f6b34', strato: 'vegetation', solido: true, velocita: 1 },
-            { codice: 'o', nome: 'mare', descrizione: 'acque profonde', colore: '#1d4f8a', strato: 'liquid', solido: true, velocita: 1 },
-            { codice: 'k', nome: 'monte', descrizione: 'pareti di calcare', colore: '#6e6a66', strato: 'rock', solido: true, velocita: 1 },
-            { codice: 'n', nome: 'neve', descrizione: 'neve alta', colore: '#e8eef2', strato: 'ground', solido: false, velocita: 0.7 },
-            { codice: 'b', nome: 'muro di pietra', descrizione: 'grosse pietre squadrate', colore: '#8a8580', strato: 'wall', solido: true, velocita: 1 },
-            { codice: 'l', nome: 'lastricato', descrizione: 'pietre lisce', colore: '#9c958c', strato: 'floor', solido: false, velocita: 1 },
-            { codice: 'z', nome: 'ponte levatoio', descrizione: 'assi sul fossato', colore: '#8b6a42', strato: 'floor', solido: false, velocita: 1 },
+          terrains: [
+            { code: 'g', name: 'pascolo', description: 'erba rasa da pecore', color: '#6aa84f', layer: 'ground', solid: false, speed: 1 },
+            { code: 'p', name: 'tratturo', description: 'terra battuta dalle greggi', color: '#c8a868', layer: 'ground', solid: false, speed: 1.1 },
+            { code: 't', name: 'macchia', description: 'cespugli e querce basse', color: '#2f6a2a', layer: 'vegetation', solid: true, speed: 1 },
+            { code: 'w', name: 'torrente', description: 'acqua fredda tra i sassi', color: '#3a78c8', layer: 'liquid', solid: true, speed: 1 },
+            { code: 'r', name: 'pietraia', description: 'massi calcarei', color: '#9a9a92', layer: 'rock', solid: true, speed: 1 },
+            { code: 'h', name: 'muro a secco', description: 'pietre sovrapposte', color: '#8a7a62', layer: 'wall', solid: true, speed: 1 },
+            { code: 'f', name: 'pavimento di cotto', description: 'mattonelle rosse', color: '#b06a4a', layer: 'floor', solid: false, speed: 1 },
+            { code: 'd', name: 'uscio', description: 'porta di castagno', color: '#d8a040', layer: 'door', solid: false, speed: 1 },
+            { code: 'm', name: 'orto', description: 'solchi di terra coltivata', color: '#6e5434', layer: 'ground', solid: false, speed: 0.8 },
+            { code: 's', name: 'sabbia', description: 'sabbia dorata', color: '#d8c27a', layer: 'ground', solid: false, speed: 0.85 },
+            { code: 'j', name: 'boscaglia', description: 'intrico di rovi e liane', color: '#1f6b34', layer: 'vegetation', solid: true, speed: 1 },
+            { code: 'o', name: 'mare', description: 'acque profonde', color: '#1d4f8a', layer: 'liquid', solid: true, speed: 1 },
+            { code: 'k', name: 'monte', description: 'pareti di calcare', color: '#6e6a66', layer: 'rock', solid: true, speed: 1 },
+            { code: 'n', name: 'neve', description: 'neve alta', color: '#e8eef2', layer: 'ground', solid: false, speed: 0.7 },
+            { code: 'b', name: 'muro di pietra', description: 'grosse pietre squadrate', color: '#8a8580', layer: 'wall', solid: true, speed: 1 },
+            { code: 'l', name: 'lastricato', description: 'pietre lisce', color: '#9c958c', layer: 'floor', solid: false, speed: 1 },
+            { code: 'z', name: 'ponte levatoio', description: 'assi sul fossato', color: '#8b6a42', layer: 'floor', solid: false, speed: 1 },
           ],
-          tetto: '#8a3a2a',
+          roof: '#8a3a2a',
         };
       case 'genesis.physics':
-        return { terreni: [] };
+        return { terrains: [] };
       case 'genesis.layouts':
         return {
-          ambienti: [
+          environments: [
             {
               id: 'stazzo',
-              nome: 'Stazzo',
-              descrizione: 'casupole di pietra e recinti per le greggi',
-              tipo: 'misto',
-              programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 't', out: 'g', p: 0.8 }] }, { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 }, { type: 'path', from: 'd', to: 'p', on: 'gm', color: 'p', steps: 2 }] }),
+              name: 'Stazzo',
+              description: 'casupole di pietra e recinti per le greggi',
+              type: 'mixed',
+              program_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 't', out: 'g', p: 0.8 }] }, { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 }, { type: 'path', from: 'd', to: 'p', on: 'gm', color: 'p', steps: 2 }] }),
             },
-            { id: 'macchia', nome: 'Macchia', descrizione: 'boscaglia fitta con radure', tipo: 'esterno', programma_json: JSON.stringify({ type: 'prl', rules: [{ in: 'g', out: 't', p: 0.3 }] }) },
-            { id: 'rotto', nome: 'Programma rotto', descrizione: 'non compila', tipo: 'esterno', programma_json: '{"type":"teletrasporta","dove":"altrove"}' },
+            { id: 'macchia', name: 'Macchia', description: 'boscaglia fitta con radure', type: 'outdoor', program_json: JSON.stringify({ type: 'prl', rules: [{ in: 'g', out: 't', p: 0.3 }] }) },
+            { id: 'rotto', name: 'Programma rotto', description: 'non compila', type: 'outdoor', program_json: '{"type":"teletrasporta","dove":"altrove"}' },
           ],
         };
       case 'genesis.cast':
         return {
-          moduli: [
-            { tipo: 'npc', richiesta: 'un vecchio pastore che conta le pecore e perde il conto' },
-            { tipo: 'oggetto', richiesta: 'una madia di legno per il pane' },
-            { tipo: 'strumento', richiesta: 'un bastone da pastore' },
+          modules: [
+            { type: 'npc', request: 'un vecchio pastore che conta le pecore e perde il conto' },
+            { type: 'object', request: 'una madia di legno per il pane' },
+            { type: 'item', request: 'un bastone da pastore' },
           ],
         };
       case 'content.items':
-        return { oggetti: this.items(d.count ?? 6, d.existing ?? [], d.hints ?? []) };
+        return { items: this.items(d.count ?? 6, d.existing ?? [], d.hints ?? []) };
       case 'content.define':
-        return { oggetti: (d.names ?? []).map((n: string) => this.item(n)) };
+        return { items: (d.names ?? []).map((n: string) => this.item(n)) };
       case 'content.physics':
-        return { correzioni: [] };
+        return { fixes: [] };
       case 'content.review':
-        return { approvato: true, problemi: [] };
+        return { approved: true, problems: [] };
       case 'content.recipes': {
         const names: string[] = d.names ?? [];
-        const ricette = names.length >= 3 ? [{ nome: `${names[names.length - 1]} grezzo`, ingredienti: [{ oggetto: names[names.length - 2], quantita: 1 }], attrezzi: [], risultato: { oggetto: names[names.length - 1], quantita: 1 } }] : [];
-        return { ricette, bottino: [{ tabella: 'comune', voci: [{ tag: 'food', peso: 3 }, { tag: 'material', peso: 2 }] }] };
+        const recipes = names.length >= 3 ? [{ name: `${names[names.length - 1]} grezzo`, inputs: [{ item: names[names.length - 2], quantity: 1 }], tools: [], result: { item: names[names.length - 1], quantity: 1 } }] : [];
+        return { recipes, loot: [{ table: 'comune', entries: [{ tag: 'food', weight: 3 }, { tag: 'material', weight: 2 }] }] };
       }
       case 'npc.individuate': {
         const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${this.drawn++}`));
@@ -232,66 +230,73 @@ export class MockAiModels implements AiModels, DecisionModels {
         const avoid: string[] = d.ctx?.avoid ?? [];
         const nome = rng.pick(NAMES.filter((n) => !avoid.includes(n)).length ? NAMES.filter((n) => !avoid.includes(n)) : NAMES);
         const common: string[] = d.ctx?.common ?? [];
+        // The bonds of the world with their kinds (T310b), as the Narrator's schema says them.
+        const BONDS: Array<[string, string]> = [['fratello', 'sibling'], ['sorella', 'sibling'], ['figlio', 'child'], ['amico', 'friend'], ['rivale', 'rival']];
         return {
-          nome,
+          name: nome,
           persona: `Sei ${nome}, ${d.archetype?.description ?? ''}. ${d.archetype?.persona ?? ''}`,
-          aspetto: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
-          porta: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
-          mestiere: rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera']),
-          genere: /a$|e$/.test(nome) && !/one$/.test(nome) ? 'femmina' : 'maschio',
-          eta: rng.pick(['giovane', 'adulto', 'anziana']),
-          storia: `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
+          look: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
+          carries: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
+          job: rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera']),
+          gender: /a$|e$/.test(nome) && !/one$/.test(nome) ? 'female' : 'male',
+          age: rng.pick(['giovane', 'adulto', 'anziana']),
+          story: `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
           // Someone already known becomes family; otherwise a relative not met yet.
-          famiglia: (() => {
+          family: (() => {
             const known = [...String(d.ctx?.society ?? '').split('Nominate')[0].matchAll(/^- ([^,]+),/gm)].pop()?.[1];
-            return known && known !== nome ? [{ nome: known, legame: rng.pick(['fratello', 'sorella', 'figlio', 'amico', 'rivale']) }] : [{ nome: rng.pick(NAMES.filter((n) => n !== nome)), legame: 'madre' }];
+            if (known && known !== nome) {
+              const [bond, kind] = rng.pick(BONDS);
+              return [{ name: known, bond, kind }];
+            }
+            return [{ name: rng.pick(NAMES.filter((n) => n !== nome)), bond: 'madre', kind: 'parent' }];
           })(),
           routine: [
-            { quando: 'mattina', fa: 'apre le imposte', dove: 'casa' },
-            { quando: 'giorno', fa: 'lavora', dove: 'lavoro' },
-            { quando: 'sera', fa: 'chiacchiera in piazza', dove: 'piazza' },
-            { quando: 'notte', fa: 'dorme', dove: 'casa' },
+            { when: 'morning', does: 'apre le imposte', where: 'home' },
+            { when: 'day', does: 'lavora', where: 'work' },
+            { when: 'evening', does: 'chiacchiera in piazza', where: 'square' },
+            { when: 'night', does: 'dorme', where: 'home' },
           ],
           // What they wear (T353): a common garment when the world has one, by the words of its name; an animal nothing. Last, so
           // that the draws before it are those of before.
-          indossa: ((garments: string[]) => (d.archetype?.specie === 'animal' || !garments.length ? [] : [rng.pick(garments)]))(common.filter((n: string) => /mantell|sciall|cappell|berrett|cappucc|tunic|giubb|grembiul|camici/i.test(n))),
+          wears: ((garments: string[]) => (d.archetype?.specie === 'animal' || !garments.length ? [] : [rng.pick(garments)]))(common.filter((n: string) => /mantell|sciall|cappell|berrett|cappucc|tunic|giubb|grembiul|camici/i.test(n))),
         };
       }
       case 'agent.chat': {
         const t = String(d.text ?? '');
         const wants = /\b(crea|creare|aggiungi|fammi|voglio)\b/i.test(t);
-        return { risposta: wants ? `Si può fare. Lo passo alla Fucina: «${t}».` : `Sono il ${d.agent}. Qui ogni cosa del mondo è un file: tocca un libro o un cristallo e leggerai come è fatta.`, richiesta_fucina: wants ? t : '' };
+        return { reply: wants ? `Si può fare. Lo passo alla Fucina: «${t}».` : `Sono il ${d.agent}. Qui ogni cosa del mondo è un file: tocca un libro o un cristallo e leggerai come è fatta.`, forge_request: wants ? t : '' };
       }
       case 'action.judge':
         return this.judgeAction(d);
       case 'mechanic.design':
-        // A careful engineer: equipment slots whose bonuses become a state of the wanderer.
+        // A careful engineer: equipment slots whose bonuses become a state of the wanderer (the slots' ids are its own words, the
+        // places and the bonuses the ids of T310b; the components of 0.4 in its Lua are ported by the kernel, luaFor0_5).
         return {
-          nome: 'Equipaggiamento',
-          descrizione: 'Slot per indossare e impugnare: armature e vestiti danno difesa e cambiano il passo.',
-          pannello: {
-            titolo: 'Equipaggiamento',
-            elementi: [
-              { tipo: 'slot', id: 'testa', etichetta: 'Testa', accetta: ['testa'] },
-              { tipo: 'slot', id: 'corpo', etichetta: 'Corpo', accetta: ['corpo', 'clothing'] },
-              { tipo: 'slot', id: 'piedi', etichetta: 'Piedi', accetta: ['piedi'] },
-              { tipo: 'slot', id: 'arma', etichetta: 'Arma', accetta: ['arma'] },
-              { tipo: 'text', etichetta: 'Difesa', campo: 'difesa.valore' },
-              { tipo: 'bar', etichetta: 'Salute', campo: 'needs.health', max: 100 },
+          name: 'Equipaggiamento',
+          description: 'Slot per indossare e impugnare: armature e vestiti danno difesa e cambiano il passo.',
+          panel: {
+            title: 'Equipaggiamento',
+            elements: [
+              { type: 'slot', id: 'head', label: 'Testa', accepts: ['head'] },
+              { type: 'slot', id: 'torso', label: 'Corpo', accepts: ['torso', 'clothing'] },
+              { type: 'slot', id: 'feet', label: 'Piedi', accepts: ['feet'] },
+              { type: 'slot', id: 'weapon', label: 'Arma', accepts: ['weapon'] },
+              { type: 'text', label: 'Difesa', field: 'difesa.valore' },
+              { type: 'bar', label: 'Salute', field: 'needs.health', max: 100 },
             ],
           },
-          componenti_json: '{"difesa":{"valore":0}}',
-          logica: [
+          components_json: '{"difesa":{"valore":0}}',
+          logic: [
             '-- Equipaggiamento: ciò che indossi dà difesa e cambia il passo.',
             'local M = {}',
-            'local POSTI = { "testa", "corpo", "piedi", "arma" }',
+            'local SLOTS = { "head", "torso", "feet", "weapon" }',
             'function M.on_slot(user, slot, item, panel)',
             '  local difesa, passo = 0, 1',
-            '  for _, p in ipairs(POSTI) do',
+            '  for _, p in ipairs(SLOTS) do',
             '    local it = ui.slot(panel, p)',
             '    if it then',
-            '      difesa = difesa + items.bonus(it, "difesa")',
-            '      local v = items.bonus(it, "velocita")',
+            '      difesa = difesa + items.bonus(it, "defense")',
+            '      local v = items.bonus(it, "speed")',
             '      if v > 0 then passo = passo * v end',
             '    end',
             '  end',
@@ -304,40 +309,40 @@ export class MockAiModels implements AiModels, DecisionModels {
             'end',
             'return M',
           ].join('\n'),
-          casi: [
+          cases: [
             {
-              titolo: "Si indossa l'elmo",
-              racconto: "Il viandante mette l'elmo in testa: la difesa sale a 3 e il passo rallenta un poco.",
-              oggetti: [{ nome: 'Elmo di prova', posto: 'testa', bonus_json: '{"difesa":3,"velocita":0.95}' }],
-              passi: [{ tipo: 'slot', slot: 'testa', oggetto: 'Elmo di prova' }],
-              durata: 1,
-              guarda: ['difesa.valore', 'stati.equipaggiamento'],
-              righe: [4, 9, 14, 17],
+              title: "Si indossa l'elmo",
+              story: "Il viandante mette l'elmo in testa: la difesa sale a 3 e il passo rallenta un poco.",
+              items: [{ name: 'Elmo di prova', slot: 'head', bonus_json: '{"defense":3,"speed":0.95}' }],
+              steps: [{ type: 'slot', slot: 'head', item: 'Elmo di prova' }],
+              duration: 1,
+              watch: ['difesa.valore', 'stati.equipaggiamento'],
+              lines: [4, 9, 14, 17],
             },
           ],
         };
       case 'referente.coordinate': {
         const t = String(d.text ?? '');
-        if (/distrugg.*universo|cancella tutto/i.test(t)) return { risposta: 'Questo no.', incarico: 'nessuno', rifiuto: "distruggerebbe l'universo" };
-        if (/riscolp/i.test(t)) return { risposta: 'Lo dico allo Scultore.', incarico: 'riscolpisci', bersaglio: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], richiesta: t };
-        if (/\brun[ae]\b/i.test(t)) return { risposta: 'Eccole.', incarico: 'runa', rune: [t.replace(/.*\brun[ae]\s+/i, '')] };
-        if (/musica|brano|canzone|melodia/i.test(t)) return { risposta: 'Lo porto al Musicista.', incarico: 'musica', richiesta: t };
-        if (/\bcredit[io]\b/i.test(t)) return { risposta: 'I crediti non passano dal Concilio.', incarico: 'nessuno' };
-        if (/regola/i.test(t)) return { risposta: 'Sarà una regola del mondo.', incarico: 'regola', richiesta: t.replace(/.*regola:?\s*/i, '') };
-        if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { risposta: 'Il Cartografo ci pensa.', incarico: 'ambiente', richiesta: t };
-        if (/personaggio|abitante|persona/i.test(t)) return { risposta: 'La Fucina lo farà nascere.', incarico: 'personaggio', richiesta: t };
-        if (/spada|oggetto|strumento|crea/i.test(t)) return { risposta: 'Alla Fucina.', incarico: 'oggetto', richiesta: t };
-        return { risposta: 'Benvenuto nello studio. Chiedi pure: qui si fa il mondo.', incarico: 'nessuno' };
+        if (/distrugg.*universo|cancella tutto/i.test(t)) return { reply: 'Questo no.', task: 'none', refusal: "distruggerebbe l'universo" };
+        if (/riscolp/i.test(t)) return { reply: 'Lo dico allo Scultore.', task: 'resculpt', target: t.replace(/.*riscolpisci\s+(il |la |lo |l')?/i, '').split(' ')[0], request: t };
+        if (/\brun[ae]\b/i.test(t)) return { reply: 'Eccole.', task: 'rune', runes: [t.replace(/.*\brun[ae]\s+/i, '')] };
+        if (/musica|brano|canzone|melodia/i.test(t)) return { reply: 'Lo porto al Musicista.', task: 'music', request: t };
+        if (/\bcredit[io]\b/i.test(t)) return { reply: 'I crediti non passano dal Concilio.', task: 'none' };
+        if (/regola/i.test(t)) return { reply: 'Sarà una regola del mondo.', task: 'rule', request: t.replace(/.*regola:?\s*/i, '') };
+        if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { reply: 'Il Cartografo ci pensa.', task: 'environment', request: t };
+        if (/personaggio|abitante|persona/i.test(t)) return { reply: 'La Fucina lo farà nascere.', task: 'character', request: t };
+        if (/spada|oggetto|strumento|crea/i.test(t)) return { reply: 'Alla Fucina.', task: 'item', request: t };
+        return { reply: 'Benvenuto nello studio. Chiedi pure: qui si fa il mondo.', task: 'none' };
       }
       case 'npc.sheet': {
         const w = d.who ?? {};
-        const legami: string[] = Array.isArray(w.legami) ? w.legami : [];
+        const bonds: string[] = Array.isArray(w.bonds) ? w.bonds : [];
         return {
-          scheda: [
-            `Sei ${w.nome ?? 'qualcuno'}, ${w.mestiere ?? 'del posto'}. ${w.persona ?? ''}`.trim(),
+          sheet: [
+            `Sei ${w.name ?? 'qualcuno'}, ${w.job ?? 'del posto'}. ${w.persona ?? ''}`.trim(),
             'Parli a frasi corte, con un «bonombo» a chi arriva, e non ti fidi di chi parla troppo.',
-            legami.length ? `Tieni ai tuoi: ${legami.join(', ')}.` : 'Non hai nessuno, e lo dici come se non pesasse.',
-            w.storia ? `Ciò che ti ha fatto: ${w.storia}` : 'Hai sempre vissuto qui.',
+            bonds.length ? `Tieni ai tuoi: ${bonds.join(', ')}.` : 'Non hai nessuno, e lo dici come se non pesasse.',
+            w.story ? `Ciò che ti ha fatto: ${w.story}` : 'Hai sempre vissuto qui.',
             'Vuoi una giornata tranquilla; temi il freddo e le cattive notizie.',
             'Con uno sconosciuto sei cortese e breve; con chi ti è caro ti sciogli.',
           ].join('\n'),
@@ -345,70 +350,70 @@ export class MockAiModels implements AiModels, DecisionModels {
       }
       case 'npc.dialogue':
         return {
-          battute: [
-            { chi: 'a', dice: `${d.b?.nome ?? 'Ehi'}, hai sentito anche tu quel rumore stanotte?` },
-            { chi: 'b', dice: d.b?.segreti ? 'Non qui. Ne parliamo dopo.' : 'Sarà stato il vento. Come sempre.' },
+          lines: [
+            { who: 'a', say: `${d.b?.name ?? 'Ehi'}, hai sentito anche tu quel rumore stanotte?` },
+            { who: 'b', say: d.b?.secrets ? 'Non qui. Ne parliamo dopo.' : 'Sarà stato il vento. Come sempre.' },
           ],
-          ricordo_a: `ha chiesto a ${d.b?.nome} del rumore di notte`,
-          ricordo_b: `${d.a?.nome} ha fatto domande sul rumore di notte`,
+          memory_a: `ha chiesto a ${d.b?.name} del rumore di notte`,
+          memory_b: `${d.a?.name} ha fatto domande sul rumore di notte`,
         };
       case 'plot.weave': {
         const names = [...String(d.society ?? '').split('Nominate')[0].matchAll(/^- ([^,]+),/gm)].map((m) => m[1]);
         const [x, y, z] = [names[0], names[1] ?? names[0], names[2] ?? names[0]];
         return {
-          titolo: 'Il rumore sotto la piazza',
-          mistero: `${x} scava di notte sotto la piazza: cerca una runa che suo nonno avrebbe sepolto lì. ${y} lo sa e lo copre.`,
-          coinvolti: [x, y, z],
-          tappe: [
-            { giorno: 0, momento: 'notte', chi: x, dove: 'piazza', cosa: 'scava in silenzio vicino al pozzo', battuta: 'Ancora un poco…', indizio: 'terra smossa vicino al pozzo' },
-            { giorno: 1, momento: 'mattina', chi: y, dove: 'piazza', cosa: 'ricopre la terra smossa', battuta: 'Nessuno deve vedere.' },
-            { giorno: 1, momento: 'sera', chi: z, dove: 'casa', cosa: 'scrive una lettera e la nasconde' },
+          title: 'Il rumore sotto la piazza',
+          mystery: `${x} scava di notte sotto la piazza: cerca una runa che suo nonno avrebbe sepolto lì. ${y} lo sa e lo copre.`,
+          involved: [x, y, z],
+          beats: [
+            { day: 0, moment: 'night', who: x, where: 'square', what: 'scava in silenzio vicino al pozzo', line: 'Ancora un poco…', clue: 'terra smossa vicino al pozzo' },
+            { day: 1, moment: 'morning', who: y, where: 'square', what: 'ricopre la terra smossa', line: 'Nessuno deve vedere.' },
+            { day: 1, moment: 'evening', who: z, where: 'home', what: 'scrive una lettera e la nasconde' },
           ],
-          missione: { da: z, testo: `Porta questa mela a ${x}, e guarda bene cosa ha nelle mani.`, tipo: 'parla', a: x, ricompensa: 'Lanterna' },
+          quest: { from: z, text: `Porta questa mela a ${x}, e guarda bene cosa ha nelle mani.`, type: 'talk', to: x, reward: 'Lanterna' },
         };
       }
       case 'genesis.atlas': {
-        const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(borgo|bosco|campi|rovine|locanda)$/.test(l.id));
-        const dirs = ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'];
-        return { regioni: special.map((l: { id: string; name: string; description: string }, i: number) => ({ nome: `${l.name} ${SUFFIX[i % SUFFIX.length]}`, descrizione: l.description, ambiente: l.id, direzione: dirs[(i * 3) % 8], distanza: 3 + (i % 5), raggio: 1 })) };
+        const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(village|woods|fields|ruins|inn)$/.test(l.id));
+        const dirs = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+        return { regions: special.map((l: { id: string; name: string; description: string }, i: number) => ({ name: `${l.name} ${SUFFIX[i % SUFFIX.length]}`, description: l.description, environment: l.id, direction: dirs[(i * 3) % 8], distance: 3 + (i % 5), radius: 1 })) };
       }
       case 'cartographer.environment': {
         const t = String(d.request ?? '');
         const elves = /elf|fat|incant/i.test(t);
         return {
           id: elves ? 'bosco_elfi' : 'luogo_nuovo',
-          nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30),
-          descrizione: elves ? 'alberi altissimi e argentei, case sugli alberi, sentieri di luce' : t,
-          tipo: 'esterno',
-          programma_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 'g', out: 'E', p: 0.3 }] }, { type: 'stamp', shape: 'tower', codes: { muro: 'E' } }] }),
-          nuovi_terreni: [{ codice: 'E', nome: elves ? 'albero argenteo' : 'pietra strana', colore: '#c8d8e8', strato: 'vegetation', solido: true, descrizione: 'alberi dalla corteccia d\'argento' }],
-          regione: { nome: elves ? 'Bosco degli Elfi' : t.slice(0, 30), descrizione: 'dove la luce cade a fili', direzione: 'nord-est', distanza: 4, raggio: 1 },
+          name: elves ? 'Bosco degli Elfi' : t.slice(0, 30),
+          description: elves ? 'alberi altissimi e argentei, case sugli alberi, sentieri di luce' : t,
+          type: 'outdoor',
+          program_json: JSON.stringify({ type: 'sequence', children: [{ type: 'prl', rules: [{ in: 'g', out: 'E', p: 0.3 }] }, { type: 'stamp', shape: 'tower', codes: { wall: 'E' } }] }),
+          new_terrains: [{ code: 'E', name: elves ? 'albero argenteo' : 'pietra strana', color: '#c8d8e8', layer: 'vegetation', solid: true, description: 'alberi dalla corteccia d\'argento' }],
+          region: { name: elves ? 'Bosco degli Elfi' : t.slice(0, 30), description: 'dove la luce cade a fili', direction: 'north-east', distance: 4, radius: 1 },
         };
       }
       case 'council.session':
-        return { valutazione: 'Il mondo cresce, ma la piazza è vuota di mestieri.', intervento: 'abitante', richiesta: 'una guaritrice che conosce le erbe del bosco' };
+        return { assessment: 'Il mondo cresce, ma la piazza è vuota di mestieri.', action: 'inhabitant', request: 'una guaritrice che conosce le erbe del bosco' };
       case 'craft.free': {
         // An honest craftsman: one thing you carry becomes what you ask for, unless it is a marvel.
         const carrying: string[] = (d.carrying ?? []).map((c: string) => c.replace(/ ×\d+$/, '')).filter((c: string) => !/^Runa|Borsa/.test(c));
         const t = String(d.text ?? '');
-        if (!carrying.length || /drago|oro|stella|magia/i.test(t)) return { possibile: false, racconto: `Con quello che hai non puoi fare ${t}.` };
-        return { possibile: true, racconto: `Lavori ${carrying[0]} con pazienza.`, risultato: t.replace(/^(un|una|uno|il|la)\s+/i, '').replace(/^./, (c) => c.toUpperCase()), descrizione: `${t}, fatto a mano`, quantita: 1, ingredienti: [{ oggetto: carrying[0], quantita: 1 }], attrezzi: [] };
+        if (!carrying.length || /drago|oro|stella|magia/i.test(t)) return { possible: false, story: `Con quello che hai non puoi fare ${t}.` };
+        return { possible: true, story: `Lavori ${carrying[0]} con pazienza.`, result: t.replace(/^(un|una|uno|il|la)\s+/i, '').replace(/^./, (c) => c.toUpperCase()), description: `${t}, fatto a mano`, quantity: 1, inputs: [{ item: carrying[0], quantity: 1 }], tools: [] };
       }
       case 'player.death': {
         // The level, literally: what the kernel does when the Narrator is silent.
         const v = fallbackDeath(Number(d.level), Array.isArray(d.carried) ? d.carried : []);
-        return { racconto: v.story, perde_tutto: v.loseAll, ripartenza: v.restart, effetti: v.effects };
+        return { story: v.story, lose_all: v.loseAll, restart: v.restart, effects: v.effects };
       }
       case 'rune.invent': {
         // A rune of an element nobody has yet (T57b): the first of a few that is not taken.
         const known: Array<{ token: string; name: string }> = d.known ?? [];
         const CANDIDATES = [
           // As the prompt asks since T310: the token in Latin like the others, the element an English id, the rest in the language of the world.
-          { token: 'sanguis', nome: 'Wunjo', glifo: 'ᚹ', colore: '#c8323c', elemento: 'blood', descrizione: 'la vena: lega, scambia, chiama', canone: 'segna i patti: chi la pronuncia dà qualcosa di sé per avere qualcosa' },
-          { token: 'glacies', nome: 'Isaz', glifo: 'ᛁ', colore: '#bfe9ff', elemento: 'ice', descrizione: 'il gelo: ferma, indurisce', canone: "ferma ciò che scorre: l'acqua, il passo, il fuoco" },
-          { token: 'umbra', nome: 'Eihwaz', glifo: 'ᛇ', colore: '#5a4a7a', elemento: 'shadow', descrizione: 'il tasso: nasconde, attenua', canone: 'spegne la luce attorno e nasconde chi la pronuncia' },
+          { token: 'sanguis', name: 'Wunjo', glyph: 'ᚹ', color: '#c8323c', element: 'blood', description: 'la vena: lega, scambia, chiama', canon: 'segna i patti: chi la pronuncia dà qualcosa di sé per avere qualcosa' },
+          { token: 'glacies', name: 'Isaz', glyph: 'ᛁ', color: '#bfe9ff', element: 'ice', description: 'il gelo: ferma, indurisce', canon: "ferma ciò che scorre: l'acqua, il passo, il fuoco" },
+          { token: 'umbra', name: 'Eihwaz', glyph: 'ᛇ', color: '#5a4a7a', element: 'shadow', description: 'il tasso: nasconde, attenua', canon: 'spegne la luce attorno e nasconde chi la pronuncia' },
         ];
-        return CANDIDATES.find((c) => !known.some((k) => k.token === c.token || k.name === c.nome)) ?? { ...CANDIDATES[0], token: 'tonitrus', nome: 'Thurisaz' };
+        return CANDIDATES.find((c) => !known.some((k) => k.token === c.token || k.name === c.name)) ?? { ...CANDIDATES[0], token: 'tonitrus', name: 'Thurisaz' };
       }
       case 'spell.name': {
         // A program (T57a): the first rune gives the main effect, stronger for every time it is repeated;
@@ -416,21 +421,21 @@ export class MockAiModels implements AiModels, DecisionModels {
         const runes: Array<{ token: string; name: string; element: string }> = d.runes ?? [];
         const s = runes.map((r) => r.token).join(' ');
         if (/^terra ventus terra$/.test(s)) {
-          return { nome: 'Innalza', descrizione: 'La terra si solleva in una collina.', costo: 24, effetti: [{ type: 'relief', delta: 2, radius: 1 }] };
+          return { name: 'Innalza', description: 'La terra si solleva in una collina.', cost: 24, effects: [{ type: 'relief', delta: 2, radius: 1 }] };
         }
         if (/^ventus terra ventus$/.test(s)) {
-          return { nome: 'Abbassa', descrizione: 'La terra si abbassa in una conca.', costo: 24, effetti: [{ type: 'relief', delta: -2, radius: 1 }] };
+          return { name: 'Abbassa', description: 'La terra si abbassa in una conca.', cost: 24, effects: [{ type: 'relief', delta: -2, radius: 1 }] };
         }
         // The terrains by their internal ids (T307a): the validator finds the tile of this world that has it.
         const BASE: Record<string, Record<string, unknown>> = { lux: { type: 'light', radius: 4, duration: 60 }, ignis: { type: 'fire', radius: 1, duration: 6 }, vita: { type: 'needs', health: 15 }, scutum: { type: 'shield', duration: 20 }, ventus: { type: 'push', force: 4 }, terra: { type: 'terrain', to: 'path', radius: 1 }, aqua: { type: 'terrain', to: 'water', radius: 0 } };
         const times = (t: string) => runes.filter((r) => r.token === t).length;
         const scaled = (t: string, k: number) => Object.fromEntries(Object.entries(BASE[t] ?? {}).map(([f, v]) => [f, typeof v === 'number' ? Math.min(f === 'radius' ? 3 : 40, Math.round(v * k)) : v]));
         const order = [...new Set(runes.map((r) => r.token))].filter((t) => BASE[t]);
-        const effetti = order.map((t, i) => scaled(t, i === 0 ? 1 + times(t) : 0.5 * times(t) + 0.5)).slice(0, 3);
-        return { nome: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), descrizione: `Le rune ${runes.map((r) => italianName('elementi', r.element)).join(' e ')} insieme.`, costo: 8 * runes.length, effetti };
+        const effects = order.map((t, i) => scaled(t, i === 0 ? 1 + times(t) : 0.5 * times(t) + 0.5)).slice(0, 3);
+        return { name: runes.map((r) => r.name.slice(0, 3)).join('').replace(/^./, (c) => c.toUpperCase()), description: `Le rune ${runes.map((r) => italianName('elementi', r.element)).join(' e ')} insieme.`, cost: 8 * runes.length, effects };
       }
       case 'text.examine':
-        return { testo: `Osservi ${d.what?.name ?? 'la cosa'} da vicino. ${d.what?.description ?? ''} Per un istante ti sembra di averla già vista, identica, altrove.` };
+        return { text: `Osservi ${d.what?.name ?? 'la cosa'} da vicino. ${d.what?.description ?? ''} Per un istante ti sembra di averla già vista, identica, altrove.` };
       default:
         return {};
     }
@@ -443,42 +448,42 @@ export class MockAiModels implements AiModels, DecisionModels {
     const name = d.target?.name ?? 'la cosa';
     const label = String(d.text ?? '').trim().replace(/^./, (c: string) => c.toUpperCase()).slice(0, 30);
     // An entity with a shape of its own changes it: the Sculptor will write the rule.
-    if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possibile: true, racconto: `${name} cambia sotto le tue mani.`, effetti: [{ type: 'needs', energy: -2 }], ripetibile: true, etichetta: label, forma: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
+    if (d.shape && has('scheggi', 'ammacc', 'incid', 'accend', 'spegn', 'dipin')) return { possible: true, story: `${name} cambia sotto le tue mani.`, effects: [{ type: 'needs', energy: -2 }], repeatable: true, label, shape: `${name} ${ws.find((w) => /scheggi|ammacc|incid/.test(w)) ? 'si scheggia in parte' : 'cambia colore in parte'}` };
     // Another wanderer (T43b): a blow hurts, care heals (the kernel takes away what the game does not allow).
-    if (d.target?.kind === 'altro viandante' && has('colp', 'pugn', 'ferisc', 'picchi')) return { possibile: true, racconto: `Colpisci ${name}.`, effetti: [{ type: 'needs', health: -20, energy: -5 }, { type: 'message', text: 'Ahi!' }], ripetibile: true, etichetta: label };
-    if (d.target?.kind === 'altro viandante' && has('cur', 'medic', 'fascia')) return { possibile: true, racconto: `Curi ${name}.`, effetti: [{ type: 'needs', health: 15 }], ripetibile: true, etichetta: label };
-    if (has('apr', 'forz', 'scassin')) return { possibile: true, racconto: `Fai leva su ${name} finché cede.`, effetti: [d.target?.container ? { type: 'open' } : { type: 'container', capacity: 4, loot: 'cassa' }, { type: 'open' }], ripetibile: true, etichetta: label };
-    if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possibile: true, racconto: `Colpisci ${name} con tutta la forza: va in pezzi.`, effetti: [{ type: 'destroy' }, { type: 'needs', energy: -5 }], ripetibile: true, etichetta: label };
-    if (has('bruc', 'incend', 'appicc')) return { possibile: true, racconto: `Le fiamme attecchiscono a ${name}.`, effetti: [{ type: 'fire', radius: 1, duration: 8 }], ripetibile: true, etichetta: label };
-    if (has('scav')) return { possibile: true, racconto: 'Scavi attorno, la terra si smuove.', effetti: [{ type: 'terrain', to: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], radius: 1 }], ripetibile: true, etichetta: label };
-    if (has('innalz', 'sollev')) return { possibile: true, racconto: 'La terra si solleva.', effetti: [{ type: 'relief', delta: 2, radius: 1 }], ripetibile: true, etichetta: label };
-    if (has('abbass', 'spian')) return { possibile: true, racconto: 'La terra si abbassa.', effetti: [{ type: 'relief', delta: -2, radius: 1 }], ripetibile: true, etichetta: label };
-    if (has('spin', 'calc')) return { possibile: true, racconto: `Dai una spinta a ${name}.`, effetti: [{ type: 'push', force: 2 }], ripetibile: true, etichetta: label };
-    if (has('mont', 'cavalc', 'sell')) return { possibile: true, racconto: `Sali in sella: ${name} sbuffa e parte al trotto.`, effetti: [{ type: 'state', name: 'a cavallo', speed: 1.8, weight: 30, duration: 0 }], ripetibile: true, etichetta: 'Monta in sella' };
-    if (has('smont', 'scend')) return { possibile: true, racconto: 'Scendi di sella.', effetti: [{ type: 'remove_state', name: 'a cavallo' }], ripetibile: true, etichetta: 'Scendi di sella' };
-    if (has('riemp')) return { possibile: true, racconto: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effetti: [{ type: 'consume', item: name }, { type: 'needs', thirst: 10 }], ripetibile: true, etichetta: label };
-    if (has('bev', 'sorsegg')) return { possibile: true, racconto: `Bevi da ${name}: l'acqua è fresca.`, effetti: [{ type: 'needs', thirst: 15 }], ripetibile: true, etichetta: label };
-    if (d.target?.kind === 'persona' && has('figli', 'bambin')) return { possibile: true, racconto: `${name} ti stringe la mano: tra qualche tempo, una nuova vita.`, effetti: [{ type: 'birth' }, { type: 'memory', text: 'abbiamo deciso di avere un figlio', weight: 3 }], ripetibile: false, etichetta: label };
-    if (d.target?.kind === 'persona' && has('abbracc', 'regal')) return { possibile: true, racconto: `${name} sorride, sorpreso.`, effetti: [{ type: 'memory', text: 'il viandante è stato gentile', weight: 2 }, { type: 'bond', bond: 'amico' }], ripetibile: false, etichetta: label };
-    if (has('bussa', 'accarezz', 'ascolt')) return { possibile: true, racconto: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effetti: [{ type: 'message', text: 'Nulla cambia.' }], ripetibile: false, etichetta: label };
-    return { possibile: false, racconto: `Provi, ma ${name} non si lascia ${d.text}.`, effetti: [], ripetibile: false, etichetta: label };
+    if (d.target?.kind === 'another wanderer' && has('colp', 'pugn', 'ferisc', 'picchi')) return { possible: true, story: `Colpisci ${name}.`, effects: [{ type: 'needs', health: -20, energy: -5 }, { type: 'message', text: 'Ahi!' }], repeatable: true, label };
+    if (d.target?.kind === 'another wanderer' && has('cur', 'medic', 'fascia')) return { possible: true, story: `Curi ${name}.`, effects: [{ type: 'needs', health: 15 }], repeatable: true, label };
+    if (has('apr', 'forz', 'scassin')) return { possible: true, story: `Fai leva su ${name} finché cede.`, effects: [d.target?.container ? { type: 'open' } : { type: 'container', capacity: 4, loot: 'cassa' }, { type: 'open' }], repeatable: true, label };
+    if (has('romp', 'sfond', 'spacc', 'distrugg')) return { possible: true, story: `Colpisci ${name} con tutta la forza: va in pezzi.`, effects: [{ type: 'destroy' }, { type: 'needs', energy: -5 }], repeatable: true, label };
+    if (has('bruc', 'incend', 'appicc')) return { possible: true, story: `Le fiamme attecchiscono a ${name}.`, effects: [{ type: 'fire', radius: 1, duration: 8 }], repeatable: true, label };
+    if (has('scav')) return { possible: true, story: 'Scavi attorno, la terra si smuove.', effects: [{ type: 'terrain', to: (d.terrains ?? []).find((t: string) => /sentier|terra|strada/.test(t)) ?? d.terrains?.[0], radius: 1 }], repeatable: true, label };
+    if (has('innalz', 'sollev')) return { possible: true, story: 'La terra si solleva.', effects: [{ type: 'relief', delta: 2, radius: 1 }], repeatable: true, label };
+    if (has('abbass', 'spian')) return { possible: true, story: 'La terra si abbassa.', effects: [{ type: 'relief', delta: -2, radius: 1 }], repeatable: true, label };
+    if (has('spin', 'calc')) return { possible: true, story: `Dai una spinta a ${name}.`, effects: [{ type: 'push', force: 2 }], repeatable: true, label };
+    if (has('mont', 'cavalc', 'sell')) return { possible: true, story: `Sali in sella: ${name} sbuffa e parte al trotto.`, effects: [{ type: 'state', name: 'a cavallo', speed: 1.8, weight: 30, duration: 0 }], repeatable: true, label: 'Monta in sella' };
+    if (has('smont', 'scend')) return { possible: true, story: 'Scendi di sella.', effects: [{ type: 'remove_state', name: 'a cavallo' }], repeatable: true, label: 'Scendi di sella' };
+    if (has('riemp')) return { possible: true, story: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effects: [{ type: 'consume', item: name }, { type: 'needs', thirst: 10 }], repeatable: true, label };
+    if (has('bev', 'sorsegg')) return { possible: true, story: `Bevi da ${name}: l'acqua è fresca.`, effects: [{ type: 'needs', thirst: 15 }], repeatable: true, label };
+    if (d.target?.kind === 'person' && has('figli', 'bambin')) return { possible: true, story: `${name} ti stringe la mano: tra qualche tempo, una nuova vita.`, effects: [{ type: 'birth' }, { type: 'memory', text: 'abbiamo deciso di avere un figlio', weight: 3 }], repeatable: false, label };
+    if (d.target?.kind === 'person' && has('abbracc', 'regal')) return { possible: true, story: `${name} sorride, sorpreso.`, effects: [{ type: 'memory', text: 'il viandante è stato gentile', weight: 2 }, { type: 'bond', bond: 'amico' }], repeatable: false, label };
+    if (has('bussa', 'accarezz', 'ascolt')) return { possible: true, story: `${name} non risponde, ma per un attimo ti sembra di sentire un'eco.`, effects: [{ type: 'message', text: 'Nulla cambia.' }], repeatable: false, label };
+    return { possible: false, story: `Provi, ma ${name} non si lascia ${d.text}.`, effects: [], repeatable: false, label };
   }
 
   private item(name: string): unknown {
     const ws = words(name);
     const food = ws.some((w) => EDIBLE.includes(w));
-    // A garment (T353): a thing of clothing with its place, so that whoever names it wears it.
-    const posto = /cappell|berrett|cappucc|elm/i.test(name) ? 'testa' : /tunic|giubb|grembiul|camici|corazz|vest/i.test(name) ? 'corpo' : /mantell|sciall|capp[ae]\b/i.test(name) ? 'schiena' : undefined;
-    if (posto) return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo portano nel regno`, categoria: 'clothing', peso: 0.8, pila: 1, tag: ['stoffa'], posto, impugnabile: false, aspetto: name, forma: 'sack' };
-    return { nome: name.trim().replace(/^./, (c) => c.toUpperCase()), descrizione: `${name}, come lo si trova nel regno`, categoria: food ? 'food' : 'misc', peso: 0.5, pila: food ? 5 : 1, tag: [food ? 'cucina' : 'casa'], effetti: food ? { fame: 15 } : undefined, impugnabile: false, aspetto: name, forma: food ? 'bread' : 'sack' };
+    // A garment (T353): a thing of clothing with its place (the ids of T310b), so that whoever names it wears it.
+    const slot = /cappell|berrett|cappucc|elm/i.test(name) ? 'head' : /tunic|giubb|grembiul|camici|corazz|vest/i.test(name) ? 'torso' : /mantell|sciall|capp[ae]\b/i.test(name) ? 'back' : undefined;
+    if (slot) return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo portano nel regno`, category: 'clothing', weight: 0.8, stack: 1, tags: ['stoffa'], slot, equippable: false, look: name, shape: 'sack' };
+    return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo si trova nel regno`, category: food ? 'food' : 'misc', weight: 0.5, stack: food ? 5 : 1, tags: [food ? 'cucina' : 'casa'], effects: food ? { hunger: 15 } : undefined, equippable: false, look: name, shape: food ? 'bread' : 'sack' };
   }
 
   private items(count: number, existing: string[], hints: string[]): unknown[] {
     const out: unknown[] = hints.slice(0, 2).map((h) => this.item(h));
-    for (const [nome, categoria, descrizione, peso, pila, tag, e] of STOCK) {
+    for (const [name, category, description, weight, stack, tags, e] of STOCK) {
       if (out.length >= count) break;
-      if (existing.includes(nome)) continue;
-      out.push({ nome, categoria, descrizione, peso, pila, tag, effetti: e ? { fame: e.hunger, sete: e.thirst, energia: e.energy, salute: e.health } : undefined, impugnabile: categoria === 'tool', aspetto: descrizione, forma: categoria === 'food' ? 'fruit' : categoria === 'drink' ? 'bottle' : categoria === 'tool' ? 'tool' : 'sack' });
+      if (existing.includes(name)) continue;
+      out.push({ name, category, description, weight, stack, tags, effects: e ? { hunger: e.hunger, thirst: e.thirst, energy: e.energy, health: e.health } : undefined, equippable: category === 'tool', look: description, shape: category === 'food' ? 'fruit' : category === 'drink' ? 'bottle' : category === 'tool' ? 'tool' : 'sack' });
     }
     return out;
   }
@@ -498,84 +503,84 @@ export class MockAiModels implements AiModels, DecisionModels {
         : biome === 'forest' && ids.includes('woods')
           ? 'woods'
           : rng.pick(ids);
-    const oggetti: Array<{ modulo: string; dove: string }> = [];
+    const objects: Array<{ module: string; where: string }> = [];
     // In the order of the ids of before T307b (`obj.letto`, not `obj.bed`): the offline worlds of the seed stay the ones they were.
     const legacy = (id: string) => italianName('moduli-seme', id);
     for (const m of [...ctx.catalog].sort((a, b) => (legacy(a.id) < legacy(b.id) ? -1 : legacy(a.id) > legacy(b.id) ? 1 : 0))) {
-      if (oggetti.length >= 6) break;
-      const p = m.kind === 'mobile' ? 0.45 : m.kind === 'npc' ? 0.35 : 0.25;
-      if (rng.chance(p)) oggetti.push({ modulo: m.id, dove: m.kind === 'mobile' ? 'dentro' : 'fuori' });
+      if (objects.length >= 6) break;
+      const p = m.kind === 'furniture' ? 0.45 : m.kind === 'npc' ? 0.35 : 0.25;
+      if (rng.chance(p)) objects.push({ module: m.id, where: m.kind === 'furniture' ? 'inside' : 'outside' });
     }
-    const rune: string[] = [];
+    const runes: string[] = [];
     const n = rng.chance(0.4) ? 0 : 1 + rng.int(2);
-    for (let i = 0; i < n && ctx.fragments.length; i++) rune.push(rng.pick(ctx.fragments));
+    for (let i = 0; i < n && ctx.fragments.length; i++) runes.push(rng.pick(ctx.fragments));
     // A careless cartographer: a rune line that does not compile (the validator drops it).
-    if (!ctx.start && ctx.attempt === 0 && rune.length && rng.chance(this.corruptRate)) {
-      const t = tokenize(rune[0]);
-      rune[0] = t.length > 1 ? t.slice(0, -1).join(' ') : `${rune[0]} =`;
+    if (!ctx.start && ctx.attempt === 0 && runes.length && rng.chance(this.corruptRate)) {
+      const t = tokenize(runes[0]);
+      runes[0] = t.length > 1 ? t.slice(0, -1).join(' ') : `${runes[0]} =`;
     }
     return {
-      luogo: { nome: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, descrizione: rng.pick(lex.descr) },
-      ambiente,
-      oggetti,
-      a_terra: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
-      nuovi: [],
-      rune,
+      place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
+      environment: ambiente,
+      objects,
+      ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
+      fresh: [],
+      runes,
       // The start has its bakery: a structure of its own, which the Sculptor writes.
-      strutture: ctx.start ? [{ concetto: 'il forno del borgo' }] : [],
+      structures: ctx.start ? [{ concept: 'il forno del borgo' }] : [],
     };
   }
 
   private concept(req: ForgeRequest): Concept {
     const ws = words(req.prompt);
     const noun = ws.find((w) => NPC_WORDS.includes(w) || ITEM_WORDS.includes(w)) ?? ws.find((w) => !STOP.has(w) && w.length > 2) ?? 'viandante';
-    const tipo = req.kind ?? (NPC_WORDS.includes(noun) ? 'npc' : ITEM_WORDS.includes(noun) ? 'strumento' : 'oggetto');
+    const type = req.kind ?? (NPC_WORDS.includes(noun) ? 'npc' : ITEM_WORDS.includes(noun) ? 'item' : 'object');
     let nome = noun[0].toUpperCase() + noun.slice(1);
     // A careful narrator: no duplicates of what exists.
     const taken = new Set((req.existingNames ?? []).map((n) => n.toLowerCase()));
     if (taken.has(nome.toLowerCase())) {
-      const other = (tipo === 'npc' ? NPC_WORDS : ITEM_WORDS).find((w) => !taken.has(w));
+      const other = (type === 'npc' ? NPC_WORDS : ITEM_WORDS).find((w) => !taken.has(w));
       if (other) nome = other[0].toUpperCase() + other.slice(1);
     }
     const edible = EDIBLE.includes(noun);
     return {
-      nome,
-      tipo,
-      descrizione: req.prompt,
-      lore: `Nessuno ricorda da quando ${tipo === 'npc' ? 'vive' : 'si trova'} qui.`,
-      aspetto: req.prompt,
-      classe: tipo === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animal' : 'person') : tipo === 'strumento' ? 'object' : 'furniture',
-      contesto: { terreni: (req.paletteCodes ?? ['g', 'p']).filter((c) => c === 'g' || c === 'p'), luoghi: 'prati e sentieri', rarita: 0.2 },
-      interazione: tipo === 'npc' ? 'parla' : tipo === 'oggetto' ? 'usa' : 'nessuna',
-      comandi: tipo === 'strumento' ? [edible ? { azione: 'usa', descrizione: 'mangialo' } : { azione: 'azione', descrizione: 'usalo su ciò che hai davanti' }] : [],
-      unico: tipo === 'npc' && !/gatto|cane|pecora|uccello|corvo/.test(req.prompt.toLowerCase()),
-      persona: tipo === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Conosci bene i sentieri attorno al borgo.` : undefined,
-      tags: tipo === 'oggetto' ? ['tagliabile'] : [],
-      azioni: tipo === 'oggetto' ? [{ id: 'tocca', etichetta: `Tocca ${nome.toLowerCase()}` }] : [],
-      contenitore: tipo === 'oggetto' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capienza: 6, bottino: 'cucina' } : undefined,
-      porta: tipo === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
+      name: nome,
+      type,
+      description: req.prompt,
+      lore: `Nessuno ricorda da quando ${type === 'npc' ? 'vive' : 'si trova'} qui.`,
+      look: req.prompt,
+      class: type === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animal' : 'person') : type === 'item' ? 'object' : 'furniture',
+      context: { terrains: (req.paletteCodes ?? ['g', 'p']).filter((c) => c === 'g' || c === 'p'), places: 'prati e sentieri', rarity: 0.2 },
+      interaction: type === 'npc' ? 'talk' : type === 'object' ? 'use' : 'none',
+      controls: type === 'item' ? [edible ? { action: 'use', description: 'mangialo' } : { action: 'action', description: 'usalo su ciò che hai davanti' }] : [],
+      unique: type === 'npc' && !/gatto|cane|pecora|uccello|corvo/.test(req.prompt.toLowerCase()),
+      persona: type === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Conosci bene i sentieri attorno al borgo.` : undefined,
+      tags: type === 'object' ? ['tagliabile'] : [],
+      actions: type === 'object' ? [{ id: 'tocca', label: `Tocca ${nome.toLowerCase()}` }] : [],
+      container: type === 'object' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capacity: 6, loot: 'cucina' } : undefined,
+      carries: type === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
       // A careful narrator (T292): furniture and small things are lifted and set down elsewhere; what is built in place is not.
-      ...(tipo === 'oggetto' ? { takeable: /madia|cassa|credenza|armadio|baule|cesta|scaffale|sgabello|panca|sedia|tavol|botte|forziere|cassett/.test(req.prompt.toLowerCase()) && !/pozzo|forno|statua|altare|fontana|colonna|torre/.test(req.prompt.toLowerCase()) } : {}),
+      ...(type === 'object' ? { takeable: /madia|cassa|credenza|armadio|baule|cesta|scaffale|sgabello|panca|sedia|tavol|botte|forziere|cassett/.test(req.prompt.toLowerCase()) && !/pozzo|forno|statua|altare|fontana|colonna|torre/.test(req.prompt.toLowerCase()) } : {}),
     };
   }
 
   private physics(c: Concept): PhysicsSpec {
-    const npc = c.tipo === 'npc';
-    const item = c.tipo === 'strumento';
-    const comandi = c.comandi ?? [];
-    return { solido: !npc && !item, spingibile: false, massa: npc ? 70 : item ? 0.5 : 40, attrito: 0.6, raggio: npc ? 0.35 : item ? 0.25 : 0.45, velocita: npc ? 1.1 : 0, peso: item ? 1 : 0, impilabile: item && EDIBLE.includes(words(c.nome ?? '')[0] ?? ''), max_pila: 10, equipaggiabile: item && !comandi.some((x) => x.azione === 'usa') };
+    const npc = c.type === 'npc';
+    const item = c.type === 'item';
+    const controls = c.controls ?? [];
+    return { solid: !npc && !item, pushable: false, mass: npc ? 70 : item ? 0.5 : 40, friction: 0.6, radius: npc ? 0.35 : item ? 0.25 : 0.45, speed: npc ? 1.1 : 0, weight: item ? 1 : 0, stackable: item && EDIBLE.includes(words(c.name ?? '')[0] ?? ''), max_stack: 10, equippable: item && !controls.some((x) => x.action === 'use') };
   }
 
   private code(c: Concept): string {
-    const name = (c.nome ?? 'Cosa').replace(/"/g, '');
+    const name = (c.name ?? 'Cosa').replace(/"/g, '');
     const lore = (c.lore ?? '').replace(/"/g, '');
-    const comandi = c.comandi ?? [];
-    if (c.tipo === 'strumento') {
-      if (comandi.some((x) => x.azione === 'usa'))
+    const controls = c.controls ?? [];
+    if (c.type === 'item') {
+      if (controls.some((x) => x.action === 'use'))
         return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_use(user, item)\n  inventory.remove(user, item, 1)\n  return "Hai consumato: ${name}."\nend\n\nreturn M\n`;
       return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_action(user, target, item)\n  if not target then return "Non c'è niente davanti a te." end\n  if world.has_tag(target, "tagliabile") then\n    world.break_entity(target)\n    return "Fatto."\n  end\n  return "Non funziona su questo."\nend\n\nreturn M\n`;
     }
-    if (c.tipo === 'oggetto') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_act(id, user, action)\n  return "${name}. ${lore}"\nend\n\nfunction M.on_interact(id)\n  return "${name}."\nend\n\nreturn M\n`;
+    if (c.type === 'object') return `-- ${name}: generato offline.\nlocal M = {}\n\nfunction M.on_act(id, user, action)\n  return "${name}. ${lore}"\nend\n\nfunction M.on_interact(id)\n  return "${name}."\nend\n\nreturn M\n`;
     return `-- ${name}: generato offline. Il dialogo è simulato dal Narratore (persona).\nlocal M = {}\n\nfunction M.on_spawn(id)\nend\n\nreturn M\n`;
   }
 
@@ -585,18 +590,18 @@ export class MockAiModels implements AiModels, DecisionModels {
     const histLen = npc?.history?.length ?? 0;
     const persona = npc?.persona ?? '';
     const rng = new Rng(hashStr(`${name}|${histLen}|${text}`));
-    if (persona.includes('gatto')) return { dice: rng.pick(CAT), azione: rng.chance(0.3) ? 'segui' : 'nessuna', umore: 'felino' };
-    if (/segui|vieni|accompagn/.test(t)) return { dice: 'Va bene, ti seguo. Tanto si torna sempre qui.', azione: 'segui', umore: 'curioso' };
-    if (/ferm|aspett|resta/.test(t)) return { dice: 'Resto qui. Il mondo verrà da me.', azione: 'resta', umore: 'calmo' };
-    if (/vai|lascia|addio/.test(t)) return { dice: 'Torno ai miei giri.', azione: 'vaga', umore: 'tranquillo' };
-    if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc?.carrying?.length) return { dice: `Tieni, prendi questo: ${npc.carrying[0]}.`, azione: 'dai', oggetto: npc.carrying[0], umore: 'generoso' };
+    if (persona.includes('gatto')) return { say: rng.pick(CAT), action: rng.chance(0.3) ? 'follow' : 'none', mood: 'felino' };
+    if (/segui|vieni|accompagn/.test(t)) return { say: 'Va bene, ti seguo. Tanto si torna sempre qui.', action: 'follow', mood: 'curioso' };
+    if (/ferm|aspett|resta/.test(t)) return { say: 'Resto qui. Il mondo verrà da me.', action: 'stay', mood: 'calmo' };
+    if (/vai|lascia|addio/.test(t)) return { say: 'Torno ai miei giri.', action: 'wander', mood: 'tranquillo' };
+    if (/dammi|hai qualcosa|regal|scambi/.test(t) && npc?.carrying?.length) return { say: `Tieni, prendi questo: ${npc.carrying[0]}.`, action: 'give', item: npc.carrying[0], mood: 'generoso' };
     // Feelings, promises, requests: what an individual will remember.
-    if (/sposami|ti amo|vuoi essere mia|vuoi essere mio/.test(t)) return { dice: 'Sì… sì, lo voglio.', azione: 'resta', umore: 'felice', ricordo: 'il viandante mi ha chiesto di sposarlo, e ho detto sì', importanza: 3, legame: 'moglie' };
-    if (/prometto|giuro/.test(t)) return { dice: 'Lo terrò a mente. Non deludermi.', azione: 'nessuna', umore: 'speranzoso', ricordo: `il viandante ha promesso: ${text.slice(0, 80)}`, importanza: 3 };
-    if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc?.secrets?.includes('richiesta per il viandante')) return { dice: 'Sì. Ho bisogno di te. Ti spiego tutto.', azione: 'missione', umore: 'sollevato', ricordo: 'ho affidato una richiesta al viandante', importanza: 2 };
-    if (npc?.memories && /ricord|ti ricordi/.test(t)) return { dice: `Mi ricordo, eccome: ${npc.memories.split('\n').pop()?.replace(/^- \([^)]*\) /, '') ?? ''}`, azione: 'nessuna', umore: npc.mood };
+    if (/sposami|ti amo|vuoi essere mia|vuoi essere mio/.test(t)) return { say: 'Sì… sì, lo voglio.', action: 'stay', mood: 'felice', memory: 'il viandante mi ha chiesto di sposarlo, e ho detto sì', weight: 3, bond: 'moglie', bond_kind: 'spouse' };
+    if (/prometto|giuro/.test(t)) return { say: 'Lo terrò a mente. Non deludermi.', action: 'none', mood: 'speranzoso', memory: `il viandante ha promesso: ${text.slice(0, 80)}`, weight: 3 };
+    if (/aiut|posso fare|serve qualcosa|richiesta/.test(t) && npc?.secrets?.includes('richiesta per il viandante')) return { say: 'Sì. Ho bisogno di te. Ti spiego tutto.', action: 'quest', mood: 'sollevato', memory: 'ho affidato una richiesta al viandante', weight: 2 };
+    if (npc?.memories && /ricord|ti ricordi/.test(t)) return { say: `Mi ricordo, eccome: ${npc.memories.split('\n').pop()?.replace(/^- \([^)]*\) /, '') ?? ''}`, action: 'none', mood: npc.mood };
     const mention = /\b(?:un|una|uno|del|della|dello)\s+([a-zàèéìòù]{4,})/i.exec(text);
-    return { dice: VILLAGER[(histLen + rng.int(3)) % VILLAGER.length], azione: 'nessuna', umore: npc?.mood ?? 'calmo', oggetti_citati: mention ? [mention[1]] : [] };
+    return { say: VILLAGER[(histLen + rng.int(3)) % VILLAGER.length], action: 'none', mood: npc?.mood ?? 'calmo', mentioned: mention ? [mention[1]] : [] };
   }
 
   private sign(facts: Record<string, unknown>, name: string): string {

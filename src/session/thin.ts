@@ -593,7 +593,7 @@ export class ThinClient {
       const other = k.otherWanderer(id);
       if (other !== undefined) return this.sayTo(other, text);
       const r = await this.send(id, { t: 'chat', text });
-      return { say: r?.text ?? (r?.reason ? `(${r.reason})` : '…'), action: 'nessuna', mood: 'tranquillo' };
+      return { say: r?.text ?? (r?.reason ? `(${r.reason})` : '…'), action: 'none', mood: 'tranquillo' };
     };
     k.inscribePhrase = () => void this.inscribe(k.phrase().tokens.length);
     k.dropSelected = () => {
@@ -782,7 +782,7 @@ export class ThinClient {
     const k = this.k;
     const r = await this.show(this.session.act({ t: 'say', wanderer: other, text }));
     if (r.ok && r.text) k.speak(k.wandererEntity, r.text);
-    return { say: r.ok ? '' : `(${r.reason ?? 'non ti sente'})`, action: 'nessuna', mood: 'tranquillo' };
+    return { say: r.ok ? '' : `(${r.reason ?? 'non ti sente'})`, action: 'none', mood: 'tranquillo' };
   }
 
   private async perform(id: Id, action: string): Promise<void> {

@@ -16,7 +16,7 @@ import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
@@ -50,7 +50,7 @@ import { layout, type Lot, type LayoutResult, articulationPoints } from './layou
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
-import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeOrigin } from './agents/forge';
+import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeKind, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis, type GenesisBrought } from './agents/genesis';
 import { broughtModels, CAST_CLASSES, sameName, withCardChoice, type BringAnswer, type BringRef, type KinView } from './bring';
@@ -906,7 +906,9 @@ export class Kernel {
         return d ? { id: d.id, name: d.name, category: d.category, weight: d.weight, tags: d.tags.join(','), slot: d.slot ?? '', effects: { ...(d.effects ?? {}) } } : undefined;
       },
       item_bonus: (id, name) => {
-        const v = this.content.get(id)?.bonus?.[name];
+        // A bonus asked by its name of before T310b (`difesa`) is the one it means (`defense`); a pack not yet ported answers to the name of today too.
+        const bonus = this.content.get(id)?.bonus;
+        const v = bonus?.[name] ?? bonus?.[internalName('bonus', name)] ?? bonus?.[italianName('bonus', name)];
         return typeof v === 'number' && Number.isFinite(v) ? v : 0;
       },
       slot_get: (panel, slot) => this.slots()[panel]?.[slot]?.item ?? undefined,
@@ -1387,7 +1389,7 @@ export class Kernel {
   catalog(): CatalogEntry[] {
     return [...this.modules.values()]
       .filter((m) => m.manifest.kind === 'entity')
-      .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.persona ? 'npc' : m.manifest.container ? 'mobile' : 'oggetto', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
+      .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.persona ? 'npc' : m.manifest.container ? 'furniture' : 'object', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
   }
 
   itemInfo(id: string): ItemInfo {
@@ -1926,7 +1928,7 @@ export class Kernel {
         const raw = await planChunk(this.council, {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
-          region: region ? { nome: region.name, descrizione: region.description } : undefined,
+          region: region ? { name: region.name, description: region.description } : undefined,
           rari: this.rareAllowed(ch),
           ...(this.broughtStructures().length ? { brought: this.broughtStructures() } : {}),
           chi: ch.chi,
@@ -1979,14 +1981,14 @@ export class Kernel {
     }
     const atlas = { regions: [] as Region[] };
     for (const d of drafts) {
-      const raggio = Math.max(1, Math.min(3, Math.round(d.raggio) || 1));
-      const centro = placeRegion(atlas, [0, 0], d.direzione, Math.max(2, Math.min(14, Math.round(d.distanza) || 4)), raggio, new Set());
-      atlas.regions.push({ id: `${d.ambiente}-${atlas.regions.length}`, name: String(d.nome).slice(0, 40), description: String(d.descrizione).slice(0, 200), environment: d.ambiente, center: centro, radius: raggio });
+      const raggio = Math.max(1, Math.min(3, Math.round(d.radius) || 1));
+      const centro = placeRegion(atlas, [0, 0], d.direction, Math.max(2, Math.min(14, Math.round(d.distance) || 4)), raggio, new Set());
+      atlas.regions.push({ id: `${d.environment}-${atlas.regions.length}`, name: String(d.name).slice(0, 40), description: String(d.description).slice(0, 200), environment: d.environment, center: centro, radius: raggio });
     }
     const final = atlas.regions.length >= 3 ? atlas : defaultAtlas(this.content.layouts, new Set(), this.config.seed);
     this.repo.write(ATLAS_FILE, writeAtlas(final));
     this.applyFiles({ ...this.repo.working });
-    this.council.say('cartographer', 'propone', `geografia: ${final.regions.map((r) => `${r.name} (${direction(r.center[0], r.center[1])})`).join(', ')}`, undefined, 'genesis.atlas');
+    this.council.say('cartographer', 'propone', `geografia: ${final.regions.map((r) => `${r.name} (${directionWord(direction(r.center[0], r.center[1]))})`).join(', ')}`, undefined, 'genesis.atlas');
   }
 
   /**
@@ -2046,13 +2048,13 @@ export class Kernel {
         this.repo.write(lp, JSON.stringify(lm, null, 2) + '\n');
       }
       const atlas = readAtlas(this.repo.working);
-      const centro = placeRegion(atlas, here, d.region.direzione, d.region.distanza, d.region.raggio, this.explored());
-      const region: Region = { id: `${layoutId}-${atlas.regions.length}`, name: d.region.nome, description: d.region.descrizione || d.description, environment: layoutId, center: centro, radius: d.region.raggio };
+      const centro = placeRegion(atlas, here, d.region.direction, d.region.distance, d.region.radius, this.explored());
+      const region: Region = { id: `${layoutId}-${atlas.regions.length}`, name: d.region.name, description: d.region.description || d.description, environment: layoutId, center: centro, radius: d.region.radius };
       atlas.regions.push(region);
       this.repo.write(ATLAS_FILE, writeAtlas(atlas));
       this.applyFiles({ ...this.repo.working });
       const dist = Math.max(Math.abs(centro[0] - here[0]), Math.abs(centro[1] - here[1]));
-      const where = `${direction(centro[0] - here[0], centro[1] - here[1])}, a ${dist} luoghi da qui`;
+      const where = `${directionWord(direction(centro[0] - here[0], centro[1] - here[1]))}, a ${dist} luoghi da qui`;
       const c = this.commitContent(`cartografo: ${region.name} (${where})`, 'cartographer.environment', 'cartographer');
       const summary = `«${region.name}» — ${region.description.replace(/\.$/, '')}. Si trova a ${where}.${Object.keys(added).length ? ` Terreni nuovi: ${Object.values(added).map((t) => t.name).join(', ')}.` : ''}`;
       this.council.say('cartographer', 'approva', `${summary} (commit ${c.id})`, undefined, 'cartographer.environment');
@@ -2101,7 +2103,7 @@ export class Kernel {
     for (const m of this.modules.values()) {
       const rule = m.manifest.spawn;
       if (m.manifest.kind !== 'entity' || !rule) continue;
-      for (let i = 0; i < rule.max; i++) if (rng.chance(rule.chance)) plan.objects.push({ module: m.manifest.id, where: rule.tiles.some((t) => this.palette[t]?.indoor) ? 'dentro' : 'fuori' });
+      for (let i = 0; i < rule.max; i++) if (rng.chance(rule.chance)) plan.objects.push({ module: m.manifest.id, where: rule.tiles.some((t) => this.palette[t]?.indoor) ? 'inside' : 'outside' });
     }
     return plan;
   }
@@ -2157,7 +2159,7 @@ export class Kernel {
     const freeTiles = new Set<number>(result.reachable);
     let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
-      let pool = (where === 'dentro' && indoor.length ? indoor : where === 'fuori' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      let pool = (where === 'inside' && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
       if (solid) pool = pool.filter((i) => !arts.has(i));
       if (!pool.length) return undefined;
       const tile = pool[rng.int(pool.length)];
@@ -2201,9 +2203,9 @@ export class Kernel {
     // Things lying around: named by the Cartographer (those not known yet are introduced later), plus what the ground loot table yields.
     const ground = plan.ground.map((name, index) => {
       const item = this.content.byName(name)?.id;
-      return { index, item, cell: item ? pick('fuori', false) : undefined };
+      return { index, item, cell: item ? pick('outside', false) : undefined };
     });
-    const loot = this.content.roll('terreno', rng, [...this.wanted]).map((l, index) => ({ index, item: l.item, count: l.count, cell: pick('ovunque', false) }));
+    const loot = this.content.roll('terreno', rng, [...this.wanted]).map((l, index) => ({ index, item: l.item, count: l.count, cell: pick('anywhere', false) }));
     return { runes, objects, ground, loot, pick };
   }
 
@@ -2269,7 +2271,7 @@ export class Kernel {
     if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
-        const tile = place.pick('fuori');
+        const tile = place.pick('outside');
         if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
@@ -2852,7 +2854,7 @@ export class Kernel {
    * intervene (items, a new inhabitant, a new entity). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
-    if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'nessuno';
+    if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'none';
     this.sessions++;
     // The summary goes to the Arbiter's prompt (English since T310); the rules, people and places are the world's words.
     const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'possible' : 'not possible'}`).join('\n');
@@ -2867,14 +2869,14 @@ export class Kernel {
       s = await councilSession(this.council, summary);
     } catch (e) {
       this.council.say('arbiter', 'errore', `sessione del Concilio: ${(e as Error).message}`);
-      return 'nessuno';
+      return 'none';
     }
-    this.council.say('arbiter', 'info', `Sessione del Concilio: ${s.assessment}${s.action !== 'nessuno' ? ` → interviene: ${s.action}${s.request ? ` («${s.request}»)` : ''}` : ''}`, undefined, 'council.session');
-    if (s.action === 'oggetti') await this.growContent(`sessione del Concilio: ${s.request ?? ''}`, 12, true);
-    else if (s.action === 'abitante') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc', false, COMUNE);
-    else if (s.action === 'cosa' && s.request) await this.forgeModule(s.request, 'agente', 'oggetto', false, COMUNE);
-    else if (s.action === 'meccanica') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare', COMUNE);
-    else if (s.action === 'runa') await this.inventRune(`the session of the Council asks for it: ${s.request ?? 'an element no rune has'}`, COMUNE);
+    this.council.say('arbiter', 'info', `Sessione del Concilio: ${s.assessment}${s.action !== 'none' ? ` → interviene: ${s.action}${s.request ? ` («${s.request}»)` : ''}` : ''}`, undefined, 'council.session');
+    if (s.action === 'items') await this.growContent(`sessione del Concilio: ${s.request ?? ''}`, 12, true);
+    else if (s.action === 'inhabitant') await this.forgeModule(s.request ?? 'un nuovo abitante del mondo', 'agente', 'npc', false, COMUNE);
+    else if (s.action === 'thing' && s.request) await this.forgeModule(s.request, 'agente', 'object', false, COMUNE);
+    else if (s.action === 'mechanic') await this.forgeMechanic(s.request ?? 'equipaggiamento: slot per indossare e impugnare', COMUNE);
+    else if (s.action === 'rune') await this.inventRune(`the session of the Council asks for it: ${s.request ?? 'an element no rune has'}`, COMUNE);
     return s.action;
   }
 
@@ -2990,7 +2992,7 @@ export class Kernel {
     const done = origin ? this.savedForms.get(origin) : undefined;
     if (done?.length) comps.form.done = [...done];
     if (man.interaction) comps.interact = { type: man.interaction.type };
-    if (man.persona) comps.mind = { mode: 'vaga', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
+    if (man.persona) comps.mind = { mode: 'wander', mood: 'tranquillo', history: [], ...(comps.mind ?? {}) } satisfies Mind;
     if (man.container) {
       const saved = origin ? this.savedContainers.get(origin) : undefined;
       comps.container = saved ? { inv: clone(saved.inv), loot: man.container.loot, filled: saved.filled } : ({ inv: newInventory(man.container.size), loot: man.container.loot, filled: false } satisfies Container);
@@ -4789,7 +4791,8 @@ export class Kernel {
         description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
         tags: info?.tags ?? m?.tags ?? [],
         container: this.ecs.has(id, 'container'),
-        kind: pk ? (this.ecs.has(id, 'placed') ? 'oggetto posato su un mobile' : 'oggetto a terra') : m?.persona ? 'persona' : this.ecs.has(id, 'container') ? 'mobile' : 'cosa',
+        // What the target is, for the Narrator's prompt (English since T310b; the offline Council reads it too).
+        kind: pk ? (this.ecs.has(id, 'placed') ? 'a thing placed on furniture' : 'a thing on the ground') : m?.persona ? 'person' : this.ecs.has(id, 'container') ? 'furniture' : 'thing',
         learnModule: !pk && !m?.persona ? entry : undefined,
         learnItem: pk?.item,
       },
@@ -4809,7 +4812,7 @@ export class Kernel {
     const other = this.besideWanderer(to, GIVE_REACH, 'Avvicinati per farlo.');
     if (!other) return '';
     const entity = this.wanderersById.get(to)!.entity;
-    return this.judgeFree({ entity, wanderer: to, key: 'viandante', name: other.nome, description: `un altro viandante come te, una persona vera: ${other.nome}`, tags: ['viandante'], container: false, kind: 'altro viandante' }, text);
+    return this.judgeFree({ entity, wanderer: to, key: 'viandante', name: other.nome, description: `un altro viandante come te, una persona vera: ${other.nome}`, tags: ['viandante'], container: false, kind: 'another wanderer' }, text);
   }
 
   /** "Altro…" on something the player carries: a fanciful use, judged like any other action. */
@@ -5423,9 +5426,9 @@ export class Kernel {
       if (p.ambiente) facts.push(['Ambiente', env ? `${env.name} (${p.ambiente}): ${env.description}` : p.ambiente]);
       if (plan) {
         const by = (w: Where) => list(plan.objects.filter((o) => o.where === w).map((o) => nameOf(o.module)));
-        if (by('dentro')) facts.push(['Dentro', by('dentro')]);
-        if (by('fuori')) facts.push(['Fuori', by('fuori')]);
-        if (by('ovunque')) facts.push(['Ovunque', by('ovunque')]);
+        if (by('inside')) facts.push(['Dentro', by('inside')]);
+        if (by('outside')) facts.push(['Fuori', by('outside')]);
+        if (by('anywhere')) facts.push(['Ovunque', by('anywhere')]);
       } else if (p.cose?.length) facts.push(['Cose', list(p.cose.map(nameOf))]);
       if (p.a_terra?.length) facts.push(['A terra', list(p.a_terra)]);
       if (p.strutture?.length) facts.push(['Strutture', list(p.strutture)]);
@@ -5893,25 +5896,25 @@ export class Kernel {
       return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     }
     const req = r.request ?? text;
-    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'ambiente' ? 'cartographer' : r.task === 'riscolpisci' ? 'artist' : r.task === 'musica' ? 'musician' : r.task === 'regola' ? 'arbiter' : r.task === 'nessuno' ? undefined : 'narrator', 'referente.coordinate');
+    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
     switch (r.task) {
-      case 'oggetto':
-        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'strumento', true)).summary };
-      case 'cosa':
-        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'oggetto', true)).summary };
-      case 'personaggio':
+      case 'item':
+        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'item', true)).summary };
+      case 'thing':
+        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'object', true)).summary };
+      case 'character':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'npc', true)).summary };
-      case 'ambiente':
+      case 'environment':
         return { say: r.say, forged: (await this.createEnvironment(req)).summary };
-      case 'oggetti':
+      case 'items':
         return { say: r.say, forged: (await this.growContent(`richiesta del viandante: ${req}`, 12, true, chi)) ? 'Il Narratore ha scritto un pacchetto di oggetti nuovi.' : 'Il pacchetto non è venuto.' };
-      case 'meccanica':
+      case 'mechanic':
         return { say: r.say, forged: (await this.forgeMechanic(req)).summary };
-      case 'regola': {
+      case 'rule': {
         this.recordRule({ key: `regola|${normName(req).slice(0, 60)}`, text: req, possible: true, story: 'stabilito dal viandante trasceso, accolto dal Concilio', effects: ['regola'] }, true, { task: 'referente.coordinate', author: this.wanderer().id });
         return { say: r.say, forged: `Nuova regola del mondo: ${req}` };
       }
-      case 'runa': {
+      case 'rune': {
         // The master's runes (T42f): in a multiplayer game the Council gives them, alone they are found in the world.
         if (!this.manyPlayers() || !this.isMaster()) return { say: r.say, forged: 'Le rune non si chiedono: si trovano nel mondo.' };
         const runes = askedRunes(r.runes);
@@ -5923,9 +5926,9 @@ export class Kernel {
         if (!this.mirror) this.grantRunes(runes);
         return { say: r.say, forged: `Il Concilio ti dà ${runes.length === 1 ? 'la runa' : 'le rune'} ${runes.map((t) => `«${t}»`).join(' ')}.`, runes };
       }
-      case 'musica':
+      case 'music':
         return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
-      case 'riscolpisci': {
+      case 'resculpt': {
         const target = this.findExhibit(r.target ?? req);
         if (!target) {
           lacking('invalid', `non trova «${r.target ?? req}»`, 'sculptor');
@@ -6421,7 +6424,7 @@ export class Kernel {
         Object.assign(this.phrase(), { tokens: [], sel: 0 });
         for (const it of wandererModule?.manifest.inventory ?? []) if (this.content.get(it)) this.give(it, 1);
       }
-      if (v.restart === 'piazza') {
+      if (v.restart === 'square') {
         Object.assign(this.wandererPos(), { x: 0, y: 0 });
         const c = this.carpet();
         if (c) Object.assign(c, { ox: 0, oy: 0 });
@@ -7726,7 +7729,7 @@ export class Kernel {
 
   /** Forges a module through the Council, then validates, commits and hot loads it; the Sculptor gives it a model. */
   /** `takeable` (T292): whether the thing can be taken and put down elsewhere, when who asks for it decided (the Cartographer). */
-  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: 'npc' | 'oggetto' | 'strumento', permissive = false, chi?: string, takeable?: boolean): Promise<{ ok: boolean; id?: string; summary: string }> {
+  async forgeModule(prompt: string, origin: ForgeOrigin, kind?: ForgeKind, permissive = false, chi?: string, takeable?: boolean): Promise<{ ok: boolean; id?: string; summary: string }> {
     // The Genesis is the world's; what the wanderer who transcended asks is theirs, and they wrote it (T36).
     if (origin === 'genesi') chi = COMUNE;
     const autore = permissive ? this.wanderer().id : 'narrator';
@@ -7739,10 +7742,10 @@ export class Kernel {
         (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
-      if (r.concept.porta?.length) {
-        const known = r.concept.porta.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
-        const fresh = r.concept.porta.filter((n) => !this.content.byName(n));
-        const defs = [...known, ...(fresh.length ? await this.introduceItems(fresh, `portati da ${r.concept.nome}`) : [])];
+      if (r.concept.carries?.length) {
+        const known = r.concept.carries.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
+        const fresh = r.concept.carries.filter((n) => !this.content.byName(n));
+        const defs = [...known, ...(fresh.length ? await this.introduceItems(fresh, `portati da ${r.concept.name}`) : [])];
         if (defs.length) r.manifest.inventory = defs.map((d) => d.id);
       }
       const dir = `modules/${r.id}/`;
@@ -7851,14 +7854,14 @@ export class Kernel {
     // The Arbiter sees subtler breaks the words miss (offline models answer nothing).
     if (generated.length && this.ai.name !== 'offline') {
       try {
-        const r = await this.council.ask<{ ritira?: string[]; motivo?: string }>(
+        const r = await this.council.ask<{ withdraw?: string[]; reason?: string }>(
           'arbiter',
           'review.fourthwall',
           `Review these modules created by the Council. Retire those that break the fourth wall (references to code, simulation, unstable or fake reality, worlds that repeat, abstract roles like keepers of reality, censors, archivists of the world, measurers of anomalies; also dressed up as legends: whoever always comes back to the square, whoever watches every wanderer, borders nobody crosses), those that duplicate the runes (other glowing symbols in the ground) and the doubles. Keep everything that is a real person or thing of the world.\n${generated.map((m) => `- ${m.manifest.id} «${m.manifest.name}»: ${(m.manifest.description ?? '').slice(0, 140)} ${(m.manifest.persona ?? '').slice(0, 160)}`).join('\n')}`,
-          { type: 'OBJECT', properties: { ritira: { type: 'ARRAY', items: { type: 'STRING' } }, motivo: { type: 'STRING' } }, required: ['ritira'] },
+          { type: 'OBJECT', properties: { withdraw: { type: 'ARRAY', items: { type: 'STRING' } }, reason: { type: 'STRING' } }, required: ['withdraw'] },
           { data: { ids: generated.map((m) => m.manifest.id) }, temperature: 0.2 },
         );
-        for (const id of r.ritira ?? []) if (this.modules.get(id)?.manifest.origin && this.modules.get(id)?.manifest.origin !== 'esempio') retire.add(id);
+        for (const id of r.withdraw ?? []) if (this.modules.get(id)?.manifest.origin && this.modules.get(id)?.manifest.origin !== 'esempio') retire.add(id);
       } catch {
         /* the words are enough */
       }
@@ -7969,8 +7972,8 @@ export class Kernel {
       const queue = [...plan.cast];
       const worker = async () => {
         for (let next = queue.shift(); next; next = queue.shift()) {
-          onProgress?.(`La Fucina crea: ${next.richiesta}`);
-          await this.forgeModule(next.richiesta, 'genesi', next.tipo);
+          onProgress?.(`La Fucina crea: ${next.request}`);
+          await this.forgeModule(next.request, 'genesi', next.type);
           done++;
         }
       };

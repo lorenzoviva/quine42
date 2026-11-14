@@ -29,7 +29,7 @@ describe('validator', async () => {
   const v = new Validator(await Sandbox.create(fakeHost().host));
 
   it('accepts a good plan and normalizes runes written without spaces', () => {
-    const r = v.validatePlan(plan({ runes: ['carpet.active', 'speed=speed'], objects: [{ module: 'npc.a', where: 'fuori' }, { module: 'obj.chest', where: 'dentro' }] }), layouts, placeable);
+    const r = v.validatePlan(plan({ runes: ['carpet.active', 'speed=speed'], objects: [{ module: 'npc.a', where: 'outside' }, { module: 'obj.chest', where: 'inside' }] }), layouts, placeable);
     expect(r.errors).toEqual([]);
     expect(r.dropped).toEqual([]);
     expect(r.plan.runes).toEqual(['carpet . active', 'speed = speed']);
@@ -41,7 +41,7 @@ describe('validator', async () => {
   });
 
   it('drops invalid code and unknown modules one by one, keeping the rest', () => {
-    const r = v.validatePlan(plan({ runes: ['carpet . strength =', 'carpet . active = false', 'print ( x )', 'x', 'time'], objects: [{ module: 'npc.nope', where: 'fuori' }, { module: 'npc.a', where: 'ovunque' }] }), layouts, placeable);
+    const r = v.validatePlan(plan({ runes: ['carpet . strength =', 'carpet . active = false', 'print ( x )', 'x', 'time'], objects: [{ module: 'npc.nope', where: 'outside' }, { module: 'npc.a', where: 'anywhere' }] }), layouts, placeable);
     expect(r.errors).toEqual([]);
     const dropped = r.dropped.join(' | ');
     expect(dropped).toMatch(/non compila/);
@@ -49,11 +49,11 @@ describe('validator', async () => {
     expect(dropped).toMatch(/funzione/);
     expect(dropped).toMatch(/inesistente/);
     expect(r.plan.runes).toEqual(['x', 'time']);
-    expect(r.plan.objects).toEqual([{ module: 'npc.a', where: 'ovunque' }]);
+    expect(r.plan.objects).toEqual([{ module: 'npc.a', where: 'anywhere' }]);
   });
 
   it('test-runs layout programs on real drafts before accepting them', () => {
-    const good: EnvironmentDef = { name: 'Borgo', description: 'case', environment: 'misto', program: { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 } };
+    const good: EnvironmentDef = { name: 'Borgo', description: 'case', environment: 'mixed', program: { type: 'one', rules: [{ in: 'gggg/gggg/gggg/gggg', out: 'hhhh/hffh/hffh/hdhh' }], steps: 2 } };
     expect(v.validateLayout('borgo', good, palette, drafts)).toEqual([]);
     const unknownCode: EnvironmentDef = { ...good, program: { type: 'all', rules: [{ in: 'g', out: 'Z' }] } };
     expect(v.validateLayout('x', unknownCode, palette, drafts).join()).toMatch(/codici inesistenti Z/);
@@ -88,11 +88,11 @@ describe('content', () => {
     const pack = assemblePack(
       {
         items: [
-          { nome: 'Corda', descrizione: 'fune', categoria: 'materiale', peso: 1, pila: 5, tag: ['Bottega'], aspetto: 'corda' },
-          { nome: 'Rete da pesca', descrizione: 'rete', categoria: 'attrezzo', peso: 2, pila: 1, tag: [], aspetto: 'rete' },
+          { name: 'Corda', description: 'fune', category: 'materiale', weight: 1, stack: 5, tags: ['Bottega'], look: 'corda' },
+          { name: 'Rete da pesca', description: 'rete', category: 'attrezzo', weight: 2, stack: 1, tags: [], look: 'rete' },
         ],
-        recipes: [{ nome: 'Rete', ingredienti: [{ oggetto: 'corda', quantita: 3 }], risultato: { oggetto: 'Rete da pesca', quantita: 1 } }, { nome: 'Impossibile', ingredienti: [{ oggetto: 'unobtainium', quantita: 1 }], risultato: { oggetto: 'Corda', quantita: 1 } }],
-        loot: [{ tabella: 'Bottega', voci: [{ tag: 'materiale', peso: 2 }, { oggetto: 'Corda', peso: 1 }] }],
+        recipes: [{ name: 'Rete', inputs: [{ item: 'corda', quantity: 3 }], result: { item: 'Rete da pesca', quantity: 1 } }, { name: 'Impossibile', inputs: [{ item: 'unobtainium', quantity: 1 }], result: { item: 'Corda', quantity: 1 } }],
+        loot: [{ table: 'Bottega', entries: [{ tag: 'materiale', weight: 2 }, { item: 'Corda', weight: 1 }] }],
       },
       new Map(),
       taken,
@@ -107,7 +107,7 @@ describe('content', () => {
   it('finds items by loose names and rolls loot by tag, favouring what was talked about', () => {
     const c = new Content();
     const taken = new Set<string>();
-    const items = ['Pane di segale', 'Formaggio', 'Coltello'].map((n, i) => toItemDef({ nome: n, descrizione: '', categoria: i < 2 ? 'cibo' : 'attrezzo', peso: 1, pila: 3, tag: ['cucina'], aspetto: n }, taken)!);
+    const items = ['Pane di segale', 'Formaggio', 'Coltello'].map((n, i) => toItemDef({ name: n, description: '', category: i < 2 ? 'cibo' : 'attrezzo', weight: 1, stack: 3, tags: ['cucina'], look: n }, taken)!);
     c.rebuild([{ manifest: { id: 'items.t', name: 't', kind: 'data', items, loot: { cucina: { rolls: [3, 3], entries: [{ tag: 'cibo', weight: 1 }] } } }, dir: '', manifestPath: '' }]);
     expect(c.byName('il pane di segale')?.id).toBe('item.pane-di-segale');
     expect(c.byName('un formaggio')?.id).toBe('item.formaggio');

@@ -81,8 +81,8 @@ export const MOUNTS: Readonly<Record<MountId, Mount>> = {
 };
 
 /**
- * The places (`ItemDef.slot`) whose things go somewhere else than the hand when wielded: as the packs write them today (Italian, until
- * T310b moves the places with a contract) and as they will (English). Any other place, or none, is the hand.
+ * The places (`ItemDef.slot`) whose things go somewhere else than the hand when wielded: `shield` (the id since T310b, `posti`) and
+ * `scudo` of a pack not yet ported. Any other place, or none, is the hand.
  */
 export const SLOT_MOUNTS: Readonly<Record<string, MountId>> = { scudo: 'forearm', shield: 'forearm' };
 

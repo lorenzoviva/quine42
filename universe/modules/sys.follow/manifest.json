@@ -24,7 +24,7 @@
           "y": 2,
           "components": {
             "mind": {
-              "mode": "segui",
+              "mode": "follow",
               "mood": "tranquillo",
               "history": []
             }
@@ -64,7 +64,7 @@
           "y": 0,
           "components": {
             "mind": {
-              "mode": "segui",
+              "mode": "follow",
               "mood": "tranquillo",
               "history": []
             }

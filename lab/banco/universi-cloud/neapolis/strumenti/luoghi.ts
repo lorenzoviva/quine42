@@ -22,43 +22,43 @@ interface Place {
 
 export const PLACES: Place[] = [
   { at: [0, 0], nome: 'Piazza delle Erbe', ambiente: 'piazza', descrizione: 'La piazza del basolato con la fontana dei delfini, il Bar Gambrinus sotto i portici, l’edicola verde e la cabina del telefono: qui si incontra mezza città.',
-    cose: [['obj.espresso', 'dentro'], ['obj.edicola', 'fuori'], ['obj.lampione', 'fuori'], ['obj.lampione', 'fuori'], ['obj.cabina-telefonica', 'fuori']], terra: ['Cornetto', 'Moneta da cento lire', 'Moneta da cento lire', 'Gettone telefonico'], rune: ['luce', 'caffe'] },
+    cose: [['obj.espresso', 'inside'], ['obj.edicola', 'outside'], ['obj.lampione', 'outside'], ['obj.lampione', 'outside'], ['obj.cabina-telefonica', 'outside']], terra: ['Cornetto', 'Moneta da cento lire', 'Moneta da cento lire', 'Gettone telefonico'], rune: ['luce', 'caffe'] },
   { at: [0, -1], nome: 'Corso Partenope', ambiente: 'corso', descrizione: 'Il corso dei negozi, con le vetrine illuminate, il tram che sferraglia e, all’ultimo piano di un palazzo d’angolo, le antenne di Radio Ciok Ciok.',
-    cose: [['obj.lampione', 'fuori'], ['obj.motorino', 'fuori'], ['obj.cassonetto', 'fuori'], ['obj.distributore', 'fuori']], terra: ['Biglietto del tram', 'Giornale del mattino', 'Moneta da cento lire'], rune: ['voce'] },
+    cose: [['obj.lampione', 'outside'], ['obj.motorino', 'outside'], ['obj.cassonetto', 'outside'], ['obj.distributore', 'outside']], terra: ['Biglietto del tram', 'Giornale del mattino', 'Moneta da cento lire'], rune: ['voce'] },
   { at: [1, -1], nome: 'Torre C del Centro Direzionale', ambiente: 'uffici', descrizione: 'La torre di vetro più alta del Centro Direzionale, mezza vuota: atrio di marmo, ascensori lenti, l’ufficio appalti al decimo piano.',
-    cose: [['obj.scrivania', 'dentro'], ['obj.distributore', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Pratica timbrata', 'Penna a sfera'], rune: ['nebbia'], strutture: ['torre di vetro'] },
+    cose: [['obj.scrivania', 'inside'], ['obj.distributore', 'outside'], ['obj.lampione', 'outside']], terra: ['Pratica timbrata', 'Penna a sfera'], rune: ['nebbia'], strutture: ['torre di vetro'] },
   { at: [1, 0], nome: 'Piazzale degli Uffici', ambiente: 'uffici', descrizione: 'Il piazzale tra le torri, con il parcheggio dei taxi, le aiuole squadrate e i signori in giacca che parlano al telefono.',
-    cose: [['obj.scrivania', 'dentro'], ['obj.motorino', 'fuori'], ['obj.cabina-telefonica', 'fuori']], terra: ['Gettone telefonico', 'Mappa della città'], rune: ['motore'] },
+    cose: [['obj.scrivania', 'inside'], ['obj.motorino', 'outside'], ['obj.cabina-telefonica', 'outside']], terra: ['Gettone telefonico', 'Mappa della città'], rune: ['motore'] },
   { at: [2, 0], nome: 'Stazione Centrale', ambiente: 'stazione', descrizione: 'La stazione di cemento con la sala d’aspetto di marmo, il capolinea del tram 1, il piazzale dei taxi e l’officina dei tassisti sul retro.',
-    cose: [['obj.distributore', 'fuori'], ['obj.banco-officina', 'dentro'], ['obj.cabina-telefonica', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Orario dei tram', 'Pila', 'Biglietto del tram'], rune: ['sirena'] },
+    cose: [['obj.distributore', 'outside'], ['obj.banco-officina', 'inside'], ['obj.cabina-telefonica', 'outside'], ['obj.lampione', 'outside']], terra: ['Orario dei tram', 'Pila', 'Biglietto del tram'], rune: ['sirena'] },
   { at: [2, 1], nome: 'Officine dei Granili', ambiente: 'officine', descrizione: 'Capannoni di mattoni sotto il cavalcavia: l’officina di Gennaro, la centralina elettrica del quartiere, piazzali pieni di motorini da riparare.',
-    cose: [['obj.banco-officina', 'dentro'], ['obj.quadro-elettrico', 'fuori'], ['obj.motorino', 'fuori'], ['obj.cassonetto', 'fuori']], terra: ['Olio motore', 'Fusibile', 'Pezzo di ricambio'], rune: ['corrente'] },
+    cose: [['obj.banco-officina', 'inside'], ['obj.quadro-elettrico', 'outside'], ['obj.motorino', 'outside'], ['obj.cassonetto', 'outside']], terra: ['Olio motore', 'Fusibile', 'Pezzo di ricambio'], rune: ['corrente'] },
   { at: [-1, 0], nome: 'Vico delle Lavandaie', ambiente: 'rione', descrizione: 'Il cuore del rione: vicoli coi panni stesi, i bassi con la porta aperta, la trattoria «Da Carmela» e l’edicola votiva all’angolo.',
-    cose: [['obj.cucina-trattoria', 'dentro'], ['obj.lampione', 'fuori'], ['obj.cassonetto', 'fuori']], terra: ['Pomodori', 'Farina', 'Carne macinata'], rune: ['pane'] },
+    cose: [['obj.cucina-trattoria', 'inside'], ['obj.lampione', 'outside'], ['obj.cassonetto', 'outside']], terra: ['Pomodori', 'Farina', 'Carne macinata'], rune: ['pane'] },
   { at: [-1, -1], nome: 'Pronto soccorso dei Pellegrini', ambiente: 'rione', descrizione: 'Il vecchio ospedale del rione, con il pronto soccorso sempre pieno, il cortile delle ambulanze e la cabina elettrica che ronza.',
-    cose: [['obj.distributore', 'fuori'], ['obj.lampione', 'fuori'], ['obj.quadro-elettrico', 'fuori']], terra: ['Garza', 'Scatola di cerotti', 'Disinfettante'], rune: ['sutura'] },
+    cose: [['obj.distributore', 'outside'], ['obj.lampione', 'outside'], ['obj.quadro-elettrico', 'outside']], terra: ['Garza', 'Scatola di cerotti', 'Disinfettante'], rune: ['sutura'] },
   { at: [-1, 1], nome: 'Vico del Vesuvietto', ambiente: 'rione', descrizione: 'Un vicolo del rione a due passi dal cantiere, con la pizzeria «Il Vesuvietto», i motorini sul marciapiede e le sedie in strada la sera.',
-    cose: [['obj.cucina-trattoria', 'dentro'], ['obj.motorino', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Mozzarella', 'Schedina del lotto', 'Farina'], rune: [] },
+    cose: [['obj.cucina-trattoria', 'inside'], ['obj.motorino', 'outside'], ['obj.lampione', 'outside']], terra: ['Mozzarella', 'Schedina del lotto', 'Farina'], rune: [] },
   { at: [0, 1], nome: 'Vico del Molo', ambiente: 'rione', descrizione: 'Il vicolo in discesa che porta dal rione al mare, con le scale, i bassi dei pescatori e la cabina telefonica all’incrocio.',
-    cose: [['obj.cabina-telefonica', 'fuori'], ['obj.cassonetto', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Gettone telefonico', 'Moneta da cento lire'], rune: ['asfalto'] },
+    cose: [['obj.cabina-telefonica', 'outside'], ['obj.cassonetto', 'outside'], ['obj.lampione', 'outside']], terra: ['Gettone telefonico', 'Moneta da cento lire'], rune: ['asfalto'] },
   { at: [1, 1], nome: 'Redazione del Mattino', ambiente: 'corso', descrizione: 'La redazione del giornale in un palazzo d’angolo del Corso: macchine da scrivere, telefoni che squillano, il chiosco dei giornali sotto.',
-    cose: [['obj.edicola', 'fuori'], ['obj.scrivania', 'dentro'], ['obj.lampione', 'fuori']], terra: ['Taccuino', 'Rullino fotografico'], rune: [] },
+    cose: [['obj.edicola', 'outside'], ['obj.scrivania', 'inside'], ['obj.lampione', 'outside']], terra: ['Taccuino', 'Rullino fotografico'], rune: [] },
   { at: [-2, 0], nome: 'Mercato del Pendino', ambiente: 'mercato', descrizione: 'Il mercato coperto di mattoni rossi, con i banchi del pesce e della frutta, le bancarelle all’aperto e l’edicola all’ingresso.',
-    cose: [['obj.edicola', 'fuori'], ['obj.cassonetto', 'fuori'], ['obj.distributore', 'fuori']], terra: ['Limone', 'Cassetta di alici', 'Pomodori', 'Chicchi di caffè'], rune: ['tufo'], strutture: ['mercato coperto'] },
+    cose: [['obj.edicola', 'outside'], ['obj.cassonetto', 'outside'], ['obj.distributore', 'outside']], terra: ['Limone', 'Cassetta di alici', 'Pomodori', 'Chicchi di caffè'], rune: ['tufo'], strutture: ['mercato coperto'] },
   { at: [-2, 1], nome: 'Cantiere della Linea 2', ambiente: 'cantiere', descrizione: 'Il cantiere eterno della metropolitana: recinzioni di rete, transenne a strisce, il grande scavo con le pompe e, in fondo, pietre di un molo antico.',
-    cose: [['obj.transenna', 'fuori'], ['obj.transenna', 'fuori'], ['obj.transenna', 'fuori'], ['obj.quadro-elettrico', 'fuori']], terra: ['Gessetto', 'Mattone forato', 'Filo di rame', 'Cavo elettrico'], rune: ['lamiera'] },
+    cose: [['obj.transenna', 'outside'], ['obj.transenna', 'outside'], ['obj.transenna', 'outside'], ['obj.quadro-elettrico', 'outside']], terra: ['Gessetto', 'Mattone forato', 'Filo di rame', 'Cavo elettrico'], rune: ['lamiera'] },
   { at: [-1, 2], nome: 'Molo Vecchio', ambiente: 'porto', descrizione: 'Il molo dei pescatori: gozzi tirati a secco, reti stese, cassette di alici, gatti che aspettano. Il porto commerciale lo vuole per i container.',
-    cose: [['obj.cassonetto', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Cima da ormeggio', 'Cassetta di alici'], rune: ['marea'] },
+    cose: [['obj.cassonetto', 'outside'], ['obj.lampione', 'outside']], terra: ['Cima da ormeggio', 'Cassetta di alici'], rune: ['marea'] },
   { at: [0, 2], nome: 'Lungomare delle Rondini', ambiente: 'lungomare', descrizione: 'La passeggiata sul golfo: la spiaggia di ciottoli, il chiosco delle granite di Tonino, le panchine, gli innamorati e i pescatori della domenica.',
-    cose: [['obj.lampione', 'fuori'], ['obj.lampione', 'fuori'], ['obj.distributore', 'fuori'], ['obj.cabina-telefonica', 'fuori']], terra: ['Granita al limone', 'Cartolina del golfo'], rune: [] },
+    cose: [['obj.lampione', 'outside'], ['obj.lampione', 'outside'], ['obj.distributore', 'outside'], ['obj.cabina-telefonica', 'outside']], terra: ['Granita al limone', 'Cartolina del golfo'], rune: [] },
   { at: [1, 2], nome: 'Porto commerciale', ambiente: 'porto', descrizione: 'Le banchine del porto commerciale: gru, pile di container, i magazzini di mattoni numerati, il magazzino sette con il lucchetto nuovo.',
-    cose: [['obj.quadro-elettrico', 'fuori'], ['obj.lampione', 'fuori'], ['obj.cassonetto', 'fuori']], terra: ['Chiave del magazzino', 'Caschetto giallo', 'Cima da ormeggio'], rune: ['fuoco'] },
+    cose: [['obj.quadro-elettrico', 'outside'], ['obj.lampione', 'outside'], ['obj.cassonetto', 'outside']], terra: ['Chiave del magazzino', 'Caschetto giallo', 'Cima da ormeggio'], rune: ['fuoco'] },
   { at: [0, -2], nome: 'Ospedale del Colle', ambiente: 'collina', descrizione: 'L’ospedale tra i pini del Colle dei Gelsi, con il giardino dei convalescenti, le panchine e la vista sul golfo.',
-    cose: [['obj.distributore', 'fuori'], ['obj.lampione', 'fuori']], terra: ['Caramella alla menta', 'Disinfettante'], rune: ['terra'] },
+    cose: [['obj.distributore', 'outside'], ['obj.lampione', 'outside']], terra: ['Caramella alla menta', 'Disinfettante'], rune: ['terra'] },
   { at: [-1, -2], nome: 'Belvedere dei Gelsi', ambiente: 'collina', descrizione: 'La terrazza di tufo sul colle, dove si vede tutta la città fino al porto; le ville coi giardini, il chiosco chiuso, la cabina del telefono.',
-    cose: [['obj.lampione', 'fuori'], ['obj.cabina-telefonica', 'fuori']], terra: ['Cartolina del golfo', 'Limone'], rune: ['vento'] },
+    cose: [['obj.lampione', 'outside'], ['obj.cabina-telefonica', 'outside']], terra: ['Cartolina del golfo', 'Limone'], rune: ['vento'] },
   { at: [1, -2], nome: 'Parco dei Platani', ambiente: 'parco', descrizione: 'Il giardino pubblico sul colle: viali di brecciolino, platani, la vasca dei pesci rossi, le panchine dei pensionati.',
-    cose: [['obj.lampione', 'fuori'], ['obj.lampione', 'fuori'], ['obj.cassonetto', 'fuori']], terra: ['Limone', 'Bustina di figurine'], rune: [] },
+    cose: [['obj.lampione', 'outside'], ['obj.lampione', 'outside'], ['obj.cassonetto', 'outside']], terra: ['Limone', 'Bustina di figurine'], rune: [] },
 ];
 
 const key = (at: [number, number]) => `${at[0]},${at[1]}`;
@@ -69,7 +69,7 @@ function planOf(p: Place): { plan: ChunkPlan; npc: Map<string, number> } {
   const npc = new Map<string, number>();
   for (const person of PEOPLE.filter((x) => key(x.at) === key(p.at))) {
     npc.set(person.nome, objects.length);
-    objects.push({ module: person.tipo, where: 'fuori' });
+    objects.push({ module: person.tipo, where: 'outside' });
   }
   for (const [module, where] of p.cose) objects.push({ module, where });
   return {

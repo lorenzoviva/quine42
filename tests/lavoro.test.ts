@@ -43,7 +43,7 @@ function worker(k: Kernel, job: string, dx = 2, dy = 2): number {
       }
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, spot.x, spot.y)!;
   k.ecs.set(id, 'identity', { name: `Prova ${job}`, persona: '', look: '', carrying: [], job });
-  k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
+  k.ecs.set(id, 'mind', { mode: 'wander', mood: '', history: [] });
   return id;
 }
 
@@ -195,7 +195,7 @@ describe('a day of work, in a planned place', () => {
     k.time = at(2, 'night');
     play(k, 4);
     expect(k.ecs.get(id, 'job').tasks.map((t: { does: string }) => t.does)).toEqual(['go', 'rest']);
-    k.ecs.get(id, 'mind').mode = 'segui';
+    k.ecs.get(id, 'mind').mode = 'follow';
     play(k, 4);
     expect(k.ecs.get(id, 'job')).toBeUndefined();
   }, 120_000);

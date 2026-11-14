@@ -73,8 +73,8 @@ export async function runArtistToday(o: ArtistTodayOptions): Promise<void> {
       if (provider === 'gemini') o.budget.settle('gemini', est, usd);
       if (!critique) throw new Error('nessun giudizio');
       const answers: Record<string, Answer> = {
-        passa: { type: 'noul', value: critique.voto >= 7, p: critique.voto / 10 },
-        voto: { type: 'score', value: markLevel(critique.voto), p: critique.voto },
+        passa: { type: 'noul', value: critique.score >= 7, p: critique.score / 10 },
+        voto: { type: 'score', value: markLevel(critique.score), p: critique.score },
       };
       const graded = { ...c, questions: c.questions.filter((q) => q.id in answers) };
       write(o, {
@@ -87,9 +87,9 @@ export async function runArtistToday(o: ArtistTodayOptions): Promise<void> {
         usd,
         ms,
         ok: true,
-        answers: { passa: { v: answers.passa.value, p: critique.voto / 10 }, voto: { v: answers.voto.value, p: critique.voto } },
+        answers: { passa: { v: answers.passa.value, p: critique.score / 10 }, voto: { v: answers.voto.value, p: critique.score } },
         right: grade(graded, { answers, usage: { input: 0, output: 0 }, ms, answeredBy: o.model }),
-        critique: { voto: critique.voto, riconoscibile: critique.riconoscibile, problemi: critique.problemi.slice(0, 4) },
+        critique: { voto: critique.score, riconoscibile: critique.recognizable, problemi: critique.problems.slice(0, 4) },
       });
     } catch (e) {
       const usd = provider === 'gemini' ? (rec ? (costOf(o.model, { prompt: rec.prompt, cached: rec.cached, output: rec.output, thoughts: rec.thoughts }) ?? est) : est) : 0;

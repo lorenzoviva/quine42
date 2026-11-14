@@ -5,7 +5,7 @@
 
 import type { FileMap } from './types';
 import { Rng } from './rng';
-import { internalFields } from './internalNames';
+import { internalFields, internalName, internalValues, italianName } from './internalNames';
 
 export interface Region {
   id: string;
@@ -49,18 +49,23 @@ export function regionAt(atlas: Atlas, cx: number, cy: number): Region | undefin
   return best;
 }
 
-const DIRS = ['est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest', 'nord', 'nord-est'];
-export const COMPASS = ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'];
+// The directions as ids (T310b, `direzioni`): the Cartographer writes them, the world says them in its language (`directionWord`).
+export const COMPASS = internalValues('direzioni').filter((d) => d !== 'here');
+const DIRS = ['east', 'south-east', 'south', 'south-west', 'west', 'north-west', 'north', 'north-east'];
 
-/** Compass direction from a to b (north is up: smaller y). */
+/** Compass direction from a to b (north is up: smaller y), as an id; `here` when they coincide. */
 export function direction(dx: number, dy: number): string {
-  if (!dx && !dy) return 'qui';
+  if (!dx && !dy) return 'here';
   const a = Math.atan2(dy, dx);
   return DIRS[(Math.round(a / (Math.PI / 4)) + 8) % 8];
 }
 
+/** A direction in the words of the world (today Italian: «nord-est»); the dictionaries of the other languages are T239's. */
+export const directionWord = (id: string): string => italianName('direzioni', id);
+
+/** The vector of a direction said as an id, or in the Italian of before T310b (`nord-est`); east when it is none. */
 export function directionVector(dir: string): [number, number] {
-  const i = COMPASS.indexOf(dir.toLowerCase().replace(/\s+/g, '-'));
+  const i = COMPASS.indexOf(internalName('direzioni', dir.toLowerCase().replace(/\s+/g, '-')));
   if (i < 0) return [1, 0];
   const a = -Math.PI / 2 + (i * Math.PI) / 4;
   return [Math.round(Math.cos(a)), Math.round(Math.sin(a))];
@@ -88,14 +93,15 @@ export function placeRegion(atlas: Atlas, from: [number, number], dir: string, d
  * atlas): every environment that is not ordinary countryside gets a region somewhere around.
  */
 export function defaultAtlas(layouts: Record<string, { name: string; description: string }>, explored: Set<string>, seed: number): Atlas {
-  const ordinary = /^(borgo|bosco|campi|rovine|locanda)$/;
+  // The seed's environments by their ids (English since the contract 0.2; the Italian of a Council's environment of before stays).
+  const ordinary = /^(village|woods|fields|ruins|inn|borgo|bosco|campi|rovine|locanda)$/;
   const ids = Object.keys(layouts).filter((id) => !ordinary.test(id));
   const rng = new Rng(seed ^ 0x51a7);
   const atlas: Atlas = { regions: [] };
   ids.forEach((id, i) => {
     const dir = COMPASS[(i * 3 + rng.int(8)) % 8];
     const dist = 3 + (i % 4) * 2 + rng.int(3);
-    const radius = /deserto|giungla|montagne|lago|mare|oceano/.test(id) ? 2 : 1;
+    const radius = /desert|jungle|mountain|lake|sea|ocean|deserto|giungla|montagne|lago|mare|oceano/.test(id) ? 2 : 1;
     const centro = placeRegion(atlas, [0, 0], dir, dist, radius, explored);
     atlas.regions.push({ id, name: layouts[id].name, description: layouts[id].description, environment: id, center: centro, radius: radius });
   });
@@ -110,13 +116,13 @@ export function directionsFrom(atlas: Atlas, chunks: Array<{ name: string; cx: n
     const d = Math.max(Math.abs(p.cx - cx), Math.abs(p.cy - cy));
     if (!d || d > 6 || seen.has(p.name)) continue;
     seen.add(p.name);
-    out.push({ d, text: `«${p.name}»: ${direction(p.cx - cx, p.cy - cy)}, ${d === 1 ? 'appena oltre' : `a ${d} luoghi da qui`}` });
+    out.push({ d, text: `«${p.name}»: ${directionWord(direction(p.cx - cx, p.cy - cy))}, ${d === 1 ? 'appena oltre' : `a ${d} luoghi da qui`}` });
   }
   for (const r of atlas.regions) {
     const d = Math.max(Math.abs(r.center[0] - cx), Math.abs(r.center[1] - cy));
     if (seen.has(r.name)) continue;
     seen.add(r.name);
-    out.push({ d: d + 0.5, text: d <= r.radius ? `qui siamo nella regione «${r.name}»` : `regione «${r.name}» (${r.description}): ${direction(r.center[0] - cx, r.center[1] - cy)}, a circa ${d} luoghi` });
+    out.push({ d: d + 0.5, text: d <= r.radius ? `qui siamo nella regione «${r.name}»` : `regione «${r.name}» (${r.description}): ${directionWord(direction(r.center[0] - cx, r.center[1] - cy))}, a circa ${d} luoghi` });
   }
   return out.sort((a, b) => a.d - b.d).slice(0, max).map((o) => o.text);
 }

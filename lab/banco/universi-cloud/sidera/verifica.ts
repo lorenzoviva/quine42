@@ -87,7 +87,7 @@ const viste: Record<string, MagicRune> = Object.fromEntries(DI_SEMPRE.map((t) =>
 const runeErr: string[] = [];
 for (const t of NUOVE) {
   const r: MagicRune = magia.runes[t];
-  const { rune, errors } = validateNewRune({ token: t, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description, canone: r.description }, viste, words);
+  const { rune, errors } = validateNewRune({ token: t, name: r.name, glyph: r.glyph, color: r.color, element: r.element, description: r.description, canon: r.description }, viste, words);
   if (!rune) runeErr.push(`${t}: ${errors.join('; ')}`);
   else if (rune.rune.glyph !== r.glyph || rune.rune.color !== r.color) runeErr.push(`${t}: il validatore ripara il segno o il colore`);
   else viste[t] = r;

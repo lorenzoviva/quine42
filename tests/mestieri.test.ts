@@ -55,7 +55,7 @@ function worker(job: string, dx = 2, dy = 2): number {
   const p = spot(dx, dy);
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, p.x, p.y)!;
   k.ecs.set(id, 'identity', { name: `Prova ${job}`, persona: '', look: '', carrying: [], job });
-  k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
+  k.ecs.set(id, 'mind', { mode: 'wander', mood: '', history: [] });
   spawned.push(id);
   return id;
 }

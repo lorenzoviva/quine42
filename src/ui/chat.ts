@@ -5,7 +5,8 @@ import type { Kernel, Mind } from '../kernel/kernel';
 import type { AgentId } from '../kernel/agents/council';
 import { $, el } from './dom';
 
-const ACTIONS: Record<string, string> = { segui: 'ti segue', resta: 'si ferma', vaga: 'riprende a girovagare', dai: 'ti dà qualcosa' };
+/** What a character decided, in the words of the world (the ids are T310b's: `follow`, `stay`, `wander`, `give`). */
+const ACTIONS: Record<string, string> = { follow: 'ti segue', stay: 'si ferma', wander: 'riprende a girovagare', give: 'ti dà qualcosa' };
 
 export class Chat {
   private root = $('#chat');
@@ -117,7 +118,7 @@ export class Chat {
     typing.remove();
     if (this.npc !== id) return;
     if (reply.say) this.log.append(this.line(name, reply.say, person ? 'note' : 'npc'));
-    if (reply.action !== 'nessuna') this.log.append(el('div', { class: 'note' }, `(${name} ${ACTIONS[reply.action] ?? reply.action})`));
+    if (reply.action !== 'none') this.log.append(el('div', { class: 'note' }, `(${name} ${ACTIONS[reply.action] ?? reply.action})`));
     this.log.scrollTop = this.log.scrollHeight;
     this.input.focus();
   }

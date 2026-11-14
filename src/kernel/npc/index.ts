@@ -158,8 +158,8 @@ export class Npc {
     return this.people.wandererWord(w);
   }
 
-  setBond(name: string, bond: string): void {
-    this.people.setBond(name, bond);
+  setBond(name: string, bond: string, kind?: string): void {
+    this.people.setBond(name, bond, kind);
   }
 
   bondOf(name: string): string | undefined {
@@ -236,13 +236,13 @@ export class Npc {
       if (this.lastPhase.get(id) !== phaseKey) {
         this.lastPhase.set(id, phaseKey);
         this.host.ecs.set(id, 'activity', { kind: activity, still: false });
-        if (mind.mode === 'vaga') this.host.ecs.set(id, 'goal', this.places.placeFor(id, identity, now.where, activity) ?? { none: true });
+        if (mind.mode === 'wander') this.host.ecs.set(id, 'goal', this.places.placeFor(id, identity, now.where, activity) ?? { none: true });
         if (Math.hypot(p.x - pc.x, p.y - pc.y) < 10) this.host.speak(id, `(${now.does})`);
       }
       // Arrived: they do it, there, visibly (lying in bed, hoeing the field, fishing on the bank).
       const meta = this.host.ecs.get(id, 'goal');
       const att = this.host.ecs.get(id, 'activity');
-      if (att && mind.mode === 'vaga') {
+      if (att && mind.mode === 'wander') {
         const arrived = !meta?.x || Math.hypot(meta.x - p.x, meta.y - p.y) < 1.3;
         att.still = arrived && activity !== 'stroll' && activity !== 'patrol';
         att.kind = activity;
@@ -260,7 +260,7 @@ export class Npc {
    */
   private workTick(id: Id, identity: Identity, mind: Mind, workers: Map<string, number>): boolean {
     const had = this.host.ecs.get(id, 'job');
-    const program = mind.mode === 'vaga' ? matchJob(identity.job, this.trades.jobPrograms()) : undefined;
+    const program = mind.mode === 'wander' ? matchJob(identity.job, this.trades.jobPrograms()) : undefined;
     const place: string | undefined = this.host.ecs.get(id, 'chunk')?.key;
     if (!program || (!had && place && (workers.get(place) ?? 0) >= WORKERS_PER_PLACE)) {
       if (had) {

@@ -5,7 +5,9 @@
 // The first is 0.1 → 0.2 (T307a, ADR-0153, ADR-0155): the internal language of the world's simulation; then 0.2 → 0.3 (T307b,
 // ADR-0158): the internal language of society, work and the Council; then 0.3 → 0.4 (T308a, ADR-0159): the fields and the paths of the
 // universe's files; then 0.4 → 0.5 (T308b, ADR-0163): the wire and Lua, the components and their fields, the API, the bus's events;
-// then 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs, a digit alone written `#` and the digit.
+// then 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs, a digit alone written `#` and the digit; then 0.6 → 0.7
+// (T310b, ADR-0189): the values the Council's schemas still listed in Italian (where a thing stands in a plan, the type of an
+// environment, the ways of a mind, the places of the things, the roles of the stamps, the bonuses) and the kind of every bond as an id.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -14,6 +16,7 @@
 import type { ChunkPlan } from './agents/cartography';
 import { COMPONENT_FIELDS, INTERNAL_NAMES, internalAgent, internalCardId, internalCardsIn, internalCoefficients, internalComponent, internalComponentField, internalComponentName, internalEvent, internalFields, internalGraph, internalJobProgram, internalManifest, internalManifest0_5, internalModelId, internalModelId0_3, internalModelInfo, internalModuleId, internalName, internalPath, internalPeople, internalPlots, internalSculptors, internalSoloIn, internalSoundPurpose, internalStoreKey, internalVenture, type FieldShapeId } from './internalNames';
 import { STORE_DIR } from './store';
+import { relationKind } from './npc/model';
 import { hashDigits } from '../mj/symbols';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
@@ -74,6 +77,14 @@ export const MIGRATIONS: readonly Migration[] = [
     descrizione:
       'i simboli dei programmi MarkovJunior (T342): una cifra da sola non è più un simbolo, si scrive # e la cifra (3 → #3) nei values, nei pattern (attributi, figli <in> e <out>, file di regole, tessere e campioni), nelle unioni, nei colori e nei simboli dei nodi; un’unione "#" prende un segno libero; la tinta dei modelli in models/index.json',
     migrate: (files) => migrate0_6(files),
+  },
+  {
+    from: '0.6',
+    to: '0.7',
+    descrizione:
+      'i valori che gli schemi del Concilio elencavano ancora in italiano (T310b): dove sta una cosa in un piano (dentro → inside, fuori → outside, ovunque → anywhere), il tipo di un ambiente (esterno → outdoor, interno → indoor, misto → mixed), i modi della mente (vaga → wander, segui → follow, resta → stay) nei manifest, nei casi e nel Lua del Concilio, i posti delle cose (testa → head, corpo → torso…) e ciò che uno slot accetta, i bonus (difesa → defense…) anche in items.bonus del Lua, i ruoli dei timbri (muro → wall…) nei programmi degli ambienti, i comandi degli strumenti (usa → use); il tipo di ogni legame come id (kind) in world/people.json',
+    migrate: (files) => migrate0_7(files),
+    migratePlan: (plan) => plan0_7(plan),
   },
 ];
 
@@ -1205,7 +1216,7 @@ export const patternFileFor0_6 = (text: string): string => patternLines0_6(text)
  * The steps of MIGRATIONS that carry a program on its own (a handmade card's) to the next contract, by the contract they read. A step
  * not here does not: a card of before it stays of its contract, kept and not offered (ADR-0161), as the cards of 0.4 stayed in 0.5.
  */
-const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6 };
+const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml };
 
 /**
  * A program alone, of the contract `contract` (`X.Y`), as this kernel reads it (a handmade card's, T342): ported by every step from there
@@ -1241,4 +1252,155 @@ function migrate0_6(files: FileMap): FileMap {
     out[p] = next;
   }
   return withSeedFollowing(files, out);
+}
+
+// --- 0.6 → 0.7 (T310b, ADR-0189): the values the Council's schemas still listed in Italian, the kind of a bond as an id --------------
+// The prompts are English since T310 (ADR-0165) and the schemas' fields are English since T310b; the values a universe keeps that the
+// schemas used to list in Italian take their internal names (the domains of the step T310b in internalNames.ts): where a thing stands in
+// a plan (`objects[].where`, `fresh[].where`: inside, outside, anywhere), the type of an environment (`layouts[].environment`: outdoor,
+// indoor, mixed), the roles of a stamp's codes in the programs of the environments (`wall`, `floor`…), the places of the things
+// (`items[].slot`: head, torso…) and what a panel's slot accepts, the bonuses of the things (`items[].bonus`: defense, speed…), the
+// controls of a tool (`item.controls`: use, action), the ways of a mind (`mind.mode` in the components a manifest gives and in its cases:
+// wander, follow, stay). In the Lua of the Council's modules, where the kernel reads a value: a way compared with or given to `mode`, a
+// bonus asked of `items.bonus`; the ids of a panel's slots are the module's own words and stay, as the player's Lua (rule 3) and the
+// seed's, which brings its own. Every bond of `world/people.json` gets its kind as an id (`kind`, from the Italian word of today), so the
+// society no longer guesses it from the word.
+
+/** The `mind` component wherever it is in a JSON value (a manifest's components, a case's wanderer and entities): its way internal. */
+function mindsOf(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(mindsOf);
+  if (!isRecord(v)) return v;
+  const out: Record<string, unknown> = {};
+  for (const [k, x] of Object.entries(v)) out[k] = k === 'mind' && isRecord(x) && typeof x.mode === 'string' ? { ...x, mode: internalName('azioni-npc', x.mode) } : mindsOf(x);
+  return out;
+}
+
+/** The stamps of an environment's program with the roles of their codes internal, at any depth. */
+function stampCodesOf(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(stampCodesOf);
+  if (!isRecord(node)) return node;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(node)) out[k] = stampCodesOf(v);
+  if (out.type === 'stamp' && isRecord(out.codes)) out.codes = renameKeys(out.codes, (k) => internalName('ruoli-timbri', k));
+  return out;
+}
+
+/** A thing of a pack (or of a case) with its place and its bonuses internal. */
+function item0_7(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const o: Record<string, unknown> = { ...raw };
+  if (typeof o.slot === 'string') o.slot = internalName('posti', o.slot);
+  if (isRecord(o.bonus)) o.bonus = renameKeys(o.bonus, (k) => internalName('bonus', k));
+  return o;
+}
+
+/** A manifest of 0.6 in 0.7: its environments, its things, its tool's controls, the minds it gives and those of its cases, what its slots accept. */
+function manifest0_7(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const m = mindsOf(raw) as Record<string, unknown>;
+  if (isRecord(m.layouts))
+    m.layouts = Object.fromEntries(
+      Object.entries(m.layouts).map(([id, def]) => {
+        if (!isRecord(def)) return [id, def];
+        const d: Record<string, unknown> = { ...def };
+        if (typeof d.environment === 'string') d.environment = internalName('tipi-ambiente', d.environment);
+        if ('program' in d) d.program = stampCodesOf(d.program);
+        return [id, d];
+      }),
+    );
+  if (Array.isArray(m.items)) m.items = m.items.map(item0_7);
+  if (isRecord(m.item) && isRecord(m.item.controls)) m.item = { ...m.item, controls: renameKeys(m.item.controls, (k) => internalName('comandi', k)) };
+  if (isRecord(m.ui) && Array.isArray(m.ui.elements))
+    m.ui = { ...m.ui, elements: m.ui.elements.map((e) => (isRecord(e) && Array.isArray(e.accepts) ? { ...e, accepts: e.accepts.map((a) => word('posti', a)) } : e)) };
+  if (Array.isArray(m.cases)) m.cases = m.cases.map((c) => (isRecord(c) && isRecord(c.wanderer) && Array.isArray(c.wanderer.items) ? { ...c, wanderer: { ...c.wanderer, items: c.wanderer.items.map(item0_7) } } : c));
+  return m;
+}
+
+/**
+ * The Lua of a module of 0.6 in 0.7, where the kernel reads a value: a way of the mind compared with or given to `mode`
+ * (`mind.mode ~= "segui"`, `mind.mode = "vaga"`, `{ mode = "vaga" }`), a bonus asked of `items.bonus(it, "difesa")`. Nothing else changes.
+ */
+export function luaFor0_7(src: string): string {
+  const toks = luaTokens(src);
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  const quote = (t: LuaToken, value: string) => `${t.text[0]}${value}${t.text[0]}`;
+  /** The field a string at `i` is compared with or given to, on either side (`a.b.mode == "x"`, `"x" == a.mode`, `{ mode = "x" }`). */
+  const fieldOf = (i: number): string | undefined => {
+    const before = toks[i - 1]?.text;
+    if ((before === '==' || before === '~=' || before === '=') && toks[i - 2]?.kind === 'name') return toks[i - 2].text;
+    const after = toks[i + 1]?.text;
+    if (after === '==' || after === '~=') {
+      let j = i + 2;
+      let last: string | undefined;
+      while (toks[j]?.kind === 'name') {
+        last = toks[j].text;
+        if (toks[j + 1]?.text !== '.') break;
+        j += 2;
+      }
+      return last;
+    }
+    return undefined;
+  };
+  /** Whether the string at `i` is the second argument of `a.b(…)`: the function's name. */
+  const argTwoOf = (i: number): string | undefined => {
+    if (toks[i - 1]?.text !== ',') return undefined;
+    let depth = 0;
+    for (let j = i - 2; j >= 0; j--) {
+      const x = toks[j].text;
+      if (x === ')' || x === ']' || x === '}') depth++;
+      else if (x === '(' || x === '[' || x === '{') {
+        if (depth === 0) return x === '(' && toks[j - 1]?.kind === 'name' && toks[j - 2]?.text === '.' && toks[j - 3]?.kind === 'name' ? `${toks[j - 3].text}.${toks[j - 1].text}` : undefined;
+        depth--;
+      } else if (depth === 0 && x === ',') return undefined;
+    }
+    return undefined;
+  };
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (t.kind !== 'string' || t.value === undefined) continue;
+    if (has('azioni-npc', t.value) && fieldOf(i) === 'mode') edits.push({ start: t.start, end: t.end, text: quote(t, internalName('azioni-npc', t.value)) });
+    else if (has('bonus', t.value) && argTwoOf(i) === 'items.bonus') edits.push({ start: t.start, end: t.end, text: quote(t, internalName('bonus', t.value)) });
+  }
+  if (!edits.length) return src;
+  let out = '';
+  let at = 0;
+  for (const e of edits.sort((a, b) => a.start - b.start)) {
+    if (e.start < at) continue;
+    out += src.slice(at, e.start) + e.text;
+    at = e.end;
+  }
+  return out + src.slice(at);
+}
+
+/** world/people.json of 0.6 in 0.7: every bond with its kind as an id (from the word of today, the Italian one), the awaited ones too. */
+function people0_7(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const kinded = (r: unknown): unknown => (isRecord(r) && typeof r.bond === 'string' && typeof r.kind !== 'string' ? { ...r, kind: relationKind(r.bond) } : r);
+  const out: Record<string, unknown> = { ...raw };
+  if (Array.isArray(out.people)) out.people = out.people.map((p) => (isRecord(p) && Array.isArray(p.family) ? { ...p, family: p.family.map(kinded) } : p));
+  if (Array.isArray(out.expected)) out.expected = out.expected.map(kinded);
+  return out;
+}
+
+function migrate0_7(files: FileMap): FileMap {
+  const council = councilModules(files);
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    const mod = /^modules\/([^/]+)\//.exec(p)?.[1];
+    let next = text;
+    if (/^modules\/[^/]+\/manifest\.json$/.test(p)) next = rewriteJson(text, manifest0_7);
+    else if (/^modules\/[^/]+\/.+\.lua$/.test(p) && mod && council.has(mod)) next = luaFor0_7(text);
+    else if (p === 'world/people.json') next = rewriteJson(text, people0_7);
+    out[p] = next;
+  }
+  return withSeedFollowing(files, out);
+}
+
+/** A plan of 0.6 in 0.7 (idempotent): where its things and its new ones stand (`inside`, `outside`, `anywhere`). */
+function plan0_7(plan: ChunkPlan): ChunkPlan {
+  const p = plan as ChunkPlan & Record<string, unknown>;
+  const where = (o: unknown): unknown => (isRecord(o) && typeof o.where === 'string' ? { ...o, where: internalName('dove-piano', o.where) } : o);
+  const next = { ...p, ...(Array.isArray(p.objects) ? { objects: p.objects.map(where) } : {}), ...(Array.isArray(p.fresh) ? { fresh: p.fresh.map(where) } : {}) } as ChunkPlan;
+  return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
 }

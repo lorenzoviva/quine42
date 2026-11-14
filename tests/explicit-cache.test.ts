@@ -178,8 +178,8 @@ function council() {
   return { models, c: new Council(models, () => ({ files, palette: {}, catalog: [], graph: () => graph })) };
 }
 
-const npc = { name: 'Bastiano', persona: 'Sei Bastiano.', scheda: 'Sei Bastiano, parli piano.', mood: 'calmo', mode: 'vaga', carrying: [], place: 'Piazza', history: [], facts: {} };
-const person = (nome: string) => ({ nome, mestiere: 'pescatore', scheda: `Sei ${nome}.`, fa: 'ripara le reti', ricordi: '', segreti: '' });
+const npc = { name: 'Bastiano', persona: 'Sei Bastiano.', sheet: 'Sei Bastiano, parli piano.', mood: 'calmo', mode: 'wander', carrying: [], place: 'Piazza', history: [], facts: {} };
+const person = (name: string) => ({ name, job: 'pescatore', sheet: `Sei ${name}.`, does: 'ripara le reti', memories: '', secrets: '' });
 
 describe('the Council asks the cache for the Actor only (T351)', () => {
   it('the Actor: the focus opens the prompt, the system is the same for every person; the Narrator as before', async () => {

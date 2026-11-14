@@ -216,7 +216,7 @@ describe('ogni manopola al minimo', () => {
 
   it('le riparazioni a 0: il modulo guasto resta com\'era, nessuno chiama, e resta scritto che manca', async () => {
     const { k, online } = await boot();
-    const f = await k.forgeModule('una madia di legno per il pane', 'agente', 'oggetto');
+    const f = await k.forgeModule('una madia di legno per il pane', 'agente', 'object');
     expect(f.ok).toBe(true);
     const entry = k.modules.get(f.id!)!;
     const before = k.repo.working[entry.logicPath!];

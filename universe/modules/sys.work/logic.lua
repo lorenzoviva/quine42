@@ -339,7 +339,7 @@ M.comportamenti = B
 function M.update(dt)
   ecs.each("job, pos", function(id, m, p)
     local mind = ecs.get(id, "mind")
-    if mind and mind.mode ~= "vaga" then return end
+    if mind and mind.mode ~= "wander" then return end
     local s = ecs.get(id, "work")
     if not s or s.phase ~= m.phase or s.day ~= m.day or s.venture ~= m.venture then
       ecs.set(id, "work", { phase = m.phase, day = m.day, venture = m.venture, step = 1 })

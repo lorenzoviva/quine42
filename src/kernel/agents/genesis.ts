@@ -9,7 +9,8 @@ import { wordsOf } from './council';
 import { designLayouts } from './cartography';
 import { repairProgram } from '../mj';
 import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
-import { internalFields } from '../internalNames';
+import { internalFields, internalName } from '../internalNames';
+import { FORGE_KINDS, type ForgeKind } from './forge';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
@@ -32,9 +33,10 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
 /** The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon. */
 const TIMELESS_LAYOUTS = new Set(['woods', 'fields', 'ruins', 'dungeon', 'desert', 'jungle', 'mountains', 'lake']);
 
+/** What the Narrator asks the Forge for at the Genesis: a kind of what it creates (T310b, `tipi-fucina`) and the request. */
 export interface CastEntry {
-  tipo: 'npc' | 'oggetto' | 'strumento';
-  richiesta: string;
+  type: ForgeKind;
+  request: string;
 }
 
 export interface GenesisPlan {
@@ -47,130 +49,130 @@ export interface GenesisPlan {
 const BIBLE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    titolo: { type: 'STRING' },
-    tono: { type: 'STRING' },
-    sintesi: { type: 'STRING' },
-    storia: { type: 'STRING' },
-    luoghi: { type: 'ARRAY', items: { type: 'STRING' } },
-    personaggi: { type: 'ARRAY', items: { type: 'STRING' } },
-    fatti: { type: 'ARRAY', items: { type: 'STRING' } },
-    misteri: { type: 'ARRAY', items: { type: 'STRING' }, description: 'legends told by the people of the world (people, beasts, gods, the powerful of the past)' },
-    usanze: { type: 'ARRAY', items: { type: 'STRING' }, description: 'at most 3 customs or sayings of this world, that enrich the lexicon without contradicting or explaining it' },
+    title: { type: 'STRING' },
+    tone: { type: 'STRING' },
+    summary: { type: 'STRING' },
+    history: { type: 'STRING' },
+    places: { type: 'ARRAY', items: { type: 'STRING' } },
+    characters: { type: 'ARRAY', items: { type: 'STRING' } },
+    facts: { type: 'ARRAY', items: { type: 'STRING' } },
+    mysteries: { type: 'ARRAY', items: { type: 'STRING' }, description: 'legends told by the people of the world (people, beasts, gods, the powerful of the past)' },
+    customs: { type: 'ARRAY', items: { type: 'STRING' }, description: 'at most 3 customs or sayings of this world, that enrich the lexicon without contradicting or explaining it' },
   },
-  required: ['titolo', 'tono', 'sintesi', 'storia', 'luoghi', 'personaggi', 'fatti', 'misteri'],
+  required: ['title', 'tone', 'summary', 'history', 'places', 'characters', 'facts', 'mysteries'],
 };
 
 const STYLE_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    stile: { type: 'STRING' },
-    forme: { type: 'STRING', description: 'proportions and shapes of the models (big or realistic heads, squat or slender buildings…)' },
+    style: { type: 'STRING' },
+    shapes: { type: 'STRING', description: 'proportions and shapes of the models (big or realistic heads, squat or slender buildings…)' },
     palette: { type: 'ARRAY', items: { type: 'STRING' } },
-    luce: { type: 'STRING' },
-    regole: { type: 'ARRAY', items: { type: 'STRING' } },
-    protagonista: { type: 'STRING', description: 'what the wanderer (the one who plays) looks like' },
-    case_comuni: { type: 'STRING', description: 'what the common houses look like, if they are not cottages of stone, wood and straw; empty otherwise' },
+    light: { type: 'STRING' },
+    rules: { type: 'ARRAY', items: { type: 'STRING' } },
+    protagonist: { type: 'STRING', description: 'what the wanderer (the one who plays) looks like' },
+    common_houses: { type: 'STRING', description: 'what the common houses look like, if they are not cottages of stone, wood and straw; empty otherwise' },
   },
-  required: ['stile', 'forme', 'palette', 'luce', 'regole', 'protagonista'],
+  required: ['style', 'shapes', 'palette', 'light', 'rules', 'protagonist'],
 };
 
 const TERRAIN_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    terreni: {
+    terrains: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
-          codice: { type: 'STRING' },
-          nome: { type: 'STRING' },
-          descrizione: { type: 'STRING', description: 'what it is like: material, colour, details' },
-          colore: { type: 'STRING', description: 'hexadecimal #rrggbb, well apart from the others' },
-          strato: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
-          solido: { type: 'BOOLEAN' },
-          velocita: { type: 'NUMBER' },
+          code: { type: 'STRING' },
+          name: { type: 'STRING' },
+          description: { type: 'STRING', description: 'what it is like: material, colour, details' },
+          color: { type: 'STRING', description: 'hexadecimal #rrggbb, well apart from the others' },
+          layer: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
+          solid: { type: 'BOOLEAN' },
+          speed: { type: 'NUMBER' },
         },
-        required: ['codice', 'nome', 'descrizione', 'colore', 'strato', 'solido', 'velocita'],
+        required: ['code', 'name', 'description', 'color', 'layer', 'solid', 'speed'],
       },
     },
-    tetto: { type: 'STRING', description: 'colour #rrggbb of the roofs of the buildings' },
+    roof: { type: 'STRING', description: 'colour #rrggbb of the roofs of the buildings' },
   },
-  required: ['terreni', 'tetto'],
+  required: ['terrains', 'roof'],
 };
 
 const PHYS_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    terreni: {
+    terrains: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { codice: { type: 'STRING' }, solido: { type: 'BOOLEAN' }, velocita: { type: 'NUMBER' }, nota: { type: 'STRING' } }, required: ['codice', 'solido', 'velocita'] },
+      items: { type: 'OBJECT', properties: { code: { type: 'STRING' }, solid: { type: 'BOOLEAN' }, speed: { type: 'NUMBER' }, note: { type: 'STRING' } }, required: ['code', 'solid', 'speed'] },
     },
   },
-  required: ['terreni'],
+  required: ['terrains'],
 };
 
 const REVIEW_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    approvato: { type: 'BOOLEAN' },
-    problemi: {
+    approved: { type: 'BOOLEAN' },
+    problems: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { agente: { type: 'STRING', enum: ['narrator', 'artist', 'cartographer'] }, problema: { type: 'STRING' } }, required: ['agente', 'problema'] },
+      items: { type: 'OBJECT', properties: { agent: { type: 'STRING', enum: ['narrator', 'artist', 'cartographer'] }, problem: { type: 'STRING' } }, required: ['agent', 'problem'] },
     },
   },
-  required: ['approvato', 'problemi'],
+  required: ['approved', 'problems'],
 };
 
 const CAST_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    moduli: {
+    modules: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { tipo: { type: 'STRING', enum: ['npc', 'oggetto', 'strumento'] }, richiesta: { type: 'STRING' } }, required: ['tipo', 'richiesta'] },
+      items: { type: 'OBJECT', properties: { type: { type: 'STRING', enum: [...FORGE_KINDS] }, request: { type: 'STRING' } }, required: ['type', 'request'] },
     },
   },
-  required: ['moduli'],
+  required: ['modules'],
 };
 
 interface RawStyle {
-  stile: string;
-  forme: string;
+  style: string;
+  shapes: string;
   palette: string[];
-  luce: string;
-  regole: string[];
-  protagonista: string;
-  case_comuni?: string;
+  light: string;
+  rules: string[];
+  protagonist: string;
+  common_houses?: string;
 }
 
 interface RawTerrain {
-  codice: string;
-  nome: string;
-  descrizione: string;
-  colore: string;
-  strato: TerrainLayer;
-  solido: boolean;
-  velocita: number;
+  code: string;
+  name: string;
+  description: string;
+  color: string;
+  layer: TerrainLayer;
+  solid: boolean;
+  speed: number;
 }
 
 export function styleMarkdown(s: RawStyle): string {
   return [
     `# Guida di stile`,
-    `Stile: ${s.stile}`,
-    `Forme: ${s.forme}`,
-    `Luce: ${s.luce}`,
+    `Stile: ${s.style}`,
+    `Forme: ${s.shapes}`,
+    `Luce: ${s.light}`,
     `Palette: ${(s.palette ?? []).join(', ')}`,
-    `Regole:\n${(s.regole ?? []).map((r) => `- ${r}`).join('\n')}`,
-    `Protagonista: ${s.protagonista}`,
+    `Regole:\n${(s.rules ?? []).map((r) => `- ${r}`).join('\n')}`,
+    `Protagonista: ${s.protagonist}`,
   ].join('\n');
 }
 
 export function terrainErrors(terrains: RawTerrain[]): string[] {
   const errors: string[] = [];
-  const codes = terrains.map((t) => t.codice);
+  const codes = terrains.map((t) => t.code);
   for (const [code, b] of Object.entries(BASE_CODES)) if (!codes.includes(code)) errors.push(`manca il codice "${code}" (${b.meaning})`);
   for (const t of terrains) {
-    if (typeof t.codice !== 'string' || t.codice.length !== 1 || '?*/[]'.includes(t.codice)) errors.push(`codice non valido "${t.codice}"`);
-    if (!/^#[0-9a-f]{6}$/i.test(t.colore)) errors.push(`colore non valido per ${t.codice}: ${t.colore}`);
+    if (typeof t.code !== 'string' || t.code.length !== 1 || '?*/[]'.includes(t.code)) errors.push(`codice non valido "${t.code}"`);
+    if (!/^#[0-9a-f]{6}$/i.test(t.color)) errors.push(`colore non valido per ${t.code}: ${t.color}`);
   }
   if (new Set(codes).size !== codes.length) errors.push('codici duplicati');
   if (terrains.length > 24) errors.push('al massimo 24 terreni');
@@ -181,12 +183,12 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
 export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
   return Object.fromEntries(
     terrains.map((t) => {
-      const base = BASE_CODES[t.codice];
-      const layer = base?.layer ?? t.strato ?? (t.solido ? 'rock' : 'ground');
-      const solid = base ? base.solid : layer === 'wall' || layer === 'liquid' || layer === 'vegetation' || layer === 'rock' ? true : layer === 'floor' || layer === 'door' ? false : !!t.solido;
+      const base = BASE_CODES[t.code];
+      const layer = base?.layer ?? t.layer ?? (t.solid ? 'rock' : 'ground');
+      const solid = base ? base.solid : layer === 'wall' || layer === 'liquid' || layer === 'vegetation' || layer === 'rock' ? true : layer === 'floor' || layer === 'door' ? false : !!t.solid;
       // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
-      const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.codice.charCodeAt(0)}` } : {};
-      return [t.codice, { name: t.nome, description: t.descrizione, color: t.colore.toLowerCase(), solid, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), speed: Math.min(1.5, Math.max(0.3, Number(t.velocita) || 1)) }];
+      const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.code.charCodeAt(0)}` } : {};
+      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), solid, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), speed: Math.min(1.5, Math.max(0.3, Number(t.speed) || 1)) }];
     }),
   );
 }
@@ -208,7 +210,7 @@ const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(
 
 export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought): Promise<GenesisPlan> {
   const data = { theme };
-  // The Narrator still writes the bible with the Italian fields of its schema (until T310b): it is read with those of 0.4 (T308a).
+  // The fields of the bible are those of the file (English since T310b); `storia` of an answer of before is `history` here, not in internalAnswer.
   const askBible = async (feedback = ''): Promise<Bible> =>
     internalFields('bible', await c.ask<Bible>(
       'narrator',
@@ -221,15 +223,15 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<RawStyle>(
       'artist',
       'genesis.style',
-      `Write the style guide for all the models of this universe: it is a 3D game where everything (people, animals, trees, rocks, things, buildings) is a voxel model (20 voxels per tile) built by a program of rules, seen from above in 3/4. The world is drawn like a cartoon: flat bands of light and a dark outline where the part changes. Say the style (simple and readable from afar), the shapes and proportions (squat and simplified), the palette (a muted, light environment, few saturated accents on the things that matter), the light, 3-6 rules (among them: one solid colour per part, neighbouring parts well apart in light and dark, details as dark marks) and the look of the protagonist, all in the age of the theme. In "case_comuni", only if the common houses of this age are not cottages of stone, wood and straw, say in one sentence what they are like (a block of flats with balconies, a tin shack with a sign); otherwise leave it empty.${brought?.all.length ? `\nSome models of the library were made before this guide and stay as they are: ${listed(brought.all)}. Let the palette and the shapes welcome them, without naming them in the guide.` : ''}\nTheme: ${theme}\nTitle: ${bible.title}\nTone: ${bible.tone}\nSummary: ${bible.summary}${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
+      `Write the style guide for all the models of this universe: it is a 3D game where everything (people, animals, trees, rocks, things, buildings) is a voxel model (20 voxels per tile) built by a program of rules, seen from above in 3/4. The world is drawn like a cartoon: flat bands of light and a dark outline where the part changes. Say the style (simple and readable from afar), the shapes and proportions (squat and simplified), the palette (a muted, light environment, few saturated accents on the things that matter), the light, 3-6 rules (among them: one solid colour per part, neighbouring parts well apart in light and dark, details as dark marks) and the look of the protagonist, all in the age of the theme. In "common_houses", only if the common houses of this age are not cottages of stone, wood and straw, say in one sentence what they are like (a block of flats with balconies, a tin shack with a sign); otherwise leave it empty.${brought?.all.length ? `\nSome models of the library were made before this guide and stay as they are: ${listed(brought.all)}. Let the palette and the shapes welcome them, without naming them in the guide.` : ''}\nTheme: ${theme}\nTitle: ${bible.title}\nTone: ${bible.tone}\nSummary: ${bible.summary}${feedback ? `\nThe Arbiter objected: ${feedback}` : ''}`,
       STYLE_SCHEMA,
       { data: { ...data, bible } },
     );
   const askTerrain = (bible: Bible, style: RawStyle, feedback = '') =>
-    c.ask<{ terreni: RawTerrain[]; tetto: string }>(
+    c.ask<{ terrains: RawTerrain[]; roof: string }>(
       'cartographer',
       'genesis.terrain',
-      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.stile}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
+      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -249,54 +251,54 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   let bible = await worldBible();
   c.say('narrator', 'propone', `«${bible.title}» — ${bible.summary}`);
   let style = await askStyle(bible);
-  c.say('artist', 'propone', `${style.stile}; ${style.forme}; luce ${style.luce}`);
+  c.say('artist', 'propone', `${style.style}; ${style.shapes}; luce ${style.light}`);
   let terrain = await askTerrain(bible, style);
-  let errs = terrainErrors(terrain.terreni);
+  let errs = terrainErrors(terrain.terrains);
   if (errs.length) {
     c.say('kernel', 'scarta', errs.join('; '), 'cartographer');
     terrain = await askTerrain(bible, style, errs.join('; '));
-    errs = terrainErrors(terrain.terreni);
+    errs = terrainErrors(terrain.terrains);
   }
-  if (!errs.length) c.say('cartographer', 'propone', terrain.terreni.map((t) => `${t.codice}=${t.nome}`).join(', '));
+  if (!errs.length) c.say('cartographer', 'propone', terrain.terrains.map((t) => `${t.code}=${t.name}`).join(', '));
 
   // The Physicist decides what can be walked on, and how fast.
   if (!errs.length) {
-    const phys = await c.ask<{ terreni: Array<{ codice: string; solido: boolean; velocita: number; nota?: string }> }>(
+    const phys = await c.ask<{ terrains: Array<{ code: string; solid: boolean; speed: number; note?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Review the physics of these terrains: what can be crossed and at what speed (a multiplier of 0.3-1.5).\n${terrain.terreni.map((t) => `${t.codice} ${t.nome} [${t.strato}]: ${t.descrizione} (solido=${t.solido}, velocita=${t.velocita})`).join('\n')}\nFixed rules: g, p, f, d walkable; w, t, r, h uncrossable.`,
+      `Review the physics of these terrains: what can be crossed and at what speed (a multiplier of 0.3-1.5).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, f, d walkable; w, t, r, h uncrossable.`,
       PHYS_SCHEMA,
-      { data: { terreni: terrain.terreni } },
+      { data: { terrains: terrain.terrains } },
     );
-    for (const p of phys.terreni ?? []) {
-      const t = terrain.terreni.find((x) => x.codice === p.codice);
-      if (!t || BASE_CODES[t.codice]) continue;
-      if (t.solido !== p.solido || t.velocita !== p.velocita) c.say('physicist', 'corregge', `${t.nome}: ${p.solido ? 'invalicabile' : 'calpestabile'}, velocità ×${p.velocita}${p.nota ? ` — ${p.nota}` : ''}`, 'cartographer');
-      t.solido = p.solido;
-      t.velocita = p.velocita;
+    for (const p of phys.terrains ?? []) {
+      const t = terrain.terrains.find((x) => x.code === p.code);
+      if (!t || BASE_CODES[t.code]) continue;
+      if (t.solid !== p.solid || t.speed !== p.speed) c.say('physicist', 'corregge', `${t.name}: ${p.solid ? 'invalicabile' : 'calpestabile'}, velocità ×${p.speed}${p.note ? ` — ${p.note}` : ''}`, 'cartographer');
+      t.solid = p.solid;
+      t.speed = p.speed;
     }
   }
-  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terreni);
+  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terrains);
 
   // The Arbiter checks that the story, the look and the land agree.
-  const review = await c.ask<{ approvato: boolean; problemi: Array<{ agente: AgentId; problema: string }> }>(
+  const review = await c.ask<{ approved: boolean; problems: Array<{ agent: AgentId; problem: string }> }>(
     'arbiter',
     'genesis.review',
-    `Check that the bible, the style guide and the terrains of this newborn universe agree. Point out only concrete contradictions.\nBible: ${JSON.stringify(bible)}\nStyle: ${JSON.stringify(style)}\nTerrains: ${JSON.stringify(terrain.terreni)}`,
+    `Check that the bible, the style guide and the terrains of this newborn universe agree. Point out only concrete contradictions.\nBible: ${JSON.stringify(bible)}\nStyle: ${JSON.stringify(style)}\nTerrains: ${JSON.stringify(terrain.terrains)}`,
     REVIEW_SCHEMA,
-    { data: { bible, style, terreni: terrain.terreni }, temperature: 0.2 },
+    { data: { bible, style, terrains: terrain.terrains }, temperature: 0.2 },
   );
-  if (review.approvato || !review.problemi?.length) c.say('arbiter', 'approva', 'Storia, aspetto e terreni sono coerenti.');
+  if (review.approved || !review.problems?.length) c.say('arbiter', 'approva', 'Storia, aspetto e terreni sono coerenti.');
   else {
-    for (const p of review.problemi.slice(0, 4)) c.say('arbiter', 'obietta', p.problema, p.agente);
-    const issues = (a: AgentId) => review.problemi.filter((p) => p.agente === a).map((p) => p.problema).join('; ');
+    for (const p of review.problems.slice(0, 4)) c.say('arbiter', 'obietta', p.problem, p.agent);
+    const issues = (a: AgentId) => review.problems.filter((p) => p.agent === a).map((p) => p.problem).join('; ');
     if (issues('narrator')) {
       bible = await worldBible(issues('narrator'));
       c.say('narrator', 'corregge', bible.summary);
     }
     if (issues('artist')) {
       style = await askStyle(bible, issues('artist'));
-      c.say('artist', 'corregge', style.stile);
+      c.say('artist', 'corregge', style.style);
     }
   }
 
@@ -328,14 +330,19 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartographer');
   }
 
-  const { moduli } = await c.ask<{ moduli: CastEntry[] }>(
+  const cast = await c.ask<{ modules: Array<{ type?: string; request?: string }> }>(
     'narrator',
     'genesis.cast',
-    `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools. For each one a one-sentence request for the Forge, consistent with the bible.${brought?.cast.length ? ` These already have their look: ${listed(brought.cast, 30)}; when one fits this world, ask for it with exactly its name.` : ''}`,
+    `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools ("type": npc, object, item). For each one a one-sentence request for the Forge, consistent with the bible.${brought?.cast.length ? ` These already have their look: ${listed(brought.cast, 30)}; when one fits this world, ask for it with exactly its name.` : ''}`,
     CAST_SCHEMA,
     { data: { bible } },
   );
-  c.say('narrator', 'propone', `Primi abitanti e cose: ${moduli.map((m) => m.richiesta).join(' · ')}`);
+  // A kind in the Italian of the contract 0.6 (`strumento`) is still the one it means.
+  const moduli: CastEntry[] = (Array.isArray(cast.modules) ? cast.modules : []).flatMap((m) => {
+    const type = internalName('tipi-fucina', String(m?.type ?? ''));
+    return m?.request && (FORGE_KINDS as readonly string[]).includes(type) ? [{ type: type as ForgeKind, request: String(m.request) }] : [];
+  });
+  c.say('narrator', 'propone', `Primi abitanti e cose: ${moduli.map((m) => m.request).join(' · ')}`);
 
   const files: FileMap = {
     'world/bible.json': JSON.stringify(bible, null, 2) + '\n',
@@ -345,9 +352,9 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const terrainPath = 'modules/world.terrain/manifest.json';
   const tm = JSON.parse(base[terrainPath]);
   tm.tiles = palette;
-  if (/^#[0-9a-f]{6}$/i.test(terrain.tetto ?? '')) tm.roof = { color: terrain.tetto.toLowerCase() };
+  if (/^#[0-9a-f]{6}$/i.test(terrain.roof ?? '')) tm.roof = { color: terrain.roof.toLowerCase() };
   // Common houses of their own only where the seed's cottages would not fit (ADR-0134): a world of cottages keeps the seed's.
-  const house = typeof style.case_comuni === 'string' ? style.case_comuni.trim().slice(0, 200) : '';
+  const house = typeof style.common_houses === 'string' ? style.common_houses.trim().slice(0, 200) : '';
   if (house && !metaBreak(house, wordsOf(base))) tm.commonHouse = house;
   else delete tm.commonHouse;
   files[terrainPath] = JSON.stringify(tm, null, 2) + '\n';
@@ -359,5 +366,5 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     lm.layouts = { ...layouts, ...Object.fromEntries(keep) };
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }
-  return { files, cast: moduli.slice(0, 14), wandererPrompt: style.protagonista, palette };
+  return { files, cast: moduli.slice(0, 14), wandererPrompt: style.protagonist, palette };
 }

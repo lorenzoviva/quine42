@@ -118,15 +118,17 @@ errori. Decisa (D34): **la lingua del mondo, l'italiano e l'inglese**, come prop
 
 | file | quante | cosa leggono | proposta |
 |---|---:|---|---|
-| `src/kernel/ai/mock.ts` | 22 | le richieste ai modelli offline | risposte offline per lingua (i modelli offline sono il mondo senza chiave: devono parlare la lingua dell'universo) |
-| `src/kernel/society.ts` | 21 | attività dalla routine (`inferActivity`), legami (`padre|madre…`), `BINDING_WORDS` | **un id nello schema**: la routine ha già `azione`, i legami prendono un `tipo` tra gli id di `KINDS`; la regex resta come ripiego solo per l'italiano |
-| `src/kernel/fourthwall.ts` | 9 | la quarta parete | tabelle per lingua (§4) |
-| `src/mj/classes.ts` | 9 | la classe di un modello dall'aspetto | la classe la dice già lo schema dello Scultore; ripiego per lingua |
-| `src/kernel/screens.ts` | 6 | lo stato dei lavori nella Direzione | testo della corona, solo del master: dizionario |
-| `src/kernel/plots.ts` | 5 | legami citati nelle trame, rune nelle trame | schema con id (`coinvolti` già lo è); la regex delle rune per lingua |
-| `src/kernel/agents/forge.ts`, `stamps.ts`, `atlas.ts`, `content.ts`, `kernel.ts`, `server/access.ts` | 11 | nomi di strutture, direzioni, oggetti | caso per caso: id quando c'è uno schema, tabella per lingua altrimenti |
+| `src/kernel/ai/mock.ts` | 22 | le richieste ai modelli offline | risposte offline per lingua (i modelli offline sono il mondo senza chiave: devono parlare la lingua dell'universo) — **resta** (L7) |
+| `src/kernel/society.ts` | 21 | attività dalla routine (`inferActivity`), legami (`padre|madre…`), `BINDING_WORDS` | **un id nello schema**: la routine ha già `azione`, i legami prendono un `tipo` tra gli id di `KINDS`; la regex resta come ripiego solo per l'italiano — **fatto** (T310b, ADR-0189: `Relation.kind`, `family[].kind` e `bond_kind` negli schemi; `BINDING_WORDS` resta per le trame) |
+| `src/kernel/fourthwall.ts` | 9 | la quarta parete | tabelle per lingua (§4) — **fatto** it/en (T310) |
+| `src/mj/classes.ts` | 9 | la classe di un modello dall'aspetto | la classe la dice già lo schema dello Scultore; ripiego per lingua — **fatto** it/en (T310b, `CLASS_WORDS`) |
+| `src/kernel/screens.ts` | 6 | lo stato dei lavori nella Direzione | testo della corona, solo del master: dizionario — **resta**: legge i prefissi dei commit, che scrive il kernel |
+| `src/kernel/plots.ts` | 5 | legami citati nelle trame, rune nelle trame | schema con id (`coinvolti` già lo è); la regex delle rune per lingua — **in parte** (T310b: il registro risponde col `kind`; le regex sui testi delle trame restano italiane, T239) |
+| `src/kernel/agents/forge.ts`, `stamps.ts`, `atlas.ts`, `content.ts`, `kernel.ts`, `server/access.ts` | 11 | nomi di strutture, direzioni, oggetti | caso per caso: id quando c'è uno schema, tabella per lingua altrimenti — **fatto** (T310b: le direzioni sono id, `direzioni`; i ruoli dei timbri per id dei terreni e nomi it/en; strutture e mobili it/en; gli articoli di `normName`; `access.ts` legge i messaggi del server, non il mondo) |
 
 Il principio è uno: **ciò che il kernel deve capire di un testo generato lo chiede come id nello schema**, non lo indovina dalle parole.
+T310b (ADR-0189) lo ha applicato: ogni schema nomina i campi in inglese (una tabella sola, `campi-risposte`, letta da `Council.ask`) e
+i valori che gli schemi elencavano in italiano sono id con la migrazione `0.6 → 0.7`.
 È anche più robusto in italiano.
 
 ## 6. Il seme in quattro lingue

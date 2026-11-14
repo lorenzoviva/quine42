@@ -299,7 +299,7 @@ export class SessionServer {
       c.budget = 0;
       c.me = undefined;
       c.state = undefined;
-      if (c.notices.length < 50) c.notices.push({ type: 'death', from: c.id, name: String(e?.causa ?? 'ferite'), text: String(e?.testo ?? ''), lost: Array.isArray(e?.perso) ? e.perso.map(String) : [], where: e?.dove === 'piazza' ? 'square' : 'here' });
+      if (c.notices.length < 50) c.notices.push({ type: 'death', from: c.id, name: String(e?.causa ?? 'ferite'), text: String(e?.testo ?? ''), lost: Array.isArray(e?.perso) ? e.perso.map(String) : [], where: e?.dove === 'square' ? 'square' : 'here' });
     });
     // Exhausted credits or spending ceiling reached (T45d: lobby).
     kernel.bus.on('credits:exhausted', (e: { id?: unknown; motivo?: unknown }) => {

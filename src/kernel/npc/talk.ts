@@ -11,7 +11,7 @@ import { normName } from '../content';
 import { removeItem, type Inventory } from '../inventory';
 import { SOLO } from '../wandererIds';
 import type { NpcHost } from './host';
-import type { Mind } from './model';
+import type { Mind, Relation } from './model';
 import type { People } from './people';
 import { readPlots, secretsOf } from './plots';
 import { bondWith, greeting, memoriesFor, memorySummary } from './society';
@@ -52,43 +52,43 @@ export class Talk {
         // A real conversation (the Narrator) when the wanderer can hear it, at most one at a time.
         if (near && !this.talking && this.host.time - this.lastTalk > stretch(40, this.host.coefficients().dialogues) && !this.host.generationHeld) {
           this.greeted.set(key, this.host.time);
-          void this.converse(a, b, ia, ib, rel?.bond);
+          void this.converse(a, b, ia, ib, rel);
           return;
         }
         if (!rel) continue;
         this.greeted.set(key, this.host.time);
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, rel.bond, this.people.routineNow(ia)?.does ?? '');
+        const [la, lb] = greeting({ name: ia.name, job: ia.job ?? '' }, { name: ib.name }, rel, this.people.routineNow(ia)?.does ?? '');
         this.host.speak(a, la);
         this.speech.later(b, lb, this.host.time + 2.2);
       }
   }
 
-  private async converse(a: Id, b: Id, ia: Identity, ib: Identity, legame?: string): Promise<void> {
+  private async converse(a: Id, b: Id, ia: Identity, ib: Identity, rel?: Relation): Promise<void> {
     this.talking = true;
     this.lastTalk = this.host.time;
     const plots = readPlots(this.host.files());
     const day = this.host.day();
-    const as = (who: Identity, other: Identity, scheda: string | undefined, l?: string) => ({
-      nome: who.name,
-      mestiere: who.job ?? '',
-      scheda,
-      legame: l ?? who.family?.find((f) => f.name === other.name)?.bond,
-      fa: this.people.routineNow(who)?.does ?? '',
-      ricordi: memorySummary(this.people.individualOf(who.name)?.memories?.filter((m) => !m.with || m.with === other.name || m.weight >= 3), 6),
-      segreti: secretsOf(plots, who.name, day),
+    const as = (who: Identity, other: Identity, sheet: string | undefined, l?: Relation) => ({
+      name: who.name,
+      job: who.job ?? '',
+      sheet,
+      bond: l?.bond ?? who.family?.find((f) => f.name === other.name)?.bond,
+      does: this.people.routineNow(who)?.does ?? '',
+      memories: memorySummary(this.people.individualOf(who.name)?.memories?.filter((m) => !m.with || m.with === other.name || m.weight >= 3), 6),
+      secrets: secretsOf(plots, who.name, day),
     });
     try {
       // The Actor plays both from their sheets (T157); a dialogue is common, and so are the sheets it needs.
       const by = this.host.interpreter();
       const [sa, sb] = by.agent === 'actor' ? await Promise.all([this.people.ensureSheet(ia.name, COMUNE), this.people.ensureSheet(ib.name, COMUNE)]) : [undefined, undefined];
-      const r = await npcDialogue(this.host.council, as(ia, ib, sa, legame), as(ib, ia, sb), this.host.chunkAt(this.host.ecs.get(a, 'pos')?.x ?? 0, this.host.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.host.focusOn([ia.name, ib.name], this.host.ecs.get(a, 'pos')), by);
+      const r = await npcDialogue(this.host.council, as(ia, ib, sa, rel), as(ib, ia, sb), this.host.chunkAt(this.host.ecs.get(a, 'pos')?.x ?? 0, this.host.ecs.get(a, 'pos')?.y ?? 0)?.place?.name ?? 'qui', this.host.focusOn([ia.name, ib.name], this.host.ecs.get(a, 'pos')), by);
       r.lines.forEach((l, i) => this.speech.later(l.who === 'a' ? a : b, l.say, this.host.time + i * 2.6));
       if (r.memoryA) this.people.rememberAbout(ia.name, r.memoryA, ib.name, 1);
       if (r.memoryB) this.people.rememberAbout(ib.name, r.memoryB, ia.name, 1);
       this.host.council.say(by.agent, 'info', `${ia.name} e ${ib.name}: ${r.lines.map((l) => `«${l.say}»`).join(' ')}`, undefined, 'npc.dialogue');
     } catch {
-      if (legame) {
-        const [la, lb] = greeting({ nome: ia.name, mestiere: ia.job ?? '' }, { nome: ib.name }, legame, this.people.routineNow(ia)?.does ?? '');
+      if (rel) {
+        const [la, lb] = greeting({ name: ia.name, job: ia.job ?? '' }, { name: ib.name }, rel, this.people.routineNow(ia)?.does ?? '');
         this.host.speak(a, la);
         this.speech.later(b, lb, this.host.time + 2.2);
       }
@@ -104,10 +104,10 @@ export class Talk {
   async talk(id: Id, text: string, wanderer?: string): Promise<NpcReply> {
     const me = (wanderer ? this.host.wandererById(wanderer) : undefined) ?? this.host.wanderer();
     const m = this.host.modules.get(this.host.ecs.get(id, 'module')?.id)?.manifest;
-    if (!m?.persona || !this.host.ecs.alive.has(id)) return { say: '…', action: 'nessuna', mood: '' };
+    if (!m?.persona || !this.host.ecs.alive.has(id)) return { say: '…', action: 'none', mood: '' };
     const identity = await this.people.ensureIdentity(id);
     let mind: Mind = this.host.ecs.get(id, 'mind');
-    if (!mind) mind = this.host.ecs.set(id, 'mind', { mode: 'vaga', mood: 'tranquillo', history: [] });
+    if (!mind) mind = this.host.ecs.set(id, 'mind', { mode: 'wander', mood: 'tranquillo', history: [] });
     mind.history ??= [];
     const inv: Inventory | undefined = this.host.ecs.get(id, 'inventory');
     const carrying = inv ? inv.slots.filter(Boolean).map((s) => this.host.itemInfo(s!.item).name) : [];
@@ -126,36 +126,36 @@ export class Talk {
         chi: me.id,
         name,
         wanderer: me.name,
-        presentazione: this.host.profileOf(me.id)?.introduction,
+        introduction: this.host.profileOf(me.id)?.introduction,
         memories: memorySummary(memoriesFor(individual?.memories, me.id), 12),
         bond: individual ? bondWith(individual, me.id) : undefined,
         secrets: secretsOf(readPlots(this.host.files()), name, this.host.day()),
-        scheda,
+        sheet: scheda,
         persona: (identity?.persona ?? m.persona) + social, mood: mind.mood, mode: mind.mode, carrying, place: this.host.chunkHere()?.name ?? '', history: mind.history.filter((t) => (t.con ?? SOLO) === me.id), facts: this.host.worldFacts() }, text, this.host.focusOn([name], this.host.ecs.get(id, 'pos')), by);
       this.host.council.say(by.agent, 'info', `${name} a ${me.name}: «${reply.say}»`, undefined, 'npc.reply');
     } catch (e) {
-      return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'nessuna', mood: mind.mood };
+      return { say: `(${name} ti guarda in silenzio — ${(e as Error).message})`, action: 'none', mood: mind.mood };
     }
     mind.history.push({ who: 'player', text, con: me.id }, { who: 'npc', text: reply.say, con: me.id });
     if (mind.history.length > 16) mind.history.splice(0, mind.history.length - 16);
     mind.mood = reply.mood;
-    if (reply.action === 'segui' || reply.action === 'resta' || reply.action === 'vaga') mind.mode = reply.action;
+    if (reply.action === 'follow' || reply.action === 'stay' || reply.action === 'wander') mind.mode = reply.action;
     // What follows happens to the wanderer who talked (synchronous: `as` never spans an await).
     const carry = this.host.as(me.id, () => {
-      if (reply.action === 'dai') {
+      if (reply.action === 'give') {
         const wantedName = normName(reply.item ?? '');
         const slot = inv?.slots.find((s) => s && normName(this.host.itemInfo(s.item).name) === wantedName) ?? inv?.slots.find((s) => s && wantedName && normName(this.host.itemInfo(s.item).name).includes(wantedName));
         if (slot && inv && this.host.give(slot.item, 1)) {
           removeItem(inv, slot.item, 1);
           this.host.message(`${name} ti dà: ${this.host.itemInfo(slot.item).name}`, 'good');
-        } else reply.action = 'nessuna';
+        } else reply.action = 'none';
       }
       if (reply.mentioned?.length) void this.host.noteMentions(reply.mentioned, `di cui si parla con ${name}`);
       if (reply.memory) this.people.rememberWanderer(name, reply.memory, reply.weight ?? 1);
-      if (reply.bond && reply.bond !== this.people.bondOf(name)) this.people.setBond(name, reply.bond);
+      if (reply.bond && reply.bond !== this.people.bondOf(name)) this.people.setBond(name, reply.bond, reply.bondKind);
       let given = '';
       let carry: string | undefined;
-      if (reply.action === 'missione') {
+      if (reply.action === 'quest') {
         this.stories.updatePlots((plots) => {
           const p = plots.find((x) => x.state === 'active' && x.quest?.from === name && x.quest.state === 'offered');
           if (!p?.quest) return false;

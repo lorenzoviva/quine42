@@ -44,7 +44,7 @@ describe('the Council keeps governing', () => {
   it('a session of the Council reads what happened and may add to the world', async () => {
     const k = await boot();
     const before = k.modules.size;
-    expect(await k.holdSession(true)).toBe('abitante');
+    expect(await k.holdSession(true)).toBe('inhabitant');
     expect(k.modules.size).toBeGreaterThan(before);
     expect([...k.modules.values()].some((m) => m.manifest.persona && /guaritrice/i.test(m.manifest.description ?? m.manifest.name))).toBe(true);
     expect(k.feed().some((e) => /Sessione del Concilio/.test(e.text))).toBe(true);

@@ -184,12 +184,12 @@ describe('what does not pass goes back to the Musician, with the reason', () => 
   });
 
   it('what the world cannot name is dropped: environments out of the list, an effect nobody plays goes back', () => {
-    expect(purposeOf({ uso: 'music', ambienti: ['bosco', 'marte'], momenti: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['night'] });
-    expect(purposeOf({ uso: 'music', ambienti: ['marte'] }, { richiesta: 'x' }, world).suono?.environments).toEqual(['bosco']);
-    expect(purposeOf({ uso: 'music' }, { richiesta: 'x' }, { ...world, qui: undefined }).error).toMatch(/ambienti/);
-    expect(purposeOf({ uso: 'effect', effetto: 'starnuto' }, { richiesta: 'x' }, world).error).toMatch(/item/);
+    expect(purposeOf({ use: 'music', environments: ['bosco', 'marte'], moments: ['notte', 'mai'] }, { richiesta: 'x' }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['night'] });
+    expect(purposeOf({ use: 'music', environments: ['marte'] }, { richiesta: 'x' }, world).suono?.environments).toEqual(['bosco']);
+    expect(purposeOf({ use: 'music' }, { richiesta: 'x' }, { ...world, qui: undefined }).error).toMatch(/environments/);
+    expect(purposeOf({ use: 'effect', effect: 'starnuto' }, { richiesta: 'x' }, world).error).toMatch(/item/);
     // What the kernel decided, the answer does not move.
-    expect(purposeOf({ uso: 'effect', ambienti: ['castello'] }, { richiesta: 'x', uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['giorno'] });
+    expect(purposeOf({ use: 'effect', environments: ['castello'] }, { richiesta: 'x', uso: 'music', ambienti: ['bosco'], momenti: ['giorno'] }, world).suono).toEqual({ use: 'music', environments: ['bosco'], moments: ['giorno'] });
   });
 
   it('an id is free, or the effect it replaces', () => {

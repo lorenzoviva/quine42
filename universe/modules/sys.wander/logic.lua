@@ -1,6 +1,6 @@
 -- Wandering: every so often a new direction is chosen, or one stops to look around.
 -- The state (direction, timer) lives in the wander component. Whoever has a mind (mind) wanders only if
--- it has decided to: "segui" and "resta" are the business of sys.follow.
+-- it has decided to: "follow" and "stay" are the business of sys.follow.
 -- Whoever has a goal (goal component {x, y}, chosen by the kernel according to its day: home, work,
 -- square) walks there; once arrived, it strolls nearby.
 local M = {}
@@ -26,7 +26,7 @@ function M.update(dt)
   local tick = math.floor(time * 10)
   ecs.each("wander, pos, body", function(id, w, p, b)
     local mind = ecs.get(id, "mind")
-    if mind and mind.mode ~= "vaga" then return end
+    if mind and mind.mode ~= "wander" then return end
     -- Arrived, it does what it must: sleeps in the bed, hoes the field, fishes from the bank. Still.
     local att = ecs.get(id, "activity")
     if att and att.still then return end

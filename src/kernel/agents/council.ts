@@ -13,7 +13,7 @@ import type { FileMap, MagicRune, Spell, TerrainDef } from '../types';
 import type { WorldGraph } from '../graph';
 import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
-import { internalFields, italianName } from '../internalNames';
+import { internalAnswer, internalFields, italianName } from '../internalNames';
 import { languageBlock, languageOf } from '../language';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
@@ -408,7 +408,8 @@ export class Council {
 
   async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {
     try {
-      return parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema }));
+      // The fields of the schemas are English (T310b): an answer with the Italian ones of before (a local model, a recorded answer) reads the same.
+      return internalAnswer(parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema })));
     } catch (e) {
       if (e instanceof Error) (e as Error & { agent?: AgentId }).agent ??= agent;
       throw e;

@@ -45,7 +45,7 @@ describe('il registro delle mancanze', () => {
 
   it('la Fucina: il validatore che rifiuta anche l\'ultimo tentativo finisce sull\'Ingegnere', async () => {
     const k = await boot({ 'forge.code': () => ({ logic: 'questo non è lua (', note: '' }) });
-    const r = await k.forgeModule('una madia di legno', 'agente', 'oggetto', true);
+    const r = await k.forgeModule('una madia di legno', 'agente', 'object', true);
     expect(r.ok).toBe(false);
     expect(k.shortfalls.list()).toEqual([expect.objectContaining({ request: 'una madia di legno', who: ['me'], agent: 'engineer', task: 'forge.concept', outcome: 'invalid', times: 1 })]);
     expect(k.shortfalls.list()[0].reason).toContain('modulo non valido');
@@ -82,7 +82,7 @@ describe('il registro delle mancanze', () => {
 
   it('l\'Ingegnere che non ripara lascia una voce, chi è del mondo', async () => {
     const k = await boot({ 'forge.fix': () => ({ logic: 'ancora non lua (', note: '' }) });
-    const f = await k.forgeModule('una madia di legno per il pane', 'agente', 'oggetto');
+    const f = await k.forgeModule('una madia di legno per il pane', 'agente', 'object');
     expect(f.ok).toBe(true);
     expect(await k.repairGenerated(`module:${f.id}:on_act`, 'attempt to index nil')).toBe(false);
     const [v] = k.shortfalls.list();

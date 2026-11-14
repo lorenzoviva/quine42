@@ -11,7 +11,8 @@ import { sizeOf, type SizeTier } from '../../mj/classes';
 import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
-export type Where = 'dentro' | 'fuori' | 'ovunque';
+/** Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere. */
+export type Where = 'inside' | 'outside' | 'anywhere';
 
 export interface PlacedObject {
   module: string;
@@ -84,7 +85,7 @@ export interface PlanContext {
   attempt: number;
   feedback?: string;
   /** The region of the atlas this place belongs to, if any. */
-  region?: { nome: string; descrizione: string };
+  region?: { name: string; description: string };
   /**
    * The rare sizes a structure here may still have (ADR-0092): Huge one per zone of the world (about a
    * million tiles), Gargantuan one per realm (4 × 4 zones); the kernel enforces it anyway.
@@ -96,20 +97,26 @@ export interface PlanContext {
   brought?: Array<{ concept: string; size?: SizeTier }>;
 }
 
-const WHERE: Where[] = ['dentro', 'fuori', 'ovunque'];
+export const WHERE: Where[] = ['inside', 'outside', 'anywhere'];
+
+/** Where a thing stands, as the Cartographer wrote it (or a plan of before T310b, in Italian): one of the three, `anywhere` otherwise. */
+export const whereOf = (w: unknown): Where => {
+  const said = internalName('dove-piano', String(w ?? ''));
+  return WHERE.includes(said as Where) ? (said as Where) : 'anywhere';
+};
 
 const PLAN_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    luogo: { type: 'OBJECT', properties: { nome: { type: 'STRING' }, descrizione: { type: 'STRING' } }, required: ['nome', 'descrizione'] },
-    ambiente: { type: 'STRING' },
-    oggetti: { type: 'ARRAY', items: { type: 'OBJECT', properties: { modulo: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE } }, required: ['modulo', 'dove'] } },
-    a_terra: { type: 'ARRAY', items: { type: 'STRING' } },
-    nuovi: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, dove: { type: 'STRING', enum: WHERE }, takeable: { type: 'BOOLEAN' } }, required: ['concetto', 'dove'] } },
-    rune: { type: 'ARRAY', items: { type: 'STRING' } },
-    strutture: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concetto: { type: 'STRING' }, taglia: { type: 'STRING', enum: internalValues('taglie') } }, required: ['concetto'] } },
+    place: { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] },
+    environment: { type: 'STRING' },
+    objects: { type: 'ARRAY', items: { type: 'OBJECT', properties: { module: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE } }, required: ['module', 'where'] } },
+    ground: { type: 'ARRAY', items: { type: 'STRING' } },
+    fresh: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE }, takeable: { type: 'BOOLEAN' } }, required: ['concept', 'where'] } },
+    runes: { type: 'ARRAY', items: { type: 'STRING' } },
+    structures: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, size: { type: 'STRING', enum: internalValues('taglie') } }, required: ['concept'] } },
   },
-  required: ['luogo', 'ambiente', 'oggetti', 'rune'],
+  required: ['place', 'environment', 'objects', 'runes'],
 };
 
 /**
@@ -117,7 +124,7 @@ const PLAN_SCHEMA: Schema = {
  * of the plans before ADR-0092 (the castle of then is Huge).
  */
 export function readStructure(s: any): { concept: string; size?: SizeTier } {
-  // The Cartographer still writes the Italian fields (until T310b); its sizes are English since T310, an Italian one is still the one it means.
+  // A plan of before the contract 0.4 says `taglia` and `concetto`; a size in the Italian of 0.1 is still the one it means.
   const size = sizeOf(internalName('taglie', String(s?.size ?? s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
   return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}) };
 }
@@ -126,16 +133,16 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
   const prompt = [
     `Design the place (${ctx.cx}, ${ctx.cy}). Starting terrain: ${ctx.terrain}.`,
     ctx.neighbors.length ? `Neighbouring places: ${ctx.neighbors.map((n) => `${n.place} (${n.layout})`).join('; ')}. Keep continuity: a settlement does not end all at once, a wood fades out.` : '',
-    `Available environments ("ambiente" = one of these ids):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
+    `Available environments ("environment" = one of these ids):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
     ctx.start ? 'It is the starting square: choose an inhabited, welcoming environment.' : '',
-    ctx.region ? `This place belongs to the region «${ctx.region.nome}» (${ctx.region.descrizione}): its name and what is in it must belong to the region (e.g. «${ctx.region.nome} — the north gate», in the language of the world).` : '',
-    `Things and characters: 2-6 entries, "modulo" = EXACTLY one of the ids below; "dove": dentro (inside the buildings), fuori (outside), ovunque (anywhere). Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
-    `"a_terra": 0-4 names of common things lying on the ground here (new ones too, if consistent).${ctx.wanted.length ? ` If it makes sense, include something people have talked about: ${ctx.wanted.join(', ')}.` : ''}`,
-    '"nuovi": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
-    `"rune": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
-    '"strutture": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
-    ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "strutture".` : '',
-    `"taglia" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
+    ctx.region ? `This place belongs to the region «${ctx.region.name}» (${ctx.region.description}): its name and what is in it must belong to the region (e.g. «${ctx.region.name} — the north gate», in the language of the world).` : '',
+    `Things and characters: 2-6 entries in "objects", "module" = EXACTLY one of the ids below; "where": inside (in the buildings), outside, anywhere. Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
+    `"ground": 0-4 names of common things lying on the ground here (new ones too, if consistent).${ctx.wanted.length ? ` If it makes sense, include something people have talked about: ${ctx.wanted.join(', ')}.` : ''}`,
+    '"fresh": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
+    `"runes": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
+    '"structures": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
+    ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "structures".` : '',
+    `"size" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
     ctx.rari?.length
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
@@ -144,44 +151,54 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     .filter(Boolean)
     .join('\n\n');
   // The environment can only be one of the existing ids: the schema says so.
-  const schema: Schema = { ...PLAN_SCHEMA, properties: { ...PLAN_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) } } };
+  const schema: Schema = { ...PLAN_SCHEMA, properties: { ...PLAN_SCHEMA.properties!, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) } } };
   const raw = await c.ask<any>('cartographer', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
-  const where = (w: unknown): Where => (WHERE.includes(w as Where) ? (w as Where) : 'ovunque');
+  // `oggetti` of a plan of before T310b are its objects (`internalAnswer` does not port the word: a pack's are items).
+  const objects = Array.isArray(raw?.objects) ? raw.objects : Array.isArray(raw?.oggetti) ? raw.oggetti : [];
   return {
-    place: { name: String(raw?.luogo?.nome ?? '').trim(), description: String(raw?.luogo?.descrizione ?? '').trim() },
-    layout: String(raw?.ambiente ?? ''),
-    objects: (raw?.oggetti ?? []).slice(0, 8).map((o: any) => ({ module: String(o?.modulo ?? ''), where: where(o?.dove) })),
-    ground: (raw?.a_terra ?? []).slice(0, 4).map(String),
-    fresh: (raw?.nuovi ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concetto ?? ''), where: where(o?.dove), ...(typeof o?.takeable === 'boolean' ? { takeable: o.takeable } : {}) })),
-    runes: (raw?.rune ?? []).slice(0, 3).map(String),
-    structures: (raw?.strutture ?? []).slice(0, 3).map(readStructure),
+    place: { name: String(raw?.place?.name ?? '').trim(), description: String(raw?.place?.description ?? '').trim() },
+    layout: String(raw?.environment ?? ''),
+    objects: objects.slice(0, 8).map((o: any) => ({ module: String(o?.module ?? ''), where: whereOf(o?.where) })),
+    ground: (raw?.ground ?? []).slice(0, 4).map(String),
+    fresh: (raw?.fresh ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concept ?? ''), where: whereOf(o?.where), ...(typeof o?.takeable === 'boolean' ? { takeable: o.takeable } : {}) })),
+    runes: (raw?.runes ?? []).slice(0, 3).map(String),
+    structures: (raw?.structures ?? []).slice(0, 3).map(readStructure),
   };
 }
+
+/** The types of an environment (T310b, `tipi-ambiente`), as the Cartographer's schemas list them. */
+export const ENVIRONMENT_TYPES: Array<EnvironmentDef['environment']> = ['outdoor', 'indoor', 'mixed'];
+
+/** The type of an environment as the Cartographer wrote it (or in the Italian of before T310b): one of the three, `outdoor` otherwise. */
+export const environmentTypeOf = (t: unknown): EnvironmentDef['environment'] => {
+  const said = internalName('tipi-ambiente', String(t ?? ''));
+  return (ENVIRONMENT_TYPES as string[]).includes(said) ? (said as EnvironmentDef['environment']) : 'outdoor';
+};
 
 const LAYOUTS_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    ambienti: {
+    environments: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
           id: { type: 'STRING' },
-          nome: { type: 'STRING' },
-          descrizione: { type: 'STRING' },
-          tipo: { type: 'STRING', enum: ['esterno', 'interno', 'misto'] },
-          programma_json: { type: 'STRING', description: 'the MarkovJunior program as JSON' },
+          name: { type: 'STRING' },
+          description: { type: 'STRING' },
+          type: { type: 'STRING', enum: ENVIRONMENT_TYPES },
+          program_json: { type: 'STRING', description: 'the MarkovJunior program as JSON' },
         },
-        required: ['id', 'nome', 'descrizione', 'tipo', 'programma_json'],
+        required: ['id', 'name', 'description', 'type', 'program_json'],
       },
     },
   },
-  required: ['ambienti'],
+  required: ['environments'],
 };
 
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
 export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = []): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
-  const raw = await c.ask<{ ambienti: Array<{ id: string; nome: string; descrizione: string; tipo: EnvironmentDef['environment']; programma_json: string }> }>(
+  const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string }> }>(
     'cartographer',
     'genesis.layouts',
     [
@@ -198,43 +215,47 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     LAYOUTS_SCHEMA,
     { data: { palette }, temperature: 0.7 },
   );
-  return (raw.ambienti ?? []).map((a) => {
+  return (raw.environments ?? []).map((a) => {
     const id = String(a.id ?? '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 24) || 'ambiente';
     try {
-      const program = JSON.parse(a.programma_json) as MjNode;
-      return { id, def: { name: String(a.nome), description: String(a.descrizione), environment: a.tipo ?? 'esterno', program } };
+      const program = JSON.parse(a.program_json) as MjNode;
+      return { id, def: { name: String(a.name), description: String(a.description), environment: environmentTypeOf(a.type), program } };
     } catch (e) {
-      return { id, error: `${id}: programma_json non è JSON valido (${(e as Error).message})` };
+      return { id, error: `${id}: program_json non è JSON valido (${(e as Error).message})` };
     }
   });
 }
 
+/** The directions of the compass as the Cartographer writes them (T310b, `direzioni`): never `here`. */
+const DIRECTIONS = internalValues('direzioni').filter((d) => d !== 'here');
+
 const REGION_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    nome: { type: 'STRING', description: 'proper name of the region, in the language of the world (e.g. «Rocca di Montenero», «Dune del Sale», «Darsena Vecchia»)' },
-    descrizione: { type: 'STRING' },
-    ambiente: { type: 'STRING' },
-    direzione: { type: 'STRING', enum: ['nord', 'nord-est', 'est', 'sud-est', 'sud', 'sud-ovest', 'ovest', 'nord-ovest'] },
-    distanza: { type: 'INTEGER', description: 'in places from the starting point (2-12)' },
-    raggio: { type: 'INTEGER', description: '1 = a place and its neighbours, 2-3 = a wide zone (deserts, jungles, seas)' },
+    name: { type: 'STRING', description: 'proper name of the region, in the language of the world (e.g. «Rocca di Montenero», «Dune del Sale», «Darsena Vecchia»)' },
+    description: { type: 'STRING' },
+    environment: { type: 'STRING' },
+    direction: { type: 'STRING', enum: DIRECTIONS },
+    distance: { type: 'INTEGER', description: 'in places from the starting point (2-12)' },
+    radius: { type: 'INTEGER', description: '1 = a place and its neighbours, 2-3 = a wide zone (deserts, jungles, seas)' },
   },
-  required: ['nome', 'descrizione', 'ambiente', 'direzione', 'distanza', 'raggio'],
+  required: ['name', 'description', 'environment', 'direction', 'distance', 'radius'],
 };
 
 export interface RegionDraft {
-  nome: string;
-  descrizione: string;
-  ambiente: string;
-  direzione: string;
-  distanza: number;
-  raggio: number;
+  name: string;
+  description: string;
+  environment: string;
+  /** A direction of the compass, as an id (`north-east`); one in the Italian of before is read as the same (`directionVector`). */
+  direction: string;
+  distance: number;
+  radius: number;
 }
 
 /** Genesis: the Cartographer draws the geography — where the castle is, the desert, the elves' wood. */
 export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: string; description: string }>): Promise<RegionDraft[]> {
   const ids = layouts.map((l) => l.id);
-  const raw = await c.ask<{ regioni: RegionDraft[] }>(
+  const raw = await c.ask<{ regions: RegionDraft[] }>(
     'cartographer',
     'genesis.atlas',
     [
@@ -242,40 +263,40 @@ export async function drawAtlas(c: Council, layouts: Array<{ id: string; name: s
       'Make it believable and of its age: the desert far from the lakes, what towers on a hill with a settlement nearby, the mountains to the north, the sea on one side; the farther you go, the stranger things are.',
       `Environments:\n${layouts.map((l) => `- ${l.id}: ${l.name} — ${l.description}`).join('\n')}`,
     ].join('\n\n'),
-    { type: 'OBJECT', properties: { regioni: { type: 'ARRAY', items: { ...REGION_SCHEMA, properties: { ...REGION_SCHEMA.properties!, ambiente: { type: 'STRING', enum: ids } } } } }, required: ['regioni'] },
+    { type: 'OBJECT', properties: { regions: { type: 'ARRAY', items: { ...REGION_SCHEMA, properties: { ...REGION_SCHEMA.properties!, environment: { type: 'STRING', enum: ids } } } } }, required: ['regions'] },
     { data: { layouts }, temperature: 0.8 },
   );
-  return (raw.regioni ?? []).filter((r) => ids.includes(r.ambiente)).slice(0, 16);
+  return (raw.regions ?? []).filter((r) => ids.includes(r.environment)).slice(0, 16);
 }
 
 const ENV_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
-    usa_ambiente: { type: 'STRING', description: 'if an existing environment already fits, its id (then no program)' },
+    reuse: { type: 'STRING', description: 'if an existing environment already fits, its id (then no program)' },
     id: { type: 'STRING' },
-    nome: { type: 'STRING' },
-    descrizione: { type: 'STRING' },
-    tipo: { type: 'STRING', enum: ['esterno', 'interno', 'misto'] },
-    programma_json: { type: 'STRING', description: 'the MarkovJunior program as JSON (it may use the stamps)' },
-    nuovi_terreni: {
+    name: { type: 'STRING' },
+    description: { type: 'STRING' },
+    type: { type: 'STRING', enum: ENVIRONMENT_TYPES },
+    program_json: { type: 'STRING', description: 'the MarkovJunior program as JSON (it may use the stamps)' },
+    new_terrains: {
       type: 'ARRAY',
       items: {
         type: 'OBJECT',
         properties: {
-          codice: { type: 'STRING', description: 'a single character not used yet' },
-          nome: { type: 'STRING' },
-          colore: { type: 'STRING', description: '#rrggbb' },
-          strato: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
-          solido: { type: 'BOOLEAN' },
-          interno: { type: 'BOOLEAN' },
-          descrizione: { type: 'STRING' },
+          code: { type: 'STRING', description: 'a single character not used yet' },
+          name: { type: 'STRING' },
+          color: { type: 'STRING', description: '#rrggbb' },
+          layer: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
+          solid: { type: 'BOOLEAN' },
+          indoor: { type: 'BOOLEAN' },
+          description: { type: 'STRING' },
         },
-        required: ['codice', 'nome', 'colore', 'strato', 'solido'],
+        required: ['code', 'name', 'color', 'layer', 'solid'],
       },
     },
-    regione: REGION_SCHEMA,
+    region: REGION_SCHEMA,
   },
-  required: ['nome', 'descrizione', 'regione'],
+  required: ['name', 'description', 'region'],
 };
 
 export interface EnvironmentDraft {
@@ -312,23 +333,23 @@ export async function designEnvironment(
   );
   let program: unknown;
   try {
-    program = raw.programma_json ? JSON.parse(raw.programma_json) : undefined;
+    program = raw.program_json ? JSON.parse(raw.program_json) : undefined;
   } catch {
     program = undefined;
   }
-  const tiles = (Array.isArray(raw.nuovi_terreni) ? raw.nuovi_terreni : []).slice(0, 4).map((t: any) => ({
-    code: String(t?.codice ?? '').slice(0, 1),
-    tile: { name: String(t?.nome ?? 'terreno').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(t?.colore) ? t.colore : '#888888', solid: !!t?.solido, layer: t?.strato, indoor: !!t?.interno, description: t?.descrizione ? String(t.descrizione).slice(0, 120) : undefined } as TerrainDef,
+  const tiles = (Array.isArray(raw.new_terrains) ? raw.new_terrains : []).slice(0, 4).map((t: any) => ({
+    code: String(t?.code ?? '').slice(0, 1),
+    tile: { name: String(t?.name ?? 'terreno').slice(0, 30), color: /^#[0-9a-f]{6}$/i.test(t?.color) ? t.color : '#888888', solid: !!t?.solid, layer: t?.layer, indoor: !!t?.indoor, description: t?.description ? String(t.description).slice(0, 120) : undefined } as TerrainDef,
   }));
-  const r = raw.regione ?? {};
+  const r = raw.region ?? {};
   return {
-    reuse: raw.usa_ambiente && ctx.layouts.some((l) => l.id === raw.usa_ambiente) ? String(raw.usa_ambiente) : undefined,
-    id: String(raw.id ?? raw.nome ?? 'ambiente').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'ambiente',
-    name: String(raw.nome ?? request).slice(0, 40),
-    description: String(raw.descrizione ?? '').slice(0, 200),
-    environment: ['esterno', 'interno', 'misto'].includes(raw.tipo) ? raw.tipo : 'esterno',
+    reuse: raw.reuse && ctx.layouts.some((l) => l.id === raw.reuse) ? String(raw.reuse) : undefined,
+    id: String(raw.id ?? raw.name ?? 'ambiente').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'ambiente',
+    name: String(raw.name ?? request).slice(0, 40),
+    description: String(raw.description ?? '').slice(0, 200),
+    environment: environmentTypeOf(raw.type),
     program,
     tiles,
-    region: { nome: String(r.nome ?? raw.nome ?? request).slice(0, 40), descrizione: String(r.descrizione ?? raw.descrizione ?? '').slice(0, 200), ambiente: '', direzione: String(r.direzione ?? 'nord'), distanza: Math.max(2, Math.min(12, Math.round(Number(r.distanza) || 4))), raggio: Math.max(1, Math.min(3, Math.round(Number(r.raggio) || 1))) },
+    region: { name: String(r.name ?? raw.name ?? request).slice(0, 40), description: String(r.description ?? raw.description ?? '').slice(0, 200), environment: '', direction: internalName('direzioni', String(r.direction ?? 'north')), distance: Math.max(2, Math.min(12, Math.round(Number(r.distance) || 4))), radius: Math.max(1, Math.min(3, Math.round(Number(r.radius) || 1))) },
   };
 }

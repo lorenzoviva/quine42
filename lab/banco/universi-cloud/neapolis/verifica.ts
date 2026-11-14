@@ -100,7 +100,7 @@ const words = lexiconWords(files['world/lexicon.md']);
 for (const t of urban) {
   const others = Object.fromEntries(Object.entries(magic.runes).filter(([x]) => x !== t)) as never;
   const r = magic.runes[t];
-  const { errors } = validateNewRune({ token: t, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description }, others, words);
+  const { errors } = validateNewRune({ token: t, name: r.name, glyph: r.glyph, color: r.color, element: r.element, description: r.description }, others, words);
   errors.forEach((e) => fail(`runa ${t}: ${e}`));
   if (!magic.spells[t]) fail(`la runa ${t} non ha un incantesimo`);
   if (!files['world/canon.md'].includes(`(«${t}»`)) fail(`la runa ${t} non è nel canone`);

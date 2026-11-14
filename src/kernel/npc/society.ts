@@ -55,7 +55,10 @@ export interface Memory {
 
 export interface Relation {
   name: string;
+  /** The word of the world («madre», «apprendista»): what this individual is to the other. */
   bond: string;
+  /** Its kind as an id (T310b, `RELATION_KINDS`: `parent`, `apprentice`…), written by the Narrator's schema and by the kernel; without it the word says it (Italian only). */
+  kind?: string;
   /** A relation with a wanderer: their id (`nome` is how they are called). */
   wanderer?: string;
 }
@@ -122,7 +125,7 @@ export function memorySummary(list: Memory[] | undefined, n = 12): string {
 export interface People {
   people: Individual[];
   /** Named by someone, not met yet: a later individual of a fitting kind may turn out to be them. */
-  expected: Array<{ name: string; bond: string; of: string }>;
+  expected: Array<{ name: string; bond: string; kind?: string; of: string }>;
 }
 
 export function readPeople(files: FileMap): People {
@@ -194,12 +197,26 @@ const KINDS: Kind[] = [
 ];
 const KIND = new Map(KINDS.map((k) => [k.id, k]));
 
+/** The kinds of a relation as ids (T310b): what the Narrator's schema says beside the word, what the registry keeps. */
+export const RELATION_KINDS: readonly string[] = KINDS.map((k) => k.id);
+
 /** The words a relation can be said with, for the Narrator. */
 export const RELATION_WORDS = KINDS.flatMap((k) => (k.m === k.f ? [k.m] : [k.m, k.f]));
 
-/** The kind of a relation: the first word that means something ("nipote lontano" is a nipote); else an acquaintance. */
-function kindOf(legame: string): Kind {
-  for (const w of legame.toLowerCase().split(/[^\p{L}]+/u)) {
+/** A relation as the registry keeps it, or only its word. */
+type RelationLike = string | { bond: string; kind?: string };
+
+/**
+ * The kind of a relation: its id when it says one (T310b), else the first word that means something ("nipote lontano" is a nipote, in
+ * the Italian of today: the words of the other languages are T239's); else an acquaintance.
+ */
+function kindOf(rel: RelationLike): Kind {
+  if (typeof rel !== 'string') {
+    const known = rel.kind !== undefined ? KIND.get(rel.kind) : undefined;
+    if (known) return known;
+  }
+  const word = typeof rel === 'string' ? rel : rel.bond;
+  for (const w of String(word ?? '').toLowerCase().split(/[^\p{L}]+/u)) {
     const k = KINDS.find((x) => x.words.test(w));
     if (k) return k;
   }
@@ -229,13 +246,19 @@ const wordOf = (k: Kind, g: Gender | undefined) => (g === 'female' ? k.f : g ===
 const backOf = (k: Kind, a: Species, b: Species) => KIND.get(k.back.find((id) => allowed(KIND.get(id)!, b, a)) ?? 'acquaintance')!;
 
 /** The other side of a relation: if Ada is Berta's mother, Berta is Ada's child (in Berta's gender). */
-export function reverseRelation(legame: string, gender?: Gender, a: Species = 'person', b: Species = a): string {
-  return wordOf(backOf(fitKind(kindOf(legame), a, b), a, b), gender);
+export function reverseRelation(rel: RelationLike, gender?: Gender, a: Species = 'person', b: Species = a): string {
+  return wordOf(backOf(fitKind(kindOf(rel), a, b), a, b), gender);
+}
+
+/** The other side of a relation as a kind (T310b): what the registry writes beside the word. */
+export function reverseKind(rel: RelationLike, a: Species = 'person', b: Species = a): string {
+  return backOf(fitKind(kindOf(rel), a, b), a, b).id;
 }
 
 /** What is wrong with a relation between these two (species, the word's gender), or undefined when it can be. */
-export function relationProblem(legame: string, a: { species?: Species; gender?: Gender }, b: { species?: Species }): string | undefined {
-  const k = kindOf(legame);
+export function relationProblem(rel: RelationLike, a: { species?: Species; gender?: Gender }, b: { species?: Species }): string | undefined {
+  const k = kindOf(rel);
+  const legame = typeof rel === 'string' ? rel : rel.bond;
   const sa = a.species ?? 'person';
   if (!allowed(k, sa, b.species)) return `«${legame}» non si dà tra ${sa === 'animal' ? 'un animale' : 'una persona'} e ${b.species === 'animal' ? 'un animale' : 'una persona'}`;
   const word = legame.toLowerCase().split(/[^\p{L}]+/u).find((w) => k.words.test(w));
@@ -244,7 +267,7 @@ export function relationProblem(legame: string, a: { species?: Species; gender?:
 }
 
 /** True when two relations can be the two sides of one bond (Ada madre di Berta, Berta figlia di Ada). */
-export function relationsAgree(ab: string, ba: string): boolean {
+export function relationsAgree(ab: RelationLike, ba: RelationLike): boolean {
   const x = kindOf(ab);
   const y = kindOf(ba);
   return x.back.includes(y.id) || y.back.includes(x.id);
@@ -253,12 +276,12 @@ export function relationsAgree(ab: string, ba: string): boolean {
 /** Relations anyone may claim loosely (a friend, a rival, a neighbour): the others bind and are checked. */
 const LOOSE = new Set(['friend', 'rival', 'neighbor', 'colleague', 'acquaintance']);
 
-/** The words of the binding relations (family, master and apprentice, owner and animal), as a regex alternation. */
+/** The words of the binding relations (family, master and apprentice, owner and animal), as a regex alternation (Italian: the plots read texts, T239 has the other languages). */
 export const BINDING_WORDS = KINDS.filter((k) => !LOOSE.has(k.id)).map((k) => k.words.source.slice(1, -1)).join('|');
 
-/** The kind of a relation: "sorella" and "fratello" are one kind, to compare what is said with the registry. */
-export function relationKind(legame: string): string {
-  return kindOf(legame).id;
+/** The kind of a relation: "sorella" and "fratello" are one kind, to compare what is said with the registry; a relation with its `kind` says it itself. */
+export function relationKind(rel: RelationLike): string {
+  return kindOf(rel).id;
 }
 
 // Names: two names are alike when their given names are close ("Elias il Giovane" and "Elias la
@@ -339,7 +362,7 @@ export function guessGender(p: Pick<Individual, 'name' | 'job' | 'family'>): Gen
   let m = 0;
   for (const r of p.family ?? []) {
     const w = r.bond.toLowerCase().split(/\s+/)[0];
-    const k = kindOf(w);
+    const k = kindOf(r);
     if (k.m === k.f) continue;
     if (w === k.f) f++;
     else if (w === k.m) m++;
@@ -422,7 +445,8 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   for (const p of persone) {
     for (const r of p.family) {
       if (wandererOf(r)) {
-        own.get(p)!.push(r);
+        // A bond with a wanderer is theirs as they said it; its kind, when it did not say one, from the word (T310b).
+        own.get(p)!.push(r.kind !== undefined && KIND.has(r.kind) ? r : { ...r, kind: kindOf(r).id });
         continue;
       }
       const q = byName.get(r.name.toLowerCase());
@@ -430,12 +454,12 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
         fixes.push(`${p.name}: legame con se stesso`);
         continue;
       }
-      const k = fitKind(kindOf(r.bond), p.species!, q?.species);
+      const k = fitKind(kindOf(r), p.species!, q?.species);
       if (!q) {
         // Someone named, not met yet.
         if (own.get(p)!.some((x) => !('a' in x) && x.name.toLowerCase() === r.name.toLowerCase())) continue;
         said(p, r, k, r.name);
-        own.get(p)!.push({ name: r.name, bond: wordOf(k, p.gender) });
+        own.get(p)!.push({ name: r.name, bond: wordOf(k, p.gender), kind: k.id });
         continue;
       }
       const key = [p.name, q.name].sort().join('\u0000');
@@ -495,7 +519,7 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
     fixes.push(`${wrong} → conoscenti`);
   }
   for (const p of persone) {
-    p.family = own.get(p)!.map((x) => ('a' in x ? { name: x.a === p ? x.b.name : x.a.name, bond: wordOf(x.a === p ? x.ab : x.ba!, p.gender) } : x));
+    p.family = own.get(p)!.map((x) => ('a' in x ? { name: x.a === p ? x.b.name : x.a.name, bond: wordOf(x.a === p ? x.ab : x.ba!, p.gender), kind: (x.a === p ? x.ab : x.ba!).id } : x));
   }
   // An animal does what animals of its kind do, not a person's job.
   const words = (s: string) => s.toLowerCase().split(/[^\p{L}]+/u).filter((w) => w.length >= 4);
@@ -515,7 +539,7 @@ export function repairSociety(people: People, speciesOf: (tipo: string) => Speci
   for (const p of persone) {
     for (const r of p.family) {
       if (wandererOf(r) || byName.has(r.name.toLowerCase()) || attesi.some((a) => a.name.toLowerCase() === r.name.toLowerCase())) continue;
-      attesi.push({ name: r.name, bond: reverseRelation(r.bond, undefined, p.species, p.species), of: p.name });
+      attesi.push({ name: r.name, bond: reverseRelation(r, undefined, p.species, p.species), kind: reverseKind(r, p.species, p.species), of: p.name });
     }
   }
   return { people: { people: persone, expected: attesi.slice(-60) }, fixes, renames };
@@ -561,16 +585,17 @@ export function defaultRoutine(job: string): RoutineStep[] {
   ];
 }
 
-/** A line two related people say when they meet (cheap: no model). */
-export function greeting(a: { nome: string; mestiere: string }, b: { nome: string }, legame: string, doing: string): [string, string] {
-  const l = legame.toLowerCase();
-  if (/figli|bambin/.test(l)) return [`${b.nome}! Non fare tardi stasera.`, `Sì, sì… sto ${doing || 'arrivando'}.`];
-  if (/genitore|madre|padre|mamma|papà/.test(l)) return [`Ciao! Sto ${doing || 'lavorando'}.`, `Brava gente lavora, ${a.nome}. Ci vediamo a cena.`];
-  if (/moglie|marito/.test(l)) return [`${b.nome}, hai visto che cielo strano oggi?`, `Sembra sempre lo stesso, caro mio.`];
-  if (/fratello|sorella/.test(l)) return [`Ehi, ${b.nome}! Ancora qui?`, `Dove vuoi che vada? Qui si torna sempre.`];
-  if (/rivale/.test(l)) return [`Hmpf. ${b.nome}.`, `${a.nome}. Sempre in mezzo ai piedi.`];
-  if (/apprendista|garzone/.test(l)) return [`Maestro, ho quasi finito!`, `Quasi non basta, ${a.nome}.`];
-  return [`Buongiorno, ${b.nome}!`, `Buongiorno a te, ${a.nome}. Come va il lavoro da ${a.mestiere}?`];
+/** A line two related people say when they meet (cheap: no model): by the kind of the bond (T310b), the words are the world's. */
+export function greeting(a: { name: string; job: string }, b: { name: string }, rel: RelationLike, doing: string): [string, string] {
+  switch (relationKind(rel)) {
+    case 'child': return [`${b.name}! Non fare tardi stasera.`, `Sì, sì… sto ${doing || 'arrivando'}.`];
+    case 'parent': return [`Ciao! Sto ${doing || 'lavorando'}.`, `Brava gente lavora, ${a.name}. Ci vediamo a cena.`];
+    case 'spouse': return [`${b.name}, hai visto che cielo strano oggi?`, `Sembra sempre lo stesso, caro mio.`];
+    case 'sibling': return [`Ehi, ${b.name}! Ancora qui?`, `Dove vuoi che vada? Qui si torna sempre.`];
+    case 'rival': return [`Hmpf. ${b.name}.`, `${a.name}. Sempre in mezzo ai piedi.`];
+    case 'apprentice': return [`Maestro, ho quasi finito!`, `Quasi non basta, ${a.name}.`];
+    default: return [`Buongiorno, ${b.name}!`, `Buongiorno a te, ${a.name}. Come va il lavoro da ${a.job}?`];
+  }
 }
 
 /** What an individual is to a wanderer, if anything (T34; here since T327: a fact of the people, the wanderer is only an id). */
