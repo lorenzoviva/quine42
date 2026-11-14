@@ -5553,7 +5553,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T389`, esito con gli screenshot descritti. Sicurezza: nessuna superficie nuova (pagine dei laboratori, nessuna rotta nuova).
 - Esito: editor /lab/editor/ e sandbox /lab/3d/ sotto i 900 px di larghezza o i 520 di altezza: la preview è il riquadro principale e intero (844×305 e 390×756), l'XML da «XML» (Esegui torna alla preview), seme e vpt in «⋯», gli strumenti del codice in «Strumenti ▾», le barre CAD, Colori, Vista e Tempo chiuse e una alla volta dalla fila di pulsanti, «⌖» centra, la camera inquadra il modello anche in verticale; la barra delle carte in una riga con «⋯» (anche nel SoundLab); la sandbox col pannello dietro «☰ Pannello», la levetta (WASD) e la «E» toccabile; lab/touch.ts riusa SceneGestures e stickAxes di src/ui/gestures.ts: un dito orbita, due zoomano, il tocco breve è il clic; desktop e mouse invariati; test in lab/tests/touch.test.ts, suite e typecheck verdi; non provati il telefono vero e il tocco sulla «E»; sicurezza: nessuna superficie nuova (pagine dei laboratori, nessuna rotta nuova)
 
-### T390 · Il SoundLab su un telefono: UX da rifinire — `da fare`
+### T390 · Il SoundLab su un telefono: UX da rifinire — `fatto` (`1357bc6e`)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 4
 - Step: 43
 - Contesto: dalla prova dell'autore sul telefono (14/11): il SoundLab (`/lab/suono/`, T222) va meglio del laboratorio dei voxel ma ha margine di miglioramento nell'UX. Nessun difetto preciso detto: il task li trova e li corregge con lo stesso criterio di T389 (contenuto principale grande, strumenti nei menu, tocco).
@@ -5562,6 +5562,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, screenshot prima e dopo alle due misure e su desktop.
 - Dipende da T389.
 - Quando è fatto: commit su `task/T390` con l'elenco dei difetti e quelli corretti. Sicurezza: nessuna superficie nuova.
+- Esito: SoundLab sotto COMPACT_QUERY: pagina senza scorrimento, schede Roll/Suono/3D/XML (`SOUND_PANES`, `data-pane`) col roll per primo e alto quanto c'è posto, passi e pennelli in fila o accanto in orizzontale, manopole e tracce e codice e diagnostica affiancati in orizzontale, intestazione con preset/⚡/▶/↶ e «⋯» per seme, dado, +1, oscilloscopio, file, Copia, WAV; vista 3D al tocco (un dito ruota, due zoomano), il roll che si ridisegna cambiando misura, il tratto chiuso anche se il gesto è annullato, pulsanti di 36 px e campi a 16 px; desktop invariato; test in tests/soundlab.test.ts; resta: roll basso in orizzontale con la barra delle carte (fasce di ~8 px con «Tutte»), XML da scorrere di lato, «non salvato» nel menu in compatto; non provati il telefono vero né iOS; sicurezza: nessuna superficie nuova (pagina del laboratorio, nessuna rotta nuova)
 
 ### T393 · Chiudere l'inventario e gli altri pannelli al tocco, su un telefono vero — `fatto` (`b0cad847`)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2

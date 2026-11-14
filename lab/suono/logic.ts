@@ -185,6 +185,16 @@ export function runOnGrid(xml: string, seed: number, grid: GridData): Grid3 {
   return g;
 }
 
+// ---- the panes on a small screen ----
+
+/**
+ * The panes of the SoundLab on a small screen (T390, COMPACT_QUERY of lab/touch.ts), one at a time, the first shown first: the piano roll,
+ * the sound (knobs and tracks), the voxels, the program's text. Every panel of the page says in `data-pane` the panes it is in.
+ */
+export const SOUND_PANES = ['roll', 'sound', 'voxels', 'code'] as const;
+export type SoundPane = (typeof SOUND_PANES)[number];
+export const isSoundPane = (v: unknown): v is SoundPane => (SOUND_PANES as readonly unknown[]).includes(v);
+
 // ---- the piano roll's geometry and brush ----
 
 export const ROLL = { left: 46, right: 8, top: 4, bottom: 20 };

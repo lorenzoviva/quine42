@@ -1,4 +1,5 @@
 // The SoundLab's logic that lives without a page (T222): the piano roll → the grid → the program's text, saving and loading, the knobs in the XML, the WAV.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../src/kernel/bundle';
 import { modelErrors } from '../src/kernel/validator';
@@ -9,6 +10,7 @@ import { renderScore, renderSoundProgram, SAMPLE_RATE } from '../src/mj/synth';
 import { scoreOf } from '../src/mj/sound';
 import {
   brushFor,
+  isSoundPane,
   gridOf,
   leadComment,
   letterAt,
@@ -25,6 +27,7 @@ import {
   seedNote,
   setSoundAttr,
   setTrackVolume,
+  SOUND_PANES,
   stepSlice,
   toGrid3,
   wavBytes,
@@ -266,5 +269,32 @@ describe('what comes out', () => {
     const s = { loopStart: 1000, loopEnd: 1000 + 16 * 441 };
     expect(stepSlice(s, 0, 16)).toEqual({ from: 1000, to: 1441 });
     expect(stepSlice(s, 15, 16).to).toBe(s.loopEnd);
+  });
+});
+
+describe('il SoundLab su uno schermo piccolo (T390)', () => {
+  const html = readFileSync('lab/suono/index.html', 'utf8');
+  const panels = [...html.matchAll(/class="panel[^"]*"(?: data-pane="([^"]*)")?/g)].map((m) => m[1]);
+
+  it('ogni riquadro sta in uno o più pannelli dichiarati, e ogni riquadro ha qualcosa', () => {
+    expect(panels.length).toBeGreaterThan(0);
+    for (const p of panels) {
+      expect(p, 'un pannello senza data-pane non si vedrebbe su un telefono').toBeDefined();
+      for (const pane of p!.split(' ')) expect(isSoundPane(pane), pane).toBe(true);
+    }
+    for (const pane of SOUND_PANES) expect(panels.some((p) => p!.split(' ').includes(pane)), pane).toBe(true);
+  });
+
+  it('il piano roll è il primo riquadro, e la pagina parte da lì', () => {
+    expect(SOUND_PANES[0]).toBe('roll');
+    expect(html).toContain('<main id="main" data-pane="roll">');
+    const tabs = [...html.matchAll(/<button data-pane="([^"]+)"/g)].map((m) => m[1]);
+    expect(tabs).toEqual([...SOUND_PANES]);
+  });
+
+  it('isSoundPane dice solo i riquadri', () => {
+    expect(isSoundPane('code')).toBe(true);
+    expect(isSoundPane('xml')).toBe(false);
+    expect(isSoundPane(undefined)).toBe(false);
   });
 });

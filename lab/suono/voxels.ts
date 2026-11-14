@@ -1,9 +1,11 @@
-// The grid as voxels, in three.js: X the time, Z the height, Y the tracks set apart so the planes can be told. Drag to turn, wheel to zoom.
+// The grid as voxels, in three.js: X the time, Z the height, Y the tracks set apart so the planes can be told. Drag to turn, wheel to zoom;
+// by touch (T390) one finger turns and two pinch, with the labs' gestures (lab/touch.ts).
 
 import * as THREE from 'three';
 import { makeRenderer } from '../../src/render/gpu';
 import type { GridData } from './logic';
 import { letterAt } from './logic';
+import { attachPreviewTouch } from '../touch';
 
 const MAX_VOXELS = 100_000;
 const YAW = -0.68;
@@ -42,22 +44,40 @@ export class VoxelView {
     this.scene.add(sun);
     let last: { x: number; y: number } | undefined;
     canvas.addEventListener('pointerdown', (e) => {
+      // The fingers have their own gestures (attachPreviewTouch below)
+      if (e.pointerType === 'touch') return;
       last = { x: e.clientX, y: e.clientY };
       canvas.setPointerCapture(e.pointerId);
     });
     canvas.addEventListener('pointermove', (e) => {
-      if (!last) return;
-      this.yaw -= (e.clientX - last.x) * 0.008;
-      this.pitch = Math.max(-1.3, Math.min(1.3, this.pitch + (e.clientY - last.y) * 0.008));
+      if (!last || e.pointerType === 'touch') return;
+      this.orbit(e.clientX - last.x, e.clientY - last.y);
       last = { x: e.clientX, y: e.clientY };
-      this.dirty = true;
     });
     canvas.addEventListener('pointerup', () => (last = undefined));
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.dist = Math.max(this.span * 0.4, Math.min(this.span * 6, this.dist * (e.deltaY > 0 ? 1.1 : 0.9)));
-      this.dirty = true;
+      this.zoom(e.deltaY > 0 ? 1.1 : 0.9);
     }, { passive: false });
+    attachPreviewTouch(canvas, { orbit: (dx, dy) => this.orbit(dx, dy), zoom: (factor) => this.zoom(factor) });
+  }
+
+  /** The camera turns by a drag of (dx, dy) pixels. */
+  orbit(dx: number, dy: number): void {
+    this.yaw -= dx * 0.008;
+    this.pitch = Math.max(-1.3, Math.min(1.3, this.pitch + dy * 0.008));
+    this.dirty = true;
+  }
+
+  /** The camera's distance times `factor`, within the grid's bounds. */
+  zoom(factor: number): void {
+    this.dist = Math.max(this.span * 0.4, Math.min(this.span * 6, this.dist * factor));
+    this.dirty = true;
+  }
+
+  /** Where the camera is, for a check in the console. */
+  get view(): { yaw: number; pitch: number; dist: number } {
+    return { yaw: this.yaw, pitch: this.pitch, dist: this.dist };
   }
 
   resetCamera(): void {
