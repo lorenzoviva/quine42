@@ -1841,6 +1841,8 @@ posto di un pannello sul filo).
 | `regola` | `rule` |
 | `riscolpisci` | `resculpt` |
 | `musica` | `music` |
+| `direttiva` | `directive` |
+| `individuo` | `individual` |
 
 <a id="posti"></a>
 ### Posti degli oggetti (dove si indossano o si impugnano) (`posti`)

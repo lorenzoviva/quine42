@@ -204,7 +204,7 @@ export async function narrate(c: Council, what: { name: string; description: str
 }
 
 /** The teams the Referente hands a request to (T310b: internal ids; `none` when there is nothing to do). */
-export const LIAISON_TASKS = ['none', 'item', 'character', 'thing', 'environment', 'rule', 'resculpt', 'items', 'mechanic', 'rune', 'music', 'directive'] as const;
+export const LIAISON_TASKS = ['none', 'item', 'character', 'thing', 'environment', 'rule', 'resculpt', 'items', 'mechanic', 'rune', 'music', 'directive', 'individual'] as const;
 export type LiaisonTask = (typeof LIAISON_TASKS)[number];
 
 const REFERENTE_SCHEMA: Schema = {
@@ -213,7 +213,8 @@ const REFERENTE_SCHEMA: Schema = {
     reply: { type: 'STRING' },
     task: { type: 'STRING', enum: [...LIAISON_TASKS] },
     request: { type: 'STRING', description: 'the request reworded for the team that takes care of it, clear and complete' },
-    target: { type: 'STRING', description: 'for "resculpt": the name of what to sculpt again' },
+    target: { type: 'STRING', description: 'for "resculpt": the name of what to sculpt again; for "individual": the place or the region where they are, as it is called' },
+    name: { type: 'STRING', description: 'for "individual": their proper name, if it is said' },
     runes: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for "rune": the words of the code asked for, one per rune (a repeated one counts twice)' },
     section: { type: 'STRING', enum: [...CAMPAIGN_SECTIONS], description: 'for "directive": the team it is for (all: the whole Council)' },
     refusal:{ type: 'STRING', description: 'only if the request would destroy the universe, the wanderer themselves or the physical laws of the game: why not' },
@@ -227,10 +228,10 @@ const REFERENTE_SCHEMA: Schema = {
  * the universe, themselves, or the game's physics). The Referente understands what is asked and
  * hands it to the right team: the Forge, the Cartographer, the Artist, the Musician, the rules, the Narrator.
  */
-export async function liaisonReply(c: Council, history: Turn[], text: string, sentBack?: string): Promise<{ say: string; task: LiaisonTask; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string }> {
+export async function liaisonReply(c: Council, history: Turn[], text: string, sentBack?: string): Promise<{ say: string; task: LiaisonTask; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string; name?: string }> {
   const past = history.slice(-8).map((t) => `${t.who === 'player' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
   const g = await c.guard('studio', text);
-  const r = await c.ask<{ reply: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string }>(
+  const r = await c.ask<{ reply: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string; name?: string }>(
     'liaison',
     'referente.coordinate',
     [
@@ -238,7 +239,7 @@ export async function liaisonReply(c: Council, history: Turn[], text: string, se
       past ? `Conversation so far:\n${past}` : '',
       `The wanderer says: «${g.quoted}»`,
       g.note,
-      'Understand what they ask and hand it to the right team with "task": item/thing/character (the Forge creates a module: a tool, a thing of the world, a kind of person), environment (the Cartographer creates a place and puts it on the map), rule (it becomes a rule of the world), resculpt (the Sculptor redoes the model of a person, a thing or an object: say which in "target"), items (a pack of common things), mechanic (the Engineer adds a mechanic with its interface: slots for the equipment, a quiver, a sheet…), rune (you give them the runes they ask for: in "runes" the words of the code, one per rune, for example ["speed", "=", "3"]), music (the Musician writes a piece for an environment or redoes the sound effect of a moment of the game), directive (they say how the world must be made from now on, not a thing to make now: names, tone, what exists and what does not, how a people lives or builds; it goes in the master\'s directives, which the teams read at every request: in "section" the team it is for, all for the whole Council, and in "request" the directive in one line, in the words of the world: the people, the realm, the wanderers, never the game, the players or the simulation; who someone is or what happened is a fact, not a directive), none (if they only ask for information, or for credits: those the Council does not give). In "reply" you answer, short and friendly, in the language of the world.',
+      'Understand what they ask and hand it to the right team with "task": item/thing/character (the Forge creates a module: a tool, a thing of the world, a kind of person), environment (the Cartographer creates a place and puts it on the map), rule (it becomes a rule of the world), resculpt (the Sculptor redoes the model of a person, a thing or an object: say which in "target"), items (a pack of common things), mechanic (the Engineer adds a mechanic with its interface: slots for the equipment, a quiver, a sheet…), rune (you give them the runes they ask for: in "runes" the words of the code, one per rune, for example ["speed", "=", "3"]), music (the Musician writes a piece for an environment or redoes the sound effect of a moment of the game), individual (they say who a precise person of the world is: their name, trade, family, a secret, where they live; the Narrator writes them with those facts: in "request" all the facts, in the words of the world, in "name" their name and in "target" the place or the region where they are), directive (they say how the world must be made from now on, not a thing to make now: names, tone, what exists and what does not, how a people lives or builds; it goes in the master\'s directives, which the teams read at every request: in "section" the team it is for, all for the whole Council, and in "request" the directive in one line, in the words of the world: the people, the realm, the wanderers, never the game, the players or the simulation; who someone is or what happened is a fact, not a directive), none (if they only ask for information, or for credits: those the Council does not give). In "reply" you answer, short and friendly, in the language of the world.',
       sentBack ? `Your directive was sent back: ${sentBack}. Word it again in the words of the world, or give a refusal with the reason.` : '',
     ]
       .filter(Boolean)
@@ -249,7 +250,7 @@ export async function liaisonReply(c: Council, history: Turn[], text: string, se
   // An Italian task of the contract 0.6 (`riscolpisci`) is still the one it means.
   const said = internalName('incarichi', String(r.task ?? 'none'));
   const task = (LIAISON_TASKS as readonly string[]).includes(said) ? (said as LiaisonTask) : 'none';
-  return { say: String(r.reply ?? '…'), task, request: r.request?.trim() || undefined, target: r.target?.trim() || undefined, refusal: r.refusal?.trim() || undefined, runes: r.runes, section: typeof r.section === 'string' ? r.section : undefined };
+  return { say: String(r.reply ?? '…'), task, request: r.request?.trim() || undefined, target: r.target?.trim() || undefined, refusal: r.refusal?.trim() || undefined, runes: r.runes, section: typeof r.section === 'string' ? r.section : undefined, name: typeof r.name === 'string' && r.name.trim() ? r.name.trim() : undefined };
 }
 
 const AGENT_CHAT_SCHEMA: Schema = {

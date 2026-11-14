@@ -16,6 +16,8 @@ const WAY_WORDS: Record<BenchWay, string> = { up: 'su', down: 'giù', left: 'sin
 import type { BibleShown } from '../kernel/bible';
 import { NODE_COLOR, NODE_NAME, type GraphNode } from '../kernel/graph';
 import type { Picture } from '../mj/photo';
+import { DAY_PHASES, MASTER_BEATS, readPeople, WHERES } from '../kernel/npc/model';
+import { italianName } from '../kernel/internalNames';
 import { $, el } from './dom';
 import { icons } from './hud';
 
@@ -74,7 +76,7 @@ export class StudioPanel {
     window.addEventListener(
       'keydown',
       (e) => {
-        if (!this.isOpen || (e.target as HTMLElement)?.tagName === 'INPUT') return;
+        if (!this.isOpen || ['INPUT', 'SELECT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
         if (e.key === 'Escape' || e.code === 'KeyE') {
           e.preventDefault();
           e.stopPropagation();
@@ -291,8 +293,68 @@ export class StudioPanel {
       ...section('chunk', live, 'Il Cartografo non sta pianificando nessun luogo.'),
       ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
       ...section('plot', of('plot'), 'Nessuna trama aperta.'),
+      // The master writes a plot by hand (T376): it plays as the Narrator's do.
+      ...(this.k.isMaster() ? [el('div', { class: 'row' }, this.writePlotButton(s))] : []),
       ...section('quest', of('quest'), 'Nessuna missione accettata.'),
       ...section('fault', of('fault'), 'Nessun guasto aperto.'),
+    );
+  }
+
+  private writePlotButton(s: Situation): HTMLButtonElement {
+    const b = el('button', {}, 'Scrivi trama');
+    b.onclick = () => this.plotForm(s);
+    return b;
+  }
+
+  /**
+   * «Scrivi trama» of the Direction (T376, ADR-0188 §5.3): a title, a mystery and the beats (when, who among the people of the registry,
+   * where, what they do, what they say); the kernel checks it with the validator of the plots and writes it, without calls. What does not
+   * hold comes back here, every reason.
+   */
+  private plotForm(s: Situation, said = ''): void {
+    const people = readPeople(this.k.files).people.map((p) => p.name).sort((a, b) => a.localeCompare(b));
+    const select = (values: readonly string[], label: (v: string) => string) => el('select', {}, ...values.map((v) => el('option', { value: v }, label(v)))) as HTMLSelectElement;
+    const title = el('input', { placeholder: 'titolo', maxlength: '60' }) as HTMLInputElement;
+    const mystery = el('input', { placeholder: "il mistero (che cosa c'è sotto)", maxlength: '300' }) as HTMLInputElement;
+    const beats = el('div', {});
+    const rows: Array<{ day: HTMLSelectElement; moment: HTMLSelectElement; who: HTMLSelectElement; where: HTMLSelectElement; what: HTMLInputElement; line: HTMLInputElement }> = [];
+    const addBeat = () => {
+      if (rows.length >= MASTER_BEATS) return;
+      const r = {
+        day: select(['0', '1', '2', '3', '4'], (v) => (v === '0' ? 'il primo giorno' : `dopo ${v} giorn${v === '1' ? 'o' : 'i'}`)),
+        moment: select(DAY_PHASES, (v) => italianName('momenti', v)),
+        who: select(people, (v) => v),
+        where: select(WHERES, (v) => italianName('dove', v)),
+        what: el('input', { placeholder: 'che cosa fa', maxlength: '120' }) as HTMLInputElement,
+        line: el('input', { placeholder: 'che cosa dice (facoltativo)', maxlength: '140' }) as HTMLInputElement,
+      };
+      rows.push(r);
+      beats.append(el('div', { class: 'section' }, `Tappa ${rows.length}`), el('div', { class: 'row' }, r.day, r.moment, r.who, r.where), el('div', { class: 'row' }, r.what), el('div', { class: 'row' }, r.line));
+    };
+    addBeat();
+    const note = el('div', { class: 'note' }, said);
+    const more = el('button', {}, '+ tappa');
+    more.onclick = addBeat;
+    const write = el('button', {}, 'Scrivi');
+    write.onclick = () => {
+      const r = this.k.writePlot({
+        title: title.value,
+        mystery: mystery.value,
+        beats: rows.map((x) => ({ day: Number(x.day.value), moment: x.moment.value, who: x.who.value, where: x.where.value, what: x.what.value, line: x.line.value })),
+      });
+      if (r.ok) this.situation({ ...this.k.situation() });
+      else note.replaceChildren(...r.reasons.map((why) => el('div', {}, `✗ ${why}`)));
+    };
+    const back = el('button', {}, 'Annulla');
+    back.onclick = () => this.situation(s);
+    this.show(
+      el('div', { class: 'title' }, 'Scrivi trama — Direzione'),
+      el('div', { class: 'note' }, people.length ? 'Una trama tra le persone del mondo: le tappe accadono il giorno e nel momento detti, viste o no, come quelle del Narratore.' : "Nel mondo non c'è ancora nessuno: una trama si scrive tra le persone del registro."),
+      el('div', { class: 'row' }, title),
+      el('div', { class: 'row' }, mystery),
+      beats,
+      note,
+      el('div', { class: 'row' }, more, write, back),
     );
   }
 
@@ -548,7 +610,9 @@ export class StudioPanel {
       return chip;
     };
 
-    const editBtn = el('button', {}, 'Apri world/bible.json');
+    // «Modifica» (T376, ADR-0188 §5.3): the master changes the bible in the editor; nothing new for the Council.
+    const editBtn = el('button', {}, 'Modifica');
+    editBtn.hidden = !this.k.isMaster() || !this.onEdit;
     editBtn.onclick = () => {
       this.close();
       this.onEdit?.('world/bible.json');

@@ -15,6 +15,7 @@ import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
 import { CAMPAIGN_FILE, directiveDay, directiveText, sectionOf, sectionTitle, withDirective, type CampaignSection } from './campaign';
 import { languageOf } from './language';
+import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
@@ -22,7 +23,7 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, pla
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { dayPhase, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
+import { dayPhase, declaredFor, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
 import { Npc, type NpcHost } from './npc';
 import { buildGraph, GRAPH_FILE, graphHash, mergeChunks, chunksOf, readGraph, slug as nodeSlug, type GraphChunk, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
@@ -105,6 +106,8 @@ export { JUMP_UP, JUMP_FAR, BODY_R };
 const WATER_EVERY = 6;
 const WATER_STEPS = 10;
 const MAX_DIG = 8;
+/** How long the facts of an individual the master declares may be (T376), in characters: a line of a player. */
+const DECLARED_FACTS = 600;
 /** What the fault `universe:kernel` says first (T312): the panel of the faults, which shows the head of a reason, says the world is read-only. */
 export const READ_ONLY_WORDS = 'sola lettura: niente si salva, il Concilio usa i modelli locali';
 
@@ -2219,6 +2222,8 @@ export class Kernel {
   /** Runs the layout and puts entities in the world: deterministic, so a cached plan rebuilds the same place. */
   private applyPlan(ch: Chunk, plan: ChunkPlan): void {
     const S = this.config.chunkSize;
+    // The individuals the master declared for this place come in as characters of its plan (T376).
+    this.settleDeclared(ch, plan);
     const pathCode = this.pathCode();
     const { result, tiles } = this.layoutOf(ch, plan, pathCode);
     ch.plan = plan;
@@ -2253,10 +2258,12 @@ export class Kernel {
       const m = this.modules.get(plan.objects[index].module);
       const origin = `${ch.key}#o${index}`;
       if (!m || cell === undefined || this.consumed.has(origin) || this.uniqueTaken(m)) continue;
+      // Someone the master declared (T376) is there whatever the variety and the knob of the people say.
+      const declared = !!plan.objects[index].individual;
       // Variety: not the same kind of individual in every place.
-      if (m.manifest.persona && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
+      if (m.manifest.persona && !declared && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
       // Fewer people per place (T45b): fewer individuals, words and dialogues.
-      if (m.manifest.persona && !this.kept(origin, coef.people)) continue;
+      if (m.manifest.persona && !declared && !this.kept(origin, coef.people)) continue;
       const p = at(cell);
       const sid = inLot(cell);
       if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m));
@@ -5078,6 +5085,126 @@ export class Kernel {
     return { ok: true, section: s, line: d.text };
   }
 
+  /**
+   * An individual the master declares (T376, ADR-0188 §5.2): only the master; the facts a text of a player (`cleanText`, one line, at most
+   * `DECLARED_FACTS` characters) that the local filter of the fourth wall lets through (D54.5: never Jev); the place a place planned or a
+   * region of the atlas, by name; the kind of inhabitant the one of the world whose words the facts share most. The Narrator writes them
+   * (`npc.individuate`, one call, paid by `chi`); a place loaded and planned takes them in at once, the others when they are planned.
+   */
+  async declareIndividual(d: { facts: unknown; name?: unknown; where?: unknown }, chi = this.payerNow()): Promise<{ ok: true; text: string; name: string; awaited: boolean } | { ok: false; reason: string }> {
+    if (!this.isMaster()) return { ok: false, reason: 'solo il master dichiara gli individui del mondo' };
+    const facts = cleanText(d.facts, DECLARED_FACTS, 'i fatti');
+    if ('error' in facts) return { ok: false, reason: facts.error };
+    const wall = metaBreak(facts.text, wordsOf(this.files));
+    if (wall) return { ok: false, reason: `nel mondo non si dice «${wall}»` };
+    let name: string | undefined;
+    if (typeof d.name === 'string' && d.name.trim()) {
+      const n = cleanText(d.name, 40, 'il nome');
+      if ('error' in n) return { ok: false, reason: n.error };
+      name = n.text;
+    }
+    const place = this.declaredPlace(d.where);
+    if (!place) {
+      const known = mergeChunks(this.files, [...this.graphChunks.values()]).map((p) => p.nome).concat(readAtlas(this.files).regions.map((r) => r.name));
+      return { ok: false, reason: `${typeof d.where === 'string' && d.where.trim() ? `non conosco «${d.where.trim().slice(0, 60)}»` : 'non so dove sta'}: dimmi un luogo già fatto o una regione dell'atlante${known.length ? ` (${[...new Set(known)].slice(0, 8).join(', ')})` : ''}` };
+    }
+    const kind = this.declaredKind(facts.text);
+    if (!kind) return { ok: false, reason: 'il mondo non ha ancora un tipo di abitante: chiedi prima un personaggio' };
+    const made = await this.npc.declare({ facts: facts.text, name, kind, place, chi });
+    if (!made.ok) return made;
+    const settled = this.settleLoaded();
+    const p = made.individual;
+    const awaited = !settled.includes(p.name);
+    return { ok: true, name: p.name, awaited, text: `Nel registro delle persone: ${p.name}, ${p.job}, a «${place.place}»${awaited ? ' (atteso: arriva quando il luogo è pronto)' : ''}.` };
+  }
+
+  /** Where a declared individual is (T376): a place planned, by its name, or else a region of the atlas; undefined when nothing is called so. */
+  private declaredPlace(where: unknown): DeclaredPlace | undefined {
+    const norm = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    const w = typeof where === 'string' ? norm(where.slice(0, 80)) : '';
+    if (w.length < 2) return undefined;
+    const like = (n: string) => norm(n) === w;
+    const near = (n: string) => w.length >= 3 && norm(n).length >= 3 && (norm(n).includes(w) || w.includes(norm(n)));
+    const places = mergeChunks(this.files, [...this.graphChunks.values()]).filter((p) => p.nome);
+    const regions = readAtlas(this.files).regions;
+    const p = places.find((x) => like(x.nome)) ?? places.find((x) => near(x.nome));
+    const r = p ? undefined : (regions.find((x) => like(x.name)) ?? regions.find((x) => near(x.name)));
+    if (p) return { place: p.nome, at: [p.cx, p.cy] };
+    if (r) return { place: r.name, region: r.id };
+    return undefined;
+  }
+
+  /** The kind of inhabitant a declared individual is (T376): the one whose name and description share most words with the facts, people first. */
+  private declaredKind(facts: string): string | undefined {
+    const words = (s: string) => new Set(s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().split(/[^\p{L}]+/u).filter((x) => x.length >= 4));
+    const said = words(facts);
+    const kinds = [...this.modules.values()].map((m) => m.manifest).filter((m) => m.kind === 'entity' && m.persona).sort((a, b) => a.id.localeCompare(b.id));
+    const score = (m: (typeof kinds)[number]) => [...words(`${m.name} ${m.description ?? ''} ${m.id}`)].filter((x) => said.has(x)).length * 2 + (this.npc.speciesOf(m.id) === 'animal' ? 0 : 1);
+    return kinds.reduce<(typeof kinds)[number] | undefined>((best, m) => (!best || score(m) > score(best) ? m : best), undefined)?.id;
+  }
+
+  /**
+   * The declared individuals a place takes in (T376): each awaited one whose place or region this is becomes a character of its plan (an
+   * object marked with their name, so a plan read again does not add them twice), with the origin that brings them back as themselves.
+   * The plan is saved again; the indexes of the objects added. Not in a mirror: the world's kernel does it.
+   */
+  private settleDeclared(ch: Chunk, plan: ChunkPlan): number[] {
+    if (this.mirror) return [];
+    const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(readAtlas(this.files), ch.cx, ch.cy)?.id;
+    const due = declaredFor(readPeople(this.files), ch.cx, ch.cy, region);
+    const added: number[] = [];
+    for (const p of due) {
+      if (!this.modules.get(p.kind)?.manifest.persona) continue;
+      let i = plan.objects.findIndex((o) => o.individual === p.name);
+      if (i < 0) {
+        plan.objects.push({ module: p.kind, where: 'outside', individual: p.name });
+        i = plan.objects.length - 1;
+        added.push(i);
+      }
+      this.npc.placeDeclared(p.name, `${ch.key}#o${i}`, plan.place.name);
+      this.council.say('kernel', 'info', `${p.name} è a «${plan.place.name}», come ha detto il master`, 'narrator', 'npc.individuate');
+    }
+    if (added.length) void this.chunkStore.save(this.recordKey(ch), { plan }).catch(() => undefined);
+    return added;
+  }
+
+  /** The places loaded and planned take in their declared individuals now (T376): they appear where the plan puts them. Who came in. */
+  private settleLoaded(): string[] {
+    const came: string[] = [];
+    const S = this.config.chunkSize;
+    for (const ch of this.chunks.values()) {
+      if (ch.stage !== 'planned' || !ch.plan) continue;
+      const added = this.settleDeclared(ch, ch.plan);
+      if (!added.length) continue;
+      const { result } = this.layoutOf(ch, ch.plan, this.pathCode(), true);
+      const place = this.placementsOf(ch, ch.plan, result);
+      for (const i of added) {
+        const o = ch.plan.objects[i];
+        const m = this.modules.get(o.module);
+        const cell = place.objects[i]?.cell;
+        if (!m || cell === undefined) continue;
+        this.spawnModuleEntity(m, ch.cx * S + (cell % S) + 0.5, ch.cy * S + Math.floor(cell / S) + 0.5, ch.key, `${ch.key}#o${i}`);
+        came.push(o.individual!);
+      }
+    }
+    return came;
+  }
+
+  /**
+   * A plot the master writes in the Direction (T376, ADR-0188 §5.3): only the master; the validator of the plots (`masterPlot`: texts of a
+   * player, days, moments and places of the world, `reviewPlot`), no call to the models; it goes in `world/plots.json` as a file the master
+   * writes (`saveFile`: a commit alone, their branch in a world of many), and the beats play as the Narrator's do.
+   */
+  writePlot(raw: unknown): { ok: true; plot: Plot } | { ok: false; reasons: string[] } {
+    if (!this.isMaster()) return { ok: false, reasons: ['solo il master scrive le trame'] };
+    const r = masterPlot(raw, readPeople(this.files), this.day(), `trama-master-${this.worldStamp()}`, wordsOf(this.files));
+    if ('errors' in r) return { ok: false, reasons: r.errors };
+    const saved = this.saveFile(PLOTS_FILE, writePlots([...readPlots(this.files), r.plot]));
+    if (!saved.written) return { ok: false, reasons: saved.errors };
+    this.council.say('narrator', 'info', `trama del master «${r.plot.title}» tra ${r.plot.involved.join(', ')}`, undefined, 'plot.weave');
+    return { ok: true, plot: r.plot };
+  }
+
   /** What the gallery shows: every thing of this universe that has (or will have) a model. */
   private exhibits(files: FileMap): Exhibit[] {
     const out: Exhibit[] = [];
@@ -5424,7 +5551,7 @@ export class Kernel {
       out.push({ id: `module:${man.id}`, label: man.name, model, color: man.appearance.color, path, facts });
       // T23: after its type, each individual, with the look it has in the world (its seed) and the module under it.
       for (const p of who)
-        out.push({ id: `individual:${p.name}`, label: `${p.name} · ${p.job}`, model, seed: this.forms.seedFor(model, p.origin ?? p.name), color: man.appearance.color, path, facts: [...individualFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
+        out.push({ id: `individual:${p.name}`, label: `${p.name} · ${p.job}${p.declared && !p.origin ? ' · atteso' : ''}`, model, seed: this.forms.seedFor(model, p.origin ?? p.name), color: man.appearance.color, path, facts: [...individualFacts(p, man.name), ...facts.filter(([w]) => w !== 'Individui').map(([w, t]): [string, string] => [w === 'Aspetto' || w === 'Carattere' ? `${w} del tipo` : w, t])] });
     }
     return out;
   }
@@ -5956,6 +6083,15 @@ export class Kernel {
       }
       case 'music':
         return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
+      case 'individual': {
+        // An individual the master declares (T376, ADR-0188 §5.2): the Narrator writes them with the facts given, where the master said.
+        const made = await this.declareIndividual({ facts: req, name: r.name, where: r.target }, chi);
+        if (!made.ok) {
+          lacking('invalid', made.reason, 'narrator');
+          return { say: r.say, forged: `L'individuo non entra: ${made.reason}` };
+        }
+        return { say: r.say, forged: made.text };
+      }
       case 'directive': {
         // The master's directives (T374, ADR-0191): only the master gives them; one that breaks the fourth wall goes back to the
         // Referente once, with the reason, and what still breaks it does not go in.
@@ -8890,7 +9026,9 @@ function individualFacts(p: Individual, type: string): Array<[string, string]> {
   if (p.family?.length) out.push(['Famiglia', p.family.map((r) => `${r.bond} di ${r.name}`).join(', ')]);
   for (const r of p.family ?? []) if (wandererOf(r)) out.push([wandererOf(r) === SOLO && r.name === WANDERER_NAME ? 'Per il viandante' : `Per ${r.name}`, r.bond]);
   if (p.routine?.length) out.push(['Giornata', p.routine.map((r) => `${italianName('momenti', r.when)}: ${r.does}`).join('; ')]);
-  if (p.place) out.push(['Incontrato a', p.place]);
+  // Declared by the master (T376): where they are, and whether a place has taken them in yet.
+  if (p.declared) out.push(['Dichiarato dal master', p.origin ? `a ${p.declared.place}` : `atteso a ${p.declared.place}: arriva quando il luogo è pronto`]);
+  else if (p.place) out.push(['Incontrato a', p.place]);
   if (p.carries?.length) out.push(['Porta con sé', p.carries.join(', ')]);
   if (p.memories?.length) out.push(['Ricorda', p.memories.slice(-3).map((m) => m.text).join(' · ')]);
   return out;

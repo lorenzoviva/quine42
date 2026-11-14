@@ -387,6 +387,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #studio .frame .rune { display: flex; flex-direction: column; align-items: center; line-height: var(--leading-tight); }
 #studio .frame .rune small { font-size: var(--text-13); color: var(--fg); text-shadow: none; }
 #studio .row input { flex: 1; font: inherit; font-size: var(--text-13); padding: var(--space-5) var(--space-8); background: var(--synth-bg); color: var(--fg); border: 1px solid var(--line); }
+#studio .row select { font: inherit; font-size: var(--text-13); padding: var(--space-5) var(--space-8); background: var(--synth-bg); color: var(--fg); border: 1px solid var(--line); }
 #studio .item { font-size: var(--text-13); padding: var(--space-2) 0; }
 #studio .item .path { color: var(--gold); font-family: monospace; }
 

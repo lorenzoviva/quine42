@@ -5383,13 +5383,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, una regione di riempitivo dichiarata e attraversata.
 - Quando è fatto: commit su `task/T375`.
 
-### T376 · Campagna: individui e trame dichiarati dal master — `da fare` (dipende da T374)
+### T376 · Campagna: individui e trame dichiarati dal master — `fatto` (`4b63d75b`) (dipende da T374)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 6
 - Step: 43
 - Contesto: riga 6 del § 6 di `docs/design/campagna-master.md`, ADR-0188.
 - Cosa fare: l'incarico `individuo` del Referente (il Narratore coi fatti dati, gli attesi), «Scrivi trama» nella Direzione, «Modifica» sul leggio; validatori di oggi.
 - Test: un individuo dichiarato compare nel luogo detto con i fatti dati; una trama scritta a mano avanza come le altre; suite e typecheck coi turni.
 - Quando è fatto: commit su `task/T376`.
+- Esito: l'incarico `individual` del Referente (solo il master; fatti con `cleanText` e il filtro locale, mai Jev; luogo pianificato o regione dell'atlante; il Narratore coi fatti dati), l'individuo in `world/people.json` con `declared`, atteso finché il piano del suo luogo non lo accoglie come personaggio marcato col suo nome (`settleDeclared`, subito se il luogo è caricato), grafo e silos che lo mostrano; «Scrivi trama» nella Direzione (`masterPlot` con `reviewPlot`, `writePlot` via `saveFile`, nessuna chiamata, niente missioni); «Modifica» sul leggio solo per il master; ADR-0192, AGENTS.md, architettura, glossario, lingua interna, kernel 0.7.3; test in `tests/campagna-individui.test.ts`; la partita di molti con due client non è provata; sicurezza: nessuna superficie nuova (testo del master solo al Narratore, pulito e filtrato in locale; scritture solo del kernel per il master).
 
 ### T377 · Campagna: la campagna nel sito — `da fare` (dipende da T366, T373, T375)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6

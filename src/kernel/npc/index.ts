@@ -21,7 +21,7 @@ import type { Mind } from './model';
 import { People } from './people';
 import { Places } from './places';
 import type { Plot } from './plots';
-import { inferActivity, type Activity, type DayPhase, type Individual, type Species } from './society';
+import { inferActivity, type Activity, type DayPhase, type DeclaredPlace, type Individual, type Species } from './society';
 import { Speech } from './speech';
 import { Stories } from './stories';
 import { Talk } from './talk';
@@ -140,6 +140,16 @@ export class Npc {
 
   individualOf(name: string): Individual | undefined {
     return this.people.individualOf(name);
+  }
+
+  /** An individual the master declares (T376): the Narrator writes them with the facts given; awaited where they are. */
+  declare(d: { facts: string; name?: string; kind: string; place: DeclaredPlace; chi?: string }): Promise<{ ok: true; individual: Individual } | { ok: false; reason: string }> {
+    return this.people.declare(d);
+  }
+
+  /** A declared individual taken in by a place (T376): the origin of their character in its plan. */
+  placeDeclared(name: string, origin: string, place: string): void {
+    this.people.placeDeclared(name, origin, place);
   }
 
   entityOf(name: string): Id | undefined {

@@ -6,7 +6,8 @@
 import type { FileMap } from '../types';
 import { metaBreak } from '../fourthwall';
 import { SOLO } from '../wandererIds';
-import { BINDING_WORDS, DAY_PHASES, relationKind, type DayPhase, type People } from './society';
+import { BINDING_WORDS, DAY_PHASES, WHERES, relationKind, type DayPhase, type People } from './society';
+import { cleanText } from '../cleantext';
 import { internalFields, internalName, internalPlot, italianName } from '../internalNames';
 
 export interface Beat {
@@ -233,4 +234,55 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
   if (fatal || !tappe.length) return { problems };
   const { quest: _, ...rest } = plot;
   return { problems, plot: { ...rest, involved: [...new Set(tappe.map((b) => b.who))], beats: tappe, ...(missione ? { quest: missione } : {}) } };
+}
+
+// --- A plot the master writes (T376, ADR-0188 §5.3) ------------------------------------------------
+
+/** How many beats a plot of the master has, at most (as many as the Narrator's). */
+export const MASTER_BEATS = 8;
+
+/**
+ * A plot the master writes in the Direction (T376): the same shape as the Narrator's (`plotFromRaw`), from texts of a player (`cleanText`:
+ * one line, no markup) with days 0-4, the moments and the places of the world, then the validator of the plots (`reviewPlot`: its people
+ * exist, an animal is silent, the bonds are those of the registry, the runes do what the canon says, nothing breaks the fourth wall, by
+ * the local filter only). Nothing is repaired in silence: what does not hold goes back to the master, all of it. No quest: those are the
+ * Narrator's. No call to the models.
+ */
+export function masterPlot(raw: unknown, people: People, day: number, id: string, words: string[] = []): { plot: Plot } | { errors: string[] } {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const errors: string[] = [];
+  const text = (v: unknown, max: number, what: string, optional = false): string | undefined => {
+    if (optional && (v === undefined || v === null || (typeof v === 'string' && !v.trim()))) return undefined;
+    const c = cleanText(v, max, what);
+    if ('error' in c) {
+      errors.push(c.error);
+      return undefined;
+    }
+    return c.text;
+  };
+  const title = text(r.title, 60, 'il titolo');
+  const mystery = text(r.mystery, 300, 'il mistero', true);
+  const list = Array.isArray(r.beats) ? r.beats : [];
+  if (!list.length) errors.push('serve almeno una tappa');
+  if (list.length > MASTER_BEATS) errors.push(`al più ${MASTER_BEATS} tappe`);
+  const beats = list.slice(0, MASTER_BEATS).map((b, i) => {
+    const x = (b && typeof b === 'object' ? b : {}) as Record<string, unknown>;
+    const n = `tappa ${i + 1}`;
+    const d = Number(x.day);
+    if (!Number.isInteger(d) || d < 0 || d > 4) errors.push(`${n}: il giorno va da 0 a 4 (dopo l'inizio della trama)`);
+    const moment = internalName('momenti', String(x.moment ?? ''));
+    if (!(DAY_PHASES as string[]).includes(moment)) errors.push(`${n}: il momento è uno di ${DAY_PHASES.map((p) => italianName('momenti', p)).join(', ')}`);
+    const where = internalName('dove', String(x.where ?? ''));
+    if (!(WHERES as string[]).includes(where)) errors.push(`${n}: il luogo è uno di ${WHERES.map((w) => italianName('dove', w)).join(', ')}`);
+    const who = text(x.who, 40, `${n}: chi`);
+    const what = text(x.what, 120, `${n}: che cosa fa`);
+    const line = text(x.line, 140, `${n}: la battuta`, true);
+    const clue = text(x.clue, 120, `${n}: l'indizio`, true);
+    return { day: d, moment, who, where, what, ...(line ? { line } : {}), ...(clue ? { clue } : {}) };
+  });
+  if (errors.length) return { errors };
+  const plot = plotFromRaw({ title, mystery: mystery ?? '', beats }, day, id);
+  const review = reviewPlot(plot, people, words);
+  if (review.problems.length || !review.plot) return { errors: review.problems.length ? review.problems : ['la trama non regge'] };
+  return { plot: review.plot };
 }

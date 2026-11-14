@@ -228,7 +228,9 @@ export class MockAiModels implements AiModels, DecisionModels {
         const rng = new Rng(hashStr(`${d.archetype?.name}|${d.ctx?.place}|${this.drawn++}`));
         // A careful narrator: a name not taken (the kernel says which ones are).
         const avoid: string[] = d.ctx?.avoid ?? [];
-        const nome = rng.pick(NAMES.filter((n) => !avoid.includes(n)).length ? NAMES.filter((n) => !avoid.includes(n)) : NAMES);
+        // An individual the master declared (T376): the name and the facts given are kept, the story says them.
+        const facts = typeof d.ctx?.facts === 'string' ? d.ctx.facts : undefined;
+        const nome = typeof d.ctx?.name === 'string' && d.ctx.name ? d.ctx.name : rng.pick(NAMES.filter((n) => !avoid.includes(n)).length ? NAMES.filter((n) => !avoid.includes(n)) : NAMES);
         const common: string[] = d.ctx?.common ?? [];
         // The bonds of the world with their kinds (T310b), as the Narrator's schema says them.
         const BONDS: Array<[string, string]> = [['fratello', 'sibling'], ['sorella', 'sibling'], ['figlio', 'child'], ['amico', 'friend'], ['rivale', 'rival']];
@@ -237,10 +239,10 @@ export class MockAiModels implements AiModels, DecisionModels {
           persona: `Sei ${nome}, ${d.archetype?.description ?? ''}. ${d.archetype?.persona ?? ''}`,
           look: rng.pick(['ha le mani screpolate dal lavoro', 'porta un fazzoletto rosso al collo', 'zoppica leggermente', 'ha un sorriso sdentato e gentile']),
           carries: [common.length ? rng.pick(common) : 'pane', common.length > 1 ? rng.pick(common) : 'moneta', 'Fischietto di canna'],
-          job: rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera']),
+          job: ((j: string) => (facts ? (/\b(fabbr[oa]|mugnai[oa]|fornai[oa]|pescator[ea]|guardia|locandier[ae]|pastor[ea]|tessitrice|erborist[ae])\b/i.exec(facts)?.[1] ?? j) : j))(rng.pick(['contadina', 'fornaio', 'pastore', 'tessitrice', 'boscaiolo', 'locandiera'])),
           gender: /a$|e$/.test(nome) && !/one$/.test(nome) ? 'female' : 'male',
           age: rng.pick(['giovane', 'adulto', 'anziana']),
-          story: `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
+          story: facts ? facts.slice(0, 300) : `È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.`,
           // Someone already known becomes family; otherwise a relative not met yet.
           family: (() => {
             const known = [...String(d.ctx?.society ?? '').split('Nominate')[0].matchAll(/^- ([^,]+),/gm)].pop()?.[1];
@@ -324,6 +326,12 @@ export class MockAiModels implements AiModels, DecisionModels {
       case 'referente.coordinate': {
         const t = String(d.text ?? '');
         if (/distrugg.*universo|cancella tutto/i.test(t)) return { reply: 'Questo no.', task: 'none', refusal: "distruggerebbe l'universo" };
+        // An individual the master declares (T376): who they are, by name, and where they live («vive a Valdorso», «sta nella Piana»).
+        if (/\bindividuo\b|\bsi chiama\b|\bdi nome\b/i.test(t)) {
+          const name = /(?:si chiama|di nome)\s+([\p{Lu}][\p{L}']+)/u.exec(t)?.[1];
+          const target = /(?:vive|sta|abita|lavora)\s+(?:a|ad|in|nel|nella|nello|al|alla)\s+«?([^«»,.;]+?)»?\s*(?:[,.;]|$)/iu.exec(t)?.[1]?.trim();
+          return { reply: 'Lo dico al Narratore.', task: 'individual', request: t, ...(name ? { name } : {}), ...(target ? { target } : {}) };
+        }
         // A directive of the master (T374): how the world is made from now on, for the team its words name.
         if (/direttiva|d'ora in (poi|avanti)|da ora in poi/i.test(t)) {
           const section = /nom[ei] dei luoghi|luogh|region|mappa|villagg|città/i.test(t)

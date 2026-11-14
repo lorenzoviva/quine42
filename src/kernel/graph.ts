@@ -588,7 +588,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   const individualByName = new Map<string, string>();
   const PF = 'world/people.json';
   for (const p of people.people) {
-    const id = g.add('individual', p.name, p.name, PF, { specie: p.species ?? speciesOf(p.kind), genere: p.gender, tipo_modulo: p.kind, mestiere: p.job, eta: p.age, luogo: p.place, legame_viandante: bondWith(p, SOLO) });
+    const id = g.add('individual', p.name, p.name, PF, { specie: p.species ?? speciesOf(p.kind), genere: p.gender, tipo_modulo: p.kind, mestiere: p.job, eta: p.age, luogo: p.place, legame_viandante: bondWith(p, SOLO), ...(p.declared ? { dichiarato: true, ...(p.origin ? {} : { atteso: true }) } : {}) });
     individualByName.set(p.name, id);
   }
   // Someone named and not met is of the species of who named them (as the repair of the society assumes).
