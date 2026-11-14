@@ -5473,3 +5473,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (T365 non ha UI nuova).
 - Quando è fatto: commit su `task/T384`, kernel 0.7.6; poi l'orchestratore integra T384 e `integra T365` toglie worktree e branch di T365. Sicurezza: quella di T365, nessuna superficie nuova oltre quella.
 - Esito: T365 integrato dopo T366: in `server/session.ts` e `src/session/host.ts` restano sia `private` (ADR-0194) sia `server` (ADR-0195), che arrivano insieme fino al kernel; l'ADR di T365 è ADR-0195 (rinumerazione già sul branch di T365, numero libero, rimandi coerenti); kernel 0.7.6 in version.ts, package.json, lock e seme, con i rimandi di T365 a 0.7.5 portati a 0.7.6 e quelli di T366 lasciati; typecheck, build e suite intera verdi (216 file, 3204 test); nessuna chiave in `dist/`; restano i limiti di T365 (nessuna interfaccia mostra il costo, il passaggio di `server` dal server al kernel provato solo dal typecheck); sicurezza: quella di T365, nessuna superficie nuova oltre quella.
+
+### T385 · Integrare T373 nel base (conflitti dopo T365: kernel 0.7.7, ADR-0196) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 43
+- Contesto: `integra T373` (il ritmo e la pausa del mondo, ADR-0196, kernel 0.7.7) ha trovato conflitti in `AGENTS.md`, `docs/pipeline/PIANO.md`, `package-lock.json`, `package.json`, `server/session.ts`, `src/kernel/version.ts`, `src/session/host.ts`, `universe/universe.json`: nel frattempo è entrato T365 via T384 (costo delle carte, ADR-0195, kernel 0.7.6). Nasce da T373: `dossier T373`, `dossier T384`.
+- Cosa fare: nel worktree `git merge task/T373`; in `server/session.ts`, `src/session/host.ts`, `AGENTS.md` (e ovunque ci sia un conflitto) tenere entrambe le aggiunte (`private`, `server` e `pace` arrivano insieme fino al kernel); `docs/pipeline/PIANO.md` è generato: tenere la versione del base; ADR-0196 resta (controllare che sia libero); kernel `0.7.7` in `src/kernel/version.ts`, `package.json`, `package-lock.json`, `universe/universe.json`, coi rimandi di T365 a 0.7.6 lasciati; typecheck, build e suite intera coi turni.
+- Test: suite intera, typecheck e build coi turni.
+- Browser: no (T373 è già stato visto nel browser; il merge non cambia UI).
+- Quando è fatto: commit su `task/T385`, kernel 0.7.7; poi l'orchestratore integra T385 e `integra T373` toglie worktree e branch di T373. Sicurezza: quella di T373 (V-039), nessuna superficie nuova oltre quella.
