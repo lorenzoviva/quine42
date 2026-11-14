@@ -1,0 +1,226 @@
+<!-- fattoria: sculpted by gemini-4-argon (step 9), the Artist's vote 7/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhswdavptcxyrgQz" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Main farmhouse body around centre H: 8x7 interior (40x35 voxels) so both side wings fit cleanly -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <all in="[Hh]E" out="*h" symmetry="()" steps="4"/>
+      <all in="E[Hh]" out="h*" symmetry="()" steps="3"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Stair zone inside the farmhouse along the back wall: 2 cells landing before small-x, 4 cells strip, floor after -->
+      <one in="wwwwwwww/whhhhhhh/whhhhhhh" out="********/***ssss*/***ssss*" symmetry="()" steps="1"/>
+
+      <!-- Silo / dovecote tower on one of the rear corners of the farmhouse -->
+      <one in="EE/EE/Ew" out="tt/tt/*w" symmetry="(x)" steps="1"/>
+      <all in="tE" out="*t" steps="1"/>
+      <all in="tE/*t" out="*t/**"/>
+
+      <!-- Lean-to (tettoia) 4 cells deep (20 voxels) and 7 cells long (35 voxels) on one side of the farmhouse -->
+      <one in="wEEEE/wEEEE/wEEEE/wEEEE/wEEEE/wEEEE/wEEEE" out="*pppp/*pppp/*pppp/*pppp/*pppp/*pppp/*pppp" symmetry="(x)" steps="1"/>
+
+      <!-- Barn wing on the other side wall (where E remains): 3 cells out, 4 cells deep, plus brick wall v -->
+      <one in="EEEEw/EEEEw/EEEEw/EEEEw/EEEEw/EEEEw" out="*****/*aaa*/*aaa*/*aaa*/*aaa*/*****" symmetry="(x)" steps="1"/>
+      <all in="aE" out="*v"/>
+      <all in="vE/*v" out="*v/**"/>
+
+      <!-- Farmyard around the farmhouse, barn, lean-to and silo -->
+      <all in="[wvtp]E" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Expand the yard at Huge and Gargantuan sizes where at least 5 cells of E remain -->
+      <all in="cEEEEE" out="*ccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Haystack in the yard -->
+      <one in="ccc/ccc/ccc" out="***/**y/**y" steps="2"/>
+
+      <!-- Well in the expanded yard (matches when a 4x4 patch of yard is free) -->
+      <one in="cccc/cccc/cccc/cccc" out="****/*QQ*/*QQ*/****" steps="1"/>
+
+      <!-- Low stone wall / fence around the yard -->
+      <all in="cE" out="*x" steps="1"/>
+      <all in="xE/*x" out="*x/**"/>
+
+      <!-- Cultivated fields outside the fence at Huge+ sizes where 4 cells of open soil remain -->
+      <all in="xEEEE" out="*ggg*" steps="1"/>
+      <all in="gE/*g" out="*g/**" steps="4"/>
+
+      <!-- Orchard trees in remaining open soil at Huge+ sizes -->
+      <one in="EEEE/EEEE/EEEE/EEEE" out="****/*zz*/*zz*/****" steps="3"/>
+
+      <!-- Way out from H straight to the front (south): door d (3 cells = 15 voxels wide) and road r to the edge -->
+      <all in="[Hh]/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dr]/[cxpgE]" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="r[cxpgE]" out="*r" symmetry="(x)" steps="1"/>
+      <prl in="H" out="h"/>
+    </sequence>
+
+    <map scale="5 5 1" values="BEhswdavptcxyrgQzfFWVGKLJRPOoNTkMU#90#91#92#94#20#21ijmnqub" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+      <rule in="p" out="ppppp/pbbbp/pbbbp/pbbbp/ppppp"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="x" out="xxxxx/xxxxx/xxxxx/xxxxx/xxxxx"/>
+      <rule in="y" out="yyyyy/yyyyy/yyyyy/yyyyy/yyyyy"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="Q" out="QQQQQ/QqqqQ/QqqqQ/QqqqQ/QQQQQ"/>
+      <rule in="z" out="zzzzz/zmmmz/zmmmz/zmmmz/zzzzz"/>
+
+      <sequence symmetry="(xy)">
+        <!-- Unions for imported parts -->
+        <union symbol="+" values="WVG"/>
+        <union symbol="=" values="fF"/>
+        <union symbol="%" values="G"/>
+
+        <!-- B. Heights: grow columns from the bottom layer -->
+
+        <!-- Main farmhouse walls (w) and front door column (d): 2 storeys = 64 high + roof R -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B w" out="w G" steps="1"/>
+        <all steps="3"><rule in="B d" out="d W"/><rule in="B w" out="w G"/></all>
+        <all steps="6"><rule in="B d" out="d W"/><rule in="B w" out="w W"/></all>
+        <all steps="8"><rule in="B d" out="d W"/><rule in="B w" out="w j"/></all>
+        <all steps="14"><rule in="B d" out="d W"/><rule in="B w" out="w W"/></all>
+        <all steps="10"><rule in="B d" out="d W"/><rule in="B w" out="w W"/></all>
+        <all steps="8"><rule in="B d" out="d j"/><rule in="B w" out="w j"/></all>
+        <all steps="14"><rule in="B d" out="d W"/><rule in="B w" out="w W"/></all>
+        <prl><rule in="w" out="R"/><rule in="d" out="R"/></prl>
+
+        <!-- Main farmhouse interior (h) and stair zone (s): floor at z=0, slab at z=32, roof R at z=64 -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+
+        <!-- Barn walls (v) and interior (a): 1 storey = 34 high + roof J -->
+        <all in="B v" out="v G" steps="4"/>
+        <all in="B v" out="v V" steps="6"/>
+        <all in="B v" out="v j" steps="8"/>
+        <all in="B v" out="v V" steps="16"/>
+        <prl in="v" out="J"/>
+        <all in="B a" out="a f" steps="1"/>
+        <all in="B a" out="a B" steps="33"/>
+        <prl in="a" out="J"/>
+
+        <!-- Lean-to porch (p, b): corner/outer wooden posts P rise 33, roof J at z=34 -->
+        <all in="b[pB]" out="p*" steps="1"/>
+        <all in="B p" out="u *" steps="1"/>
+        <all in="B b" out="b P" steps="33"/>
+        <prl in="b" out="J"/>
+        <all in="B u" out="u B" steps="33"/>
+        <prl in="u" out="J"/>
+
+        <!-- Silo / dovecote tower (t): stone column 44 high, flat top for battlements & slits -->
+        <all in="B t" out="t G" steps="44"/>
+        <prl in="t" out="G"/>
+
+        <!-- Low courtyard fence/wall (x): 7 high -->
+        <all in="B x" out="x G" steps="6"/>
+
+        <!-- Haystack (y): stepped mound of hay -->
+        <all in="B y" out="y *" steps="10"/>
+        <all in="yB" out="*B" steps="1"/>
+        <all in="B y" out="y *" steps="6"/>
+
+        <!-- Well (Q, q): stone curb and water -->
+        <all in="B Q" out="Q G" steps="7"/>
+        <all in="B q" out="q n" steps="3"/>
+
+        <!-- Orchard trees (z, m): trunk P and canopy L -->
+        <all in="B m" out="m P" steps="12"/>
+        <all in="B m" out="m L" steps="10"/>
+        <all in="LB" out="*L" steps="2"/>
+
+        <!-- C. Full scale: doors, parts, windows, roofs, cleaning -->
+
+        <!-- Internal doorway between farmhouse (f) and barn (f) through shared wall -->
+        <one in="fGGGGGGf" out="*OOOOOO*" symmetry="(xy)" steps="1"/>
+        <all in="O/[WGV]" out="*/O" symmetry="()" steps="5"/>
+        <all in="[WGV]/O" out="O/*" symmetry="()" steps="5"/>
+
+        <!-- Include parts -->
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- Cleanly spaced windows in the 8-high window band (j): 4 wide, 8 high, 3 voxels margin on each side -->
+        <one steps="16">
+          <rule in="BBBBBBBBBB/jjjjjjjjjj B/j B/j B/j B/j B/j B/j B/j" out="**********/jjiKKKKijj */* */* */* */* */* */*"/>
+        </one>
+        <all in="B K" out="K *" steps="7"/>
+        <all in="B i" out="i *" steps="7"/>
+        <all in="KjjjjB" out="*KKKK*"/>
+        <prl><rule in="j" out="W"/><rule in="i" out="W"/></prl>
+
+        <!-- Main farmhouse hip roof (R) with eaves and chimney -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>
+        <one in="B B R" out="* G *" steps="1" symmetry="()"/>
+        <all in="B G" out="G *" steps="8"/>
+
+        <!-- Barn and lean-to roof (J) -->
+        <all in="JB" out="*J" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **J**/**J**/JJJJJ/**J**/**J**" out="*****/*****/**J**/*****/***** *****/*****/*****/*****/*****" steps="7" symmetry="()"/>
+
+        <!-- Clean up temporary markers -->
+        <prl><rule in="q" out="B"/><rule in="m" out="z"/></prl>
+      </sequence>
+    </map>
+  </map>
+
+  <!-- Palette -->
+  <color symbol="E" value="8a9a68" name="erba" area="field"/>
+  <color symbol="c" value="b8a682" name="aia" area="yard"/>
+  <color symbol="r" value="9e8c6c" name="sentiero" area="yard"/>
+  <color symbol="x" value="857c70" name="muretto" area="yard"/>
+  <color symbol="g" value="786048" name="campo arato" area="field"/>
+  <color symbol="z" value="6e8c52" name="frutteto" area="orchard"/>
+  <color symbol="L" value="4e7538" name="chioma" area="orchard"/>
+  <color symbol="Q" value="7a7670" name="pozzo" area="yard"/>
+  <color symbol="n" value="4a7a96" name="acqua" area="yard"/>
+  <color symbol="y" value="d9b854" name="pagliaio" area="yard"/>
+  <color symbol="p" value="a89674" name="pavimento tettoia" area="porch"/>
+  <color symbol="P" value="6e4e32" name="legno" area="porch"/>
+  <color symbol="f" value="b89060" name="tavolato" area="house"/>
+  <color symbol="F" value="9c764c" name="solaio" area="house"/>
+  <color symbol="W" value="dcd2be" name="intonaco" area="house"/>
+  <color symbol="G" value="8c867c" name="pietra" area="tower"/>
+  <color symbol="V" value="a85844" name="mattone" area="barn"/>
+  <color symbol="R" value="b54d38" name="coppi" area="house"/>
+  <color symbol="J" value="9c4230" name="tetto" area="barn"/>
+  <color symbol="K" value="3b4d59" name="finestra" area="house"/>
+  <color symbol="O" value="73482b" name="porta" area="house"/>
+  <color symbol="o" value="4d2f1c" name="assi della porta" area="house"/>
+  <color symbol="N" value="8c867c" name="stipite" area="house"/>
+  <color symbol="k" value="8a6642" name="gradini" area="house"/>
+  <color symbol="M" value="8c867c" name="merlo" area="tower"/>
+  <color symbol="U" value="262422" name="feritoia" area="tower"/>
+  <color symbol="#20" hidden="True" area="house"/>
+  <color symbol="#21" hidden="True" area="house"/>
+
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>

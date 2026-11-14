@@ -1,0 +1,21 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "chiamate": 2,
+ "secondi": 360,
+ "usd": 0.0256,
+ "token": {
+  "prompt": 7145,
+  "output": 1808,
+  "thoughts": 3585
+ },
+ "perCompito": [
+  {
+   "model": "gemini-3.8-flash",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.0256
+  }
+ ],
+ "errore": "Gemini gemini-3.8-flash: fetch failed (non ripetuta)"
+}

@@ -1,0 +1,28 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "modello": "gemini-4-argon",
+ "voto": 6,
+ "chiamate": 5,
+ "secondi": 164,
+ "usd": 0.2053,
+ "token": {
+  "prompt": 49915,
+  "output": 12184,
+  "thoughts": 480
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-argon",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.1984
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 2,
+   "usd": 0.0069
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "chiamate": 4,
+ "secondi": 99,
+ "usd": 0.09,
+ "token": {
+  "prompt": 64541,
+  "output": 11080,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-3.8-flash",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.09
+  }
+ ],
+ "errore": "nessun programma valido"
+}

@@ -1,0 +1,3 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-argon)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 25 × 6 voxel (1,25 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui si sta in piedi ha il l
+[artist → sculptor] obietta: «fattoria»: 6/10 — La torre merlata ha un aspetto troppo militare e poco agricolo.

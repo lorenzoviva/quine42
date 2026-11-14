@@ -170,7 +170,8 @@ uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla
 
 ## Ciò che non c'è ancora
 
-- **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: il prompt è fatto (T354, ADR-0183), il giro sul banco è T355.
+- **Lo Scultore su Gemini** con le parti e il prompt senza scheletro: il giro è fatto (T355, [`gemini/`](gemini/README.md)): 3.8 Flash a Grande
+  0 su 6, Argon 5 su 6 a Enorme e 1 su 2 a Grande, le fattorie fortificate; la domanda all'autore è in `docs/pipeline/domande/T355.md`.
 - **Chi mette persone e animali nelle aree**: le aree sono lette (`formAreas`), nessuno le usa ancora; il Narratore e lo Scenografo (T259)
   le riceveranno in un task loro.
 - **Il lotto di una gargantuesca di 20 caselle** (il tetto dei voxel è misurato e pronto, T356, ADR-0185): la domanda all'autore in

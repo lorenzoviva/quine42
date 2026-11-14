@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-3.8-flash)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (
+[kernel → sculptor] scarta: «forte»: varietà: alla taglia Enorme 10 tipi di parti e 113 parti, alla Grande 10 e 96: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 3: piani: 1 (serve ≥ 2)
+[sculptor] errore: «forte»: nessun programma valido

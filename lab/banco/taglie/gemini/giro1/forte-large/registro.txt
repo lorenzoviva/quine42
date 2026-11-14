@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-3.8-flash)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: "+" è un'unione: vale solo negli ingressi delle regole
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 45 × 24 voxel (2,25 × 1,20 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui 
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 5 × 30 voxel (0,25 × 1,50 caselle), una porta è almeno 11 × 30 a ogni taglia
+[sculptor] errore: «forte»: nessun programma valido
