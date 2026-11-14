@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 443 (claude). Crediti: vedi `stato`.
+Aggiornato il 15/11/2026, epoca 445 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,7 +24,7 @@ Aggiornato il 14/11/2026, epoca 443 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T396 (testo del viandante a Jev solo via OpenRouter ZDR, D55.2), T370 (fable). T395 integrato (kernel 0.7.13: Argon per le strutture di ogni taglia, 3.5 Flash a 1,50/9,00, stima piena 1,56 $/h; la stima non conta ancora Argon sulle strutture: proposto un task all'autore). Claude 5h al 33 % (reset 00:40 CET), settimana 68 %, esaurimento previsto 16/11.
+0. **Pronti:** T370 (fable). T396 integrato il 15/11 (ADR-0204, V-044: il testo del viandante va a Jev solo per la via OpenRouter con `zdr`, `TypeSafeGate` lo rifiuta sempre; non provato contro OpenRouter né TypeSafe veri; un fallimento di `produzione.test.ts` sotto carico, verde da solo). T395 integrato (kernel 0.7.13: Argon per le strutture di ogni taglia, 3.5 Flash a 1,50/9,00, stima piena 1,56 $/h; la stima non conta ancora Argon sulle strutture: proposto un task all'autore). Claude 5h al 33 % (reset 00:40 CET), settimana 68 %, esaurimento previsto 16/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 16:13 CET):** Claude settimana 76 %, 5h 29 % (reset 19:29), esaurimento previsto 15/11 16:52, prima del reset del 19/11 16:59; Fable settimana 92 %; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -41,5 +41,5 @@ Aggiornato il 14/11/2026, epoca 443 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **443 (claude):** T395 integrato.
-- **442 (claude):** D58 e D55 chiuse → T395, T396.
+- **445 (claude):** T396 integrato.
+- **444 (claude):** T392 preparato per il reset del 15/11 mattina, da solo.
