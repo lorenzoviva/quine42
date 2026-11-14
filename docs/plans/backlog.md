@@ -5529,7 +5529,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T387`, esito con cosa è provato e cosa no. Sicurezza: nessuna superficie nuova (solo client).
 - Esito: il gioco al tocco: levetta che tiene i tasti di WASD, pulsanti che premono i tasti (E, salta, T, borsa, menu ⋯ con gli altri, ✕ per Esc, hotbar 1–6), sulla scena tocco breve = clic, tocco lungo = tasto destro, un dito = orbita, due = zoom con i limiti di oggi, niente zoom o scorrimento della pagina sopra la scena, il campo di testo sopra la tastiera; desktop invariato; test delle funzioni pure, suite e typecheck verdi; ADR-0198; non provati il telefono vero (tastiera virtuale, Safari iOS) e il trascinare nell'inventario, che resta solo col mouse; sicurezza: nessuna superficie nuova (solo client)
 
-### T388 · L'HUD su un telefono: meno ingombro, le istruzioni in un aiuto, «gira il telefono» in verticale — `da fare`
+### T388 · L'HUD su un telefono: meno ingombro, le istruzioni in un aiuto, «gira il telefono» in verticale — `fatto` (`ad2f5241`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 43
 - Contesto: dalla prova dell'autore sul telefono (14/11): l'HUD è troppo affollato per lo schermo; in verticale non c'è spazio per l'interfaccia. Le istruzioni con i controlli in basso occupano spazio che manca. Dipende da T387 per i pulsanti del tocco (lo spazio va diviso con loro).
@@ -5538,6 +5538,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì. Screenshot a 844 × 390 (orizzontale) e 390 × 844 (verticale: la schermata di rotazione), e su desktop invariato; la finestra d'aiuto si apre e chiude. Prova sul telefono vero dell'autore dopo.
 - Dipende da T387.
 - Quando è fatto: commit su `task/T388` con gli screenshot descritti nell'esito. Sicurezza: nessuna superficie nuova.
+- Esito: «?» in alto a destra (anche su desktop) apre la finestrella dei comandi (la legenda dei tasti, col dito anche levetta e dita, «Tutto l'aiuto»), che si chiude con ✕, Esc o il ✕ dei pulsanti al tocco; su uno schermo basso (max-height 520px) la riga dei tasti va in «?», luogo, bisogni e diario rimpiccioliscono e si richiudono al tocco (chiusi all'inizio), i messaggi vanno in alto al centro (gli ultimi tre), il fumetto sopra la hotbar, nulla sopra levetta e pulsanti; col dito la borsa lascia il posto al ✕ di T387, che prima copriva; in verticale su un telefono «Gira il telefono» a tutto schermo e il renderer si ferma (il kernel va avanti); desktop invariato a parte «?» e il diario spostato di 42 px; `main.ts` toccato per Esc, il ✕ e la pausa del rendering; typecheck e suite intera verdi (dopo l'ultimo ritocco al CSS rilanciati solo theme e touch, verdi); non provato il telefono vero; sicurezza: nessuna superficie nuova (solo client)
 
 ### T389 · I laboratori MJ dei voxel su un telefono: la preview visibile, lo zoom, gli strumenti nei menu — `da fare`
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 3

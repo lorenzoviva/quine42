@@ -901,6 +901,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `interactive-widget=resizes-content` e, dove il browser non rimpicciolisce la pagina, `--keyboard` dal `visualViewport`: scrivendo (`typing`)
   lo strato si toglie e chat e «Altro…» stanno sopra la tastiera. Restano del mouse il trascinare nell'inventario, l'editor e la console.
   Catture in `docs/catture/T387/`.
+- **L'HUD su uno schermo piccolo** (T388, `src/ui/hud.ts`, `src/style.css`): **«?»** in alto a destra, ovunque, apre la finestrella
+  dei comandi (`#keyhelp`: la legenda dei tasti copiata dalla riga in fondo, col dito anche ciò che fanno levetta e dita, «Tutto l'aiuto» che
+  preme H); si chiude con ✕, Esc e, col dito, con il ✕ dello strato del tocco (la finestrella conta come una finestra aperta). Su uno
+  **schermo basso** (`COMPACT`, `max-height: 520px`: un telefono di lato, una finestra bassa) la riga dei tasti va in «?», i pannelli
+  rimpiccioliscono e il luogo con i bisogni e il diario si richiudono al tocco (chiusi all'inizio: il nome del luogo e le barre senza parole,
+  «Missioni» col numero), i messaggi vanno in alto al centro (gli ultimi tre), il fumetto sopra la hotbar, nulla sopra levetta e pulsanti; col
+  dito la borsa lascia a destra il posto del ✕, che le sta sopra. Su un desktop con lo spazio cambia solo «?». **In verticale** su un telefono
+  (`UPRIGHT_SMALL`, verticale e lato corto sotto 600 px, con la classe `touch`) una schermata a tutto schermo chiede di girarlo
+  (`#rotate`), e il mondo dietro non si disegna (`Hud.rotating`: il kernel va avanti, il renderer si ferma). Catture in `docs/catture/T388/`.
 - **La GPU** (T330): ogni `THREE.WebGLRenderer` del gioco, del laboratorio e del sito nasce da `makeRenderer` (`src/render/gpu.ts`), che chiede `powerPreference: 'high-performance'` (`GPU_PREFERENCE`): su un portatile con due GPU il browser prende la dedicata. La GPU in uso (`gpuName`, da `WEBGL_debug_renderer_info` se il browser la dà) è in console come `window.gpu` e in una riga `[gpu]` all'avvio; resta nel client. `tests/gpu.test.ts` legge i sorgenti: nessun `new WebGLRenderer(` fuori dall'aiuto.
 - **Il glitch dei guasti** (T316, WCAG 2.3.1): `src/render/glitch.ts` è un piano dell'orologio, non del frame (`glitchPlan(t, intensità, fermo)`, puro): niente lampi né inversioni a pieno schermo, strappi e blocchi di rumore stretti che restano `HOLD` (0,4 s: meno di 3 cambi al secondo), glifi che vivono 1,6-2,8 s e appaiono e spariscono sfumando, l'intensità che sale in circa un secondo (`GLITCH_EASE`); la crepa rara del mondo sano è un arco di 0,8 s (`crackLevel`). Con `prefers-reduced-motion` restano solo scanline, tinta e fantasma, fermi; il riquadro dei guasti respira piano (`faultpulse`). `tests/glitch-safe.test.ts` lo misura con un orologio finto.
 - **Bozze di prova**: `kernel.sampleDrafts()` (una boscosa, una aperta, una con acqua, scelte in modo deterministico) è dove il
