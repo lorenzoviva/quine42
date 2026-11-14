@@ -20,6 +20,7 @@
 //   POST /api/universe/<name>/bring           { cards }                       → { head, brought, changes }
 //   GET|POST|DELETE /api/universe/<name>/guests                               the private universe: guests and invites (T366, server/campaign.ts)
 //   GET|POST /api/universe/<name>/pace                                        the pace of the world, the master's (T373, server/campaign.ts)
+//   GET|POST /api/universe/<name>/campaign                                    the directives and the regions of the master, from the site (T377, server/campaignSite.ts)
 //
 // A universe born here starts from the root of its contract (T295, ADR-0170, `plantRoot`): every universe born from the seed of that
 // contract has it, so they are kin. A return to the root is refused: it holds no file.
@@ -51,6 +52,7 @@ import type { ProgramChecker } from './programCheck';
 import { withCardChoice } from '../src/kernel/bring';
 import { KERNEL_CONTRACT } from '../src/kernel/version';
 import { CampaignArchive, guestsAnswer, paceAnswer, type GuestsContext, type PaceContext } from './campaign';
+import { campaignAnswer, type CampaignSiteContext } from './campaignSite';
 
 const MAX_BODY = 32 * 1024 * 1024;
 /** Universes of which an account is the master, unless the `.env` says otherwise (`QUINE_UNIVERSI_PER_ACCOUNT`, V-026). */
@@ -93,6 +95,8 @@ function send(res: ServerResponse, status: number, body: unknown): void {
 
 /** What the `guests` route reads: a few words. */
 const GUESTS_BODY = 4 * 1024;
+/** What the `campaign` route reads (T377): the directives whole, at most `CAMPAIGN_TEXT_CHARS` characters, escaped. */
+const CAMPAIGN_BODY = 160 * 1024;
 
 function readBody(req: IncomingMessage, max = MAX_BODY): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -294,7 +298,7 @@ export interface UniverseStoreOptions {
   /** The private universes' guests and invites (ADR-0194): those beside `baseDir` unless said. */
   campaigns?: CampaignArchive;
   /** What the `guests` route does to the worlds: who is in one, closing a guest's sockets, telling a world it is private (server/session.ts). */
-  worlds?: Pick<GuestsContext, 'inWorld' | 'expel' | 'tellWorld'> & Pick<PaceContext, 'tellPace'>;
+  worlds?: Pick<GuestsContext, 'inWorld' | 'expel' | 'tellWorld'> & Pick<PaceContext, 'tellPace'> & { campaign?: CampaignSiteContext['world'] };
 }
 
 export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}): Connect.NextHandleFunction {
@@ -324,7 +328,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const url = (req.url ?? '').split('?')[0];
     const who = await callerOf(req, access);
     if ('refused' in who) return send(res, who.status, { error: who.refused });
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring|guests|pace)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring|guests|pace|campaign)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
       // A private universe only for its master and its guests, and to them said so (`invite`): to anyone else it does not exist (ADR-0194).
@@ -343,20 +347,20 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const notYours = () => send(res, 403, { error: game.many ? 'solo il master di questo universo' : 'solo da questa macchina' });
     // The world's token is for its own universe: making others is not a world's to do (ADR-0110), nor bringing them cards from others; nor
     // knowing its guests (rule 8g).
-    if (who.server && (op === 'clone' || op === 'kin' || op === 'bring' || op === 'guests' || op === 'pace')) return notYours();
+    if (who.server && (op === 'clone' || op === 'kin' || op === 'bring' || op === 'guests' || op === 'pace' || op === 'campaign')) return notYours();
     const unknown = () => send(res, 404, { error: 'universo sconosciuto' });
     // A private universe for who is neither its master nor a guest: as a name that does not exist, whatever is asked (no enumeration, ADR-0194).
     // Only an invite to it gets past (`redeem`, in the route below); making one with its name stays refused, as for every name that is taken.
     const hidden = op !== 'create' && !mine && !campaigns.lets(name, who, game, masterUid);
     /** Whether the caller may see another universe of the folder (the cards a master brings from it, ADR-0170). */
     const sees = (other: string) => campaigns.lets(other, who, undefined, masterUid);
-    if ((op === 'guests' || op === 'pace') && !arg) {
+    if ((op === 'guests' || op === 'pace' || op === 'campaign') && !arg) {
       if (!(await exists(path.join(root, '.git')))) return unknown();
       if (req.method !== 'GET' && !isJson(req)) return send(res, 415, { error: 'solo JSON' });
       let body: Record<string, unknown> = {};
       if (req.method !== 'GET') {
         try {
-          const raw = await readBody(req, GUESTS_BODY);
+          const raw = await readBody(req, op === 'campaign' ? CAMPAIGN_BODY : GUESTS_BODY);
           body = raw ? (JSON.parse(raw) ?? {}) : {};
         } catch {
           return send(res, 400, { error: 'richiesta non valida' });
@@ -364,7 +368,21 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
         if (typeof body !== 'object' || Array.isArray(body)) return send(res, 400, { error: 'richiesta non valida' });
       }
       const r =
-        op === 'pace'
+        op === 'campaign'
+          ? await campaignAnswer(req.method ?? 'GET', body, {
+              name,
+              who,
+              game,
+              masterUid,
+              root,
+              world: opts.worlds?.campaign,
+              serial: (fn) => serial(name, fn),
+              commit: async (rel, text, message, author) => {
+                await writeFiles(root, { [rel]: text });
+                return (await commitAll(root, message, author)) ?? '';
+              },
+            })
+          : op === 'pace'
           ? await paceAnswer(req.method ?? 'GET', body, { name, who, game, masterUid, archive: campaigns, tellPace: opts.worlds?.tellPace })
           : await guestsAnswer(req.method ?? 'GET', body, { name, who, game, masterUid, archive: campaigns, invites: opts.accounts?.invites, ...opts.worlds });
       return r.status !== 200 && hidden ? unknown() : send(res, r.status, r.body);

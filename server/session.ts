@@ -18,6 +18,7 @@ import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { failureText, gameIn, gate, refuse, type Caller } from './access';
 import { CampaignArchive, keepPace, keptPace } from './campaign';
 import type { WorldPace } from '../src/kernel/worldPace';
+import type { CampaignDone, CampaignEdit, CampaignSeen } from '../src/kernel/campaignEdit';
 import type { KeyHolders, KeyPolicy } from '../src/kernel/credits';
 import { accountWanderer } from '../src/session/account';
 import { validWandererId } from '../src/kernel/wanderers';
@@ -117,6 +118,12 @@ export async function tellPrivate(name: string, value: boolean): Promise<void> {
 export async function tellPace(name: string, pace: WorldPace): Promise<WorldPace | undefined> {
   const calls = await getActiveWorld(name);
   return calls ? await calls.setPace(pace) : undefined;
+}
+
+/** The campaign of the running world of a universe (T377), if there is one: what it has now and, with an edit, the edit made by it. */
+export async function askCampaign(name: string, edit?: CampaignEdit): Promise<{ seen: CampaignSeen; done?: CampaignDone } | undefined> {
+  const calls = await getActiveWorld(name);
+  return calls ? await calls.campaign(edit) : undefined;
 }
 
 /** Tells every running world who holds a key of OpenRouter now (T363): ids only. A world that does not answer is told again at its next start. */

@@ -18,6 +18,12 @@ export interface Who {
 /** The site remembers, without accounts, the id the player typed (the universe: `UNIVERSE_KEY`, launcher-core.ts). */
 const LOCAL_ID_KEY = 'quine:sito:viandante';
 
+/** Without accounts, the wanderer this browser said it is (the address's `?viandante=`, or the one typed once), undefined if none (T377). */
+export function localWandererId(): string | undefined {
+  const kept = (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('viandante')?.toLowerCase() : undefined) ?? stored(LOCAL_ID_KEY);
+  return validWandererId(kept) ? kept : undefined;
+}
+
 /** Credits in dollars, as the game's panel says them. */
 export function formatCredits(n: number): string {
   return `$${(Number.isFinite(n) ? Math.max(0, n) : 0).toFixed(2)}`;

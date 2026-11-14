@@ -165,7 +165,8 @@ async function main() {
       if (!r.ok) throw new Error(`l'invito non vale: ${r.reason}`);
       if (r.account) account = r.account;
     } else if (config) account = await signedIn(config).catch(() => undefined);
-    if (account || (invite && !config)) {
+    // Without accounts only this machine comes in, as the wanderer of the tab: its master or a guest reads it as themselves (T377).
+    if (account || !config) {
       client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: tabWanderer(params) });
       snap = await client.load();
       // Not there for them either: what follows goes on as before, unnamed (a universe made from here is made as it always was).

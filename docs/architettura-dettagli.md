@@ -130,6 +130,22 @@
 - **I video** (ADR-0131, T244): i file stanno in una cartella del server (`QUINE_VIDEO`), mai nel repository né in `dist/`, con `video.json` accanto (`file`, `titolo`, `descrizione`, nell'ordine). `server/video.ts` risponde a `/api/video` (solo ciò che è nell'elenco e ha il file: niente build né riavvio) e a `/api/video/<file>`, in produzione, in sviluppo e nella preview. Il nome chiesto si confronta con l'elenco e non si unisce mai a un percorso; un `Range` non valido è un 416. Tetti: `FRONT_RATES` (`video`, `videosAtOnce`, `videosInAll`). Una visione costa circa 200 KB, non il file. Guida: `docs/beta/LEGGIMI.md`.
 - **Le istruzioni** (ADR-0131, T244): `docs/beta/guida.md` e, solo con `{ "laCorona": true }` in `site/beta.json`, `docs/beta/la-corona.md`. `server/betaGuide.ts` li porta nella build come moduli virtuali, con la trasformazione delle notizie (`markdownToHtml`). Spenta, la seconda parte non viene mai letta, quindi non è in `dist/` (`tests/site-guide.test.ts`, con una build vera). Senza testi `site/istruzioni.html` non è tra gli ingressi di Rollup e nessun link la mostra.
 - **I laboratori per i giocatori** (ADR-0161, T293): un secondo interruttore in `site/beta.json`, `{ "laboratori": true }`, separato da `laCorona` (`labsOn` in `server/betaGuide.ts`). Spento (il seme del repository) le rotte delle carte fatte a mano rifiutano chiunque e il server di produzione non serve `/lab`; nessun link porta ai laboratori. `npm run dev` lo legge a ogni richiesta, il server di produzione quando parte. Che cosa si accende è in `#carte-crediti`. Acceso (ADR-0169, T294), il server di produzione serve le tre pagine dei laboratori e nient'altro di `/lab`, e la build ha `site/laboratori.html` e il link «Laboratori» (`labsPage`, `virtual:quine-laboratori`); accenderlo vuole una build e un riavvio.
+- **La campagna nel sito** (ADR-0202, T377, kernel 0.7.12; ADR-0188 § 6 riga 7): l'hub delle sessioni (`site/sessioni.ts`) sa chi guarda
+  (`siteCaller`: un account già collegato in questo browser, `signedIn`, mai chiesto per leggere; senza account il viandante di questa macchina,
+  `localWandererId` o `me`) e lo manda con l'elenco e le istantanee: «mia» è una carta la cui istantanea arriva intera (`log`), «SU INVITO»
+  un universo che l'elenco dice privato (`invite`), «ACCEDI» se il server ha gli account e nessuno è collegato. Sulle carte del master di un
+  universo di molti «CAMPAGNA» apre il pannello (`site/campagna.ts`, `CampaignPanel`; anche dal link `?campagna=<nome>`): ospiti e inviti
+  (la rotta `guests`, come la console: privato o pubblico, «Togli», «Revoca», «Aggiungi ospite», «Crea invito» col link una volta), il ritmo
+  (la rotta `pace`, i tre pulsanti), l'atlante (un canvas: luoghi pianificati da `maps/`, regioni del master piene e del Cartografo
+  tratteggiate, il primo luogo e quello scelto; un clic mette il centro) con «Dichiara regione», «Cambia» e «Libera», e le direttive
+  (`world/campaign.md` in un'area di testo, «Salva», le righe lasciate fuori dalla quarta parete dette). Direttive e regioni passano dalla rotta
+  `campaign` dello store (`server/campaignSite.ts`): `GET` → `{ running, text, template, regions, environments, places }`, `POST`
+  `{op:'text', text}` | `{op:'region', region}` | `{op:'release', id}`; solo il master di un universo di molti, mai un mondo, il privato come un nome
+  che non c'è, JSON di al più 160 KiB. I controlli sono quelli del gioco in una funzione pura (`src/kernel/campaignEdit.ts`, `campaignEdit`:
+  `readCampaign`, `masterRegion`, `withoutMasterRegion`). A mondo acceso scrive il mondo (`WorldCalls.campaign` → `Kernel.publish`, un
+  commit della linea principale, e risponde con ciò che ha ora); a mondo spento lo store, nella fila dell'universo, con un commit; un universo
+  di un altro contratto non si scrive dal sito (409). La guida per chi fa il master: `docs/beta/campagna.md`. Test: `tests/campagna-sito.test.ts`,
+  `tests/sicurezza/campagna-sito.test.ts` (V-042).
 
 <a id="lua-sandbox"></a>
 ## Lua: confine e limiti
@@ -636,7 +652,8 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `region`, `release` con `id`), col ritmo di `pace`, e il client sottile del master le manda da lì. Ai giocatori l'atlante coi campi di
   `REGION_FIELDS` e senza le trattenute (`playerFiles`). Nello studio: l'atlante dell'Ufficio dei luoghi (un clic sceglie un luogo, «Dichiara
   regione qui», le regioni del master con «Cambia» e «Libera», il riempitivo tinto e la trattenuta tratteggiata) e la Direzione («Dichiara regione»,
-  «Regione qui» sui luoghi in coda, i luoghi trattenuti detti sul tavolo), con lo stesso modulo (`src/ui/regions.ts`). Il sito è di T377.
+  «Regione qui» sui luoghi in coda, i luoghi trattenuti detti sul tavolo), con lo stesso modulo (`src/ui/regions.ts`). Nel sito la pagina della
+  sessione fa le stesse cose senza entrare (ADR-0202, `#sito`).
 
 <a id="partita-viandanti"></a>
 ## La partita, i viandanti, le rune per ruolo
@@ -813,10 +830,11 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   prima di leggere l'universo: con un account aggiunge l'account agli ospiti (l'invito non è un'identità), un ospite già dentro non lo spende,
   le stesse parole per un token mai esistito, speso o scaduto. Il link è `/?universo=<nome>#invito=<token>`: il frammento non arriva a nessun
   server, la pagina lo toglie dall'indirizzo (`takeFromAddress`) e lo usa (`redeemInvite` in `src/session/login.ts`) prima dello snapshot; uno
-  snapshot che non c'è si rilegge come chi è già collegato (`signedIn`, senza chiedere); se non c'è nemmeno così, con gli account da un'altra macchina
+  snapshot che non c'è si rilegge come chi è già collegato (`signedIn`, senza chiedere) o, senza account, come il viandante della scheda (T377: prima il master non entrava nel suo universo privato su un server senza account); se non c'è nemmeno così, con gli account da un'altra macchina
   (o su un server a inviti) la pagina dice che non c'è o è su invito. Nella console del master, scheda «Universo», la
   sezione «Ospiti e inviti» (`Console.guests` → `UniverseClient.guests`): privato o pubblico, ospiti con «Togli» a due clic, inviti con
-  «Revoca», «Aggiungi ospite», «Crea invito» col link mostrato una volta. Il sito è di T377.
+  «Revoca», «Aggiungi ospite», «Crea invito» col link mostrato una volta. Nel sito le stesse cose dalla pagina della sessione (ADR-0202, `#sito`),
+  e l'hub delle sessioni mostra «SU INVITO» gli universi privati al master e agli ospiti, gli unici a cui l'elenco li dice.
 
 <a id="account"></a>
 ## L'account Firebase
