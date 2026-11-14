@@ -35,11 +35,16 @@ export const PRICES: Record<string, Price> = {
   // STORAGE_READ_ON on the pages that copy Google's; to check on the first bill, as the write: see EXPLICIT_CACHE).
   'gemini-3.8-flash': { input: 0.75, output: 3.75, cached: 0.075, storage: 0.5, until: '2027-01-01', next: { input: 1.5, output: 7.5, cached: 0.15, storage: 1.0 } },
   'gemini-3.6-flash': { input: 0.75, output: 3.75, cached: 0.075, until: '2027-01-01', next: { input: 1.5, output: 7.5, cached: 0.15 } },
+  // Read on FLASH_3_5_READ_ON on OpenRouter (google/gemini-3.5-flash, T395, D55.3): not on Google's page; cached at a tenth, as the others.
+  'gemini-3.5-flash': { input: 1.5, output: 9.0, cached: 0.15, note: 'OpenRouter, 14/11/2026' },
   'gemini-3.5-flash-lite': { input: 0.3, output: 2.5, cached: 0.03 },
   'gemini-3.1-flash-lite': { input: 0.25, output: 1.5, cached: 0.025 },
   'gemini-3.1-pro-preview': { input: 2.0, output: 12.0, cached: 0.2, note: 'fino a 200k token di prompt; oltre: 4,00 / 18,00 / 0,40' },
   'gemini-3-flash-preview': { input: 0.5, output: 3.0, cached: 0.05, note: 'modello «legacy»' },
 };
+
+/** When the price of Gemini 3.5 Flash was read on OpenRouter (T395). */
+export const FLASH_3_5_READ_ON = '2026-11-14';
 
 /** When the prices of Gemini 4 Carbon and Hydrogen were read (T391). */
 export const CARBON_HYDROGEN_READ_ON = '2026-11-14';
@@ -61,7 +66,6 @@ export const EXPLICIT_CACHE = { ttl: 1800, maxTtl: 3600, minTokens: 1024 } as co
  * prices; the ledger uses the higher estimate (its note says so), so a cost is never shown as lower than it is.
  */
 export const ESTIMATED: Record<string, Price> = {
-  'gemini-3.5-flash': { input: 0.75, output: 3.75, cached: 0.075, note: 'stima (report 8.2B)' },
   'gemini-3.7-flash': { input: 0.75, output: 3.75, cached: 0.075, note: 'stima (report 8.2B)' },
 };
 export const UNPRICED = Object.keys(ESTIMATED);

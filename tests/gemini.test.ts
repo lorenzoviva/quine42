@@ -96,7 +96,9 @@ describe('usage ledger', () => {
     expect(l.tasks('2026-10-22')[0].task).toBe('sculpt');
     // Prices change on their date; models without a published price use the report's estimate.
     expect(costOf('gemini-3.8-flash', { prompt: 1e6, output: 0 }, '2027-01-02')).toBe(1.5);
-    expect(priceOf('gemini-3.5-flash')?.note).toMatch(/stima/);
+    expect(priceOf('gemini-3.7-flash')?.note).toMatch(/stima/);
+    // 3.5 Flash at the price OpenRouter said on 14/11 (T395, D55.3).
+    expect(priceOf('gemini-3.5-flash')).toMatchObject({ input: 1.5, output: 9, cached: 0.15 });
     const again = new UsageLog();
     again.load(l.toJson());
     again.load(l.toJson());

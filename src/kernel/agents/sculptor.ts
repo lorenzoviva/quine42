@@ -47,7 +47,9 @@ export interface SculptorAiModels {
 export const DEFAULT_SCULPTORS: SculptorAiModels = {
   simple: 'gemini-3.1-flash-lite',
   figure: 'gemini-3.8-flash',
-  structure: 'gemini-3.8-flash',
+  // The structures of every size on the model of the important ones (T395, D58): at Large 3.8 Flash passed 0 times out of 6 (T355),
+  // Argon 6 out of 8 (T391). Provisional, until the round on Claude (T392).
+  structure: 'gemini-4-argon',
   important: 'gemini-4-argon',
   importanteFino: '2026-12-01',
   artist: 'gemini-3.5-flash',

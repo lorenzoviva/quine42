@@ -61,14 +61,15 @@ describe('the Sculptor', () => {
     expect(r!.xml).toContain('size="20 20 16"');
   });
 
-  it('sends figures and structures to the better model, and the rare sizes (Huge, Gargantuan) to the best one while its price lasts', () => {
+  it('sends figures to the better model, and structures of every size to the best one (T395, D58), the rare sizes on `important` while its price lasts', () => {
     const req = { id: 'x', nome: 'x', aspetto: 'x', classe: 'structure', taglia: 'huge' as const };
     expect(modelFor({ ...req, classe: 'person' }, classOf('person')!, DEFAULT_SCULPTORS)).toBe('gemini-3.8-flash');
     expect(modelFor(req, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
-    expect(modelFor(req, classOf('structure')!, DEFAULT_SCULPTORS, '2026-12-02')).toBe('gemini-3.8-flash');
+    expect(modelFor(req, classOf('structure')!, DEFAULT_SCULPTORS, '2026-12-02')).toBe('gemini-4-argon');
+    expect(modelFor(req, classOf('structure')!, { ...DEFAULT_SCULPTORS, structure: 'gemini-3.8-flash' }, '2026-12-02')).toBe('gemini-3.8-flash');
     expect(modelFor({ ...req, taglia: 'gargantuan' }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
-    expect(modelFor({ ...req, taglia: 'large' }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
-    expect(modelFor({ ...req, taglia: undefined }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-3.8-flash');
+    expect(modelFor({ ...req, taglia: 'large' }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
+    expect(modelFor({ ...req, taglia: undefined }, classOf('structure')!, DEFAULT_SCULPTORS, '2026-11-01')).toBe('gemini-4-argon');
     expect(modelFor({ ...req, classe: 'tree' }, classOf('tree')!, DEFAULT_SCULPTORS)).toBe('gemini-3.1-flash-lite');
   });
 
