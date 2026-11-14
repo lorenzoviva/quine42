@@ -786,4 +786,5 @@ export const UNCOVERED = {
   'V-034': 'il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts',
   'V-035': 'la modalità senza pagamenti e il controllo di salute si provano sul server di produzione vero: tests/sicurezza/produzione.test.ts',
   'V-036': 'chi paga la partita si prova sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/spese-master.test.ts',
+  'V-037': 'le direttive del master si vedono solo dentro il kernel e nei file che escono: le prova tests/sicurezza/direttive.test.ts',
 };

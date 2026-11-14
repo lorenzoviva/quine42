@@ -7,6 +7,8 @@
 // npx vite-node lab/scripts/prompt-tokens.ts -- --roles eceb3b21 [--root H:/projects/rune]  # the fixed texts alone: roles, theme, principles, the Language block
 // npx vite-node lab/scripts/prompt-tokens.ts -- --cache [--persone 6] [--ore 1] [--json f]  # the Actor's explicit cache (T351), offline: its requests
 //   recorded after an offline Genesis, the cache's policy (ExplicitCaches) at the pace of an hour of HOUR, the tokens and dollars it saves
+// npx vite-node lab/scripts/prompt-tokens.ts -- --campaign [--file f.md] [--json f]  # the master's directives (T374), offline: whether every
+//   request of an offline Genesis carries its sections and no other, what they add agent by agent and in an hour of HOUR
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -241,8 +243,152 @@ async function cacheSaving(): Promise<void> {
   if (opt('json')) fs.writeFileSync(path.resolve(opt('json')!), JSON.stringify(out, null, 1) + '\n');
 }
 
+/** A campaign of about 900 tokens as the study measured it (T347, § 4.3): 250 for everyone, Narrator 250, Cartographer 200, Sculptor and Artist 100, Engineer and Physicist 50, Musician 50. */
+const SAMPLE_CAMPAIGN = `# Campagna
+
+## Per tutti
+- (giorno 1) Niente draghi, niente giganti: le bestie sono lupi, orsi, cinghiali, e qualche serpe grossa nelle paludi.
+- (giorno 1) Il regno è povero e stanco di guerra: la gente diffida dei soldati e dei forestieri armati, rispetta chi lavora la terra.
+- (giorno 1) Il fiume Lenta divide il nord di pietra dal sud di legno e paglia; i ponti sono pochi e chi li tiene riscuote un pedaggio.
+- (giorno 2) La magia delle rune è rara e temuta: chi la usa in pubblico viene guardato storto, e i preti la chiamano superbia.
+- (giorno 2) I mesi si contano a lune e le feste seguono il raccolto: la fiera del grano a fine estate, il fuoco dei morti d'inverno.
+- (giorno 3) Le monete sono di rame e d'argento; l'oro lo vede solo il conte, e chi ne mostra viene creduto un ladro.
+
+## Narratore
+- (giorno 1) La gente parla in modo semplice e un poco arcaico: «voi» per chi non si conosce, proverbi del raccolto, poche parole dotte.
+- (giorno 1) I nomi delle persone sono brevi e di suono antico (Orm, Tilde, Berto, Sabe, Gunda); i soprannomi vengono dal mestiere.
+- (giorno 2) Le trame nascono da debiti, eredità, matrimoni combinati, confini dei campi e furti di bestiame, mai da profezie.
+- (giorno 2) Il conte Aldo di Rocca Bassa è assente e lontano: se ne parla, non si incontra; i suoi esattori sì, e non sono amati.
+- (giorno 3) I bambini hanno sempre un compito (guardare le oche, portare l'acqua) e sanno più di quello che dicono.
+- (giorno 3) Le locande sono il posto delle notizie: l'oste sa tutto, ma vuole qualcosa in cambio, anche solo una storia nuova.
+
+## Cartografo
+- (giorno 1) I nomi dei luoghi in lingua d'oïl o che ne hanno il suono: Vaudrè, Lenta, Mont Gris, Bois-Clair, la Ferté.
+- (giorno 1) A nord del fiume colline sassose, pecore e villaggi murati; a sud pianura, paludi, mulini e cascine sparse.
+- (giorno 2) Ogni villaggio ha un pozzo o una fonte in piazza e una cappella; le città più grandi stanno sul fiume.
+- (giorno 2) Le strade sono di terra battuta; solo la via del conte, da nord a sud, ha un selciato e pietre miliari.
+- (giorno 3) Le paludi del sud hanno passerelle di legno e capanne su pali; d'inverno gelano e diventano una scorciatoia.
+
+## Scultore e Artista
+- (giorno 1) Le case di pietra grigia con tetti di lastre a nord, di legno e paglia con il graticcio a sud.
+- (giorno 2) I colori del regno sono smorti: ocra, grigio, verde muschio; il rosso solo per le insegne del conte.
+- (giorno 3) Gli attrezzi sono di legno e ferro battuto, rozzi, consumati dall'uso.
+
+## Ingegnere e Fisico
+- (giorno 1) Le barche del fiume portano al più due persone e un carico piccolo; i carri si rompono sulle strade di terra.
+- (giorno 2) Il ferro è caro: le cose di ferro pesano e si consumano piano.
+
+## Musicista
+- (giorno 1) Solo flauti di canna, cornamuse, tamburi a cornice e voci; niente archi, niente ottoni.
+- (giorno 2) Le melodie sono modali e lente, da lavoro o da festa; la notte nelle paludi quasi silenzio.
+`;
+
+/**
+ * The master's directives (T374, ADR-0191), offline: a Genesis and its first places with a campaign (the file of `--file`, or a sample of
+ * about 900 tokens like the study's), every request recorded; whether each carries its sections and no other (the teams a Genesis does
+ * not call are asked once each); what they add to a request, agent by agent, at T325's 3.26 characters a token; an hour of the lobby's
+ * estimate (HOUR, knobs at 1) shared among the agents as its rows are; the dollars at full price and with the implicit cache (75 %).
+ */
+async function campaignCost(): Promise<void> {
+  const { Kernel } = await import('../../src/kernel/kernel');
+  const { bundledFiles } = await import('../../src/kernel/bundle');
+  const { memoryStore } = await import('../../src/kernel/repo');
+  const { MockAiModels } = await import('../../src/kernel/ai/mock');
+  const { WORLD_THEMES } = await import('../../src/kernel/themes');
+  const { AGENTS } = await import('../../src/kernel/agents/council');
+  const { CAMPAIGN_FILE, CAMPAIGN_SECTIONS, campaignPrompt, campaignSectionsFor, readCampaign } = await import('../../src/kernel/campaign');
+  const { COEFFICIENT_INFO, hourlyEstimate, repairActor } = await import('../../src/kernel/coefficients');
+  const { DEFAULT_SCULPTORS } = await import('../../src/kernel/agents/sculptor');
+  const { costOf } = await import('../../src/kernel/ai/prices');
+  type Agent = keyof typeof AGENTS;
+  const text = opt('file') ? fs.readFileSync(path.resolve(opt('file')!), 'utf8') : SAMPLE_CAMPAIGN;
+  const recorded: Recorded[] = [];
+  class Recording extends MockAiModels {
+    async text(call: TextCall): Promise<string> {
+      recorded.push({ agent: call.agent ?? '', task: call.task, system: call.system ?? '', prompt: call.prompt });
+      return super.text(call);
+    }
+  }
+  const k = await Kernel.boot({ files: { ...bundledFiles, [CAMPAIGN_FILE]: text }, store: memoryStore(), ai: new Recording() });
+  await k.runGenesis(WORLD_THEMES[0].text);
+  for (let i = 0; i < 300; i++) {
+    k.tick(1 / 60);
+    await new Promise((r) => setTimeout(r, 10));
+  }
+  const fromWorld = recorded.length;
+  for (const agent of Object.keys(AGENTS) as Agent[]) if (!recorded.some((r) => r.agent === agent)) await k.council.write(agent, 'prova', 'p').catch(() => undefined);
+  const read = readCampaign(text);
+  const written = CAMPAIGN_SECTIONS.filter((s) => read.sections[s].length);
+  let right = 0;
+  for (const r of recorded) {
+    const mine = campaignSectionsFor(r.agent as Agent);
+    if (written.every((s) => r.system.includes(read.sections[s][0]) === mine.includes(s))) right++;
+  }
+  const tok = (chars: number) => chars / 3.26;
+  // What a request of an agent gains: its block and the blank line before it.
+  const added = (agent: Agent) => {
+    const block = campaignPrompt(read, agent);
+    return block ? tok(block.length + 2) : 0;
+  };
+  // The hour of the lobby's estimate, shared among the agents as its rows are (a Forge: concept, physics, code, review, repair; a pack:
+  // items, physics, review, recipes; a session: the Arbiter, then half a Forge in two and a half calls).
+  const est = hourlyEstimate(k.config.ai);
+  const forge: Partial<Record<Agent, number>> = { narrator: 0.2, physicist: 0.2, engineer: 0.4, arbiter: 0.2 };
+  const pack: Partial<Record<Agent, number>> = { narrator: 0.5, physicist: 0.25, arbiter: 0.25 };
+  const plays: Agent = repairActor(k.config.ai.actor).on ? 'actor' : 'narrator';
+  const rows: Array<[string, Partial<Record<Agent, number>>]> = [
+    [COEFFICIENT_INFO.chunks.nome, { cartographer: 1 }],
+    [COEFFICIENT_INFO.sessions.nome, { arbiter: 1 / 3.5 + (2.5 / 3.5) * 0.2, narrator: (2.5 / 3.5) * 0.2, physicist: (2.5 / 3.5) * 0.2, engineer: (2.5 / 3.5) * 0.4 }],
+    [COEFFICIENT_INFO.packs.nome, pack],
+    [COEFFICIENT_INFO.inhabitants.nome, forge],
+    [COEFFICIENT_INFO.entities.nome, forge],
+    [COEFFICIENT_INFO.people.nome, { narrator: 1 }],
+    [COEFFICIENT_INFO.dialogues.nome, { [plays]: 1 }],
+    [COEFFICIENT_INFO.plots.nome, { narrator: 1 }],
+    [COEFFICIENT_INFO.models.nome, { sculptor: 1 }],
+    [COEFFICIENT_INFO.reviews.nome, { artist: 1 }],
+    [COEFFICIENT_INFO.pieces.nome, { musician: 1 }],
+    [COEFFICIENT_INFO.words.nome, { [plays]: 1 }],
+    [COEFFICIENT_INFO.actions.nome, { narrator: 1 }],
+    [COEFFICIENT_INFO.looks.nome, { narrator: 1 }],
+  ];
+  const perHour: Partial<Record<Agent, number>> = {};
+  for (const [name, share] of rows) {
+    const row = est.righe.find((r) => r.voce === name);
+    for (const [agent, f] of Object.entries(share)) perHour[agent as Agent] = (perHour[agent as Agent] ?? 0) + (row?.chiamate ?? 0) * (f ?? 0);
+  }
+  const ai = k.config.ai;
+  const modelOf = (a: Agent) => (a === 'sculptor' ? DEFAULT_SCULPTORS.figure : a === 'artist' ? DEFAULT_SCULPTORS.artist : a === 'musician' ? DEFAULT_SCULPTORS.musician : ai.textModel);
+  const CACHE = 0.75;
+  const lines = ["| agente | richieste registrate | token in più a richiesta | chiamate l'ora | token in più l'ora | $/ora pieni | $/ora in cache |", '|---|---:|---:|---:|---:|---:|---:|'];
+  let sumTok = 0;
+  let sumFull = 0;
+  let sumCached = 0;
+  for (const a of Object.keys(AGENTS) as Agent[]) {
+    const t = added(a);
+    const calls = perHour[a] ?? 0;
+    const hourTok = t * calls;
+    const full = costOf(modelOf(a), { prompt: hourTok, output: 0 }) ?? 0;
+    const cached = costOf(modelOf(a), { prompt: hourTok, cached: hourTok * CACHE, output: 0 }) ?? 0;
+    sumTok += hourTok;
+    sumFull += full;
+    sumCached += cached;
+    lines.push(`| ${AGENTS[a].name} | ${recorded.filter((r) => r.agent === a).length} | ${Math.round(t)} | ${Math.round(calls * 10) / 10} | ${Math.round(hourTok)} | ${full.toFixed(4)} | ${cached.toFixed(4)} |`);
+  }
+  const calls = Object.values(perHour).reduce((x, y) => x + (y ?? 0), 0);
+  lines.push(`| **tutti** | ${recorded.length} | | ${Math.round(calls)} | ${Math.round(sumTok)} | **${sumFull.toFixed(4)}** | **${sumCached.toFixed(4)}** |`);
+  const sizes = CAMPAIGN_SECTIONS.map((s) => `${s} ${Math.round(tok(read.sections[s].join('\n').length))}`).join(', ');
+  console.log(`direttive: ${Math.round(tok(CAMPAIGN_SECTIONS.reduce((n, s) => n + read.sections[s].join('\n').length, 0)))} token (${sizes}); ${read.left.length} righe fuori; ${read.errors.length} errori`);
+  console.log(`richieste: ${fromWorld} dalla Genesi offline e dai primi luoghi, ${recorded.length - fromWorld} chieste alle squadre che non ha chiamato; con le sezioni giuste: ${right}/${recorded.length}`);
+  console.log(`un'ora della lobby (${ai.textModel}, manopole a 1): ${est.chiamate} chiamate, ${est.dollari.toFixed(3)} $; le direttive ${((sumFull / est.dollari) * 100).toFixed(1)} % pieni, ${((sumCached / est.dollari) * 100).toFixed(1)} % in cache (${CACHE * 100} %)`);
+  console.log(lines.join('\n'));
+  if (opt('json')) fs.writeFileSync(path.resolve(opt('json')!), JSON.stringify({ tokenOra: Math.round(sumTok), dollariPieni: sumFull, dollariCache: sumCached, oraLobby: est.dollari, sezioniGiuste: right, richieste: recorded.length }, null, 1) + '\n');
+  if (right !== recorded.length) process.exitCode = 1;
+}
+
 if (opt('capture')) await capture(opt('capture')!);
 else if (argv.includes('--cache')) await cacheSaving();
+else if (argv.includes('--campaign')) await campaignCost();
 else if (argv.includes('--count')) await count(argv[argv.indexOf('--count') + 1], argv[argv.indexOf('--count') + 2]);
 else if (opt('roles')) await roles(opt('roles')!);
-else console.log('uso: --capture <file> | --count <prima> <dopo> | --roles <ref git> | --cache [--persone 6] [--ore 1] [--json f]');
+else console.log('uso: --capture <file> | --count <prima> <dopo> | --roles <ref git> | --cache [--persone 6] [--ore 1] [--json f] | --campaign [--file f.md] [--json f]');

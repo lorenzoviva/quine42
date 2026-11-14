@@ -5,6 +5,7 @@ import type { Schema } from '../ai/models';
 import type { AgentId, Council } from './council';
 import { internalName, internalValues } from '../internalNames';
 import { RELATION_KINDS } from '../npc/model';
+import { CAMPAIGN_SECTIONS } from '../campaign';
 
 /** What a character decides while talking (T310b: internal ids; `follow`, `stay` and `wander` are also the ways of its mind). */
 export const NPC_ACTIONS = ['none', 'follow', 'stay', 'wander', 'give', 'quest'] as const;
@@ -203,7 +204,7 @@ export async function narrate(c: Council, what: { name: string; description: str
 }
 
 /** The teams the Referente hands a request to (T310b: internal ids; `none` when there is nothing to do). */
-export const LIAISON_TASKS = ['none', 'item', 'character', 'thing', 'environment', 'rule', 'resculpt', 'items', 'mechanic', 'rune', 'music'] as const;
+export const LIAISON_TASKS = ['none', 'item', 'character', 'thing', 'environment', 'rule', 'resculpt', 'items', 'mechanic', 'rune', 'music', 'directive'] as const;
 export type LiaisonTask = (typeof LIAISON_TASKS)[number];
 
 const REFERENTE_SCHEMA: Schema = {
@@ -214,7 +215,8 @@ const REFERENTE_SCHEMA: Schema = {
     request: { type: 'STRING', description: 'the request reworded for the team that takes care of it, clear and complete' },
     target: { type: 'STRING', description: 'for "resculpt": the name of what to sculpt again' },
     runes: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for "rune": the words of the code asked for, one per rune (a repeated one counts twice)' },
-    refusal: { type: 'STRING', description: 'only if the request would destroy the universe, the wanderer themselves or the physical laws of the game: why not' },
+    section: { type: 'STRING', enum: [...CAMPAIGN_SECTIONS], description: 'for "directive": the team it is for (all: the whole Council)' },
+    refusal:{ type: 'STRING', description: 'only if the request would destroy the universe, the wanderer themselves or the physical laws of the game: why not' },
   },
   required: ['reply', 'task'],
 };
@@ -225,10 +227,10 @@ const REFERENTE_SCHEMA: Schema = {
  * the universe, themselves, or the game's physics). The Referente understands what is asked and
  * hands it to the right team: the Forge, the Cartographer, the Artist, the Musician, the rules, the Narrator.
  */
-export async function liaisonReply(c: Council, history: Turn[], text: string): Promise<{ say: string; task: LiaisonTask; request?: string; target?: string; refusal?: string; runes?: unknown }> {
+export async function liaisonReply(c: Council, history: Turn[], text: string, sentBack?: string): Promise<{ say: string; task: LiaisonTask; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string }> {
   const past = history.slice(-8).map((t) => `${t.who === 'player' ? 'Viandante' : 'Tu'}: ${t.text}`).join('\n');
   const g = await c.guard('studio', text);
-  const r = await c.ask<{ reply: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown }>(
+  const r = await c.ask<{ reply: string; task: string; request?: string; target?: string; refusal?: string; runes?: unknown; section?: string }>(
     'liaison',
     'referente.coordinate',
     [
@@ -236,17 +238,18 @@ export async function liaisonReply(c: Council, history: Turn[], text: string): P
       past ? `Conversation so far:\n${past}` : '',
       `The wanderer says: «${g.quoted}»`,
       g.note,
-      'Understand what they ask and hand it to the right team with "task": item/thing/character (the Forge creates a module: a tool, a thing of the world, a kind of person), environment (the Cartographer creates a place and puts it on the map), rule (it becomes a rule of the world), resculpt (the Sculptor redoes the model of a person, a thing or an object: say which in "target"), items (a pack of common things), mechanic (the Engineer adds a mechanic with its interface: slots for the equipment, a quiver, a sheet…), rune (you give them the runes they ask for: in "runes" the words of the code, one per rune, for example ["speed", "=", "3"]), music (the Musician writes a piece for an environment or redoes the sound effect of a moment of the game), none (if they only ask for information, or for credits: those the Council does not give). In "reply" you answer, short and friendly, in the language of the world.',
+      'Understand what they ask and hand it to the right team with "task": item/thing/character (the Forge creates a module: a tool, a thing of the world, a kind of person), environment (the Cartographer creates a place and puts it on the map), rule (it becomes a rule of the world), resculpt (the Sculptor redoes the model of a person, a thing or an object: say which in "target"), items (a pack of common things), mechanic (the Engineer adds a mechanic with its interface: slots for the equipment, a quiver, a sheet…), rune (you give them the runes they ask for: in "runes" the words of the code, one per rune, for example ["speed", "=", "3"]), music (the Musician writes a piece for an environment or redoes the sound effect of a moment of the game), directive (they say how the world must be made from now on, not a thing to make now: names, tone, what exists and what does not, how a people lives or builds; it goes in the master\'s directives, which the teams read at every request: in "section" the team it is for, all for the whole Council, and in "request" the directive in one line, in the words of the world: the people, the realm, the wanderers, never the game, the players or the simulation; who someone is or what happened is a fact, not a directive), none (if they only ask for information, or for credits: those the Council does not give). In "reply" you answer, short and friendly, in the language of the world.',
+      sentBack ? `Your directive was sent back: ${sentBack}. Word it again in the words of the world, or give a refusal with the reason.` : '',
     ]
       .filter(Boolean)
       .join('\n\n'),
     REFERENTE_SCHEMA,
-    { data: { text, history }, temperature: 0.6 },
+    { data: { text, history, ...(sentBack ? { sentBack } : {}) }, temperature: 0.6 },
   );
   // An Italian task of the contract 0.6 (`riscolpisci`) is still the one it means.
   const said = internalName('incarichi', String(r.task ?? 'none'));
   const task = (LIAISON_TASKS as readonly string[]).includes(said) ? (said as LiaisonTask) : 'none';
-  return { say: String(r.reply ?? '…'), task, request: r.request?.trim() || undefined, target: r.target?.trim() || undefined, refusal: r.refusal?.trim() || undefined, runes: r.runes };
+  return { say: String(r.reply ?? '…'), task, request: r.request?.trim() || undefined, target: r.target?.trim() || undefined, refusal: r.refusal?.trim() || undefined, runes: r.runes, section: typeof r.section === 'string' ? r.section : undefined };
 }
 
 const AGENT_CHAT_SCHEMA: Schema = {

@@ -15,6 +15,7 @@ import { gameSetupSummary } from '../gameSetup';
 import { repairGameSetup } from '../validator';
 import { internalAnswer, internalFields, italianName } from '../internalNames';
 import { languageBlock, languageOf } from '../language';
+import { CAMPAIGN_FILE, campaignPrompt, readCampaign, type CampaignRead } from '../campaign';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
 
@@ -282,6 +283,9 @@ export class Council {
     const lexicon = narrative ? lexiconSummary(v.files) : '';
     // The game chosen at the Genesis goes to whoever builds on it: stories, coherence, mechanics, requests.
     if (narrative || agent === 'engineer' || agent === 'liaison') parts.push(gameSummary(v.files));
+    // The master's directives (T374, ADR-0191): the section of everyone and the agent's own, after the game, before what the agent knows.
+    const campaign = campaignPrompt(this.campaign(), agent);
+    if (campaign) parts.push(campaign);
     switch (agent) {
       // The Actor plays the people (T157): it reads what the Narrator reads for those tasks, never more.
       case 'actor':
@@ -331,6 +335,31 @@ export class Council {
         break;
     }
     return parts.join('\n\n');
+  }
+
+  private campaignRead?: { key: string; read: CampaignRead };
+  private campaignToldLeft = new Set<string>();
+
+  /**
+   * The master's directives as the requests carry them (`world/campaign.md`, T374): read again only when the file, the lexicon or the
+   * language change. A line the fourth wall keeps out (`metaBreak`, local: never Jev, D54.5) is said once in the feed, which only the master
+   * hears in a game of many.
+   */
+  campaign(): CampaignRead {
+    const files = this.files;
+    const text = files[CAMPAIGN_FILE] ?? '';
+    const lang = languageOf(files);
+    const words = wordsOf(files);
+    const key = JSON.stringify([lang, words, text]);
+    if (this.campaignRead?.key === key) return this.campaignRead.read;
+    const read = readCampaign(text, { words, lang });
+    this.campaignRead = { key, read };
+    for (const l of read.left) {
+      if (this.campaignToldLeft.has(l.line)) continue;
+      this.campaignToldLeft.add(l.line);
+      this.say('kernel', 'info', `direttive: «${l.line.replace(/^[-*]\s+/, '').slice(0, 80)}» resta fuori dalle richieste (nel mondo non si dice «${l.reason}»)`, undefined, 'campaign');
+    }
+    return read;
   }
 
   /**
