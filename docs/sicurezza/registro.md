@@ -495,6 +495,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/pacchetto.test.ts`, `tests/sicurezza/produzione.test.ts`
 - Esito: chiusa da T367 (ADR-0203), 14/11/2026, branch `task/T367`. Un container vero non è stato avviato (virtualizzazione spenta sulla macchina dell'autore): provati i file e lo stadio finale come cartella a parte con l'ambiente dell'esempio.
 
+### V-044 · Il testo del viandante verso Jev: solo da OpenRouter con la ritenzione zero
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `Council.decide` e `Council.guard` (`src/kernel/agents/council.ts`: `text.guard` alle porte del testo libero, la chat, le azioni libere, la Fucina, lo studio), `freeTextDecision` (`src/kernel/coefficients.ts`), `DecisionModels.zeroRetention` e `keepsNothing` (`src/kernel/ai/decisions.ts`), `OpenRouterDecisionModels` e `decisionsBody` (`src/kernel/ai/openrouter.ts`), `decisionRequest` (`server/openrouterProxy.ts`), `jevRequest` (`server/typesafeProxy.ts`), `carriesWandererText` (`src/kernel/fourthwall.ts`)
+- Proprietà violata: ciò che un viandante scrive (un dato personale: può dire il suo nome, dove vive, chi è) esce verso un terzo per i controlli solo dove quel terzo non lo conserva: a Jev solo da OpenRouter con `provider.zdr: true` (OpenRouter rifiuta piuttosto che mandarlo a un endpoint che conserva), mai a TypeSafe direttamente, che tiene ciò che legge (D45.3, D55.2, regola 9); né il kernel né un varco lo mandano altrove per un errore dell'altro
+- Prova: test (T396)
+- Contromisura: nel kernel la via decide (`keepsNothing`: solo una via che lo dice da sé, `OpenRouterDecisionModels`; `JevDecisionModels`, i modelli locali e ogni altra rispondono con la regola, `guardRule`); nei varchi il corpo decide, non un segno che il corpo dica di sé (`carriesWandererText`: una domanda della guardia con le sue istruzioni o il suo stato, una porta e un testo): `TypeSafeGate` lo rifiuta sempre (403) e non chiama TypeSafe, `OpenRouterGate` lo rifiuta senza `provider.zdr: true` (403) e rifà ogni corpo con `zdr`; il registro dei consumi e il feed dicono la rotta, mai le parole (T350). Resta, accettato (D55.2): OpenRouter vede il testo in transito, come ogni richiesta che il viandante paga, e non lo conserva se lui non accende il logging del suo account
+- Task: T396
+- Test: `tests/sicurezza/testo-viandante.test.ts`, `tests/text-guards.test.ts`, `tests/openrouter.test.ts`
+- Esito: chiusa da T396 (ADR-0204), 15/11/2026, branch `task/T396`: la voce nasce con la via. Non provato contro OpenRouter né TypeSafe veri.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -544,6 +555,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-041 | — | — | `regioni.test.ts` | le regioni del master si provano sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/regioni.test.ts |
 | V-042 | — | — | `campagna-sito.test.ts` | la campagna dal sito si prova sullo store senza Firebase, coi collegamenti finti per il mondo acceso: tests/sicurezza/campagna-sito.test.ts |
 | V-043 | — | — | `pacchetto.test.ts`, `produzione.test.ts` | il pacchetto sono file e un’immagine, non un server da provare: il kit non costruisce immagini; le proprietà le leggono tests/sicurezza/pacchetto.test.ts e produzione.test.ts |
+| V-044 | — | — | `testo-viandante.test.ts` | il kit non ha chiavi di TypeSafe né di OpenRouter e non esce sulla rete: i due varchi e il kernel si provano coi fornitori finti, tests/sicurezza/testo-viandante.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

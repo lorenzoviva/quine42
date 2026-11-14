@@ -6,7 +6,7 @@
 // models, as when the credits run out. Only the Genesis has no knob: it happens once, before the lobby. «Low Detail» is the game played to save.
 
 import { cacheable, costOf, EXPLICIT_CACHE, priceOf } from './ai/prices';
-import { JEV_MODEL, JEV_ZERO_RETENTION } from './ai/decisions';
+import { JEV_MODEL } from './ai/decisions';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
@@ -141,7 +141,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'model.reuse', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', via: 'decide', nota: 'prima di scolpire: un modello che c’è già va bene? Una scelta, non un testo' },
   // T350: the fourth wall on what the Council writes for the world, with `metaBreak` in front; the knob of the Council's sessions, as `review.fourthwall`.
   { compito: 'text.fourthwall', agente: 'arbiter', modo: 'indiretta', coefficiente: 'sessions', via: 'decide', nota: 'ciò che il Concilio scrive per il mondo rompe la quarta parete? Quattro sì o no dopo il filtro di parole' },
-  // T350: the guard on what the wanderer writes (D45.5). Their free text: the rule answers until TypeSafe keeps nothing (D45.3).
+  // T350: the guard on what the wanderer writes (D45.5). Their free text: to Jev only through OpenRouter with zero retention, else the rule (D55.2).
   { compito: 'text.guard', agente: 'arbiter', modo: 'diretta', coefficiente: 'words', via: 'decide', freeText: true, nota: 'ciò che scrive il viandante detta ordini, è senza senso o fuori dal mondo? Mai isolato: va al Narratore, che resta nel mondo' },
 ];
 
@@ -149,10 +149,10 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
 export const decisionKnob = (task: string): CoefficientKey | undefined => CENSUS.find((c) => c.compito === task && c.via === 'decide')?.coefficiente;
 
 /**
- * Whether a decision's state carries the free text of a wanderer (D45.3): until TypeSafe offers zero retention (`JEV_ZERO_RETENTION`) such a
- * call never leaves the kernel, the local models answer with the rule.
+ * Whether a decision's state carries the free text of a wanderer (D45.3, D55.2): such a call leaves the kernel only along a route that keeps
+ * nothing of what it reads (`keepsNothing`, OpenRouter with `provider.zdr`, ADR-0204); along any other the local models answer with the rule.
  */
-export const freeTextDecision = (task: string): boolean => !JEV_ZERO_RETENTION && !!CENSUS.find((c) => c.compito === task && c.via === 'decide')?.freeText;
+export const freeTextDecision = (task: string): boolean => !!CENSUS.find((c) => c.compito === task && c.via === 'decide')?.freeText;
 
 /** The knobs the Council applies to a call itself (T247): what they do not let through goes to the local models. */
 export const RATIONED_KEYS: readonly CoefficientKey[] = ['chunks', 'words', 'looks', 'actions', 'magic', 'death', 'studio'];
@@ -334,6 +334,8 @@ export const REUSE_SHARE = REUSE_ASKED * REUSE_HIT;
 const REUSE_WEIGHT = { prompt: 800, cached: 0, output: 0 };
 /** Tokens of a `text.fourthwall` call: four questions (about 450), the world in a line and the text (T313's bench: 569 with a short text). */
 const WALL_WEIGHT = { prompt: 900, cached: 0, output: 0 };
+/** Tokens of a `text.guard` call: five questions (about 700), the door and a sentence of the wanderer. */
+const GUARD_WEIGHT = { prompt: 900, cached: 0, output: 0 };
 
 export interface HourLine {
   voce: string;
@@ -346,7 +348,7 @@ export interface HourLine {
  * What an hour of play usually costs with this configuration: the calls of every kind and their dollars, on the
  * prices of today. The budgets of `ai` (per session) cap what the world does by itself.
  */
-export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
+export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean; guards?: boolean } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficients);
   const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
   const actor = repairActor(ai.actor);
@@ -418,6 +420,11 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   add(COEFFICIENT_INFO.words.nome, 'diretta', H.parole * c.words, played(H.parole * c.words, 'npc.reply'));
   add(COEFFICIENT_INFO.actions.nome, 'diretta', H.azioni * c.actions, text(H.azioni * c.actions, 'action.judge'));
   add(COEFFICIENT_INFO.looks.nome, 'diretta', H.sguardi * c.looks, text(H.sguardi * c.looks, 'text.examine'));
+  // With Jev along a route that keeps nothing (D55.2, ADR-0204): the guard on what the wanderer writes, once for every sentence and free action.
+  if (opts.decisions && opts.guards) {
+    const guards = H.parole * c.words + H.azioni * c.actions;
+    add('Guardie sul testo del viandante (Jev, ritenzione zero)', 'diretta', guards, guards * (costOf(JEV_MODEL, GUARD_WEIGHT, date) ?? 0));
+  }
   // The lives of the people (T245a): their tasks come with T245g-T245i; until then a row with no call, whatever the knob says.
   add(COEFFICIENT_INFO.lives.nome, 'diretta', 0, 0);
   return { righe: rows, chiamate: Math.round(rows.reduce((s, r) => s + r.chiamate, 0)), dollari: rows.reduce((s, r) => s + r.dollari, 0) };

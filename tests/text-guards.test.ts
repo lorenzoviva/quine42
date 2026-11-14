@@ -1,6 +1,7 @@
 // The guards on what the wanderer writes and the fourth wall on what the Council writes, on the layer of closed decisions (T350, ADR-0157
 // §4.4, D45.5). The bench's cases (lab/banco/jev/casi-d-uso/casi/guardia.json, T325) are the fixture: the local guard, today's rule, routes
-// them; the free text of a wanderer never reaches Jev while TypeSafe keeps what it reads (D45.3). Offline: a fake layer, no call leaves.
+// them; the free text of a wanderer reaches Jev only along a route that keeps nothing (D55.2: OpenRouter with `provider.zdr`), never TypeSafe
+// directly (D45.3). Offline: a fake layer, no call leaves.
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
@@ -8,7 +9,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
-import { JEV_ZERO_RETENTION, type DecisionCall, type DecisionModels, type Decisions } from '../src/kernel/ai/decisions';
+import { keepsNothing, type DecisionCall, type DecisionModels, type Decisions } from '../src/kernel/ai/decisions';
 import { CENSUS, decisionKnob, FULL_DETAIL, freeTextDecision, hourlyEstimate } from '../src/kernel/coefficients';
 import { FOURTH_WALL_QUESTIONS, GUARD_HAZARDS, GUARD_QUESTIONS, guardNote, guardRoute, guardRule, quoteWanderer, type GuardDoor, type GuardHazard } from '../src/kernel/fourthwall';
 import { judgeAction, judgeCraft } from '../src/kernel/agents/effects';
@@ -95,10 +96,10 @@ describe('il Concilio con lo strato delle decisioni', () => {
     k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai, decisions: jev.layer });
   });
 
-  it('le guardie sono decisioni del censimento; il testo del viandante resta qui finché TypeSafe lo tiene (D45.3)', async () => {
+  it('le guardie sono decisioni del censimento; il testo del viandante resta qui su una via che lo tiene (D45.3, D55.2)', async () => {
     expect(decisionKnob('text.guard')).toBe('words');
     expect(decisionKnob('text.fourthwall')).toBe('sessions');
-    expect(JEV_ZERO_RETENTION).toBe(false);
+    expect(keepsNothing(jev.layer)).toBe(false);
     expect(freeTextDecision('text.guard')).toBe(true);
     expect(freeTextDecision('text.fourthwall')).toBe(false);
     // Only the guard carries a wanderer's text.
@@ -199,5 +200,16 @@ describe('la stima', () => {
     expect(row.dollari).toBeLessThan(0.005);
     const off = hourlyEstimate({ ...cfg, coefficients: { ...FULL_DETAIL, sessions: 0 } }, undefined, { decisions: true });
     expect(off.righe.some((r) => /quarta parete/i.test(r.voce))).toBe(false);
+  });
+
+  it('le guardie costano una riga solo su una via con la ritenzione zero (D55.2)', () => {
+    const cfg = { ...readConfig(bundledFiles).config.ai, coefficients: FULL_DETAIL };
+    expect(hourlyEstimate(cfg, undefined, { decisions: true }).righe.some((r) => /guardie/i.test(r.voce))).toBe(false);
+    const zdr = hourlyEstimate(cfg, undefined, { decisions: true, guards: true });
+    const row = zdr.righe.find((r) => /guardie/i.test(r.voce))!;
+    expect(row.chiamate).toBeGreaterThan(0);
+    expect(row.dollari).toBeLessThan(0.01);
+    const quiet = hourlyEstimate({ ...cfg, coefficients: { ...FULL_DETAIL, words: 0, actions: 0 } }, undefined, { decisions: true, guards: true });
+    expect(quiet.righe.find((r) => /guardie/i.test(r.voce))?.chiamate ?? 0).toBe(0);
   });
 });

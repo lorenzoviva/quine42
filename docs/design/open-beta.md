@@ -181,8 +181,8 @@ deve dire id fissi, come oggi per Gemini.
 - **La ritenzione zero (D45.3).** L'endpoint di TypeSafe è nell'elenco della ritenzione zero di OpenRouter (`/api/v1/endpoints/zdr`, con
   `safety_retention: false`), e ogni richiesta dell'adattatore la chiede (`provider.zdr: true`: OpenRouter rifiuta piuttosto che mandarla altrove).
   OpenRouter stesso non conserva prompt e risposte se il giocatore non accende il logging. Non ho trovato la politica dei dati scritta da TypeSafe per
-  OpenRouter: la pagina del fornitore non la riporta. Il testo libero del viandante **resta fuori** (`JEV_ZERO_RETENTION` falso): lasciarlo passare
-  per questa porta è una decisione dell'autore (`docs/pipeline/domande/T362.md`).
+  OpenRouter: la pagina del fornitore non la riporta. Il testo libero del viandante passa **solo** per questa porta (D55.2, l'autore il 14/11;
+  T396, ADR-0204): verso TypeSafe diretto mai.
 - **La coda degli abbonamenti** (ADR-0077, ADR-0106) resta solo locale e non cambia; `npm run genera` anche.
 
 ---

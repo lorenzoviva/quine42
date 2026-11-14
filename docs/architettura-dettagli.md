@@ -168,8 +168,8 @@
   pacchetti cose`: meno di ciò che causa le chiamate); a 0 nessuna chiamata, per nessuna riga; il censimento delle chiamate in `CENSUS`, dove solo la Genesi non ha una manopola, il preset «Low Detail» (`LOW_DETAIL`, anche
   lo Scultore su Flash-Lite), la stima di un'ora di gioco (`hourlyEstimate`: i token di ogni chiamata compito per compito sono quelli misurati da T325 con `countTokens`, `CALL_TOKENS` con la data in `TOKENS_MEASURED`, il prefisso stabile servito dalla cache implicita al 60 % e mai su 3.8 Flash; si rimisurano con `lab/scripts/jev-casi-d-uso.ts -- --contesto --conta`, T352); nella Genesi si scelgono con i modelli (`kernel.setAi`).
 - **Le decisioni chiuse, Jev di TypeSafe** (ADR-0157, T348, kernel 0.6.6): un modello che non scrive ma sceglie. Lo strato è `src/kernel/ai/decisions.ts`, accanto ad
-  `AiModels`: una `DecisionCall` porta l'agente, il compito, lo **stato** (scritto dal kernel, solo dati del mondo e del catalogo: mai il testo libero del
-  viandante finché TypeSafe non ha la ritenzione zero, D45), le **domande** (Choice: la chiave di un'opzione; Noul: un sì o un no; Score: l'indice di un
+  `AiModels`: una `DecisionCall` porta l'agente, il compito, lo **stato** (scritto dal kernel, solo dati del mondo e del catalogo: il testo libero del
+  viandante solo su una via a ritenzione zero, D45.3, D55.2), le **domande** (Choice: la chiave di un'opzione; Noul: un sì o un no; Score: l'indice di un
   livello) e la **regola** di oggi, domanda per domanda. Chiede il Concilio, `Council.decide(agent, task, { state, questions, rule, chi })`: solo per un
   compito che `CENSUS` dice decisione (`via: 'decide'`, `decisionKnob`, ognuno con la sua manopola: il primo è `model.reuse` con `models`); come `write`
   sceglie chi paga e passa ai modelli locali con la manopola a 0, senza crediti o in sola lettura; tiene della risposta solo ciò che sta nelle opzioni
@@ -201,9 +201,14 @@
   persona del mondo → `character`, la chiamata parte con la nota di restare nel mondo; ordini a chi scrive → `isolate`, la nota che le parole tra «» non
   comandano niente; nello studio parlare del codice è legittimo. Le parole del viandante vanno sempre tra «» con i loro «» cambiati in ‹› (`quoteWanderer`).
   La regola, il pavimento, sono i pattern locali in italiano e in inglese (`guardRule`, solo ciò che è inequivocabile: 62 rotte giuste su 63 sui casi del
-  banco, nessun testo del mondo toccato; scritti guardando quei casi). Il testo del viandante **non arriva mai a Jev** finché TypeSafe non ha la ritenzione
-  zero (D45.3): la riga del censimento ha `freeText` e `Council.decide` la manda ai modelli locali qualunque cosa dica il resto (`freeTextDecision`,
-  `JEV_ZERO_RETENTION`, falso: accenderlo è dell'autore). **`text.fourthwall`**, sui testi che il Concilio scrive per il mondo
+  banco, nessun testo del mondo toccato; scritti guardando quei casi). Il testo del viandante **arriva a Jev solo da OpenRouter con la ritenzione
+  zero** (D55.2, ADR-0204; mai a TypeSafe direttamente, che tiene ciò che legge, D45.3): la riga del censimento ha `freeText` e `Council.decide` la manda
+  ai modelli locali qualunque cosa dica il resto se la via delle decisioni non dice di non tenere niente (`freeTextDecision`, `keepsNothing`: solo
+  `OpenRouterDecisionModels.zeroRetention`, che manda `provider.zdr`; `JevDecisionModels` e i modelli locali no). I due varchi del server tengono la stessa
+  linea da soli, leggendo il corpo e non ciò che il corpo dice di sé (`carriesWandererText`: una domanda della guardia o il suo stato, una porta e un
+  testo): `TypeSafeGate` (`jevRequest`) rifiuta un corpo così qualunque cosa dica, `OpenRouterGate` (`decisionRequest`) lo rifiuta se non ha chiesto
+  `provider.zdr: true` e rifà ogni corpo con `zdr`. Se OpenRouter non trova un endpoint a ritenzione zero rifiuta, e risponde la regola. La stima conta
+  la riga delle guardie solo su quella via (`hourlyEstimate` con `{ guards }`). **`text.fourthwall`**, sui testi che il Concilio scrive per il mondo
   (`Council.fourthWall(text)`): le parole di `metaBreak` prima, senza chiamata; poi quattro Noul (`FOURTH_WALL_QUESTIONS`, le `domande-2` di T313: 91 %,
   94 % con `metaBreak` davanti) con il mondo in una riga accanto al testo; ciò che rompe torna a chi l'ha scritto col motivo (`FOURTH_WALL_REASONS`), come
   `metaBreak`. Lo usano il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore e la trama nuova; non le battute, che possono ripetere le parole
@@ -233,7 +238,7 @@
   scelta) non si ripetono e restano nel registro; 429 e 5xx tre volte, dopo `Retry-After`; 402 è un `BudgetError`; 401 lo dice con lo stato.
   **`OpenRouterDecisionModels`**, lo stesso `DecisionModels` di `JevDecisionModels`, su `/alpha/decisions`: le versioni del gioco →
   `typesafe/jev-1.13` e `typesafe/jev-1.14` (`OPENROUTER_JEV`), il corpo del varco di TypeSafe più `provider.zdr` (l'endpoint di TypeSafe è
-  nell'elenco della ritenzione zero di OpenRouter); D45.3 resta (`freeTextDecision`). **Il costo detto**: ogni risposta dice ciò che OpenRouter ha
+  nell'elenco della ritenzione zero di OpenRouter); per questo è l'unica via che porta il testo del viandante (`zeroRetention`, D55.2, ADR-0204). **Il costo detto**: ogni risposta dice ciò che OpenRouter ha
   addebitato (`usage.cost`, più quello di Google con una chiave di Google del giocatore), e va in `CallRecord.usd`: il registro dei consumi e
   l'addebito lo prendono al posto del listino (`callCost`), che resta per le stime e per chi non dice. Le chiamate stanno nel registro sotto l'id di
   OpenRouter (`google/gemini-3.8-flash`, `typesafe/jev-1.13`), che `priceOf` legge come quello di Google (`DECISION_PRICES` ha gli id di Jev).

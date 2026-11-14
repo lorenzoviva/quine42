@@ -5,7 +5,7 @@
 
 import { parseJson, type AiModels, type Schema, type Thinking } from '../ai/models';
 import { MockAiModels } from '../ai/mock';
-import { ruleDecisions, settleDecisions, type DecisionCall, type DecisionModels, type Decisions } from '../ai/decisions';
+import { keepsNothing, ruleDecisions, settleDecisions, type DecisionCall, type DecisionModels, type Decisions } from '../ai/decisions';
 import { decisionKnob, freeTextDecision } from '../coefficients';
 import { COMUNE } from '../cards';
 import { COUNCIL_PRINCIPLES, FOURTH_WALL_QUESTIONS, FOURTH_WALL_REASONS, FOURTH_WALL_RULE, GUARD_HAZARDS, GUARD_QUESTIONS, guardNote, guardRoute, guardRule, lexiconWords, metaBreak, quoteWanderer, type FourthWallBreak, type GuardDoor, type GuardHazard, type GuardRoute } from '../fourthwall';
@@ -395,8 +395,8 @@ export class Council {
         return ruleDecisions(full);
       }
       const sealed = this.readOnly?.() !== undefined;
-      // The free text of a wanderer stays here (D45.3): whatever else holds, the local models answer.
-      const local = freeTextDecision(task) || sealed || (!!this.hasCredits && !this.hasCredits(chi)) || !!this.rationed?.(task);
+      // The free text of a wanderer leaves only along a route that keeps nothing (D55.2, ADR-0204); along any other the local models answer.
+      const local = (freeTextDecision(task) && !keepsNothing(this.decisions)) || sealed || (!!this.hasCredits && !this.hasCredits(chi)) || !!this.rationed?.(task);
       return settleDecisions(full, await (local ? this.localAiModels : this.decisions).decide(full));
     } catch (e) {
       this.say('kernel', 'info', `«${task}»: ${(e as Error).message}; vale la regola`, undefined, task);
@@ -406,7 +406,7 @@ export class Council {
 
   /**
    * The guard on what a wanderer writes, before the Council reads it (T350, D45.5, a closed decision `text.guard`): the five hazards, the
-   * local patterns as the rule (`guardRule`), and while TypeSafe keeps what it reads the rule alone (D45.3). Nothing is stopped (rule 3):
+   * local patterns as the rule (`guardRule`), and the rule alone unless the decisions go along a route that keeps nothing (OpenRouter with `provider.zdr`; never TypeSafe directly, D45.3, D55.2). Nothing is stopped (rule 3):
    * the call goes with the wanderer's words quoted so that they cannot close the quote, and with a note when the route is not `pass`.
    */
   async guard(door: GuardDoor, text: string, chi?: string): Promise<{ route: GuardRoute; hazards: GuardHazard[]; quoted: string; note: string }> {

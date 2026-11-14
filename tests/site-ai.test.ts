@@ -1,5 +1,5 @@
 // The page «Come usiamo l'IA» (T368): it is built, every page of the site points to it, and it says what the open beta promises
-// (the player's OpenRouter key, the common costs in turn, where the text goes, nothing of the player's text to Jev: D45).
+// (the player's OpenRouter key, the common costs in turn, where the text goes, the player's text to Jev only through OpenRouter with zero retention, never to TypeSafe directly: D45, D55.2).
 
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -28,7 +28,8 @@ describe("la pagina «Come usiamo l'IA»", () => {
     expect(text).toMatch(/paga il master/i);
     expect(text).toMatch(/modelli locali/);
     expect(text).toMatch(/OpenRouter a Google/);
-    expect(text).toMatch(/Jev di TypeSafe non riceve mai il testo che scrivi/);
+    expect(text).toMatch(/solo da OpenRouter con la ritenzione zero, mai a TypeSafe direttamente/);
+    expect(text).not.toMatch(/Jev di TypeSafe non riceve mai il testo che scrivi/);
     expect(text).toMatch(/Nessuna immagine generata/);
   });
 
