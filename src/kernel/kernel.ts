@@ -36,8 +36,8 @@ import { hash32, hashStr, hex, Rng } from './rng';
 import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import type { DecisionModels } from './ai/decisions';
-import { billedModel, costOf } from './ai/prices';
-import { tokensOf, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
+import { billedModel } from './ai/prices';
+import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
@@ -6375,8 +6375,9 @@ export class Kernel {
   }
 
   private charge(r: CallRecord): void {
-    // A model of Google's off the price list costs what the gate counts it for, the dearest, never nothing (V-024); the local ones are free.
-    const usd = costOf(billedModel(r.model), tokensOf(r), r.day) ?? 0;
+    // What the provider said it cost where it says (OpenRouter, T362); else a model of Google's off the price list costs what the gate counts it for,
+    // the dearest, never nothing (V-024); the local ones are free.
+    const usd = callCost(r, r.day, billedModel(r.model)) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
     // Who asked stays who asked (rule 8i); who is charged is the match's policy (T372, ADR-0188): where the master pays, them alone.

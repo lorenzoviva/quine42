@@ -1,5 +1,5 @@
 // The usage ledger: what every call to a model cost, per day, model and task, in tokens and dollars.
-// GeminiAiModels reports each call (onCall); the kernel keeps the ledger and saves it in the universe
+// GeminiAiModels (and OpenRouterAiModels, T362) reports each call (onCall); the kernel keeps the ledger and saves it in the universe
 // (world/usage.json) with every commit, so the spending of every session stays with the world it made.
 // Google's own usage page lags hours behind: this one is right after every call. Every call also has a payer
 // (`chi`, T36): the wanderer it was made for, or `comune` when the whole world asked for it.
@@ -25,8 +25,13 @@ export interface CallRecord {
   stored?: number;
   /** Retries after 429 or a server error (the failed tries are not billed). */
   retries?: number;
-  /** The call never got an answer: a timeout or a network error. It may still have been billed. */
+  /** The call never got an answer (a timeout, the network), or one broken off by an error after it was accepted. It may still have been billed. */
   failed?: 'timeout' | 'errore';
+  /**
+   * What the provider said the call cost, in dollars (OpenRouter's `usage.cost`, T362, ADR-0193): the ledger and the charge take it over the price
+   * list, which stays for whoever does not say. Only a finite number ≥ 0 counts (`callCost`).
+   */
+  usd?: number;
   /** ISO day; default today. */
   day?: string;
   /** Who pays (T36): a wanderer's id, or `comune` (also when missing). */
@@ -69,6 +74,11 @@ export interface UsageFile {
 export const USAGE_FILE = 'world/usage.json';
 /** The tokens of a call as the prices read them: the storage of an explicit cache too (T351). */
 export const tokensOf = (r: CallRecord): Tokens => ({ prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts, ...(r.stored ? { stored: r.stored } : {}) });
+
+/** The dollars of a call: what its provider said (`usd`, a finite number ≥ 0), else the price list of `model` (its own if not said); undefined: no price. */
+export function callCost(r: CallRecord, day?: string, model = r.model): number | undefined {
+  return typeof r.usd === 'number' && Number.isFinite(r.usd) && r.usd >= 0 ? r.usd : costOf(model, tokensOf(r), day);
+}
 
 /** The payer of a call nobody in particular asked for (as COMUNE in cards.ts, which this layer does not import). */
 const COMMON = 'comune';
@@ -131,7 +141,7 @@ export class UsageLog {
 
   record(r: CallRecord): void {
     const day = r.day ?? today();
-    const usd = costOf(r.model, tokensOf(r), day);
+    const usd = callCost(r, day);
     add(((this.file.days[day] ??= {})[r.model] ??= {})[r.task] ??= emptyTally(), r, usd);
     add(this.session, r, usd);
     add((this.sessionByModel[r.model] ??= emptyTally()), r, usd);
@@ -150,7 +160,7 @@ export class UsageLog {
    */
   paidByMaster(r: CallRecord): void {
     const day = r.day ?? today();
-    add(((this.file.masterPaid[day] ??= {})[r.who || COMMON] ??= emptyTally()), r, costOf(r.model, tokensOf(r), day));
+    add(((this.file.masterPaid[day] ??= {})[r.who || COMMON] ??= emptyTally()), r, callCost(r, day));
     this.version++;
     this.onChange?.();
   }

@@ -1,6 +1,6 @@
 # ADR-0184 — La open beta senza pagamenti all'autore: le chiavi OpenRouter dei giocatori, le comuni a turno, un pacchetto per ogni hosting
 
-Data: 2026-11-13 · Stato: **proposto** (T345, step 43; decide l'autore) · Riferimenti: [`docs/design/open-beta.md`](../design/open-beta.md)
+Data: 2026-11-13 · Stato: **accettato** (D52, 13/11: tutte le risposte come consigliato tranne la 5, Jev, che cambia il punto 6; T345, step 43) · Riferimenti: [`docs/design/open-beta.md`](../design/open-beta.md)
 (lo studio, con le fonti datate), `docs/fasi.md` (Fase IV), ADR-0081 (spese comuni), ADR-0084 (eredità e quote), ADR-0099 (il varco della
 chiave), ADR-0104 (saldi fuori dall'universo), ADR-0110 (mondi senza segreti), ADR-0112 (il server di produzione), ADR-0113 (chi paga si
 dice), ADR-0132 (la commissione), ADR-0156 (sola lettura fuori contratto), ADR-0157 (Jev), ADR-0170 (le carte portate); T347 (la campagna del
@@ -14,7 +14,7 @@ Oggi invece la chiave dei modelli è una sola, del server (regola 9, `GeminiGate
 commissione (ADR-0104, ADR-0132); il server di produzione non parte senza Firebase, il segreto del webhook di Stripe e un tetto per la
 chiave (`productionProblems`, ADR-0112). Le alternative e i numeri sono nello studio.
 
-## Decisione proposta
+## Decisione (proposta da T345, accettata con D52)
 
 1. **I modelli via OpenRouter, con la chiave del giocatore.** Un adattatore `OpenRouterAiModels` accanto a `GeminiAiModels`: gli stessi
    modelli Gemini con id fissi, lo schema del Concilio convertito in `response_format` JSON Schema con `require_parameters`, il ragionamento
@@ -33,8 +33,12 @@ chiave (`productionProblems`, ADR-0112). Le alternative e i numeri sono nello st
    0 qualunque cosa dica `QUINE_COMMISSIONE`, nasconde le ricariche, e `productionProblems` non chiede `STRIPE_WEBHOOK_SECRET`. Il ledger
    diventa il registro di ciò che ognuno ha speso con la sua chiave; chi chiama i modelli ha una chiave valida, è sotto il suo tetto della
    lobby e la chiave non ha detto 402. `QUINE_TETTO_RICARICHE` 0. Stripe resta nel codice per la Fase VI.
-6. **Jev solo con una chiave detta**: senza `TYPESAFE_KEY` le decisioni usano la regola (ADR-0157); sul server ufficiale lo accende l'autore,
-   che lo paga.
+6. ~~**Jev solo con una chiave detta**: senza `TYPESAFE_KEY` le decisioni usano la regola (ADR-0157); sul server ufficiale lo accende l'autore,
+   che lo paga.~~ **Cambiato da D52 (13/11): Jev resta acceso in open beta e passa da OpenRouter**, che dà anche i modelli di TypeSafe
+   (`typesafe/jev-1.13`, `typesafe/jev-1.14`), con la chiave del giocatore come ogni altra chiamata: non lo paga l'autore. L'endpoint di TypeSafe su
+   OpenRouter è nell'elenco della ritenzione zero (letto il 14/11/2026) e ogni richiesta la chiede (`provider.zdr`); D45.3 resta finché l'autore non
+   decide altrimenti: il testo libero del viandante non va a Jev. Fino al varco delle chiavi (T363) `TYPESAFE_KEY` si usa se detta (ADR-0189).
+   L'adattatore è ADR-0193 (T362).
 7. **Un pacchetto, tre posti**: un'immagine Docker con `docker compose` (e lo stesso come pacchetto Node), con l'etichetta della versione del
    kernel, per una VM o VPS, Railway, Fly e il PC di casa dietro un Cloudflare Tunnel. **Il server ufficiale su una VM di Compute Engine**,
    non Cloud Run (git vuole un disco con i lock; i WebSocket di Cloud Run si chiudono a 60 minuti); T45f si riscrive così. Niente template
@@ -68,14 +72,15 @@ chiave (`productionProblems`, ADR-0112). Le alternative e i numeri sono nello st
 - I task, in ordine (studio, § 6): la modalità open beta; l'adattatore; le chiavi sul server con il turno; il collegamento nel gioco e nel
   sito; il costo delle carte; il verificatore a inviti; il pacchetto e la guida; T45f riscritto; «Come usiamo l'IA»; poi i modelli locali.
 
-## Domande per l'autore
+## Domande per l'autore (chiuse con D52, 13/11: sì a tutte tranne la 5)
 
 1. PKCE come via principale e la chiave incollata come ripiego? *Consiglio: sì.*
 2. Le spese comuni a turno come predefinito, «il master paga» come opzione (T347)? *Consiglio: sì.*
 3. Il server ufficiale: una VM di Compute Engine pagata da te per la macchina, con pochi mondi accesi; e quanti? *Consiglio: la VM; il numero
    dopo la prova di carico della beta chiusa (D6.4 del piano di lancio).*
 4. Un anonimo con una chiave sua paga per sé e partecipa al turno delle comuni? *Consiglio: sì.*
-5. Jev spento sul server ufficiale in open beta? *Consiglio: sì, finché non decidi di pagarlo.*
+5. Jev spento sul server ufficiale in open beta? *Consiglio: sì, finché non decidi di pagarlo.* **Risposta (D52): no, Jev resta e passa da OpenRouter
+   con la chiave del giocatore** (punto 6, ADR-0193).
 6. Il pacchetto su Railway: niente template nel marketplace (il kickback è un pagamento a te), solo il `Dockerfile` del repository?
    *Consiglio: sì.*
 7. Per chi ospita: verificatore a inviti oltre a Firebase? *Consiglio: sì, insieme agli universi privati di T347.*

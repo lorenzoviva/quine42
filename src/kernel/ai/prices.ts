@@ -1,4 +1,6 @@
-// The only list of prices in the project (the kernel's usage ledger, the Council panel and the lab use it).
+// The only list of prices in the project (the kernel's usage ledger, the Council panel and the lab use it). A model of Google's through OpenRouter
+// (`google/<id>`, T362) has the same price as from Google (OpenRouter adds nothing to it, read on OPENROUTER_PRICES_READ_ON), and its calls say
+// what they cost (`CallRecord.usd`): this list is then the estimate.
 // Read from https://aistudio.google.com/docs/pricing on PRICES_READ_ON (paid tier, Standard, USD per million
 // tokens). Prices change: keep the date, and the report in docs/reports/ that shows every calculation.
 // Thinking tokens are billed as output; prompt tokens served from the cache at the cache price.
@@ -62,9 +64,14 @@ export const UNPRICED = Object.keys(ESTIMATED);
  * DECISION_PRICES_READ_ON. Input tokens only: the answer is free; no cache.
  */
 export const DECISION_PRICES_READ_ON = '2026-11-06';
+/** When the prices of OpenRouter were read (its ids of Jev below, and Google's models through it: https://openrouter.ai/api/v1/models/<id>/endpoints). */
+export const OPENROUTER_PRICES_READ_ON = '2026-11-14';
 export const DECISION_PRICES: Record<string, Price> = {
   'jev-1.13.0': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe: solo i token in ingresso' },
   'jev-1.14.0': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe: solo i token in ingresso' },
+  // Jev through OpenRouter (D52): the same price, read on OPENROUTER_PRICES_READ_ON; the calls say their cost.
+  'typesafe/jev-1.13': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe via OpenRouter: solo i token in ingresso' },
+  'typesafe/jev-1.14': { input: 0.042, output: 0, cached: 0.042, note: 'TypeSafe via OpenRouter: solo i token in ingresso' },
 };
 
 /** The calls served by a subscription's CLI (T68): already paid with the subscription, zero dollars per call. */
@@ -75,7 +82,8 @@ export const SUBSCRIPTION_PRICES: Record<string, Price> = {
 };
 
 export function priceOf(model: string, date = new Date().toISOString().slice(0, 10)): Price | undefined {
-  const id = model.replace(/^models\//, '');
+  // Google's name (`models/…`) and OpenRouter's (`google/…`) of the same model: the same price.
+  const id = model.replace(/^(models|google)\//, '');
   const p = PRICES[id] ?? ESTIMATED[id] ?? DECISION_PRICES[id] ?? SUBSCRIPTION_PRICES[id];
   if (!p) return undefined;
   return p.until && p.next && date >= p.until ? { ...p.next } : p;
@@ -93,8 +101,8 @@ export interface Tokens {
 /** The dearest of the list: a model off it is never shown or billed lower. */
 export const DEAREST_MODEL = Object.keys(PRICES).reduce((a, b) => (PRICES[b].output > PRICES[a].output ? b : a));
 
-/** The model a call of Google's is billed as: its own, or the dearest if it is off the list. The others (local, subscriptions) as they are. */
-export const billedModel = (model: string): string => (/^(models\/)?gemini-/.test(model) && !priceOf(model) ? DEAREST_MODEL : model);
+/** The model a call of Google's (from Google or through OpenRouter) is billed as: its own, or the dearest if it is off the list. The others (local, subscriptions) as they are. */
+export const billedModel = (model: string): string => (/^(models\/|google\/)?gemini-/.test(model) && !priceOf(model) ? DEAREST_MODEL : model);
 
 /**
  * USD for some usage: the cached part of the prompt at the cache price, thinking at the output price, the storage of an explicit
