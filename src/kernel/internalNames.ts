@@ -893,7 +893,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     step: 'T310b',
     names: {
       nessuno: 'none', oggetti: 'items', abitante: 'inhabitant', cosa: 'thing', meccanica: 'mechanic', runa: 'rune', oggetto: 'item', personaggio: 'character',
-      ambiente: 'environment', regola: 'rule', riscolpisci: 'resculpt', musica: 'music',
+      ambiente: 'environment', regola: 'rule', riscolpisci: 'resculpt', musica: 'music', direttiva: 'directive', individuo: 'individual',
     },
     note: '`oggetto` del Referente è uno strumento (`item`, come lo crea la Fucina), `cosa` una cosa del mondo (`object` per la Fucina)',
   }),

@@ -324,7 +324,7 @@ function relationRules(specie: Species): string {
  * Behind every archetype there are individuals: a name, a past, their own pockets — and a place in
  * society: a job, a family related to the people already known, a daily routine.
  */
-export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[] }): Promise<Identity> {
+export async function individuate(c: Council, archetype: { name: string; description: string; persona: string; specie?: Species }, ctx: { place: string; common: string[]; society?: string; avoid?: string[]; focus?: string[]; facts?: string; name?: string }, chi?: string): Promise<Identity> {
   const specie = archetype.specie ?? 'person';
   const r = await c.ask<{ name: string; persona: string; look: string; carries: string[]; wears?: string[]; job?: string; gender?: string; age?: string; story?: string; storia?: string; family?: Array<{ name: string; bond: string; kind?: string }>; routine?: Array<{ when: string; does: string; where: string; activity?: string; action?: string }> }>(
     'narrator',
@@ -333,6 +333,8 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       `Create an individual of this kind of character: «${archetype.name}» (${archetype.description}), ${specie === 'animal' ? 'an animal' : 'a person'}.`,
       `Sheet of the kind:\n${archetype.persona}`,
       `Place where they are: ${ctx.place || 'unknown'}.`,
+      // An individual the master declared (T376, ADR-0188 §5.2): the facts given are kept as they are, the rest is the Narrator's.
+      ctx.facts ? `The master of the world has decided who this individual is: keep every fact as it is said (their name, trade, family, secret, where they live) and add only what is missing.${ctx.name ? ` Their name is «${ctx.name}».` : ''}\nThe facts: «${ctx.facts}»` : '',
       ctx.society ? `THE SOCIETY OF THE WORLD\n${ctx.society}` : '',
       'Give them a proper name, a short character and a story of their own (not generic), a gender (male or female), a trade, a detail of their look, and 3-6 things they carry consistent with their life (tools of the trade, food, keepsakes, small things).',
       specie === 'animal' ? 'An animal wears nothing: "wears" is empty.' : 'In "wears" what they wear on the head, the torso and the back (a hat, a tunic or an apron, a cloak or a shawl): 0-3 garments by name, of their trade and their means, the common ones that exist when they fit; an empty list if they wear nothing worth a word.',
@@ -346,7 +348,7 @@ export async function individuate(c: Council, archetype: { name: string; descrip
       .filter(Boolean)
       .join('\n'),
     INDIVIDUAL_SCHEMA,
-    { data: { archetype, ctx }, temperature: 1, focus: ctx.focus },
+    { data: { archetype, ctx }, temperature: 1, focus: ctx.focus, ...(chi ? { chi } : {}) },
   );
   const job = String(r.job ?? '').slice(0, 40);
   const routine = (r.routine ?? [])

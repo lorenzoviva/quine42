@@ -5,6 +5,7 @@
 import type { Id } from '../ecs';
 import { individuate, type Identity } from '../agents/content';
 import { wordsOf } from '../agents/council';
+import { metaBreak } from '../fourthwall';
 import { npcSheet } from '../agents/minds';
 import { slug as nodeSlug } from '../graph';
 import { italianName } from '../internalNames';
@@ -17,7 +18,7 @@ import { dressInventory } from '../wearing';
 import type { NpcHost, NpcWanderer } from './host';
 import { outfitOf, type Garment, type Outfit } from './outfits';
 import { PLOTS_FILE, readPlots, reviewPlot, writePlots, type Plot } from './plots';
-import { addIndividual, applyRenames, bondWith, defaultRoutine, freshName, guessGender, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type DayPhase, type Individual, type Species } from './society';
+import { addIndividual, applyRenames, type DeclaredPlace, bondWith, defaultRoutine, freshName, guessGender, readPeople, remember, repairSociety, sheetFingerprint, similarNames, societySummary, type DayPhase, type Individual, type Species } from './society';
 
 export class People {
   constructor(private readonly host: NpcHost) {}
@@ -266,6 +267,61 @@ export class People {
   /** The registry entry of an individual, by name. */
   individualOf(name: string): Individual | undefined {
     return readPeople(this.host.files()).people.find((p) => p.name === name);
+  }
+
+  /**
+   * An individual the master declares (T376, ADR-0188 §5.2): the Narrator writes them from the archetype `kind`, like `npc.individuate`,
+   * with the master's facts as statements to keep (`facts`, a text already clean); the name the master gave is theirs whatever the answer
+   * says. What breaks the fourth wall does not go in (the local filter only: the master's words never go to Jev, D54.5). They go in
+   * `world/people.json` with where they are (`declared`) and no origin: awaited, until the kernel puts them in the plan of that place
+   * (`placeDeclared`). One call of the Narrator, paid by `chi`.
+   */
+  async declare(d: { facts: string; name?: string; kind: string; place: DeclaredPlace; chi?: string }): Promise<{ ok: true; individual: Individual } | { ok: false; reason: string }> {
+    const m = this.host.modules.get(d.kind)?.manifest;
+    if (!m?.persona) return { ok: false, reason: `«${d.kind}» non è un tipo di abitante` };
+    const taken = (n: string) => readPeople(this.host.files()).people.some((p) => p.name.toLowerCase() === n.toLowerCase());
+    if (d.name && taken(d.name)) return { ok: false, reason: `nel mondo c'è già qualcuno che si chiama ${d.name}` };
+    const specie = this.speciesOf(d.kind) ?? 'person';
+    let identity: Identity;
+    try {
+      identity = await individuate(
+        this.host.council,
+        { name: m.name, description: m.description ?? '', persona: m.persona, specie },
+        { place: d.place.place, common: [...this.host.content.items.values()].map((x) => x.name), society: societySummary(readPeople(this.host.files())), facts: d.facts, name: d.name, focus: this.host.focusOn([`kind:${nodeSlug(d.kind)}`]) },
+        d.chi,
+      );
+    } catch (e) {
+      return { ok: false, reason: `il Narratore non ha scritto l'individuo: ${(e as Error).message}` };
+    }
+    if (d.name && identity.name !== d.name) {
+      identity.persona = applyRenames(identity.persona, [[identity.name, d.name]]);
+      identity.name = d.name;
+    }
+    if (!d.name && taken(identity.name)) return { ok: false, reason: `nel mondo c'è già qualcuno che si chiama ${identity.name}` };
+    const wall = metaBreak(`${identity.persona}\n${identity.story ?? ''}\n${identity.job ?? ''}\n${identity.look}`, wordsOf(this.host.files()));
+    if (wall) return { ok: false, reason: `l'individuo scritto rompe la quarta parete («${wall}»)` };
+    identity.gender ??= guessGender({ name: identity.name, job: identity.job ?? '', family: identity.family ?? [] });
+    const individual: Individual = {
+      name: identity.name, kind: d.kind, species: specie, gender: identity.gender, job: identity.job || m.name, age: identity.age, family: identity.family ?? [], routine: identity.routine ?? defaultRoutine(identity.job ?? ''),
+      story: identity.story, place: d.place.place, persona: identity.persona, look: identity.look, carries: identity.carrying,
+      ...(identity.wearing.length ? { wears: identity.wearing } : {}),
+      declared: d.place,
+    };
+    const next = addIndividual(readPeople(this.host.files()), individual, (t) => this.speciesOf(t));
+    this.host.write('world/people.json', JSON.stringify(next, null, 2) + '\n');
+    this.host.applyWorking();
+    this.host.commitContent(`persone: ${individual.name}, ${individual.job} (dichiarato dal master)`, 'npc.individuate', 'narrator', d.chi);
+    const fam = individual.family.map((f) => `${f.bond} di ${f.name}`).join(', ');
+    this.host.council.say('narrator', 'propone', `${individual.name}, ${individual.job}${fam ? `; ${fam}` : ''}: dichiarato dal master, a «${d.place.place}»`, undefined, 'npc.individuate');
+    return { ok: true, individual: next.people.find((p) => p.name === individual.name) ?? individual };
+  }
+
+  /** A declared individual taken in by a place (T376): the origin of the character of that plan that is them, and the place's name. */
+  placeDeclared(name: string, origin: string, place: string): void {
+    this.updateIndividual(name, (p) => {
+      p.origin = origin;
+      p.place = place;
+    });
   }
 
   private updateIndividual(name: string, fn: (p: Individual) => void): void {

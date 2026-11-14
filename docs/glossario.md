@@ -1089,6 +1089,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «memoria degli agenti», «istruzioni del master»
 - **Fermo**: `world/campaign.md`, gli id delle sezioni (`all`, `narrator`, `cartographer`, `sculptor-artist`, `engineer-physicist`, `musician`) e l'incarico `directive`; i titoli delle sezioni nel file sono nella lingua del mondo.
 
+### Individuo dichiarato
+- **Inglese**: `declared`, `DeclaredPlace`, `declareIndividual`, `settleDeclared`, `awaitedDeclared`, `declaredFor`, `individual` (l'incarico del Referente e il campo dell'oggetto del piano)
+- **Definizione**: un individuo che il master dice chi è e dove sta; il Narratore lo scrive coi fatti dati; finché nessun luogo lo accoglie è **atteso**, poi è un personaggio del piano del suo luogo (T376, ADR-0192). Una trama scritta a mano nella Direzione è una **trama del master** (`writePlot`, `masterPlot`).
+- **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/npc/people.ts`, `src/kernel/npc/plots.ts`, `src/kernel/kernel.ts`, `src/ui/studio.ts`
+- **Da non usare**: «NPC del master», «personaggio dichiarato» (un personaggio è un tipo)
+- **Fermo**: i campi `declared` (`place`, `at`, `region`) di `world/people.json`, `individual` di un oggetto del piano, l'incarico `individual`.
+
 ### Musicista
 - **Inglese**: `Musician`, `musicista`, `compose`, `ComposeRequest`, `composerRole`, `ScoreDirector`, `composing`
 - **Definizione**: l'agente che scrive i programmi sonori di ciò che il mondo e il viandante chiedono; abita nella casa dell'Artista.

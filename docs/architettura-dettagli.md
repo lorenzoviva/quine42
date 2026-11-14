@@ -456,6 +456,16 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 - **Personaggi** (ADR-0010, 0013, 0017, 0020): tipo + individuo (`identity`: anche `job family routine story`), `mind` (memoria, umore, modo), azioni
   `segui resta vaga dai nessuna`, oggetti citati → `wanted`. Al massimo 2 dello stesso tipo nel mondo
   caricato; nuovi tipi forgiati esplorando (`ai.maxCast`); ogni individuo è un seme del programma del suo tipo (pochi semi per classe).
+- **Individui e trame dichiarati dal master** (ADR-0192, T376; ADR-0188 § 5.2-5.3): l'incarico `individual` del Referente porta al Narratore
+  i fatti del master (`npc.individuate` con `facts` e il nome detto, una chiamata, la manopola `people`), solo per il master, puliti
+  (`cleanText`) e col filtro locale (`metaBreak`, mai Jev); il luogo è un luogo pianificato per nome o una regione dell'atlante, il tipo
+  quello che i fatti nominano (`Kernel.declareIndividual`). L'individuo sta in `world/people.json` con `declared` (`place`, `at` o
+  `region`); senza `origin` è **atteso**: il primo `applyPlan` del suo luogo (o subito, se è caricato: `settleLoaded`) mette nel piano un
+  personaggio del suo tipo marcato col suo nome (`individual` sull'oggetto, `settleDeclared`), gli dà l'origine `<luogo>#o<n>` e chi
+  nasce lì è lui, fuori dalla varietà e dalla manopola delle persone. Il grafo (`atteso`, `dichiarato`) e il silos li mostrano.
+  «Scrivi trama» nel tavolo della situazione (solo il master): titolo, mistero, fino a 8 tappe; `masterPlot` (`cleanText`, giorni 0-4,
+  momenti e posti del mondo, `reviewPlot`) e `Kernel.writePlot` (`saveFile` di `world/plots.json`, nessuna chiamata, niente missioni);
+  le tappe accadono come quelle del Narratore. «Modifica» sul leggio apre la bibbia nell'editor, solo per il master.
 
 <a id="corona"></a>
 ## La corona e gli interni dello studio

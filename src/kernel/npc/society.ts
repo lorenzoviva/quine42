@@ -91,6 +91,28 @@ export interface Individual {
   wandererBond?: string;
   /** The sheet the Narrator wrote for the Actor (T157): the text, and the fingerprint of what it was written from. */
   sheet?: IndividualSheet;
+  /** Declared by the master (T376, ADR-0188 §5.2): where they are; without `origin` they are awaited, and the first plan of that place takes them in. */
+  declared?: DeclaredPlace;
+}
+
+/**
+ * Where a declared individual is (T376): the place as the master said it, and either the place planned (`at`, its chunk) or the region of
+ * the atlas (`region`, its id: the first place planned in it). Read by the kernel, which puts them in the plan of that place.
+ */
+export interface DeclaredPlace {
+  place: string;
+  at?: [number, number];
+  region?: string;
+}
+
+/** The individuals the master declared who are still awaited (T376): no entity of a place is theirs yet. */
+export function awaitedDeclared(people: People): Individual[] {
+  return people.people.filter((p) => p.declared && !p.origin);
+}
+
+/** Of the awaited individuals, those a place takes in (T376): its chunk is theirs, or it lies in their region. */
+export function declaredFor(people: People, cx: number, cy: number, region?: string): Individual[] {
+  return awaitedDeclared(people).filter((p) => (p.declared!.at ? p.declared!.at[0] === cx && p.declared!.at[1] === cy : !!region && p.declared!.region === region));
 }
 
 /** The sheet of an individual (T157): written once, rewritten when their bonds or story change (`sheetFingerprint`). */

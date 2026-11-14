@@ -17,6 +17,8 @@ export type Where = 'inside' | 'outside' | 'anywhere';
 export interface PlacedObject {
   module: string;
   where: Where;
+  /** The individual the master declared whom this character is (T376): written by the kernel, never by the Cartographer. */
+  individual?: string;
 }
 
 /** The water of a tile that has flowed (T51b): its bed, its water (levels), the tile it was before it became water. */
