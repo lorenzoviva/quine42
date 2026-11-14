@@ -5347,13 +5347,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, foto del forte nel laboratorio 3D.
 - Quando è fatto: commit su `task/T371`.
 
-### T372 · Campagna: il master paga tutto — `da fare`
+### T372 · Campagna: il master paga tutto — `fatto` (`bf933076`)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 5
 - Step: 43
 - Contesto: riga 1 del § 6 di `docs/design/campagna-master.md` (T347, `dossier T347`), ADR-0188; D54 chiusa il 13/11 (`docs/pipeline/domande/aperte.md`): **1** il titolare delle carte è chi paga, cioè il master (niente spoiler; scambi e cessioni più avanti); **2** in un universo pubblico gli anonimi vanno ai modelli locali, nel privato l'ospite invitato è a carico del master.
 - Cosa fare: ADR-0188 da «proposto» ad «accettato» con tutte le risposte di D54 (anche 3-8, per i task che seguono); `game.expenses` nel `join` e in `GAME_FIELDS`, `charge` col pagante risolto dalla politica, il titolare delle carte il master quando paga lui (quote dell'eredità a lui), il tetto del master, gli anonimi, portafoglio e lobby che lo dicono; versione del kernel; glossario («spese della partita»); voce nel registro della sicurezza (§ 7 punto 1).
 - Test: due viandanti senza crediti in un mondo di molti giocano coi modelli mentre scende il saldo del master; a saldo zero tutti ai modelli locali; i test dei crediti di oggi invariati; suite e typecheck coi turni.
 - Quando è fatto: commit su `task/T372`.
+- Esito: il master paga tutto: ADR-0188 accettato con le risposte di D54; `game.expenses` dalla lobby (`settings.game` nel `join`, in `GAME_FIELDS`, fermo a partita in corso, non ereditato dai cloni); `billedTo` nel kernel per l'addebito (`charge`, niente divisione) e per le carte (pagante e titolare il master, quote dell'eredità); `hasCredits` con saldo e tetto del master per tutti; anonimi ai modelli locali salvo universo privato (`privateWorld`, falso finché T366 non lo dice); tetto minimo e tetto dei giocatori ignorati dove paga il master; avviso a tutti a crediti del master finiti; `world/usage.json → masterPaid` e portafoglio (`masterPays`, `master`, `paidFor`, pagina «Pagate per gli altri»); corretto il portafoglio di un mondo acceso, che non mostrava i consumi (leggeva `paganti`); lobby e modale lo dicono; V-036, glossario, AGENTS, architettura, kernel 0.6.13 (in 3d andrà a 0.7.1); test in `tests/spese-master.test.ts` e `tests/sicurezza/spese-master.test.ts`, suite e typecheck verdi nei turni; non visti nel browser lobby e pagina dei crediti (solo test con finto DOM e funzioni pure); niente contro Gemini vero.
 
 ### T373 · Campagna: il ritmo e la pausa del mondo — `da fare` (dipende da T366)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
