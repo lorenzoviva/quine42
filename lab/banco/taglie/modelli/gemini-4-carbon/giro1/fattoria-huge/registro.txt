@@ -1,0 +1,5 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: il simbolo "#30" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#30" value="rrggbb"/>
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: s
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 5 × 30 voxel (0,25 × 1,50 caselle), una porta è almeno 11 × 30 a ogni taglia
+[sculptor] errore: «fattoria»: nessun programma valido

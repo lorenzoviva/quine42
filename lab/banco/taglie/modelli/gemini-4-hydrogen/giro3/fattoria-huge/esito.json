@@ -1,0 +1,30 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "scultore": "gemini-4-hydrogen",
+ "modello": "gemini-4-hydrogen",
+ "voto": 6,
+ "chiamate": 7,
+ "secondi": 129,
+ "usd": 0.3141,
+ "usdGemini": 0.3141,
+ "token": {
+  "prompt": 100377,
+  "output": 18318,
+  "thoughts": 6589
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-hydrogen",
+   "task": "model.sculpt",
+   "calls": 5,
+   "usd": 0.3063
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 2,
+   "usd": 0.0077
+  }
+ ]
+}

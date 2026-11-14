@@ -1,0 +1,2 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: riga 84: l'unione "+" è scritta due volte nella stessa griglia, con simboli diversi

@@ -1,0 +1,23 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "gemini-4-hydrogen",
+ "chiamate": 4,
+ "secondi": 87,
+ "usd": 0.2282,
+ "usdGemini": 0.2282,
+ "token": {
+  "prompt": 63428,
+  "output": 11293,
+  "thoughts": 7412
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-hydrogen",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.2282
+  }
+ ],
+ "errore": "nessun programma valido"
+}

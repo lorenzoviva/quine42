@@ -1,0 +1,4 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+[kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 16 tipi di parti e 30 parti, alla Enorme 16 e 30: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un
+[artist → sculptor] obietta: «fattoria»: 6/10 — La porta d'ingresso sul fronte non è chiaramente visibile o definita.

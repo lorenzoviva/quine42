@@ -1,0 +1,30 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "scultore": "gemini-4-hydrogen",
+ "modello": "gemini-4-hydrogen",
+ "voto": 7,
+ "chiamate": 4,
+ "secondi": 58,
+ "usd": 0.1589,
+ "usdGemini": 0.1589,
+ "token": {
+  "prompt": 40836,
+  "output": 8055,
+  "thoughts": 5483
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-hydrogen",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.1549
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0039
+  }
+ ]
+}

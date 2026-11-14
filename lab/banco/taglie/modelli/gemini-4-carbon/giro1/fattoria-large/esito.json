@@ -1,0 +1,30 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "gemini-4-carbon",
+ "modello": "gemini-4-carbon",
+ "voto": 8,
+ "chiamate": 5,
+ "secondi": 268,
+ "usd": 0.3095,
+ "usdGemini": 0.3095,
+ "token": {
+  "prompt": 57198,
+  "output": 19825,
+  "thoughts": 437
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-carbon",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.3051
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0045
+  }
+ ]
+}

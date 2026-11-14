@@ -1,0 +1,4 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: il simbolo "#10" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#10" value="rrggbb"/>
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 3: stanza: la più grande in cui si sta in piedi ha il lato di 23 voxel (1,15 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: s
+[artist → sculptor] approva: «fattoria»: 8/10 — Le finestre sui lati e sul retro sono disposte in modo leggermente disordinato e asimmetrico rispetto alla facciata frontale.

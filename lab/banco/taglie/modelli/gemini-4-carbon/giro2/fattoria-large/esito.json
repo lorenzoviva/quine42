@@ -1,0 +1,23 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "gemini-4-carbon",
+ "chiamate": 4,
+ "secondi": 427,
+ "usd": 0.5401,
+ "usdGemini": 0.5401,
+ "token": {
+  "prompt": 51108,
+  "output": 11021,
+  "thoughts": 32765
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-carbon",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.5401
+  }
+ ],
+ "errore": "risposta vuota (MAX_TOKENS)"
+}

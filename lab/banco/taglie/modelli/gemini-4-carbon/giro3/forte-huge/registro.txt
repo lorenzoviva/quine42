@@ -1,0 +1,4 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: il modello è vuoto: nessun voxel visibile (i codici senza colore nella palette sono invisibili)
+[kernel → sculptor] scarta: «forte»: varietà: alla taglia Gargantuesca 19 tipi di parti e 141 parti, alla Enorme 19 e 124: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: 
+[artist → sculptor] approva: «forte»: 7/10 — C'è un pilastro verticale isolato ed estremamente alto che si estende fuori dal modello verso l'alto, staccato dal resto della struttura.
