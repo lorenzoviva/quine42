@@ -23,7 +23,7 @@ L'autore: l'implementazione del kernel 0.9.0, divisa in step. La guida dei beta 
 5. Ciò che T183 trova mancare al kernel e che non entrerebbe senza wipe è deciso: dentro la 0.9.0 oppure rimandato sapendo cosa costa, perché un wipe degli universi ufficiali costa molto. Con il versionamento (ADR-0136) «senza wipe» vuol dire «nella stessa `X.Y`»: ciò che cambia il contratto dopo la 0.9.0 la porta a 0.10.0 o a 1.0.0, e gli universi della beta restano sul server della loro versione.
 6. Il registro di ciò che il Concilio non riesce a fare è acceso (T238): senza, la Fase III non ha da dove partire.
 7. Un viandante nuovo ha seguito i due file della guida sul server di beta, e ogni passo torna (T237).
-8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (oggi `0.1.x`: `Z` sale a ogni task che cambia il kernel, ADR-0136) e quel commit ha un tag.
+8. `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` (il 14/11 `0.7.4`: `Z` sale a ogni task che cambia il kernel, `Y` a ogni contratto nuovo, ADR-0136) e quel commit ha un tag.
 
 ### Fase II: la closed beta
 
@@ -95,21 +95,21 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 26 | L'Attore interpreta gli individui, se il master lo accende | I | raggiunto | T157 T158 T229 |
 | 27 | Regge: test stabili e più veloci, cache delle forme, memoria, disco, git, prestazioni misurate | I | raggiunto | T91 T95 T148 T151 T160 T161 T162 T163 T164 T174 T175 T176 T177 T209 T210 T211 T212 T213 T214 T215 T216 |
 | 28 | Si parla del lavoro per fasi, step e titoli dei task | I | raggiunto | T230 T231 T246 |
-| 29 | La grafica a cartone | I | in corso | T89 T89a T89b T89c T89d T89e T98 |
-| 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 T303 T313 T333 T334 T335 T336 T337 T338 T339 T340 T341 T342 T343 T344 T346 T354 T355 T356 T359 |
-| 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | da fare | T152 T153 T207 T88 |
-| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | in corso | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 T302 T312 T317 |
-| 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | da fare | T241 T242 |
-| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T287 T311 T316 |
+| 29 | La grafica a cartone | I | raggiunto | T89 T89a T89b T89c T89d T89e T98 |
+| 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | in corso | T154 T155 T173 T180 T181 T182 T258 T259 T156 T303 T313 T333 T334 T335 T336 T337 T338 T339 T340 T341 T342 T343 T344 T346 T354 T355 T356 T359 T370 T371 |
+| 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | in corso | T152 T153 T207 T88 |
+| 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | in corso | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 T302 T312 T317 T319 T320 T321 |
+| 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | in corso | T241 T242 |
+| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T287 T311 T316 T315 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
 | 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 T278 |
 | 38 | Il lancio | IV | in attesa | T240 T378 |
 | 39 | Gli NPC decidono e invecchiano | III | in attesa | T326 T327 T245g T245h T245i |
-| 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | da fare | T288 T289 T290 T291 T292 T301 T353 |
-| 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | da fare | T293 T294 T295 T296 |
-| 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | da fare | T306 T307a T314 T307b T308a T308b T309 T310 T310b |
-| 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | da fare | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 |
+| 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | raggiunto | T288 T289 T290 T291 T292 T301 T353 |
+| 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | raggiunto | T293 T294 T295 T296 |
+| 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | raggiunto | T306 T307a T314 T307b T308a T308b T309 T310 T310b T318 T328 |
+| 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in corso | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 T379 T381 T383 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 
