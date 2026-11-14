@@ -10,4 +10,5 @@ Regole:
 - i dettagli sono segni: assi, pannelli e crepe in una lettera scura dedicata, mai micro-voxel sparsi
 - le ombre non si dipingono: le fanno le fasce di luce
 - niente testo, scritte o simboli
+- proporzioni auree (circa 8 a 5) tra le parti dove nient'altro le fissa, e spirali di Fibonacci dove la natura o il mestiere le hanno: foglie attorno a uno stelo, conchiglie, scale a chiocciola, cupole
 Protagonista: un viandante con mantello e cappuccio grigio-blu e un bastone

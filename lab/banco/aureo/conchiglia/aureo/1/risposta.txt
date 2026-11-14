@@ -1,0 +1,58 @@
+```xml
+<sequence values="BWKPdw" size="12 12 12" symmetry="()" name="Conchiglia">
+  <!-- Palette: warm cream body, shell pink bands and lip, pearly rose throat, dark shadow, ivory spine accents -->
+  <color symbol="W" value="fff2df" name="crema conchiglia"/>
+  <color symbol="K" value="f299a8" name="rosa striature"/>
+  <color symbol="P" value="d65b74" name="rosa interno perla"/>
+  <color symbol="d" value="542332" name="profondita gola"/>
+  <color symbol="w" value="fffdf7" name="avorio creste"/>
+
+  <!-- Spire: progressive coiled whorls tapering back and to the left -->
+  <ellipsoid at="2 2 2" size="2 2 2" color="K"/>
+  <ellipsoid at="3 3 1" size="3 3 3" color="W"/>
+  <ellipsoid at="4 4 1" size="4 4 4" color="K"/>
+  <ellipsoid at="5 5 0" size="5 5 5" color="W"/>
+
+  <!-- Main body whorl and forward siphonal canal resting on the sand (z=0) -->
+  <ellipsoid at="6 6 0" size="7 7 6" color="W"/>
+  <cylinder at="6 9 0" size="3 2 2" color="W"/>
+
+  <!-- Flared outer lip extending towards the front and right -->
+  <ellipsoid at="8 6 0" size="4 6 4" color="K"/>
+
+  <!-- Conical spines along the shoulder of the whorls -->
+  <box at="2 2 3" size="1 1 1" color="w"/>
+  <box at="3 2 3" size="1 1 2" color="w"/>
+  <box at="4 3 4" size="1 1 2" color="w"/>
+  <box at="5 4 5" size="1 1 2" color="w"/>
+  <box at="7 4 4" size="1 1 2" color="w"/>
+  <box at="8 5 3" size="1 1 2" color="w"/>
+
+  <!-- Spiral growth cords wrapping the dorsal surface -->
+  <line at="3 4 3" to="5 7 4" r="0" color="K"/>
+  <line at="5 7 4" to="8 6 3" r="0" color="K"/>
+  <line at="4 4 4" to="6 6 5" r="0" color="w"/>
+  <line at="6 6 5" to="7 8 3" r="0" color="w"/>
+
+  <!-- Aperture lining and dark interior throat -->
+  <ellipsoid at="7 7 0" size="4 5 4" color="P"/>
+  <cylinder at="6 6 0" size="2 3 3" color="d"/>
+
+  <!-- Hollow out the aperture facing front-right -->
+  <ellipsoid at="8 8 1" size="3 4 3" color="B"/>
+  <box at="7 9 0" size="2 2 2" color="B"/>
+
+  <!-- Surface growth: extend subtle pink striations along the contour -->
+  <all steps="2">
+    <rule in="BB KW" out="** *K"/>
+    <rule in="B/B K/W" out="*/* */K"/>
+  </all>
+
+  <!-- Deepen the shadow inside the spiral throat -->
+  <one steps="3">
+    <rule in="d P" out="* d"/>
+    <rule in="d/P" out="*/d"/>
+    <rule in="dP" out="*d"/>
+  </one>
+</sequence>
+```

@@ -11,6 +11,9 @@ style guide (world/style.md): palette, shapes, proportions, light, and you make 
   the part changes. Look whether the parts read as outlines: each part has its own solid colour, neighbouring parts stand
   apart in light and dark (if crown and trunk, wall and door blur together, say so), the details are clean marks and not a dust of
   voxels, the shapes are squat, the environment is muted and the saturated accents are few and on the things that matter.
+- In the style guide, as a principle for what is sculpted from now on: the golden ratio (about 8 to 5) between the main parts
+  where nothing else fixes it, and Fibonacci spirals where they belong (plants, shells, winding stairs, domes). Do not fault a
+  model only because its proportions are not golden: the class and the reading from afar come first.
 - Concrete problems and advice, in terms of shape and colour ("the crown is a cube: round it",
   "the door at the front is missing", "the door has the same tone as the wall: darken it"), never in terms of code.
   Write them in the language of the world.

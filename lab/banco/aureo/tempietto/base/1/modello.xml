@@ -1,0 +1,183 @@
+<sequence values="BPpWdCcRHhFGgImabquv" size="50 50 50" symmetry="(x)" name="Tempietto">
+  <color symbol="P" value="e8e2d5" name="marmo chiaro"/>
+  <color symbol="p" value="b8b0a2" name="pietra ombra modanature"/>
+  <color symbol="W" value="fbf8f0" name="marmo bianco rilievo"/>
+  <color symbol="d" value="686259" name="fessura pietra scura"/>
+  <color symbol="C" value="4c8c78" name="rame ossidato cupola"/>
+  <color symbol="c" value="325e51" name="costoloni rame scuro"/>
+  <color symbol="R" value="6b737a" name="piombo cupola"/>
+  <color symbol="r" value="4b5157" name="costoloni piombo scuro"/>
+  <color symbol="H" value="3e3025" name="bronzo antico"/>
+  <color symbol="h" value="8a6d46" name="borchie bronzo chiaro"/>
+  <color symbol="F" value="ffd24a" glow="True" name="fiamma sacra e oro"/>
+  <color symbol="G" value="4a7536" name="muschio umido"/>
+  <color symbol="g" value="6f9e54" name="licheni chiari"/>
+  <color symbol="I" value="1a233a" name="vano finestra ombra"/>
+  <color symbol="m" hidden="True" name="mescola seme"/>
+  <color symbol="a" hidden="True" name="scelta porta"/>
+  <color symbol="b" hidden="True" name="porta bronzo"/>
+  <color symbol="q" hidden="True" name="massa cupola"/>
+  <color symbol="u" hidden="True" name="scelta rame"/>
+  <color symbol="v" hidden="True" name="scelta piombo"/>
+
+  <!-- Shuffle: the generator starts from a different state for each seed -->
+  <box at="25 0 49" size="50 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- Crepidoma and podium: three circular tiers -->
+  <cylinder at="25 25 0" size="42 42 2" color="P"/>
+  <cylinder at="25 25 2" size="38 38 2" color="P"/>
+  <cylinder at="25 25 4" size="34 34 2" color="P"/>
+
+  <!-- Three monumental steps projecting in front (south, large y) -->
+  <box at="25 41 0" size="18 10 2" color="P"/>
+  <box at="25 39 2" size="16 10 2" color="P"/>
+  <box at="25 37 4" size="14 10 2" color="P"/>
+
+  <!-- Peristyle: 8 classical columns on the stylobate (Pythagorean radius 13) -->
+  <!-- Column bases (torus) -->
+  <cylinder at="20 37 6" size="4 4 1" color="p"/>
+  <cylinder at="30 37 6" size="4 4 1" color="p"/>
+  <cylinder at="37 30 6" size="4 4 1" color="p"/>
+  <cylinder at="37 20 6" size="4 4 1" color="p"/>
+  <cylinder at="30 13 6" size="4 4 1" color="p"/>
+  <cylinder at="20 13 6" size="4 4 1" color="p"/>
+  <cylinder at="13 20 6" size="4 4 1" color="p"/>
+  <cylinder at="13 30 6" size="4 4 1" color="p"/>
+
+  <!-- Cylindrical shafts in light marble -->
+  <cylinder at="20 37 7" size="3 3 14" color="P"/>
+  <cylinder at="30 37 7" size="3 3 14" color="P"/>
+  <cylinder at="37 30 7" size="3 3 14" color="P"/>
+  <cylinder at="37 20 7" size="3 3 14" color="P"/>
+  <cylinder at="30 13 7" size="3 3 14" color="P"/>
+  <cylinder at="20 13 7" size="3 3 14" color="P"/>
+  <cylinder at="13 20 7" size="3 3 14" color="P"/>
+  <cylinder at="13 30 7" size="3 3 14" color="P"/>
+
+  <!-- Carved capitals in white marble -->
+  <cylinder at="20 37 21" size="4 4 1" color="W"/>
+  <cylinder at="30 37 21" size="4 4 1" color="W"/>
+  <cylinder at="37 30 21" size="4 4 1" color="W"/>
+  <cylinder at="37 20 21" size="4 4 1" color="W"/>
+  <cylinder at="30 13 21" size="4 4 1" color="W"/>
+  <cylinder at="20 13 21" size="4 4 1" color="W"/>
+  <cylinder at="13 20 21" size="4 4 1" color="W"/>
+  <cylinder at="13 30 21" size="4 4 1" color="W"/>
+
+  <!-- Circular cella wall and interior rotunda -->
+  <cylinder at="25 25 6" size="18 18 16" color="P"/>
+  <cylinder at="25 25 6" size="12 12 16" color="B"/>
+
+  <!-- Front entrance portal through the cella -->
+  <box at="25 33 6" size="6 6 12" color="B"/>
+  <box at="25 33 18" size="8 2 1" color="p"/>
+
+  <!-- Sacred hearth and altar inside the cella -->
+  <cylinder at="25 25 6" size="6 6 3" color="p"/>
+  <cylinder at="25 25 9" size="4 4 1" color="W"/>
+  <box at="25 25 10" size="2 2 1" color="H"/>
+  <box at="25 25 11" size="2 2 2" color="F"/>
+
+  <!-- Entablature: architrave, frieze and projecting cornice -->
+  <cylinder at="25 25 22" size="32 32 1" color="P"/>
+  <cylinder at="25 25 22" size="14 14 1" color="B"/>
+  <cylinder at="25 25 23" size="33 33 1" color="p"/>
+  <cylinder at="25 25 23" size="14 14 1" color="B"/>
+  <cylinder at="25 25 24" size="35 35 1" color="P"/>
+  <cylinder at="25 25 25" size="36 36 1" color="W"/>
+  <cylinder at="25 25 24" size="14 14 2" color="B"/>
+
+  <!-- Peristyle balustrade with acroteria urns above each column -->
+  <cylinder at="25 25 26" size="34 34 2" color="P"/>
+  <cylinder at="25 25 26" size="30 30 2" color="B"/>
+  <box at="20 37 28" size="2 2 2" color="W"/>
+  <box at="30 37 28" size="2 2 2" color="W"/>
+  <box at="37 30 28" size="2 2 2" color="W"/>
+  <box at="37 20 28" size="2 2 2" color="W"/>
+  <box at="30 13 28" size="2 2 2" color="W"/>
+  <box at="20 13 28" size="2 2 2" color="W"/>
+  <box at="13 20 28" size="2 2 2" color="W"/>
+  <box at="13 30 28" size="2 2 2" color="W"/>
+
+  <!-- Drum of the cupola with pierced oculi windows -->
+  <cylinder at="25 25 26" size="22 22 5" color="P"/>
+  <cylinder at="25 25 26" size="14 14 5" color="B"/>
+  <cylinder at="25 25 31" size="24 24 1" color="p"/>
+  <box at="25 14 28" size="2 2 2" color="I"/>
+  <box at="14 25 28" size="2 2 2" color="I"/>
+  <box at="36 25 28" size="2 2 2" color="I"/>
+  <box at="25 36 28" size="2 2 2" color="I"/>
+
+  <!-- The Cupola mass and lantern structures -->
+  <cylinder at="25 25 32" size="22 22 2" color="q"/>
+  <cylinder at="25 25 34" size="20 20 2" color="q"/>
+  <cylinder at="25 25 36" size="17 17 2" color="q"/>
+  <cylinder at="25 25 38" size="13 13 2" color="q"/>
+  <cylinder at="25 25 40" size="9 9 2" color="q"/>
+  <cylinder at="25 25 42" size="2 2 6" color="q"/>
+  <cylinder at="25 25 47" size="5 5 1" color="q"/>
+
+  <!-- Marble lantern on top of the dome -->
+  <cylinder at="25 25 42" size="8 8 1" color="W"/>
+  <cylinder at="25 25 43" size="6 6 3" color="P"/>
+  <box at="25 25 44" size="2 6 2" color="F"/>
+  <box at="25 25 44" size="6 2 2" color="F"/>
+  <cylinder at="25 25 46" size="7 7 1" color="W"/>
+
+  <!-- Golden sphere and cross finial at the peak -->
+  <box at="25 25 48" size="2 2 1" color="F"/>
+  <box at="25 25 49" size="1 1 1" color="F"/>
+  <box at="25 25 49" size="3 1 1" color="F"/>
+
+  <!-- Dome material variation: verdigris copper vs antique lead -->
+  <box at="25 25 40" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="u"/>
+    <rule in="m" out="v"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="uq" out="uu"/>
+    <rule in="vq" out="vv"/>
+  </all>
+  <all in="u" out="C"/>
+  <all in="v" out="R"/>
+
+  <!-- Structural ribs on the dome surface -->
+  <box at="25 25 32" size="1 24 10" color="c" on="C"/>
+  <box at="25 25 32" size="24 1 10" color="c" on="C"/>
+  <box at="25 25 32" size="1 24 10" color="r" on="R"/>
+  <box at="25 25 32" size="24 1 10" color="r" on="R"/>
+
+  <!-- Hollow vault interior of the cupola -->
+  <cylinder at="25 25 32" size="14 14 7" color="B"/>
+
+  <!-- Portal choice: open sanctum showing the fire vs studded bronze door -->
+  <box at="25 33 6" size="6 1 9" color="b"/>
+  <box at="25 33 6" size="1 1 1" color="m"/>
+  <one steps="1">
+    <rule in="m" out="a"/>
+    <rule in="m" out="B"/>
+  </one>
+  <all symmetry="(xyz)">
+    <rule in="ab" out="aa"/>
+  </all>
+  <all in="a" out="B"/>
+  <all in="b" out="H"/>
+  <all in="HH" out="Hh" symmetry="()" steps="1"/>
+
+  <!-- Clean cartoon shading under overhangs and cornices -->
+  <all in="P B" out="p *" steps="1"/>
+
+  <!-- Sunlight marbling on horizontal upper faces -->
+  <prl in="B P" out="* W" p="0.25" steps="1"/>
+
+  <!-- Stone masonry joints and cracks on the podium -->
+  <prl in="PP" out="Pd" p="0.12" steps="1"/>
+
+  <!-- Weathered moss and lichen spreading on the shaded north base -->
+  <prl in="B/P" out="*/G" p="0.35" steps="1" symmetry="()"/>
+  <prl in="G P" out="* G" p="0.25" steps="2" symmetry="()"/>
+  <prl in="G" out="g" p="0.2" steps="1"/>
+</sequence>

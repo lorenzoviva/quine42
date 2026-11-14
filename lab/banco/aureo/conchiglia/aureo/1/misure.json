@@ -1,0 +1,15 @@
+{
+  "passa": true,
+  "richieste": 1,
+  "voxel": 187,
+  "materiali": 5,
+  "dominante": 0.5882352941176471,
+  "corpo": 1,
+  "snellezza": 0.875,
+  "varianza": 0,
+  "token": {
+    "input": 17892,
+    "output": 45641
+  },
+  "dollari": 0.18457275
+}

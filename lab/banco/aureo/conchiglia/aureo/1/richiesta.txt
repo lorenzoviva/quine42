@@ -1,0 +1,3 @@
+Sculpt: Conchiglia
+What it looks like: una grande conchiglia a spirale, color crema e rosa, come quelle che si trovano sulla riva
+Class: object · box 12 × 12 × 12 voxels

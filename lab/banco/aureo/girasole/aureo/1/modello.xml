@@ -1,0 +1,47 @@
+<sequence values="BSLHYCVgaf" size="20 20 16" symmetry="(xy)" name="Girasoli">
+  <color symbol="S" value="386928" name="fusto"/>
+  <color symbol="L" value="4d8c32" name="foglie"/>
+  <color symbol="H" value="78b83e" name="foglie chiare"/>
+  <color symbol="Y" value="f7b518" name="petali"/>
+  <color symbol="C" value="2c170a" name="cuore"/>
+  <color symbol="V" hidden="True" name="terra"/>
+  <color symbol="g" hidden="True" name="germoglio"/>
+  <color symbol="a" hidden="True" name="apice"/>
+  <color symbol="f" hidden="True" name="bocciolo"/>
+  <!-- Base del ciuffo: disco di terra e germogli dei girasoli -->
+  <ellipsoid at="10 10 0" size="11 11 1" color="V"/>
+  <box at="10 10 0" size="1 1 1" color="g"/>
+  <one steps="3" in="V" out="g"/>
+  <prl steps="1" in="V" out="g" p="0.05"/>
+  <all in="V" out="B"/>
+  <all in="gg" out="gB"/>
+  <all in="g/g" out="g/B"/>
+  <!-- Da ciascun germoglio nasce la base dello stelo e sale l'apice -->
+  <all in="B g" out="a S"/>
+  <!-- Foglie basali larghe alla base del ciuffo -->
+  <all in="SB" out="*L" symmetry="(xy)"/>
+  <all in="LB" out="*L" steps="2" symmetry="(xy)"/>
+  <prl steps="1" in="LB" out="*H" p="0.4" symmetry="(xy)"/>
+  <!-- Crescita iniziale degli steli verso la mezza altezza -->
+  <prl steps="4">
+    <rule in="B a" out="a S" p="0.8"/>
+    <rule in="B* *a" out="a* *S" p="0.2"/>
+  </prl>
+  <!-- Grandi foglie cuoriformi attorno alla parte mediana degli steli -->
+  <prl steps="1" in="SB" out="*L" p="0.5" symmetry="(xy)"/>
+  <all in="LB" out="*L" steps="2" symmetry="(xy)"/>
+  <prl steps="1" in="L* *B" out="** *L" p="0.25" symmetry="(xy)"/>
+  <prl steps="1" in="B L" out="* H" p="0.5"/>
+  <!-- Gli steli salgono alti svettando sopra il fogliame -->
+  <prl steps="6">
+    <rule in="B a" out="a S" p="0.75"/>
+    <rule in="B* *a" out="a* *S" p="0.2"/>
+  </prl>
+  <all in="a" out="f"/>
+  <!-- Sbocciatura dei capolini: ricettacolo verde, cuore scuro e corona di petali -->
+  <all in="B f" out="C S"/>
+  <all in="f" out="C"/>
+  <all in="CB" out="*C" steps="1" symmetry="(xy)"/>
+  <all in="C B" out="* S"/>
+  <all in="CB" out="*Y" symmetry="(xy)"/>
+</sequence>
