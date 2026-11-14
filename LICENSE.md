@@ -1,4 +1,4 @@
-# Licenza / License — RUNE
+# Licenza / License — QUINE42
 
 Copyright (c) 2026 Lorenzo Viva <lorenzo.vaccaro@hotmail.com>
 

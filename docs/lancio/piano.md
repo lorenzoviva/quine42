@@ -5,7 +5,7 @@
 > dell'autore: il lancio è la **open beta** (Fase IV, [ADR-0184](../adr/0184-la-open-beta-senza-pagamenti-all-autore.md),
 > [`docs/design/open-beta.md`](../design/open-beta.md), [`docs/fasi.md`](../fasi.md#fase-iv-la-open-beta)), senza pagamenti all'autore,
 > con OpenRouter e la chiave del giocatore e con l'hosting esterno o in casa; i pagamenti e la partita IVA passano alla Fase VI; il volto
-> del lancio è l'autore, Boa Loger resta mascotte (§ 4 e § 4 bis). Nessun account creato, nulla pubblicato.
+> del lancio è l'autore, Boa Lodger resta mascotte (§ 4 e § 4 bis). Nessun account creato, nulla pubblicato.
 > Ogni sezione finisce con le **decisioni per l'autore**, voce per voce. Le fonti, con l'URL e la data di accesso, sono in fondo
 > (§ Fonti); dove una fonte non si è potuta leggere direttamente lo dico nel testo.
 >
@@ -20,8 +20,8 @@ Il testo di ogni voce, con il consiglio, è nella sua sezione. Qui l'elenco come
 
 - **Da decidere ora:**
   - D3.1 — account personali su Hacker News e su Reddit **da subito**, usati per mesi (commenti utili, nessun link proprio) prima del
-    lancio. *Consiglio: sì, è ancora la voce più importante del piano.* Gli account sono a nome tuo (§ 4 bis), non di Boa Loger.
-  - D4.6 — **il volto del lancio sei tu**, con nome e cognome, in prima persona; Boa Loger mai portavoce. *Consiglio: sì.*
+    lancio. *Consiglio: sì, è ancora la voce più importante del piano.* Gli account sono a nome tuo (§ 4 bis), non di Boa Lodger.
+  - D4.6 — **il volto del lancio sei tu**, con nome e cognome, in prima persona; Boa Lodger mai portavoce. *Consiglio: sì.*
 - **Senza consiglio, tue:**
   - D5.1 — 10 ore a settimana di promozione?
   - D6.2 — la chiave del server nella open beta: nessuna (i modelli li pagano solo le chiavi dei giocatori) oppure una chiave tua con un
@@ -40,29 +40,29 @@ Il testo di ogni voce, con il consiglio, è nella sua sezione. Qui l'elenco come
   nel titolo per i giocatori, detta con onestà nella descrizione; D2.3 carte come collezione, niente parole di rendita; D3.2 calendario
   sfalsato; D3.3 canali (più Discord, YouTube, TikTok, newsletter, itch.io alla demo; niente Facebook; Steam rimandato); D3.6 informativa
   privacy col tuo nome nella open beta; D3.7 niente incassi di nessun tipo nella open beta (donazioni, sponsor, template a provvigione);
-  D4.1 Boa Loger mascotte dentro il gioco e nella corona, non volto né portavoce; D4.2 Boa Loger gerboa nella corona; D4.4 nei video la tua
+  D4.1 Boa Lodger mascotte dentro il gioco e nella corona, non volto né portavoce; D4.2 Boa Lodger gerboa nella corona; D4.4 nei video la tua
   voce vera o nessuna voce, mai sintetica; D4.7 i post li scrivi tu, l'IA indica gli errori e non riscrive; D4.8 una frase sola, uguale
   ovunque; D4.9 niente tecniche di PNL, al loro posto le cinque regole del § 4 bis; D5.2 la storia dei 18 anni raccontata e firmata da te;
   D5.3 le cinque idee, tutte; D5.4 Show HN martedì o mercoledì, mattina della costa est; D6.1 Show HN punta alla demo offline, con la chiave
   e l'installazione come passo dopo; D6.3 Low Detail proposto come predefinito nella lobby della prima settimana; D6.5 pagina «Come usiamo
   l'IA» (T368) e segnalazione dei contenuti; D7.1 articolo in inglese sulla pipeline, 2-3 settimane dopo; D7.2 tradurre solo `AGENTS.md` e
   `docs/pipeline/README.md`.
-- **Facoltativa:** D4.3 Boa Loger easter egg nel mondo (senza storia d'origine).
-- **Tolte:** D4.5 il bot «Boa Loger» su Discord (un bot che parla per il progetto è un portavoce: contraddice D4.6); D3.5 i Managed Payments
+- **Facoltativa:** D4.3 Boa Lodger easter egg nel mondo (senza storia d'origine).
+- **Tolte:** D4.5 il bot «Boa Lodger» su Discord (un bot che parla per il progetto è un portavoce: contraddice D4.6); D3.5 i Managed Payments
   di Stripe passano alla Fase VI con D3.4 (non serve deciderli ora).
 - **Non verificato nel piano (V1-V12):** regole di HN, Reddit, itch.io lette da fonti secondarie; obblighi del sito e GDPR in un servizio
   gratuito; AI Act; costo reale di una Genesi; il limite proposto dall'OAuth di OpenRouter; alcune fonti del § 4 bis citate senza rileggerle.
 
 **Risposte dell'autore del 14/11 (epoca 410):** D3.1 sì (crea ora l'account Reddit a nome suo e cura il profilo; commenta su HN e Reddit,
 anche in r/ClaudeGameDev, che già segue); D4.6 sì; D4.9 sì: nessuna PNL di marketing, l'idea viene da Borzacchiello («Basta dirlo», «La parola
-magica»): un mezzo finto scredita il messaggio, quindi parole e mezzi autentici; D4.1 sì, e nei video il viandante del gioco può chiamarsi Boa Loger;
+magica»): un mezzo finto scredita il messaggio, quindi parole e mezzi autentici; D4.1 sì, e nei video il viandante del gioco può chiamarsi Boa Lodger;
 **D7.3 già decisa nei fatti**: il repository GitHub (`lorenzoviva/quine42`) è pubblico, con `LICENSE.md` source-available (codice PolyForm
 Noncommercial 1.0.0, contenuti CC BY-NC-SA 4.0), cioè l'opzione (b); da ricontrollare prima del lancio che `LICENSE.md` dica QUINE42 (oggi
 «RUNE») e che il self-hosting gratuito sia detto permesso. Crediti omaggio a giocatori e content creator: in Fase III. Verifiche V1-V12: tutte
 insieme, in un giorno prima del lancio, perché le regole non cambino nel frattempo; la consulenza di V5 e V11 si prenota prima.
 
-**Cambiato rispetto al 05/11:** D3.4 dalla Fase IV alla Fase VI; D3.5 rimandata; D4.1 Boa Loger non è più «volto del Concilio» nel lancio;
-D4.4 niente filtro né voce sintetica; D4.5 tolta; D5.2 narrata da te, non da Boa Loger; D6.2 e D6.4 riscritte per le chiavi dei giocatori e il
+**Cambiato rispetto al 05/11:** D3.4 dalla Fase IV alla Fase VI; D3.5 rimandata; D4.1 Boa Lodger non è più «volto del Concilio» nel lancio;
+D4.4 niente filtro né voce sintetica; D4.5 tolta; D5.2 narrata da te, non da Boa Lodger; D6.2 e D6.4 riscritte per le chiavi dei giocatori e il
 self-hosting; D7.3 diventa un requisito della Fase IV. Nuove: D1.5, D3.6, D3.7, D4.6-D4.9.
 
 ## Sintesi
@@ -84,7 +84,7 @@ self-hosting; D7.3 diventa un requisito della Fase IV. Nuove: D1.5, D3.6, D3.7, 
 5. **Il lancio è la open beta, e la open beta non incassa** (Fase IV, ADR-0184, ADR-0189): `QUINE_PAGAMENTI=spenti`, niente Stripe,
    commissione 0. Quindi niente partita IVA né dati fiscali nel piè di pagina finché non si incassa (Fase VI, D3.4); resta l'informativa
    privacy che nomina il titolare, cioè l'autore (§ 3). L'anonimato non c'è comunque, e il piano non lo cerca più: **il volto del lancio è
-   l'autore** (§ 4 bis). Boa Loger resta **mascotte** dentro il gioco e nella corona, che è il tavolo del Dungeon Master e non il mondo
+   l'autore** (§ 4 bis). Boa Lodger resta **mascotte** dentro il gioco e nella corona, che è il tavolo del Dungeon Master e non il mondo
    (la regola 0 resta intatta), mai portavoce.
 6. **I modelli li paga chi gioca, con la sua chiave** (OpenRouter, l'OAuth PKCE o la chiave incollata; T362-T364), e le macchine chi
    ospita: il server ufficiale su una VM dell'autore (T45f), un hosting esterno o il PC di casa con la guida (T367). Per i tecnici sono due
@@ -209,7 +209,7 @@ Qui il dato del § 3 pesa: la parola «IA» nel titolo fa perdere metà del pubb
 ## 3. Il piano dell'autore, giudicato
 
 Il piano: account dedicati (Gmail, Reddit, Hacker News, X, Instagram, Facebook), una settimana di spoiler pubblicati lo stesso
-giorno ovunque, un post finale con il link il giorno del rilascio, una narrativa attorno a Boa Loger.
+giorno ovunque, un post finale con il link il giorno del rilascio, una narrativa attorno a Boa Lodger.
 
 ### Le regole che il piano incontra
 
@@ -313,43 +313,43 @@ gli account al pubblico (V11).*
 
 ---
 
-## 4. Boa Loger
+## 4. Boa Lodger
 
-L'idea: un gerboa, Boa Loger, «sviluppatore» del gioco che vi ha giocato a lungo; finto anonimato facile da forare; citato nella
-narrativa («il viandante Boa Loger, passato anni fa…»); intervistato nei video con la voce dell'autore o una voce sintetica;
+L'idea: un gerboa, Boa Lodger, «sviluppatore» del gioco che vi ha giocato a lungo; finto anonimato facile da forare; citato nella
+narrativa («il viandante Boa Lodger, passato anni fa…»); intervistato nei video con la voce dell'autore o una voce sintetica;
 simbolo del «collettivo artistico» che fa i contenuti.
 
 ### Cosa tenere
 
 - **Il gerboa.** Il gioco ce l'ha già: gli avatar del Concilio nella corona sono gerboa giganti con un cappello per ruolo
-  (T50, T158) e il sito ha «il segreto dei gerboa» nel piè di pagina. Boa Loger non va inventato: va *promosso*. È coerente,
+  (T50, T158) e il sito ha «il segreto dei gerboa» nel piè di pagina. Boa Lodger non va inventato: va *promosso*. È coerente,
   riconoscibile, disegnabile.
 - **Il «collettivo artistico».** È la descrizione *vera* di come il gioco è fatto: un Concilio di agenti con ruoli (Narratore,
-  Scultore, Artista, Musicista…). Boa Loger come gerboa del Concilio *dentro il gioco* è onesto e ha fascino.
+  Scultore, Artista, Musicista…). Boa Lodger come gerboa del Concilio *dentro il gioco* è onesto e ha fascino.
 - ~~**Le interviste animate.**~~ *Tolte il 14/11*: un gerboa intervistato parla per il progetto, cioè fa il portavoce (§ 4 bis).
 
 **Aggiornato il 14/11.** L'autore, rileggendo il piano, pensa che debba metterci la faccia lui, senza nome finto e forse senza personaggio,
-e chiede se un personaggio darebbe un messaggio sbagliato. La risposta è sì, per questo progetto, ed è nel § 4 bis: **Boa Loger resta
+e chiede se un personaggio darebbe un messaggio sbagliato. La risposta è sì, per questo progetto, ed è nel § 4 bis: **Boa Lodger resta
 mascotte dentro il gioco e nella corona, mai portavoce** (né nei post, né nei video, né su Discord).
 
 ### Cosa rischia
 
 | Variante | Rischio |
 |---|---|
-| **Finto sviluppatore** (Boa Loger «ha creato il gioco») | Alto. Il nome dell'autore è comunque nel piè di pagina (§ 3): chi lo nota non si sente premiato, si sente preso in giro, e su HN e Reddit «chi c'è davvero dietro?» diventa il thread al posto del gioco. Un progetto sull'IA con un autore finto alimenta il sospetto che anche il resto sia finto |
-| **Mascotte dichiarata** («Boa Loger, il gerboa del Concilio; il gioco lo fa Lorenzo») | Basso. È ciò che fanno molti studi con una mascotte. Lascia all'autore la storia dei 18 anni, che è il racconto più forte che ha (§ 5) |
+| **Finto sviluppatore** (Boa Lodger «ha creato il gioco») | Alto. Il nome dell'autore è comunque nel piè di pagina (§ 3): chi lo nota non si sente premiato, si sente preso in giro, e su HN e Reddit «chi c'è davvero dietro?» diventa il thread al posto del gioco. Un progetto sull'IA con un autore finto alimenta il sospetto che anche il resto sia finto |
+| **Mascotte dichiarata** («Boa Lodger, il gerboa del Concilio; il gioco lo fa Lorenzo») | Basso. È ciò che fanno molti studi con una mascotte. Lascia all'autore la storia dei 18 anni, che è il racconto più forte che ha (§ 5) |
 | **Mascotte portavoce** (il gerboa dichiarato che parla per il progetto: interviste, post, video narrati) | Medio, e il 14/11 lo giudico troppo: in un progetto sull'IA una voce che non è una persona fa pensare a un testo o a una voce generati, e la fiducia cala (§ 4 bis); copre la storia vera invece di raccontarla |
-| **Voce sintetica** | Medio, gestibile. L'AI Act, art. 50, si applica dal 02/08/2026: chi usa un sistema che genera *deepfake* (contenuti che somigliano a persone esistenti e sembrano autentici) deve dichiararlo; per opere evidentemente artistiche o di finzione basta dichiararlo in modo che non rovini l'opera. Un gerboa a cartone non somiglia a nessuno, ma: (a) se la voce sintetica *imita la voce dell'autore* o di qualcuno, è un deepfake audio e va dichiarato; (b) se Boa Loger *risponde* agli utenti con un LLM (un bot su Discord), l'art. 50(1) chiede di dire che si parla con un'IA. *Consiglio del 05/11: una riga «voce sintetica» nei titoli di coda di ogni video* (V6). *Superato il 14/11 da D4.4: nessuna voce sintetica, quindi nessun obbligo da gestire* |
-| **Nella narrativa del mondo** («il viandante Boa Loger, passato anni fa…») | Dipende da dove. Vedi sotto |
+| **Voce sintetica** | Medio, gestibile. L'AI Act, art. 50, si applica dal 02/08/2026: chi usa un sistema che genera *deepfake* (contenuti che somigliano a persone esistenti e sembrano autentici) deve dichiararlo; per opere evidentemente artistiche o di finzione basta dichiararlo in modo che non rovini l'opera. Un gerboa a cartone non somiglia a nessuno, ma: (a) se la voce sintetica *imita la voce dell'autore* o di qualcuno, è un deepfake audio e va dichiarato; (b) se Boa Lodger *risponde* agli utenti con un LLM (un bot su Discord), l'art. 50(1) chiede di dire che si parla con un'IA. *Consiglio del 05/11: una riga «voce sintetica» nei titoli di coda di ogni video* (V6). *Superato il 14/11 da D4.4: nessuna voce sintetica, quindi nessun obbligo da gestire* |
+| **Nella narrativa del mondo** («il viandante Boa Lodger, passato anni fa…») | Dipende da dove. Vedi sotto |
 
 ### La regola 0
 
 La regola 0 (ADR-0025) vieta il meta-gioco *dentro il mondo*: nessun abitante sa che il mondo è un gioco. Allora:
 
 - **Nella corona sì, senza limiti.** La corona è il tavolo del Dungeon Master: lì il Concilio è dichiarato, i gerboa lavorano al
-  codice. Boa Loger come gerboa del Concilio (per esempio il Referente, che accoglie chi trascende, o un gerboa che non lavora e
+  codice. Boa Lodger come gerboa del Concilio (per esempio il Referente, che accoglie chi trascende, o un gerboa che non lavora e
   osserva) è coerente con tutto il progetto e non tocca la regola.
-- **Nel mondo, solo come personaggio del mondo.** «Boa Loger, un viandante che passò di qui anni fa e scavò il pozzo» è
+- **Nel mondo, solo come personaggio del mondo.** «Boa Lodger, un viandante che passò di qui anni fa e scavò il pozzo» è
   ammissibile *se* non allude allo sviluppatore, al creatore, a chi «ha fatto» il mondo, a chi vi ha giocato. «Il viandante che ha
   creato queste terre» è meta-gioco travestito da leggenda (esattamente il caso che `COUNCIL_PRINCIPLES` vieta: «nemmeno
   allusioni travestite da leggenda»). Un nome ricorrente è un *easter egg*; un nome che spiega l'origine del mondo è una crepa.
@@ -357,17 +357,17 @@ La regola 0 (ADR-0025) vieta il meta-gioco *dentro il mondo*: nessun abitante sa
   `metaBreak` non lo fermerebbe (il nome non è nel filtro), quindi la frase giusta va scritta a mano nel seme e controllata.
 
 **Decisioni per l'autore**
-- D4.1 — Boa Loger come **mascotte dichiarata dentro il gioco e nella corona** (e nel press kit come immagine), non come finto sviluppatore né come portavoce. *Consiglio: sì.* (Riscritta il 14/11: prima diceva «volto del Concilio».)
-- D4.2 — Boa Loger nella corona come gerboa del Concilio (Referente o un posto suo). *Consiglio: sì; un task piccolo dopo il via.*
-- D4.3 — Boa Loger nel mondo solo come nome ricorrente senza storia d'origine (un easter egg nel lessico o in una leggenda locale). *Consiglio: facoltativo.*
+- D4.1 — Boa Lodger come **mascotte dichiarata dentro il gioco e nella corona** (e nel press kit come immagine), non come finto sviluppatore né come portavoce. *Consiglio: sì.* (Riscritta il 14/11: prima diceva «volto del Concilio».)
+- D4.2 — Boa Lodger nella corona come gerboa del Concilio (Referente o un posto suo). *Consiglio: sì; un task piccolo dopo il via.*
+- D4.3 — Boa Lodger nel mondo solo come nome ricorrente senza storia d'origine (un easter egg nel lessico o in una leggenda locale). *Consiglio: facoltativo.*
 - D4.4 — Voce nei video: quella vera dell'autore, senza filtro, oppure nessuna voce (parla il gioco, con i sottotitoli); mai una voce sintetica. *Consiglio: sì.* (Riscritta il 14/11: prima consigliava la voce filtrata; un filtro su una persona vera fa pensare a una voce generata e non serve più, perché non c'è un personaggio da far parlare.)
-- ~~D4.5 — Un bot «Boa Loger» su Discord.~~ *Tolta il 14/11*: un bot che risponde per il progetto è un portavoce. Su Discord risponde l'autore.
+- ~~D4.5 — Un bot «Boa Lodger» su Discord.~~ *Tolta il 14/11*: un bot che risponde per il progetto è un portavoce. Su Discord risponde l'autore.
 
 ---
 
 ## 4 bis. La voce dell'autore
 
-Aggiunto il 14/11 (T378). La domanda dell'autore: il suo inglese non è perfetto, per questo pensava a Boa Loger come portavoce; leggendo il
+Aggiunto il 14/11 (T378). La domanda dell'autore: il suo inglese non è perfetto, per questo pensava a Boa Lodger come portavoce; leggendo il
 piano pensa che debba metterci la faccia, e chiede se un personaggio screditerebbe il gioco. Chiede anche di considerare la
 «programmazione neurolinguistica» perché il messaggio arrivi forte e chiaro.
 
@@ -388,7 +388,7 @@ Sì, qui. Tre ragioni, in ordine di peso.
    premiano. Chi parla in prima persona con nome e cognome è anche più credibile come fonte (la credibilità della fonte è uno dei
    risultati più vecchi della psicologia della persuasione: Hovland e Weiss, 1951).
 
-Boa Loger ha comunque un posto, dove non parla per nessuno: dentro il gioco, nella corona, nel logo e nelle immagini del press kit (§ 4).
+Boa Lodger ha comunque un posto, dove non parla per nessuno: dentro il gioco, nella corona, nel logo e nelle immagini del press kit (§ 4).
 
 ### L'inglese non perfetto
 
@@ -443,7 +443,7 @@ Al suo posto, ciò che ha prove o almeno una pratica consolidata dietro, e che n
    sempre il sito, il README e i post: una differenza diventa il thread.
 
 **Decisioni per l'autore**
-- D4.6 — Il volto del lancio è l'autore, con nome e cognome, in prima persona; Boa Loger mai portavoce. *Consiglio: sì.*
+- D4.6 — Il volto del lancio è l'autore, con nome e cognome, in prima persona; Boa Lodger mai portavoce. *Consiglio: sì.*
 - D4.7 — I testi pubblici li scrive l'autore; l'IA segnala gli errori e non riscrive (su HN è una regola, altrove è credibilità). *Consiglio: sì.*
 - D4.8 — Una frase sola, uguale in ogni canale e lingua (quella sopra o una variante). *Consiglio: sì, e deciderla prima di aprire gli account del progetto.*
 - D4.9 — Niente tecniche di PNL o di persuasione nascosta; al loro posto le cinque regole sopra. *Consiglio: sì.*
@@ -514,7 +514,7 @@ sapere quanto costa un giocatore attivo, § 6).
 
 **Decisioni per l'autore**
 - D5.1 — 10 ore a settimana per la promozione: è il numero giusto? (Il calendario si scala con questo.)
-- D5.2 — La narrativa dei 18 anni raccontata e firmata dall'autore, in prima persona; Boa Loger non la narra. *Consiglio: sì.* (Riscritta il 14/11: prima diceva «con Boa Loger come narratore».)
+- D5.2 — La narrativa dei 18 anni raccontata e firmata dall'autore, in prima persona; Boa Lodger non la narra. *Consiglio: sì.* (Riscritta il 14/11: prima diceva «con Boa Lodger come narratore».)
 - D5.3 — Le cinque idee: quali tenere (consiglio: tutte; la 1 è obbligatoria per Show HN).
 - D5.4 — Giorno di Show HN: un martedì o mercoledì, mattina della costa est degli USA. *Consiglio: sì (prassi comune, non una regola: V3).*
 
@@ -528,7 +528,7 @@ sapere quanto costa un giocatore attivo, § 6).
 - [ ] **Video principale** di 60-90 s: i primi 3 secondi sono la frase che rompe il mondo; niente logo all'inizio; sottotitoli
       (si guarda senza audio); versione orizzontale e verticale. Già previsto dal sito (ADR-0131, `QUINE_VIDEO`).
 - [ ] **Press kit** su una pagina del sito: descrizione in 50, 150 e 400 parole (EN e IT), 8-10 screenshot, 3 GIF, il video,
-      logo e Boa Loger in PNG trasparente, la storia dei 18 anni, contatti, cosa usa l'IA e cosa no, fatti verificabili (prezzo,
+      logo e Boa Lodger in PNG trasparente, la storia dei 18 anni, contatti, cosa usa l'IA e cosa no, fatti verificabili (prezzo,
       piattaforme, lingue).
 - [ ] **Pagina «Come usiamo l'IA»** (T368) — onesta: cosa genera (testo, programmi), cosa no (nessuna immagine generata, nessuna
       voce clonata), quali modelli, chi paga (la chiave del giocatore, a turno per le spese comuni), dove va il testo (a OpenRouter e

@@ -39,7 +39,7 @@ L'autore: occorre individuare le funzionalità che il Concilio non riesce a impl
 
 ### Fase IV: la open beta
 
-L'autore (10/11): il rilascio della open beta al posto della produzione. Si coinvolgono la community dei giocatori e quella degli sviluppatori, e i fornitori esterni li pagano direttamente i giocatori: per i modelli OpenRouter, per l'hosting un servizio esterno (RunPod, Vast.ai, Railway) **e anche** il self-hosting. Nessun pagamento passa dall'autore: niente Stripe vero e commissione a 0 (oggi non apre una partita IVA, essendo lavoratore dipendente). La veste del sito si sceglie entro la Fase VI: in questa fase il sito ha la scelta delle vesti con il contatore (T287). Il piano di lancio di T240 (concorrenti, canali, Boa Loger) vale per questa uscita, tolto ciò che riguarda i pagamenti.
+L'autore (10/11): il rilascio della open beta al posto della produzione. Si coinvolgono la community dei giocatori e quella degli sviluppatori, e i fornitori esterni li pagano direttamente i giocatori: per i modelli OpenRouter, per l'hosting un servizio esterno (RunPod, Vast.ai, Railway) **e anche** il self-hosting. Nessun pagamento passa dall'autore: niente Stripe vero e commissione a 0 (oggi non apre una partita IVA, essendo lavoratore dipendente). La veste del sito si sceglie entro la Fase VI: in questa fase il sito ha la scelta delle vesti con il contatore (T287). Il piano di lancio di T240 (concorrenti, canali, Boa Lodger) vale per questa uscita, tolto ciò che riguarda i pagamenti.
 
 **Finita quando:** il sito è pubblico, un giocatore gioca con la sua chiave o il suo account OpenRouter, un mondo gira su un hosting esterno e uno in self-hosting seguendo la guida, il contatore delle vesti è acceso e il post del lancio con il link è uscito.
 
