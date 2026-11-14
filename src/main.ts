@@ -9,6 +9,9 @@ import { IdbChunks } from './kernel/chunks';
 import { GeminiAiModels } from './kernel/ai/gemini';
 import { JevDecisionModels } from './kernel/ai/decisions';
 import { MockAiModels } from './kernel/ai/mock';
+import { OpenRouterAiModels, OpenRouterDecisionModels } from './kernel/ai/openrouter';
+import { OpenRouterLink, type LinkAnswer } from './ui/openrouter';
+import { SOLO } from './kernel/wandererIds';
 import type { AiModels } from './kernel/ai/models';
 import { describeQueue, describeSubscriptions, QueueAiModels, RoutedAiModels, SUBSCRIPTIONS, subscriptionsOf, usesSubscriptions, type Provider } from './kernel/ai/subscription';
 import { Renderer } from './render/renderer';
@@ -47,7 +50,7 @@ const params = new URLSearchParams(location.search);
 const dev = import.meta.env.DEV || params.has('dev');
 
 /** A game alone: the kernel runs here, on the universe's repository (or in the browser's storage, without the server). */
-async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot | undefined, name: string): Promise<{ kernel: Kernel; online: boolean }> {
+async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot | undefined, name: string): Promise<{ kernel: Kernel; online: boolean; via?: 'gemini' | 'openrouter' }> {
   let files: FileMap = bundledFiles;
   let past: PastCommit[] = [];
   if (client && snap) {
@@ -80,8 +83,13 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
     past = snap.log ?? [];
   }
   const ai = readConfig(files).config.ai;
-  const online = !params.has('offline') && (await GeminiAiModels.available());
-  const baseAiModels: AiModels = online ? new GeminiAiModels({ textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 }) : new MockAiModels();
+  const gemini = !params.has('offline') && (await GeminiAiModels.available());
+  // Without a key of Google, the player's own key of OpenRouter (T364, ADR-0197), or the server's: the same calls through the gate of this machine,
+  // which knows who asks from the header (or the token) and pays with their key, never another's.
+  const openrouter = !gemini && !params.has('offline') && !!(await soloLink.status())?.available;
+  const online = gemini || openrouter;
+  const settings = { textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 };
+  const baseAiModels: AiModels = gemini ? new GeminiAiModels(settings) : openrouter ? new OpenRouterAiModels({ ...settings, fetchImpl: soloFetch }) : new MockAiModels();
   const table = subscriptionsOf(ai);
   let models: AiModels = baseAiModels;
   if (usesSubscriptions(table)) {
@@ -99,10 +107,16 @@ async function bootAlone(client: UniverseClient | null, snap: UniverseSnapshot |
   }
   const chunks = client ? new UniverseChunks(client, new IdbChunks()) : new IdbChunks();
   // The closed decisions (ADR-0157): Jev through the route of this machine, if the server has its key; otherwise the rule of today.
-  const decisions = !params.has('offline') && (await JevDecisionModels.available()) ? new JevDecisionModels() : undefined;
+  const decisions = !params.has('offline') && (await JevDecisionModels.available()) ? new JevDecisionModels() : openrouter ? new OpenRouterDecisionModels({ fetchImpl: soloFetch }) : undefined;
   const kernel = await Kernel.boot({ files, store: client ? memoryStore() : localStore, ai: models, decisions, chunks, forms: new WorkerRunner(), wasmUri, backend: client ?? undefined, past });
-  return { kernel, online };
+  return { kernel, online, ...(online ? { via: gemini ? ('gemini' as const) : ('openrouter' as const) } : {}) };
 }
+
+/** The account this tab signed in with, or none: who a page is to the routes of the keys of OpenRouter (T364). */
+const whoHeaders = (id: string) => async (): Promise<Record<string, string>> => (account ? { Authorization: `Bearer ${await account.freshToken()}` } : { [WANDERER_HEADER]: id });
+/** Alone on this machine: the wanderer is `me` (or the account), and the models' calls say it to the gate. */
+const soloLink = new OpenRouterLink(whoHeaders(SOLO));
+const soloFetch = (async (input: RequestInfo | URL, init?: RequestInit) => fetch(input, { ...init, headers: { ...((init?.headers as Record<string, string>) ?? {}), ...(await whoHeaders(SOLO)()) } })) as typeof fetch;
 
 /** The account this tab signed in with, in a multiplayer game on a server with accounts (T44b). */
 let account: SignedIn | undefined;
@@ -189,6 +203,7 @@ async function main() {
       credits,
       isAnonymous: isAnon,
       inCorso: !!seen?.viandante?.inCorso,
+      openrouter: new OpenRouterLink(whoHeaders(id)),
       onRecharge: !recharges ? undefined : async (amount: number) => {
         const token = account?.token;
         const res = await fetch('/api/stripe/checkout', {
@@ -214,7 +229,12 @@ async function main() {
   // multiplayer game only the wanderer who made the universe. A player's client never fetches them.
   const master = !thin || thin.session.master;
   const tooling = master ? import('./master') : undefined;
-  const { kernel, online } = thin ? { kernel: thin.k, online: false } : await bootAlone(client, snap, name);
+  // The way back from OpenRouter (T364): alone, the key is exchanged before the models are chosen, so that this very load uses it.
+  const linked: LinkAnswer | undefined = !thin && OpenRouterLink.returning() ? await soloLink.finish() : undefined;
+  const { kernel, online, via } = thin ? { kernel: thin.k, online: false, via: undefined } : await bootAlone(client, snap, name);
+  if (linked) kernel.message(linked.ok ? 'OpenRouter collegato: i modelli vanno sulla tua chiave.' : `OpenRouter non collegato: ${linked.reason}.`, linked.ok ? 'info' : 'warn');
+  // Who this tab is to the routes of the keys: the account, or the wanderer's id (alone `me`, in a game of many the tab's).
+  const keyLink = thin ? new OpenRouterLink(whoHeaders(thin.session.id)) : soloLink;
   // Leaving: the state of play goes into the universe (if it is valid); in a multiplayer game the server keeps it.
   window.addEventListener('pagehide', () => {
     if (thin) return thin.session.leave();
@@ -270,6 +290,8 @@ async function main() {
           },
         }
       : undefined,
+    // «Collega OpenRouter» (T364): the tab's key, alone or in a game of many.
+    { link: keyLink, alone: !thin },
   );
   // Credit exhaustion modal in multiplayer (T45d): recharge, offline, or abandon
   const creditModal = thin
@@ -514,7 +536,7 @@ async function main() {
   };
   // Alone (T247): the same lobby, without what is about other people; it comes back with every new load of the page, which is what ends a match alone.
   const enterAlone = async () => {
-    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels });
+    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels, ...(via !== 'gemini' ? { openrouter: soloLink } : {}) });
     const chosen = soloLobby.open();
     syncFocus();
     const choice = await chosen;
@@ -530,7 +552,7 @@ async function main() {
       $('#models').textContent = `partita di molti · ${thin.session.name} (${thin.session.id})${thin.session.anonymous ? ' · anonimo: modelli locali' : ''}`;
       return;
     }
-    const base = online ? `Gemini · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
+    const base = online ? `${via === 'openrouter' ? 'OpenRouter' : 'Gemini'} · ${ai.textModel}` : 'offline: luoghi abbozzati, agenti locali';
     if (kernel.ai instanceof RoutedAiModels) {
       const firstQueue = Object.values(kernel.ai.queues)[0] as QueueAiModels | undefined;
       const qState = await QueueAiModels.queryState(firstQueue?.endpoint, firstQueue?.fetchImpl);

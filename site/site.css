@@ -1746,6 +1746,54 @@ main > section[id] {
   margin: 0;
   color: var(--skin-success);
 }
+/* «Collega OpenRouter» (T364): the same box as in the game, in the page of the profile. */
+.openrouter-site {
+  background: var(--skin-ink);
+  border: 2px solid var(--skin-accent);
+  padding: var(--space-13);
+  margin-bottom: var(--space-21);
+}
+.openrouter-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--text-13);
+}
+.openrouter-box .section-title {
+  font-weight: bold;
+  color: var(--skin-accent);
+}
+.openrouter-box .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+}
+.openrouter-box .note {
+  opacity: 0.8;
+}
+.openrouter-box .openrouter-warn,
+.openrouter-box .openrouter-status {
+  color: var(--skin-primary);
+}
+.openrouter-box .openrouter-warn:empty,
+.openrouter-box .openrouter-limits:empty,
+.openrouter-box .openrouter-status:empty {
+  display: none;
+}
+.openrouter-box input[type='password'] {
+  flex: 1;
+  min-width: 12em;
+  padding: var(--space-5) var(--space-8);
+  font: inherit;
+}
+.openrouter-box summary {
+  cursor: pointer;
+}
+.openrouter-box a {
+  color: var(--skin-accent);
+  text-decoration: underline;
+}
 .account-actions {
   display: flex;
   gap: var(--space-13);

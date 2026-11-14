@@ -295,6 +295,19 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #profile .seed.on { border-color: var(--neon-yellow); box-shadow: 3px 3px 0 var(--neon-pink); }
 #profile .seed img { width: 100%; height: 100%; }
 #profile .status { color: var(--gold); min-height: 1.2em; }
+/* «Collega OpenRouter» (T364): in the panel P and in the lobby, the same box. */
+.openrouter-box { display: flex; flex-direction: column; gap: var(--space-5); font-size: var(--text-13); }
+#profile .openrouter-section { padding: var(--space-8) var(--space-13); }
+#profile .openrouter-box .section-title { font-weight: bold; }
+.openrouter-box .row { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-8); padding: 0; }
+.openrouter-box .note { color: var(--dim); font-size: var(--text-13); }
+.openrouter-box .openrouter-warn { color: var(--gold); }
+.openrouter-box .openrouter-warn:empty, .openrouter-box .openrouter-limits:empty, .openrouter-box .openrouter-status:empty { display: none; }
+.openrouter-box .openrouter-status { color: var(--gold); }
+.openrouter-box input[type='password'] { flex: 1; min-width: var(--measure-144, 9rem); padding: var(--space-5) var(--space-8); font: inherit; }
+.openrouter-box a { color: var(--cyan); }
+.openrouter-box summary { cursor: pointer; }
+#lobby .openrouter-settings { box-shadow: 3px 3px 0 var(--neon-yellow); }
 
 #feed {
   position: absolute; right: var(--space-13); bottom: var(--measure-123); width: min(var(--measure-377), 40vw); pointer-events: auto;

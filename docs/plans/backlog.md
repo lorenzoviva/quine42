@@ -5303,7 +5303,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T363`, ADR e `AGENTS.md` (regola 9) aggiornati.
 - Esito: `OpenRouterGate` con le chiavi dei giocatori in memoria per viandante (PKCE scambiato dal server con `state` a uso singolo, chiave incollata come ripiego, impronta SHA-256 fuori) e la chiave di chi ospita col tetto `OPENROUTER_TETTO_GIORNALIERO`; rotta `/api/openrouter` (`status`, `begin`, `key`; porte dei modelli solo loopback, mai in produzione); corpi rifatti campo per campo; canale `op: 'openrouter'` con chi può pagare in ordine (`x-quine-payers`, dal kernel) e chi ha pagato (`x-quine-paid-by`), 402 fuori dal turno e al prossimo, 401 dimenticata, al mondo solo gli id (`setKeys`); un mondo va su OpenRouter con `OPENROUTER_API_KEY` o senza chiave di Google (`worldsPayWith`); nel kernel `payWithKeys` (`hasCredits` dalla chiave e dal tetto, `Ledger.spend` come registro della spesa, `chi` e carte comuni invariati); ADR-0197, AGENTS.md (regola 9, `.env`, struttura), architettura, glossario, kernel 0.7.8; test nuovi offline (varco e due viandanti con due chiavi), suite e typecheck verdi nei turni; manca il collegamento nel gioco e nel sito (T364) e la spesa nel portafoglio; non provato contro OpenRouter vero né con un mondo in un processo vero; sicurezza: V-040 (chiavi in memoria, rotta del PKCE, scelta della chiave da `chi`), chiusa con i test.
 
-### T364 · Open beta: «Collega OpenRouter» nel gioco e nel sito — `da fare` (dipende da T363)
+### T364 · Open beta: «Collega OpenRouter» nel gioco e nel sito — `fatto` (`5ee65db2`) (dipende da T363)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
 - Step: 43
 - Contesto: riga 4 del § 6 di `docs/design/open-beta.md`. `dossier T363`.
@@ -5311,6 +5311,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: sì, il flusso intero (con un OpenRouter finto se non c'è la chiave dell'autore).
 - Quando è fatto: commit su `task/T364`.
+- Esito: «Collega OpenRouter» (`src/ui/openrouter.ts`) nella lobby (di molti se chi entra paga per sé e i mondi del server pagano su OpenRouter, da soli senza Gemini), nel pannello P e nel profilo del sito: PKCE dalla pagina con scambio sul server, incolla come ripiego, Scollega; `GET /api/openrouter/key` col limite letto da `/api/v1/key` (mai la chiave, un 401 la dimentica), `status.worlds`; il tetto proposto è un consiglio con i controlli sul limite vero (OpenRouter non prende un limite dal collegamento); da soli sul PC la chiave in `universes/.keys/openrouter.json` (solo sviluppo e preview, solo da questa macchina) e i modelli su OpenRouter senza chiave di Google; ADR-0200, AGENTS.md regola 9, V-040 aggiornata (sicurezza: superficie nuova la porta GET key e il file da soli, coperte da `tests/openrouter-link.test.ts`), kernel 0.7.10; suite e typecheck verdi nei turni; non provato con un account vero di OpenRouter né entrando in un mondo di molti dalla preview (il mondo non è partito in quella prova).
 
 ### T365 · Open beta: il costo di ogni carta — `fatto` (`12a1bd26`) (dipende da T362)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 6

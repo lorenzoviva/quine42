@@ -245,9 +245,24 @@
   pagare (o la chiave di chi ospita), dove paga il master la sua chiave paga per tutti; chi perde la chiave lo sente come i crediti finiti
   (`credits:exhausted`); il tetto della lobby non si limita al saldo (`sessionCapFor`); `charge` scrive nel ledger la spesa di chi ha pagato
   (`Ledger.spend`, `spent[id] = { usd, common }` in `universes/.balances/<nome>.json`), mai un addebito su un saldo; `chi` non cambia e le carte delle
-  comuni restano del mondo (`payer: comune`, il titolare col seme). Senza chiavi dei giocatori niente cambia. Manca il collegamento nel gioco e nel sito
-  (T364). Le prove: `tests/sicurezza/openrouter.test.ts` (V-040), `tests/openrouter-keys.test.ts` (due viandanti con due chiavi: ognuno paga le sue,
+  comuni restano del mondo (`payer: comune`, il titolare col seme). Senza chiavi dei giocatori niente cambia. Le prove: `tests/sicurezza/openrouter.test.ts` (V-040), `tests/openrouter-keys.test.ts` (due viandanti con due chiavi: ognuno paga le sue,
   le comuni si alternano, il 402 e il 401, il master che paga, la chiave di chi ospita).
+- **«Collega OpenRouter»** (ADR-0200, T364, kernel 0.7.10): un modulo per tutte le pagine, `src/ui/openrouter.ts`: `OpenRouterLink` (la rotta per
+  una pagina, chi è lo dicono le intestazioni: il token, o l'id del viandante) e il riquadro `openRouterBox`. **Il PKCE dalla pagina**: verifier e
+  challenge S256 fatti qui, lo `state` dal server (`POST begin`), verifier e state nel `sessionStorage` della scheda, poi
+  `https://openrouter.ai/auth?callback_url=<la pagina>&code_challenge=…&code_challenge_method=S256&state=…&key_label=QUINE42`; al ritorno
+  (`returning`, `finish`) codice e state escono dall'indirizzo, lo state si confronta con quello della scheda e il server scambia. **L'incolla** è
+  il ripiego; **Scollega** la dimentica sul server. **Lo stato**: `GET /api/openrouter/key` dice impronta, `exhausted` e il limite letto da
+  OpenRouter (`keyLimits`: `GET /api/v1/key` dal server, `readKeyLimits` campo per campo, detto di nuovo per un minuto, `LIMITS_TTL`; un 401 la
+  dimentica, `forgotten`); `status` dice anche `worlds` (se i mondi di molti di questo server pagano su OpenRouter). **Il tetto proposto**: OpenRouter
+  non prende un limite dal collegamento (solo `POST /api/v1/auth/keys/code`, con una chiave di gestione): il riquadro propone il tetto della lobby (o
+  `PROPOSED_LIMIT`, 5 $) e dice se la chiave è senza limite, finita o molto sopra (`limitWords`). **Dove**: la lobby di molti (se chi entra paga per
+  sé e `worlds`), la lobby da soli (se il gioco non va su Gemini), il pannello `P` (sempre, rifatto a ogni apertura), il profilo del sito (se c'è
+  la rotta). **Da soli sul PC** la chiave collegata da questa macchina (`who.local`) resta in `universes/.keys/openrouter.json` (`keysFile`: solo
+  `vite.config.ts`, mai il server di produzione), riletta a un riavvio, tolta quando si scollega o è revocata; e il gioco da solo senza chiave di
+  Google va su OpenRouter (`OpenRouterAiModels`, `OpenRouterDecisionModels` con le intestazioni di chi gioca, `soloFetch` in `main.ts`); il
+  ritorno del PKCE si finisce prima di scegliere i modelli. Le prove: `tests/openrouter-link.test.ts` (il flusso intero contro la rotta vera e un
+  OpenRouter finto, il file, le parti pure).
 
 <a id="lobby"></a>
 ## La lobby multigiocatore

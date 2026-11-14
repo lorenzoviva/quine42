@@ -7,6 +7,7 @@ import { PROFILE_LIMITS, type Profile } from '../kernel/wanderers';
 import { icons } from './hud';
 import { $, el } from './dom';
 import { closeButton } from './panels';
+import { openRouterBox, type OpenRouterLink } from './openrouter';
 
 /** Keeps a profile: the answer is the profile as it was repaired, and what was repaired (in words). */
 export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; profile?: Profile; text?: string; reason?: string }>;
@@ -32,6 +33,8 @@ export class ProfilePanel {
   private seeds = el('div', { class: 'seeds' });
   private status = el('div', { class: 'status' });
   private seme = 1;
+  /** «Collega OpenRouter» (T364): made again at every opening, so that it reads the key as it is now. */
+  private keySlot = el('div', { class: 'account-section openrouter-section' });
   onClose?: () => void;
 
   constructor(
@@ -39,6 +42,7 @@ export class ProfilePanel {
     private keep: ProfileKeeper,
     private current: () => Profile | undefined,
     account?: AccountView,
+    private openrouter?: { link: OpenRouterLink; alone?: boolean },
   ) {
     const close = closeButton(() => this.close());
     const save = el('button', { class: 'primary' }, 'Salva');
@@ -55,6 +59,7 @@ export class ProfilePanel {
       this.status,
     );
     if (account) this.root.append(this.accountRow(account));
+    if (openrouter) this.root.append(this.keySlot);
     this.root.addEventListener('keydown', (e) => {
       // Typing is not playing.
       e.stopPropagation();
@@ -133,6 +138,7 @@ export class ProfilePanel {
     this.presentazione.value = p?.introduction ?? '';
     this.status.textContent = '';
     this.root.hidden = false;
+    if (this.openrouter) this.keySlot.replaceChildren(openRouterBox(this.openrouter.link, { alone: this.openrouter.alone }));
     this.paint();
     this.nome.focus();
   }

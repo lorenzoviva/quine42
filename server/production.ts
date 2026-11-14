@@ -310,7 +310,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
     // A player's key of OpenRouter (T363): the PKCE flow and the pasted key, for an account; the model doors are not here.
-    openrouterRoute(openrouter, { access: { accounts, internal } }),
+    openrouterRoute(openrouter, { access: { accounts, internal }, worlds: () => openrouter.serverKey || !gemini.available }),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
     walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
     sessionList(accounts, campaigns),

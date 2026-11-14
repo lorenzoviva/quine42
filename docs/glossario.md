@@ -1261,6 +1261,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `server/openrouterProxy.ts`, `src/kernel/credits.ts`, `Kernel.setKeys`
 - **Da non usare**: «token» (è quello dell'account), «chiave API» da sola (è `GEMINI_API_KEY`, del server)
 
+### Collegamento di OpenRouter
+- **Inglese**: `OpenRouterLink`, `openRouterBox`, `keyLimits`, `KeyLimits`, `PROPOSED_LIMIT`, `keysFile`
+- **Definizione**: «Collega OpenRouter» (T364, ADR-0200): il riquadro della lobby, del pannello `P` e del sito con cui un giocatore collega la sua chiave (il PKCE dalla pagina, scambiato dal server; l'incolla come ripiego), ne vede l'impronta e il limite che OpenRouter dice, e la scollega; il tetto proposto è un consiglio, il limite lo imposta il giocatore su OpenRouter. Da soli sul PC la chiave resta in `universes/.keys/`.
+- **Dove vive**: `src/ui/openrouter.ts`, `server/openrouterProxy.ts`
+- **Da non usare**: «login con OpenRouter» (l'account resta quello del gioco; si collega una chiave), «limite» da solo per il tetto della lobby (è il tetto; il limite è della chiave, su OpenRouter)
+
 ### Turno delle comuni
 - **Inglese**: `keyPayersFor`, `PAYERS_HEADER` (`x-quine-payers`), `PAID_BY_HEADER` (`x-quine-paid-by`), `CallRecord.paidBy`
 - **Definizione**: con le chiavi dei giocatori una spesa comune va su una chiave sola: quella del collegato che finora in questo universo ha pagato meno delle comuni (`Ledger.spentOf(id).common`), a pari merito per id; su un 402 il varco passa al prossimo (T363, ADR-0197). Chi ha chiesto (`chi`) e il titolare delle carte comuni non cambiano.
