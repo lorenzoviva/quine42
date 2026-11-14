@@ -1,0 +1,21 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "chiamate": 2,
+ "secondi": 527,
+ "usd": 0.095,
+ "token": {
+  "prompt": 7143,
+  "output": 2320,
+  "thoughts": 21586
+ },
+ "perCompito": [
+  {
+   "model": "gemini-3.8-flash",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.095
+  }
+ ],
+ "errore": "Gemini gemini-3.8-flash: fetch failed (non ripetuta)"
+}

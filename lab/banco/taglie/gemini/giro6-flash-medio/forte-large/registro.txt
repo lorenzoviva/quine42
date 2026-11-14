@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-3.8-flash)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: riga 146, <union>: values: la cifra "1" da sola non è un simbolo: i simboli sono lettere o # e un numero (#1)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: riga 179, <color>: "value" è un colore esadecimale (rrggbb), non "#00000000"
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: porta: 15 × 1 voxel (0,75 × 0,05 caselle), una porta è almeno 11 × 30 a ogni taglia
+[sculptor] errore: «forte»: nessun programma valido

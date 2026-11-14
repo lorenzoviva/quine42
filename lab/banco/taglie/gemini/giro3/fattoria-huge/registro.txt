@@ -1,0 +1,4 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-argon)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: riga 242, <color>: "value" è un colore esadecimale (rrggbb), non "#ebdrc4"
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2); porta: 22 × 10 voxel (1,10 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia
+[artist → sculptor] obietta: «fattoria»: 6/10 — Il modello somiglia più a una fortezza che a una fattoria a causa delle torri con merli e delle alte mura fortificate.

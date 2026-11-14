@@ -5105,7 +5105,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T354`, kernel sale di Z.
 - Esito: prompt delle strutture senza scheletro con il metodo a tre livelli sul piano a 1/5 e gli attrezzi provati; due blocchi col ritorno in testo (`planBlock`, `textViews`, `withMeaning`, `Checked.others`); le parti del seme nella richiesta (`partResources`, primo paragrafo del commento di ogni `part-*.xml`); viste in testo in `src/mj/views.ts`; `part-stair` tollerante (primi 16, pianerottolo, solai spessi); villetta offline (`MOCK_STRUCTURE_PROGRAM`) e rocca nel banco delle taglie, foto e `--viste`; voci nel laboratorio 3D; ADR-0183, kernel 0.6.7, fixture del motore aggiornato solo per `part-stair`; suite 3052 verdi, typecheck e build verdi. Non fatto: il giro su Gemini (T355), il tetto dei voxel (T356). Non provato: lo Scultore vero sul prompt nuovo. Sicurezza: nessuna superficie nuova.
 
-### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `da fare` (dipende da T354)
+### T355 · Il giro su Gemini dello Scultore nuovo, prima di cambiare quello del gioco (passo 3 di D48) — `in attesa` (dipende da T354)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 5
 - Sbloccato (autore, 14/11, epoca 407): le chiamate passano dalla chiave API, non dagli abbonamenti di agy; niente attesa del 15/11.
 - Step: 30
@@ -5114,6 +5114,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
+- Esito: giro su Gemini fatto con lo Scultore del gioco (`lab/scripts/scultore-gemini.ts`, sei giri, 74 chiamate, 3,26 $): 3.8 Flash a Grande 0 su 6 (porta e piani), Argon 5 su 6 a Enorme e 1 su 2 a Grande, fattorie sempre fortificate, separazione tra concetti 2,62; rapporto, chiamate e foto in `lab/banco/taglie/gemini/`; lo Scultore del gioco non è cambiato (ha già il prompt di T354): domanda in `docs/pipeline/domande/T355.md`, raccomandata Argon a ogni taglia per le strutture procedurali più un task che ripari prompt e ritorno; non provato: 3.8 Flash dopo quella riparazione; sicurezza: nessuna superficie nuova (solo `lab/` e documenti).
 
 ### T356 · Il tetto dei voxel delle strutture gargantuesche — `fatto` (`c21d13b3`)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5

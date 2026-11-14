@@ -1,0 +1,21 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "chiamate": 4,
+ "secondi": 93,
+ "usd": 0.0775,
+ "token": {
+  "prompt": 52866,
+  "output": 10090,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-3.8-flash",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.0775
+  }
+ ],
+ "errore": "nessun programma valido"
+}

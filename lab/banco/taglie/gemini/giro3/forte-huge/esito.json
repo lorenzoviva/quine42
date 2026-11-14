@@ -1,0 +1,28 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "modello": "gemini-4-argon",
+ "voto": 7,
+ "chiamate": 3,
+ "secondi": 94,
+ "usd": 0.0908,
+ "token": {
+  "prompt": 21130,
+  "output": 6203,
+  "thoughts": 256
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-argon",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.087
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0039
+  }
+ ]
+}

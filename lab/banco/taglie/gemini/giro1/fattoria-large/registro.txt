@@ -1,0 +1,5 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-3.8-flash)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: porta: 15 × 6 voxel (0,75 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui si sta in piedi ha il l
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: porta: 20 × 6 voxel (1,00 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: pezzi staccati: 10% dei voxel non è attaccato al corpo principale (2 pezzi)
+[sculptor] errore: «fattoria»: nessun programma valido

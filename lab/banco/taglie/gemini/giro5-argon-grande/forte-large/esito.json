@@ -1,0 +1,21 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "chiamate": 4,
+ "secondi": 199,
+ "usd": 0.3078,
+ "token": {
+  "prompt": 62984,
+  "output": 18184,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-argon",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.3078
+  }
+ ],
+ "errore": "nessun programma valido"
+}

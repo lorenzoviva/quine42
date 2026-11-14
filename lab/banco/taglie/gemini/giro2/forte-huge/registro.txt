@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-argon)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2); porta: 15 × 2 voxel (0,75 × 0,10 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: porta: 15 × 2 voxel (0,75 × 0,10 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: porta: 25 × 2 voxel (1,25 × 0,10 caselle), una porta è almeno 11 × 30 a ogni taglia
+[artist → sculptor] approva: «forte»: 9/10 — Alcuni piccoli dettagli scuri sulle pareti del mastio centrale sembrano leggermente sparsi a caso anziché formare feritoie o crepe ben definite.

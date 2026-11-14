@@ -1,0 +1,401 @@
+# model.sculpt · gemini-3.8-flash · 54 s
+
+## Richiesta
+
+Sculpt: forte
+What it looks like: forte: a building one enters, with the door at the front
+Class: structure · box 100 × 100 × 80 voxels · at least 40 tall
+Body: a tile is 20 voxels, a step 4, a person 30 tall; the area is 5 × 5 tiles.
+Parts that never shrink, at every size: a door at least 11 × 30, a room at least 28 a side under a ceiling at least 30 up, a lean-to at least 30 clear and 20 deep (1.4 tiles a room). Build what fits at their measure: if the whole building does not fit, build less of it, not a smaller one (a small fort is one tower with a wide base, a small farm a house with a lean-to and the hay behind).
+The same program also serves the size huge (box 150 × 150 × 120, 7.5 × 7.5 tiles, a tile is 20 voxels, a step 4, a person 30 tall): there it must contain more, another kind of part or a quarter more parts (an annex, a fence, fields, a wall, towers), not the same building bigger. It runs with 4 seeds: each one is another building of the same kind.
+
+Parts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):
+- <import file="part-battlements"/>: Battlements (part-battlements): a part included with <import file="part-battlements"/> after your walls have risen. On the edge of every flat top of your walls (the union "+": <union symbol="+" values="…"/> in your program wins over this one) it puts merlons of 5 and gaps of 3, 6 high and one thick, regular from every corner (a corner is always a merlon; where two runs meet in the middle of a side the odd cells go to the merlons). Its letters: M the merlons (give M your colour), #90 and #91 its own markers.
+- <import file="part-door"/>: The door (part-door): a part one lives in, included with <import file="part-door"/> after your walls have risen. You write the seed of the door with O: at least 11 wide, at the foot of a wall and through its whole thickness, on the layer of the floor, with wall above it. The door rises 30 through the wall (as tall as a person), gets its lintel and its jambs (N) and its dark planks (o). Its letters: O the door and o the planks (yours: give them your colours), N the frame; the union "+" is the letters of your walls (<union symbol="+" values="…"/> in your program wins over this one). The actions that open and close it are yours (<action name="open"> on O and o).
+- <import file="part-slits"/>: Arrow slits (part-slits): a part included with <import file="part-slits"/> after part-battlements. Under the middle of every merlon of 5 (M) it opens a slit through the wall (the union "%": the letters of the walls that get slits, <union symbol="%" values="…"/> in your program wins over this one): one wide, 6 high, two cells under the top; regular because the merlons are. Its letter: U the slit (give U your colour); #91, #92 and #94 its own markers.
+- <import file="part-stair"/>: The stair (part-stair): a part one lives in, included with <import file="part-stair"/> after your walls, floors and slabs have risen. You mark the strip of the stair with T, with a rule of yours written with symmetry="()": at least 16 long (x) and 10 wide (y), in the air just above a floor (a storey is 32: the stair is twice as high as it is long). The stair takes the first 16 cells from the small-x end of the strip and gives the rest back to the air, climbs toward large x two voxels up for one forward (a body climbs it at every size), opens the slab above those 16 cells (through a slab of any thickness) and is solid under the steps. A body climbs it only in line: leave at least 10 voxels of free floor before the small-x end (it walks onto the first step from there, not from the side) and floor past the 16th cell, where the stair comes out onto the floor above. Its letters: T the strip (yours), k the steps (give k the colour you want), #90, #91 and #92 its own markers; the union "=" is the letters of your floors and slabs (<union symbol="=" values="…"/> in your program wins over this one). The door is yours.
+
+The program you wrote:
+<!--
+Concetto: forte medievale con mastio centrale a due piani sotto tetto a padiglione,
+cortile d'armi cinto da mura merlate con camminamento, torri d'angolo con feritoie,
+portaia fortificata con strada d'accesso.
+
+Parti e disposizione relativa:
+- Mastio (aula h, muri w, scala s): volume principale attorno a H, profondo 8-9 celle
+  e largo 9 celle (interno >= 28 voxel liberi per lato dopo aver inserito la scala).
+- Scala interna (s): fascia di 4 celle in x (20 voxel) e 2 in y (10 voxel), con sbarco
+  libero di 2 celle prima del primo gradino e pavimento libero all'uscita al piano superiore.
+- Cortile (c): cinge il mastio; nella taglia Huge si allarga sensibilmente.
+- Cinta muraria (W): racchiude il cortile, coronata da camminamento e merli regolari (M).
+- Torri d'angolo (t): sporgenti su tutti gli angoli esterni, alte 40 voxel con merli e feritoie (U).
+- Portaia (g) e porta del mastio (d): semi per part-door (O), assi (o) e stipiti (N).
+- Strada (r): dritta dall'ingresso fino al bordo della mappa.
+- Nella taglia Huge: pozzo (Q) nel cortile e fossato d'acqua (a) all'esterno delle mura.
+
+Variazione tra semi:
+- Profondità del mastio (8-9 celle).
+- Disposizione del cortile e posizione del pozzo.
+-->
+<sequence values="B H E W t G w c r q a f F k R M U L O o N T K #20 #21 #90 #91 #92 #94" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="B H E h s w c W t g d r Q a m n" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- A1. Il mastio attorno a H: profondità 8 o 9 celle, larghezza 9 celle -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <one in="h/E" out="*/h" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+
+      <!-- Mura perimetrali del mastio -->
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Zona della scala interna: 4 celle in x, 2 in y, con 2 celle libere di pianerottolo -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+
+      <!-- A2. Cortile c attorno al mastio -->
+      <all in="wE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Espansione del cortile quando c'è spazio abbondante (taglia Huge 30x30) -->
+      <all in="cEEEEEEE" out="*ccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- A3. Mura di cinta esterne W attorno al cortile -->
+      <all in="cE" out="*W" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+
+      <!-- Torri d'angolo sporgenti t (3x3 celle) -->
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+
+      <!-- A4. Accesso assiale: porta del mastio d, portaia g, strada esterna r -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[ng]/W" out="*/g" symmetry="()"/>
+      <all in="[gr]/E" out="*/r" symmetry="()"/>
+
+      <!-- Allargamento della via d'accesso a 3 celle (15 voxel) -->
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="gW" out="*g" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/><rule in="n" out="c"/></prl>
+
+      <!-- A5. Dettagli che compaiono con lo spazio (Huge): pozzo e fossato -->
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <all in="cWWEEEEE" out="***aa***" steps="1"/>
+      <all in="[Wt]E/*a" out="**/*a"/><all in="aE/*a" out="*a/**"/>
+    </sequence>
+
+    <!-- Mappatura in scala piena 5x5x1 -->
+    <map scale="5 5 1" values="B E W t G w c r q a f F k R M U L O o N T K d g h s #20 #21 #90 #91 #92 #94" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="Q" out="ccccc/cqqqc/cqaqc/cqqqc/ccccc"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+
+      <sequence symmetry="(xy)">
+        <!-- B1. Sviluppo in altezza: parapetto del pozzo -->
+        <all in="B q" out="q q" steps="2"/>
+
+        <!-- Mura di cinta W: altezza 24 voxel con camminamento -->
+        <all in="B W" out="W W" steps="23"/>
+
+        <!-- Torri d'angolo t: altezza 40 voxel -->
+        <all in="B t" out="t t" steps="39"/>
+
+        <!-- Portaia g: altezza 32 voxel con porta O -->
+        <all in="B g" out="g O" steps="1"/>
+        <all in="B g" out="g G" steps="30"/>
+        <prl in="g" out="G"/>
+
+        <!-- Porta del mastio d: a z=0 seme O, poi muro w -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d w" steps="62"/>
+        <prl in="d" out="R"/>
+
+        <!-- Muri del mastio w: altezza 64 voxel -->
+        <all in="B w" out="w w" steps="63"/>
+        <prl in="w" out="R"/>
+
+        <!-- Piani interni del mastio: piano terra a z=0, primo piano a z=32, tetto a z=64 -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1" symmetry="()"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+
+        <!-- C1. Parti incluse: porte, scala, merlature e feritoie -->
+        <union symbol="+" values="W t G w"/>
+        <union symbol="=" values="f F"/>
+        <union symbol="%" values="W t G"/>
+
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- C2. Finestre del mastio al secondo piano (almeno 6 su 3 lati) -->
+        <one steps="3" symmetry="(xy)">
+          <rule in="BwwwwwwwB BwwwwwwwB BwwwwwwwB" out="BwwLLLwwB BwwLLLwwB BwwLLLwwB"/>
+        </one>
+        <one steps="3" symmetry="(xy)">
+          <rule in="B/w/w/w/w/w/w/w/B B/w/w/w/w/w/w/w/B B/w/w/w/w/w/w/w/B" out="B/w/w/L/L/L/w/w/B B/w/w/L/L/L/w/w/B B/w/w/L/L/L/w/w/B"/>
+        </one>
+
+        <!-- C3. Tetto a padiglione del mastio e camino -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**"
+             out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>
+
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="6"/>
+
+        <!-- C4. Pulizia marcatori rimasti -->
+        <prl in="s" out="B"/>
+      </sequence>
+    </map>
+  </map>
+
+  <!-- Palette dei materiali del mondo medievale -->
+  <color symbol="E" value="#4a6e38" name="prato" area="field"/>
+  <color symbol="W" value="#6e6b64" name="pietra di cinta" area="wall"/>
+  <color symbol="t" value="#5c5953" name="pietra delle torri" area="tower"/>
+  <color symbol="G" value="#635f58" name="pietra della portaia"/>
+  <color symbol="w" value="#8a857b" name="pietra del mastio"/>
+  <color symbol="c" value="#9c978b" name="lastricato del cortile" area="courtyard"/>
+  <color symbol="r" value="#aba79d" name="strada maestra" area="road"/>
+  <color symbol="q" value="#524e48" name="parapetto del pozzo"/>
+  <color symbol="a" value="#3a6888" name="acqua"/>
+  <color symbol="f" value="#6e4f37" name="assi di quercia" area="keep"/>
+  <color symbol="F" value="#5c402b" name="travi del solaio"/>
+  <color symbol="k" value="#7a583d" name="gradini in legno"/>
+  <color symbol="R" value="#9e4434" name="tegole in cotto"/>
+  <color symbol="M" value="#54524c" name="merli in pietra"/>
+  <color symbol="U" value="#1e1c1b" name="feritoia"/>
+  <color symbol="L" value="#2a3842" name="finestra ferrata"/>
+  <color symbol="O" value="#211f1e" name="androne"/>
+  <color symbol="o" value="#3d2b1f" name="tavole ferrate"/>
+  <color symbol="N" value="#4f4d47" name="stipite in pietra"/>
+  <color symbol="K" value="#757169" name="camino in pietra"/>
+  <color symbol="#20" value="#00000000" hidden="True"/>
+  <color symbol="#21" value="#00000000" hidden="True"/>
+
+  <!-- Azioni sulle porte -->
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>
+It does not pass: taglia Grande, seme 1: riga 179, <color>: "value" è un colore esadecimale (rrggbb), non "#00000000"
+Fix it and answer with the whole program.
+
+## Risposta
+
+<!--
+Concetto: forte medievale con mastio centrale a due piani sotto tetto a padiglione,
+cortile d'armi cinto da mura merlate con camminamento, torri d'angolo con feritoie,
+portaia fortificata con strada d'accesso.
+
+Parti e disposizione relativa:
+- Mastio (aula h, muri w, scala s): volume principale attorno a H, profondo 8-9 celle
+  e largo 9 celle (interno >= 28 voxel liberi per lato dopo aver inserito la scala).
+- Scala interna (s): fascia di 4 celle in x (20 voxel) e 2 in y (10 voxel), con sbarco
+  libero di 2 celle prima del primo gradino e pavimento libero all'uscita al piano superiore.
+- Cortile (c): cinge il mastio; nella taglia Huge si allarga sensibilmente.
+- Cinta muraria (W): racchiude il cortile, coronata da camminamento e merli regolari (M).
+- Torri d'angolo (t): sporgenti su tutti gli angoli esterni, alte 40 voxel con merli e feritoie (U).
+- Portaia (g) e porta del mastio (d): semi per part-door (O), assi (o) e stipiti (N).
+- Strada (r): dritta dall'ingresso fino al bordo della mappa.
+- Nella taglia Huge: pozzo (Q) nel cortile e fossato d'acqua (a) all'esterno delle mura.
+
+Variazione tra semi:
+- Profondità del mastio (8-9 celle).
+- Disposizione del cortile e posizione del pozzo.
+-->
+<sequence values="B H E W t G w c r q a f F k R M U L O o N T K #20 #21 #90 #91 #92 #94" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="B H E h s w c W t g d r Q a m n" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- A1. Il mastio attorno a H: profondità 8 o 9 celle, larghezza 9 celle -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <one in="h/E" out="*/h" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+
+      <!-- Mura perimetrali del mastio -->
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Zona della scala interna: 4 celle in x, 2 in y, con 2 celle libere di pianerottolo -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+
+      <!-- A2. Cortile c attorno al mastio -->
+      <all in="wE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Espansione del cortile quando c'è spazio abbondante (taglia Huge 30x30) -->
+      <all in="cEEEEEEE" out="*ccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- A3. Mura di cinta esterne W attorno al cortile -->
+      <all in="cE" out="*W" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+
+      <!-- Torri d'angolo sporgenti t (3x3 celle) -->
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+
+      <!-- A4. Accesso assiale: porta del mastio d, portaia g, strada esterna r -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[ng]/W" out="*/g" symmetry="()"/>
+      <all in="[gr]/E" out="*/r" symmetry="()"/>
+
+      <!-- Allargamento della via d'accesso a 3 celle (15 voxel) -->
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="gW" out="*g" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/><rule in="n" out="c"/></prl>
+
+      <!-- A5. Dettagli che compaiono con lo spazio (Huge): pozzo e fossato -->
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <all in="cWWEEEEE" out="***aa***" steps="1"/>
+      <all in="[Wt]E/*a" out="**/*a"/><all in="aE/*a" out="*a/**"/>
+    </sequence>
+
+    <!-- Mappatura in scala piena 5x5x1 -->
+    <map scale="5 5 1" values="B E W t G w c r q a f F k R M U L O o N T K d g h s #20 #21 #90 #91 #92 #94" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="Q" out="ccccc/cqqqc/cqaqc/cqqqc/ccccc"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+
+      <sequence symmetry="(xy)">
+        <!-- B1. Sviluppo in altezza: parapetto del pozzo -->
+        <all in="B q" out="q q" steps="2"/>
+
+        <!-- Mura di cinta W: altezza 24 voxel con camminamento -->
+        <all in="B W" out="W W" steps="23"/>
+
+        <!-- Torri d'angolo t: altezza 40 voxel -->
+        <all in="B t" out="t t" steps="39"/>
+
+        <!-- Portaia g: altezza 32 voxel con porta O -->
+        <all in="B g" out="g O" steps="1"/>
+        <all in="B g" out="g G" steps="30"/>
+        <prl in="g" out="G"/>
+
+        <!-- Porta del mastio d: a z=0 seme O, poi muro w -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d w" steps="62"/>
+        <prl in="d" out="R"/>
+
+        <!-- Muri del mastio w: altezza 64 voxel -->
+        <all in="B w" out="w w" steps="63"/>
+        <prl in="w" out="R"/>
+
+        <!-- Piani interni del mastio: piano terra a z=0, primo piano a z=32, tetto a z=64 -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1" symmetry="()"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+
+        <!-- C1. Parti incluse: porte, scala, merlature e feritoie -->
+        <union symbol="+" values="W t G w"/>
+        <union symbol="=" values="f F"/>
+        <union symbol="%" values="W t G"/>
+
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- C2. Finestre del mastio al secondo piano (almeno 6 su 3 lati) -->
+        <one steps="3" symmetry="(xy)">
+          <rule in="BwwwwwwwB BwwwwwwwB BwwwwwwwB" out="BwwLLLwwB BwwLLLwwB BwwLLLwwB"/>
+        </one>
+        <one steps="3" symmetry="(xy)">
+          <rule in="B/w/w/w/w/w/w/w/B B/w/w/w/w/w/w/w/B B/w/w/w/w/w/w/w/B" out="B/w/w/L/L/L/w/w/B B/w/w/L/L/L/w/w/B B/w/w/L/L/L/w/w/B"/>
+        </one>
+
+        <!-- C3. Tetto a padiglione del mastio e camino -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**"
+             out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>
+
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="6"/>
+
+        <!-- C4. Pulizia marcatori rimasti -->
+        <prl in="s" out="B"/>
+      </sequence>
+    </map>
+  </map>
+
+  <!-- Palette dei materiali del mondo medievale -->
+  <color symbol="E" value="#4a6e38" name="prato" area="field"/>
+  <color symbol="W" value="#6e6b64" name="pietra di cinta" area="wall"/>
+  <color symbol="t" value="#5c5953" name="pietra delle torri" area="tower"/>
+  <color symbol="G" value="#635f58" name="pietra della portaia"/>
+  <color symbol="w" value="#8a857b" name="pietra del mastio"/>
+  <color symbol="c" value="#9c978b" name="lastricato del cortile" area="courtyard"/>
+  <color symbol="r" value="#aba79d" name="strada maestra" area="road"/>
+  <color symbol="q" value="#524e48" name="parapetto del pozzo"/>
+  <color symbol="a" value="#3a6888" name="acqua"/>
+  <color symbol="f" value="#6e4f37" name="assi di quercia" area="keep"/>
+  <color symbol="F" value="#5c402b" name="travi del solaio"/>
+  <color symbol="k" value="#7a583d" name="gradini in legno"/>
+  <color symbol="R" value="#9e4434" name="tegole in cotto"/>
+  <color symbol="M" value="#54524c" name="merli in pietra"/>
+  <color symbol="U" value="#1e1c1b" name="feritoia"/>
+  <color symbol="L" value="#2a3842" name="finestra ferrata"/>
+  <color symbol="O" value="#211f1e" name="androne"/>
+  <color symbol="o" value="#3d2b1f" name="tavole ferrate"/>
+  <color symbol="N" value="#4f4d47" name="stipite in pietra"/>
+  <color symbol="K" value="#757169" name="camino in pietra"/>
+  <color symbol="#20" value="#000000" hidden="True"/>
+  <color symbol="#21" value="#000000" hidden="True"/>
+
+  <!-- Azioni sulle porte -->
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>
