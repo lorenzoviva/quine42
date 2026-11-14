@@ -5418,7 +5418,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T379`, kernel 0.7.1; poi l'orchestratore integra T379 e `integra T372` toglie worktree e branch di T372. Sicurezza: nessuna superficie nuova.
 - Esito: T372 unito in task/T379, kernel 0.7.1 (version.ts, package.json, package-lock.json, universe.json); ADR-0188 e il suo indice a 0.7.1, tolta la riga «proposto» di 0188 duplicata dal merge nell'indice degli ADR; i campi di T372 (`game.expenses`, `masterPaid`, `masterPays`, `paidFor`) già inglesi e compatibili con la migrazione 0.6→0.7; typecheck, build e suite intera (3127 passati) verdi nei turni; non provati nel browser lobby e portafoglio (T380). Sicurezza: nessuna superficie nuova.
 
-### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `da fare`
+### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `fatto` (`00f5111e`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 43
 - Contesto: T372 (`dossier T372`) non ha visto nel browser la lobby (`game.expenses`, il testo che dice chi paga, la modale dei crediti) né la pagina dei crediti del sito con «Pagate per gli altri»: solo test con finto DOM.
@@ -5426,6 +5426,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo.
 - Browser: sì; se non si può, `BROWSER: da verificare`.
 - Quando è fatto: esito con ciò che si vede e le catture; commit su `task/T380` se ci sono file. Sicurezza: nessuna superficie nuova.
+- Esito: visti nel browser (server di sviluppo, offline, `me` master e `ospite`) lobby, scelta ferma a partita in corso (anche forzando il selettore), `game.expenses` sul disco, modale del giocatore e pagina dei crediti; «Pagate per gli altri» visto con un `world/usage.json` di prova scritto a mano (in offline le chiamate non costano e `masterPaid` resta vuoto), col mondo spento e acceso; difetti da aprire: (1) selettore «Chi paga la partita» con stile diverso dagli altri, (2) due frasi della pagina dei crediti sbagliate dove paga il master («si divide in parti uguali tra chi è collegato», «la tua parte delle spese comuni… non compare qui»), (3) righe arrotondate al centesimo che non tornano col totale; non provato l'addebito reale al master con Gemini vero, né «Ricarica» nascosta al giocatore perché il server non ha i pagamenti; nessun file cambiato, nessun commit. Sicurezza: nessuna superficie nuova.
 
 ### T381 · Integrare T374 nel base (conflitto con T372: V-036 → V-037, kernel 0.7.2) — `fatto` (`255c799d`)
 - Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
