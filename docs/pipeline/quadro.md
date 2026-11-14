@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 423 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 425 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -29,7 +29,7 @@ Aggiornato il 14/11/2026, epoca 423 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D57 (T355):** sospesa dall'autore (14/11): prima T391 confronta Carbon, Hydrogen, Sonnet 5.5, Opus 5.5 con Argon a costo per struttura riuscita (tetto 10 $); per i due Claude serve la chiave OpenRouter (D55).
+- **D57 (T355):** sospesa dall'autore (14/11): prima T391 confronta Carbon, Hydrogen, Sonnet 5.5, Opus 5.5 con Argon a costo per struttura riuscita (tetto 10 $); per i due Claude serve la chiave OpenRouter (D55). Diviso (autore 14/11): T391 fa Carbon e Hydrogen e prepara il comando; **T392** (Sonnet, Opus, Fable sull'abbonamento) lo lanci a mano dopo il reset di Claude del 19/11 (16:59 CET), **da solo**: aspetta che non ci sia niente in corso, sospendi gli altri provider e non lanciare altri task finché non finisce.
 
 - **D55 (T362):** prova pagata OpenRouter (chiave da creare), testo del viandante a Jev via OpenRouter (consiglio B), prezzo 3.5 Flash (consiglio sì).
 
@@ -42,5 +42,5 @@ Aggiornato il 14/11/2026, epoca 423 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **425 (claude):** T391 diviso, T392 giro Claude esclusivo dopo il 19/11.
 - **423 (claude):** D57 sospesa, T391 pianificato e approvato.
-- **422 (claude):** T355 integrato; D57 aperta.
