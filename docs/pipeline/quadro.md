@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 402 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 404 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 402 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T383 (integra T366, conflitto `AGENTS.md`). **Da integrare dopo T383:** T365. **Pronti su claude (spostati da fable, fermo fino al 19/11, sforzo extra):** T370, T363; poi T373→T375→T377; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** T384 (integra T365: conflitti in `server/session.ts`, `src/session/host.ts`; ADR-0195, kernel 0.7.6). T366 integrato via T383 (`ef5d6e2c`, kernel 0.7.5, ADR-0194). **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T370, T363, T373; poi T375→T377; T363→T364/T367/T368. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -40,5 +40,5 @@ Aggiornato il 14/11/2026, epoca 402 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **402 (claude):** T365 finito, integrazione rimandata a dopo T383 (stessi ADR-0194 e kernel 0.7.5).
-- **401 (claude):** T366 finito (universo privato, inviti, V-038), conflitto su `AGENTS.md` → T383.
+- **404 (claude):** T383 e T366 integrati (kernel 0.7.5); T365 in conflitto → T384.
+- **403 (claude):** `docs/fasi.md` riallineata al backlog (`d6002d52`).
