@@ -5288,7 +5288,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, il flusso intero (con un OpenRouter finto se non c'è la chiave dell'autore).
 - Quando è fatto: commit su `task/T364`.
 
-### T365 · Open beta: il costo di ogni carta — `da fare` (dipende da T362)
+### T365 · Open beta: il costo di ogni carta — `fatto` (`12a1bd26`) (dipende da T362)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 6
 - Step: 43
 - Contesto: riga 5 del § 6 di `docs/design/open-beta.md`, D49 (carte solo uso reale).
@@ -5296,6 +5296,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: `allCards` mostra il costo; i test delle quote invariati; suite e typecheck coi turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T365`, kernel sale di Z.
+- Esito: il timbro di ogni carta ha `usd` (le chiamate che l'hanno fatta: il costo detto o il listino, divisi tra le carte del commit e, dove le richieste girano insieme, per le richieste aperte) e `server` (la prima di `QUINE_ORIGINI`, solo dal server di produzione fino al mondo; nel browser e in sviluppo assente); `allCards`, `readCards`, i cloni e le carte portate li tengono; quote e impronte invariate; ADR-0194, kernel 0.7.5; divisione approssimata per le richieste parallele; il passaggio di `server` dal server al kernel non ha un test suo (solo il typecheck); nessuna interfaccia mostra ancora il costo; il confronto della Genesi del test di OpenRouter ignora costo e hash del grafo; sicurezza: nessuna superficie nuova (l'origine è pubblica e arriva per valore come la commissione, i campi letti da un universo passano da `costFields`, nessuna rotta nuova).
 
 ### T366 · Open beta e campagna: il verificatore a inviti e gli universi privati — `fatto` (`7cd5b41f`)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
