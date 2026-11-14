@@ -206,6 +206,28 @@
           </div>
           <p class="input-hint" style="margin: var(--space-13) 0 0">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
         </div>
+
+        <!-- Ciò che il master ha pagato per gli altri, dove paga il master (T372, ADR-0188: world/usage.json → masterPaid) -->
+        <div class="comic-panel ledger-panel" id="paid-for-panel" hidden>
+          <div class="ledger-head">
+            <h2 class="comic-title" style="font-size: var(--text-29); margin: 0">PAGATE PER GLI ALTRI</h2>
+            <span class="comic-badge yellow">IN TUTTO: <span id="paid-for-total">$0.00</span></span>
+          </div>
+          <div class="comic-table-wrap">
+            <table class="comic-table">
+              <thead>
+                <tr>
+                  <th>GIORNO</th>
+                  <th>PER</th>
+                  <th>RICHIESTE</th>
+                  <th>COSTO</th>
+                </tr>
+              </thead>
+              <tbody id="paid-for-body"></tbody>
+            </table>
+          </div>
+          <p class="input-hint" style="margin: var(--space-13) 0 0">Gli ultimi 30 giorni in cui hai pagato tu le richieste dei viandanti del tuo mondo; «il mondo» è ciò che il mondo chiede da sé.</p>
+        </div>
       </div>
     </main>
 

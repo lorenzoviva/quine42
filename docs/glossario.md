@@ -1320,7 +1320,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Titolare
 - **Inglese**: `holder`, `cardHolderOf`
-- **Definizione**: di chi è una carta: chi l'ha pagata o, per le comuni, un viandante estratto col seme.
+- **Definizione**: di chi è una carta: chi l'ha pagata o, per le comuni, un viandante estratto col seme; dove paga il master (le «spese della partita»), il master.
 - **Dove vive**: `src/kernel/cards.ts`
 - **Da non usare**: `owner` (per le carte; `owns` è chi può leggere e scrivere), `titolareOf`
 - **Fermo**: `titolare`, `titolari`.
@@ -1331,6 +1331,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/cards.ts`, `src/kernel/credits.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `pagante`, `paganti`, il campo `chi`.
+
+### Spese della partita
+- **Inglese**: `expenses`, `GameExpenses`, `masterPays`, `billedTo`
+- **Definizione**: chi viene addebitato per le chiamate di una partita di molti: `shared` (ognuno le sue, le comuni divise fra i collegati) o `master` (tutte al master, che è anche il titolare delle carte). La sceglie il master nella lobby e si fissa entrando; non cambia il pagante che una chiamata dice (`chi`), solo chi viene addebitato (ADR-0188).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/types.ts`, `src/ui/lobby.ts`, `server/wallet.ts`
+- **Da non usare**: «il master paga tutto» come nome del campo (è il valore `master`), `payerOf` per chi viene addebitato (dice chi chiede), «sponsor»
+- **Fermo**: `universe.json → game.expenses` (`shared` assente, `master`), `world/usage.json → masterPaid`, `settings.game` del messaggio `join`.
 
 ### Credito
 - **Inglese**: `credits`, `creditsOf`, `deductCredits`, `grantCredits`

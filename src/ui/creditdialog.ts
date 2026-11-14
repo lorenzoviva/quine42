@@ -15,6 +15,7 @@ export class CreditExhaustedModal {
   private titleEl: HTMLElement;
   private descEl: HTMLElement;
   private statusEl: HTMLElement;
+  private rechargeEl: HTMLElement;
 
   constructor(private opts: CreditDialogOptions) {
     let root = document.getElementById('credit-dialog');
@@ -35,6 +36,7 @@ export class CreditExhaustedModal {
 
     const btnRecharge = el('button', { class: 'primary comic-btn arcade' }, 'Ricarica crediti');
     btnRecharge.hidden = !opts.onRecharge;
+    this.rechargeEl = btnRecharge;
     btnRecharge.onclick = async () => {
       this.statusEl.textContent = 'Apertura pagamento in corso…';
       try {
@@ -68,14 +70,16 @@ export class CreditExhaustedModal {
     this.root.replaceChildren(box);
   }
 
-  show(info?: { reason?: 'exhausted' | 'cap'; text?: string }): void {
+  /** `masters`: the purse that ran out is the master's, who pays for the match (T372): a player's own top-up would change nothing. */
+  show(info?: { reason?: 'exhausted' | 'cap'; text?: string; masters?: boolean }): void {
     const isCap = info?.reason === 'cap';
+    this.rechargeEl.hidden = !this.opts.onRecharge || !!info?.masters;
     this.titleEl.textContent = isCap ? 'Tetto di spesa raggiunto' : 'Crediti esauriti';
     this.descEl.textContent =
       info?.text ??
       (isCap
         ? 'Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby. Le richieste all’IA useranno i modelli locali.'
-        : this.opts.onRecharge
+        : this.opts.onRecharge && !info?.masters
           ? 'Hai esaurito i tuoi crediti. Scegli se ricaricare il tuo saldo, continuare a giocare offline con i modelli locali o abbandonare la partita.'
           : 'Hai esaurito i tuoi crediti. Scegli se continuare a giocare offline con i modelli locali o abbandonare la partita.');
     this.statusEl.textContent = '';

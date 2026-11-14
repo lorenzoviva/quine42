@@ -406,6 +406,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/produzione.test.ts`
 - Esito: chiusa da T361 (ADR-0189), 13/11/2026, branch `task/T361`: le contromisure nascono con la modalità.
 
+### V-036 · Il pagante risolto dalla politica: il master paga la partita
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `universe.json → game.expenses` (`repairGameSetup`, `applySettings`, `setExpenses`, `keepGame`), il messaggio `join` (`settings.game`), `Kernel.billedTo`, `charge`, `hasCredits`, `sign` (`src/kernel/kernel.ts`), `SessionServer.join` e l'avviso dei crediti (`src/session/server.ts`), `world/usage.json → masterPaid`, il portafoglio (`server/wallet.ts`), `cloneChanges` (`src/kernel/clone.ts`)
+- Proprietà violata: dove paga il master, il suo saldo risponde per chiamate che chiedono altri (ADR-0188, studio § 7 punto 1): solo il master lo decide, prima della partita, e niente altro lo sposta (un giocatore, il Concilio, Lua, un ramo, un ritorno, un clone che ha un altro master); spende entro il suo saldo e il suo tetto; chi in un universo pubblico non ha un account (un anonimo) non ci arriva; `chi` resta chi ha chiesto (regola 8i, i ritmi per viandante); per chi ha pagato lo sa solo il master
+- Prova: test (T372)
+- Contromisura: `expenses` nel `join` solo dal master (`isMaster`) e solo con la partita ferma (`settingsLocked`), riparato (`master` o niente; da soli niente); `keepGame` riscrive un `universe.json` che dice altro, `fenceCouncil` già tiene il Concilio fuori da `universe.json`; il pagante lo risolve solo il kernel del mondo (`billedTo`), dal `chi` che il kernel stesso mette (ADR-0113), e il ledger è dell'universo (ADR-0104): un mondo compromesso addebita solo al master di quell'universo, entro il suo tetto della sessione e il suo saldo, con i ritmi per viandante e la coda `heavy` di oggi; un anonimo resta ai modelli locali finché l'universo non è privato (`privateWorld`, falso fino a T366); il clone nasce senza `expenses`; `masterPaid` sta in `world/usage.json`, che non è in `playerFiles` né in `publicFiles`, e solo il portafoglio del master ha `paidFor`
+- Task: T372
+- Test: `tests/sicurezza/spese-master.test.ts`, `tests/spese-master.test.ts`
+- Esito: chiusa da T372 (ADR-0188), 14/11/2026, branch `task/T372`: le contromisure nascono con l'opzione.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -447,6 +458,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-033 | — | — | `carte-portate.test.ts` | le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts |
 | V-034 | — | — | `typesafe.test.ts`, `produzione.test.ts`, `mondo.test.ts` | il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts |
 | V-035 | — | — | `produzione.test.ts` | la modalità senza pagamenti e il controllo di salute si provano sul server di produzione vero: tests/sicurezza/produzione.test.ts |
+| V-036 | — | — | `spese-master.test.ts` | chi paga la partita si prova sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/spese-master.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

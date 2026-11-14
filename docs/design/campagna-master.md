@@ -1,7 +1,7 @@
 # La Campagna del Master: spese, invito, ritmo, memoria e controllo del Concilio (T347)
 
-Data: 2026-11-13 · Step 43, Fase IV · ADR proposto: [ADR-0188](../adr/0188-la-campagna-del-master.md) (non applicato:
-decide l'autore) · Richiesta: `docs/userchats/to-do-2026-11-10.md` («Gestione delle spese dell'universo», «Gestione della campagna da
+Data: 2026-11-13 · Step 43, Fase IV · ADR: [ADR-0188](../adr/0188-la-campagna-del-master.md), accettato con le risposte di
+D54 (13/11: il titolare delle carte è chi paga, la regione «riempitivo»); il § 1 applicato da T372 · Richiesta: `docs/userchats/to-do-2026-11-10.md` («Gestione delle spese dell'universo», «Gestione della campagna da
 master») · Studio gemello: [`open-beta.md`](open-beta.md) (ADR-0184, le chiavi dei giocatori e il verificatore a inviti)
 
 Niente codice: questo documento dice cosa cambierebbe, perché, quanto costa e in che ordine. Le misure dei token sono fatte sulle
@@ -88,6 +88,7 @@ ha pagato, `holder` chi le tiene (per le comuni un viandante estratto col seme),
 - **Le carte**: `payer` dice il vero (il master); `holder` resta chi ha chiesto, come oggi un contenuto comune è di un viandante estratto e non
   di chi l'ha pagato. Così la collezione dei giocatori si riempie (è il bello della campagna) e le quote dell'eredità (ADR-0084) seguono il
   titolare. Il master che sceglie `master` lo sa: la lobby lo dice. (Domanda 2 per l'autore: in alternativa `holder = master` per tutto.)
+  **Deciso (D54.1)**: il titolare è chi paga, il master, per tutto (niente spoiler nelle collezioni dei giocatori); così fa T372.
 - **Il ledger non cambia** (8d): un saldo solo si muove, quello del master; nessun trasferimento fra viandanti; le ricariche come oggi.
 - **In open beta** (ADR-0184): «il master paga» è «tutte le chiamate sulla chiave del master», il turno delle comuni (§ 1.4 A di quello
   studio) non si usa; la scelta della chiave da `chi` diventa la scelta dal **pagante**, risolto dalla stessa politica.
