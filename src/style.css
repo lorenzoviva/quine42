@@ -50,6 +50,9 @@ html, body {
 #place .descr { color: var(--comic-paper-dim); font-size: var(--text-13); margin-top: var(--space-5); }
 #place.fresh { animation: fadein 1.2s ease; }
 
+/* The world held by its master (T373, D54.4): said outside the world, as the notice of the credits; it stays while it is so. */
+#paused { background: var(--neon-yellow); color: var(--comic-ink); border: var(--border-ink-thick); box-shadow: 3px 3px 0 var(--neon-pink); padding: var(--space-5) var(--space-13); font-size: var(--text-13); }
+
 #zone {
   position: absolute; top: var(--space-13); left: 50%; transform: translateX(-50%);
   background: var(--panel); border: var(--border-ink-thick); box-shadow: var(--shadow-hard-green); color: var(--code);

@@ -53,18 +53,42 @@ export interface GrantRecord {
   quando: number;
 }
 
+/** The ids whose key of OpenRouter the server holds (T363, ADR-0197): those that can pay, and those whose key said 402. By value: never a key. */
+export interface KeyHolders {
+  holders: string[];
+  exhausted: string[];
+}
+
+/** How the calls of a world are paid (T363): with the wanderers' own keys (`players`, the open beta), and/or the key of who hosts (`server`). */
+export interface KeyPolicy {
+  players: boolean;
+  server: boolean;
+}
+
+/** What a wanderer spent with a key of their own (T363, ADR-0197): all of it, and the part that was the world's (the commons, by turns). */
+export interface SpentRecord {
+  usd: number;
+  common: number;
+}
+
 /** What a ledger holds. */
 export interface LedgerBook {
   saldi: Record<string, number>;
   /** The events already credited: what makes a payment count once. */
   eventi: Record<string, PaymentRecord>;
   ricariche: GrantRecord[];
+  /** What each wanderer paid with their own key of OpenRouter (T363): the register of the spending where nothing is prepaid. Born with the kernel 0.7.8, in English. */
+  spent: Record<string, SpentRecord>;
 }
 
-export const emptyBook = (): LedgerBook => ({ saldi: {}, eventi: {}, ricariche: [] });
+export const emptyBook = (): LedgerBook => ({ saldi: {}, eventi: {}, ricariche: [], spent: {} });
 
 const money = (v: number) => Math.round(v * 1e6) / 1e6;
 const held = (b: LedgerBook, id: string) => (Object.hasOwn(b.saldi, id) ? b.saldi[id] : 0);
+const spentBy = (b: LedgerBook, id: string): SpentRecord => {
+  const s = b.spent && Object.hasOwn(b.spent, id) ? b.spent[id] : undefined;
+  return { usd: Number(s?.usd) > 0 ? Number(s!.usd) : 0, common: Number(s?.common) > 0 ? Number(s!.common) : 0 };
+};
 
 /**
  * Balances and payments of a universe. Each operation is one step on the book (`update`): nothing else happens between what it
@@ -102,6 +126,24 @@ export abstract class Ledger {
       b.saldi[id] = after;
       return { before, after };
     });
+  }
+
+  /**
+   * What a call cost on a wanderer's own key (T363, ADR-0197): the register of the spending, nothing is taken from a balance. `common` says the
+   * world asked for it (a turn of the commons): the turn reads it to choose who pays next.
+   */
+  spend(id: string, amount: number, common: boolean): SpentRecord {
+    return this.update((b) => {
+      const s = spentBy(b, id);
+      const next: SpentRecord = { usd: money(s.usd + Math.max(0, amount)), common: money(s.common + (common ? Math.max(0, amount) : 0)) };
+      (b.spent ??= {})[id] = next;
+      return next;
+    });
+  }
+
+  /** What a wanderer spent with their own key in this universe (T363). */
+  spentOf(id: string): SpentRecord {
+    return spentBy(this.read(), id);
   }
 
   /** Credits a payment unless its event was credited already: false then. One step: the same event twice, at the same moment, counts once. */

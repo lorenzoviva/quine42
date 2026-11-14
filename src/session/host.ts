@@ -9,9 +9,10 @@ import { bundledFiles } from '../kernel/bundle';
 import { memoryStore } from '../kernel/repo';
 import { MockAiModels } from '../kernel/ai/mock';
 import { GeminiAiModels } from '../kernel/ai/gemini';
-import { JevDecisionModels } from '../kernel/ai/decisions';
+import { JevDecisionModels, type DecisionModels } from '../kernel/ai/decisions';
+import { OpenRouterAiModels, OpenRouterDecisionModels } from '../kernel/ai/openrouter';
 import type { AiModels } from '../kernel/ai/models';
-import type { Ledger } from '../kernel/credits';
+import type { KeyHolders, KeyPolicy, Ledger } from '../kernel/credits';
 import { readConfig } from '../kernel/universe';
 import { INTERNAL_HEADER, prepareUniverse, UniverseChunks, UniverseClient } from '../kernel/universes';
 import { BRANCH, SessionServer } from './server';
@@ -62,7 +63,30 @@ const FLUSH_MS = 2500;
  * route); `gemini` is the `fetch` that spends the key, which stays in the server: without it, the local models. A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; typesafe?: typeof fetch; verify?: Verifier; masterUid?: string; private?: boolean; token?: string; ledger?: Ledger; grantCap?: number; platformFee?: number; server?: string; restore?: string; onBeat?: (tick: number) => void; wasmUri?: string }): Promise<UniverseHost | { error: string }> {
+export async function openUniverse(opts: {
+  name: string;
+  base: string;
+  offline?: boolean;
+  gemini?: typeof fetch;
+  typesafe?: typeof fetch;
+  /**
+   * OpenRouter over the channel (T363, ADR-0197): the `fetch` that names who may pay and hears whose key answered, with the policy (the
+   * wanderers' keys, the host's) and who holds a key now. It comes before Gemini: a server that wants the players to pay has no key of Google.
+   */
+  openrouter?: { fetch: typeof fetch; policy: KeyPolicy; keys?: KeyHolders };
+  verify?: Verifier;
+  masterUid?: string;
+  private?: boolean;
+  pace?: unknown;
+  token?: string;
+  ledger?: Ledger;
+  grantCap?: number;
+  platformFee?: number;
+  server?: string;
+  restore?: string;
+  onBeat?: (tick: number) => void;
+  wasmUri?: string;
+}): Promise<UniverseHost | { error: string }> {
   // The world reads and writes its universe whole: the store knows it by a token good for this universe only (T120, ADR-0102, ADR-0110).
   const client = await UniverseClient.connect(opts.name, opts.base, opts.token ? { [INTERNAL_HEADER]: opts.token } : {});
   if (!client) return { error: 'nessun archivio degli universi' };
@@ -75,15 +99,28 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const up = prepareUniverse(snap.files, bundledFiles);
   if (Object.keys(up.changes).length) await client.commit(up.changes, `${up.applied.length ? `migrazione ${up.applied.map((a) => a.split(':')[0]).join(', ')}; ` : ''}aggiornamento dal kernel: ${up.updated.slice(0, 6).join(', ') || 'seme'}${up.updated.length > 6 ? '…' : ''}`, 'kernel');
   const ai = readConfig(up.files).config.ai;
-  const models: AiModels = !opts.offline && opts.gemini
-    ? new GeminiAiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
-    : new MockAiModels();
-  // The closed decisions (ADR-0157): Jev through the server's gate over the channel; without it the local models, which answer with the rule.
-  const decisions = !opts.offline && opts.typesafe ? new JevDecisionModels({ fetchImpl: opts.typesafe, endpoint: 'typesafe:' }) : undefined;
+  const openrouter = !opts.offline ? opts.openrouter : undefined;
+  const models: AiModels = openrouter
+    ? new OpenRouterAiModels({ fetchImpl: openrouter.fetch, endpoint: 'openrouter:', textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
+    : !opts.offline && opts.gemini
+      ? new GeminiAiModels({ fetchImpl: opts.gemini, textModel: ai.textModel, limits: { text: ai.maxText }, thinking: ai.thinking, timeout: (ai.timeout ?? 120) * 1000 })
+      : new MockAiModels();
+  // The closed decisions (ADR-0157): Jev through the server's gate over the channel (through OpenRouter where the world is on it, D52); without
+  // it the local models, which answer with the rule.
+  const decisions: DecisionModels | undefined = openrouter ? new OpenRouterDecisionModels({ fetchImpl: openrouter.fetch, endpoint: 'openrouter:' }) : !opts.offline && opts.typesafe ? new JevDecisionModels({ fetchImpl: opts.typesafe, endpoint: 'typesafe:' }) : undefined;
   const runner = new TurnRunner();
   const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, decisions, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap, platformFee: opts.platformFee, server: opts.server });
   // Private or not, by value (ADR-0194): an anonymous guest is the master's to pay for only in a private universe (ADR-0188).
   kernel.privateWorld = opts.private === true;
+  // Whose keys pay (T363, ADR-0197): the policy and who holds a key, by value; the kernel sorts the turn of the commons for every call.
+  if (openrouter) {
+    kernel.setKeyPolicy(openrouter.policy);
+    if (openrouter.keys) kernel.setKeys(openrouter.keys);
+    (models as OpenRouterAiModels).keyPayers = (chi) => kernel.keyPayersFor(chi);
+    (decisions as OpenRouterDecisionModels).keyPayers = (chi) => kernel.keyPayersFor(chi);
+  }
+  // The pace by value too (T373): a world that starts again while the master holds it does not plan a place.
+  kernel.applyPace(opts.pace, true);
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).
   const branch = await client.readBranch(BRANCH).catch(() => null);

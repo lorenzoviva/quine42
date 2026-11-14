@@ -3,6 +3,10 @@
 
 import type { ClientMsg } from './protocol';
 import type { HandmadeProgram } from '../kernel/handmade';
+import type { WorldPace } from '../kernel/worldPace';
+import type { KeyHolders, KeyPolicy } from '../kernel/credits';
+
+export type { KeyHolders, KeyPolicy };
 
 /** What a world needs in order to open, sent over the channel: never in its environment nor on its command line. */
 export interface WorldOpen {
@@ -16,6 +20,12 @@ export interface WorldOpen {
   gemini?: boolean;
   /** Whether the server has TypeSafe's key: the closed decisions go over the channel (ADR-0157). */
   typesafe?: boolean;
+  /**
+   * The world goes through OpenRouter over the channel (T363, ADR-0197): with the wanderers' own keys (`players`, the open beta) and/or the key of
+   * who hosts (`server`). The keys never come here: only who holds one (`keys`, ids), now and at every change (`setKeys`).
+   */
+  openrouter?: KeyPolicy;
+  keys?: KeyHolders;
   /** Whether the server has accounts: tokens are verified over the channel. */
   verify?: boolean;
   masterUid?: string;
@@ -27,10 +37,12 @@ export interface WorldOpen {
   restore?: string;
   /** The universe is private (ADR-0194): by value, the world never reads who its guests are. */
   private?: boolean;
+  /** The pace of the world as the server keeps it (T373, ADR-0188 §3): by value, as `private`; normal if not said. */
+  pace?: WorldPace;
 }
 
 /** The calls a route may make to a running world; anything else is not a call. */
-export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate'] as const;
+export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate', 'setPace', 'setKeys'] as const;
 export type WorldCallName = (typeof WORLD_CALLS)[number];
 
 export type ToWorld =
@@ -51,18 +63,24 @@ export type FromWorld =
   | { t: 'vivo'; tick: number }
   | { t: 'invia'; cid: number; json: string }
   | { t: 'chiudi'; cid: number }
-  | { t: 'chiedi'; id: number; op: 'gemini' | 'verify' | 'typesafe'; args: unknown[] }
+  | { t: 'chiedi'; id: number; op: 'gemini' | 'verify' | 'typesafe' | 'openrouter'; args: unknown[] }
   | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string }
+  /** The master set the pace of the world (T373): the server keeps it in `.campaign`, repaired, so that a world that starts again has it. New on the wire, so in English. */
+  | { t: 'pace'; pace: WorldPace }
   /** Why the program cannot be a card; empty: it can. */
   | { t: 'checked'; id: number; errors: string[] };
 
-/** A call to Gemini (or to TypeSafe: the same shape) as it crosses the channel. */
+/** A call to Gemini (or to TypeSafe, or to OpenRouter: the same shape) as it crosses the channel. */
 export interface GeminiCall {
   url: string;
   method?: string;
   body?: string;
+  /** To OpenRouter (T363): whose key may pay, in order (a wanderer, or the turn of the commons as the kernel sorts it); empty, the server's. */
+  payers?: string[];
 }
 export interface GeminiAnswer {
   status: number;
   text: string;
+  /** From OpenRouter (T363): whose key answered, when a wanderer's. */
+  paidBy?: string;
 }

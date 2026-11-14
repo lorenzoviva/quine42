@@ -264,7 +264,7 @@ export class ModelDirector {
 
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld) return;
+    if (!this.active || this.busy || this.k.generationHeld || this.k.paceHeld()) return;
     // What another size already has costs nothing, and does not wait for the budget; nor what came with the cards.
     for (const r of this.missing()) if (this.free(r)) return;
     if (this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().models <= 0) return;
@@ -284,7 +284,7 @@ export class ModelDirector {
       this.used++;
       const coef = this.k.coefficients();
       const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.reviews));
-      this.nextAt = this.k.time + modelGap(coef.models);
+      this.nextAt = this.k.time + this.k.pacedGap(modelGap(coef.models));
       if (!r) {
         this.skip.add(req.id);
         this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));

@@ -39,7 +39,7 @@ import type { DecisionModels } from './ai/decisions';
 import { billedModel } from './ai/prices';
 import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
-import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
+import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
@@ -77,6 +77,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
+import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -620,6 +621,20 @@ export class Kernel {
    * answers for them, so they play with the models too. The server says it by value (the private universe is T366); false, as everywhere today.
    */
   privateWorld = false;
+  /**
+   * How the calls of this world are paid (T363, ADR-0197): with the wanderers' own keys of OpenRouter (`players`: the open beta, where nothing
+   * is prepaid and the ledger is the register of what each spent) and/or the key of who hosts (`server`: the commons). Undefined: the ledger's
+   * credits, as with a key of Gemini. The server says it by value when the world opens; the keys themselves never come here (rule 8g).
+   */
+  private keyPolicy?: KeyPolicy;
+  /** Who holds a key of OpenRouter now (ids, by value from the server), and whose key said 402 (out of the turn until a new key). */
+  private keyHolders = new Set<string>();
+  private keysExhausted = new Set<string>();
+  /**
+   * The pace of the world (T373, ADR-0188 §3): the master's knob that only goes down. On a server it comes by value from `.campaign` when the
+   * world starts and from the route; here it is what the world does, never written in the universe.
+   */
+  private pace: WorldPace = NORMAL_PACE;
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
   private capBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
@@ -1883,7 +1898,7 @@ export class Kernel {
     if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!noQuota && !this.chunkQuota()) {
-      if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
+      if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
       ch.held = true;
       return;
     }
@@ -1907,9 +1922,11 @@ export class Kernel {
    * `ai.placesPerMinute` in a minute of the world, for everyone together (T40, costs).
    */
   private chunkQuota(): boolean {
-    if (!this.manyPlayers()) return true;
+    // Alone the lobby's quota does not apply; the master's pace still does (T373): slower, or none at all.
+    const most = placesPerMinute(this.pace, this.manyPlayers() ? (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE) : Infinity);
+    if (most === Infinity) return true;
     this.chunksMade = this.chunksMade.filter((t) => this.time - t < 60);
-    return this.chunksMade.length < (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE);
+    return this.chunksMade.length < most;
   }
 
   private terrainSummary(draft: string): string {
@@ -2290,18 +2307,21 @@ export class Kernel {
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
-    if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
+    // Held (T373): what a known place would ask the Council for waits; the place comes back with it when it is loaded again.
+    const asks = !this.paceHeld();
+    if (asks && unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
         const tile = place.pick('outside');
         if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
+    for (const f of asks ? (plan.fresh ?? []) : []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     if (away !== undefined) this.npc.onReturn(ch.key, away);
     this.bus.emit('chunk:planned', { key: ch.key });
-    // The rhythms of the world (T45b): stretched by the coefficients of generation.
+    // The rhythms of the world (T45b): stretched by the coefficients of generation; none while the world is held (T373).
+    if (!asks) return;
     if (onBeat(this.plannedCount, 10, coef.packs)) void this.growContent('esplorazione');
     if (onBeat(this.plannedCount, 7, coef.inhabitants)) void this.growCast(plan.place);
     if ((this.plannedCount === 3 && coef.sessions > 0) || onBeat(this.plannedCount, 12, coef.sessions)) void this.holdSession();
@@ -2876,7 +2896,7 @@ export class Kernel {
    * intervene (items, a new inhabitant, a new entity). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
-    if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'none';
+    if (!force && (this.sessions >= 4 || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return 'none';
     this.sessions++;
     // The summary goes to the Arbiter's prompt (English since T310); the rules, people and places are the world's words.
     const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'possible' : 'not possible'}`).join('\n');
@@ -2904,7 +2924,7 @@ export class Kernel {
 
   async growCast(chunk?: ChunkInfo, force = false): Promise<boolean> {
     const max = this.config.ai.maxCast ?? 3;
-    if (!force && (this.castUsed >= max || this.generationHeld || this.ai.name === 'offline')) return false;
+    if (!force && (this.castUsed >= max || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return false;
     const people = [...this.modules.values()].filter((m) => m.manifest.persona);
     if (people.length >= 14) return false;
     this.castUsed++;
@@ -6154,6 +6174,45 @@ export class Kernel {
     return !this.manyPlayers() || (!!id && id === (this.gameSetup().master ?? SOLO));
   }
 
+  /** The pace of the world now (T373, ADR-0188 §3). */
+  worldPace(): WorldPace {
+    return this.pace;
+  }
+
+  /** Whether the master holds the world (`hold`): new places stay drafts and nothing the world does by itself calls the models. */
+  paceHeld(): boolean {
+    return this.pace.mode === 'hold';
+  }
+
+  /** A pause of the Sculptor or of the Musician as the pace makes it: longer in a slow world, never shorter. */
+  pacedGap(gap: number): number {
+    return paceGap(gap, this.pace);
+  }
+
+  /**
+   * The master sets the pace of the world (T373): `normal`, `slow` (fewer new places a minute, never above the lobby's) or `hold`. Only the master;
+   * on a mirror the world decides (the thin client sends it). The pace as it is now, or why not.
+   */
+  async setPace(raw: unknown, by: string = this.wanderer().id): Promise<PaceAnswer> {
+    if (this.mirror) return { ok: false, reason: 'il ritmo lo decide il mondo, non uno specchio' };
+    if (!this.isMaster(by)) return { ok: false, reason: 'solo il master decide il ritmo del mondo' };
+    return { ok: true, pace: this.applyPace(raw) };
+  }
+
+  /**
+   * The pace as the server says it (`.campaign`, the route) or as the master set it, repaired; `pace` on the bus when it changes (the world's
+   * process tells its server, which keeps it). `quiet`: a value that comes from where it is kept, not told back. Going on again, the drafts nearest
+   * to the wanderers are planned first, as always.
+   */
+  applyPace(raw: unknown, quiet = false): WorldPace {
+    const pace = readPace(raw);
+    if (samePace(pace, this.pace)) return this.pace;
+    this.pace = pace;
+    if (!this.mirror) this.council.say('kernel', 'info', `ritmo del mondo: ${PACE_NAME[pace.mode]}${pace.mode === 'slow' ? ` (${placesPerMinute(pace, this.manyPlayers() ? (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE) : Infinity)} luoghi nuovi al minuto)` : ''}`);
+    if (!quiet) this.bus.emit('pace', pace);
+    return pace;
+  }
+
   /** God mode (T42a): in a multiplayer game the master does not die, has no needs, takes no harm from the others. */
   godMode(id: string | undefined = this.wanderer().id): boolean {
     return this.manyPlayers() && this.isMaster(id);
@@ -6211,21 +6270,96 @@ export class Kernel {
   hasCredits(id: string = this.wanderer().id): boolean {
     if (!this.manyPlayers()) return true;
     if (this.masterPays()) {
-      if (id === COMUNE) return !this.commonNeedsPayer || this.canPay(this.masterId());
-      if (id !== this.masterId() && this.isAnonymous(id) && !this.privateWorld) return false;
+      if (id === COMUNE) return (!this.commonNeedsPayer && !this.payWithKeys()) || this.canPay(this.masterId());
+      if (id !== this.masterId() && this.isAnonymous(id) && !this.privateWorld && !this.payWithKeys()) return false;
       return this.canPay(this.masterId());
     }
-    if (id === COMUNE) return !this.commonNeedsPayer || (this.connectedWanderers?.() ?? []).some((w) => this.hasCredits(w));
+    if (id === COMUNE) {
+      // With the players' keys (T363) nothing is free: the host's key pays the commons where it has one, else the turn of those who hold a key.
+      if (this.payWithKeys()) return !!this.keyPolicy?.server || this.connectedIds().some((w) => this.hasCredits(w));
+      return !this.commonNeedsPayer || this.connectedIds().some((w) => this.hasCredits(w));
+    }
     return this.canPay(id);
   }
 
-  /** Whether a wanderer's own purse pays now: an account, credits left, and the session's ceiling not reached. */
+  /**
+   * Whether a wanderer's own purse pays now: the session's ceiling not reached, and credits left; with the players' keys (T363) a key the server
+   * holds that has not said 402, an anonymous one too (D52.4: with a key of their own they pay for themselves).
+   */
   private canPay(id: string): boolean {
-    if (this.isAnonymous(id)) return false;
+    if (this.payWithKeys()) {
+      if (!this.keyHolders.has(id)) return false;
+    } else if (this.isAnonymous(id)) return false;
     const tetto = this.sessionCap.get(id);
     const spent = this.sessionSpent.get(id) ?? 0;
     if (tetto !== undefined && spent >= tetto) return false;
-    return this.creditsOf(id) > 0;
+    return this.payWithKeys() || this.creditsOf(id) > 0;
+  }
+
+  /** The wanderers connected now, or (where nobody counts them) those of the world. */
+  private connectedIds(): string[] {
+    return this.connectedWanderers ? this.connectedWanderers() : this.wanderers().map((w) => w.id);
+  }
+
+  /** How this world's calls are paid (T363, ADR-0197), said by the server when the world opens; nothing else sets it. */
+  setKeyPolicy(policy: KeyPolicy | undefined): void {
+    this.keyPolicy = policy ? { players: policy.players === true, server: policy.server === true } : undefined;
+  }
+
+  keyPolicyOf(): KeyPolicy | undefined {
+    return this.keyPolicy ? { ...this.keyPolicy } : undefined;
+  }
+
+  /** Whether the wanderers pay with their own keys of OpenRouter (T363): a game of many whose server said so. */
+  payWithKeys(): boolean {
+    return this.manyPlayers() && !!this.keyPolicy?.players;
+  }
+
+  /** Whether a wanderer holds a key that can pay now (T363), as the server last said. */
+  holdsKey(id: string): boolean {
+    return this.keyHolders.has(id);
+  }
+
+  /**
+   * Who holds a key of OpenRouter now (T363), by value from the server: ids only. One who held a key and no longer does hears it as exhausted
+   * credits (their key said 402, or was revoked): from then on the local models, as with an empty balance.
+   */
+  setKeys(keys: KeyHolders): void {
+    const ids = (v: unknown) => (Array.isArray(v) ? v.filter(validWandererId) : []);
+    const before = this.keyHolders;
+    this.keyHolders = new Set(ids(keys?.holders));
+    this.keysExhausted = new Set(ids(keys?.exhausted));
+    for (const id of before) {
+      if (this.keyHolders.has(id)) continue;
+      const why = this.keysExhausted.has(id) ? 'il credito della sua chiave di OpenRouter è finito' : 'la sua chiave di OpenRouter non vale più';
+      const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
+      this.council.say('kernel', 'info', `${id}: ${why}: ${whose} useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
+    }
+  }
+
+  /**
+   * Whose keys may pay a call asked by `chi` (T363, ADR-0197), in order, for the gate of OpenRouter: a wanderer's own (where the master pays,
+   * the master's); for the commons the host's key where there is one (empty), else the turn: the connected holders, the one who has paid the
+   * least of the commons in this universe first, then by id. Empty without the players' keys: the server's.
+   */
+  keyPayersFor(chi: string): string[] {
+    if (!this.payWithKeys()) return [];
+    const billed = this.billedTo(chi || COMUNE);
+    if (billed !== COMUNE) return this.keyHolders.has(billed) ? [billed] : [];
+    if (this.keyPolicy?.server) return [];
+    return this.connectedIds()
+      .filter((id) => this.keyHolders.has(id))
+      .sort((a, b) => this.ledger.spentOf(a).common - this.ledger.spentOf(b).common || (a < b ? -1 : a > b ? 1 : 0));
+  }
+
+  /**
+   * The ceiling a wanderer brings from the lobby, as this world keeps it (T45d): never more than their balance; with the players' keys (T363)
+   * as they said it, the key's own limit being OpenRouter's; an anonymous one without a key of their own spends nothing.
+   */
+  sessionCapFor(id: string, cap: number): number {
+    if (this.payWithKeys()) return cap;
+    return this.isAnonymous(id) ? 0 : Math.min(cap, this.creditsOf(id));
   }
 
   /** The master of a game of many (T37); alone, the one who plays. */
@@ -6344,10 +6478,33 @@ export class Kernel {
   deductCredits(id: string, amount: number): number {
     if (amount <= 0) return this.creditsOf(id);
     const { before: cur, after: next } = this.ledger.charge(id, amount);
+    this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
+    this.spentInSession(id, amount);
+    // Where the master pays (T372) their purse answers for everyone's requests.
+    const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
+    if (cur > 0 && next === 0) {
+      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: ${whose} useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
+      if (this.wanderer().id === id) {
+        this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
+      }
+    }
+    return next;
+  }
+
+  /** What a call cost on a wanderer's own key of OpenRouter (T363): in the ledger as spending, and against the ceiling of the session. */
+  private spendWithKey(id: string, amount: number, common: boolean): void {
+    if (amount <= 0) return;
+    const spent = this.ledger.spend(id, amount, common);
+    this.bus.emit('credits:spent', { id, usd: spent.usd, common: spent.common, delta: amount });
+    this.spentInSession(id, amount);
+  }
+
+  /** Counts a cost against a wanderer's ceiling of the session (T45d): at the ceiling, the local models, and they hear it. */
+  private spentInSession(id: string, amount: number): void {
     const spentBefore = this.sessionSpent.get(id) ?? 0;
     const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
     this.sessionSpent.set(id, spentAfter);
-    this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
     // Where the master pays (T372) their purse answers for everyone's requests.
     const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
     const tetto = this.sessionCap.get(id);
@@ -6358,14 +6515,6 @@ export class Kernel {
         this.message('Hai raggiunto il tetto di crediti per questa sessione: le tue richieste saranno gestite dai modelli locali.', 'warn');
       }
     }
-    if (cur > 0 && next === 0) {
-      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: ${whose} useranno i modelli locali.`);
-      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
-      if (this.wanderer().id === id) {
-        this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
-      }
-    }
-    return next;
   }
 
   /**
@@ -6388,15 +6537,24 @@ export class Kernel {
     const usd = callCost(r, r.day, billedModel(r.model)) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
+    const asked = r.who || COMUNE;
+    if (this.payWithKeys()) {
+      // The players' keys (T363, ADR-0197): whose key answered is what the gate said (`CallRecord.paidBy`); the host's key, where it paid, is
+      // counted by the server against its own cap, not here. A key's spending is the ledger's register (`Ledger.spend`), nothing is taken from a balance.
+      const payer = r.paidBy ?? (this.billedTo(asked) === COMUNE ? undefined : this.billedTo(asked));
+      if (!payer) return;
+      this.spendWithKey(payer, total, asked === COMUNE);
+      if (payer !== asked && this.masterPays() && payer === this.masterId()) this.usage.paidByMaster(r);
+      return;
+    }
     // Who asked stays who asked (rule 8i); who is charged is the match's policy (T372, ADR-0188): where the master pays, them alone.
-    const payer = this.billedTo(r.who || COMUNE);
+    const payer = this.billedTo(asked);
     if (payer !== COMUNE) {
       this.deductCredits(payer, total);
       // What the master paid for someone else, for their wallet and for the others' (the cost alone, as the usage counts it).
-      if (payer !== (r.who || COMUNE)) this.usage.paidByMaster(r);
+      if (payer !== asked) this.usage.paidByMaster(r);
     } else {
-      const connected = this.connectedWanderers ? this.connectedWanderers() : this.wanderers().map((w) => w.id);
-      const eligible = connected.filter((id) => !this.isAnonymous(id));
+      const eligible = this.connectedIds().filter((id) => !this.isAnonymous(id));
       if (eligible.length > 0) {
         const shares = splitCost(total, eligible.length);
         eligible.forEach((id, i) => {
@@ -7578,6 +7736,9 @@ export class Kernel {
       get generationHeld() {
         return k.generationHeld;
       },
+      get paused() {
+        return k.paceHeld();
+      },
       get offline() {
         return k.ai.name === 'offline';
       },
@@ -7897,7 +8058,7 @@ export class Kernel {
 
   /** The world grows as it is explored: a new pack of items, recipes and loot (text only, cheap). */
   async growContent(reason: string, count = 16, force = false, chi?: string): Promise<boolean> {
-    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.ai.name === 'offline'))) return false;
+    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.paceHeld() || this.ai.name === 'offline'))) return false;
     this.growing = true;
     this.packsUsed++;
     try {

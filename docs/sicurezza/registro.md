@@ -439,6 +439,28 @@ Modello di una voce:
 - Test: `tests/sicurezza/ospiti.test.ts`
 - Esito: chiusa da T366 (ADR-0194), 14/11/2026, branch `task/T366`: le contromisure nascono con l'universo privato. Resta, accettato: chi conosce già il nome di un universo privato può sapere che esiste (un `create` con quel nome risponde «esiste già», un socket non è rifiutato subito come per un nome senza universo); non può leggerlo né entrarci, e nessun elenco glielo dice.
 
+### V-039 · Il ritmo del mondo: il messaggio `pace` e il file `.campaign`
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: il messaggio `pace` (`src/session/server.ts`, `LIMITS.paceRate`), `Kernel.setPace` e `applyPace` (`src/kernel/kernel.ts`, `src/kernel/worldPace.ts`), la rotta `/api/universe/<nome>/pace` e `universes/.campaign/<nome>.json → pace` (`server/campaign.ts`, `server/universeStore.ts`), il canale dei mondi (`WorldOpen.pace`, `setPace`, il messaggio `pace` del mondo al server, `server/worldHost.ts`, `server/session.ts`)
+- Proprietà violata: il ritmo lo cambia solo il master (ADR-0188 § 7 punti 5-6): un giocatore, un estraneo, un anonimo o il mondo non fermano né rallentano la partita degli altri; nessun ritmo detto fa pianificare al mondo più luoghi nuovi al minuto di quanti ne ha regolati la lobby, né accorcia una pausa (ADR-0133: chi è entrato con una stima spende al più quella); il file `.campaign` lo scrive solo il server, mai il processo del mondo (regola 8g), e il ritmo non tocca ospiti né inviti
+- Prova: test (T373)
+- Contromisura: il messaggio `pace` solo da `isMaster` (anche nel kernel, `setPace`), con un ritmo suo (`LIMITS.paceRate`, `paceBurst`) oltre a quello di ogni messaggio; il valore si ripara (`readPace`: tre modi, i luoghi al minuto interi nella scala della lobby, solo per `slow`) e si usa sempre col minimo della lobby (`placesPerMinute`, `paceGap`): il ritmo scende soltanto. La rotta `pace`: solo il master (`owns`), mai il token del mondo (`who.server`), solo JSON, 4 KiB, sotto `HEAVY`; un universo privato a chi non lo vede risponde come un nome che non c'è. Il mondo riceve il ritmo per valore (all'avvio, `WorldOpen.pace`; dalla rotta, `setPace`) e quando il master lo cambia sul filo lo dice al server col solo valore: il server lo ripara e lo scrive sotto il lucchetto (`keepPace`), solo il campo `pace`; un mondo compromesso può al più fermare o rallentare sé stesso. Un file illeggibile non ferma il mondo (`keptPace`: normale)
+- Task: T373
+- Test: `tests/sicurezza/ritmo.test.ts`, `tests/ritmo.test.ts`
+- Esito: chiusa da T373 (ADR-0196), 14/11/2026, branch `task/T373`: le contromisure nascono con il ritmo.
+
+### V-040 · Le chiavi di OpenRouter dei giocatori sul server
+- Gravità: alta
+- Stato: `chiusa`
+- Superficie: `server/openrouterProxy.ts` (`OpenRouterGate`: le chiavi in memoria, lo scambio del PKCE, la rotta `/api/openrouter` con `status`, `begin`, `key` e le porte dei modelli, `direct()` per i mondi), il canale dei mondi (`op: 'openrouter'`, `payers`, `paidBy`, `WorldOpen.openrouter`, `keys`, `setKeys`; `server/worldHost.ts`, `src/session/worldProcess.ts`), le intestazioni `x-quine-payers` e `x-quine-paid-by` (`src/kernel/ai/openrouter.ts`), `Kernel.keyPayersFor`, `setKeys`, `hasCredits`, `charge` (`src/kernel/kernel.ts`), `Ledger.spend` (`src/kernel/credits.ts`, `server/ledger.ts`), `OPENROUTER_API_KEY` e il suo tetto (`productionProblems`)
+- Proprietà violata: una chiave di OpenRouter di un giocatore si spende solo per le chiamate del gioco che sono sue (o, a turno, del mondo in cui gioca), solo dal varco, entro il suo tetto della lobby; non arriva al browser (nemmeno il suo: il PKCE lo scambia il server), a un mondo, a un universo, a un log, a una risposta o a un altro giocatore; nessuno la collega al posto suo (lo `state` del flusso è suo e a uso singolo, il token verificato); un mondo non fa pagare a un viandante una chiamata che lui non ha causato oltre il turno e i suoi ritmi (studio § 5 punti 1-3, regola 8i); la chiave di chi ospita ha un tetto al giorno scritto, come ogni chiave del server (regola 8h)
+- Prova: test (T363)
+- Contromisura: le chiavi solo nella memoria del processo del server, per id di viandante, mai su disco (`worldEnv` non le porta, il file dei mondi non le nomina) e nelle risposte solo l'impronta SHA-256; le porte delle chiavi da `callerOf` (`gate`, il token; senza account solo questa macchina con l'id detto; il mondo e chi non ha un id non collegano) con un ritmo per viandante (`KEY_PACE`); lo `state` (16 byte casuali, dieci minuti, quattro per viandante) consumato una volta e solo da una richiesta con codice e verifier ben formati, lo scambio dal server, un rifiuto di OpenRouter non riportato alla lettera; una chiave incollata solo nella forma di OpenRouter; le porte dei modelli solo loopback e stessa origine, mai in produzione, e pagano con la chiave del chiamante o del server qualunque `x-quine-payers` scriva una pagina; i corpi rifatti campo per campo (`chatRequest`, `decisionRequest`: modelli a elenco, niente ripieghi su altri modelli, il `provider` del varco, i tetti di Gemini e di Jev); sul canale il mondo nomina solo ids (`payersIn`, al più 64) e la chiave la sceglie il varco fra chi può pagare, con un ritmo per chiave (`CALL_PACE`), un 402 fuori dal turno, un 401 dimenticata, al mondo solo chi ha pagato; nel kernel il turno dal ledger dell'universo, il tetto della lobby per viandante (`sessionCapFor`), i ritmi per viandante e la coda `heavy` di oggi; `OPENROUTER_API_KEY` vuole `OPENROUTER_TETTO_GIORNALIERO` in produzione, la spesa in `universes/.openrouter-spend.json`. Resta, accettato (ADR-0184, studio § 5 punto 7): chi ospita vede le chiavi di chi gioca sul suo server, in memoria; il PKCE propone un limite e la chiave si revoca da OpenRouter
+- Task: T363
+- Test: `tests/sicurezza/openrouter.test.ts`, `tests/openrouter-keys.test.ts`
+- Esito: chiusa da T363 (ADR-0197), 14/11/2026, branch `task/T363`: le contromisure nascono con il varco.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -483,6 +505,8 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-036 | — | — | `spese-master.test.ts` | chi paga la partita si prova sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/spese-master.test.ts |
 | V-037 | — | — | `direttive.test.ts` | le direttive del master si vedono solo dentro il kernel e nei file che escono: le prova tests/sicurezza/direttive.test.ts |
 | V-038 | — | — | `ospiti.test.ts` | il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts |
+| V-039 | — | — | `ritmo.test.ts` | il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts |
+| V-040 | — | — | `openrouter.test.ts` | il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

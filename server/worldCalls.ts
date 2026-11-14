@@ -5,6 +5,8 @@ import type { Kernel } from '../src/kernel/kernel';
 import type { PaymentRecord } from '../src/kernel/credits';
 import { walletFromKernel, type Wallet } from './wallet';
 import { viewFromKernel, type WandererView } from './wanderer';
+import type { WorldPace } from '../src/kernel/worldPace';
+import type { KeyHolders } from '../src/kernel/credits';
 
 type Later<T> = T | Promise<T>;
 type AccountKind = WandererView['account'];
@@ -18,6 +20,10 @@ export interface WorldCalls {
   keepProfile(universo: string, id: string, account: AccountKind, profilo: unknown): Later<{ profilo: unknown; riparato: string[]; viandante: WandererView } | undefined>;
   /** Whether the universe is private now (ADR-0194): the master's purse answers for an anonymous guest only then (ADR-0188). */
   setPrivate(value: boolean): Later<boolean>;
+  /** The pace of the world as the master set it through the route (T373): the world repairs it and answers how it took it. */
+  setPace(pace: WorldPace): Later<WorldPace>;
+  /** Who holds a key of OpenRouter now (T363, ADR-0197), by value: the ids that can pay, and those whose key said 402. */
+  setKeys(keys: KeyHolders): Later<void>;
 }
 
 /** The calls answered by a kernel at hand: in the world's own process, and in the tests. */
@@ -35,5 +41,8 @@ export function worldOf(k: Kernel): WorldCalls {
       k.privateWorld = value === true;
       return k.privateWorld;
     },
+    // Quiet: the server already keeps it.
+    setPace: (pace) => k.applyPace(pace, true),
+    setKeys: (keys) => k.setKeys(keys),
   };
 }

@@ -5272,7 +5272,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T362`, kernel sale di Z; sicurezza nell'esito.
 - Esito: `OpenRouterAiModels` e `OpenRouterDecisionModels` (Jev su `/api/alpha/decisions` con `provider.zdr`), id fissi a elenco, schema JSON in `response_format` con `require_parameters`, foto come `image_url`, 402/401/429/408 gestiti, il costo detto (`CallRecord.usd`, `callCost`) nel registro e nell'addebito al posto del listino; ADR-0193 nuovo, ADR-0184 accettato con D52, studio § 1.5-1.7 verificato il 14/11, kernel 0.7.4; test offline con risposte scritte dalla documentazione e Genesi attraverso l'adattatore uguale; non provato contro OpenRouter vero (manca la chiave: domanda aperta in `docs/pipeline/domande/T362.md`, con lo script pronto, il testo del viandante a Jev via OpenRouter e il prezzo di 3.5 Flash); non cablato nel gioco (T363); cache esplicita dell'Attore via OpenRouter non fatta; sicurezza: nessuna superficie nuova (nessuna chiave né rotta; il costo detto entra nell'addebito solo dalla risposta del varco di T363, che sarà la sua superficie).
 
-### T363 · Open beta: le chiavi dei giocatori sul server e il turno delle comuni — `da fare` (dipende da T361, T362)
+### T363 · Open beta: le chiavi dei giocatori sul server e il turno delle comuni — `fatto` (`64804307`) (dipende da T361, T362)
 - Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 43
 - Contesto: D52 (PKCE principale, chiave incollata come ripiego; spese comuni a turno, «il master paga» come opzione di T347; l'anonimo con la sua chiave paga per sé e partecipa al turno). Riga 3 del § 6 e § 1.2-1.4, § 5 di `docs/design/open-beta.md`. `dossier T345`.
@@ -5280,6 +5280,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: due viandanti con due chiavi in un mondo di molti: ognuno paga le sue, le comuni si alternano; suite di sicurezza; suite e typecheck coi turni.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T363`, ADR e `AGENTS.md` (regola 9) aggiornati.
+- Esito: `OpenRouterGate` con le chiavi dei giocatori in memoria per viandante (PKCE scambiato dal server con `state` a uso singolo, chiave incollata come ripiego, impronta SHA-256 fuori) e la chiave di chi ospita col tetto `OPENROUTER_TETTO_GIORNALIERO`; rotta `/api/openrouter` (`status`, `begin`, `key`; porte dei modelli solo loopback, mai in produzione); corpi rifatti campo per campo; canale `op: 'openrouter'` con chi può pagare in ordine (`x-quine-payers`, dal kernel) e chi ha pagato (`x-quine-paid-by`), 402 fuori dal turno e al prossimo, 401 dimenticata, al mondo solo gli id (`setKeys`); un mondo va su OpenRouter con `OPENROUTER_API_KEY` o senza chiave di Google (`worldsPayWith`); nel kernel `payWithKeys` (`hasCredits` dalla chiave e dal tetto, `Ledger.spend` come registro della spesa, `chi` e carte comuni invariati); ADR-0197, AGENTS.md (regola 9, `.env`, struttura), architettura, glossario, kernel 0.7.8; test nuovi offline (varco e due viandanti con due chiavi), suite e typecheck verdi nei turni; manca il collegamento nel gioco e nel sito (T364) e la spesa nel portafoglio; non provato contro OpenRouter vero né con un mondo in un processo vero; sicurezza: V-040 (chiavi in memoria, rotta del PKCE, scelta della chiave da `chi`), chiusa con i test.
 
 ### T364 · Open beta: «Collega OpenRouter» nel gioco e nel sito — `da fare` (dipende da T363)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
@@ -5361,7 +5362,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T372`.
 - Esito: il master paga tutto: ADR-0188 accettato con le risposte di D54; `game.expenses` dalla lobby (`settings.game` nel `join`, in `GAME_FIELDS`, fermo a partita in corso, non ereditato dai cloni); `billedTo` nel kernel per l'addebito (`charge`, niente divisione) e per le carte (pagante e titolare il master, quote dell'eredità); `hasCredits` con saldo e tetto del master per tutti; anonimi ai modelli locali salvo universo privato (`privateWorld`, falso finché T366 non lo dice); tetto minimo e tetto dei giocatori ignorati dove paga il master; avviso a tutti a crediti del master finiti; `world/usage.json → masterPaid` e portafoglio (`masterPays`, `master`, `paidFor`, pagina «Pagate per gli altri»); corretto il portafoglio di un mondo acceso, che non mostrava i consumi (leggeva `paganti`); lobby e modale lo dicono; V-036, glossario, AGENTS, architettura, kernel 0.6.13 (in 3d andrà a 0.7.1); test in `tests/spese-master.test.ts` e `tests/sicurezza/spese-master.test.ts`, suite e typecheck verdi nei turni; non visti nel browser lobby e pagina dei crediti (solo test con finto DOM e funzioni pure); niente contro Gemini vero.
 
-### T373 · Campagna: il ritmo e la pausa del mondo — `da fare` (dipende da T366)
+### T373 · Campagna: il ritmo e la pausa del mondo — `fatto` (`67b212cb`) (dipende da T366)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
 - Step: 43
 - Contesto: riga 3 del § 6 di `docs/design/campagna-master.md`, ADR-0188; D54.3 e D54.4: la pausa ferma ciò che il mondo fa da sé (dialoghi fra individui, trame che avanzano, luoghi nuovi che restano bozze), le risposte ai viandanti continuano; l'HUD dice che il mondo è in pausa perché il master lo sta scrivendo (regola 0 per ciò che vede chi è dentro).
@@ -5369,6 +5370,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: in pausa i luoghi restano bozze e nessuna chiamata parte; «normale» riprende da dove sono i giocatori; `pace` non alza mai `placesPerMinute` sopra la lobby.
 - Browser: sì, la pausa dalla console e l'avviso nell'HUD.
 - Quando è fatto: commit su `task/T373`.
+- Esito: ritmo del mondo `pace` normal/slow/hold (`src/kernel/worldPace.ts`), mai sopra la lobby; in pausa i luoghi nuovi restano bozze senza chiamate, quelli noti tornano, fermo ciò che il mondo fa da sé, le risposte ai viandanti continuano; «normale» riprende dai giocatori; messaggio `pace` del master con un limite suo, `pace` in `welcome`/`update`, avviso dell'HUD distinto per master e giocatore; `.campaign → pace` scritto solo dal server e dato al mondo per valore, rotta `/api/universe/<nome>/pace`; console e Direzione; ADR-0196, regola 8b-bis, V-039, kernel 0.7.7. Restano: da soli il ritmo non si salva; le tappe delle trame dovute in pausa accadono tutte alla ripresa; non provato da un test il riavvio di un mondo vero in pausa.
 
 ### T374 · Campagna: le direttive del master — `fatto` (`361769b6`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
@@ -5475,7 +5477,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T384`, kernel 0.7.6; poi l'orchestratore integra T384 e `integra T365` toglie worktree e branch di T365. Sicurezza: quella di T365, nessuna superficie nuova oltre quella.
 - Esito: T365 integrato dopo T366: in `server/session.ts` e `src/session/host.ts` restano sia `private` (ADR-0194) sia `server` (ADR-0195), che arrivano insieme fino al kernel; l'ADR di T365 è ADR-0195 (rinumerazione già sul branch di T365, numero libero, rimandi coerenti); kernel 0.7.6 in version.ts, package.json, lock e seme, con i rimandi di T365 a 0.7.5 portati a 0.7.6 e quelli di T366 lasciati; typecheck, build e suite intera verdi (216 file, 3204 test); nessuna chiave in `dist/`; restano i limiti di T365 (nessuna interfaccia mostra il costo, il passaggio di `server` dal server al kernel provato solo dal typecheck); sicurezza: quella di T365, nessuna superficie nuova oltre quella.
 
-### T385 · Integrare T373 nel base (conflitti dopo T365: kernel 0.7.7, ADR-0196) — `da fare`
+### T385 · Integrare T373 nel base (conflitti dopo T365: kernel 0.7.7, ADR-0196) — `fatto` (`d5775dd7`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 43
 - Contesto: `integra T373` (il ritmo e la pausa del mondo, ADR-0196, kernel 0.7.7) ha trovato conflitti in `AGENTS.md`, `docs/pipeline/PIANO.md`, `package-lock.json`, `package.json`, `server/session.ts`, `src/kernel/version.ts`, `src/session/host.ts`, `universe/universe.json`: nel frattempo è entrato T365 via T384 (costo delle carte, ADR-0195, kernel 0.7.6). Nasce da T373: `dossier T373`, `dossier T384`.
@@ -5483,6 +5485,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera, typecheck e build coi turni.
 - Browser: no (T373 è già stato visto nel browser; il merge non cambia UI).
 - Quando è fatto: commit su `task/T385`, kernel 0.7.7; poi l'orchestratore integra T385 e `integra T373` toglie worktree e branch di T373. Sicurezza: quella di T373 (V-039), nessuna superficie nuova oltre quella.
+- Esito: T373 integrato dopo T365/T384: in `server/session.ts` e `src/session/host.ts` restano `server`, `private` e `pace` fino al kernel; `AGENTS.md` tiene entrambe le righe; `PIANO.md` del base; ADR-0196 libero e nell'indice; kernel 0.7.7 in version.ts, package.json, lock e seme, i rimandi di T365 a 0.7.6 lasciati; typecheck, build e suite intera verdi (218 file, 3220 test); nessuna chiave in `dist/`; restano i limiti di T373 (da soli il ritmo non si salva, le tappe dovute in pausa accadono tutte alla ripresa, il riavvio di un mondo vero in pausa non ha un test) e di T365; sicurezza: quella di T373 (V-039), nessuna superficie nuova oltre quella.
 
 ### T386 · La licenza: PolyForm Noncommercial alla lettera, il self-hosting gratuito permesso per iscritto — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
@@ -5493,3 +5496,42 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessun codice; `npm test` non serve. Controllare che i link della licenza rispondano.
 - Browser: no.
 - Quando è fatto: commit su `task/T386` con `LICENSE.md` (e `package.json` se cambia) e le domande scritte; l'autore approva il testo prima dell'integrazione. Sicurezza: nessuna superficie nuova.
+
+### T387 · Il gioco al tocco: muoversi, orbitare, zoomare e i comandi di gioco su un telefono — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Step: 43
+- Contesto: l'autore ha provato il gioco da telefono (14/11, preview sulla rete di casa, in orizzontale): il sito si vede bene, ma nel gioco funzionano solo il click sinistro e il destro (pressione lunga); zoom, orbita, movimento e i comandi di gioco (tasti) no. L'interfaccia di testo si apre e la tastiera compare. Oggi nel gioco non c'è nessun gestore del tocco (`touchstart`/`pointerType` solo in `site/carte.ts`). Fase IV (open beta): chi entra da telefono deve poter giocare.
+- Cosa fare: (1) movimento con un joystick virtuale (in basso a sinistra, solo con un puntatore `touch`, mai su desktop) che produce gli stessi assi di WASD in `src/kernel/input.ts`, senza un percorso nuovo nel kernel (in multigiocatore passa dagli stessi tasti, `keys`, ADR-0139); (2) orbita con il trascinamento a un dito fuori dai pannelli e zoom con il pizzico a due dita, sugli stessi parametri della camera di rotella e tasto destro (`render/renderer.ts`), con i limiti di oggi; il tocco breve resta il click, la pressione lunga il destro; (3) i comandi di gioco che oggi sono solo tasti (E interagisci, T pronuncia, inventario, borsa delle rune, chat, mappa, `,` `.` e gli altri del pannello dei controlli) come pulsanti a scomparsa in basso a destra, i più usati sempre visibili e il resto in un menu; (4) niente zoom della pagina né scorrimento col doppio tocco sopra la scena (`touch-action`, `viewport`), la tastiera virtuale non copre il campo di testo. Leggere prima `#convalida-browser` e `#mondo3d`.
+- Test: un test sulla traduzione joystick → assi e pizzico → zoom (funzioni pure); suite e typecheck verdi.
+- Browser: sì. Chrome con una finestra stretta e gli eventi di tocco simulati (`TouchEvent`/`PointerEvent` con `pointerType: 'touch'` dalla console): il viandante si muove, la camera orbita e zooma, E apre un contenitore, T pronuncia; screenshot in orizzontale a 844 × 390. Desktop invariato (screenshot). La prova sul telefono vero la fa l'autore: scrivere nell'esito come avviare la preview sulla rete (`--host`).
+- Quando è fatto: commit su `task/T387`, esito con cosa è provato e cosa no. Sicurezza: nessuna superficie nuova (solo client).
+
+### T388 · L'HUD su un telefono: meno ingombro, le istruzioni in un aiuto, «gira il telefono» in verticale — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): l'HUD è troppo affollato per lo schermo; in verticale non c'è spazio per l'interfaccia. Le istruzioni con i controlli in basso occupano spazio che manca. Dipende da T387 per i pulsanti del tocco (lo spazio va diviso con loro).
+- Cosa fare: (1) in verticale su uno schermo piccolo (puntatore grossolano e lato corto sotto una soglia) una schermata a tutto schermo «Gira il telefono» (testo nella lingua dell'interfaccia, un'icona), il gioco in pausa grafica dietro; (2) in orizzontale su schermo piccolo l'HUD ridotto: le istruzioni dei controlli tolte dal fondo e messe in una finestrella di aiuto aperta da un pulsante «?» (anche su desktop il pulsante c'è; su desktop le istruzioni restano dove sono se c'è spazio), pannelli e messaggi (`#topleft`, `#messages`, `#quests`, la frase, la borsa) più piccoli o richiudibili, nulla sopra il joystick e i pulsanti di T387; (3) solo CSS e il DOM di `src/ui/` (`hud.ts`, `src/style.css`), con i token del tema (`--space-*`, `--text-*`), niente valori sparsi.
+- Test: typecheck e suite verdi; `tests/theme.test.ts` se tocca il tema.
+- Browser: sì. Screenshot a 844 × 390 (orizzontale) e 390 × 844 (verticale: la schermata di rotazione), e su desktop invariato; la finestra d'aiuto si apre e chiude. Prova sul telefono vero dell'autore dopo.
+- Dipende da T387.
+- Quando è fatto: commit su `task/T388` con gli screenshot descritti nell'esito. Sicurezza: nessuna superficie nuova.
+
+### T389 · I laboratori MJ dei voxel su un telefono: la preview visibile, lo zoom, gli strumenti nei menu — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 3
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): il laboratorio MJ dei voxel è difficile da usare, tutto compresso, la preview non si vede affatto e non si può zoomare; i pulsanti affollano l'interfaccia. Le pagine dei giocatori sono la sandbox 3D `/lab/3d/` e l'editor `/lab/editor/` (con la barra delle carte fatte a mano, `lab/handmade/`, ADR-0169): sistemarle entrambe, prima quella che la pagina `site/laboratori.html` apre per prima. Dipende da T387 per i gesti del tocco (riusare le stesse funzioni di orbita e pizzico se si può importarle senza che `src/` importi `lab/`).
+- Cosa fare: (1) su schermo stretto un layout a schede o a pannelli richiudibili: la preview 3D occupa lo spazio principale e ha una misura vera (oggi non si vede), l'XML e gli altri pannelli si aprono sopra o accanto a richiesta; (2) orbita a un dito e zoom a pizzico sulla preview; (3) gli strumenti (pulsanti) raggruppati in menu a tendina o a scomparsa, i 3-4 più usati visibili; (4) su desktop nessuna perdita di funzioni (stesso layout o il nuovo solo sotto una larghezza).
+- Test: typecheck e suite verdi.
+- Browser: sì. Screenshot di entrambe le pagine a 844 × 390, 390 × 844 e desktop; la preview si vede, ruota e zooma con tocchi simulati; un programma si esegue e si salva come bozza.
+- Dipende da T387.
+- Quando è fatto: commit su `task/T389`, esito con gli screenshot descritti. Sicurezza: nessuna superficie nuova (pagine dei laboratori, nessuna rotta nuova).
+
+### T390 · Il SoundLab su un telefono: UX da rifinire — `da fare`
+- Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 4
+- Step: 43
+- Contesto: dalla prova dell'autore sul telefono (14/11): il SoundLab (`/lab/suono/`, T222) va meglio del laboratorio dei voxel ma ha margine di miglioramento nell'UX. Nessun difetto preciso detto: il task li trova e li corregge con lo stesso criterio di T389 (contenuto principale grande, strumenti nei menu, tocco).
+- Cosa fare: aprire la pagina a 844 × 390 e 390 × 844, elencare ciò che è stretto, illeggibile o non toccabile (piano roll a trascinamento col dito, manopole, preset, volume e muto per traccia, editor XML), correggere i più gravi con pannelli richiudibili e menu, riusando ciò che T389 introduce; scrivere nell'esito ciò che resta.
+- Test: typecheck e `tests/soundlab.test.ts` verdi.
+- Browser: sì, screenshot prima e dopo alle due misure e su desktop.
+- Dipende da T389.
+- Quando è fatto: commit su `task/T390` con l'elenco dei difetti e quelli corretti. Sicurezza: nessuna superficie nuova.

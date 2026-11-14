@@ -10,6 +10,7 @@ import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
 import type { BrokenCard } from '../kernel/brokencards';
 import type { WornZone } from '../kernel/wearing';
+import type { WorldPace } from '../kernel/worldPace';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -159,7 +160,12 @@ export type ClientMsg =
   /** The master gives credits by hand (ADR-0104), within the day's cap. */
   | { t: 'recharge'; seq: number; wanderer: string; count: number }
   /** The master takes a brought card away from the world (T296, ADR-0172): the card and its copies, with a commit of the kernel. */
-  | { t: 'card'; seq: number; op: 'remove'; id: string };
+  | { t: 'card'; seq: number; op: 'remove'; id: string }
+  /**
+   * The master sets the pace of the world (T373, ADR-0188 §3): `normal`, `slow` (`placesPerMinute`, never above the lobby's) or `hold`. Only the
+   * master, at a pace of its own (`LIMITS.paceRate`); the answer's `text` is the pace as the world took it.
+   */
+  | { t: 'pace'; seq: number; mode: string; placesPerMinute?: number };
 
 
 /** Files changed: their new text, or null when they are gone. */
@@ -181,12 +187,14 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the platform fee their console shows (ADR-0132), the Council's feed so far and their branch (T42b); the
    * master's updates say (`players`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[]; broken?: BrokenCard[] } & Clock)
+  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[]; broken?: BrokenCard[]; pace?: WorldPace } & Clock)
   /**
+   * `pace` (T373): the pace of the world, to every client, in `welcome` when it is not `normal` and in `update` when it changes: the HUD says
+   * that the world is held, outside the world (D54.4).
    * `broken` (T296, ADR-0172): the brought cards that do not work in the world, when the list changes: every client draws the generic of their
    * class in their place, as the world does, and the master's console shows why.
    */
-  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[] } & Clock)
+  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[]; pace?: WorldPace } & Clock)
   /** The step was not possible (too fast, through a wall): the wanderer is here. */
   | { t: 'correction'; seq: number; x: number; y: number }
   /**

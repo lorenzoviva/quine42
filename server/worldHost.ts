@@ -12,6 +12,9 @@ import type { ClientMsg, ServerMsg } from '../src/session/protocol';
 import type { FromWorld, GeminiAnswer, GeminiCall, ToWorld, WorldCallName, WorldOpen } from '../src/session/worldwire';
 import { worldToken } from './access';
 import type { WorldCalls } from './worldCalls';
+import type { WorldPace } from '../src/kernel/worldPace';
+import type { KeyHolders, KeyPolicy } from '../src/kernel/credits';
+import { PAID_BY_HEADER, PAYERS_HEADER } from '../src/kernel/ai/openrouter';
 
 /** The heap of a world, in MB, unless the `.env` says otherwise (`QUINE_MONDO_MEMORIA`). */
 export const DEFAULT_WORLD_MEMORY = 1024;
@@ -70,10 +73,19 @@ export interface WorldOptions {
   gemini?: typeof fetch;
   /** TypeSafe's gate (ADR-0157): the world asks it over the channel, never with the key. */
   typesafe?: typeof fetch;
+  /**
+   * OpenRouter's gate (T363, ADR-0197): the world asks it over the channel naming who may pay, never with a key. With it the policy (the
+   * wanderers' keys, the host's) and who holds a key now, asked at every start; `setKeys` tells the world of every change.
+   */
+  openrouter?: { fetch: typeof fetch; policy: KeyPolicy; keys: () => KeyHolders } | undefined;
   verify?: Verifier;
   masterUid?: string;
   /** Whether the universe is private, asked at every start (ADR-0194): the world gets the answer, never the guests. */
   private?: () => boolean;
+  /** The pace of the world as the server keeps it (T373), asked at every start: a world that starts again while the master holds it plans nothing. */
+  pace?: () => WorldPace;
+  /** The world says the master set its pace (T373): the server keeps it, repaired (`.campaign`, never in the world's process). */
+  onPace?: (pace: WorldPace) => void;
   ledgerFile?: string;
   grantCap?: number;
   /** The platform fee, which the server decides (ADR-0132). */
@@ -191,6 +203,7 @@ export class WorldHost {
     child.on('error', (e) => {
       if (this.child === child) this.died(e.message);
     });
+    const pace = o.pace?.();
     const open: WorldOpen = {
       name: o.name,
       base: o.base,
@@ -198,9 +211,11 @@ export class WorldHost {
       ...(o.offline ? { offline: true } : {}),
       ...(o.gemini ? { gemini: true } : {}),
       ...(o.typesafe ? { typesafe: true } : {}),
+      ...(o.openrouter ? { openrouter: { ...o.openrouter.policy }, keys: o.openrouter.keys() } : {}),
       ...(o.verify ? { verify: true } : {}),
       ...(o.masterUid ? { masterUid: o.masterUid } : {}),
       ...(o.private?.() ? { private: true } : {}),
+      ...(pace && pace.mode !== 'normal' ? { pace } : {}),
       ...(o.ledgerFile ? { ledgerFile: o.ledgerFile, grantCap: o.grantCap } : {}),
       ...(o.server ? { server: o.server } : {}),
       ...(restore ? { restore } : {}),
@@ -230,6 +245,10 @@ export class WorldHost {
           this.readyWaiters.splice(0).forEach((done) => done({ error: String(m.motivo) }));
         }
         this.child?.kill();
+        return;
+      case 'pace':
+        // What the world says is repaired by who keeps it: at worst a world holds or slows itself.
+        this.o.onPace?.(m.pace);
         return;
       case 'vivo':
         this.lastBeat = Date.now();
@@ -276,6 +295,15 @@ export class WorldHost {
         const call = args?.[0] as GeminiCall;
         const r = await this.o.typesafe(String(call?.url), { method: 'POST', body: String(call?.body ?? '') });
         const out: GeminiAnswer = { status: r.status, text: await r.text() };
+        return reply(true, out);
+      }
+      if (op === 'openrouter' && this.o.openrouter) {
+        // Who may pay, as the world sorted it: ids only, which the gate reads again; whose key answered goes back the same way.
+        const call = args?.[0] as GeminiCall;
+        const payers = Array.isArray(call?.payers) ? call.payers.filter((p): p is string => typeof p === 'string').slice(0, 64) : [];
+        const r = await this.o.openrouter.fetch(String(call?.url), { method: 'POST', headers: { 'Content-Type': 'application/json', ...(payers.length ? { [PAYERS_HEADER]: payers.join(',') } : {}) }, body: String(call?.body ?? '') });
+        const paidBy = r.headers.get(PAID_BY_HEADER);
+        const out: GeminiAnswer = { status: r.status, text: await r.text(), ...(paidBy ? { paidBy } : {}) };
         return reply(true, out);
       }
       reply(false, undefined, 'non si può chiedere');
@@ -447,6 +475,8 @@ export class WorldHost {
     view: (universo, id, account) => this.call('view', [universo, id, account]),
     keepProfile: (universo, id, account, profilo) => this.call('keepProfile', [universo, id, account, profilo]),
     setPrivate: (value) => this.call('setPrivate', [value]),
+    setPace: (pace) => this.call('setPace', [pace]),
+    setKeys: (keys) => this.call('setKeys', [keys]),
   };
 
   /** Stops the world, letting it save if it can, and waits for what git is still doing with that save. */

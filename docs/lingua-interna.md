@@ -1528,7 +1528,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/session/protocol.ts (ClientMsg, ServerMsg)`, `src/session/server.ts (LIMITS)`, `src/session/thin.ts`, `src/session/client.ts`
 - **Tocca**: filo · **lingua**: inglese · **task**: T308b, contratto 0.5
-- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata) nasce inglese; `carta` è solo la parola del concetto, nessun client l’ha mandata
+- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata) e `pace` (T373, ADR-0196: il ritmo del mondo) nascono inglesi; `carta` e `ritmo` sono solo le parole del concetto, nessun client le ha mandate
 
 | italiano | interno |
 |---|---|
@@ -1563,6 +1563,7 @@ posto di un pannello sul filo).
 | `concilio` | `council` |
 | `file` | `file` |
 | `carta` | `card` |
+| `ritmo` | `pace` |
 
 <a id="valori-filo"></a>
 ### Operazioni e stati sul filo (`valori-filo`)

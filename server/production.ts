@@ -10,6 +10,7 @@ import path from 'node:path';
 import type { Duplex } from 'node:stream';
 import { accessRefusal, GeminiGate } from './geminiProxy';
 import { TypeSafeGate } from './typesafeProxy';
+import { OpenRouterGate, openrouterRoute, worldsPayWith } from './openrouterProxy';
 import { isInternal, newSecret } from './access';
 import { ACCOUNT_MODES, accountHandler, accountModeOf, accountSettings, type AccountSettings } from './account';
 import { secretProblem } from './invites';
@@ -17,7 +18,7 @@ import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
 import { grantCapOf, PAYMENTS, paymentsOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
-import { attachSessions, expelFrom, getActiveWorld, sessionList, tellPrivate, wanderersIn, type SessionOptions } from './session';
+import { attachSessions, expelFrom, getActiveWorld, sessionList, tellKeys, tellPace, tellPrivate, wanderersIn, type SessionOptions } from './session';
 import { CampaignArchive } from './campaign';
 import { stripeHandler, stripeSettings } from './stripe';
 import { universeHandler, universesPerAccount } from './universeStore';
@@ -82,6 +83,8 @@ export function productionProblems(env: Record<string, string | undefined>): str
   if (proxyHops(env.QUINE_PROXY_FIDATI) === undefined) problems.push('QUINE_PROXY_FIDATI: è quanti proxy nostri stanno davanti a questo server, un numero');
   if (has('GEMINI_API_KEY') && !(Number(env.GEMINI_TETTO_GIORNALIERO) >= 0 && has('GEMINI_TETTO_GIORNALIERO'))) problems.push('GEMINI_TETTO_GIORNALIERO: con la chiave serve un tetto in dollari al giorno, scritto');
   if (has('TYPESAFE_KEY') && !(Number(env.TYPESAFE_TETTO_GIORNALIERO) >= 0 && has('TYPESAFE_TETTO_GIORNALIERO'))) problems.push('TYPESAFE_TETTO_GIORNALIERO: con la chiave di TypeSafe serve un tetto in dollari al giorno, scritto');
+  // The server's own key of OpenRouter (T363, ADR-0197) is who hosts paying for the commons: with a cap, as every key of the server's.
+  if (has('OPENROUTER_API_KEY') && !(Number(env.OPENROUTER_TETTO_GIORNALIERO) >= 0 && has('OPENROUTER_TETTO_GIORNALIERO'))) problems.push('OPENROUTER_TETTO_GIORNALIERO: con la chiave di OpenRouter del server serve un tetto in dollari al giorno, scritto');
   return problems;
 }
 
@@ -286,9 +289,13 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     return !apiRate.take(address) || (HEAVY.test(req.url ?? '') && !heavyRate.take(address)) || (VIDEO_PIECE.test(req.url ?? '') && !videoRate.take(address));
   };
   const gemini = new GeminiGate({ apiKey: o.env.GEMINI_API_KEY, dailyCap: o.env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
-  if (!gemini.available) console.warn('GEMINI_API_KEY assente: i mondi usano i modelli locali');
   // Jev (ADR-0157): only for the worlds, over their channel; no route here.
   const typesafe = new TypeSafeGate({ apiKey: o.env.TYPESAFE_KEY, dailyCap: o.env.TYPESAFE_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'typesafeSpend') });
+  // The keys of OpenRouter (T363, ADR-0197): the players' in memory, the server's from the environment; here only the key doors, the worlds ask over their channel.
+  const openrouter = new OpenRouterGate({ apiKey: o.env.OPENROUTER_API_KEY, dailyCap: o.env.OPENROUTER_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'openrouterSpend') });
+  openrouter.onChange = (keys) => void tellKeys(keys);
+  if (openrouter.serverKey) console.log('OPENROUTER_API_KEY: i mondi vanno su OpenRouter con la chiave del server per le spese comuni');
+  else if (!gemini.available) console.log('nessuna chiave del server: i mondi vanno su OpenRouter con le chiavi dei giocatori (chi non ne ha, i modelli locali)');
   const answerAccount = accountHandler(accounts);
   // The programs of the handmade cards: each checked by the program of the worlds, in a process of its own (programCheck.ts).
   const checker = processChecker({ program: async () => o.worldProgram });
@@ -299,9 +306,11 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const payments = paymentsOf(o.env) === 'on';
   const routes: Route[] = [
     // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
-    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate } }),
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
+    // A player's key of OpenRouter (T363): the PKCE flow and the pasted key, for an account; the model doors are not here.
+    openrouterRoute(openrouter, { access: { accounts, internal } }),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
     walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
     sessionList(accounts, campaigns),
@@ -352,6 +361,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     accounts,
     gemini: gemini.direct(),
     typesafe: typesafe.direct(),
+    openrouter: () => worldsPayWith(openrouter, { gemini: gemini.available, accounts: !!accounts.verify }),
     internal,
     credits: { universesDir, grantCap: grantCapOf(o.env, true), platformFee: platformFeeOf(o.env) },
     // Where the cards of its worlds are made: the first site it answers for (T365, ADR-0195).

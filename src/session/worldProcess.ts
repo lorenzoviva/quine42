@@ -11,6 +11,8 @@ import { openUniverse, type UniverseHost } from './host';
 import type { Account, Verifier } from './account';
 import type { ClientMsg, ServerLink, ServerMsg } from './protocol';
 import { WORLD_CALLS, type FromWorld, type GeminiAnswer, type GeminiCall, type ToWorld, type WorldOpen } from './worldwire';
+import { PAID_BY_HEADER, PAYERS_HEADER } from '../kernel/ai/openrouter';
+import { validWandererId } from '../kernel/wandererIds';
 
 /** A client's link at this end of the channel. */
 interface Linked {
@@ -26,7 +28,7 @@ let asked = 0;
 let host: UniverseHost | undefined;
 let calls: WorldCalls | undefined;
 
-function ask<T>(op: 'gemini' | 'verify' | 'typesafe', args: unknown[]): Promise<T> {
+function ask<T>(op: 'gemini' | 'verify' | 'typesafe' | 'openrouter', args: unknown[]): Promise<T> {
   const id = ++asked;
   return new Promise<T>((done, fail) => {
     waiting.set(id, { done: done as (v: unknown) => void, fail });
@@ -34,19 +36,31 @@ function ask<T>(op: 'gemini' | 'verify' | 'typesafe', args: unknown[]): Promise<
   });
 }
 
-/** `fetch` for Gemini (or for TypeSafe, ADR-0157): over the channel, to the only one who has the key and its limits. */
-const overChannel = (op: 'gemini' | 'typesafe') => (async (input: RequestInfo | URL, init?: RequestInit) => {
-  const call: GeminiCall = { url: String(input), method: init?.method, body: typeof init?.body === 'string' ? init.body : undefined };
+/**
+ * `fetch` for Gemini (or for TypeSafe, ADR-0157; or for OpenRouter, T363): over the channel, to the only one who has the keys and their limits. To
+ * OpenRouter the call names whose key may pay (the header the adapter writes) and hears whose key answered (the header it reads).
+ */
+const overChannel = (op: 'gemini' | 'typesafe' | 'openrouter') => (async (input: RequestInfo | URL, init?: RequestInit) => {
+  const headers = init?.headers as Record<string, string> | undefined;
+  const payers = op === 'openrouter' ? payersIn(headers?.[PAYERS_HEADER]) : [];
+  const call: GeminiCall = { url: String(input), method: init?.method, body: typeof init?.body === 'string' ? init.body : undefined, ...(payers.length ? { payers } : {}) };
   const answer = ask<GeminiAnswer>(op, [call]);
   const signal = init?.signal;
   // Who gave up does not wait; what was already sent may be paid, as with any request.
   const r = await (signal
     ? Promise.race([answer, new Promise<never>((_, fail) => (signal.aborted ? fail(signal.reason) : signal.addEventListener('abort', () => fail(signal.reason), { once: true })))])
     : answer);
-  return new Response(r.text, { status: r.status, headers: { 'Content-Type': 'application/json' } });
+  return new Response(r.text, { status: r.status, headers: { 'Content-Type': 'application/json', ...(typeof r.paidBy === 'string' ? { [PAID_BY_HEADER]: r.paidBy } : {}) } });
 }) as typeof fetch;
 const gemini = overChannel('gemini');
 const typesafe = overChannel('typesafe');
+const openrouter = overChannel('openrouter');
+
+/** The ids a header names, as the server will read them again (`payersIn` of the gate): only ids, at most a few dozen. */
+function payersIn(header: unknown): string[] {
+  if (typeof header !== 'string' || !header) return [];
+  return header.split(',').map((s) => s.trim()).filter(validWandererId).slice(0, 64);
+}
 
 const verify: Verifier = (token) => ask<Account | undefined>('verify', [token]);
 
@@ -72,9 +86,12 @@ async function open(o: WorldOpen): Promise<void> {
     offline: o.offline,
     gemini: o.gemini ? gemini : undefined,
     typesafe: o.typesafe ? typesafe : undefined,
+    // OpenRouter (T363): the policy and who holds a key, by value; the keys stay in the server.
+    openrouter: o.openrouter ? { fetch: openrouter, policy: o.openrouter, keys: o.keys } : undefined,
     verify: o.verify ? verify : undefined,
     masterUid: o.masterUid,
     private: o.private === true,
+    pace: o.pace,
     restore: o.restore,
     grantCap: o.grantCap,
     server: o.server,
@@ -89,6 +106,8 @@ async function open(o: WorldOpen): Promise<void> {
   if ('error' in opened) return send({ t: 'errore', motivo: opened.error });
   host = opened;
   calls = worldOf(opened.session.kernel);
+  // The pace the master set (T373): the server keeps it (`.campaign`, never written here, rule 8g).
+  opened.session.kernel.bus.on('pace', (pace) => send({ t: 'pace', pace }));
   send({ t: 'pronto' });
 }
 

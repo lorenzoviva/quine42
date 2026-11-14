@@ -16,7 +16,9 @@ import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { failureText, gameIn, gate, refuse, type Caller } from './access';
-import { CampaignArchive } from './campaign';
+import { CampaignArchive, keepPace, keptPace } from './campaign';
+import type { WorldPace } from '../src/kernel/worldPace';
+import type { KeyHolders, KeyPolicy } from '../src/kernel/credits';
 import { accountWanderer } from '../src/session/account';
 import { validWandererId } from '../src/kernel/wanderers';
 import { PROGRAMS_DIR } from './hidden';
@@ -109,6 +111,24 @@ export function expelFrom(name: string, id: string, reason: string): void {
 export async function tellPrivate(name: string, value: boolean): Promise<void> {
   const calls = await getActiveWorld(name);
   await calls?.setPrivate(value);
+}
+
+/** Tells the running world of a universe, if there is one, its pace (T373): how it took it, or undefined if none is running. */
+export async function tellPace(name: string, pace: WorldPace): Promise<WorldPace | undefined> {
+  const calls = await getActiveWorld(name);
+  return calls ? await calls.setPace(pace) : undefined;
+}
+
+/** Tells every running world who holds a key of OpenRouter now (T363): ids only. A world that does not answer is told again at its next start. */
+export async function tellKeys(keys: KeyHolders): Promise<void> {
+  for (const name of [...activeHosts.keys()]) {
+    try {
+      const calls = await getActiveWorld(name);
+      await calls?.setKeys(keys);
+    } catch {
+      /* a world that is restarting gets them when it opens */
+    }
+  }
 }
 
 /** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `join` on (before it nothing goes to a world). */
@@ -210,6 +230,11 @@ export interface SessionOptions {
   gemini?: typeof fetch;
   /** TypeSafe's gate (ADR-0157): the closed decisions of the worlds. */
   typesafe?: typeof fetch;
+  /**
+   * OpenRouter's gate (T363, ADR-0197), where the worlds go through it: the `fetch` over which they name who may pay, the policy (the
+   * wanderers' keys, the host's) and who holds a key now, asked at every start. The gate's changes reach the worlds with `tellKeys`.
+   */
+  openrouter?: () => { fetch: typeof fetch; policy: KeyPolicy; keys: () => KeyHolders } | undefined;
   internal?: string;
   credits?: { universesDir: string; grantCap: number; platformFee?: number };
   /** The origin of this server (the first of `QUINE_ORIGINI`): the cards its worlds stamp name it (T365, ADR-0195). Absent in development. */
@@ -233,7 +258,7 @@ export interface SessionOptions {
 
 /** The sockets of the multiplayer games on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
-  const { accounts, gemini, typesafe, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
+  const { accounts, gemini, typesafe, openrouter, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
   const campaigns = o.campaigns ?? (credits ? CampaignArchive.of(credits.universesDir) : undefined);
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
   /** Sockets now, by account and by address. */
@@ -272,10 +297,21 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       offline,
       gemini,
       typesafe,
+      // Whether this world goes through OpenRouter is decided now (T363): a key of who hosts, or the players' where there is no key of Google.
+      openrouter: openrouter?.(),
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
       private: () => campaigns?.isPrivate(name) ?? false,
       ...(o.server ? { server: o.server } : {}),
+      // The pace by value at every start (T373); what the master sets in the world comes back here and is kept, repaired.
+      ...(campaigns ? { pace: () => keptPace(campaigns, name), onPace: (pace: WorldPace) => {
+              try {
+                keepPace(campaigns, name, pace);
+              } catch {
+                /* the file is busy: the world has it, the next change keeps it */
+              }
+            },
+          } : {}),
       ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
@@ -424,7 +460,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
   return { stop };
 }
 
-export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: SessionOptions['credits'], memoryMb?: number, maxWorlds?: number, typesafe?: typeof fetch): Plugin {
+export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch, internal?: string, credits?: SessionOptions['credits'], memoryMb?: number, maxWorlds?: number, typesafe?: typeof fetch, openrouter?: SessionOptions['openrouter']): Plugin {
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
@@ -443,7 +479,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
         return (built ??= buildWorld(root, { outDir, preserveSymlinks: server.config.resolve.preserveSymlinks }));
       };
       if (!server.httpServer) return;
-      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, typesafe, internal, credits, memoryMb, maxWorlds, program });
+      const { stop } = attachSessions(server.httpServer as HttpServer, { accounts, gemini, typesafe, openrouter, internal, credits, memoryMb, maxWorlds, program });
       server.httpServer.on('close', () => void stop().then(() => outDir && fs.rmSync(outDir, { recursive: true, force: true })));
     },
     configurePreviewServer(server) {
