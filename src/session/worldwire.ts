@@ -21,6 +21,8 @@ export interface WorldOpen {
   masterUid?: string;
   ledgerFile?: string;
   grantCap?: number;
+  /** The origin of this server (T365, ADR-0195): the cards the world stamps name it. */
+  server?: string;
   /** A commit to go back to before opening: the world kept dying on what came after. */
   restore?: string;
   /** The universe is private (ADR-0194): by value, the world never reads who its guests are. */

@@ -1302,6 +1302,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `Carta`, `isCarta` (nel codice), `CardLedger`
 - **Fermo**: `carta`, `autore`, `utilizzi`, `world/cards.json`.
 
+### Costo della carta
+- **Inglese**: `usd` e `server` di `CardStamp`, `CardCosts`, `CARD_MAKERS`, `costFields`, `priceCards`
+- **Definizione**: i dollari delle chiamate che hanno fatto una carta (il costo detto o il listino), divisi tra le carte dello stesso commit, e l'origine del server il cui mondo l'ha fatta; senza server la storia è dichiarata, non contata (ADR-0195).
+- **Dove vive**: `src/kernel/cards.ts`, i timbri dei file dell'universo, `world/cards.json` per i luoghi
+- **Da non usare**: «prezzo della carta» (il prezzo è del listino), «origine» da sola (è la catena dei titolari, `origins`)
+- **Fermo**: i campi `usd` e `server` del timbro.
+
 ### Carta fatta a mano
 - **Inglese**: `handmade`, `HandmadeCard`, `HandmadeRecord`, `HandmadeArchive`, `handmadeHandler`, `handmadeSummary`, `handmadeView`, `HANDMADE_CAPS`, `newHandmadeId`
 - **Definizione**: un programma (modello o suono) che un giocatore ha forkato nei laboratori e cambiato, con un id suo, il nome, la classe e la taglia, il contratto `X.Y` con cui è stato controllato, l'autore e da dove nasce (`from`, `origins`); sta nella collezione del suo account, fuori dagli universi, e entra in un mondo solo all'inizio di un universo (T295). La **firma** (`signature`) è come l'autore si fa vedere dagli altri, mai il suo id.

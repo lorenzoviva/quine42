@@ -78,6 +78,8 @@ export interface WorldOptions {
   grantCap?: number;
   /** The platform fee, which the server decides (ADR-0132). */
   platformFee?: number;
+  /** The origin of this server, which the cards its worlds stamp name (T365, ADR-0195). */
+  server?: string;
   /** The program of the process, and what it may read besides its own folder. */
   entry: string;
   entryArgs?: string[];
@@ -200,6 +202,7 @@ export class WorldHost {
       ...(o.masterUid ? { masterUid: o.masterUid } : {}),
       ...(o.private?.() ? { private: true } : {}),
       ...(o.ledgerFile ? { ledgerFile: o.ledgerFile, grantCap: o.grantCap } : {}),
+      ...(o.server ? { server: o.server } : {}),
       ...(restore ? { restore } : {}),
     };
     this.tell({ t: 'apri', open });

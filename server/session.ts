@@ -212,6 +212,8 @@ export interface SessionOptions {
   typesafe?: typeof fetch;
   internal?: string;
   credits?: { universesDir: string; grantCap: number; platformFee?: number };
+  /** The origin of this server (the first of `QUINE_ORIGINI`): the cards its worlds stamp name it (T365, ADR-0195). Absent in development. */
+  server?: string;
   memoryMb?: number;
   /** Worlds running at once (`QUINE_MONDI_MASSIMI`, V-025). */
   maxWorlds?: number;
@@ -273,6 +275,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
       private: () => campaigns?.isPrivate(name) ?? false,
+      ...(o.server ? { server: o.server } : {}),
       ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
