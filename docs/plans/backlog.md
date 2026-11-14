@@ -5116,6 +5116,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
 - Esito: giro su Gemini fatto con lo Scultore del gioco (`lab/scripts/scultore-gemini.ts`, sei giri, 74 chiamate, 3,26 $): 3.8 Flash a Grande 0 su 6 (porta e piani), Argon 5 su 6 a Enorme e 1 su 2 a Grande, fattorie sempre fortificate, separazione tra concetti 2,62; rapporto, chiamate e foto in `lab/banco/taglie/gemini/`; lo Scultore del gioco non è cambiato (ha già il prompt di T354): domanda in `docs/pipeline/domande/T355.md`, raccomandata Argon a ogni taglia per le strutture procedurali più un task che ripari prompt e ritorno; non provato: 3.8 Flash dopo quella riparazione; sicurezza: nessuna superficie nuova (solo `lab/` e documenti).
 
+### T391 · Quale modello scrive meglio le strutture, a parità di costo per struttura riuscita: Carbon, Hydrogen, Sonnet 5.5 e Opus 5.5 contro Argon — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Step: 30
+- Contesto: l'autore (14/11, su D57): Argon costa quanto Gemini 4 Carbon e il 25 % più di Gemini 4 Hydrogen, entrambi successivi; a quel prezzo c'è anche Sonnet 5.5, e un modello più caro che riesce in una sola iterazione può costare meno di Argon più le correzioni. Prima di decidere D57 si misura. `dossier T355` (il banco, `lab/scripts/scultore-gemini.ts`, il rapporto `lab/banco/taglie/gemini/README.md`, i numeri di 3.8 Flash e Argon già pagati: non si rifanno), ADR-0183, ADR-0193 (adattatore OpenRouter, `OPENROUTER_MODELS` a elenco).
+- Cosa fare: lo stesso giro di T355 (forte e fattoria, Grande ed Enorme, gli stessi semi, lo Scultore del gioco con il prompt di oggi, revisione dell'Artista uguale) con Gemini 4 Carbon e Gemini 4 Hydrogen (chiave di Google, se l'API li offre; prezzi di listino in `prices.ts` con la data) e Sonnet 5.5 e Opus 5.5 (OpenRouter, con `OPENROUTER_API_KEY` dai `.env`; costo detto da ogni risposta); se un modello non è raggiungibile lo dice e prosegue con gli altri. Per ogni modello: strutture riuscite su tentate, **costo per struttura riuscita contando tentativi e correzioni falliti**, chiamate, tempo (il gioco ne aspetta 120 s), voto dell'Artista, fattorie fortificate o no, separazione fra concetti; tabella accanto a 3.8 Flash e Argon di T355, foto. Tetto del giro 10 $ sul registro intero. Un id nuovo in un elenco del kernel (`OPENROUTER_MODELS`, `prices.ts`) fa salire Z; nessun cambio allo Scultore del gioco. Alla fine una raccomandazione che sostituisce o conferma D57 (`docs/pipeline/domande/T391.md`).
+- Test: suite e typecheck coi turni.
+- Browser: non serve (foto dal banco).
+- Quando è fatto: commit su `task/T391`, rapporto e foto in `lab/banco/taglie/modelli/`, la domanda all'autore. Sicurezza: nessuna superficie nuova attesa (solo elenchi di modelli e `lab/`); se tocca `OpenRouterGate` lo dice.
+
 ### T356 · Il tetto dei voxel delle strutture gargantuesche — `fatto` (`c21d13b3`)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 30
