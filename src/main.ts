@@ -7,7 +7,7 @@ import type { FileMap } from './kernel/types';
 import { readConfig } from './kernel/universe';
 import { IdbChunks } from './kernel/chunks';
 import { GeminiAiModels } from './kernel/ai/gemini';
-import { JevDecisionModels } from './kernel/ai/decisions';
+import { JevDecisionModels, keepsNothing } from './kernel/ai/decisions';
 import { MockAiModels } from './kernel/ai/mock';
 import { OpenRouterAiModels, OpenRouterDecisionModels } from './kernel/ai/openrouter';
 import { OpenRouterLink, type LinkAnswer } from './ui/openrouter';
@@ -537,7 +537,7 @@ async function main() {
   };
   // Alone (T247): the same lobby, without what is about other people; it comes back with every new load of the page, which is what ends a match alone.
   const enterAlone = async () => {
-    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels, ...(via !== 'gemini' ? { openrouter: soloLink } : {}) });
+    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels, guards: keepsNothing(kernel.council.decisions), ...(via !== 'gemini' ? { openrouter: soloLink } : {}) });
     const chosen = soloLobby.open();
     syncFocus();
     const choice = await chosen;

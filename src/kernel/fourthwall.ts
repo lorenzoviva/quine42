@@ -380,3 +380,18 @@ export function guardNote(door: GuardDoor, hazards: Partial<Record<GuardHazard, 
 
 /** The wanderer's text as it goes inside «»: their own «» cannot close the quote (the isolation holds whatever the guard saw). */
 export const quoteWanderer = (text: string): string => String(text ?? '').replace(/«/g, '‹').replace(/»/g, '›');
+
+const GUARD_INSTRUCTIONS = new Set(Object.values(GUARD_QUESTIONS).map((q) => q.instructions));
+const GUARD_DOORS: ReadonlySet<unknown> = new Set<GuardDoor>(['words', 'action', 'craft', 'studio']);
+
+/**
+ * Whether a body of decisions, as it reaches a gate of the server, carries the free text of a wanderer (D55.2, ADR-0204): a question of the
+ * guard (its instructions as they are) or the guard's state (a door and a text). The gates read the body, never a flag the body says about
+ * itself: TypeSafe's refuses such a body whatever else it says, OpenRouter's lets it through only with `provider.zdr`.
+ */
+export function carriesWandererText(body: { state?: unknown; questions?: unknown }): boolean {
+  const qs = body?.questions && typeof body.questions === 'object' ? Object.values(body.questions as Record<string, unknown>) : [];
+  if (qs.some((q) => !!q && typeof q === 'object' && GUARD_INSTRUCTIONS.has((q as { instructions?: unknown }).instructions as string))) return true;
+  const s = body?.state;
+  return !!s && typeof s === 'object' && !Array.isArray(s) && typeof (s as { text?: unknown }).text === 'string' && GUARD_DOORS.has((s as { door?: unknown }).door);
+}

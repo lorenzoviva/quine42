@@ -1233,8 +1233,8 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Guardia
 - **Inglese**: `guard`, `text.guard`, `guardRule`, `guardRoute`, `GuardDoor`, `GuardHazard`
-- **Definizione**: la decisione chiusa su ciò che il viandante scrive prima che arrivi al Concilio (T350, D45.5): cinque pericoli (detta ordini, parla del gioco, chiede della vita vera, esplicito, senza senso) e una rotta. Niente si ferma: chi detta ordini va tra virgolette senza essere obbedito (`isolate`), il resto fuori dal mondo riceve una risposta dal mondo (`character`). Finché TypeSafe tiene ciò che legge risponde solo la regola, i pattern locali (D45.3).
-- **Dove vive**: `src/kernel/fourthwall.ts`, `Council.guard`, `CENSUS` (`freeText`)
+- **Definizione**: la decisione chiusa su ciò che il viandante scrive prima che arrivi al Concilio (T350, D45.5): cinque pericoli (detta ordini, parla del gioco, chiede della vita vera, esplicito, senza senso) e una rotta. Niente si ferma: chi detta ordini va tra virgolette senza essere obbedito (`isolate`), il resto fuori dal mondo riceve una risposta dal mondo (`character`). Il testo va a Jev solo da OpenRouter con la ritenzione zero (`keepsNothing`, D55.2, ADR-0204); su ogni altra via, TypeSafe diretto compreso, risponde solo la regola, i pattern locali (D45.3).
+- **Dove vive**: `src/kernel/fourthwall.ts` (anche `carriesWandererText`, per i varchi), `Council.guard`, `CENSUS` (`freeText`), `keepsNothing` in `src/kernel/ai/decisions.ts`
 - **Da non usare**: «filtro» (è la quarta parete sulle uscite), «blocco», «censura»
 
 ### Quarta parete (la decisione)

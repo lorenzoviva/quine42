@@ -11,6 +11,7 @@ import type { ServerResponse } from 'node:http';
 import { accessRefusal, readBody, STATUS_CAP, TooLarge } from './geminiProxy';
 import { costOf } from '../src/kernel/ai/prices';
 import { JEV_MAX_BODY, JEV_MAX_QUESTIONS, JEV_MODELS } from '../src/kernel/ai/decisions';
+import { carriesWandererText } from '../src/kernel/fourthwall';
 
 const UPSTREAM = 'https://api.typesafe.ai/v1/systemone';
 /** USD a day, unless `.env` says otherwise (TYPESAFE_TETTO_GIORNALIERO): at 0.042 $ a million tokens, some twenty million. */
@@ -40,7 +41,9 @@ const refusal = (status: number, message: string): TypeSafeAnswer => ({ status, 
 
 /**
  * The request as it goes to TypeSafe, made again from what arrived: the model on the list, the state, the questions (each of a known
- * type); anything else is a refusal, never passed on: then the reason and the status.
+ * type); anything else is a refusal, never passed on: then the reason and the status. A body that carries the free text of a wanderer (the
+ * guard, `carriesWandererText`) is refused whatever it says: TypeSafe keeps what it reads (D45.3), the kernel never sends it here (D55.2,
+ * ADR-0204), and this holds if it ever did.
  */
 export function jevRequest(body: string): { model: string; body: string } | { error: string; status: number } {
   let j: unknown;
@@ -61,6 +64,7 @@ export function jevRequest(body: string): { model: string; body: string } | { er
     const t = v && typeof v === 'object' ? (v as Record<string, unknown>).type : undefined;
     if (typeof t !== 'string' || !QUESTION_TYPES.has(t)) return { status: 400, error: 'tipo di domanda non ammesso' };
   }
+  if (carriesWandererText({ state: r.state, questions: q })) return { status: 403, error: 'il testo del viandante non va a TypeSafe' };
   return { model: r.model, body: JSON.stringify({ model: r.model, state: r.state ?? null, questions: q }) };
 }
 

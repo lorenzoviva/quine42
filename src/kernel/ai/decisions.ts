@@ -6,8 +6,9 @@
 // (no key, the gate's cap, a refusal, the network, an answer outside the options, the master's knob at 0, a read-only universe, no credits)
 // the rule is the answer. The local models answer with the rule, so the tests and the game without a key are the same as before.
 //
-// Only data of the world and of the catalogue go to Jev, never the free text of a wanderer (D45.3, until TypeSafe offers zero retention):
-// the state of a call is built by the kernel. Which tasks may decide is said by the census (`CENSUS`, the rows with `via: 'decide'`).
+// Only data of the world and of the catalogue go to Jev; the free text of a wanderer (the guard, `text.guard`) only along a route that keeps
+// nothing of what it reads (D55.2, ADR-0204): OpenRouter with `provider.zdr`, never TypeSafe directly, which keeps it (D45.3). The state of a
+// call is built by the kernel. Which tasks may decide is said by the census (`CENSUS`, the rows with `via: 'decide'`).
 // Jev comes through TypeSafe's own gate (JevDecisionModels, here) or through OpenRouter with the player's key (OpenRouterDecisionModels in
 // openrouter.ts, D52, ADR-0193): the same calls, the same answers.
 
@@ -17,11 +18,6 @@ import type { CallRecord } from './usage';
 /** The models the gate lets through (fixed versions, never an alias that moves: ADR-0157 §1). Changing it means running the bench again (§7). */
 export const JEV_MODELS = ['jev-1.13.0', 'jev-1.14.0'] as const;
 export type JevModel = (typeof JEV_MODELS)[number];
-/**
- * Whether TypeSafe keeps nothing of what it reads (D45.3): until it does, a decision whose state carries the free text of a wanderer
- * (`freeText` in `CENSUS`: the guard, `text.guard`) never reaches Jev; the rule answers. Turning it on is a decision of the author.
- */
-export const JEV_ZERO_RETENTION = false;
 /** The production model of today. */
 export const JEV_MODEL: JevModel = 'jev-1.13.0';
 /**
@@ -57,11 +53,21 @@ export interface DecisionCall {
 
 export interface DecisionModels {
   readonly name: string;
+  /** True only on a route where nothing read is kept (D55.2): see `keepsNothing`. */
+  readonly zeroRetention?: boolean;
   /** Every call, with its tokens (the kernel's usage ledger listens). */
   onCall?: (r: CallRecord) => void;
   /** The answers as the model gave them: the Council keeps only those within the options (`settleDecisions`). */
   decide(call: DecisionCall): Promise<Partial<Decisions>>;
 }
+
+/**
+ * Whether a route of the decisions keeps nothing of what it reads (D55.2, ADR-0204): only then may a decision whose state carries the free
+ * text of a wanderer (`freeText` in `CENSUS`) leave the kernel. A property of the route, said by the route itself (OpenRouter with
+ * `provider.zdr`, `OpenRouterDecisionModels.zeroRetention`); TypeSafe directly, the local models and anything else do not say it, and the rule
+ * answers. The gates of the server hold the same line on their own (`carriesWandererText`).
+ */
+export const keepsNothing = (m: DecisionModels | undefined): boolean => m?.zeroRetention === true;
 
 /** Whether a value answers a question: an option of the list, a boolean, a level of the rubric. */
 export function answers(q: DecisionQuestion, v: unknown): v is DecisionValue {

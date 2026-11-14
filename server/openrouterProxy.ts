@@ -22,6 +22,7 @@ import { Rates, type Pace } from './rates';
 import { costOf } from '../src/kernel/ai/prices';
 import { type KeyLimits, OPENROUTER_API, OPENROUTER_JEV, OPENROUTER_MODELS, PAID_BY_HEADER, PAYERS_HEADER, reportedCost } from '../src/kernel/ai/openrouter';
 import { JEV_MAX_BODY, JEV_MAX_QUESTIONS } from '../src/kernel/ai/decisions';
+import { carriesWandererText } from '../src/kernel/fourthwall';
 import { writeAtomic } from './lockedFile';
 import { validWandererId } from '../src/kernel/wandererIds';
 import type { KeyHolders, KeyPolicy } from '../src/kernel/credits';
@@ -112,7 +113,11 @@ export function chatRequest(body: string): { model: string; body: string } | { e
   return { model: r.model, body: JSON.stringify(out) };
 }
 
-/** The decision body as it goes to OpenRouter: a version of Jev on the list, the state, the questions (each of a known type), and only zero retention. */
+/**
+ * The decision body as it goes to OpenRouter: a version of Jev on the list, the state, the questions (each of a known type), and only zero
+ * retention (`provider.zdr`, always written again here). A body that carries the free text of a wanderer (the guard, `carriesWandererText`)
+ * and did not ask for zero retention itself is refused (D55.2, ADR-0204): whoever sent it did not know where it was going.
+ */
 export function decisionRequest(body: string): { model: string; body: string } | { error: string; status: number } {
   let j: unknown;
   try {
@@ -131,6 +136,8 @@ export function decisionRequest(body: string): { model: string; body: string } |
     const t = v && typeof v === 'object' ? (v as Record<string, unknown>).type : undefined;
     if (typeof t !== 'string' || !QUESTION_TYPES.has(t)) return { status: 400, error: 'tipo di domanda non ammesso' };
   }
+  const zdr = !!r.provider && typeof r.provider === 'object' && (r.provider as Record<string, unknown>).zdr === true;
+  if (!zdr && carriesWandererText({ state: r.state, questions: q })) return { status: 403, error: 'il testo del viandante va solo con la ritenzione zero' };
   return { model: r.model, body: JSON.stringify({ model: r.model, state: r.state ?? null, questions: q, provider: { zdr: true } }) };
 }
 

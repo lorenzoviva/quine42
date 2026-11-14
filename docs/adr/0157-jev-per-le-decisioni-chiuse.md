@@ -148,7 +148,8 @@ un testo che detta ordini si isola tra virgolette, non si ferma (regola 3); la q
   ai modelli locali qualunque cosa dicano chiave, crediti e manopola (`freeTextDecision`). Quindi oggi la guardia è **la regola**: i pattern locali
   (`guardRule`, italiano e inglese), solo ciò che è inequivocabile; sui 63 casi del banco 62 rotte giuste e nessun testo del mondo toccato, ma i pattern
   sono stati scritti guardando quei casi (il banco non è un collaudo indipendente) e l'insulto scritto come segnaposto passa. Il giorno della ritenzione
-  zero basta accendere la costante: lo stato e le domande sono già quelli del banco (Jev 1.13: 59/63).
+  zero basta accendere la costante: lo stato e le domande sono già quelli del banco (Jev 1.13: 59/63). *Aggiornamento (ADR-0204, T396, D55.2): la
+  costante non c'è più; il testo va a Jev solo da OpenRouter con la ritenzione zero (`keepsNothing`), mai a TypeSafe direttamente.*
 - **`text.fourthwall`** (manopola `sessions`, come `review.fourthwall`), con `Council.fourthWall(text)`: `metaBreak` prima (ciò che conosce, senza
   chiamata), poi le quattro Noul delle `domande-2` di T313 con il mondo in una riga accanto al testo (`{ world, text }`), la regola «regge». Ciò che rompe
   torna a chi l'ha scritto col motivo, come `metaBreak`: il concetto della Fucina, l'individuo nuovo, la scheda per l'Attore, la trama nuova. **Non le

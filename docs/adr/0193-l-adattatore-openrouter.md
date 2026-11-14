@@ -49,7 +49,7 @@ listino di `prices.ts`. OpenRouter ha un'API nel formato di OpenAI (`/api/v1/cha
    risposte si leggono con `readJevAnswers` (un `refusal` lascia la regola a quella domanda; un livello di Score anche per le sue parole).
 7. **D45 resta**: il testo libero del viandante non va a Jev nemmeno così (`freeTextDecision`, `JEV_ZERO_RETENTION` falso). Che l'endpoint di
    TypeSafe su OpenRouter sia a ritenzione zero è un fatto della porta (`zeroRetention`), non un permesso: accenderlo è dell'autore
-   (`docs/pipeline/domande/T362.md`).
+   (`docs/pipeline/domande/T362.md`). *Aggiornamento (ADR-0204, T396, D55.2): l'autore l'ha acceso per questa porta sola; `JEV_ZERO_RETENTION` non c'è più, decide `keepsNothing` dalla via.*
 8. **Niente cablaggio nel gioco** in questo passo: senza il varco (T363: le chiavi dei giocatori, la rotta, il canale dei mondi) nessuna chiave
    arriva a una pagina o a un mondo (regole 8g e 9). La prova pagata è `lab/scripts/openrouter-prova.ts`, con la chiave dell'autore dal `.env`.
 

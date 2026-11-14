@@ -362,8 +362,9 @@ export class OpenRouterDecisionModels implements DecisionModels {
   /** Whose keys may pay each decision (T363, ADR-0197): as for the models that write. */
   keyPayers?: KeyPayers;
   /**
-   * Every request asks for an endpoint that keeps nothing (`provider.zdr`): OpenRouter refuses rather than send it elsewhere. A fact of this door,
-   * not a permission: whether the free text of a wanderer may go to Jev is still D45.3 (`JEV_ZERO_RETENTION`), the author's.
+   * Every request asks for an endpoint that keeps nothing (`provider.zdr`): OpenRouter refuses rather than send it elsewhere. So this route may
+   * carry the free text of a wanderer (the guard, D55.2, ADR-0204: `keepsNothing`); the gate of the server makes the body again with `zdr` and
+   * refuses such a body without it.
    */
   readonly zeroRetention = true;
   readonly usage = { decisions: 0, failures: 0, inputTokens: 0 };
