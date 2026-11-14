@@ -36,3 +36,7 @@ Chiuse il 05/11: D34 → C, inglese lingua interna subito (T306-T310, step 42), 
 
 ## Rimandate per tua scelta
 T45f a fine Fase I (progetto GCP, hosting, regione); T93 in Fase IV (Managed Payments).
+
+## D59 (T364) — la chiave OpenRouter su disco da soli
+
+T364 salva la chiave collegata in `universes/.keys/openrouter.json` solo col server di sviluppo e la preview, solo da questa macchina (ADR-0200): eccezione alla regola 9 «mai su disco». Tenerla? Consiglio: sì.
