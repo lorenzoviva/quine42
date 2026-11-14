@@ -65,7 +65,7 @@ export class ScoreDirector {
 
   /** Called every few seconds: starts the next piece if idle. */
   pump(): void {
-    if (!this.active || this.busy || this.k.generationHeld || this.used >= (this.k.config.ai.maxPieces ?? 8) || this.k.time < this.nextAt || this.k.coefficients().pieces <= 0) return;
+    if (!this.active || this.busy || this.k.generationHeld || this.k.paceHeld() || this.used >= (this.k.config.ai.maxPieces ?? 8) || this.k.time < this.nextAt || this.k.coefficients().pieces <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);
   }
@@ -81,7 +81,7 @@ export class ScoreDirector {
       const effetti = [...new Set(soundPrograms(k.files).flatMap((p) => (p.sound?.use === 'effect' ? (p.sound.effects ?? []) : [])))];
       k.council.say('musician', 'propone', req.richiesta.slice(0, 80), undefined, COMPOSE_TASK);
       const r = await compose(k.council, req, { ambienti: Object.keys(k.content.layouts), effetti, ...(qui ? { qui } : {}) }, k.sculptors().musician, chi ? { chi } : {});
-      this.nextAt = k.time + pieceGap(k.coefficients().pieces);
+      this.nextAt = k.time + k.pacedGap(pieceGap(k.coefficients().pieces));
       if (!r) {
         skip();
         lacking('invalid', k.lastDiscard('musician', COMPOSE_TASK));

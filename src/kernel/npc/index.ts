@@ -230,7 +230,7 @@ export class Npc {
       const p = this.host.ecs.get(id, 'pos');
       const identity: Identity | undefined = this.host.ecs.get(id, 'identity');
       if (!identity) {
-        if (!this.host.generationHeld && started < 2 && this.people.pending < 2 && Math.hypot(p.x - pc.x, p.y - pc.y) < 9) {
+        if (!this.host.generationHeld && !this.host.paused && started < 2 && this.people.pending < 2 && Math.hypot(p.x - pc.x, p.y - pc.y) < 9) {
           started++;
           void this.people.ensureIdentity(id);
         }

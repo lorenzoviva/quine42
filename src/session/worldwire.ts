@@ -3,6 +3,7 @@
 
 import type { ClientMsg } from './protocol';
 import type { HandmadeProgram } from '../kernel/handmade';
+import type { WorldPace } from '../kernel/worldPace';
 
 /** What a world needs in order to open, sent over the channel: never in its environment nor on its command line. */
 export interface WorldOpen {
@@ -27,10 +28,12 @@ export interface WorldOpen {
   restore?: string;
   /** The universe is private (ADR-0194): by value, the world never reads who its guests are. */
   private?: boolean;
+  /** The pace of the world as the server keeps it (T373, ADR-0188 §3): by value, as `private`; normal if not said. */
+  pace?: WorldPace;
 }
 
 /** The calls a route may make to a running world; anything else is not a call. */
-export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate'] as const;
+export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate', 'setPace'] as const;
 export type WorldCallName = (typeof WORLD_CALLS)[number];
 
 export type ToWorld =
@@ -53,6 +56,8 @@ export type FromWorld =
   | { t: 'chiudi'; cid: number }
   | { t: 'chiedi'; id: number; op: 'gemini' | 'verify' | 'typesafe'; args: unknown[] }
   | { t: 'risposta'; id: number; ok: boolean; value?: unknown; error?: string }
+  /** The master set the pace of the world (T373): the server keeps it in `.campaign`, repaired, so that a world that starts again has it. New on the wire, so in English. */
+  | { t: 'pace'; pace: WorldPace }
   /** Why the program cannot be a card; empty: it can. */
   | { t: 'checked'; id: number; errors: string[] };
 

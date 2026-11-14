@@ -50,7 +50,7 @@ export class Talk {
         if ((this.greeted.get(key) ?? -1e9) > this.host.time - (rel ? 90 : 240)) continue;
         const near = Math.hypot(pa.x - pc.x, pa.y - pc.y) < 10;
         // A real conversation (the Narrator) when the wanderer can hear it, at most one at a time.
-        if (near && !this.talking && this.host.time - this.lastTalk > stretch(40, this.host.coefficients().dialogues) && !this.host.generationHeld) {
+        if (near && !this.talking && this.host.time - this.lastTalk > stretch(40, this.host.coefficients().dialogues) && !this.host.generationHeld && !this.host.paused) {
           this.greeted.set(key, this.host.time);
           void this.converse(a, b, ia, ib, rel);
           return;

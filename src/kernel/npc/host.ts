@@ -65,6 +65,11 @@ export interface NpcHost {
   readonly mirror: boolean;
   /** Generation held (a bench, a mirror, the Genesis not done): no new individual, no model called by the society. */
   readonly generationHeld: boolean;
+  /**
+   * The master holds the world (T373, ADR-0188 §3): what it does by itself waits (new individuals, plots that unfold or are woven, dialogues
+   * between individuals); what the wanderers ask goes on.
+   */
+  readonly paused: boolean;
   /** The models are the local ones (`offline`). */
   readonly offline: boolean;
   /** The day of the world (0 = the first) and its phase now. */

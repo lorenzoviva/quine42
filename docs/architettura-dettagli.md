@@ -233,6 +233,18 @@
 
   **Le spese della partita** (ADR-0188, T372): con le regolazioni il master sceglie chi paga, `settings.game.expenses` (`LobbySettings`): `shared` (assente: ognuno le sue, le comuni divise) o `master` (ogni chiamata del mondo e dei viandanti al master). È l'unico campo di `game` che cambia dopo la Genesi, e solo da qui: `applySettings` lo ripara (`expensesIn`: da soli non c'è nessuno per cui pagare, un valore ignoto resta quello di prima) e lo scrive (`setExpenses`, `shared` come niente), rifiutato a partita in corso come il resto; `keepGame` riscrive un `universe.json` che dice altro. Esce ai client in `GAME_FIELDS`: la lobby di un giocatore dice «paga il master», non chiede un tetto né il tetto minimo (il server non applica `minimums.cap` né `setSessionCap` a chi non paga, e il suo tetto non si somma ai budget); quella del master ha la scelta (`#lobby-spese`) e dice che il suo tetto è quello di tutti.
 
+  **Il ritmo del mondo** (ADR-0188 punto 3, ADR-0196, T373): l'eccezione «solo verso il basso» alla partita in corso. Il master, in ogni momento, può
+  rallentare (`slow`: `placesPerMinute` al più quello della lobby, 4 se non dice altro, anche da soli dove la lobby non ha quota; le pause dello Scultore e
+  del Musicista doppie, almeno 60 s) o fermare (`hold`) ciò che il mondo fa da sé, mai accelerarlo: `src/kernel/worldPace.ts` (`readPace`,
+  `placesPerMinute`, `paceGap`), `Kernel.setPace` (solo il master) e `applyPace`. In pausa la quota dei luoghi nuovi è 0: le bozze nuove restano
+  bozze (`held`), un luogo con il piano su disco torna senza ciò che chiederebbe (oggetti ignoti, concetti nuovi, i battiti dei pacchetti, del cast e
+  delle sessioni), e sono fermi i direttori dei modelli e dei brani, le sessioni del Concilio e, nella società (`NpcHost.paused`), gli individui nuovi,
+  le trame (le tappe dovute accadono al primo sguardo dopo) e i dialoghi fra individui; ciò che un viandante fa ha la sua risposta. «Normale» riprende
+  dalle bozze più vicine ai viandanti. Si cambia col messaggio `pace` (solo il master, `LIMITS.paceRate`), dalla console («Concilio») e dalla
+  Direzione (`src/ui/pace.ts`), dalla rotta `/api/universe/<nome>/pace` (il sito, T377); ogni client lo riceve (`welcome`, `update`) e l'HUD dice
+  «Il mondo è in pausa: il master lo sta scrivendo» (`#paused`). Sta in `universes/.campaign/<nome>.json → pace`, scritto solo dal server
+  (`keepPace`, anche quando il mondo dice che il master l'ha cambiato), al mondo per valore (`WorldOpen.pace`, `WorldCalls.setPace`); da soli non si tiene.
+
 <a id="abbonamenti"></a>
 ## La coda della CLI degli abbonamenti
 
