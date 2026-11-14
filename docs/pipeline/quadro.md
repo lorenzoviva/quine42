@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 420 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 421 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,13 +23,11 @@ Aggiornato il 14/11/2026, epoca 420 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T355. T386 finito in attesa di D56. **Pronti su claude:** T364, T367 (dopo D7.3/D56), T368, T370, T387→T388/T389→T390; poi T375→T377.
+0. **In corso:** T355. T386 integrato (`0462b999`). **Pronti su claude:** T364, T367, T368, T370, T387→T388/T389→T390; poi T375→T377.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 13:23 CET):** Claude settimana 34 %, 5h 29 % (reset 14:59); Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
-
-- **D56 (T386, licenza):** anti-concorrenza (consiglio togliere), nome del titolare, non profit ammessi (consiglio sì), donazioni.
 
 - **D55 (T362):** prova pagata OpenRouter (chiave da creare), testo del viandante a Jev via OpenRouter (consiglio B), prezzo 3.5 Flash (consiglio sì).
 
@@ -42,5 +40,5 @@ Aggiornato il 14/11/2026, epoca 420 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **421 (claude):** D56 chiusa (tutto come proposto, titolare Lorenzo Vaccaro); T386 integrato.
 - **420 (claude):** T363 integrato; D56 aperta (T386).
-- **419 (claude):** riscontro dal telefono → T387-T390.
