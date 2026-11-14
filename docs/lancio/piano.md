@@ -53,6 +53,14 @@ Il testo di ogni voce, con il consiglio, è nella sua sezione. Qui l'elenco come
 - **Non verificato nel piano (V1-V12):** regole di HN, Reddit, itch.io lette da fonti secondarie; obblighi del sito e GDPR in un servizio
   gratuito; AI Act; costo reale di una Genesi; il limite proposto dall'OAuth di OpenRouter; alcune fonti del § 4 bis citate senza rileggerle.
 
+**Risposte dell'autore del 14/11 (epoca 410):** D3.1 sì (crea ora l'account Reddit a nome suo e cura il profilo; commenta su HN e Reddit,
+anche in r/ClaudeGameDev, che già segue); D4.6 sì; D4.9 sì: nessuna PNL di marketing, l'idea viene da Borzacchiello («Basta dirlo», «La parola
+magica»): un mezzo finto scredita il messaggio, quindi parole e mezzi autentici; D4.1 sì, e nei video il viandante del gioco può chiamarsi Boa Loger;
+**D7.3 già decisa nei fatti**: il repository GitHub (`lorenzoviva/quine42`) è pubblico, con `LICENSE.md` source-available (codice PolyForm
+Noncommercial 1.0.0, contenuti CC BY-NC-SA 4.0), cioè l'opzione (b); da ricontrollare prima del lancio che `LICENSE.md` dica QUINE42 (oggi
+«RUNE») e che il self-hosting gratuito sia detto permesso. Crediti omaggio a giocatori e content creator: in Fase III. Verifiche V1-V12: tutte
+insieme, in un giorno prima del lancio, perché le regole non cambino nel frattempo; la consulenza di V5 e V11 si prenota prima.
+
 **Cambiato rispetto al 05/11:** D3.4 dalla Fase IV alla Fase VI; D3.5 rimandata; D4.1 Boa Loger non è più «volto del Concilio» nel lancio;
 D4.4 niente filtro né voce sintetica; D4.5 tolta; D5.2 narrata da te, non da Boa Loger; D6.2 e D6.4 riscritte per le chiavi dei giocatori e il
 self-hosting; D7.3 diventa un requisito della Fase IV. Nuove: D1.5, D3.6, D3.7, D4.6-D4.9.
