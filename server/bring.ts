@@ -53,6 +53,8 @@ export interface BringContext {
   archive: HandmadeArchive;
   /** Who asks, for `mine` of the handmade cards. */
   asker?: string;
+  /** Whether the asker may see another universe: a private one only its master and its guests (ADR-0194); none said, every one. */
+  sees?: (universe: string) => boolean;
 }
 
 const GIT: [string, string] = ['Kernel', 'kernel@rune.local'];
@@ -117,6 +119,8 @@ export async function kinOf(name: string, o: Omit<BringContext, 'master' | 'chec
   const kin: KinUniverse[] = [];
   if (mine.size) {
     for (const other of await universes(o.baseDir, name)) {
+      // A private universe is not there for who is not its master nor a guest: neither its name nor its cards (ADR-0194).
+      if (o.sees && !o.sees(other)) continue;
       const root = path.join(o.baseDir, other);
       if (!(await rootsOf(root, GIT)).some((r) => mine.has(r))) continue;
       const files = await listingFiles(root);
@@ -158,7 +162,7 @@ async function sourceOf(ref: BringRef, o: BringContext, roots: Set<string>, kinR
   }
   if (ref.universe === destination) return { reason: 'è già di questo universo' };
   const root = path.join(o.baseDir, ref.universe);
-  if (!existsSync(path.join(root, '.git'))) return { reason: 'universo sconosciuto' };
+  if (!existsSync(path.join(root, '.git')) || (o.sees && !o.sees(ref.universe))) return { reason: 'universo sconosciuto' };
   if (!kinRoots.has(ref.universe)) kinRoots.set(ref.universe, rootsOf(root, GIT));
   if (!(await kinRoots.get(ref.universe)!).some((r) => roots.has(r))) return { reason: 'non ha un antenato comune con questo universo: le carte vengono solo dagli universi con la stessa radice' };
   const v = contractIn(await readText(path.join(root, 'universe.json')));

@@ -72,6 +72,8 @@ export interface WorldOptions {
   typesafe?: typeof fetch;
   verify?: Verifier;
   masterUid?: string;
+  /** Whether the universe is private, asked at every start (ADR-0194): the world gets the answer, never the guests. */
+  private?: () => boolean;
   ledgerFile?: string;
   grantCap?: number;
   /** The platform fee, which the server decides (ADR-0132). */
@@ -196,6 +198,7 @@ export class WorldHost {
       ...(o.typesafe ? { typesafe: true } : {}),
       ...(o.verify ? { verify: true } : {}),
       ...(o.masterUid ? { masterUid: o.masterUid } : {}),
+      ...(o.private?.() ? { private: true } : {}),
       ...(o.ledgerFile ? { ledgerFile: o.ledgerFile, grantCap: o.grantCap } : {}),
       ...(restore ? { restore } : {}),
     };
@@ -440,6 +443,7 @@ export class WorldHost {
     wallet: (universo, id, account) => this.call('wallet', [universo, id, account]),
     view: (universo, id, account) => this.call('view', [universo, id, account]),
     keepProfile: (universo, id, account, profilo) => this.call('keepProfile', [universo, id, account, profilo]),
+    setPrivate: (value) => this.call('setPrivate', [value]),
   };
 
   /** Stops the world, letting it save if it can, and waits for what git is still doing with that save. */

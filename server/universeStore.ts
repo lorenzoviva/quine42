@@ -18,12 +18,15 @@
 //   GET  /api/universe/<name>/carte           → { exists, carte, files }      the cards measured here, what shows them (T104, T120)
 //   GET  /api/universe/<name>/kin             → { open, kin, handmade… }      the cards the master may bring before the start (T295, server/bring.ts)
 //   POST /api/universe/<name>/bring           { cards }                       → { head, brought, changes }
+//   GET|POST|DELETE /api/universe/<name>/guests                               the private universe: guests and invites (T366, server/campaign.ts)
 //
 // A universe born here starts from the root of its contract (T295, ADR-0170, `plantRoot`): every universe born from the seed of that
 // contract has it, so they are kin. A return to the root is refused: it holds no file.
 //
 // Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a multiplayer game of its master and
 // its world. Everyone else reads only `publicFiles` and writes nothing. In a multiplayer game balances are written only by the world.
+// A private universe (ADR-0194) is not there for who is neither its master nor a guest: every route answers as for a name that does not exist,
+// and the list does not say it.
 
 import type { Connect, Plugin } from 'vite';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -46,6 +49,7 @@ import { HandmadeArchive } from './handmade';
 import type { ProgramChecker } from './programCheck';
 import { withCardChoice } from '../src/kernel/bring';
 import { KERNEL_CONTRACT } from '../src/kernel/version';
+import { CampaignArchive, guestsAnswer, type GuestsContext } from './campaign';
 
 const MAX_BODY = 32 * 1024 * 1024;
 /** Universes of which an account is the master, unless the `.env` says otherwise (`QUINE_UNIVERSI_PER_ACCOUNT`, V-026). */
@@ -86,13 +90,16 @@ function send(res: ServerResponse, status: number, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-function readBody(req: IncomingMessage): Promise<string> {
+/** What the `guests` route reads: a few words. */
+const GUESTS_BODY = 4 * 1024;
+
+function readBody(req: IncomingMessage, max = MAX_BODY): Promise<string> {
   return new Promise((resolve, reject) => {
     let size = 0;
     const chunks: Buffer[] = [];
     req.on('data', (c: Buffer) => {
       size += c.length;
-      if (size > MAX_BODY) reject(new Error('richiesta troppo grande'));
+      if (size > max) reject(new Error('richiesta troppo grande'));
       else chunks.push(c);
     });
     req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
@@ -283,6 +290,10 @@ export interface UniverseStoreOptions {
   checker?: ProgramChecker;
   /** The labs (`site/beta.json → laboratori`): closed, no handmade card comes into a universe (ADR-0161). */
   labs?: () => boolean;
+  /** The private universes' guests and invites (ADR-0194): those beside `baseDir` unless said. */
+  campaigns?: CampaignArchive;
+  /** What the `guests` route does to the worlds: who is in one, closing a guest's sockets, telling a world it is private (server/session.ts). */
+  worlds?: Pick<GuestsContext, 'inWorld' | 'expel' | 'tellWorld'>;
 }
 
 export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}): Connect.NextHandleFunction {
@@ -303,6 +314,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
   const brings = new Rates(BRINGS);
   const labs = opts.labs ?? (() => false);
   const archive = HandmadeArchive.of(baseDir);
+  const campaigns = opts.campaigns ?? CampaignArchive.of(baseDir);
   /** With accounts, whether this wanderer has no room for one more; the author (`QUINE_MASTER`) is not counted. */
   const noRoom = async (id: string | undefined) => !!opts.accounts?.verify && !!id && !(masterUid && id === accountWanderer(masterUid)) && (await universesOf(baseDir, id)) >= quota;
   const full = () => `al più ${quota} universi per account`;
@@ -311,10 +323,14 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const url = (req.url ?? '').split('?')[0];
     const who = await callerOf(req, access);
     if ('refused' in who) return send(res, who.status, { error: who.refused });
-    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring)(?:\/([^/]+))?)?$/.exec(url);
+    const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring|guests)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
-      return send(res, 200, { available: true, universes: es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name) });
+      // A private universe only for its master and its guests, and to them said so (`invite`): to anyone else it does not exist (ADR-0194).
+      const names = es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name);
+      const seen = names.filter((n) => !UNIVERSE_NAME_RE.test(n) || campaigns.lets(n, who, undefined, masterUid));
+      const invite = seen.filter((n) => UNIVERSE_NAME_RE.test(n) && campaigns.isPrivate(n));
+      return send(res, 200, { available: true, universes: seen, ...(invite.length ? { invite } : {}) });
     }
     if (!m || !UNIVERSE_NAME_RE.test(m[1])) return send(res, 404, { error: 'universo sconosciuto' });
     const name = m[1];
@@ -324,8 +340,33 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const game = gameIn(await fs.readFile(path.join(root, 'universe.json'), 'utf8').catch(() => undefined));
     const mine = owns(who, game, masterUid);
     const notYours = () => send(res, 403, { error: game.many ? 'solo il master di questo universo' : 'solo da questa macchina' });
-    // The world's token is for its own universe: making others is not a world's to do (ADR-0110), nor bringing them cards from others.
-    if (who.server && (op === 'clone' || op === 'kin' || op === 'bring')) return notYours();
+    // The world's token is for its own universe: making others is not a world's to do (ADR-0110), nor bringing them cards from others; nor
+    // knowing its guests (rule 8g).
+    if (who.server && (op === 'clone' || op === 'kin' || op === 'bring' || op === 'guests')) return notYours();
+    const unknown = () => send(res, 404, { error: 'universo sconosciuto' });
+    // A private universe for who is neither its master nor a guest: as a name that does not exist, whatever is asked (no enumeration, ADR-0194).
+    // Only an invite to it gets past (`redeem`, in the route below); making one with its name stays refused, as for every name that is taken.
+    const hidden = op !== 'create' && !mine && !campaigns.lets(name, who, game, masterUid);
+    /** Whether the caller may see another universe of the folder (the cards a master brings from it, ADR-0170). */
+    const sees = (other: string) => campaigns.lets(other, who, undefined, masterUid);
+    if (op === 'guests' && !arg) {
+      if (!(await exists(path.join(root, '.git')))) return unknown();
+      if (req.method !== 'GET' && !isJson(req)) return send(res, 415, { error: 'solo JSON' });
+      let body: Record<string, unknown> = {};
+      if (req.method !== 'GET') {
+        try {
+          const raw = await readBody(req, GUESTS_BODY);
+          body = raw ? (JSON.parse(raw) ?? {}) : {};
+        } catch {
+          return send(res, 400, { error: 'richiesta non valida' });
+        }
+        if (typeof body !== 'object' || Array.isArray(body)) return send(res, 400, { error: 'richiesta non valida' });
+      }
+      const r = await guestsAnswer(req.method ?? 'GET', body, { name, who, game, masterUid, archive: campaigns, invites: opts.accounts?.invites, ...opts.worlds });
+      return r.status !== 200 && hidden ? unknown() : send(res, r.status, r.body);
+    }
+    // Hidden, it answers what a name with no universe answers this caller: the reads say it does not exist, the rest is not theirs (a game alone).
+    if (hidden) return (op === undefined || op === 'carte') && !arg && req.method === 'GET' ? send(res, 200, { exists: false }) : send(res, 403, { error: 'solo da questa macchina' });
 
     // --- What anyone may read: cut down to what is public, unless the universe is theirs. ---
     if (!op && req.method === 'GET') {
@@ -395,7 +436,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
       return send(res, 200, files ? { exists: true, files } : { exists: false });
     }
     // The cards the master may bring before the start (T295): what the other universes and the archive have, and whether the choice is open.
-    if (op === 'kin' && !arg && req.method === 'GET') return send(res, 200, await kinOf(name, { baseDir, labs, archive, asker: who.id }));
+    if (op === 'kin' && !arg && req.method === 'GET') return send(res, 200, await kinOf(name, { baseDir, labs, archive, asker: who.id, sees }));
     if (req.method !== 'POST') return send(res, 405, { error: 'metodo non ammesso' });
     if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
     // Before reading up to MAX_BODY of who could not make anything anyway (V-028): `newUniverse` says the rest from the files.
@@ -410,7 +451,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     if (op === 'bring') {
       // Read, checked and written in the universe's own line: one commit of the kernel, or nothing (server/bring.ts). Whose the cards become: the master's.
       const r = await serial(name, async () => {
-        const out = await bringCards(name, body.cards, { baseDir, master: game.master, checker: opts.checker!, labs, archive, asker: who.id });
+        const out = await bringCards(name, body.cards, { baseDir, master: game.master, checker: opts.checker!, labs, archive, asker: who.id, sees });
         if (!('ok' in out)) return out;
         await writeFiles(root, out.changes);
         return { ...out, head: await commitAll(root, out.message, 'kernel') };
@@ -431,6 +472,8 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
         case 'create': {
           if (await exists(path.join(root, '.git'))) throw new Error('esiste già');
           sealLedger(baseDir, name);
+          // Born public, with nobody (ADR-0188): the guests of a universe that had this name before are not this one's.
+          campaigns.forget(name);
           await fs.mkdir(root, { recursive: true });
           await git(root, ['init', '-q']);
           // From the root of this kernel's contract, the same for every universe born here (T295, ADR-0170); the files come in the commit after.

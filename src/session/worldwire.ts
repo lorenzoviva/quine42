@@ -23,10 +23,12 @@ export interface WorldOpen {
   grantCap?: number;
   /** A commit to go back to before opening: the world kept dying on what came after. */
   restore?: string;
+  /** The universe is private (ADR-0194): by value, the world never reads who its guests are. */
+  private?: boolean;
 }
 
 /** The calls a route may make to a running world; anything else is not a call. */
-export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile'] as const;
+export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate'] as const;
 export type WorldCallName = (typeof WORLD_CALLS)[number];
 
 export type ToWorld =

@@ -2,7 +2,8 @@
 // is a client of that universe; the first one starts its world, in a process of its own (server/worldHost.ts, T127, ADR-0110), which then
 // keeps running watched from here. Each message is one JSON object of src/session/protocol.ts. `?offline` starts a world with the local models.
 // `npm run dev` and the production server (server/production.ts, T133): the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
-// this process, the token of who comes in.
+// this process, the token of who comes in. A private universe (ADR-0194, server/campaign.ts) lets in only its master and its guests, here in `admit`,
+// before its world starts; the world is told only that it is private, never who the guests are.
 
 import { isGenerating, worldLit, worldOut } from './generation';
 import type { Connect, Plugin, ViteDevServer } from 'vite';
@@ -14,7 +15,10 @@ import path from 'node:path';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
-import { failureText, gameIn, gate, refuse } from './access';
+import { failureText, gameIn, gate, refuse, type Caller } from './access';
+import { CampaignArchive } from './campaign';
+import { accountWanderer } from '../src/session/account';
+import { validWandererId } from '../src/kernel/wanderers';
 import { PROGRAMS_DIR } from './hidden';
 import { runGit, settleGit } from './git';
 import { serverPath } from './folders';
@@ -84,6 +88,27 @@ export async function getActiveWorld(name: string): Promise<WorldCalls | undefin
 /** What a socket said to come in. */
 export interface EntrySaid {
   token?: unknown;
+  /** Who they say they are: heard only without a verifier, where only this machine comes in. */
+  id?: unknown;
+}
+
+/** Who is in the world of each universe now, as `admit` let them in: the `guests` route closes a guest who is taken out (ADR-0194). */
+const inWorlds = new Map<string, Map<object, { id: string; refuse(reason: string): void }>>();
+
+/** The wanderers in the world of a universe now. */
+export function wanderersIn(name: string): string[] {
+  return [...new Set([...(inWorlds.get(name)?.values() ?? [])].map((w) => w.id))];
+}
+
+/** Closes every socket of a wanderer in the world of a universe, with the reason. */
+export function expelFrom(name: string, id: string, reason: string): void {
+  for (const w of [...(inWorlds.get(name)?.values() ?? [])]) if (w.id === id) w.refuse(reason);
+}
+
+/** Tells the running world of a universe, if there is one, whether it is private. */
+export async function tellPrivate(name: string, value: boolean): Promise<void> {
+  const calls = await getActiveWorld(name);
+  await calls?.setPrivate(value);
 }
 
 /** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `join` on (before it nothing goes to a world). */
@@ -148,8 +173,11 @@ export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState
   };
 }
 
-/** GET /api/session: how many, not who (the master has the list of the players through their own session). */
-export function sessionList(accounts?: AccountSettings): Connect.NextHandleFunction {
+/**
+ * GET /api/session: how many, not who (the master has the list of the players through their own session). A private universe is never in it
+ * (ADR-0194): its master and its guests find it in the store's list, which knows who asks.
+ */
+export function sessionList(accounts?: AccountSettings, campaigns?: CampaignArchive): Connect.NextHandleFunction {
   return async (req, res, next) => {
     const url = req.url?.split('?')[0];
     if (url !== '/api/session' || req.method !== 'GET') return next();
@@ -157,6 +185,7 @@ export function sessionList(accounts?: AccountSettings): Connect.NextHandleFunct
     if (no) return refuse(res, no, (error) => ({ error }));
     const sessions: Array<{ name: string; active: boolean; clients: number }> = [];
     for (const [name, hostPromise] of activeHosts.entries()) {
+      if (campaigns?.isPrivate(name)) continue;
       try {
         const h = await hostPromise;
         if (h && 'session' in h) {
@@ -196,11 +225,14 @@ export interface SessionOptions {
   program: () => Promise<string>;
   /** What is refused before the rules of `gate`: the production server's origins (T133). */
   guard?: (req: IncomingMessage) => string | undefined;
+  /** The private universes' guests (ADR-0194): those beside the universes of `credits` unless said. */
+  campaigns?: CampaignArchive;
 }
 
 /** The sockets of the multiplayer games on a server, whichever it is. `stop` stops the worlds, saving what they can, and closes the clients. */
 export function attachSessions(httpServer: HttpServer, o: SessionOptions): { stop(): Promise<void> } {
   const { accounts, gemini, typesafe, internal, credits, memoryMb, maxWorlds, program, crowd } = o;
+  const campaigns = o.campaigns ?? (credits ? CampaignArchive.of(credits.universesDir) : undefined);
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE });
   /** Sockets now, by account and by address. */
   const accountSockets = new Map<string, number>();
@@ -240,6 +272,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       typesafe,
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
+      private: () => campaigns?.isPrivate(name) ?? false,
       ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
@@ -299,6 +332,8 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
     };
     const said = await link.entry(o.entryMs ?? ENTRY_MS);
     if (!said) return no('nessun ingresso: entra di nuovo');
+    // Who comes in: the account's wanderer, or without a verifier (only this machine) the id they say.
+    let who: Caller = { local: !accounts?.verify, ...(validWandererId(said.id) ? { id: said.id } : {}) };
     if (accounts?.verify) {
       const token = typeof said.token === 'string' ? said.token : '';
       const account = token ? await accounts.verify(token).catch(() => undefined) : undefined;
@@ -306,15 +341,31 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       if (typeof account?.uid !== 'string' || !account.uid) return no(token ? 'accesso non valido o scaduto: entra di nuovo' : 'serve un account per entrare');
       if (ws.readyState !== ws.OPEN) return;
       const uid = account.uid;
+      who = { local: false, id: accountWanderer(uid), uid, anonimo: !!account.anonymous };
       if ((accountSockets.get(uid) ?? 0) >= ACCOUNT_SOCKETS) return no('troppe finestre aperte con questo account');
       count(accountSockets, uid, 1);
       ws.once('close', () => count(accountSockets, uid, -1));
       const first = !activeHosts.has(name);
       if (first && !(starts.take(`account:${uid}`) && starts.take(`indirizzo:${address}`))) return no('troppi mondi avviati di recente: riprova tra poco');
     }
+    // A private universe (ADR-0194): its master and its guests, nobody else, and the world does not start for them. The same words for any stranger.
+    if (campaigns) {
+      const game = campaigns.gameOf(name);
+      if (!campaigns.lets(name, { ...who, local: false }, game, accounts?.masterUid)) return no('questo mondo è su invito');
+    }
     if (ws.readyState !== ws.OPEN) return;
     const h = await open(name, offline);
     if ('error' in h) return no(failureText('mondo', h.error));
+    if (who.id) {
+      const id = who.id;
+      const here = inWorlds.get(name) ?? new Map();
+      inWorlds.set(name, here);
+      here.set(ws, { id, refuse: no });
+      ws.once('close', () => {
+        here.delete(ws);
+        if (!here.size && inWorlds.get(name) === here) inWorlds.delete(name);
+      });
+    }
     h.session.connect(link);
   };
   httpServer.on('upgrade', (req: IncomingMessage, socket: Duplex, head: Buffer) => {
@@ -374,7 +425,7 @@ export function sessionServer(accounts?: AccountSettings, gemini?: typeof fetch,
   return {
     name: 'rune-session',
     configureServer(server: ViteDevServer) {
-      server.middlewares.use(sessionList(accounts));
+      server.middlewares.use(sessionList(accounts, credits ? CampaignArchive.of(credits.universesDir) : undefined));
       // The program of the worlds: built once, and again if the sources changed since (a world that is running keeps its own).
       let outDir: string | undefined;
       let built: Promise<string> | undefined;
