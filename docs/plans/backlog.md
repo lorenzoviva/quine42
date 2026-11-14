@@ -5461,3 +5461,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (T366 è già stato verificato nel browser).
 - Quando è fatto: commit su `task/T383`, kernel 0.7.5; poi l'orchestratore integra T383 e `integra T366` toglie worktree e branch di T366. Sicurezza: V-038 di T366, nessuna superficie nuova oltre quella.
 - Esito: T366 integrato dopo T362: in `AGENTS.md` restano sia `QUINE_ACCOUNT=inviti` (ADR-0194) sia `OPENROUTER_API_KEY` (ADR-0193); l'ADR di T366 è ADR-0194, V-038 resta a lui; kernel 0.7.5 in version.ts, package.json, lock e seme, con i rimandi di T366 a 0.7.4 portati a 0.7.5 e quelli di T362 lasciati; typecheck, build e suite intera verdi (la prima suite aveva fallito un test, `tests/vestire-individui.test.ts`, «in the tick», che passa da solo e nella seconda suite: probabilmente l'attesa a tempo con la macchina carica, non dimostrato, fuori da ciò che T366 tocca); sicurezza: V-038 di T366, nessuna superficie nuova oltre quella.
+
+### T384 · Integrare T365 nel base (conflitto con T366: ADR-0194 → ADR-0195, kernel 0.7.6) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Step: 43
+- Contesto: `integra T365` (il costo di ogni carta: `usd` e `server` nel timbro delle carte, ADR-0194, kernel 0.7.5) ha trovato conflitti in `server/session.ts` e `src/session/host.ts`: nel frattempo è entrato T366 via T383 (universo privato e inviti), che ha già preso ADR-0194 e il kernel 0.7.5. Nasce da T365: `dossier T365`, `dossier T383`.
+- Cosa fare: nel worktree `git merge task/T365`; in `server/session.ts`, `src/session/host.ts` (e ovunque ci sia un conflitto) tenere entrambe le aggiunte; l'ADR di T365 rinumerato a `ADR-0195` (file, titolo, indice degli ADR, ogni rimando di T365 in `AGENTS.md`, `docs/architettura-dettagli.md`, test, codice), controllando che 0195 sia libero; kernel a `0.7.6` in `src/kernel/version.ts`, `package.json`, `package-lock.json`, `universe/universe.json`, coi riferimenti di T365 a `0.7.5` portati a `0.7.6` senza toccare quelli di T366; typecheck, build e suite intera coi turni.
+- Test: suite intera, typecheck e build coi turni.
+- Browser: no (T365 non ha UI nuova).
+- Quando è fatto: commit su `task/T384`, kernel 0.7.6; poi l'orchestratore integra T384 e `integra T365` toglie worktree e branch di T365. Sicurezza: quella di T365, nessuna superficie nuova oltre quella.
