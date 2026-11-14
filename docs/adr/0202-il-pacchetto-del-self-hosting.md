@@ -1,4 +1,4 @@
-# ADR-0201 — Il pacchetto del self-hosting: un'immagine con l'etichetta del kernel, compose col tunnel facoltativo, la guida
+# ADR-0202 — Il pacchetto del self-hosting: un'immagine con l'etichetta del kernel, compose col tunnel facoltativo, la guida
 
 Data: 2026-11-14 · Stato: accettato · Riferimenti: T367 (step 43, Fase IV: la open beta), ADR-0112 (il server di produzione), ADR-0184 (la open
 beta), ADR-0189 (la modalità senza pagamenti e `/healthz`), ADR-0194 (il verificatore a inviti), ADR-0197 (le chiavi dei giocatori),

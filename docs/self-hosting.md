@@ -1,6 +1,6 @@
 # Ospitare un mondo di QUINE42 (self-hosting)
 
-> T367, ADR-0201. Lo studio da cui nasce è [`design/open-beta.md`](design/open-beta.md) § 2. Il server è quello di produzione (ADR-0112): lo
+> T367, ADR-0202. Lo studio da cui nasce è [`design/open-beta.md`](design/open-beta.md) § 2. Il server è quello di produzione (ADR-0112): lo
 > stesso pacchetto per il server ufficiale e per il tuo, in un'immagine Docker o come pacchetto Node.
 
 Con questa guida un master fa girare il server del gioco su una macchina sua (un PC di casa, una VPS, una VM) o su un servizio che legge il

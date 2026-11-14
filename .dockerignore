@@ -1,4 +1,4 @@
-# What never goes into the image (T367, ADR-0201): secrets, universes, builds and the dependencies of this machine, the agents' folders.
+# What never goes into the image (T367, ADR-0202): secrets, universes, builds and the dependencies of this machine, the agents' folders.
 # The image builds dist/ and dist-server/ itself and installs its own node_modules.
 .env
 .env.*

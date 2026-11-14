@@ -1,4 +1,4 @@
-// npm run immagine (T367, ADR-0201): the server's image, tagged with the kernel's version of this code and with its contract (`quine42:0.7.10`,
+// npm run immagine (T367, ADR-0202): the server's image, tagged with the kernel's version of this code and with its contract (`quine42:0.7.10`,
 // `quine42:0.7`), never only `latest`: who hosts pins a version and updates when the migrations carry their universes (ADR-0152, ADR-0156).
 // Arguments after `--` go to `docker build` as they are (`--platform linux/amd64`, `--no-cache`).
 

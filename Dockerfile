@@ -1,4 +1,4 @@
-# The production server in an image (T367, ADR-0201): the same package as `npm run build`, `npm run build:server`, `npm run serve` (ADR-0112).
+# The production server in an image (T367, ADR-0202): the same package as `npm run build`, `npm run build:server`, `npm run serve` (ADR-0112).
 # Build it with `npm run immagine` (the tag is the kernel's version, never only `latest`), or with `docker compose build` and QUINE_KERNEL in `.env`.
 # Railway and Fly read this file: give them KERNEL_VERSION as a build argument (the guide: docs/self-hosting.md).
 #
@@ -28,7 +28,7 @@ RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
 FROM node:22-bookworm-slim
 ARG KERNEL_VERSION
 LABEL org.opencontainers.image.title="quine42" \
-      org.opencontainers.image.description="Il server di produzione di QUINE42 (self-hosting, ADR-0201)" \
+      org.opencontainers.image.description="Il server di produzione di QUINE42 (self-hosting, ADR-0202)" \
       org.opencontainers.image.version="$KERNEL_VERSION" \
       org.opencontainers.image.licenses="SEE LICENSE IN LICENSE.md" \
       quine42.kernel="$KERNEL_VERSION"

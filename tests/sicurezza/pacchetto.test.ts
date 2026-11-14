@@ -1,4 +1,4 @@
-// The package of the self-hosting (T367, ADR-0201; open-beta.md § 5 points 6-7): the image has no secret and no universe, the server in it never runs
+// The package of the self-hosting (T367, ADR-0202; open-beta.md § 5 points 6-7): the image has no secret and no universe, the server in it never runs
 // as root, the port is published only on this machine unless said, the example of `.env` has no real value, and the image carries the kernel's
 // version it was built for, checked against the code. Read from the files: the image itself is built by `npm run immagine`, not here.
 

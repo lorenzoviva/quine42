@@ -1,4 +1,4 @@
-# The production server in a container, for who hosts a world of their own (T367, ADR-0201). The guide: docs/self-hosting.md.
+# The production server in a container, for who hosts a world of their own (T367, ADR-0202). The guide: docs/self-hosting.md.
 #
 #   cp .env.example .env            then fill it (QUINE_KERNEL, QUINE_ORIGINI, QUINE_SEGRETO_INVITI…)
 #   docker compose up -d --build    the server, on http://localhost:8080, only from this machine unless QUINE_PUBBLICA_SU says otherwise

@@ -471,7 +471,7 @@ Modello di una voce:
 - Contromisura: `.dockerignore` tiene fuori `.env`, ogni `.env.*` tranne l'esempio, `universes/`, le build, `node_modules`, `.git`, le cartelle degli agenti e `backup/`; lo stadio che gira copia solo le due build, le dipendenze di produzione, `site/beta.json` e i due script, e nessun `ENV` né `ARG` nomina un segreto: i segreti arrivano dall'ambiente all'avvio (`env_file` di compose, le variabili e i segreti di Railway e Fly); `quine-avvio` parte da root solo per dare il volume a `node` e scende con `setpriv`, e così il comando `inviti`; compose pubblica su `QUINE_PUBBLICA_SU`, predefinito `127.0.0.1`; la build si ferma senza `KERNEL_VERSION` o con una versione diversa da `package.json`, e lo script la etichetta `X.Y.Z` e `X.Y`, mai `latest`; l'esempio ha vuote chiavi, segreti e token. La guida dice dove va la fiducia: chi ospita vede in memoria le chiavi di chi gioca sul suo server (accettato in V-040), e i suoi universi sono sul suo disco
 - Task: T367
 - Test: `tests/sicurezza/pacchetto.test.ts`, `tests/sicurezza/produzione.test.ts`
-- Esito: chiusa da T367 (ADR-0201), 14/11/2026, branch `task/T367`. Un container vero non è stato avviato (virtualizzazione spenta sulla macchina dell'autore): provati i file e lo stadio finale come cartella a parte con l'ambiente dell'esempio.
+- Esito: chiusa da T367 (ADR-0202), 14/11/2026, branch `task/T367`. Un container vero non è stato avviato (virtualizzazione spenta sulla macchina dell'autore): provati i file e lo stadio finale come cartella a parte con l'ambiente dell'esempio.
 
 ## Le prove dell'autore
 

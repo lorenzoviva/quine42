@@ -1,5 +1,5 @@
 #!/bin/sh
-# The image's start (T367, ADR-0201): the universes' volume belongs to `node`, and the server never runs as root. Docker's named volumes take
+# The image's start (T367, ADR-0202): the universes' volume belongs to `node`, and the server never runs as root. Docker's named volumes take
 # their owner from the image; Fly's and Railway's are root's when new, so the first start gives the folder to `node`, then drops to it.
 set -e
 if [ "$(id -u)" = "0" ]; then

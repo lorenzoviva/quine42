@@ -832,7 +832,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="self-hosting"></a>
 ## Il self-hosting: l'immagine e la guida
 
-- **Il pacchetto** (ADR-0201, T367): il server di produzione (ADR-0112) consegnato a chi ospita. `Dockerfile` a tre stadi su `node:22-bookworm-slim`:
+- **Il pacchetto** (ADR-0202, T367): il server di produzione (ADR-0112) consegnato a chi ospita. `Dockerfile` a tre stadi su `node:22-bookworm-slim`:
   la build (`npm ci`, `npm run build`, `npm run build:server`), le dipendenze di esecuzione (`npm ci --omit=dev`: il server importa solo
   `firebase-admin`), ciò che gira (git, tini, `dist/`, `dist-server/`, `site/beta.json`, i due script). Gli universi in un volume su
   `/app/universes`; dentro il container `QUINE_HOST=0.0.0.0`, la porta `QUINE_PORTA`, `PORT` o 8080; `HEALTHCHECK` su `/healthz` (ADR-0189).

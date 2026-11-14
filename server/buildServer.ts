@@ -1,5 +1,5 @@
 // How the production server is built (T133, ADR-0112): one file with what it needs, and the world's program in a folder of its own, which is all a world
-// reads; beside them the owner's command of a server without Firebase (`inviti.mjs`, ADR-0194), so the package needs no vite-node (T367, ADR-0201).
+// reads; beside them the owner's command of a server without Firebase (`inviti.mjs`, ADR-0194), so the package needs no vite-node (T367, ADR-0202).
 // Only here is Vite called; firebase-admin stays a dependency to install, and `vite` remains only as the import `buildWorld` makes if it is called, which here it never is.
 
 import fs from 'node:fs';
