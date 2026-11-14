@@ -12,7 +12,7 @@ import { stripeHandler, type StripeRouteOptions } from '../server/stripe';
 import type { AccountSettings } from '../server/account';
 import { accountWanderer } from '../src/session/account';
 import type { PaymentRecord } from '../src/kernel/credits';
-import { checkoutTarget, cleanSearch, feeText, formatDay, formatSpent, parseAmount, returnState, returnUrlFor } from '../site/pagamenti';
+import { checkoutTarget, cleanSearch, feeText, formatDay, formatSpent, parseAmount, payerTexts, returnState, returnUrlFor, tableAmounts } from '../site/pagamenti';
 
 function call(handler: Connect.NextHandleFunction, method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
   return new Promise<{ status: number; body: any; next?: true }>((resolve) => {
@@ -233,5 +233,43 @@ describe('the page of the credits (T105)', () => {
     expect(formatSpent(0.0012)).toBe('$0.0012');
     expect(formatSpent(0)).toBe('$0.00');
     expect(formatSpent(1.5)).toBe('$1.50');
+  });
+});
+
+describe('the credits page where the master pays (T382)', () => {
+  it('says who pays the common spending and what the table leaves out', () => {
+    const shared = payerTexts({ multigiocatore: true, masterPays: false, master: false });
+    expect(shared.common).toContain('parti uguali');
+    expect(shared.spendingHint).toContain('spese comuni');
+    const player = payerTexts({ multigiocatore: true, masterPays: true, master: false });
+    expect(player.common).toContain('paga il master');
+    expect(player.spendingHint).toContain('paga il master');
+    const master = payerTexts({ multigiocatore: true, masterPays: true, master: true });
+    expect(master.common).toContain('paghi tu');
+    expect(master.spendingHint).toContain('Pagate per gli altri');
+    for (const t of [player, master]) expect(`${t.common} ${t.spendingHint}`).not.toMatch(/parti uguali|tua parte delle spese comuni/);
+    // Alone nobody pays for anyone: the usual sentences.
+    expect(payerTexts({ multigiocatore: false, masterPays: true, master: true })).toEqual(shared);
+  });
+
+  it('rounds the rows so that they add up to the total', () => {
+    // What T380 saw: $0.03 + $0.03 + $0.25 under a total of $0.30.
+    const t = tableAmounts([0.02525, 0.02525, 0.2525], 0.303);
+    expect(t).toEqual({ rows: ['$0.03', '$0.02', '$0.25'], total: '$0.30' });
+    // In the table's own unit: the cent, or the hundredth of a cent.
+    const scale = (s: string) => 10 ** s.split('.')[1].length;
+    const units = (s: string) => Math.round(Number(s.slice(1)) * scale(s));
+    for (const values of [[0.333, 0.333, 0.334], [0.005, 0.005, 1.99], [0.29, 0.01, 0.7], [1.115, 2.225, 3.335, 4.445]]) {
+      const sum = values.reduce((s, v) => s + v, 0);
+      const r = tableAmounts(values, sum);
+      expect(r.rows.reduce((s, x) => s + units(x), 0)).toBe(units(r.total));
+      for (const [i, x] of r.rows.entries()) expect(Math.abs(units(x) - values[i] * scale(x))).toBeLessThan(1);
+    }
+    // Under a cent is not zero: the whole table goes to the hundredth of a cent, and still adds up.
+    expect(tableAmounts([0.0012, 0.5], 0.5012)).toEqual({ rows: ['$0.0012', '$0.5000'], total: '$0.5012' });
+    // The days not shown are in the total, and only there.
+    expect(tableAmounts([0.02525, 0.02525], 1.0505)).toEqual({ rows: ['$0.03', '$0.02'], total: '$1.05' });
+    expect(tableAmounts([], 0)).toEqual({ rows: [], total: '$0.00' });
+    expect(tableAmounts([NaN, -1], NaN)).toEqual({ rows: ['$0.00', '$0.00'], total: '$0.00' });
   });
 });

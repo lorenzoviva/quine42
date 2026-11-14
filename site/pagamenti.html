@@ -106,7 +106,7 @@
             <ul style="padding-left: var(--space-21); margin: 0; font-size: var(--text-13); line-height: var(--leading-read); color: var(--skin-text)">
               <li style="margin-bottom: var(--space-8)">Un credito vale un dollaro, e ogni universo ha il suo saldo.</li>
               <li style="margin-bottom: var(--space-8)">I crediti coprono le chiamate alle intelligenze artificiali che generano trame, dialoghi e forme: <span id="wallet-fee">il loro costo</span>.</li>
-              <li style="margin-bottom: var(--space-8)">Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.</li>
+              <li style="margin-bottom: var(--space-8)" id="wallet-common">Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.</li>
               <li>A crediti esauriti si continua a giocare, con risposte più semplici.</li>
             </ul>
           </div>
@@ -204,7 +204,7 @@
               <tbody id="spending-body"></tbody>
             </table>
           </div>
-          <p class="input-hint" style="margin: var(--space-13) 0 0">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
+          <p class="input-hint" style="margin: var(--space-13) 0 0" id="spending-hint">Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.</p>
         </div>
 
         <!-- Ciò che il master ha pagato per gli altri, dove paga il master (T372, ADR-0188: world/usage.json → masterPaid) -->

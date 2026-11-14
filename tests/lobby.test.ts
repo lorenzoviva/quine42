@@ -457,6 +457,9 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       const hostRoot = (host as any).root as FakeElement;
       const spese = hostRoot.querySelector("select[id='lobby-spese']") as FakeElement;
       expect(spese.disabled).toBe(false);
+      // In the same grid as the other selectors, styled like them (T382).
+      const speseGrid = (hostRoot.querySelector('.expenses-row') as FakeElement).querySelector('.settings-grid') as FakeElement;
+      expect(speseGrid.querySelector("select[id='lobby-spese']")).toBe(spese);
       spese.value = 'master';
       (hostRoot.querySelector('.primary') as FakeElement).onclick!();
       expect((await hostOpen).regolazioni?.game).toEqual({ expenses: 'master' });
