@@ -5417,7 +5417,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T379`, kernel 0.7.1; poi l'orchestratore integra T379 e `integra T372` toglie worktree e branch di T372. Sicurezza: nessuna superficie nuova.
 - Esito: T372 unito in task/T379, kernel 0.7.1 (version.ts, package.json, package-lock.json, universe.json); ADR-0188 e il suo indice a 0.7.1, tolta la riga «proposto» di 0188 duplicata dal merge nell'indice degli ADR; i campi di T372 (`game.expenses`, `masterPaid`, `masterPays`, `paidFor`) già inglesi e compatibili con la migrazione 0.6→0.7; typecheck, build e suite intera (3127 passati) verdi nei turni; non provati nel browser lobby e portafoglio (T380). Sicurezza: nessuna superficie nuova.
 
-### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `da fare` (dipende da T379)
+### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 43
 - Contesto: T372 (`dossier T372`) non ha visto nel browser la lobby (`game.expenses`, il testo che dice chi paga, la modale dei crediti) né la pagina dei crediti del sito con «Pagate per gli altri»: solo test con finto DOM.
@@ -5425,3 +5425,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo.
 - Browser: sì; se non si può, `BROWSER: da verificare`.
 - Quando è fatto: esito con ciò che si vede e le catture; commit su `task/T380` se ci sono file. Sicurezza: nessuna superficie nuova.
+
+### T381 · Integrare T374 nel base (conflitto con T372: V-036 → V-037, kernel 0.7.2) — `da fare`
+- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
+- Step: 43
+- Contesto: `integra T374` (le direttive del master, `world/campaign.md` a sezioni, ADR-0191, V-036, kernel 0.7.1) ha trovato conflitti in `docs/sicurezza/registro.md` e `tools/sicurezza/catalogo.mjs`: nel frattempo è entrato T372 via T379 (il master paga, ADR-0188, V-036 già presa, kernel 0.7.1). Nasce da T374: `dossier T374`, `dossier T379`.
+- Cosa fare: nel worktree `git merge task/T374`; nel registro e nel catalogo tenere entrambe le voci (due aggiunte nello stesso punto restano entrambe), con le direttive di T374 rinumerate a `V-037` (scheda, riga della tabella, `tests/sicurezza/direttive.test.ts`, catalogo e ogni rimando di T374, anche in ADR-0191 e `docs/architettura-dettagli.md`); kernel a `0.7.2` in `src/kernel/version.ts`, `package.json`, `package-lock.json`, `universe/universe.json`, con i riferimenti di T374 a `0.7.1` portati a `0.7.2` (ADR-0191, indice degli ADR, `AGENTS.md`, `docs/architettura-dettagli.md`), senza toccare gli ADR di prima; controllare che ADR-0191 non sia già preso; typecheck, build e suite intera coi turni.
+- Test: suite intera, typecheck e build coi turni.
+- Browser: no (T374 è già stato verificato nel browser).
+- Quando è fatto: commit su `task/T381`, kernel 0.7.2; poi l'orchestratore integra T381 e `integra T374` toglie worktree e branch di T374. Sicurezza: V-037 (rinumerata da V-036 di T374), nessuna superficie nuova oltre quella.
