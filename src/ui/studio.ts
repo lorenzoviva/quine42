@@ -19,6 +19,7 @@ import type { Picture } from '../mj/photo';
 import { DAY_PHASES, MASTER_BEATS, readPeople, WHERES } from '../kernel/npc/model';
 import { italianName } from '../kernel/internalNames';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 import { paceRow } from './pace';
 import { icons } from './hud';
 
@@ -93,8 +94,7 @@ export class StudioPanel {
   }
 
   private show(...children: Array<Node | string>): void {
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     this.shown = undefined;
     this.screen = undefined;
     this.benchOpen = false;

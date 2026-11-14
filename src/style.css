@@ -712,3 +712,24 @@ li.touch-only { display: none; }
   #inventory .body { padding: var(--space-8); gap: var(--space-8); }
   #inventory .details .big { padding: var(--space-2); }
 }
+
+/* --- Every window has a way out by a finger (T393, the census in src/ui/panels.ts) --- */
+/* The cross (closeButton): at the top right of its window; with a mouse as it was, with fingers --touch-target at least. */
+.cross { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+#inventory .cross, #actions .cross, #help > .cross, #dialog .cross, #editor .cross {
+  background: var(--neon-pink); color: #fff; box-shadow: 2px 2px 0 var(--neon-yellow); font-size: var(--text-18); padding: 0 var(--space-8); text-align: center;
+}
+#actions .head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-8); }
+#help > .cross { position: sticky; top: 0; float: right; z-index: 1; margin: calc(-1 * var(--space-8)) calc(-1 * var(--space-8)) var(--space-5) var(--space-8); }
+#dialog .cross { position: absolute; top: calc(-1 * var(--space-13)); right: calc(-1 * var(--space-13)); pointer-events: auto; border: var(--border-ink-thick); }
+#editor .cross { display: none; }
+.touch .cross { min-width: var(--touch-target); min-height: var(--touch-target); padding: 0; font-size: var(--text-29); line-height: 1; }
+.touch #editor .cross { display: inline-flex; }
+.touch #editor .shut, .touch #inventory .hint { display: none; }
+/* The inventory's head stays in sight while its window scrolls, the cross in its corner. */
+.touch #inventory .head { position: sticky; top: 0; z-index: 1; padding-right: calc(var(--touch-target) + var(--space-13)); }
+.touch #inventory .head .cross { position: absolute; top: var(--space-5); right: var(--space-5); }
+.touch #dialog .cross { top: calc(-1 * var(--space-21)); right: calc(-1 * var(--space-13)); }
+/* A choice is left by its buttons: a finger's size too. */
+.touch #death button, .touch .credit-exhausted-window button, .touch #login button, .touch #watch button,
+.touch #lobby .lobby-actions button, .touch #genesis .actions button, .touch #feed .toggle { min-height: var(--touch-target); }

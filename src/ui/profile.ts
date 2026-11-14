@@ -6,6 +6,7 @@ import type { Kernel } from '../kernel/kernel';
 import { PROFILE_LIMITS, type Profile } from '../kernel/wanderers';
 import { icons } from './hud';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 /** Keeps a profile: the answer is the profile as it was repaired, and what was repaired (in words). */
 export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; profile?: Profile; text?: string; reason?: string }>;
@@ -39,8 +40,7 @@ export class ProfilePanel {
     private current: () => Profile | undefined,
     account?: AccountView,
   ) {
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     const save = el('button', { class: 'primary' }, 'Salva');
     save.onclick = () => void this.save();
     this.tinta.addEventListener('input', () => this.paint());

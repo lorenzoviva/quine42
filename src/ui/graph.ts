@@ -8,6 +8,7 @@ import type { Kernel } from '../kernel/kernel';
 import { EDGE_NAME, NODE_COLOR, NODE_NAME, type GraphIssue, type GraphLink, type GraphNode, type NodeType, type WorldGraph } from '../kernel/graph';
 import { ForceLayout } from './graphlayout';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 /** What is drawn: some nodes of the graph (indices into `ids`), their own layout and the edges among them. */
 interface View {
@@ -128,8 +129,7 @@ export class GraphPanel {
   open(nodeId?: string): void {
     const g = this.k.graph();
     if (g !== this.g) this.load(g);
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     const fit = el('button', {}, 'Tutto');
     fit.onclick = () => this.focusAll();
     const n = this.ids.length;

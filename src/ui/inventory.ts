@@ -7,6 +7,7 @@ import { HOTBAR, totalWeight } from '../kernel/inventory';
 import { wornSlots, ZONE_WORDS } from '../kernel/wearing';
 import { itemIcon } from './hud';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 import { runeGlyph } from '../kernel/runes';
 import { isThing } from '../kernel/moving';
 
@@ -33,8 +34,9 @@ export class InventoryPanel {
         this.render();
       }
     });
-    this.root.addEventListener('mousedown', (e) => {
-      if (e.target === this.root) this.close();
+    // A click on the veil around closes; a finger's touch there is src/ui/panels.ts's (not with something written, T393).
+    this.root.addEventListener('pointerdown', (e) => {
+      if (e.target === this.root && e.pointerType !== 'touch') this.close();
     });
     k.bus.on('item:picked', () => this.isOpen && this.render());
     // In a multiplayer game what is carried changes when the server says so (T39b).
@@ -300,7 +302,7 @@ export class InventoryPanel {
       el(
         'div',
         { class: 'window' },
-        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over comic-badge' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${Math.round(cap)}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere')),
+        el('div', { class: 'head' }, el('span', { class: 'title' }, 'Inventario'), tabs, el('span', { class: `weight${over ? ' over comic-badge' : ''}` }, `peso ${Math.round(weight * 10) / 10} / ${Math.round(cap)}${over ? ' — appesantito' : ''}`), el('span', { class: 'hint' }, 'I / Tab per chiudere'), closeButton(() => this.close())),
         el('div', { class: 'body' }, mine, side),
         el(
           'div',

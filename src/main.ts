@@ -32,6 +32,7 @@ import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
 import { SoundRenders } from './audio/renders';
 import { bindSoundMenu } from './ui/soundmenu';
 import { TouchControls } from './ui/touch';
+import { closeButton, OutsideTouches } from './ui/panels';
 import { dayPhase } from './kernel/npc/model';
 import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
@@ -485,6 +486,22 @@ async function main() {
   const intro = $('#intro');
   const help = $('#help');
   const helpBeyond = $('#help-beyond');
+  help.prepend(closeButton(() => (help.hidden = true)));
+  // Every window has a way out by a finger (T393): its cross, and a touch outside where nothing would be lost (src/ui/panels.ts).
+  const outside = new OutsideTouches();
+  outside.watch('help', help, () => !help.hidden, () => (help.hidden = true));
+  outside.watch('keyhelp', $('#keyhelp'), () => hud.keyHelpOpen, () => hud.toggleKeyHelp(false));
+  outside.watch('actions', $('#actions'), () => actions.isOpen, () => actions.close());
+  outside.watch('inventory', $('#inventory'), () => inventory.isOpen, () => inventory.close());
+  outside.watch('chat', $('#chat'), () => chat.isOpen, () => chat.close());
+  outside.watch('profile', $('#profile'), () => profile.isOpen, () => profile.close());
+  if (tools) {
+    outside.watch('studio', $('#studio'), () => tools.studio.isOpen, () => tools.studio.close());
+    outside.watch('atlas', $('#atlas'), () => tools.atlas.isOpen, () => tools.atlas.close());
+    outside.watch('graph', $('#graph'), () => tools.graph.isOpen, () => tools.graph.close());
+    outside.watch('console', $('#console'), () => tools.konsole.isOpen, () => tools.konsole.close());
+    outside.watch('editor', $('#editor'), () => tools.editor.isOpen, () => tools.editor.close());
+  }
   const startGame = () => {
     if (intro.hidden) return;
     intro.classList.add('out');

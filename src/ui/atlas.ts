@@ -7,6 +7,7 @@ import type { Kernel } from '../kernel/kernel';
 import type { Region } from '../kernel/atlas';
 import { OPERATION_COLOR } from '../kernel/situation';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 type View = Awaited<ReturnType<Kernel['atlasView']>>;
 
@@ -79,8 +80,7 @@ export class AtlasPanel {
     this.view = await this.k.atlasView();
     this.cx = this.view.here.cx + 0.5;
     this.cy = this.view.here.cy + 0.5;
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     const legend = el('div', { class: 'legend' }, el('span', { class: 'k planned' }, 'esplorato'), el('span', { class: 'k draft' }, 'abbozzato'), el('span', { class: 'k fog' }, 'mai visto'), el('span', { class: 'k region' }, 'regione'), el('span', { class: 'k you' }, 'tu'), ...(this.k.follow ? [el('span', { class: 'k player' }, 'giocatori')] : []));
     this.root.replaceChildren(el('div', { class: 'window' }, close, el('div', { class: 'title' }, "L'atlante del mondo"), legend, this.canvas, this.info, ...this.players(), el('div', { class: 'note' }, 'Trascina o frecce per spostarti, rotella o +/- per lo zoom. Guardare non genera nulla.')));
     this.root.hidden = false;

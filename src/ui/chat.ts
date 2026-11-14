@@ -4,6 +4,7 @@ import type { Id } from '../kernel/ecs';
 import type { Kernel, Mind } from '../kernel/kernel';
 import type { AgentId } from '../kernel/agents/council';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 /** What a character decided, in the words of the world (the ids are T310b's: `follow`, `stay`, `wander`, `give`). */
 const ACTIONS: Record<string, string> = { follow: 'ti segue', stay: 'si ferma', wander: 'riprende a girovagare', give: 'ti dà qualcosa' };
@@ -20,8 +21,7 @@ export class Chat {
   onClose?: () => void;
 
   constructor(private k: Kernel) {
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     this.root.append(el('div', { class: 'head' }, this.title, close), this.log, el('div', { class: 'row' }, this.input));
     this.input.addEventListener('keydown', (e) => {
       e.stopPropagation();

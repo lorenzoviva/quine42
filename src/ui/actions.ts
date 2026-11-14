@@ -3,6 +3,7 @@
 
 import type { ActionOption, Kernel } from '../kernel/kernel';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 export class ActionMenu {
   private root = $('#actions');
@@ -41,7 +42,7 @@ export class ActionMenu {
     this.options = options;
     this.typing = false;
     this.root.replaceChildren(
-      el('div', { class: 'title' }, name),
+      el('div', { class: 'head' }, el('div', { class: 'title' }, name), closeButton(() => this.close())),
       ...options.map((o, i) => {
         const b = el('button', { class: o.enabled ? '' : 'disabled' }, el('kbd', {}, String(i + 1)), ` ${o.label}`, o.reason ? el('span', { class: 'reason' }, ` — ${o.reason}`) : '');
         b.onclick = () => this.choose(o);
@@ -69,7 +70,7 @@ export class ActionMenu {
       const done = tile && id < 0 ? this.k.freeTileAction(tile.col, tile.row, text) : this.k.freeAction(id, text);
       void done.finally(() => this.close());
     });
-    this.root.replaceChildren(el('div', { class: 'title' }, name), input, note);
+    this.root.replaceChildren(el('div', { class: 'head' }, el('div', { class: 'title' }, name), closeButton(() => this.close())), input, note);
     this.root.hidden = false;
     this.onClose?.();
     requestAnimationFrame(() => input.focus());

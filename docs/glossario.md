@@ -1305,6 +1305,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/ui/touch.ts`, `src/ui/gestures.ts`, `src/render/camera.ts`
 - **Da non usare**: `joystick` (nel codice: è la levetta, `stick`), `mobile` (per lo strato: il tocco non è il telefono, anche un portatile ha lo schermo che si tocca)
 
+### Croce di una finestra
+- **Inglese**: `closeButton`, `cross`, `PANELS`, `OutsideTouches`, `touchExits`
+- **Definizione**: il pulsante ✕ in alto a destra di ogni finestra del gioco, grande almeno 44 × 44 px col dito (`--touch-target`); con il tocco fuori, dove non si perde niente, è la via d'uscita al tocco che il censimento delle finestre garantisce (ADR-0199).
+- **Dove vive**: `src/ui/panels.ts`
+- **Da non usare**: `X` (è una lettera e un tasto, posa), «chiudi» per la croce (è il ✕ dello strato del tocco, che preme Esc)
+
 ### Ramo del master
 - **Inglese**: `branch`, `branchKernel`, `publish`
 - **Definizione**: ciò che il master ha cambiato e i giocatori non vedono finché non pubblica.

@@ -5560,7 +5560,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Dipende da T389.
 - Quando è fatto: commit su `task/T390` con l'elenco dei difetti e quelli corretti. Sicurezza: nessuna superficie nuova.
 
-### T393 · Chiudere l'inventario e gli altri pannelli al tocco, su un telefono vero — `da fare`
+### T393 · Chiudere l'inventario e gli altri pannelli al tocco, su un telefono vero — `fatto` (`b0cad847`)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2
 - Step: 43
 - Contesto: l'autore ha provato T387 sul telefono vero (14/11): il resto va, ma chiudere l'inventario è difficile, e forse anche altre interfacce. Oggi si chiude con Esc (al tocco il pulsante ✕ di T387) o con il tasto che lo apre; il pannello copre la scena e la croce o il ✕ sono piccoli o lontani. Nasce da T387: `dossier T387` (ADR-0198, `src/ui/touch.ts`, `src/ui/gestures.ts`). Tocca gli stessi file di T388 (`src/ui/`, `src/style.css`): per questo viene dopo.
@@ -5569,3 +5569,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì. A 844 × 390 con tocchi simulati (`pointerType: 'touch'`): ogni pannello del censimento si apre e si chiude con la croce e, dove previsto, toccando fuori; screenshot dell'inventario aperto; desktop invariato. Scrivere nell'esito la tabella del censimento. La prova sul telefono vero la fa l'autore.
 - Dipende da T388.
 - Quando è fatto: commit su `task/T393`, esito con il censimento e cosa è provato. Sicurezza: nessuna superficie nuova (solo client).
+- Esito: ogni finestra del gioco ha la croce ✕ in alto a destra (`closeButton` in `src/ui/panels.ts`, almeno `--touch-target` = 47 px col dito, col mouse com'era; nuova su inventario, menu delle azioni, aiuto e fumetto, l'editor la mostra solo col dito); col dito un tocco fuori chiude la finestra più in alto solo dove il censimento lo dice (sempre aiuto, «?», atlante, grafo; inventario, azioni e studio solo se nessun campo ha qualcosa scritto; mai chat, profilo, console, editor) e non arriva alla scena né al clic sotto; le scelte (crediti, morte, lobby, Genesi, entrare) escono dai loro pulsanti, alti 47 px col dito; il censimento `PANELS` con come si apre e come si chiudeva ogni finestra è controllato da `tests/pannelli-tocco.test.ts`; il clic sul velo dell'inventario ora vale solo col mouse (l'eco del tocco lo chiudeva anche con «Altro…» scritto); ADR-0199, `AGENTS.md`, `architettura-dettagli`, glossario; suite intera e typecheck verdi; non provati il telefono vero e la finestra dei crediti esauriti (solo in multigiocatore); sicurezza: nessuna superficie nuova (solo client)
