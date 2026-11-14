@@ -47,6 +47,8 @@ export class Hud {
   constructor(
     private kernel: Kernel,
     private renderer: Renderer,
+    /** Whether this client is the master's (alone, always): a player's mirror has the local id of a game alone, so the kernel cannot say it. */
+    private master = true,
   ) {
     kernel.bus.on('ui:message', ({ text, tone }) => this.message(text, tone));
     kernel.bus.on('ui:dialog', ({ speaker, text }) => this.showDialog(speaker, text));
@@ -101,7 +103,7 @@ export class Hud {
     }
 
     // The world held by the master (T373): outside the world, for as long as it is (rule 0: nothing in the world says it).
-    const paused = k.paceHeld() ? (k.isMaster() ? HELD_NOTICE_MASTER : HELD_NOTICE) : '';
+    const paused = k.paceHeld() ? (this.master ? HELD_NOTICE_MASTER : HELD_NOTICE) : '';
     if (paused !== this.lastPaused) {
       this.lastPaused = paused;
       this.pausedEl.textContent = paused;
