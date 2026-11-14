@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 398 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 399 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -12,7 +12,7 @@ Aggiornato il 14/11/2026, epoca 398 (claude). Crediti: vedi `stato`.
 - **Vestiti e armature (step 40):** T290 integrato (ADR-0180, `<worn>`); T353 integrato (ADR-0181, kernel 0.6.5: abiti degli individui dalla scheda o dal mestiere); mancano cambio d’abito dopo l’individuazione, abiti nella scheda dell’Attore, gambe/piedi/mani.
 - **Launcher (D51.2):** T233 integrato (`492b5e5e`): la home è il launcher; «in gioco ora» provato solo con `/api/session` simulata.
 - **Jev e costi del Concilio (D45):** T348 integrato (varco `TypeSafeGate`, strato `decide`, V-034 chiusa); T349 integrato (`model.reuse` nel `ModelDirector`, −16 % sculture stimato); T350 integrato (`2e733d0e`, kernel 0.6.9: guardie `text.guard` locali alle 5 porte senza inviare il testo del viandante a Jev finché `JEV_ZERO_RETENTION` è falso, e quarta parete `text.fourthwall` con `metaBreak` + Jev su Fucina, individui, schede Attore e trame, escluse le battute); T351 integrato (`6912ba9d`, ADR-0186, kernel 0.6.11: cache esplicita di Gemini 3.8 Flash per il prefisso di sistema dell'Attore, `ExplicitCaches` ttl 1800 s scritta alla seconda richiesta, `Price.storage` e `cache.write` pagata da `comune`, `GeminiGate.writeCache` con 4 test V-002, −47 % costo Attore misurato in `lab/banco/jev/cache-attore.md`, non provato contro Gemini vero). T352 integrato (`e28d73ce`, kernel 0.6.12): stima oraria della lobby coi token misurati da T325, un'ora a pieno dettaglio 1,42 $ (prima ~1,04), con l'Attore 1,68 $; restano stimate le uscite non misurate e `forge.fix`. Non provato contro TypeSafe vero né su traffico reale; manca l'archivio di sessione delle domande del viandante (D45.6). `tests/carte-guaste.test.ts` rosso nella suite intera e verde da solo (T352, causa non dimostrata): possibile instabilità sotto carico.
-- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 chiusa il 13/11 → T366 (fable, ora anche universo privato e inviti, 6 %), T372 master paga (integrato via T379, kernel 0.7.1; T380 visto nel browser, tre difetti corretti da T382, integrato), T374 direttive (integrato via T381, kernel 0.7.2, V-037, ADR-0191; manca la manopola di Jev negli universi privati, con T366), T373 ritmo/pausa, T375 regioni riempitivo/trattenuta, T376 individui e trame, T377 campagna nel sito (claude, approvati, ~20 %).
+- **Campagna del Master (autore, 10/11):** spese universo a carico del master, universo privato su invito, velocità/pausa di generazione, direttive della campagna nel Referente iniettate per competenza, controllo preventivo cartografia → T347 integrato (`c72f4617`, studio `docs/design/campagna-master.md`, ADR-0188 proposto: pagamento del master in `charge`, universo privato con inviti in `universes/.campaign/`, `pace`, direttive a sezioni `campaign.md`, regioni `mare`/`trattenuta`) → D54 chiusa il 13/11 → T366 (fable, ora anche universo privato e inviti, 6 %), T372 master paga (integrato via T379, kernel 0.7.1; T380 visto nel browser, tre difetti corretti da T382, integrato), T374 direttive (integrato via T381, kernel 0.7.2, V-037, ADR-0191; manca la manopola di Jev negli universi privati, con T366), T376 individui e trame (integrato, kernel 0.7.3, ADR-0192: incarico `individual` del Referente, «Scrivi trama» nella Direzione; due client non provati), T373 ritmo/pausa, T375 regioni riempitivo/trattenuta, T377 campagna nel sito (claude, approvati, ~20 %).
 - **Claude Fable (autore, 10/11):** reset settimanale giovedì 12/11 16:00; adozione intensiva per massimizzare l'uso di Fable.
 - **Domande chiuse (10/11):** D45 (Jev, ZDR spiegato), D47 (vestiti C+B), D48 (strutture D integrata), D49 (carte solo uso reale), D50 (gestito + self-hosting in VI), D51 (T345 e contatore vesti).
 - **Modelli specializzati di Antigravity (autore, 13/11):** T360 integrato (`703c838c`, ADR-0187): provider `hydrogen` (Gemini 4 Hydrogen, conto `gemini`) e `orchestrator` (Orchestrator (Argon), conto `argon`), in prova a tetto 1, senza browser, non orchestrabili senza la casella; sforzo come suffisso `-high|-xhigh`, mai `--effort` su agy. Non misurati: contatori e rapporti 5h/settimana (prime righe di `consumi.jsonl`).
@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 398 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T376 (claude). **Pronti:** T362, T370, T366 (fable, fermo fino al reset 19/11 16:00 CET; claude esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** —. **Pronti:** T362, T370, T366 (fable, fermo fino al reset 19/11 16:00 CET; claude esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -38,5 +38,5 @@ Aggiornato il 14/11/2026, epoca 398 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **399 (claude):** integrato T376 (individui dichiarati dal master e trame scritte a mano, verificato nel browser).
 - **398 (claude):** integrato T378 (piano di lancio aggiornato, solo documentazione), D35 riscritta in `aperte.md`.
-- **397 (claude):** integrato T382 (difetti di T380: selettore lobby, frasi crediti dove paga il master, arrotondamento), verificato nel browser.
