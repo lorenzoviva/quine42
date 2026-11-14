@@ -11,6 +11,7 @@ import type { Profile } from '../kernel/wanderers';
 import type { BrokenCard } from '../kernel/brokencards';
 import type { WornZone } from '../kernel/wearing';
 import type { WorldPace } from '../kernel/worldPace';
+import type { RegionRequest } from '../kernel/atlas';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -165,7 +166,14 @@ export type ClientMsg =
    * The master sets the pace of the world (T373, ADR-0188 §3): `normal`, `slow` (`placesPerMinute`, never above the lobby's) or `hold`. Only the
    * master, at a pace of its own (`LIMITS.paceRate`); the answer's `text` is the pace as the world took it.
    */
-  | { t: 'pace'; seq: number; mode: string; placesPerMinute?: number };
+  | { t: 'pace'; seq: number; mode: string; placesPerMinute?: number }
+  /**
+   * The master declares a region of the atlas or lets one go (T375, ADR-0188 §5, ADR-0201): the world checks it (`masterRegion`) and writes
+   * `world/atlas.json` with a commit of the kernel, without calls. Only the master, at the pace of `pace` (`LIMITS.paceRate`); the answer's `text`
+   * is the region as the world wrote it.
+   */
+  | { t: 'region'; seq: number; op: 'declare'; region: RegionRequest }
+  | { t: 'region'; seq: number; op: 'release'; id: string };
 
 
 /** Files changed: their new text, or null when they are gone. */

@@ -623,6 +623,20 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
+- **Le regioni del master** (ADR-0201, T375, kernel 0.7.11; ADR-0188 § 5, D54.6): una regione dell'atlante con `master: true` l'ha dichiarata
+  il master, e vince su quella del Cartografo dove copre un luogo (`regionAt`; fra le sue la più vicina, così un'isola è una regione piccola dentro
+  la grande); non toglie il suo ambiente al resto del mondo (`environmentsFor`). `kind` dice che cosa fa ai luoghi nuovi: assente, li pianifica il
+  Cartografo con l'ambiente della regione; `filler` (il **riempitivo**), il kernel li stende col programma dell'ambiente e il seme del luogo
+  (`fillerPlan` in `develop`: nome e descrizione della regione, nessuna cosa, persona, runa o struttura chiesta, nessuna carta, il piano salvato),
+  senza chiamate né battiti del mondo (`applyPlan`), fuori dalla quota e dalla pausa; `held` (la **trattenuta**), restano bozze (la pompa e
+  `planAhead` li saltano) finché il master non la libera o la cambia. I luoghi già pianificati restano come sono. Le dichiara e le libera solo il
+  master: `Kernel.declareRegion`, `releaseRegion`, controllate da `masterRegion` (`cleanText`, `metaBreak`, `MASTER_REGION_LIMITS`: raggio 0-8,
+  centro entro 200, 32 regioni, nome 40 e descrizione 200 caratteri; un ambiente del mondo, facoltativo per `held`; mai sul primo luogo; un `id`
+  cambia solo una regione del master), scritte dal kernel in `world/atlas.json` con un commit suo; sul filo il messaggio `region` (`declare` con
+  `region`, `release` con `id`), col ritmo di `pace`, e il client sottile del master le manda da lì. Ai giocatori l'atlante coi campi di
+  `REGION_FIELDS` e senza le trattenute (`playerFiles`). Nello studio: l'atlante dell'Ufficio dei luoghi (un clic sceglie un luogo, «Dichiara
+  regione qui», le regioni del master con «Cambia» e «Libera», il riempitivo tinto e la trattenuta tratteggiata) e la Direzione («Dichiara regione»,
+  «Regione qui» sui luoghi in coda, i luoghi trattenuti detti sul tavolo), con lo stesso modulo (`src/ui/regions.ts`). Il sito è di T377.
 
 <a id="partita-viandanti"></a>
 ## La partita, i viandanti, le rune per ruolo

@@ -1428,6 +1428,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «pausa» da sola per `generationHeld` (la lobby e la Genesi: un'altra cosa), «velocità», «ritmo» per i limiti dei messaggi (`Pace` di `src/session/server.ts` e di `server/rates.ts`: «ritmo per viandante»)
 - **Fermo**: il messaggio `pace` (`mode`, `placesPerMinute`) del client e del mondo, il campo `pace` di `welcome` e `update`, `universes/.campaign/<nome>.json → pace`, `WorldOpen.pace`, la chiamata `setPace`, la rotta `/api/universe/<nome>/pace`.
 
+### Regione del master
+- **Inglese**: `MASTER_REGION_LIMITS`, `RegionKind`, `declareRegion`, `releaseRegion`, `masterRegion`, `withoutMasterRegion`, `regionKind`
+- **Definizione**: una regione dell'atlante che il master dichiara nell'Ufficio dei luoghi o nella Direzione (ADR-0188 § 5, ADR-0201): nome, descrizione, centro, raggio, ambiente e che cosa fa ai luoghi nuovi dentro (l'ambiente col Cartografo, il riempitivo, la trattenuta). Dove copre un luogo vince su quella del Cartografo; «Libera» la toglie. I luoghi già pianificati restano come sono.
+- **Dove vive**: `src/kernel/atlas.ts`, `src/kernel/kernel.ts`, `src/ui/regions.ts`, `src/ui/atlas.ts`, `src/ui/studio.ts`
+- **Da non usare**: «zona», «area» (le aree sono di una struttura, ADR-0182), «regione `mare`» (riformulata in riempitivo, D54.6)
+- **Fermo**: `world/atlas.json → regions[].master`, `regions[].kind` (`filler`, `held`), il messaggio `region` (`op`: `declare` con `region`, `release` con `id`).
+
+### Riempitivo
+- **Inglese**: `filler`, `fillerPlan`
+- **Definizione**: una regione del master i cui luoghi nuovi ripetono un ambiente che il mondo ha già (il mare, un deserto, un bosco), stesi dal kernel col programma dell'ambiente e il seme del luogo, senza nessuna chiamata al Concilio: niente cose, persone, rune né carte. Indirizza i viandanti senza dirlo e senza pagare luoghi che il master non vuole (D54.6).
+- **Dove vive**: `src/kernel/kernel.ts` (`develop`, `fillerPlan`)
+- **Da non usare**: «mare» per la regione, «confine», «muro»
+- **Fermo**: `kind: filler`.
+
+### Regione trattenuta
+- **Inglese**: `held` (di una regione)
+- **Definizione**: una regione del master i cui luoghi nuovi restano bozze finché il master non la libera o la cambia: una pausa locale («questa valle la scrivo io, dopo»). Ai giocatori non esce.
+- **Dove vive**: `src/kernel/kernel.ts` (`pumpDevelopment`, `develop`), `src/session/files.ts`
+- **Da non usare**: «in pausa» (è del ritmo del mondo), `Chunk.held` (un luogo che aspetta la quota)
+- **Fermo**: `kind: held`.
+
 ### Ospite
 - **Inglese**: `guests`, `guestOf`, `Guest`
 - **Definizione**: un viandante, per id, che il master lascia entrare nel suo universo privato: aggiunto per id o entrato con un invito; tolto, l'universo sparisce per lui e il suo socket si chiude.

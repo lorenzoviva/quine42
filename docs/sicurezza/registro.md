@@ -462,6 +462,17 @@ Modello di una voce:
 - Esito: chiusa da T363 (ADR-0197), 14/11/2026, branch `task/T363`: le contromisure nascono con il varco.
 - Aggiornamento (T364, ADR-0200): superficie in più, il collegamento dalle pagine (`src/ui/openrouter.ts`: il verifier nel `sessionStorage` della scheda, mai una chiave; il ritorno toglie codice e state dall'indirizzo e confronta lo state della scheda), la porta `GET /api/openrouter/key` (il limite letto da `GET /api/v1/key` dal server, campo per campo, mai la chiave; detto di nuovo per un minuto, così una pagina che chiede di continuo non moltiplica le chiamate a OpenRouter), `status.worlds`, e **da soli sul PC** il file `universes/.keys/openrouter.json`: lo dà al varco solo `vite.config.ts` (sviluppo e preview, mai `server/production.ts`), ci va solo una chiave collegata da un chiamante `local`, ogni voce si rilegge controllata, esce quando si scollega o è revocata; `universes/` non si serve (ADR-0109). Test: `tests/openrouter-link.test.ts`. La proprietà resta: sul server di produzione una chiave di un giocatore non tocca il disco.
 
+### V-041 · Le regioni del master: il messaggio `region` e l'atlante che esce
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: il messaggio `region` (`src/session/server.ts`: `regionAsked`, il ritmo di `pace`), `Kernel.declareRegion` e `releaseRegion` (`src/kernel/kernel.ts`), `masterRegion` e `withoutMasterRegion` (`src/kernel/atlas.ts`), `world/atlas.json` verso i client dei giocatori (`playerFiles`, `playerChanges` in `src/session/files.ts`), i piani dei luoghi di un riempitivo (`fillerPlan`, `develop`, `applyPlan`)
+- Proprietà violata: le regioni le dichiara e le libera solo il master (ADR-0188 § 7 punto 8): un giocatore non riempie né trattiene i luoghi degli altri e non tocca le regioni del Cartografo; ciò che arriva dal filo non scrive nell'atlante niente che il kernel non abbia controllato (testi di un giocatore, la quarta parete, i tetti, un ambiente del mondo); un riempitivo non fa pagare nessuno (nessuna chiamata per i suoi luoghi); i client dei giocatori non leggono il piano del master (le regioni trattenute, che cosa fa una regione) né un campo dell'atlante che nessuno ha nominato (regola 8f)
+- Prova: test (T375)
+- Contromisura: il messaggio `region` solo da `isMaster` (anche nel kernel; uno specchio rifiuta), con il ritmo dei comandi del master (`LIMITS.paceRate`, `paceBurst`, insieme a `pace`) oltre a quello di ogni messaggio; il server passa al kernel solo i campi nominati, ognuno del suo tipo e tagliato (`regionAsked`); `masterRegion` controlla tutto (`cleanText` per nome e descrizione, `metaBreak`, centro e raggio interi entro i tetti, un ambiente proprio del mondo con `hasOwnProperty`, non sul primo luogo, al più 32 regioni, un `id` solo di una regione del master) e un rifiuto lascia l'atlante com'era; il kernel scrive con un commit suo, senza chiamate. Il riempitivo non chiede niente: il piano del kernel (nessuna cosa, persona, runa o struttura chiesta, nessuna carta) e nessun battito del mondo. Ai giocatori l'atlante coi soli campi di `REGION_FIELDS`, senza le regioni trattenute
+- Task: T375
+- Test: `tests/sicurezza/regioni.test.ts`, `tests/campagna-regioni.test.ts`
+- Esito: chiusa da T375 (ADR-0201), 14/11/2026, branch `task/T375`: le contromisure nascono con le regioni del master. Resta, accettato: un ambiente con lotti in un riempitivo mette le case comuni del mondo, che lo Scultore scrive se mancano (dove l'ambiente si è già usato esistono).
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -508,6 +519,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-038 | — | — | `ospiti.test.ts` | il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts |
 | V-039 | — | — | `ritmo.test.ts` | il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts |
 | V-040 | — | — | `openrouter.test.ts` | il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts |
+| V-041 | — | — | `regioni.test.ts` | le regioni del master si provano sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/regioni.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

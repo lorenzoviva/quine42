@@ -6,6 +6,17 @@
 import type { FileMap } from './types';
 import { Rng } from './rng';
 import { internalFields, internalName, internalValues, italianName } from './internalNames';
+import { cleanText } from './cleantext';
+import { metaBreak } from './fourthwall';
+
+/**
+ * What a region the master declared does to the new places inside it (T375, ADR-0188 §5, D54.6): `filler` repeats an environment the world
+ * already has, laid out by the kernel from its program with the place's seed, without a call to the Council; `held` keeps them drafts until
+ * the master lets the region go or changes it. Absent: the places are planned by the Cartographer, with the region's environment.
+ */
+export type RegionKind = 'filler' | 'held';
+
+export const REGION_KINDS: readonly RegionKind[] = ['filler', 'held'];
 
 export interface Region {
   id: string;
@@ -16,6 +27,10 @@ export interface Region {
   center: [number, number];
   /** In chunks (Chebyshev distance). */
   radius: number;
+  /** A region the master declared (T375): it wins over the Cartographer's where both cover a place. */
+  master?: true;
+  /** Only on a region of the master: what it does to the new places inside it. */
+  kind?: RegionKind;
 }
 
 export interface Atlas {
@@ -38,15 +53,114 @@ export function writeAtlas(a: Atlas): string {
   return JSON.stringify(a, null, 2) + '\n';
 }
 
-/** The region a chunk belongs to (the nearest centre among those whose radius covers it). */
+/**
+ * The region a chunk belongs to: the nearest centre among those whose radius covers it, a region of the master before the Cartographer's
+ * (T375: «only sea here» holds over the region that was there; an island in the master's sea is the master's region nearest to it).
+ */
 export function regionAt(atlas: Atlas, cx: number, cy: number): Region | undefined {
   let best: Region | undefined;
   let bd = Infinity;
   for (const r of atlas.regions) {
+    if (!r || !Array.isArray(r.center)) continue;
     const d = Math.max(Math.abs(cx - r.center[0]), Math.abs(cy - r.center[1]));
-    if (d <= r.radius && d < bd) [best, bd] = [r, d];
+    if (d > r.radius) continue;
+    const rank = r.master ? d - 1e6 : d;
+    if (rank < bd) [best, bd] = [r, rank];
   }
   return best;
+}
+
+/** What a region does to the new places inside it (T375): only a region of the master has a kind, and only a known one. */
+export function regionKind(r: Region | undefined): RegionKind | undefined {
+  return r?.master && REGION_KINDS.includes(r.kind as RegionKind) ? r.kind : undefined;
+}
+
+/** The kinds in the words of the master's tools. */
+export const REGION_KIND_NAME: Record<RegionKind | 'plan', string> = { plan: 'ambiente', filler: 'riempitivo', held: 'trattenuta' };
+/** What each kind means, for the master. */
+export const REGION_KIND_NOTE: Record<RegionKind | 'plan', string> = {
+  plan: 'il Cartografo pianifica i luoghi nuovi con questo ambiente',
+  filler: 'i luoghi nuovi ripetono questo ambiente senza chiamate al Concilio: niente cose, persone né rune',
+  held: 'i luoghi nuovi restano abbozzati finché non la liberi o la cambi',
+};
+
+/** The caps of a region of the master (T375): its radius in places, how far from the first place its centre may be, how many regions, the texts. */
+export const MASTER_REGION_LIMITS = { radius: 8, reach: 200, regions: 32, name: 40, description: 200 } as const;
+
+/** What the master's tools send to declare a region (T375): checked by `masterRegion`, never taken as it came. */
+export interface RegionRequest {
+  /** The id of a region of the master to change; absent, a new one. */
+  id?: string;
+  name: string;
+  description?: string;
+  center: [number, number];
+  radius: number;
+  /** `plan` (or absent): the Cartographer plans with the environment. */
+  kind?: RegionKind | 'plan';
+  environment?: string;
+}
+
+const has = (o: Record<string, unknown>, k: string) => Object.prototype.hasOwnProperty.call(o, k);
+
+/**
+ * A region the master declares (T375, ADR-0188 §5): the texts of a player (`cleanText`) inside the world (`metaBreak`, the local filter: the
+ * master's words never go to Jev), a centre and a radius within the caps, an environment the world has (none needed for `held`, which keeps the
+ * places drafts), not over the first place (nobody's region, as for the Cartographer). The atlas with it in, or every reason why not. An `id`
+ * of a region of the master changes it; a region of the Cartographer is never changed (the master declares one of their own over it). Pure.
+ */
+export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<string, unknown>, words: string[] = []): { atlas: Atlas; region: Region } | { errors: string[] } {
+  const L = MASTER_REGION_LIMITS;
+  if (!raw || typeof raw !== 'object') return { errors: ['la regione: serve un nome, un centro e un raggio'] };
+  const r = raw as Record<string, unknown>;
+  const errors: string[] = [];
+  const name = cleanText(r.name, L.name, 'il nome');
+  if ('error' in name) errors.push(name.error);
+  const description = r.description === undefined || r.description === '' ? { text: '' } : cleanText(r.description, L.description, 'la descrizione');
+  if ('error' in description) errors.push(description.error);
+  for (const t of ['text' in name ? name.text : '', 'text' in description ? description.text : '']) {
+    const hit = t ? metaBreak(t, words) : undefined;
+    if (hit) errors.push(`«${hit}» non è una parola del mondo: il nome e la descrizione della regione li leggono anche le persone`);
+  }
+  const center = Array.isArray(r.center) && r.center.length === 2 && r.center.every((n) => Number.isInteger(n) && Math.abs(n as number) <= L.reach) ? [r.center[0] as number, r.center[1] as number] : undefined;
+  if (!center) errors.push(`il centro: due numeri interi, al più ${L.reach} luoghi dal primo`);
+  const radius = Number.isInteger(r.radius) && (r.radius as number) >= 0 && (r.radius as number) <= L.radius ? (r.radius as number) : undefined;
+  if (radius === undefined) errors.push(`il raggio: un intero da 0 a ${L.radius} luoghi`);
+  if (center && radius !== undefined && Math.max(Math.abs(center[0]), Math.abs(center[1])) <= radius) errors.push('il primo luogo non è di nessuna regione: sposta il centro o stringi il raggio');
+  const kind = r.kind === undefined || r.kind === 'plan' ? undefined : REGION_KINDS.includes(r.kind as RegionKind) ? (r.kind as RegionKind) : null;
+  if (kind === null) errors.push(`il tipo: ${Object.values(REGION_KIND_NAME).join(', ')}`);
+  const environment = typeof r.environment === 'string' ? r.environment : '';
+  if (kind !== 'held' && !has(environments, environment)) errors.push("l'ambiente: uno di quelli che il mondo ha già");
+  if (kind === 'held' && environment && !has(environments, environment)) errors.push("l'ambiente: uno di quelli che il mondo ha già, o nessuno");
+  const regions = atlas.regions.slice();
+  const id = r.id === undefined ? undefined : typeof r.id === 'string' ? r.id : null;
+  const at = id ? regions.findIndex((x) => x.id === id) : -1;
+  if (id === null || (id !== undefined && (at < 0 || !regions[at].master))) errors.push('la regione da cambiare: una regione del master che c’è');
+  if (at < 0 && regions.filter((x) => x.master).length >= L.regions) errors.push(`al più ${L.regions} regioni del master: liberane una`);
+  if (errors.length) return { errors };
+  let fresh = at >= 0 ? regions[at].id : '';
+  for (let n = 1; !fresh; n++) if (!regions.some((x) => x.id === `master-${n}`)) fresh = `master-${n}`;
+  const region: Region = {
+    id: fresh,
+    name: (name as { text: string }).text,
+    description: (description as { text: string }).text,
+    environment,
+    center: [center![0], center![1]],
+    radius: radius!,
+    master: true,
+    ...(kind ? { kind } : {}),
+  };
+  if (at >= 0) regions[at] = region;
+  else regions.push(region);
+  return { atlas: { regions }, region };
+}
+
+/** What declaring or letting go a region answers (T375): the region, or every reason why not. */
+export type RegionAnswer = { ok: true; region: Region } | { ok: false; reasons: string[] };
+
+/** The atlas without a region of the master (T375, «Libera»): the Cartographer's are never taken away. Undefined when there is none so. */
+export function withoutMasterRegion(atlas: Atlas, id: unknown): { atlas: Atlas; region: Region } | undefined {
+  const region = typeof id === 'string' ? atlas.regions.find((r) => r.id === id && r.master) : undefined;
+  return region ? { atlas: { regions: atlas.regions.filter((r) => r !== region) }, region } : undefined;
 }
 
 // The directions as ids (T310b, `direzioni`): the Cartographer writes them, the world says them in its language (`directionWord`).

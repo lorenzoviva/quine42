@@ -21,6 +21,8 @@ import { italianName } from '../kernel/internalNames';
 import { $, el } from './dom';
 import { closeButton } from './panels';
 import { paceRow } from './pace';
+import { masterRegionRows, regionForm } from './regions';
+import { readAtlas, type Region } from '../kernel/atlas';
 import { icons } from './hud';
 
 /** A showcase and what it shows (the kernel's `ui:showcase` and `studio:showcase`). */
@@ -93,8 +95,12 @@ export class StudioPanel {
     return !this.root.hidden;
   }
 
+  /** How many times the panel was drawn: who redraws later knows whether something else came in between. */
+  private shows = 0;
+
   private show(...children: Array<Node | string>): void {
     const close = closeButton(() => this.close());
+    this.shows++;
     this.shown = undefined;
     this.screen = undefined;
     this.benchOpen = false;
@@ -295,6 +301,8 @@ export class StudioPanel {
       ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
       // The pace beside the queue (T373): the master slows or holds what the world does by itself.
       ...(this.k.isMaster() ? [paceRow(this.k, () => this.situation({ ...this.k.situation() }))] : []),
+      // The regions of the master (T375): a filler where the players should not go on, a valley held for later.
+      ...(this.k.isMaster() ? this.regionsSection(s, places.filter((o) => !o.live)) : []),
       ...section('plot', of('plot'), 'Nessuna trama aperta.'),
       // The master writes a plot by hand (T376): it plays as the Narrator's do.
       ...(this.k.isMaster() ? [el('div', { class: 'row' }, this.writePlotButton(s))] : []),
@@ -302,6 +310,44 @@ export class StudioPanel {
       ...section('fault', of('fault'), 'Nessun guasto aperto.'),
     );
   }
+
+  /**
+   * The regions of the master in the Direction (T375, ADR-0188 §5): «Dichiara regione» where the wanderer is, «Regione qui» on a place in the
+   * queue, and the regions declared with «Cambia» and «Libera». The same form as the atlas of the Office of places.
+   */
+  private regionsSection(s: Situation, queued: Operation[]): HTMLElement[] {
+    // On a mirror the atlas comes back with the world's next files: the table is drawn again a moment later, if nothing else was shown meanwhile.
+    const again = (text: string) => {
+      this.regionSaid = text;
+      this.situation(this.k.situation());
+      const drawn = this.shows;
+      setTimeout(() => {
+        if (this.shows === drawn && this.isOpen) this.situation(this.k.situation());
+      }, 800);
+    };
+    const declareAt = (cx: number, cy: number, region?: Region) =>
+      this.show(
+        el('div', { class: 'title' }, 'Dichiara regione — Direzione'),
+        regionForm(this.k, { center: [cx, cy], ...(region ? { region } : {}), done: (text) => again(text), cancel: () => this.situation(s) }),
+      );
+    const here = s.ops.find((o) => o.kind === 'wanderer');
+    const open = el('button', { 'data-region-open': '' }, 'Dichiara regione');
+    open.onclick = () => declareAt(here?.cx ?? 0, here?.cy ?? 0);
+    const spots = queued.filter((o) => o.cx !== undefined && o.cy !== undefined).slice(0, 6);
+    const shown = this.regionSaid;
+    return [
+      el('div', { class: 'section' }, 'Le regioni del master'),
+      el('div', { class: 'row' }, open, ...spots.map((o) => {
+        const b = el('button', { 'data-region-here': `${o.cx},${o.cy}` }, `Regione qui (${o.cx},${o.cy})`);
+        b.onclick = () => declareAt(o.cx!, o.cy!);
+        return b;
+      })),
+      ...masterRegionRows(this.k, readAtlas(this.k.files).regions, (r) => declareAt(r.center[0], r.center[1], r), (text) => again(text)),
+      ...(shown ? [el('div', { class: 'note', 'data-region': 'said' }, shown)] : []),
+    ];
+  }
+  /** What the last change of a region said, until the next one (as the pace's row). */
+  private regionSaid = '';
 
   private writePlotButton(s: Situation): HTMLButtonElement {
     const b = el('button', {}, 'Scrivi trama');
@@ -374,7 +420,12 @@ export class StudioPanel {
     g.fillRect(0, 0, c.width, c.height);
     g.font = '10px monospace';
     for (const r of s.regions) {
-      g.strokeStyle = 'rgba(255,207,92,0.45)';
+      // The master's (T375): a filler blue-grey, a held one grey and filled.
+      if (r.kind) {
+        g.fillStyle = r.kind === 'held' ? 'rgba(180,180,180,0.18)' : 'rgba(120,170,220,0.18)';
+        g.fillRect((r.centro[0] - r.raggio - x0) * cell, (r.centro[1] - r.raggio - y0) * cell, (r.raggio * 2 + 1) * cell, (r.raggio * 2 + 1) * cell);
+      }
+      g.strokeStyle = r.kind === 'held' ? 'rgba(200,200,200,0.6)' : r.kind === 'filler' ? 'rgba(120,170,220,0.6)' : 'rgba(255,207,92,0.45)';
       g.strokeRect((r.centro[0] - r.raggio - x0) * cell + 0.5, (r.centro[1] - r.raggio - y0) * cell + 0.5, (r.raggio * 2 + 1) * cell - 1, (r.raggio * 2 + 1) * cell - 1);
       g.fillStyle = 'rgba(255,207,92,0.7)';
       g.fillText(r.nome, (r.centro[0] - r.raggio - x0) * cell + 2, (r.centro[1] - r.raggio - y0) * cell + 10);

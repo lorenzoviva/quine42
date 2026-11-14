@@ -7,7 +7,7 @@ import { CARDS_FILE } from '../kernel/cards';
 import { RELIEF_PATH } from '../kernel/relief';
 import type { FileMap } from '../kernel/types';
 import { PER_WANDERER } from '../kernel/wanderers';
-import { internalEffect } from '../kernel/internalNames';
+import { internalEffect, internalFields } from '../kernel/internalNames';
 import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
@@ -34,6 +34,8 @@ const RECIPE_FIELDS = ['id', 'name', 'inputs', 'tools', 'output', 'card'];
 const RUNE_FIELDS = ['name', 'glyph', 'color', 'element', 'description', 'card'];
 const SPELL_FIELDS = ['name', 'description', 'cost', 'card'];
 const LAYOUT_FIELDS = ['name', 'description', 'card'];
+/** What a client reads of a region of the atlas (T375): not whether the master declared it nor what it does to the places inside it. */
+const REGION_FIELDS = ['id', 'name', 'description', 'environment', 'center', 'radius'];
 
 /** The fields of an object that are named here. */
 function only(o: unknown, keys: string[]): Record<string, unknown> {
@@ -90,7 +92,21 @@ function configShown(text: string | undefined, fields: string[], aiFields: strin
 }
 
 /** Whether a file outside the modules and the settings is one a player's client has, as it is. */
-const shownWhole = (path: string) => path === ATLAS_FILE || path === RELIEF_PATH || path.startsWith('models/');
+const shownWhole = (path: string) => path === RELIEF_PATH || path.startsWith('models/');
+
+/**
+ * The atlas a player's client gets (T375): every region with the fields named above, but not the regions the master holds (`kind: held`, a valley
+ * they will write later: their plan, not the world's yet). Unreadable, nothing.
+ */
+function atlasShown(text: string | undefined): string | undefined {
+  const read = parsed(text);
+  if (!read) return undefined;
+  // An atlas of the contract 0.3 (`regioni`, `centro`) reads internal, as the kernel reads it.
+  const raw = internalFields('atlas', read) as { regions?: unknown };
+  const list: Fields[] = Array.isArray(raw.regions) ? raw.regions.filter((r): r is Fields => !!r && typeof r === 'object') : [];
+  const regions = list.filter((r) => !(r.master && r.kind === 'held')).map((r) => only(r, REGION_FIELDS));
+  return JSON.stringify({ regions }, null, 2) + '\n';
+}
 
 /**
  * The files a player's client gets (T41, T130): what it draws and walks with. Of `universe.json` and of the modules' manifests
@@ -102,6 +118,10 @@ export function playerFiles(files: FileMap): FileMap {
   const out: FileMap = {};
   for (const [path, text] of Object.entries(files)) {
     if (shownWhole(path)) out[path] = text;
+    if (path === ATLAS_FILE) {
+      const shown = atlasShown(text);
+      if (shown !== undefined) out[path] = shown;
+    }
     if (path === 'universe.json') {
       const shown = configShown(text, UNIVERSE_FIELDS);
       if (shown !== undefined) out[path] = shown;
@@ -133,7 +153,7 @@ export function playerChanges(files: FileMap, changed: string[]): FileChanges {
   }
   for (const [p, v] of Object.entries(files)) if (dirs.has(dirOf(p) ?? '')) subset[p] = v;
   const out: FileChanges = { ...playerFiles(subset) };
-  for (const p of changed) if (files[p] === undefined && (dirOf(p) || p === 'universe.json' || shownWhole(p))) out[p] = null;
+  for (const p of changed) if (files[p] === undefined && (dirOf(p) || p === 'universe.json' || p === ATLAS_FILE || shownWhole(p))) out[p] = null;
   return out;
 }
 

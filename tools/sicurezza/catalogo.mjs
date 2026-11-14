@@ -790,4 +790,5 @@ export const UNCOVERED = {
   'V-038': 'il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts',
   'V-039': 'il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts',
   'V-040': 'il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts',
+  'V-041': 'le regioni del master si provano sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/regioni.test.ts',
 };

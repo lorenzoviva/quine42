@@ -66,7 +66,10 @@ export const LIMITS = {
    */
   moveRate: 4,
   moveBurst: 8,
-  /** The master changing the pace of the world (T373, ADR-0188 §3): one every five seconds, and how many may come at once. */
+  /**
+   * The master changing the pace of the world (T373, ADR-0188 §3) or declaring a region of the atlas (T375: a commit each): one every five seconds,
+   * and how many may come at once, the two together.
+   */
   paceRate: 0.2,
   paceBurst: 4,
   /** A wanderer's requests running at once; the others wait their turn, up to this many. Nobody else's wait for them. */
@@ -93,6 +96,16 @@ interface Pace {
 }
 
 const SLOW_DOWN = 'stai andando troppo in fretta: aspetta un momento';
+
+/** What the wire says of a region the master declares (T375), cut down to its fields, each of its type; the kernel checks the rest. */
+function regionAsked(raw: unknown): Record<string, unknown> | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const text = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : undefined);
+  const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
+  const center = Array.isArray(r.center) && r.center.length === 2 ? [num(r.center[0]), num(r.center[1])] : undefined;
+  return { id: text(r.id, 64), name: text(r.name, 200), description: text(r.description, 600), center, radius: num(r.radius), kind: text(r.kind, 16), environment: text(r.environment, 120) };
+}
 
 /** Words from the wire, as long as they may be. */
 const words = (v: unknown) => String(v ?? '').slice(0, LIMITS.text);
@@ -561,7 +574,7 @@ export class SessionServer {
       if (p.moves < 1) return this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
       p.moves--;
     }
-    if (msg.t === 'pace') {
+    if (msg.t === 'pace' || msg.t === 'region') {
       if (p.paceChanges < 1) return this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
       p.paceChanges--;
     }
@@ -678,6 +691,13 @@ export class SessionServer {
         // The master's alone (T373); the kernel repairs it and never goes above the lobby (`placesPerMinute`, ADR-0188 §3).
         const placesPerMinute = typeof msg.placesPerMinute === 'number' ? msg.placesPerMinute : undefined;
         return k.setPace({ mode: msg.mode, ...(placesPerMinute !== undefined ? { placesPerMinute } : {}) }, c.id).then((r) => this.answer(c, seq, r.ok ? { ok: true, value: JSON.stringify(r.pace) } : { ok: false, reason: r.reason }));
+      }
+      case 'region': {
+        // The master's alone (T375); the kernel checks every field (`masterRegion`): here only what is a text or a number goes on.
+        const r = msg.op === 'declare' ? regionAsked((msg as { region?: unknown }).region) : undefined;
+        const ask = msg.op === 'declare' ? k.declareRegion(r, c.id) : msg.op === 'release' ? k.releaseRegion(typeof msg.id === 'string' ? msg.id.slice(0, 64) : undefined, c.id) : undefined;
+        if (!ask) return this.answer(c, seq, { ok: false, reason: 'richiesta non valida' });
+        return ask.then((a) => this.answer(c, seq, a.ok ? { ok: true, value: JSON.stringify(a.region) } : { ok: false, reason: a.reasons.join(' · ') }));
       }
       case 'follow':
         return this.answer(c, seq, this.watch(c, msg.id));
