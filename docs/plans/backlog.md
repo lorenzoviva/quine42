@@ -5365,13 +5365,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, la pausa dalla console e l'avviso nell'HUD.
 - Quando è fatto: commit su `task/T373`.
 
-### T374 · Campagna: le direttive del master — `da fare`
+### T374 · Campagna: le direttive del master — `fatto` (`361769b6`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
 - Step: 43
 - Contesto: riga 4 del § 6 di `docs/design/campagna-master.md`, ADR-0188 via E; D54.5 (autore 13/11, la via di mezzo): un file solo a sezioni, `world/campaign.md`, scritto da master e Referente; le direttive scritte dal master **non** passano da Jev, `metaBreak` locale sempre, Jev `text.fourthwall` una manopola nei privati.
 - Cosa fare: `campaign.md` a sezioni in `Council.context` (ogni agente la sua sezione e «Per tutti»; l'Attore solo «Per tutti»), l'incarico `direttiva` del Referente con la quarta parete come sopra, `cleanText` e i tetti, l'editor solo del master (`owns`); la misura in `lab/scripts/prompt-tokens.ts --campaign`; voce di sicurezza (§ 7 punto 7: il testo del master non va a Jev né ai client).
 - Test: richieste registrate con la sezione giusta; una direttiva con meta-gioco è rifiutata col motivo; `tests/regolazioni.test.ts` sui prompt; suite e typecheck coi turni.
 - Quando è fatto: commit su `task/T374`.
+- Esito: `world/campaign.md` a sezioni nelle richieste del Concilio (ognuno «Per tutti» e la sua; Arbitro e Referente tutto; Attore solo «Per tutti»; decisioni chiuse niente), validatore con sezioni e tetti, quarta parete solo locale (le righe fermate restano fuori e il master lo sa, mai Jev), incarico `directive` del Referente solo per il master (`cleanText` spostato in `src/kernel/cleantext.ts`, tetti, giorno del mondo, un rinvio col motivo), editor che mostra il file anche se manca, misura `prompt-tokens.ts --campaign` (46/46; 0,064 $/h pieni, 0,021 in cache), V-036 con il suo test, ADR-0191, AGENTS.md, architettura, glossario, kernel 0.7.1; manca la manopola di Jev negli universi privati (con T366); all'integrazione con T372 la mia V-036 diventa V-037 e la versione va riconciliata.
 
 ### T375 · Campagna: le regioni del master (riempitivo e trattenuta) — `da fare` (dipende da T373)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
