@@ -22,6 +22,8 @@ export const SERVER_FOLDERS = {
   geminiSpend: ['.gemini-spend.json', '.spesa-gemini.json'],
   /** What the key of TypeSafe spent today (ADR-0157, `typesafeProxy.ts`): born with the contract 0.6, it has no name of before. */
   typesafeSpend: ['.typesafe-spend.json'],
+  /** What the server's own key of OpenRouter spent today (ADR-0197, `openrouterProxy.ts`): born with the contract 0.7, it has no name of before. */
+  openrouterSpend: ['.openrouter-spend.json'],
   /** The handmade cards, one file per account (ADR-0161, `handmade.ts`): born with the contract 0.4, it has no name of before. */
   handmade: ['.handmade'],
   /** The private universes, one file per universe: guests, invites (ADR-0188, ADR-0194, `campaign.ts`): born with the contract 0.7, it has no name of before. */

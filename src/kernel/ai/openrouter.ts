@@ -20,6 +20,16 @@ import { JEV_MAX_BODY, JEV_MAX_QUESTIONS, JEV_MODEL, jevBody, readJevAnswers, ty
 export const OPENROUTER_READ_ON = '2026-11-14';
 /** The API of OpenRouter, for the scripts of the lab; the game goes through the gate (`/api/openrouter`, T363). */
 export const OPENROUTER_API = 'https://openrouter.ai/api';
+/**
+ * The header with which a call names whose key may pay (T363, ADR-0197): ids separated by commas, in order (the wanderer the call is for, or the
+ * turn of the commons as the kernel sorts it); none, the server's key. The gate reads it from a world over the channel, never from a stranger.
+ */
+export const PAYERS_HEADER = 'x-quine-payers';
+/** The header with which the gate says whose key answered: a wanderer's id; absent on the server's key. */
+export const PAID_BY_HEADER = 'x-quine-paid-by';
+
+/** Whose keys may pay a call asked by `chi`, in order (T363): what the kernel decides; empty, the server's key. */
+export type KeyPayers = (chi: string) => string[];
 
 export interface OpenRouterModel {
   /** OpenRouter's id, as asked. */
@@ -170,6 +180,18 @@ function refused(what: string, status: number, message: string): Error {
   return Object.assign(new Error(`${what}: ${status} ${message}`), { status });
 }
 
+/** The headers of a call: JSON, and whose keys may pay it (T363) where the kernel says. */
+function payersHeader(keyPayers: KeyPayers | undefined, chi: string | undefined): Record<string, string> {
+  const payers = keyPayers?.(chi ?? 'comune') ?? [];
+  return { 'Content-Type': 'application/json', ...(payers.length ? { [PAYERS_HEADER]: payers.join(',') } : {}) };
+}
+
+/** Whose key answered, as the gate said it (T363): a valid id, or nothing. */
+function paidBy(r: Pick<Response, 'headers'>): Pick<CallRecord, 'paidBy'> {
+  const id = r.headers?.get?.(PAID_BY_HEADER);
+  return id && /^[a-z0-9][a-z0-9_-]{0,39}$/.test(id) ? { paidBy: id } : {};
+}
+
 /** What a failed request becomes in the ledger, and its error: never repeated, it may have been billed. */
 function unanswered(e: unknown): { failed: 'timeout' | 'errore'; message: string } {
   const timeout = /abort|timeout/i.test(`${(e as Error)?.name} ${(e as Error)?.message}`);
@@ -186,6 +208,8 @@ export interface OpenRouterOptions {
   thinking?: Thinking;
   /** Milliseconds before a request is given up (default 120 s); it is then not repeated. */
   timeout?: number;
+  /** Whose keys may pay each call (T363): the kernel's turn; without, the server's key. */
+  keyPayers?: KeyPayers;
 }
 
 /** The models that write, through OpenRouter: the same AiModels as GeminiAiModels, the same calls, the same text back. */
@@ -194,6 +218,8 @@ export class OpenRouterAiModels implements AiModels {
   readonly usage = emptyUsage();
   limits: Limits;
   onCall?: (r: CallRecord) => void;
+  /** Whose keys may pay each call (T363, ADR-0197), in order: the kernel sets it once it is up; without, the server's key. */
+  keyPayers?: KeyPayers;
   private textGate = new Semaphore(4);
   private endpoint: string;
   private fetchImpl: typeof fetch;
@@ -209,6 +235,7 @@ export class OpenRouterAiModels implements AiModels {
     this.limits = opts.limits;
     this.endpoint = opts.endpoint ?? '/api/openrouter';
     this.fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
+    this.keyPayers = opts.keyPayers;
   }
 
   /** Whether the gate has a key for whoever plays here (T363). */
@@ -248,6 +275,7 @@ export class OpenRouterAiModels implements AiModels {
       this.usage.thoughtTokens += r.thoughts;
       this.onCall?.(r);
     };
+    const headers = payersHeader(this.keyPayers, call.chi);
     let last: Error | undefined;
     let retries = 0;
     for (let attempt = 0; attempt <= RETRIES; attempt++) {
@@ -255,7 +283,7 @@ export class OpenRouterAiModels implements AiModels {
       try {
         r = await this.fetchImpl(`${this.endpoint}/v1/chat/completions`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body,
           signal: AbortSignal.timeout(this.opts.timeout ?? 120_000),
         });
@@ -272,7 +300,7 @@ export class OpenRouterAiModels implements AiModels {
         // An answer, or an error OpenRouter could only put in the body: either way what it counted is counted, and the error is not repeated.
         const broken = 'error' in answerText(j);
         if (broken) this.usage.failures++;
-        report(j, { retries, ...(broken ? { failed: 'errore' as const } : {}) });
+        report(j, { retries, ...paidBy(r), ...(broken ? { failed: 'errore' as const } : {}) });
         return j;
       }
       last = refused(`OpenRouter ${model}`, r.status, short(typeof j?.error?.message === 'string' ? j.error.message : r.statusText));
@@ -311,11 +339,15 @@ export interface OpenRouterJevOptions {
   fetchImpl?: typeof fetch;
   /** Milliseconds before a request is given up (default 20 s): Jev answers in a few hundred. */
   timeout?: number;
+  /** Whose keys may pay each decision (T363): the kernel's turn; without, the server's key. */
+  keyPayers?: KeyPayers;
 }
 
 /** Jev of TypeSafe through OpenRouter (D52): the same decisions as JevDecisionModels, the same answers, OpenRouter's ids and costs. */
 export class OpenRouterDecisionModels implements DecisionModels {
   readonly name = 'jev-openrouter';
+  /** Whose keys may pay each decision (T363, ADR-0197): as for the models that write. */
+  keyPayers?: KeyPayers;
   /**
    * Every request asks for an endpoint that keeps nothing (`provider.zdr`): OpenRouter refuses rather than send it elsewhere. A fact of this door,
    * not a permission: whether the free text of a wanderer may go to Jev is still D45.3 (`JEV_ZERO_RETENTION`), the author's.
@@ -330,6 +362,7 @@ export class OpenRouterDecisionModels implements DecisionModels {
   constructor(private opts: OpenRouterJevOptions = {}) {
     this.endpoint = opts.endpoint ?? '/api/openrouter';
     this.fetchImpl = opts.fetchImpl ?? ((...a) => fetch(...a));
+    this.keyPayers = opts.keyPayers;
   }
 
   async decide(call: DecisionCall): Promise<Partial<Decisions>> {
@@ -365,6 +398,7 @@ export class OpenRouterDecisionModels implements DecisionModels {
       this.usage.inputTokens += r.prompt;
       this.onCall?.(r);
     };
+    const headers = payersHeader(this.keyPayers, call.chi);
     let last: Error | undefined;
     let retries = 0;
     for (let attempt = 0; attempt <= RETRIES; attempt++) {
@@ -372,7 +406,7 @@ export class OpenRouterDecisionModels implements DecisionModels {
       try {
         r = await this.fetchImpl(`${this.endpoint}/alpha/decisions`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body,
           signal: AbortSignal.timeout(this.opts.timeout ?? 20_000),
         });
@@ -388,10 +422,10 @@ export class OpenRouterDecisionModels implements DecisionModels {
         if (j?.error) {
           // Accepted, then broken off: what it counted is counted, and the rule answers.
           this.usage.failures++;
-          report(j, { retries, failed: 'errore' });
+          report(j, { retries, ...paidBy(r), failed: 'errore' });
           throw new Error(`Jev ${model}: ${typeof j.error.code === 'number' ? j.error.code : 502} ${short(String(j.error.message ?? 'errore del fornitore'))} (non ripetuta)`);
         }
-        report(j, { retries });
+        report(j, { retries, ...paidBy(r) });
         return j ?? {};
       }
       last = refused(`Jev ${model}`, r.status, short(typeof j?.error?.message === 'string' ? j.error.message : r.statusText));

@@ -85,6 +85,12 @@ chiave (`productionProblems`, ADR-0112). Le alternative e i numeri sono nello st
    *Consiglio: sì.*
 7. Per chi ospita: verificatore a inviti oltre a Firebase? *Consiglio: sì, insieme agli universi privati di T347.*
 
+## Applicazione dei punti 2, 3 e 4 (T363)
+
+Il varco `OpenRouterGate`, le chiavi dei giocatori nella memoria del server, la rotta del PKCE con lo scambio sul server, `chi` → chiave nel canale dei
+mondi, il turno delle comuni e il ledger come registro della spesa sono in [ADR-0197](0197-le-chiavi-dei-giocatori-e-il-turno-delle-comuni.md). Il
+collegamento nel gioco e nel sito, e da soli sul PC il file accanto agli universi, sono di T364.
+
 ## Applicazione del punto 8 (T366)
 
 Il verificatore a inviti è in [ADR-0194](0194-l-universo-privato-e-il-verificatore-a-inviti.md), con gli universi privati di ADR-0188 (D52.7, D54.8):

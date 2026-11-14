@@ -4,11 +4,12 @@ import path from 'node:path';
 import { defineConfig, loadEnv, searchForWorkspaceRoot } from 'vite';
 import { GeminiGate, geminiProxy } from './server/geminiProxy';
 import { TypeSafeGate, typesafeProxy } from './server/typesafeProxy';
+import { OpenRouterGate, openrouterProxy, worldsPayWith } from './server/openrouterProxy';
 import { hideUniverses } from './server/hidden';
 import { securityHeaders } from './server/csp';
 import { universeStore, universesPerAccount } from './server/universeStore';
 import { newSecret } from './server/access';
-import { sessionServer, getActiveWorld, expelFrom, tellPace, tellPrivate, wanderersIn } from './server/session';
+import { sessionServer, getActiveWorld, expelFrom, tellKeys, tellPace, tellPrivate, wanderersIn } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
@@ -35,6 +36,9 @@ export default defineConfig(({ mode }) => {
   const typesafe = new TypeSafeGate({ apiKey: env.TYPESAFE_KEY, dailyCap: env.TYPESAFE_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'typesafeSpend') });
   // How the worlds of this process prove themselves to the store (T120, ADR-0102): only in memory, a new one at every start.
   const internal = newSecret();
+  // The only holder of the keys of OpenRouter (T363, ADR-0197): the players' in memory, the server's from `.env` with its cap; the worlds hear who holds one.
+  const openrouter = new OpenRouterGate({ apiKey: env.OPENROUTER_API_KEY, dailyCap: env.OPENROUTER_TETTO_GIORNALIERO, ledgerFile: serverPath(universesDir, 'openrouterSpend') });
+  openrouter.onChange = (keys) => void tellKeys(keys);
   return {
     // Universes live next to the kernel, each a git repository of its own (ignored by the kernel's).
     // The multiplayer games (T38): each world in a process of its own (T127, ADR-0110), clients over /api/session.
@@ -46,6 +50,7 @@ export default defineConfig(({ mode }) => {
       hideUniverses(process.cwd(), universesDir),
       geminiProxy(gemini),
       typesafeProxy(typesafe),
+      openrouterProxy(openrouter, { accounts, internal }),
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
       universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()), worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
       accountRoute(accounts),
@@ -62,7 +67,7 @@ export default defineConfig(({ mode }) => {
       walletRoute({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(env) }),
       // The handmade cards (T293, ADR-0161): only with `laboratori` in site/beta.json, read at every request; the programs checked here (only this machine listens).
       handmadeRoute({ accounts, universesDir, labs: () => labsOn(process.cwd()), checker: inlineChecker() }),
-      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined, typesafe.direct()),
+      sessionServer(accounts, gemini.direct(), internal, { universesDir, grantCap: grantCapOf(env, !!accounts?.verify), platformFee: platformFeeOf(env) }, Number(env.QUINE_MONDO_MEMORIA) || undefined, Number(env.QUINE_MONDI_MASSIMI) || undefined, typesafe.direct(), () => worldsPayWith(openrouter, { gemini: gemini.available, accounts: !!accounts?.verify })),
       subscriptionQueue(serverPath(path.resolve(process.cwd(), 'universes'), 'queue'), { enabled: queueWanted(env) }),
       // The site's videos, from the same folder as in production (T244, ADR-0131), and the instructions of the beta: what is off never reaches the build.
       videoRoute({ folder: videoFolder(env), accounts }),
