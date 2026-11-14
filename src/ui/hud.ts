@@ -9,6 +9,7 @@ import { ofThe } from '../kernel/corona';
 import { runeGlyph } from '../kernel/runes';
 import { HELD_NOTICE, HELD_NOTICE_MASTER } from '../kernel/worldPace';
 import { pressKey } from './touch';
+import { closeButton } from './panels';
 
 /** A phone held upright (T388): the short side under this, with fingers, and the game asks to be turned. */
 export const UPRIGHT_SMALL = '(orientation: portrait) and (max-width: 600px)';
@@ -97,8 +98,7 @@ export class Hud {
     };
     const button = quiet(el('button', { id: 'helpbtn', type: 'button', 'aria-label': 'comandi', title: 'comandi' }, '?'));
     button.addEventListener('click', () => this.toggleKeyHelp());
-    const close = quiet(el('button', { class: 'close', type: 'button', 'aria-label': 'chiudi' }, '✕'));
-    close.addEventListener('click', () => this.toggleKeyHelp(false));
+    const close = closeButton(() => this.toggleKeyHelp(false));
     const all = quiet(el('button', { class: 'all', type: 'button' }, "Tutto l'aiuto ", el('kbd', {}, 'H')));
     all.addEventListener('click', () => {
       this.toggleKeyHelp(false);
@@ -143,7 +143,7 @@ export class Hud {
   }
 
   showDialog(speaker: string, text: string): void {
-    this.dialog.replaceChildren(el('div', { class: 'speaker' }, speaker), el('div', { class: 'text' }, text));
+    this.dialog.replaceChildren(el('div', { class: 'speaker' }, speaker), el('div', { class: 'text' }, text), closeButton(() => this.hideDialog()));
     this.dialog.hidden = false;
     this.dialogTimer = 8;
   }

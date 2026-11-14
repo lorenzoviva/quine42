@@ -8,6 +8,7 @@ import { CAMPAIGN_FILE, campaignTemplate, readCampaign } from '../kernel/campaig
 import { wordsOf } from '../kernel/agents/council';
 import { languageOf } from '../kernel/language';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 
 export class Editor {
   private root = $('#editor');
@@ -24,7 +25,7 @@ export class Editor {
   constructor(private kernel: Kernel) {
     const save = el('button', { class: 'primary' }, 'Salva  Ctrl+S');
     const check = el('button', {}, 'Valida');
-    const close = el('button', {}, 'Chiudi  Esc');
+    const close = el('button', { class: 'shut' }, 'Chiudi  Esc');
     save.onclick = () => this.save(false);
     check.onclick = () => this.check();
     close.onclick = () => this.close();
@@ -34,7 +35,7 @@ export class Editor {
     this.publishBtn.hidden = true;
     const code = el('div', { class: 'code' }, this.gutter, this.area);
     this.root.append(
-      el('div', { class: 'head' }, this.title, el('div', { class: 'actions' }, check, save, this.forceBtn, this.publishBtn, close)),
+      el('div', { class: 'head' }, this.title, el('div', { class: 'actions' }, check, save, this.forceBtn, this.publishBtn, close), closeButton(() => this.close())),
       el('div', { class: 'body' }, this.list, code),
       this.status,
     );

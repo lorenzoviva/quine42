@@ -6,6 +6,7 @@ import type { GuestsView } from '../kernel/universes';
 import { tallyLine } from '../kernel/ai/usage';
 import { feePercent } from '../kernel/credits';
 import { $, el } from './dom';
+import { closeButton } from './panels';
 import { feedLine } from './feed';
 import { paceRow } from './pace';
 
@@ -39,8 +40,7 @@ export class Console {
   dev = false;
 
   constructor(private kernel: Kernel) {
-    const close = el('button', { class: 'close' }, '×');
-    close.onclick = () => this.close();
+    const close = closeButton(() => this.close());
     this.root.append(el('div', { class: 'head' }, el('span', { class: 'brand' }, 'RUNE // kernel'), this.tabs, close), this.body);
     this.root.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') this.close();

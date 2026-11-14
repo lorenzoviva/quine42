@@ -163,6 +163,8 @@
   --measure-610: 610px;
   --measure-843: 843px;
   --measure-1364: 1364px;
+  /* The least a finger hits (44 × 44 CSS px, WCAG 2.5.5): the next step of the scale above it (T393). */
+  --touch-target: var(--measure-47);
 
   /* --- Comic & Arcade Hard Borders & Shadows --- */
   --border-ink: 2px solid var(--comic-ink);
