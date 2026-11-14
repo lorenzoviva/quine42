@@ -25,7 +25,7 @@ Aggiornato il 14/11/2026, epoca 408 (claude). Crediti: vedi `stato`.
 
 0. **In corso:** T242. **Da integrare:** T373 via T385 (pronto, priorità 1). T355 sbloccato il 14/11. **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T385, T355, T370, T363; poi T375→T377; T363→T364/T367/T368.
 1. **Da approvare dall'autore:** T369 (dopo).
-2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
+2. **Crediti (14/11 13:23 CET):** Claude settimana 34 %, 5h 29 % (reset 14:59); Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
 
