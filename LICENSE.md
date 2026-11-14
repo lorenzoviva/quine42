@@ -1,8 +1,8 @@
 # Licenza / License — QUINE42
 
-Copyright (c) 2026 Lorenzo Viva <lorenzo.vaccaro@hotmail.com>
+Copyright (c) 2026 Lorenzo Vaccaro <lorenzo.vaccaro@hotmail.com>
 
-Required Notice: Copyright 2026 Lorenzo Viva (https://github.com/lorenzoviva/quine42)
+Required Notice: Copyright 2026 Lorenzo Vaccaro (https://github.com/lorenzoviva/quine42)
 
 Questo file contiene, in quest'ordine: chi copre che cosa, due sintesi non vincolanti (italiano e inglese), il testo di
 **PolyForm Noncommercial 1.0.0** alla lettera (§ 1), i **permessi aggiuntivi** del titolare (§ 2), la licenza **CC BY-NC-SA 4.0**
@@ -90,8 +90,8 @@ For commercial use or an exception, contact the author.
 
 Il testo che segue è quello ufficiale, senza modifiche
 ([fonte](https://github.com/polyformproject/polyform-licenses/blob/1.0.0/PolyForm-Noncommercial-1.0.0.md)). Il «licensor» è
-Lorenzo Viva; la riga `Required Notice:` è in cima a questo file. /
-The following is the official text, unmodified. The licensor is Lorenzo Viva; the `Required Notice:` line is at the top of this file.
+Lorenzo Vaccaro; la riga `Required Notice:` è in cima a questo file. /
+The following is the official text, unmodified. The licensor is Lorenzo Vaccaro; the `Required Notice:` line is at the top of this file.
 
 # PolyForm Noncommercial License 1.0.0
 
@@ -223,7 +223,7 @@ International**. Il testo legale, il solo vincolante, è qui: <https://creativec
 The content listed in "What covers what" is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International**
 license. The legal code, which alone is binding, is linked above.
 
-Attribuzione richiesta / Required attribution: «QUINE42 © 2026 Lorenzo Viva, CC BY-NC-SA 4.0,
+Attribuzione richiesta / Required attribution: «QUINE42 © 2026 Lorenzo Vaccaro, CC BY-NC-SA 4.0,
 https://github.com/lorenzoviva/quine42».
 
 La sintesi di Creative Commons (non è la licenza) / The Creative Commons summary (not the license):
