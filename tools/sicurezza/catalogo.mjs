@@ -788,4 +788,5 @@ export const UNCOVERED = {
   'V-036': 'chi paga la partita si prova sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/spese-master.test.ts',
   'V-037': 'le direttive del master si vedono solo dentro il kernel e nei file che escono: le prova tests/sicurezza/direttive.test.ts',
   'V-038': 'il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts',
+  'V-039': 'il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts',
 };

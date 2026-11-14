@@ -439,6 +439,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/ospiti.test.ts`
 - Esito: chiusa da T366 (ADR-0194), 14/11/2026, branch `task/T366`: le contromisure nascono con l'universo privato. Resta, accettato: chi conosce già il nome di un universo privato può sapere che esiste (un `create` con quel nome risponde «esiste già», un socket non è rifiutato subito come per un nome senza universo); non può leggerlo né entrarci, e nessun elenco glielo dice.
 
+### V-039 · Il ritmo del mondo: il messaggio `pace` e il file `.campaign`
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: il messaggio `pace` (`src/session/server.ts`, `LIMITS.paceRate`), `Kernel.setPace` e `applyPace` (`src/kernel/kernel.ts`, `src/kernel/worldPace.ts`), la rotta `/api/universe/<nome>/pace` e `universes/.campaign/<nome>.json → pace` (`server/campaign.ts`, `server/universeStore.ts`), il canale dei mondi (`WorldOpen.pace`, `setPace`, il messaggio `pace` del mondo al server, `server/worldHost.ts`, `server/session.ts`)
+- Proprietà violata: il ritmo lo cambia solo il master (ADR-0188 § 7 punti 5-6): un giocatore, un estraneo, un anonimo o il mondo non fermano né rallentano la partita degli altri; nessun ritmo detto fa pianificare al mondo più luoghi nuovi al minuto di quanti ne ha regolati la lobby, né accorcia una pausa (ADR-0133: chi è entrato con una stima spende al più quella); il file `.campaign` lo scrive solo il server, mai il processo del mondo (regola 8g), e il ritmo non tocca ospiti né inviti
+- Prova: test (T373)
+- Contromisura: il messaggio `pace` solo da `isMaster` (anche nel kernel, `setPace`), con un ritmo suo (`LIMITS.paceRate`, `paceBurst`) oltre a quello di ogni messaggio; il valore si ripara (`readPace`: tre modi, i luoghi al minuto interi nella scala della lobby, solo per `slow`) e si usa sempre col minimo della lobby (`placesPerMinute`, `paceGap`): il ritmo scende soltanto. La rotta `pace`: solo il master (`owns`), mai il token del mondo (`who.server`), solo JSON, 4 KiB, sotto `HEAVY`; un universo privato a chi non lo vede risponde come un nome che non c'è. Il mondo riceve il ritmo per valore (all'avvio, `WorldOpen.pace`; dalla rotta, `setPace`) e quando il master lo cambia sul filo lo dice al server col solo valore: il server lo ripara e lo scrive sotto il lucchetto (`keepPace`), solo il campo `pace`; un mondo compromesso può al più fermare o rallentare sé stesso. Un file illeggibile non ferma il mondo (`keptPace`: normale)
+- Task: T373
+- Test: `tests/sicurezza/ritmo.test.ts`, `tests/ritmo.test.ts`
+- Esito: chiusa da T373 (ADR-0196), 14/11/2026, branch `task/T373`: le contromisure nascono con il ritmo.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -483,6 +494,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-036 | — | — | `spese-master.test.ts` | chi paga la partita si prova sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/spese-master.test.ts |
 | V-037 | — | — | `direttive.test.ts` | le direttive del master si vedono solo dentro il kernel e nei file che escono: le prova tests/sicurezza/direttive.test.ts |
 | V-038 | — | — | `ospiti.test.ts` | il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts |
+| V-039 | — | — | `ritmo.test.ts` | il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

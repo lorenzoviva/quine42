@@ -7,6 +7,7 @@ import { wornSlots } from '../kernel/wearing';
 import { $, el } from './dom';
 import { ofThe } from '../kernel/corona';
 import { runeGlyph } from '../kernel/runes';
+import { HELD_NOTICE, HELD_NOTICE_MASTER } from '../kernel/worldPace';
 
 /** Where icons come from: photographs of the items' models (src/render/thumbs.ts), set by main. */
 export const icons: { get?: (item: string) => Promise<string | undefined>; model?: (model: string, tint?: string, seed?: number) => Promise<string | undefined> } = {};
@@ -33,6 +34,8 @@ export class Hud {
   private zone = $('#zone');
   private needsEl = $('#needs');
   private questsEl = $('#quests');
+  private pausedEl = $('#paused');
+  private lastPaused = '';
   private lastQuests = '';
   private lastNeeds = '';
   private lastChunk = '';
@@ -95,6 +98,14 @@ export class Hud {
       this.place.classList.remove('fresh');
       void this.place.offsetWidth;
       this.place.classList.add('fresh');
+    }
+
+    // The world held by the master (T373): outside the world, for as long as it is (rule 0: nothing in the world says it).
+    const paused = k.paceHeld() ? (k.isMaster() ? HELD_NOTICE_MASTER : HELD_NOTICE) : '';
+    if (paused !== this.lastPaused) {
+      this.lastPaused = paused;
+      this.pausedEl.textContent = paused;
+      this.pausedEl.hidden = !paused;
     }
 
     if (k.zone === 'corona') {

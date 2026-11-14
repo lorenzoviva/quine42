@@ -8,7 +8,7 @@ import { hideUniverses } from './server/hidden';
 import { securityHeaders } from './server/csp';
 import { universeStore, universesPerAccount } from './server/universeStore';
 import { newSecret } from './server/access';
-import { sessionServer, getActiveWorld, expelFrom, tellPrivate, wanderersIn } from './server/session';
+import { sessionServer, getActiveWorld, expelFrom, tellPace, tellPrivate, wanderersIn } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => {
       geminiProxy(gemini),
       typesafeProxy(typesafe),
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
-      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()), worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate } }),
+      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()), worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
       accountRoute(accounts),
       // Without payments (the open beta, ADR-0189) not even here: the game and the site see what the production server would show.
       paymentsOf(env) !== 'off' && stripeRoute({

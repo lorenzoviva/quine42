@@ -38,6 +38,8 @@ export class Stories {
    * there, does it, says the line (and remembers it). Seen or not, it happened.
    */
   plotTick(): void {
+    // Held (T373): the beats wait; going on again, those due meanwhile happen at the next look.
+    if (this.host.paused) return;
     const phase = `${this.host.day()}|${this.host.phase()}`;
     if (phase === this.worldPhase) return;
     const first = !this.worldPhase;
@@ -82,7 +84,7 @@ export class Stories {
   /** The Narrator weaves a horizontal plot among existing people and places (westworld-like). */
   async weaveStory(force = false): Promise<Plot | undefined> {
     const society = readPeople(this.host.files());
-    if (!force && (this.plotsWoven >= 3 || society.people.length < 3 || this.host.offline || this.host.generationHeld)) return undefined;
+    if (!force && (this.plotsWoven >= 3 || society.people.length < 3 || this.host.offline || this.host.generationHeld || this.host.paused)) return undefined;
     this.plotsWoven++;
     const pc = this.host.wandererCarpet();
     const places = this.host.directionsAt(pc.x, pc.y).join('\n');

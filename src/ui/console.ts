@@ -7,6 +7,7 @@ import { tallyLine } from '../kernel/ai/usage';
 import { feePercent } from '../kernel/credits';
 import { $, el } from './dom';
 import { feedLine } from './feed';
+import { paceRow } from './pace';
 
 type Tab = 'log' | 'faults' | 'commits' | 'modules' | 'ai' | 'agent' | 'universe';
 
@@ -145,6 +146,7 @@ export class Console {
       case 'ai': {
         const u = k.ai.usage;
         return [
+          ...(k.isMaster() ? [paceRow(k, () => this.tab === 'ai' && this.isOpen && this.render())] : []),
           el('div', { class: 'note' }, `Modelli: ${k.ai.name} (${k.config.ai.textModel}). Chiamate ${u.text}/${k.ai.limits.text}, errori ${u.failures} (scadute ${u.timeouts}), token ${u.inputTokens} (cache ${u.cachedTokens}) → ${u.outputTokens} + ragionamento ${u.thoughtTokens}. Costo: ${tallyLine(k.usage.session)}. Ogni proposta passa dall'Arbitro e dal validatore.`),
           ...k.feed().slice(-150).reverse().map((e) => feedLine(e)),
         ];

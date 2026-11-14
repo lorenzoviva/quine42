@@ -19,6 +19,7 @@ import type { Picture } from '../mj/photo';
 import { DAY_PHASES, MASTER_BEATS, readPeople, WHERES } from '../kernel/npc/model';
 import { italianName } from '../kernel/internalNames';
 import { $, el } from './dom';
+import { paceRow } from './pace';
 import { icons } from './hud';
 
 /** A showcase and what it shows (the kernel's `ui:showcase` and `studio:showcase`). */
@@ -292,6 +293,8 @@ export class StudioPanel {
       ...(this.k.follow ? section('player', of('player'), 'Nessun giocatore collegato.') : []),
       ...section('chunk', live, 'Il Cartografo non sta pianificando nessun luogo.'),
       ...(queued ? [el('div', { class: 'note' }, `In coda: ${queued} luogh${queued === 1 ? 'o' : 'i'} solo abbozzat${queued === 1 ? 'o' : 'i'}.`)] : []),
+      // The pace beside the queue (T373): the master slows or holds what the world does by itself.
+      ...(this.k.isMaster() ? [paceRow(this.k, () => this.situation({ ...this.k.situation() }))] : []),
       ...section('plot', of('plot'), 'Nessuna trama aperta.'),
       // The master writes a plot by hand (T376): it plays as the Narrator's do.
       ...(this.k.isMaster() ? [el('div', { class: 'row' }, this.writePlotButton(s))] : []),

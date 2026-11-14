@@ -77,6 +77,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
+import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -614,6 +615,11 @@ export class Kernel {
    * answers for them, so they play with the models too. The server says it by value (the private universe is T366); false, as everywhere today.
    */
   privateWorld = false;
+  /**
+   * The pace of the world (T373, ADR-0188 §3): the master's knob that only goes down. On a server it comes by value from `.campaign` when the
+   * world starts and from the route; here it is what the world does, never written in the universe.
+   */
+  private pace: WorldPace = NORMAL_PACE;
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
   private capBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
@@ -1882,7 +1888,7 @@ export class Kernel {
     if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!noQuota && !this.chunkQuota()) {
-      if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
+      if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
       ch.held = true;
       return;
     }
@@ -1899,9 +1905,11 @@ export class Kernel {
    * `ai.placesPerMinute` in a minute of the world, for everyone together (T40, costs).
    */
   private chunkQuota(): boolean {
-    if (!this.manyPlayers()) return true;
+    // Alone the lobby's quota does not apply; the master's pace still does (T373): slower, or none at all.
+    const most = placesPerMinute(this.pace, this.manyPlayers() ? (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE) : Infinity);
+    if (most === Infinity) return true;
     this.chunksMade = this.chunksMade.filter((t) => this.time - t < 60);
-    return this.chunksMade.length < (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE);
+    return this.chunksMade.length < most;
   }
 
   private terrainSummary(draft: string): string {
@@ -2282,18 +2290,21 @@ export class Kernel {
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
-    if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
+    // Held (T373): what a known place would ask the Council for waits; the place comes back with it when it is loaded again.
+    const asks = !this.paceHeld();
+    if (asks && unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
         const tile = place.pick('outside');
         if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
       });
     });
-    for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
+    for (const f of asks ? (plan.fresh ?? []) : []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     if (away !== undefined) this.npc.onReturn(ch.key, away);
     this.bus.emit('chunk:planned', { key: ch.key });
-    // The rhythms of the world (T45b): stretched by the coefficients of generation.
+    // The rhythms of the world (T45b): stretched by the coefficients of generation; none while the world is held (T373).
+    if (!asks) return;
     if (onBeat(this.plannedCount, 10, coef.packs)) void this.growContent('esplorazione');
     if (onBeat(this.plannedCount, 7, coef.inhabitants)) void this.growCast(plan.place);
     if ((this.plannedCount === 3 && coef.sessions > 0) || onBeat(this.plannedCount, 12, coef.sessions)) void this.holdSession();
@@ -2868,7 +2879,7 @@ export class Kernel {
    * intervene (items, a new inhabitant, a new entity). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
-    if (!force && (this.sessions >= 4 || this.generationHeld || this.ai.name === 'offline')) return 'none';
+    if (!force && (this.sessions >= 4 || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return 'none';
     this.sessions++;
     // The summary goes to the Arbiter's prompt (English since T310); the rules, people and places are the world's words.
     const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'possible' : 'not possible'}`).join('\n');
@@ -2896,7 +2907,7 @@ export class Kernel {
 
   async growCast(chunk?: ChunkInfo, force = false): Promise<boolean> {
     const max = this.config.ai.maxCast ?? 3;
-    if (!force && (this.castUsed >= max || this.generationHeld || this.ai.name === 'offline')) return false;
+    if (!force && (this.castUsed >= max || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return false;
     const people = [...this.modules.values()].filter((m) => m.manifest.persona);
     if (people.length >= 14) return false;
     this.castUsed++;
@@ -6146,6 +6157,45 @@ export class Kernel {
     return !this.manyPlayers() || (!!id && id === (this.gameSetup().master ?? SOLO));
   }
 
+  /** The pace of the world now (T373, ADR-0188 §3). */
+  worldPace(): WorldPace {
+    return this.pace;
+  }
+
+  /** Whether the master holds the world (`hold`): new places stay drafts and nothing the world does by itself calls the models. */
+  paceHeld(): boolean {
+    return this.pace.mode === 'hold';
+  }
+
+  /** A pause of the Sculptor or of the Musician as the pace makes it: longer in a slow world, never shorter. */
+  pacedGap(gap: number): number {
+    return paceGap(gap, this.pace);
+  }
+
+  /**
+   * The master sets the pace of the world (T373): `normal`, `slow` (fewer new places a minute, never above the lobby's) or `hold`. Only the master;
+   * on a mirror the world decides (the thin client sends it). The pace as it is now, or why not.
+   */
+  async setPace(raw: unknown, by: string = this.wanderer().id): Promise<PaceAnswer> {
+    if (this.mirror) return { ok: false, reason: 'il ritmo lo decide il mondo, non uno specchio' };
+    if (!this.isMaster(by)) return { ok: false, reason: 'solo il master decide il ritmo del mondo' };
+    return { ok: true, pace: this.applyPace(raw) };
+  }
+
+  /**
+   * The pace as the server says it (`.campaign`, the route) or as the master set it, repaired; `pace` on the bus when it changes (the world's
+   * process tells its server, which keeps it). `quiet`: a value that comes from where it is kept, not told back. Going on again, the drafts nearest
+   * to the wanderers are planned first, as always.
+   */
+  applyPace(raw: unknown, quiet = false): WorldPace {
+    const pace = readPace(raw);
+    if (samePace(pace, this.pace)) return this.pace;
+    this.pace = pace;
+    if (!this.mirror) this.council.say('kernel', 'info', `ritmo del mondo: ${PACE_NAME[pace.mode]}${pace.mode === 'slow' ? ` (${placesPerMinute(pace, this.manyPlayers() ? (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE) : Infinity)} luoghi nuovi al minuto)` : ''}`);
+    if (!quiet) this.bus.emit('pace', pace);
+    return pace;
+  }
+
   /** God mode (T42a): in a multiplayer game the master does not die, has no needs, takes no harm from the others. */
   godMode(id: string | undefined = this.wanderer().id): boolean {
     return this.manyPlayers() && this.isMaster(id);
@@ -7570,6 +7620,9 @@ export class Kernel {
       get generationHeld() {
         return k.generationHeld;
       },
+      get paused() {
+        return k.paceHeld();
+      },
       get offline() {
         return k.ai.name === 'offline';
       },
@@ -7889,7 +7942,7 @@ export class Kernel {
 
   /** The world grows as it is explored: a new pack of items, recipes and loot (text only, cheap). */
   async growContent(reason: string, count = 16, force = false, chi?: string): Promise<boolean> {
-    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.ai.name === 'offline'))) return false;
+    if (this.growing || (!force && (this.packsUsed >= (this.config.ai.maxPacks ?? 4) || this.paceHeld() || this.ai.name === 'offline'))) return false;
     this.growing = true;
     this.packsUsed++;
     try {

@@ -16,7 +16,8 @@ import { WebSocketServer, type WebSocket } from 'ws';
 import type { AccountSettings } from './account';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { failureText, gameIn, gate, refuse, type Caller } from './access';
-import { CampaignArchive } from './campaign';
+import { CampaignArchive, keepPace, keptPace } from './campaign';
+import type { WorldPace } from '../src/kernel/worldPace';
 import { accountWanderer } from '../src/session/account';
 import { validWandererId } from '../src/kernel/wanderers';
 import { PROGRAMS_DIR } from './hidden';
@@ -109,6 +110,12 @@ export function expelFrom(name: string, id: string, reason: string): void {
 export async function tellPrivate(name: string, value: boolean): Promise<void> {
   const calls = await getActiveWorld(name);
   await calls?.setPrivate(value);
+}
+
+/** Tells the running world of a universe, if there is one, its pace (T373): how it took it, or undefined if none is running. */
+export async function tellPace(name: string, pace: WorldPace): Promise<WorldPace | undefined> {
+  const calls = await getActiveWorld(name);
+  return calls ? await calls.setPace(pace) : undefined;
 }
 
 /** A WebSocket as a link of the protocol: what arrives before anyone listens is kept for them, from `join` on (before it nothing goes to a world). */
@@ -273,6 +280,15 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       verify: accounts?.verify,
       masterUid: accounts?.masterUid,
       private: () => campaigns?.isPrivate(name) ?? false,
+      // The pace by value at every start (T373); what the master sets in the world comes back here and is kept, repaired.
+      ...(campaigns ? { pace: () => keptPace(campaigns, name), onPace: (pace: WorldPace) => {
+              try {
+                keepPace(campaigns, name, pace);
+              } catch {
+                /* the file is busy: the world has it, the next change keeps it */
+              }
+            },
+          } : {}),
       ...(universes && credits ? { ledgerFile: path.join(serverPath(universes, 'balances'), `${name}.json`), grantCap: credits.grantCap, platformFee: credits.platformFee } : {}),
       entry: await program(),
       memoryMb,
