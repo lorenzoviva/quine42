@@ -5399,7 +5399,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, con il server di produzione vero (`tools/produzione/laboratori.ts`).
 - Quando è fatto: commit su `task/T377`.
 
-### T378 · Il piano di lancio aggiornato: open beta, OpenRouter, VPS e la voce dell'autore — `da fare`
+### T378 · Il piano di lancio aggiornato: open beta, OpenRouter, VPS e la voce dell'autore — `fatto` (`6a70abe1`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 5
 - Step: 38
 - Contesto: l'autore (14/11) ha letto `docs/lancio/piano.md` (T240) per rispondere alla D35: è superato in due punti. Mancano la open beta come fase a sé (Fase IV, ADR-0184, `docs/design/open-beta.md`: niente pagamenti, `QUINE_PAGAMENTI=spenti`, quindi niente partita IVA né dati fiscali nel piè di pagina finché non si incassa, Fase VI) e i nuovi modi di dare l'IA e le macchine (OpenRouter e la chiave del giocatore, T362-T364; hosting esterno e self-hosting su VPS, T367; «Come usiamo l'IA», T368). Il resto gli va bene. Poi la voce: il suo inglese non è perfetto, per questo pensava a Boa Loger come portavoce; leggendo il piano pensa che debba metterci la faccia, senza nome finto e forse senza personaggio, e chiede se un personaggio darebbe un messaggio sbagliato (meno affidabile, il gioco screditato). Vuole che il messaggio arrivi forte e chiaro e chiede di considerare gli aspetti di «programmazione neurolinguistica».
@@ -5407,6 +5407,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: non serve.
 - Quando è fatto: il piano dice la open beta, OpenRouter e la VPS, ha il § della voce dell'autore e le decisioni D35 aggiornate; commit su `task/T378`. Sicurezza: nessuna superficie nuova.
+- Esito: `docs/lancio/piano.md` aggiornato: open beta come lancio (D3.4/D3.5 in Fase VI, nuove D3.6 e D3.7), OpenRouter con la chiave del giocatore, hosting esterno e self-hosting (costi al picco, D6.2/D6.4 riscritte, D1.5 nuova, D7.3 requisito di Fase IV), nuovo § 4 bis «La voce dell'autore» (D4.6-D4.9; D4.1, D4.4, D5.2 riviste, D4.5 tolta), D35 riscritta in testa come elenco aggiornato; da fare: aggiornare la voce D35 in `aperte.md`; non provati: V10-V12, le stime di traffico e di RAM; typecheck verde, suite non lanciata (solo documentazione); sicurezza: nessuna superficie nuova.
 
 ### T379 · Integrare T372 nel base (conflitto di versione con T310b: kernel 0.7.1) — `fatto` (`649baa98`)
 - Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
