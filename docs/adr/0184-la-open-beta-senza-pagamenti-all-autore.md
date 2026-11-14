@@ -84,3 +84,9 @@ chiave (`productionProblems`, ADR-0112). Le alternative e i numeri sono nello st
 6. Il pacchetto su Railway: niente template nel marketplace (il kickback è un pagamento a te), solo il `Dockerfile` del repository?
    *Consiglio: sì.*
 7. Per chi ospita: verificatore a inviti oltre a Firebase? *Consiglio: sì, insieme agli universi privati di T347.*
+
+## Applicazione del punto 8 (T366)
+
+Il verificatore a inviti è in [ADR-0194](0194-l-universo-privato-e-il-verificatore-a-inviti.md), con gli universi privati di ADR-0188 (D52.7, D54.8):
+`QUINE_ACCOUNT=inviti` e `QUINE_SEGRETO_INVITI`, identità `inv-…` firmate col segreto, 30 giorni rinnovati, revocabili nel libro delle identità;
+il padrone del server con `npm run inviti`.

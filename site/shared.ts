@@ -3,7 +3,7 @@
 // No three.js here: a page that draws nothing in 3D must not carry it.
 
 import { validWandererId } from '../src/kernel/wanderers';
-import { accountConfig, signIn, type SignedIn } from '../src/session/login';
+import { accountConfig, NEEDS_INVITE, signIn, type SignedIn } from '../src/session/login';
 import { pickUniverse, store, stored, UNIVERSE_KEY } from './launcher-core';
 
 // What the landing shares with the pages with an account, without carrying the sign-in (launcher-core.ts).
@@ -124,8 +124,9 @@ export async function pageLogin(content: HTMLElement): Promise<Who | undefined> 
   if (!config) return { localId: await askLocalId(content) };
   try {
     return { signed: await signIn(config, chooseOnPage(content)) };
-  } catch {
-    alertBox('error', 'ZAP!', 'L’accesso non è riuscito: ricarica la pagina e riprova.');
+  } catch (e) {
+    // A server of invites (ADR-0194) without an identity in this browser: what to do is ask the master for a link.
+    alertBox('error', 'ZAP!', String((e as Error)?.message ?? '').includes(NEEDS_INVITE) ? `${(e as Error).message}.` : 'L’accesso non è riuscito: ricarica la pagina e riprova.');
     return undefined;
   }
 }

@@ -74,6 +74,7 @@ async function open(o: WorldOpen): Promise<void> {
     typesafe: o.typesafe ? typesafe : undefined,
     verify: o.verify ? verify : undefined,
     masterUid: o.masterUid,
+    private: o.private === true,
     restore: o.restore,
     grantCap: o.grantCap,
     // Its environment holds only what the server put there (`worldEnv`).

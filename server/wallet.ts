@@ -19,7 +19,7 @@ import { playerFile, readWandererState } from '../src/kernel/wanderers';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { bearer, failureText, gate, refuse } from './access';
 import { openLedger } from './ledger';
-import { send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
+import { seesUniverse, send, whoAsks, type WandererRouteOptions, type WandererView } from './wanderer';
 
 /** The days of spending a page shows. */
 export const WALLET_DAYS = 30;
@@ -202,6 +202,8 @@ export function walletHandler(opts: WalletRouteOptions): Connect.NextHandleFunct
         if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
+        // A private universe is not there for who is neither its master nor a guest (ADR-0194): as a name that does not exist.
+        if (!seesUniverse(opts, universo, who)) return send(res, 404, { ok: false, motivo: `universo sconosciuto: ${universo}` });
         const active = await opts.getActiveWorld?.(universo);
         if (active) return send(res, 200, { ok: true, portafoglio: await active.wallet(universo, who.id, who.account) });
         const root = path.join(opts.universesDir, universo);

@@ -57,7 +57,8 @@ import { MODEL_RE } from '../src/kernel/validator';
 import { SOLO, validWandererId } from '../src/kernel/wanderers';
 import type { FileMap } from '../src/kernel/types';
 import type { AccountSettings } from './account';
-import { callerOf, gate, isJson, newSecret, type Refusal } from './access';
+import { callerOf, gate, isJson, newSecret, type Caller, type Refusal } from './access';
+import { CampaignArchive } from './campaign';
 import { serverName, serverPath } from './folders';
 import type { ProgramChecker } from './programCheck';
 import { Rates, type Pace } from './rates';
@@ -245,7 +246,7 @@ export async function modelFiles(root: string, model: string): Promise<FileMap> 
  * Where a card is born, and its chain, as the server reads them: the client names a model of a universe, or one of its own cards; the
  * fingerprint, the holder and the chain are taken from what is on the disk, never from what the client says (ADR-0084).
  */
-export async function resolveFrom(raw: unknown, universesDir: string, own: HandmadeRecord): Promise<{ from?: HandmadeFrom; origins?: CardOrigin[] } | Refusal> {
+export async function resolveFrom(raw: unknown, universesDir: string, own: HandmadeRecord, sees: (universe: string) => boolean = () => true): Promise<{ from?: HandmadeFrom; origins?: CardOrigin[] } | Refusal> {
   if (raw === undefined || raw === null) return {};
   const said = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : undefined;
   if (said && typeof said.card === 'string') {
@@ -258,7 +259,8 @@ export async function resolveFrom(raw: unknown, universesDir: string, own: Handm
   const { universe, model } = said;
   if (!UNIVERSE_NAME_RE.test(universe) || !MODEL_RE.test(model)) return { status: 400, refused: 'from: universo o modello non valido' };
   const root = path.join(universesDir, universe);
-  if (!existsSync(path.join(root, '.git'))) return { status: 404, refused: `from: universo sconosciuto: ${universe}` };
+  // A private universe is not there for who is neither its master nor a guest (ADR-0194): not even whether it has a model.
+  if (!existsSync(path.join(root, '.git')) || !sees(universe)) return { status: 404, refused: `from: universo sconosciuto: ${universe}` };
   const files = await modelFiles(root, model);
   const xml = files[`${MODELS_DIR}${model}.xml`];
   if (xml === undefined) return { status: 404, refused: `from: nessun modello «${model}» in «${universe}»` };
@@ -334,6 +336,7 @@ function contractRefusal(said: unknown): Refusal | undefined {
 
 export function handmadeHandler(o: HandmadeRouteOptions): Connect.NextHandleFunction {
   const archive = HandmadeArchive.of(o.universesDir);
+  const campaigns = CampaignArchive.of(o.universesDir);
   const caps = o.caps ?? HANDMADE_CAPS;
   const writes = new Rates(o.writes ?? HANDMADE_WRITES);
   const access = { accounts: o.accounts, internal: newSecret() };
@@ -355,7 +358,7 @@ export function handmadeHandler(o: HandmadeRouteOptions): Connect.NextHandleFunc
     return undefined;
   };
 
-  const create = async (res: ServerResponse, author: string, body: Record<string, unknown>) => {
+  const create = async (res: ServerResponse, author: string, body: Record<string, unknown>, who: Caller) => {
     const name = cleanCardName(body.name);
     if ('error' in name) return no(res, { status: 400, refused: name.error });
     const program = programOf(body, body.kind);
@@ -366,7 +369,7 @@ export function handmadeHandler(o: HandmadeRouteOptions): Connect.NextHandleFunc
     if (version) return no(res, version);
     const before = archive.read(author);
     if (heldCards(before) >= caps.cards) return no(res, { status: 413, refused: `hai già ${heldCards(before)} carte: al più ${caps.cards} per account` });
-    const born = await resolveFrom(body.from, o.universesDir, before);
+    const born = await resolveFrom(body.from, o.universesDir, before, (u) => campaigns.lets(u, who, undefined, o.accounts?.masterUid));
     if ('refused' in born) return no(res, born);
     const checked = await o.checker.check(program);
     if ('busy' in checked) return checkerBusy(res);
@@ -513,7 +516,7 @@ export function handmadeHandler(o: HandmadeRouteOptions): Connect.NextHandleFunc
         return no(res, (e as Error).message === 'richiesta troppo grande' ? { status: 413, refused: 'richiesta troppo grande' } : { status: 400, refused: 'richiesta non valida' });
       }
     }
-    if (method === 'POST' && !segment) return create(res, author, body);
+    if (method === 'POST' && !segment) return create(res, author, body, who);
     if (method === 'POST' && segment === 'signature') return sign(res, author, body);
     if (!HANDMADE_ID_RE.test(segment)) return no(res, { status: 404, refused: 'carta sconosciuta' });
     if (method === 'POST') return update(res, author, segment, body);

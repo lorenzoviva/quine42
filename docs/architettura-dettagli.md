@@ -717,6 +717,27 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   zone, testi tagliati) e ne fa il corpo con i suoi file. Gli individui (ADR-0181, T353): `EntityView.worn` porta zona → id dei capi di
   un'entità con segni nell'inventario (`wornItems`; dell'inventario nient'altro), il client sottile lo mette nel componente `worn` dello
   specchio (`readWorn`), che `wornBy` legge dopo `remote.worn` e prima dei segni; se ne va con il prossimo `update` senza segni.
+- **L'universo privato** (ADR-0194, T366; ADR-0188 punto 2): gli ospiti e gli inviti di un universo di molti stanno fuori dall'universo,
+  `universes/.campaign/<nome>.json` (`CampaignArchive` in `server/campaign.ts`: `private`, `guests` per id, `invites` per impronta SHA-256 del
+  token), scritto intero sotto un lucchetto fra processi (`server/lockedFile.ts`); un file illeggibile vale privato e senza ospiti; un universo
+  che nasce con un nome e un clone nascono pubblici. **Chi lo vede** (`letsIn`): il mondo, il master (mai un anonimo), gli ospiti (anche anonimi).
+  A chiunque altro non esiste: lo store risponde come per un nome senza universo (`{ exists: false }` allo snapshot e a `carte`, «solo da questa
+  macchina» al resto), `/api/universe` non lo elenca (a chi lo vede lo dice in `invite`), `/api/session` non dice mai un universo privato,
+  `kin`, `bring`, `/api/viandante`, `/api/crediti` e il `from` di una carta fatta a mano lo saltano. **L'ingresso**: `admit` rifiuta chi non è
+  master né ospite («questo mondo è su invito») prima di `open`; il mondo sa solo se è privato (`WorldOpen.private`, `setPrivate` fra le
+  `WorldCalls`, `kernel.privateWorld`, che fa pagare al master un ospite anonimo, ADR-0188), mai chi sono gli ospiti; il server tiene chi ha
+  ammesso (`wanderersIn`) e chiude i socket di chi è tolto (`expelFrom`). **La rotta** `/api/universe/<nome>/guests` (`guestsAnswer`): `GET`
+  la lista e gli inviti vivi (per nome, l'inizio dell'impronta; mai un token); `POST` `{op:'private', value}` (diventando privato chi è nel
+  mondo resta come ospite), `{op:'add', id, note?}`, `{op:'invite', days?, uses?, note?}` (7 giorni e un uso se non detto, il token **una
+  volta** nella risposta); `DELETE` `{guest}` (chiude i suoi socket; un'identità nata da un invito di quell'universo è revocata) o `{invite}`;
+  solo il master, mai il mondo, JSON di al più 4 KiB, `CAMPAIGN_LIMITS`. **L'invito si usa** con `POST {op:'redeem', invite}`, aperto a tutti,
+  prima di leggere l'universo: con un account aggiunge l'account agli ospiti (l'invito non è un'identità), un ospite già dentro non lo spende,
+  le stesse parole per un token mai esistito, speso o scaduto. Il link è `/?universo=<nome>#invito=<token>`: il frammento non arriva a nessun
+  server, la pagina lo toglie dall'indirizzo (`takeFromAddress`) e lo usa (`redeemInvite` in `src/session/login.ts`) prima dello snapshot; uno
+  snapshot che non c'è si rilegge come chi è già collegato (`signedIn`, senza chiedere); se non c'è nemmeno così, con gli account da un'altra macchina
+  (o su un server a inviti) la pagina dice che non c'è o è su invito. Nella console del master, scheda «Universo», la
+  sezione «Ospiti e inviti» (`Console.guests` → `UniverseClient.guests`): privato o pubblico, ospiti con «Togli» a due clic, inviti con
+  «Revoca», «Aggiungi ospite», «Crea invito» col link mostrato una volta. Il sito è di T377.
 
 <a id="account"></a>
 ## L'account Firebase
@@ -730,6 +751,17 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
   `QUINE_MASTER` (uid) è il master `me` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
   oggi; in singola nessun account.
+- **Il verificatore a inviti** (ADR-0194, T366; ADR-0184 § 8): per chi ospita senza Firebase, `QUINE_ACCOUNT=inviti` e `QUINE_SEGRETO_INVITI`
+  (almeno 32 caratteri; il server di produzione non parte senza, né con Firebase insieme). Un'identità è un token `qid1.<{id, exp}>.<firma>`
+  (HMAC-SHA256 con una chiave derivata dal segreto, confronto a tempo costante; `signIdentity`, `readIdentity` in `server/invites.ts`) per un id
+  `inv-` e 16 lettere casuali, che il verificatore di Firebase rifiuta come uid (`refusedUid`): un account e un invito non condividono mai un
+  viandante. Vale se l'id è nel libro delle identità (`universes/.identities.json`, `IdentityBook`: quando, da dove, se revocata; mai un token) e
+  non è revocato; un libro illeggibile non fa entrare nessuno. Nasce da un invito usato senza identità (`redeem` risponde `identity`, una volta),
+  scade in 30 giorni e si rinnova a ogni ingresso (`POST /api/account`, `accountHandler`); il browser la tiene in `localStorage → quine:identity`
+  (`signInWithIdentity` in `src/session/login.ts`; `GET /api/account` dice `{ invites: true }`). Il padrone del server è `inv-owner`:
+  `npm run inviti -- padrone` (`tools/inviti/cli.ts`, sulla macchina del server, col `.env`) lo fa o lo rifà e stampa il link
+  `…/site/profilo.html#accesso=<token>`; `elenco` e `revoca <id>` per il resto. Togliere un ospite revoca l'identità nata da un invito di
+  quell'universo; quella nata altrove resta. `whoAsks` dice `account: 'invito'`, il profilo del sito «SU INVITO».
 
 <a id="stripe"></a>
 ## I pagamenti con Stripe
