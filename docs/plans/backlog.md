@@ -5462,7 +5462,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T383`, kernel 0.7.5; poi l'orchestratore integra T383 e `integra T366` toglie worktree e branch di T366. Sicurezza: V-038 di T366, nessuna superficie nuova oltre quella.
 - Esito: T366 integrato dopo T362: in `AGENTS.md` restano sia `QUINE_ACCOUNT=inviti` (ADR-0194) sia `OPENROUTER_API_KEY` (ADR-0193); l'ADR di T366 è ADR-0194, V-038 resta a lui; kernel 0.7.5 in version.ts, package.json, lock e seme, con i rimandi di T366 a 0.7.4 portati a 0.7.5 e quelli di T362 lasciati; typecheck, build e suite intera verdi (la prima suite aveva fallito un test, `tests/vestire-individui.test.ts`, «in the tick», che passa da solo e nella seconda suite: probabilmente l'attesa a tempo con la macchina carica, non dimostrato, fuori da ciò che T366 tocca); sicurezza: V-038 di T366, nessuna superficie nuova oltre quella.
 
-### T384 · Integrare T365 nel base (conflitto con T366: ADR-0194 → ADR-0195, kernel 0.7.6) — `da fare`
+### T384 · Integrare T365 nel base (conflitto con T366: ADR-0194 → ADR-0195, kernel 0.7.6) — `fatto` (`b15a20a6`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
 - Step: 43
 - Contesto: `integra T365` (il costo di ogni carta: `usd` e `server` nel timbro delle carte, ADR-0194, kernel 0.7.5) ha trovato conflitti in `server/session.ts` e `src/session/host.ts`: nel frattempo è entrato T366 via T383 (universo privato e inviti), che ha già preso ADR-0194 e il kernel 0.7.5. Nasce da T365: `dossier T365`, `dossier T383`.
@@ -5470,3 +5470,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera, typecheck e build coi turni.
 - Browser: no (T365 non ha UI nuova).
 - Quando è fatto: commit su `task/T384`, kernel 0.7.6; poi l'orchestratore integra T384 e `integra T365` toglie worktree e branch di T365. Sicurezza: quella di T365, nessuna superficie nuova oltre quella.
+- Esito: T365 integrato dopo T366: in `server/session.ts` e `src/session/host.ts` restano sia `private` (ADR-0194) sia `server` (ADR-0195), che arrivano insieme fino al kernel; l'ADR di T365 è ADR-0195 (rinumerazione già sul branch di T365, numero libero, rimandi coerenti); kernel 0.7.6 in version.ts, package.json, lock e seme, con i rimandi di T365 a 0.7.5 portati a 0.7.6 e quelli di T366 lasciati; typecheck, build e suite intera verdi (216 file, 3204 test); nessuna chiave in `dist/`; restano i limiti di T365 (nessuna interfaccia mostra il costo, il passaggio di `server` dal server al kernel provato solo dal typecheck); sicurezza: quella di T365, nessuna superficie nuova oltre quella.

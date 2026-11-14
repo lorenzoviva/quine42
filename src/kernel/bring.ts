@@ -5,7 +5,7 @@
 // game reads of it, checked, with its card: one more link in the chain, the master who brings it its holder, as in a clone that passes the
 // cards, ADR-0084), the doubles, the choice open or closed. Pure: the store (server/bring.ts) and the kernel read the same.
 
-import type { CardStamp } from './cards';
+import { costFields, type CardStamp } from './cards';
 import { MODELS_DIR, MODELS_INDEX, type ModelInfo } from './forms';
 import { contentText, fingerprint, HANDMADE_ID_RE, HANDMADE_ORIGIN, readOrigins, type CardOrigin } from './heritage';
 import { internalCardsIn, internalFields } from './internalNames';
@@ -169,6 +169,8 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
   }
   info.brought = 'handmade' in src ? HANDMADE_ORIGIN : src.universe;
   let stamp: { author: string; payer: string; holder: string; origins: CardOrigin[] };
+  // What it cost and where (T365, ADR-0195) come along as the other universe says them: declared, not counted here.
+  let said: Pick<CardStamp, 'usd' | 'server'> = {};
   if ('handmade' in src) {
     if (!validWandererId(src.author)) return { error: 'una carta fatta a mano senza autore' };
     stamp = { author: src.author, payer: src.author, holder: src.author, origins: src.origins ?? [] };
@@ -178,13 +180,14 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
     // Another universe wrote this stamp: its names are names, or the card does not come (V-033).
     if (![c.author, c.payer, c.holder].every(plainName)) return { error: 'il suo timbro non si legge' };
     stamp = { author: c.author, payer: c.payer, holder: c.holder, origins: readOrigins(c.origins) };
+    said = costFields(c);
     if (stamp.origins.length !== (Array.isArray(c.origins) ? c.origins.length : 0)) return { error: 'la sua catena non si legge' };
   }
   if (stamp.origins.length > MAX_LINKS || !stamp.origins.every((o) => plainName(o.holder) && (UNIVERSE_NAME_RE.test(o.universe) || o.universe === HANDMADE_ORIGIN) && o.fingerprint.length <= 64)) return { error: 'la sua catena non si legge' };
   // What it is as it enters: a handmade card by its program, as `allCards` measures it here; any other by the entry it becomes.
   const now = HANDMADE_ID_RE.test(src.id) ? fingerprint(src.xml) : fingerprint(contentText(info));
   const origins: CardOrigin[] = [...stamp.origins, { holder: stamp.holder, universe: info.brought, fingerprint: now }];
-  return { info: { ...info, card: { author: stamp.author, payer: stamp.payer, holder: master, origins } } };
+  return { info: { ...info, card: { author: stamp.author, payer: stamp.payer, holder: master, origins, ...said } } };
 }
 
 /**
