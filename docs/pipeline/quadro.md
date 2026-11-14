@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 430 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 433 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,12 +24,13 @@ Aggiornato il 14/11/2026, epoca 430 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** —. **Pronti su claude:** T391 (p2), T389, T364, T370, T375, T367; poi T390, T377.
+0. **In corso:** T389. **Pronti su claude:** T364, T370, T375, T367; poi T390, T377. Claude 5h al 96 % (reset 23:40), settimana 74 %.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 16:13 CET):** Claude settimana 76 %, 5h 29 % (reset 19:29), esaurimento previsto 15/11 16:52, prima del reset del 19/11 16:59; Fable settimana 92 %; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
 
+- **D58 (T391, integrato `7c8588a6`, kernel 0.7.9: Carbon e Hydrogen in `prices.ts`, giro su Claude preparato):** Carbon 4/12 a 0,75 $ per riuscita, Hydrogen 4/12 a 0,68 $, Argon 6/8 a 0,37 $; consiglio 1 (Argon a ogni taglia, provvisorio fino a T392).
 - **D57 (T355):** sospesa dall'autore (14/11): prima T391 confronta Carbon, Hydrogen, Sonnet 5.5, Opus 5.5 con Argon a costo per struttura riuscita (tetto 10 $); per i due Claude serve la chiave OpenRouter (D55). Diviso (autore 14/11): T391 fa Carbon e Hydrogen e prepara il comando; **T392** (Sonnet, Opus, Fable sull'abbonamento) lo lanci a mano dopo il reset di Claude del 19/11 (16:59 CET), **da solo**: aspetta che non ci sia niente in corso, sospendi gli altri provider e non lanciare altri task finché non finisce.
 
 - **D55 (T362):** prova pagata OpenRouter (chiave da creare), testo del viandante a Jev via OpenRouter (consiglio B), prezzo 3.5 Flash (consiglio sì).
@@ -43,5 +44,5 @@ Aggiornato il 14/11/2026, epoca 430 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **433 (claude):** T391 integrato (in attesa di D58).
 - **430 (claude):** T393 integrato.
-- **429 (claude):** T388 integrato; T393 sbloccato.
