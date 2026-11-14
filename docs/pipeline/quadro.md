@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 408 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 409 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 408 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T242. **Da integrare:** T373 via T385 (pronto, priorità 1). T355 sbloccato il 14/11. **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T385, T355, T370, T363; poi T375→T377; T363→T364/T367/T368.
+0. **In corso:** —. T242 integrato (rapporto aureo nei prompt dello Scultore e dell'Artista, banco `lab/scripts/banco-aureo.ts`; strutture non misurate → T355). **Da integrare:** T373 via T385 (pronto, priorità 1). T355 sbloccato il 14/11. **Pronti su claude (fable fermo fino al 19/11, sforzo extra):** T385, T355, T370, T363; poi T375→T377; T363→T364/T367/T368.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 13:23 CET):** Claude settimana 34 %, 5h 29 % (reset 14:59); Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -40,5 +40,5 @@ Aggiornato il 14/11/2026, epoca 408 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **409 (claude):** T242 integrato.
 - **408 (claude):** T373 finito e visto nel browser; integra in conflitto (kernel, sessione) → T385.
-- **405-407 (claude):** T384 e T365 integrati (kernel 0.7.6); decisioni A e C sulle fasi; T355 sbloccato.
