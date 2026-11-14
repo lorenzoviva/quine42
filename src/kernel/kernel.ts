@@ -315,7 +315,7 @@ export interface KernelOptions {
   grantCap?: number;
   /** The platform fee on every call charged (ADR-0132): only the server says it, never the universe, Lua or the Council. */
   platformFee?: number;
-  /** The origin of the server that runs this world (T365, ADR-0194): only the server says it; the cards stamped here name it. */
+  /** The origin of the server that runs this world (T365, ADR-0195): only the server says it; the cards stamped here name it. */
   server?: string;
   store: KeyValueStore;
   ai: AiModels;
@@ -490,9 +490,9 @@ export class Kernel {
   /** The cards' uses and the places' cards (T36): world/cards.json, written before every commit. */
   readonly cards = new CardUses();
   private cardsWritten = -1;
-  /** The dollars of the calls not yet in a card (T365, ADR-0194); a kernel on the master's branch shares its world's. */
+  /** The dollars of the calls not yet in a card (T365, ADR-0195); a kernel on the master's branch shares its world's. */
   private cardCosts = new CardCosts();
-  /** The origin of the server whose world this is (T365, ADR-0194): only the server says it; the cards it stamps name it. */
+  /** The origin of the server whose world this is (T365, ADR-0195): only the server says it; the cards it stamps name it. */
   private readonly server?: string;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
@@ -8555,7 +8555,7 @@ export class Kernel {
     return { author: autore, payer: pagante, holder: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0), ...(this.server ? { server: this.server } : {}) };
   }
 
-  /** The cards a task has just signed take what the calls that made them cost, shared among them (T365, ADR-0194). */
+  /** The cards a task has just signed take what the calls that made them cost, shared among them (T365, ADR-0195). */
   private priceCards(signed: CardStamp[], task: string): CardStamp[] {
     const each = this.cardCosts.take(task, signed.length);
     if (each !== undefined) for (const c of signed) c.usd = each;

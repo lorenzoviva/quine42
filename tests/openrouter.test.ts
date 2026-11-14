@@ -438,7 +438,7 @@ describe('la Genesi attraverso OpenRouter', () => {
     // Every schema of the Genesis crossed as a JSON Schema: types in lower case, nothing of Gemini's style.
     expect(schemas.length).toBeGreaterThan(0);
     expect(JSON.stringify(schemas)).not.toMatch(/"(OBJECT|STRING|ARRAY|INTEGER|NUMBER|BOOLEAN)"/);
-    // The same world; only what the cards cost differs, said by OpenRouter (T365, ADR-0194): the local models say nothing.
+    // The same world; only what the cards cost differs, said by OpenRouter (T365, ADR-0195): the local models say nothing.
     const world = (k: Kernel) => Object.fromEntries(Object.entries(k.repo.working).filter(([p]) => p !== USAGE_FILE).map(([p, v]) => [p, v?.replace(/,\s*"usd": [0-9.e-]+/g, '').replace(/"hash":"[0-9a-f]+"/, '')]));
     expect(world(through)).toEqual(world(direct));
     expect(Object.values(through.repo.working).some((v) => /"usd": /.test(v ?? '') && !/usage/.test(v ?? ''))).toBe(true);

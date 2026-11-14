@@ -183,7 +183,7 @@ export interface SessionOptions {
   typesafe?: typeof fetch;
   internal?: string;
   credits?: { universesDir: string; grantCap: number; platformFee?: number };
-  /** The origin of this server (the first of `QUINE_ORIGINI`): the cards its worlds stamp name it (T365, ADR-0194). Absent in development. */
+  /** The origin of this server (the first of `QUINE_ORIGINI`): the cards its worlds stamp name it (T365, ADR-0195). Absent in development. */
   server?: string;
   memoryMb?: number;
   /** Worlds running at once (`QUINE_MONDI_MASSIMI`, V-025). */

@@ -1,4 +1,4 @@
-// The cost of every card and the server that measured it (T365, ADR-0194).
+// The cost of every card and the server that measured it (T365, ADR-0195).
 import { describe, expect, it } from 'vitest';
 import { Kernel } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';

@@ -612,7 +612,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   piani dei luoghi): i punti che creano contenuti committano con `commitContent`, che timbra ciò che il cambio porta (`stampFiles`); il
   titolare delle comuni è un viandante estratto col seme (`cardHolderOf`). Gli utilizzi (`luoghi trame prompt`) e le carte dei luoghi in
   `world/cards.json` (`CardUses`, scritto prima di ogni commit); la collezione: `kernel.cardsOf(id)`, `collectionOf`.
-- **Il costo di ogni carta e il server** (ADR-0194, T365): il timbro ha anche `usd` (i dollari delle chiamate che l'hanno fatta) e `server`
+- **Il costo di ogni carta e il server** (ADR-0195, T365): il timbro ha anche `usd` (i dollari delle chiamate che l'hanno fatta) e `server`
   (l'origine del server il cui mondo l'ha fatta), facoltativi, letti con `costFields`. `CARD_MAKERS` dice quali compiti fanno le carte di
   un compito del timbro (una chat, una guardia, una sessione non fanno carte); ogni chiamata (`Kernel.called`, anche Jev) aggiunge `callCost`
   al suo gruppo in `CardCosts`; un timbro prende la sua parte e la divide tra le carte che firma (`stampFiles(…, settle)`, `priceCards`): tutto

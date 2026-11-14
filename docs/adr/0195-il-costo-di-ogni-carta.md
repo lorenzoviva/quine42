@@ -1,4 +1,4 @@
-# ADR-0194 — Il costo di ogni carta e il server che l'ha misurato
+# ADR-0195 — Il costo di ogni carta e il server che l'ha misurato
 
 Data: 2026-11-14 · Stato: accettato · Riferimenti: ADR-0056 (le carte), ADR-0084 (l'eredità dei cloni), ADR-0170 (le carte portate),
 ADR-0184 (la open beta), ADR-0193 (OpenRouter e il costo detto); [`docs/design/open-beta.md`](../design/open-beta.md) § 4 e § 6 riga 5;

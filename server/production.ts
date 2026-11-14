@@ -341,7 +341,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     typesafe: typesafe.direct(),
     internal,
     credits: { universesDir, grantCap: grantCapOf(o.env, true), platformFee: platformFeeOf(o.env) },
-    // Where the cards of its worlds are made: the first site it answers for (T365, ADR-0194).
+    // Where the cards of its worlds are made: the first site it answers for (T365, ADR-0195).
     ...(origins[0] ? { server: origins[0] } : {}),
     memoryMb: Number(o.env.QUINE_MONDO_MEMORIA) || undefined,
     maxWorlds: Number(o.env.QUINE_MONDI_MASSIMI) || undefined,

@@ -1304,7 +1304,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Costo della carta
 - **Inglese**: `usd` e `server` di `CardStamp`, `CardCosts`, `CARD_MAKERS`, `costFields`, `priceCards`
-- **Definizione**: i dollari delle chiamate che hanno fatto una carta (il costo detto o il listino), divisi tra le carte dello stesso commit, e l'origine del server il cui mondo l'ha fatta; senza server la storia è dichiarata, non contata (ADR-0194).
+- **Definizione**: i dollari delle chiamate che hanno fatto una carta (il costo detto o il listino), divisi tra le carte dello stesso commit, e l'origine del server il cui mondo l'ha fatta; senza server la storia è dichiarata, non contata (ADR-0195).
 - **Dove vive**: `src/kernel/cards.ts`, i timbri dei file dell'universo, `world/cards.json` per i luoghi
 - **Da non usare**: «prezzo della carta» (il prezzo è del listino), «origine» da sola (è la catena dei titolari, `origins`)
 - **Fermo**: i campi `usd` e `server` del timbro.

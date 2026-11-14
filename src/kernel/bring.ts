@@ -169,7 +169,7 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
   }
   info.brought = 'handmade' in src ? HANDMADE_ORIGIN : src.universe;
   let stamp: { author: string; payer: string; holder: string; origins: CardOrigin[] };
-  // What it cost and where (T365, ADR-0194) come along as the other universe says them: declared, not counted here.
+  // What it cost and where (T365, ADR-0195) come along as the other universe says them: declared, not counted here.
   let said: Pick<CardStamp, 'usd' | 'server'> = {};
   if ('handmade' in src) {
     if (!validWandererId(src.author)) return { error: 'una carta fatta a mano senza autore' };

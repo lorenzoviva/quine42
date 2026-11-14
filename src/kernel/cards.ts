@@ -27,19 +27,19 @@ export interface CardStamp {
   /** Who held it before, in the universes it was cloned from, the first one first (T45c, ADR-0084). */
   origins?: CardOrigin[];
   /**
-   * What the calls that made it cost, in dollars (T365, ADR-0194): what the provider said, else the price list (`callCost`), shared among
+   * What the calls that made it cost, in dollars (T365, ADR-0195): what the provider said, else the price list (`callCost`), shared among
    * the cards of the same commit. Absent: nothing that made it was a call (the seed, a universe of before, a rule of the kernel).
    */
   usd?: number;
   /**
-   * Where it was made and its cost measured (T365, ADR-0194): the origin of the server whose world made it (`https://…`). Absent: a kernel
+   * Where it was made and its cost measured (T365, ADR-0195): the origin of the server whose world made it (`https://…`). Absent: a kernel
    * in a browser or in development, whose history is declared, not counted.
    */
   server?: string;
 }
 
 /**
- * Which calls make the content of a commit (T365, ADR-0194): the task a card is stamped with → the tasks of the calls that made it. A call
+ * Which calls make the content of a commit (T365, ADR-0195): the task a card is stamped with → the tasks of the calls that made it. A call
  * of a task not here (a chat, a guard, a review, a session of the Council) makes no card: its dollars are the world's, not a card's.
  */
 export const CARD_MAKERS: Readonly<Record<string, readonly string[]>> = {
@@ -83,7 +83,7 @@ export function costFields(c: { usd?: unknown; server?: unknown }): Pick<CardSta
 }
 
 /**
- * The dollars of the calls not yet in a card (T365, ADR-0194), by the task the cards will be stamped with: every call adds to its group
+ * The dollars of the calls not yet in a card (T365, ADR-0195), by the task the cards will be stamped with: every call adds to its group
  * (`CARD_MAKERS`), and a stamp of that group takes its part, shared among the cards it signs. Its part: all of it when the group's requests
  * come one at a time; where they may run together (the forges of the Genesis, the places planned around the wanderer) each request says it
  * has begun and ended (`begin`), and a stamp takes what is pending divided by the requests still open, its own included. An attempt that
