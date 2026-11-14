@@ -792,4 +792,5 @@ export const UNCOVERED = {
   'V-040': 'il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts',
   'V-041': 'le regioni del master si provano sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/regioni.test.ts',
   'V-042': 'la campagna dal sito si prova sullo store senza Firebase, coi collegamenti finti per il mondo acceso: tests/sicurezza/campagna-sito.test.ts',
+  'V-043': 'il pacchetto sono file e un’immagine, non un server da provare: il kit non costruisce immagini; le proprietà le leggono tests/sicurezza/pacchetto.test.ts e produzione.test.ts',
 };

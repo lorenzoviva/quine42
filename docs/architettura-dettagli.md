@@ -27,6 +27,7 @@
 | [Chi paga, le carte, i crediti](#carte-crediti) | `src/kernel/cards.ts`, `src/kernel/credits.ts`, `server/ledger.ts` |
 | [Il multigiocatore: server, client, ramo del master, tra viandanti](#multigiocatore) | `src/session/`, `server/session.ts`, `server/universeStore.ts`, `server/access.ts`, `src/master.ts` |
 | [L'account Firebase](#account) | `src/session/account.ts`, `src/session/login.ts`, `server/account.ts` |
+| [Il self-hosting](#self-hosting) | `Dockerfile`, `docker-compose.yml`, `.env.example`, `tools/produzione/immagine.mjs`, `docs/self-hosting.md` |
 | [I pagamenti con Stripe](#stripe) | `server/stripe.ts`, `server/ledger.ts`, `site/pagamenti.ts` |
 | [Il clone e l'eredità](#clone-eredita) | `src/kernel/clone.ts`, `src/kernel/heritage.ts`, `server/universeStore.ts` |
 | [I sotterranei](#sotterranei) | `src/kernel/forms.ts`, `src/mj/mesh.ts`, `src/render/terrain.ts` |
@@ -859,6 +860,28 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `npm run inviti -- padrone` (`tools/inviti/cli.ts`, sulla macchina del server, col `.env`) lo fa o lo rifà e stampa il link
   `…/site/profilo.html#accesso=<token>`; `elenco` e `revoca <id>` per il resto. Togliere un ospite revoca l'identità nata da un invito di
   quell'universo; quella nata altrove resta. `whoAsks` dice `account: 'invito'`, il profilo del sito «SU INVITO».
+
+<a id="self-hosting"></a>
+## Il self-hosting: l'immagine e la guida
+
+- **Il pacchetto** (ADR-0203, T367): il server di produzione (ADR-0112) consegnato a chi ospita. `Dockerfile` a tre stadi su `node:22-bookworm-slim`:
+  la build (`npm ci`, `npm run build`, `npm run build:server`), le dipendenze di esecuzione (`npm ci --omit=dev`: il server importa solo
+  `firebase-admin`), ciò che gira (git, tini, `dist/`, `dist-server/`, `site/beta.json`, i due script). Gli universi in un volume su
+  `/app/universes`; dentro il container `QUINE_HOST=0.0.0.0`, la porta `QUINE_PORTA`, `PORT` o 8080; `HEALTHCHECK` su `/healthz` (ADR-0189).
+  `KERNEL_VERSION` (argomento di build) deve essere la versione di `package.json` o la build si ferma; diventa le etichette `quine42.kernel` e
+  `org.opencontainers.image.version`. `npm run immagine` (`tools/produzione/immagine.mjs`) etichetta `quine42:X.Y.Z` e `quine42:X.Y`, mai `latest`.
+- **Chi gira**: `quine-avvio` (`tools/produzione/immagine/avvio.sh`) parte da root solo per dare a `node` la cartella degli universi (un volume
+  nuovo di Fly o Railway è di root), poi `exec setpriv` a `node`. Il comando del padrone (ADR-0194) è `inviti` nell'immagine
+  (`tools/produzione/immagine/inviti.sh` → `node dist-server/inviti.mjs`, che `buildServer` costruisce da `tools/inviti/cli.ts`), anch'esso come `node`.
+- **Compose** (`docker-compose.yml`): `quine` col `.env` come `env_file`, la porta su `QUINE_PUBBLICA_SU:QUINE_PUBBLICA_PORTA` (predefiniti
+  `127.0.0.1:8080`), il volume `universi`, l'immagine `quine42:${QUINE_KERNEL}` (richiesta); i profili `tunnel` (Cloudflare Tunnel con nome,
+  `CLOUDFLARE_TUNNEL_TOKEN`), `tunnel-rapido` (trycloudflare.com) e `backup` (un `tar` del volume in `./backup/`, a server fermo).
+- **`.env.example`**: ogni variabile, vuote chiavi, segreti e token, la open beta detta (`QUINE_PAGAMENTI=spenti`, `QUINE_ACCOUNT=inviti`); com'è,
+  `productionProblems` chiede solo `QUINE_SEGRETO_INVITI`. `.dockerignore` tiene fuori `.env` e ogni `.env.*` tranne l'esempio, gli universi, le
+  build, `node_modules`, `.git`, le cartelle degli agenti, `backup/`.
+- **La guida** per chi ospita: [`docs/self-hosting.md`](self-hosting.md) (la fiducia, il contratto e gli aggiornamenti, il `.env`, il padrone,
+  PC di casa, VM o VPS, Railway senza template, Fly, il pacchetto Node, `/healthz`, il backup e il ripristino, lo spegnimento). I test sono
+  `tests/sicurezza/pacchetto.test.ts` (i file) e `produzione.test.ts` (il comando degli inviti costruito), V-043.
 
 <a id="stripe"></a>
 ## I pagamenti con Stripe

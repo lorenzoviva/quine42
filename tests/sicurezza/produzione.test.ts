@@ -132,7 +132,7 @@ describe('non parte senza configurazione', () => {
 describe('il server vero', () => {
   let work: string;
   let dist: string;
-  let built: { server: string; world: string };
+  let built: { server: string; world: string; invites: string };
   let running: ProductionServer;
   let crowded: ProductionServer | undefined;
   let port: number;
@@ -356,6 +356,16 @@ describe('il server vero', () => {
     // Only that path: what is next to it is the front door's, as before.
     expect((await ask(`${HEALTH_PATH}/x`, { headers: { Host: 'altro.example' } })).status).toBe(403);
     expect((await ask('/api/healthz', { headers: { Host: 'altro.example' } })).status).toBe(403);
+  });
+
+  it('V-043 il comando degli inviti è nel pacchetto: gira con node, senza vite-node, e non dice il segreto', () => {
+    const run = (args: string[], env: Record<string, string>) =>
+      execFileSync(process.execPath, [built.invites, ...args], { cwd: work, env: { PATH: process.env.PATH ?? '', SystemRoot: process.env.SystemRoot ?? '', QUINE_UNIVERSI: universes(), ...env }, encoding: 'utf8' });
+    const secret = 'FINTO-segreto-inviti-t367-abbastanza-lungo-per-firmare';
+    const out = run(['padrone'], { QUINE_SEGRETO_INVITI: secret, QUINE_ORIGINI: SITE });
+    expect(out).toContain(`${SITE}/site/profilo.html#accesso=`);
+    expect(out.includes(secret)).toBe(false);
+    expect(run(['elenco'], {})).toMatch(/^inv-owner\towner\t/m);
   });
 
   it('V-035 senza pagamenti (la open beta): le rotte di Stripe non ci sono, la commissione è 0, il resto risponde', async () => {
