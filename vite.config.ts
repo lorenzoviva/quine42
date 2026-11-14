@@ -100,6 +100,7 @@ export default defineConfig(({ mode }) => {
           notizie: path.resolve('site/notizie.html'),
           siteProfilo: path.resolve('site/profilo.html'),
           sitePagamenti: path.resolve('site/pagamenti.html'),
+          siteIa: path.resolve('site/ia.html'),
           ...guidePage(process.cwd()),
           // The site's entry page of the labs for the players, only with `laboratori` on (T294).
           ...labsPage(process.cwd()),
