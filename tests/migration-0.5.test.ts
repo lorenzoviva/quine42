@@ -126,7 +126,7 @@ describe('the migration 0.4 → 0.5: a universe of 0.4, file by file', () => {
   const { files, applied } = migrateUniverse(before, TO_0_5);
 
   it('is the fourth migration of the chain, it says what it does, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.4→0\.5: .*world\.venture/);
     const cfg = json(files['universe.json']);
@@ -135,7 +135,7 @@ describe('the migration 0.4 → 0.5: a universe of 0.4, file by file', () => {
     // The same files give the same files, and a universe of 0.5 stays as it is (for the kernel of 0.5; this one ports it on, T342).
     expect(migrateUniverse(universe04(), TO_0_5).files).toEqual(files);
     expect(migrateUniverse(files, TO_0_5).applied).toEqual([]);
-    expect(migrateUniverse(files).applied).toHaveLength(1);
+    expect(migrateUniverse(files).applied).toHaveLength(2);
   });
 
   it('the manifests: the components they give, their panels\' fields, their cases; the work\'s panel and button', () => {
@@ -175,10 +175,10 @@ describe('the migration 0.4 → 0.5: a universe of 0.4, file by file', () => {
     expect(seed['modules/mio.lume/manifest.json']).toBe('cambiato');
   });
 
-  it('prepareUniverse: the chain (0.4 → 0.5 → 0.6), then the seed of today (its sys.work, its Lua)', () => {
+  it('prepareUniverse: the chain (0.4 → 0.5 → 0.6 → 0.7), then the seed of today (its sys.work, its Lua)', () => {
     const out = prepareUniverse(universe04(), bundledFiles);
-    expect(out.applied).toHaveLength(2);
-    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.6' });
+    expect(out.applied).toHaveLength(3);
+    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.7' });
   });
 });
 

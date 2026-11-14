@@ -90,27 +90,27 @@ export function plotText(p: Pick<Plot, 'title' | 'mystery' | 'beats' | 'quest'>)
 
 /**
  * A plot from the Narrator's answer: the shape is the kernel's (days, moments, lengths); the people are checked by `reviewPlot`. The
- * Narrator writes with the Italian fields of its schema (until T310): the plot has those of 0.4 (T308a).
+ * fields are those of its schema, English since T310b (an answer with the Italian ones of before reaches here ported, `internalAnswer`).
  */
 export function plotFromRaw(raw: any, inizio: number, id: string): Plot {
-  const tappe: Beat[] = (Array.isArray(raw?.tappe) ? raw.tappe : []).filter((b: any) => b?.chi).slice(0, 8).map((b: any) => ({
-    day: Math.max(0, Math.min(4, Math.round(Number(b.giorno) || 0))),
-    moment: (DAY_PHASES as string[]).includes(internalName('momenti', String(b.momento))) ? internalName('momenti', String(b.momento)) : 'day',
-    who: String(b.chi), where: internalName('dove', String(b.dove ?? 'square')).slice(0, 40), what: String(b.cosa ?? '').slice(0, 120),
-    ...(b.battuta ? { line: String(b.battuta).slice(0, 140) } : {}), ...(b.indizio ? { clue: String(b.indizio).slice(0, 120) } : {}),
+  const beats: Beat[] = (Array.isArray(raw?.beats) ? raw.beats : []).filter((b: any) => b?.who).slice(0, 8).map((b: any) => ({
+    day: Math.max(0, Math.min(4, Math.round(Number(b.day) || 0))),
+    moment: (DAY_PHASES as string[]).includes(internalName('momenti', String(b.moment))) ? internalName('momenti', String(b.moment)) : 'day',
+    who: String(b.who), where: internalName('dove', String(b.where ?? 'square')).slice(0, 40), what: String(b.what ?? '').slice(0, 120),
+    ...(b.line ? { line: String(b.line).slice(0, 140) } : {}), ...(b.clue ? { clue: String(b.clue).slice(0, 120) } : {}),
   }));
-  const m = raw?.missione;
-  const goal = typeof m?.tipo === 'string' ? (internalName('trame', m.tipo) as QuestGoal) : undefined;
+  const m = raw?.quest;
+  const goal = typeof m?.type === 'string' ? (internalName('trame', m.type) as QuestGoal) : undefined;
   return {
     id,
-    title: String(raw?.titolo ?? 'Una storia').slice(0, 60),
-    mystery: String(raw?.mistero ?? '').slice(0, 300),
-    involved: [...new Set(tappe.map((b) => b.who))],
-    beats: tappe,
+    title: String(raw?.title ?? 'Una storia').slice(0, 60),
+    mystery: String(raw?.mystery ?? '').slice(0, 300),
+    involved: [...new Set(beats.map((b) => b.who))],
+    beats,
     start: inizio,
     state: 'active',
-    ...(m?.da && goal && QUEST_GOALS.includes(goal)
-      ? { quest: { from: String(m.da), text: String(m.testo ?? '').slice(0, 200), goal: { type: goal, ...(m.oggetto ? { item: String(m.oggetto) } : {}), ...(m.a ? { to: String(m.a) } : {}), ...(m.luogo ? { place: String(m.luogo) } : {}) }, ...(m.ricompensa ? { reward: String(m.ricompensa) } : {}), state: 'offered' as const } }
+    ...(m?.from && goal && QUEST_GOALS.includes(goal)
+      ? { quest: { from: String(m.from), text: String(m.text ?? '').slice(0, 200), goal: { type: goal, ...(m.item ? { item: String(m.item) } : {}), ...(m.to ? { to: String(m.to) } : {}), ...(m.place ? { place: String(m.place) } : {}) }, ...(m.reward ? { reward: String(m.reward) } : {}), state: 'offered' as const } }
       : {}),
   };
 }
@@ -199,10 +199,10 @@ export function reviewPlot(plot: Plot, people: People, words: string[] = []): Pl
   const names = [...byName.keys()].sort((a, b) => b.length - a.length).map(escapeRe).join('|');
   const claim = (who: string, word: string, of: string, quote: string) => {
     if (who === of) return;
-    const real = byName.get(who)?.family.find((r) => r.name === of)?.bond;
+    const real = byName.get(who)?.family.find((r) => r.name === of);
     if (real && relationKind(real) === relationKind(word)) return;
     fatal = true;
-    problems.push(`«${quote.trim()}»: per il registro ${who} ${real ? `è ${real} di ${of}` : `non è parente di ${of}`}`);
+    problems.push(`«${quote.trim()}»: per il registro ${who} ${real ? `è ${real.bond} di ${of}` : `non è parente di ${of}`}`);
   };
   if (names) {
     const end = '(?![\\p{L}])';

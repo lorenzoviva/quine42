@@ -53,7 +53,7 @@ sezione(`piani dei luoghi (${Object.keys(maps).length}, validatePlan)`, piani(k,
     const others = Object.entries({ ...seed, ...mine }).filter(([t]) => t !== token);
     // Against all the other eighteen, in groups under the Council's cap (MAX_MAGIC_RUNES is for what the Council adds).
     for (let i = 0; i < others.length; i += MAX_MAGIC_RUNES - 1) {
-      const v = validateNewRune({ token, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description }, Object.fromEntries(others.slice(i, i + MAX_MAGIC_RUNES - 1)), words);
+      const v = validateNewRune({ token, name: r.name, glyph: r.glyph, color: r.color, element: r.element, description: r.description }, Object.fromEntries(others.slice(i, i + MAX_MAGIC_RUNES - 1)), words);
       out.push(...v.errors.map((e) => `${token}: ${e}`));
       if (v.rune && v.rune.rune.glyph !== r.glyph) out.push(`${token}: il segno ${r.glyph} non è libero`);
       if (i === 0 && v.rune && !canonWithRune('', v.rune).includes(`- ${r.glyph} ${r.name} («${token}», ${r.element}):`)) out.push(`${token}: la riga del canone non è quella di canonWithRune`);

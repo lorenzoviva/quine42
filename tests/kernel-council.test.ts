@@ -22,7 +22,7 @@ describe('the Council', () => {
 
   it('forged objects get actions and containers', async () => {
     const k = await boot();
-    const r = await k.forgeModule('una madia di legno per il pane', 'agente', 'oggetto');
+    const r = await k.forgeModule('una madia di legno per il pane', 'agente', 'object');
     const m = k.modules.get(r.id!)!.manifest;
     expect(m.actions?.length).toBeGreaterThan(0);
     expect(m.container?.loot).toBe('cucina');
@@ -166,7 +166,7 @@ describe('the life of people', () => {
     clearArea(k);
     const a = await individual(k, 'vita#c', 1);
     const b = await individual(k, 'vita#d', 1.6);
-    for (const id of [a.id, b.id]) k.ecs.get(id, 'mind').mode = 'resta';
+    for (const id of [a.id, b.id]) k.ecs.get(id, 'mind').mode = 'stay';
     for (let i = 0; i < 70; i++) k.tick(1 / 60);
     await settle(100);
     for (let i = 0; i < 60 * 6; i++) k.tick(1 / 60);

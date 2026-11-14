@@ -66,7 +66,7 @@ describe('the bench of the Sala sistemi', () => {
   it('keeps only what the scene needs: core, content, the system; objects the universe lacks are trial objects', async () => {
     const k = await boot();
     const { manifest, logic } = seed(k, 'sys.fire');
-    const c: BenchCase = { title: 'x', story: '', wanderer: { items: [{ name: 'Elmo di prova', slot: 'testa', bonus: { difesa: 2 } }, { name: 'Ciocco di legna' }] }, duration: 1, watch: ['needs.health'] };
+    const c: BenchCase = { title: 'x', story: '', wanderer: { items: [{ name: 'Elmo di prova', slot: 'head', bonus: { defense: 2 } }, { name: 'Ciocco di legna' }] }, duration: 1, watch: ['needs.health'] };
     const known = (n: string) => k.content.byName(n)?.id;
     const files = benchFiles(k.files, manifest, logic, c, known);
     const modules = [...new Set(Object.keys(files).filter((p) => p.startsWith('modules/')).map((p) => p.split('/')[1]))];
@@ -77,7 +77,7 @@ describe('the bench of the Sala sistemi', () => {
     expect(Object.keys(files).some((p) => p.startsWith('models/') || p.startsWith('world/'))).toBe(false);
     const trial = JSON.parse(files['modules/bench.prova/manifest.json']).items;
     expect(trial.map((i: { id: string }) => i.id)).toEqual([trialId('Elmo di prova')]);
-    expect(trial[0]).toMatchObject({ slot: 'testa', bonus: { difesa: 2 }, category: 'clothing' });
+    expect(trial[0]).toMatchObject({ slot: 'head', bonus: { defense: 2 }, category: 'clothing' });
     expect(BENCH).toBe(5);
   });
 
@@ -92,7 +92,7 @@ describe('the bench of the Sala sistemi', () => {
       10,
     );
     expect(cases.length).toBe(1);
-    expect(cases[0]).toMatchObject({ duration: 30, watch: ['difesa.valore'], lines: [2], wanderer: { components: { needs: { health: 10 } }, items: [{ name: 'Elmo', slot: 'testa', bonus: { difesa: 1 } }] } });
+    expect(cases[0]).toMatchObject({ duration: 30, watch: ['difesa.valore'], lines: [2], wanderer: { components: { needs: { health: 10 } }, items: [{ name: 'Elmo', slot: 'head', bonus: { defense: 1 } }] } });
     expect(cases[0].steps).toEqual([{ type: 'slot', slot: 'testa', item: 'Elmo' }, { type: 'button', action: 'riposa' }]);
     expect(errors.join()).toMatch(/piedi/);
     expect(errors.join()).toMatch(/«B»/);
@@ -115,7 +115,7 @@ describe('the bench of the Sala sistemi', () => {
     expect(run.cambiati).toEqual(['difesa.valore', 'states.equipaggiamento']);
     expect(run.messaggi).toContain('Ti senti più protetto.');
     // The player rewrites the mechanic: the case shows what the new code does.
-    const doubled = logic.replace('difesa = difesa + items.bonus(it, "difesa")', 'difesa = difesa + 2 * items.bonus(it, "difesa")');
+    const doubled = logic.replace('difesa = difesa + items.bonus(it, "defense")', 'difesa = difesa + 2 * items.bonus(it, "defense")');
     expect((await k.runBenchCase(manifest, doubled, manifest.cases![0])).dopo['difesa.valore']).toBe(6);
     // T27d: the mechanic lives in the Sala sistemi, with the systems; the studio has no Archive for it.
     const ids = k.corona.buildings.map((b) => b.id);
@@ -133,7 +133,7 @@ describe('the bench of the Sala sistemi', () => {
       if (call.task !== 'mechanic.design') return text;
       asked.push(call.prompt);
       const out = JSON.parse(text);
-      if (asked.length === 1) out.casi = [{ ...out.casi[0], passi: [], guarda: ['difesa.valore'] }];
+      if (asked.length === 1) out.cases = [{ ...out.cases[0], steps: [], watch: ['difesa.valore'] }];
       return JSON.stringify(out);
     };
     const r = await k.forgeMechanic('equipaggiamento');

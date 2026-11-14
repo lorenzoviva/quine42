@@ -49,7 +49,7 @@ const seed: Record<string, MagicRune> = {
   fuoco: { name: 'Kenaz', glyph: 'ᚲ', color: '#ff7a3a', element: 'fuoco', description: 'la fiaccola' },
   acqua: { name: 'Laguz', glyph: 'ᛚ', color: '#5ab8ff', element: 'acqua', description: 'il lago' },
 };
-const draft = { token: 'Sangue', nome: 'Wunjo', glifo: 'ᛝ', colore: '#C8323C', elemento: 'sangue', descrizione: 'la vena: lega, scambia', canone: 'segna i patti' };
+const draft = { token: 'Sangue', name: 'Wunjo', glyph: 'ᛝ', color: '#C8323C', element: 'sangue', description: 'la vena: lega, scambia', canon: 'segna i patti' };
 
 describe('new magic runes (T57b)', () => {
   it('the validator lets in a rune of its own and repairs its form', () => {
@@ -58,7 +58,7 @@ describe('new magic runes (T57b)', () => {
     expect(ok.rune).toMatchObject({ token: 'sangue', rune: { name: 'Wunjo', glyph: 'ᛝ', color: '#c8323c', element: 'sangue' }, canone: 'segna i patti' });
     // A glyph taken, a word rune's letter, or not one sign: a free sign instead; a colour that is not one: a colour.
     for (const glifo of ['ᚲ', FUTHARK[0], 'ab', '', 'x']) {
-      const r = validateNewRune({ ...draft, glifo, colore: 'rosso' }, seed).rune!;
+      const r = validateNewRune({ ...draft, glyph: glifo, color: 'rosso' }, seed).rune!;
       expect(r.rune.glyph).not.toBe('ᚲ');
       expect(r.rune.glyph).not.toBe('ᛚ');
       expect(FUTHARK).not.toContain(r.rune.glyph);
@@ -70,11 +70,11 @@ describe('new magic runes (T57b)', () => {
   it('the validator refuses what would be mistaken or breaks the fourth wall', () => {
     expect(validateNewRune({ ...draft, token: 'fuoco' }, seed).errors.join()).toMatch(/già una runa/);
     expect(validateNewRune({ ...draft, token: 'fuochi' }, seed).errors.join()).toMatch(/troppo simile/);
-    expect(validateNewRune({ ...draft, nome: 'Kenas' }, seed).errors.join()).toMatch(/troppo simile a «Kenaz»/);
+    expect(validateNewRune({ ...draft, name: 'Kenas' }, seed).errors.join()).toMatch(/troppo simile a «Kenaz»/);
     expect(validateNewRune({ ...draft, token: 'end' }, seed).errors.join()).toMatch(/riservata/);
     expect(validateNewRune({ ...draft, token: 'concilio' }, seed).errors.join()).toMatch(/riservata/);
     expect(validateNewRune({ ...draft, token: 'x2' }, seed).errors.join()).toMatch(/3-12 lettere/);
-    expect(validateNewRune({ ...draft, canone: 'la incise chi osserva ogni viandante' }, seed).errors.join()).toMatch(/quarta parete/);
+    expect(validateNewRune({ ...draft, canon: 'la incise chi osserva ogni viandante' }, seed).errors.join()).toMatch(/quarta parete/);
     const many = Object.fromEntries(Array.from({ length: MAX_MAGIC_RUNES }, (_, i) => [`r${i}`, seed.fuoco]));
     expect(validateNewRune(draft, many).errors.join()).toMatch(/il massimo/);
   });
@@ -145,7 +145,7 @@ describe('new magic runes (T57b)', () => {
     const asked: string[] = [];
     const orig = models.text;
     models.text = async (call: TextCall) => (call.task === 'rune.invent' && asked.push(call.prompt), orig(call));
-    expect(await k.holdSession(true)).toBe('runa');
+    expect(await k.holdSession(true)).toBe('rune');
     expect(k.content.runes.sanguis).toBeTruthy();
     expect(asked[0]).toMatch(/session of the Council[^\n]*ghiaccio/);
     // The formula that calls for an element no rune has: one more rune, after the spell.

@@ -411,14 +411,14 @@ export class WorldGraph {
       const b = this.nodes.get(l.target)!;
       if (a.viandante || b.viandante) continue;
       // The graph's nodes keep their attributes in the graph's own words (`specie`, `genere`).
-      const why = relationProblem(String(l.legame), { species: a.specie as Individual['species'], gender: a.genere as Individual['gender'] }, { species: b.specie as Individual['species'] });
+      const why = relationProblem({ bond: String(l.legame), kind: typeof l.kind === 'string' ? l.kind : undefined }, { species: a.specie as Individual['species'], gender: a.genere as Individual['gender'] }, { species: b.specie as Individual['species'] });
       if (why) issues.push({ tipo: 'impossibile', testo: `${a.label} è ${l.legame} di ${b.label}: ${why}`, nodi: [a.id, b.id] });
       if (a.atteso || b.atteso) continue;
       const back = rel(b.id, a.id);
       if (!back.length) issues.push({ tipo: 'simmetria', testo: `${a.label} è ${l.legame} di ${b.label}, ma ${b.label} non ha legami con ${a.label}`, nodi: [a.id, b.id] });
       else {
         const key = [a.id, b.id].sort().join('|');
-        if (!pairs.has(key) && !back.some((x) => relationsAgree(String(l.legame), String(x.legame)))) {
+        if (!pairs.has(key) && !back.some((x) => relationsAgree({ bond: String(l.legame), kind: typeof l.kind === 'string' ? l.kind : undefined }, { bond: String(x.legame), kind: typeof x.kind === 'string' ? x.kind : undefined }))) {
           pairs.add(key);
           issues.push({ tipo: 'simmetria', testo: `${a.label} è ${l.legame} di ${b.label}, ma ${b.label} è ${back.map((x) => x.legame).join(' e ')} di ${a.label}`, nodi: [a.id, b.id] });
         }
@@ -606,7 +606,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
     for (const r of p.family ?? []) {
       const w = wandererOf(r);
       const t = w ? wandererAt(w, r.name) : individualByName.get(r.name);
-      if (t) g.link(id, t, 'legame', PF, { legame: r.bond });
+      if (t) g.link(id, t, 'legame', PF, { legame: r.bond, ...(r.kind ? { kind: r.kind } : {}) });
       else g.missing(`${p.name} è ${r.bond} di ${r.name}, che non esiste`, [id]);
     }
     const home = p.place ? chunkIn(p.place) : undefined;
@@ -619,7 +619,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   for (const a of people.expected) {
     const id = individualByName.get(a.name)!;
     const t = individualByName.get(a.of);
-    if (t) g.link(id, t, 'legame', PF, { legame: a.bond });
+    if (t) g.link(id, t, 'legame', PF, { legame: a.bond, ...(a.kind ? { kind: a.kind } : {}) });
   }
   for (const w of wanderersOf(files)) {
     const file = files[playerFile(w.id)] !== undefined ? playerFile(w.id) : STATE_FILE;

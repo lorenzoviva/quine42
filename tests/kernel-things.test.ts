@@ -107,10 +107,10 @@ describe('characters', () => {
     const identity = k.ecs.get(npc, 'identity');
     expect(identity.name).not.toBe('Abitante');
     expect(k.nameOf(npc)).toBe(identity.name);
-    expect(give.action).toBe('dai');
+    expect(give.action).toBe('give');
     expect(carried(k)).toBe(1);
     const follow = await k.talk(npc, 'Seguimi, ti prego');
-    expect(follow.action).toBe('segui');
+    expect(follow.action).toBe('follow');
     expect(k.ecs.get(npc, 'mind').history.length).toBe(4);
     // A second NPC of the same kind is somebody else.
     const other = spawnInFront(k, 'npc.villager', 2);

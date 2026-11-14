@@ -161,16 +161,16 @@ export class People {
         const text = await npcSheet(
           this.host.council,
           {
-            nome: p.name,
+            name: p.name,
             persona: p.persona ?? '',
-            mestiere: p.job,
-            genere: p.gender,
-            eta: p.age,
-            aspetto: p.look,
-            storia: p.story,
-            legami: (p.family ?? []).map((f) => `${f.bond} ${f.name}`),
+            job: p.job,
+            gender: p.gender,
+            age: p.age,
+            look: p.look,
+            story: p.story,
+            bonds: (p.family ?? []).map((f) => `${f.bond} ${f.name}`),
             routine: (p.routine ?? []).map((r) => `${italianName('momenti', r.when)}: ${r.does} (${italianName('dove', r.where)})`).join('; '),
-            porta: p.carries ?? [],
+            carries: p.carries ?? [],
           },
           this.host.focusOn([name]),
           chi,
@@ -297,12 +297,12 @@ export class People {
     return w.id === SOLO && w.name === WANDERER_NAME ? 'il viandante' : w.name;
   }
 
-  /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world. */
-  setBond(name: string, legame: string): void {
+  /** What someone becomes to the wanderer acting now (friend, sweetheart, spouse, child…): a fact of the world; its kind as an id when who said it knows it (T310b). */
+  setBond(name: string, legame: string, kind?: string): void {
     const w = this.host.wanderer();
     this.updateIndividual(name, (p) => {
       // As everywhere in the registry: what this individual is to the other one.
-      p.family = [...p.family.filter((f) => wandererOf(f) !== w.id), { name: w.name, bond: legame, wanderer: w.id }];
+      p.family = [...p.family.filter((f) => wandererOf(f) !== w.id), { name: w.name, bond: legame, ...(kind ? { kind } : {}), wanderer: w.id }];
     });
     const who = this.wandererWord(w);
     this.host.recordRule({ key: `legame|${name}${w.id === SOLO ? '' : `|${w.id}`}`, text: `${name} e ${who}`, possible: true, story: `${name} ora è ${legame} ${who === 'il viandante' ? 'del viandante' : `di ${who}`}.`, effects: ['bond'] }, false);

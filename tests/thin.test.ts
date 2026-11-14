@@ -405,15 +405,15 @@ describe('what is carried, among many (T39b)', () => {
     expect(panel).toBe(k.uiPanels()[0].panel.id);
     k.as('anna', () => k.give('item.elmo', 1));
     run(server, [anna], 12);
-    expect(anna.k.equip(panel, 'testa', slotOf(anna.k, 'item.elmo'))).toBe(true);
+    expect(anna.k.equip(panel, 'head', slotOf(anna.k, 'item.elmo'))).toBe(true);
     await flush(server, [anna]);
-    expect(k.as('anna', () => k.slots()[panel].testa?.item)).toBe('item.elmo');
-    expect(anna.k.slots()[panel].testa?.item).toBe('item.elmo');
+    expect(k.as('anna', () => k.slots()[panel].head?.item)).toBe('item.elmo');
+    expect(anna.k.slots()[panel].head?.item).toBe('item.elmo');
     expect(countItem(anna.k.inventory(), 'item.elmo')).toBe(0);
     expect(k.as('anna', () => k.uiValue('difesa.valore'))).toBe(3);
-    anna.k.unequip(panel, 'testa');
+    anna.k.unequip(panel, 'head');
     await flush(server, [anna]);
-    expect(anna.k.slots()[panel].testa ?? null).toBeNull();
+    expect(anna.k.slots()[panel].head ?? null).toBeNull();
     expect(countItem(anna.k.inventory(), 'item.elmo')).toBe(1);
     // A button of the panel reaches the server (with nothing to do, it answers all the same).
     expect((await until(server, [anna], anna.session.act({ t: 'panel', panel: panel, op: 'button', action: 'nulla' }))).ok).toBe(true);

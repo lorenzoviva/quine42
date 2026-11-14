@@ -19,7 +19,7 @@ for (const [token, r] of Object.entries(mine)) {
   const others = Object.entries({ ...seed, ...mine }).filter(([t]) => t !== token);
   const errors = new Set<string>();
   for (let i = 0; i < others.length; i += MAX_MAGIC_RUNES - 1) {
-    const v = validateNewRune({ token, nome: r.name, glifo: r.glyph, colore: r.color, elemento: r.element, descrizione: r.description, canone: lines[token] ?? r.description }, Object.fromEntries(others.slice(i, i + MAX_MAGIC_RUNES - 1)), words);
+    const v = validateNewRune({ token, name: r.name, glyph: r.glyph, color: r.color, element: r.element, description: r.description, canon: lines[token] ?? r.description }, Object.fromEntries(others.slice(i, i + MAX_MAGIC_RUNES - 1)), words);
     v.errors.forEach((e) => errors.add(e));
     if (v.rune && v.rune.rune.glyph !== r.glyph) errors.add(`il segno ${r.glyph} è stato cambiato in ${v.rune.rune.glyph}`);
     if (i === 0 && v.rune) canon = canonWithRune(canon, v.rune);

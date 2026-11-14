@@ -153,7 +153,7 @@ describe('a rise of a model, in the kernel', () => {
       const { k, c, r, ground } = await scene(model);
       const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, c - 2.5, r + 0.5)!;
       k.ecs.set(id, 'identity', { name: 'Prova', persona: '', look: '', carrying: [], job: 'fabbro' });
-      k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
+      k.ecs.set(id, 'mind', { mode: 'wander', mood: '', history: [] });
       k.time = at(3, 'morning');
       for (let t = 0; t < 4 && !k.ecs.get(id, 'job'); t += STEP) k.tick(STEP);
       const m = k.ecs.get(id, 'job');

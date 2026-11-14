@@ -119,18 +119,20 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
   const id = (s: unknown) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24);
   for (const r0 of (Array.isArray(raw) ? raw : []).slice(0, MAX_CASES) as Array<Record<string, any>>) {
     if (!r0 || typeof r0 !== 'object') continue;
-    // The Engineer still writes the Italian fields of its schema (until T310): read with those of 0.4 (T308a), as a case of a manifest is.
+    // A case as the Engineer writes it (English fields since T310b; one of before reads with those of 0.4, T308a), or as a manifest keeps it.
     const r = internalFields('bench', r0) as Record<string, any>;
     const titolo = String(r.title ?? '').trim().slice(0, 60) || 'Caso';
     const v = r.wanderer && typeof r.wanderer === 'object' ? r.wanderer : {};
-    // The items of the wanderer, also as the Engineer may list them beside the case (`oggetti`): with the fields of 0.4.
-    const listed = (Array.isArray(r.oggetti) ? r.oggetti : Array.isArray(v.items) ? v.items : []).map((o: any) => (typeof o === 'string' ? { name: o } : o));
+    // The items of the wanderer, also as the Engineer lists them beside the case (`items`; `oggetti` before T310b): with the fields of 0.4.
+    const listed = (Array.isArray(r.items) ? r.items : Array.isArray(r.oggetti) ? r.oggetti : Array.isArray(v.items) ? v.items : []).map((o: any) => (typeof o === 'string' ? { name: o } : o));
     const oggetti: BenchItem[] = ((internalFields('bench', { viandante: { oggetti: listed } }) as { wanderer?: { items?: any[] } }).wanderer?.items ?? [])
       .slice(0, 6)
       .filter((o: any) => o && typeof o.name === 'string' && o.name.trim())
       .map((o: any) => {
-        const bonus = typeof o.bonus_json === 'string' ? parseFlat(o.bonus_json) : o.bonus && typeof o.bonus === 'object' ? parseFlat(JSON.stringify(o.bonus)) : undefined;
-        return { name: o.name.trim().slice(0, 40), ...(o.slot ? { slot: String(o.slot).toLowerCase().trim() } : {}), ...(o.category ? { category: internalName('categorie', String(o.category).toLowerCase().trim()) } : {}), ...(bonus ? { bonus } : {}) };
+        // The bonuses by their internal names (T310b): `{"difesa":3}` of before is `{"defense":3}`.
+        const raw = typeof o.bonus_json === 'string' ? parseFlat(o.bonus_json) : o.bonus && typeof o.bonus === 'object' ? parseFlat(JSON.stringify(o.bonus)) : undefined;
+        const bonus = raw ? Object.fromEntries(Object.entries(raw).map(([k, x]) => [internalName('bonus', k), x])) : undefined;
+        return { name: o.name.trim().slice(0, 40), ...(o.slot ? { slot: internalName('posti', String(o.slot).toLowerCase().trim()) } : {}), ...(o.category ? { category: internalName('categorie', String(o.category).toLowerCase().trim()) } : {}), ...(bonus ? { bonus } : {}) };
       });
     const passi: BenchStep[] = [];
     for (const p of (Array.isArray(r.steps) ? r.steps : []).slice(0, 8) as Array<Record<string, any>>) {
@@ -165,9 +167,9 @@ export function cleanCases(raw: unknown, panel: UiPanel | undefined, lines: numb
     const cose = (Array.isArray(r.entities) ? r.entities : [])
       .slice(0, 6)
       .filter((c: any) => c && typeof c.module === 'string')
-      .map((c: any) => ({ module: c.module, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.components ?? c.componenti_json) ? { components: internalComponents(parseJson(c.components ?? c.componenti_json)) as Record<string, Record<string, unknown>> } : {}) }));
+      .map((c: any) => ({ module: c.module, x: Math.round(num(c.x, -2, 2, 1)), y: Math.round(num(c.y, -2, 2, 0)), ...(parseJson(c.components ?? c.components_json ?? c.componenti_json) ? { components: internalComponents(parseJson(c.components ?? c.components_json ?? c.componenti_json)) as Record<string, Record<string, unknown>> } : {}) }));
     // The components and the watched fields of 0.4 (`meta.x`) the Engineer may still write (T308b): those of 0.5 (`goal.x`).
-    const componenti = internalComponents(parseJson(v.components ?? r.viandante_json)) as ReturnType<typeof parseJson>;
+    const componenti = internalComponents(parseJson(v.components ?? r.wanderer_json ?? r.viandante_json)) as ReturnType<typeof parseJson>;
     const righe = [...new Set((Array.isArray(r.lines) ? r.lines : []).filter((n: unknown) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= lines))].slice(0, 12) as number[];
     cases.push({
       title: titolo,

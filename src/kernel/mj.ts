@@ -12,7 +12,7 @@
 //   markov   — every step, run the first child that can do something
 //   path     — draw a shortest path of `color` from a `from` cell to the nearest `to` cell over `on` cells
 //   stamp    — a whole structure drawn by the kernel (castello, torre, tempio…, see stamps.ts), with the
-//              world's codes for each role (muro, pavimento, porta, acqua, ponte…); `count` copies
+//              world's codes for each role (wall, floor, door, water, bridge…); `count` copies
 // `steps` limits how many times a node may apply; `symmetry` ("all" by default) also tries rotations
 // and mirrors of each rule.
 
@@ -308,7 +308,7 @@ class StampRunner extends Runner {
     if (this.count >= (this.limit ?? 1)) return false;
     this.count++;
     // Codes are resolved by the layout from the palette; a lone stamp falls back to the base codes.
-    const codes = { muro: 'h', pavimento: 'f', porta: 'd', acqua: 'w', ponte: 'p', terreno: 'g', strada: 'p', roccia: 'r', recinto: 'h', ...(this.node.codes ?? {}) } as StampCodes;
+    const codes = { wall: 'h', floor: 'f', door: 'd', water: 'w', bridge: 'p', ground: 'g', road: 'p', rock: 'r', fence: 'h', ...(this.node.codes ?? {}) } as StampCodes;
     return stamp(g.cells, g.w, g.h, g.fixed, this.node.shape, codes, rng, this.node.on);
   }
 }
@@ -385,7 +385,8 @@ export function repairProgram(node: unknown, notes: string[] = [], depth = 0): M
   if (n.type === 'stamp') {
     const shape = stampShape(n.shape) as StampShape;
     if (!(STAMP_SHAPES as readonly string[]).includes(shape)) return notes.push(`forma sconosciuta "${n.shape}" rimossa`), null;
-    const codes = Object.fromEntries(Object.entries(n.codes ?? {}).filter(([k, v]) => (STAMP_ROLES as string[]).includes(k) && typeof v === 'string' && v.length === 1));
+    // A role in the Italian of before T310b (`muro`) is the one it means (`wall`).
+    const codes = Object.fromEntries(Object.entries(n.codes ?? {}).map(([k, v]) => [internalName('ruoli-timbri', k), v]).filter(([k, v]) => (STAMP_ROLES as string[]).includes(k as string) && typeof v === 'string' && v.length === 1));
     return { type: 'stamp', shape, ...(Object.keys(codes).length ? { codes } : {}), ...(typeof n.on === 'string' ? { on: n.on } : {}), ...(Number.isInteger(n.count) ? { count: Math.max(1, Math.min(6, n.count)) } : {}) };
   }
   if (n.type === 'path') return typeof n.from === 'string' && typeof n.to === 'string' && typeof n.on === 'string' && typeof n.color === 'string' && n.color.length === 1 ? { ...n } : (notes.push('path incompleto rimosso'), null);

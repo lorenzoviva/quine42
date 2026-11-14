@@ -147,21 +147,48 @@ export function partVoxels(vpt: number) {
   };
 }
 
-/** A guess from the name and description, for assets that do not say. */
+/**
+ * The words of a name or a description that say a class, by language (T310b): the Forge's schema says the class itself, this is the
+ * fallback for what does not say it. Italian and English (the words a model may slip into); the other languages are T239's. The order
+ * decides: the first class whose words are there wins.
+ */
+const CLASS_WORDS: Record<'it' | 'en', Array<[string, RegExp]>> = {
+  it: [
+    ['animal', /\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/],
+    ['beast', /\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/],
+    ['person', /^$/],
+    ['pebble', /\b(sasso|ciottolo)\b/],
+    ['rock', /(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/],
+    ['tree', /(albero|pino|quercia|betulla|salice|palma|abete|faggio|bosco|giungla)/],
+    ['bush', /(cespuglio|felce|siepe|arbusto|fungo|fiore|ceppo|canneto)/],
+    ['monument', /(colonna|statua|portale|porta|obelisco|totem|menhir)/],
+    ['building', /(pozzo|fontana|capanna|casetta|torre|edicola|forno)/],
+    ['object', /(vaso|secchio|lanterna|sacco|brocca|candela|libro)/],
+  ],
+  en: [
+    ['animal', /\b(cat|dog|fox|hen|chicken|rabbit|mouse|rat|crow|owl|duck|slime)\b/],
+    ['beast', /\b(wolf|horse|bear|deer|stag|troll|dragon|ox|cow|boar|monster)\b/],
+    ['person', /^$/],
+    ['pebble', /\b(pebble|stone)\b/],
+    ['rock', /\b(rocks?|boulders?|crag|outcrop|reef)\b/],
+    ['tree', /\b(trees?|pine|oak|birch|willow|palm|fir|beech|woods?|jungle)\b/],
+    ['bush', /\b(bush|fern|hedge|shrub|mushroom|flower|stump|reeds)\b/],
+    ['monument', /\b(column|statue|portal|gate|obelisk|totem|menhir)\b/],
+    ['building', /\b(well|fountain|hut|cottage|tower|shrine|oven|kiln)\b/],
+    ['object', /\b(vase|jar|bucket|lantern|sack|jug|candle|book)\b/],
+  ],
+};
+
+/** A guess from the name and description, for assets that do not say: the first class, in the order of the table, whose words (Italian or English) are there. */
 export function guessClass(text: string, category?: string): AssetClass {
   const t = text.toLowerCase();
-  const by = (re: RegExp, id: string) => (re.test(t) ? classOf(id) : undefined);
-  return (
-    by(/\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/, 'animal') ??
-    by(/\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/, 'beast') ??
-    (category === 'figure' ? classOf('person') : undefined) ??
-    by(/\b(sasso|ciottolo)\b/, 'pebble') ??
-    by(/(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/, 'rock') ??
-    by(/(albero|pino|quercia|betulla|salice|palma|abete|faggio|bosco|giungla)/, 'tree') ??
-    by(/(cespuglio|felce|siepe|arbusto|fungo|fiore|ceppo|canneto)/, 'bush') ??
-    by(/(colonna|statua|portale|porta|obelisco|totem|menhir)/, 'monument') ??
-    by(/(pozzo|fontana|capanna|casetta|torre|edicola|forno)/, 'building') ??
-    by(/(vaso|secchio|lanterna|sacco|brocca|candela|libro)/, 'object') ??
-    classOf('furniture')!
-  );
+  const order = CLASS_WORDS.it.map(([id]) => id);
+  for (const id of order) {
+    if (id === 'person') {
+      if (category === 'figure') return classOf('person')!;
+      continue;
+    }
+    if ((['it', 'en'] as const).some((lang) => CLASS_WORDS[lang].find(([c]) => c === id)![1].test(t))) return classOf(id)!;
+  }
+  return classOf('furniture')!;
 }

@@ -161,8 +161,8 @@ async function cacheSaving(): Promise<void> {
   const sheetOf = (p: Person) => p.sheet?.text ?? `Sei ${p.name}, ${p.job ?? 'abitante'}. Parli poco e guardi molto; ti fidi di chi ti aiuta e ricordi i torti.`;
   const words = ['ciao', 'come va il lavoro?', 'hai visto qualcosa di strano stanotte?', 'mi dai una mano?'];
   for (const p of cast)
-    for (const w of words) await npcReply(k.council, { name: p.name, persona: p.persona ?? '', scheda: sheetOf(p), mood: 'calmo', mode: 'vaga', carrying: [], place: p.place ?? '', history: [], facts: {} }, w, [p.name], by);
-  const two = (p: Person) => ({ nome: p.name, mestiere: p.job ?? 'abitante', scheda: sheetOf(p), fa: 'lavora', ricordi: '', segreti: '' });
+    for (const w of words) await npcReply(k.council, { name: p.name, persona: p.persona ?? '', sheet: sheetOf(p), mood: 'calmo', mode: 'wander', carrying: [], place: p.place ?? '', history: [], facts: {} }, w, [p.name], by);
+  const two = (p: Person) => ({ name: p.name, job: p.job ?? 'abitante', sheet: sheetOf(p), does: 'lavora', memories: '', secrets: '' });
   for (let i = 0; i + 1 < cast.length; i++) await npcDialogue(k.council, two(cast[i]), two(cast[i + 1]), cast[i].place ?? 'piazza', [cast[i].name, cast[i + 1].name], by);
   const recorded: Recorded[] = rec.calls.slice(before).filter((c) => c.agent === 'actor');
 

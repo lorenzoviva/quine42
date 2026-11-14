@@ -143,7 +143,7 @@ function worker(k: Kernel, name: string, job: string, x: number, y: number): num
       }
   const id = k.spawnModuleEntity(k.modules.get('npc.villager')!, spot.x, spot.y)!;
   k.ecs.set(id, 'identity', { name, persona: '', look: '', carrying: [], job });
-  k.ecs.set(id, 'mind', { mode: 'vaga', mood: '', history: [] });
+  k.ecs.set(id, 'mind', { mode: 'wander', mood: '', history: [] });
   return id;
 }
 

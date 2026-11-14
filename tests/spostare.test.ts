@@ -851,28 +851,28 @@ describe('two wanderers', () => {
 // --- The Council decides what can be taken ----------------------------------------------------------------------------------------
 
 describe('who decides what can be taken', () => {
-  const physics: PhysicsSpec = { solido: true, spingibile: false, massa: 30, attrito: 0.6, raggio: 0.45, velocita: 0, peso: 0, impilabile: false, max_pila: 1, equipaggiabile: false };
-  const concept = (o: Partial<Concept>): Concept => ({ nome: 'Madia', tipo: 'oggetto', descrizione: 'una madia', lore: '', aspetto: 'una madia di legno', classe: 'furniture', contesto: { terreni: ['g'], luoghi: 'case', rarita: 0.2 }, interazione: 'usa', comandi: [], tags: [], ...o });
+  const physics: PhysicsSpec = { solid: true, pushable: false, mass: 30, friction: 0.6, radius: 0.45, speed: 0, weight: 0, stackable: false, max_stack: 1, equippable: false };
+  const concept = (o: Partial<Concept>): Concept => ({ name: 'Madia', type: 'object', description: 'una madia', lore: '', look: 'una madia di legno', class: 'furniture', context: { terrains: ['g'], places: 'case', rarity: 0.2 }, interaction: 'use', controls: [], tags: [], ...o });
 
   it('the manifest says it only for a thing one lifts: furniture or something small, not a building, not someone, not large', () => {
     const m = (o: Partial<Concept>) => assembleManifest('obj.prova', concept(o), physics, { logic: 'local M = {}\nreturn M\n' }, ['g'], 'agente');
     expect(m({ takeable: true }).takeable).toBe(true);
     expect(m({ takeable: false }).takeable).toBeUndefined();
     expect(m({}).takeable).toBeUndefined();
-    expect(m({ takeable: true, classe: 'building', nome: 'Pozzo' }).takeable).toBeUndefined();
-    expect(m({ takeable: true, classe: 'monument' }).takeable).toBeUndefined();
-    expect(m({ takeable: true, taglia: 'large' }).takeable).toBeUndefined();
-    expect(m({ takeable: true, tipo: 'npc', persona: 'un fornaio' }).takeable).toBeUndefined();
+    expect(m({ takeable: true, class: 'building', name: 'Pozzo' }).takeable).toBeUndefined();
+    expect(m({ takeable: true, class: 'monument' }).takeable).toBeUndefined();
+    expect(m({ takeable: true, size: 'large' }).takeable).toBeUndefined();
+    expect(m({ takeable: true, type: 'npc', persona: 'un fornaio' }).takeable).toBeUndefined();
     expect([...TAKEABLE_CLASSES].sort()).toEqual(['furniture', 'object', 'pebble']);
   });
 
   it('the Narrator decides it in the Forge, and who asked for the thing has the last word (the Cartographer, for what a place calls for)', async () => {
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
-    const madia = await k.forgeModule('una madia di legno per il pane', 'agente', 'oggetto');
+    const madia = await k.forgeModule('una madia di legno per il pane', 'agente', 'object');
     expect(madia.ok).toBe(true);
     expect(k.modules.get(madia.id!)!.manifest.takeable).toBe(true);
     expect(madia.summary).toMatch(/si può spostare/);
-    const pozzo = await k.forgeModule('un pozzo di pietra coperto', 'agente', 'oggetto');
+    const pozzo = await k.forgeModule('un pozzo di pietra coperto', 'agente', 'object');
     expect(pozzo.ok).toBe(true);
     expect(k.modules.get(pozzo.id!)!.manifest.takeable).toBeUndefined();
     const fixed = await k.forgeModule('una credenza murata nella parete', 'cartografo', undefined, false, undefined, false);

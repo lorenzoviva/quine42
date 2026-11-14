@@ -181,24 +181,25 @@ describe('the range of the kernels a universe runs on (T302)', () => {
     const seed = { ...bundledFiles, 'modules/nuovo/manifest.json': '{"id":"nuovo","kind":"data"}' };
     const out = withKernel('0.0.4', { from: '0.0' });
     expect(upgradeFromSeed(out, seed)).toEqual({ files: out, changes: {}, updated: [] });
-    expect(upgradeFromSeed(withKernel('0.6.0'), seed).updated).toContain('modules/nuovo/manifest.json');
-    // One of a contract before takes nothing either, until it is ported (prepareUniverse, T307a, T307b, T308a, T308b, T342).
+    expect(upgradeFromSeed(withKernel('0.7.0'), seed).updated).toContain('modules/nuovo/manifest.json');
+    // One of a contract before takes nothing either, until it is ported (prepareUniverse, T307a, T307b, T308a, T308b, T342, T310b).
     expect(upgradeFromSeed(withKernel('0.1.2'), seed).updated).toEqual([]);
     expect(upgradeFromSeed(withKernel('0.2.1'), seed).updated).toEqual([]);
     expect(upgradeFromSeed(withKernel('0.3.0'), seed).updated).toEqual([]);
     expect(upgradeFromSeed(withKernel('0.4.0'), seed).updated).toEqual([]);
     expect(upgradeFromSeed(withKernel('0.5.10'), seed).updated).toEqual([]);
+    expect(upgradeFromSeed(withKernel('0.6.12'), seed).updated).toEqual([]);
   });
 
-  it('a universe without the field opens as before, and gets it at its next commit; one of 0.1 is ported, born again with 0.6', async () => {
-    const k = await boot(withKernel('0.6.0'));
+  it('a universe without the field opens as before, and gets it at its next commit; one of 0.1 is ported, born again with 0.7', async () => {
+    const k = await boot(withKernel('0.7.0'));
     expect(k.faults.has('universe:kernel')).toBe(false);
     k.repo.write('world/prova.txt', 'x\n');
     k.repo.commit('prova', 'player');
-    expect(JSON.parse(k.repo.head().files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.6' } });
+    expect(JSON.parse(k.repo.head().files['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.7' } });
     const old = await boot(withKernel('0.1.2'));
     expect(old.faults.has('universe:kernel')).toBe(false);
-    expect(JSON.parse(old.repo.working['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.6' } });
+    expect(JSON.parse(old.repo.working['universe.json'])).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.7' } });
   });
 });
 
@@ -206,14 +207,15 @@ describe('the migrations (T302): one place, three migrations today (T307a, T307b
   const at = (kernel: string, kernels?: unknown): FileMap => ({ 'universe.json': JSON.stringify({ name: 'x', kernel, ...(kernels ? { kernels } : {}) }), 'world/a.txt': 'a' });
   const step = (from: string, to: string): Migration => ({ from, to, descrizione: `da ${from} a ${to}`, migrate: (f) => ({ ...f, 'world/a.txt': `${f['world/a.txt']}>${to}` }) });
 
-  it('there are five, 0.1 → 0.2 → 0.3 → 0.4 → 0.5 → 0.6; a universe they do not reach, of this contract or unreadable stays as it is', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6']);
-    expect(migrateUniverse(at('0.1.1', { from: '0.1' })).applied).toHaveLength(5);
-    expect(migrateUniverse(at('0.2.1', { from: '0.2' })).applied).toHaveLength(4);
-    expect(migrateUniverse(at('0.3.0', { from: '0.3' })).applied).toHaveLength(3);
-    expect(migrateUniverse(at('0.4.0', { from: '0.4' })).applied).toHaveLength(2);
-    expect(migrateUniverse(at('0.5.10', { from: '0.5' })).applied).toHaveLength(1);
-    for (const files of [at('0.0.3'), at(KERNEL_VERSION, { from: '0.6' }), at('9.9.9'), { 'universe.json': '{ rotto' }, {}]) {
+  it('there are six, 0.1 → 0.2 → 0.3 → 0.4 → 0.5 → 0.6 → 0.7; a universe they do not reach, of this contract or unreadable stays as it is', () => {
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7']);
+    expect(migrateUniverse(at('0.1.1', { from: '0.1' })).applied).toHaveLength(6);
+    expect(migrateUniverse(at('0.2.1', { from: '0.2' })).applied).toHaveLength(5);
+    expect(migrateUniverse(at('0.3.0', { from: '0.3' })).applied).toHaveLength(4);
+    expect(migrateUniverse(at('0.4.0', { from: '0.4' })).applied).toHaveLength(3);
+    expect(migrateUniverse(at('0.5.10', { from: '0.5' })).applied).toHaveLength(2);
+    expect(migrateUniverse(at('0.6.12', { from: '0.6' })).applied).toHaveLength(1);
+    for (const files of [at('0.0.3'), at(KERNEL_VERSION, { from: '0.7' }), at('9.9.9'), { 'universe.json': '{ rotto' }, {}]) {
       const r = migrateUniverse(files);
       expect(r.applied).toEqual([]);
       expect(r.files).toBe(files);

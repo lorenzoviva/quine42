@@ -240,7 +240,7 @@ describe('la spesa di oggi', () => {
     rec.contextOf = () => '## Il mondo\nTitolo: Prova';
     const out = await rec.text({ agent: 'narrator', task: 'text.examine', system: 'sistema', prompt: 'Il viandante osserva da vicino «Sasso» (un sasso).', data: { what: { name: 'Sasso', description: 'un sasso' }, facts: {} }, temperature: 0.9 });
     expect(rec.name).not.toBe('offline');
-    expect(JSON.parse(out).testo).toBeTruthy();
+    expect(JSON.parse(out).text).toBeTruthy();
     expect(rec.calls).toHaveLength(1);
     expect(rec.calls[0]).toMatchObject({ task: 'text.examine', context: '## Il mondo\nTitolo: Prova', temperature: 0.9 });
   });

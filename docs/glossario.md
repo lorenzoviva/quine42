@@ -738,11 +738,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `scheda` in `world/people.json`.
 
 ### Legame
-- **Inglese**: `bond`, `bonds`, `bondWith`, `bondOf`
-- **Definizione**: ciò che un individuo è per un altro o per un viandante, simmetrico e possibile per le specie.
+- **Inglese**: `bond`, `bonds`, `bondWith`, `bondOf`; il tipo `kind` (`RELATION_KINDS`, `relationKind`)
+- **Definizione**: ciò che un individuo è per un altro o per un viandante, simmetrico e possibile per le specie: la parola (`bond`, nella lingua del mondo: «madre») e il suo tipo come id (`kind`: `parent`, `child`, `sibling`, `spouse`, `apprentice`…, dal contratto 0.7, ADR-0190), che il Narratore scrive accanto alla parola e il kernel ricava dalla parola italiana quando manca.
 - **Dove vive**: `src/kernel/npc/society.ts`, `src/kernel/wandererIds.ts`
-- **Da non usare**: nessuno
-- **Fermo**: `legami`, l'effetto `legame`.
+- **Da non usare**: `tipo` (per il tipo di legame: è `kind`)
+- **Fermo**: `legami`, l'effetto `legame`; `world/people.json → family[].kind`.
+
+### Posto di una cosa
+- **Inglese**: `slot` (`ItemDef.slot`), gli id del dominio `posti` (`head`, `torso`, `legs`, `feet`, `hands`, `weapon`, `shield`, `ring`, `neck`, `back`)
+- **Definizione**: dove una cosa si indossa o si impugna, come la scrive il Narratore nei pacchetti; ciò che uno slot di un pannello accetta lo nomina così. Dal contratto 0.7 (ADR-0190) è un id; prima era la parola italiana (`testa`, `corpo`…). Non è lo slot di un pannello (un id del modulo) né la tasca dell'inventario.
+- **Dove vive**: `src/kernel/agents/content.ts`, `src/kernel/wearing.ts` (`SLOT_ZONES`), `src/mj/hold.ts` (`SLOT_MOUNTS`)
+- **Da non usare**: `posizione`, `zona` (è la zona del corpo)
+- **Fermo**: `slot` nei manifest (`items[].slot`), i valori del dominio `posti`.
 
 ### Ricordo
 - **Inglese**: `memory`, `memories`, `memoriesFor`
@@ -1446,7 +1453,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Riparazione dei valori italiani
 - **Inglese**: `internalManifest`, `internalEffect`, `internalModelId`, `internalModelInfo`, `italianValues`, `italianName`
-- **Definizione**: ciò che il Concilio scrive con i valori del contratto prima si riporta ai nomi interni entrando nel kernel (manifest, effetti, piani, pannelli, casi, timbri, rune nuove, indice dei modelli); ciò che il mondo mostra usa la parola italiana. Dal kernel 0.5.2 (T310, ADR-0165) i prompt sono inglesi e gli schemi elencano i valori interni (`internalValues`): la riparazione resta ancora un contratto, per i modelli che scrivono l'italiano di prima, poi si toglie.
+- **Definizione**: ciò che il Concilio scrive con i valori del contratto prima si riporta ai nomi interni entrando nel kernel (manifest, effetti, piani, pannelli, casi, timbri, rune nuove, indice dei modelli); ciò che il mondo mostra usa la parola italiana. Dal kernel 0.5.2 (T310, ADR-0165) i prompt sono inglesi e gli schemi elencano i valori interni (`internalValues`); dal contratto 0.7 (T310b, ADR-0190) anche i campi delle risposte sono inglesi e `Council.ask` riporta quelli di prima con una tabella sola (`internalAnswer`, `campi-risposte`): la riparazione resta ancora un contratto, per i modelli che scrivono l'italiano di prima, poi si toglie.
 - **Dove vive**: `src/kernel/internalNames.ts`, `src/kernel/validator.ts`
 - **Da non usare**: `traduzione` (non è il testo del mondo)
 - **Fermo**: nessuno.

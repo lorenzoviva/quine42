@@ -23,7 +23,7 @@ export function normName(s: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/\b(il|lo|la|i|gli|le|un|uno|una|di|del|della|dei|delle|da)\b/g, ' ')
+    .replace(/\b(il|lo|la|i|gli|le|un|uno|una|di|del|della|dei|delle|da|the|an?|of)\b/g, ' ')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
@@ -98,7 +98,10 @@ export class Content {
         });
       }
       for (const it of man.items ?? []) {
-        this.items.set(it.id, { ...it, tags: [...new Set([...(it.tags ?? []), it.category])] });
+        // A place or a bonus in the Italian of before T310b (a pack not yet ported) is the one it means.
+        const slot = it.slot ? { slot: internalName('posti', it.slot) } : {};
+        const bonus = it.bonus ? { bonus: Object.fromEntries(Object.entries(it.bonus).map(([k, v]) => [internalName('bonus', k), v])) } : {};
+        this.items.set(it.id, { ...it, ...slot, ...bonus, tags: [...new Set([...(it.tags ?? []), it.category])] });
         this.itemSource.set(it.id, man.id);
       }
       this.recipes.push(...(man.recipes ?? []));

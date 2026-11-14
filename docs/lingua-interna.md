@@ -1,6 +1,6 @@
 # La lingua interna: l'inglese, e le rune in latino (T306, step 42)
 
-> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`); **T308b fatto** (contratto `0.5.0`, ADR-0163: il filo e Lua, la migrazione `0.4 → 0.5`); **T309 fatto** (kernel `0.5.1`: i commenti del Lua e degli XML del seme); **T310 fatto in parte** (kernel `0.5.2`, ADR-0165: i prompt in inglese, il blocco «Lingua», la quarta parete in italiano e inglese; il resto è T310b). Questo documento è il piano: la tabella completa di ciò che cambia nome,
+> Stato: **decisa** dall'autore (D34, 05/11 sera), ADR-0153; **T307a fatto** (contratto `0.2.0`, ADR-0155: la simulazione e le rune latine, la migrazione `0.1 → 0.2`); **T307b fatto** (contratto `0.3.0`, ADR-0158: la società e il Concilio, la migrazione `0.2 → 0.3`); **T308a fatto** (contratto `0.4.0`, ADR-0159: i campi e i percorsi dei file dell’universo, la migrazione `0.3 → 0.4`); **T308b fatto** (contratto `0.5.0`, ADR-0163: il filo e Lua, la migrazione `0.4 → 0.5`); **T309 fatto** (kernel `0.5.1`: i commenti del Lua e degli XML del seme); **T310 fatto** (kernel `0.5.2`, ADR-0165: i prompt in inglese, il blocco «Lingua», la quarta parete in italiano e inglese); **T310b fatto** (contratto `0.7.0`, ADR-0190: i campi degli schemi in inglese, il tipo di legame come id, i valori che restavano, la migrazione `0.6 → 0.7`; lo `0.6` è di T342, i simboli dei programmi). Questo documento è il piano: la tabella completa di ciò che cambia nome,
 > dominio per dominio, e i task che la applicano. La stessa tabella, come dato, è `src/kernel/internalNames.ts` (`INTERNAL_NAMES`);
 > `tests/internal-names.test.ts` controlla che non abbia doppioni né collisioni e che copra i valori del codice; le tabelle qui sotto
 > le riscrive `npx vite-node lab/scripts/lingua-interna.ts` (con `-- --misura` conta anche i file che ogni passo tocca).
@@ -59,6 +59,8 @@ il suo contratto, ogni migrazione è una funzione pura con il suo test, e la cat
 | T307b | `0.3.0` | `0.2 → 0.3` | la società e il Concilio: momenti, «dove», attività, specie, legami, mestieri e moduli del seme, comportamenti, imprese, trame, suoni, parti, agenti (e i file dei loro prompt), classi dello Scultore, coefficienti, carte e grafo, modalità, valori del solo TypeScript |
 | T308a | `0.4.0` | `0.3 → 0.4` | i file dell'universo: i nomi di campo di ogni file e i percorsi (`world/giocatori/` → `world/players/`…), con `paths.ts` e `files.ts` |
 | T308b | `0.5.0` | `0.4 → 0.5` | il filo e Lua: messaggi del protocollo, i loro campi, i componenti e i loro campi, l'API Lua, gli eventi del bus |
+| T342 | `0.6.0` | `0.5 → 0.6` | (non di questo piano, ADR-0175) i simboli dei programmi MarkovJunior: una cifra da sola diventa `#` e la cifra |
+| T310b | `0.7.0` | `0.6 → 0.7` | i valori che gli schemi del Concilio elencavano ancora in italiano: dove sta una cosa in un piano, il tipo di un ambiente, i modi della mente, i posti e i bonus delle cose, i ruoli dei timbri, i comandi di uno strumento; il tipo di ogni legame come id (`kind`); i campi delle risposte (`campi-risposte`, non su disco) |
 
 Come migra un universo salvato:
 
@@ -150,13 +152,20 @@ T307 come era scritto (tutti i valori insieme) toccava ≈ 400 file, T308 ≈ 38
    campi degli effetti e degli elementi dei pannelli; la quarta parete sulla lingua del mondo, l'italiano e l'inglese, con le frasi di prova e
    venti frasi innocue per lingua (`tests/fourthwall-languages.test.ts`). La riparazione dei valori italiani resta: si toglie un contratto dopo.
    Misura (`lab/scripts/prompt-tokens.ts`): testi fissi −6,9 %, richieste di una Genesi offline −3,3 %; prova a pagamento (≈ 0,07 $): nessun
-   testo del mondo in inglese. **Resta, in T310b**: i campi degli schemi del Concilio in inglese (`titolo`, `racconto`, `possibile`… con i
-   lettori, le risposte di `MockAiModels` e i test, accettando i campi di prima per un contratto); il tipo di legame come id; i valori interni
-   ancora italiani che gli schemi elencano (`dentro`/`fuori`/`ovunque`, `esterno`/`interno`/`misto`, le direzioni, `npc`/`oggetto`/`strumento`,
-   le azioni degli individui, gli interventi della sessione, i posti degli oggetti, i ruoli dei timbri: vogliono una migrazione, cioè un
-   contratto); le espressioni regolari di `lingue.md` §5 che leggono le risposte (`society.ts`, `classes.ts`, `screens.ts`, `plots.ts`,
-   `stamps.ts`, `atlas.ts`…): un id dove c'è uno schema, una tabella per lingua dove no. `MockAiModels` legge `data`, non i prompt: le
-   richieste nuove le riconosce già; le risposte seguono gli schemi nuovi (rune nuove latine, elemento inglese, effetti interni).
+   testo del mondo in inglese. Il resto è T310b (punto 7).
+7. **T310b** — i campi degli schemi del Concilio in inglese, il tipo di legame come id, i valori che restavano, contratto `0.7.0`.
+   **Fatto** (ADR-0190): ogni schema di `src/kernel/agents/*.ts` e del kernel nomina i campi in inglese (`say`, `title`, `beats`, `possible`,
+   `story`…), con i tipi che li leggono e le risposte di `MockAiModels`; una tabella sola, `campi-risposte`, che `Council.ask` applica a ogni
+   risposta a ogni profondità (`internalAnswer`), così una risposta coi campi di prima legge uguale (tre parole restano a ciascun lettore
+   perché cambiano senso fra schemi: `storia`, `oggetti`, `tag`). Il tipo di legame come id: `Relation.kind` (`RELATION_KINDS`), scritto dallo
+   schema del Narratore accanto alla parola del mondo (`family[].kind`, `bond_kind`) e dal kernel quando ripara la società; i lettori
+   (`relationKind`, `relationProblem`, `greeting`…) leggono il `kind` e, senza, la parola italiana come ripiego. Dodici domini nuovi
+   (`dove-piano`, `tipi-ambiente`, `direzioni`, `tipi-fucina`, `azioni-npc`, `incarichi`, `posti`, `ruoli-timbri`, `interazioni`, `comandi`,
+   `ripartenza`, `bonus`) con la migrazione `0.6 → 0.7` (`MIGRATIONS[5]`: i piani, i manifest, il Lua del Concilio dove il kernel legge
+   un valore con `luaFor0_7`, `world/people.json`); gli id degli slot di un pannello sono parole del modulo e restano. Le espressioni
+   regolari di `lingue.md` §5: un id dove c'è uno schema, tabelle in italiano e inglese dove no (`guessClass`, `forge.ts`, `defaultCodes`,
+   `normName`, l'atlante); quelle sui testi generati (le trame, le rune, le attività come ripiego) restano italiane fino a T239. La
+   riparazione dei valori italiani di 0.1-0.3 resta un contratto ancora (si toglie con lo 0.8).
 
 Le stime di T307 (8 %) e T308 (6 %) si dividono a metà fra a e b; il backlog le rinumera quando integra.
 
@@ -167,7 +176,8 @@ Le stime di T307 (8 %) e T308 (6 %) si dividono a metà fra a e b; il backlog le
 - **Gli indirizzi**: `/api/viandante`, `/api/crediti`, `/api/coda`, `?universo=`, `?viandante=`, `?classica`, `window.rune`, le chiavi di
   `localStorage` del sito e del profilo (`quine:sito:reame`, `rune:profilo:`), l'ancora `#reami`. Sono l'interfaccia (link, profili dei
   browser, abitudini): li cambierà T239 con un reindirizzamento, se servirà. `quine:fila:` invece è un formato interno e passa con T308a.
-- **Le espressioni regolari che leggono testo** (le 83 di `lingue.md` §5): le tocca T310, non i passi di codice.
+- **Le espressioni regolari che leggono testo** (le 83 di `lingue.md` §5): T310b ha messo un id dove c'è uno schema e tabelle it/en dove no;
+  quelle sui testi generati (trame, rune, attività come ripiego, modelli offline) restano italiane fino a T239.
 - **I contenuti scritti dal Concilio negli universi salvati** che solo il loro modulo legge (§2), e gli id di oggetti e modelli che il
   kernel non nomina.
 - **Le stringhe del Lua del seme che nessun TypeScript legge** fuori dagli esiti di `sys.work` (che hanno il loro dominio, T307b): i nomi
@@ -237,13 +247,26 @@ posto di un pannello sul filo).
 | [Campi dei piani dei luoghi (`maps/*.json`)](#campi-piani) | campi | 15 | disco, filo | T308a (0.4) |
 | [Campi di `models/index.json` e attributi dei programmi](#campi-modelli) | campi | 17 | disco, prompt | T308a (0.4) |
 | [Percorsi dell’universo e del server](#percorsi) | percorsi | 17 | disco, filo | T308a (0.4) |
-| [Messaggi del protocollo (`t`)](#messaggi) | valori | 30 | filo | T308b (0.5) |
+| [Messaggi del protocollo (`t`)](#messaggi) | valori | 31 | filo | T308b (0.5) |
 | [Operazioni e stati sul filo](#valori-filo) | valori | 24 | filo | T308b (0.5) |
 | [Campi dei messaggi](#campi-filo) | campi | 53 | filo | T308b (0.5) |
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
 | [Campi dei componenti](#campi-componenti) | campi | 34 | filo, Lua, prompt | T308b (0.5) |
 | [Nomi dell’API Lua, eventi del bus, chiavi del magazzino](#api-lua) | valori | 6 | Lua, prompt | T308b (0.5) |
-| **totale** | | **930** | | T307a: 192 · T307b: 301 · T308a: 274 · T308b: 163 |
+| [«Dove» di una cosa in un piano (dentro o fuori i lotti)](#dove-piano) | valori | 3 | disco, filo, prompt | T310b (0.7) |
+| [Tipi di ambiente (all’aperto, al chiuso, misto)](#tipi-ambiente) | valori | 3 | disco, prompt | T310b (0.7) |
+| [Direzioni della bussola](#direzioni) | valori | 9 | prompt, solo codice | T310b (0.7) |
+| [Tipi di ciò che la Fucina crea](#tipi-fucina) | valori | 3 | prompt, solo codice | T310b (0.7) |
+| [Azioni di un individuo in un dialogo e modi della sua mente (`mind.mode`)](#azioni-npc) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
+| [Incarichi del Referente e interventi della sessione del Concilio](#incarichi) | valori | 12 | prompt, solo codice | T310b (0.7) |
+| [Posti degli oggetti (dove si indossano o si impugnano)](#posti) | valori | 10 | disco, Lua, filo, prompt | T310b (0.7) |
+| [Ruoli dei codici di un timbro (`codes`)](#ruoli-timbri) | valori | 9 | disco, prompt | T310b (0.7) |
+| [Interazioni di un concetto della Fucina](#interazioni) | valori | 4 | prompt, solo codice | T310b (0.7) |
+| [Comandi di uno strumento (`item.controls`)](#comandi) | valori | 2 | disco, prompt | T310b (0.7) |
+| [Dove si riapre gli occhi dopo la morte](#ripartenza) | valori | 2 | prompt, solo codice | T310b (0.7) |
+| [Bonus di una cosa indossata o impugnata](#bonus) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
+| [Campi delle risposte del Concilio (gli schemi delle richieste)](#campi-risposte) | campi | 164 | prompt | T310b (0.7) |
+| **totale** | | **1165** | | T307a: 192 · T307b: 301 · T308a: 275 · T308b: 164 · T310b: 233 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -1505,6 +1528,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/session/protocol.ts (ClientMsg, ServerMsg)`, `src/session/server.ts (LIMITS)`, `src/session/thin.ts`, `src/session/client.ts`
 - **Tocca**: filo · **lingua**: inglese · **task**: T308b, contratto 0.5
+- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata) nasce inglese; `carta` è solo la parola del concetto, nessun client l’ha mandata
 
 | italiano | interno |
 |---|---|
@@ -1538,6 +1562,7 @@ posto di un pannello sul filo).
 | `mondo` | `world` |
 | `concilio` | `council` |
 | `file` | `file` |
+| `carta` | `card` |
 
 <a id="valori-filo"></a>
 ### Operazioni e stati sul filo (`valori-filo`)
@@ -1721,5 +1746,364 @@ posto di un pannello sul filo).
 | `deposito:` | `deposit:` |
 | `cantiere` | `worksite` |
 | `porta` | `bring` |
+
+<a id="dove-piano"></a>
+### «Dove» di una cosa in un piano (dentro o fuori i lotti) (`dove-piano`)
+
+- **Dove si legge**: `src/kernel/agents/cartography.ts (Where, WHERE)`, `src/kernel/kernel.ts (placeEntities)`, `maps/*.json → objects[].where, fresh[].where`
+- **Tocca**: disco, filo, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: non è il «dove» della routine (`dove`, T307b): quello dice un posto della vita di un individuo, questo se una cosa sta dentro i lotti o fuori
+
+| italiano | interno |
+|---|---|
+| `dentro` | `inside` |
+| `fuori` | `outside` |
+| `ovunque` | `anywhere` |
+
+<a id="tipi-ambiente"></a>
+### Tipi di ambiente (all’aperto, al chiuso, misto) (`tipi-ambiente`)
+
+- **Dove si legge**: `src/kernel/types.ts (EnvironmentDef.environment)`, `src/kernel/agents/cartography.ts`, `manifest → layouts[].environment`
+- **Tocca**: disco, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+
+| italiano | interno |
+|---|---|
+| `esterno` | `outdoor` |
+| `interno` | `indoor` |
+| `misto` | `mixed` |
+
+<a id="direzioni"></a>
+### Direzioni della bussola (`direzioni`)
+
+- **Dove si legge**: `src/kernel/atlas.ts (COMPASS, direction, directionVector)`, `src/kernel/agents/cartography.ts (REGION_SCHEMA)`
+- **Tocca**: prompt, solo codice · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: nel testo del mondo la direzione si dice nella sua lingua (`directionWord`); il Cartografo la scrive come id
+
+| italiano | interno |
+|---|---|
+| `nord` | `north` |
+| `nord-est` | `north-east` |
+| `est` | `east` |
+| `sud-est` | `south-east` |
+| `sud` | `south` |
+| `sud-ovest` | `south-west` |
+| `ovest` | `west` |
+| `nord-ovest` | `north-west` |
+| `qui` | `here` |
+
+<a id="tipi-fucina"></a>
+### Tipi di ciò che la Fucina crea (`tipi-fucina`)
+
+- **Dove si legge**: `src/kernel/agents/forge.ts (Concept.type, ForgeRequest.kind)`, `src/kernel/agents/genesis.ts (CastEntry.type)`, `src/kernel/kernel.ts (forgeModule)`
+- **Tocca**: prompt, solo codice · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: un `item` va nell’inventario (`kind: item` del manifest), un `object` sta nel mondo; i prefissi degli id (`npc.`, `obj.`, `item.`) non cambiano
+
+| italiano | interno |
+|---|---|
+| `npc` | `npc` |
+| `oggetto` | `object` |
+| `strumento` | `item` |
+
+<a id="azioni-npc"></a>
+### Azioni di un individuo in un dialogo e modi della sua mente (`mind.mode`) (`azioni-npc`)
+
+- **Dove si legge**: `src/kernel/agents/minds.ts (NPC_ACTIONS)`, `src/kernel/npc/model.ts (Mind.mode)`, `universe/modules/sys.follow, sys.wander, sys.work (logic.lua)`, `manifest → components.mind.mode, cases`
+- **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: `wander`, `follow` e `stay` sono anche i modi della mente che Lua legge (`mind.mode`)
+
+| italiano | interno |
+|---|---|
+| `nessuna` | `none` |
+| `segui` | `follow` |
+| `resta` | `stay` |
+| `vaga` | `wander` |
+| `dai` | `give` |
+| `missione` | `quest` |
+
+<a id="incarichi"></a>
+### Incarichi del Referente e interventi della sessione del Concilio (`incarichi`)
+
+- **Dove si legge**: `src/kernel/agents/minds.ts (REFERENTE_SCHEMA)`, `src/kernel/agents/effects.ts (SESSION_SCHEMA, councilSession)`, `src/kernel/kernel.ts (liaison, councilSession)`
+- **Tocca**: prompt, solo codice · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: `oggetto` del Referente è uno strumento (`item`, come lo crea la Fucina), `cosa` una cosa del mondo (`object` per la Fucina)
+
+| italiano | interno |
+|---|---|
+| `nessuno` | `none` |
+| `oggetti` | `items` |
+| `abitante` | `inhabitant` |
+| `cosa` | `thing` |
+| `meccanica` | `mechanic` |
+| `runa` | `rune` |
+| `oggetto` | `item` |
+| `personaggio` | `character` |
+| `ambiente` | `environment` |
+| `regola` | `rule` |
+| `riscolpisci` | `resculpt` |
+| `musica` | `music` |
+
+<a id="posti"></a>
+### Posti degli oggetti (dove si indossano o si impugnano) (`posti`)
+
+- **Dove si legge**: `src/kernel/agents/content.ts (ITEM_SCHEMA.slot)`, `src/kernel/wearing.ts (SLOT_ZONES)`, `src/mj/hold.ts (SLOT_MOUNTS)`, `manifest → items[].slot, ui.elements[].accepts`, `prompt dell’Ingegnere`
+- **Tocca**: disco, Lua, filo, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: gli id degli slot di un pannello (`ui.elements[].id`) sono parole del modulo, come le sue azioni: non cambiano; cambiano i posti delle cose e ciò che uno slot accetta
+
+| italiano | interno |
+|---|---|
+| `testa` | `head` |
+| `corpo` | `torso` |
+| `gambe` | `legs` |
+| `piedi` | `feet` |
+| `mani` | `hands` |
+| `arma` | `weapon` |
+| `scudo` | `shield` |
+| `anello` | `ring` |
+| `collo` | `neck` |
+| `schiena` | `back` |
+
+<a id="ruoli-timbri"></a>
+### Ruoli dei codici di un timbro (`codes`) (`ruoli-timbri`)
+
+- **Dove si legge**: `src/kernel/stamps.ts (StampCodes, STAMP_ROLES)`, `src/kernel/mj.ts (stamp)`, `manifest → layouts[].program (stamp.codes)`, `prompt del Cartografo`
+- **Tocca**: disco, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+
+| italiano | interno |
+|---|---|
+| `muro` | `wall` |
+| `pavimento` | `floor` |
+| `porta` | `door` |
+| `acqua` | `water` |
+| `ponte` | `bridge` |
+| `terreno` | `ground` |
+| `strada` | `road` |
+| `roccia` | `rock` |
+| `recinto` | `fence` |
+
+<a id="interazioni"></a>
+### Interazioni di un concetto della Fucina (`interazioni`)
+
+- **Dove si legge**: `src/kernel/agents/forge.ts (Concept.interaction)`
+- **Tocca**: prompt, solo codice · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: nel manifest diventano `interaction.type` (`talk`, `read`, `lua`), già inglesi
+
+| italiano | interno |
+|---|---|
+| `parla` | `talk` |
+| `leggi` | `read` |
+| `usa` | `use` |
+| `nessuna` | `none` |
+
+<a id="comandi"></a>
+### Comandi di uno strumento (`item.controls`) (`comandi`)
+
+- **Dove si legge**: `src/kernel/agents/forge.ts (Concept.controls[].action, requiredHooks)`, `manifest → item.controls (chiavi)`
+- **Tocca**: disco, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+
+| italiano | interno |
+|---|---|
+| `usa` | `use` |
+| `azione` | `action` |
+
+<a id="ripartenza"></a>
+### Dove si riapre gli occhi dopo la morte (`ripartenza`)
+
+- **Dove si legge**: `src/kernel/agents/effects.ts (DEATH_SCHEMA)`, `src/kernel/gameSetup.ts (fallbackDeath)`, `src/kernel/kernel.ts`
+- **Tocca**: prompt, solo codice · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: le stesse parole dell’avviso sul filo (`valori-filo`)
+
+| italiano | interno |
+|---|---|
+| `qui` | `here` |
+| `piazza` | `square` |
+
+<a id="bonus"></a>
+### Bonus di una cosa indossata o impugnata (`bonus`)
+
+- **Dove si legge**: `src/kernel/agents/content.ts (ITEM_SCHEMA.bonus)`, `src/kernel/kernel.ts (item_bonus)`, `manifest → items[].bonus (chiavi)`, `Lua: items.bonus(id, nome)`, `prompt dell’Ingegnere`
+- **Tocca**: disco, Lua, prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+
+| italiano | interno |
+|---|---|
+| `difesa` | `defense` |
+| `attacco` | `attack` |
+| `velocita` | `speed` |
+| `peso` | `weight` |
+| `luce` | `light` |
+| `calore` | `warmth` |
+
+<a id="campi-risposte"></a>
+### Campi delle risposte del Concilio (gli schemi delle richieste) (`campi-risposte`)
+
+- **Dove si legge**: `src/kernel/agents/*.ts (gli schemi)`, `src/kernel/ai/mock.ts`, `src/kernel/agents/council.ts (ask: internalAnswer)`
+- **Tocca**: prompt · **lingua**: inglese · **task**: T310b, contratto 0.7
+- **Nota**: una tabella sola per ogni risposta, letta a ogni profondità (`internalAnswer`): la stessa parola italiana vale lo stesso in ogni schema. Tre non ci sono perché cambiano senso: `storia` è `history` nella bibbia e `story` in una persona, `oggetti` sono `items` di un pacchetto e `objects` di un piano, `tag` è l’elenco `tags` di una cosa e il `tag` di una voce di bottino; li legge ciascun lettore
+
+| italiano | interno |
+|---|---|
+| `nome` | `name` |
+| `descrizione` | `description` |
+| `testo` | `text` |
+| `titolo` | `title` |
+| `racconto` | `story` |
+| `possibile` | `possible` |
+| `dice` | `say` |
+| `azione` | `action` |
+| `oggetto` | `item` |
+| `umore` | `mood` |
+| `oggetti_citati` | `mentioned` |
+| `ricordo` | `memory` |
+| `importanza` | `weight` |
+| `legame` | `bond` |
+| `scheda` | `sheet` |
+| `risposta` | `reply` |
+| `incarico` | `task` |
+| `richiesta` | `request` |
+| `bersaglio` | `target` |
+| `rifiuto` | `refusal` |
+| `richiesta_fucina` | `forge_request` |
+| `battute` | `lines` |
+| `chi` | `who` |
+| `ricordo_a` | `memory_a` |
+| `ricordo_b` | `memory_b` |
+| `mistero` | `mystery` |
+| `coinvolti` | `involved` |
+| `tappe` | `beats` |
+| `giorno` | `day` |
+| `momento` | `moment` |
+| `dove` | `where` |
+| `cosa` | `what` |
+| `battuta` | `line` |
+| `indizio` | `clue` |
+| `missione` | `quest` |
+| `da` | `from` |
+| `tipo` | `type` |
+| `a` | `to` |
+| `luogo` | `place` |
+| `ricompensa` | `reward` |
+| `categoria` | `category` |
+| `peso` | `weight` |
+| `pila` | `stack` |
+| `effetti` | `effects` |
+| `fame` | `hunger` |
+| `sete` | `thirst` |
+| `energia` | `energy` |
+| `salute` | `health` |
+| `impugnabile` | `equippable` |
+| `contenitore` | `container` |
+| `posto` | `slot` |
+| `aspetto` | `look` |
+| `forma` | `shape` |
+| `correzioni` | `fixes` |
+| `nota` | `note` |
+| `approvato` | `approved` |
+| `problemi` | `problems` |
+| `agente` | `agent` |
+| `problema` | `problem` |
+| `ricette` | `recipes` |
+| `ingredienti` | `inputs` |
+| `quantita` | `quantity` |
+| `attrezzi` | `tools` |
+| `risultato` | `result` |
+| `bottino` | `loot` |
+| `tabella` | `table` |
+| `voci` | `entries` |
+| `porta` | `carries` |
+| `indossa` | `wears` |
+| `mestiere` | `job` |
+| `genere` | `gender` |
+| `eta` | `age` |
+| `famiglia` | `family` |
+| `quando` | `when` |
+| `fa` | `does` |
+| `ambiente` | `environment` |
+| `modulo` | `module` |
+| `a_terra` | `ground` |
+| `nuovi` | `fresh` |
+| `concetto` | `concept` |
+| `rune` | `runes` |
+| `strutture` | `structures` |
+| `taglia` | `size` |
+| `ambienti` | `environments` |
+| `programma_json` | `program_json` |
+| `direzione` | `direction` |
+| `distanza` | `distance` |
+| `raggio` | `radius` |
+| `usa_ambiente` | `reuse` |
+| `nuovi_terreni` | `new_terrains` |
+| `codice` | `code` |
+| `colore` | `color` |
+| `strato` | `layer` |
+| `solido` | `solid` |
+| `interno` | `indoor` |
+| `regione` | `region` |
+| `tono` | `tone` |
+| `sintesi` | `summary` |
+| `luoghi` | `places` |
+| `personaggi` | `characters` |
+| `fatti` | `facts` |
+| `misteri` | `mysteries` |
+| `usanze` | `customs` |
+| `stile` | `style` |
+| `forme` | `shapes` |
+| `luce` | `light` |
+| `regole` | `rules` |
+| `protagonista` | `protagonist` |
+| `case_comuni` | `common_houses` |
+| `terreni` | `terrains` |
+| `velocita` | `speed` |
+| `tetto` | `roof` |
+| `moduli` | `modules` |
+| `classe` | `class` |
+| `contesto` | `context` |
+| `rarita` | `rarity` |
+| `interazione` | `interaction` |
+| `comandi` | `controls` |
+| `unico` | `unique` |
+| `azioni` | `actions` |
+| `etichetta` | `label` |
+| `richiede` | `requires` |
+| `capienza` | `capacity` |
+| `spingibile` | `pushable` |
+| `massa` | `mass` |
+| `attrito` | `friction` |
+| `impilabile` | `stackable` |
+| `max_pila` | `max_stack` |
+| `equipaggiabile` | `equippable` |
+| `componenti_json` | `components_json` |
+| `spiegazione` | `reason` |
+| `ripetibile` | `repeatable` |
+| `serve` | `requires` |
+| `costo` | `cost` |
+| `runa_nuova` | `new_rune` |
+| `glifo` | `glyph` |
+| `elemento` | `element` |
+| `canone` | `canon` |
+| `valutazione` | `assessment` |
+| `intervento` | `action` |
+| `perde_tutto` | `lose_all` |
+| `ripartenza` | `restart` |
+| `viandante_json` | `wanderer_json` |
+| `passi` | `steps` |
+| `verso` | `toward` |
+| `secondi` | `seconds` |
+| `durata` | `duration` |
+| `guarda` | `watch` |
+| `righe` | `lines` |
+| `pannello` | `panel` |
+| `elementi` | `elements` |
+| `accetta` | `accepts` |
+| `campo` | `field` |
+| `logica` | `logic` |
+| `casi` | `cases` |
+| `voto` | `score` |
+| `riconoscibile` | `recognizable` |
+| `consigli` | `advice` |
+| `programma` | `program` |
+| `uso` | `use` |
+| `momenti` | `moments` |
+| `effetto` | `effect` |
+| `ritira` | `withdraw` |
+| `motivo` | `reason` |
 
 <!-- tabelle: fine -->

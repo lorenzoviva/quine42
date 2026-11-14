@@ -290,7 +290,7 @@ export class ModelDirector {
         this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
         return false;
       }
-      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.voto !== undefined ? { score: r.voto } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`, SCULPTED);
+      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.score !== undefined ? { score: r.score } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`, SCULPTED);
       if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
       return added;
     } catch (e) {

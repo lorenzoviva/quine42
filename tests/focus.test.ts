@@ -81,7 +81,7 @@ function council(files: FileMap, chunks: GraphChunk[], models = new Recording())
   return { models, c: new Council(models, () => ({ files, palette: {}, catalog: catalogOf(files), graph: () => graph })) };
 }
 
-const npc = (name: string) => ({ name, persona: 'Sei tu.', mood: 'tranquillo', mode: 'vaga', carrying: [], place: 'Piazza del Borgo', history: [], facts: {} });
+const npc = (name: string) => ({ name, persona: 'Sei tu.', mood: 'tranquillo', mode: 'wander', carrying: [], place: 'Piazza del Borgo', history: [], facts: {} });
 
 describe('the context of the agents from the graph (T13)', () => {
   it('a task with a focus gets the neighbourhood of what it is about instead of the whole bible and catalog', async () => {

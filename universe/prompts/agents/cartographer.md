@@ -68,9 +68,9 @@ what it is is told by the name of the environment and by the materials of `codes
 - `{"type":"stamp","shape":"castle"}` — moat, walls with towers at the corners, a bridge, a keep.
 - Shapes: `house`, `castle`, `fortress`, `tower`, `temple`, `pyramid`, `huts`, `pen`
   (riding ground with a stable), `barracks`, `dungeon` (rooms and tunnels in the rock), `lair` (cave), `well`.
-- `"count": N` puts N of them (e.g. 5 huts); `"codes"` chooses the terrains for each role: `muro` (wall),
-  `pavimento` (floor), `porta` (door), `acqua` (water), `ponte` (bridge), `terreno` (ground), `strada` (road), `roccia` (rock), `recinto` (fence)
-  (e.g. huts with `{"muro":"a"}` = straw, a castle with `{"muro":"b","ponte":"z"}`). Without `codes` the kernel chooses.
+- `"count": N` puts N of them (e.g. 5 huts); `"codes"` chooses the terrains for each role: `wall`,
+  `floor`, `door`, `water`, `bridge`, `ground`, `road`, `rock`, `fence`
+  (e.g. huts with `{"wall":"a"}` = straw, a castle with `{"wall":"b","bridge":"z"}`). Without `codes` the kernel chooses.
 - They combine with the rules: first clear (`prl` trees → meadow), then the stamps, then the details.
 
 ## The atlas

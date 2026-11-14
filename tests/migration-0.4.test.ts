@@ -107,7 +107,7 @@ describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by 
   const { files, applied } = migrateUniverse(before, TO_0_4);
 
   it('is the third migration of the chain, it says what it does, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6']);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7']);
     expect(applied).toHaveLength(1);
     expect(applied[0]).toMatch(/^0\.3→0\.4: /);
     const cfg = json(files['universe.json']);
@@ -244,9 +244,9 @@ describe('the migration 0.3 → 0.4: a universe of 0.3 born among many, file by 
     expect(json(migrateUniverse(u, TO_0_4).files['world/state.json'])).toEqual({ time: 9 });
   });
 
-  it('prepareUniverse: the chain (0.3 → 0.4 → 0.5 → 0.6), then the seed of today', () => {
+  it('prepareUniverse: the chain (0.3 → 0.4 → 0.5 → 0.6 → 0.7), then the seed of today', () => {
     const out = prepareUniverse(universe03(), bundledFiles);
-    expect(out.applied).toHaveLength(3);
+    expect(out.applied).toHaveLength(4);
     expect(out.files['world/canon.md']).toBeDefined();
     expect(out.changes['world/stato.json']).toBeNull();
     expect(out.changes['world/giocatori/io.json']).toBeNull();

@@ -73,7 +73,7 @@ describe('a coherent society', () => {
       if (q) expect(q.family.some((x) => x.name === p.name)).toBe(true);
     }
     // Someone named and never met is awaited, as what they are to who named them.
-    expect(people.expected).toContainEqual({ name: 'Nessuno Mai', bond: 'fratello', of: 'Aldo' });
+    expect(people.expected).toContainEqual({ name: 'Nessuno Mai', bond: 'fratello', kind: 'sibling', of: 'Aldo' });
     expect(reverseRelation('madre', 'female')).toBe('figlia');
     expect(reverseRelation('padrone', 'male', 'person', 'animal')).toBe('animale');
   });

@@ -72,22 +72,22 @@ The texts the code shows (`world.say`, `world.speak`) stay inside the world: nev
 The Council can add mechanics to the game (equipment, quivers, saddlebags of the horse, a reputation
 sheet…) as **system modules with a panel**: the kernel draws it as a tab
 of the inventory, your `logic.lua` reacts. Elements of the panel (the labels in the language of the world):
-- `{"type":"slot","id":"testa","label":"Testa","accepts":["testa"]}` — one puts in it an item
-  of the inventory if its `posto` (slot: testa, corpo, gambe, piedi, mani, arma, scudo, anello…), its
+- `{"type":"slot","id":"head","label":"Testa","accepts":["head"]}` — one puts in it an item
+  of the inventory if its place (`slot`: head, torso, legs, feet, hands, weapon, shield, ring, neck, back), its
   category or one of its tags is among those accepted; the kernel moves the item and calls
   `M.on_slot(user, slot, item, panel)` (`item` is nil when it is taken out); `M.on_return(place, elapsed)` when a place nobody was seeing is seen again, with the seconds passed (there, meanwhile, Lua was not running);
 - `{"type":"bar","label":"Salute","field":"needs.health","max":100}` and
   `{"type":"text","label":"Difesa","field":"defense.value"}` — show a field of a component
   of the wanderer;
 - `{"type":"button","id":"rest","label":"Riposa"}` — calls `M.on_ui(user, "rest")`.
-API: `ui.slot(panel, slot)` → the item in that slot (or nil); `items.bonus(id, "difesa")` → a number
-of the item's bonus (difesa, attacco, velocita, peso, luce, calore). The consequences go through the
+API: `ui.slot(panel, slot)` → the item in that slot (or nil); `items.bonus(id, "defense")` → a number
+of the item's bonus (defense, attack, speed, weight, light, warmth). The consequences go through the
 **states** of the wanderer, the component `states`: `local st = ecs.get(user, "states") or {}; st["armour"] = { speed = 0.9, weight = 0, light = 0, expires = 0 }; ecs.set(user, "states", st)`
 (the kernel applies speed and carrying weight). Never walk with `pairs` the tables that come
-from `ecs.get`: use lists of names you know (e.g. `for _, p in ipairs({"testa","corpo"}) do … end`).
-With the mechanic write 1-3 **use cases** (`casi`), the examples the Systems Hall stages: who the wanderer is
-before (`viandante_json`), what they carry (`oggetti`: one that exists, by name, or a test one with `posto` and `bonus_json`),
-what happens (`passi`: `slot` with the slot and the item, `remove`, `button` with the action, `wait` with the seconds, `walk` with the way, `up down left right`, and the seconds), how long
-it lasts, what changes (`guarda`: fields `component.field` of the wanderer, e.g. `defense.value`) and the `righe` of your code that
+from `ecs.get`: use lists of names you know (e.g. `for _, p in ipairs({"head","torso"}) do … end`).
+With the mechanic write 1-3 **use cases** (`cases`), the examples the Systems Hall stages: who the wanderer is
+before (`wanderer_json`), what they carry (`items`: one that exists, by name, or a test one with `slot` and `bonus_json`),
+what happens (`steps`: `slot` with the slot and the item, `remove`, `button` with the action, `wait` with the seconds, `walk` with the way, `up down left right`, and the seconds), how long
+it lasts, what changes (`watch`: fields `component.field` of the wanderer, e.g. `defense.value`) and the `lines` of your code that
 do it. The kernel runs them with your code in a miniature world: a case in which what you watch does not change is
 discarded.

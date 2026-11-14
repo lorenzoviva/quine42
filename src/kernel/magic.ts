@@ -24,14 +24,15 @@ const RESERVED = new Set([
 /** The signs a magic rune may take when the one it asked for is taken or is not a sign: the runic letters no word rune uses. */
 const SPARE_GLYPHS = [...'ᚡᚣᚤᚥᚧᚨᚪᚫᚬᚭᚮᚯᚰᚲᚴᚵᚶᚻᚼᚽᚿᛀᛂᛄᛅᛆᛉᛊᛋᛌᛍᛎᛐᛑᛒᛓᛔᛕᛘᛙᛚᛛᛝᛟᛠᛡᛢᛦᛨᛩᛪᛮ'];
 
+/** A rune as the Narrator's schema says it (English fields since T310b; an answer of before reaches here ported by `internalAnswer`). */
 export interface RuneDraft {
   token?: unknown;
-  nome?: unknown;
-  glifo?: unknown;
-  colore?: unknown;
-  elemento?: unknown;
-  descrizione?: unknown;
-  canone?: unknown;
+  name?: unknown;
+  glyph?: unknown;
+  color?: unknown;
+  element?: unknown;
+  description?: unknown;
+  canon?: unknown;
 }
 
 export interface NewRune {
@@ -63,11 +64,11 @@ export function validateNewRune(draft: RuneDraft, existing: Record<string, Magic
   const tokens = Object.keys(existing);
   if (tokens.length >= MAX_MAGIC_RUNES) return { errors: [`le rune magiche sono già ${tokens.length}, il massimo: restano rare`] };
   const token = runeToken(draft.token);
-  const name = text(draft.nome, 20);
-  // An element of the seed in the Italian the Narrator still writes (T307a, until T310) is the internal one; a new one is its word.
-  const element = internalName('elementi', text(draft.elemento, 24).toLowerCase()) || token;
-  const description = text(draft.descrizione, 120);
-  const canone = text(draft.canone, 240) || description;
+  const name = text(draft.name, 20);
+  // An element of the seed in the Italian of the contract 0.1 is the internal one; a new one is its word.
+  const element = internalName('elementi', text(draft.element, 24).toLowerCase()) || token;
+  const description = text(draft.description, 120);
+  const canone = text(draft.canon, 240) || description;
   if (token.length < 3 || token.length > 12) errors.push(`il token «${String(draft.token ?? '')}» deve essere una sola parola di 3-12 lettere`);
   else if (existing[token]) errors.push(`«${token}» è già una runa magica`);
   else if (RESERVED.has(token) || CARPET_TOKENS.has(token) || BINDINGS.has(token) || token === COUNCIL_RUNE) errors.push(`«${token}» è una parola riservata`);
@@ -87,10 +88,10 @@ export function validateNewRune(draft: RuneDraft, existing: Record<string, Magic
   }
   if (errors.length) return { errors };
   const used = new Set(Object.values(existing).map((r) => r.glyph));
-  const asked = typeof draft.glifo === 'string' ? [...draft.glifo.trim()] : [];
+  const asked = typeof draft.glyph === 'string' ? [...draft.glyph.trim()] : [];
   const glyph = asked.length === 1 && /\p{L}|\p{S}/u.test(asked[0]) && !/[a-z0-9]/i.test(asked[0]) && !used.has(asked[0]) && !FUTHARK.includes(asked[0]) ? asked[0] : SPARE_GLYPHS.find((g) => !used.has(g));
   if (!glyph) return { errors: ['nessun segno libero per una runa nuova'] };
-  const color = typeof draft.colore === 'string' && /^#[0-9a-f]{6}$/i.test(draft.colore.trim()) ? draft.colore.trim().toLowerCase() : `#${(hashStr(token) & 0xffffff | 0x404040).toString(16).padStart(6, '0')}`;
+  const color = typeof draft.color === 'string' && /^#[0-9a-f]{6}$/i.test(draft.color.trim()) ? draft.color.trim().toLowerCase() : `#${(hashStr(token) & 0xffffff | 0x404040).toString(16).padStart(6, '0')}`;
   return { rune: { token, rune: { name, glyph, color, element, description }, canone }, errors: [] };
 }
 

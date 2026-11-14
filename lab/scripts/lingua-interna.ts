@@ -11,7 +11,7 @@ const DOC = path.join(ROOT, 'docs/lingua-interna.md');
 const START = '<!-- tabelle: inizio (lab/scripts/lingua-interna.ts) -->';
 const END = '<!-- tabelle: fine -->';
 
-const CONTRACT: Record<NameStep, string> = { T307a: '0.2', T307b: '0.3', T308a: '0.4', T308b: '0.5' };
+const CONTRACT: Record<NameStep, string> = { T307a: '0.2', T307b: '0.3', T308a: '0.4', T308b: '0.5', T310b: '0.7' };
 const KIND: Record<NameDomain['kind'], string> = { values: 'valori', fields: 'campi', paths: 'percorsi' };
 const REACH: Record<string, string> = { disco: 'disco', filo: 'filo', lua: 'Lua', prompt: 'prompt', codice: 'solo codice' };
 
