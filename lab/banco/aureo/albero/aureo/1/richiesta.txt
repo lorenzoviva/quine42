@@ -1,0 +1,3 @@
+Sculpt: Quercia
+What it looks like: una quercia frondosa con il tronco robusto, rami che si aprono e la chioma larga e tondeggiante
+Class: tree · box 40 × 40 × 60 voxels · at least 48 tall

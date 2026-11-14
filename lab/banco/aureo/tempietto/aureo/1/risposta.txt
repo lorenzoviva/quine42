@@ -1,0 +1,150 @@
+<sequence values="BPpdCcOoFgmkhW" size="50 50 50" symmetry="(xy)" name="Tempietto">
+  <color symbol="P" value="ded7cb" name="marmo chiaro base"/>
+  <color symbol="p" value="f7f3eb" name="marmo bianco rilievo"/>
+  <color symbol="d" value="8a8275" name="ombra pietra e fessure"/>
+  <color symbol="C" value="3d8274" name="cupola rame ossidato"/>
+  <color symbol="c" value="65ab9b" name="costoloni cupola in luce"/>
+  <color symbol="O" value="c89a3c" name="bronzo dorato finimenti"/>
+  <color symbol="o" value="5c431e" name="bronzo scuro ombra"/>
+  <color symbol="F" value="ffb833" glow="True" name="fiamma votiva altare"/>
+  <color symbol="g" value="547a46" name="muschio basamento nord"/>
+  <color symbol="W" value="2d2b28" name="penombra interna cella"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+  <color symbol="k" hidden="True" name="taglio"/>
+  <color symbol="h" hidden="True" name="variante"/>
+
+  <!-- Shuffle per varianza tra i semi -->
+  <box at="25 0 49" size="50 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- Basamento circolare a gradoni (crepidoma) -->
+  <cylinder at="25 25 0" size="42 42 1" color="d"/>
+  <cylinder at="25 25 1" size="38 38 1" color="P"/>
+  <cylinder at="25 25 2" size="34 34 1" color="p"/>
+
+  <!-- Tre gradini monumentali davanti (verso sud, y crescente) -->
+  <box at="25 44 0" size="20 8 1" color="P"/>
+  <box at="25 42 1" size="18 6 1" color="P"/>
+  <box at="25 40 2" size="16 6 1" color="p"/>
+
+  <!-- Plinti laterali della gradinata d'ingresso con urne decorative -->
+  <box at="14 43 0" size="2 8 3" color="p"/>
+  <box at="36 43 0" size="2 8 3" color="p"/>
+  <box at="14 43 3" size="2 2 2" color="O"/>
+  <box at="36 43 3" size="2 2 2" color="O"/>
+
+  <!-- Pavimentazione dello stilobate -->
+  <cylinder at="25 25 3" size="32 32 1" color="P"/>
+
+  <!-- Cella interna circolare (parete, vano d'ombra e portale d'accesso) -->
+  <cylinder at="25 25 3" size="18 18 19" color="P"/>
+  <cylinder at="25 25 3" size="14 14 19" color="W"/>
+  <box at="25 32 3" size="6 8 15" color="B"/>
+  <box at="21 32 3" size="2 4 16" color="p"/>
+  <box at="29 32 3" size="2 4 16" color="p"/>
+  <box at="25 32 18" size="10 4 2" color="p"/>
+
+  <!-- Altare centrale con braciere e fiamma votiva sacra -->
+  <cylinder at="25 25 3" size="6 6 4" color="p"/>
+  <cylinder at="25 25 7" size="4 4 1" color="O"/>
+  <cylinder at="25 25 8" size="4 4 2" color="O"/>
+  <cylinder at="25 25 9" size="2 2 3" color="F"/>
+
+  <!-- Colonne del peristilio (8 colonne a raggio 13) -->
+  <!-- Basi / Plinti delle colonne -->
+  <box at="37 30 3" size="4 4 2" color="p"/>
+  <box at="30 37 3" size="4 4 2" color="p"/>
+  <box at="20 37 3" size="4 4 2" color="p"/>
+  <box at="13 30 3" size="4 4 2" color="p"/>
+  <box at="13 20 3" size="4 4 2" color="p"/>
+  <box at="20 13 3" size="4 4 2" color="p"/>
+  <box at="30 13 3" size="4 4 2" color="p"/>
+  <box at="37 20 3" size="4 4 2" color="p"/>
+
+  <!-- Fusti cilindrici delle colonne -->
+  <cylinder at="37 30 5" size="3 3 15" color="P"/>
+  <cylinder at="30 37 5" size="3 3 15" color="P"/>
+  <cylinder at="20 37 5" size="3 3 15" color="P"/>
+  <cylinder at="13 30 5" size="3 3 15" color="P"/>
+  <cylinder at="13 20 5" size="3 3 15" color="P"/>
+  <cylinder at="20 13 5" size="3 3 15" color="P"/>
+  <cylinder at="30 13 5" size="3 3 15" color="P"/>
+  <cylinder at="37 20 5" size="3 3 15" color="P"/>
+
+  <!-- Capitelli delle colonne -->
+  <box at="37 30 20" size="4 4 2" color="p"/>
+  <box at="30 37 20" size="4 4 2" color="p"/>
+  <box at="20 37 20" size="4 4 2" color="p"/>
+  <box at="13 30 20" size="4 4 2" color="p"/>
+  <box at="13 20 20" size="4 4 2" color="p"/>
+  <box at="20 13 20" size="4 4 2" color="p"/>
+  <box at="30 13 20" size="4 4 2" color="p"/>
+  <box at="37 20 20" size="4 4 2" color="p"/>
+
+  <!-- Trabeazione circolare: architrave, fregio e cornice aggettante -->
+  <cylinder at="25 25 22" size="32 32 2" color="P"/>
+  <cylinder at="25 25 22" size="16 16 2" color="B"/>
+  <cylinder at="25 25 24" size="30 30 2" color="d"/>
+  <cylinder at="25 25 26" size="34 34 2" color="p"/>
+  <cylinder at="25 25 26" size="24 24 2" color="B"/>
+
+  <!-- Attico e balaustra sopra la trabeazione -->
+  <cylinder at="25 25 28" size="32 32 3" color="P"/>
+  <cylinder at="25 25 28" size="26 26 3" color="B"/>
+
+  <!-- Urne decorative sull'attico in asse con le colonne -->
+  <box at="37 30 31" size="2 2 2" color="O"/>
+  <box at="30 37 31" size="2 2 2" color="O"/>
+  <box at="20 37 31" size="2 2 2" color="O"/>
+  <box at="13 30 31" size="2 2 2" color="O"/>
+  <box at="13 20 31" size="2 2 2" color="O"/>
+  <box at="20 13 31" size="2 2 2" color="O"/>
+  <box at="30 13 31" size="2 2 2" color="O"/>
+  <box at="37 20 31" size="2 2 2" color="O"/>
+
+  <!-- Tamburo della cupola con nicchie e cornice d'imposta -->
+  <cylinder at="25 25 28" size="24 24 5" color="P"/>
+  <cylinder at="25 25 28" size="18 18 5" color="W"/>
+  <box at="25 36 29" size="4 4 3" color="B"/>
+  <box at="25 14 29" size="4 4 3" color="B"/>
+  <box at="36 25 29" size="4 4 3" color="B"/>
+  <box at="14 25 29" size="4 4 3" color="B"/>
+  <cylinder at="25 25 33" size="26 26 1" color="p"/>
+
+  <!-- Calotta della cupola in rame ossidato verde -->
+  <cylinder at="25 25 34" size="24 24 3" color="C"/>
+  <cylinder at="25 25 37" size="20 20 2" color="C"/>
+  <cylinder at="25 25 39" size="16 16 2" color="C"/>
+  <cylinder at="25 25 41" size="12 12 2" color="C"/>
+  <cylinder at="25 25 34" size="18 18 4" color="W"/>
+  <cylinder at="25 25 38" size="12 12 3" color="W"/>
+
+  <!-- Costoloni radiali in rilievo sulla calotta -->
+  <line at="25 37 34" to="25 29 43" r="1" color="c" on="C"/>
+  <line at="25 13 34" to="25 21 43" r="1" color="c" on="C"/>
+  <line at="37 25 34" to="29 25 43" r="1" color="c" on="C"/>
+  <line at="13 25 34" to="21 25 43" r="1" color="c" on="C"/>
+  <line at="33 33 34" to="28 28 43" r="1" color="c" on="C"/>
+  <line at="17 33 34" to="22 28 43" r="1" color="c" on="C"/>
+  <line at="33 17 34" to="28 22 43" r="1" color="c" on="C"/>
+  <line at="17 17 34" to="22 22 43" r="1" color="c" on="C"/>
+
+  <!-- Lanterna sommitale e sfera dorata -->
+  <cylinder at="25 25 43" size="8 8 1" color="P"/>
+  <cylinder at="25 25 44" size="6 6 3" color="p"/>
+  <box at="25 25 44" size="2 2 3" color="B"/>
+  <cone at="25 25 47" size="8 8 2" color="p"/>
+  <box at="25 25 49" size="2 2 1" color="O"/>
+
+  <!-- Dettagli procedurali: ombre nei giunti e rilievi del marmo -->
+  <prl in="PP" out="Pd" p="0.18" steps="1"/>
+  <prl in="P/P" out="P/d" p="0.14" steps="1"/>
+  <prl in="P" out="p" p="0.12" steps="1"/>
+  <prl in="C" out="c" p="0.10" steps="1"/>
+  <prl in="B p" out="* d" p="0.35" steps="1"/>
+
+  <!-- Patina di muschio umido sul basamento esposto a nord (retro) -->
+  <prl in="B/P" out="*/g" p="0.30" steps="1" symmetry="()"/>
+  <prl in="g P" out="* g" p="0.25" steps="2" symmetry="()"/>
+</sequence>

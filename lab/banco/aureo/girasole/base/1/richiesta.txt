@@ -1,0 +1,3 @@
+Sculpt: Girasoli
+What it looks like: un ciuffo di girasoli alti, foglie larghe attorno agli steli e i capolini gialli col cuore scuro
+Class: bush · box 20 × 20 × 16 voxels · at least 8 tall

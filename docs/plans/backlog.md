@@ -3882,7 +3882,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: commit su `task/T241`, con la tabella dei rapporti in `#sito`. Sicurezza: nessuna superficie nuova.
 - Esito: HUD e pannelli leggono la scala φ/Fibonacci da `src/theme.css` (spazi, corpi, interlinea, larghezze; inventario 322:521, bisogni 55:89), tabella in `#sito`, voce nel glossario, test che rifiuta `font`/`padding`/`margin`/`gap` in px a mano; corretti griglia dell'inventario stirata, parole lunghe fuori dai fumetti, barra dei tasti a capo a 1920. Restano fuori bordi, ombre, pallini delle legende e classi `comic-*` del sito. Non provato: un vero viewport a 1280 (simulato, `vw`/`vh` restano a 1920×919) e la guida H a 800 px di altezza. Sicurezza: nessuna superficie nuova. Typecheck e suite intera verdi (1871 test), `tests/theme.test.ts` rilanciato dopo la rimozione di `--phi`.
 
-### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `da fare` (dipende da T156, fatto)
+### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `fatto` (`33bef055`) (dipende da T156, fatto)
 - Pipeline: claude · stima 1% · approvato · priorità 33
 - Sbloccato (14/11, epoca 406, decisione A dell'autore): T156 è fatto; la riga va nel prompt delle strutture di oggi (ADR-0183).
 - Step: 33
@@ -3891,6 +3891,7 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Test: typecheck e suite intera con i loro turni, offline.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T242`, con le misure prima e con la riga. Sicurezza: nessuna superficie nuova.
+- Esito: riga sul rapporto aureo e su Fibonacci nel prompt dello Scultore (classi semplici e strutture), nell'Artista per la guida della Genesi e in `world/style.md` del seme; modelli esistenti non toccati; banco nuovo `lab/scripts/banco-aureo.ts` con 4 richieste senza e con la riga su Gemini 3.8 Flash via agy (8 chiamate, 1,44 $ al listino): 8 su 8 passano alla prima, nessun peggioramento di materiali o varianza; la quercia ha copiato l'esempio della libreria in entrambe le varianti (confronto nullo), varianza di forme pronte non misurabile, un tentativo per variante; la riga delle strutture procedurali non è misurata (giro di T355); suite e typecheck verdi; sicurezza: nessuna superficie nuova.
 
 ### T243 · La beta senza commissione — `fatto` (`12dfb2b`)
 - Pipeline: claude · stima 1% · approvato · priorità 3

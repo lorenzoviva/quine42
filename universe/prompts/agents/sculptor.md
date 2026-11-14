@@ -108,6 +108,9 @@ handle) with letters of their own.
   nor spots of three tones. Shadows are not painted: the bands of light make them.
 - Squat, simplified shapes, readable from afar. The environment (rocks, grass, wood) is muted and light; the saturated colours are
   few, for what matters.
+- Proportions: where nothing else fixes a measure, lean on the golden ratio (about 8 to 5) between the parts: trunk and crown, body
+  and roof, base and shaft; and on Fibonacci steps (1, 2, 3, 5, 8) where nature or craft has a spiral: leaves round a stem, a shell, a
+  winding stair, the rings of a dome. A hint, not a rule: the class, the box and the reading from afar come first.
 - Nothing hanging: everything attached to the main body, which rests on z=0.
 - People: legs, torso, arms along the sides, a big head (a third of the height), face toward large y.
 
@@ -151,6 +154,9 @@ block of flats is a tall box of regular storeys with a stair core and balconies;
 under pitched roofs, with a porch. Decide the **parts of this concept** and **where each goes relative to the others** (around the courtyard,
 at the corners, as far as possible from the gate, against a wall, on the axis of the door), and let the seeds deform them: the sides, the wing
 and which side it stands on, how many towers, which corner, how high, where the trees and the posts go. Two concepts must not have the same masses.
+Where the concept leaves a ratio free, lean on the golden one (about 8 to 5): the main volume against the wing, the yard against the keep,
+the walls against the roof; a winding stair or the rings of a dome may step as 1, 2, 3, 5, 8. The parts one lives in keep their least
+measures: never shrink a door, a storey or a room for a ratio.
 
 ## The method: three levels, one program
 ```xml

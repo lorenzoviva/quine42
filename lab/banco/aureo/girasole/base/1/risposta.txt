@@ -1,0 +1,73 @@
+<sequence values="BTLDYNVsuvwfc" size="20 20 16" symmetry="(xy)" name="Girasoli">
+  <color symbol="T" value="2e6930" name="steli"/>
+  <color symbol="L" value="488e35" name="foglie"/>
+  <color symbol="D" value="1f4a22" name="piccioli e foglie scure"/>
+  <color symbol="Y" value="ffbe1a" name="petali"/>
+  <color symbol="N" value="381e11" name="cuore del girasole"/>
+  <color symbol="V" hidden="True" name="area del ciuffo"/>
+  <color symbol="s" hidden="True" name="stelo che cresce"/>
+  <color symbol="u" hidden="True" name="attacco foglia"/>
+  <color symbol="v" hidden="True" name="centro foglia"/>
+  <color symbol="w" hidden="True" name="punta foglia"/>
+  <color symbol="f" hidden="True" name="cima stelo"/>
+  <color symbol="c" hidden="True" name="centro fiore"/>
+  <!-- Base of the sunflower clump on the ground -->
+  <ellipsoid at="10 10 0" size="7 7 1" color="V"/>
+  <box at="10 10 0" size="1 1 1" color="s"/>
+  <one steps="3" in="V" out="s"/>
+  <prl steps="1" in="V" out="s" p="0.08"/>
+  <all in="V" out="B"/>
+  <all symmetry="(xy)">
+    <rule in="ss" out="sB"/>
+    <rule in="s/s" out="s/B"/>
+  </all>
+  <!-- Lower stems and lower broad leaves -->
+  <prl steps="4" in="B s" out="s T"/>
+  <prl steps="1" symmetry="(xy)" in="TB" out="*u" p="0.18"/>
+  <all steps="1" symmetry="(xy)" in="TuB" out="**v"/>
+  <all steps="1" symmetry="(xy)" in="uvB" out="**w"/>
+  <all steps="1" symmetry="(xy)" in="BvB" out="L*L"/>
+  <all steps="1" in="w B" out="B L"/>
+  <all in="u" out="D"/>
+  <all in="v" out="L"/>
+  <all in="w" out="L"/>
+  <!-- Middle stems and middle broad leaves -->
+  <prl steps="4" in="B s" out="s T"/>
+  <prl steps="1" symmetry="(xy)" in="TB" out="*u" p="0.22"/>
+  <all steps="1" symmetry="(xy)" in="TuB" out="**v"/>
+  <all steps="1" symmetry="(xy)" in="uvB" out="**w"/>
+  <all steps="1" symmetry="(xy)" in="BvB" out="L*L"/>
+  <all steps="1" in="w B" out="B L"/>
+  <all in="u" out="D"/>
+  <all in="v" out="L"/>
+  <all in="w" out="L"/>
+  <!-- Upper stems and varying heights -->
+  <prl steps="2" in="B s" out="s T"/>
+  <prl steps="1" symmetry="(xy)" in="TB" out="*u" p="0.15"/>
+  <all steps="1" symmetry="(xy)" in="TuB" out="**v"/>
+  <all steps="1" symmetry="(xy)" in="uvB" out="**w"/>
+  <all steps="1" symmetry="(xy)" in="BvB" out="L*L"/>
+  <all steps="1" in="w B" out="B L"/>
+  <all in="u" out="D"/>
+  <all in="v" out="L"/>
+  <all in="w" out="L"/>
+  <prl steps="3">
+    <rule in="B s" out="s T" p="0.5"/>
+    <rule in="s" out="f" p="0.4"/>
+  </prl>
+  <all in="s" out="f"/>
+  <!-- Flower heads angle forward toward the viewer (large y) -->
+  <all steps="1" symmetry="()" in="f/B" out="T/c"/>
+  <all in="f" out="c"/>
+  <!-- Dark center disks of the sunflower heads -->
+  <prl steps="1" symmetry="()" in="BB cB" out="NN NN" p="0.7"/>
+  <all in="c" out="N"/>
+  <!-- Green calyx behind the flower heads -->
+  <all steps="1" symmetry="()" in="B/N" out="T/*"/>
+  <!-- Golden yellow petals forming the flower heads in x-z plane -->
+  <all steps="1" symmetry="(x)">
+    <rule in="NB" out="*Y"/>
+    <rule in="B N" out="Y *"/>
+    <rule in="N B" out="* Y"/>
+  </all>
+</sequence>
