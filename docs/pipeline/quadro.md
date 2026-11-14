@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 397 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 398 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,13 +23,13 @@ Aggiornato il 14/11/2026, epoca 397 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T378. **Pronti:** T376 (claude); T362, T370, T366 (fable, fermo fino al reset 19/11 16:00 CET; claude esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** T376 (claude). **Pronti:** T362, T370, T366 (fable, fermo fino al reset 19/11 16:00 CET; claude esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
 
-- **D35 (piano di lancio):** in aggiornamento in T378 (open beta, OpenRouter/VPS, voce dell'autore e alternative alla PNL).
+- **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
 ## Regole attive
 
@@ -38,5 +38,5 @@ Aggiornato il 14/11/2026, epoca 397 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **398 (claude):** integrato T378 (piano di lancio aggiornato, solo documentazione), D35 riscritta in `aperte.md`.
 - **397 (claude):** integrato T382 (difetti di T380: selettore lobby, frasi crediti dove paga il master, arrotondamento), verificato nel browser.
-- **396 (claude):** integrati T381 e T374 (kernel 0.7.2, V-037) e T380 (verifica, tre difetti → T382).
