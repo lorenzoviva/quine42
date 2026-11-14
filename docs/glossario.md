@@ -1449,6 +1449,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «login a inviti», «account a inviti» (non è un account: niente da recuperare se il browser lo perde)
 - **Fermo**: `universes/.identities.json`, il prefisso `inv-`, l'id `inv-owner`, `#accesso=` nel link del padrone, la chiave `quine:identity` di `localStorage`.
 
+### Pacchetto del self-hosting
+- **Inglese**: `buildServer`, `KERNEL_VERSION`
+- **Definizione**: il server di produzione consegnato a chi ospita un mondo suo: un'immagine Docker con l'etichetta della versione del kernel (`quine42:X.Y.Z` e `quine42:X.Y`, mai solo `latest`), `docker-compose.yml` con il tunnel facoltativo e il backup, `.env.example` senza valori veri, o le stesse build come pacchetto Node; la guida è `docs/self-hosting.md` (ADR-0201).
+- **Dove vive**: `Dockerfile`, `docker-compose.yml`, `.env.example`, `tools/produzione/immagine.mjs`, `tools/produzione/immagine/`, `server/buildServer.ts`
+- **Da non usare**: «template» (nel marketplace di Railway non c'è, D52.6), «container ufficiale»
+- **Fermo**: le variabili `QUINE_KERNEL`, `QUINE_PUBBLICA_SU`, `QUINE_PUBBLICA_PORTA`, `CLOUDFLARE_TUNNEL_TOKEN`, l'argomento `KERNEL_VERSION`, l'etichetta `quine42.kernel`, il volume su `/app/universes`, i comandi `inviti` e `quine-avvio` nell'immagine, `dist-server/inviti.mjs`.
+
 ### Credito
 - **Inglese**: `credits`, `creditsOf`, `deductCredits`, `grantCredits`
 - **Definizione**: la moneta del gioco: un credito è un dollaro.

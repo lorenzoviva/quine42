@@ -1,0 +1,72 @@
+# The production server in a container, for who hosts a world of their own (T367, ADR-0201). The guide: docs/self-hosting.md.
+#
+#   cp .env.example .env            then fill it (QUINE_KERNEL, QUINE_ORIGINI, QUINE_SEGRETO_INVITI…)
+#   docker compose up -d --build    the server, on http://localhost:8080, only from this machine unless QUINE_PUBBLICA_SU says otherwise
+#   docker compose --profile tunnel up -d          with a named Cloudflare Tunnel (CLOUDFLARE_TUNNEL_TOKEN)
+#   docker compose --profile tunnel-rapido up -d   with a quick tunnel, no domain: its address is in `docker compose logs tunnel-rapido`
+#   docker compose exec quine node dist-server/inviti.mjs padrone        the owner's link (QUINE_ACCOUNT=inviti)
+#   docker compose stop quine && docker compose --profile backup run --rm backup && docker compose start quine   a backup in ./backup/
+#
+# The image's tag is the kernel's version, said in `.env` (QUINE_KERNEL) and checked against the code while building: a universe of another
+# contract opens read-only (ADR-0156), so who hosts changes it on purpose, never by pulling.
+
+name: quine42
+
+services:
+  quine:
+    build:
+      context: .
+      args:
+        KERNEL_VERSION: ${QUINE_KERNEL:?scrivi in .env QUINE_KERNEL, la versione del kernel (quella di package.json)}
+    image: quine42:${QUINE_KERNEL:?scrivi in .env QUINE_KERNEL, la versione del kernel (quella di package.json)}
+    restart: unless-stopped
+    # The secrets arrive here, from .env, when the container starts: never in the image.
+    env_file: .env
+    environment:
+      # Inside the container: what is published outside is decided by `ports`.
+      QUINE_HOST: 0.0.0.0
+      QUINE_PORTA: "8080"
+      QUINE_UNIVERSI: /app/universes
+    ports:
+      - "${QUINE_PUBBLICA_SU:-127.0.0.1}:${QUINE_PUBBLICA_PORTA:-8080}:8080"
+    volumes:
+      - universi:/app/universes
+    # A world that empties saves itself (ADR-0114); on a stop the server waits for the git of its universes (ADR-0121).
+    stop_grace_period: 30s
+
+  # A named Cloudflare Tunnel: the public name, its route to http://quine:8080 and the token are made in Cloudflare's dashboard.
+  tunnel:
+    image: ${CLOUDFLARED_IMMAGINE:-cloudflare/cloudflared:latest}
+    profiles: [tunnel]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      quine:
+        condition: service_healthy
+
+  # A quick tunnel (trycloudflare.com): an address that changes at every start, no guarantees; enough for an evening among friends.
+  tunnel-rapido:
+    image: ${CLOUDFLARED_IMMAGINE:-cloudflare/cloudflared:latest}
+    profiles: [tunnel-rapido]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://quine:8080
+    depends_on:
+      quine:
+        condition: service_healthy
+
+  # The backup of every universe and of the server's folders beside them (balances, guests, identities, cards made by hand): a tar of the
+  # volume, with the server stopped, in ./backup/.
+  backup:
+    image: quine42:${QUINE_KERNEL:?scrivi in .env QUINE_KERNEL, la versione del kernel (quella di package.json)}
+    profiles: [backup]
+    user: root
+    entrypoint: ["sh", "-c"]
+    command: ["tar -czf /backup/universi-$$(date +%Y%m%d-%H%M%S).tar.gz -C /app/universes . && ls -l /backup"]
+    volumes:
+      - universi:/app/universes:ro
+      - ./backup:/backup
+
+volumes:
+  universi:

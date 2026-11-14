@@ -462,6 +462,17 @@ Modello di una voce:
 - Esito: chiusa da T363 (ADR-0197), 14/11/2026, branch `task/T363`: le contromisure nascono con il varco.
 - Aggiornamento (T364, ADR-0200): superficie in più, il collegamento dalle pagine (`src/ui/openrouter.ts`: il verifier nel `sessionStorage` della scheda, mai una chiave; il ritorno toglie codice e state dall'indirizzo e confronta lo state della scheda), la porta `GET /api/openrouter/key` (il limite letto da `GET /api/v1/key` dal server, campo per campo, mai la chiave; detto di nuovo per un minuto, così una pagina che chiede di continuo non moltiplica le chiamate a OpenRouter), `status.worlds`, e **da soli sul PC** il file `universes/.keys/openrouter.json`: lo dà al varco solo `vite.config.ts` (sviluppo e preview, mai `server/production.ts`), ci va solo una chiave collegata da un chiamante `local`, ogni voce si rilegge controllata, esce quando si scollega o è revocata; `universes/` non si serve (ADR-0109). Test: `tests/openrouter-link.test.ts`. La proprietà resta: sul server di produzione una chiave di un giocatore non tocca il disco.
 
+### V-041 · Il pacchetto pubblico del self-hosting: l'immagine, compose, l'esempio del `.env`
+- Gravità: alta
+- Stato: `chiusa`
+- Superficie: `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `.env.example`, `tools/produzione/immagine.mjs`, `tools/produzione/immagine/avvio.sh` e `inviti.sh`, `dist-server/inviti.mjs` (`server/buildServer.ts`), la guida `docs/self-hosting.md`
+- Proprietà violata: l'immagine pubblica non contiene un `.env`, una chiave, un segreto o un universo; il server nel container non gira come root; fuori dal container la porta arriva solo a questa macchina se chi ospita non dice altro; l'esempio del `.env` non ha valori veri e da solo non fa partire un server (manca il segreto degli inviti); l'immagine dice per quale kernel è costruita e non lo può dire falso; il comando del padrone non stampa il segreto; chi gioca su un server di un master sa che la sua chiave passa da lì (studio § 5 punti 6-7)
+- Prova: test (T367)
+- Contromisura: `.dockerignore` tiene fuori `.env`, ogni `.env.*` tranne l'esempio, `universes/`, le build, `node_modules`, `.git`, le cartelle degli agenti e `backup/`; lo stadio che gira copia solo le due build, le dipendenze di produzione, `site/beta.json` e i due script, e nessun `ENV` né `ARG` nomina un segreto: i segreti arrivano dall'ambiente all'avvio (`env_file` di compose, le variabili e i segreti di Railway e Fly); `quine-avvio` parte da root solo per dare il volume a `node` e scende con `setpriv`, e così il comando `inviti`; compose pubblica su `QUINE_PUBBLICA_SU`, predefinito `127.0.0.1`; la build si ferma senza `KERNEL_VERSION` o con una versione diversa da `package.json`, e lo script la etichetta `X.Y.Z` e `X.Y`, mai `latest`; l'esempio ha vuote chiavi, segreti e token. La guida dice dove va la fiducia: chi ospita vede in memoria le chiavi di chi gioca sul suo server (accettato in V-040), e i suoi universi sono sul suo disco
+- Task: T367
+- Test: `tests/sicurezza/pacchetto.test.ts`, `tests/sicurezza/produzione.test.ts`
+- Esito: chiusa da T367 (ADR-0201), 14/11/2026, branch `task/T367`. Un container vero non è stato avviato (virtualizzazione spenta sulla macchina dell'autore): provati i file e lo stadio finale come cartella a parte con l'ambiente dell'esempio.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -508,6 +519,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-038 | — | — | `ospiti.test.ts` | il server del kit non ha né Firebase né il verificatore a inviti: gli universi privati e le identità si provano su un server senza Firebase con due invitati, tests/sicurezza/ospiti.test.ts |
 | V-039 | — | — | `ritmo.test.ts` | il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts |
 | V-040 | — | — | `openrouter.test.ts` | il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts |
+| V-041 | — | — | `pacchetto.test.ts`, `produzione.test.ts` | il pacchetto sono file e un’immagine, non un server da provare: il kit non costruisce immagini; le proprietà le leggono tests/sicurezza/pacchetto.test.ts e produzione.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 
