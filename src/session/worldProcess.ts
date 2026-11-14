@@ -75,6 +75,7 @@ async function open(o: WorldOpen): Promise<void> {
     verify: o.verify ? verify : undefined,
     masterUid: o.masterUid,
     private: o.private === true,
+    pace: o.pace,
     restore: o.restore,
     grantCap: o.grantCap,
     server: o.server,
@@ -89,6 +90,8 @@ async function open(o: WorldOpen): Promise<void> {
   if ('error' in opened) return send({ t: 'errore', motivo: opened.error });
   host = opened;
   calls = worldOf(opened.session.kernel);
+  // The pace the master set (T373): the server keeps it (`.campaign`, never written here, rule 8g).
+  opened.session.kernel.bus.on('pace', (pace) => send({ t: 'pace', pace }));
   send({ t: 'pronto' });
 }
 

@@ -23,6 +23,7 @@ import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
+import { readPace } from '../kernel/worldPace';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
 const STEP_EVERY = 0.05;
@@ -102,6 +103,8 @@ export class ThinClient {
     }
     // The cards the world does not use (T296), after the master's branch: the master's mirror shows them as faults too.
     k.worldBroken(s.broken);
+    // The pace of the world (T373): what the HUD says, as the world has it.
+    k.applyPace(s.pace, true);
   }
 
   /**
@@ -164,6 +167,7 @@ export class ThinClient {
       case 'update':
         // The cards the world does not use (T296) first: the entities that come with them are drawn as the world has them.
         if (m.broken) this.k.worldBroken(this.session.broken);
+        if (m.pace) this.k.applyPace(this.session.pace, true);
         this.places(m.chunks ?? []);
         this.things(m.entities ?? []);
         for (const id of m.gone ?? []) this.drop(id);
@@ -224,6 +228,8 @@ export class ThinClient {
     for (const p of Object.keys(this.main)) if (files[p] === undefined) changed[p] = null;
     if (Object.keys(changed).length) this.worldFiles(changed);
     k.worldBroken(s.broken);
+    // The pace of the world (T373): what the HUD says, as the world has it.
+    k.applyPace(s.pace, true);
     this.places([...s.places.values()]);
     this.things([...s.entities.values()]);
     for (const o of s.others.values()) this.other(o);
@@ -626,6 +632,21 @@ export class ThinClient {
       k.rollback = (id?: string) => this.rollbackBranch(id);
       k.grantCredits = (id, amount) => this.session.act({ t: 'recharge', wanderer: id, count: amount }).then((r) => ({ ok: r.ok, ...(r.reason ? { motivo: r.reason } : {}) }));
       // A card is taken away in the world (T296): the files that go come back as the world's.
+      // The pace of the world (T373): the world sets it and says it back to every client.
+      k.setPace = (raw) => {
+        const p = readPace(raw);
+        return this.session.act({ t: 'pace', mode: p.mode, ...(p.placesPerMinute !== undefined ? { placesPerMinute: p.placesPerMinute } : {}) }).then((r) => {
+          if (!r.ok) return { ok: false as const, reason: r.reason ?? 'nessuna risposta' };
+          let pace = p;
+          try {
+            pace = readPace(JSON.parse(r.text ?? ''));
+          } catch {
+            /* the pace asked */
+          }
+          k.applyPace(pace, true);
+          return { ok: true as const, pace };
+        });
+      };
       k.removeCard = (id) => this.session.act({ t: 'card', op: 'remove', id }).then((r) => ({ ok: r.ok, ...(r.reason ? { reason: r.reason } : {}), ...(r.text ? { text: r.text } : {}), ...(r.done ? { commit: r.done } : {}) }));
       // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
       k.talkToAgent = async (agent, text) => {

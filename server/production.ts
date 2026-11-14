@@ -17,7 +17,7 @@ import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
 import { grantCapOf, PAYMENTS, paymentsOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
-import { attachSessions, expelFrom, getActiveWorld, sessionList, tellPrivate, wanderersIn, type SessionOptions } from './session';
+import { attachSessions, expelFrom, getActiveWorld, sessionList, tellPace, tellPrivate, wanderersIn, type SessionOptions } from './session';
 import { CampaignArchive } from './campaign';
 import { stripeHandler, stripeSettings } from './stripe';
 import { universeHandler, universesPerAccount } from './universeStore';
@@ -299,7 +299,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const payments = paymentsOf(o.env) === 'on';
   const routes: Route[] = [
     // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
-    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate } }),
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
     wandererHandler({ accounts, universesDir, getActiveWorld }),

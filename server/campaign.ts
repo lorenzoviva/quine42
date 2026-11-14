@@ -20,6 +20,7 @@ import path from 'node:path';
 import { cleanText } from '../src/kernel/cleantext';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
 import { validWandererId } from '../src/kernel/wanderers';
+import { NORMAL_PACE, readPace, type WorldPace } from '../src/kernel/worldPace';
 import { gameIn, isMasterOf, owns, type Caller, type Game } from './access';
 import { serverPath } from './folders';
 import type { InviteIdentities } from './invites';
@@ -49,6 +50,11 @@ export interface Campaign {
   guests: Record<string, Guest>;
   /** By the SHA-256 of the token, in hex: the token itself is nowhere on this server. */
   invites: Record<string, Invite>;
+  /**
+   * The pace of the world (T373, ADR-0188 §3): what the master set, kept here so that a world that starts again does not plan while they write.
+   * Not said: normal. The world gets it by value at its start and from the route; it never reads this file (rule 8g).
+   */
+  pace?: WorldPace;
 }
 
 /** What the master may write: guests and live invites at most, a note's length, an invite's days and uses (the defaults are D54.7: a week, one use). */
@@ -79,6 +85,8 @@ export function readCampaign(raw: unknown): Campaign {
   if (!raw || typeof raw !== 'object') return c;
   const r = raw as Record<string, unknown>;
   c.private = r.private === true;
+  const pace = readPace(r.pace);
+  if (pace.mode !== 'normal') c.pace = pace;
   for (const [id, g] of Object.entries((r.guests as Record<string, Partial<Guest>>) ?? {})) {
     if (!validWandererId(id) || !g || typeof g !== 'object') continue;
     c.guests[id] = { since: num(g.since), by: typeof g.by === 'string' ? g.by : '', ...noteOf(g.note), ...(typeof g.invite === 'string' ? { invite: g.invite.slice(0, 16) } : {}) };
@@ -209,6 +217,53 @@ export class CampaignArchive {
       now,
     );
   }
+}
+
+/** The pace a universe's world has (T373): what its file says, normal if nothing or if it cannot be read (a world is never held by a broken file). */
+export function keptPace(archive: CampaignArchive, name: string): WorldPace {
+  try {
+    return archive.read(name).pace ?? NORMAL_PACE;
+  } catch {
+    return NORMAL_PACE;
+  }
+}
+
+/** Keeps the pace of a universe's world, repaired (T373): normal is said by saying nothing. The pace as kept. */
+export function keepPace(archive: CampaignArchive, name: string, raw: unknown): WorldPace {
+  const pace = readPace(raw);
+  archive.change(name, (c) => {
+    if (pace.mode === 'normal') delete c.pace;
+    else c.pace = pace;
+  });
+  return pace;
+}
+
+export interface PaceContext {
+  name: string;
+  who: Caller;
+  game: Game;
+  masterUid?: string;
+  archive: CampaignArchive;
+  /** Tells the running world, if there is one, its new pace; its answer is how it took it. */
+  tellPace?: (name: string, pace: WorldPace) => Promise<WorldPace | undefined>;
+}
+
+/**
+ * The store's `pace` route (T373, ADR-0188 §3): the master reads and sets the pace of their world, also when it is not running (the site, T377).
+ * `GET` → { pace }; `POST` { mode, placesPerMinute? } → { pace } as kept. Only the master of a universe of many; the world it reaches never goes
+ * above the lobby, whatever is kept here.
+ */
+export async function paceAnswer(method: string, body: Record<string, unknown>, o: PaceContext): Promise<GuestsAnswer> {
+  const { name, who, game } = o;
+  if (!game.many) return refused(409, 'il ritmo del mondo solo negli universi di molti: da soli lo regola la console');
+  if (!owns(who, game, o.masterUid) || who.server) return refused(403, 'solo il master di questo universo');
+  if (method === 'GET') return { status: 200, body: { ok: true, pace: keptPace(o.archive, name) } };
+  if (method !== 'POST') return refused(405, 'metodo non ammesso');
+  if (typeof body.mode !== 'string' || !['normal', 'slow', 'hold'].includes(body.mode)) return refused(400, 'ritmo: normal, slow o hold');
+  if (body.placesPerMinute !== undefined && (typeof body.placesPerMinute !== 'number' || !Number.isFinite(body.placesPerMinute))) return refused(400, 'luoghi al minuto: un numero');
+  const pace = keepPace(o.archive, name, body);
+  const taken = await o.tellPace?.(name, pace).catch(() => undefined);
+  return { status: 200, body: { ok: true, pace, ...(taken ? { running: taken } : {}) } };
 }
 
 /** Whether a caller is among a universe's guests. */

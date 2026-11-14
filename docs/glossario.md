@@ -1379,6 +1379,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «campagna» per il file (la campagna è il modo di giocare: privato, spese al master, direttive), «universo chiuso», «whitelist»
 - **Fermo**: `universes/.campaign/<nome>.json → private`, il campo `private` del canale dei mondi (`WorldOpen`), la chiamata `setPrivate`.
 
+### Ritmo del mondo
+- **Inglese**: `WorldPace`, `PaceMode`, `setPace`, `applyPace`, `paceHeld`, `worldPace`, `readPace`, `keepPace`, `keptPace`
+- **Definizione**: la manopola del master che scende soltanto (ADR-0188 § 3, ADR-0196): `normal` (ciò che la lobby ha regolato), `slow` (meno luoghi nuovi al minuto, mai più della lobby, le pause dello Scultore e del Musicista raddoppiate) o `hold` («in pausa»: i luoghi nuovi restano bozze e il mondo non fa niente da sé, le risposte ai viandanti continuano). Si cambia a partita in corso; l'HUD dice ai giocatori che il mondo è in pausa.
+- **Dove vive**: `src/kernel/worldPace.ts`, `src/kernel/kernel.ts`, `src/session/server.ts`, `server/campaign.ts`, `src/ui/pace.ts`
+- **Da non usare**: «pausa» da sola per `generationHeld` (la lobby e la Genesi: un'altra cosa), «velocità», «ritmo» per i limiti dei messaggi (`Pace` di `src/session/server.ts` e di `server/rates.ts`: «ritmo per viandante»)
+- **Fermo**: il messaggio `pace` (`mode`, `placesPerMinute`) del client e del mondo, il campo `pace` di `welcome` e `update`, `universes/.campaign/<nome>.json → pace`, `WorldOpen.pace`, la chiamata `setPace`, la rotta `/api/universe/<nome>/pace`.
+
 ### Ospite
 - **Inglese**: `guests`, `guestOf`, `Guest`
 - **Definizione**: un viandante, per id, che il master lascia entrare nel suo universo privato: aggiunto per id o entrato con un invito; tolto, l'universo sparisce per lui e il suo socket si chiude.
@@ -1616,6 +1623,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | forma | ciò che esce da un programma (`Form`); gli id `forma-…` dei modelli degli oggetti (`ItemShape`) | «Forma» è la prima |
 | pannello | scheda di una meccanica (`UiPanel`); pannello dello studio (`ui:showcase`) | il contesto |
 | fase / `phase` | dello sviluppo; del giorno (`DayPhase`); di un'onda (`src/audio/sfx.ts`); le F0-F8 del piano dello step 9, nell'archivio | «Fase» è la prima, con il suo numero romano |
+| ritmo / `pace` | del mondo, del master (`WorldPace`, il messaggio `pace`); per viandante, quanto spesso si può chiedere (`Pace` di `src/session/server.ts` e di `server/rates.ts`); il passo di chi cammina (`paceOf`, `paceTick` del kernel) | «Ritmo del mondo», «ritmo per viandante», «passo» |
 | step / `step` | obiettivo dello sviluppo; il passo di un calcolo nel codice (`archive.ts`); una sessione del metodo di prima, negli ADR e nei commenti («step 8.2B») | «Step» è il primo, con il suo numero |
 
 ## Le scelte fatte

@@ -12,6 +12,7 @@ import type { ClientMsg, ServerMsg } from '../src/session/protocol';
 import type { FromWorld, GeminiAnswer, GeminiCall, ToWorld, WorldCallName, WorldOpen } from '../src/session/worldwire';
 import { worldToken } from './access';
 import type { WorldCalls } from './worldCalls';
+import type { WorldPace } from '../src/kernel/worldPace';
 
 /** The heap of a world, in MB, unless the `.env` says otherwise (`QUINE_MONDO_MEMORIA`). */
 export const DEFAULT_WORLD_MEMORY = 1024;
@@ -74,6 +75,10 @@ export interface WorldOptions {
   masterUid?: string;
   /** Whether the universe is private, asked at every start (ADR-0194): the world gets the answer, never the guests. */
   private?: () => boolean;
+  /** The pace of the world as the server keeps it (T373), asked at every start: a world that starts again while the master holds it plans nothing. */
+  pace?: () => WorldPace;
+  /** The world says the master set its pace (T373): the server keeps it, repaired (`.campaign`, never in the world's process). */
+  onPace?: (pace: WorldPace) => void;
   ledgerFile?: string;
   grantCap?: number;
   /** The platform fee, which the server decides (ADR-0132). */
@@ -191,6 +196,7 @@ export class WorldHost {
     child.on('error', (e) => {
       if (this.child === child) this.died(e.message);
     });
+    const pace = o.pace?.();
     const open: WorldOpen = {
       name: o.name,
       base: o.base,
@@ -201,6 +207,7 @@ export class WorldHost {
       ...(o.verify ? { verify: true } : {}),
       ...(o.masterUid ? { masterUid: o.masterUid } : {}),
       ...(o.private?.() ? { private: true } : {}),
+      ...(pace && pace.mode !== 'normal' ? { pace } : {}),
       ...(o.ledgerFile ? { ledgerFile: o.ledgerFile, grantCap: o.grantCap } : {}),
       ...(o.server ? { server: o.server } : {}),
       ...(restore ? { restore } : {}),
@@ -230,6 +237,10 @@ export class WorldHost {
           this.readyWaiters.splice(0).forEach((done) => done({ error: String(m.motivo) }));
         }
         this.child?.kill();
+        return;
+      case 'pace':
+        // What the world says is repaired by who keeps it: at worst a world holds or slows itself.
+        this.o.onPace?.(m.pace);
         return;
       case 'vivo':
         this.lastBeat = Date.now();
@@ -447,6 +458,7 @@ export class WorldHost {
     view: (universo, id, account) => this.call('view', [universo, id, account]),
     keepProfile: (universo, id, account, profilo) => this.call('keepProfile', [universo, id, account, profilo]),
     setPrivate: (value) => this.call('setPrivate', [value]),
+    setPace: (pace) => this.call('setPace', [pace]),
   };
 
   /** Stops the world, letting it save if it can, and waits for what git is still doing with that save. */

@@ -226,7 +226,7 @@ async function main() {
   const thumbs = new Thumbs(kernel);
   icons.get = (item) => thumbs.icon(item);
   icons.model = (model, tint, seed) => thumbs.model(model, tint, seed);
-  const hud = new Hud(kernel, renderer);
+  const hud = new Hud(kernel, renderer, master);
   const inventory = new InventoryPanel(kernel);
   const chat = new Chat(kernel);
   const actions = new ActionMenu(kernel);

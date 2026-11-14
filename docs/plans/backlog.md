@@ -5475,7 +5475,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T384`, kernel 0.7.6; poi l'orchestratore integra T384 e `integra T365` toglie worktree e branch di T365. Sicurezza: quella di T365, nessuna superficie nuova oltre quella.
 - Esito: T365 integrato dopo T366: in `server/session.ts` e `src/session/host.ts` restano sia `private` (ADR-0194) sia `server` (ADR-0195), che arrivano insieme fino al kernel; l'ADR di T365 è ADR-0195 (rinumerazione già sul branch di T365, numero libero, rimandi coerenti); kernel 0.7.6 in version.ts, package.json, lock e seme, con i rimandi di T365 a 0.7.5 portati a 0.7.6 e quelli di T366 lasciati; typecheck, build e suite intera verdi (216 file, 3204 test); nessuna chiave in `dist/`; restano i limiti di T365 (nessuna interfaccia mostra il costo, il passaggio di `server` dal server al kernel provato solo dal typecheck); sicurezza: quella di T365, nessuna superficie nuova oltre quella.
 
-### T385 · Integrare T373 nel base (conflitti dopo T365: kernel 0.7.7, ADR-0196) — `da fare`
+### T385 · Integrare T373 nel base (conflitti dopo T365: kernel 0.7.7, ADR-0196) — `fatto` (`d5775dd7`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 43
 - Contesto: `integra T373` (il ritmo e la pausa del mondo, ADR-0196, kernel 0.7.7) ha trovato conflitti in `AGENTS.md`, `docs/pipeline/PIANO.md`, `package-lock.json`, `package.json`, `server/session.ts`, `src/kernel/version.ts`, `src/session/host.ts`, `universe/universe.json`: nel frattempo è entrato T365 via T384 (costo delle carte, ADR-0195, kernel 0.7.6). Nasce da T373: `dossier T373`, `dossier T384`.
@@ -5483,6 +5483,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera, typecheck e build coi turni.
 - Browser: no (T373 è già stato visto nel browser; il merge non cambia UI).
 - Quando è fatto: commit su `task/T385`, kernel 0.7.7; poi l'orchestratore integra T385 e `integra T373` toglie worktree e branch di T373. Sicurezza: quella di T373 (V-039), nessuna superficie nuova oltre quella.
+- Esito: T373 integrato dopo T365/T384: in `server/session.ts` e `src/session/host.ts` restano `server`, `private` e `pace` fino al kernel; `AGENTS.md` tiene entrambe le righe; `PIANO.md` del base; ADR-0196 libero e nell'indice; kernel 0.7.7 in version.ts, package.json, lock e seme, i rimandi di T365 a 0.7.6 lasciati; typecheck, build e suite intera verdi (218 file, 3220 test); nessuna chiave in `dist/`; restano i limiti di T373 (da soli il ritmo non si salva, le tappe dovute in pausa accadono tutte alla ripresa, il riavvio di un mondo vero in pausa non ha un test) e di T365; sicurezza: quella di T373 (V-039), nessuna superficie nuova oltre quella.
 
 ### T386 · La licenza: PolyForm Noncommercial alla lettera, il self-hosting gratuito permesso per iscritto — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
