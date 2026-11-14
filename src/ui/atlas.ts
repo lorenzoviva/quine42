@@ -130,9 +130,11 @@ export class AtlasPanel {
     ];
   }
 
-  /** The chunk under a point of the canvas. */
+  /** The chunk under a point of the canvas, in the page's pixels (the canvas may be drawn larger or smaller than it is). */
   private chunkAt(x: number, y: number): [number, number] {
-    return [Math.floor((x - this.canvas.width / 2) / this.zoom + this.cx), Math.floor((y - this.canvas.height / 2) / this.zoom + this.cy)];
+    const sx = this.canvas.width / (this.canvas.clientWidth || this.canvas.width);
+    const sy = this.canvas.height / (this.canvas.clientHeight || this.canvas.height);
+    return [Math.floor((x * sx - this.canvas.width / 2) / this.zoom + this.cx), Math.floor((y * sy - this.canvas.height / 2) / this.zoom + this.cy)];
   }
 
   /** A place chosen on the map (the master's): the tools say it and offer to declare a region around it. */
