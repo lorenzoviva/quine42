@@ -42,7 +42,7 @@ export interface WorldOpen {
 }
 
 /** The calls a route may make to a running world; anything else is not a call. */
-export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate', 'setPace', 'setKeys'] as const;
+export const WORLD_CALLS = ['creditRecharge', 'isAnonymous', 'wallet', 'view', 'keepProfile', 'setPrivate', 'setPace', 'setKeys', 'campaign'] as const;
 export type WorldCallName = (typeof WORLD_CALLS)[number];
 
 export type ToWorld =

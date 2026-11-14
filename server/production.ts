@@ -18,7 +18,7 @@ import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
 import { grantCapOf, PAYMENTS, paymentsOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
-import { attachSessions, expelFrom, getActiveWorld, sessionList, tellKeys, tellPace, tellPrivate, wanderersIn, type SessionOptions } from './session';
+import { askCampaign, attachSessions, expelFrom, getActiveWorld, sessionList, tellKeys, tellPace, tellPrivate, wanderersIn, type SessionOptions } from './session';
 import { CampaignArchive } from './campaign';
 import { stripeHandler, stripeSettings } from './stripe';
 import { universeHandler, universesPerAccount } from './universeStore';
@@ -306,7 +306,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const payments = paymentsOf(o.env) === 'on';
   const routes: Route[] = [
     // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
-    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace } }),
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate, tellPace, campaign: askCampaign } }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
     // A player's key of OpenRouter (T363): the PKCE flow and the pasted key, for an account; the model doors are not here.

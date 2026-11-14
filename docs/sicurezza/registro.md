@@ -473,6 +473,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/regioni.test.ts`, `tests/campagna-regioni.test.ts`
 - Esito: chiusa da T375 (ADR-0201), 14/11/2026, branch `task/T375`: le contromisure nascono con le regioni del master. Resta, accettato: un ambiente con lotti in un riempitivo mette le case comuni del mondo, che lo Scultore scrive se mancano (dove l'ambiente si è già usato esistono).
 
+### V-042 · La campagna dal sito: la rotta `campaign`
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: la rotta `/api/universe/<nome>/campaign` (`server/campaignSite.ts`, `server/universeStore.ts`), la chiamata `campaign` del canale dei mondi (`WorldCalls.campaign`, `server/worldCalls.ts`, `server/worldHost.ts`, `WORLD_CALLS`), `campaignEdit` (`src/kernel/campaignEdit.ts`), la pagina della sessione (`site/campagna.ts`, `site/sessioni.ts`: gli intestatari di chi guarda nelle letture dell'elenco e delle istantanee)
+- Proprietà violata: le direttive e le regioni del master le legge e le scrive solo il master (ADR-0188 § 7 punti 7-8): un giocatore, un ospite, un estraneo o il mondo non leggono le direttive (V-037) né cambiano l'atlante; un universo privato non c'è per chi non lo vede (V-038); dal sito non si scrive niente che il gioco non avrebbe controllato, né un file diverso dai due della campagna; ciò che non regge lascia l'universo com'era
+- Prova: test (T377)
+- Contromisura: la rotta solo per il master (`owns`), mai per il token di un mondo (`who.server`), solo negli universi di molti; un universo privato a chi non lo vede risponde 404 come un nome che non c'è (`hidden`); solo JSON, 160 KiB, sotto `HEAVY`; la richiesta letta campo per campo (`readCampaignEdit`: tre forme, i tipi giusti, il resto ignorato) e controllata dalle funzioni del gioco (`readCampaign`, `masterRegion`, `withoutMasterRegion`: testi di un giocatore, quarta parete locale, tetti, un ambiente proprio del mondo); il risultato è uno dei due file, scritto dallo store nella fila dell'universo con un commit, o dal mondo acceso con `Kernel.publish` (validato, e rimesso com'era se rompe il mondo); un universo di un altro contratto non si scrive dal sito. Nella pagina ogni testo entra come testo (`el`, `textContent`), l'unico `innerHTML` della carta con l'escape (`escapeHtml`)
+- Task: T377
+- Test: `tests/sicurezza/campagna-sito.test.ts`, `tests/campagna-sito.test.ts`
+- Esito: chiusa da T377 (ADR-0202), 14/11/2026, branch `task/T377`: le contromisure nascono con la rotta. Resta, accettato: un mondo che si avvia mentre lo store scrive può leggere l'universo di prima (ADR-0202, Conseguenze).
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -520,6 +531,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-039 | — | — | `ritmo.test.ts` | il ritmo del mondo si prova sul kernel, sul server di sessione con i collegamenti finti e sullo store senza Firebase: tests/sicurezza/ritmo.test.ts |
 | V-040 | — | — | `openrouter.test.ts` | il kit non ha chiavi di OpenRouter e non esce sulla rete: il varco, il PKCE e il turno si provano con OpenRouter finto, tests/sicurezza/openrouter.test.ts |
 | V-041 | — | — | `regioni.test.ts` | le regioni del master si provano sul kernel e sul server di sessione con i collegamenti finti: tests/sicurezza/regioni.test.ts |
+| V-042 | — | — | `campagna-sito.test.ts` | la campagna dal sito si prova sullo store senza Firebase, coi collegamenti finti per il mondo acceso: tests/sicurezza/campagna-sito.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

@@ -321,3 +321,156 @@
 .comic-btn.is-loading::after {
   content: ' …';
 }
+
+/* ==========================================================================
+   La campagna (T377): ospiti e inviti, ritmo, atlante e direttive del master
+   ========================================================================== */
+
+.hub-who {
+  font-size: var(--text-13);
+  margin: 0 0 var(--space-21);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.universe-card-actions {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.campaign-panel {
+  background: var(--skin-panel);
+  border: var(--border-ink-thick);
+  box-shadow: var(--shadow-m) var(--skin-accent-2);
+  padding: var(--space-21);
+  margin-bottom: var(--space-34);
+}
+
+.campaign-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-13);
+}
+
+.campaign-title {
+  font-size: var(--text-29);
+  margin: var(--space-8) 0 0;
+}
+
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--measure-377), 1fr));
+  gap: var(--space-21);
+}
+
+.campaign-block {
+  border-top: 2px solid var(--skin-ink);
+  padding-top: var(--space-13);
+  margin-top: var(--space-21);
+  min-width: 0;
+}
+
+.campaign-block-title,
+.campaign-form-title {
+  font-family: var(--skin-font-display);
+  font-size: var(--text-18);
+  letter-spacing: 0.05em;
+  color: var(--skin-primary);
+  margin: 0 0 var(--space-8);
+}
+
+.campaign-note {
+  font-size: var(--text-13);
+  color: var(--skin-text-dim);
+  line-height: var(--leading-snug);
+  margin: var(--space-5) 0;
+}
+
+.campaign-said {
+  font-size: var(--text-13);
+  color: var(--skin-text);
+  white-space: pre-line;
+  margin: var(--space-5) 0;
+}
+
+.campaign-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  margin: var(--space-8) 0;
+}
+
+.campaign-row .comic-input,
+.campaign-row .comic-select {
+  width: auto;
+  flex: 1 1 var(--measure-144);
+}
+
+.campaign-row .comic-input.campaign-number {
+  flex: 0 0 var(--measure-76);
+}
+
+.campaign-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-8) 0;
+  font-size: var(--text-13);
+}
+
+.campaign-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--skin-text) 10%, transparent);
+}
+
+.campaign-swatch {
+  display: inline-block;
+  width: var(--space-13);
+  height: var(--space-13);
+  border: 1px solid var(--skin-ink);
+}
+
+.campaign-atlas-wrap {
+  display: flex;
+  gap: var(--space-21);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.campaign-atlas {
+  width: min(100%, var(--measure-521));
+  aspect-ratio: 1;
+  background: var(--skin-bg);
+  border: var(--border-ink-thick);
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+.campaign-atlas-side {
+  flex: 1 1 var(--measure-322);
+  min-width: 0;
+}
+
+.campaign-form {
+  border: 2px dashed color-mix(in srgb, var(--skin-text) 25%, transparent);
+  padding: var(--space-13);
+  margin: var(--space-8) 0;
+}
+
+.campaign-text {
+  width: 100%;
+  font-family: var(--skin-font-mono);
+  resize: vertical;
+}
+
+.comic-btn[aria-pressed='true'] {
+  outline: 2px solid var(--skin-primary);
+}

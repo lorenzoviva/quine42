@@ -15,9 +15,11 @@ import { internalSculptors } from '../src/kernel/internalNames';
 import { bundledFiles } from '../src/kernel/bundle';
 import { SEED_FILE, seedHashes, WANDERER_HEADER } from '../src/kernel/universes';
 import { rangeLabel } from '../src/kernel/version';
+import { isMultiplayer } from '../src/kernel/gameSetup';
 import { SOLO } from '../src/kernel/wanderers';
-import { accountConfig, signIn } from '../src/session/login';
-import { escapeHtml } from './shared';
+import { accountConfig, NEEDS_INVITE, signedIn, signIn, type SignedIn } from '../src/session/login';
+import { escapeHtml, localWandererId } from './shared';
+import { CampaignPanel } from './campagna';
 
 export interface ActiveSessionRecord {
   name: string;
@@ -40,6 +42,39 @@ export interface UniverseView {
   description: string;
   /** When this kernel does not run it, the range of the kernels it runs on, «kernel 0.1–0.1» (T302): it is shown, never deleted. */
   kernels?: string;
+  /** A universe of many (a game alone has no campaign). */
+  many?: boolean;
+  /** Private (ADR-0194): the list says so only to its master and its guests (T377). */
+  invite?: boolean;
+}
+
+/** What the server said of the caller about a universe: whether it is theirs (the snapshot came whole, with its log) and whether it is private. */
+export interface UniverseSeen {
+  mine?: boolean;
+  invite?: boolean;
+}
+
+/**
+ * Who looks at the page (T377): an account already signed in in this browser (never asked here: the page reads the public universes without),
+ * or, on a server without accounts, the wanderer of this machine. Its headers are asked at every request: a token expires.
+ */
+export interface SiteCaller {
+  headers: () => Promise<Record<string, string>>;
+  /** The account, when there is one. */
+  signed?: SignedIn;
+  /** Whether the server has accounts and nobody is signed in here. */
+  signedOut: boolean;
+}
+
+export async function siteCaller(): Promise<SiteCaller> {
+  const config = await accountConfig();
+  if (!config) {
+    const id = localWandererId() ?? SOLO;
+    return { headers: async () => ({ [WANDERER_HEADER]: id }), signedOut: false };
+  }
+  const signed = await signedIn(config).catch(() => undefined);
+  if (!signed) return { headers: async () => ({}), signedOut: true };
+  return { signed, headers: async () => ({ Authorization: `Bearer ${await signed.freshToken().catch(() => signed.token)}` }), signedOut: false };
 }
 
 /** Fetches active sessions from /api/session. */
@@ -61,20 +96,24 @@ export async function fetchActiveSessions(base = ''): Promise<Map<string, Active
   return map;
 }
 
-/** Fetches the list of universe folders from /api/universe. */
-export async function fetchUniverses(base = ''): Promise<string[]> {
+/** Fetches the list of universe folders from /api/universe, and those of them that are private (only their master and guests are told). */
+export async function fetchUniverseIndex(base = '', headers: Record<string, string> = {}): Promise<{ universes: string[]; invite: string[] }> {
   try {
-    const res = await fetch(`${base}/api/universe`);
+    const res = await fetch(`${base}/api/universe`, { headers, cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data?.universes)) {
-        return data.universes;
-      }
+      const names = (v: unknown) => (Array.isArray(v) ? v.filter((n): n is string => typeof n === 'string') : []);
+      return { universes: names(data?.universes), invite: names(data?.invite) };
     }
   } catch (err) {
     console.warn('[sessioni] impossibile recuperare elenco universi:', err);
   }
-  return [];
+  return { universes: [], invite: [] };
+}
+
+/** Fetches the list of universe folders from /api/universe. */
+export async function fetchUniverses(base = '', headers: Record<string, string> = {}): Promise<string[]> {
+  return (await fetchUniverseIndex(base, headers)).universes;
 }
 
 /** A number from a universe's files, which may say anything: what is not one counts as nothing, and never reaches the page as text. */
@@ -84,7 +123,7 @@ const toNumber = (value: unknown): number => {
 };
 
 /** Parses a snapshot of files into a UniverseView descriptor. */
-export function parseUniverseSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord): UniverseView {
+export function parseUniverseSnapshot(name: string, files: FileMap, active?: ActiveSessionRecord, seen: UniverseSeen = {}): UniverseView {
   const { config } = readConfig(files);
   const ai = config.ai;
   const kernels = rangeLabel(config);
@@ -124,7 +163,10 @@ export function parseUniverseSnapshot(name: string, files: FileMap, active?: Act
     name,
     seed: toNumber(config.seed),
     master,
-    isMine: master === 'me' || master === 'Master',
+    // The server says it (T377): the snapshot is whole only for who owns the universe. Without its word, the master of this machine.
+    isMine: seen.mine ?? (master === 'me' || master === 'Master'),
+    many: isMultiplayer(config.game?.mode),
+    invite: seen.invite === true,
     live: !!active?.active,
     clients: toNumber(active?.clients),
     textModel: ai.textModel,
@@ -142,13 +184,15 @@ export async function fetchUniverseDetails(
   name: string,
   activeSessions: Map<string, ActiveSessionRecord>,
   base = '',
+  headers: Record<string, string> = {},
+  invite = false,
 ): Promise<UniverseView | null> {
   try {
-    const res = await fetch(`${base}/api/universe/${encodeURIComponent(name)}`);
+    const res = await fetch(`${base}/api/universe/${encodeURIComponent(name)}`, { headers, cache: 'no-store' });
     if (!res.ok) return null;
     const snap = await res.json();
     if (!snap.exists || !snap.files) return null;
-    return parseUniverseSnapshot(name, snap.files, activeSessions.get(name));
+    return parseUniverseSnapshot(name, snap.files, activeSessions.get(name), { mine: Array.isArray(snap.log), invite });
   } catch {
     return null;
   }
@@ -292,12 +336,16 @@ export function renderUniverseCard(universe: UniverseView): HTMLElement {
     ? `<span class="comic-badge green">LIVE · ${universe.clients} ${universe.clients === 1 ? 'VIANDANTE' : 'VIANDANTI'}</span>`
     : `<span class="comic-badge yellow">IN PAUSA</span>`;
   // Out of the kernels it runs on (T302): the label, and it opens with the fault that says why.
+  // Private (ADR-0194): only its master and its guests see it at all, and to them it is said (T377).
+  const inviteBadge = universe.invite ? ` <span class="comic-badge pink" title="Universo privato: entrano solo il master e gli ospiti">SU INVITO</span>` : '';
+  // The campaign (T377): the master of a universe of many runs it from here, without entering.
+  const campaign = universe.isMine && universe.many ? `<button type="button" class="comic-btn arcade pink sm" data-campaign="${escapeHtml(universe.name)}">CAMPAGNA</button>` : '';
   const kernelBadge = universe.kernels ? ` <span class="comic-badge pink" title="Questo universo gira su altri kernel: si apre con il guasto che lo dice, e non si salva">${escapeHtml(universe.kernels.toUpperCase())}</span>` : '';
 
   card.innerHTML = `
     <div class="universe-card-header">
       <div>
-        ${liveBadge}${kernelBadge}
+        ${liveBadge}${inviteBadge}${kernelBadge}
         <h3 class="comic-title" style="font-size: var(--text-29); margin: var(--space-8) 0 0;">${escapeHtml(universe.name.toUpperCase())}</h3>
       </div>
       <span class="arcade-text text-cyan" style="font-size: var(--text-11);">SEME #${universe.seed}</span>
@@ -333,9 +381,12 @@ export function renderUniverseCard(universe: UniverseView): HTMLElement {
     </div>
     <div class="universe-card-footer">
       <span class="arcade-text text-dim" style="font-size: var(--text-11);">${universe.live ? (globalThis.location?.port ? `PORTA ${location.port}` : '') : 'OFFLINE'}</span>
-      <a href="../index.html?universo=${encodeURIComponent(universe.name)}" class="comic-btn arcade cyan sm">
-        ENTRA NELLA LOBBY
-      </a>
+      <span class="universe-card-actions">
+        ${campaign}
+        <a href="../index.html?universo=${encodeURIComponent(universe.name)}" class="comic-btn arcade cyan sm">
+          ENTRA NELLA LOBBY
+        </a>
+      </span>
     </div>
   `;
   return card;
@@ -361,6 +412,57 @@ if (typeof document !== 'undefined') {
     const statusMsg = document.getElementById('wizard-status-msg');
 
     let allUniverses: UniverseView[] = [];
+    // Who looks (T377): the master sees their universes as theirs, a guest the private ones; asked once, its headers at every request.
+    const caller = siteCaller();
+    const campaignRoot = document.getElementById('campaign-panel');
+    let campaign: CampaignPanel | undefined;
+    const campaignParam = 'campagna';
+
+    function openCampaign(name: string) {
+      if (!campaignRoot) return;
+      campaign?.close();
+      void caller.then((c) => {
+        campaign = new CampaignPanel(campaignRoot, name, c.headers, () => {
+          const q = new URLSearchParams(location.search);
+          q.delete(campaignParam);
+          history.replaceState(history.state, '', `${location.pathname}${q.size ? `?${q}` : ''}${location.hash}`);
+        });
+        const q = new URLSearchParams(location.search);
+        q.set(campaignParam, name);
+        history.replaceState(history.state, '', `${location.pathname}?${q}${location.hash}`);
+        void campaign.open().then(() => campaignRoot.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      });
+    }
+
+    universesGrid?.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-campaign]');
+      if (b?.dataset.campaign) openCampaign(b.dataset.campaign);
+    });
+
+    // A server with accounts and nobody signed in here: the page reads the public universes, and offers to sign in for one's own.
+    void caller.then(async (c) => {
+      const who = document.getElementById('hub-who');
+      if (!who) return;
+      if (c.signedOut) {
+        who.hidden = false;
+        who.replaceChildren(
+          Object.assign(document.createElement('span'), { textContent: 'Accedi per vedere i tuoi mondi, quelli su invito e la campagna. ' }),
+          Object.assign(document.createElement('button'), { type: 'button', className: 'comic-btn arcade sm', id: 'btn-hub-login', textContent: 'ACCEDI' }),
+        );
+        document.getElementById('btn-hub-login')?.addEventListener('click', async () => {
+          const config = await accountConfig();
+          try {
+            if (config) await signIn(config);
+            location.reload();
+          } catch (e) {
+            who.replaceChildren(Object.assign(document.createElement('span'), { textContent: String((e as Error)?.message ?? '').includes(NEEDS_INVITE) ? `${(e as Error).message}.` : 'L’accesso non è riuscito: riprova.' }));
+          }
+        });
+      } else if (c.signed) {
+        who.hidden = false;
+        who.textContent = `Sei ${c.signed.uid}.`;
+      }
+    });
 
     function openModal() {
       if (wizardModal) {
@@ -426,10 +528,13 @@ if (typeof document !== 'undefined') {
         </div>
       `;
 
-      const [activeSessions, universeNames] = await Promise.all([
+      const headers = await (await caller).headers();
+      const [activeSessions, index] = await Promise.all([
         fetchActiveSessions(),
-        fetchUniverses(),
+        fetchUniverseIndex('', headers),
       ]);
+      const universeNames = index.universes;
+      const invite = new Set(index.invite);
 
       // If universeNames is empty, check if any active session or seed universe exists
       const namesToLoad = new Set<string>(universeNames);
@@ -443,7 +548,7 @@ if (typeof document !== 'undefined') {
       }
 
       const universePromises = Array.from(namesToLoad).map((name) =>
-        fetchUniverseDetails(name, activeSessions),
+        fetchUniverseDetails(name, activeSessions, '', headers, invite.has(name)),
       );
 
       const results = await Promise.all(universePromises);
@@ -472,6 +577,10 @@ if (typeof document !== 'undefined') {
       const currentTab = document.querySelector('#universe-filter-tabs .comic-tab.active');
       const currentFilter = currentTab?.getAttribute('data-filter') || 'all';
       applyFilter(currentFilter);
+
+      // Opened from a link (`?campagna=<nome>`): only for a universe the server says is the caller's.
+      const asked = new URLSearchParams(location.search).get(campaignParam);
+      if (asked && !campaign && allUniverses.some((u) => u.name === asked && u.isMine && u.many)) openCampaign(asked);
     }
 
     // Wizard confirmation handler

@@ -50,12 +50,18 @@
         </button>
       </div>
 
+      <!-- Chi guarda (T377): accedi per i tuoi mondi e per la campagna -->
+      <p class="hub-who arcade-text text-dim" id="hub-who" hidden></p>
+
       <!-- Filters & Search Toolbar -->
       <div class="comic-tabs" id="universe-filter-tabs">
         <button class="comic-tab active" data-filter="all">TUTTI GLI UNIVERSI</button>
         <button class="comic-tab" data-filter="live">SESSIONI LIVE</button>
         <button class="comic-tab" data-filter="mine">I MIEI MONDI</button>
       </div>
+
+      <!-- La campagna di un universo del master (T377): ospiti e inviti, ritmo, atlante, direttive (campagna.ts) -->
+      <section class="campaign-panel" id="campaign-panel" aria-label="La campagna" hidden></section>
 
       <!-- Universes Grid (Populated dynamically by sessioni.ts) -->
       <div class="grid-3" id="universes-grid">

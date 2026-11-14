@@ -5423,13 +5423,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T376`.
 - Esito: l'incarico `individual` del Referente (solo il master; fatti con `cleanText` e il filtro locale, mai Jev; luogo pianificato o regione dell'atlante; il Narratore coi fatti dati), l'individuo in `world/people.json` con `declared`, atteso finché il piano del suo luogo non lo accoglie come personaggio marcato col suo nome (`settleDeclared`, subito se il luogo è caricato), grafo e silos che lo mostrano; «Scrivi trama» nella Direzione (`masterPlot` con `reviewPlot`, `writePlot` via `saveFile`, nessuna chiamata, niente missioni); «Modifica» sul leggio solo per il master; ADR-0192, AGENTS.md, architettura, glossario, lingua interna, kernel 0.7.3; test in `tests/campagna-individui.test.ts`; la partita di molti con due client non è provata; sicurezza: nessuna superficie nuova (testo del master solo al Narratore, pulito e filtrato in locale; scritture solo del kernel per il master).
 
-### T377 · Campagna: la campagna nel sito — `da fare` (dipende da T366, T373, T375)
+### T377 · Campagna: la campagna nel sito — `fatto` (`0417a86d`) (dipende da T366, T373, T375)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6
 - Step: 43
 - Contesto: riga 7 del § 6 di `docs/design/campagna-master.md`, ADR-0188.
 - Cosa fare: ospiti e inviti, ritmo, atlante e `campaign.md` nella pagina della sessione; la guida della beta (`docs/beta/`).
 - Browser: sì, con il server di produzione vero (`tools/produzione/laboratori.ts`).
 - Quando è fatto: commit su `task/T377`.
+- Esito: pagina della campagna nell'hub delle sessioni (`site/campagna.ts`): ospiti e inviti, ritmo, atlante con regioni del master (Dichiara/Cambia/Libera), direttive `campaign.md`; hub che sa chi guarda («mia», «SU INVITO»); rotta `campaign` (`server/campaignSite.ts`) coi controlli del gioco in `src/kernel/campaignEdit.ts`, scritta dal mondo se acceso (`WorldCalls.campaign` → `Kernel.publish`) e dallo store con un commit se spento, un altro contratto rifiutato; guida `docs/beta/campagna.md` (fuori dalla build); corretto in `src/main.ts` il master che su un server senza account non entrava nel suo universo privato; ADR-0202, V-042, kernel 0.7.12. Non provati: account Firebase e server a inviti nel pannello; i luoghi pianificati sulla mappa visti solo nei test. Resta: l'estraneo vede «esiste già» (noto da T366); la finestra stretta fra avvio del mondo e scrittura dello store (accettata in ADR-0202).
 
 ### T378 · Il piano di lancio aggiornato: open beta, OpenRouter, VPS e la voce dell'autore — `fatto` (`6a70abe1`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 5

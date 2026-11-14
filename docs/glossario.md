@@ -1449,6 +1449,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «in pausa» (è del ritmo del mondo), `Chunk.held` (un luogo che aspetta la quota)
 - **Fermo**: `kind: held`.
 
+### Pagina della campagna
+- **Inglese**: `CampaignPanel`, `campaignEdit`, `CampaignEdit`, `campaignSeen`, `campaignAnswer`, `siteCaller`
+- **Definizione**: nel sito, il pannello che il master di un universo di molti apre con «CAMPAGNA» dall'hub delle sessioni: ospiti e inviti, il ritmo del mondo, l'atlante con le regioni del master e le direttive, ciò che nel gioco fanno la console e la Direzione, anche senza entrare (ADR-0202). Il design la chiama «pagina della sessione».
+- **Dove vive**: `site/campagna.ts`, `site/sessioni.ts`, `server/campaignSite.ts`, `src/kernel/campaignEdit.ts`
+- **Da non usare**: «pannello di controllo», «dashboard», «campagna» da sola per il pannello (la campagna è ciò che il master fa, ADR-0188)
+- **Fermo**: la rotta `/api/universe/<nome>/campaign` (`op`: `text`, `region`, `release`), la chiamata `campaign` del canale dei mondi, il parametro `?campagna=<nome>` di `site/sessioni.html`.
+
 ### Ospite
 - **Inglese**: `guests`, `guestOf`, `Guest`
 - **Definizione**: un viandante, per id, che il master lascia entrare nel suo universo privato: aggiunto per id o entrato con un invito; tolto, l'universo sparisce per lui e il suo socket si chiude.

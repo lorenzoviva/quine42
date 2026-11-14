@@ -477,6 +477,7 @@ export class WorldHost {
     setPrivate: (value) => this.call('setPrivate', [value]),
     setPace: (pace) => this.call('setPace', [pace]),
     setKeys: (keys) => this.call('setKeys', [keys]),
+    campaign: (edit) => this.call('campaign', edit ? [edit] : []),
   };
 
   /** Stops the world, letting it save if it can, and waits for what git is still doing with that save. */
