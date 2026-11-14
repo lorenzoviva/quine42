@@ -5340,7 +5340,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, un mondo di molti in un container locale giocato da due browser.
 - Quando è fatto: commit su `task/T367`.
 
-### T368 · Open beta: la pagina «Come usiamo l'IA» — `da fare` (dipende da T363)
+### T368 · Open beta: la pagina «Come usiamo l'IA» — `fatto` (`eb58aa50`) (dipende da T363)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 7
 - Step: 43
 - Contesto: riga 9 del § 6 di `docs/design/open-beta.md`; è nella lista del piano di lancio (D35).
@@ -5348,6 +5348,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: sì, la pagina nel sito.
 - Quando è fatto: commit su `task/T368`.
+- Esito: `site/ia.html`, pagina statica con il link nel piè di pagina di tutte le pagine del sito: cosa genera e cosa no, modelli, chi paga (chiave OpenRouter, comuni a turno, master, modelli locali), dove sta la chiave, dove va il testo (Jev solo dati del mondo, D45), guardrail, altri server; build, test `tests/site-ai.test.ts`, docs; suite e typecheck verdi nei turni; da rivedere: «Collega OpenRouter» descritto prima di T364, la frase sul codice scritto con agenti, la frase su Jev se D45.3 si chiude con B; manca un contatto per le segnalazioni.
 
 ### T369 · (dopo) Un endpoint compatibile per modelli locali su RunPod o Vast.ai — `da fare` (dipende da T362)
 - Pipeline: claude · sforzo high · stima 4% · priorità 9

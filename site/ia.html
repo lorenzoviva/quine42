@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="it" data-skin="sobria">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Come QUINE42 usa l'intelligenza artificiale: che cosa genera e che cosa no, quali modelli, chi paga, dove va il testo che scrivi." />
+    <title>QUINE42 · Come usiamo l'IA</title>
+    <!-- La veste (ADR-0145): prima di tutto, così la pagina non si disegna mai con quella sbagliata. Niente script scritti qui: la CSP -->
+    <script src="/skins/boot.js" vite-ignore></script>
+    <noscript><link rel="stylesheet" href="/skins/sobria/skin.css" vite-ignore /></noscript>
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body class="page-ai">
+    <header class="site-nav">
+      <a href="./index.html" class="nav-brand">
+        <span class="nav-logo">QUINE42</span>
+        <span class="nav-tagline">// ARCADE · VOXEL · IA</span>
+      </a>
+      <button class="nav-toggle-btn" id="nav-toggle" aria-controls="nav-links" aria-expanded="false">MENU ▼</button>
+      <nav aria-label="Pagine">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="./index.html" class="nav-link">Mondo</a></li>
+          <li><a href="./carte.html" class="nav-link">Carte 3D</a></li>
+          <li><a href="./sessioni.html" class="nav-link">Sessioni</a></li>
+          <li><a href="./notizie.html" class="nav-link">Notizie</a></li>
+          <li><a href="./profilo.html" class="nav-link">Profilo</a></li>
+          <li><a href="./pagamenti.html" class="nav-link">Crediti</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="../index.html" class="comic-btn arcade cyan">GIOCA SUBITO</a>
+      </div>
+    </header>
+
+    <!-- «Come usiamo l'IA» (T368, docs/design/open-beta.md § 6 riga 9, docs/lancio/piano.md): una pagina statica, senza script suoi.
+         Quando cambia chi paga, dove va il testo o ciò che va a Jev (D45), cambia anche qui. -->
+    <main class="section-wrap news-page">
+      <div class="section-head">
+        <span class="comic-badge cyan">OPEN BETA</span>
+        <h1 class="comic-title">Come usiamo l'IA</h1>
+        <p class="arcade-text text-dim">// AGGIORNATA IL 14 NOVEMBRE 2026</p>
+      </div>
+
+      <article class="comic-panel news-article" id="ai-short">
+        <div class="news-body">
+          <h2>In breve</h2>
+          <ul>
+            <li>Il mondo di QUINE42 lo scrivono modelli linguistici: storie, luoghi, persone, dialoghi, e i <strong>programmi</strong> da cui nascono l'aspetto, i suoni e le regole di ogni cosa.</li>
+            <li><strong>Nessuna immagine generata</strong>, nessuna voce sintetica o clonata: ciò che vedi e senti lo calcola il tuo computer da quei programmi.</li>
+            <li>In open beta i modelli si chiamano <strong>con la tua chiave di OpenRouter</strong>: paghi a OpenRouter ciò che consumi, senza ricarichi nostri. Senza chiave giochi con i modelli locali, senza costo.</li>
+            <li>Ciò che scrivi nel gioco va al nostro server, da lì a OpenRouter e da OpenRouter a Google. A Jev di TypeSafe vanno solo dati del mondo, <strong>mai il testo che scrivi tu</strong>.</li>
+            <li>Il cuore del gioco (il kernel) l'IA non lo può toccare: tutto ciò che genera passa da un validatore, e ciò che non va viene rifiutato.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-what">
+        <div class="news-body">
+          <h2>Che cosa genera, che cosa no</h2>
+          <h3>Genera</h3>
+          <ul>
+            <li><strong>Testo</strong>: la storia del mondo, i luoghi e i loro nomi, le persone (mestiere, famiglia, abitudini, ricordi), ciò che dicono quando parli con loro, gli oggetti e le ricette, le trame e le missioni, il giudizio sulle azioni che inventi.</li>
+            <li><strong>Programmi</strong>: l'aspetto di ogni cosa è un programma <a href="https://github.com/mxgmn/MarkovJunior">MarkovJunior</a> che costruisce i voxel; i brani sono programmi dello stesso tipo che diventano suono; il comportamento degli oggetti e dei sistemi è codice Lua. Il tuo computer esegue quei programmi: non riceve immagini né audio.</li>
+          </ul>
+          <h3>Non genera</h3>
+          <ul>
+            <li>Immagini, texture, video, voci, musica registrata. Un modello guarda le foto dei modelli 3D (fatte dal gioco stesso, dai programmi) per giudicarli, mai per disegnarne.</li>
+            <li>Il kernel: le regole che tengono in piedi il mondo, la sandbox in cui gira il codice generato, il validatore, i crediti. Quello è codice del gioco e l'IA del gioco non lo può cambiare.</li>
+          </ul>
+          <p>Per onestà: anche il codice del gioco è scritto con l'aiuto di agenti di programmazione, sotto la guida e la revisione dell'autore. È un'altra cosa dall'IA che gira mentre giochi, ma te lo diciamo.</p>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-models">
+        <div class="news-body">
+          <h2>Quali modelli</h2>
+          <ul>
+            <li><strong>Gemini di Google</strong>: 3.1 Flash-Lite per la gran parte del lavoro; 3.8 Flash e Gemini 4 Argon per le figure e gli edifici più importanti e, se il master lo accende, per chi dà voce alle persone del mondo.</li>
+            <li><strong>Jev di TypeSafe</strong> per le decisioni chiuse, quelle con risposte già scritte (per esempio: questo modello 3D che c'è già va bene anche qui?). Riceve dati del mondo e sceglie tra le opzioni.</li>
+            <li><strong>Modelli locali</strong>: regole scritte nel gioco che rispondono quando non c'è una chiave o i crediti sono finiti. Non costano niente e sono più semplici.</li>
+          </ul>
+          <p>Le regolazioni (quanto spesso si chiamano i modelli, il «Low Detail», il tuo tetto di spesa) le decide il master nella lobby prima che la partita cominci, e restano ferme finché c'è qualcuno dentro.</p>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-pay">
+        <div class="news-body">
+          <h2>Chi paga</h2>
+          <ul>
+            <li><strong>Le tue richieste le paghi tu</strong>, con la tua chiave di OpenRouter: ciò che dici a una persona del mondo, un'azione che inventi, un oggetto che fabbrichi.</li>
+            <li><strong>Le spese comuni a turno</strong>: ciò che il mondo fa per tutti (un luogo nuovo, la storia che va avanti, un modello che manca) va ogni volta sulla chiave di chi, fra i collegati, finora ne ha pagate meno. In media sono parti uguali, e nessun soldo passa da un giocatore all'altro.</li>
+            <li><strong>Oppure paga il master</strong>, se l'ha scelto nella lobby: allora tutte le richieste della partita vanno sulla sua chiave.</li>
+            <li><strong>Senza chiave</strong> si gioca lo stesso, con i modelli locali. Lo stesso quando la tua chiave arriva al suo limite.</li>
+          </ul>
+          <p>OpenRouter non ricarica i prezzi di Google; prende il 5,5 % (almeno 0,80 $) quando compri i suoi crediti. Noi in open beta non prendiamo niente: niente pagamenti, niente commissioni. Un'ora di gioco costa intorno a 1,10 $ a dettaglio pieno e 0,38 $ in Low Detail, ed è una stima: ogni risposta di OpenRouter dice il suo costo vero, ed è quello che contiamo.</p>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-key">
+        <div class="news-body">
+          <h2>Dove sta la tua chiave</h2>
+          <ul>
+            <li>La colleghi con «Collega OpenRouter»: accedi a OpenRouter, autorizzi QUINE42, e OpenRouter crea una chiave solo per il gioco, con il limite che vedi lì. Lo scambio lo fa il nostro server: la chiave non passa nemmeno dal tuo browser. In alternativa puoi incollarne una tua.</li>
+            <li>La chiave sta <strong>solo nella memoria del server</strong>: mai su disco, mai in un registro, mai nel mondo, mai a un altro giocatore. Dove serve un riferimento usiamo la sua impronta (SHA-256), da cui la chiave non si ricava.</li>
+            <li>Se il server si riavvia, la chiave è dimenticata e la ricolleghi con un clic. La revochi quando vuoi dalle impostazioni di OpenRouter.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-text">
+        <div class="news-body">
+          <h2>Dove va il testo che scrivi</h2>
+          <ol>
+            <li>Dal tuo browser al server di QUINE42, dove gira il mondo.</li>
+            <li>Dal server a <a href="https://openrouter.ai/">OpenRouter</a>, con la chiave di chi paga quella richiesta.</li>
+            <li>Da OpenRouter a Google (AI Studio o Vertex), che risponde.</li>
+          </ol>
+          <p>Ogni nostra richiesta chiede a OpenRouter di non mandarla a fornitori che usano i dati per addestrare i modelli. OpenRouter non conserva prompt e risposte se non accendi tu il logging nel tuo account; ne tiene i metadati (token, tempi, costo). Dalle impostazioni di OpenRouter puoi anche chiedere solo fornitori a ritenzione zero.</p>
+          <p><strong>Jev di TypeSafe non riceve mai il testo che scrivi.</strong> Le sue domande portano solo dati del mondo (nomi, classi, misure), passano anche loro da OpenRouter e chiedono la ritenzione zero. I controlli sul tuo testo li fanno regole scritte nel gioco, sul nostro server.</p>
+          <p>Dentro il gioco, ciò che scrivi può diventare parte del mondo: una regola, un ricordo di una persona, un oggetto. Gli altri viandanti del tuo universo lo possono incontrare. Non scrivere nel gioco ciò che non vuoi che resti.</p>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-guards">
+        <div class="news-body">
+          <h2>I guardrail</h2>
+          <ul>
+            <li><strong>Il validatore</strong>: ogni luogo, oggetto, programma e pezzo di codice generato viene controllato e provato prima di entrare nel mondo; ciò che non va torna al modello con il motivo, o viene scartato.</li>
+            <li><strong>La sandbox</strong>: il codice generato gira in un ambiente Lua chiuso, con limiti di tempo e di memoria, e tocca il mondo solo da un'interfaccia stretta. Se si rompe, il gioco lo isola e lo ripara.</li>
+            <li><strong>Il filtro del mondo</strong>: un testo generato che esce dal mondo (che parla di codice, di simulazione, di chi lo scrive) viene richiesto di nuovo o ritirato.</li>
+            <li><strong>Il master</strong> del tuo universo può dare indicazioni a chi genera il mondo, e rallentarlo o fermarlo.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="comic-panel news-article" id="ai-elsewhere">
+        <div class="news-body">
+          <h2>Su un altro server</h2>
+          <p>QUINE42 si può ospitare in proprio. Questa pagina descrive il server ufficiale della open beta: chi ospita un altro server può usare una sua chiave di OpenRouter o di Google e pagare lui le spese comuni. Chiedi a chi lo ospita come funziona lì. Da soli sul proprio computer la chiave sta nel file di configurazione e non esce da lì.</p>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">QUINE42</div>
+      <div class="footer-links">
+        <a href="../index.html">GIOCO</a>
+        <a href="./index.html">MONDO</a>
+        <a href="./carte.html">CARTE</a>
+        <a href="./sessioni.html">SESSIONI</a>
+        <a href="./notizie.html">NOTIZIE</a>
+        <a href="./profilo.html">PROFILO</a>
+        <a href="./pagamenti.html">CREDITI</a>
+        <a href="./ia.html">COME USIAMO L'IA</a>
+      </div>
+      <div class="footer-copy">QUINE42 © 2026 · Voxel e modelli MarkovJunior 3D · Generato con intelligenza artificiale</div>
+    </footer>
+
+    <script type="module" src="./skin.ts"></script>
+    <script type="module" src="./labs-nav.ts"></script>
+    <script type="module" src="./ia.ts"></script>
+  </body>
+</html>
