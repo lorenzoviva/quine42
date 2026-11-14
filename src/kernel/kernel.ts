@@ -39,7 +39,7 @@ import type { DecisionModels } from './ai/decisions';
 import { billedModel } from './ai/prices';
 import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
-import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type Ledger, type PaymentRecord } from './credits';
+import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
 import { classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type SizeTier } from '../mj/classes';
@@ -621,6 +621,15 @@ export class Kernel {
    * answers for them, so they play with the models too. The server says it by value (the private universe is T366); false, as everywhere today.
    */
   privateWorld = false;
+  /**
+   * How the calls of this world are paid (T363, ADR-0197): with the wanderers' own keys of OpenRouter (`players`: the open beta, where nothing
+   * is prepaid and the ledger is the register of what each spent) and/or the key of who hosts (`server`: the commons). Undefined: the ledger's
+   * credits, as with a key of Gemini. The server says it by value when the world opens; the keys themselves never come here (rule 8g).
+   */
+  private keyPolicy?: KeyPolicy;
+  /** Who holds a key of OpenRouter now (ids, by value from the server), and whose key said 402 (out of the turn until a new key). */
+  private keyHolders = new Set<string>();
+  private keysExhausted = new Set<string>();
   /**
    * The pace of the world (T373, ADR-0188 §3): the master's knob that only goes down. On a server it comes by value from `.campaign` when the
    * world starts and from the route; here it is what the world does, never written in the universe.
@@ -6261,21 +6270,96 @@ export class Kernel {
   hasCredits(id: string = this.wanderer().id): boolean {
     if (!this.manyPlayers()) return true;
     if (this.masterPays()) {
-      if (id === COMUNE) return !this.commonNeedsPayer || this.canPay(this.masterId());
-      if (id !== this.masterId() && this.isAnonymous(id) && !this.privateWorld) return false;
+      if (id === COMUNE) return (!this.commonNeedsPayer && !this.payWithKeys()) || this.canPay(this.masterId());
+      if (id !== this.masterId() && this.isAnonymous(id) && !this.privateWorld && !this.payWithKeys()) return false;
       return this.canPay(this.masterId());
     }
-    if (id === COMUNE) return !this.commonNeedsPayer || (this.connectedWanderers?.() ?? []).some((w) => this.hasCredits(w));
+    if (id === COMUNE) {
+      // With the players' keys (T363) nothing is free: the host's key pays the commons where it has one, else the turn of those who hold a key.
+      if (this.payWithKeys()) return !!this.keyPolicy?.server || this.connectedIds().some((w) => this.hasCredits(w));
+      return !this.commonNeedsPayer || this.connectedIds().some((w) => this.hasCredits(w));
+    }
     return this.canPay(id);
   }
 
-  /** Whether a wanderer's own purse pays now: an account, credits left, and the session's ceiling not reached. */
+  /**
+   * Whether a wanderer's own purse pays now: the session's ceiling not reached, and credits left; with the players' keys (T363) a key the server
+   * holds that has not said 402, an anonymous one too (D52.4: with a key of their own they pay for themselves).
+   */
   private canPay(id: string): boolean {
-    if (this.isAnonymous(id)) return false;
+    if (this.payWithKeys()) {
+      if (!this.keyHolders.has(id)) return false;
+    } else if (this.isAnonymous(id)) return false;
     const tetto = this.sessionCap.get(id);
     const spent = this.sessionSpent.get(id) ?? 0;
     if (tetto !== undefined && spent >= tetto) return false;
-    return this.creditsOf(id) > 0;
+    return this.payWithKeys() || this.creditsOf(id) > 0;
+  }
+
+  /** The wanderers connected now, or (where nobody counts them) those of the world. */
+  private connectedIds(): string[] {
+    return this.connectedWanderers ? this.connectedWanderers() : this.wanderers().map((w) => w.id);
+  }
+
+  /** How this world's calls are paid (T363, ADR-0197), said by the server when the world opens; nothing else sets it. */
+  setKeyPolicy(policy: KeyPolicy | undefined): void {
+    this.keyPolicy = policy ? { players: policy.players === true, server: policy.server === true } : undefined;
+  }
+
+  keyPolicyOf(): KeyPolicy | undefined {
+    return this.keyPolicy ? { ...this.keyPolicy } : undefined;
+  }
+
+  /** Whether the wanderers pay with their own keys of OpenRouter (T363): a game of many whose server said so. */
+  payWithKeys(): boolean {
+    return this.manyPlayers() && !!this.keyPolicy?.players;
+  }
+
+  /** Whether a wanderer holds a key that can pay now (T363), as the server last said. */
+  holdsKey(id: string): boolean {
+    return this.keyHolders.has(id);
+  }
+
+  /**
+   * Who holds a key of OpenRouter now (T363), by value from the server: ids only. One who held a key and no longer does hears it as exhausted
+   * credits (their key said 402, or was revoked): from then on the local models, as with an empty balance.
+   */
+  setKeys(keys: KeyHolders): void {
+    const ids = (v: unknown) => (Array.isArray(v) ? v.filter(validWandererId) : []);
+    const before = this.keyHolders;
+    this.keyHolders = new Set(ids(keys?.holders));
+    this.keysExhausted = new Set(ids(keys?.exhausted));
+    for (const id of before) {
+      if (this.keyHolders.has(id)) continue;
+      const why = this.keysExhausted.has(id) ? 'il credito della sua chiave di OpenRouter è finito' : 'la sua chiave di OpenRouter non vale più';
+      const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
+      this.council.say('kernel', 'info', `${id}: ${why}: ${whose} useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
+    }
+  }
+
+  /**
+   * Whose keys may pay a call asked by `chi` (T363, ADR-0197), in order, for the gate of OpenRouter: a wanderer's own (where the master pays,
+   * the master's); for the commons the host's key where there is one (empty), else the turn: the connected holders, the one who has paid the
+   * least of the commons in this universe first, then by id. Empty without the players' keys: the server's.
+   */
+  keyPayersFor(chi: string): string[] {
+    if (!this.payWithKeys()) return [];
+    const billed = this.billedTo(chi || COMUNE);
+    if (billed !== COMUNE) return this.keyHolders.has(billed) ? [billed] : [];
+    if (this.keyPolicy?.server) return [];
+    return this.connectedIds()
+      .filter((id) => this.keyHolders.has(id))
+      .sort((a, b) => this.ledger.spentOf(a).common - this.ledger.spentOf(b).common || (a < b ? -1 : a > b ? 1 : 0));
+  }
+
+  /**
+   * The ceiling a wanderer brings from the lobby, as this world keeps it (T45d): never more than their balance; with the players' keys (T363)
+   * as they said it, the key's own limit being OpenRouter's; an anonymous one without a key of their own spends nothing.
+   */
+  sessionCapFor(id: string, cap: number): number {
+    if (this.payWithKeys()) return cap;
+    return this.isAnonymous(id) ? 0 : Math.min(cap, this.creditsOf(id));
   }
 
   /** The master of a game of many (T37); alone, the one who plays. */
@@ -6394,10 +6478,33 @@ export class Kernel {
   deductCredits(id: string, amount: number): number {
     if (amount <= 0) return this.creditsOf(id);
     const { before: cur, after: next } = this.ledger.charge(id, amount);
+    this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
+    this.spentInSession(id, amount);
+    // Where the master pays (T372) their purse answers for everyone's requests.
+    const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
+    if (cur > 0 && next === 0) {
+      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: ${whose} useranno i modelli locali.`);
+      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
+      if (this.wanderer().id === id) {
+        this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
+      }
+    }
+    return next;
+  }
+
+  /** What a call cost on a wanderer's own key of OpenRouter (T363): in the ledger as spending, and against the ceiling of the session. */
+  private spendWithKey(id: string, amount: number, common: boolean): void {
+    if (amount <= 0) return;
+    const spent = this.ledger.spend(id, amount, common);
+    this.bus.emit('credits:spent', { id, usd: spent.usd, common: spent.common, delta: amount });
+    this.spentInSession(id, amount);
+  }
+
+  /** Counts a cost against a wanderer's ceiling of the session (T45d): at the ceiling, the local models, and they hear it. */
+  private spentInSession(id: string, amount: number): void {
     const spentBefore = this.sessionSpent.get(id) ?? 0;
     const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
     this.sessionSpent.set(id, spentAfter);
-    this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
     // Where the master pays (T372) their purse answers for everyone's requests.
     const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
     const tetto = this.sessionCap.get(id);
@@ -6408,14 +6515,6 @@ export class Kernel {
         this.message('Hai raggiunto il tetto di crediti per questa sessione: le tue richieste saranno gestite dai modelli locali.', 'warn');
       }
     }
-    if (cur > 0 && next === 0) {
-      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: ${whose} useranno i modelli locali.`);
-      this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
-      if (this.wanderer().id === id) {
-        this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
-      }
-    }
-    return next;
   }
 
   /**
@@ -6438,15 +6537,24 @@ export class Kernel {
     const usd = callCost(r, r.day, billedModel(r.model)) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
+    const asked = r.who || COMUNE;
+    if (this.payWithKeys()) {
+      // The players' keys (T363, ADR-0197): whose key answered is what the gate said (`CallRecord.paidBy`); the host's key, where it paid, is
+      // counted by the server against its own cap, not here. A key's spending is the ledger's register (`Ledger.spend`), nothing is taken from a balance.
+      const payer = r.paidBy ?? (this.billedTo(asked) === COMUNE ? undefined : this.billedTo(asked));
+      if (!payer) return;
+      this.spendWithKey(payer, total, asked === COMUNE);
+      if (payer !== asked && this.masterPays() && payer === this.masterId()) this.usage.paidByMaster(r);
+      return;
+    }
     // Who asked stays who asked (rule 8i); who is charged is the match's policy (T372, ADR-0188): where the master pays, them alone.
-    const payer = this.billedTo(r.who || COMUNE);
+    const payer = this.billedTo(asked);
     if (payer !== COMUNE) {
       this.deductCredits(payer, total);
       // What the master paid for someone else, for their wallet and for the others' (the cost alone, as the usage counts it).
-      if (payer !== (r.who || COMUNE)) this.usage.paidByMaster(r);
+      if (payer !== asked) this.usage.paidByMaster(r);
     } else {
-      const connected = this.connectedWanderers ? this.connectedWanderers() : this.wanderers().map((w) => w.id);
-      const eligible = connected.filter((id) => !this.isAnonymous(id));
+      const eligible = this.connectedIds().filter((id) => !this.isAnonymous(id));
       if (eligible.length > 0) {
         const shares = splitCost(total, eligible.length);
         eligible.forEach((id, i) => {

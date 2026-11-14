@@ -36,6 +36,11 @@ export interface CallRecord {
   day?: string;
   /** Who pays (T36): a wanderer's id, or `comune` (also when missing). */
   who?: string;
+  /**
+   * Whose key of OpenRouter answered the call (T363, ADR-0197), as the gate said it: a wanderer's id. Absent on the server's key, on Gemini,
+   * on the local models. Not in the file: the charge reads it, the tallies keep who asked (`who`).
+   */
+  paidBy?: string;
 }
 
 export interface Tally {

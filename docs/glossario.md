@@ -1249,6 +1249,30 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/ai/openrouter.ts`, `lab/scripts/openrouter-prova.ts`
 - **Da non usare**: «proxy» (il varco è un'altra cosa, sul server), «router dei modelli» (è `RoutedAiModels`, gli abbonamenti)
 
+### Varco di OpenRouter
+- **Inglese**: `OpenRouterGate`, `openrouterRoute`, `worldsPayWith`, `chatRequest`, `decisionRequest`
+- **Definizione**: l'unico posto che spende una chiave di OpenRouter (T363, ADR-0197): le chiavi dei giocatori in memoria per viandante (dal PKCE scambiato dal server, o incollate), la chiave di chi ospita col suo tetto, i corpi rifatti campo per campo, la scelta della chiave fra chi può pagare; la rotta `/api/openrouter` e la porta dei mondi per il canale.
+- **Dove vive**: `server/openrouterProxy.ts`
+- **Da non usare**: «proxy di OpenRouter» (un varco rifà e decide, non inoltra), «adattatore» (è `OpenRouterAiModels`, nel kernel)
+
+### Chiave del giocatore
+- **Inglese**: `setKey`, `keyOf`, `keyFingerprint`, `KeyHolders`, `holders`, `exhausted`, `setKeys`, `holdsKey`
+- **Definizione**: la chiave di OpenRouter di un viandante, tenuta solo nella memoria del server (ADR-0197): altrove la sua impronta SHA-256; un mondo sa solo chi ne ha una (`holders`) e di chi ha detto 402 (`exhausted`), per valore. Un anonimo con la sua paga per sé (D52.4).
+- **Dove vive**: `server/openrouterProxy.ts`, `src/kernel/credits.ts`, `Kernel.setKeys`
+- **Da non usare**: «token» (è quello dell'account), «chiave API» da sola (è `GEMINI_API_KEY`, del server)
+
+### Turno delle comuni
+- **Inglese**: `keyPayersFor`, `PAYERS_HEADER` (`x-quine-payers`), `PAID_BY_HEADER` (`x-quine-paid-by`), `CallRecord.paidBy`
+- **Definizione**: con le chiavi dei giocatori una spesa comune va su una chiave sola: quella del collegato che finora in questo universo ha pagato meno delle comuni (`Ledger.spentOf(id).common`), a pari merito per id; su un 402 il varco passa al prossimo (T363, ADR-0197). Chi ha chiesto (`chi`) e il titolare delle carte comuni non cambiano.
+- **Dove vive**: `Kernel.keyPayersFor`, `src/kernel/ai/openrouter.ts`, `server/openrouterProxy.ts`
+- **Da non usare**: «divisione delle comuni» (è `splitCost`, coi crediti), «rotazione»
+
+### Spesa con la chiave
+- **Inglese**: `Ledger.spend`, `spentOf`, `SpentRecord`, `LedgerBook.spent`, `KeyPolicy`, `payWithKeys`, `setKeyPolicy`, `sessionCapFor`
+- **Definizione**: con le chiavi dei giocatori (`KeyPolicy.players`) niente è prepagato: il ledger scrive per ogni viandante quanto ha speso con la sua chiave e quanto di quello era comune (`spent`, in `universes/.balances/<nome>.json`), `hasCredits` guarda la chiave e il tetto della lobby, il tetto non si limita al saldo (ADR-0197).
+- **Dove vive**: `src/kernel/credits.ts`, `server/ledger.ts`, `Kernel.charge`
+- **Da non usare**: «saldo» (è `saldi`, ciò che è prepagato), «addebito» (nulla si toglie)
+
 ### Costo detto
 - **Inglese**: `CallRecord.usd`, `callCost`, `reportedCost`
 - **Definizione**: ciò che il fornitore dice di aver addebitato per una chiamata (`usage.cost` di OpenRouter, più ciò che Google ha chiesto con una chiave di Google del giocatore); il registro dei consumi e l'addebito lo prendono al posto del listino quando è un numero finito ≥ 0 (T362, ADR-0193).

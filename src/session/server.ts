@@ -454,7 +454,7 @@ export class SessionServer {
     // What they ask to spend is theirs to lower, not to raise: it adds to the world's budgets, so never more than they have (T120). Where
     // the master pays, a player spends nothing of theirs: their ceiling neither limits nor adds, the master's is the one that counts.
     if (ownPurse && typeof cap === 'number' && Number.isFinite(cap) && cap >= 0) {
-      this.kernel.setSessionCap(id, this.isAnonymous(id) ? 0 : Math.min(cap, this.kernel.creditsOf(id)));
+      this.kernel.setSessionCap(id, this.kernel.sessionCapFor(id, cap));
     }
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profile` changes it, what a browser brings on entering may be another wanderer's.

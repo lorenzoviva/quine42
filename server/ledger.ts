@@ -70,7 +70,14 @@ function readBook(text: string): LedgerBook {
     delete saldi[SOLO_BEFORE_0_4];
   }
   const eventi = Object.fromEntries(Object.entries(data.eventi as Record<string, PaymentRecord>).map(([k, p]) => [k, p && p.wandererId === SOLO_BEFORE_0_4 ? { ...p, wandererId: SOLO } : p]));
-  return { saldi, eventi, ricariche: Array.isArray(data.ricariche) ? data.ricariche : [] };
+  // What was spent with the players' own keys (`LedgerBook.spent`, T363): a file of before has none; a line that is not numbers is nothing spent.
+  const spent: LedgerBook['spent'] = {};
+  for (const [id, s] of Object.entries((data.spent && typeof data.spent === 'object' ? data.spent : {}) as Record<string, { usd?: unknown; common?: unknown }>)) {
+    const usd = Number(s?.usd);
+    const common = Number(s?.common);
+    if (Number.isFinite(usd) && usd >= 0) spent[id] = { usd, common: Number.isFinite(common) && common >= 0 ? common : 0 };
+  }
+  return { saldi, eventi, ricariche: Array.isArray(data.ricariche) ? data.ricariche : [], spent };
 }
 
 export class FileLedger extends Ledger {
