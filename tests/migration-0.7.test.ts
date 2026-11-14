@@ -1,4 +1,4 @@
-// The migration 0.6 → 0.7 (T310b, ADR-0189): the values the Council's schemas still listed in Italian take their internal names, and
+// The migration 0.6 → 0.7 (T310b, ADR-0190): the values the Council's schemas still listed in Italian take their internal names, and
 // every bond of the registry gets its kind as an id. A universe of 0.6 opens ported: its plans (where a thing stands), its manifests
 // (the type of an environment, the roles of the stamps' codes, the places and the bonuses of the things, the controls of a tool, the
 // ways of the minds in its components and its cases, what its slots accept), the Lua of the Council's modules where the kernel reads a

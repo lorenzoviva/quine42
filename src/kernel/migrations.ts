@@ -6,7 +6,7 @@
 // ADR-0158): the internal language of society, work and the Council; then 0.3 → 0.4 (T308a, ADR-0159): the fields and the paths of the
 // universe's files; then 0.4 → 0.5 (T308b, ADR-0163): the wire and Lua, the components and their fields, the API, the bus's events;
 // then 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs, a digit alone written `#` and the digit; then 0.6 → 0.7
-// (T310b, ADR-0189): the values the Council's schemas still listed in Italian (where a thing stands in a plan, the type of an
+// (T310b, ADR-0190): the values the Council's schemas still listed in Italian (where a thing stands in a plan, the type of an
 // environment, the ways of a mind, the places of the things, the roles of the stamps, the bonuses) and the kind of every bond as an id.
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
@@ -1254,7 +1254,7 @@ function migrate0_6(files: FileMap): FileMap {
   return withSeedFollowing(files, out);
 }
 
-// --- 0.6 → 0.7 (T310b, ADR-0189): the values the Council's schemas still listed in Italian, the kind of a bond as an id --------------
+// --- 0.6 → 0.7 (T310b, ADR-0190): the values the Council's schemas still listed in Italian, the kind of a bond as an id --------------
 // The prompts are English since T310 (ADR-0165) and the schemas' fields are English since T310b; the values a universe keeps that the
 // schemas used to list in Italian take their internal names (the domains of the step T310b in internalNames.ts): where a thing stands in
 // a plan (`objects[].where`, `fresh[].where`: inside, outside, anywhere), the type of an environment (`layouts[].environment`: outdoor,

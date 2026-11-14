@@ -1,4 +1,4 @@
-# ADR-0189 — I campi degli schemi del Concilio in inglese, il tipo di legame come id, i valori italiani che restavano (contratto 0.7)
+# ADR-0190 — I campi degli schemi del Concilio in inglese, il tipo di legame come id, i valori italiani che restavano (contratto 0.7)
 
 Data: 2026-11-14 · Stato: accettato (task T310b del backlog, step 42) · Riferimenti: ADR-0153 (l'inglese è la lingua interna), ADR-0165 (i prompt in inglese e il blocco «Lingua»), ADR-0136 (la versione del kernel), ADR-0152 e ADR-0155 (le migrazioni), ADR-0175 (il contratto 0.6, i simboli), ADR-0180 e ADR-0181 (i posti delle cose), `docs/lingua-interna.md`, `docs/lingue.md` §5
 
