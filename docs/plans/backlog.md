@@ -5361,7 +5361,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T372`.
 - Esito: il master paga tutto: ADR-0188 accettato con le risposte di D54; `game.expenses` dalla lobby (`settings.game` nel `join`, in `GAME_FIELDS`, fermo a partita in corso, non ereditato dai cloni); `billedTo` nel kernel per l'addebito (`charge`, niente divisione) e per le carte (pagante e titolare il master, quote dell'eredità); `hasCredits` con saldo e tetto del master per tutti; anonimi ai modelli locali salvo universo privato (`privateWorld`, falso finché T366 non lo dice); tetto minimo e tetto dei giocatori ignorati dove paga il master; avviso a tutti a crediti del master finiti; `world/usage.json → masterPaid` e portafoglio (`masterPays`, `master`, `paidFor`, pagina «Pagate per gli altri»); corretto il portafoglio di un mondo acceso, che non mostrava i consumi (leggeva `paganti`); lobby e modale lo dicono; V-036, glossario, AGENTS, architettura, kernel 0.6.13 (in 3d andrà a 0.7.1); test in `tests/spese-master.test.ts` e `tests/sicurezza/spese-master.test.ts`, suite e typecheck verdi nei turni; non visti nel browser lobby e pagina dei crediti (solo test con finto DOM e funzioni pure); niente contro Gemini vero.
 
-### T373 · Campagna: il ritmo e la pausa del mondo — `da fare` (dipende da T366)
+### T373 · Campagna: il ritmo e la pausa del mondo — `fatto` (`67b212cb`) (dipende da T366)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
 - Step: 43
 - Contesto: riga 3 del § 6 di `docs/design/campagna-master.md`, ADR-0188; D54.3 e D54.4: la pausa ferma ciò che il mondo fa da sé (dialoghi fra individui, trame che avanzano, luoghi nuovi che restano bozze), le risposte ai viandanti continuano; l'HUD dice che il mondo è in pausa perché il master lo sta scrivendo (regola 0 per ciò che vede chi è dentro).
@@ -5369,6 +5369,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: in pausa i luoghi restano bozze e nessuna chiamata parte; «normale» riprende da dove sono i giocatori; `pace` non alza mai `placesPerMinute` sopra la lobby.
 - Browser: sì, la pausa dalla console e l'avviso nell'HUD.
 - Quando è fatto: commit su `task/T373`.
+- Esito: ritmo del mondo `pace` normal/slow/hold (`src/kernel/worldPace.ts`), mai sopra la lobby; in pausa i luoghi nuovi restano bozze senza chiamate, quelli noti tornano, fermo ciò che il mondo fa da sé, le risposte ai viandanti continuano; «normale» riprende dai giocatori; messaggio `pace` del master con un limite suo, `pace` in `welcome`/`update`, avviso dell'HUD distinto per master e giocatore; `.campaign → pace` scritto solo dal server e dato al mondo per valore, rotta `/api/universe/<nome>/pace`; console e Direzione; ADR-0196, regola 8b-bis, V-039, kernel 0.7.7. Restano: da soli il ritmo non si salva; le tappe delle trame dovute in pausa accadono tutte alla ripresa; non provato da un test il riavvio di un mondo vero in pausa.
 
 ### T374 · Campagna: le direttive del master — `fatto` (`361769b6`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
