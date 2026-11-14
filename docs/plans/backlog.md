@@ -5297,7 +5297,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: commit su `task/T365`, kernel sale di Z.
 
-### T366 · Open beta e campagna: il verificatore a inviti e gli universi privati — `da fare`
+### T366 · Open beta e campagna: il verificatore a inviti e gli universi privati — `fatto` (`7cd5b41f`)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 5
 - Step: 43
 - Contesto: D52.7 (sì, insieme a T347); riga 6 del § 6 di `docs/design/open-beta.md` e lo studio di T347 (`docs/design/campagna-master.md`, ADR-0188). D54 chiusa il 13/11: **7** inviti di 7 giorni, un uso, token mostrato una volta; **8** universo privato e verificatore a inviti in questo task solo (è anche la riga 2 del § 6 di `campagna-master.md`, che non diventa un task a parte).
@@ -5305,6 +5305,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Fatto anche quando: un terzo account è rifiutato, entra con un invito a un uso, non rientra con lo stesso, sparisce se tolto; l'elenco non lo mostra a chi non è ospite; il kit `tests/sicurezza/`.
 - Test: un server senza Firebase con due invitati; suite di sicurezza; suite e typecheck coi turni.
 - Quando è fatto: commit su `task/T366`.
+- Esito: universo privato (ospiti e inviti fuori dall'universo, invisibile agli estranei in ogni lettura, `admit`, rotta `guests` del master, `redeem` prima della lettura, link nel frammento, console «Ospiti e inviti») e verificatore a inviti (`QUINE_ACCOUNT=inviti`, identità `inv-…` firmate e rinnovate, libro delle revoche, `npm run inviti`), V-038 con `tests/sicurezza/ospiti.test.ts`, ADR-0193, kernel 0.7.4; cambi rispetto ad ADR-0188: invito con `redeem` e non nel `join`, token nel frammento; resta (accettato) che `create` e il socket confermano l'esistenza di un nome già noto; il sito che mostra gli universi privati agli ospiti è di T377; `npm run inviti` usa vite-node (da portare nel pacchetto di T367)
 
 ### T367 · Open beta: il pacchetto e la guida del self-hosting — `da fare` (dipende da T361, T363, T366)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
