@@ -5333,7 +5333,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T366`.
 - Esito: universo privato (ospiti e inviti fuori dall'universo, invisibile agli estranei in ogni lettura, `admit`, rotta `guests` del master, `redeem` prima della lettura, link nel frammento, console «Ospiti e inviti») e verificatore a inviti (`QUINE_ACCOUNT=inviti`, identità `inv-…` firmate e rinnovate, libro delle revoche, `npm run inviti`), V-038 con `tests/sicurezza/ospiti.test.ts`, ADR-0193, kernel 0.7.4; cambi rispetto ad ADR-0188: invito con `redeem` e non nel `join`, token nel frammento; resta (accettato) che `create` e il socket confermano l'esistenza di un nome già noto; il sito che mostra gli universi privati agli ospiti è di T377; `npm run inviti` usa vite-node (da portare nel pacchetto di T367)
 
-### T367 · Open beta: il pacchetto e la guida del self-hosting — `da fare` (dipende da T361, T363, T366)
+### T367 · Open beta: il pacchetto e la guida del self-hosting — `fatto` (`280a2a29`) (dipende da T361, T363, T366)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
 - Step: 43
 - Contesto: D52.6 (solo Dockerfile per Railway, niente template nel marketplace); riga 7 del § 6 di `docs/design/open-beta.md`.
@@ -5341,6 +5341,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: sì, un mondo di molti in un container locale giocato da due browser.
 - Quando è fatto: commit su `task/T367`.
+- Esito: `Dockerfile` a tre stadi con l'etichetta del kernel controllata sul codice (`KERNEL_VERSION`, `npm run immagine` → `quine42:X.Y.Z` e `X.Y`, mai latest), server come `node` (`quine-avvio`, `setpriv`), `dist-server/inviti.mjs` nel pacchetto (comando `inviti` nell'immagine), `docker-compose.yml` (porta su 127.0.0.1 se non detto, profili `tunnel`, `tunnel-rapido`, `backup`), `.env.example` senza valori veri, guida `docs/self-hosting.md` (VM/VPS, Railway senza template, Fly, PC di casa, pacchetto Node, backup), ADR-0201, AGENTS.md, architettura, glossario, V-041 chiusa con `tests/sicurezza/pacchetto.test.ts` e una prova in `produzione.test.ts`; suite e typecheck verdi; NON provati la build dell'immagine e un container vero (virtualizzazione spenta su questa macchina, Docker Desktop non avvia il motore), il tunnel, Railway, Fly e una VPS; sicurezza: V-041
 
 ### T368 · Open beta: la pagina «Come usiamo l'IA» — `fatto` (`eb58aa50`) (dipende da T363)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 7
