@@ -5126,7 +5126,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T392`, rapporto e foto in `lab/banco/taglie/modelli/`, la domanda all'autore. Sicurezza: nessuna superficie nuova attesa.
 
-### T391 · Quale modello scrive meglio le strutture, a parità di costo per struttura riuscita: Carbon, Hydrogen, Sonnet 5.5 e Opus 5.5 contro Argon — `da fare`
+### T391 · Quale modello scrive meglio le strutture, a parità di costo per struttura riuscita: Carbon, Hydrogen, Sonnet 5.5 e Opus 5.5 contro Argon — `in attesa`
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
 - Step: 30
 - Contesto: l'autore (14/11, su D57): Argon costa quanto Gemini 4 Carbon e il 25 % più di Gemini 4 Hydrogen, entrambi successivi; a quel prezzo c'è anche Sonnet 5.5, e un modello più caro che riesce in una sola iterazione può costare meno di Argon più le correzioni. Prima di decidere D57 si misura. `dossier T355` (il banco, `lab/scripts/scultore-gemini.ts`, il rapporto `lab/banco/taglie/gemini/README.md`, i numeri di 3.8 Flash e Argon già pagati: non si rifanno), ADR-0183, ADR-0193 (adattatore OpenRouter, `OPENROUTER_MODELS` a elenco).
@@ -5134,6 +5134,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T391`, rapporto e foto in `lab/banco/taglie/modelli/`, la domanda all'autore. Sicurezza: nessuna superficie nuova attesa (solo elenchi di modelli e `lab/`); se tocca `OpenRouterGate` lo dice.
+- Esito: giro su Gemini fatto (100 chiamate, 5,74 $): Carbon 4 su 12 (0,75 $ per riuscita, 4 richieste senza risposta entro 300 s), Hydrogen 4 su 12 (0,68 $, veloce, fattorie senza merli, cade sui piani), Argon di T355 6 su 8 (0,37 $); banco e giro su Claude preparati e provati offline; Carbon e Hydrogen in `prices.ts` (kernel 0.7.9); domanda in `docs/pipeline/domande/T391.md`; non provato: le immagini della revisione sulla CLI vera, il giro su Claude (T392); sicurezza: nessuna superficie nuova.
 
 ### T356 · Il tetto dei voxel delle strutture gargantuesche — `fatto` (`c21d13b3`)
 - Pipeline: fable · sforzo high · stima 4% · approvato · browser · priorità 5

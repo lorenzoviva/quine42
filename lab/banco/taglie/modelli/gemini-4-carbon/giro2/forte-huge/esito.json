@@ -1,0 +1,30 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "gemini-4-carbon",
+ "modello": "gemini-4-carbon",
+ "voto": 9,
+ "chiamate": 3,
+ "secondi": 129,
+ "usd": 0.1347,
+ "usdGemini": 0.1347,
+ "token": {
+  "prompt": 21771,
+  "output": 9559,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-carbon",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.132
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0027
+  }
+ ]
+}

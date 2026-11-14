@@ -1,0 +1,5 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «fattoria»: nessun programma valido

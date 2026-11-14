@@ -1,0 +1,3 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 0 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (
+[artist → sculptor] approva: «forte»: 7/10 — Ci sono dei voxel verde brillante fluorescente sopra il portone frontale e sul fianco che stonano con i toni smorzati della pietra.

@@ -1,0 +1,2 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 10 × 30 voxel (0,50 × 1,50 caselle), una porta è almeno 11 × 30 a ogni taglia

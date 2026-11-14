@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 0 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: varietà: alla taglia Enorme 15 tipi di parti e 115 parti, alla Grande 15 e 135: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tip
+[sculptor] errore: «forte»: nessun programma valido

@@ -1,0 +1,445 @@
+{
+ "fattoria-huge": {
+  "taglia": "huge",
+  "righe": {
+   "large": [
+    {
+     "seme": 1,
+     "ms": 259,
+     "voxel": 111435,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 111435,
+      "letters": 13,
+      "parts": 57,
+      "byLetter": {
+       "g": 1,
+       "W": 1,
+       "f": 29,
+       "c": 2,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "k": 1,
+       "L": 10,
+       "F": 1,
+       "R": 2,
+       "K": 1
+      }
+     },
+     "aree": {
+      "field": 2,
+      "yard": 6
+     },
+     "errori": []
+    },
+    {
+     "seme": 2,
+     "ms": 235,
+     "voxel": 107330,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 107330,
+      "letters": 12,
+      "parts": 57,
+      "byLetter": {
+       "g": 1,
+       "W": 1,
+       "f": 28,
+       "c": 2,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "k": 1,
+       "L": 12,
+       "F": 1,
+       "R": 2
+      }
+     },
+     "aree": {
+      "field": 4,
+      "yard": 8
+     },
+     "errori": []
+    }
+   ],
+   "huge": [
+    {
+     "seme": 1,
+     "ms": 417,
+     "voxel": 129083,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 129083,
+      "letters": 16,
+      "parts": 101,
+      "byLetter": {
+       "y": 5,
+       "b": 5,
+       "g": 2,
+       "W": 1,
+       "f": 60,
+       "c": 2,
+       "Q": 1,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "k": 1,
+       "L": 11,
+       "F": 1,
+       "R": 2,
+       "K": 1
+      }
+     },
+     "aree": {
+      "field": 9,
+      "orchard": 5,
+      "yard": 19
+     },
+     "errori": []
+    },
+    {
+     "seme": 2,
+     "ms": 403,
+     "voxel": 129186,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 129186,
+      "letters": 16,
+      "parts": 104,
+      "byLetter": {
+       "y": 5,
+       "b": 5,
+       "g": 2,
+       "W": 1,
+       "f": 61,
+       "c": 2,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "Q": 1,
+       "k": 1,
+       "L": 13,
+       "F": 1,
+       "R": 2,
+       "K": 1
+      }
+     },
+     "aree": {
+      "field": 10,
+      "orchard": 5,
+      "yard": 20
+     },
+     "errori": []
+    }
+   ],
+   "gargantuan": [
+    {
+     "seme": 1,
+     "ms": 704,
+     "voxel": 140799,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 140799,
+      "letters": 16,
+      "parts": 131,
+      "byLetter": {
+       "y": 15,
+       "b": 15,
+       "g": 3,
+       "W": 1,
+       "f": 68,
+       "c": 2,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "Q": 1,
+       "k": 1,
+       "L": 12,
+       "F": 1,
+       "R": 2,
+       "K": 1
+      }
+     },
+     "aree": {
+      "field": 36,
+      "orchard": 15,
+      "yard": 24
+     },
+     "errori": []
+    },
+    {
+     "seme": 2,
+     "ms": 688,
+     "voxel": 141562,
+     "parti": {
+      "storeys": [
+       6,
+       33
+      ],
+      "rooms": [
+       {
+        "z": 5,
+        "area": 946,
+        "room": 10,
+        "clear": 59
+       },
+       {
+        "z": 6,
+        "area": 948,
+        "room": 11,
+        "clear": 59
+       },
+       {
+        "z": 7,
+        "area": 946,
+        "room": 10,
+        "clear": 57
+       },
+       {
+        "z": 33,
+        "area": 978,
+        "room": 31,
+        "clear": 31
+       }
+      ],
+      "doors": [
+       {
+        "width": 15,
+        "height": 30
+       }
+      ]
+     },
+     "composizione": {
+      "voxels": 141562,
+      "letters": 16,
+      "parts": 138,
+      "byLetter": {
+       "y": 17,
+       "b": 17,
+       "g": 3,
+       "W": 1,
+       "f": 69,
+       "c": 2,
+       "N": 3,
+       "O": 4,
+       "o": 1,
+       "r": 1,
+       "Q": 1,
+       "k": 1,
+       "L": 14,
+       "F": 1,
+       "R": 2,
+       "K": 1
+      }
+     },
+     "aree": {
+      "field": 35,
+      "orchard": 17,
+      "yard": 23
+     },
+     "errori": []
+    }
+   ]
+  },
+  "varieta": [
+   "large → huge: cresce",
+   "huge → gargantuan: cresce"
+  ],
+  "controllo": {
+   "large": "passa",
+   "huge": "passa"
+  },
+  "fortificato": true
+ }
+}

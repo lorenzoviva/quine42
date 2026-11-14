@@ -91,17 +91,49 @@ export const ISOLATION_ARGS: readonly string[] = [
   'none',
 ];
 
+/**
+ * The model and the effort of a run (T391: the bench chooses them; the queue of the game says neither, and the CLI uses its own), and
+ * whether the images of the request go with it: then the prompt goes as one user message of events (`--input-format stream-json`).
+ */
+export interface CliChoice {
+  model?: string;
+  effort?: string;
+  images?: boolean;
+}
+
+/** An id of a model or an effort: letters, digits, dots and dashes, never an option of the CLI. */
+const CHOICE_RE = /^[a-z0-9][a-z0-9.-]{0,63}$/i;
+
+/** A data URL (image/png, image/jpeg) as an image block of Claude's messages; anything else is refused. */
+export function imageBlock(url: string): { type: 'image'; source: { type: 'base64'; media_type: string; data: string } } {
+  const m = /^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+/=]+)$/.exec(url);
+  if (!m) throw new Error('immagine non valida: solo data URL png o jpeg');
+  return { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } };
+}
+
 /** Builds the non-interactive CLI command and arguments for the chosen subscription provider. */
 export function buildCliCommand(
   provider: SubscriptionProvider,
-  req: QueuedRequest,
+  req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
   customCmd?: string,
+  choice: CliChoice = {},
 ): CliCommand {
   if (provider !== 'claude') throw new Error(`${String(provider)} non serve la coda: non può escludere gli strumenti`);
+  for (const v of [choice.model, choice.effort]) if (v !== undefined && !CHOICE_RE.test(v)) throw new Error(`scelta della CLI non valida: ${v}`);
   const parts = (customCmd ?? 'claude').trim().split(/\s+/).filter(Boolean);
+  const text = promptWithSchema(req.prompt, req.schema);
+  const images = choice.images ? (req.images ?? []) : [];
+  const chosen = [
+    ...(choice.model ? ['--model', choice.model] : []),
+    ...(choice.effort ? ['--effort', choice.effort] : []),
+    ...(images.length ? ['--input-format', 'stream-json'] : []),
+  ];
   // `--system-prompt` takes the next argument whatever it says.
-  const args = [...parts.slice(1), ...ISOLATION_ARGS, ...(req.system ? ['--system-prompt', req.system] : [])];
-  return { cmd: parts[0], args, stdin: promptWithSchema(req.prompt, req.schema) };
+  const args = [...parts.slice(1), ...ISOLATION_ARGS, ...chosen, ...(req.system ? ['--system-prompt', req.system] : [])];
+  const stdin = images.length
+    ? `${JSON.stringify({ type: 'user', message: { role: 'user', content: [...images.map(imageBlock), { type: 'text', text }] } })}\n`
+    : text;
+  return { cmd: parts[0], args, stdin };
 }
 
 /** What the CLI needs to run and to find the subscription's login, by name; everything else (keys, the `.env`) stays here. */
@@ -290,6 +322,66 @@ export function runCli(opts: { cmd: string; args: string[]; stdin?: string; cwd?
   });
 }
 
+/** What one isolated run gave: `raw` is the CLI's last event (the `result`, with its usage per model), for who prices it (T391). */
+export interface IsolatedRun {
+  status: 'ok' | 'error' | 'limit' | 'isolation';
+  text?: string;
+  errore?: string;
+  reset?: Date;
+  usage?: QueuedAnswer['usage'];
+  raw?: unknown;
+}
+
+/**
+ * One request through the isolated CLI, without the queue (T391): an empty folder, the reduced environment, the confirmation of
+ * each run. The queue serves with it (`serveOne`); the bench of the Sculptor too, with the model, the effort and the images it chooses.
+ */
+export async function runIsolated(
+  provider: SubscriptionProvider,
+  req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
+  opts: { cmd?: string; timeoutMs?: number; choice?: CliChoice } = {},
+): Promise<IsolatedRun> {
+  const { cmd, args, stdin } = buildCliCommand(provider, req, opts.cmd, opts.choice);
+  const check = new IsolationCheck();
+  const empty = await fs.mkdtemp(path.join(os.tmpdir(), 'quine-coda-'));
+  const run = await runCli({ cmd, args, stdin, cwd: empty, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
+  await fs.rm(empty, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+
+  // 0. It had something to act with: no answer from that run, and no more runs.
+  if (check.breach) return { status: 'isolation', errore: `isolamento della CLI non confermato: ${check.breach}` };
+
+  // 1. Subscription usage limit check
+  const reset = usageLimit(run.combined);
+  if (reset) return { status: 'limit', errore: `limite abbonamento ${provider} raggiunto, reset alle ${reset.toISOString()}`, reset };
+
+  // 2. Process failure, or a run that never said what it had
+  const parsed = readCliOutput(run.stdout || run.stderr);
+  const raw = parsed.rawJson;
+  if (run.code === 0 && !check.confirmed) return { status: 'isolation', errore: 'isolamento della CLI non confermato: nessun evento di avvio' };
+  if (run.code !== 0 || parsed.error) {
+    // A `result` that says it is an error says why in its text (an unknown model, T391).
+    const said = parsed.error === true && (raw as { type?: unknown } | undefined)?.type === 'result' ? parsed.result.trim() : '';
+    const detail = typeof parsed.error === 'string'
+      ? parsed.error
+      : (said || run.stderr.trim() || run.stdout.trim() || `codice di uscita ${run.code}`);
+    return { status: 'error', errore: `errore CLI (${provider}): ${detail}`, usage: parsed.usage, raw };
+  }
+
+  // 3. Success: validate schema if required, or take raw text
+  let text = parsed.result;
+  if (req.schema) {
+    try {
+      text = JSON.stringify(parseJson(parsed.result));
+    } catch (e) {
+      return { status: 'error', errore: `la CLI non ha prodotto un JSON valido conforme allo schema: ${(e as Error).message}`, usage: parsed.usage, raw };
+    }
+  } else {
+    text = text.trim();
+    if (!text) return { status: 'error', errore: 'risposta vuota dalla CLI', usage: parsed.usage, raw };
+  }
+  return { status: 'ok', text, usage: parsed.usage, raw };
+}
+
 /** Takes the oldest request for this provider and serves it through the CLI. */
 export async function serveOne(
   dir: string,
@@ -300,72 +392,24 @@ export async function serveOne(
   const req = await take(dir, provider);
   if (!req) return { served: false };
 
-  // Images check: Claude Code does not accept images in print mode.
+  // Images check: the queue of the game sends no images to the CLI (the bench may, T391).
   if (req.images && req.images.length > 0) {
     const errore = `la CLI di ${provider} non supporta immagini da riga di comando`;
     await answer(dir, req.id, { errore });
     return { served: true, id: req.id, status: 'error', errore };
   }
 
-  const { cmd, args, stdin } = buildCliCommand(provider, req, opts.cmd);
-  const check = new IsolationCheck();
-  const empty = await fs.mkdtemp(path.join(os.tmpdir(), 'quine-coda-'));
-  const run = await runCli({ cmd, args, stdin, cwd: empty, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
-  await fs.rm(empty, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
-
-  // 0. It had something to act with: no answer from that run, and no more runs.
-  if (check.breach) {
-    const errore = `isolamento della CLI non confermato: ${check.breach}`;
-    await answer(dir, req.id, { errore });
-    return { served: true, id: req.id, status: 'isolation', errore };
-  }
-
-  // 1. Subscription usage limit check
-  const reset = usageLimit(run.combined);
-  if (reset) {
-    const errore = `limite abbonamento ${provider} raggiunto, reset alle ${reset.toISOString()}`;
-    await answer(dir, req.id, { errore });
-    return { served: true, id: req.id, status: 'limit', errore, reset };
-  }
-
-  // 2. Process failure, or a run that never said what it had
-  const parsed = readCliOutput(run.stdout || run.stderr);
-  if (run.code === 0 && !check.confirmed) {
-    const errore = 'isolamento della CLI non confermato: nessun evento di avvio';
-    await answer(dir, req.id, { errore });
-    return { served: true, id: req.id, status: 'isolation', errore };
-  }
-  if (run.code !== 0 || parsed.error) {
-    const detail = typeof parsed.error === 'string'
-      ? parsed.error
-      : (run.stderr.trim() || run.stdout.trim() || `codice di uscita ${run.code}`);
-    const errore = `errore CLI (${provider}): ${detail}`;
-    await answer(dir, req.id, { errore });
-    return { served: true, id: req.id, status: 'error', errore };
-  }
-
-  // 3. Success: validate schema if required, or take raw text
-  let text = parsed.result;
-  if (req.schema) {
-    try {
-      const obj = parseJson(parsed.result);
-      text = JSON.stringify(obj);
-    } catch (e) {
-      const errore = `la CLI non ha prodotto un JSON valido conforme allo schema: ${(e as Error).message}`;
-      await answer(dir, req.id, { errore, usage: parsed.usage });
-      return { served: true, id: req.id, status: 'error', errore, usage: parsed.usage };
-    }
-  } else {
-    text = text.trim();
-    if (!text) {
-      const errore = 'risposta vuota dalla CLI';
-      await answer(dir, req.id, { errore, usage: parsed.usage });
-      return { served: true, id: req.id, status: 'error', errore, usage: parsed.usage };
-    }
-  }
-
-  await answer(dir, req.id, { text, usage: parsed.usage });
-  return { served: true, id: req.id, status: 'ok', text, usage: parsed.usage };
+  const r = await runIsolated(provider, req, opts);
+  await answer(dir, req.id, r.status === 'ok' ? { text: r.text, usage: r.usage } : { errore: r.errore, ...(r.usage ? { usage: r.usage } : {}) });
+  return {
+    served: true,
+    id: req.id,
+    status: r.status,
+    ...(r.text !== undefined ? { text: r.text } : {}),
+    ...(r.errore ? { errore: r.errore } : {}),
+    ...(r.reset ? { reset: r.reset } : {}),
+    ...(r.usage ? { usage: r.usage } : {}),
+  };
 }
 
 function providerArg(p: string): SubscriptionProvider {

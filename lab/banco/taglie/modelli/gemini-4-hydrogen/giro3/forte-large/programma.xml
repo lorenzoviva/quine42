@@ -1,0 +1,146 @@
+<!-- forte: sculpted by gemini-4-hydrogen (step 9), the Artist's vote 7/10 -->
+<sequence values="BHEhswdcnWGrQatmM fFRWUTkLNOo#90#91#92#94#20#21" symmetry="(xy)" soil="E" origin="bottom">
+  <union symbol="+" values="W"/>
+  <union symbol="=" values="fF"/>
+  <union symbol="%" values="W"/>
+  <map scale="1/5 1/5 1" values="BHEhswdcnWGrQatm" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Keep interior around H -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="4"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+      <!-- Optional side bastion/annex on a random side wall -->
+      <one in="Eh/Eh/Eh/Eh/Eh" out="**/**/h*/**/**" symmetry="(x)" steps="1"/>
+      <all in="hE" out="*h" symmetry="(x)" steps="1"/>
+      <!-- Keep walls -->
+      <all in="[Hh]E" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+      <!-- Stair zone along a wall with 2 cells landing -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+      <!-- Courtyard around keep, expanding if space allows -->
+      <all in="wE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <!-- Curtain wall around courtyard -->
+      <all in="cE" out="*W" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+      <!-- Corner towers on outer corners of curtain wall -->
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+      <!-- Axis from H to front edge: marker (m), keep door (d), paving (n), gatehouse (G), road (r) -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/>
+      <all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <!-- Widen door, paving, gatehouse, road to 3 cells -->
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <!-- Turn H and m into h -->
+      <prl><rule in="H" out="h"/><rule in="m" out="h"/></prl>
+      <!-- Well in courtyard if 5x5 free c exists -->
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <!-- Moat outside curtain wall where 5 cells of ground remain -->
+      <all in="cWEEEEE" out="**aa***" steps="1"/>
+      <all in="[Wt]E/*a" out="**/*a"/>
+      <all in="aE/*a" out="*a/**"/>
+    </sequence>
+    <map scale="5 5 1" values="BHEhswdcnWGrQatfFRWUTkMLNOo#90#91#92#94#20#21" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="n" out="nnnnn/nnnnn/nnnnn/nnnnn/nnnnn"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="G" out="GGGGG/GGGGG/GGGGG/GGGGG/GGGGG"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="Q" out="QQQQQ/QQQQQ/QQQQQ/QQQQQ/QQQQQ"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <sequence symmetry="(xy)">
+        <!-- B. Heights -->
+        <!-- Keep walls (w): 2 storeys of 32 (64) with window bands -->
+        <all in="B w" out="w W" steps="6"/>
+        <all in="B w" out="w U" steps="14"/>
+        <all in="B w" out="w W" steps="12"/>
+        <all in="B w" out="w W" steps="6"/>
+        <all in="B w" out="w U" steps="14"/>
+        <all in="B w" out="w W" steps="12"/>
+        <prl in="w" out="R"/>
+        <!-- Keep door wall (d): door seed O at z=0, then wall up to 64 -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d W" steps="63"/>
+        <prl in="d" out="R"/>
+        <!-- Keep floor (h) and stair zone (s): 2 storeys -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+        <!-- Curtain wall (W): 24 high -->
+        <all in="B W" out="W W" steps="24"/>
+        <!-- Corner towers (t): 40 high -->
+        <all in="B t" out="t W" steps="40"/>
+        <!-- Gatehouse (G): door seed O at z=0, wall up to 36 -->
+        <all in="B G" out="G O" steps="1"/>
+        <all in="B G" out="G W" steps="35"/>
+        <!-- Well (Q): 6 high stone rim -->
+        <all in="B Q" out="Q W" steps="6"/>
+
+        <!-- C. Full scale: parts, windows, roofs, cleaning -->
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- Windows in the U band of the keep -->
+        <one steps="12"><rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU" out="*L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L"/></one>
+        <all in="LUUUUB" out="*LLLL*"/>
+        <prl in="U" out="W"/>
+
+        <!-- Keep hip roof -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>
+
+        <!-- Cleaning -->
+        <prl in="T" out="B"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="B" value="000000" hidden="True"/>
+  <color symbol="E" value="6b7b4c" name="erba" area="ground" hidden="True"/>
+  <color symbol="c" value="b5a689" name="cortile" area="courtyard"/>
+  <color symbol="n" value="9e9585" name="lastricato" area="courtyard"/>
+  <color symbol="r" value="8c8270" name="strada" area="road"/>
+  <color symbol="a" value="3d6480" name="fossato" area="moat"/>
+  <color symbol="f" value="c2a878" name="pavimento legno" area="keep"/>
+  <color symbol="F" value="a88c5c" name="solaio legno" area="keep"/>
+  <color symbol="W" value="7a766e" name="muro pietra" area="wall"/>
+  <color symbol="R" value="8c4632" name="tetto" area="keep"/>
+  <color symbol="L" value="9ec4d6" name="vetro finestra"/>
+  <color symbol="M" value="636059" name="merli"/>
+  <color symbol="U" value="2b2926" name="feritoia"/>
+  <color symbol="O" value="5c4028" name="porta" area="keep"/>
+  <color symbol="o" value="3d2918" name="assi porta" area="keep"/>
+  <color symbol="N" value="4a4742" name="stipite"/>
+  <color symbol="k" value="8f6f47" name="gradini"/>
+  <color symbol="#20" value="000000" hidden="True"/>
+  <color symbol="#21" value="000000" hidden="True"/>
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>

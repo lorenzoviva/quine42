@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 0 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «forte»: nessun programma valido

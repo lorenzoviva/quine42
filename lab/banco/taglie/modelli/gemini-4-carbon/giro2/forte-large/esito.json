@@ -1,0 +1,23 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "scultore": "gemini-4-carbon",
+ "chiamate": 3,
+ "secondi": 424,
+ "usd": 0.1117,
+ "usdGemini": 0.1117,
+ "token": {
+  "prompt": 17747,
+  "output": 8580,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-carbon",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.1117
+  }
+ ],
+ "errore": "Gemini gemini-4-carbon: fetch failed (non ripetuta)"
+}

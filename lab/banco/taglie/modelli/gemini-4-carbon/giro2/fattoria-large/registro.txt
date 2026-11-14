@@ -1,0 +1,3 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 58% dei voxel non è attac

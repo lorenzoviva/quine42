@@ -1,0 +1,23 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "gemini-4-hydrogen",
+ "chiamate": 4,
+ "secondi": 86,
+ "usd": 0.2119,
+ "usdGemini": 0.2119,
+ "token": {
+  "prompt": 50311,
+  "output": 12565,
+  "thoughts": 6580
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-hydrogen",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.2119
+  }
+ ],
+ "errore": "nessun programma valido"
+}

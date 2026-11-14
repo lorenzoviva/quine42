@@ -1,0 +1,5 @@
+[sculptor] propone: «fattoria» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: "[..]" non è ammesso in un'uscita: W [wd]
+[kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Enorme 14 tipi di parti e 42 parti, alla Grande 14 e 44: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo 
+[kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Enorme 15 tipi di parti e 42 parti, alla Grande 15 e 46: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo 
+[sculptor] errore: «fattoria»: nessun programma valido

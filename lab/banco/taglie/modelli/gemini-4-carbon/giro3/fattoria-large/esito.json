@@ -1,0 +1,23 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "gemini-4-carbon",
+ "chiamate": 3,
+ "secondi": 420,
+ "usd": 0.1173,
+ "usdGemini": 0.1173,
+ "token": {
+  "prompt": 17688,
+  "output": 8194,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "gemini-4-carbon",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.1173
+  }
+ ],
+ "errore": "Gemini gemini-4-carbon: fetch failed (non ripetuta)"
+}

@@ -27,6 +27,10 @@ export const PRICES_READ_ON = '2026-10-22';
 
 export const PRICES: Record<string, Price> = {
   'gemini-4-argon': { input: 2.0, output: 10.0, cached: 0.1, until: '2026-12-01', next: { input: 4.0, output: 20.0, cached: 0.2 } },
+  // Read on CARBON_HYDROGEN_READ_ON (T391): Carbon at the price of Argon, with the same change on 1/12; Hydrogen a quarter less, no change said.
+  // Both with the implicit cache only (no storage: never cached explicitly).
+  'gemini-4-carbon': { input: 2.0, output: 10.0, cached: 0.1, until: '2026-12-01', next: { input: 4.0, output: 20.0, cached: 0.2 } },
+  'gemini-4-hydrogen': { input: 1.5, output: 7.5, cached: 0.075 },
   // The storage of an explicit cache (T351): 0.50 $ per million tokens an hour until the end of 2026, then 1.00 $ (read on
   // STORAGE_READ_ON on the pages that copy Google's; to check on the first bill, as the write: see EXPLICIT_CACHE).
   'gemini-3.8-flash': { input: 0.75, output: 3.75, cached: 0.075, storage: 0.5, until: '2027-01-01', next: { input: 1.5, output: 7.5, cached: 0.15, storage: 1.0 } },
@@ -36,6 +40,9 @@ export const PRICES: Record<string, Price> = {
   'gemini-3.1-pro-preview': { input: 2.0, output: 12.0, cached: 0.2, note: 'fino a 200k token di prompt; oltre: 4,00 / 18,00 / 0,40' },
   'gemini-3-flash-preview': { input: 0.5, output: 3.0, cached: 0.05, note: 'modello «legacy»' },
 };
+
+/** When the prices of Gemini 4 Carbon and Hydrogen were read (T391). */
+export const CARBON_HYDROGEN_READ_ON = '2026-11-14';
 
 /** When the storage price of the explicit cache was read (T351). */
 export const STORAGE_READ_ON = '2026-11-13';
@@ -120,3 +127,31 @@ export function costOf(model: string, t: Tokens, date?: string): number | undefi
 export const cacheable = (model: string, date?: string): boolean => priceOf(model, date)?.storage !== undefined;
 
 export const usd = (v: number | undefined) => (v === undefined ? 'n.d.' : v < 0.01 ? `$${v.toFixed(4)}` : `$${v.toFixed(3)}`);
+
+/**
+ * Anthropic's API list (T391, read on ANTHROPIC_PRICES_READ_ON): what a call of the Sculptor answered on Claude's subscription would cost if the game
+ * paid the API. `write` is a prompt token written to the 5-minute cache (1.25 × input); one written for an hour costs 2 × input. Not in `priceOf`:
+ * the game calls no Claude model through an API, and a ledger that records one says its dollars (`CallRecord.usd`, `anthropicCost`).
+ */
+export const ANTHROPIC_PRICES_READ_ON = '2026-11-14';
+export const ANTHROPIC_PRICES: Record<string, Price & { write: number }> = {
+  'claude-sonnet-5-5': { input: 2.0, output: 10.0, cached: 0.2, write: 2.5 },
+  'claude-opus-5-5': { input: 4.0, output: 20.0, cached: 0.2, write: 5.0 },
+  'claude-fable-5-1': { input: 10.0, output: 50.0, cached: 0.25, write: 12.5 },
+};
+
+/** The tokens of a call of Claude as its usage says them: input not cached, written to the cache (5 minutes, an hour), read from it, output (thinking included). */
+export interface AnthropicTokens {
+  input: number;
+  written5m?: number;
+  written1h?: number;
+  read?: number;
+  output: number;
+}
+
+/** USD at Anthropic's API list for a call of Claude; undefined for a model off the list. */
+export function anthropicCost(model: string, t: AnthropicTokens): number | undefined {
+  const p = ANTHROPIC_PRICES[model];
+  if (!p) return undefined;
+  return (t.input * p.input + (t.written5m ?? 0) * p.write + (t.written1h ?? 0) * 2 * p.input + (t.read ?? 0) * p.cached + t.output * p.output) / 1e6;
+}

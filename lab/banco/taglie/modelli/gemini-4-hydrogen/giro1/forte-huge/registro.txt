@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-hydrogen)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2); porta: 10 × 30 voxel (0,50 × 1,50 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: porta: 10 × 30 voxel (0,50 × 1,50 caselle), una porta è almeno 11 × 30 a ogni taglia
+[sculptor] errore: «forte»: nessun programma valido

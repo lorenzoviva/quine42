@@ -1,0 +1,176 @@
+<!-- fattoria: sculpted by gemini-4-hydrogen (step 9), the Artist's vote 6/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwsdravpcQgxtm" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Corpo principale della casa intorno a H: 4 dietro (+1 a caso), 5 davanti (+1 a caso), 5 ai lati -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="4"/>
+      <prl in="E/h" out="h/*" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="5"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="5"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Zona scala interna lungo il muro posteriore -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+
+      <!-- Ala della stalla su un lato scelto a caso (sinistra o destra) -->
+      <one in="Ew/Ew/Ew/Ew/Ew" out="**/**/a*/**/**" symmetry="(x)" steps="1"/>
+      <all in="aE" out="*a" symmetry="(x)" steps="3"/>
+      <all in="E/a" out="a/*" symmetry="()" steps="2"/>
+      <all in="a/E" out="*/a" symmetry="()" steps="3"/>
+      <all in="aE" out="*v"/>
+      <all in="vE/*v" out="*v/**"/>
+
+      <!-- Portico davanti alla casa -->
+      <all in="w/E" out="*/p" symmetry="()" steps="2"/>
+
+      <!-- Strada dritta dal centro verso il bordo anteriore, larga 3 celle -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="d/p" out="*/r" symmetry="()" steps="1"/>
+      <all in="r/p" out="*/r" symmetry="()" steps="1"/>
+      <all in="r/E" out="*/r" symmetry="()"/>
+      <prl in="m" out="h"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="rp" out="*r" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+
+      <!-- Aia intorno a casa, stalla e portico -->
+      <all in="[wvp]E" out="*c" steps="2"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Pozzo nell'aia se entra un 5x5 -->
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+
+      <!-- Orto/frutteto sul retro o ai lati dove c'e' spazio, poi recinzione -->
+      <all in="[wc]EEEEEEE" out="*gggg***" steps="1"/>
+      <all in="gE/*g" out="*g/**"/>
+      <all in="gE" out="*x"/>
+
+      <!-- Alberi sparsi dove c'e' terreno libero 5x5 -->
+      <one in="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE" out="*****/*****/**t**/*****/*****"/>
+    </sequence>
+    <map scale="5 5 1" values="BEfFWULRKTk#90#91#92OoNAVYPyJCrqugXblhwsdavpQt" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="H" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+      <rule in="p" out="ppppp/ppppp/ppppp/ppppp/ppppp"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="c" out="CCCCC/CCCCC/CCCCC/CCCCC/CCCCC"/>
+      <rule in="Q" out="qqqqq/quuuq/quuuq/quuuq/qqqqq"/>
+      <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="x" out="XXXXX/XXXXX/XXXXX/XXXXX/XXXXX"/>
+      <rule in="t" out="EEEEE/EEbEE/EbbbE/EEbEE/EEEEE"/>
+      <sequence symmetry="(xy)">
+        <union symbol="+" values="W"/>
+        <union symbol="=" values="fF"/>
+
+        <!-- B. Altezze: casa a due piani -->
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <prl in="w" out="R"/>
+
+        <!-- Porta frontale: O alla base, W sopra -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d W" steps="63"/>
+        <prl in="d" out="R"/>
+
+        <!-- Pavimenti e solaio della casa + zona scala -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+
+        <!-- Stalla -->
+        <all in="B a" out="a A" steps="1"/>
+        <all in="B a" out="a B" steps="39"/>
+        <prl in="a" out="Y"/>
+        <all in="B v" out="v V" steps="40"/>
+        <prl in="v" out="Y"/>
+
+        <!-- Portico: pavimento C e tetto J a quota 34 -->
+        <all in="B p" out="y C" steps="1"/>
+        <all in="B y" out="y B" steps="33"/>
+        <prl in="y" out="J"/>
+
+        <!-- Pozzo, staccionata, alberi -->
+        <all in="B q" out="q q" steps="6"/>
+        <all in="B u" out="u u" steps="4"/>
+        <all in="B X" out="X X" steps="6"/>
+        <all in="B b" out="b b" steps="15"/>
+        <all in="B b" out="l *" steps="1"/>
+        <all in="lB" out="*l" steps="3"/>
+        <all in="B l" out="l *" steps="3"/>
+
+        <!-- C. Scala e porta -->
+        <import file="part-stair"/>
+        <import file="part-door"/>
+
+        <!-- Finestre nelle fasce U -->
+        <one steps="14">
+          <rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU"
+                out="*L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L"/>
+        </one>
+        <all in="LUUUUB" out="*LLLL*"/>
+        <prl in="U" out="W"/>
+
+        <!-- Tetti a padiglione -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="12" symmetry="()"/>
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="10"/>
+
+        <all in="YB" out="*Y" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **Y**/**Y**/YYYYY/**Y**/**Y**" out="*****/*****/**Y**/*****/***** *****/*****/*****/*****/*****" steps="8" symmetry="()"/>
+
+        <!-- Pulizia -->
+        <prl in="T" out="B"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="B" value="000000" hidden="True"/>
+  <color symbol="E" value="6A7F4A" name="prato" hidden="True"/>
+  <color symbol="f" value="C8B89A" name="pavimento" area="house"/>
+  <color symbol="F" value="B8A686" name="solaio" area="house"/>
+  <color symbol="W" value="D8CFC0" name="intonaco" area="house"/>
+  <color symbol="L" value="8EB8C9" name="vetro" area="house"/>
+  <color symbol="R" value="A64B38" name="tetto" area="house"/>
+  <color symbol="K" value="7A7268" name="camino" area="house"/>
+  <color symbol="k" value="9C7A54" name="gradini" area="house"/>
+  <color symbol="O" value="6E472B" name="porta" area="house"/>
+  <color symbol="o" value="52341E" name="assi della porta" area="house"/>
+  <color symbol="N" value="4A3B32" name="stipite" area="house"/>
+  <color symbol="#20" value="000000" hidden="True"/>
+  <color symbol="#21" value="000000" hidden="True"/>
+  <color symbol="A" value="B59E7A" name="pavimento della stalla" area="barn"/>
+  <color symbol="V" value="7A5C43" name="muro della stalla" area="barn"/>
+  <color symbol="Y" value="8C4A32" name="tetto della stalla" area="barn"/>
+  <color symbol="J" value="8B6B4D" name="tettoia" area="porch"/>
+  <color symbol="r" value="9C8E78" name="strada" area="yard"/>
+  <color symbol="C" value="B0A184" name="aia" area="yard"/>
+  <color symbol="q" value="6E757A" name="pietra del pozzo" area="yard"/>
+  <color symbol="u" value="4A7B8C" name="acqua del pozzo" area="yard"/>
+  <color symbol="g" value="5A6E3A" name="orto" area="garden"/>
+  <color symbol="X" value="6E5239" name="staccionata" area="garden"/>
+  <color symbol="b" value="5C4028" name="tronco" area="garden"/>
+  <color symbol="l" value="3E5C2E" name="chioma" area="garden"/>
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>

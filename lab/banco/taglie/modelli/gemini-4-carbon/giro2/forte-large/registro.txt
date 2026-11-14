@@ -1,0 +1,2 @@
+[sculptor] propone: «forte» (struttura grande, gemini-4-carbon)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 11 × 9 voxel (0,55 × 0,45 caselle), una porta è almeno 11 × 30 a ogni taglia
