@@ -5588,7 +5588,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T394`; poi l'orchestratore integra T394 e `integra T367` toglie worktree e branch di T367. Sicurezza: quella di T367 (V-043), nessuna superficie nuova oltre quella.
 - Esito: T367 unito nel base: registro e catalogo con tutte le voci (V-041 a T375, V-042 a T377, il pacchetto del self-hosting a V-043 in registro, catalogo, test, ADR, AGENTS.md e docs), ADR di T367 rinumerato a ADR-0203 (file, titolo, indice, rimandi), guida e `immagine.mjs` aggiornati alla 0.7.12 (la versione non cambia: T367 non la toccava), censimento del glossario rigenerato; typecheck, build e suite intera verdi; non provati il container vero, il tunnel, Railway e Fly (come in T367); sicurezza: quella di T367 (V-043), nessuna superficie nuova.
 
-### T395 · Lo Scultore delle strutture su Argon a ogni taglia (D58) e il prezzo di 3.5 Flash a 1,50/9,00 (D55.3) — `da fare`
+### T395 · Lo Scultore delle strutture su Argon a ogni taglia (D58) e il prezzo di 3.5 Flash a 1,50/9,00 (D55.3) — `fatto` (`8e7cb808`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
 - Step: 30
 - Contesto: l'autore (14/11) ha detto sì a D58 e a D55.3. D58: fino al giro di Claude (T392) lo Scultore del gioco scrive le strutture di ogni taglia con Gemini 4 Argon, perché a Grande 3.8 Flash è riuscito 0 volte su 6 (T355) e Argon 6 su 8 a 0,37 $ per struttura riuscita (T391); provvisorio: la raccomandazione finale la dà T392, la riparazione del prompt verrà quando T392 avrà dato i numeri. D55.3: nella stima della lobby e nel listino il prezzo di Gemini 3.5 Flash (l'Artista) passa da 0,75/3,75 a 1,50/9,00 $ per milione di token (prezzo detto da OpenRouter il 14/11). `dossier T355`, `dossier T391`; `src/kernel/agents/sculptor.ts` (`DEFAULT_SCULPTORS`: `structure` oggi `gemini-3.8-flash`, `important` Argon con `importanteFino` 2026-12-01), `src/kernel/ai/prices.ts`, `src/kernel/coefficients.ts` (stima oraria).
@@ -5596,6 +5596,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni.
 - Browser: no (la lobby mostra solo il numero nuovo della stima: dirlo nell'esito).
 - Quando è fatto: commit su `task/T395`, esito con la stima oraria prima e dopo. Sicurezza: nessuna superficie nuova.
+- Esito: lo Scultore scrive le strutture di ogni taglia con Argon (anche dopo `importanteFino`, al prezzo raddoppiato; nessun universo ha uno `structure` scritto); 3.5 Flash a 1,50/9,00 (cache 0,15, OpenRouter 14/11); stima oraria con dettaglio pieno da 1,4232 a 1,5645 $ (Low Detail ferma a 0,5823), la lobby mostra solo il numero nuovo; kernel 0.7.13; la stima non conta ancora Argon sulle strutture, perché calcola figure e strutture col modello delle figure; sicurezza: nessuna superficie nuova.
 
 ### T396 · Il testo del viandante a Jev solo via OpenRouter con la ritenzione zero (D55.2) — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
