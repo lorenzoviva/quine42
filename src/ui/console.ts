@@ -31,7 +31,7 @@ export class Console {
   onGenesis?: () => void;
   /** The master of a multiplayer game (T42d): a copy of the universe with another master, under a new name. */
   onClone?: (nome: string, master: string, titolari: 'restano' | 'master') => Promise<string | null>;
-  /** The master of a multiplayer game (ADR-0193): the guests and the invites of a private universe, through the store. */
+  /** The master of a multiplayer game (ADR-0194): the guests and the invites of a private universe, through the store. */
   guests?: (method: 'GET' | 'POST' | 'DELETE', body?: Record<string, unknown>) => Promise<GuestsView>;
   /** The universe's name on the server, for the invite's link: the folder's, which universe.json may not say. */
   universeName?: string;
@@ -281,7 +281,7 @@ export class Console {
   private guestArming?: { id: string; until: number };
 
   /**
-   * The private universe (ADR-0193): whether it is, its guests and its invites, and the gestures that change them. In a private universe only the
+   * The private universe (ADR-0194): whether it is, its guests and its invites, and the gestures that change them. In a private universe only the
    * master and the guests come in; to anyone else it does not exist. An invite's link is shown once: the server keeps only its fingerprint.
    */
   private guestRows(): HTMLElement[] {

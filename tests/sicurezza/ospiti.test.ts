@@ -1,4 +1,4 @@
-// V-038 (T366, ADR-0193): the private universe and the invite verifier. A server without Firebase (`QUINE_ACCOUNT=inviti`) where the owner makes a
+// V-038 (T366, ADR-0194): the private universe and the invite verifier. A server without Firebase (`QUINE_ACCOUNT=inviti`) where the owner makes a
 // universe private and invites two people: a third account is refused, an invite has one use, a guest taken out is gone (their identity too),
 // the list and every read say nothing of a private universe to a stranger, the tokens are nowhere on the disk, the world never learns who the guests are.
 

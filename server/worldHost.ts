@@ -72,7 +72,7 @@ export interface WorldOptions {
   typesafe?: typeof fetch;
   verify?: Verifier;
   masterUid?: string;
-  /** Whether the universe is private, asked at every start (ADR-0193): the world gets the answer, never the guests. */
+  /** Whether the universe is private, asked at every start (ADR-0194): the world gets the answer, never the guests. */
   private?: () => boolean;
   ledgerFile?: string;
   grantCap?: number;

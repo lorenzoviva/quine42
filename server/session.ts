@@ -2,7 +2,7 @@
 // is a client of that universe; the first one starts its world, in a process of its own (server/worldHost.ts, T127, ADR-0110), which then
 // keeps running watched from here. Each message is one JSON object of src/session/protocol.ts. `?offline` starts a world with the local models.
 // `npm run dev` and the production server (server/production.ts, T133): the preview server does not start worlds. With accounts (server/account.ts, T44b) every world verifies, through
-// this process, the token of who comes in. A private universe (ADR-0193, server/campaign.ts) lets in only its master and its guests, here in `admit`,
+// this process, the token of who comes in. A private universe (ADR-0194, server/campaign.ts) lets in only its master and its guests, here in `admit`,
 // before its world starts; the world is told only that it is private, never who the guests are.
 
 import { isGenerating, worldLit, worldOut } from './generation';
@@ -92,7 +92,7 @@ export interface EntrySaid {
   id?: unknown;
 }
 
-/** Who is in the world of each universe now, as `admit` let them in: the `guests` route closes a guest who is taken out (ADR-0193). */
+/** Who is in the world of each universe now, as `admit` let them in: the `guests` route closes a guest who is taken out (ADR-0194). */
 const inWorlds = new Map<string, Map<object, { id: string; refuse(reason: string): void }>>();
 
 /** The wanderers in the world of a universe now. */
@@ -175,7 +175,7 @@ export function wsLink(ws: Pick<WebSocket, 'on' | 'send' | 'close' | 'readyState
 
 /**
  * GET /api/session: how many, not who (the master has the list of the players through their own session). A private universe is never in it
- * (ADR-0193): its master and its guests find it in the store's list, which knows who asks.
+ * (ADR-0194): its master and its guests find it in the store's list, which knows who asks.
  */
 export function sessionList(accounts?: AccountSettings, campaigns?: CampaignArchive): Connect.NextHandleFunction {
   return async (req, res, next) => {
@@ -225,7 +225,7 @@ export interface SessionOptions {
   program: () => Promise<string>;
   /** What is refused before the rules of `gate`: the production server's origins (T133). */
   guard?: (req: IncomingMessage) => string | undefined;
-  /** The private universes' guests (ADR-0193): those beside the universes of `credits` unless said. */
+  /** The private universes' guests (ADR-0194): those beside the universes of `credits` unless said. */
   campaigns?: CampaignArchive;
 }
 
@@ -348,7 +348,7 @@ export function attachSessions(httpServer: HttpServer, o: SessionOptions): { sto
       const first = !activeHosts.has(name);
       if (first && !(starts.take(`account:${uid}`) && starts.take(`indirizzo:${address}`))) return no('troppi mondi avviati di recente: riprova tra poco');
     }
-    // A private universe (ADR-0193): its master and its guests, nobody else, and the world does not start for them. The same words for any stranger.
+    // A private universe (ADR-0194): its master and its guests, nobody else, and the world does not start for them. The same words for any stranger.
     if (campaigns) {
       const game = campaigns.gameOf(name);
       if (!campaigns.lets(name, { ...who, local: false }, game, accounts?.masterUid)) return no('questo mondo è su invito');

@@ -82,7 +82,7 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   const decisions = !opts.offline && opts.typesafe ? new JevDecisionModels({ fetchImpl: opts.typesafe, endpoint: 'typesafe:' }) : undefined;
   const runner = new TurnRunner();
   const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, decisions, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap, platformFee: opts.platformFee });
-  // Private or not, by value (ADR-0193): an anonymous guest is the master's to pay for only in a private universe (ADR-0188).
+  // Private or not, by value (ADR-0194): an anonymous guest is the master's to pay for only in a private universe (ADR-0188).
   kernel.privateWorld = opts.private === true;
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).

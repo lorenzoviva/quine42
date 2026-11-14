@@ -1,5 +1,5 @@
 // A file of the server beside the universes, written whole and atomically (a temporary file, fsync, rename) under a lock file that holds
-// across processes: the guests of a private universe and the identities of the invite verifier (T366, ADR-0193). The same steps as the
+// across processes: the guests of a private universe and the identities of the invite verifier (T366, ADR-0194). The same steps as the
 // ledger's and the handmade cards' archive (ADR-0104, ADR-0161), for files that are not money: a command of the owner (`npm run inviti`)
 // may write the identities while the server runs.
 

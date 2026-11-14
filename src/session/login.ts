@@ -1,7 +1,7 @@
 // Signing in to a multiplayer game (T44b, ADR-0081): Firebase Auth in the browser, with Google or anonymously. The server
 // says how (GET /api/account, server/account.ts); without settings there are no accounts and the tab's id goes as before.
 // Firebase is loaded only when it is needed: a game alone never fetches it. Its web settings are public; the token is
-// what proves the account, and the server verifies it. A server without Firebase verifies the identities born of its invites (ADR-0193): the
+// what proves the account, and the server verifies it. A server without Firebase verifies the identities born of its invites (ADR-0194): the
 // browser keeps its token (`localStorage`), renews it at every sign-in, and gets it the first time from an invite (`#invito=` in the link) or
 // from the owner's link (`#accesso=`, `npm run inviti`). Both stay in the fragment, which the browser never sends: no server's log sees them.
 
@@ -64,7 +64,7 @@ export async function signIn(config: AccountConfig, choose: ChooseHow = chooseHo
   return (await firebaseSignIn(config, choose))!;
 }
 
-/** Who this browser is already signed in as, without asking: undefined if nobody (ADR-0193: a guest's page reads a private universe as them). */
+/** Who this browser is already signed in as, without asking: undefined if nobody (ADR-0194: a guest's page reads a private universe as them). */
 export async function signedIn(config: AccountConfig): Promise<SignedIn | undefined> {
   if (config.invites) return storedIdentity() || location.hash.includes('accesso=') ? signInWithIdentity() : undefined;
   return firebaseSignIn(config, undefined);
@@ -113,7 +113,7 @@ async function firebaseSignIn(config: AccountConfig, choose: ChooseHow | undefin
   };
 }
 
-// --- The invite verifier (ADR-0193) -------------------------------------------------------------------------------------------------------------
+// --- The invite verifier (ADR-0194) -------------------------------------------------------------------------------------------------------------
 
 const IDENTITY_KEY = 'quine:identity';
 /** What a page says when this server lets in only who has an invite, and this browser has no identity. */
@@ -198,7 +198,7 @@ async function signInWithIdentity(): Promise<SignedIn> {
 export type Redeemed = { ok: true; account?: SignedIn } | { ok: false; reason: string };
 
 /**
- * An invite to a private universe (ADR-0193), used by who opens its link: signed in first (Firebase, or the identity this browser keeps), the
+ * An invite to a private universe (ADR-0194), used by who opens its link: signed in first (Firebase, or the identity this browser keeps), the
  * server makes them a guest. On a server of invites a browser with no identity gets one from the invite itself. Without accounts (only this
  * machine) the wanderer is the one the page says (`headers`).
  */

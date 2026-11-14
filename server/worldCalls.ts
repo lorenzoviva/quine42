@@ -16,7 +16,7 @@ export interface WorldCalls {
   view(universo: string, id: string, account: AccountKind): Later<WandererView>;
   /** The profile kept, repaired, and the wanderer as they are now; undefined if it could not be kept. */
   keepProfile(universo: string, id: string, account: AccountKind, profilo: unknown): Later<{ profilo: unknown; riparato: string[]; viandante: WandererView } | undefined>;
-  /** Whether the universe is private now (ADR-0193): the master's purse answers for an anonymous guest only then (ADR-0188). */
+  /** Whether the universe is private now (ADR-0194): the master's purse answers for an anonymous guest only then (ADR-0188). */
   setPrivate(value: boolean): Later<boolean>;
 }
 

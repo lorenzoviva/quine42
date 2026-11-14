@@ -53,7 +53,7 @@ export interface BringContext {
   archive: HandmadeArchive;
   /** Who asks, for `mine` of the handmade cards. */
   asker?: string;
-  /** Whether the asker may see another universe: a private one only its master and its guests (ADR-0193); none said, every one. */
+  /** Whether the asker may see another universe: a private one only its master and its guests (ADR-0194); none said, every one. */
   sees?: (universe: string) => boolean;
 }
 
@@ -119,7 +119,7 @@ export async function kinOf(name: string, o: Omit<BringContext, 'master' | 'chec
   const kin: KinUniverse[] = [];
   if (mine.size) {
     for (const other of await universes(o.baseDir, name)) {
-      // A private universe is not there for who is not its master nor a guest: neither its name nor its cards (ADR-0193).
+      // A private universe is not there for who is not its master nor a guest: neither its name nor its cards (ADR-0194).
       if (o.sees && !o.sees(other)) continue;
       const root = path.join(o.baseDir, other);
       if (!(await rootsOf(root, GIT)).some((r) => mine.has(r))) continue;

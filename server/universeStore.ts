@@ -25,7 +25,7 @@
 //
 // Who may do what (T120, ADR-0102, server/access.ts): a game alone is of whoever is on this machine, a multiplayer game of its master and
 // its world. Everyone else reads only `publicFiles` and writes nothing. In a multiplayer game balances are written only by the world.
-// A private universe (ADR-0193) is not there for who is neither its master nor a guest: every route answers as for a name that does not exist,
+// A private universe (ADR-0194) is not there for who is neither its master nor a guest: every route answers as for a name that does not exist,
 // and the list does not say it.
 
 import type { Connect, Plugin } from 'vite';
@@ -290,7 +290,7 @@ export interface UniverseStoreOptions {
   checker?: ProgramChecker;
   /** The labs (`site/beta.json → laboratori`): closed, no handmade card comes into a universe (ADR-0161). */
   labs?: () => boolean;
-  /** The private universes' guests and invites (ADR-0193): those beside `baseDir` unless said. */
+  /** The private universes' guests and invites (ADR-0194): those beside `baseDir` unless said. */
   campaigns?: CampaignArchive;
   /** What the `guests` route does to the worlds: who is in one, closing a guest's sockets, telling a world it is private (server/session.ts). */
   worlds?: Pick<GuestsContext, 'inWorld' | 'expel' | 'tellWorld'>;
@@ -326,7 +326,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const m = /^\/api\/universe\/([^/]+)(?:\/(create|commit|checkout|reset|map|maps|branch|merge|clone|carte|kin|bring|guests)(?:\/([^/]+))?)?$/.exec(url);
     if (url === '/api/universe' || url === '/api/universe/') {
       const es = await fs.readdir(baseDir, { withFileTypes: true }).catch(() => []);
-      // A private universe only for its master and its guests, and to them said so (`invite`): to anyone else it does not exist (ADR-0193).
+      // A private universe only for its master and its guests, and to them said so (`invite`): to anyone else it does not exist (ADR-0194).
       const names = es.filter((e) => e.isDirectory() && !e.name.startsWith('.')).map((e) => e.name);
       const seen = names.filter((n) => !UNIVERSE_NAME_RE.test(n) || campaigns.lets(n, who, undefined, masterUid));
       const invite = seen.filter((n) => UNIVERSE_NAME_RE.test(n) && campaigns.isPrivate(n));
@@ -344,7 +344,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     // knowing its guests (rule 8g).
     if (who.server && (op === 'clone' || op === 'kin' || op === 'bring' || op === 'guests')) return notYours();
     const unknown = () => send(res, 404, { error: 'universo sconosciuto' });
-    // A private universe for who is neither its master nor a guest: as a name that does not exist, whatever is asked (no enumeration, ADR-0193).
+    // A private universe for who is neither its master nor a guest: as a name that does not exist, whatever is asked (no enumeration, ADR-0194).
     // Only an invite to it gets past (`redeem`, in the route below); making one with its name stays refused, as for every name that is taken.
     const hidden = op !== 'create' && !mine && !campaigns.lets(name, who, game, masterUid);
     /** Whether the caller may see another universe of the folder (the cards a master brings from it, ADR-0170). */

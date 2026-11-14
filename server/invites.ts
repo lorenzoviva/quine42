@@ -1,4 +1,4 @@
-// The invite verifier (ADR-0184 §8, T366, ADR-0193): who a wanderer is on a server without Firebase (`QUINE_ACCOUNT=inviti`). The owner of the
+// The invite verifier (ADR-0184 §8, T366, ADR-0194): who a wanderer is on a server without Firebase (`QUINE_ACCOUNT=inviti`). The owner of the
 // server has the secret (`QUINE_SEGRETO_INVITI`); an identity is a token signed with it (HMAC-SHA256), with an expiry, for an id that only this
 // verifier makes: `inv-` and random letters, which no account of Firebase can be (`refusedUid`), so a universe that changes verifier never mixes
 // the two. Every identity is written in a book beside the universes (`universes/.identities.json`, what made it and whether it is revoked): a

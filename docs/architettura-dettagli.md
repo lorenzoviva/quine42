@@ -701,7 +701,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   zone, testi tagliati) e ne fa il corpo con i suoi file. Gli individui (ADR-0181, T353): `EntityView.worn` porta zona → id dei capi di
   un'entità con segni nell'inventario (`wornItems`; dell'inventario nient'altro), il client sottile lo mette nel componente `worn` dello
   specchio (`readWorn`), che `wornBy` legge dopo `remote.worn` e prima dei segni; se ne va con il prossimo `update` senza segni.
-- **L'universo privato** (ADR-0193, T366; ADR-0188 punto 2): gli ospiti e gli inviti di un universo di molti stanno fuori dall'universo,
+- **L'universo privato** (ADR-0194, T366; ADR-0188 punto 2): gli ospiti e gli inviti di un universo di molti stanno fuori dall'universo,
   `universes/.campaign/<nome>.json` (`CampaignArchive` in `server/campaign.ts`: `private`, `guests` per id, `invites` per impronta SHA-256 del
   token), scritto intero sotto un lucchetto fra processi (`server/lockedFile.ts`); un file illeggibile vale privato e senza ospiti; un universo
   che nasce con un nome e un clone nascono pubblici. **Chi lo vede** (`letsIn`): il mondo, il master (mai un anonimo), gli ospiti (anche anonimi).
@@ -735,7 +735,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   (pannello `P`, «Lega a Google») smette di essere anonimo (`setAnonymous`), tiene lo stesso uid e viandante e può ricevere crediti.
   `QUINE_MASTER` (uid) è il master `me` degli universi fatti prima degli account. Senza `FIREBASE_PROJECT_ID` (sviluppo, test) vale l'id di
   oggi; in singola nessun account.
-- **Il verificatore a inviti** (ADR-0193, T366; ADR-0184 § 8): per chi ospita senza Firebase, `QUINE_ACCOUNT=inviti` e `QUINE_SEGRETO_INVITI`
+- **Il verificatore a inviti** (ADR-0194, T366; ADR-0184 § 8): per chi ospita senza Firebase, `QUINE_ACCOUNT=inviti` e `QUINE_SEGRETO_INVITI`
   (almeno 32 caratteri; il server di produzione non parte senza, né con Firebase insieme). Un'identità è un token `qid1.<{id, exp}>.<firma>`
   (HMAC-SHA256 con una chiave derivata dal segreto, confronto a tempo costante; `signIdentity`, `readIdentity` in `server/invites.ts`) per un id
   `inv-` e 16 lettere casuali, che il verificatore di Firebase rifiuta come uid (`refusedUid`): un account e un invito non condividono mai un

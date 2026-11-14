@@ -49,7 +49,7 @@ export const WANDERER_MODEL = 'viandante';
 export interface WandererView {
   id: string;
   universo: string;
-  /** How they are signed in: Google, anonymous, an identity born of an invite (ADR-0193), or no accounts on this server. */
+  /** How they are signed in: Google, anonymous, an identity born of an invite (ADR-0194), or no accounts on this server. */
   account: 'google' | 'anonimo' | 'invito' | 'locale';
   anonimo: boolean;
   profilo?: Profile;
@@ -135,7 +135,7 @@ export function keepProfileInFiles(files: FileMap, id: string, raw: unknown): { 
   return { repair, file, text };
 }
 
-/** Whether a private universe is there for who asks (ADR-0193): its master and its guests; the account's own wanderer, as `whoAsks` says it. */
+/** Whether a private universe is there for who asks (ADR-0194): its master and its guests; the account's own wanderer, as `whoAsks` says it. */
 export function seesUniverse(opts: { accounts?: AccountSettings; universesDir: string; campaigns?: CampaignArchive }, universo: string, who: { id: string; account: WandererView['account'] }): boolean {
   const campaigns = opts.campaigns ?? CampaignArchive.of(opts.universesDir);
   return campaigns.lets(universo, { local: who.account === 'locale', id: who.id, anonimo: who.account === 'anonimo' }, undefined, opts.accounts?.masterUid);
@@ -186,7 +186,7 @@ function git(cwd: string, args: string[]): Promise<string> {
 export interface WandererRouteOptions {
   accounts?: AccountSettings;
   universesDir: string;
-  /** The private universes' guests (ADR-0193): those beside `universesDir` unless said. */
+  /** The private universes' guests (ADR-0194): those beside `universesDir` unless said. */
   campaigns?: CampaignArchive;
   getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }
@@ -235,7 +235,7 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), body.viandante ?? params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
-        // A private universe is not there for who is neither its master nor a guest (ADR-0193): as a name that does not exist.
+        // A private universe is not there for who is neither its master nor a guest (ADR-0194): as a name that does not exist.
         if (!seesUniverse(opts, universo, who)) return send(res, 404, { ok: false, motivo: `universo sconosciuto: ${universo}` });
         const root = path.join(opts.universesDir, universo);
         const active = await opts.getActiveWorld?.(universo);

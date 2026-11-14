@@ -1,4 +1,4 @@
-// `npm run inviti`: the owner of a server without Firebase (QUINE_ACCOUNT=inviti, ADR-0193), on the server's machine. It reads the `.env` (only
+// `npm run inviti`: the owner of a server without Firebase (QUINE_ACCOUNT=inviti, ADR-0194), on the server's machine. It reads the `.env` (only
 // QUINE_SEGRETO_INVITI, QUINE_UNIVERSI and QUINE_ORIGINI) and writes only the book of the identities beside the universes, under its lock: the
 // server may be running. Never prints the secret; a token it prints only for `padrone`, in the fragment of a link, which no server's log sees.
 //

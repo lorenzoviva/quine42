@@ -55,7 +55,7 @@ export function originsOf(text: string | undefined): { origins: string[]; bad: n
 export function productionProblems(env: Record<string, string | undefined>): string[] {
   const has = (k: string) => !!env[k]?.trim();
   const problems: string[] = [];
-  // Who verifies identities (ADR-0193): Firebase, or for who hosts their friends without it the invite verifier, said and with its secret.
+  // Who verifies identities (ADR-0194): Firebase, or for who hosts their friends without it the invite verifier, said and with its secret.
   const mode = accountModeOf(env);
   if (!mode) problems.push(`QUINE_ACCOUNT: o niente (Firebase) o «${ACCOUNT_MODES.invites}», scritto così`);
   if (mode === 'invites') {
@@ -264,7 +264,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const { origins } = originsOf(o.env.QUINE_ORIGINI);
   const accounts = o.accounts ?? accountSettings(o.env, o.universesDir);
   const universesDir = o.universesDir;
-  // The private universes' guests (ADR-0193): the store's route writes them, the sockets and the reads ask them.
+  // The private universes' guests (ADR-0194): the store's route writes them, the sockets and the reads ask them.
   const campaigns = CampaignArchive.of(universesDir);
   const internal = newSecret();
   const hops = proxyHops(o.env.QUINE_PROXY_FIDATI) ?? 0;

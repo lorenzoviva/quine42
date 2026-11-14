@@ -259,7 +259,7 @@ export async function resolveFrom(raw: unknown, universesDir: string, own: Handm
   const { universe, model } = said;
   if (!UNIVERSE_NAME_RE.test(universe) || !MODEL_RE.test(model)) return { status: 400, refused: 'from: universo o modello non valido' };
   const root = path.join(universesDir, universe);
-  // A private universe is not there for who is neither its master nor a guest (ADR-0193): not even whether it has a model.
+  // A private universe is not there for who is neither its master nor a guest (ADR-0194): not even whether it has a model.
   if (!existsSync(path.join(root, '.git')) || !sees(universe)) return { status: 404, refused: `from: universo sconosciuto: ${universe}` };
   const files = await modelFiles(root, model);
   const xml = files[`${MODELS_DIR}${model}.xml`];

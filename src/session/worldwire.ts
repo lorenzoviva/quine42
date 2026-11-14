@@ -23,7 +23,7 @@ export interface WorldOpen {
   grantCap?: number;
   /** A commit to go back to before opening: the world kept dying on what came after. */
   restore?: string;
-  /** The universe is private (ADR-0193): by value, the world never reads who its guests are. */
+  /** The universe is private (ADR-0194): by value, the world never reads who its guests are. */
   private?: boolean;
 }
 

@@ -154,7 +154,7 @@ riempitivo e trattenuta), T376 (individui e trame), T377 (la campagna nel sito).
 
 ## Applicazione del punto 2 (T366, kernel 0.7.4)
 
-In [ADR-0193](0193-l-universo-privato-e-il-verificatore-a-inviti.md), insieme al verificatore a inviti di ADR-0184 (D54.8). Due cambi rispetto al
+In [ADR-0194](0194-l-universo-privato-e-il-verificatore-a-inviti.md), insieme al verificatore a inviti di ADR-0184 (D54.8). Due cambi rispetto al
 punto 2: l'invito si usa con la rotta `guests` (`redeem`) **prima** di leggere l'universo, non nel `join` (la pagina legge l'universo prima di
 entrare, e a un estraneo non esiste); il link lo porta nel frammento (`#invito=`), che non arriva a nessun server. Diventando privato, chi è nel
 mondo resta fra gli ospiti. `privateWorld` arriva al mondo per valore (`WorldOpen.private`, `setPrivate`). La superficie nuova è la V-038.

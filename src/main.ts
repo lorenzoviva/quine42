@@ -136,7 +136,7 @@ async function main() {
   // universe: the site's links say it, the way back from a payment too (T133). What it may read and write the server decides.
   const other = params.get('universo');
   const name = other && /^[a-z0-9][a-z0-9-]{0,40}$/.test(other) ? other : readConfig(bundledFiles).config.name;
-  // An invite to a private universe (ADR-0193): taken off the address at once, so that it stays in no history.
+  // An invite to a private universe (ADR-0194): taken off the address at once, so that it stays in no history.
   const invite = takeFromAddress('invito');
   const client = await UniverseClient.connect(name);
   if (client) loading.textContent = `apertura dell'universo «${name}»…`;
@@ -459,7 +459,7 @@ async function main() {
     const signed = account;
     if (signed) client.renewAuth = async () => ({ Authorization: `Bearer ${await signed.freshToken()}` });
     tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
-    // The private universe (ADR-0193): guests and invites, through the store's route, as the master.
+    // The private universe (ADR-0194): guests and invites, through the store's route, as the master.
     tools.konsole.guests = (method, body) => client.guests(method, body);
     tools.konsole.universeName = client.name;
   }

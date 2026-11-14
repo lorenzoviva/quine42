@@ -1,4 +1,4 @@
-// The private universe (ADR-0188 point 2, T366, ADR-0193): who may come into a universe of many, outside the universe like the balances
+// The private universe (ADR-0188 point 2, T366, ADR-0194): who may come into a universe of many, outside the universe like the balances
 // (`universes/.campaign/<nome>.json`, ADR-0104), so that no clone, export, brought card, rollback, Lua, Council or branch reaches it, and the world
 // never reads it (rule 8g). The guests by wanderer id; the invites as SHA-256 of random tokens, with an expiry and the uses left. Only the master
 // writes it, through the store's `guests` route:
@@ -214,7 +214,7 @@ export class CampaignArchive {
 /** Whether a caller is among a universe's guests. */
 export const guestOf = (who: Pick<Caller, 'id'>, c: Campaign): boolean => !!who.id && Object.hasOwn(c.guests, who.id);
 
-/** Whether a universe is there for this caller: its world and its master always; a private one for its guests only (ADR-0193). */
+/** Whether a universe is there for this caller: its world and its master always; a private one for its guests only (ADR-0194). */
 export function letsIn(who: Caller, game: Game, c: Campaign, masterUid?: string): boolean {
   if (owns(who, game, masterUid)) return true;
   return !c.private || guestOf(who, c);

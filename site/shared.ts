@@ -125,7 +125,7 @@ export async function pageLogin(content: HTMLElement): Promise<Who | undefined> 
   try {
     return { signed: await signIn(config, chooseOnPage(content)) };
   } catch (e) {
-    // A server of invites (ADR-0193) without an identity in this browser: what to do is ask the master for a link.
+    // A server of invites (ADR-0194) without an identity in this browser: what to do is ask the master for a link.
     alertBox('error', 'ZAP!', String((e as Error)?.message ?? '').includes(NEEDS_INVITE) ? `${(e as Error).message}.` : 'L’accesso non è riuscito: ricarica la pagina e riprova.');
     return undefined;
   }

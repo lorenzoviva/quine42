@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
   const env = loadEnv(mode, process.cwd(), '');
   const universesDir = path.resolve(process.cwd(), 'universes');
-  // Accounts (T44b): on only with FIREBASE_PROJECT_ID, or with the invites' (QUINE_ACCOUNT=inviti, ADR-0193); the browser asks /api/account how to sign in.
+  // Accounts (T44b): on only with FIREBASE_PROJECT_ID, or with the invites' (QUINE_ACCOUNT=inviti, ADR-0194); the browser asks /api/account how to sign in.
   const accounts = accountSettings(env, universesDir);
   // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
   const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });

@@ -373,7 +373,7 @@ export interface UniverseClientOptions {
 }
 
 /** Client of the universe store (server/universeStore.ts): the browser's, or the session server's with an absolute `base` (T38). */
-/** A private universe as its master reads it (ADR-0193, server/campaign.ts): the guests, the invites still good by their names; `token` only once, when an invite is made. */
+/** A private universe as its master reads it (ADR-0194, server/campaign.ts): the guests, the invites still good by their names; `token` only once, when an invite is made. */
 export interface GuestsView {
   ok?: boolean;
   private: boolean;
@@ -675,7 +675,7 @@ export class UniverseClient implements UniverseBackend {
   }
 
   /**
-   * The guests and the invites of this universe (ADR-0193): only its master. `GET` reads them; `POST` makes it private or public, adds a guest,
+   * The guests and the invites of this universe (ADR-0194): only its master. `GET` reads them; `POST` makes it private or public, adds a guest,
    * makes an invite (its token in the answer, once); `DELETE` takes a guest out or revokes an invite. Throws with the store's reason.
    */
   async guests(method: 'GET' | 'POST' | 'DELETE', body?: Record<string, unknown>): Promise<GuestsView> {

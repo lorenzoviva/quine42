@@ -6,7 +6,7 @@
 // FIREBASE_AUTH_EMULATOR_HOST (the Auth emulator, e.g. localhost:9099), QUINE_MASTER (the uid of the account that is
 // the master `io` of the universes made before accounts). Verifying needs no service account key: only the project.
 // Without Firebase, a server that hosts its own friends verifies invites instead (`QUINE_ACCOUNT=inviti` and `QUINE_SEGRETO_INVITI`,
-// server/invites.ts, ADR-0193): an identity is a token signed by the server's secret, born of an invite; `POST /api/account` renews it.
+// server/invites.ts, ADR-0194): an identity is a token signed by the server's secret, born of an invite; `POST /api/account` renews it.
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
@@ -18,11 +18,11 @@ export interface AccountSettings {
   config: AccountConfig;
   verify?: Verifier;
   masterUid?: string;
-  /** The invite verifier's identities (ADR-0193): only on a server without Firebase that says so. */
+  /** The invite verifier's identities (ADR-0194): only on a server without Firebase that says so. */
   invites?: InviteIdentities;
 }
 
-/** What `QUINE_ACCOUNT` may say: nothing (Firebase, if it is configured) or `inviti`, the invite verifier (ADR-0193). */
+/** What `QUINE_ACCOUNT` may say: nothing (Firebase, if it is configured) or `inviti`, the invite verifier (ADR-0194). */
 export const ACCOUNT_MODES = { invites: 'inviti' } as const;
 
 /** Which verifier the environment asks for: `firebase` (or none, when Firebase is not configured), `invites`, or undefined for a value that is neither. */
@@ -64,7 +64,7 @@ export function accountSettings(env: Record<string, string | undefined>, univers
     })();
     try {
       const t = await (await auth).verifyIdToken(token);
-      // An uid shaped like an invite's identity is no account here: the two verifiers never share a wanderer (ADR-0193).
+      // An uid shaped like an invite's identity is no account here: the two verifiers never share a wanderer (ADR-0194).
       if (refusedUid(t.uid)) return undefined;
       // Of Google's name only the first word: the wanderer's name is theirs to choose (the profile, T44a).
       const name = typeof t.name === 'string' ? t.name.trim().split(/\s+/)[0] : undefined;
@@ -86,7 +86,7 @@ export function anonymousToken(f: { sign_in_provider?: string; identities?: Reco
 }
 
 /**
- * GET /api/account: what the browser needs to sign in, or {} when this server has no accounts. POST, with the invite verifier (ADR-0193): an identity
+ * GET /api/account: what the browser needs to sign in, or {} when this server has no accounts. POST, with the invite verifier (ADR-0194): an identity
  * whose token is still good gets one that lasts longer (`{ token }`); anything else is 401.
  */
 export function accountHandler(settings: AccountSettings) {

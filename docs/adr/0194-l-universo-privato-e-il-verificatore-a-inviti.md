@@ -1,4 +1,4 @@
-# ADR-0193 — L'universo privato e il verificatore a inviti: ospiti e inviti fuori dall'universo, identità firmate per chi ospita senza Firebase
+# ADR-0194 — L'universo privato e il verificatore a inviti: ospiti e inviti fuori dall'universo, identità firmate per chi ospita senza Firebase
 
 Data: 2026-11-14 · Stato: **accettato** (T366, step 43; applica ADR-0188 punto 2 e ADR-0184 punto 8, D52.7 e D54.7-8) · Riferimenti:
 [`docs/design/campagna-master.md`](../design/campagna-master.md) § 2 e § 7, [`docs/design/open-beta.md`](../design/open-beta.md) § 2.4 e § 5,
