@@ -1299,6 +1299,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/kernel.ts`
 - **Da non usare**: nessuno
 
+### Gioco al tocco
+- **Inglese**: `TouchControls`, `SceneGestures`, `stickAxes`, `axesKeys`, `pressKey`, `pinchDistance`
+- **Definizione**: lo strato del gioco per chi gioca col dito (telefono, tablet): la levetta tiene le direzioni di WASD, i pulsanti premono i tasti del pannello dei controlli, le dita sulla scena fanno ciò che fanno i tasti del mouse e la rotella; si accende con un puntatore `touch`, mai col mouse (ADR-0198).
+- **Dove vive**: `src/ui/touch.ts`, `src/ui/gestures.ts`, `src/render/camera.ts`
+- **Da non usare**: `joystick` (nel codice: è la levetta, `stick`), `mobile` (per lo strato: il tocco non è il telefono, anche un portatile ha lo schermo che si tocca)
+
 ### Ramo del master
 - **Inglese**: `branch`, `branchKernel`, `publish`
 - **Definizione**: ciò che il master ha cambiato e i giocatori non vedono finché non pubblica.

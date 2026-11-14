@@ -31,6 +31,7 @@ import { Sfx } from './audio/sfx';
 import { readPrograms, SoundDirector, type SoundCue } from './audio/director';
 import { SoundRenders } from './audio/renders';
 import { bindSoundMenu } from './ui/soundmenu';
+import { TouchControls } from './ui/touch';
 import { dayPhase } from './kernel/npc/model';
 import { keepsFormsOnDisk } from './render/forms';
 import { $ } from './ui/dom';
@@ -306,9 +307,19 @@ async function main() {
     });
   }
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());
+  // The game by touch (T387): the stick, the fingers on the scene, the keys as buttons; only with a finger.
+  const touch = new TouchControls({
+    kernel,
+    renderer,
+    canvas: $<HTMLCanvasElement>('#world'),
+    covered: () => !kernel.input.enabled || !$('#help').hidden,
+    beyond: () => !!tools && (dev || kernel.exitedOnce),
+  });
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
   $<HTMLCanvasElement>('#world').addEventListener('contextmenu', (e) => {
     e.preventDefault();
+    // A finger's long press: the touch controls have already opened it.
+    if (touch.ownsMouse(e)) return;
     const r = renderer.toReal(e.offsetX, e.offsetY);
     kernel.contextAt(r.x, r.y);
   });
@@ -318,7 +329,8 @@ async function main() {
     renderer.fitView();
   };
   $<HTMLCanvasElement>('#world').addEventListener('mousedown', (e) => {
-    // A left click in the studio: a showcase or its arrows (T21).
+    // A left click in the studio: a showcase or its arrows (T21). A finger's tap has already done it.
+    if (touch.ownsMouse(e)) return;
     if (e.button === 0) {
       const r = renderer.toReal(e.offsetX, e.offsetY);
       kernel.clickStudio(r.x, r.y);
@@ -468,6 +480,8 @@ async function main() {
   kernel.input.attach(window);
   kernel.input.onAny = unlockSound;
   window.addEventListener('pointerdown', unlockSound);
+  // A finger unlocks the sound when it lifts: its pointerdown is not a gesture that lets a page play.
+  window.addEventListener('pointerup', unlockSound);
   const intro = $('#intro');
   const help = $('#help');
   const helpBeyond = $('#help-beyond');
@@ -666,6 +680,7 @@ async function main() {
     thin?.frame(elapsed);
     renderer.render(elapsed);
     hud.update(elapsed);
+    touch.update(now);
     updateSound(now);
     requestAnimationFrame(frame);
   };

@@ -884,7 +884,22 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   tutte le direzioni; un'unità = una casella, kernel (x, y) = three.js (x, z). La simulazione (chunk, cose, rune) è in coordinate del
   tappeto e si disegna spostata del suo scorrimento; viandante, corona e studio in coordinate reali; quando la corona si
   vede, nulla della simulazione si disegna oltre il cerchio (un taglio nello shader). Testi, fumetti, «E», passaggio del
-  mouse e glitch su uno strato 2D sopra. Il tasto destro sceglie la casella con un raggio sul terreno.
+  mouse e glitch su uno strato 2D sopra. Il tasto destro sceglie la casella con un raggio sul terreno. I limiti dello zoom sono uno, per la
+  rotella e per il pizzico: `ZOOM`, `zoomDistance`, `pinchDistance` in `src/render/camera.ts`.
+- **Il gioco al tocco** (ADR-0198, T387): uno strato solo col dito (`TouchControls`, `src/ui/touch.ts`; la classe `touch` sulla radice),
+  acceso da un puntatore `touch` o da un puntatore principale `coarse`, spento dal primo clic di un mouse: su un desktop niente cambia. La
+  **levetta** in basso a sinistra tiene le direzioni di WASD (`Input.setHeld`; `stickAxes`, `axesKeys` in `src/ui/gestures.ts`: una delle
+  otto direzioni dei tasti, la zona morta `STICK.dead`), quindi in multigiocatore partono gli stessi `keys`. I **pulsanti** in basso a destra
+  premono i tasti (`pressKey`: `keydown` e `keyup` sul `body`, come un tasto con niente a fuoco): E, salta, T (magia), I (la borsa) sempre in
+  vista (`TOUCH_MAIN`), gli altri del pannello dei controlli nel menu ⋯ (`TOUCH_MORE`; G e F2 solo oltre il bordo o allo sviluppatore); con una
+  finestra aperta (`input.enabled` falso o l'aiuto) resta solo ✕, cioè Esc; la hotbar si tocca come `1`–`6`. **Le dita sulla scena**
+  (`SceneGestures`, puro): un tocco breve è il clic sinistro (`clickStudio`) e per 2,5 s mostra ciò che il mouse direbbe lì (`renderer.mouse`),
+  un tocco lungo (`TOUCH.longPress`, 500 ms) il destro (`contextAt`), un dito che si sposta oltre `TOUCH.slop` (10 px) il tasto centrale
+  trascinato (l'orbita), due dita la rotella (`Renderer.zoomTo`); il `pointerdown` del dito è cancellato, e l'eco del mouse (il menu del tocco
+  lungo di Chrome, un clic tardo) la riconosce `ownsMouse`. Sopra la scena `touch-action: none`, altrove `manipulation`; nel `viewport`
+  `interactive-widget=resizes-content` e, dove il browser non rimpicciolisce la pagina, `--keyboard` dal `visualViewport`: scrivendo (`typing`)
+  lo strato si toglie e chat e «Altro…» stanno sopra la tastiera. Restano del mouse il trascinare nell'inventario, l'editor e la console.
+  Catture in `docs/catture/T387/`.
 - **La GPU** (T330): ogni `THREE.WebGLRenderer` del gioco, del laboratorio e del sito nasce da `makeRenderer` (`src/render/gpu.ts`), che chiede `powerPreference: 'high-performance'` (`GPU_PREFERENCE`): su un portatile con due GPU il browser prende la dedicata. La GPU in uso (`gpuName`, da `WEBGL_debug_renderer_info` se il browser la dà) è in console come `window.gpu` e in una riga `[gpu]` all'avvio; resta nel client. `tests/gpu.test.ts` legge i sorgenti: nessun `new WebGLRenderer(` fuori dall'aiuto.
 - **Il glitch dei guasti** (T316, WCAG 2.3.1): `src/render/glitch.ts` è un piano dell'orologio, non del frame (`glitchPlan(t, intensità, fermo)`, puro): niente lampi né inversioni a pieno schermo, strappi e blocchi di rumore stretti che restano `HOLD` (0,4 s: meno di 3 cambi al secondo), glifi che vivono 1,6-2,8 s e appaiono e spariscono sfumando, l'intensità che sale in circa un secondo (`GLITCH_EASE`); la crepa rara del mondo sano è un arco di 0,8 s (`crackLevel`). Con `prefers-reduced-motion` restano solo scanline, tinta e fantasma, fermi; il riquadro dei guasti respira piano (`faultpulse`). `tests/glitch-safe.test.ts` lo misura con un orologio finto.
 - **Bozze di prova**: `kernel.sampleDrafts()` (una boscosa, una aperta, una con acqua, scelte in modo deterministico) è dove il
@@ -1196,6 +1211,11 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
   `k.council.say(agente, tipo, testo, a, compito)` scrive nel registro, `k.faults.raise(chiave, messaggio)` apre un guasto.
 - **Guardare**: lo screenshot dello strumento del browser; la camera gira con i tasti `,` `.` mandati alla pagina (o trascinando col
   tasto centrale), la rotellina fa lo zoom. Errori: i messaggi della console della pagina.
+- **Al tocco** (T387): nella scheda, `PointerEvent` con `pointerType: 'touch'` sulla scena (`#world`) o sulla levetta (`#touch .stick`)
+  dalla console, i pulsanti con `.click()`; la pagina non si apre in un iframe (`frame-ancestors 'none'`) e la finestra massimizzata non si
+  stringe, quindi la disposizione a 844 × 390 si guarda in un Chrome headless con `Emulation.setDeviceMetricsOverride` (`mobile: true`),
+  `Emulation.setTouchEmulationEnabled` e tocchi veri (`Input.dispatchTouchEvent`), con l'aiuto di `tools/vesti/cdp.mjs`. Sul telefono vero:
+  `npx vite preview --host --port <n> --strictPort` e, dal telefono sulla stessa rete, `http://<ip del computer>:<n>/?skip`.
 - **Alla fine**: chiudi la scheda e ferma la preview.
 
 <a id="costi"></a>

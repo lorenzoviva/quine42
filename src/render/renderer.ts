@@ -18,6 +18,7 @@ import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
 import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
+import { ZOOM, wheelFactor, zoomDistance } from './camera';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
@@ -206,12 +207,15 @@ export class Renderer {
     }
   }
 
-  /** Zoom with mouse wheel: within [2.5, 15] in simulation; up to 45 in god mode / corona. */
+  /** Zoom with the mouse wheel: within [2.5, 15] in simulation; up to 45 in god mode / corona (`ZOOM`, src/render/camera.ts). */
   zoom(deltaY: number): void {
-    const factor = deltaY > 0 ? 1.12 : 0.89;
-    const maxDist = this.canFreeOrbit() ? 45 : 15;
-    const minDist = 2.5;
-    this.distance = THREE.MathUtils.clamp(this.distance * factor, minDist, maxDist);
+    this.distance = zoomDistance(this.distance, wheelFactor(deltaY), this.canFreeOrbit());
+    this.fitView();
+  }
+
+  /** The camera at a distance, within the wheel's limits: a pinch of two fingers (T387). */
+  zoomTo(distance: number): void {
+    this.distance = zoomDistance(distance, 1, this.canFreeOrbit());
     this.fitView();
   }
 
@@ -338,8 +342,8 @@ export class Renderer {
 
     // In simulation without god mode: restore pitch to 3/4 (PITCH) and clamp distance to 15
     if (!this.canFreeOrbit()) {
-      if (this.distance > 15) {
-        this.distance = Math.max(15, this.distance - dt * 20);
+      if (this.distance > ZOOM.max) {
+        this.distance = Math.max(ZOOM.max, this.distance - dt * 20);
         this.fitView();
       }
       if (Math.abs(this.pitch - PITCH) > 0.001) {
