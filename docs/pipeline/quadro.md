@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 14/11/2026, epoca 393 (claude). Crediti: vedi `stato`.
+Aggiornato il 14/11/2026, epoca 394 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -23,7 +23,7 @@ Aggiornato il 14/11/2026, epoca 393 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **In corso:** T374 (claude). **Pronti:** T379 → T380, T378 (claude); T362, T370, T366 (fable, fermo: settimana Fable esaurita fino al reset 19/11 16:00 CET; claude non regge altri task, esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
+0. **In corso:** T379 (claude, integra T372 a 0.7.1). **Da integrare:** T374 finito e verificato nel browser (direttive `campaign.md`, ADR-0191, V-036, kernel 0.7.1): si integra dopo T379; se va in conflitto (versione → 0.7.2, V-036 → V-037) nasce «Integrare T374». **Pronti:** T380 (dopo T379), T378 (claude); T362, T370, T366 (fable, fermo: settimana Fable esaurita fino al reset 19/11 16:00 CET; claude non regge altri task, esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -38,5 +38,5 @@ Aggiornato il 14/11/2026, epoca 393 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **394 (claude):** T374 finito e verificato; aspetta T379 per l'integrazione.
 - **393 (claude):** T372 finito, `integra` in conflitto sulla versione → T379 (integrazione, 0.7.1) e T380 (browser).
-- **392 (claude):** integrato T310b (ADR-0189 → 0190); Fable fermo fino al 19/11, i suoi task restano lì.
