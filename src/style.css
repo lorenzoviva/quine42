@@ -553,3 +553,71 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #inventory .head, #chat .head, #profile .head { background: var(--comic-ink); border-bottom: 3px solid var(--neon-pink); }
 #inventory .title, #chat .title, #profile .title { color: var(--neon-yellow); font: 400 var(--text-21)/var(--leading-tight) var(--font-display); letter-spacing: 0.06em; }
 #chat .close, #profile .close { background: var(--neon-pink); color: #fff; box-shadow: 2px 2px 0 var(--neon-yellow); font-size: var(--text-18); padding: 0 var(--space-8); }
+
+/* --- The game by touch (T387): only with a finger (html.touch, src/ui/touch.ts), never with the mouse --- */
+/* Over the scene the page neither zooms nor scrolls: the fingers are the camera's. Elsewhere no double-tap zoom. */
+body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#world { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#touch { display: none; }
+.touch #touch {
+  display: block; position: fixed; inset: 0; z-index: 31; pointer-events: none;
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+#touch > * { pointer-events: auto; }
+/* The stick, at the bottom left: a ring and the knob under the thumb. */
+#touch .stick {
+  position: absolute; left: var(--space-21); bottom: var(--space-21); width: var(--measure-123); height: var(--measure-123); border-radius: 50%;
+  background: rgba(7, 4, 13, 0.35); border: 3px solid rgba(0, 240, 255, 0.6); box-shadow: 3px 3px 0 var(--neon-pink);
+}
+#touch .stick.held { border-color: var(--neon-yellow); }
+#touch .knob {
+  position: absolute; left: 50%; top: 50%; width: var(--measure-47); height: var(--measure-47); margin: calc(var(--measure-47) / -2) 0 0 calc(var(--measure-47) / -2);
+  border-radius: 50%; background: var(--neon-cyan); border: var(--border-ink-thick); opacity: 0.85; pointer-events: none;
+}
+/* The keys, at the bottom right: E the biggest in the corner, the others around it, ⋯ for the rest. */
+#touch .pad { position: absolute; right: var(--space-21); bottom: var(--space-21); width: var(--measure-144); height: 204px; pointer-events: none; }
+#touch .pad button, #touch .close {
+  position: absolute; pointer-events: auto; width: var(--measure-55); height: var(--measure-55); border-radius: 50%; padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+  background: rgba(19, 10, 36, 0.82); border: var(--border-ink-thick); box-shadow: 3px 3px 0 var(--neon-cyan);
+}
+#touch .pad button b, #touch .close b { font: 400 var(--text-21)/1 var(--font-display); color: var(--neon-yellow); }
+#touch .pad button small, #touch .close small { font: var(--text-8)/1 var(--font-arcade); text-transform: uppercase; margin-top: var(--space-2); color: var(--comic-paper); }
+#touch .key-keye { right: 0; bottom: 0; width: var(--measure-76); height: var(--measure-76); box-shadow: 3px 3px 0 var(--neon-pink); }
+#touch .key-keye b { font-size: var(--text-29); }
+#touch .key-space { right: var(--measure-89); bottom: 0; }
+#touch .key-keyt { right: var(--measure-76); bottom: var(--measure-76); }
+#touch .key-keyi { right: var(--space-8); bottom: var(--measure-89); }
+#touch .more { right: var(--space-13); bottom: 157px; width: var(--measure-47); height: var(--measure-47); }
+/* The menu of the other keys: left of the pad (on a phone held upright, above it). */
+#touch .menu {
+  position: absolute; right: calc(var(--space-21) + var(--measure-144) + var(--space-13)); bottom: var(--space-21); max-height: calc(100% - var(--space-34));
+  overflow: auto; display: grid; grid-template-columns: repeat(2, auto); gap: var(--space-5); padding: var(--space-8);
+  background: var(--panel); border: var(--border-ink-thick); box-shadow: var(--shadow-hard-cyan);
+}
+#touch .menu[hidden], #touch .menu button[hidden] { display: none; }
+#touch .menu button { text-align: left; white-space: nowrap; font-size: var(--text-13); padding: var(--space-5) var(--space-8); }
+/* A window open: only «chiudi» (Esc), where E was. */
+#touch .close { display: none; right: var(--space-21); bottom: var(--space-21); width: var(--measure-76); height: var(--measure-76); box-shadow: 3px 3px 0 var(--neon-pink); }
+#touch.covered .stick, #touch.covered .pad, #touch.covered .menu { display: none; }
+#touch.covered .close { display: flex; }
+/* Writing: the keyboard on the screen has the bottom; the field stays above it (--keyboard: what it hides where the page does not shrink). */
+.touch.typing #touch { display: none; }
+.touch.typing #chat { bottom: calc(var(--space-8) + var(--keyboard, 0px)); max-height: calc(100% - var(--space-21) - var(--keyboard, 0px)); }
+.touch.typing #actions { top: auto; bottom: calc(var(--space-8) + var(--keyboard, 0px)); max-height: calc(100% - var(--space-21) - var(--keyboard, 0px)); overflow: auto; }
+/* The HUD makes room: no legend of the keys, the hotbar between the stick and the keys, and it is touched (1–6). */
+.touch #handbar .keys { display: none; }
+.touch #handbar { left: calc(var(--space-21) + var(--measure-123) + var(--space-13)); right: calc(var(--space-21) + var(--measure-144) + var(--space-13)); }
+.touch #hotbar { pointer-events: auto; }
+.touch #messages { bottom: calc(var(--space-21) + var(--measure-123) + var(--space-13)); }
+/* The Council's registry (the master's): at the top right, above the keys, its list short («Concilio» folds it); where the diary or the faults are, there is no room. */
+.touch #feed { top: var(--space-13); bottom: auto; }
+.touch #feed .list { max-height: calc(100vh - 204px - var(--measure-123)); overflow: hidden; }
+.touch #quests:not([hidden]) ~ #feed, .touch #faults:not([hidden]) ~ #feed { display: none; }
+li.touch-only { display: none; }
+.touch li.touch-only { display: list-item; }
+@media (orientation: portrait) {
+  .touch #handbar { left: var(--space-13); right: var(--space-13); bottom: calc(var(--space-21) + 204px + var(--space-13)); }
+  .touch #touch .menu { right: var(--space-21); bottom: calc(var(--space-21) + 204px + var(--space-13)); max-height: calc(100% - 204px - var(--space-55)); }
+  .touch #messages { bottom: calc(var(--space-21) + 204px + var(--space-13) + var(--measure-89)); }
+}
