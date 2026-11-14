@@ -90,6 +90,54 @@ export function walletNote(w: Pick<Wallet, 'anonimo' | 'multigiocatore' | 'maste
   return w.multigiocatore ? 'Si scala a ogni richiesta che fai al mondo.' : 'In questo universo giochi da solo: il saldo non si scala, serve quando l’universo è condiviso.';
 }
 
+/**
+ * The two sentences of the page that depend on who pays (T382): how the common spending goes, and what the spending table leaves out.
+ * Where the master pays (ADR-0188) nothing is split among those connected: the master pays everything, the others nothing.
+ */
+export function payerTexts(w: Pick<Wallet, 'multigiocatore' | 'masterPays' | 'master'>): { common: string; spendingHint: string } {
+  if (w.multigiocatore && w.masterPays)
+    return w.master
+      ? {
+          common: 'In questo universo paghi tu: le richieste degli altri viandanti e ciò che arricchisce il mondo di tutti si scalano dal tuo saldo.',
+          spendingHint: 'Gli ultimi 30 giorni, per le tue richieste. Ciò che hai pagato per gli altri viandanti e per il mondo è già nel saldo ed è a parte, in «Pagate per gli altri».',
+        }
+      : {
+          common: 'In questo universo paga il master: anche ciò che arricchisce il mondo di tutti è a suo carico.',
+          spendingHint: 'Gli ultimi 30 giorni, per le richieste a tuo carico. In questo universo paga il master: ciò che chiedi non si scala dal tuo saldo e non compare qui.',
+        };
+  return {
+    common: 'Ciò che arricchisce il mondo di tutti si divide in parti uguali tra chi è collegato.',
+    spendingHint: 'Gli ultimi 30 giorni, per le richieste a tuo carico. La tua parte delle spese comuni è già nel saldo ma non compare qui.',
+  };
+}
+
+/**
+ * The amounts of a table and of its total as the page writes them, so that the rows add up to what it says (T382). Every row is
+ * rounded to the cent (or to the hundredth of a cent if one is under a cent, which must not read as zero) by largest remainder, so
+ * that they add up to the rounded sum of the rows; the total is that plus, rounded, what the days not shown add.
+ */
+export function tableAmounts(values: number[], total: number): { rows: string[]; total: string } {
+  const clean = (n: number) => (Number.isFinite(n) && n > 0 ? n : 0);
+  const rows = values.map(clean);
+  const shown = rows.reduce((s, v) => s + v, 0);
+  const all = Math.max(clean(total), shown);
+  const digits = [...rows, all].some((v) => v > 0 && v < 0.01) ? 4 : 2;
+  const unit = 10 ** digits;
+  // A hair of tolerance: 0.29 * 100 is 28.999999999999996, which is 29 units.
+  const exact = rows.map((v) => v * unit);
+  const units = exact.map((x) => Math.floor(x + 1e-6));
+  let left = Math.round(shown * unit) - units.reduce((s, u) => s + u, 0);
+  const order = exact.map((x, i) => [x - units[i], i] as const).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  for (const [, i] of order) {
+    if (left <= 0) break;
+    units[i]++;
+    left--;
+  }
+  const rest = Math.round(Math.max(0, all - shown) * unit);
+  const money = (u: number) => `$${(u / unit).toFixed(digits)}`;
+  return { rows: units.map(money), total: money(units.reduce((s, u) => s + u, 0) + rest) };
+}
+
 /** Who the master paid for, as the table says it: `comune` is the world itself. */
 export const paidForName = (who: string): string => (who === 'comune' ? 'il mondo' : who);
 
@@ -220,23 +268,30 @@ class WalletPage {
   }
 
   private fillSpending(w: Wallet): void {
-    const rows = w.consumi.map((d) => {
+    const texts = payerTexts(w);
+    $('wallet-common').textContent = texts.common;
+    $('spending-hint').textContent = texts.spendingHint;
+    // The rows and the total rounded together, so that they add up (T382).
+    const spent = tableAmounts(w.consumi.map((d) => d.usd), w.totaleConsumi);
+    const rows = w.consumi.map((d, i) => {
       const tr = document.createElement('tr');
-      tr.append(cell(formatDay(d.giorno)), cell(String(d.chiamate)), cell(formatSpent(d.usd), 'text-yellow'));
+      tr.append(cell(formatDay(d.giorno)), cell(String(d.chiamate)), cell(spent.rows[i], 'text-yellow'));
       return tr;
     });
     $('spending-body').replaceChildren(...(rows.length ? rows : [emptyRow(3, 'Nessuna richiesta a tuo carico in questo universo.')]));
-    $('spending-total').textContent = formatSpent(w.totaleConsumi);
+    $('spending-total').textContent = spent.total;
     // Where the master paid for the others (T372): only in their wallet.
-    $('paid-for-panel').hidden = !w.paidFor?.length;
+    const paidFor = w.paidFor ?? [];
+    const paid = tableAmounts(paidFor.map((d) => d.usd), w.paidForTotal ?? 0);
+    $('paid-for-panel').hidden = !paidFor.length;
     $('paid-for-body').replaceChildren(
-      ...(w.paidFor ?? []).map((d) => {
+      ...paidFor.map((d, i) => {
         const tr = document.createElement('tr');
-        tr.append(cell(formatDay(d.day)), cell(paidForName(d.who)), cell(String(d.calls)), cell(formatSpent(d.usd), 'text-yellow'));
+        tr.append(cell(formatDay(d.day)), cell(paidForName(d.who)), cell(String(d.calls)), cell(paid.rows[i], 'text-yellow'));
         return tr;
       }),
     );
-    $('paid-for-total').textContent = formatSpent(w.paidForTotal ?? 0);
+    $('paid-for-total').textContent = paid.total;
   }
 
   /** The tier that matches the amount lights up; the button follows whether it can be paid. */

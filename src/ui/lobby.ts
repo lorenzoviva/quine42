@@ -249,7 +249,8 @@ export class LobbyScreen {
     };
     expenses.onchange = showExpenses;
     showExpenses();
-    const expensesRow = alone ? '' : el('div', { class: 'expenses-row' }, field('Chi paga la partita', expenses), expensesNote);
+    // In the same grid as the other selectors, so that it looks like them (T382).
+    const expensesRow = alone ? '' : el('div', { class: 'expenses-row' }, el('div', { class: 'settings-grid' }, field('Chi paga la partita', expenses)), expensesNote);
     /** What the lobby brings in: the knobs, and (not alone) who pays. */
     const readAll = (): LobbySettings => ({ ...read(), ...(alone ? {} : { game: { expenses: expenses.value as GameExpenses } }) });
     /** What the master found on opening, to send only what they changed. */

@@ -497,6 +497,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #lobby .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--measure-233), 1fr)); gap: var(--space-8) var(--space-13); font-size: var(--text-13); }
 #lobby .settings-grid label { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
 #lobby .settings-grid select, #lobby .settings-grid input[type='number'] { width: 100%; box-sizing: border-box; padding: var(--space-5) var(--space-8); font: inherit; min-width: 0; }
+#lobby .expenses-row { display: flex; flex-direction: column; gap: var(--space-3); }
 #lobby .settings-title { color: var(--gold); font-size: var(--text-13); margin-top: var(--space-5); }
 #lobby details summary { cursor: pointer; color: var(--fg); font-size: var(--text-13); margin-top: var(--space-5); }
 #lobby .locked-note { color: var(--gold); font-size: var(--text-13); }
