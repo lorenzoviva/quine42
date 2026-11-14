@@ -18,12 +18,12 @@ Aggiornato il 14/11/2026, epoca 392 (claude). Crediti: vedi `stato`.
 - **Modelli specializzati di Antigravity (autore, 13/11):** T360 integrato (`703c838c`, ADR-0187): provider `hydrogen` (Gemini 4 Hydrogen, conto `gemini`) e `orchestrator` (Orchestrator (Argon), conto `argon`), in prova a tetto 1, senza browser, non orchestrabili senza la casella; sforzo come suffisso `-high|-xhigh`, mai `--effort` su agy. Non misurati: contatori e rapporti 5h/settimana (prime righe di `consumi.jsonl`).
 - **Carte fatte a mano (step 41):** T293-T296 integrati (kernel 0.5.8).
 - **NPC coeso (step 39):** T327, T332 integrati (kernel 0.5.4) → T245g-i.
-- **Lingua interna (step 42):** T310b integrato il 14/11 (contratto 0.7.0, migrazione 0.6→0.7, ADR-0190 rinumerato da 0189): schemi del Concilio in inglese,  come id, dodici domini nuovi in ; Genesi offline e universo 0.1 migrato provati nel browser;  non lanciato.
+- **Lingua interna (step 42):** T310b integrato il 14/11 (contratto 0.7.0, migrazione 0.6→0.7, ADR-0190 rinumerato da 0189): schemi del Concilio in inglese, `Relation.kind` come id, dodici domini nuovi in `internalNames.ts`; Genesi offline e universo 0.1 migrato provati nel browser; `sicurezza:prove` non lanciato.
 - **Nodi MJ (step 30):** T333-T339 integrati (kernel 0.6.3, ADR-0171..0179).
 
 ## Pronti e priorità
 
-0. **In corso:** T372 (claude). **Pronti:** T374, T378 (claude); T362, T370, T366 (fable, fermo: settimana Fable esaurita fino al reset 19/11 16:00 CET; claude non regge altri task, esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355  fino al 15/11.
+0. **In corso:** T372 (claude). **Pronti:** T374, T378 (claude); T362, T370, T366 (fable, fermo: settimana Fable esaurita fino al reset 19/11 16:00 CET; claude non regge altri task, esaurimento previsto 15/11, quindi restano su fable); poi T373→T375→T377, T376; T363→T364/T367/T368, T365. T355 `in attesa` fino al 15/11.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 05:04 CET):** Claude settimana 46 %, 5h 46 %; Fable settimana 3 %, fermo fino al 19/11; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
@@ -39,4 +39,4 @@ Aggiornato il 14/11/2026, epoca 392 (claude). Crediti: vedi `stato`.
 ## Ultime 2 epoche
 
 - **392 (claude):** integrato T310b (ADR-0189 → 0190); Fable fermo fino al 19/11, i suoi task restano lì.
-- **390 (orchestrator):** attivato ; T310b sospeso al limite 5h e ripreso alle 04:01 UTC.
+- **390 (orchestrator):** attivato `orchestrabile.orchestrator`; T310b sospeso al limite 5h e ripreso alle 04:01 UTC.
