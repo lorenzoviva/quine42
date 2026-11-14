@@ -621,3 +621,94 @@ li.touch-only { display: none; }
   .touch #touch .menu { right: var(--space-21); bottom: calc(var(--space-21) + 204px + var(--space-13)); max-height: calc(100% - 204px - var(--space-55)); }
   .touch #messages { bottom: calc(var(--space-21) + 204px + var(--space-13) + var(--measure-89)); }
 }
+
+/* --- The HUD on a small screen (T388): «?» and its window, a compact HUD on a short screen, «gira il telefono» upright --- */
+/* «?», at the top right, everywhere: the window of the controls. What stands at the top right makes room for it. */
+#helpbtn {
+  position: absolute; top: var(--space-13); right: var(--space-13); width: var(--space-34); height: var(--space-34); padding: 0; pointer-events: auto;
+  font: 400 var(--text-21)/1 var(--font-display); color: var(--neon-yellow); border-radius: 50%; border: var(--border-ink-thick);
+}
+#quests, #faults, .touch #feed { right: calc(var(--space-13) + var(--space-34) + var(--space-8)); }
+#quests .h .n { display: none; color: var(--fg); font-size: var(--text-18); }
+#keyhelp {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30;
+  width: min(var(--measure-521), calc(100vw - var(--space-34))); max-height: calc(100% - var(--space-34)); overflow: auto;
+  display: flex; flex-direction: column; gap: var(--space-8); padding: 0 0 var(--space-13);
+  background: var(--window-veil), var(--halftone-cyan), var(--synth-panel); background-size: auto, 14px 14px, auto;
+  border: 4px solid var(--comic-ink); box-shadow: 8px 8px 0 var(--neon-cyan);
+}
+#keyhelp .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-5) var(--space-8) var(--space-5) var(--space-13); background: var(--comic-ink); border-bottom: 3px solid var(--neon-pink); }
+#keyhelp .title { color: var(--neon-yellow); font: 400 var(--text-21)/var(--leading-tight) var(--font-display); letter-spacing: 0.06em; }
+#keyhelp .close { background: var(--neon-pink); color: #fff; box-shadow: 2px 2px 0 var(--neon-yellow); font-size: var(--text-18); padding: 0 var(--space-8); }
+#keyhelp p { margin: 0 var(--space-13); color: var(--comic-paper); font-size: var(--text-13); }
+#keyhelp p b { color: var(--gold); font-weight: normal; }
+#keyhelp .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--measure-199), 1fr)); gap: var(--space-3) var(--space-13); margin: 0 var(--space-13); color: var(--comic-paper-dim); font: var(--text-18)/var(--leading-tight) var(--font-pixel); }
+#keyhelp .all { align-self: flex-start; margin: 0 var(--space-13); }
+#keyhelp .touch-only { display: none; }
+.touch #keyhelp .touch-only { display: block; }
+
+/* A short screen (a phone on its side, a low window): the legend of the keys goes into «?», the panels shrink and fold.
+   The threshold is COMPACT in src/ui/hud.ts. */
+@media (max-height: 520px) {
+  #handbar .keys { display: none; }
+  #topleft { max-width: 34vw; gap: var(--space-5); pointer-events: auto; cursor: pointer; }
+  #place { padding: var(--space-3) var(--space-8) var(--space-5); box-shadow: 3px 3px 0 var(--neon-pink); }
+  #place .name { font-size: var(--text-21); }
+  #place .descr { font-size: var(--text-11); margin-top: var(--space-2); }
+  #needs { gap: var(--space-2); padding: var(--space-3) var(--space-8); box-shadow: 3px 3px 0 var(--neon-cyan); }
+  #needs .need { font-size: var(--text-13); gap: var(--space-5); }
+  #needs .need .l { width: var(--measure-47); }
+  #needs .need .bar { width: var(--measure-55); height: var(--space-5); }
+  #paused { font-size: var(--text-11); padding: var(--space-3) var(--space-8); }
+  /* Folded (a touch opens and closes): the name of the place and the bars, without words. */
+  #topleft.folded #place .descr, #topleft.folded #needs .need .l { display: none; }
+  #quests { max-width: 26vw; font-size: var(--text-11); pointer-events: auto; cursor: pointer; padding: var(--space-3) var(--space-8); box-shadow: 3px 3px 0 var(--neon-yellow); }
+  #quests .h { font-size: var(--text-18); margin-bottom: var(--space-2); }
+  #quests .h .n { display: inline; }
+  #quests.folded .q { display: none; }
+  #quests.folded .h { margin-bottom: 0; }
+  #faults { width: 34vw; font-size: var(--text-11); padding: var(--space-5) var(--space-8); }
+  #faults .title { font-size: var(--text-18); }
+  #faults .fault:nth-child(n + 4) { display: none; }
+  /* What happens: at the top, in the middle, the last three; never over the stick or the keys. */
+  #messages, .touch #messages { top: var(--space-13); bottom: auto; left: 50%; transform: translateX(-50%); max-width: 30vw; align-items: center; gap: var(--space-5); }
+  #zone:not([hidden]) ~ #messages { top: calc(var(--space-13) + var(--space-34) + var(--space-5)); }
+  #messages .msg { font-size: var(--text-11); padding: var(--space-3) var(--space-8); }
+  #messages .msg.warn { font-size: var(--text-13); }
+  #messages .msg:nth-last-child(n + 4) { display: none; }
+  #dialog { bottom: var(--measure-123); width: min(var(--measure-521), 50vw); padding: var(--space-5) var(--space-8) var(--space-8); }
+  #dialog .speaker { font-size: var(--text-13); }
+  #dialog .text { font-size: var(--text-13); }
+  #hand { min-height: var(--space-21); padding: var(--space-3) var(--space-5); }
+  #hand .slot { padding: var(--space-2) var(--space-5); min-width: var(--space-21); }
+  #hand .slot b { font-size: var(--text-13); }
+  #hand .slot small { font-size: var(--text-8); }
+  #hand .cast { font-size: var(--text-11); }
+  #banner .title { font-size: var(--text-47); }
+  #banner .sub { margin-top: var(--space-8); font-size: var(--text-13); }
+}
+
+/* Upright on a phone (UPRIGHT_SMALL in src/ui/hud.ts, with fingers): all the screen asks to turn it; the world is not drawn behind. */
+#rotate {
+  position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-21);
+  padding: var(--space-21); text-align: center; touch-action: none;
+  background: var(--synth-backdrop); background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px, auto;
+}
+#rotate .phone {
+  width: var(--measure-55); height: var(--measure-89); border: 4px solid var(--neon-cyan); border-radius: var(--space-8); box-shadow: 4px 4px 0 var(--neon-pink);
+  display: flex; align-items: center; justify-content: center; color: var(--neon-yellow); font-size: var(--text-29);
+  animation: turnphone 2.4s ease-in-out infinite;
+}
+#rotate .title { font-size: var(--text-34); line-height: var(--leading-tight); transform: rotate(-2deg); }
+#rotate .sub { color: var(--comic-paper); font: var(--text-21)/var(--leading-tight) var(--font-pixel); }
+@keyframes turnphone { 0%, 25% { transform: rotate(0deg); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+@media (prefers-reduced-motion: reduce) { #rotate .phone { animation: none; transform: rotate(-90deg); } }
+/* The bag with fingers: «chiudi» stays above it, at the bottom right, and the window leaves it room on its left. */
+.touch #touch.covered { z-index: 36; }
+.touch #inventory { justify-content: flex-start; padding-left: var(--space-8); }
+.touch #inventory .window { width: min(calc(var(--measure-843) + var(--measure-47)), calc(100vw - var(--space-8) - var(--space-21) - var(--measure-76) - var(--space-13))); }
+@media (max-height: 520px) {
+  #inventory .head { padding: var(--space-5) var(--space-8); gap: var(--space-8); }
+  #inventory .body { padding: var(--space-8); gap: var(--space-8); }
+  #inventory .details .big { padding: var(--space-2); }
+}

@@ -8,6 +8,12 @@ import { $, el } from './dom';
 import { ofThe } from '../kernel/corona';
 import { runeGlyph } from '../kernel/runes';
 import { HELD_NOTICE, HELD_NOTICE_MASTER } from '../kernel/worldPace';
+import { pressKey } from './touch';
+
+/** A phone held upright (T388): the short side under this, with fingers, and the game asks to be turned. */
+export const UPRIGHT_SMALL = '(orientation: portrait) and (max-width: 600px)';
+/** A screen too short for the whole HUD (T388): a phone on its side, a low window. The same threshold is in src/style.css. */
+export const COMPACT = '(max-height: 520px)';
 
 /** Where icons come from: photographs of the items' models (src/render/thumbs.ts), set by main. */
 export const icons: { get?: (item: string) => Promise<string | undefined>; model?: (model: string, tint?: string, seed?: number) => Promise<string | undefined> } = {};
@@ -43,6 +49,12 @@ export class Hud {
   private lastHot = '';
   private lastFaults = '';
   private dialogTimer = 0;
+  /** The small window of the controls (T388), opened by «?». */
+  private keyHelp = el('div', { id: 'keyhelp', hidden: '', role: 'dialog', 'aria-label': 'comandi' });
+  private rotate = el('div', { id: 'rotate', hidden: '' });
+  private upright = typeof matchMedia === 'function' ? matchMedia(UPRIGHT_SMALL) : undefined;
+  /** Whether the screen asks to be turned: the world is not drawn behind it. */
+  rotating = false;
 
   constructor(
     private kernel: Kernel,
@@ -57,6 +69,69 @@ export class Hud {
     });
     kernel.bus.on('rollback', () => this.showBanner('ROLLBACK', "Il mondo è tornato all'ultimo stato valido.", 1800));
     kernel.bus.on('universe:reloaded', () => (this.lastHot = ''));
+    this.buildHelp();
+    this.buildRotate();
+    // On a short screen the corner of the place and the diary start folded: a touch opens them (only there, src/style.css).
+    for (const fold of [$('#topleft'), this.questsEl]) {
+      fold.classList.add('folded');
+      fold.addEventListener('click', () => fold.classList.toggle('folded'));
+    }
+  }
+
+  get keyHelpOpen(): boolean {
+    return !this.keyHelp.hidden;
+  }
+
+  toggleKeyHelp(open = this.keyHelp.hidden): void {
+    this.keyHelp.hidden = !open;
+    $('#helpbtn').classList.toggle('on', open);
+  }
+
+  /** «?» and its window: the legend of the keys (the same of the bottom row, which a short screen has not room for), what fingers do, the whole help. */
+  private buildHelp(): void {
+    const quiet = (b: HTMLElement) => {
+      // A button that takes no focus: Space stays the jump, not a click.
+      b.tabIndex = -1;
+      b.addEventListener('pointerdown', (e) => e.preventDefault());
+      return b;
+    };
+    const button = quiet(el('button', { id: 'helpbtn', type: 'button', 'aria-label': 'comandi', title: 'comandi' }, '?'));
+    button.addEventListener('click', () => this.toggleKeyHelp());
+    const close = quiet(el('button', { class: 'close', type: 'button', 'aria-label': 'chiudi' }, '✕'));
+    close.addEventListener('click', () => this.toggleKeyHelp(false));
+    const all = quiet(el('button', { class: 'all', type: 'button' }, "Tutto l'aiuto ", el('kbd', {}, 'H')));
+    all.addEventListener('click', () => {
+      this.toggleKeyHelp(false);
+      pressKey({ code: 'KeyH', key: 'h' });
+    });
+    const legend = document.querySelector('#handbar .keys');
+    const keys = el('div', { class: 'list' }, ...[...(legend?.children ?? [])].map((k) => k.cloneNode(true)));
+    this.keyHelp.append(
+      el('div', { class: 'head' }, el('span', { class: 'title' }, 'Comandi'), close),
+      el(
+        'p',
+        { class: 'touch-only' },
+        'Levetta: cammina. Un dito sulla scena gira la vista, due dita avvicinano. Tocco breve: guarda; tocco lungo: il menu del terreno. ',
+        el('b', {}, '⋯'),
+        ' gli altri comandi, ',
+        el('b', {}, '✕'),
+        ' chiude.',
+      ),
+      keys,
+      all,
+    );
+    $('#hud').append(button);
+    document.body.append(this.keyHelp);
+  }
+
+  /** Upright on a phone: a screen that asks to turn it, the world paused behind (T388). */
+  private buildRotate(): void {
+    this.rotate.append(
+      el('div', { class: 'phone', 'aria-hidden': 'true' }, el('span', {}, 'ᚱ')),
+      el('div', { class: 'title comic-title' }, 'Gira il telefono'),
+      el('div', { class: 'sub' }, 'Il mondo si guarda in orizzontale.'),
+    );
+    document.body.append(this.rotate);
   }
 
   message(text: string, tone: string = 'info'): void {
@@ -87,6 +162,11 @@ export class Hud {
 
   update(dt: number): void {
     const k = this.kernel;
+    const rotating = !!this.upright?.matches && document.documentElement.classList.contains('touch');
+    if (rotating !== this.rotating) {
+      this.rotating = rotating;
+      this.rotate.hidden = !rotating;
+    }
     if (this.dialogTimer > 0 && (this.dialogTimer -= dt) <= 0) this.hideDialog();
 
     const chunk = k.zone === 'corona' ? null : k.chunkHere();
@@ -158,7 +238,7 @@ export class Hud {
     if (qk !== this.lastQuests) {
       this.lastQuests = qk;
       this.questsEl.hidden = !qs.length;
-      this.questsEl.replaceChildren(el('div', { class: 'h' }, 'Missioni'), ...qs.map((q) => el('div', { class: 'q' }, el('b', {}, `${q.da}: `), q.obiettivo, el('span', {}, `«${q.testo}» — ${q.titolo}`))));
+      this.questsEl.replaceChildren(el('div', { class: 'h' }, 'Missioni', el('span', { class: 'n' }, ` ${qs.length}`)), ...qs.map((q) => el('div', { class: 'q' }, el('b', {}, `${q.da}: `), q.obiettivo, el('span', {}, `«${q.testo}» — ${q.titolo}`))));
     }
 
     const n = k.needs();

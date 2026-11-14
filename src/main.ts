@@ -312,7 +312,7 @@ async function main() {
     kernel,
     renderer,
     canvas: $<HTMLCanvasElement>('#world'),
-    covered: () => !kernel.input.enabled || !$('#help').hidden,
+    covered: () => !kernel.input.enabled || !$('#help').hidden || hud.keyHelpOpen,
     beyond: () => !!tools && (dev || kernel.exitedOnce),
   });
   // Right click on a tile near you: its context menu (with what stands on it, and "Altro…").
@@ -626,6 +626,7 @@ async function main() {
       case 'help':
         // What lies beyond the edge (the Council, the code) is told only to those who have been there.
         helpBeyond.hidden = !dev && !kernel.exitedOnce;
+        hud.toggleKeyHelp(false);
         help.hidden = !help.hidden;
         break;
       case 'console':
@@ -644,6 +645,7 @@ async function main() {
         else if (inventory.isOpen) inventory.close();
         else if (tools?.konsole.isOpen) tools.konsole.close();
         else if (!help.hidden) help.hidden = true;
+        else if (hud.keyHelpOpen) hud.toggleKeyHelp(false);
         else hud.hideDialog();
         syncFocus();
         break;
@@ -678,7 +680,8 @@ async function main() {
     }
     if (steps === 4) acc = 0;
     thin?.frame(elapsed);
-    renderer.render(elapsed);
+    // Upright on a phone the screen asks to be turned (T388): the world goes on, nothing is drawn behind it.
+    if (!hud.rotating) renderer.render(elapsed);
     hud.update(elapsed);
     touch.update(now);
     updateSound(now);
