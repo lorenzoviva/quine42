@@ -5405,3 +5405,21 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessun codice: typecheck con il suo turno.
 - Browser: non serve.
 - Quando è fatto: il piano dice la open beta, OpenRouter e la VPS, ha il § della voce dell'autore e le decisioni D35 aggiornate; commit su `task/T378`. Sicurezza: nessuna superficie nuova.
+
+### T379 · Integrare T372 nel base (conflitto di versione con T310b: kernel 0.7.1) — `da fare`
+- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
+- Step: 43
+- Contesto: `integra T372` (il master paga tutto, ADR-0188, V-036) ha trovato conflitti in `package.json`, `src/kernel/version.ts`, `universe/universe.json`: T372 era partito da 0.6.12 portandola a 0.6.13, mentre in `3d` è entrato T310b (contratto 0.7.0, migrazione 0.6 → 0.7, ADR-0190). Nasce da T372: `dossier T372`, `dossier T310b`.
+- Cosa fare: nel worktree `git merge task/T372`; risolvere portando il kernel a `0.7.1` in `src/kernel/version.ts` (`KERNEL_VERSION`), `package.json`, `package-lock.json` e `universe/universe.json`; aggiornare a `0.7.1` i riferimenti a `0.6.13` di T372 (ADR-0188, `docs/adr/README.md`, `docs/architettura-dettagli.md`, `AGENTS.md`), lasciando invariati gli ADR precedenti; controllare che i campi nuovi di T372 (`game.expenses`, `masterPaid`, `masterPays`, `paidFor`) siano inglesi e compatibili con la migrazione 0.6 → 0.7 e con `internalNames.ts`; typecheck, build e suite intera coi turni.
+- Test: suite intera, typecheck e build coi turni.
+- Browser: no (la verifica della lobby e del portafoglio è T380).
+- Quando è fatto: commit su `task/T379`, kernel 0.7.1; poi l'orchestratore integra T379 e `integra T372` toglie worktree e branch di T372. Sicurezza: nessuna superficie nuova.
+
+### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `da fare` (dipende da T379)
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 43
+- Contesto: T372 (`dossier T372`) non ha visto nel browser la lobby (`game.expenses`, il testo che dice chi paga, la modale dei crediti) né la pagina dei crediti del sito con «Pagate per gli altri»: solo test con finto DOM.
+- Cosa fare: sul base dopo T379, build e preview (`#convalida-browser`); da master in una partita di molti (`?viandante=`, due schede) scegli nella lobby che paga il master, entra, verifica che la scelta resti ferma a partita in corso e che le spese vadano al master (`window.quine.ai.usage`, `world/usage.json → masterPaid`) in offline; apri la pagina dei crediti del sito e guarda «Pagate per gli altri» e il portafoglio di un mondo acceso. Catture. Un difetto trovato si scrive nell'esito come task da aprire; non correggere codice oltre un refuso evidente.
+- Test: nessuno nuovo.
+- Browser: sì; se non si può, `BROWSER: da verificare`.
+- Quando è fatto: esito con ciò che si vede e le catture; commit su `task/T380` se ci sono file. Sicurezza: nessuna superficie nuova.
