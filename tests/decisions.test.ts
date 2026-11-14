@@ -10,6 +10,7 @@ import { costOf, DECISION_PRICES, priceOf } from '../src/kernel/ai/prices';
 import { JEV_MAX_BODY, JEV_MODEL, JEV_MODELS, JevDecisionModels, readJevAnswers, ruleDecisions, settleDecisions, type DecisionCall, type DecisionQuestion } from '../src/kernel/ai/decisions';
 import { CENSUS, decisionKnob, FULL_DETAIL } from '../src/kernel/coefficients';
 import type { CallRecord } from '../src/kernel/ai/usage';
+import { OPENROUTER_JEV } from '../src/kernel/ai/openrouter';
 
 const QUESTIONS: Record<string, DecisionQuestion> = {
   model: { type: 'choice', instructions: 'Which model of the library fits?', criteria: { barrel: 'a wooden barrel', crate: 'a crate', none: 'none fits' } },
@@ -56,7 +57,8 @@ describe('le risposte dentro le scelte', () => {
 
   it('ogni versione di Jev ammessa ha un prezzo, e la risposta è gratis', () => {
     for (const m of JEV_MODELS) expect(priceOf(m), m).toBeDefined();
-    expect(Object.keys(DECISION_PRICES).sort()).toEqual([...JEV_MODELS].sort());
+    // Every version of Jev, from TypeSafe and through OpenRouter (T362), and nothing else.
+    expect(Object.keys(DECISION_PRICES).sort()).toEqual([...JEV_MODELS, ...JEV_MODELS.map((m) => OPENROUTER_JEV[m])].sort());
     expect(costOf(JEV_MODEL, { prompt: 1e6, output: 1e6 })).toBeCloseTo(0.042, 6);
   });
 

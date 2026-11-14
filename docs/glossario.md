@@ -1243,6 +1243,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/fourthwall.ts`, `src/kernel/agents/council.ts`
 - **Da non usare**: «guardia» (è sul testo del viandante)
 
+### Adattatore OpenRouter
+- **Inglese**: `OpenRouterAiModels`, `OpenRouterDecisionModels`, `OPENROUTER_MODELS`, `OPENROUTER_JEV`, `toJsonSchema`
+- **Definizione**: i modelli che scrivono e Jev attraverso OpenRouter, con la chiave del giocatore (ADR-0184, ADR-0193): gli stessi `AiModels` e `DecisionModels` di Gemini e di TypeSafe, gli id fissi a elenco, lo schema del Concilio come schema JSON, il costo detto da ogni risposta. Non tiene chiavi: le aggiunge il varco (T363) o uno script del laboratorio.
+- **Dove vive**: `src/kernel/ai/openrouter.ts`, `lab/scripts/openrouter-prova.ts`
+- **Da non usare**: «proxy» (il varco è un'altra cosa, sul server), «router dei modelli» (è `RoutedAiModels`, gli abbonamenti)
+
+### Costo detto
+- **Inglese**: `CallRecord.usd`, `callCost`, `reportedCost`
+- **Definizione**: ciò che il fornitore dice di aver addebitato per una chiamata (`usage.cost` di OpenRouter, più ciò che Google ha chiesto con una chiave di Google del giocatore); il registro dei consumi e l'addebito lo prendono al posto del listino quando è un numero finito ≥ 0 (T362, ADR-0193).
+- **Dove vive**: `src/kernel/ai/usage.ts`, `src/kernel/ai/openrouter.ts`, `Kernel.charge`
+- **Da non usare**: «costo reale» (anche il listino lo è, per chi non dice), «prezzo» (è del listino, `prices.ts`)
+
 ### Cache esplicita
 - **Inglese**: `ExplicitCaches`, `cache.write`, `cachedContent`, `cacheable`, `CACHED_AGENTS`, `EXPLICIT_CACHE`, `storage`, `stored`
 - **Definizione**: le istruzioni di sistema di un agente (oggi solo l'Attore) tenute da Gemini per una durata (`ttl`) e nominate dalle chiamate che seguono, che le pagano al prezzo della cache; la scrittura la paga il mondo (`comune`), con la conservazione per tutta la durata (T351, ADR-0186). Si scrive la seconda volta che lo stesso prefisso è chiesto.

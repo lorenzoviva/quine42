@@ -5260,7 +5260,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T361`; sicurezza nell'esito.
 - Esito: `QUINE_PAGAMENTI=spenti` (detto, un altro valore non parte): rotte di Stripe non montate in produzione e in sviluppo, `STRIPE_WEBHOOK_SECRET` non chiesto, commissione forzata a 0, ricariche nascoste nella lobby, nel pannello `P`, nella finestra dei crediti esauriti, nella pagina dei crediti e nel profilo del sito; Jev resta con la sua chiave (D52); `/healthz` prima della porta d'ingresso (qualunque `Host`, solo `ok`, 503 in chiusura); ADR-0189, AGENTS.md (8h, `.env`), architettura, glossario; test in `tests/sicurezza/produzione.test.ts` con e senza la modalità; `QUINE_TETTO_RICARICHE` invariato (unica fonte di crediti finché non c'è OpenRouter); non provati il 503 in chiusura né la UI nel browser (il task non lo chiede); sicurezza: voce V-035 (modalità senza pagamenti e controllo di salute), chiusa con i test.
 
-### T362 · Open beta: l'adattatore OpenRouter (anche Jev) — `da fare`
+### T362 · Open beta: l'adattatore OpenRouter (anche Jev) — `fatto` (`9b0bcdaf`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
 - Step: 43
 - Contesto: D52 e riga 2 del § 6 di `docs/design/open-beta.md` (ADR-0184). L'autore (13/11): OpenRouter fornisce anche i modelli di TypeSafe, quindi le decisioni chiuse (ADR-0157) passano di lì con la chiave del giocatore; vale ancora D45: il testo libero del viandante non va a Jev finché non c'è la ritenzione zero (verificare cosa dice OpenRouter per quei modelli). `dossier T345`, `dossier T348`.
@@ -5268,6 +5268,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: offline con risposte registrate; Genesi offline uguale; una prova pagata piccola (una decina di chiamate, schema, immagini e una decisione di Jev) con una chiave OpenRouter dell'autore se c'è nel `.env`, altrimenti in `domande/T362.md`.
 - Browser: non serve.
 - Quando è fatto: commit su `task/T362`, kernel sale di Z; sicurezza nell'esito.
+- Esito: `OpenRouterAiModels` e `OpenRouterDecisionModels` (Jev su `/api/alpha/decisions` con `provider.zdr`), id fissi a elenco, schema JSON in `response_format` con `require_parameters`, foto come `image_url`, 402/401/429/408 gestiti, il costo detto (`CallRecord.usd`, `callCost`) nel registro e nell'addebito al posto del listino; ADR-0193 nuovo, ADR-0184 accettato con D52, studio § 1.5-1.7 verificato il 14/11, kernel 0.7.4; test offline con risposte scritte dalla documentazione e Genesi attraverso l'adattatore uguale; non provato contro OpenRouter vero (manca la chiave: domanda aperta in `docs/pipeline/domande/T362.md`, con lo script pronto, il testo del viandante a Jev via OpenRouter e il prezzo di 3.5 Flash); non cablato nel gioco (T363); cache esplicita dell'Attore via OpenRouter non fatta; sicurezza: nessuna superficie nuova (nessuna chiave né rotta; il costo detto entra nell'addebito solo dalla risposta del varco di T363, che sarà la sua superficie).
 
 ### T363 · Open beta: le chiavi dei giocatori sul server e il turno delle comuni — `da fare` (dipende da T361, T362)
 - Pipeline: fable · sforzo extra · stima 6% · approvato · priorità 5

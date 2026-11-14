@@ -8,6 +8,8 @@
 //
 // Only data of the world and of the catalogue go to Jev, never the free text of a wanderer (D45.3, until TypeSafe offers zero retention):
 // the state of a call is built by the kernel. Which tasks may decide is said by the census (`CENSUS`, the rows with `via: 'decide'`).
+// Jev comes through TypeSafe's own gate (JevDecisionModels, here) or through OpenRouter with the player's key (OpenRouterDecisionModels in
+// openrouter.ts, D52, ADR-0193): the same calls, the same answers.
 
 import { BudgetError, Semaphore } from './models';
 import type { CallRecord } from './usage';
@@ -108,7 +110,9 @@ export function readJevAnswers(raw: unknown, questions: Record<string, DecisionQ
       const best = Object.entries(probs)
         .filter((e): e is [string, number] => typeof e[1] === 'number' && Number.isFinite(e[1]))
         .sort((x, y) => y[1] - x[1])[0]?.[0];
-      const level = best !== undefined ? Number(best) : typeof a.score === 'number' ? Math.round(a.score) : NaN;
+      // A level by its index ("2", as TypeSafe says it) or by its words (as a legend might); else the likeliest position.
+      const keyed = best === undefined ? -1 : /^\d+$/.test(best) ? Number(best) : q.criteria.indexOf(best);
+      const level = keyed >= 0 ? keyed : typeof a.score === 'number' ? Math.round(a.score) : NaN;
       if (Number.isInteger(level)) out[id] = level;
     }
   }

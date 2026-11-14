@@ -205,6 +205,22 @@
   del giorno, tiene al più 64 cache vive; una chiamata può nominare solo una cache scritta da lui, per il suo modello, finché vive. La stima della
   lobby paga il 70 % del prompt dell'Attore al prezzo della cache e aggiunge la riga «Cache dell'Attore». La misura offline:
   `prompt-tokens.ts -- --cache` → `lab/banco/jev/cache-attore.md` (−47 % sulle righe dell'Attore, 0,16 $ l'ora).
+- **OpenRouter** (ADR-0193, T362, kernel 0.7.4; la open beta, ADR-0184): gli stessi modelli e Jev con la chiave del giocatore. In
+  `src/kernel/ai/openrouter.ts`, senza chiavi: una base (`endpoint`: il varco `/api/openrouter` di T363, o `OPENROUTER_API` in uno script che aggiunge
+  la chiave) e due porte. **`OpenRouterAiModels`**, lo stesso `AiModels` di `GeminiAiModels`, su `/v1/chat/completions`: gli id fissi e a elenco
+  (`OPENROUTER_MODELS`: il nostro id → `google/<id>`, la versione datata letta, se ogni endpoint standard prende la temperatura; un modello fuori elenco
+  non parte e non consuma il budget); le istruzioni di sistema prima, il prompt e le foto dell'Artista come parti `image_url`; lo schema del Concilio
+  come schema JSON (`toJsonSchema`) in `response_format` con `strict: false`; `reasoning.effort` con `exclude` (`off` non manda niente, come per
+  Google); `provider: { require_parameters: true, data_collection: 'deny' }`. Gli errori: senza risposta, 408 e un 200 con l'errore (nel corpo o nella
+  scelta) non si ripetono e restano nel registro; 429 e 5xx tre volte, dopo `Retry-After`; 402 è un `BudgetError`; 401 lo dice con lo stato.
+  **`OpenRouterDecisionModels`**, lo stesso `DecisionModels` di `JevDecisionModels`, su `/alpha/decisions`: le versioni del gioco →
+  `typesafe/jev-1.13` e `typesafe/jev-1.14` (`OPENROUTER_JEV`), il corpo del varco di TypeSafe più `provider.zdr` (l'endpoint di TypeSafe è
+  nell'elenco della ritenzione zero di OpenRouter); D45.3 resta (`freeTextDecision`). **Il costo detto**: ogni risposta dice ciò che OpenRouter ha
+  addebitato (`usage.cost`, più quello di Google con una chiave di Google del giocatore), e va in `CallRecord.usd`: il registro dei consumi e
+  l'addebito lo prendono al posto del listino (`callCost`), che resta per le stime e per chi non dice. Le chiamate stanno nel registro sotto l'id di
+  OpenRouter (`google/gemini-3.8-flash`, `typesafe/jev-1.13`), che `priceOf` legge come quello di Google (`DECISION_PRICES` ha gli id di Jev).
+  Non è ancora cablato nel gioco: il varco, le chiavi dei giocatori e il canale dei mondi sono di T363. La prova pagata con la chiave dell'autore:
+  `npx vite-node lab/scripts/openrouter-prova.ts` (`--offline` con un OpenRouter finto), il rapporto in `lab/banco/openrouter/prova.md`.
 
 <a id="lobby"></a>
 ## La lobby multigiocatore

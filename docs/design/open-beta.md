@@ -1,7 +1,7 @@
 # La open beta senza pagamenti all'autore: OpenRouter, hosting esterno, self-hosting (T345)
 
-Data: 2026-11-13 · Step 43, Fase IV · ADR proposto: [ADR-0184](../adr/0184-la-open-beta-senza-pagamenti-all-autore.md) (non applicato:
-decide l'autore) · Richiesta: `docs/userchats/to-do-2026-11-10.md` («Le due beta») · Fase: [`docs/fasi.md`](../fasi.md#fase-iv-la-open-beta)
+Data: 2026-11-13 (§ 1.5-1.7 aggiornati il 14/11 da T362) · Step 43, Fase IV · [ADR-0184](../adr/0184-la-open-beta-senza-pagamenti-all-autore.md)
+(accettato con D52, tranne la 5: Jev resta, via OpenRouter) · l'adattatore: [ADR-0193](../adr/0193-l-adattatore-openrouter.md) · Richiesta: `docs/userchats/to-do-2026-11-10.md` («Le due beta») · Fase: [`docs/fasi.md`](../fasi.md#fase-iv-la-open-beta)
 
 Le fonti sono in fondo, tutte lette il **13/11/2026**. Dove una cifra viene da un aggregatore e non dalla pagina ufficiale, lo dico.
 Niente codice: questo documento dice cosa cambierebbe e in che ordine.
@@ -122,6 +122,27 @@ dettaglio pieno e 0,36 $ in Low Detail**, più il 5,5 % sull'acquisto dei credit
 Gli id cambiano: OpenRouter tiene anche le versioni datate (`google/gemini-3.8-flash-20260902`). L'elenco dei modelli ammessi del varco
 deve dire id fissi, come oggi per Gemini.
 
+**Verificato il 14/11 (T362)** sugli endpoint pubblici di OpenRouter (`/api/v1/models`, `/api/v1/models/<id>/endpoints`):
+
+| Nostro id | Id di OpenRouter (versione servita) | Livello standard, $ per milione (ingresso / uscita / cache) | `temperature` su ogni endpoint standard |
+|---|---|---|---|
+| `gemini-3.1-flash-lite` | `google/gemini-3.1-flash-lite` (`-20260507`) | 0,25 / 1,50 / 0,025 (Vertex eu e us 0,275 / 1,65) | sì |
+| `gemini-3.8-flash` | `google/gemini-3.8-flash` (`-20260902`) | 0,75 / 3,75 / 0,075 (Vertex us +10 %) | **no** (solo AI Studio) |
+| `gemini-4-argon` | `google/gemini-4-argon` (`-20261013`) | 2 / 10 / 0,10 (Vertex us +10 %) | sì |
+| `gemini-3.5-flash` (l'Artista) | `google/gemini-3.5-flash` (`-20260519`) | **1,50 / 9,00** / 0,15 | sì |
+| `gemini-3.6-flash`, `gemini-3.7-flash` | `google/…` (`-20260721`, `-20260813`) | 0,75 / 3,75 / 0,075 | no |
+| `gemini-3.5-flash-lite` | `google/gemini-3.5-flash-lite` (`-20260721`) | 0,30 / 2,50 / 0,03 | no |
+| `gemini-3.1-pro-preview`, `gemini-3-flash-preview` | `google/…` | 2 / 12 e 0,50 / 3 | sì |
+
+- **Le «fasce» del § 1.5 sono livelli di servizio**: ogni modello ha anche endpoint `flex` (metà prezzo, al meglio) e `priority` (circa 1,8 volte);
+  un id senza suffisso non li sceglie mai (`:floor` e `:nitro` li aggiungono). I prezzi del livello standard sono quelli di `prices.ts`.
+- **3.5 Flash costa il doppio della stima**: `prices.ts` lo stima 0,75 / 3,75 (`ESTIMATED`, report 8.2B), OpenRouter, che riporta il prezzo di Google,
+  dice 1,50 / 9,00. Le chiamate via OpenRouter dicono il loro costo e non ne soffrono; il registro della via diretta sì (da correggere a parte).
+- **La temperatura**: gli endpoint Vertex delle Flash più nuove non la accettano; con `require_parameters` una richiesta che la manda resta ad AI
+  Studio, e non trova endpoint per chi ha imposto la ritenzione zero nel suo account (AI Studio non è nell'elenco, Vertex sì). L'adattatore la manda
+  solo dove ogni endpoint standard la prende (`OPENROUTER_MODELS`).
+- **Le immagini**: tutti e tre i modelli hanno `image` fra le `input_modalities`.
+
 ### 1.6 Il `responseSchema`, il ragionamento, le immagini
 
 - **Lo schema.** Oggi il Concilio passa a Gemini `responseMimeType: application/json` e `responseSchema` nello stile di Google (`type:
@@ -138,16 +159,30 @@ deve dire id fissi, come oggi per Gemini.
   `inlineData`. Su OpenRouter diventano parti `{ type: 'image_url', image_url: { url: 'data:image/png;base64,…' } }` nello stesso messaggio
   del testo; il modello deve avere `image` tra le `input_modalities` (da controllare per ciascuno dei tre: le pagine che ho letto non lo
   dicono), e le immagini si pagano come token in ingresso. Non serve un URL pubblico.
+- **Fatto da T362** (`OpenRouterAiModels`, ADR-0193): lo schema convertito da `toJsonSchema` con `strict: false` e il nome del compito; `provider:
+  { require_parameters: true, data_collection: 'deny' }`; `reasoning: { effort, exclude: true }` (il ragionamento non torna); **`ai.thinking: off` non
+  manda niente**, come la via di Google (il predefinito del modello), invece di `effort: 'none'` (che 3.8 Flash e Argon rifiutano: il ragionamento è
+  obbligatorio); le foto come parti `image_url` dopo il testo. Il costo: `usage.cost` è ciò che OpenRouter ha addebitato; con una chiave di Google
+  del giocatore (`is_byok`) si aggiunge `cost_details.upstream_inference_cost`. I token di ragionamento sono dentro `completion_tokens`: il registro li
+  separa. Un 200 può portare l'errore nel corpo o nella scelta (`finish_reason: 'error'`): non si ripete. Il plugin «Response Healing» non è usato.
 - **Ciò che non c'è.** `countTokens` di Google (gli script di `lab/` per i prompt) non ha un gemello in OpenRouter: quegli strumenti
   restano dell'autore, con la sua chiave di Google. Le ripetizioni restano come oggi: 429 e 5xx sì (con `Retry-After`), una richiesta
   scaduta mai (può essere stata pagata).
 
 ### 1.7 Jev di TypeSafe e la coda degli abbonamenti
 
-- **Jev non è su OpenRouter.** `TYPESAFE_KEY` è dell'autore: su un server della open beta che non è la sua macchina le decisioni chiuse
-  usano la regola, che è il pavimento (ADR-0157), e il gioco è quello di prima. Chi fa self-hosting può mettere la sua `TYPESAFE_KEY` con il
-  suo tetto. Accendere Jev sul server ufficiale vuol dire che l'autore paga le decisioni di tutti (meno di mezzo centesimo l'ora a
-  giocatore, ma è una spesa sua): lo decide lui.
+- **Jev è su OpenRouter** (corretto il 14/11: il 13/11 non l'avevo trovato; D52 l'ha detto all'autore). Ci sono `typesafe/jev-1.13` (versione
+  `-20260917`) e `typesafe/jev-1.14` (`-20261014`, l'alias `~typesafe/jev-latest` lo segue e non si usa), un solo fornitore, TypeSafe, a 0,042 $ al
+  milione in ingresso e la risposta gratis, contesto di 262 144 token (le richieste sopra circa 32 KB vanno nel modo a contesto lungo, più lento).
+  L'API è `POST /api/alpha/decisions` (c'è anche `/api/v1/systemone`, compatibile con l'SDK di TypeSafe): `model`, `state` (testo, oggetto o un
+  elenco di parti, anche immagini), `questions` (`noul`, `choice`, `score`, e `box` solo dalla 1.14) e `provider`; la risposta ha `answers` con le
+  stesse forme di TypeSafe più un tipo `refusal`, e `usage` con `input_tokens`, `output_tokens` e `cost`. **D52**: Jev resta acceso in open beta e
+  passa da qui con la chiave del giocatore, come ogni chiamata; non lo paga l'autore. Fatto da T362 (`OpenRouterDecisionModels`, ADR-0193).
+- **La ritenzione zero (D45.3).** L'endpoint di TypeSafe è nell'elenco della ritenzione zero di OpenRouter (`/api/v1/endpoints/zdr`, con
+  `safety_retention: false`), e ogni richiesta dell'adattatore la chiede (`provider.zdr: true`: OpenRouter rifiuta piuttosto che mandarla altrove).
+  OpenRouter stesso non conserva prompt e risposte se il giocatore non accende il logging. Non ho trovato la politica dei dati scritta da TypeSafe per
+  OpenRouter: la pagina del fornitore non la riporta. Il testo libero del viandante **resta fuori** (`JEV_ZERO_RETENTION` falso): lasciarlo passare
+  per questa porta è una decisione dell'autore (`docs/pipeline/domande/T362.md`).
 - **La coda degli abbonamenti** (ADR-0077, ADR-0106) resta solo locale e non cambia; `npm run genera` anche.
 
 ---
@@ -325,6 +360,14 @@ OpenRouter (pagine senza data di aggiornamento visibile):
 - Modelli: https://openrouter.ai/google/gemini-3.1-flash-lite, https://openrouter.ai/google/gemini-3.8-flash/providers (rilascio 02/09/2026);
   Argon dagli aggregatori https://pricepertoken.com/pricing-page/model/google-gemini-4-argon e
   https://www.getmaxim.ai/bifrost/llm-cost-calculator/provider/openrouter/model/gemini-4-argon
+
+Lette il 14/11/2026 (T362):
+- Gli endpoint pubblici dei modelli: https://openrouter.ai/api/v1/models, https://openrouter.ai/api/v1/models/google/gemini-3.8-flash/endpoints (e gli
+  altri id della tabella del § 1.5), l'elenco della ritenzione zero https://openrouter.ai/api/v1/endpoints/zdr
+- Jev su OpenRouter: https://openrouter.ai/docs/guides/community/jev, https://openrouter.ai/docs/guides/community/jev-tutorial, il riferimento
+  https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-request.md, il fornitore https://openrouter.ai/provider/typesafe
+- Instradamento (livelli, `require_parameters`, `data_collection`, `zdr`): https://openrouter.ai/docs/guides/routing/provider-selection
+- Errori (anche il 200 con l'errore): https://openrouter.ai/docs/api/reference/errors-and-debugging
 
 Hosting:
 - Cloud Run e WebSocket (timeout, affinità): https://docs.cloud.google.com/run/docs/triggering/websockets
