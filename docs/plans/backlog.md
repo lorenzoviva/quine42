@@ -5404,7 +5404,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T374`.
 - Esito: `world/campaign.md` a sezioni nelle richieste del Concilio (ognuno «Per tutti» e la sua; Arbitro e Referente tutto; Attore solo «Per tutti»; decisioni chiuse niente), validatore con sezioni e tetti, quarta parete solo locale (le righe fermate restano fuori e il master lo sa, mai Jev), incarico `directive` del Referente solo per il master (`cleanText` spostato in `src/kernel/cleantext.ts`, tetti, giorno del mondo, un rinvio col motivo), editor che mostra il file anche se manca, misura `prompt-tokens.ts --campaign` (46/46; 0,064 $/h pieni, 0,021 in cache), V-036 con il suo test, ADR-0191, AGENTS.md, architettura, glossario, kernel 0.7.1; manca la manopola di Jev negli universi privati (con T366); all'integrazione con T372 la mia V-036 diventa V-037 e la versione va riconciliata.
 
-### T375 · Campagna: le regioni del master (riempitivo e trattenuta) — `da fare` (dipende da T373)
+### T375 · Campagna: le regioni del master (riempitivo e trattenuta) — `fatto` (`28056a89`) (dipende da T373)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 5
 - Step: 43
 - Contesto: riga 5 del § 6 di `docs/design/campagna-master.md`, ADR-0188; **D54.6 riformulata dall'autore**: non una regione `mare` del kernel ma una regione «riempitivo» che sui luoghi nuovi ripete un ambiente che il mondo ha già (mare, deserto, bosco…) senza chiamate al Concilio, per indirizzare i viandanti senza dirlo e senza pagare luoghi che il master non vuole; `trattenuta` resta (pausa locale: bozza finché non si libera).
@@ -5412,6 +5412,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: un luogo in una regione di riempitivo prende l'ambiente detto senza nessuna chiamata; `trattenuta` resta bozza finché non si libera; suite e typecheck coi turni.
 - Browser: sì, una regione di riempitivo dichiarata e attraversata.
 - Quando è fatto: commit su `task/T375`.
+- Esito: regioni del master in `world/atlas.json` (`master`, `kind`: `filler` riempitivo che ripete un ambiente del mondo senza chiamate né carte né battiti, fuori da quota e pausa; `held` trattenuta, bozze finché non si libera); vincono su quelle del Cartografo; `declareRegion`/`releaseRegion` solo del master, controllate da `masterRegion`; messaggio `region` col ritmo di `pace`; ai giocatori l'atlante coi campi nominati e senza trattenute; «Dichiara regione» e «Libera» nell'Ufficio dei luoghi e nella Direzione (`src/ui/regions.ts`); ADR-0201, ADR-0188 punto 5, V-041, kernel 0.7.11. Mancano: il sito (T377); il filo provato solo nei test, non con due schede in multigiocatore; un ambiente con lotti in un riempitivo può chiamare lo Scultore se mancano le case comuni.
 
 ### T376 · Campagna: individui e trame dichiarati dal master — `fatto` (`4b63d75b`) (dipende da T374)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 6

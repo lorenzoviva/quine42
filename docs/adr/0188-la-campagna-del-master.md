@@ -158,3 +158,11 @@ In [ADR-0194](0194-l-universo-privato-e-il-verificatore-a-inviti.md), insieme al
 punto 2: l'invito si usa con la rotta `guests` (`redeem`) **prima** di leggere l'universo, non nel `join` (la pagina legge l'universo prima di
 entrare, e a un estraneo non esiste); il link lo porta nel frammento (`#invito=`), che non arriva a nessun server. Diventando privato, chi è nel
 mondo resta fra gli ospiti. `privateWorld` arriva al mondo per valore (`WorldOpen.private`, `setPrivate`). La superficie nuova è la V-038.
+
+## Applicazione del punto 5 (T375, kernel 0.7.11)
+
+In [ADR-0201](0201-le-regioni-del-master.md), con la forma di D54.6: niente regione `mare` del kernel, ma il **riempitivo** (`kind: filler`), che sui
+luoghi nuovi ripete un ambiente che il mondo ha già, steso dal suo programma col seme del luogo, senza chiamate (né il piano, né le cose, né i battiti
+del mondo), fuori dalla quota e dalla pausa; e la **trattenuta** (`kind: held`), i luoghi nuovi bozze finché il master non la libera. Le regioni del
+master (`master: true`) vincono su quelle del Cartografo dove le coprono; i client dei giocatori ricevono l'atlante coi soli campi nominati, senza le
+trattenute. Il messaggio `region` ha il ritmo di `pace`. La superficie nuova è la V-041.

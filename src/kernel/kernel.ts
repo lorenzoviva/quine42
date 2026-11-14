@@ -19,7 +19,7 @@ import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, placeRegion, readAtlas, regionAt, writeAtlas, type Region } from './atlas';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
@@ -1836,7 +1836,13 @@ export class Kernel {
       });
     if (!at.length) return;
     const quota = this.chunkQuota();
-    const drafts = [...this.chunks.values()].filter((c) => c.stage === 'draft' && !c.developing && (quota || !c.held));
+    // A region of the master (T375): what it holds is not asked again until it is let go; a filler place costs nothing, so neither the quota nor
+    // the pace keeps it a draft.
+    const drafts = [...this.chunks.values()].filter((c) => {
+      if (c.stage !== 'draft' || c.developing) return false;
+      const kind = regionKind(this.masterRegionOf(c));
+      return kind === 'filler' || (kind !== 'held' && (quota || !c.held));
+    });
     const dist = (c: Chunk) => Math.min(...at.map((p) => Math.hypot(c.cx - p.x, c.cy - p.y)));
     drafts.sort((a, b) => dist(a) - dist(b));
     for (const ch of drafts.slice(0, 3 - this.developers)) {
@@ -1896,6 +1902,23 @@ export class Kernel {
     if (!this.alive(ch)) return;
     // A plan whose environment is gone belongs to another world (a Genesis under the same title, ADR-0134): planned again.
     if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
+    // A region of the master (T375): held, the place stays a draft until it is let go; filler, the kernel lays out the environment the master chose,
+    // without a call, outside the quota and the pace (it costs nothing).
+    const region = this.masterRegionOf(ch);
+    const kind = regionKind(region);
+    if (kind === 'held') {
+      if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: nella regione trattenuta «${region!.name}», resta abbozzato`, 'cartographer', 'chunk.plan');
+      ch.held = true;
+      return;
+    }
+    if (kind === 'filler' && this.content.layouts[region!.environment]) {
+      ch.held = false;
+      const plan = this.fillerPlan(region!);
+      await this.chunkStore.save(this.recordKey(ch), { plan });
+      this.council.say('kernel', 'info', `luogo ${ch.key}: riempitivo «${region!.name}» (${this.content.layouts[plan.layout]?.name ?? plan.layout}), senza chiamate`, 'cartographer', 'chunk.plan');
+      if (this.alive(ch)) this.applyPlan(ch, plan);
+      return;
+    }
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!noQuota && !this.chunkQuota()) {
       if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
@@ -1938,13 +1961,39 @@ export class Kernel {
       .join(', ');
   }
 
+  /** The atlas of the world's files, read once for every text it has (the pump asks of it at every tick, T375). */
+  private atlasNow(): Atlas {
+    const text = this.files[ATLAS_FILE];
+    if (!this.atlasRead || this.atlasRead.text !== text) this.atlasRead = { text, atlas: readAtlas(this.files) };
+    return this.atlasRead.atlas;
+  }
+  private atlasRead?: { text: string | undefined; atlas: Atlas };
+
+  /** The region of the master a place falls in (T375), if any: the first place is nobody's. */
+  private masterRegionOf(ch: Pick<Chunk, 'cx' | 'cy'>): Region | undefined {
+    if (ch.cx === 0 && ch.cy === 0) return undefined;
+    const r = regionAt(this.atlasNow(), ch.cx, ch.cy);
+    return r?.master ? r : undefined;
+  }
+
+  /**
+   * The plan of a place in a filler region (T375, D54.6): the environment the master chose, laid out from its program with the place's seed
+   * (`layoutOf`, as every plan: the gates and the paths the kernel digs keep it connected, rule 10), the region's name; no thing, person, rune
+   * or structure asked, no card: nothing was written for it.
+   */
+  private fillerPlan(region: Region): ChunkPlan {
+    const description = region.description || this.content.layouts[region.environment]?.description || '';
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [] };
+  }
+
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
   private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
-    const atlas = readAtlas(this.files);
+    const atlas = this.atlasNow();
     const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
     if (region && this.content.layouts[region.environment]) return { layouts: all.filter((l) => l.id === region.environment), region };
-    const regional = new Set(atlas.regions.map((r) => r.environment));
+    // The master's regions do not take their environment away from the rest of the world (T375): only the Cartographer's are regional.
+    const regional = new Set(atlas.regions.filter((r) => !r.master).map((r) => r.environment));
     const free = all.filter((l) => !regional.has(l.id));
     return { layouts: free.length ? free : all };
   }
@@ -2307,8 +2356,9 @@ export class Kernel {
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
-    // Held (T373): what a known place would ask the Council for waits; the place comes back with it when it is loaded again.
-    const asks = !this.paceHeld();
+    // Held (T373): what a known place would ask the Council for waits; the place comes back with it when it is loaded again. A place of a filler
+    // region (T375) asks nothing, not even the rhythms its exploring would beat: the master filled it so as not to pay for it.
+    const asks = !this.paceHeld() && regionKind(this.masterRegionOf(ch)) !== 'filler';
     if (asks && unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
       if (!this.alive(ch)) return;
       defs.forEach((d, i) => {
@@ -6211,6 +6261,39 @@ export class Kernel {
     if (!this.mirror) this.council.say('kernel', 'info', `ritmo del mondo: ${PACE_NAME[pace.mode]}${pace.mode === 'slow' ? ` (${placesPerMinute(pace, this.manyPlayers() ? (this.config.ai.placesPerMinute ?? Kernel.PLACES_PER_MINUTE) : Infinity)} luoghi nuovi al minuto)` : ''}`);
     if (!quiet) this.bus.emit('pace', pace);
     return pace;
+  }
+
+  /**
+   * The master declares a region of the atlas (T375, ADR-0188 §5, ADR-0201): the Cartographer's environment, a filler (the places repeat an
+   * environment the world has, without calls) or held (the places stay drafts). Only the master; on a mirror the world decides (the thin client
+   * sends it). Checked by `masterRegion` (texts of a player, the fourth wall, the caps), written by the kernel in `world/atlas.json` with a commit
+   * of its own, without calls. The places already planned in it stay as they are; the new ones follow it.
+   */
+  async declareRegion(raw: unknown, by: string = this.wanderer().id): Promise<RegionAnswer> {
+    if (this.mirror) return { ok: false, reasons: ['le regioni le scrive il mondo, non uno specchio'] };
+    if (!this.isMaster(by)) return { ok: false, reasons: ['solo il master dichiara le regioni'] };
+    const r = masterRegion(this.atlasNow(), raw, this.content.layouts, wordsOf(this.files));
+    if ('errors' in r) return { ok: false, reasons: r.errors };
+    const kind = REGION_KIND_NAME[r.region.kind ?? 'plan'];
+    this.writeAtlasFile(r.atlas, `regione del master «${r.region.name}» (${kind})`);
+    return { ok: true, region: r.region };
+  }
+
+  /** «Libera» (T375): a region of the master taken away; the places it held are planned as the rest of the world. Only the master. */
+  async releaseRegion(id: unknown, by: string = this.wanderer().id): Promise<RegionAnswer> {
+    if (this.mirror) return { ok: false, reasons: ['le regioni le scrive il mondo, non uno specchio'] };
+    if (!this.isMaster(by)) return { ok: false, reasons: ['solo il master libera le regioni'] };
+    const r = withoutMasterRegion(this.atlasNow(), id);
+    if (!r) return { ok: false, reasons: ['nessuna regione del master con questo nome'] };
+    this.writeAtlasFile(r.atlas, `regione del master «${r.region.name}» liberata`);
+    return { ok: true, region: r.region };
+  }
+
+  private writeAtlasFile(atlas: Atlas, message: string): void {
+    this.repo.write(ATLAS_FILE, writeAtlas(atlas));
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(message, 'agent');
+    this.council.say('kernel', 'info', message, 'cartographer', 'atlas');
   }
 
   /** God mode (T42a): in a multiplayer game the master does not die, has no needs, takes no harm from the others. */

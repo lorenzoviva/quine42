@@ -24,6 +24,7 @@ import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
 import { readPace } from '../kernel/worldPace';
+import type { Region, RegionAnswer, RegionRequest } from '../kernel/atlas';
 
 /** Seconds between two steps sent (the server checks the walk at its pace; 20 a second are plenty). */
 const STEP_EVERY = 0.05;
@@ -647,6 +648,18 @@ export class ThinClient {
           return { ok: true as const, pace };
         });
       };
+      // The regions of the master (T375): the world checks and writes them; the atlas comes back with the world's files.
+      const region = (ask: Promise<{ ok: boolean; reason?: string; text?: string }>) =>
+        ask.then((r): RegionAnswer => {
+          if (!r.ok) return { ok: false, reasons: [r.reason ?? 'nessuna risposta'] };
+          try {
+            return { ok: true, region: JSON.parse(r.text ?? '') as Region };
+          } catch {
+            return { ok: false, reasons: ['risposta illeggibile'] };
+          }
+        });
+      k.declareRegion = (raw) => region(this.session.act({ t: 'region', op: 'declare', region: raw as RegionRequest }));
+      k.releaseRegion = (id) => region(this.session.act({ t: 'region', op: 'release', id: String(id) }));
       k.removeCard = (id) => this.session.act({ t: 'card', op: 'remove', id }).then((r) => ({ ok: r.ok, ...(r.reason ? { reason: r.reason } : {}), ...(r.text ? { text: r.text } : {}), ...(r.done ? { commit: r.done } : {}) }));
       // The Referente and the teams of the corona work on the server, on the master's branch (T42e).
       k.talkToAgent = async (agent, text) => {

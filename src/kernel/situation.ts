@@ -5,7 +5,7 @@
 // players connected too, each on their chunk (T42c).
 
 import { normName } from './content';
-import { regionAt, type Atlas } from './atlas';
+import { regionAt, regionKind, type Atlas, type RegionKind } from './atlas';
 import type { Plot } from './npc/model';
 import type { Fault } from './faults';
 import { italianName } from './internalNames';
@@ -38,7 +38,8 @@ export interface Operation {
 
 export interface Situation {
   ops: Operation[];
-  regions: Array<{ nome: string; centro: [number, number]; raggio: number }>;
+  /** `kind` (T375): a region of the master that fills or holds its new places. */
+  regions: Array<{ nome: string; centro: [number, number]; raggio: number; kind?: RegionKind }>;
   /** The chunks the table shows (all the operations and the regions, with a margin). */
   bounds: { x0: number; y0: number; x1: number; y1: number };
 }
@@ -99,7 +100,9 @@ export function situation(s: SituationInput): Situation {
     ops.push(at({ kind: 'player', label: p.name, detail: `collegato, a ${Math.floor(p.x)},${Math.floor(p.y)}`, who: p.id }, { cx: Math.floor(p.x / s.chunkSize), cy: Math.floor(p.y / s.chunkSize) }));
   for (const c of s.chunks) {
     if (c.stage !== 'draft') continue;
-    ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
+    // In a region the master holds (T375) it waits for them, not for the Cartographer.
+    const held = !(c.cx === 0 && c.cy === 0) && regionKind(regionAt(s.atlas, c.cx, c.cy)) === 'held';
+    ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : held ? 'trattenuto: la regione aspetta il master' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
   }
   for (const p of s.plots) {
     if (p.state !== 'active') continue;
@@ -120,7 +123,7 @@ export function situation(s: SituationInput): Situation {
     ops.push(at({ kind: 'fault', label: f.key, detail: f.count > 1 ? `${f.message} (×${f.count})` : f.message }, c));
   }
 
-  const regions = s.atlas.regions.map((r) => ({ nome: r.name, centro: r.center, raggio: r.radius }));
+  const regions = s.atlas.regions.map((r) => ({ nome: r.name, centro: r.center, raggio: r.radius, ...(regionKind(r) ? { kind: regionKind(r) } : {}) }));
   const xs = [...ops.flatMap((o) => (o.cx === undefined ? [] : [o.cx])), ...regions.flatMap((r) => [r.centro[0] - r.raggio, r.centro[0] + r.raggio])];
   const ys = [...ops.flatMap((o) => (o.cy === undefined ? [] : [o.cy])), ...regions.flatMap((r) => [r.centro[1] - r.raggio, r.centro[1] + r.raggio])];
   const bounds = { x0: Math.min(...xs) - 1, y0: Math.min(...ys) - 1, x1: Math.max(...xs) + 1, y1: Math.max(...ys) + 1 };
