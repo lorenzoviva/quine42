@@ -1,6 +1,6 @@
 {
   "name": "quine42",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "private": true,
   "description": "QUINE42 — un mondo in 3D fatto del proprio codice sorgente.",
   "type": "module",
@@ -18,7 +18,8 @@
     "abbonamento": "vite-node --script tools/abbonamenti/servi.ts",
     "mancanze": "vite-node --script tools/mancanze/rapporto.ts",
     "universi:cloud": "vite-node --script lab/scripts/installa-universi-cloud.ts",
-    "genera": "vite-node --script tools/generazione/genera.ts"
+    "genera": "vite-node --script tools/generazione/genera.ts",
+    "inviti": "vite-node --script tools/inviti/cli.ts"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
   "license": "PolyForm-Noncommercial-1.0.0",

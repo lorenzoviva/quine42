@@ -25,6 +25,8 @@ export interface AccountConfig {
   projectId?: string;
   /** The Auth emulator (`localhost:9099`), when the server uses it. */
   emulator?: string;
+  /** No Firebase: the server verifies the identities born of its invites (ADR-0193). */
+  invites?: true;
 }
 
 /**

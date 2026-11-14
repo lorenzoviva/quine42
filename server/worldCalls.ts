@@ -16,6 +16,8 @@ export interface WorldCalls {
   view(universo: string, id: string, account: AccountKind): Later<WandererView>;
   /** The profile kept, repaired, and the wanderer as they are now; undefined if it could not be kept. */
   keepProfile(universo: string, id: string, account: AccountKind, profilo: unknown): Later<{ profilo: unknown; riparato: string[]; viandante: WandererView } | undefined>;
+  /** Whether the universe is private now (ADR-0193): the master's purse answers for an anonymous guest only then (ADR-0188). */
+  setPrivate(value: boolean): Later<boolean>;
 }
 
 /** The calls answered by a kernel at hand: in the world's own process, and in the tests. */
@@ -28,6 +30,10 @@ export function worldOf(k: Kernel): WorldCalls {
     keepProfile(universo, id, account, profilo) {
       const r = k.keepProfile(id, profilo);
       return r ? { profilo: r.profilo, riparato: r.riparato, viandante: viewFromKernel(k, universo, id, account) } : undefined;
+    },
+    setPrivate(value) {
+      k.privateWorld = value === true;
+      return k.privateWorld;
     },
   };
 }

@@ -21,7 +21,7 @@ import { ActionMenu } from './ui/actions';
 import { SessionClient } from './session/client';
 import { ThinClient } from './session/thin';
 import { keepProfile, savedProfile, socketLink, tabWanderer } from './session/socket';
-import { accountConfig, signIn, type SignedIn } from './session/login';
+import { accountConfig, redeemInvite, signedIn, signIn, takeFromAddress, type SignedIn } from './session/login';
 import { accountWanderer } from './session/account';
 import { ProfilePanel } from './ui/profile';
 import { LobbyScreen, type LobbyResult } from './ui/lobby';
@@ -136,9 +136,29 @@ async function main() {
   // universe: the site's links say it, the way back from a payment too (T133). What it may read and write the server decides.
   const other = params.get('universo');
   const name = other && /^[a-z0-9][a-z0-9-]{0,40}$/.test(other) ? other : readConfig(bundledFiles).config.name;
+  // An invite to a private universe (ADR-0193): taken off the address at once, so that it stays in no history.
+  const invite = takeFromAddress('invito');
   const client = await UniverseClient.connect(name);
   if (client) loading.textContent = `apertura dell'universo «${name}»…`;
-  const snap = client ? await client.load() : undefined;
+  let snap = client ? await client.load() : undefined;
+  // A private universe is there only for its master and its guests: an invite makes a guest, and who is signed in reads it as themselves.
+  if (client && (invite || !snap?.exists)) {
+    const config = await accountConfig();
+    if (invite) {
+      const r = await redeemInvite(name, invite, config, { [WANDERER_HEADER]: tabWanderer(params) });
+      if (!r.ok) throw new Error(`l'invito non vale: ${r.reason}`);
+      if (r.account) account = r.account;
+    } else if (config) account = await signedIn(config).catch(() => undefined);
+    if (account || (invite && !config)) {
+      client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: tabWanderer(params) });
+      snap = await client.load();
+      // Not there for them either: what follows goes on as before, unnamed (a universe made from here is made as it always was).
+      if (!snap?.exists) client.identify({});
+    }
+    // With accounts, from another machine (or on a server of invites) nobody makes a universe from this page: it is not there, or not for them.
+    const here = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+    if (config && !snap?.exists && (config.invites || !here)) throw new Error(`l'universo «${name}» non c'è, o è su invito: chiedi un link al suo master`);
+  }
   const snapFiles = snap?.files;
   const many = !!snapFiles && readConfig(snapFiles).config.game?.mode === 'multiplayer';
   // Whether this server takes top-ups (ADR-0189): without payments (the open beta) no button of the lobby, the panel P or the credits' modal leads to one.
@@ -439,6 +459,9 @@ async function main() {
     const signed = account;
     if (signed) client.renewAuth = async () => ({ Authorization: `Bearer ${await signed.freshToken()}` });
     tools.konsole.onClone = (nome, master, titolari) => client.clone(nome, master, titolari);
+    // The private universe (ADR-0193): guests and invites, through the store's route, as the master.
+    tools.konsole.guests = (method, body) => client.guests(method, body);
+    tools.konsole.universeName = client.name;
   }
   kernel.bus.on('genesis:done', ({ title }) => hud.showBanner(title.toUpperCase(), 'Un nuovo universo è stato scritto. Il tappeto ti riporta al centro.', 4000));
 

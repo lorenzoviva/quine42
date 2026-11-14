@@ -13,6 +13,7 @@ import { promises as fs } from 'node:fs';
 import type { AccountSettings } from './account';
 import { bearer, failureText, gameIn, gate, isJson, refuse } from './access';
 import { runGit } from './git';
+import { CampaignArchive } from './campaign';
 import { openLedger } from './ledger';
 import { Rates, type Pace } from './rates';
 import { UNIVERSE_NAME_RE } from '../src/kernel/paths';
@@ -48,8 +49,8 @@ export const WANDERER_MODEL = 'viandante';
 export interface WandererView {
   id: string;
   universo: string;
-  /** How they are signed in: Google, anonymous, or no accounts on this server. */
-  account: 'google' | 'anonimo' | 'locale';
+  /** How they are signed in: Google, anonymous, an identity born of an invite (ADR-0193), or no accounts on this server. */
+  account: 'google' | 'anonimo' | 'invito' | 'locale';
   anonimo: boolean;
   profilo?: Profile;
   crediti: number;
@@ -134,6 +135,12 @@ export function keepProfileInFiles(files: FileMap, id: string, raw: unknown): { 
   return { repair, file, text };
 }
 
+/** Whether a private universe is there for who asks (ADR-0193): its master and its guests; the account's own wanderer, as `whoAsks` says it. */
+export function seesUniverse(opts: { accounts?: AccountSettings; universesDir: string; campaigns?: CampaignArchive }, universo: string, who: { id: string; account: WandererView['account'] }): boolean {
+  const campaigns = opts.campaigns ?? CampaignArchive.of(opts.universesDir);
+  return campaigns.lets(universo, { local: who.account === 'locale', id: who.id, anonimo: who.account === 'anonimo' }, undefined, opts.accounts?.masterUid);
+}
+
 /** Who asks: the account's wanderer (with a verifier), or the id the page says (without). */
 export async function whoAsks(
   accounts: AccountSettings | undefined,
@@ -144,7 +151,7 @@ export async function whoAsks(
     if (!token) return { status: 401, error: 'serve un account' };
     const a = await accounts.verify(token);
     if (!a) return { status: 401, error: 'accesso scaduto o non valido' };
-    return { id: accountWanderer(a.uid), account: a.anonymous ? 'anonimo' : 'google' };
+    return { id: accountWanderer(a.uid), account: a.anonymous ? 'anonimo' : accounts.invites ? 'invito' : 'google' };
   }
   const id = typeof asked === 'string' && asked ? asked.toLowerCase() : SOLO;
   if (!validWandererId(id)) return { status: 400, error: 'viandante non valido' };
@@ -179,6 +186,8 @@ function git(cwd: string, args: string[]): Promise<string> {
 export interface WandererRouteOptions {
   accounts?: AccountSettings;
   universesDir: string;
+  /** The private universes' guests (ADR-0193): those beside `universesDir` unless said. */
+  campaigns?: CampaignArchive;
   getActiveWorld?: (universe: string) => Promise<WorldCalls | undefined>;
 }
 
@@ -226,6 +235,8 @@ export function wandererHandler(opts: WandererRouteOptions): Connect.NextHandleF
         if (!UNIVERSE_NAME_RE.test(universo)) return send(res, 400, { ok: false, motivo: 'universo non valido' });
         const who = await whoAsks(opts.accounts, bearer(req), body.viandante ?? params.get('viandante'));
         if ('error' in who) return send(res, who.status, { ok: false, motivo: who.error });
+        // A private universe is not there for who is neither its master nor a guest (ADR-0193): as a name that does not exist.
+        if (!seesUniverse(opts, universo, who)) return send(res, 404, { ok: false, motivo: `universo sconosciuto: ${universo}` });
         const root = path.join(opts.universesDir, universo);
         const active = await opts.getActiveWorld?.(universo);
         if (!active) {

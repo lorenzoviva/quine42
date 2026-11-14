@@ -373,6 +373,15 @@ export interface UniverseClientOptions {
 }
 
 /** Client of the universe store (server/universeStore.ts): the browser's, or the session server's with an absolute `base` (T38). */
+/** A private universe as its master reads it (ADR-0193, server/campaign.ts): the guests, the invites still good by their names; `token` only once, when an invite is made. */
+export interface GuestsView {
+  ok?: boolean;
+  private: boolean;
+  guests: Array<{ id: string; since: number; by: string; note?: string; invite?: string }>;
+  invites: Array<{ id: string; made: number; expires: number; uses: number; left: number; note?: string }>;
+  token?: string;
+}
+
 export class UniverseClient implements UniverseBackend {
   private queue: Promise<unknown> = Promise.resolve();
   lastError = '';
@@ -663,6 +672,26 @@ export class UniverseClient implements UniverseBackend {
   async clone(nome: string, master: string, titolari: 'restano' | 'master' = 'restano'): Promise<string | null> {
     await this.afterCommits();
     return (await this.post('clone', { nome, master, titolari })).head ?? null;
+  }
+
+  /**
+   * The guests and the invites of this universe (ADR-0193): only its master. `GET` reads them; `POST` makes it private or public, adds a guest,
+   * makes an invite (its token in the answer, once); `DELETE` takes a guest out or revokes an invite. Throws with the store's reason.
+   */
+  async guests(method: 'GET' | 'POST' | 'DELETE', body?: Record<string, unknown>): Promise<GuestsView> {
+    const ask = () => fetch(this.url('guests'), { method, cache: 'no-store', headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...this.headers }, ...(body ? { body: JSON.stringify(body) } : {}) });
+    let r = await ask();
+    // A token that expired is renewed once (T265).
+    if (r.status === 401 && this.renewAuth) {
+      const fresh = await this.renewAuth().catch(() => undefined);
+      if (fresh) {
+        this.headers = fresh;
+        r = await ask();
+      }
+    }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new StoreAnswer(j.error ?? `HTTP ${r.status}`, r.status);
+    return { private: !!j.private, guests: Array.isArray(j.guests) ? j.guests : [], invites: Array.isArray(j.invites) ? j.invites : [], ...(typeof j.token === 'string' ? { token: j.token } : {}) };
   }
 
   /** What the master may bring before the start (T295). Throws with the store's reason (not the master, no store). */

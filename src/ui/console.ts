@@ -2,6 +2,7 @@
 // the AI gateway, the agent, import/export.
 
 import type { Kernel } from '../kernel/kernel';
+import type { GuestsView } from '../kernel/universes';
 import { tallyLine } from '../kernel/ai/usage';
 import { feePercent } from '../kernel/credits';
 import { $, el } from './dom';
@@ -30,6 +31,10 @@ export class Console {
   onGenesis?: () => void;
   /** The master of a multiplayer game (T42d): a copy of the universe with another master, under a new name. */
   onClone?: (nome: string, master: string, titolari: 'restano' | 'master') => Promise<string | null>;
+  /** The master of a multiplayer game (ADR-0193): the guests and the invites of a private universe, through the store. */
+  guests?: (method: 'GET' | 'POST' | 'DELETE', body?: Record<string, unknown>) => Promise<GuestsView>;
+  /** The universe's name on the server, for the invite's link: the folder's, which universe.json may not say. */
+  universeName?: string;
   dev = false;
 
   constructor(private kernel: Kernel) {
@@ -65,6 +70,11 @@ export class Console {
     clearInterval(this.timer);
     this.cardNote = '';
     this.arming = undefined;
+    // Read again at the next opening; an invite's link is not shown twice.
+    this.guestsSeen = undefined;
+    this.guestsNote = '';
+    this.inviteLink = '';
+    this.guestArming = undefined;
     this.onClose?.();
   }
 
@@ -255,11 +265,96 @@ export class Console {
           el('div', { class: 'row' }, genesis),
           el('div', { class: 'row' }, flush),
           ...clone,
+          ...this.guestRows(),
           ...creditiRows,
           el('div', { class: 'row' }, reset),
         ];
       }
     }
+  }
+
+  /** What the store last said of the guests, and the link of an invite just made: shown once, never kept. */
+  private guestsSeen?: GuestsView;
+  private guestsNote = '';
+  private inviteLink = '';
+  /** A guest whose «Togli» was pressed once: a second press takes them out (no browser dialog: it would stop the page). */
+  private guestArming?: { id: string; until: number };
+
+  /**
+   * The private universe (ADR-0193): whether it is, its guests and its invites, and the gestures that change them. In a private universe only the
+   * master and the guests come in; to anyone else it does not exist. An invite's link is shown once: the server keeps only its fingerprint.
+   */
+  private guestRows(): HTMLElement[] {
+    const k = this.kernel;
+    if (!this.guests || k.gameSetup().mode !== 'multiplayer') return [];
+    const box = el('div', { class: 'guests', 'data-guests': '' });
+    const ask = (method: 'GET' | 'POST' | 'DELETE', body?: Record<string, unknown>, done?: string) =>
+      this.guests!(method, body)
+        .then((v) => {
+          this.guestsSeen = v;
+          if (v.token) this.inviteLink = `${location.origin}/?universo=${encodeURIComponent(this.universeName ?? k.config.name)}#invito=${v.token}`;
+          if (done) this.guestsNote = done;
+        })
+        .catch((e: Error) => (this.guestsNote = `✗ ${e.message}`))
+        .finally(() => this.tab === 'universe' && this.isOpen && this.render());
+    const v = this.guestsSeen;
+    if (!v) {
+      if (!this.guestsNote) void ask('GET');
+      box.append(el('div', { class: 'note' }, this.guestsNote ? `Ospiti e inviti: ${this.guestsNote}` : 'Ospiti e inviti: lettura…'));
+      return [box];
+    }
+    const day = (ms: number) => new Date(ms).toLocaleDateString('it-IT');
+    const toggle = el('button', { class: v.private ? '' : 'primary' }, v.private ? 'Rendi pubblico' : 'Rendi privato');
+    toggle.onclick = () => void ask('POST', { op: 'private', value: !v.private }, v.private ? '✓ ora l’universo è pubblico: entra chiunque abbia un account' : '✓ ora l’universo è privato: chi era nel mondo è fra gli ospiti');
+    const rows: HTMLElement[] = [
+      el('div', { class: 'note' }, `Ospiti e inviti: questo universo è ${v.private ? 'PRIVATO: entrano solo il master e gli ospiti, agli altri non esiste (né nell’elenco né per nome)' : 'pubblico: entra chiunque abbia un account'}. Un invito vale 7 giorni e un uso se non dici altro; chi lo usa diventa ospite e da lì entra col suo account.`),
+      el('div', { class: 'row' }, toggle),
+    ];
+    for (const g of v.guests) {
+      const armed = this.guestArming?.id === g.id && this.guestArming.until > Date.now();
+      const out = el('button', { class: armed ? 'danger' : '' }, armed ? `Sicuro? Togli ${g.id}` : 'Togli');
+      out.onclick = () => {
+        if (!(this.guestArming?.id === g.id && this.guestArming.until > Date.now())) {
+          this.guestArming = { id: g.id, until: Date.now() + 5000 };
+          return this.render();
+        }
+        this.guestArming = undefined;
+        void ask('DELETE', { guest: g.id }, `✓ ${g.id} non è più un ospite: se era nel mondo ne è uscito`);
+      };
+      rows.push(el('div', { class: 'row', 'data-guest': g.id }, el('span', { class: 'id' }, g.id), `${g.note ? `«${g.note}» · ` : ''}dal ${day(g.since)}${g.invite ? ' con un invito' : ''}`, out));
+    }
+    for (const i of v.invites) {
+      const revoke = el('button', {}, 'Revoca');
+      revoke.onclick = () => void ask('DELETE', { invite: i.id }, '✓ invito revocato');
+      rows.push(el('div', { class: 'row', 'data-invite': i.id }, el('span', { class: 's' }, 'invito'), `${i.note ? `«${i.note}» · ` : ''}${i.left} su ${i.uses} usi · scade il ${day(i.expires)}`, revoke));
+    }
+    const id = el('input', { type: 'text', placeholder: 'id del viandante' }) as HTMLInputElement;
+    const note = el('input', { type: 'text', placeholder: 'nota (facoltativa)', maxlength: '80' }) as HTMLInputElement;
+    const add = el('button', {}, 'Aggiungi ospite');
+    add.onclick = () => {
+      const who = id.value.trim();
+      if (who) void ask('POST', { op: 'add', id: who, ...(note.value.trim() ? { note: note.value.trim() } : {}) }, `✓ ${who} è un ospite`);
+    };
+    const days = el('input', { type: 'number', min: '1', max: '30', value: '7', style: 'width: 4rem;' }) as HTMLInputElement;
+    const uses = el('input', { type: 'number', min: '1', max: '20', value: '1', style: 'width: 4rem;' }) as HTMLInputElement;
+    const inviteNote = el('input', { type: 'text', placeholder: 'per chi (facoltativo)', maxlength: '80' }) as HTMLInputElement;
+    const make = el('button', {}, 'Crea invito');
+    make.onclick = () => void ask('POST', { op: 'invite', days: Number(days.value) || 7, uses: Number(uses.value) || 1, ...(inviteNote.value.trim() ? { note: inviteNote.value.trim() } : {}) }, '✓ invito creato');
+    rows.push(el('div', { class: 'row' }, id, note, add), el('div', { class: 'row' }, 'giorni ', days, ' usi ', uses, inviteNote, make));
+    if (this.inviteLink) {
+      const link = el('input', { type: 'text', readonly: '', value: this.inviteLink, 'data-invite-link': '' }) as HTMLInputElement;
+      const copy = el('button', {}, 'Copia');
+      copy.onclick = () => void navigator.clipboard?.writeText(link.value).then(() => (copy.textContent = 'Copiato'));
+      const hide = el('button', {}, 'Nascondi');
+      hide.onclick = () => {
+        this.inviteLink = '';
+        this.render();
+      };
+      rows.push(el('div', { class: 'note' }, 'Il link dell’invito si vede solo ora: mandalo a chi inviti. Il server ne tiene solo l’impronta.'), el('div', { class: 'row' }, link, copy, hide));
+    }
+    if (this.guestsNote) rows.push(el('div', { class: 'note', 'data-guests-note': '' }, this.guestsNote));
+    box.append(...rows);
+    return [box];
   }
 
   /** What was said of the last card taken away (or not), until the console closes. */

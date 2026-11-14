@@ -8,7 +8,7 @@ import { hideUniverses } from './server/hidden';
 import { securityHeaders } from './server/csp';
 import { universeStore, universesPerAccount } from './server/universeStore';
 import { newSecret } from './server/access';
-import { sessionServer, getActiveWorld } from './server/session';
+import { sessionServer, getActiveWorld, expelFrom, tellPrivate, wanderersIn } from './server/session';
 import { accountRoute, accountSettings } from './server/account';
 import { stripeRoute, stripeSettings } from './server/stripe';
 import { queueWanted, subscriptionQueue } from './server/subscriptionQueue';
@@ -26,9 +26,9 @@ import { serverPath } from './server/folders';
 export default defineConfig(({ mode }) => {
   // '' prefix: read every variable, but only server-side. Nothing without VITE_ reaches the client.
   const env = loadEnv(mode, process.cwd(), '');
-  // Accounts (T44b): on only with FIREBASE_PROJECT_ID; the browser asks /api/account how to sign in.
-  const accounts = accountSettings(env);
   const universesDir = path.resolve(process.cwd(), 'universes');
+  // Accounts (T44b): on only with FIREBASE_PROJECT_ID, or with the invites' (QUINE_ACCOUNT=inviti, ADR-0193); the browser asks /api/account how to sign in.
+  const accounts = accountSettings(env, universesDir);
   // The only holder of the key (T123): models on a list, a daily cap; the route for the browser, `direct()` for the worlds of many.
   const gemini = new GeminiGate({ apiKey: env.GEMINI_API_KEY, dailyCap: env.GEMINI_TETTO_GIORNALIERO, universesDir, ledgerFile: serverPath(universesDir, 'geminiSpend') });
   // The only holder of TypeSafe's key (T348, ADR-0157): Jev's fixed versions, a daily cap; the route for the browser, `direct()` for the worlds.
@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => {
       geminiProxy(gemini),
       typesafeProxy(typesafe),
       // The cards a master brings before the start (T295): their programs checked here, as the handmade cards' (only this machine listens).
-      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()) }),
+      universeStore(universesDir, { accounts, internal, quota: universesPerAccount(env.QUINE_UNIVERSI_PER_ACCOUNT), checker: inlineChecker(), labs: () => labsOn(process.cwd()), worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate } }),
       accountRoute(accounts),
       // Without payments (the open beta, ADR-0189) not even here: the game and the site see what the production server would show.
       paymentsOf(env) !== 'off' && stripeRoute({

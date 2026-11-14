@@ -1353,6 +1353,34 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «il master paga tutto» come nome del campo (è il valore `master`), `payerOf` per chi viene addebitato (dice chi chiede), «sponsor»
 - **Fermo**: `universe.json → game.expenses` (`shared` assente, `master`), `world/usage.json → masterPaid`, `settings.game` del messaggio `join`.
 
+### Universo privato
+- **Inglese**: `Campaign`, `CampaignArchive`, `letsIn`, `privateWorld`, `setPrivate`
+- **Definizione**: un universo di molti dove entrano solo il master e gli ospiti; a chiunque altro non esiste, né nell'elenco né per nome (ogni rotta risponde come per un nome senza universo). Lo decide il master quando vuole, anche a partita in corso (chi era nel mondo diventa ospite); nasce pubblico, e un clone anche (ADR-0188, ADR-0193).
+- **Dove vive**: `server/campaign.ts`, `server/universeStore.ts`, `server/session.ts`, `src/ui/console.ts`
+- **Da non usare**: «campagna» per il file (la campagna è il modo di giocare: privato, spese al master, direttive), «universo chiuso», «whitelist»
+- **Fermo**: `universes/.campaign/<nome>.json → private`, il campo `private` del canale dei mondi (`WorldOpen`), la chiamata `setPrivate`.
+
+### Ospite
+- **Inglese**: `guests`, `guestOf`, `Guest`
+- **Definizione**: un viandante, per id, che il master lascia entrare nel suo universo privato: aggiunto per id o entrato con un invito; tolto, l'universo sparisce per lui e il suo socket si chiude.
+- **Dove vive**: `server/campaign.ts`
+- **Da non usare**: «invitato» per l'ospite (l'invito è il link), «membro», «giocatore ammesso»
+- **Fermo**: `universes/.campaign/<nome>.json → guests` (`since`, `by`, `note`, `invite`), la rotta `/api/universe/<nome>/guests`.
+
+### Invito
+- **Inglese**: `invites`, `Invite`, `redeem`, `redeemInvite`, `inviteHash`, `inviteName`
+- **Definizione**: un link che il master crea per il suo universo privato: un token casuale mostrato una volta sola, che vale 7 giorni e un uso se non dice altro; chi lo usa diventa ospite. Il server ne tiene solo l'impronta SHA-256; il master lo vede col suo nome (l'inizio dell'impronta) e lo revoca. Non è un'identità: lo diventa solo sul server senza Firebase (il verificatore a inviti).
+- **Dove vive**: `server/campaign.ts`, `src/session/login.ts`
+- **Da non usare**: «codice», «chiave», «pass»
+- **Fermo**: `universes/.campaign/<nome>.json → invites` (per impronta: `made`, `expires`, `uses`, `left`, `by`, `note`), `#invito=` nel link, l'operazione `redeem`.
+
+### Verificatore a inviti
+- **Inglese**: `inviteVerifier`, `IdentityBook`, `InviteIdentities`, `INVITE_PREFIX`, `OWNER_ID`
+- **Definizione**: chi dice chi è un viandante su un server senza Firebase (`QUINE_ACCOUNT=inviti`): un'identità è un token firmato col segreto del server (`QUINE_SEGRETO_INVITI`), con una scadenza, per un id `inv-…` che nessun account di Firebase può avere; nasce da un invito (o, per il padrone del server, da `npm run inviti`), è scritta nel libro delle identità e si revoca lì (ADR-0184 § 8, ADR-0193).
+- **Dove vive**: `server/invites.ts`, `server/account.ts`, `tools/inviti/cli.ts`
+- **Da non usare**: «login a inviti», «account a inviti» (non è un account: niente da recuperare se il browser lo perde)
+- **Fermo**: `universes/.identities.json`, il prefisso `inv-`, l'id `inv-owner`, `#accesso=` nel link del padrone, la chiave `quine:identity` di `localStorage`.
+
 ### Credito
 - **Inglese**: `credits`, `creditsOf`, `deductCredits`, `grantCredits`
 - **Definizione**: la moneta del gioco: un credito è un dollaro.

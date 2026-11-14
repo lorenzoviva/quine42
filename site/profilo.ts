@@ -21,7 +21,7 @@ export { formatCredits, pickUniverse, playLink };
 export interface WandererView {
   id: string;
   universo: string;
-  account: 'google' | 'anonimo' | 'locale';
+  account: 'google' | 'anonimo' | 'invito' | 'locale';
   anonimo: boolean;
   profilo?: Profile;
   crediti: number;
@@ -273,10 +273,10 @@ class ProfilePage {
     const p = v.profilo;
     $('wanderer-id').textContent = v.id;
     const badge = $('account-badge');
-    badge.className = `comic-badge ${v.account === 'google' ? 'green' : v.account === 'anonimo' ? 'yellow' : 'purple'}`;
-    badge.textContent = v.account === 'google' ? 'ACCOUNT GOOGLE' : v.account === 'anonimo' ? 'ANONIMO' : 'SENZA ACCOUNT';
+    badge.className = `comic-badge ${v.account === 'google' || v.account === 'invito' ? 'green' : v.account === 'anonimo' ? 'yellow' : 'purple'}`;
+    badge.textContent = v.account === 'google' ? 'ACCOUNT GOOGLE' : v.account === 'invito' ? 'SU INVITO' : v.account === 'anonimo' ? 'ANONIMO' : 'SENZA ACCOUNT';
     $('account-kind').textContent =
-      v.account === 'google' ? 'Google: il viandante ti segue ovunque' : v.account === 'anonimo' ? 'Anonimo: legalo a Google per non perderlo' : 'Identificativo diretto (server senza account)';
+      v.account === 'google' ? 'Google: il viandante ti segue ovunque' : v.account === 'invito' ? 'Entrato con un invito: su questo server il viandante ti segue finché il master non ti toglie' : v.account === 'anonimo' ? 'Anonimo: legalo a Google per non perderlo' : 'Identificativo diretto (server senza account)';
     $('wanderer-name').textContent = p?.name ?? 'non ancora scelto';
     $('wanderer-where').textContent = v.nelMondo ? 'sì, in cammino adesso' : v.noto ? 'no, il viandante riposa' : 'non è mai entrato in questo universo';
     $('wallet-amount').textContent = formatCredits(v.crediti);

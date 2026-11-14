@@ -11,12 +11,14 @@ import type { Duplex } from 'node:stream';
 import { accessRefusal, GeminiGate } from './geminiProxy';
 import { TypeSafeGate } from './typesafeProxy';
 import { isInternal, newSecret } from './access';
-import { accountHandler, accountSettings, type AccountSettings } from './account';
+import { ACCOUNT_MODES, accountHandler, accountModeOf, accountSettings, type AccountSettings } from './account';
+import { secretProblem } from './invites';
 import { contentSecurityPolicy } from './csp';
 import { settleAllGit } from './git';
 import { grantCapOf, PAYMENTS, paymentsOf, platformFeeOf } from './ledger';
 import { clientAddress, proxyHops, Rates, type Pace } from './rates';
-import { attachSessions, getActiveWorld, sessionList, type SessionOptions } from './session';
+import { attachSessions, expelFrom, getActiveWorld, sessionList, tellPrivate, wanderersIn, type SessionOptions } from './session';
+import { CampaignArchive } from './campaign';
 import { stripeHandler, stripeSettings } from './stripe';
 import { universeHandler, universesPerAccount } from './universeStore';
 import { videoFolder, videoHandler } from './video';
@@ -53,8 +55,17 @@ export function originsOf(text: string | undefined): { origins: string[]; bad: n
 export function productionProblems(env: Record<string, string | undefined>): string[] {
   const has = (k: string) => !!env[k]?.trim();
   const problems: string[] = [];
-  if (!has('FIREBASE_PROJECT_ID')) problems.push('FIREBASE_PROJECT_ID: senza chi verifica le identità, l’id detto da un client varrebbe per chiunque');
-  if (!has('FIREBASE_API_KEY')) problems.push('FIREBASE_API_KEY: senza, nessun browser può accedere');
+  // Who verifies identities (ADR-0193): Firebase, or for who hosts their friends without it the invite verifier, said and with its secret.
+  const mode = accountModeOf(env);
+  if (!mode) problems.push(`QUINE_ACCOUNT: o niente (Firebase) o «${ACCOUNT_MODES.invites}», scritto così`);
+  if (mode === 'invites') {
+    const bad = secretProblem(env.QUINE_SEGRETO_INVITI);
+    if (bad) problems.push(`QUINE_SEGRETO_INVITI: ${bad} (firma le identità nate dagli inviti)`);
+    if (has('FIREBASE_PROJECT_ID')) problems.push('QUINE_ACCOUNT=inviti con FIREBASE_PROJECT_ID: un verificatore solo, togline uno');
+  } else {
+    if (!has('FIREBASE_PROJECT_ID')) problems.push('FIREBASE_PROJECT_ID: senza chi verifica le identità, l’id detto da un client varrebbe per chiunque (o QUINE_ACCOUNT=inviti)');
+    if (!has('FIREBASE_API_KEY')) problems.push('FIREBASE_API_KEY: senza, nessun browser può accedere');
+  }
   // firebase-admin would take unsigned tokens.
   if (has('FIREBASE_AUTH_EMULATOR_HOST')) problems.push('FIREBASE_AUTH_EMULATOR_HOST: con l’emulatore un token senza firma varrebbe');
   // The open beta (ADR-0189): with the payments off, said, Stripe's routes are not there, and neither are their secrets' reasons.
@@ -251,8 +262,10 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   if (problems.length) throw new Error(`il server di produzione non parte:\n- ${problems.join('\n- ')}`);
 
   const { origins } = originsOf(o.env.QUINE_ORIGINI);
-  const accounts = o.accounts ?? accountSettings(o.env);
+  const accounts = o.accounts ?? accountSettings(o.env, o.universesDir);
   const universesDir = o.universesDir;
+  // The private universes' guests (ADR-0193): the store's route writes them, the sockets and the reads ask them.
+  const campaigns = CampaignArchive.of(universesDir);
   const internal = newSecret();
   const hops = proxyHops(o.env.QUINE_PROXY_FIDATI) ?? 0;
   const limits = { ...FRONT_RATES, ...o.rates };
@@ -286,12 +299,12 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
   const payments = paymentsOf(o.env) === 'on';
   const routes: Route[] = [
     // The cards a master brings before the start (T295): checked by the same processes as the handmade cards.
-    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true }),
+    universeHandler(universesDir, { accounts, internal, quota: universesPerAccount(o.env.QUINE_UNIVERSI_PER_ACCOUNT), checker, labs: () => o.labs === true, campaigns, worlds: { inWorld: wanderersIn, expel: expelFrom, tellWorld: tellPrivate } }),
     (req, res, next) => (req.url?.split('?')[0] === '/api/account' ? answerAccount(req, res) : next()),
     ...(payments ? [stripeHandler({ settings: stripeSettings(o.env), accounts, universesDir, getActiveWorld })] : []),
     wandererHandler({ accounts, universesDir, getActiveWorld }),
     walletHandler({ accounts, universesDir, getActiveWorld, platformFee: platformFeeOf(o.env) }),
-    sessionList(accounts),
+    sessionList(accounts, campaigns),
     videoHandler({ folder: videos, accounts, addressOf, atOnce: limits.videosAtOnce, inAll: limits.videosInAll }),
     handmadeHandler({ accounts, universesDir, labs: () => o.labs === true, checker }),
   ] as Route[];
@@ -346,6 +359,7 @@ export function createProductionServer(o: ProductionOptions): ProductionServer {
     program: async () => o.worldProgram,
     guard: (req) => frontDoorRefusal(req, origins),
     crowd: { addressOf, rate: (address) => socketRate.take(address), atOnce: limits.socketsAtOnce },
+    campaigns,
     ...o.sessions,
   });
   // Nothing else is a socket here: Vite's own is not there to take it.

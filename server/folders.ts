@@ -24,6 +24,10 @@ export const SERVER_FOLDERS = {
   typesafeSpend: ['.typesafe-spend.json'],
   /** The handmade cards, one file per account (ADR-0161, `handmade.ts`): born with the contract 0.4, it has no name of before. */
   handmade: ['.handmade'],
+  /** The private universes, one file per universe: guests, invites (ADR-0188, ADR-0193, `campaign.ts`): born with the contract 0.7, it has no name of before. */
+  campaign: ['.campaign'],
+  /** The identities the invite verifier made, for a server without Firebase (ADR-0184 §8, ADR-0193, `invites.ts`). */
+  identities: ['.identities.json'],
 } as const satisfies Record<string, readonly [string, string?]>;
 
 export type ServerFolder = keyof typeof SERVER_FOLDERS;
