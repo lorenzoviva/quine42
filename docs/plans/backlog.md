@@ -5558,3 +5558,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, screenshot prima e dopo alle due misure e su desktop.
 - Dipende da T389.
 - Quando è fatto: commit su `task/T390` con l'elenco dei difetti e quelli corretti. Sicurezza: nessuna superficie nuova.
+
+### T393 · Chiudere l'inventario e gli altri pannelli al tocco, su un telefono vero — `da fare`
+- Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2
+- Step: 43
+- Contesto: l'autore ha provato T387 sul telefono vero (14/11): il resto va, ma chiudere l'inventario è difficile, e forse anche altre interfacce. Oggi si chiude con Esc (al tocco il pulsante ✕ di T387) o con il tasto che lo apre; il pannello copre la scena e la croce o il ✕ sono piccoli o lontani. Nasce da T387: `dossier T387` (ADR-0198, `src/ui/touch.ts`, `src/ui/gestures.ts`). Tocca gli stessi file di T388 (`src/ui/`, `src/style.css`): per questo viene dopo.
+- Cosa fare: (1) censire tutti i pannelli e le finestre del gioco che si aprono (inventario, borsa delle rune, chat, mappa, profilo, menu delle azioni, pannelli dei moduli `ui`, contenitori, dialoghi, crediti, la finestra d'aiuto di T388) e come si chiudono oggi al tocco; (2) ognuno con un pulsante di chiusura ben visibile in alto a destra, di almeno 44 × 44 px CSS al tocco (token del tema, niente valori sparsi), e la chiusura toccando fuori dal pannello dove non si perde lavoro; (3) un pannello aperto non resta mai senza via d'uscita al tocco (niente che richieda un tasto); (4) desktop invariato salvo la croce, se oggi manca.
+- Test: un test che ogni pannello del censimento abbia una chiusura al tocco (o una funzione pura che lo dica); typecheck e suite verdi.
+- Browser: sì. A 844 × 390 con tocchi simulati (`pointerType: 'touch'`): ogni pannello del censimento si apre e si chiude con la croce e, dove previsto, toccando fuori; screenshot dell'inventario aperto; desktop invariato. Scrivere nell'esito la tabella del censimento. La prova sul telefono vero la fa l'autore.
+- Dipende da T388.
+- Quando è fatto: commit su `task/T393`, esito con il censimento e cosa è provato. Sicurezza: nessuna superficie nuova (solo client).

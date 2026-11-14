@@ -109,7 +109,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | raggiunto | T288 T289 T290 T291 T292 T301 T353 |
 | 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | raggiunto | T293 T294 T295 T296 |
 | 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | raggiunto | T306 T307a T314 T307b T308a T308b T309 T310 T310b T318 T328 |
-| 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in corso | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 T379 T381 T383 |
+| 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in corso | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 T379 T381 T383 T387 T388 T389 T390 T393 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 
