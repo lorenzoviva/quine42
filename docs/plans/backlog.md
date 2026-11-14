@@ -3882,9 +3882,9 @@ Il testo dell'autore: [`to-do-2026-11-04.md`](../userchats/to-do-2026-11-04.md).
 - Quando è fatto: commit su `task/T241`, con la tabella dei rapporti in `#sito`. Sicurezza: nessuna superficie nuova.
 - Esito: HUD e pannelli leggono la scala φ/Fibonacci da `src/theme.css` (spazi, corpi, interlinea, larghezze; inventario 322:521, bisogni 55:89), tabella in `#sito`, voce nel glossario, test che rifiuta `font`/`padding`/`margin`/`gap` in px a mano; corretti griglia dell'inventario stirata, parole lunghe fuori dai fumetti, barra dei tasti a capo a 1920. Restano fuori bordi, ombre, pallini delle legende e classi `comic-*` del sito. Non provato: un vero viewport a 1280 (simulato, `vw`/`vh` restano a 1920×919) e la guida H a 800 px di altezza. Sicurezza: nessuna superficie nuova. Typecheck e suite intera verdi (1871 test), `tests/theme.test.ts` rilanciato dopo la rimozione di `--phi`.
 
-### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `in attesa` (dipende da T156)
+### T242 · Il rapporto aureo nei prompt dello Scultore e dell'Artista — `da fare` (dipende da T156, fatto)
 - Pipeline: claude · stima 1% · approvato · priorità 33
-- Attesa (07/11, epoca 324): l'autore propone una metodologia nuova per i programmi MarkovJunior degli edifici, «ad alto livello per scomposizione del modello», che scriverà l'08/11; questo task tocca il prompt o la misura dello Scultore e aspetta quel testo (poi si riscrive o si sblocca).
+- Sbloccato (14/11, epoca 406, decisione A dell'autore): T156 è fatto; la riga va nel prompt delle strutture di oggi (ADR-0183).
 - Step: 33
 - Contesto: l'autore (04/11, `docs/pipeline/domande/T232.md`): nel mondo solo come indicazione per ciò che si genera da qui in poi. **I modelli esistenti non si toccano e non si rigenerano:** potrebbe costare caro.
 - Cosa fare: una riga di principio (proporzioni auree, spirali di Fibonacci dove ha senso: piante, conchiglie, scale, cupole) nel prompt dello Scultore e nella guida di stile dell'Artista, nel seme. Misura sul banco, con pochi tentativi, che non peggiori qualità e varianza.
@@ -4431,7 +4431,8 @@ L'autore: i modelli più cari non sono per forza i migliori (legge Opus 5.5 sopr
 
 ### T287 · La scelta della veste: subito dall'autore, o col voto dei beta tester — `in attesa` (dipende da T284, T285, T286, T315)
 - D38 A (autore, 05/11): il filone del prompt 7 (le orecchie) resta fuori dal sito della beta, niente quarta veste; le orecchie restano un'idea per monete e carte.
-- Step: 34
+- Spostato (14/11, epoca 406, decisione C dell'autore): dallo step 34 (Fase I) al 38 (Fase IV), dove `fasi.md` mette il contatore delle vesti.
+- Step: 38
 - Contesto: l'autore confronta le tre vesti. Se una è nettamente superiore la sceglie subito; altrimenti decidono i tester. Il testo in `docs/userchats/to-do-2026-11-05.md`. Lo riscrive e lo stima l'orchestratore alla risposta dell'autore.
 - Se sceglie subito: restano la veste scelta e, solo se è la futuristica o la fumetto, le sue conseguenze (senza showcase se è MJ; i fumetti degli NPC in gioco se è la fumetto).
 - Se si vota: lo switch in alto e una scelta per account, che si può cambiare, registrata dal server. Una rotta nuova passa da `gate` e dall'elenco di `server/production.ts`, con il suo ritmo in `FRONT_RATES`; i voti stanno sotto `universes/` in una cartella che non si serve, e i conti li legge solo il master. Due parole per i tester nella guida della beta. Sicurezza: voci nuove.
@@ -4856,7 +4857,7 @@ Nasce da T156 (`dossier T156`, `docs/pipeline/domande/T156.md`, risposta C scelt
 **Quando è fatto:** test nuovi, `npm test` e `npm run typecheck` verdi nei loro turni; esito con il tempo misurato per seme. Non serve il browser. Sicurezza: nessuna superficie nuova.
 - Esito: portata la misura dei piani raggiungibili a piedi nel kernel (src/kernel/forms.ts: reachableStoreys) e aggiunta a checkProgram per structure da Grande in su con motivo di scarto leggibile 'piani: <n> (serve ≥ 2)'; costo medio ~90 ms per seme; kernel 0.4.3, ADR-0162, typecheck e suite intera di test (170/170 file) verdi nei loro turni.
 
-### T321 · Lo Scultore su Gemini 3.8 Flash: il prompt adattato e un giro sul banco — `in attesa` (dipende da T320)
+### T321 · Lo Scultore su Gemini 3.8 Flash: il prompt adattato e un giro sul banco — `fatto` (superato da T355, decisione A dell'autore 14/11: la misura dello Scultore su Gemini la fa T355)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
 - Attesa (07/11, epoca 324): l'autore propone una metodologia nuova per i programmi MarkovJunior degli edifici, «ad alto livello per scomposizione del modello», che scriverà l'08/11; questo task tocca il prompt o la misura dello Scultore e aspetta quel testo (poi si riscrive o si sblocca).
 - Step: 32
