@@ -4,6 +4,9 @@
 // their branch (T42b): they try them alone, and «Pubblica» gives them to the world.
 
 import type { Kernel } from '../kernel/kernel';
+import { CAMPAIGN_FILE, campaignTemplate, readCampaign } from '../kernel/campaign';
+import { wordsOf } from '../kernel/agents/council';
+import { languageOf } from '../kernel/language';
 import { $, el } from './dom';
 
 export class Editor {
@@ -68,7 +71,8 @@ export class Editor {
   }
 
   private renderList(): void {
-    const paths = Object.keys(this.kernel.files).sort();
+    // The master's directives are always there to write (T374), even before the first one.
+    const paths = [...new Set([...Object.keys(this.kernel.files), CAMPAIGN_FILE])].sort();
     this.list.replaceChildren(
       ...paths.map((p) => {
         const item = el('div', { class: `file${p === this.path ? ' on' : ''}` }, p);
@@ -81,7 +85,7 @@ export class Editor {
   private load(path: string, line: number): void {
     this.path = path;
     this.title.textContent = `§ ${path}`;
-    this.area.value = this.kernel.files[path] ?? '';
+    this.area.value = this.kernel.files[path] ?? (path === CAMPAIGN_FILE ? campaignTemplate(languageOf(this.kernel.files)) : '');
     this.updateGutter();
     this.forceBtn.hidden = true;
     this.setStatus(`HEAD ${this.kernel.repo.head().id} — ${this.kernel.repo.head().message}`, 'info');
@@ -122,9 +126,19 @@ export class Editor {
     }
     this.forceBtn.hidden = true;
     this.updatePublish();
-    if (r.committed && this.kernel.publisher) this.setStatus(`✓ nel tuo ramo — commit ${this.kernel.repo.head().id}; il mondo lo vede quando pubblichi`, 'ok');
-    else if (r.committed) this.setStatus(`✓ ricaricato a caldo — commit ${this.kernel.repo.head().id}`, 'ok');
+    if (r.committed && this.kernel.publisher) this.setStatus(`✓ nel tuo ramo — commit ${this.kernel.repo.head().id}; il mondo lo vede quando pubblichi${this.leftOut()}`, 'ok');
+    else if (r.committed) this.setStatus(`✓ ricaricato a caldo — commit ${this.kernel.repo.head().id}${this.leftOut()}`, 'ok');
     else this.setStatus('⚠ scritto, ma l\'universo è rotto: nessun commit. R (fuori dall\'editor) per tornare indietro.', 'err');
+  }
+
+  /** Of the master's directives, the lines the fourth wall keeps out of the requests (T374): said, not refused (rule 3). */
+  private leftOut(): string {
+    if (this.path !== CAMPAIGN_FILE) return '';
+    const files = this.kernel.files;
+    const left = readCampaign(this.area.value, { words: wordsOf(files), lang: languageOf(files) }).left;
+    if (!left.length) return '';
+    const shown = left.slice(0, 3).map((l) => `«${l.line.replace(/^[-*]\s+/, '').slice(0, 50)}» (nel mondo non si dice «${l.reason}»)`);
+    return ` — ${left.length === 1 ? 'una riga resta' : `${left.length} righe restano`} fuori dalle richieste: ${shown.join('; ')}`;
   }
 
   /** «Pubblica (n)» while the master's branch has files the world does not. */

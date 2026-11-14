@@ -21,6 +21,9 @@ import { publicFiles } from '../src/session/files';
 import { universeHandler } from '../server/universeStore';
 import { LobbyScreen } from '../src/ui/lobby';
 import { develop } from './world';
+import { WORLD_THEMES } from '../src/kernel/themes';
+import { CAMPAIGN_FILE, CAMPAIGN_SECTIONS, campaignSectionsFor } from '../src/kernel/campaign';
+import type { DecisionCall, DecisionModels } from '../src/kernel/ai/decisions';
 
 const DT = 1 / 60;
 
@@ -620,5 +623,70 @@ describe('la lobby', () => {
     slider.oninput!();
     enter();
     expect(repairCoefficients((await done).regolazioni?.coefficients).chunks).toBe(0.5);
+  });
+});
+
+describe('le direttive del master nei prompt (T374)', () => {
+  /** A mark in every section of world/campaign.md, and a line the fourth wall keeps out. */
+  const MARKS = { all: 'segno-tutti', narrator: 'segno-narratore', cartographer: 'segno-cartografo', 'sculptor-artist': 'segno-scultore', 'engineer-physicist': 'segno-ingegnere', musician: 'segno-musicista' } as const;
+  const CAMPAIGN = [
+    '# Campagna',
+    '## Per tutti',
+    '- niente draghi a nord del fiume (segno-tutti)',
+    '- la simulazione non finisce mai (segno-meta)',
+    '## Narratore',
+    '- la gente parla in lingua arcaica (segno-narratore)',
+    '## Cartografo',
+    '- i luoghi prendono nomi di erbe (segno-cartografo)',
+    '## Scultore e Artista',
+    '- le case di pietra a nord, di legno a sud (segno-scultore)',
+    '## Ingegnere e Fisico',
+    '- le barche reggono al più due persone (segno-ingegnere)',
+    '## Musicista',
+    '- solo flauti e tamburi (segno-musicista)',
+    '',
+  ].join('\n');
+
+  class Recorder extends MockAiModels {
+    requests: Array<{ agent: string; task: string; system: string; prompt: string }> = [];
+    async text(call: TextCall): Promise<string> {
+      this.requests.push({ agent: call.agent ?? '', task: call.task, system: call.system ?? '', prompt: call.prompt });
+      return super.text(call);
+    }
+  }
+
+  it('ogni richiesta registrata porta la sezione di tutti e la sua, mai le altre; le decisioni chiuse niente', async () => {
+    const models = new Recorder();
+    const cfg = JSON.parse(bundledFiles['universe.json']);
+    const files = { ...bundledFiles, [CAMPAIGN_FILE]: CAMPAIGN, 'universe.json': JSON.stringify(cfg, null, 2) };
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: models });
+    // Jev, recorded: whatever it is asked, the rule.
+    const asked: DecisionCall[] = [];
+    const jev: DecisionModels = { name: 'jev-finto', decide: async (call) => (asked.push(call), call.rule) };
+    k.council.decisions = jev;
+    // The requests of a Genesis offline and of the first places, as `lab/scripts/prompt-tokens.ts --capture` records them.
+    await k.runGenesis(WORLD_THEMES[0].text);
+    await develop(k);
+    // The teams the world did not call while it grew: each once, as their tasks do.
+    for (const agent of ['sculptor', 'artist', 'musician', 'actor', 'liaison', 'engineer', 'physicist'] as AgentId[]) await k.council.write(agent, 'prova', 'p').catch(() => undefined);
+    expect(new Set(models.requests.map((r) => r.agent)).size).toBeGreaterThanOrEqual(9);
+    for (const r of models.requests) {
+      const mine = campaignSectionsFor(r.agent as AgentId);
+      for (const s of CAMPAIGN_SECTIONS) expect(r.system.includes(MARKS[s]), `${r.agent} ${r.task}: ${s}`).toBe(mine.includes(s));
+      expect(r.system + r.prompt, `${r.agent} ${r.task}`).not.toMatch(/segno-meta/);
+    }
+    expect(models.requests.filter((r) => r.agent === 'actor').every((r) => !/segno-narratore/.test(r.system))).toBe(true);
+    // The closed decisions get the state of the world, never the master's text.
+    expect(asked.length).toBeGreaterThan(0);
+    for (const call of asked) expect(JSON.stringify(call)).not.toMatch(/segno-/);
+    // The line left out is said once, to the master.
+    expect(k.feed().filter((e) => /segno-meta/.test(e.text))).toHaveLength(1);
+  });
+
+  it('senza direttive le richieste sono quelle di prima', async () => {
+    const models = new Recorder();
+    const { k } = await boot({}, {}, models as unknown as Online);
+    await k.council.write('narrator', 'npc.reply', 'ciao');
+    expect(models.requests[0].system).not.toMatch(/master's directives/);
   });
 });

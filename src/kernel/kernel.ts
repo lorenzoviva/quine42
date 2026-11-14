@@ -13,6 +13,8 @@ import { councilMayWrite } from './paths';
 import { Corona, campusModel, coronaNearby, coronaShown, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
 import { Archive } from './archive';
 import { bibleBreaks, cleanBible, metaBreak } from './fourthwall';
+import { CAMPAIGN_FILE, directiveDay, directiveText, sectionOf, sectionTitle, withDirective, type CampaignSection } from './campaign';
+import { languageOf } from './language';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
@@ -5050,6 +5052,27 @@ export class Kernel {
     }
   }
 
+  /**
+   * A directive of the master into `world/campaign.md` (T374, ADR-0188 §4, ADR-0191): only the master (alone, always), a text of a player
+   * (`cleanText`, one line, at most `DIRECTIVE_CHARS`), the local filter of the fourth wall (`metaBreak`: the master's words never go to Jev,
+   * D54.5; `wall` when it refuses), the caps of its section and of the file, dated with the day of the world, then a commit of the kernel. A
+   * section nobody reads is «for everyone». It is not a card: the file says how the world is made, the graph says what is in it.
+   */
+  addDirective(section: unknown, text: unknown): { ok: true; section: CampaignSection; line: string } | { ok: false; reason: string; wall?: true } {
+    if (!this.isMaster()) return { ok: false, reason: 'solo il master scrive le direttive della campagna' };
+    const lang = languageOf(this.files);
+    const d = directiveText(text, { words: wordsOf(this.files), lang });
+    if ('error' in d) return { ok: false, reason: d.error, ...(d.wall ? { wall: true as const } : {}) };
+    const s = sectionOf(section) ?? 'all';
+    const next = withDirective(this.files[CAMPAIGN_FILE], s, `(${directiveDay(this.day(), lang)}) ${d.text}`, lang);
+    if ('error' in next) return { ok: false, reason: next.error };
+    this.repo.write(CAMPAIGN_FILE, next.text);
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`direttiva (${sectionTitle(s, lang)}): ${d.text.slice(0, 60)}`, 'agent');
+    this.council.say('liaison', 'info', `direttiva per «${sectionTitle(s, lang)}»: ${d.text}`, s === 'all' ? undefined : s === 'sculptor-artist' ? 'sculptor' : s === 'engineer-physicist' ? 'engineer' : s, 'referente.coordinate');
+    return { ok: true, section: s, line: d.text };
+  }
+
   /** What the gallery shows: every thing of this universe that has (or will have) a model. */
   private exhibits(files: FileMap): Exhibit[] {
     const out: Exhibit[] = [];
@@ -5928,6 +5951,24 @@ export class Kernel {
       }
       case 'music':
         return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
+      case 'directive': {
+        // The master's directives (T374, ADR-0191): only the master gives them; one that breaks the fourth wall goes back to the
+        // Referente once, with the reason, and what still breaks it does not go in.
+        let made = this.addDirective(r.section, req);
+        let say = r.say;
+        if (!made.ok && made.wall) {
+          const again = await liaisonReply(this.council, history, text, made.reason).catch(() => undefined);
+          if (again?.task === 'directive') {
+            made = this.addDirective(again.section, again.request ?? req);
+            say = again.say;
+          } else if (again?.refusal) made = { ok: false, reason: again.refusal };
+        }
+        if (!made.ok) {
+          lacking('invalid', made.reason);
+          return { say, forged: `La direttiva non entra: ${made.reason.replace(/^la direttiva: /, '')}` };
+        }
+        return { say, forged: `Nelle direttive, per «${sectionTitle(made.section, languageOf(this.files))}»: ${made.line}` };
+      }
       case 'resculpt': {
         const target = this.findExhibit(r.target ?? req);
         if (!target) {

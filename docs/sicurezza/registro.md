@@ -406,6 +406,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/produzione.test.ts`
 - Esito: chiusa da T361 (ADR-0189), 13/11/2026, branch `task/T361`: le contromisure nascono con la modalità.
 
+### V-036 · Le direttive del master nei prompt del Concilio
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: `world/campaign.md` (`src/kernel/campaign.ts`), `Council.context` (`src/kernel/agents/council.ts`), l'incarico `directive` del Referente (`liaisonReply`, `Kernel.addDirective`), l'editor (`src/ui/editor.ts`), il ramo del master e la pubblicazione (`src/session/server.ts`)
+- Proprietà violata: il testo del master entra in ogni richiesta del Concilio: lo scrive solo il master (in una partita di molti né un giocatore, né un anonimo, né il mondo), è una riga per direttiva senza markup né caratteri invisibili entro i tetti, ciò che rompe la quarta parete non arriva agli agenti, e il testo non esce dal server: né a un client che non è il master (`playerFiles`, `publicFiles`, le modifiche sul filo) né a Jev (le decisioni chiuse ricevono lo stato del mondo, mai il testo libero di chi gioca, D45.3, D54.5)
+- Prova: test (T374)
+- Contromisura: il file non è in `playerFiles` né in `publicFiles` (gli elenchi della regola 8f); l'incarico `directive` e `addDirective` solo per `isMaster()`, il messaggio `agent` e il ramo solo del master (`askOnBranch`, `takeBranch`), la pubblicazione passa dal validatore (`readCampaign`: sezioni note, niente testo fuori, 4.000 caratteri per sezione e 12.000 per il file); `cleanText` (una riga, niente `<` né `>`, niente caratteri di controllo o invisibili, al più 300 caratteri) e `metaBreak` locale su ogni direttiva e su ogni riga del file (una riga che rompe la quarta parete resta fuori dalle richieste e il master lo legge una volta nel registro del Concilio); `Council.decide` non porta mai il contesto degli agenti, e la direttiva non passa da `Council.fourthWall`
+- Task: T374
+- Test: `tests/sicurezza/direttive.test.ts`, `tests/campagna.test.ts`, `tests/regolazioni.test.ts`
+- Esito: chiusa da T374 (ADR-0191), 14/11/2026, branch `task/T374`: le contromisure nascono con il file.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -447,6 +458,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-033 | — | — | `carte-portate.test.ts` | le carte portate si provano sullo store con gli account finti: tests/sicurezza/carte-portate.test.ts |
 | V-034 | — | — | `typesafe.test.ts`, `produzione.test.ts`, `mondo.test.ts` | il kit non ha la chiave di TypeSafe e non esce sulla rete: il varco si prova con TypeSafe finto, tests/sicurezza/typesafe.test.ts |
 | V-035 | — | — | `produzione.test.ts` | la modalità senza pagamenti e il controllo di salute si provano sul server di produzione vero: tests/sicurezza/produzione.test.ts |
+| V-036 | — | — | `direttive.test.ts` | le direttive del master si vedono solo dentro il kernel e nei file che escono: le prova tests/sicurezza/direttive.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

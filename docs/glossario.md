@@ -1082,6 +1082,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `referenteReply`, `askReferente`
 - **Fermo**: il valore `referente` di `AgentId`, come gli altri agenti.
 
+### Direttive del master
+- **Inglese**: `campaign`, `CAMPAIGN_FILE`, `CampaignSection`, `readCampaign`, `campaignPrompt`, `campaignSectionsFor`, `addDirective`, `directive`
+- **Definizione**: come il master vuole che il mondo si faccia da qui in avanti, in `world/campaign.md`, a sezioni per squadra; ogni richiesta del Concilio porta la sua sezione e quella di tutti; le scrive il master nell'editor o il Referente per lui (T374, ADR-0191).
+- **Dove vive**: `src/kernel/campaign.ts`, `src/kernel/agents/council.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: «memoria degli agenti», «istruzioni del master»
+- **Fermo**: `world/campaign.md`, gli id delle sezioni (`all`, `narrator`, `cartographer`, `sculptor-artist`, `engineer-physicist`, `musician`) e l'incarico `directive`; i titoli delle sezioni nel file sono nella lingua del mondo.
+
 ### Musicista
 - **Inglese**: `Musician`, `musicista`, `compose`, `ComposeRequest`, `composerRole`, `ScoreDirector`, `composing`
 - **Definizione**: l'agente che scrive i programmi sonori di ciò che il mondo e il viandante chiedono; abita nella casa dell'Artista.

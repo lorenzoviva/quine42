@@ -11,6 +11,7 @@ import { compileMjx } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
+import { cleanText } from './cleantext';
 import { portedProgram } from './migrations';
 import { fingerprint, HANDMADE_ID_RE, readOrigins, type CardOrigin } from './heritage';
 import { soundErrors, WORLD_NODE_LIMITS, worldNodeErrors } from './validator';
@@ -111,20 +112,8 @@ export function newHandmadeId(bytes: Uint8Array): string {
 export const NAME_MAX = 60;
 export const SIGNATURE_MAX = 40;
 
-/**
- * A text a player wrote, for a page and maybe a world: one line, at most `max` characters, at least a letter or a digit, no markup, no
- * control or invisible character (no bidirectional override that turns it round on a page). Spaces collapse; nothing else is changed:
- * what is wrong goes back with the reason.
- */
-export function cleanText(raw: unknown, max: number, what: string): { text: string } | { error: string } {
-  if (typeof raw !== 'string') return { error: `${what}: serve un testo` };
-  const text = raw.normalize('NFC').replace(/\s+/gu, ' ').trim();
-  if (/[\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}]/u.test(text)) return { error: `${what}: contiene caratteri invisibili o di controllo` };
-  if (/[<>]/.test(text)) return { error: `${what}: niente «<» né «>»` };
-  if (!/[\p{L}\p{N}]/u.test(text)) return { error: `${what}: serve almeno una lettera o una cifra` };
-  if ([...text].length > max) return { error: `${what}: al più ${max} caratteri` };
-  return { text };
-}
+/** A text a player wrote, cleaned to one line: it lives in cleantext.ts (T374), light, and is said here for who imports it from the cards. */
+export { cleanText };
 
 /** A card's name: a text of a player that may one day be the name of a thing in a world, so the fourth wall holds for it too (ADR-0025). */
 export function cleanCardName(raw: unknown): { text: string } | { error: string } {

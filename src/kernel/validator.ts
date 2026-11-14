@@ -24,6 +24,7 @@ import { wornErrors } from '../mj/worn';
 import { FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
+import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
@@ -405,6 +406,8 @@ export class Validator {
       return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)));
     }
     if (/^models\/[^/]+\.txt$/.test(path)) return ruleFileErrors(path, content);
+    // The master's directives (T374): sections the Council reads, within their caps; what breaks the fourth wall is left out, not an error.
+    if (path === CAMPAIGN_FILE) return readCampaign(content).errors;
     if (path.endsWith('manifest.json')) return this.parseManifest(path, content).errors;
     if (path.endsWith('.json')) {
       try {
