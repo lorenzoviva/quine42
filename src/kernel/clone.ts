@@ -112,7 +112,9 @@ export function cloneChanges(files: FileMap, opts: CloneOptions): { changes: Fil
   const from: string = validWandererId(game.master) ? game.master : SOLO;
   if (from === opts.master) throw new Error(`«${opts.master}» è già il master di questo universo`);
   const changes: FileMap = inheritCards(files, typeof raw.name === 'string' ? raw.name : '', from, opts.titolari === 'master' ? opts.master : undefined);
-  // A clone may still bring cards, until the first wanderer enters it (T295, ADR-0170): the kernel closes the choice then.
-  changes['universe.json'] = JSON.stringify({ ...raw, name: opts.nome, game: { ...game, master: opts.master }, cardChoice: 'clone' }, null, 2) + '\n';
+  // A clone may still bring cards, until the first wanderer enters it (T295, ADR-0170): the kernel closes the choice then. Who pays for the
+  // match is not the game chosen at the Genesis but the old master's word (T372, ADR-0188): the new master pays for nobody until they say so.
+  const kept = Object.fromEntries(Object.entries(game as Record<string, unknown>).filter(([k]) => k !== 'expenses'));
+  changes['universe.json'] = JSON.stringify({ ...raw, name: opts.nome, game: { ...kept, master: opts.master }, cardChoice: 'clone' }, null, 2) + '\n';
   return { changes, from };
 }

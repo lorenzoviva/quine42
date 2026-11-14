@@ -2,14 +2,15 @@
 // master, and only the master, set every knob of the consumption while no match is under way: preset, coefficients, models, budgets and
 // minimums, with the estimate of an hour following the values. What it sets goes in with the master (`entra`): the server repairs it, refuses
 // it to anyone else and during a match. Then the entering wanderer's ceiling (which adds to the budgets) and their cards. Alone
-// (`alone`) it is the same screen without what is about other people.
+// (`alone`) it is the same screen without what is about other people. Who pays for the match (T372, ADR-0188): the master chooses it
+// here with the rest; where the master pays, a player has no ceiling to set and reads that the match is the master's to pay.
 
 import { collectionOf } from '../kernel/cards';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, repairActor, repairCoefficients, type CoefficientKey } from '../kernel/coefficients';
 import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { internalSculptors } from '../kernel/internalNames';
 import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
-import type { AiSettings, FileMap } from '../kernel/types';
+import type { AiSettings, FileMap, GameExpenses, LobbySettings } from '../kernel/types';
 import { usd } from '../kernel/ai/prices';
 import { checkKernelVersion, KERNEL_VERSION } from '../kernel/version';
 import type { BringAnswer, BringRef, KinView } from '../kernel/bring';
@@ -40,8 +41,8 @@ export interface LobbyOptions {
 export interface LobbyResult {
   tetto: number;
   offline?: boolean;
-  /** What the master set here (T247); only when they changed something. */
-  regolazioni?: AiSettings;
+  /** What the master set here (T247, and who pays the match, T372); only when they changed something. */
+  regolazioni?: LobbySettings;
 }
 
 const BUDGET_NAMES: Record<BudgetKey, string> = {
@@ -102,6 +103,9 @@ export class LobbyScreen {
     // Everyone sees the settings; the master, and only the master, sets them, while no match is under way (the server refuses the rest).
     const isMaster = !!alone || wandererId === master;
     const editable = isMaster && !inCorso;
+    // Who pays for the match (T372, ADR-0188): where the master pays, a player spends nothing of theirs and has no ceiling to set.
+    const masterPays = !alone && config.game?.expenses === 'master';
+    const ownPurse = !masterPays || isMaster;
     const lockIf = <T extends HTMLInputElement | HTMLSelectElement>(c: T): T => {
       c.disabled = !editable;
       return c;
@@ -226,8 +230,30 @@ export class LobbyScreen {
     };
     showPreset();
     showEstimate();
+
+    // Who pays for the match (T372): the master chooses, everyone reads it; alone there is nobody to pay for.
+    const expenses = lockIf(
+      el('select', { id: 'lobby-spese' }, el('option', { value: 'shared' }, 'Ognuno paga le sue richieste'), el('option', { value: 'master' }, isMaster ? 'Pago io tutta la partita' : 'Paga il master')) as HTMLSelectElement,
+    );
+    expenses.value = masterPays ? 'master' : 'shared';
+    const expensesNote = el('div', { class: 'note' });
+    const showExpenses = () => {
+      const paid = expenses.value === 'master';
+      expensesNote.textContent = isMaster
+        ? paid
+          ? 'Ogni richiesta del mondo e dei viandanti si scala dal tuo saldo: chi entra non usa i suoi crediti e il tetto che conta è il tuo. Le carte che nascono sono tue. A saldo finito, o al tuo tetto, tutti giocano con i modelli locali. Chi entra con un account anonimo resta ai modelli locali.'
+          : 'Ognuno paga le richieste che fa; le spese comuni del mondo si dividono fra chi è collegato.'
+        : paid
+          ? 'In questo mondo paga il master: entri senza usare i tuoi crediti. Le carte che nascono sono del master. Se i suoi crediti finiscono, tutti giocano con i modelli locali.'
+          : 'Ognuno paga le richieste che fa; le spese comuni del mondo si dividono fra chi è collegato.';
+    };
+    expenses.onchange = showExpenses;
+    showExpenses();
+    const expensesRow = alone ? '' : el('div', { class: 'expenses-row' }, field('Chi paga la partita', expenses), expensesNote);
+    /** What the lobby brings in: the knobs, and (not alone) who pays. */
+    const readAll = (): LobbySettings => ({ ...read(), ...(alone ? {} : { game: { expenses: expenses.value as GameExpenses } }) });
     /** What the master found on opening, to send only what they changed. */
-    const opened = JSON.stringify(read());
+    const opened = JSON.stringify(readAll());
 
     const lockedNote = inCorso ? 'La partita è in corso: le regolazioni restano queste per chiunque, anche per il master. Si possono cambiare quando nel mondo non c’è più nessuno.' : '';
     const howLong = alone ? 'Si fissano entrando: durante la partita non cambiano. Si regolano di nuovo la prossima volta che apri questo universo.' : 'Si fissano entrando: durante la partita nessuno le cambia, nemmeno il master. Si regolano di nuovo quando nel mondo non c’è più nessuno.';
@@ -236,6 +262,7 @@ export class LobbyScreen {
       { class: 'lobby-section master-settings' },
       el('div', { class: 'section-title' }, alone ? 'Le regolazioni del consumo' : 'Impostazioni dell’universo (stabilite dal master)'),
       lockedNote ? el('div', { class: 'locked-note' }, lockedNote) : el('div', { class: 'note' }, isMaster ? howLong : `Le stabilisce il master. ${howLong}`),
+      expensesRow,
       estimateRow,
       el('div', { class: 'settings-grid' }, field('Dettaglio', preset), field('Modello del Concilio', text), field('Ragionamento', thinking)),
       el('div', { class: 'settings-title' }, 'Modelli'),
@@ -263,7 +290,8 @@ export class LobbyScreen {
       const items: HTMLElement[] = [];
       if (minimi.textModel) items.push(el('div', {}, `Modello testo minimo: ${minimi.textModel}`));
       if (internalSculptors(minimi.sculptors ?? {}).structure) items.push(el('div', {}, `Strutture minime: ${internalSculptors(minimi.sculptors ?? {}).structure}`));
-      if (minimi.cap !== undefined) items.push(el('div', {}, `Tetto minimo d’ingresso: ${usd(minimi.cap)}`));
+      // Where the master pays a player brings no ceiling: there is no minimum to ask of them (T372).
+      if (minimi.cap !== undefined && ownPurse) items.push(el('div', {}, `Tetto minimo d’ingresso: ${usd(minimi.cap)}`));
       if (minimi.coefficients) {
         items.push(el('div', {}, 'Coefficienti minimi imposti dal master'));
       }
@@ -278,7 +306,7 @@ export class LobbyScreen {
     }
 
     // Wanderer & Tetto block
-    const minCap = editable ? Math.max(0, Number(minCapField.value) || 0) : (minimi?.cap ?? 0);
+    const minCap = !ownPurse ? 0 : editable ? Math.max(0, Number(minCapField.value) || 0) : (minimi?.cap ?? 0);
     const defaultCap = isAnonymous ? 0 : Math.max(minCap, Math.min(1.0, credits > 0 ? credits : 1.0));
     const capInput = el('input', {
       type: 'number',
@@ -318,17 +346,21 @@ export class LobbyScreen {
           isAnonymous ? '0.00 $ (Account anonimo: modelli locali)' : usd(credits),
         ),
       ),
-      el(
-        'div',
-        { class: 'tetto-form' },
-        el('label', {}, el('strong', {}, 'Tetto di spesa per questa sessione: ')),
-        el('div', { class: 'tetto-controls' }, capInput, preset1, preset2, preset5, presetAll),
-        el(
-          'div',
-          { class: 'note' },
-          'Il tetto stabilisce la spesa massima autorizzata per questa sessione e si somma ai budget di IA dell’universo. Se esaurito durante il gioco, continuerai a giocare offline con i modelli locali.',
-        ),
-      ),
+      ownPurse
+        ? el(
+            'div',
+            { class: 'tetto-form' },
+            el('label', {}, el('strong', {}, 'Tetto di spesa per questa sessione: ')),
+            el('div', { class: 'tetto-controls' }, capInput, preset1, preset2, preset5, presetAll),
+            el(
+              'div',
+              { class: 'note' },
+              masterPays
+                ? 'Paghi tu la partita: il tuo tetto è quello di tutti, e si somma ai budget di IA dell’universo. Quando lo raggiungi, tutti continuano con i modelli locali.'
+                : 'Il tetto stabilisce la spesa massima autorizzata per questa sessione e si somma ai budget di IA dell’universo. Se esaurito durante il gioco, continuerai a giocare offline con i modelli locali.',
+            ),
+          )
+        : el('div', { class: 'tetto-form master-pays' }, el('strong', {}, 'Paga il master: '), isAnonymous ? 'con un account anonimo giochi comunque con i modelli locali.' : 'entri senza un tetto di spesa, il tuo saldo non si tocca.'),
     );
 
     // Cards Collection block outside match (T45d)
@@ -376,8 +408,9 @@ export class LobbyScreen {
     const choice = isMaster && !inCorso && this.opts.cards ? new CardChoicePanel({ load: this.opts.cards.load, has: this.opts.cards.has }) : undefined;
     const btnEnter = el('button', { class: 'primary comic-btn arcade' }, 'Entra nel mondo');
     btnEnter.onclick = async () => {
+      // Where the master pays a player's ceiling counts for nothing on the server (T372): the default goes, as if untouched.
       const tetto = isAnonymous || alone ? 0 : Number(capInput.value) || 0;
-      if (!alone && tetto < minCap) {
+      if (!alone && ownPurse && tetto < minCap) {
         statusEl.textContent = `Il master richiede un tetto minimo di ${usd(minCap)} per entrare.`;
         return;
       }
@@ -400,7 +433,7 @@ export class LobbyScreen {
           return;
         }
       }
-      const now = read();
+      const now = readAll();
       this.close({ tetto, ...(editable && JSON.stringify(now) !== opened ? { regolazioni: now } : {}) });
     };
 

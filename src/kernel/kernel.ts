@@ -69,7 +69,7 @@ import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readPar
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
 import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
-import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
+import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
@@ -604,6 +604,11 @@ export class Kernel {
   private acting = 0;
   /** What the whole world asks goes to the local models when none of those connected can pay (V-023): a public server's key is not free. */
   commonNeedsPayer = false;
+  /**
+   * Whether this universe is private, on invitation (ADR-0188 §2): where the master pays, an anonymous guest was invited and the master
+   * answers for them, so they play with the models too. The server says it by value (the private universe is T366); false, as everywhere today.
+   */
+  privateWorld = false;
   /** The highest ceiling each wanderer brought: entering again does not add the same budget twice. */
   private capBudgeted = new Map<string, number>();
   /** Credits spent in this session per wanderer (T45d). */
@@ -6013,15 +6018,48 @@ export class Kernel {
     return rationedKnob(task) !== undefined && !this.rationing.allows(knob, c);
   }
 
-  /** Whether a wanderer has credits to pay for model calls (T45a, T45d: checks balance and session tetto). */
+  /**
+   * Whether the calls asked by `id` (a wanderer, or `comune`) can go to the models (T45a, T45d: balance and session ceiling). Where the
+   * master pays (T372, ADR-0188) it is the master's purse that answers for everyone: their balance and their ceiling; an anonymous wanderer
+   * stays with the local models unless the universe is private (`privateWorld`), and without accounts what the world asks is free as before.
+   */
   hasCredits(id: string = this.wanderer().id): boolean {
     if (!this.manyPlayers()) return true;
+    if (this.masterPays()) {
+      if (id === COMUNE) return !this.commonNeedsPayer || this.canPay(this.masterId());
+      if (id !== this.masterId() && this.isAnonymous(id) && !this.privateWorld) return false;
+      return this.canPay(this.masterId());
+    }
     if (id === COMUNE) return !this.commonNeedsPayer || (this.connectedWanderers?.() ?? []).some((w) => this.hasCredits(w));
+    return this.canPay(id);
+  }
+
+  /** Whether a wanderer's own purse pays now: an account, credits left, and the session's ceiling not reached. */
+  private canPay(id: string): boolean {
     if (this.isAnonymous(id)) return false;
     const tetto = this.sessionCap.get(id);
     const spent = this.sessionSpent.get(id) ?? 0;
     if (tetto !== undefined && spent >= tetto) return false;
     return this.creditsOf(id) > 0;
+  }
+
+  /** The master of a game of many (T37); alone, the one who plays. */
+  masterId(): string {
+    return this.gameSetup()?.master ?? SOLO;
+  }
+
+  /** Whether every call of this match is charged to the master (T372, ADR-0188): a game of many whose expenses are the master's. */
+  masterPays(): boolean {
+    return this.manyPlayers() && this.gameSetup()?.expenses === 'master';
+  }
+
+  /**
+   * Who is charged for a call asked by `chi` (T372, ADR-0188), the one place where the policy of the match resolves it: where the master
+   * pays, the master; otherwise `chi` itself (a wanderer, or `comune`, which `charge` splits). `chi` never changes (rule 8i): the paces,
+   * the usage and the shortfalls keep who asked; the cards are whoever is charged (`sign`, D54.1).
+   */
+  billedTo(chi: string): string {
+    return this.masterPays() ? this.masterId() : chi;
   }
 
   /** Whether a wanderer is anonymous (T44b, T45a): no account, no credits, plays with local models. */
@@ -6125,16 +6163,18 @@ export class Kernel {
     const spentAfter = Math.round((spentBefore + amount) * 1e6) / 1e6;
     this.sessionSpent.set(id, spentAfter);
     this.bus.emit('credits:changed', { id, crediti: next, delta: -amount });
+    // Where the master pays (T372) their purse answers for everyone's requests.
+    const whose = this.masterPays() && id === this.masterId() ? 'le richieste di tutti' : 'le sue richieste';
     const tetto = this.sessionCap.get(id);
     if (tetto !== undefined && spentBefore < tetto && spentAfter >= tetto) {
-      this.council.say('kernel', 'info', `${id} ha raggiunto il tetto di crediti fissato (${tetto} USD): le sue richieste useranno i modelli locali.`);
+      this.council.say('kernel', 'info', `${id} ha raggiunto il tetto di crediti fissato (${tetto} USD): ${whose} useranno i modelli locali.`);
       this.bus.emit('credits:exhausted', { id, motivo: 'tetto' });
       if (this.wanderer().id === id) {
         this.message('Hai raggiunto il tetto di crediti per questa sessione: le tue richieste saranno gestite dai modelli locali.', 'warn');
       }
     }
     if (cur > 0 && next === 0) {
-      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: le sue richieste useranno i modelli locali.`);
+      this.council.say('kernel', 'info', `I crediti di ${id} sono esauriti: ${whose} useranno i modelli locali.`);
       this.bus.emit('credits:exhausted', { id, motivo: 'finiti' });
       if (this.wanderer().id === id) {
         this.message('Hai esaurito i crediti: le tue richieste saranno gestite dai modelli locali.', 'warn');
@@ -6162,9 +6202,12 @@ export class Kernel {
     const usd = costOf(billedModel(r.model), tokensOf(r), r.day) ?? 0;
     if (usd <= 0) return;
     const total = costWithFee(usd, this.fee);
-    const payer = r.who || COMUNE;
+    // Who asked stays who asked (rule 8i); who is charged is the match's policy (T372, ADR-0188): where the master pays, them alone.
+    const payer = this.billedTo(r.who || COMUNE);
     if (payer !== COMUNE) {
       this.deductCredits(payer, total);
+      // What the master paid for someone else, for their wallet and for the others' (the cost alone, as the usage counts it).
+      if (payer !== (r.who || COMUNE)) this.usage.paidByMaster(r);
     } else {
       const connected = this.connectedWanderers ? this.connectedWanderers() : this.wanderers().map((w) => w.id);
       const eligible = connected.filter((id) => !this.isAnonymous(id));
@@ -6255,7 +6298,7 @@ export class Kernel {
       return;
     }
     if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, game: this.game }, null, 2) + '\n');
-    this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi: universe.json la tiene com'era");
+    this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi, chi paga le sue spese solo nella lobby: universe.json la tiene com'era");
   }
 
   /** `universe.json → ai` as it was when the match started (T247, ADR-0133); undefined when no match is under way. */
@@ -6321,7 +6364,9 @@ export class Kernel {
   applySettings(raw: unknown): { ok: boolean; motivo?: string; riparati?: string[] } {
     if (this.settingsLocked) return { ok: false, motivo: 'la partita è in corso: le regolazioni restano quelle con cui è cominciata' };
     const { settings, riparati } = repairAiSettings(raw);
+    const expenses = this.expensesIn(raw, riparati);
     if (!this.setAi(settings)) return { ok: false, motivo: 'le regolazioni non si possono scrivere' };
+    if (expenses !== undefined) this.setExpenses(expenses);
     if (!this.mirror && this.repo.working['universe.json'] !== this.repo.head().files['universe.json']) this.repo.commit('il master regola il mondo, prima di entrare', 'kernel');
     return { ok: true, ...(riparati.length ? { riparati } : {}) };
   }
@@ -6348,6 +6393,46 @@ export class Kernel {
     // The budget in use follows, with what the wanderers' ceilings already added.
     if (this.ai.limits) this.ai.limits.text = Math.max(0, this.ai.limits.text + this.config.ai.maxText - before);
     return true;
+  }
+
+  /**
+   * The expenses of the match the lobby brought (`settings.game.expenses`, T372), or undefined when it says nothing of them. Alone there is
+   * nobody to pay for: a word about them is dropped, and said.
+   */
+  private expensesIn(raw: unknown, riparati: string[]): GameExpenses | undefined {
+    const game = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as { game?: unknown }).game : undefined;
+    const said = game && typeof game === 'object' && !Array.isArray(game) ? (game as { expenses?: unknown }).expenses : undefined;
+    if (said === undefined) return undefined;
+    if (!this.manyPlayers()) {
+      riparati.push('spese della partita: da soli non c’è nessuno per cui pagare');
+      return undefined;
+    }
+    if (said === 'master' || said === 'shared') return said;
+    riparati.push('spese della partita: valore sconosciuto, restano quelle di prima');
+    return undefined;
+  }
+
+  /**
+   * Who pays for the match (T372, ADR-0188): the one change the game takes after the Genesis, and only from the lobby, before entering
+   * (`applySettings`, refused while a match is under way). `shared` is written as nothing, as in every universe before the choice.
+   */
+  private setExpenses(expenses: GameExpenses): void {
+    const game = repairGameSetup({ ...this.gameSetup(), expenses });
+    if (expenses === 'shared') delete game.expenses;
+    if (JSON.stringify(game) === JSON.stringify(this.gameSetup())) return;
+    let raw: Record<string, unknown>;
+    try {
+      raw = internalFields('config', JSON.parse(this.repo.working['universe.json'] ?? '{}'));
+    } catch {
+      raw = {};
+    }
+    const text = JSON.stringify({ ...raw, game }, null, 2) + '\n';
+    this.game = game;
+    this.config = { ...this.config, game };
+    this.writeCommanded('universe.json', text);
+    // Whoever enters next reads it in their welcome (`GAME_FIELDS`).
+    this.files = { ...this.files, 'universe.json': text };
+    this.council?.say('kernel', 'info', expenses === 'master' ? 'il master paga ogni spesa della partita: chi entra non usa i suoi crediti' : 'ognuno paga le sue richieste, le spese comuni si dividono fra i collegati');
   }
 
   /** Chooses the game of a universe that was never generated (the Genesis screen); after, it is fixed. */
@@ -8270,10 +8355,12 @@ export class Kernel {
 
   /**
    * Who wrote and who pays for a piece of content made now by a task, and whose card it is: the payer, or for
-   * what the world pays one of the wanderers, drawn with the seed. `chi` overrides the task's payer.
+   * what the world pays one of the wanderers, drawn with the seed. `chi` overrides the task's payer. Where the master pays (T372,
+   * ADR-0188, D54.1) the card is whoever pays, the master: payer and holder, and so the shares of the heritage; nothing of the campaign
+   * lands in the players' collections before they meet it.
    */
   sign(cardId: string, task: string, autore: string, chi?: string): CardStamp {
-    const pagante = chi ?? payerOf(task, this.payerNow());
+    const pagante = this.billedTo(chi ?? payerOf(task, this.payerNow()));
     const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
     return { author: autore, payer: pagante, holder: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
   }

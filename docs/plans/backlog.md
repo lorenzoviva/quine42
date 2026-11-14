@@ -5406,7 +5406,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: non serve.
 - Quando è fatto: il piano dice la open beta, OpenRouter e la VPS, ha il § della voce dell'autore e le decisioni D35 aggiornate; commit su `task/T378`. Sicurezza: nessuna superficie nuova.
 
-### T379 · Integrare T372 nel base (conflitto di versione con T310b: kernel 0.7.1) — `da fare`
+### T379 · Integrare T372 nel base (conflitto di versione con T310b: kernel 0.7.1) — `fatto` (`649baa98`)
 - Pipeline: claude · sforzo high · stima 1% · approvato · priorità 1
 - Step: 43
 - Contesto: `integra T372` (il master paga tutto, ADR-0188, V-036) ha trovato conflitti in `package.json`, `src/kernel/version.ts`, `universe/universe.json`: T372 era partito da 0.6.12 portandola a 0.6.13, mentre in `3d` è entrato T310b (contratto 0.7.0, migrazione 0.6 → 0.7, ADR-0190). Nasce da T372: `dossier T372`, `dossier T310b`.
@@ -5414,6 +5414,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera, typecheck e build coi turni.
 - Browser: no (la verifica della lobby e del portafoglio è T380).
 - Quando è fatto: commit su `task/T379`, kernel 0.7.1; poi l'orchestratore integra T379 e `integra T372` toglie worktree e branch di T372. Sicurezza: nessuna superficie nuova.
+- Esito: T372 unito in task/T379, kernel 0.7.1 (version.ts, package.json, package-lock.json, universe.json); ADR-0188 e il suo indice a 0.7.1, tolta la riga «proposto» di 0188 duplicata dal merge nell'indice degli ADR; i campi di T372 (`game.expenses`, `masterPaid`, `masterPays`, `paidFor`) già inglesi e compatibili con la migrazione 0.6→0.7; typecheck, build e suite intera (3127 passati) verdi nei turni; non provati nel browser lobby e portafoglio (T380). Sicurezza: nessuna superficie nuova.
 
 ### T380 · Verifica nel browser di T372: la lobby col master che paga e «Pagate per gli altri» — `da fare` (dipende da T379)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2

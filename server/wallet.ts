@@ -1,7 +1,8 @@
 // Dev server: the wallet as the site sees it (T105, ADR-0095). GET /api/crediti?universo=<nome> says a wanderer's balance,
-// the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/usage.json → paganti`).
+// the top-ups credited to them (the ledger, ADR-0104) and what they spent day by day (`world/usage.json → payers`).
 // Only their own lines: those records hold everybody's, so they never go to the page as they are. Who asks comes from the
-// account's token, as in /api/viandante (`whoAsks`). The running world is asked first, then the files on disk.
+// account's token, as in /api/viandante (`whoAsks`). The running world is asked first, then the files on disk. Where the master
+// pays (T372, ADR-0188) the master's wallet also says what they paid for whom (`masterPaid`), and a player's spending is only theirs.
 
 import type { Connect, Plugin } from 'vite';
 import path from 'node:path';
@@ -9,7 +10,8 @@ import { promises as fs } from 'node:fs';
 import type { Kernel } from '../src/kernel/kernel';
 import type { FileMap } from '../src/kernel/types';
 import { isMultiplayer } from '../src/kernel/gameSetup';
-import { internalFields } from '../src/kernel/internalNames';
+import { internalFields, internalSoloIn } from '../src/kernel/internalNames';
+import { repairGameSetup } from '../src/kernel/validator';
 import { pathsBefore, portedFiles } from '../src/kernel/migrations';
 import { costWithFee, DEFAULT_PLATFORM_FEE, type Ledger, type PaymentRecord } from '../src/kernel/credits';
 import { USAGE_FILE } from '../src/kernel/ai/usage';
@@ -33,10 +35,18 @@ export interface WalletPayment {
   cents?: number;
 }
 
-/** What a wanderer spent on a day: their own calls, not their share of the common ones. */
+/** What a wanderer spent on a day: their own calls, not their share of the common ones, nor those the master paid for them (T372). */
 export interface WalletDay {
   giorno: string;
   chiamate: number;
+  usd: number;
+}
+
+/** What the master paid on a day for someone else (T372, ADR-0188): a wanderer, or `comune` for what the world asked. */
+export interface WalletPaidFor {
+  day: string;
+  who: string;
+  calls: number;
   usd: number;
 }
 
@@ -56,10 +66,36 @@ export interface Wallet {
   consumi: WalletDay[];
   /** On every day. */
   totaleConsumi: number;
+  /** In this universe the master pays every call of the match (T372, ADR-0188): a player spends nothing of theirs. */
+  masterPays: boolean;
+  /** The wallet is the master's, in a game of many (T372): the page says they pay, and only theirs has `paidFor`. */
+  master: boolean;
+  /** Only in the master's wallet, where they paid for someone: by day and by who asked, newest first, at most WALLET_DAYS days. */
+  paidFor?: WalletPaidFor[];
+  /** On every day: what the master paid for the others. */
+  paidForTotal?: number;
 }
 
-/** This wanderer's lines of the two ledgers. A usage file written by hand or by an older version must not break the page. */
-export function linesOf(payments: PaymentRecord[], usageText: string | undefined, id: string, many: boolean, fee: number): Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi'> {
+type Tallies = Record<string, Record<string, { calls?: number; usd?: number }>>;
+type Lines = Pick<Wallet, 'pagamenti' | 'consumi' | 'totaleConsumi' | 'paidFor' | 'paidForTotal'>;
+
+/** The two tallies of the usage file, day → who → tally, whatever contract wrote it (`paganti` and the payer `io` before 0.4). */
+function talliesOf(usageText: string | undefined): { payers: Tallies; masterPaid: Tallies } {
+  const table = (v: unknown): Tallies => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Tallies) : {});
+  try {
+    const f = internalSoloIn(internalFields('usage', JSON.parse(usageText ?? '{}') ?? {})) as { payers?: unknown; masterPaid?: unknown };
+    return { payers: table(f?.payers), masterPaid: table(f?.masterPaid) };
+  } catch {
+    /* no ledger: nothing spent that we know of */
+    return { payers: {}, masterPaid: {} };
+  }
+}
+
+/**
+ * This wanderer's lines of the two ledgers. A usage file written by hand or by an older version must not break the page. `master`: the
+ * wallet is the master's, who sees what they paid for the others (T372); anyone else sees nothing of anyone else's.
+ */
+export function linesOf(payments: PaymentRecord[], usageText: string | undefined, id: string, many: boolean, fee: number, master = false): Lines {
   const pagamenti: WalletPayment[] = [];
   for (const p of payments) {
     if (p?.wandererId !== id || !Number.isFinite(p.crediti) || !Number.isFinite(p.timestamp)) continue;
@@ -67,33 +103,52 @@ export function linesOf(payments: PaymentRecord[], usageText: string | undefined
   }
   pagamenti.sort((a, b) => b.data - a.data);
 
-  let paganti: Record<string, Record<string, { calls?: number; usd?: number }>> = {};
-  try {
-    paganti = JSON.parse(usageText ?? '{}')?.paganti ?? {};
-  } catch {
-    /* no ledger: nothing spent that we know of */
-  }
+  const { payers, masterPaid } = talliesOf(usageText);
+  // What the balance lost: the fee is charged with the call, and only in a multiplayer game. The ledger keeps the cost alone, so a day
+  // before the fee changed reads at today's fee (ADR-0132).
+  const lost = (base: number) => (many ? costWithFee(base, fee) : base);
   const days: WalletDay[] = [];
   let total = 0;
-  for (const [giorno, payers] of Object.entries(paganti)) {
-    const t = payers?.[id];
+  for (const [giorno, byPayer] of Object.entries(payers)) {
+    const t = byPayer?.[id];
     if (!t) continue;
-    const base = Number(t.usd) || 0;
-    // What the balance lost: the fee is charged with the call, and only in a multiplayer game. The ledger keeps the cost alone, so a day
-    // before the fee changed reads at today's fee (ADR-0132).
-    const usd = many ? costWithFee(base, fee) : base;
+    // What the master paid for them that day was not theirs to pay (T372).
+    const paid = masterPaid[giorno]?.[id];
+    const base = Math.max(0, (Number(t.usd) || 0) - (Number(paid?.usd) || 0));
+    const chiamate = Math.max(0, (Number(t.calls) || 0) - (Number(paid?.calls) || 0));
+    if (paid && !chiamate && !base) continue;
+    const usd = lost(base);
     total += usd;
-    days.push({ giorno, chiamate: Number(t.calls) || 0, usd });
+    days.push({ giorno, chiamate, usd });
   }
   days.sort((a, b) => b.giorno.localeCompare(a.giorno));
-  return { pagamenti, consumi: days.slice(0, WALLET_DAYS), totaleConsumi: Math.round(total * 1e6) / 1e6 };
+  const out: Lines = { pagamenti, consumi: days.slice(0, WALLET_DAYS), totaleConsumi: Math.round(total * 1e6) / 1e6 };
+  if (!master) return out;
+  const paidFor: WalletPaidFor[] = [];
+  let paidTotal = 0;
+  for (const [day, byAsker] of Object.entries(masterPaid))
+    for (const [who, t] of Object.entries(byAsker ?? {})) {
+      if (who === id || !t) continue;
+      const usd = lost(Number(t.usd) || 0);
+      paidTotal += usd;
+      paidFor.push({ day, who, calls: Number(t.calls) || 0, usd });
+    }
+  if (!paidFor.length) return out;
+  const shown = new Set([...new Set(paidFor.map((r) => r.day))].sort().reverse().slice(0, WALLET_DAYS));
+  out.paidFor = paidFor.filter((r) => shown.has(r.day)).sort((a, b) => b.day.localeCompare(a.day) || a.who.localeCompare(b.who));
+  out.paidForTotal = Math.round(paidTotal * 1e6) / 1e6;
+  return out;
 }
 
-function manyIn(files: FileMap): boolean {
+/** The game as universe.json says it: whether it is of many, its master, and whether the master pays (T372). */
+function gameIn(files: FileMap): { many: boolean; master?: string; masterPays: boolean } {
   try {
-    return isMultiplayer(internalFields('config', JSON.parse(files['universe.json'] ?? '{}') ?? {})?.game?.mode);
+    const raw = internalFields('config', JSON.parse(files['universe.json'] ?? '{}') ?? {})?.game;
+    if (!isMultiplayer(raw?.mode)) return { many: false, masterPays: false };
+    const game = repairGameSetup(raw);
+    return { many: true, master: game.master, masterPays: game.expenses === 'master' };
   } catch {
-    return false;
+    return { many: false, masterPays: false };
   }
 }
 
@@ -101,15 +156,15 @@ function manyIn(files: FileMap): boolean {
 export function walletFromFiles(files: FileMap, ledger: Ledger, universo: string, id: string, account: WandererView['account'], fee: number): Wallet {
   const saved = readWandererState(files, id);
   const anonimo = account === 'anonimo' || !!saved?.anonymous;
-  const many = manyIn(files);
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, commissione: fee, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many, fee) };
+  const { many, master, masterPays } = gameIn(files);
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : ledger.balance(id), multigiocatore: many, commissione: fee, masterPays, master: many && id === master, ...linesOf(ledger.paymentsOf(id), files[USAGE_FILE], id, many, fee, many && id === master) };
 }
 
 /** The wallet from a world running here, whose ledgers are fresher than the disk. */
 export function walletFromKernel(k: Kernel, universo: string, id: string, account: WandererView['account']): Wallet {
   const anonimo = account === 'anonimo' || k.isAnonymous(id);
   const many = k.manyPlayers();
-  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, commissione: k.platformFee, ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many, k.platformFee) };
+  return { id, universo, account, anonimo, crediti: anonimo ? 0 : k.creditsOf(id), multigiocatore: many, commissione: k.platformFee, masterPays: k.masterPays(), master: many && id === k.masterId(), ...linesOf(k.ledger.paymentsOf(id), k.usage.toJson(), id, many, k.platformFee, many && id === k.masterId()) };
 }
 
 /** The few files a wallet needs, as this kernel reads them (a universe not opened since the contract 0.4 is ported in memory, T308a). */

@@ -281,7 +281,8 @@ async function main() {
 
   if (thin && creditModal) {
     kernel.bus.on('ui:credits:exhausted', (e: { reason?: 'exhausted' | 'cap'; text?: string }) => {
-      creditModal.show(e);
+      // Where the master pays (T372) a player's purse is not what ran out: nothing to top up.
+      creditModal.show({ ...e, masters: kernel.masterPays() && !kernel.isMaster() });
     });
   }
   const tools: MasterTools | undefined = tooling && new (await tooling).MasterTools(kernel, renderer, dev, () => syncFocus());

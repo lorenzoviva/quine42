@@ -59,6 +59,11 @@ export interface UsageFile {
   days: Record<string, Record<string, Record<string, Tally>>>;
   /** day → payer (a wanderer's id or `comune`) → tally (T36). */
   payers?: Record<string, Record<string, Tally>>;
+  /**
+   * day → who asked (a wanderer other than the master, or `comune`) → what the master was charged for them, in a match where the master
+   * pays (T372, ADR-0188): the master's wallet says it, and a player's own spending is what is left of theirs. Absent where nobody paid for another.
+   */
+  masterPaid?: Record<string, Record<string, Tally>>;
 }
 
 export const USAGE_FILE = 'world/usage.json';
@@ -90,7 +95,7 @@ function sum(into: Tally, t: Tally): Tally {
 }
 
 export class UsageLog {
-  private file: UsageFile & { payers: Record<string, Record<string, Tally>> } = { prices: PRICES_READ_ON, days: {}, payers: {} };
+  private file: UsageFile & { payers: Record<string, Record<string, Tally>>; masterPaid: Record<string, Record<string, Tally>> } = { prices: PRICES_READ_ON, days: {}, payers: {}, masterPaid: {} };
   /** This session only (since the page opened). */
   readonly session = emptyTally();
   readonly sessionByModel: Record<string, Tally> = {};
@@ -117,6 +122,8 @@ export class UsageLog {
           }
       for (const [day, payers] of Object.entries(f.payers ?? {}))
         for (const [chi, t] of Object.entries(payers ?? {})) sum(((this.file.payers[day] ??= {})[chi] ??= emptyTally()), { ...emptyTally(), ...t });
+      for (const [day, askers] of Object.entries(f.masterPaid ?? {}))
+        for (const [chi, t] of Object.entries(askers ?? {})) sum(((this.file.masterPaid[day] ??= {})[chi] ??= emptyTally()), { ...emptyTally(), ...t });
     } catch {
       /* a broken file is replaced by this session's */
     }
@@ -135,6 +142,24 @@ export class UsageLog {
     this.lastCall[r.agent] = { model: r.model, task: r.task, time: Date.now() };
     this.version++;
     this.onChange?.();
+  }
+
+  /**
+   * A call the master was charged for, asked by someone else (T372, ADR-0188): `record` already counted it for who asked; this says who
+   * paid it instead, at the same price.
+   */
+  paidByMaster(r: CallRecord): void {
+    const day = r.day ?? today();
+    add(((this.file.masterPaid[day] ??= {})[r.who || COMMON] ??= emptyTally()), r, costOf(r.model, tokensOf(r), day));
+    this.version++;
+    this.onChange?.();
+  }
+
+  /** What the master paid for each of the others: on a day, or (without one) on every day (T372). */
+  paidForOthers(day?: string): Record<string, Tally> {
+    const out: Record<string, Tally> = {};
+    for (const d of day ? [day] : Object.keys(this.file.masterPaid)) for (const [chi, t] of Object.entries(this.file.masterPaid[d] ?? {})) sum((out[chi] ??= emptyTally()), t);
+    return out;
   }
 
   /** A day's total (default today), and per model. */
@@ -179,7 +204,11 @@ export class UsageLog {
     const paganti: NonNullable<UsageFile['payers']> = {};
     for (const day of Object.keys(this.file.payers).sort())
       for (const chi of Object.keys(this.file.payers[day]).sort()) (paganti[day] ??= {})[chi] = round(this.file.payers[day][chi]);
-    return JSON.stringify({ prices: PRICES_READ_ON, days: giorni, payers: paganti } satisfies UsageFile, null, 1) + '\n';
+    const masterPaid: NonNullable<UsageFile['masterPaid']> = {};
+    for (const day of Object.keys(this.file.masterPaid).sort())
+      for (const chi of Object.keys(this.file.masterPaid[day]).sort()) (masterPaid[day] ??= {})[chi] = round(this.file.masterPaid[day][chi]);
+    // Only where the master paid for someone (T372): every other universe's file stays as it was.
+    return JSON.stringify({ prices: PRICES_READ_ON, days: giorni, payers: paganti, ...(Object.keys(masterPaid).length ? { masterPaid } : {}) } satisfies UsageFile, null, 1) + '\n';
   }
 }
 

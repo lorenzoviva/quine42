@@ -12,7 +12,8 @@ import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
 const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'relief'];
-const GAME_FIELDS = ['mode', 'death', 'pvp', 'freeActionsBetweenPlayers', 'master'];
+// `expenses` (T372, ADR-0188): whoever enters reads who pays for the match before entering.
+const GAME_FIELDS = ['mode', 'death', 'pvp', 'freeActionsBetweenPlayers', 'master', 'expenses'];
 /** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agents`, `thinking`, `timeout`. */
 const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxPieces', 'placesPerMinute', 'thinking', 'actor'];
 

@@ -303,19 +303,24 @@ export class SessionServer {
     });
     // Exhausted credits or spending ceiling reached (T45d: lobby).
     kernel.bus.on('credits:exhausted', (e: { id?: unknown; motivo?: unknown }) => {
-      const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
-      if (!c) return;
       const reason = e?.motivo === 'tetto' ? 'cap' : 'exhausted';
-      if (c.notices.length < 50) {
+      // Where the master pays (T372, ADR-0188) their purse is everyone's: when it is empty, everyone hears it.
+      const everyone = kernel.masterPays() && e?.id === kernel.masterId();
+      for (const c of everyone ? this.clients.values() : [typeof e?.id === 'string' ? this.clients.get(e.id) : undefined]) {
+        if (!c || c.notices.length >= 50) continue;
+        const own = c.id === e?.id;
         c.notices.push({
           type: 'credits',
           from: 'server',
           name: reason,
           reason,
-          text:
-            reason === 'cap'
-              ? 'Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby: le tue richieste useranno i modelli locali.'
-              : 'I tuoi crediti sono esauriti: le tue richieste useranno i modelli locali.',
+          text: !own
+            ? reason === 'cap'
+              ? 'Il master ha raggiunto il tetto di spesa che si era fissato: da ora le richieste di tutti useranno i modelli locali.'
+              : 'I crediti del master, che paga questa partita, sono esauriti: da ora le richieste di tutti useranno i modelli locali.'
+            : reason === 'cap'
+              ? `Hai raggiunto il tetto di crediti fissato per questa sessione nella lobby: ${everyone ? 'le richieste di tutti, che paghi tu,' : 'le tue richieste'} useranno i modelli locali.`
+              : `I tuoi crediti sono esauriti: ${everyone ? 'le richieste di tutti, che paghi tu,' : 'le tue richieste'} useranno i modelli locali.`,
         });
       }
     });
@@ -427,8 +432,10 @@ export class SessionServer {
     const applied = settings === undefined ? undefined : this.kernel.isMaster(id) ? this.kernel.applySettings(settings) : { ok: false, motivo: 'solo il master regola il mondo' };
     const settled = applied && { ok: applied.ok, ...(applied.motivo ? { reason: applied.motivo } : {}), ...('riparati' in applied && applied.riparati ? { repaired: applied.riparati } : {}) };
     // The master's minimum: what is asked below it does not enter; asking nothing, or 0 (the local models), spends nothing of the world's.
+    // Where the master pays (T372, ADR-0188) a player's ceiling counts for nothing: only the master's own is held to it.
     const least = this.kernel.config.ai.minimums?.cap;
-    if (typeof cap === 'number' && cap > 0 && least !== undefined && cap < least && !this.isAnonymous(id)) {
+    const ownPurse = !this.kernel.masterPays() || this.kernel.isMaster(id);
+    if (ownPurse && typeof cap === 'number' && cap > 0 && least !== undefined && cap < least && !this.isAnonymous(id)) {
       link.send({ t: 'refusal', reason: `il master chiede un tetto di almeno ${least}: alzalo, o gioca con i modelli locali` });
       return undefined;
     }
@@ -437,8 +444,9 @@ export class SessionServer {
       return undefined;
     }
     this.kernel.setRemote(id, true);
-    // What they ask to spend is theirs to lower, not to raise: it adds to the world's budgets, so never more than they have (T120).
-    if (typeof cap === 'number' && Number.isFinite(cap) && cap >= 0) {
+    // What they ask to spend is theirs to lower, not to raise: it adds to the world's budgets, so never more than they have (T120). Where
+    // the master pays, a player spends nothing of theirs: their ceiling neither limits nor adds, the master's is the one that counts.
+    if (ownPurse && typeof cap === 'number' && Number.isFinite(cap) && cap >= 0) {
       this.kernel.setSessionCap(id, this.isAnonymous(id) ? 0 : Math.min(cap, this.kernel.creditsOf(id)));
     }
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only

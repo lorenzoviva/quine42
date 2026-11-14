@@ -3,7 +3,7 @@
 // JSON; positions are in the world's space (the carpet's, ADR-0004): every wanderer has a carpet of their
 // own, so a client draws itself where it likes on its circle and tells the server only where it is in the world.
 
-import type { AiSettings, FileMap } from '../kernel/types';
+import type { FileMap, LobbySettings } from '../kernel/types';
 import type { Inventory } from '../kernel/inventory';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
@@ -116,7 +116,7 @@ export type ClientMsg =
    * `cap` is the spending cap in USD for this session (T45d, ADR-0086), which the server keeps within the balance. Being anonymous is
    * the token's to say, not the client's (T120, ADR-0102).
    */
-  | { t: 'join'; id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: AiSettings }
+  | { t: 'join'; id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: LobbySettings }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profile'; seq: number; profile: Partial<Profile> }
   /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
