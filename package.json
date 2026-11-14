@@ -22,7 +22,7 @@
     "inviti": "vite-node --script tools/inviti/cli.ts"
   },
   "author": "lorenzoviva <lorenzo.vaccaro@hotmail.com>",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
     "firebase": "^13.1.0",
     "firebase-admin": "^14.5.0",

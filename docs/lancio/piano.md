@@ -61,6 +61,14 @@ Noncommercial 1.0.0, contenuti CC BY-NC-SA 4.0), cioè l'opzione (b); da ricontr
 «RUNE») e che il self-hosting gratuito sia detto permesso. Crediti omaggio a giocatori e content creator: in Fase III. Verifiche V1-V12: tutte
 insieme, in un giorno prima del lancio, perché le regole non cambino nel frattempo; la consulenza di V5 e V11 si prenota prima.
 
+**D7.3, la licenza (T386, in attesa dell'autore):** `LICENSE.md` ha PolyForm Noncommercial 1.0.0 **alla lettera** (§ 1, con la riga
+`Required Notice:`), i permessi aggiuntivi del titolare a parte (§ 2: il self-hosting **gratuito**, per sé, per amici o per una comunità,
+con le chiavi IA di chi ospita o dei giocatori, senza pagamenti, pubblicità né abbonamenti), CC BY-NC-SA 4.0 per i contenuti
+(`universe/` tranne il Lua, `docs/`; § 3) e MarkovJunior sotto MIT in `NOTICE.md` (§ 4); `package.json → license` è
+`SEE LICENSE IN LICENSE.md`. Tolte la clausola anti-concorrenza e la definizione riscritta di «Noncommercial Purposes». Le versioni già
+pubblicate restano coi termini con cui sono uscite. Le domande (anti-concorrenza, nome del titolare, enti non profit) sono in
+`docs/pipeline/domande/T386.md`; la guida del self-hosting (T367, non ancora scritta) dovrà rimandare alla § 2 e dire `QUINE_PAGAMENTI=spenti`. Non è un parere legale: un legale lo rilegge prima del lancio.
+
 **Cambiato rispetto al 05/11:** D3.4 dalla Fase IV alla Fase VI; D3.5 rimandata; D4.1 Boa Lodger non è più «volto del Concilio» nel lancio;
 D4.4 niente filtro né voce sintetica; D4.5 tolta; D5.2 narrata da te, non da Boa Lodger; D6.2 e D6.4 riscritte per le chiavi dei giocatori e il
 self-hosting; D7.3 diventa un requisito della Fase IV. Nuove: D1.5, D3.6, D3.7, D4.6-D4.9.

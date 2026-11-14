@@ -173,8 +173,10 @@ Un ringraziamento speciale a:
 
 ## Licenza
 
-Questo progetto è rilasciato sotto licenza source-available non-commerciale:
-- **Codice sorgente**: [PolyForm Noncommercial License 1.0.0](LICENSE.md)
-- **Asset, mondo, modelli 3D e testi**: [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](LICENSE.md)
+Questo progetto è rilasciato sotto licenza source-available non commerciale:
+- **Codice sorgente**: [PolyForm Noncommercial License 1.0.0](LICENSE.md) (§ 1), alla lettera
+- **Mondo, modelli MarkovJunior, prompt e documentazione** (`universe/` tranne il codice Lua, `docs/`): [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](LICENSE.md) (§ 3)
+- **Permessi aggiuntivi**: si può ospitare il gioco in proprio **gratis**, per sé, per gli amici o per una comunità, con la propria chiave IA, senza pagamenti, pubblicità né abbonamenti ([LICENSE.md](LICENSE.md), § 2)
+- **Materiale di terzi**: i modelli di MarkovJunior in `lab/mjx/official/` restano sotto licenza MIT ([NOTICE.md](NOTICE.md))
 
-Il codice è aperto: chiunque può leggerlo, imparare, compilarlo, fare Pull Request e giocarci in locale con la propria API key di Google Gemini. È fatto divieto assoluto di monetizzazione, vendita diretta o indiretta, o fornitura come servizio di hosting a pagamento. Dettagli completi in [LICENSE.md](LICENSE.md).
+Chiunque può leggere il codice, impararci, compilarlo, fare Pull Request, giocarci in locale e ospitarlo gratis. Non si può venderlo, farlo pagare, monetizzarlo né offrirlo come servizio di hosting commerciale. Il testo vincolante è [LICENSE.md](LICENSE.md).
