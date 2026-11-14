@@ -26,6 +26,103 @@ export interface CardStamp {
   holder: string;
   /** Who held it before, in the universes it was cloned from, the first one first (T45c, ADR-0084). */
   origins?: CardOrigin[];
+  /**
+   * What the calls that made it cost, in dollars (T365, ADR-0194): what the provider said, else the price list (`callCost`), shared among
+   * the cards of the same commit. Absent: nothing that made it was a call (the seed, a universe of before, a rule of the kernel).
+   */
+  usd?: number;
+  /**
+   * Where it was made and its cost measured (T365, ADR-0194): the origin of the server whose world made it (`https://…`). Absent: a kernel
+   * in a browser or in development, whose history is declared, not counted.
+   */
+  server?: string;
+}
+
+/**
+ * Which calls make the content of a commit (T365, ADR-0194): the task a card is stamped with → the tasks of the calls that made it. A call
+ * of a task not here (a chat, a guard, a review, a session of the Council) makes no card: its dollars are the world's, not a card's.
+ */
+export const CARD_MAKERS: Readonly<Record<string, readonly string[]>> = {
+  'genesis.cast': ['genesis.atlas', 'genesis.bible', 'genesis.cast', 'genesis.physics', 'genesis.review', 'genesis.style', 'genesis.terrain'],
+  'genesis.layouts': ['genesis.layouts'],
+  'cartographer.environment': ['cartographer.environment'],
+  'chunk.plan': ['chunk.plan'],
+  'forge.concept': ['forge.concept', 'forge.code', 'forge.physics', 'forge.review'],
+  'model.sculpt': ['model.sculpt', 'model.judge'],
+  'model.reuse': ['model.reuse'],
+  'sound.compose': ['sound.compose'],
+  'content.items': ['content.items', 'content.physics', 'content.recipes', 'content.review'],
+  'items.citati': ['content.define'],
+  'craft.free': ['craft.free', 'craft.judge'],
+  'action.judge': ['action.judge'],
+  'mechanic.design': ['mechanic.design'],
+  'spell.name': ['spell.name'],
+  'rune.invent': ['rune.invent'],
+  'npc.individuate': ['npc.individuate'],
+  'npc.sheet': ['npc.sheet'],
+  'plot.weave': ['plot.weave'],
+  'referente.coordinate': ['referente.coordinate'],
+};
+
+/** The stamp task whose cards a call's task makes, if any. */
+const MADE_BY = new Map(Object.entries(CARD_MAKERS).flatMap(([stamp, calls]) => calls.map((c) => [c, stamp] as const)));
+
+/** A server's origin as a card says it: `https://name`, or `http://` for this machine; nothing else (a card is read from any universe). */
+const SERVER_RE = /^(https:\/\/[a-z0-9.-]{1,200}(:\d{1,5})?|http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d{1,5})?)$/i;
+
+export const readServer = (v: unknown): string | undefined => (typeof v === 'string' && SERVER_RE.test(v) ? v : undefined);
+
+/** A card's dollars as read from a file: a finite number ≥ 0, to the millionth. */
+export const readUsd = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.round(v * 1e6) / 1e6 : undefined);
+
+/** What a stamp says beyond its names, read without trusting it: its dollars and its server. */
+export function costFields(c: { usd?: unknown; server?: unknown }): Pick<CardStamp, 'usd' | 'server'> {
+  const usd = readUsd(c.usd);
+  const server = readServer(c.server);
+  return { ...(usd === undefined ? {} : { usd }), ...(server ? { server } : {}) };
+}
+
+/**
+ * The dollars of the calls not yet in a card (T365, ADR-0194), by the task the cards will be stamped with: every call adds to its group
+ * (`CARD_MAKERS`), and a stamp of that group takes its part, shared among the cards it signs. Its part: all of it when the group's requests
+ * come one at a time; where they may run together (the forges of the Genesis, the places planned around the wanderer) each request says it
+ * has begun and ended (`begin`), and a stamp takes what is pending divided by the requests still open, its own included. An attempt that
+ * made nothing leaves its calls to the next cards of the group: the sum of the cards is the sum of the calls that made cards. It lives
+ * with the kernel's session, as the session of the usage ledger does.
+ */
+export class CardCosts {
+  private pending = new Map<string, number>();
+  private open = new Map<string, number>();
+
+  /** A request of the group of `task` begins; the function returned ends it, whether it stamped a card or not (once). */
+  begin(task: string): () => void {
+    this.open.set(task, (this.open.get(task) ?? 0) + 1);
+    let ended = false;
+    return () => {
+      if (ended) return;
+      ended = true;
+      const n = (this.open.get(task) ?? 1) - 1;
+      if (n > 0) this.open.set(task, n);
+      else this.open.delete(task);
+    };
+  }
+
+  /** One call and its dollars (`callCost`; undefined: no price, nothing to add, but a call of the group all the same). */
+  note(task: string, usd: number | undefined): void {
+    const stamp = MADE_BY.get(task);
+    if (!stamp) return;
+    this.pending.set(stamp, (this.pending.get(stamp) ?? 0) + (usd ?? 0));
+  }
+
+  /** What each of `n` cards stamped with `task` cost; undefined when no call of its group is pending. Takes the stamp's part of the group. */
+  take(task: string, n: number): number | undefined {
+    const usd = this.pending.get(task);
+    if (usd === undefined || n < 1) return undefined;
+    const part = usd / Math.max(1, this.open.get(task) ?? 0);
+    if (usd - part > 1e-12) this.pending.set(task, usd - part);
+    else this.pending.delete(task);
+    return Math.round((part / n) * 1e6) / 1e6;
+  }
 }
 
 /**
@@ -130,7 +227,7 @@ export function allCards(files: FileMap, shares = false): Card[] {
   const push = (id: string, tipo: CardKind, nome: string, file: string, holder: any, content: () => string = () => contentText(holder)) => {
     const c = tipo === 'chunk' ? holder : holder?.card;
     if (!isCardStamp(c)) return;
-    const card: Card = { id, tipo, nome, file, author: c.author, payer: c.payer, holder: c.holder, uses: { ...emptyUses(), ...ledger.uses[id] } };
+    const card: Card = { id, tipo, nome, file, author: c.author, payer: c.payer, holder: c.holder, ...costFields(c), uses: { ...emptyUses(), ...ledger.uses[id] } };
     const origini = readOrigins(c.origins);
     if (origini.length) card.origins = origini;
     if (cfg) {
@@ -226,7 +323,7 @@ export function readCards(files: FileMap): CardsFile {
   for (const [key, c] of Object.entries((f?.chunks ?? {}) as Record<string, any>)) {
     if (!isCardStamp(c)) continue;
     const origini = readOrigins(c.origins);
-    luoghi[key] = { author: c.author, payer: c.payer, holder: c.holder, ...(origini.length ? { origins: origini } : {}), name: String((c as { name?: unknown }).name ?? '') };
+    luoghi[key] = { author: c.author, payer: c.payer, holder: c.holder, ...(origini.length ? { origins: origini } : {}), ...costFields(c), name: String((c as { name?: unknown }).name ?? '') };
   }
   const allaNascita = uses(f?.atBirth);
   return { uses: uses(f?.uses), chunks: luoghi, ...(Object.keys(allaNascita).length ? { atBirth: allaNascita } : {}) };
@@ -314,8 +411,11 @@ const indentOf = (src: string) => /\n( +)"/.exec(src)?.[1].length ?? 2;
  * repaired) gets it back. What was there before without a card (the seed, universes older than T36) stays so.
  * Returns the files it rewrote.
  */
-export function stampFiles(working: FileMap, head: FileMap, sign: (cardId: string) => CardStamp): FileMap {
+export function stampFiles(working: FileMap, head: FileMap, sign: (cardId: string) => CardStamp, settle?: (signed: CardStamp[]) => void): FileMap {
   const out: FileMap = {};
+  const touched: Array<{ path: string; data: unknown; indent: number }> = [];
+  // The cards signed now, all of them before any file is written: `settle` shares among them what made them (T365).
+  const signed: CardStamp[] = [];
   for (const path of Object.keys(working)) {
     const src = working[path];
     if (src === undefined || src === head[path]) continue;
@@ -328,10 +428,13 @@ export function stampFiles(working: FileMap, head: FileMap, sign: (cardId: strin
       if (isCardStamp(o.card)) continue;
       const old = before.get(id);
       if (old && !isCardStamp(old.card)) continue;
-      o.card = old ? { ...old.card! } : sign(id);
+      if (old) o.card = { ...old.card! };
+      else signed.push((o.card = sign(id)));
       changed = true;
     }
-    if (changed) out[path] = JSON.stringify(now, null, indentOf(src)) + '\n';
+    if (changed) touched.push({ path, data: now, indent: indentOf(src) });
   }
+  if (signed.length) settle?.(signed);
+  for (const t of touched) out[t.path] = JSON.stringify(t.data, null, t.indent) + '\n';
   return out;
 }

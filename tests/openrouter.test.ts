@@ -438,8 +438,11 @@ describe('la Genesi attraverso OpenRouter', () => {
     // Every schema of the Genesis crossed as a JSON Schema: types in lower case, nothing of Gemini's style.
     expect(schemas.length).toBeGreaterThan(0);
     expect(JSON.stringify(schemas)).not.toMatch(/"(OBJECT|STRING|ARRAY|INTEGER|NUMBER|BOOLEAN)"/);
-    const world = (k: Kernel) => Object.fromEntries(Object.entries(k.repo.working).filter(([p]) => p !== USAGE_FILE));
+    // The same world; only what the cards cost differs, said by OpenRouter (T365, ADR-0194): the local models say nothing.
+    const world = (k: Kernel) => Object.fromEntries(Object.entries(k.repo.working).filter(([p]) => p !== USAGE_FILE).map(([p, v]) => [p, v?.replace(/,\s*"usd": [0-9.e-]+/g, '').replace(/"hash":"[0-9a-f]+"/, '')]));
     expect(world(through)).toEqual(world(direct));
+    expect(Object.values(through.repo.working).some((v) => /"usd": /.test(v ?? '') && !/usage/.test(v ?? ''))).toBe(true);
+    expect(through.cardsOf().some((c) => (c.usd ?? 0) > 0)).toBe(true);
     // The ledger has the calls under OpenRouter's ids, at the cost it said.
     const usage = JSON.parse(through.repo.working[USAGE_FILE] ?? through.usage.toJson());
     const day = Object.keys(usage.days)[0];

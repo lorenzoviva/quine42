@@ -62,7 +62,7 @@ const FLUSH_MS = 2500;
  * route); `gemini` is the `fetch` that spends the key, which stays in the server: without it, the local models. A universe that does not exist, or is a game alone, is not opened: alone the
  * kernel stays in the browser.
  */
-export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; typesafe?: typeof fetch; verify?: Verifier; masterUid?: string; token?: string; ledger?: Ledger; grantCap?: number; platformFee?: number; restore?: string; onBeat?: (tick: number) => void; wasmUri?: string }): Promise<UniverseHost | { error: string }> {
+export async function openUniverse(opts: { name: string; base: string; offline?: boolean; gemini?: typeof fetch; typesafe?: typeof fetch; verify?: Verifier; masterUid?: string; token?: string; ledger?: Ledger; grantCap?: number; platformFee?: number; server?: string; restore?: string; onBeat?: (tick: number) => void; wasmUri?: string }): Promise<UniverseHost | { error: string }> {
   // The world reads and writes its universe whole: the store knows it by a token good for this universe only (T120, ADR-0102, ADR-0110).
   const client = await UniverseClient.connect(opts.name, opts.base, opts.token ? { [INTERNAL_HEADER]: opts.token } : {});
   if (!client) return { error: 'nessun archivio degli universi' };
@@ -81,7 +81,7 @@ export async function openUniverse(opts: { name: string; base: string; offline?:
   // The closed decisions (ADR-0157): Jev through the server's gate over the channel; without it the local models, which answer with the rule.
   const decisions = !opts.offline && opts.typesafe ? new JevDecisionModels({ fetchImpl: opts.typesafe, endpoint: 'typesafe:' }) : undefined;
   const runner = new TurnRunner();
-  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, decisions, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap, platformFee: opts.platformFee });
+  const kernel = await Kernel.boot({ files: up.files, store: memoryStore(), ai: models, decisions, forms: runner, chunks: new UniverseChunks(client), backend: client, past: snap.log ?? [], wasmUri: opts.wasmUri, ledger: opts.ledger, grantCap: opts.grantCap, platformFee: opts.platformFee, server: opts.server });
   const session = new SessionServer(kernel, { verify: opts.verify, masterUid: opts.masterUid });
   // The master's branch waits on disk while the server is down (T42b).
   const branch = await client.readBranch(BRANCH).catch(() => null);

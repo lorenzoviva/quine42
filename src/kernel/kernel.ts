@@ -70,7 +70,7 @@ import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from 
 import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
 import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels } from './relief';
-import { CardUses, CARDS_FILE, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
+import { CardCosts, CardUses, CARDS_FILE, readServer, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
@@ -315,6 +315,8 @@ export interface KernelOptions {
   grantCap?: number;
   /** The platform fee on every call charged (ADR-0132): only the server says it, never the universe, Lua or the Council. */
   platformFee?: number;
+  /** The origin of the server that runs this world (T365, ADR-0194): only the server says it; the cards stamped here name it. */
+  server?: string;
   store: KeyValueStore;
   ai: AiModels;
   /** Who takes the closed decisions (ADR-0157): Jev through its gate; without, the local models answer with today's rule. */
@@ -488,6 +490,10 @@ export class Kernel {
   /** The cards' uses and the places' cards (T36): world/cards.json, written before every commit. */
   readonly cards = new CardUses();
   private cardsWritten = -1;
+  /** The dollars of the calls not yet in a card (T365, ADR-0194); a kernel on the master's branch shares its world's. */
+  private cardCosts = new CardCosts();
+  /** The origin of the server whose world this is (T365, ADR-0194): only the server says it; the cards it stamps name it. */
+  private readonly server?: string;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
   private graphChunks = new Map<string, GraphChunk>();
@@ -708,6 +714,7 @@ export class Kernel {
     this.ledger = opts.ledger ?? new MemoryLedger();
     this.grantCap = opts.grantCap ?? DEFAULT_GRANT_CAP;
     this.fee = opts.platformFee ?? DEFAULT_PLATFORM_FEE;
+    this.server = readServer(opts.server);
     this.wasmUri = opts.wasmUri;
     // Every plan read is ported to this contract (T307a): the plans of a universe of before stay on disk as they were until written again.
     const chunks = opts.chunks ?? new MemoryChunks();
@@ -755,17 +762,11 @@ export class Kernel {
     // The usage ledger: every call is counted; the file is written before every commit (it survives rollbacks).
     k.usage.load(repo.working[USAGE_FILE]);
     k.shortfalls.load(repo.working[SHORTFALLS_FILE]);
-    k.ai.onCall = (r) => {
-      k.usage.record(r);
-      k.billCall(r);
-    };
+    k.ai.onCall = (r) => k.called(r);
     // The closed decisions (ADR-0157): in the same ledger, and paid as every call.
     if (opts.decisions) {
       k.council.decisions = opts.decisions;
-      opts.decisions.onCall = (r) => {
-        k.usage.record(r);
-        k.billCall(r);
-      };
+      opts.decisions.onCall = (r) => k.called(r);
     }
     k.usage.onChange = () => k.bus.emit('usage', k.usage);
     // The cards (T36): who pays for every call (cards.ts), and how often every card goes into a prompt.
@@ -1888,8 +1889,15 @@ export class Kernel {
     }
     ch.held = false;
     this.chunksMade.push(this.time);
-    const plan = await this.makePlan(ch);
-    this.cardChunk(ch, plan, ch.chi);
+    // Places are planned several at once: the card of each takes its part of what planning them cost (T365).
+    const end = this.cardCosts.begin('chunk.plan');
+    let plan: ChunkPlan;
+    try {
+      plan = await this.makePlan(ch);
+      this.cardChunk(ch, plan, ch.chi);
+    } finally {
+      end();
+    }
     await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
   }
@@ -5053,7 +5061,7 @@ export class Kernel {
   /** A judgement becomes a rule: written in the universe, shown to the Council in every later judgement. */
   recordRule(r: Rule, commit = true, card?: { task: string; author: string }): void {
     // A judgement of the Council is a card (T36); the facts the kernel notes (a death, a bond, a quest) are not.
-    if (card) r.card = this.sign(`rule:${nodeSlug(r.key)}`, card.task, card.author);
+    if (card) r.card = this.priceCards([this.sign(`rule:${nodeSlug(r.key)}`, card.task, card.author)], card.task)[0];
     const all = this.rules().filter((x) => x.key !== r.key);
     all.push(r);
     this.repo.write('world/rules.json', JSON.stringify({ rules: all.slice(-300) }, null, 2) + '\n');
@@ -7998,6 +8006,8 @@ export class Kernel {
     const autore = permissive ? this.wanderer().id : 'narrator';
     const asker = chi ?? (permissive ? this.payerNow() : COMUNE);
     const ids = [...this.modules.keys()];
+    // The forges of the Genesis run together: the card of each takes its part of what they cost (T365).
+    const end = this.cardCosts.begin('forge.concept');
     try {
       const r = await forge(
         this.council,
@@ -8026,6 +8036,8 @@ export class Kernel {
       this.council.say('kernel', 'errore', `Fucina: ${msg}`);
       this.noteShortfall({ request: prompt, who: asker, agent: (e as { agent?: string }).agent ?? 'kernel', task: 'forge.concept', outcome: e instanceof ForgeRejected ? 'invalid' : 'error', reason: msg });
       return { ok: false, summary: `Il Concilio non è riuscito a creare un modulo valido: ${msg}` };
+    } finally {
+      end();
     }
   }
 
@@ -8476,7 +8488,7 @@ export class Kernel {
 
   /** Stamps the content the working files bring against the last commit (cards.ts, stampFiles). */
   private stampContent(task: string, autore: string, chi?: string): void {
-    const changed = stampFiles(this.repo.working, this.repo.head().files, (id) => this.sign(id, task, autore, chi));
+    const changed = stampFiles(this.repo.working, this.repo.head().files, (id) => this.sign(id, task, autore, chi), (signed) => this.priceCards(signed, task));
     if (!Object.keys(changed).length) return;
     for (const [p, src] of Object.entries(changed)) this.repo.write(p, src);
     this.files = { ...this.files, ...changed };
@@ -8511,7 +8523,7 @@ export class Kernel {
 
   /** A place planned for the first time: its card, and one use of every card it holds (T36). */
   private cardChunk(ch: Chunk, plan: ChunkPlan, chi?: string): void {
-    plan.card ??= this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartographer', chi);
+    plan.card ??= this.priceCards([this.sign(chunkCardId(ch.cx, ch.cy), 'chunk.plan', 'cartographer', chi)], 'chunk.plan')[0];
     this.cards.addChunk(`${ch.cx}_${ch.cy}`, plan.place.name, plan.card);
     const ids = [`environment:${nodeSlug(plan.layout)}`];
     for (const o of plan.objects) ids.push(...this.entityCards(o.module));
@@ -8540,7 +8552,21 @@ export class Kernel {
   sign(cardId: string, task: string, autore: string, chi?: string): CardStamp {
     const pagante = this.billedTo(chi ?? payerOf(task, this.payerNow()));
     const all = [...new Set([...this.wanderers().map((w) => w.id), ...wanderersIn(this.files).map((w) => w.id)])];
-    return { author: autore, payer: pagante, holder: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0) };
+    return { author: autore, payer: pagante, holder: cardHolderOf(cardId, pagante, all.length ? all : [SOLO], this.config?.seed ?? 0), ...(this.server ? { server: this.server } : {}) };
+  }
+
+  /** The cards a task has just signed take what the calls that made them cost, shared among them (T365, ADR-0194). */
+  private priceCards(signed: CardStamp[], task: string): CardStamp[] {
+    const each = this.cardCosts.take(task, signed.length);
+    if (each !== undefined) for (const c of signed) c.usd = each;
+    return signed;
+  }
+
+  /** A call to the models or a closed decision: in the ledger, charged, and waiting for the card it makes (T365). */
+  private called(r: CallRecord): void {
+    this.usage.record(r);
+    this.billCall(r);
+    this.cardCosts.note(r.task, callCost(r, r.day));
   }
 
   /** Whether an id (of the graph's kind) is a card of this universe. */
@@ -8763,16 +8789,11 @@ export class Kernel {
    */
   async branchKernel(files: FileMap, wanderer: string): Promise<Kernel> {
     const decisions = this.council.decisions === this.council.localAiModels ? undefined : this.council.decisions;
-    const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, decisions, wasmUri: this.wasmUri, mirror: true });
-    this.ai.onCall = (r) => {
-      this.usage.record(r);
-      this.billCall(r);
-    };
-    if (decisions)
-      decisions.onCall = (r) => {
-        this.usage.record(r);
-        this.billCall(r);
-      };
+    const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, decisions, wasmUri: this.wasmUri, mirror: true, server: this.server });
+    this.ai.onCall = (r) => this.called(r);
+    if (decisions) decisions.onCall = (r) => this.called(r);
+    // What the branch commits is made by calls counted here: its cards take their dollars from this world's (T365).
+    k.cardCosts = this.cardCosts;
     k.bus.on('council', (e: FeedEntry) => this.council.say(e.from, e.kind, e.text, e.to, e.task));
     const body = k.addWanderer(wanderer);
     if (body !== undefined) k.wandererEntity = body;

@@ -76,6 +76,7 @@ async function open(o: WorldOpen): Promise<void> {
     masterUid: o.masterUid,
     restore: o.restore,
     grantCap: o.grantCap,
+    server: o.server,
     // Its environment holds only what the server put there (`worldEnv`).
     platformFee: platformFeeOf(process.env),
     // The server made the folder: this process may write only this file and those beside it (its lock, its temporary one).
