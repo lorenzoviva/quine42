@@ -80,6 +80,19 @@ export function feeText(fee: number): string {
   return fee > 0 ? `il loro costo, più la commissione della piattaforma (${feePercent(fee)})` : 'il loro costo, senza commissioni';
 }
 
+/** What the balance is for, in this universe: anonymous, alone, where everyone pays their own, or where the master pays (T372, ADR-0188). */
+export function walletNote(w: Pick<Wallet, 'anonimo' | 'multigiocatore' | 'masterPays' | 'master'>): string {
+  if (w.multigiocatore && w.masterPays)
+    return w.master
+      ? 'In questo universo paghi tu la partita: ogni richiesta del mondo e dei viandanti si scala dal tuo saldo, e le carte che nascono sono tue.'
+      : 'In questo universo paga il master: le tue richieste non si scalano dal tuo saldo.';
+  if (w.anonimo) return 'Un viandante anonimo non ha crediti: gioca con i modelli locali.';
+  return w.multigiocatore ? 'Si scala a ogni richiesta che fai al mondo.' : 'In questo universo giochi da solo: il saldo non si scala, serve quando l’universo è condiviso.';
+}
+
+/** Who the master paid for, as the table says it: `comune` is the world itself. */
+export const paidForName = (who: string): string => (who === 'comune' ? 'il mondo' : who);
+
 function cell(text: string, className?: string): HTMLTableCellElement {
   const td = document.createElement('td');
   td.textContent = text;
@@ -184,11 +197,7 @@ class WalletPage {
     $('wallet-amount').textContent = formatCredits(w.crediti);
     $('wallet-who').textContent = w.id;
     $('wallet-fee').textContent = feeText(w.commissione);
-    $('wallet-note').textContent = w.anonimo
-      ? 'Un viandante anonimo non ha crediti: gioca con i modelli locali.'
-      : w.multigiocatore
-        ? 'Si scala a ogni richiesta che fai al mondo.'
-        : 'In questo universo giochi da solo: il saldo non si scala, serve quando l’universo è condiviso.';
+    $('wallet-note').textContent = walletNote(w);
     $<HTMLAnchorElement>('nav-play').href = playLink(w.universo, w);
     $('btn-link-google').hidden = w.account !== 'anonimo';
     this.fillPayments(w);
@@ -218,6 +227,16 @@ class WalletPage {
     });
     $('spending-body').replaceChildren(...(rows.length ? rows : [emptyRow(3, 'Nessuna richiesta a tuo carico in questo universo.')]));
     $('spending-total').textContent = formatSpent(w.totaleConsumi);
+    // Where the master paid for the others (T372): only in their wallet.
+    $('paid-for-panel').hidden = !w.paidFor?.length;
+    $('paid-for-body').replaceChildren(
+      ...(w.paidFor ?? []).map((d) => {
+        const tr = document.createElement('tr');
+        tr.append(cell(formatDay(d.day)), cell(paidForName(d.who)), cell(String(d.calls)), cell(formatSpent(d.usd), 'text-yellow'));
+        return tr;
+      }),
+    );
+    $('paid-for-total').textContent = formatSpent(w.paidForTotal ?? 0);
   }
 
   /** The tier that matches the amount lights up; the button follows whether it can be paid. */

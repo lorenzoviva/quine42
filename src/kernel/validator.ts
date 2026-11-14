@@ -58,6 +58,8 @@ export function repairGameSetup(raw: unknown): GameSetup {
     freeActionsBetweenPlayers: flag(r.freeActionsBetweenPlayers, DEFAULT_GAME_SETUP.freeActionsBetweenPlayers),
     // Alone, the one who plays is the master of everything; in a multiplayer game, who created it (T37).
     ...(modalita === 'multiplayer' ? { master: validWandererId(master) ? master : SOLO } : {}),
+    // Who is charged (T372, ADR-0188): only the master's word is written; anything else, and a game alone, is the shared expenses of today.
+    ...(modalita === 'multiplayer' && r.expenses === 'master' ? { expenses: 'master' as const } : {}),
   };
 }
 

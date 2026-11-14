@@ -441,6 +441,26 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
       (oldRoot.querySelector('.primary') as FakeElement).onclick!();
       await oldOpen;
 
+      // Where the master pays (T372): a player reads it, has no ceiling to set and no minimum to meet; the master chooses it.
+      const paid = { ...files, 'universe.json': JSON.stringify({ ...JSON.parse(files['universe.json']), game: { mode: 'multiplayer', master: 'me', expenses: 'master' } }) };
+      const guest = new LobbyScreen({ name: 'mondo-multi', files: paid, wandererId: 'carlo', wandererName: 'Carlo', credits: 0 });
+      const guestOpen = guest.open();
+      const guestRoot = (guest as any).root as FakeElement;
+      expect(guestRoot.textContent).toContain('In questo mondo paga il master');
+      expect(guestRoot.textContent).not.toContain('Tetto minimo d’ingresso');
+      expect(guestRoot.querySelector("input[type='number']")).toBeNull();
+      expect((guestRoot.querySelector("select[id='lobby-spese']") as FakeElement).disabled).toBe(true);
+      (guestRoot.querySelector('.primary') as FakeElement).onclick!();
+      expect((await guestOpen).regolazioni).toBeUndefined();
+      const host = new LobbyScreen({ name: 'mondo-multi', files, wandererId: 'me', credits: 5 });
+      const hostOpen = host.open();
+      const hostRoot = (host as any).root as FakeElement;
+      const spese = hostRoot.querySelector("select[id='lobby-spese']") as FakeElement;
+      expect(spese.disabled).toBe(false);
+      spese.value = 'master';
+      (hostRoot.querySelector('.primary') as FakeElement).onclick!();
+      expect((await hostOpen).regolazioni?.game).toEqual({ expenses: 'master' });
+
       // 2. Test CreditExhaustedModal
       let recharged = false;
       let offlined = false;
@@ -483,8 +503,13 @@ describe('lobby requirements, minimums and tetto budgets (T45d)', () => {
 
       // Recharge click
       modal.show({ reason: 'exhausted' });
+      expect(btns[0].hidden).toBe(false);
       await btns[0].onclick!();
       expect(recharged).toBe(true);
+      // The master's purse ran out (T372): a player's own top-up would change nothing.
+      modal.show({ reason: 'exhausted', text: 'I crediti del master sono esauriti', masters: true });
+      expect(btns[0].hidden).toBe(true);
+      expect(modalRoot.textContent).toContain('I crediti del master');
     } finally {
       delete (globalThis as any).document;
     }

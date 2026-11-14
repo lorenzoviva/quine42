@@ -3,7 +3,7 @@
 // actions, and takes back the server's corrections. No kernel and no drawing here: the thin client of T39
 // gives this to the renderer.
 
-import type { AiSettings, FileMap } from '../kernel/types';
+import type { FileMap, LobbySettings } from '../kernel/types';
 import type { FeedEntry } from '../kernel/agents/council';
 import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
@@ -75,7 +75,7 @@ export class SessionClient {
 
   constructor(
     private link: ClientLink,
-    private who: { id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: AiSettings; freshToken?: () => Promise<string> },
+    private who: { id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: LobbySettings; freshToken?: () => Promise<string> },
   ) {
     this.ready = new Promise((r) => (this.entered = r));
     link.onMessage((m) => this.receive(m));

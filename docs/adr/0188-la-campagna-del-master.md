@@ -1,6 +1,6 @@
 # ADR-0188 — La Campagna del Master: le spese a carico del master, l'universo privato su invito, il ritmo del mondo che scende soltanto, le direttive a sezioni per competenza
 
-Data: 2026-11-13 · Stato: **proposto** (T347, step 43; decide l'autore) · Riferimenti: [`docs/design/campagna-master.md`](../design/campagna-master.md)
+Data: 2026-11-13 · Stato: **accettato** il 13/11 con le risposte di D54 (T347 lo ha proposto; T372 lo accetta e applica il punto 1, step 43) · Riferimenti: [`docs/design/campagna-master.md`](../design/campagna-master.md)
 (lo studio, con le misure), ADR-0025 (i due tavoli), ADR-0045 (il grafo e il `focus`), ADR-0056 (chi paga e le carte), ADR-0066 (il ramo del
 master), ADR-0069 (il Concilio sul ramo), ADR-0081 (le spese comuni divise), ADR-0084 (l'eredità delle carte), ADR-0102 (chi può scrivere),
 ADR-0104 (i saldi fuori dall'universo), ADR-0107 (i ritmi), ADR-0109 (gli elenchi), ADR-0110 (i mondi senza segreti), ADR-0113 (chi paga si
@@ -17,15 +17,20 @@ viandante paga le sue chiamate e le comuni si dividono (ADR-0081); chiunque con 
 fissano entrando (ADR-0133) e la pausa esiste solo nella lobby; la conversazione con un agente vive in memoria e sparisce; le regioni
 dell'atlante le scrive solo il Cartografo. Le alternative e i numeri sono nello studio.
 
-## Decisione proposta
+## Decisione
+
+Accettata dall'autore il 13/11 (D54, `docs/pipeline/domande/aperte.md`) con due cambi rispetto alla proposta, scritti sotto in **Le
+risposte dell'autore**: il titolare delle carte, quando paga il master, è il master (punto 1); la regione `mare` diventa la regione
+«riempitivo» (punto 5). Il resto vale come proposto.
 
 1. **Le spese della partita** sono un campo della partita, `universe.json → game.expenses`: `shared` (oggi, assente vale così) o
    `master`. Lo sceglie il master nella lobby con le altre regolazioni (`join.settings`), si fissa quando entra il primo viandante e si
    sblocca quando esce l'ultimo (ADR-0133 vale com'è), esce ai client in `GAME_FIELDS`. **`chi` non cambia** (ADR-0113): chi ha chiesto
-   resta chi ha chiesto per le carte, i ritmi, il registro e le mancanze; cambia un punto solo, `charge`, dove con `master` ogni addebito,
+   resta chi ha chiesto per i ritmi, il registro e le mancanze (le carte, D54.1, sono di chi paga); cambia un punto solo, `charge`, dove con `master` ogni addebito,
    personale o comune, va al master. Il tetto che conta è quello del master; il minimo della lobby non rifiuta più chi entra; a saldo zero
    del master tutti passano ai modelli locali con l'avviso di oggi. Gli anonimi restano ai modelli locali a meno che l'universo sia privato.
-   Le carte: `payer` il master, `holder` chi ha chiesto, come per le comuni di oggi. In open beta (ADR-0184) è «tutte le chiamate sulla
+   Le carte: `payer` e `holder` il master, chi paga (D54.1: niente spoiler nelle collezioni dei giocatori; scambi e cessioni più
+   avanti), e con loro le quote dell'eredità. Il risolutore è uno, `billedTo(chi)` nel kernel, per l'addebito e per le carte. In open beta (ADR-0184) è «tutte le chiamate sulla
    chiave del master»: la chiave si sceglie dal pagante risolto, non da `chi`.
 2. **L'universo privato** sta fuori dall'universo, come i saldi (ADR-0104): `universes/.campaign/<nome>.json` (`SERVER_FOLDERS.campaign`),
    atomico sotto lucchetto, con `private`, gli **ospiti** per id del viandante e gli **inviti** come impronte SHA-256 di token casuali con
@@ -99,7 +104,7 @@ dell'atlante le scrive solo il Cartografo. Le alternative e i numeri sono nello 
 - Le direttive sono testo del master dentro i prompt: ciò che il filtro non prende arriva agli agenti; il master lo vede e lo corregge nel
   file, e la quarta parete sui testi scritti (T350) resta a valle.
 
-## Domande per l'autore
+## Domande per l'autore (chiuse: D54)
 
 1. Quando paga il master, il titolare delle carte resta chi ha chiesto (le collezioni dei giocatori si riempiono, le quote dell'eredità
    seguono loro) o è il master? *Consiglio: chi ha chiesto, come per le comuni di oggi; la lobby lo dice.*
@@ -113,3 +118,36 @@ dell'atlante le scrive solo il Cartografo. Le alternative e i numeri sono nello 
 6. La regione `mare` è un piano d'acqua scritto dal kernel a costo zero, e `trattenuta` una pausa locale? *Consiglio: sì a entrambe.*
 7. Gli inviti: 7 giorni e un uso per predefinito, il token mostrato una volta sola? *Consiglio: sì.*
 8. L'universo privato di T347 e il verificatore a inviti di ADR-0184 §8 in un task solo? *Consiglio: sì, il task 2 dello studio.*
+
+## Le risposte dell'autore (D54, 13/11)
+
+1. **Il titolare delle carte è chi paga**: quando paga il master, `payer` e `holder` sono il master, e con loro le quote dell'eredità
+   (ADR-0084). Niente spoiler: le collezioni dei giocatori non si riempiono di ciò che la campagna prepara. Scambi e cessioni di carte
+   verranno più avanti, come task a parte. (Contro il consiglio, che diceva chi ha chiesto.)
+2. **Sì**: con «paga il master» in un universo pubblico gli anonimi restano ai modelli locali; in un universo privato l'ospite invitato,
+   anonimo o no, è a carico del master.
+3. **Sì**: la pausa ferma ciò che il mondo fa da sé (i dialoghi fra individui, le trame, le sessioni; i luoghi nuovi restano bozze); le
+   risposte ai viandanti continuano.
+4. **Sì**: l'HUD dice «il mondo è in pausa: il master lo sta scrivendo», fuori dal mondo come l'avviso dei crediti.
+5. **Sì alla via di mezzo**: le direttive in `world/campaign.md` a sezioni (la via E), scritte dal master e dal Referente; le direttive del
+   master non passano da Jev, il filtro locale `metaBreak` sempre; la quarta parete di Jev (`text.fourthwall`) è una manopola negli
+   universi privati.
+6. **Riformulata**: la regione «riempitivo» ripete sui luoghi nuovi un ambiente che il mondo ha già (il mare, un deserto…), senza
+   chiamate al Concilio, per indirizzare i viandanti senza dirlo e senza pagare luoghi che il master non vuole; resta la regione
+   `trattenuta`, una pausa locale.
+7. **Sì**: inviti di 7 giorni, un uso, il token mostrato una volta sola.
+8. **Sì**: l'universo privato e il verificatore a inviti di ADR-0184 §8 in un task solo (T366).
+
+I task: T372 (il punto 1, questo), T366 (il punto 2, con il verificatore a inviti), T373 (il ritmo), T374 (le direttive), T375 (le regioni,
+riempitivo e trattenuta), T376 (individui e trame), T377 (la campagna nel sito).
+
+## Applicazione del punto 1 (T372, kernel 0.6.13)
+
+- `GameSetup.expenses` (`GameExpenses`: `shared` assente, `master`), riparato da `repairGameSetup` (solo in una partita di molti),
+  `GAME_FIELDS`; dalla lobby `LobbySettings` (`settings.game.expenses` del `join`), `applySettings` → `expensesIn` e `setExpenses`.
+- Nel kernel: `masterPays()`, `masterId()`, `billedTo(chi)` (l'unico risolutore, per `charge` e per `sign`), `hasCredits` con la borsa del
+  master (`canPay`), `privateWorld` (falso finché T366 non lo dice per valore); `world/usage.json → masterPaid` (ciò che il master ha pagato
+  per chi, `UsageLog.paidByMaster`).
+- Nel server di sessione: il tetto minimo e `setSessionCap` solo per chi paga; l'esaurimento della borsa del master avvisa ogni client.
+- Il portafoglio (`masterPays`, `master`, `paidFor`, `paidForTotal`), la pagina dei crediti, la lobby e la modale dei crediti lo dicono.
+- La superficie nuova è la V-036 del registro della sicurezza.

@@ -443,7 +443,19 @@ export interface GameSetup {
   freeActionsBetweenPlayers: boolean;
   /** The master of a multiplayer game (T37): the wanderer who created it, `io` until accounts exist (T44). Never changes. */
   master?: string;
+  /**
+   * Who is charged for the match's calls (T372, ADR-0188), multiplayer only: absent (`shared`) each wanderer their own and the common
+   * ones split among the connected (ADR-0081); `master` every call, of the world and of the wanderers, to the master. Unlike the rest of
+   * the game it is the lobby's: the master sets it before entering, and it is fixed while a match is under way (ADR-0133).
+   */
+  expenses?: GameExpenses;
 }
+
+/** The expenses of the match (T372, ADR-0188): `shared` is what is absent, as before the choice existed. */
+export type GameExpenses = 'shared' | 'master';
+
+/** What the master sets in the lobby (T247, T372): the knobs of `universe.json → ai`, and of the game the expenses only. */
+export type LobbySettings = AiSettings & { game?: { expenses?: GameExpenses } };
 
 export interface ChunkInfo {
   name: string;
