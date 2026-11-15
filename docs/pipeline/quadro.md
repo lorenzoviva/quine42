@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 15/11/2026, epoca 445 (claude). Crediti: vedi `stato`.
+Aggiornato il 15/11/2026, epoca 449 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,13 +24,13 @@ Aggiornato il 15/11/2026, epoca 445 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T370 (claude, sforzo extra; spostato da fable nell’epoca 399). T396 integrato il 15/11 (ADR-0204, V-044: il testo del viandante va a Jev solo per la via OpenRouter con `zdr`, `TypeSafeGate` lo rifiuta sempre; non provato contro OpenRouter né TypeSafe veri; un fallimento di `produzione.test.ts` sotto carico, verde da solo). T395 integrato (kernel 0.7.13: Argon per le strutture di ogni taglia, 3.5 Flash a 1,50/9,00, stima piena 1,56 $/h; la stima non conta ancora Argon sulle strutture: proposto un task all'autore). Claude 5h al 33 % (reset 00:40 CET), settimana 68 %, esaurimento previsto 16/11.
+0. **Pronti:** T370 (claude, sforzo extra; sbloccato il 15/11 dopo il giro di T392), poi T371 (fable). T392 integrato (dati in `lab/banco/taglie/modelli/`), domanda D57 aperta. T396 e T395 integrati (vedi diario).
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (14/11 16:13 CET):** Claude settimana 76 %, 5h 29 % (reset 19:29), esaurimento previsto 15/11 16:52, prima del reset del 19/11 16:59; Fable settimana 92 %; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
 
 ## Attese dall'autore
 
-- **D57 (T355):** sospesa dall'autore (14/11): prima T391 confronta Carbon, Hydrogen, Sonnet 5.5, Opus 5.5 con Argon a costo per struttura riuscita (tetto 10 $); per i due Claude serve la chiave OpenRouter (D55). Diviso (autore 14/11): T391 fa Carbon e Hydrogen e prepara il comando; **T392** (Sonnet, Opus, Fable sull'abbonamento) lo lanci a mano dopo il reset di Claude del 19/11 (16:59 CET), **da solo**: aspetta che non ci sia niente in corso, sospendi gli altri provider e non lanciare altri task finché non finisce.
+- **D57 finale (T392, `docs/pipeline/domande/T392.md`):** giro Claude fatto il 15/11 (82 punti della finestra, 39,63 $ a listino): Opus 5.5 11/12 a 0,75 $/riuscita, 207 s, fattorie non fortificate; Sonnet 12/12 ma 662 s; Fable 7/8 a 2,91 $; Argon 6/8 a 0,37 $ (0,74 dopo l'1/12). Opzioni: **1 Argon fino all'1/12, poi Opus 5.5 via OpenRouter (task nuovo, prima un giro di prova ~3 $) (consiglio)**; 2 Opus su OpenRouter subito; 3 Argon e basta.
 
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
@@ -41,5 +41,5 @@ Aggiornato il 15/11/2026, epoca 445 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **449 (claude):** T392 integrato, T370 sbloccato, D57 finale chiesta.
 - **448 (claude):** forte v1 dell'autore committato, T371 sbloccato (dopo T370).
-- **445 (claude):** T396 integrato.
