@@ -5369,10 +5369,10 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, il forte dell'autore come gargantuesca in un mondo vero, attraversato a piedi fra i quattro luoghi, frame misurati.
 - Quando è fatto: commit su `task/T370`, kernel sale (di `Y` se cambia il formato dei piani).
 
-### T371 · Il forte dell'autore come riferimento della qualità «ottima» — `in attesa` (dipende da T370; l'autore avvisa quando il forte è finito)
+### T371 · Il forte dell'autore come riferimento della qualità «ottima» — `da fare` (dipende da T370)
 - Pipeline: fable · sforzo extra · stima 5% · approvato · browser · priorità 5
 - Step: 30
-- Contesto: D53 (autore 13/11): il forte disegnato a mano (`lab/mjx/models/handmade/forte-handmade.xml`, `docs/img/castello-gargantuan-handmade.png`: cortili come unioni di rettangoli, mura irregolari con torri agli angoli, mastio su più piani) fissa lo standard della qualità «ottima». Non ci si aspetta che i modelli di oggi lo raggiungano: è il riferimento.
+- Contesto: D53 (autore 13/11): il forte disegnato a mano (`lab/mjx/models/handmade/forte-handmade.xml`, `docs/img/castello-gargantuan-handmade.png`: cortili come unioni di rettangoli, mura irregolari con torri agli angoli, mastio su più piani) fissa lo standard della qualità «ottima». Non ci si aspetta che i modelli di oggi lo raggiungano: è il riferimento. **Forte pronto (autore 15/11):** la prima versione del forte di massima qualità è `forte-handmade.xml` nel commit del 15/11; c'è ancora margine e potrebbero arrivare altre versioni: il banco tratti il riferimento come versionato (v1), così una versione nuova lo sostituisce senza rifare la scala.
 - Cosa fare: il forte al posto del forte di T339 come riferimento del banco (`lab/banco/taglie/`, `lab/banco/riferimento/`) e dello Scultore (esempio o metro nel prompt delle strutture, ADR-0183, senza superare i token misurati), con foto e viste in testo; una scala di giudizio nel banco che dica quanto un programma scritto da Gemini gli si avvicina.
 - Browser: sì, foto del forte nel laboratorio 3D.
 - Quando è fatto: commit su `task/T371`.
