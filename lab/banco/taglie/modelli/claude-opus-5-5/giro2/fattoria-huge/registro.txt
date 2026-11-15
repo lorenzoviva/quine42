@@ -1,0 +1,4 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 15 × 1 voxel (0,75 × 0,05 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 21 tipi di parti e 47 parti, alla Enorme 21 e 39: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un
+[artist → sculptor] obietta: «fattoria»: 6/10 — Il contrasto cromatico tra alcuni volumi e pareti risulta ridotto

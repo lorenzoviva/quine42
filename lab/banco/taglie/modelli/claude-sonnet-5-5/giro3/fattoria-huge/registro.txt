@@ -1,0 +1,2 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-sonnet-5-5)
+[artist → sculptor] obietta: «fattoria»: 6/10 — Il cortile interno appare vuoto e privo di elementi caratteristici.

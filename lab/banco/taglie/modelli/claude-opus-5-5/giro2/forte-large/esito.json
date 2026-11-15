@@ -1,0 +1,70 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 8,
+ "chiamate": 4,
+ "secondi": 191,
+ "usd": 0.6399,
+ "usdGemini": 0.0073,
+ "usdClaude": 0.6326,
+ "usdCli": 0.6326,
+ "claude": [
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 357,
+   "read": 9758,
+   "output": 3803,
+   "usd": 0.0808756,
+   "usdCli": 0.08087559999999999,
+   "task": "model.sculpt",
+   "seconds": 41
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 6984,
+   "read": 8025,
+   "output": 9696,
+   "usd": 0.251405,
+   "usdCli": 0.251405,
+   "task": "model.sculpt",
+   "seconds": 101
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 26062,
+   "read": 8025,
+   "output": 4512,
+   "usd": 0.300349,
+   "usdCli": 0.300349,
+   "task": "model.sculpt",
+   "seconds": 35
+  }
+ ],
+ "token": {
+  "prompt": 62240,
+  "output": 18122,
+  "thoughts": 193
+ },
+ "perCompito": [
+  {
+   "model": "claude-opus-5-5",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.6326
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0073
+  }
+ ]
+}

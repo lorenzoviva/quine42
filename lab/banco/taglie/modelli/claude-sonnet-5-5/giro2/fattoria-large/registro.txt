@@ -1,0 +1,2 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-sonnet-5-5)
+[artist → sculptor] approva: «fattoria»: 8/10 — Le finestre sulle pareti laterali sono disposte in modo troppo irregolare e sparso.

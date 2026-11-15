@@ -1,0 +1,70 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "scultore": "claude-fable-5-1",
+ "modello": "claude-fable-5-1",
+ "voto": 6,
+ "chiamate": 5,
+ "secondi": 663,
+ "usd": 2.9636,
+ "usdGemini": 0.0128,
+ "usdClaude": 2.9507,
+ "usdCli": 2.9507,
+ "claude": [
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 380,
+   "read": 9798,
+   "output": 13128,
+   "usd": 0.6664695,
+   "usdCli": 0.6664695000000002,
+   "task": "model.sculpt",
+   "seconds": 200
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 9881,
+   "read": 8025,
+   "output": 20723,
+   "usd": 1.23579625,
+   "usdCli": 1.2357962499999997,
+   "task": "model.sculpt",
+   "seconds": 300
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 25467,
+   "read": 8025,
+   "output": 10742,
+   "usd": 1.04846625,
+   "usdCli": 1.0484662500000002,
+   "task": "model.sculpt",
+   "seconds": 123
+  }
+ ],
+ "token": {
+  "prompt": 67682,
+  "output": 44764,
+  "thoughts": 237
+ },
+ "perCompito": [
+  {
+   "model": "claude-fable-5-1",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 2.9507
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 2,
+   "usd": 0.0128
+  }
+ ]
+}

@@ -1,0 +1,113 @@
+<!-- forte: sculpted by claude-fable-5-1 (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwmdscnWGrtQbP" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- mastio: 4 dietro, 3 davanti, 3 per lato e una in più su un lato a caso -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="4"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="3"/>
+      <one in="hE" out="*h" symmetry="(x)" steps="1"/>
+      <all in="hE/*h" out="*h/**"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+      <!-- cortile: una cella attorno, poi una in più su un lato dove restano almeno 5 celle di terra -->
+      <all in="wE" out="*c" steps="1"/><all in="cE/*c" out="*c/**"/>
+      <one in="wcEEEEE" out="**c****" steps="1"/><all in="cE/*c" out="*c/**"/>
+      <!-- al Huge il cortile cresce di quattro dove la terra continua per sei -->
+      <all in="c/E/E/E/E/E/E" out="*/c/c/c/c/*/*" symmetry="()" steps="1"/><all in="cE/*c" out="*c/**"/>
+      <!-- cinta spessa due -->
+      <all in="cE" out="*W"/><all in="WE/*W" out="*W/**"/><all in="WE" out="*W" steps="1"/><all in="WE/*W" out="*W/**"/>
+      <!-- torri d'angolo 3x3 -->
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="1"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+      <!-- l'uscita: porta del mastio, lastricato, corpo di guardia, strada -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/><all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/><all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/><all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/><all in="nc" out="*n" symmetry="(x)" steps="1"/><all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
+      <!-- la zona della scala lungo il muro di fondo del mastio: due celle di pianerottolo, quattro di scala, una di pavimento dopo -->
+      <one in="wwwwwwww/whhhhhhh/whhhhhhh" out="********/***ssss*/***ssss*" symmetry="()" steps="1"/>
+      <!-- stalla contro la cinta e pozzo, dove il cortile è largo -->
+      <one in="Wccccc/Wccccc/Wccccc/Wccccc/Wccccc" out="*bbbb*/*bbbb*/*bbbb*/*bbbb*/*bbbb*" symmetry="(x)" steps="1"/>
+      <all in="bc" out="P*" symmetry="(x)" steps="1"/>
+      <one in="ccc/ccc/ccc" out="***/*Q*/***" steps="1"/>
+    </sequence>
+    <map scale="5 5 1" values="BEhwdscnWGrtQbPafFKuLVjJpqkTMOoNUxz#90#91#92#94" symmetry="()">
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="n" out="nnnnn/nnnnn/nnnnn/nnnnn/nnnnn"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="G" out="GGGGG/GGGGG/GGGGG/GGGGG/GGGGG"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="Q" out="ccccc/cQQQc/cQaQc/cQQQc/ccccc"/>
+      <rule in="b" out="bbbbb/bbbbb/bbbbb/bbbbb/bbbbb"/>
+      <rule in="P" out="bbbbb/bpppb/bpppb/bpppb/bbbbb"/>
+      <sequence symmetry="(xy)">
+        <union symbol="+" values="KVu"/>
+        <union symbol="=" values="fF"/>
+        <union symbol="%" values="VK"/>
+        <!-- B. i muri del mastio: 65, con due fasce per le finestre; la porta d lascia O al piede -->
+        <all steps="1"><rule in="B w" out="w K"/><rule in="B d" out="w O"/></all>
+        <all in="B w" out="w K" steps="5"/><all in="B w" out="w u" steps="14"/><all in="B w" out="w K" steps="12"/>
+        <all in="B w" out="w K" steps="6"/><all in="B w" out="w u" steps="14"/><all in="B w" out="w K" steps="12"/>
+        <all in="B w" out="w K" steps="1"/>
+        <prl in="w" out="K"/>
+        <!-- la cinta 44, il corpo di guardia 50 con la porta al piede, le torri 56 -->
+        <all in="B W" out="W V" steps="44"/><prl in="W" out="V"/>
+        <all in="B G" out="G O" steps="1"/><all in="B G" out="G V" steps="49"/><prl in="G" out="V"/>
+        <all in="B t" out="t V" steps="56"/><prl in="t" out="V"/>
+        <!-- i piani del mastio -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="F"/><rule in="s" out="F"/></prl>
+        <!-- il pozzo e la stalla: pali 33, tettoia a 34 -->
+        <all in="B Q" out="Q q" steps="3"/><prl in="Q" out="q"/>
+        <all in="B p" out="p p" steps="33"/>
+        <all in="B b" out="j b" steps="1"/><all in="B j" out="j B" steps="33"/>
+        <all in="B p" out="J *" steps="1"/><prl in="j" out="J"/>
+        <!-- C. le parti -->
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+        <!-- le finestre nelle fasce: 3 larghe, 8 alte, due di muro tra l'una e l'altra -->
+        <one steps="60" in="uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB uB/uB/uB/uB/uB/uB/uB" out="**/**/**/**/**/**/** **/**/**/**/**/**/** **/**/**/**/**/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/L*/L*/L*/**/** **/**/**/**/**/**/** **/**/**/**/**/**/** **/**/**/**/**/**/**"/>
+        <all in="LuuuuB" out="*LLLL*"/>
+        <prl in="u" out="K"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="E" hidden="True" name="terra"/>
+  <color symbol="c" value="7FA85A" name="cortile" area="courtyard"/>
+  <color symbol="n" value="B8B0A0" name="lastricato"/>
+  <color symbol="r" value="C2A878" name="strada"/>
+  <color symbol="b" value="C9A25A" name="paglia della stalla" area="barn"/>
+  <color symbol="a" value="4A7FB0" name="acqua del pozzo"/>
+  <color symbol="q" value="8C8C84" name="pietra del pozzo"/>
+  <color symbol="p" value="6B4A2A" name="palo"/>
+  <color symbol="J" value="9A4A32" name="tettoia"/>
+  <color symbol="f" value="B07A45" name="assi del pavimento" area="keep"/>
+  <color symbol="F" value="7D6A50" name="solaio"/>
+  <color symbol="K" value="A09A88" name="pietra del mastio"/>
+  <color symbol="V" value="6E6E68" name="pietra della cinta" area="tower"/>
+  <color symbol="M" value="5A5A55" name="merlo"/>
+  <color symbol="L" value="2E4A6B" name="finestra"/>
+  <color symbol="U" value="1E2A38" name="feritoia"/>
+  <color symbol="k" value="8A7050" name="gradino"/>
+  <color symbol="O" value="6B3F1E" name="porta"/>
+  <color symbol="o" value="4A2A12" name="assi della porta"/>
+  <color symbol="N" value="5C5C58" name="stipite"/>
+  <color symbol="x" hidden="True" name="porta aperta"/>
+  <color symbol="z" hidden="True" name="assi aperte"/>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="x"/><rule in="o" out="z"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="x" out="O"/><rule in="z" out="o"/></all></action>
+</sequence>

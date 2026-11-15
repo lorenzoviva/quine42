@@ -1,0 +1,58 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "scultore": "claude-fable-5-1",
+ "modello": "claude-fable-5-1",
+ "voto": 8,
+ "chiamate": 3,
+ "secondi": 437,
+ "usd": 1.5495,
+ "usdGemini": 0.0069,
+ "usdClaude": 1.5426,
+ "usdCli": 1.5426,
+ "claude": [
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 379,
+   "read": 9758,
+   "output": 9068,
+   "usd": 0.4634395,
+   "usdCli": 0.46343949999999995,
+   "task": "model.sculpt",
+   "seconds": 145
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 6671,
+   "read": 8025,
+   "output": 18875,
+   "usd": 1.07919625,
+   "usdCli": 1.0791962499999999,
+   "task": "model.sculpt",
+   "seconds": 285
+  }
+ ],
+ "token": {
+  "prompt": 27820,
+  "output": 28052,
+  "thoughts": 159
+ },
+ "perCompito": [
+  {
+   "model": "claude-fable-5-1",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 1.5426
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0069
+  }
+ ]
+}

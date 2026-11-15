@@ -1,0 +1,209 @@
+<!-- forte: sculpted by claude-sonnet-5-5 (step 9), the Artist's vote 9/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwucWtGdnrmsavgQy" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="4"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <prl in="E/h" out="h/*" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+
+      <one in="EE/Ew" out="**/*u" steps="2"/>
+
+      <one in="wEEEEEEEE/wEEEEEEEE/wEEEEEEEE/wEEEEEEEE/wEEEEEEEE" out="*********/*********/*a*******/*********/*********" symmetry="(x)" steps="1"/>
+      <all in="aE" out="*a" symmetry="(x)" steps="2"/>
+      <all in="E/a" out="a/*" symmetry="()" steps="2"/>
+      <all in="a/E" out="*/a" symmetry="()" steps="2"/>
+      <all in="aE" out="*v"/>
+      <all in="vE/*v" out="*v/**"/>
+
+      <all in="[wvu]E" out="*c"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEEE" out="*ccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <all in="cE" out="*W"/>
+      <all in="WE/*W" out="*W/**"/>
+      <all in="WE" out="*W" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/>
+      <all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <prl>
+        <rule in="m" out="h"/>
+        <rule in="H" out="h"/>
+      </prl>
+
+      <one in="WWWWWWW/ccccccc/ccccccc/ccccccc/ccccccc/ccccccc/ccccccc" out="*******/*ggggg*/*ggggg*/*ggggg*/*ggggg*/*******/*******" symmetry="(x)" steps="1"/>
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <one in="ccccccc/ccccccc/ccccccc/ccccccc/ccccccc/ccccccc/ccccccc" out="*******/*******/*******/***y***/*******/*******/*******" steps="2"/>
+
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="2">
+        <rule in="t[EW]" out="*t"/>
+        <rule in="t*/*[EW]" out="**/*t"/>
+      </all>
+
+      <one in="EEEEE/EEEEE/WWWWW" out="ttttt/ttttt/WWWWW" steps="1"/>
+      <one in="EEEEE/EEEEE/WWWWW" out="ttttt/ttttt/WWWWW" p="0.5" steps="1"/>
+    </sequence>
+  </map>
+  <map scale="5 5 1" values="BEhwxZXLuOoNcWtGmdnrsTkavgQylRFMUjJqzpei" symmetry="()">
+    <union symbol="+" values="wxZXuWtGv"/>
+    <union symbol="=" values="hsaF"/>
+    <union symbol="%" values="wxW"/>
+    <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+    <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+    <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+    <rule in="u" out="uuuuu/uuuuu/uuuuu/uuuuu/uuuuu"/>
+    <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+    <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+    <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+    <rule in="G" out="mmmmm/mmmmm/mmmmm/mmmmm/mmmmm"/>
+    <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+    <rule in="n" out="nnnnn/nnnnn/nnnnn/nnnnn/nnnnn"/>
+    <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+    <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+    <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+    <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+    <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+    <rule in="Q" out="QQQQQ/QQQQQ/QQQQQ/QQQQQ/QQQQQ"/>
+    <rule in="y" out="yyyyy/yyyyy/yyyyy/yyyyy/yyyyy"/>
+    <sequence symmetry="(xy)">
+      <!-- B. the keep walls: two storeys, band for the windows; the door columns have no band -->
+      <all in="B w" out="j w" steps="1"/>
+      <all in="B d" out="J d" steps="1"/>
+      <all steps="5"><rule in="B j" out="j w"/><rule in="B J" out="J w"/></all>
+      <all steps="14"><rule in="B j" out="j Z"/><rule in="B J" out="J w"/></all>
+      <all steps="12"><rule in="B j" out="j w"/><rule in="B J" out="J w"/></all>
+      <all steps="6"><rule in="B j" out="j x"/><rule in="B J" out="J x"/></all>
+      <all steps="14"><rule in="B j" out="j X"/><rule in="B J" out="J x"/></all>
+      <all steps="14"><rule in="B j" out="j x"/><rule in="B J" out="J x"/></all>
+      <prl><rule in="j" out="B"/><rule in="J" out="B"/></prl>
+
+      <!-- windows in the bands -->
+      <one steps="22">
+        <rule in="B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX] B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]/B[ZX]"
+              out="*L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L"/>
+      </one>
+      <all in="L[ZX][ZX][ZX][ZX]B" out="*LLLL*"/>
+      <prl><rule in="Z" out="w"/><rule in="X" out="x"/></prl>
+
+      <!-- curtain wall 24 -->
+      <all in="B W" out="j W" steps="1"/>
+      <all in="B j" out="j W" steps="23"/>
+      <prl in="j" out="B"/>
+      <!-- towers 56 -->
+      <all in="B t" out="j t" steps="1"/>
+      <all in="B j" out="j t" steps="55"/>
+      <prl in="j" out="B"/>
+      <!-- gatehouse 48 -->
+      <all in="B m" out="j m" steps="1"/>
+      <all in="B j" out="j G" steps="47"/>
+      <prl in="j" out="B"/>
+      <!-- turrets 90 -->
+      <all in="B u" out="j u" steps="1"/>
+      <all in="B j" out="j u" steps="89"/>
+      <prl in="j" out="B"/>
+      <!-- annex walls, roof on top -->
+      <all in="B v" out="j v" steps="1"/>
+      <all in="B j" out="j v" steps="31"/>
+      <prl in="j" out="R"/>
+      <!-- barracks -->
+      <all in="B g" out="j g" steps="1"/>
+      <all in="B j" out="j g" steps="27"/>
+      <prl in="j" out="R"/>
+      <!-- well -->
+      <all in="B Q" out="j Q" steps="1"/>
+      <all in="B j" out="j Q" steps="9"/>
+      <prl in="j" out="B"/>
+      <!-- trees -->
+      <all in="B y" out="j y" steps="1"/>
+      <all in="B j" out="j y" steps="9"/>
+      <all in="B j" out="j l" steps="12"/>
+      <prl in="j" out="B"/>
+      <!-- annex hall -->
+      <all in="B a" out="p a" steps="1"/>
+      <all in="B p" out="p B" steps="31"/>
+      <prl in="p" out="R"/>
+
+      <!-- the keep hall: floor, strip of the stair, slab, ceiling -->
+      <all in="B h" out="q h" steps="1"/>
+      <all in="B s" out="T s" symmetry="()" steps="1"/>
+      <all in="B T" out="z T" symmetry="()" steps="1"/>
+      <all in="B q" out="q B" steps="31"/>
+      <all in="B z" out="z B" steps="30"/>
+      <all steps="1"><rule in="B q" out="q F"/><rule in="B z" out="z F"/></all>
+      <all steps="31"><rule in="B q" out="q B"/><rule in="B z" out="z B"/></all>
+      <prl><rule in="q" out="R"/><rule in="z" out="R"/></prl>
+
+      <!-- C. the doors -->
+      <prl><rule in="d" out="O"/><rule in="m" out="O"/></prl>
+      <one in="aaaaaaaaaaa/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/vvvvvvvvvvv/ccccccccccc" out="***********/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/***********" symmetry="()" steps="1"/>
+
+      <import file="part-door"/>
+      <import file="part-stair"/>
+      <import file="part-battlements"/>
+      <import file="part-slits"/>
+    </sequence>
+  </map>
+  <color symbol="B" value="000000" name="aria" hidden="True"/>
+  <color symbol="E" value="7FA650" name="terreno" hidden="True"/>
+  <color symbol="H" value="E0C060" name="centro" hidden="True"/>
+  <color symbol="h" value="C9A66B" name="pavimento del mastio" area="keep"/>
+  <color symbol="w" value="8F8A80" name="muro del mastio"/>
+  <color symbol="x" value="E3D9BE" name="intonaco"/>
+  <color symbol="Z" value="8F8A80" name="fascia bassa" hidden="True"/>
+  <color symbol="X" value="E3D9BE" name="fascia alta" hidden="True"/>
+  <color symbol="L" value="2E3B55" name="finestra"/>
+  <color symbol="u" value="6F6A63" name="torretta"/>
+  <color symbol="O" value="8B5A2B" name="porta"/>
+  <color symbol="o" value="4A2F1B" name="assi della porta"/>
+  <color symbol="N" value="3C2F28" name="stipite"/>
+  <color symbol="c" value="B9A878" name="cortile" area="courtyard"/>
+  <color symbol="W" value="76736C" name="muro di cinta"/>
+  <color symbol="t" value="5E5B55" name="torre" area="tower"/>
+  <color symbol="G" value="4A4742" name="portale"/>
+  <color symbol="m" value="FFFFFF" name="segno" hidden="True"/>
+  <color symbol="d" value="A0642D" name="porta del mastio"/>
+  <color symbol="n" value="A39B8A" name="selciato"/>
+  <color symbol="r" value="C2A878" name="strada"/>
+  <color symbol="s" value="9A7A4E" name="pavimento della scala"/>
+  <color symbol="T" value="FF00FF" name="segno scala" hidden="True"/>
+  <color symbol="k" value="C97B4A" name="gradini"/>
+  <color symbol="a" value="D4B483" name="sala dell'ala" area="annex"/>
+  <color symbol="v" value="9A8F7E" name="muro dell'ala"/>
+  <color symbol="g" value="7A4A3A" name="caserma" area="garrison"/>
+  <color symbol="Q" value="3F6F8F" name="pozzo"/>
+  <color symbol="y" value="6B4A2B" name="tronco" area="orchard"/>
+  <color symbol="l" value="4F8A3E" name="fogliame"/>
+  <color symbol="R" value="B5492F" name="tetto"/>
+  <color symbol="F" value="7A5C3A" name="solaio"/>
+  <color symbol="M" value="9B968C" name="merlo"/>
+  <color symbol="U" value="1E1E22" name="feritoia"/>
+  <color symbol="j" value="FF00FF" name="testa" hidden="True"/>
+  <color symbol="J" value="FF00FF" name="testa porta" hidden="True"/>
+  <color symbol="q" value="FF00FF" name="testa sala" hidden="True"/>
+  <color symbol="z" value="FF00FF" name="testa scala" hidden="True"/>
+  <color symbol="p" value="FF00FF" name="testa ala" hidden="True"/>
+  <color symbol="e" value="000000" name="porta aperta" hidden="True"/>
+  <color symbol="i" value="000000" name="assi aperte" hidden="True"/>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="e"/><rule in="o" out="i"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="e" out="O"/><rule in="i" out="o"/></all></action>
+</sequence>

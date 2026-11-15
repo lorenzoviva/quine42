@@ -1,0 +1,3 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-sonnet-5-5)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: pezzi staccati: 8% dei voxel non è attaccato al corpo principale (13 pezzi)
+[artist → sculptor] obietta: «fattoria»: 6/10 — I dettagli delle finestre sembrano micro-voxel sparsi anziché segni puliti

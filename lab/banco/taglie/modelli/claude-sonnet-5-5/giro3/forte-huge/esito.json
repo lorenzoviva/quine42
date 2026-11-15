@@ -1,0 +1,70 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "claude-sonnet-5-5",
+ "modello": "claude-sonnet-5-5",
+ "voto": 9,
+ "chiamate": 4,
+ "secondi": 561,
+ "usd": 0.7607,
+ "usdGemini": 0.0082,
+ "usdClaude": 0.7525,
+ "usdCli": 0.75,
+ "claude": [
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 362,
+   "read": 9794,
+   "output": 35073,
+   "usd": 0.3541408,
+   "usdCli": 0.3531614,
+   "task": "model.sculpt",
+   "seconds": 292
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 9589,
+   "read": 8025,
+   "output": 28339,
+   "usd": 0.323355,
+   "usdCli": 0.32255249999999996,
+   "task": "model.sculpt",
+   "seconds": 232
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 6608,
+   "read": 8025,
+   "output": 4701,
+   "usd": 0.075051,
+   "usdCli": 0.0742485,
+   "task": "model.sculpt",
+   "seconds": 23
+  }
+ ],
+ "token": {
+  "prompt": 45475,
+  "output": 68235,
+  "thoughts": 277
+ },
+ "perCompito": [
+  {
+   "model": "claude-sonnet-5-5",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 0.7525
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0082
+  }
+ ]
+}

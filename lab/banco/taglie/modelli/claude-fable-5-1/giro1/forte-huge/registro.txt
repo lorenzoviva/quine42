@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, claude-fable-5-1)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 2: piani: 0 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «forte»: nessun programma valido

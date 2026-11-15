@@ -1,0 +1,142 @@
+<!-- forte: sculpted by claude-sonnet-5-5 (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwmdncWGrtsaQy" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="4"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+      <all in="wE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEEEEE" out="*ccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cE" out="*W"/>
+      <all in="WE/*W" out="*W/**"/>
+      <one in="EE/EW" out="**/*t" steps="2"/>
+      <prl in="EE/EW" out="**/*t" p="0.5" steps="1"/>
+      <all steps="2"><rule in="t[EW]" out="*t"/><rule in="t*/*[EW]" out="**/*t"/></all>
+      <all in="[Hm]/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/>
+      <all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
+      <one in="wwwwwww/hhhhhhh/hhhhhhh" out="*******/**ssss*/**ssss*" symmetry="()" steps="1"/>
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+      <one in="ccccccc/ccccccc/ccccccc/ccccccc/ccccccc/WWWWWWW" out="*******/*aaaaa*/*aaaaa*/*aaaaa*/*aaaaa*/*******" steps="2"/>
+      <one in="EEE/EEE/EEE" out="***/*y*/***" steps="3"/>
+    </sequence>
+    <map scale="5 5 1" values="BEhswWtGgnrcaQqyjOoNDYXKJRVLZFTkMU" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="OOOOO/OOOOO/OOOOO/OOOOO/OOOOO"/>
+      <rule in="n" out="nnnnn/nnnnn/nnnnn/nnnnn/nnnnn"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="W" out="WWWWW/WWWWW/WWWWW/WWWWW/WWWWW"/>
+      <rule in="G" out="GGGGG/GGGGG/GGGGG/GGGGG/GGGGG"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="Q" out="QQQQQ/QqqqQ/QqqqQ/QqqqQ/QQQQQ"/>
+      <rule in="y" out="yyyyy/yjjjy/yjjjy/yjjjy/yyyyy"/>
+      <union symbol="+" values="wWtG"/>
+      <union symbol="=" values="hsF"/>
+      <union symbol="%" values="wW"/>
+      <sequence symmetry="(xy)">
+        <all steps="1"><rule in="B h" out="Y h"/><rule in="B s" out="X s"/><rule in="B a" out="K a"/><rule in="B O" out="D O"/></all>
+        <all in="B w" out="w w" steps="6"/>
+        <all in="B w" out="w V" steps="14"/>
+        <all in="B w" out="w w" steps="12"/>
+        <all in="B w" out="w w" steps="6"/>
+        <all in="B w" out="w V" steps="14"/>
+        <all in="B w" out="w w" steps="12"/>
+        <all in="B w" out="w w" steps="1"/>
+        <all in="B D" out="D w" steps="64"/>
+        <all in="B W" out="W W" steps="10"/>
+        <all in="B W" out="W Z" steps="2"/>
+        <all in="B W" out="W W" steps="11"/>
+        <all in="B t" out="t t" steps="10"/>
+        <all in="B t" out="t Z" steps="2"/>
+        <all in="B t" out="t t" steps="27"/>
+        <all in="B G" out="G n" steps="1"/>
+        <all in="B G" out="G g" steps="31"/>
+        <all in="B G" out="G G" steps="7"/>
+        <all in="B K" out="K a" steps="23"/>
+        <all in="B K" out="K J" steps="3"/>
+        <all in="B Q" out="Q Q" steps="8"/>
+        <all in="B j" out="j j" steps="19"/>
+        <all in="B y" out="y E" steps="1"/>
+        <all in="B y" out="y B" steps="9"/>
+        <all in="B y" out="y y" steps="9"/>
+        <all in="B X" out="X T" steps="1" symmetry="()"/>
+        <all in="B Y" out="Y B" steps="1"/>
+        <all steps="30"><rule in="B Y" out="Y B"/><rule in="B X" out="X B"/></all>
+        <all steps="1"><rule in="B Y" out="Y F"/><rule in="B X" out="X F"/></all>
+        <all steps="31"><rule in="B Y" out="Y B"/><rule in="B X" out="X B"/></all>
+        <prl><rule in="Y" out="R"/><rule in="X" out="R"/><rule in="D" out="w"/><rule in="K" out="J"/></prl>
+        <one steps="60"><rule in="BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV BV/BV/BV/BV/BV/BV" out="*L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L"/></one>
+        <all in="LVVVVB" out="*LLLL*"/>
+        <prl in="V" out="w"/>
+        <all in="[BW]ggggggggggggggg[BW]" out="***BBBBBBBBBBB***"/>
+        <prl in="g" out="G"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+        <import file="part-stair"/>
+        <import file="part-door"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="B" value="#000000" name="aria"/>
+  <color symbol="H" value="#8A6A4A" name="centro del maschio" area="keep"/>
+  <color symbol="E" value="#7FA05A" name="terra" hidden="True"/>
+  <color symbol="h" value="#B89A6A" name="assito del maschio" area="keep"/>
+  <color symbol="w" value="#A9A59A" name="muro del maschio"/>
+  <color symbol="m" value="#C9A66B" name="traccia del percorso" hidden="True"/>
+  <color symbol="d" value="#5A3A22" name="porta del maschio"/>
+  <color symbol="n" value="#B7A98A" name="selciato"/>
+  <color symbol="c" value="#A8B878" name="cortile" area="courtyard"/>
+  <color symbol="W" value="#8A8A82" name="cinta muraria"/>
+  <color symbol="G" value="#6A6862" name="torre del cancello"/>
+  <color symbol="g" value="#6A6862" name="pilastro del cancello"/>
+  <color symbol="r" value="#C8B58A" name="strada"/>
+  <color symbol="t" value="#9A8C78" name="torre d'angolo" area="tower"/>
+  <color symbol="s" value="#A88A5A" name="assito della scala" area="keep"/>
+  <color symbol="a" value="#B5654A" name="caserma" area="barracks"/>
+  <color symbol="Q" value="#7C7A74" name="pozzo"/>
+  <color symbol="q" value="#4A7FA8" name="acqua del pozzo"/>
+  <color symbol="y" value="#3F7A3A" name="chioma"/>
+  <color symbol="j" value="#5B3E26" name="tronco"/>
+  <color symbol="O" value="#7A4E2C" name="porta"/>
+  <color symbol="o" value="#4A2E1A" name="assi della porta"/>
+  <color symbol="N" value="#3C2A1E" name="stipite"/>
+  <color symbol="D" value="#A9A59A" name="segno" hidden="True"/>
+  <color symbol="Y" value="#000000" name="segno del piano" hidden="True"/>
+  <color symbol="X" value="#000000" name="segno della scala" hidden="True"/>
+  <color symbol="K" value="#000000" name="segno della caserma" hidden="True"/>
+  <color symbol="J" value="#6B4A3A" name="tetto della caserma"/>
+  <color symbol="R" value="#A6483A" name="tetto del maschio"/>
+  <color symbol="V" value="#A9A59A" name="fascia" hidden="True"/>
+  <color symbol="L" value="#8FB8D0" name="vetro"/>
+  <color symbol="Z" value="#4A4642" name="cordolo scuro"/>
+  <color symbol="F" value="#8C6A44" name="solaio"/>
+  <color symbol="T" value="#000000" name="traccia della scala" hidden="True"/>
+  <color symbol="k" value="#C2A878" name="gradini"/>
+  <color symbol="M" value="#B5B0A4" name="merlo"/>
+  <color symbol="U" value="#1E1E22" name="feritoia"/>
+  <color symbol="#20" value="#000000" name="porta aperta" hidden="True"/>
+  <color symbol="#21" value="#000000" name="assi aperte" hidden="True"/>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="#20" out="O"/><rule in="#21" out="o"/></all></action>
+</sequence>

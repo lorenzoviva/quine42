@@ -1,0 +1,70 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "claude-fable-5-1",
+ "modello": "claude-fable-5-1",
+ "voto": 8,
+ "chiamate": 4,
+ "secondi": 551,
+ "usd": 2.4772,
+ "usdGemini": 0.0056,
+ "usdClaude": 2.4716,
+ "usdCli": 2.4716,
+ "claude": [
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 380,
+   "read": 9794,
+   "output": 6446,
+   "usd": 0.3323685,
+   "usdCli": 0.33236850000000007,
+   "task": "model.sculpt",
+   "seconds": 96
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 8929,
+   "read": 8025,
+   "output": 22814,
+   "usd": 1.32130625,
+   "usdCli": 1.32130625,
+   "task": "model.sculpt",
+   "seconds": 348
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 23456,
+   "read": 8025,
+   "output": 6935,
+   "usd": 0.81789625,
+   "usdCli": 0.81789625,
+   "task": "model.sculpt",
+   "seconds": 85
+  }
+ ],
+ "token": {
+  "prompt": 61663,
+  "output": 36314,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "claude-fable-5-1",
+   "task": "model.sculpt",
+   "calls": 3,
+   "usd": 2.4716
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0056
+  }
+ ]
+}

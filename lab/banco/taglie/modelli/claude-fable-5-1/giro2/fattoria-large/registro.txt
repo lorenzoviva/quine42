@@ -1,0 +1,2 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-fable-5-1)
+[artist → sculptor] approva: «fattoria»: 8/10 — La struttura principale è molto alta e slanciata, ricordando più una torre che una casa da fattoria bassa e accogliente.
