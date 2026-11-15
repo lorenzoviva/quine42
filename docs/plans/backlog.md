@@ -5360,7 +5360,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: l'endpoint solo dall'ambiente (SSRF, § 5 punto 5), un banco della qualità sui compiti del Concilio.
 - Quando è fatto: il banco dice quali compiti un modello aperto regge.
 
-### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356)
+### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356, T392)
 - Pipeline: claude · sforzo extra · stima 10% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D53 chiusa (autore 13/11): opzione 1 di `docs/pipeline/domande/T356.md`, un lotto di 2 × 2 luoghi (36 × 36 caselle), con `STRUCTURE_SIDE` 500 invece di 400 perché il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 voxel, 25 caselle) ci deve stare. Misure e tetti in T356 (ADR-0185, `dossier T356`).
