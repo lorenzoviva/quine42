@@ -1,0 +1,151 @@
+<!-- fattoria: sculpted by claude-fable-5-1 (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwsdrapfyxQtgm" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- il corpo della casa -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="4"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="3"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+      <!-- la zona della scala lungo il muro di fondo -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+      <!-- la tettoia contro un fianco -->
+      <one in="Ew/Ew/Ew/Ew/Ew" out="**/**/a*/**/**" symmetry="(x)" steps="1"/>
+      <all in="aE" out="*a" symmetry="(x)" steps="2"/>
+      <all in="E/a" out="a/*" symmetry="()" steps="2"/>
+      <all in="a/E" out="*/a" symmetry="()" steps="2"/>
+      <all in="aE" out="*p"/>
+      <all in="pE/*p" out="*p/**"/>
+      <!-- il fieno dietro, largo quanto la casa -->
+      <all in="E/w/[hs]" out="f/*/*" symmetry="()" steps="1"/>
+      <all in="E/f" out="f/*" symmetry="()" steps="2"/>
+      <!-- il cortile: un anello sempre, un secondo dove la terra continua -->
+      <all in="[wpf]E" out="*y"/>
+      <all in="yE/*y" out="*y/**"/>
+      <all in="yEEE" out="*y**" steps="1"/>
+      <all in="yE/*y" out="*y/**"/>
+      <!-- la via d'uscita: dal centro al fronte, porta e strada fino al bordo -->
+      <all in="[Hm]/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dr]/[yE]" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <all in="r[yE]" out="*r" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
+      <!-- lo steccato dove la terra continua -->
+      <all in="yE" out="*x"/>
+      <all in="xE/*x" out="*x/**"/>
+      <!-- il pozzo nel cortile -->
+      <one in="yyy/yyy" out="***/*Q*" steps="1"/>
+      <!-- i campi oltre lo steccato, dove la terra va avanti -->
+      <all in="xEEEEEEE" out="*gggggg*" steps="1"/>
+      <all in="gE/*g" out="*g/**"/>
+      <!-- il frutteto nei campi -->
+      <one in="ggggg/ggggg/ggggg/ggggg/ggggg" out="*****/*****/**t**/*****/*****"/>
+    </sequence>
+    <map scale="5 5 1" values="BEwWULRKhlCsTk#90#91#92OoNdrafPzJyxXQAtuGgD" symmetry="()">
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="p" out="aaaaa/aPPPa/aPPPa/aPPPa/aaaaa"/>
+      <rule in="f" out="fffff/fffff/fffff/fffff/fffff"/>
+      <rule in="y" out="yyyyy/yyyyy/yyyyy/yyyyy/yyyyy"/>
+      <rule in="x" out="yyyyy/yxxxy/yxxxy/yxxxy/yyyyy"/>
+      <rule in="Q" out="QQQQQ/QAAAQ/QAAAQ/QAAAQ/QQQQQ"/>
+      <rule in="t" out="ggggg/ggggg/ggugg/ggggg/ggggg"/>
+      <rule in="g" out="gDgDg/gDgDg/gDgDg/gDgDg/gDgDg"/>
+      <sequence symmetry="(xy)">
+        <!-- B. i muri della casa: intonaco, fascia delle finestre, intonaco, due piani -->
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <prl in="w" out="R"/>
+        <!-- la colonna della porta: il seme O a terra, muro sopra -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d W" steps="63"/>
+        <prl in="d" out="R"/>
+        <!-- i pavimenti, la striscia della scala, il solaio, il soffitto -->
+        <all steps="1"><rule in="B h" out="h l"/><rule in="B s" out="s l"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h C"/><rule in="B s" out="s C"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+        <!-- la tettoia: pali e tetto a 34 -->
+        <all in="B P" out="P P" steps="33"/>
+        <all in="B a" out="z a" steps="1"/>
+        <all in="B z" out="z B" steps="33"/>
+        <prl in="z" out="J"/>
+        <all in="B P" out="J *" steps="1"/>
+        <all in="JB" out="*J" steps="1"/>
+        <!-- il fieno: una catasta dal colmo irregolare -->
+        <all in="B f" out="f f" steps="9"/>
+        <one in="B f" out="f f" steps="80"/>
+        <!-- lo steccato: pali con la traversa -->
+        <all in="B x" out="x x" steps="4"/>
+        <all in="B x" out="x X" steps="1"/>
+        <all in="XBBX" out="*XX*"/>
+        <all in="B x" out="x x" steps="2"/>
+        <!-- il pozzo: la vera di pietra -->
+        <all in="B Q" out="Q Q" steps="3"/>
+        <!-- i solchi dei campi -->
+        <all in="B D" out="D D" steps="1"/>
+        <!-- gli alberi: tronco e chioma tonda -->
+        <all in="B u" out="u u" steps="5"/>
+        <all in="B u" out="G *" steps="1"/>
+        <all in="GB" out="*G" steps="2"/>
+        <all in="G B" out="* G" steps="1"/>
+        <all in="B G" out="G *" steps="1"/>
+        <all in="GB" out="*G" steps="1"/>
+        <all in="B G" out="G *" steps="1"/>
+        <!-- C. la porta e la scala -->
+        <union symbol="+" values="WUL"/>
+        <union symbol="=" values="lC"/>
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <!-- le finestre nella fascia -->
+        <one steps="14"><rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU" out="*L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L *L/*L/*L/*L/*L/*L"/></one>
+        <all in="LUUUUB" out="*LLLL*"/>
+        <prl in="U" out="W"/>
+        <!-- il tetto a falde, la gronda, il camino -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="8" symmetry="()"/>
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="5"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="W" value="E8DCC0" name="intonaco"/>
+  <color symbol="U" value="E8DCC0" name="fascia delle finestre"/>
+  <color symbol="L" value="6A8AB0" name="vetro"/>
+  <color symbol="R" value="B04830" name="tegole"/>
+  <color symbol="K" value="707070" name="camino"/>
+  <color symbol="l" value="C8A878" name="assi del pavimento" area="house"/>
+  <color symbol="C" value="A08858" name="solaio"/>
+  <color symbol="k" value="8A6A48" name="gradini"/>
+  <color symbol="O" value="6A4A2A" name="porta"/>
+  <color symbol="o" value="4A3018" name="assi della porta"/>
+  <color symbol="N" value="9A8A70" name="stipiti"/>
+  <color symbol="r" value="B8A890" name="strada" area="road"/>
+  <color symbol="a" value="D0C0A0" name="pavimento della tettoia" area="porch"/>
+  <color symbol="P" value="7A5A3A" name="pali"/>
+  <color symbol="J" value="8A5A38" name="tetto della tettoia"/>
+  <color symbol="f" value="E0C050" name="fieno"/>
+  <color symbol="y" value="9AB060" name="cortile" area="yard"/>
+  <color symbol="x" value="8A6A48" name="pali dello steccato"/>
+  <color symbol="X" value="A08060" name="traversa dello steccato"/>
+  <color symbol="Q" value="808890" name="pietra del pozzo"/>
+  <color symbol="A" value="4A7AB0" name="acqua"/>
+  <color symbol="u" value="6A4A2A" name="tronco"/>
+  <color symbol="G" value="4A8A3A" name="chioma"/>
+  <color symbol="g" value="A09040" name="campo" area="field"/>
+  <color symbol="D" value="7A6A30" name="solchi"/>
+  <color symbol="#20" hidden="True"/>
+  <color symbol="#21" hidden="True"/>
+  <action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>
+  <action name="close" label="Chiudi la porta"><all><rule in="#20" out="O"/><rule in="#21" out="o"/></all></action>
+</sequence>

@@ -1,0 +1,3 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-fable-5-1)
+[kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 23 tipi di parti e 50 parti, alla Enorme 23 e 46: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un
+[artist → sculptor] obietta: «fattoria»: 6/10 — Le finestre sono piccole e poco definite.

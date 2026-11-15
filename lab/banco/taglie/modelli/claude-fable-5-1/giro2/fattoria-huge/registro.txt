@@ -1,0 +1,2 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-fable-5-1)
+[artist → sculptor] obietta: «fattoria»: 6/10 — Il contrasto tra la porta principale e la parete frontale è leggermente debole.

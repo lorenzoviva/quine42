@@ -1,0 +1,4 @@
+[sculptor] propone: «forte» (struttura grande, claude-fable-5-1)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 15 × 6 voxel (0,75 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: porta: 15 × 6 voxel (0,75 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui si sta in piedi ha il l
+[artist → sculptor] approva: «forte»: 8/10 — La struttura è molto monocromatica e scura, la pietra grigio-bruna tende ad appiattire i volumi delle torri e delle mura

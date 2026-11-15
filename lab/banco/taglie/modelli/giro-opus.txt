@@ -1,0 +1,234 @@
+Registro di H:\projects\rune\.claude\worktrees\t392\lab\banco\taglie\modelli: $5.84 di Gemini prima del giro, tetto $10.00
+Claude prima: 5 ore 26 %, settimana 34 %
+  giro1 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro1 forte-huge [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro1 forte-large [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro1 fattoria-huge [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro1 forte-large [kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: s
+  giro1 forte-huge [artist → sculptor] approva: «forte»: 9/10
+giro1 forte-huge: fatto (claude-opus-5-5, voto 9) in 152 s · 3 chiamate · $0.42 · input 30k (cache 8025) · risposta 13k · ragionamento 161
+  giro1 fattoria-large [artist → sculptor] approva: «fattoria»: 8/10 — La canna fumaria sul tetto è fin troppo sottile e poco definita
+giro1 fattoria-large: fatto (claude-opus-5-5, voto 8) in 153 s · 3 chiamate · $0.41 · input 28k (cache 8025) · risposta 14k · ragionamento 301
+  giro1 forte-large [artist → sculptor] approva: «forte»: 8/10 — Le superfici in pietra delle torri e del corpo centrale usano tonalità molto simili, rendendo poco staccati i volumi interni rispetto alla cinta muraria.
+giro1 forte-large: fatto (claude-opus-5-5, voto 8) in 203 s · 4 chiamate · $0.74 · input 63k (cache 16k) · risposta 19k · ragionamento 160
+  giro1 fattoria-huge [kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 18 tipi di parti e 181 parti, alla Enorme 18 e 155: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: 
+  giro1 fattoria-huge [kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 20 tipi di parti e 189 parti, alla Enorme 20 e 159: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: 
+  giro1 fattoria-huge [artist → sculptor] obietta: «fattoria»: 6/10 — Le finestre appaiono come piccoli blocchi sparsi e disordinati sulle pareti.
+giro1 fattoria-huge: fatto (claude-opus-5-5, voto 6) in 280 s · 5 chiamate · $1.19 · input 107k (cache 24k) · risposta 27k · ragionamento 317
+
+claude-opus-5-5\giro1: $2.77 a listino, 15 chiamate, registro di Gemini $5.87
+  giro2 forte-large [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro2 forte-huge [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro2 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro2 fattoria-huge [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro2 forte-large [kernel → sculptor] scarta: «forte»: varietà: alla taglia Enorme 18 tipi di parti e 129 parti, alla Grande 18 e 114: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tip
+  giro2 fattoria-large [artist → sculptor] approva: «fattoria»: 8/10 — Le finestre sono disposte in modo un po' caotico sulle pareti principali
+giro2 fattoria-large: fatto (claude-opus-5-5, voto 8) in 148 s · 3 chiamate · $0.33 · input 28k (cache 18k) · risposta 13k · ragionamento 253
+  giro2 forte-huge [artist → sculptor] approva: «forte»: 9/10 — Il tono di grigio della cinta muraria e del maschio centrale è molto simile e tende a fondersi leggermente nelle parti in ombra.
+giro2 forte-huge: fatto (claude-opus-5-5, voto 9) in 168 s · 3 chiamate · $0.38 · input 30k (cache 18k) · risposta 15k · ragionamento 318
+  giro2 fattoria-huge [kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 15 × 1 voxel (0,75 × 0,05 caselle), una porta è almeno 11 × 30 a ogni taglia
+  giro2 forte-large [artist → sculptor] approva: «forte»: 8/10 — Alcune finestre e feritoie sulle pareti sembrano blocchi scuri casuali invece di aperture ben definite
+giro2 forte-large: fatto (claude-opus-5-5, voto 8) in 191 s · 4 chiamate · $0.64 · input 62k (cache 26k) · risposta 18k · ragionamento 193
+  giro2 fattoria-huge [kernel → sculptor] scarta: «fattoria»: varietà: alla taglia Gargantuesca 21 tipi di parti e 47 parti, alla Enorme 21 e 39: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un
+  giro2 fattoria-huge [artist → sculptor] obietta: «fattoria»: 6/10 — Il contrasto cromatico tra alcuni volumi e pareti risulta ridotto
+giro2 fattoria-huge: fatto (claude-opus-5-5, voto 6) in 341 s · 7 chiamate · $1.49 · input 146k (cache 43k) · risposta 35k · ragionamento 300
+
+claude-opus-5-5\giro2: $2.83 a listino, 17 chiamate, registro di Gemini $5.91
+  giro3 forte-large [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro3 forte-huge [sculptor] propone: «forte» (struttura grande, claude-opus-5-5)
+  giro3 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro3 fattoria-huge [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro3 forte-huge [kernel → sculptor] scarta: «forte»: taglia Enorme, seme 2: piani: 1 (serve ≥ 2)
+  giro3 forte-large [artist → sculptor] approva: «forte»: 8/10 — La struttura in pietra ha toni molto omogenei e la palette appare un po' monotona nei grigi
+giro3 forte-large: fatto (claude-opus-5-5, voto 8) in 152 s · 3 chiamate · $0.35 · input 28k (cache 18k) · risposta 14k · ragionamento 188
+  giro3 forte-huge [kernel → sculptor] scarta: «forte»: varietà: alla taglia Gargantuesca 18 tipi di parti e 128 parti, alla Enorme 18 e 130: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: 
+  giro3 fattoria-large [artist → sculptor] approva: «fattoria»: 7/10 — Il colore ciano acceso degli alberi è innaturale e stona con la palette ambiente.
+giro3 fattoria-large: fatto (claude-opus-5-5, voto 7) in 210 s · 5 chiamate · $0.62 · input 63k (cache 26k) · risposta 18k · ragionamento 507
+  giro3 fattoria-huge [artist → sculptor] obietta: «fattoria»: 6/10 — La recinzione e l'ingresso sono disallineati rispetto al corpo principale.
+giro3 fattoria-huge: fatto (claude-opus-5-5, voto 6) in 213 s · 5 chiamate · $0.65 · input 64k (cache 26k) · risposta 19k · ragionamento 364
+  giro3 forte-huge [kernel → sculptor] scarta: «forte»: varietà: alla taglia Gargantuesca 18 tipi di parti e 130 parti, alla Enorme 18 e 130: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: 
+  giro3 forte-huge [sculptor] errore: «forte»: nessun programma valido
+giro3 forte-huge: NON riuscito (nessun programma valido) in 275 s · 4 chiamate · $0.97 · input 89k (cache 34k) · risposta 26k · ragionamento 0
+
+claude-opus-5-5\giro3: $2.59 a listino, 17 chiamate, registro di Gemini $5.95
+Claude dopo: 5 ore 36 %, settimana 35 % · il giro ha preso 1 punti della settimana
+
+forte-large (include part-battlements.xml, part-slits.xml, part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 293 ms, 198542 voxel, parti 90 (15 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 9, keep 6, tower 5
+   seme 2: 264 ms, 196542 voxel, parti 88 (15 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 9, keep 6, tower 5
+   merli (M) per lunghezza: {"2":2,"3":17,"4":2,"5":39}
+ huge (150×150×120)
+   seme 1: 489 ms, 286372 voxel, parti 118 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barracks 2, courtyard 29, keep 4, tower 13
+   seme 2: 480 ms, 286372 voxel, parti 119 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barracks 2, courtyard 29, keep 4, tower 13
+   merli (M) per lunghezza: {"2":2,"3":29,"4":4,"5":51}
+ gargantuan (200×200×160)
+   seme 1: 844 ms, 338816 voxel, parti 134 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barracks 2, courtyard 47, keep 6, tower 13
+   seme 2: 822 ms, 338816 voxel, parti 136 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barracks 1, courtyard 48, keep 6, tower 13
+   merli (M) per lunghezza: {"2":2,"3":36,"4":8,"5":60}
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): sì
+
+forte-huge (include part-door.xml, part-stair.xml, part-battlements.xml, part-slits.xml)
+ large (100×100×80)
+   seme 1: 257 ms, 218975 voxel, parti 91 (16 lettere); piani —; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree courtyard 6, keep 8, tower 9
+   seme 2: 254 ms, 220141 voxel, parti 108 (16 lettere); piani —; stanze z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree courtyard 6, keep 8, tower 10
+   merli (M) per lunghezza: {"2":3,"3":36,"4":1,"5":40}
+ huge (150×150×120)
+   seme 1: 463 ms, 295627 voxel, parti 169 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 19, keep 6, tower 23
+   seme 2: 446 ms, 292603 voxel, parti 161 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 18, keep 6, tower 22
+   merli (M) per lunghezza: {"2":2,"3":84,"4":8,"5":84}
+ gargantuan (200×200×160)
+   seme 1: 782 ms, 333157 voxel, parti 173 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 33, keep 6, tower 21
+   seme 2: 785 ms, 333001 voxel, parti 169 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 34, keep 6, tower 21
+   merli (M) per lunghezza: {"2":2,"3":84,"4":8,"5":84}
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: taglia Grande, seme 1: piani: 0 (serve ≥ 2)
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): sì
+
+fattoria-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 243 ms, 107325 voxel, parti 40 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 9, porch 2, yard 1
+   seme 2: 238 ms, 106621 voxel, parti 35 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 9, porch 2
+ huge (150×150×120)
+   seme 1: 416 ms, 126161 voxel, parti 37 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 5, orchard 2, porch 1, yard 10
+   seme 2: 401 ms, 126856 voxel, parti 37 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 1, house 5, porch 1, yard 12
+ gargantuan (200×200×160)
+   seme 1: 705 ms, 156751 voxel, parti 161 (22 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, orchard 26, porch 2, yard 15
+   seme 2: 698 ms, 156221 voxel, parti 161 (22 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, orchard 26, porch 2, yard 15
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+fattoria-huge (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 233 ms, 106256 voxel, parti 79 (15 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 1, house 6, yard 13
+   seme 2: 234 ms, 106256 voxel, parti 83 (15 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 1, house 6, yard 13
+ huge (150×150×120)
+   seme 1: 393 ms, 114038 voxel, parti 124 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 5, yard 32
+   seme 2: 382 ms, 114038 voxel, parti 121 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 5, yard 32
+ gargantuan (200×200×160)
+   seme 1: 685 ms, 123451 voxel, parti 165 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, yard 60
+   seme 2: 674 ms, 123451 voxel, parti 162 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, yard 60
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+forte-large (include part-door.xml, part-battlements.xml, part-slits.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 282 ms, 157734 voxel, parti 114 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 10, keep 6
+   seme 2: 262 ms, 188853 voxel, parti 120 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 10, keep 6
+   merli (M) per lunghezza: {"2":6,"3":15,"4":1,"5":62}
+ huge (150×150×120)
+   seme 1: 485 ms, 272465 voxel, parti 132 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 26, keep 4
+   seme 2: 480 ms, 272465 voxel, parti 133 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 26, keep 4
+   merli (M) per lunghezza: {"2":4,"3":32,"4":8,"5":64}
+ gargantuan (200×200×160)
+   seme 1: 797 ms, 299165 voxel, parti 133 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 30, keep 6
+   seme 2: 774 ms, 299165 voxel, parti 131 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 30, keep 6
+   merli (M) per lunghezza: {"2":4,"3":32,"4":8,"5":64}
+   varietà: large → huge: cresce · huge → gargantuan: varietà: alla taglia Gargantuesca 20 tipi di parti e 133 parti, alla Enorme 20 e 132: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 165 parti), non lo stesso edificio più grande
+   checkProgram large: passa
+   checkProgram huge: varietà: alla taglia Gargantuesca 20 tipi di parti e 133 parti, alla Enorme 20 e 132: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 165 parti), non lo stesso edificio più grande
+   fortificato (merli disegnati a Enorme, seme 1): sì
+
+forte-huge (include part-door.xml, part-stair.xml, part-battlements.xml, part-slits.xml)
+ large (100×100×80)
+   seme 1: 224 ms, 140468 voxel, parti 63 (13 lettere); piani 1,33; stanze z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 1, courtyard 13, keep 6, wall 5
+   seme 2: 238 ms, 140468 voxel, parti 60 (13 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree courtyard 12, keep 6, wall 7
+   merli (M) per lunghezza: {"2":2,"3":10,"5":28}
+ huge (150×150×120)
+   seme 1: 472 ms, 281599 voxel, parti 138 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barn 1, courtyard 11, keep 5, moat 28, road 2, tower 4, wall 11
+   seme 2: 452 ms, 281599 voxel, parti 133 (18 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 11, keep 6, moat 28, road 2, tower 4, wall 11
+   merli (M) per lunghezza: {"2":4,"3":38,"4":8,"5":64}
+ gargantuan (200×200×160)
+   seme 1: 786 ms, 323254 voxel, parti 137 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree barn 1, courtyard 34, keep 7, moat 31, road 2, tower 8, wall 5
+   seme 2: 784 ms, 323254 voxel, parti 135 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 34, keep 8, moat 31, road 2, tower 8, wall 5
+   merli (M) per lunghezza: {"2":4,"3":38,"4":8,"5":64}
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: taglia Grande, seme 1: pezzi staccati: 39% dei voxel non è attaccato al corpo principale (2 pezzi)
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): sì
+
+fattoria-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 249 ms, 103492 voxel, parti 31 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 3, house 11, yard 2
+   seme 2: 275 ms, 103487 voxel, parti 32 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 3, house 11, yard 2
+ huge (150×150×120)
+   seme 1: 413 ms, 109656 voxel, parti 59 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 14, orchard 14, yard 5
+   seme 2: 396 ms, 110862 voxel, parti 65 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 14, orchard 17, yard 5
+ gargantuan (200×200×160)
+   seme 1: 699 ms, 120885 voxel, parti 113 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 3, house 11, orchard 41, yard 8
+   seme 2: 683 ms, 119277 voxel, parti 106 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 3, house 11, orchard 37, yard 8
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: taglia Gargantuesca, seme 1: pezzi staccati: 14% dei voxel non è attaccato al corpo principale (43 pezzi)
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+fattoria-huge (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 256 ms, 119685 voxel, parti 31 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 7, porch 2, yard 9
+   seme 2: 265 ms, 119685 voxel, parti 32 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 7, porch 2, yard 9
+ huge (150×150×120)
+   seme 1: 434 ms, 135665 voxel, parti 57 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 4, porch 4, yard 26
+   seme 2: 427 ms, 133401 voxel, parti 49 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 5, porch 4, yard 25
+ gargantuan (200×200×160)
+   seme 1: 760 ms, 140700 voxel, parti 76 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, porch 2, yard 39
+   seme 2: 731 ms, 140634 voxel, parti 73 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 39 · z1 lato 36 (1.80 c) soffitto 39 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, porch 2, yard 39
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+forte-large (include part-door.xml, part-stair.xml, part-battlements.xml, part-slits.xml)
+ large (100×100×80)
+   seme 1: 257 ms, 185386 voxel, parti 89 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 6, keep 9, tower 5
+   seme 2: 257 ms, 185386 voxel, parti 89 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 31 · z1 lato 36 (1.80 c) soffitto 31 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 6, keep 9, tower 5
+   merli (M) per lunghezza: {"2":8,"3":11,"4":1,"5":41}
+ huge (150×150×120)
+   seme 1: 481 ms, 255794 voxel, parti 121 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 34 · z1 lato 36 (1.80 c) soffitto 34 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 31, keep 4, tower 13
+   seme 2: 476 ms, 255794 voxel, parti 119 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 34 · z1 lato 36 (1.80 c) soffitto 34 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 31, keep 4, tower 13
+   merli (M) per lunghezza: {"2":8,"3":25,"4":4,"5":55}
+ gargantuan (200×200×160)
+   seme 1: 835 ms, 297373 voxel, parti 134 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 34 · z1 lato 36 (1.80 c) soffitto 34 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 49, keep 6, tower 13
+   seme 2: 844 ms, 297373 voxel, parti 137 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 34 · z1 lato 36 (1.80 c) soffitto 34 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree courtyard 49, keep 6, tower 13
+   merli (M) per lunghezza: {"2":8,"3":32,"4":8,"5":68}
+   varietà: large → huge: cresce · huge → gargantuan: varietà: alla taglia Gargantuesca 21 tipi di parti e 134 parti, alla Enorme 21 e 121: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 152 parti), non lo stesso edificio più grande
+   checkProgram large: passa
+   checkProgram huge: varietà: alla taglia Gargantuesca 21 tipi di parti e 134 parti, alla Enorme 21 e 121: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 152 parti), non lo stesso edificio più grande
+   fortificato (merli disegnati a Enorme, seme 1): sì
+
+fattoria-large (include part-stair.xml, part-door.xml)
+ large (100×100×80)
+   seme 1: 260 ms, 102616 voxel, parti 40 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, yard 4
+   seme 2: 249 ms, 102616 voxel, parti 38 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 2, house 6, yard 4
+ huge (150×150×120)
+   seme 1: 395 ms, 121386 voxel, parti 52 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 5, yard 14
+   seme 2: 397 ms, 122880 voxel, parti 56 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 5, yard 14
+ gargantuan (200×200×160)
+   seme 1: 684 ms, 128402 voxel, parti 58 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 6, yard 20
+   seme 2: 698 ms, 128402 voxel, parti 59 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 4, house 6, yard 20
+   varietà: large → huge: cresce · huge → gargantuan: varietà: alla taglia Gargantuesca 19 tipi di parti e 58 parti, alla Enorme 19 e 52: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 65 parti), non lo stesso edificio più grande
+   checkProgram large: passa
+   checkProgram huge: varietà: alla taglia Gargantuesca 19 tipi di parti e 58 parti, alla Enorme 19 e 52: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno 65 parti), non lo stesso edificio più grande
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+fattoria-huge (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 267 ms, 115952 voxel, parti 32 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 8, house 6, yard 11
+   seme 2: 269 ms, 115952 voxel, parti 32 (16 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 8, house 6, yard 11
+ huge (150×150×120)
+   seme 1: 438 ms, 126844 voxel, parti 34 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 5, house 5, yard 26
+   seme 2: 461 ms, 126844 voxel, parti 36 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 5, house 5, yard 26
+ gargantuan (200×200×160)
+   seme 1: 753 ms, 137607 voxel, parti 68 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 6, house 6, orchard 18, yard 28
+   seme 2: 735 ms, 138105 voxel, parti 77 (19 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree barn 6, house 6, orchard 21, yard 28
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no

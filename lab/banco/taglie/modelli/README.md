@@ -7,7 +7,7 @@ a Grande e a Enorme, col ragionamento del gioco (`low`); qui lo Scultore è **lo
 poi alle tre taglie e a due semi con le misure del banco, `checkProgram` e le foto.
 
 Questo task fa i modelli di Gemini (**Gemini 4 Carbon** e **Gemini 4 Hydrogen**, con la chiave di Google: l'API li offre entrambi, letti il
-14/11 con `models.list`) e prepara il giro sull'abbonamento di Claude (Sonnet 5.5, Opus 5.5, Fable 5.1), che fa **T392**. I numeri di 3.8 Flash
+14/11 con `models.list`) e prepara il giro sull'abbonamento di Claude (Sonnet 5.5, Opus 5.5, Fable 5.1), che ha fatto **T392** il 15/11 (sotto, «Il giro su Claude»). I numeri di 3.8 Flash
 e Argon sono quelli di T355, già pagati e non rifatti (solo i giri col ragionamento del gioco: giro1-3 e giro5).
 
 ```bash
@@ -115,7 +115,85 @@ Il registro della CLI finta mostra a ogni chiamata il modello, `--effort low`, `
 sistema dello Scultore (19,8 mila caratteri); Fable risulta «non raggiungibile» e il comando prosegue con Opus; i test sono in
 `tests/banco-claude.test.ts`.
 
-## Raccomandazione provvisoria per D57 (solo Gemini; quella finale la dà T392)
+## Il giro su Claude (T392, 15/11)
+
+Lanciato il 15/11 dalle 02:46 alle 04:12 (ora di Roma), all'inizio di una finestra delle 5 ore pulita (3 %), senza altri task (claude e fable
+sospesi, generatore spento), col comando di T391 **un modello alla volta**, per avere le letture di ciascuno:
+
+```bash
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude-sonnet-5-5 --ripeti 3 --out lab/banco/taglie/modelli   # poi claude-opus-5-5, claude-fable-5-1
+```
+
+Tutti e tre i modelli sono raggiungibili dalla CLI (`claude-fable-5-1` compreso: l'alias `fable` della pipeline è 5.2, qui si è chiesto l'id
+del listino); le immagini della revisione con `--input-format stream-json` sono passate senza errori (nessun `--senza-immagini`). Il costo
+calcolato coi prezzi di `ANTHROPIC_PRICES` coincide con quello che dice la CLI (`usdCli`). Le uscite intere sono `giro-sonnet.txt`,
+`giro-opus.txt` e `giro-fable.txt`; le letture della finestra in `settimana.json`.
+
+**Fable ha fatto due giri su tre**: dopo il secondo la finestra delle 5 ore era all'85 % e il banco ha fermato il terzo (`--finestra 80`),
+come chiesto. Ha 8 tentativi, come Argon in T355.
+
+### Il risultato, i sei modelli
+
+| Scultore | riuscite | costo per riuscita (listino) | tempo a struttura (media, max) | chiamate oltre i 120 s del gioco | riuscite con ogni chiamata entro 120 s | voti | fattorie con merli | forti con merli | separazione fra concetti |
+|---|---|---|---|---|---|---|---|---|---|
+| 3.8 Flash a Grande (T355) | 0 su 6 | — | 98 s, 106 s | 0 su 24 | 0 | — | — | — | — |
+| Argon (T355) | 6 su 8 | **0,37 $** (0,74 $ dopo l'1/12) | 188 s, 273 s | 0 su 40 | 6 | 6, 6, 9, 6, 7, 7 | **4 su 4** | 2 su 2 | 2,62 |
+| Carbon (T391) | 4 su 12 | 0,75 $ (1,50 $ dopo l'1/12) | 308 s, 450 s | 5 su 45 | 4 | 8, 8, 9, 7 | 0 su 1 | 3 su 3 | 2,57 |
+| Hydrogen (T391) | 4 su 12 | 0,68 $ | 88 s, 129 s | 0 su 55 | 4 | 6, 6, 6, 7 | 0 su 3 | 0 su 1 | 2,71 |
+| **Sonnet 5.5** | **12 su 12** | 0,92 $ | 662 s, 977 s | **22 su 48** | **0** | 6, 8, 9, 8, 7, 8, 8, 8, 6, 8, 9, 9 | 0 su 6 | 6 su 6 | 4,34 |
+| **Opus 5.5** | **11 su 12** | **0,75 $** | 207 s, 341 s | 1 su 49 | 10 | 6, 8, 9, 8, 6, 8, 9, 8, 6, 7, 8 | **0 su 6** | **5 su 5** | **8,50** |
+| **Fable 5.1** (2 giri) | 7 su 8 | 2,91 $ | 539 s, 739 s | 17 su 33 | 0 | 6, 8, 8, 6, 8, 8, 8 | 0 su 4 | 3 su 3 | 4,91 |
+
+Per taglia (`tabella.md`): Opus 6 su 6 a Grande (0,52 $) e 5 su 6 a Enorme (1,02 $); Sonnet 6 su 6 a entrambe (0,91 $ e 0,93 $); Fable 4 su
+4 a Grande (1,98 $) e 3 su 4 a Enorme (4,16 $). Il costo per riuscita conta ogni richiesta (le riuscite, le fallite, ogni correzione, ogni
+voto dell'Artista su Gemini). Gli scarti del kernel lungo la strada: Sonnet colori mancanti (3) e pezzi staccati (2); Opus la varietà fra le
+taglie (6, il forte fallito compreso); Fable piani (4), porta (3), stanza (2).
+
+- **Opus 5.5 è il migliore**: 11 su 12, 0,75 $ per riuscita, cioè **quanto Argon dopo l'1/12** (0,74 $) e il doppio di Argon oggi; 3,5 minuti
+  a struttura e una sola chiamata su 49 oltre i 120 s. Ragiona poco con `--effort low` (6,5 mila token in uscita a chiamata, risposta
+  compresa). **Nessuna fattoria fortificata** (0 su 6: casa col tetto, fienile, recinto) e tutti i forti coi merli; la separazione fra i
+  concetti più alta misurata per un modello (8,50, il triplo dei Gemini; a mano 19,7), con l'86 % dei vicini dello stesso concetto. L'unico
+  fallito è un forte a Enorme che, corretto due volte, cresceva troppo poco alla Gargantuesca (la varietà).
+- **Sonnet 5.5 riesce sempre, ma è lento e caro**: 12 su 12, voti alti, nessuna fattoria fortificata, ma 11 minuti a struttura e **nessuna**
+  struttura riuscita con tutte le chiamate entro i 120 s del gioco: con `--effort low` ragiona comunque 25-55 mila token a chiamata, che non
+  si vedono nella risposta (9-23 kB) ma si pagano (29 mila token in uscita a chiamata in media). In gioco, col tempo di oggi, cadrebbero quasi
+  tutte. Costa per riuscita più di Opus, pur costando la metà per token.
+- **Fable 5.1 non vale il prezzo**: 7 su 8, voti come gli altri, 2,91 $ per riuscita (quasi 8 volte Argon oggi), 9 minuti a struttura, metà
+  delle chiamate oltre i 120 s; è anche quello che consuma di più l'abbonamento.
+- **Le fattorie**: i tre Claude lasciano la fattoria una fattoria (0 su 16), come Hydrogen; Argon la fortifica sempre (4 su 4).
+
+![il forte di Opus a Enorme, giro1, voto 9](claude-opus-5-5/giro1/forte-huge/huge.png)
+![la fattoria di Opus a Grande, giro1, voto 8: senza merli](claude-opus-5-5/giro1/fattoria-large/large.png)
+![il forte di Sonnet a Enorme, giro1, voto 9](claude-sonnet-5-5/giro1/forte-huge/huge.png)
+![la fattoria di Fable a Grande, giro2, voto 8](claude-fable-5-1/giro2/fattoria-large/large.png)
+
+### Quanto ne ha preso l'abbonamento
+
+Letture di `claude -p /usage` prima e dopo ogni modello (`settimana.json`; la settimana di Fable letta a mano):
+
+| | 5 ore | settimana (tutti i modelli) | settimana di Fable | chiamate dello Scultore | tempo |
+|---|---|---|---|---|---|
+| Sonnet 5.5, 3 giri | 3 → 26 % (**23 punti**) | 33 → 34 % (1) | — | 33 | 40 min |
+| Opus 5.5, 3 giri | 26 → 36 % (**10 punti**) | 34 → 35 % (1) | — | 35 | 19 min |
+| Fable 5.1, 2 giri | 36 → 85 % (**49 punti**) | 35 → 39 % (4) | 8 → 16 % (8) | 24 | 25 min |
+| **insieme** | **82 punti** | **6 punti** | 8 punti | 92 | 84 min |
+
+Le letture comprendono anche l'agente che ha lanciato e seguito il giro (T392, Opus 5.5): durante i giri faceva solo attese brevi e la
+lettura dei risultati, stimate in **2-4 punti** della finestra in tutto (non separabili: `/usage` non dice da quale sessione viene il
+consumo); la scrittura di questo rapporto, dopo l'ultima lettura, non è nel giro. A listino API il giro su Claude sarebbe costato **39,63 $**
+(Sonnet 11,03 $, Opus 8,20 $, Fable 20,40 $); il registro di Gemini della cartella è a **6,00 $** (l'Artista, 0,26 $ in questo giro), sotto
+il tetto di 10 $.
+
+### Come cambia D57
+
+A parità di costo per struttura riuscita **e** di tempo del gioco oggi vince ancora **Argon** (0,37 $, 6 su 8, tutto entro 120 s). **Dopo
+l'1/12**, quando Argon raddoppia, **Opus 5.5 costa uguale (0,75 $ contro 0,74 $) e riesce di più (11 su 12 contro 6 su 8)**, non fortifica le
+fattorie e separa meglio i concetti. Sonnet e Fable no: lenti per il tempo del gioco e più cari per riuscita. Il gioco oggi non chiama nessun
+modello di Claude (né da Google né da OpenRouter: `OPENROUTER_MODELS` ha solo Gemini): Opus come Scultore delle strutture vuole un task che
+lo porti nella via di OpenRouter (id fisso a elenco, prezzo, lo Scultore delle strutture di quella via; nella via di Google resta Argon). La
+domanda all'autore è in [`docs/pipeline/domande/T392.md`](../../../../docs/pipeline/domande/T392.md).
+
+## Raccomandazione provvisoria per D57 di T391 (solo Gemini; superata da T392, sopra)
 
 Fra i modelli di Gemini **Argon resta lo Scultore delle strutture**, a ogni taglia (l'opzione 1 di T355): riesce 3 volte su 4 contro 1 su 3 di
 Carbon e Hydrogen, costa la metà per riuscita oggi e, dopo l'1/12, quanto Hydrogen. **Carbon no**: al prezzo di Argon riesce la metà delle

@@ -1,4 +1,481 @@
 {
+ "claude-fable-5-1": {
+  "traSemi": [
+   {
+    "nome": "claude-fable-5-1/giro1/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.1393910358128067,
+     "profilo": 0.03432077157868426,
+     "pieni": 0.00847574596350481,
+     "distanza": 0.0608442344267239
+    },
+    "colore": 0.004470097036412935,
+    "voxel": 0.21660266619629773
+   },
+   {
+    "nome": "claude-fable-5-1/giro1/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.4443207126948775,
+     "profilo": 0.1966492562892877,
+     "pieni": 0.0014559137943216394,
+     "distanza": 0.21449226890369152
+    },
+    "colore": 0.11052823828430067,
+    "voxel": 0.1829661472326706
+   },
+   {
+    "nome": "claude-fable-5-1/giro1/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.1631878557874763,
+     "profilo": 0.09455991020291686,
+     "pieni": 0.007141003334323659,
+     "distanza": 0.08829625644157228
+    },
+    "colore": 0.031989119165740695,
+    "voxel": 0.35968621583063526
+   },
+   {
+    "nome": "claude-fable-5-1/giro2/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.17103205206519861,
+     "profilo": 0.06902204117229138,
+     "pieni": 0.06412631534121649,
+     "distanza": 0.10230902511964189
+    },
+    "colore": 0.02233844414126725,
+    "voxel": 0.17614146969119318
+   },
+   {
+    "nome": "claude-fable-5-1/giro2/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.3575539568345324,
+     "profilo": 0.16727926204210092,
+     "pieni": 0.04643661473559757,
+     "distanza": 0.1904232781816368
+    },
+    "colore": 0.07798657867387376,
+    "voxel": 0.15683618524346116
+   },
+   {
+    "nome": "claude-fable-5-1/giro2/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.1691278203490847,
+     "profilo": 0.0317773754378336,
+     "pieni": 0.030785871873732995,
+     "distanza": 0.07723035588688376
+    },
+    "colore": 0.05261878932523324,
+    "voxel": 0.18846877968517617
+   },
+   {
+    "nome": "claude-fable-5-1/giro2/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.14108618654073202,
+     "profilo": 0.10809273571439162,
+     "pieni": 0.05319352188205567,
+     "distanza": 0.09726103930698235
+    },
+    "colore": 0.28361337145052,
+    "voxel": 0.36759086576963546
+   }
+  ],
+  "dentro": {
+   "impronta": 0.1631878557874763,
+   "profilo": 0.05271634804239093,
+   "pieni": 0.008093284352842178,
+   "distanza": 0.08848016081964223
+  },
+  "fra": {
+   "impronta": 0.5012062726176116,
+   "profilo": 0.33203825679592147,
+   "pieni": 0.4366188307222184,
+   "distanza": 0.4341572352723611
+  },
+  "separazione": {
+   "impronta": 3.0713454147614105,
+   "profilo": 6.298582301811171,
+   "pieni": 53.94828745500432,
+   "distanza": 4.9068314439136955
+  },
+  "vicini": 1,
+  "matrice": {
+   "concetti": [
+    "fattoria",
+    "forte"
+   ],
+   "d": [
+    [
+     0.2934683650494705,
+     0.4341572352723611
+    ],
+    [
+     0.4341572352723611,
+     0.298639060527789
+    ]
+   ]
+  }
+ },
+ "claude-opus-5-5": {
+  "traSemi": [
+   {
+    "nome": "claude-opus-5-5/giro1/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.08894273222631432,
+     "profilo": 0.029789440769719604,
+     "pieni": 0.0021414848380747475,
+     "distanza": 0.03997606634866176
+    },
+    "colore": 0.03511899390195123,
+    "voxel": 0.1480388135731517
+   },
+   {
+    "nome": "claude-opus-5-5/giro1/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.26176188538881784,
+     "profilo": 0.09357343327862466,
+     "pieni": 0.02201071239490171,
+     "distanza": 0.12408840382024776
+    },
+    "colore": 0.07100490811541654,
+    "voxel": 0.1860367176096603
+   },
+   {
+    "nome": "claude-opus-5-5/giro1/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.08054054054054055,
+     "profilo": 0.034145162187743536,
+     "pieni": 0.004237683710442919,
+     "distanza": 0.03866272996324646
+    },
+    "colore": 0.0974154266542197,
+    "voxel": 0.14878247912539783
+   },
+   {
+    "nome": "claude-opus-5-5/giro1/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0,
+     "profilo": 0.02754565069958261,
+     "pieni": 0.005116160002869574,
+     "distanza": 0.010887270234150728
+    },
+    "colore": 0.03421294103458277,
+    "voxel": 0.041810390277223816
+   },
+   {
+    "nome": "claude-opus-5-5/giro2/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.2176704052484672,
+     "profilo": 0.054626485905378566,
+     "pieni": 0.03367752787839956,
+     "distanza": 0.09226426944170979
+    },
+    "colore": 0.05680791554079834,
+    "voxel": 0.21779010820996314
+   },
+   {
+    "nome": "claude-opus-5-5/giro2/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.11194894167335112,
+     "profilo": 0.03837173991915667,
+     "pieni": 0.0021496544812833474,
+     "distanza": 0.050507822270974466
+    },
+    "colore": 0.05227952521081635,
+    "voxel": 0.16233270958730805
+   },
+   {
+    "nome": "claude-opus-5-5/giro2/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.08117584850123749,
+     "profilo": 0.053215483060255295,
+     "pieni": 0,
+     "distanza": 0.04492496441925079
+    },
+    "colore": 0.043757017059335095,
+    "voxel": 0.13500092939270825
+   },
+   {
+    "nome": "claude-opus-5-5/giro2/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.11063752276867034,
+     "profilo": 0.09265582580810686,
+     "pieni": 0.10404613199175738,
+     "distanza": 0.10190063347588235
+    },
+    "colore": 0.11762774621351073,
+    "voxel": 0.18140484851865257
+   },
+   {
+    "nome": "claude-opus-5-5/giro3/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.07381408054437794,
+     "profilo": 0.04541410126330714,
+     "pieni": 0.013453713931958156,
+     "distanza": 0.044209492817745125
+    },
+    "colore": 0.04855652085331316,
+    "voxel": 0.18214210360003485
+   },
+   {
+    "nome": "claude-opus-5-5/giro3/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.17352137214262114,
+     "profilo": 0.04343608713544313,
+     "pieni": 0.004551678853613905,
+     "distanza": 0.07544685499986814
+    },
+    "colore": 0.055839452202258194,
+    "voxel": 0.18250088558271343
+   },
+   {
+    "nome": "claude-opus-5-5/giro3/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.00972644376899695,
+     "profilo": 0.03681269620906589,
+     "pieni": 0.00029421993913980593,
+     "distanza": 0.015611119972400882
+    },
+    "colore": 0.039179869290554864,
+    "voxel": 0.03860667982946603
+   }
+  ],
+  "dentro": {
+   "impronta": 0.08571326190561507,
+   "profilo": 0.0449868544287812,
+   "pieni": 0.002398244827473861,
+   "distanza": 0.046327815790594626
+  },
+  "fra": {
+   "impronta": 0.47912629211607,
+   "profilo": 0.28142161244849506,
+   "pieni": 0.43599599504489495,
+   "distanza": 0.3937487639512426
+  },
+  "separazione": {
+   "impronta": 5.589873509232093,
+   "profilo": 6.255641031626568,
+   "pieni": 181.7979507555706,
+   "distanza": 8.49918687578577
+  },
+  "vicini": 0.8636363636363636,
+  "matrice": {
+   "concetti": [
+    "fattoria",
+    "forte"
+   ],
+   "d": [
+    [
+     0.18900165607404054,
+     0.3937487639512426
+    ],
+    [
+     0.3937487639512426,
+     0.12921348758188678
+    ]
+   ]
+  }
+ },
+ "claude-sonnet-5-5": {
+  "traSemi": [
+   {
+    "nome": "claude-sonnet-5-5/giro1/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.23057432432432434,
+     "profilo": 0.04785033491859582,
+     "pieni": 0,
+     "distanza": 0.09584231306266489
+    },
+    "colore": 0.08784117528868088,
+    "voxel": 0.14267458603311733
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro1/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.30638414218703675,
+     "profilo": 0.12880179385251267,
+     "pieni": 0.03009351273071681,
+     "distanza": 0.1501641594723807
+    },
+    "colore": 0.07043665366918425,
+    "voxel": 0.06503740815835718
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro1/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.021499713029828726,
+     "profilo": 0.018360429819688884,
+     "pieni": 0.011523254654695225,
+     "distanza": 0.017127799168070945
+    },
+    "colore": 0.040759715353625575,
+    "voxel": 0.0406320405490337
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro1/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.12643146785104076,
+     "profilo": 0.10383558049580219,
+     "pieni": 0.05700448029775612,
+     "distanza": 0.09938514068528974
+    },
+    "colore": 0.15031208746474578,
+    "voxel": 0.27922440738184584
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro2/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.2539727958459832,
+     "profilo": 0.12031480848889367,
+     "pieni": 0.05845252407657475,
+     "distanza": 0.14442179217009304
+    },
+    "colore": 0.07748326912235375,
+    "voxel": 0.23402845293505808
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro2/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.3080779253379873,
+     "profilo": 0.13203362135035046,
+     "pieni": 0,
+     "distanza": 0.15086462627254613
+    },
+    "colore": 0.12518946420054056,
+    "voxel": 0.253635305654681
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro2/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0,
+     "profilo": 0.0014880092998530252,
+     "pieni": 0,
+     "distanza": 0.0004960030999510084
+    },
+    "colore": 0.04433474438156452,
+    "voxel": 0.0012297887811394263
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro2/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.12215316557895445,
+     "profilo": 0.07287821575341154,
+     "pieni": 0.06709464252228159,
+     "distanza": 0.08571892993943886
+    },
+    "colore": 0.1051191705287566,
+    "voxel": 0.1809600813020605
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro3/fattoria-huge",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.22431218187544777,
+     "profilo": 0.09603329414465718,
+     "pieni": 0.002659004615962246,
+     "distanza": 0.10771007011732028
+    },
+    "colore": 0.09911922480389418,
+    "voxel": 0.09020285504887388
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro3/fattoria-large",
+    "concetto": "fattoria",
+    "quote": {
+     "impronta": 0.31614105324864333,
+     "profilo": 0.14207993476228886,
+     "pieni": 0.00005902274066454938,
+     "distanza": 0.1527600031973294
+    },
+    "colore": 0.07036512068242208,
+    "voxel": 0.08684519263857934
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro3/forte-huge",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.03027522935779814,
+     "profilo": 0.004397413647704795,
+     "pieni": 0,
+     "distanza": 0.011557547668500978
+    },
+    "colore": 0.019416892914125232,
+    "voxel": 0.017940122011033767
+   },
+   {
+    "nome": "claude-sonnet-5-5/giro3/forte-large",
+    "concetto": "forte",
+    "quote": {
+     "impronta": 0.14750203759832753,
+     "profilo": 0.13733374521059885,
+     "pieni": 0.11931522782058751,
+     "distanza": 0.12749472841877363
+    },
+    "colore": 0.12379826623664743,
+    "voxel": 0.25286974492966313
+   }
+  ],
+  "dentro": {
+   "impronta": 0.16472572424727355,
+   "profilo": 0.06271994994041064,
+   "pieni": 0.0019360872021010889,
+   "distanza": 0.09382915297787897
+  },
+  "fra": {
+   "impronta": 0.4687679083094556,
+   "profilo": 0.300161436495328,
+   "pieni": 0.45342790488440976,
+   "distanza": 0.40686650322717977
+  },
+  "separazione": {
+   "impronta": 2.8457480484698148,
+   "profilo": 4.785741008730193,
+   "pieni": 234.19807971063432,
+   "distanza": 4.3362482801384985
+  },
+  "vicini": 1,
+  "matrice": {
+   "concetti": [
+    "fattoria",
+    "forte"
+   ],
+   "d": [
+    [
+     0.2575102799601666,
+     0.40686650322717977
+    ],
+    [
+     0.40686650322717977,
+     0.24069781222240855
+    ]
+   ]
+  }
+ },
  "gemini-4-carbon": {
   "traSemi": [
    {

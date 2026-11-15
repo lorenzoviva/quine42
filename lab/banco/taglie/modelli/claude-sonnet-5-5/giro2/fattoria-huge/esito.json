@@ -1,0 +1,82 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "scultore": "claude-sonnet-5-5",
+ "modello": "claude-sonnet-5-5",
+ "voto": 7,
+ "chiamate": 5,
+ "secondi": 682,
+ "usd": 1.0645,
+ "usdGemini": 0.0081,
+ "usdClaude": 1.0564,
+ "usdCli": 1.0531,
+ "claude": [
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 361,
+   "read": 9798,
+   "output": 1881,
+   "usd": 0.022217599999999997,
+   "usdCli": 0.0212378,
+   "task": "model.sculpt",
+   "seconds": 14
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 8282,
+   "read": 8025,
+   "output": 66690,
+   "usd": 0.701637,
+   "usdCli": 0.7008345000000001,
+   "task": "model.sculpt",
+   "seconds": 548
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 22923,
+   "read": 8025,
+   "output": 7393,
+   "usd": 0.167231,
+   "usdCli": 0.16642849999999998,
+   "task": "model.sculpt",
+   "seconds": 50
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 22358,
+   "read": 8025,
+   "output": 7432,
+   "usd": 0.165361,
+   "usdCli": 0.1645585,
+   "task": "model.sculpt",
+   "seconds": 45
+  }
+ ],
+ "token": {
+  "prompt": 90837,
+  "output": 83518,
+  "thoughts": 271
+ },
+ "perCompito": [
+  {
+   "model": "claude-sonnet-5-5",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 1.0564
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0081
+  }
+ ]
+}

@@ -1,0 +1,75 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "claude-fable-5-1",
+ "chiamate": 4,
+ "secondi": 589,
+ "usd": 3.3695,
+ "usdGemini": 0,
+ "usdClaude": 3.3695,
+ "usdCli": 3.3695,
+ "claude": [
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 10175,
+   "read": 0,
+   "output": 4947,
+   "usd": 0.45087,
+   "usdCli": 0.45087,
+   "task": "model.sculpt",
+   "seconds": 80
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 8903,
+   "read": 8025,
+   "output": 14723,
+   "usd": 0.91623625,
+   "usdCli": 0.91623625,
+   "task": "model.sculpt",
+   "seconds": 218
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 24704,
+   "read": 8025,
+   "output": 6192,
+   "usd": 0.80570625,
+   "usdCli": 0.8057062500000001,
+   "task": "model.sculpt",
+   "seconds": 79
+  },
+  {
+   "model": "claude-fable-5-1",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 25170,
+   "read": 8025,
+   "output": 13825,
+   "usd": 1.19667625,
+   "usdCli": 1.19667625,
+   "task": "model.sculpt",
+   "seconds": 195
+  }
+ ],
+ "token": {
+  "prompt": 93035,
+  "output": 39687,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "claude-fable-5-1",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 3.3695
+  }
+ ],
+ "errore": "nessun programma valido"
+}

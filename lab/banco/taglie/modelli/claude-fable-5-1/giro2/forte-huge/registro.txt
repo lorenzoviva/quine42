@@ -1,0 +1,3 @@
+[sculptor] propone: «forte» (struttura grande, claude-fable-5-1)
+[kernel → sculptor] scarta: «forte»: taglia Gargantuesca, seme 1: porta: 11 × 1 voxel (0,55 × 0,05 caselle), una porta è almeno 11 × 30 a ogni taglia
+[artist → sculptor] approva: «forte»: 8/10 — Le finestre e feritoie scure sono disposte come micro-voxel sparsi invece di formare segni puliti

@@ -1,0 +1,2 @@
+[sculptor] propone: «forte» (struttura grande, claude-fable-5-1)
+[artist → sculptor] approva: «forte»: 8/10 — La struttura in pietra è molto scura e monocromatica, risultando un po' pesante visivamente.

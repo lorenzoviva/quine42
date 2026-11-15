@@ -1,0 +1,58 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "claude-sonnet-5-5",
+ "modello": "claude-sonnet-5-5",
+ "voto": 9,
+ "chiamate": 3,
+ "secondi": 723,
+ "usd": 0.9566,
+ "usdGemini": 0.0064,
+ "usdClaude": 0.9502,
+ "usdCli": 0.9494,
+ "claude": [
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 10156,
+   "read": 0,
+   "output": 31010,
+   "usd": 0.350728,
+   "usdCli": 0.350728,
+   "task": "model.sculpt",
+   "seconds": 259
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 9286,
+   "read": 8025,
+   "output": 56076,
+   "usd": 0.599513,
+   "usdCli": 0.5987105,
+   "task": "model.sculpt",
+   "seconds": 449
+  }
+ ],
+ "token": {
+  "prompt": 30519,
+  "output": 87162,
+  "thoughts": 123
+ },
+ "perCompito": [
+  {
+   "model": "claude-sonnet-5-5",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.9502
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0064
+  }
+ ]
+}

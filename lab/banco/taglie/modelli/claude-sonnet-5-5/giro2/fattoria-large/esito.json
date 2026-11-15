@@ -1,0 +1,58 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "claude-sonnet-5-5",
+ "modello": "claude-sonnet-5-5",
+ "voto": 8,
+ "chiamate": 3,
+ "secondi": 718,
+ "usd": 0.9232,
+ "usdGemini": 0.0064,
+ "usdClaude": 0.9167,
+ "usdCli": 0.915,
+ "claude": [
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 361,
+   "read": 9762,
+   "output": 42047,
+   "usd": 0.42387040000000004,
+   "usdCli": 0.4228942,
+   "task": "model.sculpt",
+   "seconds": 345
+  },
+  {
+   "model": "claude-sonnet-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 7301,
+   "read": 8025,
+   "output": 46205,
+   "usd": 0.492863,
+   "usdCli": 0.4920605,
+   "task": "model.sculpt",
+   "seconds": 363
+  }
+ ],
+ "token": {
+  "prompt": 28459,
+  "output": 88342,
+  "thoughts": 122
+ },
+ "perCompito": [
+  {
+   "model": "claude-sonnet-5-5",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.9167
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0064
+  }
+ ]
+}

@@ -5116,7 +5116,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T355`, rapporto e foto in `lab/banco/`.
 - Esito: giro su Gemini fatto con lo Scultore del gioco (`lab/scripts/scultore-gemini.ts`, sei giri, 74 chiamate, 3,26 $): 3.8 Flash a Grande 0 su 6 (porta e piani), Argon 5 su 6 a Enorme e 1 su 2 a Grande, fattorie sempre fortificate, separazione tra concetti 2,62; rapporto, chiamate e foto in `lab/banco/taglie/gemini/`; lo Scultore del gioco non è cambiato (ha già il prompt di T354): domanda in `docs/pipeline/domande/T355.md`, raccomandata Argon a ogni taglia per le strutture procedurali più un task che ripari prompt e ritorno; non provato: 3.8 Flash dopo quella riparazione; sicurezza: nessuna superficie nuova (solo `lab/` e documenti).
 
-### T392 · Il giro dei modelli Claude per le strutture sull'abbonamento: Sonnet 5.5, Opus 5.5 e Fable, da solo dopo il reset — `da fare` (dipende da T396)
+### T392 · Il giro dei modelli Claude per le strutture sull'abbonamento: Sonnet 5.5, Opus 5.5 e Fable, da solo dopo il reset — `in attesa` (dipende da T396)
 - Pipeline: claude · sforzo medium · stima 3% · approvato · priorità 2
 - Step: 30
 - Contesto: l'autore (14/11, su D57 e T391): la parte Claude del confronto si fa sull'abbonamento quando il consumo di sessione e di settimana è molto basso (subito dopo il reset del 19/11, 16:59 CET), **senza altri task in contemporanea** e senza interruzioni, perché la misura non sia falsata; c'è anche Fable. `dossier T391` (il comando preparato, la tabella dei Gemini), `dossier T355`.
@@ -5125,6 +5125,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni se cambia codice.
 - Browser: non serve (foto dal banco).
 - Quando è fatto: commit su `task/T392`, rapporto e foto in `lab/banco/taglie/modelli/`, la domanda all'autore. Sicurezza: nessuna superficie nuova attesa.
+- Esito: giro su Claude fatto sull'abbonamento (Sonnet 5.5 12/12 a 0,92 $ per riuscita ma nessuna riuscita entro i 120 s del gioco; Opus 5.5 11/12 a 0,75 $ per riuscita, 207 s, fattorie mai fortificate, separazione fra concetti 8,50; Fable 5.1 7/8 a 2,91 $, solo due giri perché la finestra delle 5 ore è salita all'85 %); il giro ha preso 82 punti della finestra, 6 della settimana e 8 della settimana di Fable, 39,63 $ al listino API, Gemini 0,26 $ (registro a 6,00 $ su 10); tabella dei sei modelli, foto e rapporto in `lab/banco/taglie/modelli/`; domanda in `docs/pipeline/domande/T392.md` (raccomandata: Argon fino all'1/12, poi Opus 5.5 sulla via di OpenRouter, che chiede un task); nessun codice cambiato, quindi suite e typecheck non lanciati; non provato: Opus via OpenRouter, il terzo giro di Fable; il consumo dell'agente stesso è nelle letture, stimato in 2-4 punti della finestra; sicurezza: nessuna superficie nuova.
 
 ### T391 · Quale modello scrive meglio le strutture, a parità di costo per struttura riuscita: Carbon, Hydrogen, Sonnet 5.5 e Opus 5.5 contro Argon — `in attesa`
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
