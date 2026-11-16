@@ -18,6 +18,7 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
 
 ## Chiuse di recente (10/11, epoca 347)
 - **D59 (chiusa, autore 14/11):** la chiave OpenRouter da soli sul PC, nel gioco scaricato in locale, si salva su disco (`universes/.keys/`, ADR-0200).
+- **D60 (aperta, autore 17/11) (scala del forte dell’autore, T371):** il forte è pensato a 5 voxel per casella (500 voxel = 100 caselle, mura alte ~4 viandanti), il gioco lo mostra a 20. A: densità per voce (`vpt` 5, il campo c’è già) e un lotto di più luoghi parametrico (`BLOCK` 2 → 6 per 100 caselle), stessa memoria, voxel 4× più grossi del resto; B: compromesso `vpt` 10, 50 caselle, lotto 3 × 3; C: ridisegnare il forte a misura d’uomo dentro 500 a 20 voxel per casella. Consiglio B come primo passo (poi A se regge), T371 dopo.
 - **D56 / T386 (chiusa, autore 14/11):** licenza approvata com'è, titolare Lorenzo Vaccaro.
 - **D53 (chiusa, autore 13/11 → T370, T371):** opzione 1, lotto di 2 × 2 luoghi con `STRUCTURE_SIDE` 500; il forte a mano dell'autore, finito, diventa il riferimento della qualità «ottima» del banco e dello Scultore.
 - **D45 (chiusa: tutte approvate, autore 10/11):** Jev per le decisioni chiuse del gioco secondo l'ordine e le modalità misurate nel banco (varco, model.reuse, guardie, cache Flash per Attore). A Jev solo dati del mondo/catalogo, niente testo libero del viandante finché non c'è ZDR (Zero Data Retention) per tutela della privacy/GDPR.
