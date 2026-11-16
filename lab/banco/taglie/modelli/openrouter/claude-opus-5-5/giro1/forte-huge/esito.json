@@ -1,0 +1,74 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 6,
+ "chiamate": 7,
+ "secondi": 368,
+ "usd": 1.041,
+ "usdGemini": 0.0165,
+ "via": "openrouter",
+ "usdOpenRouter": 1.0245,
+ "openrouter": [
+  {
+   "prompt": 9550,
+   "cached": 0,
+   "output": 2164,
+   "thoughts": 1177,
+   "usd": 0.113024,
+   "seconds": 33
+  },
+  {
+   "prompt": 17072,
+   "cached": 8004,
+   "output": 4231,
+   "thoughts": 7048,
+   "usd": 0.2634528,
+   "seconds": 119
+  },
+  {
+   "prompt": 29826,
+   "cached": 8004,
+   "output": 4489,
+   "thoughts": 2598,
+   "usd": 0.2306288,
+   "seconds": 60
+  },
+  {
+   "prompt": 30341,
+   "cached": 8004,
+   "output": 4885,
+   "thoughts": 1386,
+   "usd": 0.2163688,
+   "seconds": 49
+  },
+  {
+   "prompt": 31420,
+   "cached": 8004,
+   "output": 4888,
+   "thoughts": 400,
+   "usd": 0.2010248,
+   "seconds": 40
+  }
+ ],
+ "token": {
+  "prompt": 124217,
+  "output": 20878,
+  "thoughts": 13224
+ },
+ "perCompito": [
+  {
+   "model": "anthropic/claude-opus-5.5",
+   "task": "model.sculpt",
+   "calls": 5,
+   "usd": 1.0245
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 2,
+   "usd": 0.0165
+  }
+ ]
+}

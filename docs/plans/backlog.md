@@ -5637,7 +5637,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T397`, esito coi numeri del giro accanto a quelli della CLI. Sicurezza: nessuna superficie nuova (un id in più nell'elenco dei modelli del varco: dirlo).
 - Esito: Opus 5.5 in `OPENROUTER_MODELS` (`anthropic/claude-opus-5.5` `-20260921`, 4/20 $ letti su OpenRouter il 16/11, senza temperatura, prompt di sistema in cache con `cache_control`, `max_tokens` 32 000, schema JSON, ragionamento basso); `sculptorsOn`/`Kernel.aiRoute`: dall'1/12 su OpenRouter Opus per le strutture e le importanti lasciate ai predefiniti, Argon sulla via di Google; stima oraria con le strutture sul loro Scultore (pieno 1,56 → 2,67 $/h, 3,83 dall'1/12 su entrambe le vie; Low Detail 0,58 → 0,73; lobby da soli e di molti, Genesi); banco `scultore-gemini.ts --via openrouter` provato solo offline; ADR-0205, AGENTS, architettura, glossario, `site/ia.html`; kernel 0.7.14; suite e typecheck verdi; manca il giro pagato (4 strutture, tetto 4 $): nessuna `OPENROUTER_API_KEY` nei `.env` (`docs/pipeline/domande/T397.md`), quindi nessun numero via OpenRouter accanto alla CLI (11/12, 0,75 $, 207 s); non provato contro OpenRouter vero; sicurezza: nessuna superficie nuova (un id in più nell'elenco dei modelli del varco, `CHAT_MODELS`; `cache_control` passa già dentro `messages`).
 
-### T402 · Il giro pagato di Opus 5.5 via OpenRouter (punto 2 di T397) — `da fare`
+### T402 · Il giro pagato di Opus 5.5 via OpenRouter (punto 2 di T397) — `fatto` (`54d78f06`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
 - Step: 30
 - Contesto: T397 è integrato (kernel 0.7.14, ADR-0205): dall'1/12 lo Scultore delle strutture sulla via di OpenRouter è Opus 5.5. Il giro di prova pagato non si è fatto perché nessun `.env` ha `OPENROUTER_API_KEY` (`docs/pipeline/domande/T397.md`). Aspetta l'autore: una chiave con limite 5 $ nel `.env` del checkout principale. Deve finire prima dell'1/12. **Sbloccato il 17/11:** chiave nel `.env` del checkout principale (`H:/projects/rune/.env`), limite della chiave 5 $, account con 10 $ di crediti (verificato via `/api/v1/credits`, zero spesi); il tetto del giro resta 4 $.
@@ -5645,6 +5645,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni se cambia il codice; il giro costa (tetto 4 $).
 - Browser: no.
 - Quando è fatto: commit su `task/T402` col rapporto; esito coi numeri accanto a quelli della CLI (11/12, 0,75 $, 207 s).
+- Esito: giro pagato di Opus 5.5 via OpenRouter: 4 su 4, 0,61 $ a riuscita (CLI 11/12, 0,75 $, 207 s), 228 s di media, 1 chiamata su 17 oltre 120 s (124 s), cache letta (8004 token dalla seconda chiamata), 2,42 $ spesi su 4 $; soglia superata, `DEFAULT_SCULPTORS` invariato; rapporto in `lab/banco/taglie/modelli/README.md` e uscite in `openrouter/`, domanda T397 chiusa; codice non toccato, suite e typecheck non rilanciati; un giro solo, meno solido dei tre di T392.
 
 ### T398 · Lo Scultore «performante» scelto alla Genesi e nella lobby, pagato da chi lo sceglie (D57) — `da fare`
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
