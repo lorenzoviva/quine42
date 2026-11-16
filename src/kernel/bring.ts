@@ -12,7 +12,7 @@ import { internalCardsIn, internalFields } from './internalNames';
 import { UNIVERSE_NAME_RE } from './paths';
 import type { CardChoice, FileMap } from './types';
 import { validWandererId } from './wandererIds';
-import { classOf, densityFor, densityOf, growsByRules, sizeOf, TILE, tilesOf } from '../mj/classes';
+import { classOf, densityFor, densityOf, growsByRules, scaledTiles, sizeOf, TILE } from '../mj/classes';
 import { soundPrograms, SOUND_CLASS, type SoundPurpose } from '../mj/sound';
 
 /** A card the master chooses: a model or a sound of a universe, or a handmade card. Only names: what it is, the store reads from the disk. */
@@ -134,9 +134,11 @@ function sized(classe: string, size: unknown, own?: unknown, handmade = false): 
   if (!cls || !t || t.id === cls.taglia) return {};
   // A structure that grows by rules keeps the density it was sculpted at (ADR-0179): 16 at Huge before, TILE at every size now.
   const kept = growsByRules(cls, t.id) && typeof own === 'number' && Number.isInteger(own) && own >= 4 && own <= TILE ? own : undefined;
-  // A handmade card runs where it was tried, under MAX_SIDE (its ceilings, ADR-0161).
-  const vpt = kept ?? (handmade ? densityOf(tilesOf(cls, t.id)) : densityFor(cls, t.id));
-  return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
+  // A handmade card runs where it was tried, under MAX_SIDE (its ceilings, ADR-0161), at the scale of D&D (T370).
+  const vpt = kept ?? (handmade ? densityOf(scaledTiles(cls, t.id)) : densityFor(cls, t.id));
+  // A Gargantuan structure that says its density is of before the lot of more places (T370): it keeps saying it, and its box.
+  const old = kept !== undefined && cls.id === 'structure' && t.id === 'gargantuan';
+  return { size: t.id, ...(vpt !== TILE || old ? { vpt } : {}) };
 }
 
 /** A sound's purpose as this kernel reads it, from the entry and its program: what does not read as one is no purpose. */

@@ -50,6 +50,8 @@ export interface ChunkView {
   description?: string;
   /** The lots of its structures (`x0 y0 x1 y1` in the place's cells): the ground is flat on them (ADR-0048). */
   lots?: number[][];
+  /** The lot of its block (T370, ADR-0206): `x0 y0 x1 y1` in the place's cells (it goes past the place) and the level it lies flat at. */
+  block?: number[];
   /** The cells where its draft has the open sea: its water lies at the sea's level (T51a). */
   sea?: number[];
   /** The ground dug or raised and the water that has flowed (T51b): cell → levels, cell → bed and water. */

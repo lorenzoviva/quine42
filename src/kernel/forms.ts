@@ -9,7 +9,7 @@
 
 import type { SoundPurpose } from '../mj/sound';
 import { areasOf, type AreaMap } from '../mj/areas';
-import { boxOf, classOf, CLASSES, growsByRules, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
+import { boxOf, classOf, CLASSES, growsByRules, scaledTiles, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
@@ -202,10 +202,12 @@ export const rootTag = (xml: string) => /<[a-z]+\b[^>]*>/i.exec(xml.replace(/<!-
 /**
  * The box of a library entry in voxels: its class's at its size; a structure that grows by rules at the density its entry says
  * (ADR-0179), so an entry sculpted before keeps the box it was sculpted in (`vpt` 16 at Huge, 120 voxels) and a new one, at
- * TILE voxels a tile, has a larger area at every larger size.
+ * TILE voxels a tile, has a larger area at every larger size. An entry that says its density was sculpted before the lot of more places
+ * too (T370, ADR-0206): its area is the scale of D&D (`scaledTiles`), a Gargantuan one 10 × 10 tiles and not the 25 of today.
  */
 export function entryBox(cls: AssetClass, info: Pick<ModelInfo, 'size' | 'vpt'> | undefined): Vec3 {
-  return growsByRules(cls, info?.size) ? voxelsOf(tilesOf(cls, info?.size), vptOf(info as ModelInfo)) : boxOf(cls, info?.size);
+  if (!growsByRules(cls, info?.size)) return boxOf(cls, info?.size);
+  return voxelsOf(typeof info?.vpt === 'number' ? scaledTiles(cls, info.size) : tilesOf(cls, info?.size), vptOf(info as ModelInfo));
 }
 
 /**

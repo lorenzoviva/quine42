@@ -70,12 +70,31 @@ export const RARE_SIZES: SizeTier[] = ['huge', 'gargantuan'];
 /** A size's place in the scale (0 Tiny … 5 Gargantuan). */
 export const sizeRank = (t: SizeTier) => SIZE_TIERS.findIndex((x) => x.id === t);
 
-/** The box in tiles of a class at a size (its own if none): the class's box scaled by the ratio of the spaces. */
-export function tilesOf(c: AssetClass, taglia?: string): [number, number, number] {
+/**
+ * The side, in tiles, of the lot of a Gargantuan structure (T370, ADR-0206): it stands on a lot of 2 × 2 places (`src/kernel/block.ts`),
+ * 36 × 36 tiles, in the middle, with a ring of five or six tiles for the paths between the gates. 25 tiles at 20 voxels a tile are the
+ * 500 voxels of the author's fort (`lab/mjx/models/handmade/forte-handmade.xml`), the reference of the size (D53).
+ */
+export const GARGANTUAN_LOT = 25;
+
+/**
+ * The box in tiles of a class at a size by the scale of D&D alone (its own if none): the class's box scaled by the ratio of the spaces.
+ * What was sculpted before the lot of more places (T370) was sculpted in it: an entry that says its density (`entryBox`), a handmade card.
+ */
+export function scaledTiles(c: AssetClass, taglia?: string): [number, number, number] {
   const to = sizeOf(taglia), from = sizeOf(c.taglia)!;
   if (!to || to.id === from.id) return c.tiles;
   const k = to.scala / from.scala;
   return c.tiles.map((t) => Math.round(t * k * 4) / 4) as [number, number, number];
+}
+
+/**
+ * The box in tiles of a class at a size (its own if none): the scale of D&D (`scaledTiles`). A Gargantuan structure (the class
+ * `structure`) is the exception: its area is the lot of more places (`GARGANTUAN_LOT`), its height the scale's (T370, ADR-0206).
+ */
+export function tilesOf(c: AssetClass, taglia?: string): [number, number, number] {
+  const scaled = scaledTiles(c, taglia);
+  return c.id === 'structure' && sizeOf(taglia)?.id === 'gargantuan' ? [GARGANTUAN_LOT, GARGANTUAN_LOT, scaled[2]] : scaled;
 }
 
 /** The largest side, in voxels, a model is run at: past it the model is written coarser (ADR-0049). */
@@ -87,8 +106,9 @@ export const densityOf = (tiles: [number, number, number]) => Math.min(TILE, Mat
 /**
  * The largest side, in voxels, a structure that grows by rules runs at (T338, ADR-0179): up to it a tile stays TILE voxels at
  * every size, so a larger size is a larger area at the same scale, where more fits, and not the same building drawn bigger.
+ * 500 since T370 (ADR-0206): the Gargantuan structure, 25 × 25 tiles on its lot of 2 × 2 places; 200 before.
  */
-export const STRUCTURE_SIDE = 200;
+export const STRUCTURE_SIDE = 500;
 
 /** The structures that grow by rules (ADR-0160): the class `structure` from Large up. Their parts keep their size in tiles. */
 export const growsByRules = (c: AssetClass, taglia?: string): boolean => c.id === 'structure' && sizeRank(sizeOf(taglia)?.id ?? c.taglia) >= sizeRank('large');
@@ -110,7 +130,8 @@ export const voxelsOf = (tiles: readonly number[], vpt: number): Vec3 => tiles.m
  * keep it, their ceilings were measured there (ADR-0161).
  */
 export function boxUnderMaxSide(c: AssetClass, taglia?: string): Vec3 {
-  const tiles = tilesOf(c, taglia);
+  // The scale of D&D, as before the lot of more places (T370): the ceilings of the cards were measured there.
+  const tiles = scaledTiles(c, taglia);
   return voxelsOf(tiles, taglia ? densityOf(tiles) : TILE);
 }
 

@@ -5378,7 +5378,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: l'endpoint solo dall'ambiente (SSRF, § 5 punto 5), un banco della qualità sui compiti del Concilio.
 - Quando è fatto: il banco dice quali compiti un modello aperto regge.
 
-### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `da fare` (dipende da T356; dopo il giro di T392, fatto)
+### T370 · Il lotto di 2 × 2 luoghi per le strutture gargantuesche — `fatto` (`8a3fc398`) (dipende da T356; dopo il giro di T392, fatto)
 - Pipeline: claude · sforzo extra · stima 10% · approvato · browser · priorità 5
 - Step: 30
 - Contesto: D53 chiusa (autore 13/11): opzione 1 di `docs/pipeline/domande/T356.md`, un lotto di 2 × 2 luoghi (36 × 36 caselle), con `STRUCTURE_SIDE` 500 invece di 400 perché il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 voxel, 25 caselle) ci deve stare. Misure e tetti in T356 (ADR-0185, `dossier T356`).
@@ -5386,6 +5386,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: lotto su quattro luoghi connesso, salvato e ricaricato; suite e typecheck coi turni.
 - Browser: sì, il forte dell'autore come gargantuesca in un mondo vero, attraversato a piedi fra i quattro luoghi, frame misurati.
 - Quando è fatto: commit su `task/T370`, kernel sale (di `Y` se cambia il formato dei piani).
+- Esito: la gargantuesca delle strutture è 25 × 25 × 8 caselle (500 × 500 × 160, `STRUCTURE_SIDE` 500, `FORM_LIMITS` 40 M) su un blocco di 2 × 2 luoghi (`src/kernel/block.ts`): `claimBlock` sul piano nuovo che la chiede (bozze libere, stessa regione, niente regioni del master, lotto ≤ 1/4 d'acqua, nessun piano salvato), gli altri tre luoghi col piano del kernel senza chiamate, caselle del lotto riservate, varchi interni nell'anello, bordo del lotto camminato e libero da cose posate (regola 10), lotto piano a un livello (`blockLevel`, `LotBox.level`, `ChunkView.block`), i quattro caricati insieme, `block` nei piani e `blocks` in state.json; `groundJoins` per le strutture che crescono a regole (la fattoria a 20-25 caselle ora passa); `addModel` prova una voce nuova col suo `time` e la sua crescita; le gargantuesche di prima tengono 200 voxel e il loro lotto (migrazione 0.7 → 0.8, `vpt: 20`, `scaledTiles`); contratto 0.8, kernel 0.8.0, ADR-0206, test nuovi in `tests/block.test.ts` (blocco connesso, salvato e ricaricato, senza blocco libero scende, migrazione), suite 3340 verdi, typecheck e build verdi; misure del forte dell'autore: 7,2 s in Node, mesh 77 MB, validatore 7,6-7,8 s (al limite degli 8 s: la sua voce vuole `time`, T371). Non fatto: le 30 caselle, lo Scultore vero a 500 (provato solo offline). Sicurezza: nessuna superficie nuova (un campo nei piani e nello stato letto coi tipi, cinque numeri controllati in `ChunkView.block`, tetto delle celle a 40 M a tempo invariato).
 
 ### T371 · Il forte dell'autore come riferimento della qualità «ottima» — `da fare` (dipende da T370)
 - Pipeline: fable · sforzo extra · stima 5% · approvato · browser · priorità 5

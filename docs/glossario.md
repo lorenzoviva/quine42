@@ -151,6 +151,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `building`, `Building`, `buildings`, `findBuildings`, `buildingAt` (per il lotto: sono l'edificio dello studio)
 - **Fermo**: `lotti` del protocollo.
 
+### Blocco
+- **Inglese**: `block`, `Block`, `BlockMark`, `blocks`, `blockLot`, `blockPlaces`, `blockOfPlace`
+- **Definizione**: quattro luoghi, 2 × 2, con nel mezzo il lotto di una struttura gargantuesca (25 × 25 caselle) e attorno l'anello dei loro sentieri; il luogo che l'ha chiesta tiene la struttura, gli altri tre hanno il piano del kernel (T370, ADR-0206).
+- **Dove vive**: `src/kernel/block.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `megachunk`, `quadrante`, `gruppo di luoghi`
+- **Fermo**: `block` nei piani di `maps/` e nel protocollo, `blocks` in `world/state.json`.
+
 ### Varco
 - **Inglese**: `gate`, `gates`, `gateTiles`
 - **Definizione**: il punto del bordo di un luogo per cui si passa nel vicino, deterministico.

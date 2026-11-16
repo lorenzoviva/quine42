@@ -1,0 +1,30 @@
+[
+ {
+  "id": "forte-autore",
+  "box": [
+   500,
+   500,
+   160
+  ],
+  "seme": 1,
+  "celle": 40000000,
+  "ms": 7500,
+  "passi": 1162,
+  "finito": true,
+  "picco": 175,
+  "resta": 301,
+  "pezzi": 48,
+  "pezzoLento": 104,
+  "mesh": {
+   "ms": 635,
+   "vertici": 1796416,
+   "mb": 77.2
+  },
+  "piccoMesh": 175,
+  "meshFondo": {
+   "ms": 699,
+   "vertici": 2137216,
+   "mb": 91.9
+  }
+ }
+]

@@ -6,6 +6,8 @@
 //   4. connectivity is guaranteed: every gate, door and sizeable walkable area is joined to the rest
 //      by carving the cheapest path (vegetation before rock, never through lots);
 //   5. lots (indoor floor enclosed by walls) are recognised for roofs and interiors.
+// A place of a block (T370, ADR-0206) has cells reserved for the lot of more places: the program does not write them, no path goes
+// through them, they are never reachable; its gates are the kernel's (those inside the block moved into the ring).
 
 import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
@@ -45,6 +47,12 @@ export interface LayoutOptions {
   pathCode: string;
   /** Keep the intermediate grids (`LayoutResult.stages`). */
   stages?: boolean;
+  /** Cells under the lot of a block (T370): frozen for the program, never walked nor carved, never reachable. */
+  reserved?: ReadonlySet<number>;
+  /** The four gates ([west, east, north, south]) when they are not `gates`' (a place of a block, `blockGates`). */
+  gates?: number[];
+  /** Cells that must be walked and reached from the gates (the edge of the lot of a block, T370): path where they block, frozen for the program. */
+  apron?: ReadonlySet<number>;
 }
 
 const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -79,10 +87,10 @@ function solidCost(t: TerrainDef | undefined): number {
   }
 }
 
-/** Indices of walkable cells connected to `from` (4-neighbourhood). */
-function flood(grid: string[], size: number, palette: Record<string, TerrainDef>, from: number[]): Set<number> {
+/** Indices of walkable cells connected to `from` (4-neighbourhood); `blocked` cells are never walked (the lot of a block). */
+function flood(grid: string[], size: number, palette: Record<string, TerrainDef>, from: number[], blocked?: ReadonlySet<number>): Set<number> {
   const seen = new Set<number>();
-  const queue = from.filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false);
+  const queue = from.filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false && !blocked?.has(i));
   for (const q of queue) seen.add(q);
   while (queue.length) {
     const cur = queue.pop()!;
@@ -93,7 +101,7 @@ function flood(grid: string[], size: number, palette: Record<string, TerrainDef>
       const ny = y + dy;
       if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
       const n = ny * size + nx;
-      if (seen.has(n) || palette[grid[ny][nx]]?.solid !== false) continue;
+      if (seen.has(n) || palette[grid[ny][nx]]?.solid !== false || blocked?.has(n)) continue;
       seen.add(n);
       queue.push(n);
     }
@@ -185,15 +193,18 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const cells = draft.map((r) => [...r]);
   const border = new Set<number>();
   for (let i = 0; i < size; i++) for (const c of [i, (size - 1) * size + i, i * size, i * size + size - 1]) border.add(c);
-  const gateTiles = gates(opts.cx, opts.cy, size, opts.seed);
-  const walkable = (i: number) => palette[cells[Math.floor(i / size)][i % size]]?.solid === false;
-  for (const g of gateTiles) if (!walkable(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
+  const gateTiles = opts.gates?.length === 4 ? opts.gates : gates(opts.cx, opts.cy, size, opts.seed);
+  const reserved = opts.reserved ?? new Set<number>();
+  const walkable = (i: number) => palette[cells[Math.floor(i / size)][i % size]]?.solid === false && !reserved.has(i);
+  for (const g of gateTiles) if (!walkable(g) && !reserved.has(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
+  const apron = [...(opts.apron ?? [])].filter((i) => i >= 0 && i < size * size && !reserved.has(i));
+  for (const a of apron) if (!walkable(a)) cells[Math.floor(a / size)][a % size] = opts.pathCode;
   const gated = opts.stages ? cells.map((r) => r.join('')) : undefined;
 
   // The layout program shapes the interior; the border ring stays exactly as the draft.
   let steps = 0;
   if (opts.program) {
-    const grid = { w: size, h: size, cells: cells.flat(), fixed: border };
+    const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border };
     steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];
   }
@@ -203,11 +214,13 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const rows = () => cells.map((r) => r.join(''));
   const stages = gated && { gated, programmed: rows() };
   const doorTiles: number[] = [];
-  for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door') doorTiles.push(i);
-  const mustReach = [...gateTiles.slice(1), ...doorTiles];
-  let reach = flood(rows(), size, palette, [gateTiles[0]]);
+  for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door' && !reserved.has(i)) doorTiles.push(i);
+  const mustReach = [...gateTiles.slice(1), ...doorTiles, ...apron].filter((i) => !reserved.has(i));
+  let reach = flood(rows(), size, palette, [gateTiles[0]], reserved);
+  const frozen = new Set([...border].filter((b) => !gateTiles.includes(b)));
+  for (const r of reserved) frozen.add(r);
   const join = (from: number) => {
-    const path = carvePath(cells, size, palette, from, reach, new Set([...border].filter((b) => !gateTiles.includes(b))));
+    const path = carvePath(cells, size, palette, from, reach, frozen);
     if (!path) return;
     for (const c of path) {
       const x = c % size;
@@ -218,14 +231,14 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
         carved++;
       }
     }
-    reach = flood(rows(), size, palette, [gateTiles[0]]);
+    reach = flood(rows(), size, palette, [gateTiles[0]], reserved);
   };
   for (const target of mustReach) if (!reach.has(target)) join(target);
   // Sizeable walkable pockets are joined too; tiny ones are left as scenery.
   const visited = new Set(reach);
   for (let i = 0; i < size * size; i++) {
     if (visited.has(i) || !walkable(i)) continue;
-    const pocket = flood(rows(), size, palette, [i]);
+    const pocket = flood(rows(), size, palette, [i], reserved);
     for (const p of pocket) visited.add(p);
     if (pocket.size >= 4 && !pocket.has(gateTiles[0])) join(i);
   }

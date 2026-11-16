@@ -7,7 +7,9 @@
 // universe's files; then 0.4 → 0.5 (T308b, ADR-0163): the wire and Lua, the components and their fields, the API, the bus's events;
 // then 0.5 → 0.6 (T342, ADR-0175): the symbols of the MarkovJunior programs, a digit alone written `#` and the digit; then 0.6 → 0.7
 // (T310b, ADR-0190): the values the Council's schemas still listed in Italian (where a thing stands in a plan, the type of an
-// environment, the ways of a mind, the places of the things, the roles of the stamps, the bonuses) and the kind of every bond as an id.
+// environment, the ways of a mind, the places of the things, the roles of the stamps, the bonuses) and the kind of every bond as an id;
+// then 0.7 → 0.8 (T370, ADR-0206): the lot of 2 × 2 places of the Gargantuan structures, a contract of the ground and of the plans that
+// changes no file (a plan of before has no block, and stays as it is).
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -85,6 +87,13 @@ export const MIGRATIONS: readonly Migration[] = [
       'i valori che gli schemi del Concilio elencavano ancora in italiano (T310b): dove sta una cosa in un piano (dentro → inside, fuori → outside, ovunque → anywhere), il tipo di un ambiente (esterno → outdoor, interno → indoor, misto → mixed), i modi della mente (vaga → wander, segui → follow, resta → stay) nei manifest, nei casi e nel Lua del Concilio, i posti delle cose (testa → head, corpo → torso…) e ciò che uno slot accetta, i bonus (difesa → defense…) anche in items.bonus del Lua, i ruoli dei timbri (muro → wall…) nei programmi degli ambienti, i comandi degli strumenti (usa → use); il tipo di ogni legame come id (kind) in world/people.json',
     migrate: (files) => migrate0_7(files),
     migratePlan: (plan) => plan0_7(plan),
+  },
+  {
+    from: '0.7',
+    to: '0.8',
+    descrizione:
+      'il lotto di 2 × 2 luoghi delle strutture gargantuesche (T370): una gargantuesca nuova è 25 × 25 caselle (500 voxel di lato) e sta nel mezzo di quattro luoghi, che i loro piani segnano (block) e lo stato ricorda (blocks); una gargantuesca di prima dice in models/index.json la sua densità (vpt 20) e resta di 10 × 10 caselle, nel lotto del suo luogo',
+    migrate: (files) => migrate0_8(files),
   },
 ];
 
@@ -1216,7 +1225,7 @@ export const patternFileFor0_6 = (text: string): string => patternLines0_6(text)
  * The steps of MIGRATIONS that carry a program on its own (a handmade card's) to the next contract, by the contract they read. A step
  * not here does not: a card of before it stays of its contract, kept and not offered (ADR-0161), as the cards of 0.4 stayed in 0.5.
  */
-const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml };
+const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml, '0.7': (xml) => xml };
 
 /**
  * A program alone, of the contract `contract` (`X.Y`), as this kernel reads it (a handmade card's, T342): ported by every step from there
@@ -1239,6 +1248,25 @@ function index0_6(raw: unknown): unknown {
   const out: Record<string, unknown> = {};
   for (const [id, info] of Object.entries(raw)) out[id] = isRecord(info) && typeof info.tint === 'string' ? { ...info, tint: hashDigits(info.tint) } : info;
   return out;
+}
+
+// --- 0.7 → 0.8 (T370, ADR-0206): the lot of 2 × 2 places of the Gargantuan structures -------------------------------------------------
+// A Gargantuan structure is 25 × 25 tiles now, on a lot of four places. One of before was 10 × 10 at 20 voxels a tile and stands on a lot
+// of its place: its entry says its density (`vpt: 20`), which keeps it at the scale of D&D (`entryBox`), and its place keeps it there
+// (`claimSizes` reads the tiles of the entry it wears). The plans of before have no block, and stay as they are.
+
+/** models/index.json of 0.7 in 0.8: a Gargantuan structure that does not say its density says the one it was sculpted at. */
+function index0_8(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const out: Record<string, unknown> = {};
+  for (const [id, info] of Object.entries(raw)) out[id] = isRecord(info) && info.class === 'structure' && info.size === 'gargantuan' && info.vpt === undefined ? { ...info, vpt: 20 } : info;
+  return out;
+}
+
+function migrate0_8(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) if (p !== SEED) out[p] = p === 'models/index.json' ? rewriteJson(text, index0_8) : text;
+  return withSeedFollowing(files, out);
 }
 
 function migrate0_6(files: FileMap): FileMap {

@@ -163,6 +163,36 @@ un corpo solo: la regola dei pezzi staccati va ripensata per le strutture che cr
 ![la fattoria a 20 × 20 caselle](fattoria-gargantuan-20.png)
 ![la villetta a 20 × 20 caselle](scultore-villetta-gargantuan-20.png)
 
+## Il lotto di più luoghi (T370, ADR-0206)
+
+L'autore (D53) ha scelto il lotto di 2 × 2 luoghi con il lato a 500: la gargantuesca delle strutture è ora **25 × 25 × 8 caselle**, 500 × 500 ×
+160 voxel (`GARGANTUAN_LOT`, `STRUCTURE_SIDE` 500, `FORM_LIMITS` 40 milioni di celle), e i programmi di questo banco alla gargantuesca girano a
+500 (`banco-taglie.ts` prende la scatola del gioco). Il riferimento è il forte disegnato a mano dall'autore,
+`lab/mjx/models/handmade/forte-handmade.xml` (`size="500 500 150"`, `<pieces>`).
+
+**Il forte dell'autore** (`misura-tetto.ts -- --solo forte-autore --lati 500 --z 150|160`, `misure/tetto-forte-autore-*.json`, un processo
+suo, Node): a 500 × 500 × 150 (37,5 milioni di celle) gira in **7,2 s**, 48 pezzi (il più lento 105 ms), picco 164 MB; a 160 di altezza 7,5 s e
+175 MB. La mesh del gioco (senza il fondo) è **1,80 milioni di vertici, 77 MB** (col fondo 2,14 M, 92 MB): sta nei 128 MB del worker, ma ne
+prende più di metà. **Il validatore** lo passa in 7,6-7,8 s, al limite degli 8 s di un modello: nella pagina, col processore occupato da
+altro, non finisce in tempo; la sua voce nella libreria deve dire `time` (fino a 30 s, come ogni programma lento scritto a mano), e
+`addModel` ora prova una voce nuova col suo `time` (T370). **La regola dei pezzi staccati** con `groundJoins` (ciò che poggia sul fondo è un
+corpo solo): la fattoria a 400 (48 % staccato prima) e a 500 (10 % prima) passa; il forte del banco e quello dell'autore passavano già.
+
+**Nel browser** (Chrome headless sulla GPU vera, RTX 2070, `misura-frame.mjs 4473 --modello lab/mjx/models/handmade/forte-handmade.xml
+--scatola 500,500,150`, `misure/frame-forte-autore.json`): il forte arriva dal worker in **8,6 s** (programma e mesh; mentre arriva 156 fps,
+4,5 ms di JS e 4,1 di GPU a frame, tre long task fino a 296 ms); dentro il forte disegnato **197 fps, 3,8 ms di JS e 3,4 ms di GPU** a frame con
+4,18 milioni di triangoli in scena (la fattoria a 400 di T356: 3,2 e 2,9 con 2,96 milioni).
+
+**In un mondo vero** (la build, `?skip&offline`, Claude in Chrome): il forte nella libreria come `struttura-il-forte-gargantuan` (`time` 30 s,
+validato in 7,2 s), il Cartografo che chiede «il forte» gargantuesco al luogo (20,24), `planAhead`: il blocco 20,24-21,25 è preso, i quattro
+luoghi sono «Piana del Re Muto», il forte sta nel mezzo del lotto (377,5; 449,5) girato a est. Dopo una ricarica della pagina il blocco torna da
+`state.json → blocks` e dai piani, con il forte allo stesso posto. A piedi (i tasti tenuti e i tick del kernel, con le collisioni vere) il
+viandante fa il giro dell'anello attraverso i quattro luoghi (21,25 → 20,25 → 20,24 → 21,24 → 21,25, 15 s di gioco) ed entra dal portone a est;
+la prima prova aveva trovato un armadio del piano posato sul bordo del lotto, ora libero (`placementsOf`).
+
+![il forte dell'autore sul suo blocco](browser/forte-autore-blocco.jpg)
+![dal portone del forte](browser/forte-autore-portone.jpg)
+
 ## Costo
 
 Nessuna chiamata ai modelli: i programmi sono scritti a mano (`genera.mjs`, `parti.mjs`; la villetta e la rocca di T354 direttamente). Un giro del forte costa 0,15-0,45 s a seme,
@@ -174,8 +204,9 @@ uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla
   0 su 6, Argon 5 su 6 a Enorme e 1 su 2 a Grande, le fattorie fortificate; la domanda all'autore è in `docs/pipeline/domande/T355.md`.
 - **Chi mette persone e animali nelle aree**: le aree sono lette (`formAreas`), nessuno le usa ancora; il Narratore e lo Scenografo (T259)
   le riceveranno in un task loro.
-- **Il lotto di una gargantuesca di 20 caselle** (il tetto dei voxel è misurato e pronto, T356, ADR-0185): la domanda all'autore in
-  `docs/pipeline/domande/T356.md`; la fattoria di 50 × 50 a 20 voxel per casella non entra in un browser (160 milioni di celle).
+- **Le 30 caselle e oltre**: il lotto di 2 × 2 luoghi è fatto (T370, ADR-0206) a 25 caselle; 30 non entrano con l'anello e vorrebbero una mesh
+  per pezzo; la fattoria di 50 × 50 a 20 voxel per casella non entra in un browser (160 milioni di celle).
+- **Il forte dell'autore come riferimento «ottima»** (T371): la sua voce con `time`, il prompt dello Scultore che lo cita.
 - **La varietà degli appezzamenti a 10 × 10**: in 20 celle restano 2-5 celle di campo attorno al cortile, quindi pochi tracciati e due o
   tre tipi di appezzamento per seme; la varianza dei campi di T339 vuole l'area di T356.
 - **Le torri del forte** hanno la porta dal camminamento ma il camminamento non ha una scala dal cortile: la cinta si raggiunge dalle

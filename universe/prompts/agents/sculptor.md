@@ -179,7 +179,7 @@ measures: never shrink a door, a storey or a room for a ratio.
 ```
 `soil="E"` is the soil of the world (the kernel writes it over the bottom layer at every size) and `origin="bottom"` puts H at its centre; the
 first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **20 × 20 cells at Large (100 × 100 × 80 voxels, 5 × 5
-tiles), 30 × 30 at Huge (150, 7.5 × 7.5), 40 × 40 at Gargantuan (200, 10 × 10)**: write rules that do not depend on it, anchored to H, to
+tiles), 30 × 30 at Huge (150, 7.5 × 7.5), 100 × 100 at Gargantuan (500, 25 × 25: the land of four places)**: write rules that do not depend on it, anchored to H, to
 what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
 same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
 of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of

@@ -40,6 +40,8 @@ export const PROGRAMMI: Array<{ id: string; file: string; pezzi?: boolean; xml?:
   { id: 'fattoria-intera', file: 'lab/banco/pezzi/fattoria.xml', pezzi: false },
   { id: 'forte-pezzi', file: 'lab/banco/pezzi/forte.xml', pezzi: true },
   { id: 'forte-intero', file: 'lab/banco/pezzi/forte.xml', pezzi: false },
+  // The author's fort drawn by hand (D53, T370): the Gargantuan of reference, 500 × 500 × 150, on the lot of 2 × 2 places.
+  { id: 'forte-autore', file: 'lab/mjx/models/handmade/forte-handmade.xml' },
 ];
 
 export interface Misura {
