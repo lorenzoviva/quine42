@@ -194,7 +194,7 @@ describe('one program for two sizes (ADR-0160)', () => {
     expect(s.info).toMatchObject({ class: 'structure', ...modelSize(gar), seeds: STRUCTURE_SEEDS });
     expect(k.addModel(gar.id, s.xml, s.info, 'prova')).toBe(true);
     // The same text, two areas at the same scale (T338, ADR-0179): a tile is 20 voxels at both, the Gargantuan box is larger.
-    expect(k.forms.request(gar.id, 1)!.size).toEqual([200, 200, 160]);
+    expect(k.forms.request(gar.id, 1)!.size).toEqual([500, 500, 160]);
     expect(k.forms.request(huge.id, 1)!.size).toEqual([150, 150, 120]);
     expect(k.forms.request(gar.id, 1)!.vpt).toBe(20);
     expect(k.forms.request(huge.id, 1)!.vpt).toBe(20);

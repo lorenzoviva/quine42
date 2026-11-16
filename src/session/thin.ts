@@ -311,6 +311,8 @@ export class ThinClient {
         stage: v.stage,
         ...(v.name ? { place: { name: v.name, description: v.description ?? '' } } : {}),
         lots: (v.lots ?? []).map(([x0, y0, x1, y1]) => ({ x0, y0, x1, y1, floor: [], walls: [], doors: [] })),
+        // The lot of its block (T370): flat at the block's level, as the server has it.
+        ...(Array.isArray(v.block) && v.block.length === 5 && v.block.every(Number.isFinite) ? { blockLot: { x0: v.block[0], y0: v.block[1], x1: v.block[2], y1: v.block[3], level: v.block[4] } } : {}),
         ...(v.digs ? { digs: v.digs } : {}),
         ...(v.water ? { water: v.water } : {}),
       });

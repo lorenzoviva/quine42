@@ -342,7 +342,8 @@ try {
   const modelFile = opt('modello');
   if (modelFile) {
     const box = (opt('scatola') ?? '400,400,160').split(',').map(Number);
-    const xml = fs.readFileSync(modelFile, 'utf8').replace(/<sequence /, `<sequence size="${box.join(' ')}" `);
+    // The box asked for, over the program's own if it says one (the author's fort, T370).
+    const xml = fs.readFileSync(modelFile, 'utf8').replace(/(<sequence\b[^>]*?)\ssize="[^"]*"/, '$1').replace(/<sequence /, `<sequence size="${box.join(' ')}" `);
     await page.eval(RESET);
     const made = await page.eval(`(async () => {
       const k = window.quine; const xml = ${JSON.stringify(xml)};

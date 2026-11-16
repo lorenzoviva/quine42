@@ -27,7 +27,12 @@ export interface Analysis {
 
 const visibleCodes = (g: Grid3, palette: Record<string, PaletteEntry>) => g.alphabet.map((c) => c !== AIR && !!palette[c]?.color && !palette[c]?.hidden);
 
-export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opts: { grounded?: boolean; minHeight?: number } = {}): Analysis {
+/**
+ * `groundJoins` (T370, ADR-0206): the pieces that rest on the bottom of the grid are one body, joined by the ground they stand on. A
+ * structure that grows by rules is a whole of parts (the fences of the pastures, the fields, the towers of a long wall), not a body in one
+ * piece: what is detached is what floats.
+ */
+export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opts: { grounded?: boolean; minHeight?: number; groundJoins?: boolean } = {}): Analysis {
   const g = r.grid;
   const vis = visibleCodes(g, palette);
   const XY = g.X * g.Y;
@@ -57,6 +62,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
   let parts = 0;
   let biggest = 0;
   let biggestGrounded = false;
+  let onGround = 0;
   for (let i = 0; i < g.cells.length; i++) {
     if (!solid[i] || seen[i]) continue;
     parts++;
@@ -85,7 +91,11 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
       biggest = size;
       biggestGrounded = grounded;
     }
+    if (grounded) onGround += size;
   }
+  // With the ground joining what stands on it, the main body is all that rests on the bottom, unless a floating piece is larger.
+  const joined = !!opts.groundJoins && onGround >= biggest;
+  const main = joined ? onGround : biggest;
   const bbox = voxels ? { min, max } : null;
   const boxVolume = bbox ? (max[0] - min[0] + 1) * (max[1] - min[1] + 1) * (max[2] - min[2] + 1) : 1;
   const a: Analysis = {
@@ -94,7 +104,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
     fill: voxels / g.cells.length,
     bbox,
     grounded: ground > 0,
-    mainPart: voxels ? biggest / voxels : 0,
+    mainPart: voxels ? main / voxels : 0,
     parts,
     colors,
     steps: r.steps,
@@ -107,9 +117,9 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
   if (!voxels) a.errors.push('il modello è vuoto: nessun voxel visibile (i codici senza colore nella palette sono invisibili)');
   else {
     if (opts.grounded !== false && !a.grounded) a.errors.push(`non tocca terra: il voxel più basso è a z=${min[2]}, deve appoggiarsi a z=0`);
-    else if (opts.grounded !== false && !biggestGrounded) a.errors.push('il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)');
-    if (a.mainPart < 0.92) a.errors.push(`pezzi staccati: ${pct(1 - a.mainPart)} dei voxel non è attaccato al corpo principale (${parts} pezzi)`);
-    else if (parts > 1) a.warnings.push(`${parts - 1} frammenti staccati (${pct(1 - a.mainPart)} dei voxel)`);
+    else if (opts.grounded !== false && !biggestGrounded && !joined) a.errors.push('il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)');
+    if (a.mainPart < 0.92) a.errors.push(joined ? `pezzi staccati: ${pct(1 - a.mainPart)} dei voxel non poggia a terra né su ciò che vi poggia (${parts} pezzi)` : `pezzi staccati: ${pct(1 - a.mainPart)} dei voxel non è attaccato al corpo principale (${parts} pezzi)`);
+    else if (parts > 1 && a.mainPart < 1) a.warnings.push(`${parts - 1} frammenti staccati (${pct(1 - a.mainPart)} dei voxel)`);
     if (a.fill > 0.8 && !hasTranslucent) a.errors.push(`riempie ${pct(a.fill)} della griglia: sembra un blocco, non una forma`);
     if (voxels < 12) a.errors.push(`troppo piccolo: solo ${voxels} voxel`);
     if (opts.minHeight && bbox && max[2] + 1 < opts.minHeight) a.errors.push(`troppo basso: alto ${max[2] + 1} voxel, la sua classe chiede almeno ${opts.minHeight} (le cose simili hanno le stesse proporzioni)`);

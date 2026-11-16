@@ -115,7 +115,8 @@ describe('the areas of a structure (T346)', () => {
     const r = runMjx(m, 2, { deadline: 30_000 });
     const areas = areasOf(r.grid, m.program.palette, TILE);
     expect(Object.keys(areas)).toEqual(expect.arrayContaining(['house', 'shelter', 'yard', 'barn']));
-    for (const tiles of Object.values(areas)) for (const [x, y] of tiles) expect(x >= 0 && x < 10 && y >= 0 && y < 10).toBe(true);
+    // The Gargantuan box is 25 × 25 tiles since T370 (the lot of 2 × 2 places).
+    for (const tiles of Object.values(areas)) for (const [x, y] of tiles) expect(x >= 0 && x < 25 && y >= 0 && y < 25).toBe(true);
     const form = { result: { grid: r.grid, palette: m.program.palette, actions: [], animations: [] }, vpt: TILE, base: 0 } as unknown as Form;
     expect(formAreas(form)).toEqual(areas);
     expect(formAreas(form)).toBe(form.areas);

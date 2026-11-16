@@ -216,8 +216,8 @@ describe('la griglia a pezzi (T339)', () => {
   });
 
   it("nel gioco una forma a pezzi può essere più grande di FORM_LIMITS, con l'impronta; la stessa a griglia intera no", async () => {
-    // 500 × 500 × 140 is 35 million cells: past FORM_LIMITS (32 million since T356), within FORM_PIECES (64 million).
-    const box = (inner: string) => `<sequence values="BGw" size="500 500 140" ground="G">${inner}<color symbol="G" value="7da35a"/><color symbol="w" value="8a8a86"/></sequence>`;
+    // 500 × 500 × 180 is 45 million cells: past FORM_LIMITS (40 million since T370), within FORM_PIECES (64 million).
+    const box = (inner: string) => `<sequence values="BGw" size="500 500 180" ground="G">${inner}<color symbol="G" value="7da35a"/><color symbol="w" value="8a8a86"/></sequence>`;
     const forms = new Forms(new InlineRunner(new FormCache()));
     forms.load({
       'models/grande.xml': box('<pieces piece="250" margin="0"><all in="B G" out="w *" steps="1"/><all in="B w" out="w *" steps="6"/></pieces>'),
@@ -226,7 +226,7 @@ describe('la griglia a pezzi (T339)', () => {
     });
     const big = await forms.settled('grande', 1);
     expect(big?.status, big?.error).toBe('ready');
-    expect([big!.result!.grid.X, big!.result!.grid.Y, big!.result!.grid.Z]).toEqual([500, 500, 140]);
+    expect([big!.result!.grid.X, big!.result!.grid.Y, big!.result!.grid.Z]).toEqual([500, 500, 180]);
     // A block seven voxels high everywhere: the whole footprint blocks (between a step, 2, and a head, 7, at 10 voxels a tile).
     expect(big!.foot!.every((v) => v === 1)).toBe(true);
     const whole = await forms.settled('intera', 1);

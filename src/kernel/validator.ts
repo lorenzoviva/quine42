@@ -71,7 +71,7 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * A model of the library must compile, finish and build something that stands: what the front-end can
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
-export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number], files?: MjxFiles): string[] {
+export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number], files?: MjxFiles, opts: { groundJoins?: boolean } = {}): string[] {
   // The Musician's program was measured a moment ago: a piece costs up to two seconds on the page, and the answer would be the same.
   if (xml === lastCleanSound) return [];
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
@@ -91,7 +91,8 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     if (!r.finished) return [`${path}: il programma non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps; un programma lento scritto a mano può avere \`tempo\` in models/index.json)`];
     // What is worn (T290, ADR-0180): every section tried on the kernel's two bodies, as the world will try it on any.
     const worn = wornErrors(xml, { background: symbolName(m.background), palette: m.program.palette });
-    return [...analyse(r, m.program.palette, { grounded: true }).errors, ...worn].map((e) => `${path}: ${e}`);
+    // A structure that grows by rules is a whole of parts on the ground (T370): what rests on the bottom is one body.
+    return [...analyse(r, m.program.palette, { grounded: true, groundJoins: !!opts.groundJoins }).errors, ...worn].map((e) => `${path}: ${e}`);
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
@@ -306,6 +307,8 @@ export class Validator {
   modelTime: (id: string) => number | undefined = () => undefined;
   /** The box a model without a `size` of its own runs in (its class at its size, ADR-0160), set by the kernel; else an object's. */
   modelBox: (id: string) => [number, number, number] | undefined = () => undefined;
+  /** Whether a model of the library is a structure that grows by rules (T370): its pieces on the ground are one body. Set by the kernel. */
+  modelGrows: (id: string) => boolean = () => false;
   /** A file of models/ by its name there (`torre.xml`, `porta.txt`), for the programs that read others (T333), set by the kernel. */
   modelFile: (name: string) => string | undefined = () => undefined;
 
@@ -400,12 +403,13 @@ export class Validator {
     return e ? [e] : [];
   }
 
-  validateFile(path: string, content: string, box?: [number, number, number]): string[] {
+  /** `entry`: what the index entry of a model not in the library yet says (its own time, whether it grows by rules, T370). */
+  validateFile(path: string, content: string, box?: [number, number, number], entry?: { time?: number; grows?: boolean }): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
     if (/^models\/[^/]+\.xml$/.test(path) && isTileset(content)) return tilesetErrors(path, content, (f) => this.modelFile(f));
     if (/^models\/[^/]+\.xml$/.test(path)) {
       const id = path.slice('models/'.length, -'.xml'.length);
-      return modelErrors(path, content, this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)));
+      return modelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)), { groundJoins: entry?.grows ?? this.modelGrows(id) });
     }
     if (/^models\/[^/]+\.txt$/.test(path)) return ruleFileErrors(path, content);
     // The master's directives (T374): sections the Council reads, within their caps; what breaks the fourth wall is left out, not an error.

@@ -112,12 +112,13 @@ describe('the migration 0.6 → 0.7: a universe of 0.6, file by file', () => {
   const { files, applied } = migrateUniverse(before);
 
   it('is the sixth migration of the chain, it says what it does, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7']);
-    expect(KERNEL_CONTRACT).toBe('0.7');
-    expect(applied).toHaveLength(1);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`)).toEqual(['0.1→0.2', '0.2→0.3', '0.3→0.4', '0.4→0.5', '0.5→0.6', '0.6→0.7', '0.7→0.8']);
+    expect(KERNEL_CONTRACT).toBe('0.8');
+    // Then 0.7 → 0.8 (T370), which changes no file of this universe.
+    expect(applied).toHaveLength(2);
     expect(applied[0]).toMatch(/^0\.6→0\.7: .*dentro → inside/);
     const cfg = json(files['universe.json']);
-    expect(cfg).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.7' } });
+    expect(cfg).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: '0.8' } });
     expect(checkKernelVersion(cfg.kernel, KERNEL_VERSION, cfg.kernels).ok).toBe(true);
     // Pure, and a universe of 0.7 stays as it is.
     expect(migrateUniverse(universe06()).files).toEqual(files);
@@ -192,14 +193,14 @@ describe('the migration 0.6 → 0.7: a universe of 0.6, file by file', () => {
     expect(seed['modules/items.vesti/manifest.json']).toBe(h(out['modules/items.vesti/manifest.json']));
     expect(seed['modules/mio.cane/manifest.json']).toBe('cambiato');
     const xml = '<sequence values="BW"><one in="B" out="W"/></sequence>';
-    expect(portedProgram(xml, '0.6')).toEqual({ xml, contract: '0.7' });
-    expect(portedProgram('<sequence values="B1"><one in="B" out="1"/></sequence>', '0.5')).toEqual({ xml: '<sequence values="B#1"><one in="B" out="#1"/></sequence>', contract: '0.7' });
+    expect(portedProgram(xml, '0.6')).toEqual({ xml, contract: '0.8' });
+    expect(portedProgram('<sequence values="B1"><one in="B" out="1"/></sequence>', '0.5')).toEqual({ xml: '<sequence values="B#1"><one in="B" out="#1"/></sequence>', contract: '0.8' });
   });
 
   it('prepareUniverse: the chain, then the seed of today, which is of the contract', () => {
     const out = prepareUniverse(universe06(), bundledFiles);
-    expect(out.applied).toHaveLength(1);
-    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.7' });
+    expect(out.applied).toHaveLength(2);
+    expect(json(out.files['universe.json']).kernels).toEqual({ from: '0.8' });
     // The seed says the values of 0.7 everywhere the table names them.
     const layouts = json(bundledFiles['modules/world.layouts/manifest.json']).layouts as Record<string, { environment: string; program: unknown }>;
     expect(Object.values(layouts).every((l) => ['outdoor', 'indoor', 'mixed'].includes(l.environment))).toBe(true);
@@ -292,7 +293,7 @@ describe('a universe of 0.6 opens on this kernel and its Council\'s code works',
     for (const p of ['modules/npc.gatto/manifest.json', 'modules/npc.gatto/logic.lua', 'modules/items.vesti/manifest.json', 'world/people.json']) files[p] = old[p];
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     expect(k.faults.has('universe:kernel')).toBe(false);
-    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.7' });
+    expect(JSON.parse(k.files['universe.json']).kernels).toEqual({ from: '0.8' });
     for (let i = 0; i < 10; i++) k.tick(1 / 60);
     expect(k.faults.list().filter((f) => f.key.startsWith('module:npc.gatto'))).toEqual([]);
     expect(k.content.get('item.elmo')).toMatchObject({ slot: 'head', bonus: { defense: 3, speed: 0.95, warmth: 1 } });

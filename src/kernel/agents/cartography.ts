@@ -70,6 +70,12 @@ export interface ChunkPlan {
   water?: Record<string, WaterRecord>;
   /** Who planned the place and who paid for it (T36). */
   card?: CardStamp;
+  /**
+   * The block this place is part of (T370, ADR-0206): its top-left place. Four places carry it, written by the kernel when a place's
+   * Gargantuan structure takes the lot of 2 × 2 places; the plan of that place has the structure, the other three are the kernel's own,
+   * planned at once without a call. The lot's cells are reserved in the layout of each.
+   */
+  block?: { x: number; y: number };
 }
 
 export interface PlanContext {

@@ -1038,6 +1038,7 @@ export class SessionServer {
         version: ch.version,
         ...(ch.place?.name ? { name: ch.place.name, description: ch.place.description } : {}),
         ...(ch.lots.length ? { lots: ch.lots.map((b) => [b.x0, b.y0, b.x1, b.y1]) } : {}),
+        ...(ch.blockLot?.level !== undefined ? { block: [ch.blockLot.x0, ch.blockLot.y0, ch.blockLot.x1, ch.blockLot.y1, ch.blockLot.level] } : {}),
         ...(ch.draft.includes(SEA_DRAFT) ? { sea: [...ch.draft].flatMap((c, i) => (c === SEA_DRAFT ? [i] : [])) } : {}),
         ...(ch.plan?.digs && Object.keys(ch.plan.digs).length ? { digs: { ...ch.plan.digs } } : {}),
         ...(ch.plan?.water && Object.keys(ch.plan.water).length ? { water: { ...ch.plan.water } } : {}),

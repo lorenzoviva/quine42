@@ -43,7 +43,7 @@ describe('the scale of the parts one lives in (T338)', () => {
 
   it('runs a structure that grows by rules at 20 voxels a tile at every size: a larger size is a larger area', () => {
     for (const t of SIZES) expect(densityFor(structure, t)).toBe(TILE);
-    expect(SIZES.map((t) => boxOf(structure, t)[0])).toEqual([100, 150, 200]);
+    expect(SIZES.map((t) => boxOf(structure, t)[0])).toEqual([100, 150, 500]);
     expect(Math.max(...boxOf(structure, 'gargantuan'))).toBeLessThanOrEqual(STRUCTURE_SIDE);
     expect(tilesOf(structure, 'gargantuan')[0] * TILE).toBe(boxOf(structure, 'gargantuan')[0]);
   });

@@ -247,8 +247,9 @@ describe('lots and structures', () => {
     expect(b.structures![0].size).toBe('large');
     expect(k.rareAllowed({ key: '6,5', cx: 6, cy: 5 })).toEqual(['gargantuan']);
     expect(k.rareAllowed({ key: '5,5', cx: 5, cy: 5 })).toEqual(['huge', 'gargantuan']);
+    // A Gargantuan structure stands on the lot of a block, 25 × 25 tiles (T370): the largest of its place's lots.
     const g: Partial<ChunkPlan> = { structures: [{ concept: 'la cittadella', size: 'gargantuan' }] };
-    claim('7,5', 7, 5, g);
+    claim('7,5', 7, 5, g, [25, 6]);
     expect(g.structures![0].size).toBe('gargantuan');
     // In another zone of the same realm: a Huge one yes, the Gargantuan one no (it goes down to Huge).
     const c: Partial<ChunkPlan> = { structures: [{ concept: 'la piramide', size: 'gargantuan' }] };

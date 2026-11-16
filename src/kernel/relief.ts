@@ -263,6 +263,11 @@ export interface LotBox {
   y0: number;
   x1: number;
   y1: number;
+  /**
+   * The level it lies flat at, when it is not this chunk's to decide (T370, ADR-0206): the lot of a block, which goes past the chunk and
+   * lies at one level for its four places (`blockLevel`). It is laid first, over the chunk's border too.
+   */
+  level?: number;
 }
 
 /**
@@ -284,7 +289,7 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
     out[i] = level(c, r);
     if (c === 0 || r === 0 || c === S - 1 || r === S - 1) fixed[i] = 1;
   }
-  const order = lots.map((l, i) => ({ l, i, area: (l.x1 - l.x0 + 1) * (l.y1 - l.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+  const order = lots.map((l, i) => ({ l, i, area: (l.x1 - l.x0 + 1) * (l.y1 - l.y0 + 1) })).sort((a, b) => Number(b.l.level !== undefined) - Number(a.l.level !== undefined) || b.area - a.area || a.i - b.i);
   // Within two levels a tile of what is already fixed, so that the land between can still be climbed.
   const reach = (x0: number, y0: number, x1: number, y1: number) => {
     let lo = -Infinity, hi = Infinity;
@@ -306,7 +311,7 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
     if (!own.length) continue;
     own.sort((a, b) => a - b);
     const [lo, hi] = reach(l.x0, l.y0, l.x1, l.y1);
-    const flat = Math.min(hi, Math.max(lo, own[own.length >> 1]));
+    const flat = l.level !== undefined && Number.isFinite(l.level) ? l.level : Math.min(hi, Math.max(lo, own[own.length >> 1]));
     flats.set(l, flat);
     for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++)
       for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) {

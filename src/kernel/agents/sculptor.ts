@@ -340,7 +340,8 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     if (nodes.length) return { xml, model, error: nodes.join('; ') };
     const result = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
-    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia) });
+    // A structure that grows by rules is a whole of parts on the ground (T370, ADR-0206): what rests on the bottom is one body.
+    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia), groundJoins: procedural(cls, taglia) });
     const notes = [...a.errors];
     // What is worn (T290): its sections tried on the kernel's two bodies, as the validator and the world will.
     if (wornSections(xml).length) notes.push(...wornErrors(xml, { background: symbolName(model.background), palette: model.program.palette }));
