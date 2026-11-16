@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 16/11/2026, epoca 461 (claude). Crediti: vedi `stato`.
+Aggiornato il 16/11/2026, epoca 462 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,7 +24,7 @@ Aggiornato il 16/11/2026, epoca 461 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T400 integrato (`fe782dc3`: cinque test instabili resi stabili, causa riprodotta per ognuno; `mj-pieces:205` e `nucleus:104` non toccati; T401 dovrà spostare la «0.9.0 futura» di due test), T397 integrato (`ba3a7ec8`, ADR-0205, kernel 0.7.14: Opus 5.5 Scultore delle strutture via OpenRouter dall'1/12, provato solo offline; il giro pagato è T402, in attesa della chiave), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
+0. **Pronti:** T370 integrato (22:00 CET, ADR-0206, contratto 0.8, kernel 0.8.0: gargantuesca 25 × 25 × 8 caselle su un blocco di 2 × 2 luoghi, migrazione 0.7 → 0.8; visto nel browser col forte dell'autore, 197 fps dentro; il forte valida in 7,6-7,8 s, al limite: la sua voce vuole `time` → T371). Ora pronto T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11 o una tua scelta); T398 aspetta T397/T402.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
@@ -41,5 +41,5 @@ Aggiornato il 16/11/2026, epoca 461 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **462 (claude):** T370 integrato.
 - **461 (claude):** T400 integrato.
-- **460 (claude):** T397 integrato; T402 (giro pagato) in attesa della chiave OpenRouter.
