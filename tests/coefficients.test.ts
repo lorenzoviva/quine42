@@ -35,12 +35,17 @@ async function bootWith(ai: Record<string, unknown>): Promise<{ k: Kernel; model
   return { k: await Kernel.boot({ files, store: memoryStore(), ai: models }), models };
 }
 
+/**
+ * Until every place loaded is planned (T400). The local models answer after a timer (`latency`), so how many rounds of 10 ms a place takes
+ * depends on the machine: a wait cut at a number of rounds left a draft behind when a worker of the suite stalled, the carpet moved on, the
+ * draft was unloaded unplanned, and that walk planned fewer places than the other («expected 57 to be 60»). A world that never plans fails
+ * at the test's timeout.
+ */
 async function develop(k: Kernel) {
-  for (let i = 0; i < 60; i++) {
+  do {
     k.tick(DT);
     await settle(10);
-    if ([...k.chunks.values()].every((c) => c.stage !== 'draft')) break;
-  }
+  } while ([...k.chunks.values()].some((c) => c.stage === 'draft'));
 }
 
 /** A walk of the world: the carpet carries the wanderer east place after place, so many new places are planned. */

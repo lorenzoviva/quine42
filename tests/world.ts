@@ -13,13 +13,16 @@ export async function boot(models = new MockAiModels()) {
   return k;
 }
 
-/** Ticks until every loaded chunk has been planned by the Cartographer. */
+/**
+ * Ticks until every loaded chunk has been planned by the Cartographer. On what it waits for, not on a number of rounds (T400): the local
+ * models answer after a timer, so the rounds a plan takes depend on the machine, and a draft left behind made a test fail only in the
+ * whole suite. A world that never plans fails at the test's timeout.
+ */
 export async function develop(k: Kernel) {
-  for (let i = 0; i < 80; i++) {
+  do {
     k.tick(DT);
     await settle(25);
-    if ([...k.chunks.values()].every((c) => c.stage !== 'draft')) break;
-  }
+  } while ([...k.chunks.values()].some((c) => c.stage === 'draft'));
   k.tick(DT);
 }
 

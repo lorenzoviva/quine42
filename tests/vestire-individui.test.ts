@@ -133,7 +133,10 @@ describe('the kernel dresses the people', () => {
     const k = await boot();
     const npc = villager(k, 'test#tick', 2);
     expect(k.ecs.get(npc, 'identity')).toBeUndefined();
-    for (let i = 0; i < 40 && !k.ecs.get(npc, 'identity'); i++) {
+    // Until they are dressed, not until they have a name (T400): the identity comes first, then the Narrator defines what of theirs the world
+    // does not have yet (a call, with the local models' latency) and only then are they dressed; a check at the name alone found them bare
+    // when the suite's load put a round between the two.
+    for (let i = 0; i < 40 && !(k.ecs.get(npc, 'identity') && Object.keys(outfit(k, npc)).length); i++) {
       for (let t = 0; t < 60; t++) k.tick(DT);
       await settle(25);
     }
