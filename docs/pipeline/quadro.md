@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 16/11/2026, epoca 462 (claude). Crediti: vedi `stato`.
+Aggiornato il 17/11/2026, epoca 465 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,13 +24,11 @@ Aggiornato il 16/11/2026, epoca 462 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T370 integrato (22:00 CET, ADR-0206, contratto 0.8, kernel 0.8.0: gargantuesca 25 × 25 × 8 caselle su un blocco di 2 × 2 luoghi, migrazione 0.7 → 0.8; visto nel browser col forte dell'autore, 197 fps dentro; il forte valida in 7,6-7,8 s, al limite: la sua voce vuole `time` → T371). Ora pronto T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11 o una tua scelta); T398 aspetta T397/T402.
+0. **Pronti:** T398 (Scultore «performante» alla Genesi e in lobby, claude), T303 (misura dello Scenografo, claude), T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
 ## Attese dall'autore
-
-- **T402 (prima dell'1/12):** `OPENROUTER_API_KEY` con limite 5 $ nel `.env` del checkout principale, poi il giro pagato di Opus (≤4 $); sotto 3/4 o oltre 1,50 $ a riuscita si toglie il passaggio dell'1/12.
 
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
@@ -41,5 +39,5 @@ Aggiornato il 16/11/2026, epoca 462 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **465 (claude):** T402 integrato, T397 chiuso, pronti T398 e T303.
 - **462 (claude):** T370 integrato.
-- **461 (claude):** T400 integrato.
