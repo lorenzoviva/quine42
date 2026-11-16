@@ -1664,12 +1664,13 @@ le risposte alle domande del piano.
 - Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
 - Anche (autore, 16/11; condizione 4 della Fase I): `npm run sicurezza:prove` contro il server di beta, l'esito nel dossier; nessuna voce aperta nel registro con cui un tester tocchi crediti di altri, il server o la chiave.
 
-### T400 · I test instabili sotto carico diventano stabili — `da fare`
+### T400 · I test instabili sotto carico diventano stabili — `fatto` (`9c44ddcc`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
 - Step: 34
 - Contesto: l'autore (16/11, chat) ha detto sì: `tests/carte-guaste.test.ts` e il test dei coefficienti (`coefficients`) falliscono nella suite intera e passano da soli (T352, causa non dimostrata). Prima dei tester la suite deve essere affidabile.
 - Cosa fare: riprodurre il fallimento (suite intera, al più 6 worker, col turno `test`), trovarne la causa (tempi, stato condiviso, ordine, cache delle forme, worker) e correggerla nel test o nel codice; niente `retry` né timeout gonfiati come rimedio.
 - Quando è fatto: tre suite intere di fila verdi (col turno `test`), la causa scritta nell'esito, commit su `task/T400`.
+- Esito: cinque test instabili nella suite intera resi stabili, ognuno con la causa riprodotta: `carte-guaste` falliva solo col seme indietro di una versione del kernel (non instabile; ora la finta d'universo usa `KERNEL_VERSION`); `coefficients` e `tests/world.ts` aspettavano i piani per un numero fisso di giri, ora finché non resta nessun luogo da pianificare; `vestire-individui` controllava gli abiti prima della chiamata che li porta; `determinism` dipendeva da tick e ordine dei piani legati all'orologio, ora pianifica in ordine fisso senza tick; V-021 scambiava un ritardo del battito per un mondo fermo, ora fallisce solo se il mondo muore o resta bloccato. Solo test cambiati, niente retry né timeout gonfiati. Typecheck verde, tre suite intere di fila verdi su `9c44ddcc`. Commit `fee6aa93`, `3da3fc9f`, `9c44ddcc`. Manca: `kernel-version` e `salvataggio-guasto` usano «0.9.0» come versione futura e si romperanno con T401; non ho controllato tutti i test per lo stesso schema. Sicurezza: nessuna superficie nuova.
 
 ### T401 · Il kernel 0.9.0 con il tag — `da fare` (dipende da T45f, T400)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 10

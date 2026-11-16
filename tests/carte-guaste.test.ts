@@ -23,6 +23,7 @@ import { fakeLink, type ServerMsg } from '../src/session/protocol';
 import { SessionServer } from '../src/session/server';
 import { ThinClient } from '../src/session/thin';
 import { SOUND_CLASS } from '../src/mj/sound';
+import { KERNEL_VERSION } from '../src/kernel/version';
 
 /** The ways a card breaks, each a program that passed the check where it came from and fails here. */
 const PROGRAMS = {
@@ -53,7 +54,11 @@ interface CardSpec {
 const solid = (id: string, model: string, name: string) =>
   JSON.stringify({ id, name, kind: 'entity', version: '0.1.0', description: name, appearance: { model, class: 'furniture', glyph: 'o', color: '#a07040', look: name }, physics: { solid: true, radius: 0.45 } }, null, 2) + '\n';
 
-/** A universe with brought cards (as the store makes them: `broughtEntry`, the master's card, a link more), the things that wear them, and a game. */
+/**
+ * A universe with brought cards (as the store makes them: `broughtEntry`, the master's card, a link more), the things that wear them, and a game.
+ * It says this kernel (T400): the seed's `universe.json` says the kernel that last wrote it, behind this one while a task raises
+ * `KERNEL_VERSION`, and then the first commit would stamp it too (T260) besides what the test looks at.
+ */
 function universe(cards: CardSpec[], game?: Record<string, unknown>): FileMap {
   const files: FileMap = { ...bundledFiles };
   const entries: Record<string, ModelInfo> = {};
@@ -73,7 +78,7 @@ function universe(cards: CardSpec[], game?: Record<string, unknown>): FileMap {
     }
   }
   files['models/index.json'] = withBrought(bundledFiles['models/index.json'], entries);
-  if (game) files['universe.json'] = JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), game }, null, 2) + '\n';
+  files['universe.json'] = JSON.stringify({ ...JSON.parse(bundledFiles['universe.json']), kernel: KERNEL_VERSION, ...(game ? { game } : {}) }, null, 2) + '\n';
   return files;
 }
 
@@ -315,9 +320,10 @@ describe('una carta guasta nel mondo, per ogni modo di guastarsi (T296)', () => 
     for (const bad of ['../universe', 'a/b', '', 'x'.repeat(80), 3 as unknown as string]) expect((await k.removeCard(bad)).ok).toBe(false);
     expect(k.repo.head().id).toBe(head);
     expect(k.files['models/pozzo.xml']).toBeDefined();
-    // A universe of a kernel to come is only read (ADR-0156): nothing is taken away from it.
+    // A universe of a kernel to come is only read (ADR-0156): nothing is taken away from it. The contract after this kernel's, whatever it is.
+    const [era, contract] = KERNEL_VERSION.split('.').map(Number);
     const later = universe([{ id: 'botte', xml: PROGRAMS.good }]);
-    later['universe.json'] = JSON.stringify({ ...JSON.parse(later['universe.json']), kernel: '0.9.0', kernels: { from: '0.9' } }, null, 2) + '\n';
+    later['universe.json'] = JSON.stringify({ ...JSON.parse(later['universe.json']), kernel: `${era}.${contract + 1}.0`, kernels: { from: `${era}.${contract + 1}` } }, null, 2) + '\n';
     const read = await boot(later);
     expect(read.readOnly()).toBeDefined();
     expect(await read.removeCard('botte')).toEqual({ ok: false, reason: expect.stringMatching(/si legge soltanto/) });

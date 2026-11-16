@@ -4,6 +4,7 @@ import { Sandbox } from '../src/kernel/sandbox';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
+import type { TextCall } from '../src/kernel/ai/models';
 import type { Action } from '../src/kernel/input';
 import type { FileMap } from '../src/kernel/types';
 import { fakeHost } from './helpers';
@@ -19,13 +20,33 @@ const DICE: FileMap = {
     'local M = {}\nfunction M.update(dt)\n  ecs.each("wander", function(id)\n    ecs.set(id, "dado", { v = math.random(1, 1000000) })\n  end)\n  local p = world.player()\n  if p then ecs.set(p, "dado", { v = math.random() }) end\nend\nreturn M\n',
 };
 
-/** Ticks until every loaded chunk has been planned (the offline models answer after a few ms). */
-async function develop(k: Kernel) {
-  for (let i = 0; i < 80; i++) {
-    k.tick(1 / 60);
-    await new Promise((r) => setTimeout(r, 25));
-    if ([...k.chunks.values()].every((c) => c.stage !== 'draft')) break;
+/** The offline models, counting the answers they still owe: the world is still when none is owed. */
+class Owing extends MockAiModels {
+  owed = 0;
+  async text(call: TextCall): Promise<string> {
+    this.owed++;
+    try {
+      return await super.text(call);
+    } finally {
+      this.owed--;
+    }
   }
+}
+
+/**
+ * Every loaded place planned, the same way in both worlds (T400). The world was let tick until the plans arrived, and the plans arrive
+ * after the offline models' timers: how many ticks that took, which plans came first (three at a time), what the Forge they asked for
+ * had made by then, all of it went by the machine's clock, so two worlds differed before they lived («expected { things: […] } to deeply
+ * equal …», only in the whole suite). Now one tick with the world held loads the places, each is planned in turn in a fixed order with
+ * no tick in between, and what the plans asked of the Council is answered before the world is let go.
+ */
+async function develop(k: Kernel, models: Owing) {
+  k.generationHeld = true;
+  k.tick(1 / 60);
+  const drafts = [...k.chunks.values()].filter((c) => c.stage === 'draft').sort((p, q) => p.cy - q.cy || p.cx - q.cx);
+  for (const c of drafts) await k.planAhead(c.cx, c.cy);
+  while (models.owed) await new Promise((r) => setTimeout(r, 5));
+  k.generationHeld = false;
 }
 
 /** What the world is: every entity (module, place, where it is, what the dice said), the people, the wanderer. */
@@ -77,11 +98,12 @@ describe('shared seeds and determinism (T35)', () => {
 
   it('two kernels with the same universe and the same input reach the same state after N ticks', async () => {
     const files = { ...bundledFiles, ...DICE };
-    const a = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
-    const b = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
+    const [ma, mb] = [new Owing(), new Owing()];
+    const a = await Kernel.boot({ files, store: memoryStore(), ai: ma });
+    const b = await Kernel.boot({ files, store: memoryStore(), ai: mb });
     // The generation is asynchronous: both worlds are planned before they start to live.
-    await develop(a);
-    await develop(b);
+    await develop(a, ma);
+    await develop(b, mb);
     const before = snapshot(a);
     expect(snapshot(b)).toEqual(before);
     play(a, 240);

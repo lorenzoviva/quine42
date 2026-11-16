@@ -564,10 +564,15 @@ describe('il server vero', () => {
       pb.say({ t: 'join', id: accountWanderer('uid-dario'), token: 'vero-uid-dario' });
       await entered(pb, 30000, 'ingresso di dario');
       for (const m of [null, 7, [], {}, { t: {} }, { t: 'step', x: {}, y: [] }, { t: 'step', seq: { toString: 1 } }, { t: 'chat', id: [], text: {} }, { t: 'join', id: {} }, { t: 'profile', profile: 'x' }, { t: 'action', x: 'y' }, { t: 'give', wanderer: {}, slot: {}, count: {} }]) pa.say(m);
-      // What it sends after those is the same world's: none restarted, no warning that it stopped.
+      // What it sends after those is the same world's: none restarted, none stuck. A world that dies says it stopped and then that it
+      // restarted (`restarted`), one stuck says it stopped and nothing more; one whose beat came later than WorldHost's `notice` (5 s),
+      // as under the load of the whole suite, says it stopped and then that it moves again (`resumed`): not the doing of these messages
+      // (T400; the warning alone made this test red in the suite).
       const before = pa.heard.length + pb.heard.length;
       await until(() => pa.heard.length + pb.heard.length > before + 5, 20000, 'il mondo risponde ancora');
-      expect([...pa.of('world'), ...pb.of('world')]).toEqual([]);
+      const states = () => [...pa.of('world'), ...pb.of('world')].map((m) => m.state);
+      await until(() => states().filter((s) => s === 'stopped').length <= states().filter((s) => s === 'resumed').length, 20000, 'il mondo riprende');
+      expect(states().filter((s) => s !== 'stopped' && s !== 'resumed')).toEqual([]);
       for (const ws of [a, b]) ws.close();
     }, 240000);
   });
