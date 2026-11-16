@@ -1678,6 +1678,7 @@ le risposte alle domande del piano.
 - Contesto: l'autore (16/11, chat) ha detto sì: condizione 8 della Fase I (`docs/fasi.md`): `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` e quel commit ha un tag. Oggi 0.7.12; ADR-0136 dice come si sale (contratto nuovo → `Y`, migrazione in `migrations.ts` se il formato cambia).
 - Cosa fare: alla fine della Fase I (dopo gli altri task dello step 30, 31 e 34 tranne T237), decidere con l'autore se 0.9.0 è un contratto nuovo (migrazione `0.7 → 0.9` vuota o no) e portarci versione, seme e test; il tag `v0.9.0` sul commit lo mette `integra` o l'autore.
 - Quando è fatto: `npm test` e `npm run typecheck` verdi, la versione 0.9.0 ovunque, commit su `task/T401`; domande in `docs/pipeline/domande/T401.md`.
+- Nota da T400 (`dossier T400`): `tests/kernel-version` e `tests/salvataggio-guasto` usano «0.9.0» come versione «futura»: portarli a una versione oltre la nuova, e cercare lo stesso schema negli altri test.
 
 
 ## Varie
