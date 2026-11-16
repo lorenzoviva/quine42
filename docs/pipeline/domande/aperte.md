@@ -2,7 +2,6 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
-- **D57 (finale, T392 il 15/11, `docs/pipeline/domande/T392.md`, rapporto `lab/banco/taglie/modelli/README.md`):** quale Scultore per le strutture. Opus 5.5 11/12 a 0,75 $/riuscita (207 s, fattorie non fortificate), Argon 6/8 a 0,37 $ (0,74 dopo l'1/12), Sonnet 12/12 ma 662 s, Fable 7/8 a 2,91 $, Carbon e Hydrogen 4/12. Opzioni: **1 Argon fino all'1/12, poi Opus 5.5 via OpenRouter, Argon resta sulla via di Google (consiglio)**; 2 Opus su OpenRouter subito; 3 Argon e basta.
 - **D35 (T240 → T378 il 14/11 — Il piano di lancio, `docs/lancio/piano.md`, § «Le decisioni (D35)»; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, a nome tuo (consiglio: sì, la voce più importante); D4.6 il volto del lancio sei tu, nome e cognome, Boa Lodger mai portavoce (consiglio: sì).
   - **Senza consiglio, tue:** D5.1 10 ore a settimana di promozione?; D6.2 chiave del server in open beta: nessuna oppure una tua con tetto piccolo per un universo vetrina (proposta 10-20 $/giorno); D6.4 quanti mondi accesi sul server ufficiale (proposta 4-8, chi trova pieno va alla demo offline e alla guida d'installazione); D7.3 codice o pacchetto pubblico con licenza, ora requisito della Fase IV (da decidere prima che T367 pubblichi l'immagine).
