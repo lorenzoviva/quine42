@@ -193,6 +193,22 @@ modello di Claude (né da Google né da OpenRouter: `OPENROUTER_MODELS` ha solo 
 lo porti nella via di OpenRouter (id fisso a elenco, prezzo, lo Scultore delle strutture di quella via; nella via di Google resta Argon). La
 domanda all'autore è in [`docs/pipeline/domande/T392.md`](../../../../docs/pipeline/domande/T392.md).
 
+## Il giro di Opus via OpenRouter (T397): preparato e provato offline, non lanciato
+
+D57 è chiusa con l'opzione 1 (16/11): dall'1/12 Opus 5.5 scrive le strutture quando il mondo va su OpenRouter (ADR-0205, kernel 0.7.14). Prima, un
+giro breve dello stesso banco **attraverso l'adattatore del gioco** (`OpenRouterAiModels`: senza temperatura, il prompt di sistema in cache con
+`cache_control`, `max_tokens` 32 000, il ragionamento `low`, il costo detto da ogni risposta), l'Artista su Gemini come sopra:
+
+```bash
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude-opus-5-5 --via openrouter --tetto 4 --out lab/banco/taglie/modelli/openrouter
+npx vite-node lab/scripts/scultore-gemini.ts -- --tabella --out lab/banco/taglie/modelli/openrouter
+```
+
+4 strutture (forte e fattoria, Grande ed Enorme), circa 3 $, fermo oltre 4 $ sul registro della cartella (Gemini e OpenRouter insieme); in ogni
+`esito.json` le chiamate di OpenRouter con i token letti dalla cache, il costo detto e i secondi. Provato con `--offline` (un OpenRouter finto che
+risponde con la villetta): il percorso, il registro e la tabella («claude-opus-5-5 via OpenRouter»). **Non lanciato**: nei `.env` della macchina non
+c'è `OPENROUTER_API_KEY` (`docs/pipeline/domande/T397.md`). La soglia: meno di 3 su 4 o oltre 1,50 $ a riuscita, e il passaggio dell'1/12 si toglie.
+
 ## Raccomandazione provvisoria per D57 di T391 (solo Gemini; superata da T392, sopra)
 
 Fra i modelli di Gemini **Argon resta lo Scultore delle strutture**, a ogni taglia (l'opzione 1 di T355): riesce 3 volte su 4 contro 1 su 3 di

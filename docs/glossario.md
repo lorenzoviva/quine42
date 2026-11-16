@@ -1249,6 +1249,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/ai/openrouter.ts`, `lab/scripts/openrouter-prova.ts`
 - **Da non usare**: «proxy» (il varco è un'altra cosa, sul server), «router dei modelli» (è `RoutedAiModels`, gli abbonamenti)
 
+### Via dei modelli
+- **Inglese**: `AiRoute`, `aiRoute`, `sculptorsOn`
+- **Definizione**: da dove passano le chiamate del Concilio di un mondo: la chiave di Google (`google`) o OpenRouter (`openrouter`, `OpenRouterAiModels`); il kernel la sa da ciò con cui scrive e ne fa dipendere lo Scultore delle strutture (Opus 5.5 su OpenRouter dall'1/12, Argon su Google; T397, ADR-0205) e la stima oraria.
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `src/kernel/kernel.ts`, `src/kernel/coefficients.ts`
+- **Da non usare**: «provider» (è la tabella degli abbonamenti, `subscription.ts`), «rotta» (è una route del server)
+
 ### Varco di OpenRouter
 - **Inglese**: `OpenRouterGate`, `openrouterRoute`, `worldsPayWith`, `chatRequest`, `decisionRequest`
 - **Definizione**: l'unico posto che spende una chiave di OpenRouter (T363, ADR-0197): le chiavi dei giocatori in memoria per viandante (dal PKCE scambiato dal server, o incollate), la chiave di chi ospita col suo tetto, i corpi rifatti campo per campo, la scelta della chiave fra chi può pagare; la rotta `/api/openrouter` e la porta dei mondi per il canale.

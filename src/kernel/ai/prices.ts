@@ -41,7 +41,13 @@ export const PRICES: Record<string, Price> = {
   'gemini-3.1-flash-lite': { input: 0.25, output: 1.5, cached: 0.025 },
   'gemini-3.1-pro-preview': { input: 2.0, output: 12.0, cached: 0.2, note: 'fino a 200k token di prompt; oltre: 4,00 / 18,00 / 0,40' },
   'gemini-3-flash-preview': { input: 0.5, output: 3.0, cached: 0.05, note: 'modello «legacy»' },
+  // Opus 5.5 through OpenRouter (anthropic/claude-opus-5.5, T397, D57), read on OPUS_PRICES_READ_ON: the same as Anthropic's list
+  // (ANTHROPIC_PRICES). A prompt written to the cache costs 5,00 (for an hour 8,00): not here, the calls say what they cost.
+  'claude-opus-5-5': { input: 4.0, output: 20.0, cached: 0.2, note: 'OpenRouter, 16/11/2026; scrittura in cache 5,00' },
 };
+
+/** When the price of Opus 5.5 was read on OpenRouter (T397): its endpoints at the list price (a few regional ones ask 10 % more). */
+export const OPUS_PRICES_READ_ON = '2026-11-16';
 
 /** When the price of Gemini 3.5 Flash was read on OpenRouter (T395). */
 export const FLASH_3_5_READ_ON = '2026-11-14';
@@ -94,7 +100,8 @@ export const SUBSCRIPTION_PRICES: Record<string, Price> = {
 
 export function priceOf(model: string, date = new Date().toISOString().slice(0, 10)): Price | undefined {
   // Google's name (`models/…`) and OpenRouter's (`google/…`) of the same model: the same price.
-  const id = model.replace(/^(models|google)\//, '');
+  // Anthropic's on OpenRouter (`anthropic/claude-opus-5.5`, T397) has a dot where ours has a hyphen.
+  const id = model.replace(/^(models|google)\//, '').replace(/^anthropic\/(claude-[a-z]+-\d+)\.(\d+)$/, '$1-$2');
   const p = PRICES[id] ?? ESTIMATED[id] ?? DECISION_PRICES[id] ?? SUBSCRIPTION_PRICES[id];
   if (!p) return undefined;
   return p.until && p.next && date >= p.until ? { ...p.next } : p;
@@ -109,8 +116,8 @@ export interface Tokens {
   stored?: number;
 }
 
-/** The dearest of the list: a model off it is never shown or billed lower. */
-export const DEAREST_MODEL = Object.keys(PRICES).reduce((a, b) => (PRICES[b].output > PRICES[a].output ? b : a));
+/** The dearest of Google's on the list: a model of Google's off it is never shown or billed lower. */
+export const DEAREST_MODEL = Object.keys(PRICES).filter((m) => m.startsWith('gemini-')).reduce((a, b) => (PRICES[b].output > PRICES[a].output ? b : a));
 
 /** The model a call of Google's (from Google or through OpenRouter) is billed as: its own, or the dearest if it is off the list. The others (local, subscriptions) as they are. */
 export const billedModel = (model: string): string => (/^(models\/|google\/)?gemini-/.test(model) && !priceOf(model) ? DEAREST_MODEL : model);
@@ -134,8 +141,8 @@ export const usd = (v: number | undefined) => (v === undefined ? 'n.d.' : v < 0.
 
 /**
  * Anthropic's API list (T391, read on ANTHROPIC_PRICES_READ_ON): what a call of the Sculptor answered on Claude's subscription would cost if the game
- * paid the API. `write` is a prompt token written to the 5-minute cache (1.25 × input); one written for an hour costs 2 × input. Not in `priceOf`:
- * the game calls no Claude model through an API, and a ledger that records one says its dollars (`CallRecord.usd`, `anthropicCost`).
+ * paid the API. `write` is a prompt token written to the 5-minute cache (1.25 × input); one written for an hour costs 2 × input. Not in `priceOf`,
+ * but for Opus 5.5, which the game calls through OpenRouter from T397 (`PRICES`, the same numbers); a ledger of the CLI says its dollars (`CallRecord.usd`, `anthropicCost`).
  */
 export const ANTHROPIC_PRICES_READ_ON = '2026-11-14';
 export const ANTHROPIC_PRICES: Record<string, Price & { write: number }> = {

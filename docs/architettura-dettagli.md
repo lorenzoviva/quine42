@@ -244,6 +244,19 @@
   OpenRouter (`google/gemini-3.8-flash`, `typesafe/jev-1.13`), che `priceOf` legge come quello di Google (`DECISION_PRICES` ha gli id di Jev).
   La prova pagata con la chiave dell'autore: `npx vite-node lab/scripts/openrouter-prova.ts` (`--offline` con un OpenRouter finto), il rapporto in
   `lab/banco/openrouter/prova.md`.
+- **Opus 5.5, Scultore delle strutture su OpenRouter** (ADR-0205, T397, kernel 0.7.14; D57): `OPENROUTER_MODELS['claude-opus-5-5']` è
+  `anthropic/claude-opus-5.5` (versione `-20260921`, letta il 16/11, `OPUS_READ_ON`), senza temperatura (nessun endpoint la prende), con le istruzioni di
+  sistema in una parte di testo con `cache_control: { type: 'ephemeral' }` (`cacheSystem`: nessun endpoint di Anthropic ha la cache implicita; i blocchi e
+  le correzioni di una struttura la leggono entro cinque minuti) e `max_tokens` 32 000 (`maxTokens`); i modelli di Google come prima. Prezzo in
+  `PRICES['claude-opus-5-5']` (4 / 20 / 0,20, `OPUS_PRICES_READ_ON`), `priceOf` legge anche l'id di OpenRouter col punto. **La via del mondo**:
+  `Kernel.aiRoute()` (`openrouter` se il Concilio scrive con `OpenRouterAiModels`, anche dietro il router degli abbonamenti; `google` altrimenti) e
+  `Kernel.sculptors()` = `sculptorsOn(ai.sculptors, via)` (`src/kernel/agents/sculptor.ts`): su OpenRouter da `openRouterFrom` (2026-12-01)
+  `openRouterStructure` per `structure` e `important` dove il master ha lasciato i predefiniti; sulla via di Google un modello che Google non ha torna
+  al predefinito. **La stima oraria** conta le strutture dei concetti nuovi col loro Scultore (`STRUCTURE_SCULPT`: tre chiamate di 20 mila token,
+  7,5 mila stabili, 6,5 mila in uscita, da T392; al più `HOUR.strutture`, 4 l'ora) e prende la via (`hourlyEstimate(…, { route })`: la lobby da soli
+  dal kernel, in una partita di molti da `/api/openrouter/status` → `worlds`, la Genesi dal kernel). Il banco: `lab/scripts/scultore-gemini.ts --
+  --modelli claude-opus-5-5 --via openrouter --tetto 4 --out lab/banco/taglie/modelli/openrouter` (`OPENROUTER_API_KEY` dal `.env`, `--offline`
+  con un OpenRouter finto).
 - **Le chiavi dei giocatori e il turno delle comuni** (ADR-0197, T363, kernel 0.7.8): **il varco** è `OpenRouterGate` (`server/openrouterProxy.ts`),
   gemello di `GeminiGate`. Le chiavi dei giocatori stanno nella memoria del processo del server, per id di viandante, mai su disco né in un log né in una
   risposta (altrove l'impronta SHA-256, `keyFingerprint`); quella di chi ospita è `OPENROUTER_API_KEY`, col tetto `OPENROUTER_TETTO_GIORNALIERO` (10 $,
@@ -1238,7 +1251,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `part-stair` prende i primi 16 voxel della striscia dal lato basso e rende il resto all'aria, apre il solaio di qualunque spessore, non chiede
   aria sul lato basso; il contratto vuole dieci voxel liberi prima del primo gradino (il corpo sale in linea) e pavimento oltre il sedicesimo.
   Il banco (`lab/banco/taglie/`): la villetta (`MOCK_STRUCTURE_PROGRAM`) e la rocca (`scultore-rocca.xml`) scritte a mano come lo Scultore,
-  con `--viste` il ritorno; nel laboratorio 3D accanto a fattoria e forte. Il giro su Gemini è T355.
+  con `--viste` il ritorno; nel laboratorio 3D accanto a fattoria e forte. Il giro su Gemini è T355. **Chi le scrive**: Argon a ogni taglia (T395,
+  D58); dall'1/12, su un mondo che va su OpenRouter, Opus 5.5 (11 su 12 a 0,75 $ per riuscita nel giro di T392; `sculptorsOn`, ADR-0205, in `#gemini`).
 
 <a id="taglie"></a>
 ## Le taglie

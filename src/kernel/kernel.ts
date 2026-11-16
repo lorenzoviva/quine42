@@ -46,7 +46,7 @@ import { classOf, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf,
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
-import { categoryOf, DEFAULT_SCULPTORS, sculptAction, shareableProgram, type SculptorAiModels } from './agents/sculptor';
+import { categoryOf, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
 import { entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { layout, type Lot, type LayoutResult, articulationPoints } from './layout';
@@ -5775,9 +5775,14 @@ export class Kernel {
     return true;
   }
 
-  /** The Sculptor's models per class (universe.json → ai.scultori over the defaults). */
+  /** The Sculptor's models per class (universe.json → ai.sculptors over the defaults), on the route the world's models go along (T397). */
   sculptors(): SculptorAiModels {
-    return { ...DEFAULT_SCULPTORS, ...internalSculptors(this.config.ai.sculptors ?? {}) };
+    return sculptorsOn(internalSculptors(this.config.ai.sculptors ?? {}), this.aiRoute());
+  }
+
+  /** The route of the world's models (T397): OpenRouter when the Council writes through it (also behind the subscriptions' router), Google's key otherwise. */
+  aiRoute(): AiRoute {
+    return this.ai.name === 'openrouter' ? 'openrouter' : 'google';
   }
 
   // --- The cards brought before the start (T295, ADR-0170) --------------------------------------------------------------------

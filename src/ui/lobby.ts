@@ -7,7 +7,7 @@
 
 import { collectionOf } from '../kernel/cards';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, repairActor, repairCoefficients, type CoefficientKey } from '../kernel/coefficients';
-import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
+import { DEFAULT_SCULPTORS, type AiRoute, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { internalSculptors } from '../kernel/internalNames';
 import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
 import type { AiSettings, FileMap, GameExpenses, LobbySettings } from '../kernel/types';
@@ -33,6 +33,8 @@ export interface LobbyOptions {
   decisions?: boolean;
   /** Those decisions go along a route that keeps nothing (D55.2): the estimate counts the guards on what the wanderer writes. */
   guards?: boolean;
+  /** The route of the world's models, where this page knows it (alone): the estimate counts the structures' Sculptor of that route (T397). */
+  route?: AiRoute;
   onRecharge?: (amount: number) => Promise<{ ok: boolean; url?: string; motivo?: string }>;
   /**
    * The master of a universe that may still bring cards (a clone before its first entry, T295, ADR-0170): what may come, and how it comes
@@ -122,7 +124,7 @@ export class LobbyScreen {
     const estimateLines = el('div', { class: 'note' });
     let read: () => AiSettings = () => ({});
     const showEstimate = () => {
-      const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai), undefined, { decisions: !!this.opts.decisions, guards: !!this.opts.guards });
+      const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai), undefined, { decisions: !!this.opts.decisions, guards: !!this.opts.guards, route: this.opts.route });
       const budget = (read().maxText as number | undefined) ?? ai.maxText;
       estimateRow.textContent = `Stima oraria: circa ${usd(h.dollari)} (${h.chiamate} chiamate/ora). Budget sessione: ${budget} chiamate testo.`;
       estimateLines.replaceChildren(...h.righe.map((x) => el('div', {}, `· ${x.voce}: ${x.chiamate} → ${usd(x.dollari)}`)));

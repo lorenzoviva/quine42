@@ -195,6 +195,9 @@ async function main() {
     // The master of a clone nobody entered yet may still bring cards (T295): asked of the store as the master, before the world starts.
     const asMaster = client && readConfig(snapFiles).config.game?.master === id && !isAnon;
     if (asMaster) client.identify(account ? { Authorization: `Bearer ${account.token}` } : { [WANDERER_HEADER]: id });
+    const link = new OpenRouterLink(whoHeaders(id));
+    // The route of the worlds of many of this server (T397): the estimate counts the structures' Sculptor of that route.
+    const worldsOnOpenRouter = (await link.status().catch(() => undefined))?.worlds === true;
     const lobby = new LobbyScreen({
       ...(asMaster ? { cards: { load: () => client.kin().catch(() => undefined), bring: (refs: BringRef[]) => client.bring(refs), has: (m: string) => snapFiles[`models/${m}.xml`] !== undefined } } : {}),
       name,
@@ -204,7 +207,8 @@ async function main() {
       credits,
       isAnonymous: isAnon,
       inCorso: !!seen?.viandante?.inCorso,
-      openrouter: new OpenRouterLink(whoHeaders(id)),
+      openrouter: link,
+      route: worldsOnOpenRouter ? 'openrouter' : 'google',
       onRecharge: !recharges ? undefined : async (amount: number) => {
         const token = account?.token;
         const res = await fetch('/api/stripe/checkout', {
@@ -537,7 +541,7 @@ async function main() {
   };
   // Alone (T247): the same lobby, without what is about other people; it comes back with every new load of the page, which is what ends a match alone.
   const enterAlone = async () => {
-    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels, guards: keepsNothing(kernel.council.decisions), ...(via !== 'gemini' ? { openrouter: soloLink } : {}) });
+    soloLobby = new LobbyScreen({ name, files: kernel.files, wandererId: kernel.wanderer().id, credits: 0, alone: true, decisions: kernel.council.decisions !== kernel.council.localAiModels, guards: keepsNothing(kernel.council.decisions), route: kernel.aiRoute(), ...(via !== 'gemini' ? { openrouter: soloLink } : {}) });
     const chosen = soloLobby.open();
     syncFocus();
     const choice = await chosen;

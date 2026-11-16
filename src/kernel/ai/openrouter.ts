@@ -2,7 +2,7 @@
 // (`endpoint`), two doors: `/v1/chat/completions` for the models that write (OpenRouterAiModels, beside GeminiAiModels) and `/alpha/decisions`
 // for Jev (OpenRouterDecisionModels, beside JevDecisionModels). The key never comes here: the gate of the server (T363) or a script of the lab adds it.
 //
-// The ids are fixed and on a list (OPENROUTER_MODELS, OPENROUTER_JEV): never an alias that moves (`~…-latest`), `openrouter/auto` or a tier
+// The ids are fixed and on a list (OPENROUTER_MODELS, OPENROUTER_JEV; Google's models and, from T397, Opus 5.5 for the Sculptor): never an alias that moves (`~…-latest`), `openrouter/auto` or a tier
 // (`:floor`, `:nitro`); a model off the list is never asked. The Council's schema becomes a JSON Schema in `response_format` (`toJsonSchema`), with
 // `require_parameters`, so that only an endpoint that takes every parameter answers; the reasoning is `reasoning.effort` (Gemini's `thinkingLevel`,
 // one to one) and does not come back; the Artist's photos are `image_url` parts with the data URLs of today. What a call cost is what OpenRouter
@@ -54,6 +54,13 @@ export interface OpenRouterModel {
    * only the others (the Vertex endpoints of the newer Flash do not take it): where not, the model's own temperature.
    */
   temperature: boolean;
+  /**
+   * Where the provider caches only what the request marks (Anthropic's models, T397: no implicit cache on any endpoint): the system
+   * instructions go as one text part with `cache_control`, so the calls that follow within five minutes read them at the cache price.
+   */
+  cacheSystem?: boolean;
+  /** The most tokens an answer may have, thinking included, where the model's own ceiling is far above any program (Opus: 128 thousand). */
+  maxTokens?: number;
 }
 
 /** Our id → OpenRouter's: the models of `prices.ts`, the same prices (OpenRouter adds nothing to what Google asks). */
@@ -67,7 +74,13 @@ export const OPENROUTER_MODELS: Readonly<Record<string, OpenRouterModel>> = {
   'gemini-4-argon': { id: 'google/gemini-4-argon', snapshot: 'google/gemini-4-argon-20261013', temperature: true },
   'gemini-3.1-pro-preview': { id: 'google/gemini-3.1-pro-preview', snapshot: 'google/gemini-3.1-pro-preview-20260219', temperature: true },
   'gemini-3-flash-preview': { id: 'google/gemini-3-flash-preview', snapshot: 'google/gemini-3-flash-preview-20251217', temperature: true },
+  // The Sculptor of the structures on this route from 1/12 (T397, D57): read on OPUS_READ_ON. No endpoint takes a temperature; every one takes
+  // `response_format` and `reasoning`; none caches by itself.
+  'claude-opus-5-5': { id: 'anthropic/claude-opus-5.5', snapshot: 'anthropic/claude-opus-5.5-20260921', temperature: false, cacheSystem: true, maxTokens: 32_000 },
 };
+
+/** When the endpoints of Opus 5.5 were read (T397). */
+export const OPUS_READ_ON = '2026-11-16';
 
 /** The versions of Jev the game knows → OpenRouter's ids (TypeSafe's endpoint, the only one, is in OpenRouter's list of zero retention). */
 export const OPENROUTER_JEV: Readonly<Record<JevModel, string>> = { 'jev-1.13.0': 'typesafe/jev-1.13', 'jev-1.14.0': 'typesafe/jev-1.14' };
@@ -124,12 +137,13 @@ export function openRouterBody(call: TextCall, model: OpenRouterModel, thinking:
   return {
     model: model.id,
     messages: [
-      ...(call.system ? [{ role: 'system', content: call.system }] : []),
+      ...(call.system ? [{ role: 'system', content: model.cacheSystem ? [{ type: 'text', text: call.system, cache_control: { type: 'ephemeral' } }] : call.system }] : []),
       { role: 'user', content: images.length ? [{ type: 'text', text: call.prompt }, ...images] : call.prompt },
     ],
     ...(model.temperature ? { temperature: call.temperature ?? 0.8 } : {}),
     ...(call.schema ? { response_format: { type: 'json_schema', json_schema: { name: schemaName(call.task), strict: false, schema: toJsonSchema(call.schema) } } } : {}),
     ...(thinking !== 'off' ? { reasoning: { effort: thinking, exclude: true } } : {}),
+    ...(model.maxTokens ? { max_tokens: model.maxTokens } : {}),
     provider: { require_parameters: true, data_collection: 'deny' },
   };
 }

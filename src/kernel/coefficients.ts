@@ -7,7 +7,7 @@
 
 import { cacheable, costOf, EXPLICIT_CACHE, priceOf } from './ai/prices';
 import { JEV_MODEL } from './ai/decisions';
-import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
+import { sculptorsOn, type AiRoute, type SculptorAiModels } from './agents/sculptor';
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
@@ -244,6 +244,11 @@ export const HOUR = {
   /** New entities the Cartographer asks for, unknown items on the ground, per place. */
   nuovi: 0.3,
   ignoti: 0.3,
+  /**
+   * Structures of a concept not sculpted yet (T397): one program per concept, shared by its sizes and seeds (ADR-0160), so far fewer than the
+   * structures the places show; the Sculptor of the structures writes these, the rest of the models are simple things and figures.
+   */
+  strutture: 4,
   /** What the wanderer asks: words to people, «Altro…» and fabrications, «Esamina» and «Leggi». */
   parole: 20,
   azioni: 8,
@@ -317,6 +322,15 @@ export function callCost(model: string, tasks: string | string[], date?: string,
  */
 export const ACTOR_CACHED_SHARE = 0.7;
 export const ACTOR_PREFIX_TOKENS = 5400;
+/**
+ * A structure that grows by rules (T397, from T392's round of Opus 5.5 on 35 calls): about three calls of the Sculptor (the composition, the
+ * whole program, a fix), each with the parts of the seed and the views in text (a prompt about twice a model's), of which the system
+ * instructions are the stable part, and a long program back. Its own row of the estimate, on the structures' model of the route.
+ */
+export const STRUCTURE_SCULPT = { calls: 3, prompt: 20000, prefix: 7500, output: 6500 } as const;
+/** The structures among the models an hour asks for: about one place in three shows one (ADR-0043), most of them of a concept already sculpted. */
+const STRUCTURES_PER_PLACE = 0.3;
+
 /** Calls of a Forge (concept, physics, code, review, and some repair), of an item pack. */
 const FORGE_CALLS = 5;
 const PACK_CALLS = 4;
@@ -348,9 +362,10 @@ export interface HourLine {
  * What an hour of play usually costs with this configuration: the calls of every kind and their dollars, on the
  * prices of today. The budgets of `ai` (per session) cap what the world does by itself.
  */
-export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean; guards?: boolean } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
+export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean; guards?: boolean; route?: AiRoute } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficients);
-  const sc: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...internalSculptors(ai.sculptors ?? {}) };
+  // The structures' Sculptor depends on the route (T397): Argon on Google's, Opus 5.5 on OpenRouter from 1/12.
+  const sc: SculptorAiModels = sculptorsOn(internalSculptors(ai.sculptors ?? {}), opts.route ?? 'google', date);
   const actor = repairActor(ai.actor);
   const text = (n: number, task: string | string[]) => n * callCost(ai.textModel, task, date);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
@@ -397,19 +412,27 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   }
   // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it.
   const gap = modelGap(c.models);
-  const wanted = (kinds + fresh + packs * 2 + H.luoghi * 0.3) * (c.models > 0 ? 1 : 0);
+  const structuresWanted = H.luoghi * STRUCTURES_PER_PLACE;
+  const wanted = (kinds + fresh + packs * 2 + structuresWanted) * (c.models > 0 ? 1 : 0);
   let models = Math.min(wanted, Number.isFinite(gap) ? 3600 / (40 + gap) : 0, ai.maxModels ?? 40);
   const plan = sculptPlan(c.reviews);
+  // The structures of a new concept (T397), never more than their share of what is wanted: a share of the models, which the reuse thins as the rest.
+  const structureShare = models > 0 && wanted > 0 ? Math.min(H.strutture, (models * structuresWanted) / wanted) / models : 0;
   // With Jev (T349) a share of them wears a model of the library: asked once each, not sculpted nor judged.
   const asked = opts.decisions ? models * REUSE_ASKED : 0;
   if (opts.decisions) {
     add('Riuso dei modelli della libreria (Jev)', 'diretta', asked, asked * (costOf(JEV_MODEL, REUSE_WEIGHT, date) ?? 0));
     models -= asked * REUSE_HIT;
   }
-  // Half simple things, half figures and structures (a revision for half of them).
-  const writes = models * (0.5 * plan.semplici + 0.5 * (1 + (plan.revisione ? 0.5 : 0)));
+  // The structures on their own model (T397); the rest half simple things, half figures (a revision for half of them).
+  const structures = models * structureShare;
+  const others = models - structures;
+  const writes = others * (0.5 * plan.semplici + 0.5 * (1 + (plan.revisione ? 0.5 : 0))) + structures * STRUCTURE_SCULPT.calls;
   const judges = plan.giudizio ? writes : 0;
-  const sculptCost = models * (0.5 * plan.semplici * callCost(sc.simple, 'model.sculpt', date) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * callCost(sc.figure, 'model.sculpt', date));
+  const structureCall = costOf(sc.structure, { prompt: STRUCTURE_SCULPT.prompt, cached: NO_IMPLICIT_CACHE.has(sc.structure) ? 0 : Math.round(STRUCTURE_SCULPT.prefix * IMPLICIT_CACHE_SHARE), output: STRUCTURE_SCULPT.output }, date) ?? 0;
+  const sculptCost =
+    others * (0.5 * plan.semplici * callCost(sc.simple, 'model.sculpt', date) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * callCost(sc.figure, 'model.sculpt', date)) +
+    structures * STRUCTURE_SCULPT.calls * structureCall;
   add(COEFFICIENT_INFO.models.nome, 'diretta', writes, sculptCost);
   add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * callCost(sc.artist, 'model.judge', date));
   // The Musician: a program for each environment that has none, a third of them sent back once.
