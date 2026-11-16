@@ -24,7 +24,7 @@ Aggiornato il 16/11/2026, epoca 454 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T397 (p1, Opus 5.5 Scultore via OpenRouter dall'11/12, giro di prova ≤4 $; deve arrivare prima dell'11/12), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
+0. **Pronti:** T397 (p1, Opus 5.5 Scultore via OpenRouter dall'1/12, giro di prova ≤4 $; deve arrivare prima dell'1/12), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
