@@ -1,0 +1,50 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 8,
+ "chiamate": 3,
+ "secondi": 141,
+ "usd": 0.3558,
+ "usdGemini": 0.0124,
+ "via": "openrouter",
+ "usdOpenRouter": 0.3434,
+ "openrouter": [
+  {
+   "prompt": 9554,
+   "cached": 0,
+   "output": 2516,
+   "thoughts": 1371,
+   "usd": 0.12396,
+   "seconds": 37
+  },
+  {
+   "prompt": 17418,
+   "cached": 8004,
+   "output": 5129,
+   "thoughts": 3880,
+   "usd": 0.2194368,
+   "seconds": 82
+  }
+ ],
+ "token": {
+  "prompt": 30004,
+  "output": 7806,
+  "thoughts": 5964
+ },
+ "perCompito": [
+  {
+   "model": "anthropic/claude-opus-5.5",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.3434
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0124
+  }
+ ]
+}

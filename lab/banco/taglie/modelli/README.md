@@ -193,7 +193,7 @@ modello di Claude (né da Google né da OpenRouter: `OPENROUTER_MODELS` ha solo 
 lo porti nella via di OpenRouter (id fisso a elenco, prezzo, lo Scultore delle strutture di quella via; nella via di Google resta Argon). La
 domanda all'autore è in [`docs/pipeline/domande/T392.md`](../../../../docs/pipeline/domande/T392.md).
 
-## Il giro di Opus via OpenRouter (T397): preparato e provato offline, non lanciato
+## Il giro di Opus via OpenRouter (T397): preparato e provato offline (lanciato da T402, sotto)
 
 D57 è chiusa con l'opzione 1 (16/11): dall'1/12 Opus 5.5 scrive le strutture quando il mondo va su OpenRouter (ADR-0205, kernel 0.7.14). Prima, un
 giro breve dello stesso banco **attraverso l'adattatore del gioco** (`OpenRouterAiModels`: senza temperatura, il prompt di sistema in cache con
@@ -208,6 +208,32 @@ npx vite-node lab/scripts/scultore-gemini.ts -- --tabella --out lab/banco/taglie
 `esito.json` le chiamate di OpenRouter con i token letti dalla cache, il costo detto e i secondi. Provato con `--offline` (un OpenRouter finto che
 risponde con la villetta): il percorso, il registro e la tabella («claude-opus-5-5 via OpenRouter»). **Non lanciato**: nei `.env` della macchina non
 c'è `OPENROUTER_API_KEY` (`docs/pipeline/domande/T397.md`). La soglia: meno di 3 su 4 o oltre 1,50 $ a riuscita, e il passaggio dell'1/12 si toglie.
+
+## Il giro di Opus via OpenRouter (T402, 17/11)
+
+Lanciato il 17/11 col comando di T397, con la chiave di OpenRouter del `.env` del checkout principale (limite 5 $), l'Artista su Gemini; le
+uscite in `openrouter/` (`giro.txt`, ogni `esito.json` con le chiamate di OpenRouter, `tabella.md`). Le quattro richieste partono insieme.
+
+| Scultore | riuscite | costo per riuscita | tempo a struttura (media, max) | chiamate oltre i 120 s del gioco | riuscite con ogni chiamata entro 120 s | voti | fattorie con merli | forti con merli |
+|---|---|---|---|---|---|---|---|---|
+| Opus 5.5 sulla CLI (T392, 3 giri) | 11 su 12 | 0,75 $ | 207 s, 341 s | 1 su 49 | 10 | 6, 8, 9, 8, 6, 8, 9, 8, 6, 7, 8 | 0 su 6 | 5 su 5 |
+| **Opus 5.5 via OpenRouter** (1 giro) | **4 su 4** | **0,61 $** | 228 s, 368 s | 1 su 17 | 3 | 8, 8, 9, 6 | 0 su 2 | 2 su 2 |
+
+Per taglia: Grande 2 su 2 a 0,51 $, Enorme 2 su 2 a 0,70 $. In tutto **2,42 $** sul registro della cartella (OpenRouter 2,38 $ detti dalle
+risposte, l'Artista su Gemini 0,04 $), sotto il tetto di 4 $; il conto di OpenRouter è il costo che ogni risposta dice, non il listino.
+
+- **La soglia del task è passata**: 4 su 4 (almeno 3) e 0,61 $ a riuscita (al più 1,50 $). Il passaggio dell'1/12 in `DEFAULT_SCULPTORS`
+  resta com'è.
+- **La cache si legge**: ogni chiamata dopo la prima di una struttura legge dalla cache 8004 token (il prompt di sistema dello Scultore,
+  scritto dalla prima chiamata); a 0,20 $ al milione invece di 4 $, circa 3 centesimi risparmiati a chiamata.
+- **Il tempo**: una chiamata su 17 passa i 120 s del gioco (124 s, la prima correzione del forte a Grande, 7 mila token di ragionamento);
+  le altre tra 33 e 119 s. Come sulla CLI (1 su 49), il tempo è al limite sulle correzioni lunghe: due altre stavano a 114 e 119 s.
+- **Gli scarti del kernel**: il forte a Enorme scartato due volte per la varietà fra le taglie (alla Gargantuesca 17-19 tipi di parti come
+  all'Enorme), riuscito alla terza correzione (voto 6); il forte a Grande una volta per una stanza di 26 voxel (ne vuole 28). Le fattorie al
+  primo programma.
+- **Il comportamento è quello della CLI**: nessuna fattoria fortificata, i forti coi merli, il ragionamento basso (1-7 mila token a
+  chiamata). Il costo per riuscita è un po' sotto quello della CLI perché la cache taglia l'ingresso e il giro è breve: un giro solo, da
+  non leggere come più preciso di T392.
 
 ## Raccomandazione provvisoria per D57 di T391 (solo Gemini; superata da T392, sopra)
 
