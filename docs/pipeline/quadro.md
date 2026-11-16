@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 15/11/2026, epoca 449 (claude). Crediti: vedi `stato`.
+Aggiornato il 16/11/2026, epoca 453 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,9 +24,9 @@ Aggiornato il 15/11/2026, epoca 449 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T370 (claude, sforzo extra; sbloccato il 15/11 dopo il giro di T392), poi T371 (fable). T392 integrato (dati in `lab/banco/taglie/modelli/`), domanda D57 aperta. T396 e T395 integrati (vedi diario).
+0. **Pronti:** T370 (claude, sforzo extra; approvato, aspetta la finestra delle 5h di claude, reset 21:10 CET del 16/11), poi T371 (fable). T392 integrato (dati in `lab/banco/taglie/modelli/`), domanda D57 aperta. T396 e T395 integrati (vedi diario).
 1. **Da approvare dall'autore:** T369 (dopo).
-2. **Crediti (14/11 16:13 CET):** Claude settimana 76 %, 5h 29 % (reset 19:29), esaurimento previsto 15/11 16:52, prima del reset del 19/11 16:59; Fable settimana 92 %; Gemini/Hydrogen/Argon/Orchestrator 99-100 % (reset 20/11); agy Claude 100 %.
+2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
 ## Attese dall'autore
 
@@ -41,5 +41,5 @@ Aggiornato il 15/11/2026, epoca 449 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **450-453 (claude):** spegnimenti del 15/11 e 16/11 (nessun task in corso), OAuth scaduto nelle epoche 451-452; T370 in attesa della finestra.
 - **449 (claude):** T392 integrato, T370 sbloccato, D57 finale chiesta.
-- **448 (claude):** forte v1 dell'autore committato, T371 sbloccato (dopo T370).
