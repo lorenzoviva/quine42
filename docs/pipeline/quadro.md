@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 16/11/2026, epoca 459 (claude). Crediti: vedi `stato`.
+Aggiornato il 16/11/2026, epoca 460 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,11 +24,13 @@ Aggiornato il 16/11/2026, epoca 459 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T400 in corso (claude: test instabili; anche `mj-pieces:205` e `nucleus:104` cadono sotto carico, visti da T399), T397 in corso (p1, Opus 5.5 Scultore via OpenRouter dall'1/12, giro di prova ≤4 $; deve arrivare prima dell'1/12), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
+0. **Pronti:** T400 in corso (claude: test instabili; anche `mj-pieces:205` e `nucleus:104` cadono sotto carico, visti da T399), T397 integrato (`ba3a7ec8`, ADR-0205, kernel 0.7.14: Opus 5.5 Scultore delle strutture via OpenRouter dall'1/12, provato solo offline; il giro pagato è T402, in attesa della chiave), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
 ## Attese dall'autore
+
+- **T402 (prima dell'1/12):** `OPENROUTER_API_KEY` con limite 5 $ nel `.env` del checkout principale, poi il giro pagato di Opus (≤4 $); sotto 3/4 o oltre 1,50 $ a riuscita si toglie il passaggio dell'1/12.
 
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
@@ -39,5 +41,5 @@ Aggiornato il 16/11/2026, epoca 459 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **460 (claude):** T397 integrato; T402 (giro pagato) in attesa della chiave OpenRouter.
 - **459 (claude):** T399 integrato (scroll della pagina web conservato, `tools/pipeline/domPatch.mjs`; da vedere alla ricarica).
-- **458 (claude):** T303 riscritto in Fase I; T400, T401 aggiunti.
