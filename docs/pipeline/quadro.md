@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 16/11/2026, epoca 456 (claude). Crediti: vedi `stato`.
+Aggiornato il 16/11/2026, epoca 459 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,7 +24,7 @@ Aggiornato il 16/11/2026, epoca 456 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T399 (hydrogen, p1: lo scroll della pagina web che si azzera), T397 in corso (p1, Opus 5.5 Scultore via OpenRouter dall'1/12, giro di prova ≤4 $; deve arrivare prima dell'1/12), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
+0. **Pronti:** T400 in corso (claude: test instabili; anche `mj-pieces:205` e `nucleus:104` cadono sotto carico, visti da T399), T397 in corso (p1, Opus 5.5 Scultore via OpenRouter dall'1/12, giro di prova ≤4 $; deve arrivare prima dell'1/12), T370 (claude, sforzo extra), poi T398 (dopo T397: Scultore «performante» alla Genesi/lobby, anche Fable a spese di chi sceglie) e T371 (fable). Tutti aspettano la finestra 5h di claude (reset 21:10 CET del 16/11).
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
@@ -39,5 +39,5 @@ Aggiornato il 16/11/2026, epoca 456 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **456 (claude):** spiegati all’autore i task `in attesa` (tutti per scelta sua o per fase, nessuno dimenticato); T399 creato.
-- **454 (claude):** D57 chiusa (opzione 1 + Scultore performante scelto alla Genesi) → T397, T398 approvati.
+- **459 (claude):** T399 integrato (scroll della pagina web conservato, `tools/pipeline/domPatch.mjs`; da vedere alla ricarica).
+- **458 (claude):** T303 riscritto in Fase I; T400, T401 aggiunti.
