@@ -4,8 +4,10 @@ import { execFileSync } from 'node:child_process';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { captureScroll, patchHtml, patchText, patchValue, restoreScroll } from './domPatch.mjs';
 import { markdownToHtml, taskRefsToHtml } from './markdown.mjs';
 import { badgeStyle, effortStyle, priorityStyle, stepStyle } from './tiles.mjs';
+export { captureScroll, patchHtml, patchText, patchValue, restoreScroll };
 import {
   approveTasks,
   assignTask,
@@ -1357,15 +1359,17 @@ export function renderHtml() {
     ${priorityStyle.toString()}
     ${effortStyle.toString()}
     ${stepStyle.toString()}
+    ${captureScroll.toString()}
+    ${restoreScroll.toString()}
+    ${patchHtml.toString()}
+    ${patchText.toString()}
+    ${patchValue.toString()}
     let MD_SOURCE = localStorage.getItem('pipeline-md-sorgente') === '1';
     const md = (text, breaks = false) => MD_SOURCE
       ? \`<div class="md-source">\${esc(text)}</div>\`
       : \`<div class="md">\${markdownToHtml(text, { breaks })}</div>\`;
     // Only when something changes: a refresh must not lose a selection in a long document.
-    const setMd = (el, text) => {
-      const html = md(text);
-      if (el.dataset.shown !== html) { el.innerHTML = html; el.dataset.shown = html; }
-    };
+    const setMd = (el, text) => patchHtml(el, md(text));
     function syncEditor(name) {
       const editor = document.getElementById(name + '-editor');
       const preview = document.getElementById(name + '-preview');
@@ -1446,27 +1450,26 @@ export function renderHtml() {
       const o = s.orchestratore;
       const orchSwitch = document.getElementById('orch-switch');
       if (document.activeElement !== orchSwitch) {
-        orchSwitch.innerHTML = '<option value="">Passa a…</option>' + s.config.orchestrabili.map((p) => \`<option value="\${esc(p)}">\${esc(p)}</option>\`).join('');
+        patchHtml(orchSwitch, '<option value="">Passa a…</option>' + s.config.orchestrabili.map((p) => \`<option value="\${esc(p)}">\${esc(p)}</option>\`).join(''));
       }
-      document.getElementById('orch-prov').innerHTML = provBadge(o.provider);
-      document.getElementById('orch-epoca').textContent = \`epoca \${o.stato.epoca ?? 0}\`;
-      document.getElementById('orch-ctx').textContent = \`contesto \${o.percentualeContesto ?? 0}%\`;
+      patchHtml(document.getElementById('orch-prov'), provBadge(o.provider));
+      patchText(document.getElementById('orch-epoca'), \`epoca \${o.stato.epoca ?? 0}\`);
+      patchText(document.getElementById('orch-ctx'), \`contesto \${o.percentualeContesto ?? 0}%\`);
       const stEl = document.getElementById('orch-status');
       if (o.alLavoro) {
-        stEl.className = 'badge st-incorso';
-        stEl.textContent = '⚙ Al lavoro…';
+        if (stEl.className !== 'badge st-incorso') stEl.className = 'badge st-incorso';
+        patchText(stEl, '⚙ Al lavoro…');
       } else if (o.inCoda.length) {
-        stEl.className = 'badge st-attesa';
-        stEl.textContent = \`\${o.inCoda.length} msg in coda\`;
+        if (stEl.className !== 'badge st-attesa') stEl.className = 'badge st-attesa';
+        patchText(stEl, \`\${o.inCoda.length} msg in coda\`);
       } else {
-        stEl.className = 'badge st-fatto';
-        stEl.textContent = 'In ascolto';
+        if (stEl.className !== 'badge st-fatto') stEl.className = 'badge st-fatto';
+        patchText(stEl, 'In ascolto');
       }
     }
 
     function renderChatAndEvents(s) {
       const chatEl = document.getElementById('chat-list');
-      const atBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 60;
       const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
       // The Source view stays the text as it is written.
       const refs = (html) => MD_SOURCE ? html : taskRefsToHtml(html, titles);
@@ -1485,14 +1488,13 @@ export function renderHtml() {
           <div>\${refs(md(q.testo, true))}</div>
         </div>\`);
       }
-      // Only when something changes: a refresh must not lose a selection nor close the tooltip under the mouse.
+      // Only when something changes: a refresh must not lose a selection, close a tooltip, nor reset scroll if scrolled up.
       const chatHtml = items.join('') || '<div style="color:var(--muted);">Nessun messaggio nella chat.</div>';
-      if (chatEl.dataset.shown !== chatHtml) { chatEl.innerHTML = chatHtml; chatEl.dataset.shown = chatHtml; }
-      if (atBottom) chatEl.scrollTop = chatEl.scrollHeight;
+      patchHtml(chatEl, chatHtml, { stickToBottom: true });
 
       const evEl = document.getElementById('events-list');
       const consegnati = s.orchestratore.stato.consegnati ?? 0;
-      document.getElementById('count-eventi').textContent = s.eventi.length;
+      patchText(document.getElementById('count-eventi'), String(s.eventi.length));
       const evHtml = s.eventi.slice().reverse().map((e) => {
         const done = e.n <= consegnati;
         return \`<div class="msg pipeline">
@@ -1503,7 +1505,7 @@ export function renderHtml() {
           <div>\${esc(e.testo)}</div>
         </div>\`;
       });
-      evEl.innerHTML = evHtml.join('') || '<div style="color:var(--muted);">Nessun evento registrato.</div>';
+      patchHtml(evEl, evHtml.join('') || '<div style="color:var(--muted);">Nessun evento registrato.</div>');
       setMd(document.getElementById('quadro-text'), s.quadro || '(nessun quadro)');
     }
 
@@ -1539,8 +1541,24 @@ export function renderHtml() {
       ];
       const byId = new Map(s.tasks.map((t) => [t.id, t]));
       const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
-      document.getElementById('boards-wrap').innerHTML = cols.map((col) => {
-        const cards = col.list.map((item) => {
+      const wrap = document.getElementById('boards-wrap');
+      const colsKey = cols.map((c) => c.key).join(',');
+      if (wrap.dataset.colsInit !== colsKey) {
+        wrap.innerHTML = cols.map((col) => \`<div class="board-col" data-board-col="\${col.key}">
+          <div class="board-col-header">
+            <span>\${esc(col.title)}</span>
+            <span class="badge st-dafare" data-board-count="\${col.key}">0</span>
+          </div>
+          <div class="board-cards" data-board-cards="\${col.key}"></div>
+        </div>\`).join('');
+        wrap.dataset.colsInit = colsKey;
+      }
+      for (const col of cols) {
+        const countEl = wrap.querySelector(\`[data-board-count="\${col.key}"]\`);
+        if (countEl) patchText(countEl, String(col.list.length));
+        const cardsEl = wrap.querySelector(\`[data-board-cards="\${col.key}"]\`);
+        if (!cardsEl) continue;
+        const cardsHtml = col.list.map((item) => {
           const full = byId.get(item.id) || item;
           const r = full.esecuzione;
           return \`<div class="task-card" data-task-card="\${esc(full.id)}">
@@ -1558,19 +1576,13 @@ export function renderHtml() {
             <div class="task-card-actions">\${cardButtons(full)}</div>
           </div>\`;
         }).join('') || '<div style="color:var(--muted); font-size:12px; padding:6px;">Nessun task</div>';
-        return \`<div class="board-col" data-board-col="\${col.key}">
-          <div class="board-col-header">
-            <span>\${esc(col.title)}</span>
-            <span class="badge st-dafare">\${col.list.length}</span>
-          </div>
-          <div class="board-cards">\${cards}</div>
-        </div>\`;
-      }).join('');
+        patchHtml(cardsEl, cardsHtml);
+      }
     }
 
     function renderDone(s) {
       const list = s.finiti || [];
-      document.getElementById('count-done').textContent = list.length;
+      patchText(document.getElementById('count-done'), String(list.length));
       const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
       const when = (iso) => {
         const d = new Date(iso);
@@ -1586,12 +1598,11 @@ export function renderHtml() {
           <div class="done-title">\${titleHtml(d.title, titles)}</div>
           \${d.esito ? \`<div class="done-esito md-inline\${opened.has(d.id) ? ' open' : ''}" data-task="\${esc(d.id)}" title="Clic per leggerlo tutto">\${MD_SOURCE ? esc(d.esito) : taskRefsToHtml(markdownToHtml(d.esito, { inline: true }), titles)}</div>\` : ''}
         </div>\`).join('') || '<div style="color:var(--muted); font-size:12px;">Nessun task finito con una data.</div>';
-      const el = document.getElementById('done-list');
-      if (el.dataset.shown !== html) { el.innerHTML = html; el.dataset.shown = html; }
+      patchHtml(document.getElementById('done-list'), html);
     }
 
     function renderTasksTable(s) {
-      document.getElementById('count-all').textContent = s.tasks.length;
+      patchText(document.getElementById('count-all'), String(s.tasks.length));
       const q = document.getElementById('filter-search').value.trim().toLowerCase();
       const fStatus = document.getElementById('filter-status').value;
       const fProv = document.getElementById('filter-provider').value;
@@ -1606,7 +1617,7 @@ export function renderHtml() {
       });
 
       const titles = new Map(s.tasks.map((t) => [t.id, t.title]));
-      document.getElementById('tasks-tbody').innerHTML = filtered.map((t) => {
+      const tbodyHtml = filtered.map((t) => {
         const r = t.esecuzione;
         const deps = (t.deps || []).map((d) => \`<a class="task-id" style="font-size:11px; margin-right:4px;" onclick="openTask('\${esc(d)}')">\${esc(d)}</a>\`).join('') || '—';
         const execInfo = r
@@ -1627,57 +1638,62 @@ export function renderHtml() {
           <td><div style="display:flex; gap:4px; flex-wrap:wrap;">\${cardButtons(t)}</div></td>
         </tr>\`;
       }).join('');
+      patchHtml(document.getElementById('tasks-tbody'), tbodyHtml);
     }
 
     function renderDomandeAndTodo(s) {
-      document.getElementById('count-domande').textContent = s.domandeAperte;
+      if (document.getElementById('count-domande').textContent !== String(s.domandeAperte)) document.getElementById('count-domande').textContent = s.domandeAperte;
       const sel = document.getElementById('domande-select');
       const prev = DOMANDE_CURRENT_ID || sel.value || s.domande[0]?.id;
-      sel.innerHTML = s.domande.map((d) =>
+      const selHtml = s.domande.map((d) =>
         \`<option value="\${esc(d.id)}" \${d.id === prev ? 'selected' : ''}>\${esc(d.id)} · \${esc(d.taskTitle)} (\${d.stato ?? (d.answered ? 'risposto' : 'da rispondere')})</option>\`
       ).join('');
+      if (document.activeElement !== sel) {
+        if (patchHtml(sel, selHtml) && prev && sel.value !== prev) sel.value = prev;
+      }
       if (!DOMANDE_DIRTY && prev) {
-        loadSelectedDomanda(prev, s);
+        loadSelectedDomanda(prev, s, false);
       }
       if (!TODO_DIRTY) {
-        document.getElementById('todo-editor').value = s.todo || '';
+        patchValue(document.getElementById('todo-editor'), s.todo || '');
         syncEditor('todo');
       }
     }
 
-    function loadSelectedDomanda(id, s = STATE) {
+    function loadSelectedDomanda(id, s = STATE, force = true) {
       if (!s) return;
       DOMANDE_CURRENT_ID = id;
       const d = s.domande.find((x) => x.id === id);
-      document.getElementById('domande-filename').textContent = d ? id + '.md' : '…';
+      patchText(document.getElementById('domande-filename'), d ? id + '.md' : '…');
+      const editor = document.getElementById('domande-editor');
+      const structured = document.getElementById('domande-structured');
       if (!d) {
-        document.getElementById('domande-structured').innerHTML = '<div style="color:var(--muted);">Nessun file di domande selezionato.</div>';
-        document.getElementById('domande-editor').value = '';
+        patchHtml(structured, '<div style="color:var(--muted);">Nessun file di domande selezionato.</div>');
+        patchValue(editor, '', { force });
         syncEditor('domande');
         return;
       }
-      document.getElementById('domande-editor').value = d.content;
+      patchValue(editor, d.content, { force });
       syncEditor('domande');
-      document.getElementById('domande-structured').innerHTML = d.items.map((item) => \`
+      const itemsHtml = d.items.map((item) => \`
         <div class="q-item">
           <label><strong>Domanda \${item.numero}:</strong>\${md(item.domanda)}</label>
-          <input type="text" class="q-answer-input" data-qnum="\${item.numero}" value="\${esc(item.risposta)}" placeholder="Scrivi la risposta…" style="width:100%;" />
+          <input type="text" class="q-answer-input" data-qnum="\${item.numero}" data-focus-key="q-\${esc(id)}-\${item.numero}" value="\${esc(item.risposta)}" placeholder="Scrivi la risposta…" style="width:100%;" />
         </div>
       \`).join('');
-      for (const inp of document.querySelectorAll('.q-answer-input')) {
-        inp.addEventListener('input', () => { DOMANDE_DIRTY = 'inputs'; });
-      }
+      patchHtml(structured, itemsHtml);
     }
 
     function renderConsumiAndBudget(s) {
       const plans = document.getElementById('plan-selectors');
       if (!plans.contains(document.activeElement)) {
-        plans.innerHTML = Object.entries(s.config.piani).map(([sub, list]) => \`<label>Piano \${esc(sub)}
-          <select onchange="setPlan('\${esc(sub)}', this.value)">\${list.map((n) => \`<option value="\${esc(n)}"\${s.config.abbonamenti[sub] === n ? ' selected' : ''}>\${esc(n)}</option>\`).join('')}</select>
+        const plansHtml = Object.entries(s.config.piani).map(([sub, list]) => \`<label>Piano \${esc(sub)}
+          <select data-focus-key="plan-\${esc(sub)}" onchange="setPlan('\${esc(sub)}', this.value)">\${list.map((n) => \`<option value="\${esc(n)}"\${s.config.abbonamenti[sub] === n ? ' selected' : ''}>\${esc(n)}</option>\`).join('')}</select>
         </label>\`).join('');
+        patchHtml(plans, plansHtml);
       }
       const grid = document.getElementById('budget-grid');
-      grid.innerHTML = Object.entries(s.budget).map(([prov, b]) => {
+      const gridHtml = Object.entries(s.budget).map(([prov, b]) => {
         const w = b.residuo ?? 100;
         const h5 = b.sessione ?? 100;
         const wColor = w <= s.config.sogliaUnSolo ? 'var(--red)' : w <= 25 ? 'var(--amber)' : 'var(--green)';
@@ -1695,7 +1711,7 @@ export function renderHtml() {
             <small style="color:var(--muted);">\${b.letto ? 'letto ' + esc(b.letto.slice(11, 19)) : 'manuale'}</small>
           </div>
           \${s.config.abilitati.includes(prov) ? '' : '<div class="badge st-errore" style="margin-bottom:8px;">Non nel piano attivo</div>'}
-          <label style="display:block; font-size:12px; margin-bottom:8px;"><input type="checkbox" \${s.config.permessoOrchestrare[prov] ? 'checked' : ''} onchange="setOrchestrable('\${esc(prov)}', this.checked)" /> Può orchestrare</label>
+          <label style="display:block; font-size:12px; margin-bottom:8px;"><input type="checkbox" data-focus-key="orch-\${esc(prov)}" \${s.config.permessoOrchestrare[prov] ? 'checked' : ''} onchange="setOrchestrable('\${esc(prov)}', this.checked)" /> Può orchestrare</label>
           \${b.fermoFino ? \`<div class="badge st-errore" style="margin-bottom:8px;">Fermo fino a \${esc(b.fermoFino)}</div>\` : ''}
           \${b.sospeso ? \`<div class="badge st-in-attesa" style="margin-bottom:8px;">Sospeso\${typeof b.sospeso === 'string' && b.sospeso !== 'true' ? ' fino a ' + esc(b.sospeso) : ''}</div>\` : ''}
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Settimana</span><strong>\${w}% residuo</strong></div>
@@ -1710,16 +1726,17 @@ export function renderHtml() {
           </div>
         </div>\`;
       }).join('');
+      patchHtml(grid, gridHtml);
 
       const totalUsd = s.consumi.reduce((acc, c) => acc + (Number(c.costoUsd) || 0), 0);
       const totalMin = s.consumi.reduce((acc, c) => acc + (Number(c.minuti) || 0), 0);
-      document.getElementById('consumi-summary').innerHTML = \`
+      patchHtml(document.getElementById('consumi-summary'), \`
         <span class="badge st-dafare">Esecuzioni registrate: <strong>\${s.consumi.length}</strong></span>
         <span class="badge st-dafare">Costo USD riportato (Claude): <strong>$\${totalUsd.toFixed(2)}</strong></span>
         <span class="badge st-dafare">Tempo totale: <strong>\${totalMin} min</strong></span>
-      \`;
+      \`);
 
-      document.getElementById('consumi-tbody').innerHTML = s.consumi.slice().reverse().map((c) => {
+      const consumiHtml = s.consumi.slice().reverse().map((c) => {
         const wDelta = c.prima?.settimana !== undefined && c.dopo?.settimana !== undefined
           ? \`\${c.prima.settimana}% → \${c.dopo.settimana}% (Δ \${c.prima.settimana - c.dopo.settimana}%)\`
           : '—';
@@ -1739,12 +1756,13 @@ export function renderHtml() {
           <td>\${esc(c.esito || '')}</td>
         </tr>\`;
       }).join('');
+      patchHtml(document.getElementById('consumi-tbody'), consumiHtml);
     }
 
     function renderConversations(list) {
-      document.getElementById('count-conv').textContent = list.length;
+      patchText(document.getElementById('count-conv'), String(list.length));
       const k = (n) => n >= 1000 ? Math.round(n / 1000) + 'k' : String(n);
-      document.getElementById('conv-grid').innerHTML = list.length ? list.map((c) => {
+      const convHtml = list.length ? list.map((c) => {
         const u = c.consumo || { chiamate: 0, input: 0, cache: 0, scritti: 0, output: 0 };
         const who = c.chi === 'orchestratore'
           ? \`<strong>orchestratore</strong> · epoca \${c.epoca}\`
@@ -1756,11 +1774,12 @@ export function renderHtml() {
           </div>
           <div style="font-size:12px;">Conversazione: <code>\${esc(c.sessione || 'id non ancora noto')}</code></div>
           <div style="font-size:12px; color:var(--muted); word-break:break-all;">\${esc(c.file || '')}</div>
-          \${c.riprendi ? \`<pre class="code-block" style="margin:6px 0;">\${esc(c.riprendi)}</pre>\` : ''}
+          \${c.riprendi ? \`<pre class="code-block" data-scroll-key="conv-resume-\${esc(c.chi)}" style="margin:6px 0;">\${esc(c.riprendi)}</pre>\` : ''}
           <div style="font-size:12px; margin:6px 0;">Consumo: <strong>\${u.chiamate}</strong> chiamate · \${k(u.input)} nuovi · \${k(u.cache)} dalla cache\${u.scritti ? ' · ' + k(u.scritti) + ' scritti' : ''} · \${k(u.output)} in uscita\${c.costoUsd !== undefined ? ' · $' + Number(c.costoUsd).toFixed(2) : ''}</div>
-          <pre class="code-block" style="max-height:180px; overflow-y:auto; font-size:11px;">\${esc((c.ultime || []).join('\\n') || 'nessun passo ancora')}</pre>
+          <pre class="code-block" data-scroll-key="conv-log-\${esc(c.chi)}" style="max-height:180px; overflow-y:auto; font-size:11px;">\${esc((c.ultime || []).join('\\n') || 'nessun passo ancora')}</pre>
         </div>\`;
       }).join('') : '<div style="color:var(--muted);">Nessuna conversazione in corso.</div>';
+      patchHtml(document.getElementById('conv-grid'), convHtml);
     }
 
     async function loadState() {
@@ -1782,17 +1801,23 @@ export function renderHtml() {
 
     // Actions
     window.openTask = async function(id) {
+      const prev = OPEN_TASK_ID;
       OPEN_TASK_ID = id;
       document.getElementById('task-modal').classList.add('open');
+      if (prev !== id) {
+        const body = document.querySelector('#task-modal .modal-body');
+        if (body) body.scrollTop = 0;
+      }
       await refreshOpenTask(id);
     };
 
     async function refreshOpenTask(id) {
       const detail = await api('GET', '/api/task/' + encodeURIComponent(id));
+      if (OPEN_TASK_ID !== id) return;
       const t = STATE?.tasks.find((x) => x.id === id) || { id, title: id, status: '—' };
-      document.getElementById('modal-task-id').textContent = id;
-      document.getElementById('modal-task-title').textContent = t.title || '';
-      document.getElementById('modal-task-badges').innerHTML = \`\${statusBadge(t.status)} \${provBadge(t.provider)}\`;
+      patchText(document.getElementById('modal-task-id'), id);
+      patchText(document.getElementById('modal-task-title'), t.title || '');
+      patchHtml(document.getElementById('modal-task-badges'), \`\${statusBadge(t.status)} \${provBadge(t.provider)}\`);
 
       const form = document.getElementById('modal-assign-form');
       if (form.dataset.loadedFor !== id) {
@@ -1820,23 +1845,22 @@ export function renderHtml() {
       if (detail.dossier?.hasQuestions || detail.domande) {
         actions.push(\`<button class="warn" onclick="openQuestionsFor('\${esc(id)}')">Apri domande (\${esc(id)}.md)</button>\`);
       }
-      document.getElementById('modal-exec-actions').innerHTML = actions.join('');
+      patchHtml(document.getElementById('modal-exec-actions'), actions.join(''));
 
       setMd(document.getElementById('modal-dossier-text'), detail.dossier?.markdown || '');
       const tr = detail.traccia;
       const conv = tr?.conversazione || [];
-      document.getElementById('modal-conv-count').textContent = conv.length;
-      document.getElementById('modal-trace-meta').innerHTML = tr
+      patchText(document.getElementById('modal-conv-count'), String(conv.length));
+      patchHtml(document.getElementById('modal-trace-meta'), tr
         ? \`AGENTS.md: <strong style="color:\${tr.agents ? 'var(--green)' : 'var(--amber)'}">\${tr.agents ? 'letto ✓' : 'non rilevato'}</strong> · stato: <strong>\${esc(tr.run?.stato || '—')}</strong>\`
-        : 'Nessuna esecuzione registrata';
+        : 'Nessuna esecuzione registrata');
 
       const convEl = document.getElementById('mtab-conv');
-      if (!conv.length) {
-        convEl.innerHTML = tr?.out?.result
+      const convHtml = !conv.length
+        ? (tr?.out?.result
           ? \`<div class="conv-step agente"><strong>Riepilogo finale:</strong>\${md(tr.out.result, true)}</div>\`
-          : '<div style="color:var(--muted);">Nessun passo della conversazione disponibile per questo task.</div>';
-      } else {
-        convEl.innerHTML = conv.map((step) => {
+          : '<div style="color:var(--muted);">Nessun passo della conversazione disponibile per questo task.</div>')
+        : conv.map((step) => {
           const time = step.t ? step.t.slice(11, 19) : '';
           if (step.ruolo === 'strumento') {
             return \`<div class="conv-step strumento">🛠 <strong>\${esc(step.nome)}</strong> <code>\${esc(step.argomenti || '')}</code> <span style="float:right; color:var(--muted);">\${esc(time)}</span></div>\`;
@@ -1846,10 +1870,10 @@ export function renderHtml() {
             <div>\${md(step.testo || '', true)}</div>
           </div>\`;
         }).join('');
-      }
-      document.getElementById('modal-log-text').textContent = tr
+      patchHtml(convEl, convHtml);
+      patchText(document.getElementById('modal-log-text'), tr
         ? \`--- Riepilogo ---\\n\${tr.out?.result || '(nessun riepilogo)'}\\n\\n--- Log grezzo (\${tr.log}) ---\\n\${tr.logText || '(vuoto)'}\`
-        : '(nessun log)';
+        : '(nessun log)');
     }
 
     document.getElementById('btn-close-modal').addEventListener('click', () => {
@@ -2024,6 +2048,11 @@ export function renderHtml() {
       loadSelectedDomanda(e.target.value);
     });
     document.getElementById('domande-editor').addEventListener('input', () => { DOMANDE_DIRTY = 'editor'; });
+    document.getElementById('domande-structured').addEventListener('input', (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('q-answer-input')) {
+        DOMANDE_DIRTY = 'inputs';
+      }
+    });
     document.getElementById('btn-save-domande').addEventListener('click', async () => {
       if (!DOMANDE_CURRENT_ID) return;
       const inputs = [...document.querySelectorAll('.q-answer-input')];
