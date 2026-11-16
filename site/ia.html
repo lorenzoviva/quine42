@@ -76,6 +76,7 @@
           <h2>Quali modelli</h2>
           <ul>
             <li><strong>Gemini di Google</strong>: 3.1 Flash-Lite per la gran parte del lavoro; 3.8 Flash e Gemini 4 Argon per le figure e gli edifici più importanti e, se il master lo accende, per chi dà voce alle persone del mondo.</li>
+            <li><strong>Claude Opus di Anthropic</strong>: dal 1° dicembre, quando i modelli passano da OpenRouter, scrive gli edifici che crescono a regole (forti, fattorie, borghi); con la chiave di Google li scrive Gemini 4 Argon.</li>
             <li><strong>Jev di TypeSafe</strong> per le decisioni chiuse, quelle con risposte già scritte (per esempio: questo modello 3D che c'è già va bene anche qui?). Riceve dati del mondo e sceglie tra le opzioni; per i controlli sul testo che scrivi, solo attraverso OpenRouter con la ritenzione zero.</li>
             <li><strong>Modelli locali</strong>: regole scritte nel gioco che rispondono quando non c'è una chiave o i crediti sono finiti. Non costano niente e sono più semplici.</li>
           </ul>
@@ -113,7 +114,7 @@
           <ol>
             <li>Dal tuo browser al server di QUINE42, dove gira il mondo.</li>
             <li>Dal server a <a href="https://openrouter.ai/">OpenRouter</a>, con la chiave di chi paga quella richiesta.</li>
-            <li>Da OpenRouter a Google (AI Studio o Vertex), che risponde; per i controlli sul tuo testo, a TypeSafe con la ritenzione zero.</li>
+            <li>Da OpenRouter a Google (AI Studio o Vertex), che risponde; dal 1° dicembre, per gli edifici che crescono a regole, ad Anthropic (direttamente o dai suoi fornitori: Amazon Bedrock, Azure, Google Vertex); per i controlli sul tuo testo, a TypeSafe con la ritenzione zero.</li>
           </ol>
           <p>Ogni nostra richiesta chiede a OpenRouter di non mandarla a fornitori che usano i dati per addestrare i modelli. OpenRouter non conserva prompt e risposte se non accendi tu il logging nel tuo account; ne tiene i metadati (token, tempi, costo). Dalle impostazioni di OpenRouter puoi anche chiedere solo fornitori a ritenzione zero.</p>
           <p><strong>Il testo che scrivi può andare a Jev di TypeSafe per i controlli, solo da OpenRouter con la ritenzione zero, mai a TypeSafe direttamente.</strong> Prima che il mondo ti risponda, il gioco chiede a Jev cinque sì o no su ciò che hai scritto: se dà ordini a chi risponde, se parla del gioco invece che del mondo, se viene dalla tua vita fuori dal gioco, se è esplicito, se non ha senso. Niente viene fermato: le tue parole arrivano sempre al mondo, tra virgolette se serve. Quella domanda parte solo quando passa da OpenRouter con la ritenzione zero: OpenRouter la manda solo a chi non conserva niente di ciò che legge, e se non lo trova la rifiuta. Il nostro server rifà ogni richiesta e rifiuta quella col tuo testo senza la ritenzione zero; verso TypeSafe direttamente il tuo testo non parte mai, perché TypeSafe conserva ciò che riceve. Su ogni altra via i controlli li fanno regole scritte nel gioco, sul nostro server. Le altre domande a Jev portano solo dati del mondo (nomi, classi, misure).</p>

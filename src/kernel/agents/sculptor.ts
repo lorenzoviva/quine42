@@ -42,19 +42,49 @@ export interface SculptorAiModels {
   artist: string;
   /** Not a sculptor, as the Artist is not: the Musician's model (T225). */
   musician: string;
+  /**
+   * The structures and the important ones when the world goes through OpenRouter, from `openRouterFrom` (ISO date; T397, D57): Opus 5.5,
+   * which passed 11 times out of 12 where Argon passed 6 out of 8, at Argon's cost per success once Argon's price doubles. On Google's route
+   * the structures stay `structure` and `important`. Only where the master left those as they are (`sculptorsOn`).
+   */
+  openRouterStructure?: string;
+  openRouterFrom?: string;
 }
+
+/** The route the world's models go along (T397): Google's key, or OpenRouter (`OpenRouterAiModels`, ADR-0193). */
+export type AiRoute = 'google' | 'openrouter';
 
 export const DEFAULT_SCULPTORS: SculptorAiModels = {
   simple: 'gemini-3.1-flash-lite',
   figure: 'gemini-3.8-flash',
   // The structures of every size on the model of the important ones (T395, D58): at Large 3.8 Flash passed 0 times out of 6 (T355),
-  // Argon 6 out of 8 (T391). Provisional, until the round on Claude (T392).
+  // Argon 6 out of 8 (T391). After the round on Claude (T392, D57) Argon stays on Google's route; on OpenRouter see `openRouterStructure`.
   structure: 'gemini-4-argon',
   important: 'gemini-4-argon',
   importanteFino: '2026-12-01',
   artist: 'gemini-3.5-flash',
   musician: 'gemini-3.8-flash',
+  // From the day Argon's price doubles (T397, D57, T392's round): on OpenRouter the structures go to Opus 5.5; on Google's route Argon stays.
+  openRouterStructure: 'claude-opus-5-5',
+  openRouterFrom: '2026-12-01',
 };
+
+/** Whether a model is called through Google's key: the others only through OpenRouter. */
+const onGoogle = (model: string): boolean => /^(models\/)?gemini-/.test(model);
+
+/**
+ * The Sculptor's models of a world (T397): the defaults under what the universe says (`ai.sculptors`), then, on OpenRouter from
+ * `openRouterFrom`, `openRouterStructure` for the structures and the important ones the master left as the defaults (Low Detail, a model
+ * chosen in the lobby stay); on Google's route a model Google does not have goes back to the default (a universe.json written by hand).
+ */
+export function sculptorsOn(configured: Partial<SculptorAiModels>, route: AiRoute, today = new Date().toISOString().slice(0, 10)): SculptorAiModels {
+  const m: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...configured };
+  for (const k of ['structure', 'important'] as const) {
+    if (route === 'google' && !onGoogle(m[k])) m[k] = DEFAULT_SCULPTORS[k];
+    else if (route === 'openrouter' && m.openRouterStructure && m.openRouterFrom && today >= m.openRouterFrom && m[k] === DEFAULT_SCULPTORS[k]) m[k] = m.openRouterStructure;
+  }
+  return m;
+}
 
 export interface SculptRequest {
   /** Id in the library (`models/<id>.xml`). */

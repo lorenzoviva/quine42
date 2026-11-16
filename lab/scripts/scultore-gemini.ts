@@ -4,9 +4,13 @@
 // the bench's measures (`lab/banco/taglie/misure.ts`), the kernel's check and photos. Every call is kept, with its cost.
 // T391: the same round with other Sculptors at every size (`--modelli`), Gemini through the key, Claude through the isolated CLI of the
 // subscriptions (`lab/scripts/claude-cli.ts`) with the Artist still on Gemini, and the table of every model against T355's.
+// T397: `--via openrouter` sends the Sculptor's calls to OpenRouter through the game's own adapter (OpenRouterAiModels: the schema, the
+// reasoning, the system instructions in the cache, the cost it says), with OPENROUTER_API_KEY from <root>/.env; the Artist stays on Gemini.
+// Then --tetto counts OpenRouter's dollars as well. --offline answers with a fake OpenRouter (the offline Sculptor's program, a cost of 0).
 //
 //   npx vite-node lab/scripts/scultore-gemini.ts -- [--root ../../..] [--giro giro1] [--pensiero low|medium|high] [--scultore <modello>] [--solo forte,fattoria] [--taglie large,huge] [--tetto 10] [--out lab/banco/taglie/gemini]
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-carbon,claude-sonnet-5-5 [--ripeti 2] [--sforzo low] [--cli-cmd "claude"] [--senza-immagini] [--finestra 80] [--offline] --out lab/banco/taglie/modelli
+//   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli claude-opus-5-5 --via openrouter --tetto 4 [--offline] --out lab/banco/taglie/modelli/openrouter
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --misura [--out lab/banco/taglie/gemini]     # no call: measures and photographs the programs kept
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --concetti                                   # no call: concepts against seeds (T337), Gemini's and the hand-written
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --tabella --out lab/banco/taglie/modelli     # no call: the table of every model (and T355's), → <out>/tabella.md
@@ -37,6 +41,7 @@ import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { runMjx } from '../../src/mj/run';
 import { direct, readKey } from './gemini';
 import { claudeCliModels, readWindow, routed, type ClaudeCall, type ClaudeWindow } from './claude-cli';
+import { OPENROUTER_API, OPENROUTER_MODELS, OpenRouterAiModels } from '../../src/kernel/ai/openrouter';
 import { png } from './png';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
@@ -57,6 +62,42 @@ const SEMI = Number(opt('semi') ?? 2);
 const TETTO = Number(opt('tetto') ?? 10);
 /** The 5-hour window of Claude past which the calls on the subscription stop (per cent used). */
 const FINESTRA = Number(opt('finestra') ?? 80);
+/** The Sculptor of the round through OpenRouter, the game's adapter (T397), instead of the CLI of the subscriptions. */
+const VIA_OPENROUTER = opt('via') === 'openrouter';
+/** Whether a Sculptor of the round goes to OpenRouter: asked so, and on the adapter's list. */
+const onOpenRouter = (model?: string): boolean => VIA_OPENROUTER && !!model && Object.prototype.hasOwnProperty.call(OPENROUTER_MODELS, model);
+/** Whether a Sculptor of the round goes to the CLI of Claude's subscription. */
+const onCli = (model?: string): boolean => !!model?.startsWith('claude-') && !onOpenRouter(model);
+
+/** OPENROUTER_API_KEY from the environment or from <root>/.env: never printed nor written. */
+function openRouterKey(root: string): string | undefined {
+  if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY;
+  try {
+    return /^OPENROUTER_API_KEY\s*=\s*"?([^"\r\n]+)"?/m.exec(fs.readFileSync(path.join(root, '.env'), 'utf8'))?.[1]?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** A fake OpenRouter (--offline): the offline Sculptor's program (the cottage of ADR-0183) as a chat completion, a cost of 0, about the tokens asked. */
+function fakeOpenRouter(): typeof fetch {
+  return (async (_url: RequestInfo | URL, init?: RequestInit) => {
+    const text = `\`\`\`xml\n${MOCK_STRUCTURE_PROGRAM}\n\`\`\``;
+    const tokens = Math.round(String(init?.body ?? '').length / 4);
+    return new Response(JSON.stringify({ choices: [{ message: { content: text }, finish_reason: 'stop' }], usage: { prompt_tokens: tokens, completion_tokens: Math.round(text.length / 4), cost: 0 } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }) as typeof fetch;
+}
+
+/** The Sculptor's calls of a model on OpenRouter to `openrouter`, the rest as they were. */
+function viaOpenRouter(rest: AiModels, openrouter: (call: TextCall) => Promise<string>): AiModels {
+  return {
+    name: rest.name,
+    get usage() { return rest.usage; },
+    limits: rest.limits,
+    textModel: rest.textModel,
+    text: (call: TextCall) => (call.agent === 'sculptor' && onOpenRouter(call.model) ? openrouter(call) : rest.text(call)),
+  };
+}
 
 /** A Sculptor at every size (the structures' model and the important ones'), the rest of the game's. */
 const sculptors = (model?: string): SculptorAiModels => (model ? { ...DEFAULT_SCULPTORS, structure: model, important: model } : DEFAULT_SCULPTORS);
@@ -86,8 +127,8 @@ function esitiIn(dir: string): string[] {
 const unreachable = (e: Esito): boolean =>
   !!e.errore?.includes('finestra delle 5 ore') || (!!e.claude?.length && e.claude.every((c) => !!c.errore && !c.output && !c.input));
 
-/** What Gemini cost in an esito (T355's had no split: they were all Gemini). */
-const geminiOf = (e: Partial<Esito>): number => e.usdGemini ?? (e.usdClaude ? 0 : (e.usd ?? 0));
+/** What Gemini cost in an esito (T355's had no split: they were all Gemini), and OpenRouter (T397): what the register's cap counts. */
+const geminiOf = (e: Partial<Esito>): number => (e.usdGemini ?? (e.usdClaude || e.usdOpenRouter ? 0 : (e.usd ?? 0))) + (e.usdOpenRouter ?? 0);
 
 /** The register: Gemini's dollars already in BASE (the folders this run rewrites excluded) and the ones of this run, as they come. */
 const register = {
@@ -124,7 +165,7 @@ function logged(inner: AiModels, dir: string): AiModels {
     limits: inner.limits,
     textModel: inner.textModel,
     async text(call: TextCall) {
-      const toClaude = call.agent === 'sculptor' && call.model?.startsWith('claude-');
+      const toClaude = call.agent === 'sculptor' && onCli(call.model);
       const spent = register.spent();
       if (!toClaude && !OFFLINE && spent > TETTO) throw new Error(`tetto del registro: ${usd(spent)} di Gemini oltre ${usd(TETTO)}`);
       const i = ++n;
@@ -159,6 +200,11 @@ interface Esito {
   usdClaude?: number;
   /** What the CLI itself said Claude's calls cost. */
   usdCli?: number;
+  /** Of `usd`: the Sculptor's calls through OpenRouter, as it said them (T397), and the route. */
+  usdOpenRouter?: number;
+  via?: 'openrouter';
+  /** The Sculptor's calls through OpenRouter one by one: tokens, the cache read, the cost said, the seconds. */
+  openrouter?: Array<{ prompt: number; cached: number; output: number; thoughts: number; usd?: number; seconds: number; failed?: string }>;
   token: { prompt: number; output: number; thoughts: number };
   perCompito: Array<{ model: string; task: string; calls: number; usd: number }>;
   /** Claude's calls one by one (T391). */
@@ -166,17 +212,26 @@ interface Esito {
   errore?: string;
 }
 
-async function scolpisci(key: string | undefined, out: string, concept: string, taglia: SizeTier, scultore?: string): Promise<Esito> {
+async function scolpisci(key: string | undefined, out: string, concept: string, taglia: SizeTier, scultore?: string, orKey?: string): Promise<Esito> {
   const dir = path.join(out, `${concept}-${taglia}`);
   fs.rmSync(path.join(dir, 'chiamate'), { recursive: true, force: true });
   fs.rmSync(path.join(dir, 'programma.xml'), { force: true });
   fs.mkdirSync(dir, { recursive: true });
   const ledger = new UsageLog();
   let usdGemini = 0;
+  let usdOpenRouter = 0;
+  const orCalls: NonNullable<Esito['openrouter']> = [];
+  let orStart = Date.now();
   const record = (r: CallRecord) => {
     ledger.record(r);
     if (r.model.startsWith('claude-')) return;
     register.live.record(r);
+    // OpenRouter's ids of Anthropic's models (`anthropic/…`, T397): what it said, in its own column.
+    if (r.model.startsWith('anthropic/')) {
+      usdOpenRouter += callCost(r) ?? 0;
+      orCalls.push({ prompt: r.prompt, cached: r.cached, output: r.output, thoughts: r.thoughts, ...(r.usd !== undefined ? { usd: r.usd } : {}), seconds: Math.round((Date.now() - orStart) / 1000), ...(r.failed ? { failed: r.failed } : {}) });
+      return;
+    }
     usdGemini += callCost(r) ?? 0;
   };
   // The game's models: the Sculptor's per call (`model` of the call), the thinking of `universe.json → ai`.
@@ -190,7 +245,24 @@ async function scolpisci(key: string | undefined, out: string, concept: string, 
   }
   const claude: ClaudeCall[] = [];
   const cli = claudeCliModels({ cmd: CLI_CMD, effort: SFORZO, gate: claudeGate, images: !args.includes('--senza-immagini'), onCall: (c, r) => { claude.push(c); record(r); } });
-  const ai = scultore?.startsWith('claude-') ? routed(rest, cli) : rest;
+  let ai = onCli(scultore) ? routed(rest, cli) : rest;
+  if (onOpenRouter(scultore)) {
+    // The game's adapter, with ten minutes of patience instead of the game's 120 s: the bench measures how long, the table says what the game would drop.
+    const or = new OpenRouterAiModels({
+      endpoint: OPENROUTER_API,
+      textModel: scultore!,
+      limits: { text: 40 },
+      thinking: PENSIERO,
+      timeout: 600_000,
+      fetchImpl: OFFLINE ? fakeOpenRouter() : (url, init) => fetch(url, { ...init, headers: { ...(init?.headers as Record<string, string>), Authorization: `Bearer ${orKey}`, 'X-Title': 'QUINE42 banco' } }),
+    });
+    or.onCall = record;
+    // One call at a time per structure (the blocks and the fixes follow each other): its seconds from when it was asked.
+    ai = viaOpenRouter(rest, (call) => {
+      orStart = Date.now();
+      return or.text(call);
+    });
+  }
   const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: logged(ai, dir) });
   // The kernel gives every call of the Council its `ai.thinking` (T247): the round's goes there, not to the models.
   k.council.thinking = () => PENSIERO;
@@ -225,6 +297,7 @@ async function scolpisci(key: string | undefined, out: string, concept: string, 
     usd: Number(tot.usd.toFixed(4)),
     usdGemini: Number(usdGemini.toFixed(4)),
     ...(claude.length ? { usdClaude: Number(usdClaude.toFixed(4)), usdCli: Number(usdCli.toFixed(4)), claude } : {}),
+    ...(onOpenRouter(scultore) ? { via: 'openrouter' as const, usdOpenRouter: Number(usdOpenRouter.toFixed(4)), openrouter: orCalls } : {}),
     token: { prompt: tot.prompt, output: tot.output, thoughts: tot.thoughts },
     perCompito: day.map((t) => ({ model: t.model, task: t.task, calls: t.tally.calls, usd: Number(t.tally.usd.toFixed(4)) })),
     ...(errore ? { errore } : !r! ? { errore: 'nessun programma valido' } : {}),
@@ -404,7 +477,10 @@ function tabella(): void {
       const s = scultoreDi(esito, path.dirname(f));
       return s ? [{ esito, dir: path.dirname(f), scultore: s }] : [];
     });
-  const sculptOf = (e: Esito) => e.scultore ?? e.perCompito.find((t) => t.task === 'model.sculpt')?.model;
+  const sculptOf = (e: Esito) => {
+    const s = e.scultore ?? e.perCompito.find((t) => t.task === 'model.sculpt')?.model;
+    return s && e.via ? `${s} via OpenRouter` : s;
+  };
   // A structure whose Sculptor never answered is not an attempt of that model.
   const righe: Riga[] = leggi(BASE, (e) => (unreachable(e) ? undefined : sculptOf(e)));
   const T355 = path.resolve('lab/banco/taglie/gemini');
@@ -488,26 +564,31 @@ if (args.includes('--tabella')) {
 if (!args.includes('--misura')) {
   const root = path.resolve(opt('root') ?? (fs.existsSync('.env') ? '.' : '../../..'));
   const key = OFFLINE ? undefined : readKey(root);
+  const orKey = VIA_OPENROUTER && !OFFLINE ? openRouterKey(root) : undefined;
+  if (VIA_OPENROUTER && !OFFLINE && !orKey) {
+    console.error(`nessuna OPENROUTER_API_KEY nell'ambiente né in ${path.join(root, '.env')} (aggiungila, o --offline per provare senza)`);
+    process.exit(1);
+  }
   // The register before this run: every esito of BASE but the ones it rewrites.
   const rewritten = new Set(rounds.flatMap((r) => giri.map(([c, t]) => path.join(r.out, `${c}-${t}`, 'esito.json'))));
   register.before = esitiIn(BASE).filter((f) => !rewritten.has(f)).reduce((s, f) => s + geminiOf(JSON.parse(fs.readFileSync(f, 'utf8'))), 0);
   console.log(`Registro di ${BASE}: ${usd(register.before)} di Gemini prima del giro, tetto ${usd(TETTO)}`);
-  const usesClaude = rounds.some((r) => r.scultore?.startsWith('claude-'));
+  const usesClaude = rounds.some((r) => onCli(r.scultore));
   const before = usesClaude && !OFFLINE ? readWindow() : undefined;
   if (usesClaude) console.log(`Claude prima: ${before ? `5 ore ${before.session ?? '?'} %, settimana ${before.week ?? '?'} %` : OFFLINE ? 'non letto (offline)' : 'la CLI non risponde a /usage'}`);
   const settimana: Array<Record<string, unknown>> = [];
   const irraggiungibili = new Set<string>();
   for (const round of rounds) {
     if (round.scultore && irraggiungibili.has(round.scultore)) continue;
-    if (round.scultore?.startsWith('claude-') && claudeGate()) {
+    if (onCli(round.scultore) && claudeGate()) {
       console.log(`${path.relative(BASE, round.out)}: non lanciato (${windowState.stop})`);
       continue;
     }
     const t0 = new Date().toISOString();
-    const esiti = await Promise.all(giri.map(([c, t]) => scolpisci(key, round.out, c, t, round.scultore)));
+    const esiti = await Promise.all(giri.map(([c, t]) => scolpisci(key, round.out, c, t, round.scultore, orKey)));
     // A model the CLI does not reach: no call of it gave a token. It is said, and the others go on.
-    if (round.scultore?.startsWith('claude-') && !windowState.stop && esiti.every((e) => unreachable(e))) {
-      irraggiungibili.add(round.scultore);
+    if (onCli(round.scultore) && !windowState.stop && esiti.every((e) => unreachable(e))) {
+      irraggiungibili.add(round.scultore!);
       fs.writeFileSync(path.join(round.out, 'irraggiungibile.txt'), `${round.scultore}: ${esiti[0].errore}
 `);
       console.log(`${round.scultore}: non raggiungibile dalla CLI (${esiti[0].errore?.slice(0, 200)}), proseguo con gli altri`);
@@ -515,7 +596,7 @@ if (!args.includes('--misura')) {
     }
     const somma = esiti.reduce((s, e) => s + e.usd, 0);
     console.log(`\n${path.relative(BASE, round.out) || '.'}: ${usd(somma)} a listino, ${esiti.reduce((s, e) => s + e.chiamate, 0)} chiamate, registro di Gemini ${usd(register.spent())}`);
-    if (round.scultore?.startsWith('claude-')) settimana.push({ giro: path.relative(BASE, round.out), da: t0, a: new Date().toISOString(), finestra: windowState.last });
+    if (onCli(round.scultore)) settimana.push({ giro: path.relative(BASE, round.out), da: t0, a: new Date().toISOString(), finestra: windowState.last });
   }
   if (usesClaude) {
     const after = OFFLINE ? undefined : readWindow();

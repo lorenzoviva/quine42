@@ -153,9 +153,10 @@ describe('lo schema e la richiesta', () => {
 });
 
 describe('gli id e i prezzi', () => {
-  it('ogni modello dell’elenco ha un id fisso e lo stesso prezzo di Google', () => {
+  it('ogni modello dell’elenco ha un id fisso e lo stesso prezzo di chi lo fa', () => {
     for (const [ours, m] of Object.entries(OPENROUTER_MODELS)) {
-      expect(m.id, ours).toBe(`google/${ours}`);
+      // Google's models by their own name; Anthropic's with a dot where ours has a hyphen (T397).
+      expect(m.id, ours).toBe(ours.startsWith('claude-') ? `anthropic/${ours.replace(/-(\d+)$/, '.$1')}` : `google/${ours}`);
       expect(m.snapshot.startsWith(`${m.id}-`), ours).toBe(true);
       expect(m.id).not.toMatch(/[~:]|latest|auto/);
       expect(PRICES[ours] ?? ESTIMATED[ours], ours).toBeDefined();
