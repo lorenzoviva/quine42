@@ -1662,6 +1662,22 @@ le risposte alle domande del piano.
 - Fare: il server della sessione e i repository degli universi su Google Cloud, sempre acceso (Cloud Run con istanza minima o una VM,
   disco persistente per `universes/`, repository privati), il deploy da script, i segreti in Secret Manager.
 - Fatto quando: un universo multigiocatore giocato da due browser sul server di prova, commit. Il progetto Google Cloud lo dà l'autore.
+- Anche (autore, 16/11; condizione 4 della Fase I): `npm run sicurezza:prove` contro il server di beta, l'esito nel dossier; nessuna voce aperta nel registro con cui un tester tocchi crediti di altri, il server o la chiave.
+
+### T400 · I test instabili sotto carico diventano stabili — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Step: 34
+- Contesto: l'autore (16/11, chat) ha detto sì: `tests/carte-guaste.test.ts` e il test dei coefficienti (`coefficients`) falliscono nella suite intera e passano da soli (T352, causa non dimostrata). Prima dei tester la suite deve essere affidabile.
+- Cosa fare: riprodurre il fallimento (suite intera, al più 6 worker, col turno `test`), trovarne la causa (tempi, stato condiviso, ordine, cache delle forme, worker) e correggerla nel test o nel codice; niente `retry` né timeout gonfiati come rimedio.
+- Quando è fatto: tre suite intere di fila verdi (col turno `test`), la causa scritta nell'esito, commit su `task/T400`.
+
+### T401 · Il kernel 0.9.0 con il tag — `da fare` (dipende da T45f, T400)
+- Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 10
+- Step: 34
+- Contesto: l'autore (16/11, chat) ha detto sì: condizione 8 della Fase I (`docs/fasi.md`): `package.json`, `KERNEL_VERSION` (`src/kernel/version.ts`) e `universe.json → kernel` del seme dicono `0.9.0` e quel commit ha un tag. Oggi 0.7.12; ADR-0136 dice come si sale (contratto nuovo → `Y`, migrazione in `migrations.ts` se il formato cambia).
+- Cosa fare: alla fine della Fase I (dopo gli altri task dello step 30, 31 e 34 tranne T237), decidere con l'autore se 0.9.0 è un contratto nuovo (migrazione `0.7 → 0.9` vuota o no) e portarci versione, seme e test; il tag `v0.9.0` sul commit lo mette `integra` o l'autore.
+- Quando è fatto: `npm test` e `npm run typecheck` verdi, la versione 0.9.0 ovunque, commit su `task/T401`; domande in `docs/pipeline/domande/T401.md`.
+
 
 ## Varie
 
