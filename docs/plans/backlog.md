@@ -5626,3 +5626,11 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite, typecheck e `npm run test:sicurezza` coi turni.
 - Browser: sì (Genesi e lobby con le tre scelte e la stima che cambia, offline).
 - Quando è fatto: commit su `task/T398`. Dipende da T397. Sicurezza: dire se l'elenco dei modelli del varco cambia (un id più caro: il tetto lo regge).
+
+### T399 · La pagina web dell'orchestratore non perde lo scroll — `da fare`
+- Pipeline: hydrogen · sforzo high · stima 2% · approvato · priorità 1
+- Contesto: l'autore (16/11, chat): in `http://localhost:4242/` lo scroll si azzera periodicamente, soprattutto in «Lavagne & Chat». `tools/pipeline/web.mjs` ricarica lo stato ogni 3 s (`setInterval(loadState, 3000)`) e riscrive l'HTML senza confronto: le lavagne (`boards-wrap`, `innerHTML` a ogni giro), gli eventi (`evEl`), la tabella dei task, consumi, conversazioni; la chat confronta l'HTML (`dataset.shown`) ma va controllata.
+- Cosa fare: ogni riquadro che si aggiorna si riscrive solo se il suo HTML cambia (come fa già la chat) e, quando cambia, conserva lo scroll di ogni contenitore che scorre (la colonna di ogni lavagna, la lista degli eventi, la chat se l'utente non è in fondo, la pagina) e il focus/la selezione di un campo in cui si scrive. Nessun cambio al server né ai dati.
+- Test: un test in `tests/` sulla funzione che decide se riscrivere e che rimette lo scroll, se la si estrae; `node --check` sul file; typecheck con il suo turno.
+- Browser: non serve per l'agente (hydrogen); l'autore lo vede alla prossima ricarica della pagina.
+- Quando è fatto: commit su `task/T399`.
