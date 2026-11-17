@@ -553,6 +553,37 @@ export function furnishFromStage(plan: InteriorPlan, stage: Grid3, palette: Reco
   return { grid: { X: built.X, Y: built.Y, Z: built.Z, cells, alphabet }, palette: { ...plan.palette, ...colours }, voxels, pieces, refused };
 }
 
+/** A storey's covered floor as rooms (T413): what a dwelling's floor is measured on. */
+export interface StoreyFloor {
+  /** Height of its floor, voxels from the bottom of the grid. */
+  z: number;
+  /** Under the ground. */
+  cellar: boolean;
+  /** Its rooms, tiles² of body centres each, the largest (the hall) first. */
+  rooms: number[];
+  /** The covered floor where a body's centre stands, tiles²: the sum of its rooms. */
+  area: number;
+}
+
+/**
+ * The covered floor of every storey reached, cut into rooms (T413, ADR-0213), as the Scenografo's bench measures it (`stanzeDi`, T406): on
+ * each storey of `storeysOf` the centres a body stands on with something above them (the yard and a terrace are not a house's floor), cut
+ * at the passages narrower than `NARROW` (a door in a wall cuts), every piece of `roomsOf`. The walk is the one `habitableParts` measures.
+ */
+export function storeyFloors(w: Walked, vpt: number, base = 0): StoreyFloor[] {
+  const { X, Y } = w.g;
+  const zs = storeysOf(w, vpt);
+  const centres = zs.map(() => new Set<number>());
+  for (const c of w.celle) {
+    const k = zs.findIndex((z) => Math.abs(z - c.z) <= 1);
+    if (k >= 0 && headroomAbove(w.levels, c.x + c.y * X, c.z) !== undefined) centres[k].add(c.x + c.y * X);
+  }
+  return zs.map((z, k) => {
+    const rooms = roomsOf(centres[k], X, Y, Math.round(NARROW * vpt)).map((r) => r.length / (vpt * vpt)).sort((a, b) => b - a);
+    return { z, cellar: z < base, rooms, area: rooms.reduce((s, r) => s + r, 0) };
+  });
+}
+
 /** The rooms of a storey: its centres, cut at the narrow passages, each passage cell given back to the nearest piece (T259). */
 export function roomsOf(centres: Set<number>, X: number, Y: number, narrow: number): number[][] {
   let mask = new Uint8Array(X * Y);

@@ -181,6 +181,36 @@ export const PARTS = {
   shelter: { clear: 30 / 16, depth: 20 / 16 },
 } as const;
 
+/**
+ * The floor of a dwelling (T413, ADR-0213): a house, a farm, an inn that grows by rules gives the house the area of its size, not a hut in
+ * a garden (T406: a body of 35-45 voxels in a lot of 100, one room a storey). In tiles², measured where the centre of a body stands on
+ * covered floor and cut into rooms at the passages narrower than 0.4 tiles (`storeyFloors`, the bench's `stanzeDi`): at least `floor` on
+ * the ground floor and on another storey, the ground floor in at least `groundRooms` rooms of `room` or more (the hall and a room; a room
+ * of the Sculptor's least side, 28 voxels, has 1.56 tiles² of centres). Only the dwellings: a fort, a tower, a temple have other parts.
+ */
+export const DWELLING = { floor: 10, storeys: 2, groundRooms: 2, room: 1.5 } as const;
+
+/**
+ * The words of a concept that say a dwelling (T413), Italian and English like `CLASS_WORDS` (the other languages are T239's), and those
+ * that say it is something else even with a dwelling's word in it (a tower house, a fort with its lodgings): those win.
+ */
+const DWELLING_WORDS = {
+  yes: [
+    /\b(casa|case|casetta|casette|casupola|casale|casali|casolare|casolari|cascina|cascine|villa|ville|villetta|villette|villino|fattoria|fattorie|masseria|masserie|podere|poderi|baita|baite|chalet|capanna|capanne|dimora|dimore|abitazione|abitazioni|palazzina|palazzine|locanda|locande|osteria|osterie|taverna|taverne|ostello|rifugio|maniero|magione|residenza)\b/,
+    /\b(house|houses|home|homes|cottage|cottages|villa|villas|farm|farms|farmhouse|farmstead|homestead|cabin|cabins|hut|huts|lodge|lodges|chalet|manor|mansion|dwelling|dwellings|residence|inn|inns|tavern|taverns|hostel)\b/,
+  ],
+  no: [
+    /\b(fort[ei]|fortezza|fortino|castell[oi]|rocca|torre|torri|torrione|tempio|templi|santuario|chiesa|cappella|monastero|abbazia|convento|mulino|faro|caserma|bastione|mura|cittadella)\b/,
+    /\b(forts?|fortress|castles?|keep|towers?|temples?|shrines?|church|chapel|monastery|abbey|convent|mill|lighthouse|barracks|bastion|citadel|walls)\b/,
+  ],
+};
+
+/** Whether a structure's concept says a dwelling (T413): a word of a house and none of a fort, a tower, a temple. */
+export function isDwelling(concept: string): boolean {
+  const t = concept.toLowerCase();
+  return DWELLING_WORDS.yes.some((re) => re.test(t)) && !DWELLING_WORDS.no.some((re) => re.test(t));
+}
+
 /** The least measures of the parts in voxels at a density (rounded up: never under the measure in tiles). */
 export function partVoxels(vpt: number) {
   const v = (t: number) => Math.ceil(t * vpt - 1e-9);

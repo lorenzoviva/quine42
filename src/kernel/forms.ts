@@ -513,7 +513,11 @@ export interface HabitableMeasure {
  * is the room's edge); the doors from the cells the action `open` changes, each piece measured by its widest side and its height.
  */
 export function habitableParts(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, clear: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): HabitableMeasure {
-  const w = walkIn(grid, palette, vpt, base, actions, seed);
+  return habitablePartsOf(walkIn(grid, palette, vpt, base, actions, seed), vpt, clear);
+}
+
+/** `habitableParts` on a walk already made (T413: the Sculptor's checks measure the parts and a dwelling's floor on one walk). */
+export function habitablePartsOf(w: Walked, vpt: number, clear: number): HabitableMeasure {
   const { g } = w;
   const body = Math.round(2 * BODY_R * vpt);
   const { cells, heights } = standingCells(w, vpt);

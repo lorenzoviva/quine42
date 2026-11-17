@@ -9,8 +9,8 @@
 
 import type { Schema } from '../ai/models';
 import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
-import { analyse, compositionOf, partErrors, varietyError, type Composition } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityFor, growsByRules, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { analyse, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
+import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -20,7 +20,8 @@ import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
-import { habitableParts } from '../forms';
+import { habitablePartsOf, walkIn } from '../forms';
+import { storeyFloors } from '../interior';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
@@ -120,7 +121,12 @@ export interface SculptRequest {
   shareWith?: string[];
   /** It is worn there (T290, ADR-0180): the program has its `<worn>` section for that zone of the body. */
   worn?: WornZone;
+  /** A dwelling (T413, ADR-0213), if who asks knows it (a world's common houses); else the words of its concept say it (`dwellingOf`). */
+  dwelling?: boolean;
 }
+
+/** Whether a structure asked for is a dwelling (T413, ADR-0213): the request says it, or its concept (`isDwelling`). */
+export const dwellingOf = (req: Pick<SculptRequest, 'nome' | 'dwelling'>): boolean => req.dwelling ?? isDwelling(req.nome);
 
 /** Where a thing is worn, as the request says it. */
 const WORN_ON: Record<WornZone, string> = { head: 'on the head', torso: 'on the torso', back: 'on the back' };
@@ -306,7 +312,7 @@ export function partResources(files: FileMap): string[] {
 }
 
 /** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. `files` are the universe's (`filesOf`). */
-export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}): Checked {
+export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}, opts: CheckOptions = {}): Checked {
   if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1, files);
   // A procedural structure (ADR-0160): every seed the world shows at its size, and the first at the next size, which shares it.
   xml = withoutSize(xml);
@@ -320,13 +326,13 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
   const besides = (shown: number): Checked['others'] => {
     for (let seed = 1; seed <= 3 && ran.size < 3; seed++) {
       if (ran.has(seed)) continue;
-      const r = checkOnce(xml, cls, own, seed, files).result;
+      const r = checkOnce(xml, cls, own, seed, files, opts).result;
       if (r) ran.set(seed, r);
     }
     return [...ran.entries()].filter(([seed]) => seed !== shown).slice(0, 2).map(([seed, result]) => ({ seed, result }));
   };
   for (const [t, seed] of tries) {
-    const c = checkOnce(xml, cls, t, seed, files);
+    const c = checkOnce(xml, cls, t, seed, files, opts);
     first ??= c;
     if (t === next) other = c;
     else if (c.result) ran.set(seed, c.result);
@@ -346,7 +352,12 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
  */
 export const leastHeight = (cls: AssetClass, taglia?: string): number => Math.round((cls.minHeight ?? 0) * boxOf(cls, procedural(cls, taglia) ? undefined : taglia)[2]);
 
-function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}): Checked {
+/** What the checks of a structure know of what was asked (T413): a dwelling has the floor of a house to give. */
+export interface CheckOptions {
+  dwelling?: boolean;
+}
+
+function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}, opts: CheckOptions = {}): Checked {
   const box = boxOf(cls, taglia);
   try {
     // A program that decides on a coarse grid and maps up keeps its own size; the others get the class's box.
@@ -367,9 +378,12 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     if (procedural(cls, taglia) && !notes.length) {
       // The storeys reached (ADR-0162) and the parts one lives in at their least measures, the same at every size (T338, ADR-0179).
       const vpt = densityFor(cls, taglia);
-      const parts = habitableParts(result.grid, model.program.palette, vpt, partVoxels(vpt).storey.clear, 0, model.actions, seed);
+      const walk = walkIn(result.grid, model.program.palette, vpt, 0, model.actions, seed);
+      const parts = habitablePartsOf(walk, vpt, partVoxels(vpt).storey.clear);
       if (parts.storeys.length < 2) notes.push(`piani: ${parts.storeys.length} (serve ≥ 2)`);
       notes.push(...partErrors(parts, vpt));
+      // A dwelling gives the house the floor of its size (T413, ADR-0213): measured as the Scenografo's bench does.
+      if (opts.dwelling && parts.storeys.length >= 2) notes.push(...dwellingErrors(storeyFloors(walk, vpt)));
       if (seed === 1) composition = compositionOf(result.grid, model.program.palette);
     }
     return { xml, model, result, ...(composition ? { composition } : {}), ...(notes.length ? { error: notes.join('; ') } : {}) };
@@ -399,6 +413,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     req.tinta && 'It serves many things of this kind: the main colour is the letter C (the game recolours it for each one).',
     req.worn && `It is worn ${WORN_ON[req.worn]}: after the program write its <worn zone="${req.worn}"> section (see «Worn things»).`,
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
+    procedural(cls, req.taglia) && dwellingOf(req) && DWELLING_LINE,
   ]
     .filter(Boolean)
     .join('\n');
@@ -458,6 +473,9 @@ export function textViews(c: Pick<Checked, 'model' | 'result' | 'others' | 'fail
   return parts.join('\n');
 }
 
+/** What a dwelling's request says of its floor (T413, ADR-0213): the same at every size, measured as the check does. */
+const DWELLING_LINE = `It is a dwelling (see «What fits»): the house takes most of the area, not a cottage in a garden. At least ${DWELLING.floor} tiles² of covered floor where a body stands (its centre, half a body off every wall) on the ground floor and on another storey, the ground floor in ${DWELLING.groundRooms} rooms or more of at least ${String(DWELLING.room)} tiles² each (the hall and a room) divided by an inner wall with a door: about 75 × 65 voxels inside the outer walls at every size, two storeys.`;
+
 /** What each measure of the checks means, for who reads only the reason (T354): the key is how the reason begins. */
 const MEANINGS: Array<[RegExp, string]> = [
   [/^piani:/, 'the covered storeys a body reaches on foot from the front of the box, through the door the action open takes away, climbing stairs in line'],
@@ -469,6 +487,7 @@ const MEANINGS: Array<[RegExp, string]> = [
   [/^il programma non finisce/, 'the time at the largest size: every growth needs steps'],
   [/^(non tocca terra|il corpo principale galleggia|pezzi staccati)/, 'everything must rest on the bottom and be attached to the main body'],
   [/^troppo basso/, 'the height of the top against the box of the class'],
+  [/^casa:/, 'a dwelling: the covered floor of each storey where the centre of a body stands (half a body off every wall), cut into rooms where a passage is narrower than 0.4 tiles (a door in a wall cuts), in tiles² (a tile is 16 × 16 voxels)'],
 ];
 
 /** A reason of the checks with what it measures, where the measure is not plain. */
@@ -600,7 +619,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
       calls++;
       xml = await call(i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${proc ? withMeaning(last!.error!) : last!.error}${seen(last!)}\nFix it and answer with the whole program.`);
     }
-    last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files));
+    last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files), { dwelling: dwellingOf(req) });
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');
   }

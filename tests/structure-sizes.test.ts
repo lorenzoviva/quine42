@@ -124,11 +124,12 @@ describe('what fits: the same program at three sizes (T338, T354)', () => {
   }
 
   it('sends back a program that draws the same building in a larger box', () => {
-    // The country house without what fits around it (the hedge, the well, the trees) is the same house at every size.
+    // The country house without what fits around it (the hedge, the well, the trees, the wing) is the same house at every size; without
+    // the chimney too, which at Large stands on a roof near the top of the box and is a part only where it has room (T413).
     const bare = MOCK_STRUCTURE_PROGRAM.split('\n')
-      .filter((l) => !/out="\*x"|\*\*Q\*\*|\*\*\*t\*\*\*/.test(l))
+      .filter((l) => !/out="\*x"|\*\*Q\*\*|\*\*t\*\*|\*\*\*a\*|out="\* K \*"|in="B K"/.test(l))
       .join('\n');
-    expect(bare).not.toContain('***t***');
+    expect(bare).not.toContain('**t**');
     const c = checkProgram(bare, structure, undefined, seedFiles(bare));
     expect(c.error).toMatch(/^varietà: alla taglia Enorme/);
     expect(c.failedAt).toEqual({ taglia: 'huge', seed: 1 });

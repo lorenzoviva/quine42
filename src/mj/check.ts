@@ -1,7 +1,7 @@
 // Judging voxel models, like src/kernel/validator.ts does for the game: the model a program builds is
 // measured, and what makes it unusable (empty, floating, in pieces, too low) goes back to the sculptor.
 
-import { partVoxels } from './classes';
+import { DWELLING, partVoxels } from './classes';
 import { AIR, type Grid3, type PaletteEntry, type RunResult, type Vec3 } from './engine';
 
 export interface Analysis {
@@ -164,6 +164,38 @@ export function partErrors(m: PartsMeasured, vpt: number): string[] {
         `stanza: la più grande in cui si sta in piedi ha il lato di ${room} voxel (${tiles(room, vpt)} caselle), una stanza ne vuole almeno ${p.room.side} (${tiles(p.room.side, vpt)}) a ogni taglia: se l'area è piccola fai meno parti, non più piccole`,
       );
   }
+  return out;
+}
+
+/** The covered floor of a storey as rooms, in tiles² (`storeyFloors` in src/kernel/interior.ts), as the dwelling's check reads it. */
+export interface FloorMeasured {
+  cellar: boolean;
+  /** Tiles² of body centres of each room, the largest first. */
+  rooms: number[];
+}
+
+const sq = (v: number) => v.toFixed(1).replace('.', ',');
+
+/**
+ * A dwelling with too little floor (T413, ADR-0213): the ground floor and another storey under `DWELLING.floor` tiles² of covered floor
+ * where a body stands, or a ground floor of one room. Each with the measure found and the one wanted, and what to do instead.
+ */
+export function dwellingErrors(floors: FloorMeasured[]): string[] {
+  const storeys = floors.filter((f) => !f.cellar);
+  const ground = storeys[0];
+  if (!ground) return [];
+  const area = (f: FloorMeasured) => f.rooms.reduce((s, r) => s + r, 0);
+  const out: string[] = [];
+  const wide = storeys.filter((f) => area(f) >= DWELLING.floor);
+  if (area(ground) < DWELLING.floor || wide.length < DWELLING.storeys)
+    out.push(
+      `casa: pavimento coperto ${storeys.map((f) => sq(area(f))).join(' · ')} caselle² per piano, un'abitazione ne vuole almeno ${DWELLING.floor} al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande`,
+    );
+  const rooms = ground.rooms.filter((r) => r >= DWELLING.room).length;
+  if (rooms < DWELLING.groundRooms)
+    out.push(
+      `casa: il piano terra ha ${rooms === 1 ? 'una stanza sola' : `${rooms} stanze`} (${ground.rooms.map(sq).join(' · ') || '—'} caselle²), un'abitazione vuole a terra almeno ${DWELLING.groundRooms} stanze di ${sq(DWELLING.room)} caselle² o più, la sala e una stanza, divise da un muro con una porta`,
+    );
   return out;
 }
 

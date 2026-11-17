@@ -6,35 +6,38 @@
 // in the prompt is copied (T337).
 
 export const MOCK_STRUCTURE_PROGRAM = `<!--
-Country house (villetta): a body of two storeys under a hip roof, a one-storey wing on one side with its own roof, a porch along the front
-on posts, a garden with a hedge where the ground goes on, trees and a well where more ground is left. The seeds change the depth of the
-body, the side and the place of the wing, the posts, the trees.
-Plan letters (a cell is 5 voxels): H the centre, h the floor of the body, w its walls, s the zone of the stair, d the door, m the way to it,
-a the floor of the wing, v its walls, p the porch, q the road on the porch, r the road, g the garden, b a post, x the hedge, t a tree, Q the well.
+Country house (villetta): a dwelling that takes most of the area, a body of two storeys under a hip roof, the ground floor in two rooms (the
+hall in front with the door, a room behind with the stair, an inner wall with a door between them), the storey above in one; a porch along
+the front on posts, a garden with a hedge where the ground goes on; where more ground is left a one-storey wing on one side with its own
+roof, trees, a well. The seeds change the depth of the hall, the side and the place of the wing, the posts, the trees.
+Plan letters (a cell is 5 voxels): H the centre, h the floor of the body, w its walls, i the inner wall, s the zone of the stair, d the door,
+m the way to it, a the floor of the wing, v its walls, p the porch, q the road on the porch, r the road, g the garden, b a post, x the hedge,
+t a tree, Q the well.
 Not S nor #90-#97: they belong to the parts.
 -->
 <sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
-  <map scale="1/5 1/5 1" values="BHEhwsdmavpqrgbxtQ" symmetry="()">
+  <map scale="1/5 1/5 1" values="BHEhwisdmavpqrgbxtQ" symmetry="()">
     <rule in="E" out="E"/>
     <rule in="H" out="H"/>
     <sequence symmetry="(xy)">
-      <!-- A. The body: a line through the centre, 3 behind, 5 in front and one more by chance (one cell decides: the front end of the line); then 4 to each side of every cell of the line; its walls, the corners filled. -->
-      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
-      <all in="[Hh]/E" out="*/h" symmetry="()" steps="5"/>
+      <!-- A. The body, a dwelling's (75 × 65-70 voxels inside: at least 10 tiles² where a body stands on each storey): a line through the centre, 6 behind, 6 in front and one more by chance (one cell decides: the front end of the line); then 7 to each side of every cell of the line; the inner wall along the row of the centre, from side to side; the walls, the corners filled. -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="6"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="6"/>
       <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
-      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
-      <all in="hE" out="*w"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="7"/>
+      <all in="[Hi]h" out="*i" symmetry="(x)"/>
+      <all in="[hi]E" out="*w"/>
       <all in="wE/*w" out="*w/**"/>
       <!-- The door: from the centre straight to the front wall, three cells wide; the way back to floor. -->
       <all in="H/h" out="*/m" symmetry="()" steps="1"/>
       <all in="m/h" out="*/m" symmetry="()"/>
       <all in="m/w" out="*/d" symmetry="()" steps="1"/>
       <all in="dw" out="*d" symmetry="(x)" steps="1"/>
-      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
-      <!-- The zone of the stair: along the back wall, two cells from the left wall (the landing: a body walks onto the first step in line), four cells along x and two wide (20 × 10 voxels: the stair takes 16). -->
+      <prl><rule in="m" out="h"/><rule in="H" out="i"/></prl>
+      <!-- The zone of the stair, in the room behind: along the back wall, two cells from the left wall (the landing: a body walks onto the first step in line), four cells along x and two wide (20 × 10 voxels: the stair takes 16). -->
       <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
-      <!-- The wing: a one-storey body against a side wall, 3 cells out and 5 deep, from a cell of that side chosen at random. -->
-      <one in="Ew/Ew/Ew/Ew/Ew" out="**/**/a*/**/**" symmetry="(x)" steps="1"/>
+      <!-- The wing, where four cells of ground go on past a side wall (not at Large): a one-storey body against it, 3 cells out and 5 deep, from a cell of that side chosen at random. -->
+      <one in="EEEEw/EEEEw/EEEEw/EEEEw/EEEEw" out="*****/*****/***a*/*****/*****" symmetry="(x)" steps="1"/>
       <all in="aE" out="*a" symmetry="(x)" steps="2"/>
       <all in="E/a" out="a/*" symmetry="()" steps="2"/>
       <all in="a/E" out="*/a" symmetry="()" steps="2"/>
@@ -50,15 +53,16 @@ Not S nor #90-#97: they belong to the parts.
       <all in="[wvpb]E" out="*g" steps="1"/>
       <all in="gE" out="*g" steps="1"/>
       <all in="gE" out="*x"/>
-      <!-- Beyond the hedge: a well where 11 × 11 of lawn are free, trees where 7 × 7 are. -->
+      <!-- Beyond the hedge: a well where 11 × 11 of lawn are free, trees where 5 × 5 are. -->
       <one in="EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE/EEEEEEEEEEE" out="***********/***********/***********/***********/***********/*****Q*****/***********/***********/***********/***********/***********" steps="1"/>
-      <one in="EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE" out="*******/*******/*******/***t***/*******/*******/*******"/>
+      <one in="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE" out="*****/*****/**t**/*****/*****"/>
     </sequence>
     <!-- B. To the voxels: every cell five by five. -->
-    <map scale="5 5 1" values="BEhwsavpqrgbGYQAfWUFRLOoNkT#90#91#92KJyCP#20#21" symmetry="()">
+    <map scale="5 5 1" values="BEhwisavpqrgbGYQAfWUFRLOoNkT#90#91#92KJyCP#20#21" symmetry="()">
       <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
       <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
       <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="i" out="iiiii/iiiii/iiiii/iiiii/iiiii"/>
       <rule in="d" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
       <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
       <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
@@ -84,6 +88,8 @@ Not S nor #90-#97: they belong to the parts.
         <all in="B w" out="w U" steps="14"/>
         <all in="B w" out="w W" steps="12"/>
         <prl in="w" out="R"/>
+        <!-- The inner wall: a storey of plaster, under the slab. -->
+        <all in="B i" out="i W" steps="32"/>
         <!-- The floors rise too: the planks at the bottom, the strip of the stair in the air above its zone, the slab at 32, the ceiling at 64 (the wing's at 32). -->
         <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/><rule in="B a" out="a f"/></all>
         <all in="B s" out="s T" steps="1"/>
@@ -91,10 +97,11 @@ Not S nor #90-#97: they belong to the parts.
         <all in="B s" out="s B" steps="30"/>
         <all in="B a" out="a B" steps="31"/>
         <prl in="a" out="R"/>
-        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
-        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
-        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
-        <!-- 2. The doors: where the road meets the foot of the front wall, the seed O through the wall; between the wing and the body, a seed through the shared wall, 11 wide. part-door raises them. -->
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/><rule in="B i" out="i F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/><rule in="B i" out="i B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/><rule in="i" out="R"/></prl>
+        <!-- 2. The doors: in the inner wall, 11 wide where there is floor on both sides; where the road meets the foot of the front wall, the seed O through the wall; between the wing and the body, a seed through the shared wall, 11 wide. part-door raises them. -->
+        <one in="fffffffffff/WWWWWWWWWWW/WWWWWWWWWWW/WWWWWWWWWWW/WWWWWWWWWWW/WWWWWWWWWWW/fffffffffff" out="***********/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/OOOOOOOOOOO/***********" symmetry="()" steps="1"/>
         <all in="W/q" out="O/*" symmetry="()" steps="1"/>
         <all in="W/O" out="O/*" symmetry="()" steps="4"/>
         <one in="fWWWWWf" out="*OOOOO*" symmetry="(x)" steps="1"/>
@@ -135,7 +142,7 @@ Not S nor #90-#97: they belong to the parts.
   <color symbol="P" value="c2ad84" name="ghiaia"/><color symbol="G" value="3f6f2f" name="siepe"/><color symbol="Y" value="6b4a2e" name="tronco"/><color symbol="C" value="4e7f34" name="chioma"/>
   <color symbol="Q" value="8a8274" name="pozzo"/><color symbol="A" value="3a78c8" name="acqua"/>
   <color symbol="g" hidden="True" name="giardino" area="garden"/><color symbol="E" hidden="True" name="prato"/>
-  <color symbol="H" hidden="True"/><color symbol="h" hidden="True"/><color symbol="w" hidden="True"/><color symbol="s" hidden="True"/><color symbol="d" hidden="True"/><color symbol="m" hidden="True"/><color symbol="a" hidden="True"/><color symbol="v" hidden="True"/><color symbol="q" hidden="True"/><color symbol="r" hidden="True"/><color symbol="x" hidden="True"/><color symbol="t" hidden="True"/><color symbol="U" hidden="True"/><color symbol="y" hidden="True"/><color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#20" hidden="True"/><color symbol="#21" hidden="True"/>
+  <color symbol="H" hidden="True"/><color symbol="h" hidden="True"/><color symbol="w" hidden="True"/><color symbol="i" hidden="True"/><color symbol="s" hidden="True"/><color symbol="d" hidden="True"/><color symbol="m" hidden="True"/><color symbol="a" hidden="True"/><color symbol="v" hidden="True"/><color symbol="q" hidden="True"/><color symbol="r" hidden="True"/><color symbol="x" hidden="True"/><color symbol="t" hidden="True"/><color symbol="U" hidden="True"/><color symbol="y" hidden="True"/><color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#20" hidden="True"/><color symbol="#21" hidden="True"/>
   <action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>
   <action name="close" label="Chiudi la porta"><all><rule in="#20" out="O"/><rule in="#21" out="o"/></all></action>
 </sequence>

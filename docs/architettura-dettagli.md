@@ -1386,6 +1386,15 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   nell'edificio ciò che il programma ha scritto, pezzo per pezzo. Un edificio arredato sta nella cache delle forme con la chiave
   dell'interno (`interiorKey`, `furnishedResult`: la via, il testo, il seme dell'arredo, poi la `formKey` dell'edificio). Nessun agente
   lo chiama ancora.
+- **La casa che usa la Grande** (ADR-0213, T413): un'abitazione che cresce a regole dà alla casa il pavimento della sua taglia, non un
+  corpo di 35-45 voxel in un giardino. Chi lo è lo dice la richiesta (`SculptRequest.dwelling`: le case comuni del mondo) o il concetto
+  (`isDwelling` in `src/mj/classes.ts`, le parole di una casa e nessuna di un forte, una torre, un tempio, in italiano e in inglese). Il
+  kernel misura il pavimento coperto di ogni piano in stanze (`storeyFloors` in `interior.ts`, sul cammino di `habitablePartsOf`: i centri
+  del corpo con qualcosa sopra, tagliati a `NARROW` da `roomsOf`, la misura `stanzeDi` del banco dello Scenografo); i controlli dello
+  Scultore (`checkProgram(…, { dwelling })`, `dwellingErrors` in `src/mj/check.ts`) vogliono `DWELLING`: 10 caselle² al piano terra e a un
+  altro piano, il piano terra in 2 stanze di 1,5 caselle² o più. La richiesta lo dice (`DWELLING_LINE`), il prompt delle strutture dà il corpo
+  di un'abitazione (6 celle dietro il centro, 6 davanti, 7 per lato), il muro interno e la sua porta; la villetta offline è un'abitazione
+  che passa.
 
 <a id="taglie"></a>
 ## Le taglie
