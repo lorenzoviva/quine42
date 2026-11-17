@@ -152,11 +152,11 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `lotti` del protocollo.
 
 ### Blocco
-- **Inglese**: `block`, `Block`, `BlockMark`, `blocks`, `blockLot`, `blockPlaces`, `blockOfPlace`
-- **Definizione**: quattro luoghi, 2 × 2, con nel mezzo il lotto di una struttura gargantuesca (25 × 25 caselle) e attorno l'anello dei loro sentieri; il luogo che l'ha chiesta tiene la struttura, gli altri tre hanno il piano del kernel (T370, ADR-0206).
+- **Inglese**: `block`, `Block`, `BlockMark`, `blocks`, `blockLot`, `blockPlaces`, `blockOfPlace`; il suo lato in luoghi `side` (`sideOf`, `BLOCK`, `MAX_BLOCK`), il lato del suo lotto in caselle `lot` (`lotSideOf`), la sua forma `BlockShape` (`blockShapeFor`), l'anello `RING`
+- **Definizione**: luoghi in un quadrato, 2 × 2 o 3 × 3, con nel mezzo il lotto di una struttura gargantuesca (25 × 25 caselle, o quanto la struttura, fino a 50 × 50 su 3 × 3) e attorno l'anello dei loro sentieri; il luogo che l'ha chiesta tiene la struttura, gli altri hanno il piano del kernel (T370, ADR-0206; il lato dalla voce della struttura, T404, ADR-0208). Il lato di un blocco non è la taglia di una struttura (`size`).
 - **Dove vive**: `src/kernel/block.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `megachunk`, `quadrante`, `gruppo di luoghi`
-- **Fermo**: `block` nei piani di `maps/` e nel protocollo, `blocks` in `world/state.json`.
+- **Fermo**: `block` nei piani di `maps/` (con `side` e `lot`) e nel protocollo, `blocks` in `world/state.json` (`anchor`, `side`, `lot`).
 
 ### Varco
 - **Inglese**: `gate`, `gates`, `gateTiles`

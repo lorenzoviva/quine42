@@ -188,13 +188,19 @@ for (const [file, xml] of Object.entries(sculpted)) {
   CATALOG.push({ id: `scultori:${run}/${concept}-${size}`, name: `${concept} ${size} · ${who}`, role: 'structure', xml, vpt: 20, size: box, source: sourceOf(xml), sculpted: true, ...withIncludes(xml) });
 }
 
+/**
+ * The density a hand drawn model is drawn for, if not the lab's 20 (T404, D61): the author's fort, 500 × 500 voxels, is 50 × 50 tiles at
+ * 10 voxels a tile, as its entry says in a world (`vpt: 10`, ADR-0208); the «voxel per casella» of the inspector starts from it.
+ */
+export const HANDMADE_VPT: Readonly<Record<string, number>> = { 'forte-handmade': 10 };
+
 // Hand drawn models
 const handmade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 for (const [file, xml] of Object.entries(handmade)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const target = base.split('.')[0];
   // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
-  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'handmade', xml, vpt: 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
+  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'handmade', xml, vpt: HANDMADE_VPT[target] ?? 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
 }
 
 

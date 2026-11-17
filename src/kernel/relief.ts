@@ -265,7 +265,7 @@ export interface LotBox {
   y1: number;
   /**
    * The level it lies flat at, when it is not this chunk's to decide (T370, ADR-0206): the lot of a block, which goes past the chunk and
-   * lies at one level for its four places (`blockLevel`). It is laid first, over the chunk's border too.
+   * lies at one level for all its places (`blockLevel`). It is laid first, over the chunk's border too.
    */
   level?: number;
 }

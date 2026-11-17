@@ -1265,7 +1265,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   D58); dall'1/12, su un mondo che va su OpenRouter, Opus 5.5 (11 su 12 a 0,75 $ per riuscita nel giro di T392; `sculptorsOn`, ADR-0205, in `#gemini`).
 - **Il lotto di più luoghi** (ADR-0206, T370, contratto 0.8, D53 opzione 1): la **gargantuesca delle strutture** è 25 × 25 × 8 caselle
   (`GARGANTUAN_LOT`, `tilesOf`: 500 × 500 × 160 voxel a 20 per casella, `STRUCTURE_SIDE` 500, `FORM_LIMITS` 40 milioni di celle), la misura del
-  forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`); le altre classi e taglie restano la scala di D&D
+  forte disegnato a mano dall'autore a 20 voxel per casella (`lab/mjx/models/handmade/forte-handmade.xml`; la sua voce lo vuole a 10, 50 × 50 su
+  3 × 3 luoghi, sotto); le altre classi e taglie restano la scala di D&D
   (`scaledTiles`), e così ciò che è venuto prima: una voce che dice la sua densità (`vpt`) e una carta fatta a mano (`boxUnderMaxSide`).
   Non entra in un luogo di 18: sta su un **blocco** di 2 × 2 luoghi (`src/kernel/block.ts`: il luogo in alto a sinistra lo nomina, `BlockMark`),
   nel mezzo, con cinque caselle di anello prima e sei dopo (`blockLot`, `lotIn`). **Chi lo prende**: il piano nuovo di un luogo che chiede una
@@ -1294,6 +1295,29 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (`analyse(…, { groundJoins })`, `Validator.modelGrows`, `checkProgram`; `addModel` prova una voce nuova col suo `time` e la sua crescita):
   la fattoria a 20 caselle non cade più per i recinti e i campi. Il prompt dello Scultore: il piano a 1/5 è 100 × 100 celle alla gargantuesca. Le
   misure col forte dell'autore (7,2 s, mesh 77 MB, 197 fps dentro) sono nel banco `lab/banco/taglie/`.
+- **Il blocco grande quanto la sua struttura** (ADR-0208, T404, kernel 0.8.2, D60 A e D61 A2): il forte dell'autore è a **10 voxel per
+  casella**, la densità della sua voce (`{ class: 'structure', size: 'gargantuan', vpt: 10, time: 30000 }`): 500 × 500 × 148 voxel sono
+  50 × 50 × 14,8 caselle, e tutto ciò che il gioco misura sulla forma scala con lei (il gradino `stepOf(10)` = 2 voxel, l'alzata delle sue
+  scale; l'impronta, i pavimenti, `habitableParts`, `reachableStoreys`, `formAreas`, la mesh); nel laboratorio 3D parte da 10
+  (`HANDMADE_VPT`); nel seme non c'è, entra in un mondo come ogni voce (`addModel`). **Le caselle di una gargantuesca** sono quelle della voce
+  che indosserà (`lotTiles` → `Forms.entryTiles`: la scatola del programma se la dice, altrimenti `entryBox`, divise per `vptOf`; una da
+  scolpire: `tilesOf`, 25). **Il blocco** ha un lato in luoghi e un lotto in caselle (`BlockMark.side`, `.lot`; 2 e 25 se non li dice):
+  `blockShapeFor` fa il lotto grande quanto la struttura (mai sotto i 25 di prima) e il lato il più piccolo da `BLOCK` 2 a `MAX_BLOCK` 3 che
+  lo tiene con almeno `RING` 2 caselle d'anello per lato; il forte: 3 × 3 luoghi (54 caselle), lotto di 50, due caselle d'anello. Oltre
+  3 × 3 nessun blocco: il registro lo dice («più grande del blocco più grande») e la struttura scende (`claimSizes`). `blocksAround(cx, cy,
+  forma)` dà i nove candidati di un 3 × 3 (prima quello dove il luogo è in alto a sinistra) e `claimBlock` salta quelli dove il luogo che
+  chiede sarebbe tutto lotto (il luogo di mezzo): le cose, le rune e le persone del suo piano hanno l'anello; gli altri otto hanno il piano
+  del kernel, i nove si caricano insieme; `blockOfPlace` cerca fra i blocchi noti. **Con l'anello di due caselle** il varco di un lato fra
+  due luoghi del blocco che cade sotto il lotto va sulla casella accanto all'angolo, che è bordo del lotto e si cammina (`blockGates`: fra 2 e
+  17 come prima, se lì è tutto lotto fra 1 e 16); il luogo di mezzo è tutto lotto e un lato che il lotto copre tutto tiene il varco sotto il
+  lotto; il layout parte dal primo varco fuori dal lotto (`layout`; per i 2 × 2 sempre quello ovest). **Dove si ricorda**: `block: { x, y,
+  side?, lot? }` nei piani e `blocks: { "x,y": "ax,ay" | { anchor, side, lot } }` nello stato, i 2 × 2 col lotto di 25 scritti come prima
+  (`markOf`, `blockRecord`); `readBlockMark` e `readBlocks` rifiutano un lato fuori da 2-3 o un lotto non sano. **Le misure**: col cammino
+  del kernel (`lab/scripts/forte-scala.ts -- --cammina 20,10,5`) a 10 il corpo raggiunge a piedi quattro piani del forte (il suolo, il
+  camminatoio a 23 voxel, i piani del mastio a 35 e 59), a 5 solo il suolo; nel browser (`misura-frame.mjs <porta> --blocco <xml> --vpt 10`,
+  `lab/banco/riferimento/misure/`) il 3 × 3 si pianifica in 1,9 s, il forte arriva in 11,5 s, 184 fps accanto (il 2 × 2 a 20: 1,4 s, 12,2 s,
+  192 fps), i buffer a 200 MB in tutti e due; a piedi il viandante entra dalla porta del mastio e sale la rampa al secondo piano
+  (`docs/img/forte-gioco-10-*.jpg`). Le mura di 1,5 viandanti sono il disegno dell'autore: le alza il programma, non il kernel.
 
 <a id="taglie"></a>
 ## Le taglie

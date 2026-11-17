@@ -42,7 +42,7 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
-import { classOf, growsByRules, guessClass, RARE_SIZES, scaledTiles, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
+import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
@@ -50,7 +50,7 @@ import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareablePro
 import { entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
-import { blockGates, blockKey, blockLevel, blockPlaces, blocksAround, inBlock, lotIn, readBlockMark, readBlocks, reservedCells, type Block, type BlockMark } from './block';
+import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { WaterFlow, WET, type WaterChange } from './water';
@@ -573,8 +573,8 @@ export class Kernel {
   /** The places that have the rare structures (ADR-0092): size → area (zone, realm) → chunk key. */
   private rari = new Map<SizeTier, Map<string, string>>(RARE_SIZES.map((t) => [t, new Map()]));
   /**
-   * The blocks of the world (T370, ADR-0206): four places with the lot of a Gargantuan structure in the middle, by their top-left place
-   * («x,y»), with the place whose plan has the structure (saved with the game, and marked in the four plans).
+   * The blocks of the world (T370, ADR-0206): 2 × 2 places (or 3 × 3, T404) with the lot of a Gargantuan structure in the middle, by their
+   * top-left place («x,y»), with the place whose plan has the structure (saved with the game, and marked in the plans of all its places).
    */
   private blocks = new Map<string, Block>();
   private runesDirty = true;
@@ -1961,20 +1961,17 @@ export class Kernel {
     } finally {
       end();
     }
-    // A Gargantuan structure takes the lot of 2 × 2 places (T370), if three places beside it are still free; a place of a block whose
-    // structure's plan is lost is planned by the Cartographer as any, and keeps the block's lot.
-    if (block) plan.block = { x: block.x, y: block.y };
+    // A Gargantuan structure takes the lot of a block of places (T370; its side the structure's, T404), if the places beside it are still
+    // free; a place of a block whose structure's plan is lost is planned by the Cartographer as any, and keeps the block's lot.
+    if (block) plan.block = markOf(block);
     else if (this.alive(ch)) await this.claimBlock(ch, plan);
     await this.chunkStore.save(this.recordKey(ch), { plan });
     if (this.alive(ch)) this.applyPlan(ch, plan);
   }
 
-  /** The block a place is part of (T370), if any. */
+  /** The block a place is part of (T370), if any: blocks are few (one Gargantuan structure a realm) and of any side (T404). */
   blockOfPlace(cx: number, cy: number): Block | undefined {
-    for (const b of blocksAround(cx, cy)) {
-      const hit = this.blocks.get(blockKey(b));
-      if (hit) return hit;
-    }
+    for (const b of this.blocks.values()) if (inBlock(b, cx, cy)) return b;
     return undefined;
   }
 
@@ -2006,13 +2003,13 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: { x: b.x, y: b.y } };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b) };
   }
 
   /**
    * Whether the places of a block other than `ch` may be its (T370): drafts nobody is planning, in no block, not the start, in no region
-   * of the master and in the same region of the atlas as `ch` (one environment for the four), and the lot mostly on land (a quarter of
-   * water at most, the sea included).
+   * of the master and in the same region of the atlas as `ch` (one environment for all), and the lot mostly on land (a quarter of water at
+   * most, the sea included).
    */
   private blockFree(b: BlockMark, ch: Chunk): boolean {
     const S = this.config.chunkSize;
@@ -2038,24 +2035,34 @@ export class Kernel {
   }
 
   /**
-   * A Gargantuan structure asked by a new plan (T370, ADR-0206): it takes the lot of 2 × 2 places, the first of the four blocks around the
-   * place (`blocksAround`) whose other places are free (`blockFree`) and have no saved plan. The plan is marked, its Gargantuan structure
-   * goes first (it is the one on the largest lot), the realm's Gargantuan is this place's; the other three get the kernel's plan, saved now.
-   * Without a free block nothing changes: the structure goes down to the size its own lots take (`claimSizes`).
+   * A Gargantuan structure asked by a new plan (T370, ADR-0206): it takes the lot of a block of places, the first of the blocks around the
+   * place (`blocksAround`) whose other places are free (`blockFree`) and have no saved plan. The block is as large as the structure (T404,
+   * `blockShapeFor`): 2 × 2 places for one of 25 tiles, 3 × 3 for the author's fort at 10 voxels a tile (50 tiles); the place that asks keeps
+   * ground of its own (never the middle place of 3 × 3, all under the lot). The plan is marked, its Gargantuan structure goes first (it is the
+   * one on the largest lot), the realm's Gargantuan is this place's; the other places get the kernel's plan, saved now. Without a free block,
+   * or for a structure larger than the largest block, nothing changes: it goes down to the size its own lots take (`claimSizes`).
    */
   private async claimBlock(ch: Chunk, plan: ChunkPlan): Promise<void> {
     if (this.mirror || !Kernel.asksGargantuan(plan) || this.blockOfPlace(ch.cx, ch.cy)) return;
-    for (const b of blocksAround(ch.cx, ch.cy)) {
+    const S = this.config.chunkSize;
+    const concept = (plan.structures ?? []).map(readStructure).find((s) => s.size === 'gargantuan')!.concept;
+    const shape = blockShapeFor(Math.max(...this.lotTiles(classOf('structure')!, 'gargantuan', concept).slice(0, 2)), S);
+    if (!shape) {
+      this.council.say('kernel', 'info', `luogo ${ch.key}: «${concept}» è più grande del blocco più grande (${this.lotTiles(classOf('structure')!, 'gargantuan', concept).slice(0, 2).join(' × ')} caselle), scende di taglia`, 'cartographer', 'chunk.plan');
+      return;
+    }
+    for (const b of blocksAround(ch.cx, ch.cy, shape)) {
+      if (reservedCells(b, S, ch.cx, ch.cy).size === S * S) continue;
       if (!this.rareAllowed(ch).includes('gargantuan') || !this.blockFree(b, ch)) continue;
       const others = blockPlaces(b).filter(([cx, cy]) => cx !== ch.cx || cy !== ch.cy);
       const saved = await Promise.all(others.map(([cx, cy]) => this.chunkStore.load(this.recordKey({ cx, cy, key: this.chunkKey(cx, cy) } as Chunk)).catch(() => undefined)));
       // Checked again after the wait: another place may have been taken meanwhile.
       if (saved.some(Boolean) || !this.alive(ch) || !this.rareAllowed(ch).includes('gargantuan') || !this.blockFree(b, ch)) continue;
-      const block: Block = { x: b.x, y: b.y, anchor: ch.key };
+      const block: Block = { ...markOf(b), anchor: ch.key };
       this.blocks.set(blockKey(block), block);
       this.blockAnchors.set(blockKey(block), plan);
       this.rari.get('gargantuan')!.set(rareAreaOf('gargantuan', ch.cx, ch.cy), ch.key);
-      plan.block = { x: b.x, y: b.y };
+      plan.block = markOf(b);
       const all = (plan.structures ?? []).map(readStructure);
       const first = all.findIndex((s) => s.size === 'gargantuan');
       plan.structures = [all[first], ...all.filter((_, i) => i !== first)];
@@ -2063,7 +2070,7 @@ export class Kernel {
         const there = this.chunks.get(this.chunkKey(cx, cy));
         if (there) there.held = false;
       }
-      this.council.say('kernel', 'info', `luogo ${ch.key}: «${plan.structures[0].concept}» prende il lotto di 2 × 2 luoghi da ${b.x},${b.y}`, 'cartographer', 'chunk.plan');
+      this.council.say('kernel', 'info', `luogo ${ch.key}: «${plan.structures[0].concept}» prende il lotto di ${sideOf(b)} × ${sideOf(b)} luoghi da ${b.x},${b.y}`, 'cartographer', 'chunk.plan');
       await Promise.all(others.map(([cx, cy]) => this.chunkStore.save(this.recordKey({ cx, cy, key: this.chunkKey(cx, cy) } as Chunk), { plan: this.blockPlan(b, plan) }).catch(() => undefined)));
       return;
     }
@@ -2636,13 +2643,14 @@ export class Kernel {
   }
 
   /**
-   * The tiles a structure of a concept takes at a size (ADR-0092): its class's (`tilesOf`), but a Gargantuan one sculpted before the lot
-   * of more places (its entry says its density, T370) takes the 10 × 10 tiles it was sculpted for, and stays where it stood.
+   * The tiles a structure of a concept takes at a size (ADR-0092): its class's (`tilesOf`), but a Gargantuan one takes the tiles of the
+   * entry it would wear, at that entry's density (T404, `Forms.entryTiles`): one sculpted before the lot of more places (its entry says
+   * `vpt` 20, T370) the 10 × 10 tiles it was sculpted for, the author's fort (500 voxels at 10 a tile) 50 × 50.
    */
   private lotTiles(cls: AssetClass, t: SizeTier, concept: string): [number, number, number] {
     if (cls.id !== 'structure' || t !== 'gargantuan') return tilesOf(cls, t);
-    const info = this.forms.info(this.structureModelFor(concept, t));
-    return info?.class === 'structure' && typeof info.vpt === 'number' ? scaledTiles(cls, t) : tilesOf(cls, t);
+    const id = this.structureModelFor(concept, t);
+    return (this.forms.info(id)?.class === 'structure' && this.forms.entryTiles(id)) || tilesOf(cls, t);
   }
 
   /**
@@ -2667,7 +2675,7 @@ export class Kernel {
     const known = this.blocks.get(key);
     // The place the world knows keeps it; one not known yet is the place whose plan asks for the Gargantuan structure.
     const anchor = known?.anchor || (Kernel.asksGargantuan(plan) ? ch.key : '');
-    if (!known || known.anchor !== anchor) this.blocks.set(key, { x: b.x, y: b.y, anchor });
+    if (!known || known.anchor !== anchor) this.blocks.set(key, { ...markOf(b), anchor });
     if (anchor === ch.key) this.blockAnchors.set(key, plan);
   }
 
@@ -3054,7 +3062,7 @@ export class Kernel {
     const field = this.levelsOf(ch);
     let l = this.levelCache.get(ch);
     if (l?.tiles !== ch.tiles || l.lots !== ch.lots || l.field !== field || l.block !== ch.blockLot) {
-      // The lot of a block lies at the block's level, for its four places (T370).
+      // The lot of a block lies at the block's level, for all its places (T370).
       const lots = ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots;
       const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => field[r * S + c], lots);
       l = { tiles: ch.tiles, lots: ch.lots, block: ch.blockLot, field, levels };
@@ -3244,7 +3252,7 @@ export class Kernel {
     const want = new Set<string>();
     let any = false;
     for (const w of this.wanderersById.keys()) any = this.as(w, () => this.wantChunks(want)) || any;
-    // The places of a block come and go together (T370): its structure stands on the four, and lives with one of them.
+    // The places of a block come and go together (T370): its structure stands on all of them (four, or nine, T404), and lives with one.
     for (const key of [...want]) {
       const [cx, cy] = key.split(',').map(Number);
       const b = this.blocks.size ? this.blockOfPlace(cx, cy) : undefined;
@@ -4532,9 +4540,12 @@ export class Kernel {
     }
   }
 
-  /** The blocks as the state keeps them (T370): top-left place → the place with the structure; those whose structure is not known stay in the plans only. */
-  private blocksToSave(): Record<string, string> {
-    return Object.fromEntries([...this.blocks.values()].filter((b) => b.anchor).sort((a, b) => a.y - b.y || a.x - b.x).map((b) => [blockKey(b), b.anchor]));
+  /**
+   * The blocks as the state keeps them (T370): top-left place → the place with the structure (with the side and the lot of a block that is
+   * not 2 × 2 with the lot of 25, T404, `blockRecord`); those whose structure is not known stay in the plans only.
+   */
+  private blocksToSave(): Record<string, ReturnType<typeof blockRecord>> {
+    return Object.fromEntries([...this.blocks.values()].filter((b) => b.anchor).sort((a, b) => a.y - b.y || a.x - b.x).map((b) => [blockKey(b), blockRecord(b)]));
   }
 
   /** The things moved as the save keeps them (T292): from the world where they stand now, the rest as they were last seen. */
