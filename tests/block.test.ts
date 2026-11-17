@@ -4,11 +4,11 @@
 // are connected (rule 10), saved and loaded again as they were; without a free block it goes down to what its own lots take.
 
 import { describe, expect, it } from 'vitest';
-import { BLOCK, blockGates, blockKey, blockLevel, blockLot, blockPlaces, blocksAround, inBlock, lotIn, readBlockMark, readBlocks, reservedCells, type BlockMark } from '../src/kernel/block';
+import { BLOCK, blockGates, blockShapeFor, blockKey, blockLevel, blockLot, blockPlaces, blocksAround, inBlock, lotIn, readBlockMark, readBlocks, reservedCells, type BlockMark } from '../src/kernel/block';
 import { gates, layout } from '../src/kernel/layout';
 import { chunkLevels } from '../src/kernel/relief';
 import { analyse } from '../src/mj/check';
-import { boxOf, classOf, densityFor, GARGANTUAN_LOT, STRUCTURE_SIDE, TILE, tilesOf } from '../src/mj/classes';
+import { boxOf, classOf, densityFor, GARGANTUAN_LOT, STRUCTURE_SIDE, STRUCTURE_VPT, TILE, tilesOf } from '../src/mj/classes';
 import { FORM_LIMITS } from '../src/mj/run';
 import { Kernel, realmOf } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
@@ -149,15 +149,18 @@ describe('the layout of a place of a block', () => {
 describe('the Gargantuan structure, 25 × 25 tiles', () => {
   const structure = classOf('structure')!;
 
-  it('is 500 × 500 × 160 voxels at 20 a tile, within the ceilings of the forms', () => {
+  it('is 500 × 500 × 160 voxels, within the ceilings of the forms: 25 × 25 tiles at 20, 31.25 at 16 since T405', () => {
     expect(STRUCTURE_SIDE).toBe(500);
-    expect(tilesOf(structure, 'gargantuan')).toEqual([25, 25, 8]);
-    expect(densityFor(structure, 'gargantuan')).toBe(TILE);
+    expect(tilesOf(structure, 'gargantuan')).toEqual([31.25, 31.25, 10]);
+    expect(densityFor(structure, 'gargantuan')).toBe(STRUCTURE_VPT);
+    expect(GARGANTUAN_LOT * TILE).toBe(500);
+    // On a block of 2 × 2 places still: a lot of 32, a ring of two tiles.
+    expect(blockShapeFor(tilesOf(structure, 'gargantuan')[0], 18)).toEqual({ side: 2, lot: 32 });
     expect(boxOf(structure, 'gargantuan')).toEqual([500, 500, 160]);
     expect(500 * 500 * 160).toBeLessThanOrEqual(FORM_LIMITS.cells);
     // The other classes keep the scale of D&D.
     expect(tilesOf(classOf('building')!, 'gargantuan')).toEqual([10, 10, 10]);
-    expect(tilesOf(structure, 'huge')).toEqual([7.5, 7.5, 6]);
+    expect(tilesOf(structure, 'huge')).toEqual([9.375, 9.375, 7.5]);
   });
 
   it('is a whole of parts on the ground: what rests on the bottom is one body, what floats is detached', () => {
@@ -225,22 +228,24 @@ describe('a Gargantuan structure in the world', () => {
   const A = key(b.x, b.y);
 
   it('takes the lot of 2 × 2 places: four plans marked, the structure in the middle, every place connected; saved and loaded again as it was', async () => {
+    // Its tiles at 16 voxels a tile (T405): 31.25, a lot of 32 on the 2 × 2 places, two tiles of ring.
+    const m: BlockMark = { ...b, lot: 32 };
     const chunks = new MemoryChunks();
     const k = await boot(undefined, chunks, new Set([A]));
     expect(k.config.chunkSize).toBe(S);
     expect(await k.planAhead(b.x, b.y)).toBe('nuovo');
-    expect(k.blockOfPlace(b.x + 1, b.y + 1)).toEqual({ ...b, anchor: A });
+    expect(k.blockOfPlace(b.x + 1, b.y + 1)).toEqual({ ...m, anchor: A });
     expect(k.rareAllowed({ key: key(b.x + 2, b.y + 2), cx: b.x + 2, cy: b.y + 2 })).not.toContain('gargantuan');
     // The other three: the kernel's plans, saved at once, without a call to the Cartographer.
     const calls = k.ai.usage.text;
     for (const [cx, cy] of blockPlaces(b).slice(1)) expect(await k.planAhead(cx, cy)).toBe('noto');
     expect(k.ai.usage.text).toBe(calls);
     const anchor = k.chunks.get(A)!;
-    expect(anchor.plan!.block).toEqual(b);
+    expect(anchor.plan!.block).toEqual(m);
     expect(anchor.plan!.structures!.map((s) => s.concept)).toEqual(['la cittadella', 'il mulino']);
     for (const [cx, cy] of blockPlaces(b).slice(1)) {
       const p = k.chunks.get(key(cx, cy))!.plan!;
-      expect(p).toMatchObject({ block: b, place: anchor.plan!.place, layout: anchor.plan!.layout, objects: [], runes: [] });
+      expect(p).toMatchObject({ block: m, place: anchor.plan!.place, layout: anchor.plan!.layout, objects: [], runes: [] });
       expect(p.structures).toBeUndefined();
     }
     // One structure, Gargantuan, in the middle of the lot, kept by the place that asked for it.
@@ -250,18 +255,20 @@ describe('a Gargantuan structure in the world', () => {
     expect(k.ecs.get(sid, 'origin').key).toBe(`${A}#s${anchor.lots.length}`);
     expect(k.ecs.get(sid, 'chunk').key).toBe(A);
     expect(k.ecs.get(sid, 'structure')).toMatchObject({ concept: 'la cittadella', class: 'structure', size: 'gargantuan', model: 'struttura-la-cittadella-gargantuan' });
-    // The lot has five tiles of ring before it and six after: its middle is half a tile before the corner of the four places.
-    const mid = { x: (b.x + 1) * S - 0.5, y: (b.y + 1) * S - 0.5 };
+    // The lot has two tiles of ring on every side: its middle is the corner of the four places.
+    const ml = blockLot(m, S);
+    const mid = { x: (ml.x0 + ml.x1 + 1) / 2, y: (ml.y0 + ml.y1 + 1) / 2 };
+    expect(mid).toEqual({ x: (b.x + 1) * S, y: (b.y + 1) * S });
     expect(k.ecs.get(sid, 'pos')).toEqual(mid);
     // Rule 10: in every place the gates and the edge of the lot are walked from the first gate, the lot is ground nobody is put on.
     const level = k.groundAt(mid.x, mid.y);
     for (const [cx, cy] of blockPlaces(b)) {
       const here = key(cx, cy), ch = k.chunks.get(here)!;
-      const reserved = reservedCells(b, S, cx, cy);
-      const g = blockGates(gates(cx, cy, S, k.config.seed), b, S, k.config.seed, cx, cy);
+      const reserved = reservedCells(m, S, cx, cy);
+      const g = blockGates(gates(cx, cy, S, k.config.seed), m, S, k.config.seed, cx, cy);
       const reach = walked(k, here, g[0]);
       for (const t of g) expect(reach.has(t), `${here}: varco ${t}`).toBe(true);
-      const l = lotIn(b, S, cx, cy);
+      const l = lotIn(m, S, cx, cy);
       for (let r = Math.max(0, l.y0 - 1); r <= Math.min(S - 1, l.y1 + 1); r++)
         for (let c = Math.max(0, l.x0 - 1); c <= Math.min(S - 1, l.x1 + 1); c++) {
           const i = r * S + c;
@@ -288,7 +295,7 @@ describe('a Gargantuan structure in the world', () => {
       const cx = Math.floor(x / S), cy = Math.floor(y / S);
       return k.chunks.get(key(cx, cy))!.tiles[(y - cy * S) * S + (x - cx * S)];
     };
-    const lot = blockLot(b, S);
+    const lot = blockLot(m, S);
     for (const x of [lot.x0 - 1, lot.x1 + 1]) for (let y = lot.y0 - 1; y <= lot.y1 + 1; y++) expect(k.palette[tileAt(x, y)].solid, `${x},${y}`).toBe(false);
     for (const y of [lot.y0 - 1, lot.y1 + 1]) for (let x = lot.x0 - 1; x <= lot.x1 + 1; x++) expect(k.palette[tileAt(x, y)].solid, `${x},${y}`).toBe(false);
     // The structure looks one of four ways.
@@ -296,10 +303,10 @@ describe('a Gargantuan structure in the world', () => {
     // Saved with the game, and loaded again in another kernel from the same plans: the same places, the same structure.
     expect(k.saveState()).toBe(true);
     const state = JSON.parse(k.repo.head().files['world/state.json']!);
-    expect(state.blocks).toEqual({ [A]: A });
+    expect(state.blocks).toEqual({ [A]: { anchor: A, lot: 32 } });
     expect(state.rares.gargantuan).toEqual({ [realmOf(b.x, b.y)]: A });
     const again = await boot(k.repo.head().files, chunks);
-    expect(again.blockOfPlace(b.x, b.y + 1)).toEqual({ ...b, anchor: A });
+    expect(again.blockOfPlace(b.x, b.y + 1)).toEqual({ ...m, anchor: A });
     for (const [cx, cy] of [...blockPlaces(b)].reverse()) expect(await again.planAhead(cx, cy)).toBe('noto');
     for (const [cx, cy] of blockPlaces(b)) expect(again.chunks.get(key(cx, cy))!.tiles).toBe(k.chunks.get(key(cx, cy))!.tiles);
     const sid2 = again.ecs.query('structure', 'origin').find((id) => again.ecs.get(id, 'structure').size === 'gargantuan')!;
@@ -313,9 +320,9 @@ describe('a Gargantuan structure in the world', () => {
     const other = key(b.x + 1, b.y);
     expect(bare.blockOfPlace(b.x + 1, b.y)).toBeUndefined();
     expect(await bare.planAhead(b.x + 1, b.y)).toBe('noto');
-    expect(bare.blockOfPlace(b.x + 1, b.y)).toEqual({ ...b, anchor: '' });
+    expect(bare.blockOfPlace(b.x + 1, b.y)).toEqual({ ...m, anchor: '' });
     expect(await bare.planAhead(b.x, b.y)).toBe('noto');
-    expect(bare.blockOfPlace(b.x + 1, b.y)).toEqual({ ...b, anchor: A });
+    expect(bare.blockOfPlace(b.x + 1, b.y)).toEqual({ ...m, anchor: A });
     expect(bare.chunks.get(other)!.tiles).toBe(k.chunks.get(other)!.tiles);
   }, 60_000);
 
@@ -347,10 +354,11 @@ describe('the migration 0.7 → 0.8', () => {
       [`models/${id}.xml`]: '<sequence values="BW" origin="bottom"><box at="0 0 0" size="20 20 60" color="W"/></sequence>',
     };
     const { files: out, applied } = migrateUniverse(files);
-    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.7→0.8:']);
+    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.7→0.8:', '0.8→0.9:']);
     const after = JSON.parse(out['models/index.json']);
     expect(after[id]).toEqual({ class: 'structure', size: 'gargantuan', vpt: 20 });
-    expect(after['struttura-la-rocca-huge']).toEqual({ class: 'structure', size: 'huge' });
+    // Then 0.8 → 0.9 (T405): the Huge one of then says its 20 too.
+    expect(after['struttura-la-rocca-huge']).toEqual({ class: 'structure', size: 'huge', vpt: 20 });
     // Its box is the one it was sculpted in; a new one has the lot of more places.
     const structure = classOf('structure')!;
     expect(entryBox(structure, after[id])).toEqual([200, 200, 160]);

@@ -11,7 +11,7 @@ import { boxOf, classOf } from '../src/mj/classes';
 import { withSize } from '../src/kernel/agents/sculptor';
 import { SOUND_CLASS } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
-import { cellarOf, InlineRunner, rootTag, vptOf, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
+import { cellarVoxels, InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
@@ -29,7 +29,7 @@ describe('the library of models', () => {
       // In the box the library runs it in (`sizeFor`): its own `size`, or its class's box at its size and as much deeper as its cellar (ADR-0135).
       const xml = bundledFiles[p];
       const cls = classOf(index[id].class);
-      const boxed = index[id].class === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].size).map((n, i) => (i === 2 ? n + cellarOf(index[id]) * vptOf(index[id]) : n)) as [number, number, number]);
+      const boxed = index[id].class === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].size).map((n, i) => (i === 2 ? n + cellarVoxels(index[id]) : n)) as [number, number, number]);
       const errors = modelErrors(p, boxed, index[id].time);
       const expected = expectedModelErrors(id);
       expect(errors, id).toHaveLength(expected.length);

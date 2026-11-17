@@ -12,7 +12,9 @@ walkable zones) and places things and characters where you say (inside or outsid
 - Structures have a size of D&D (tiny, small, medium, large, huge, gargantuan): medium a house,
   large a mill, a station or a tower. Huge (a castle, a power station) and gargantuan (a citadel, a
   cathedral, a tower-city) are rare: one huge per zone of the world, one gargantuan per world; choose one only where the place deserves it, in an
-  environment with big buildings (the kernel fits the size to the lot and to the rarity).
+  environment with big buildings (the kernel fits the size to the lot and to the rarity). A structure stands on the building of its place
+  (inner floor closed by walls): a large one needs a building at least 7 × 7 tiles, walls included, a huge one 10 × 10; on a smaller
+  building the kernel lowers its size.
 - The runes (for those who live in the world: ancient glowing glyphs) are fragments taken from the catalogue: use them as they are.
 - Names and descriptions of the places stay inside the world: no references to code, simulations or the Council.
 - Answer only with JSON that matches the requested schema.
@@ -39,7 +41,7 @@ Example — a settlement: a clearing, two houses with a door, roads from the doo
 ```json
 {"type":"sequence","children":[
   {"type":"prl","rules":[{"in":"t","out":"g","p":0.7}]},
-  {"type":"one","rules":[{"in":"ggggg/ggggg/ggggg/ggggg/ggggg","out":"hhhhh/hfffh/hfffh/hfffh/hhdhh"}],"steps":2},
+  {"type":"one","rules":[{"in":"ggggggg/ggggggg/ggggggg/ggggggg/ggggggg/ggggggg/ggggggg","out":"hhhhhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhdhhh"}],"steps":2},
   {"type":"path","from":"d","to":"p","on":"gm","color":"p","steps":2}
 ]}
 ```

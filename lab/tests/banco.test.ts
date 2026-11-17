@@ -72,8 +72,9 @@ describe('le misure del banco', () => {
 describe('il corpo del banco è quello del kernel', () => {
   it('dove il banco sale, il kernel sale; dove il banco si ferma, il kernel si ferma', async () => {
     const index = JSON.parse(bundledFiles['models/index.json']!);
-    index.buono = { classe: 'structure' };
-    index.stretta = { classe: 'structure' };
+    // The bench of 20 voxels a tile (T405: a structure that does not say it is at 16).
+    index.buono = { classe: 'structure', vpt: 20 };
+    index.stretta = { classe: 'structure', vpt: 20 };
     const files = { ...bundledFiles, 'models/buono.xml': esempio('buono'), 'models/stretta.xml': esempio('scala-stretta'), 'models/index.json': JSON.stringify(index) };
     const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
     k.tick(1 / 60);

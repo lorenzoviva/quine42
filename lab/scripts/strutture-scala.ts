@@ -3,7 +3,10 @@
 // away) and the rise of the stairs (the steps between neighbouring places where one stands), in voxels, then in wanderers at 20, 10 and
 // 5 voxels a tile. The wanderer is 30 voxels at 20 (1.5 tiles); a game's body steps up `stepOf` voxels (a fifth of a tile).
 //
-//   npx vite-node lab/scripts/strutture-scala.ts -- [--seme 1] [--json lab/banco/riferimento/strutture-scala.json]
+//   npx vite-node lab/scripts/strutture-scala.ts -- [--seme 1] [--json lab/banco/riferimento/strutture-scala.json] [--densita 16,15,14]
+//
+// `--densita` (T405): the densities of the table (20, 10, 5 if not said), and at each the storeys the game's body reaches on foot from
+// the ground (`habitableParts` at that density: its step, its body), the doors and the rooms as the checks measure them there.
 
 import fs from 'node:fs';
 import { compileMjx, mjxIncludes, type MjxFiles } from '../../src/mj/model';
@@ -20,7 +23,7 @@ const opt = (name: string, fallback?: string) => {
 };
 const SEED = Number(opt('seme', '1'));
 const JSON_OUT = opt('json');
-const DENSITIES = [20, 10, 5];
+const DENSITIES = opt('densita')?.split(',').map(Number).filter((n) => Number.isInteger(n) && n >= 4) ?? [20, 10, 5];
 const WANDERER_TILES = 1.5;
 
 /** The structures of the photos (the ids of the lab 3D's catalogue), at the box the lab shows them at, 20 voxels a tile. */
@@ -84,7 +87,13 @@ for (const s of STRUCTURES) {
   const door = parts.doors.reduce((b, d) => (d.height > b.height ? d : b), { width: 0, height: 0 });
   const clear = parts.rooms.filter((r) => r.room > 0).map((r) => r.clear);
   const stair = stairRise(r.grid, 20);
-  results.push({ id: s.id, seed: SEED, ms, box: s.box, storeys: parts.storeys, storeyGaps, door, rooms: parts.rooms, stair });
+  // At each density, what the game measures (T405): the storeys reached on foot with its step and its body, the least room and door.
+  const at = DENSITIES.map((d) => {
+    const p = habitableParts(r.grid, model.program.palette, d, partVoxels(d).storey.clear, 0, model.actions, SEED);
+    return { vpt: d, step: stepOf(d), storeys: p.storeys, rooms: p.rooms.filter((x) => x.room > 0).length, doors: p.doors.length };
+  });
+  results.push({ id: s.id, seed: SEED, ms, box: s.box, storeys: parts.storeys, storeyGaps, door, rooms: parts.rooms, stair, at });
+  for (const a of at) console.log(`  a ${a.vpt}: gradino ${a.step}, piani a piedi ${a.storeys.join(', ')}, stanze ${a.rooms}, porte ${a.doors}`);
   console.log(`${s.id}: ${ms} ms, piani ${parts.storeys.join(', ')}, porte ${parts.doors.map((d) => `${d.width}×${d.height}`).join(' ') || '—'}, alzata ${stair.rise} (${stair.n})`);
   const all: Array<[string, number]> = [
     ['porta, luce', door.height],
@@ -97,6 +106,8 @@ for (const s of STRUCTURES) {
   lines.push(`**${s.name}** (\`${s.id}\`, ${s.box.join(' × ')} voxel, seme ${SEED})`, '');
   lines.push(`| misura | voxel | ${DENSITIES.map((d) => `a ${d}: caselle · **viandanti**`).join(' | ')} |`, `|---|---|${DENSITIES.map(() => '---').join('|')}|`);
   for (const [label, v] of rows) lines.push(`| ${label} | ${v} | ${DENSITIES.map((d) => `${fmt(v / d)} · **${fmt(v / d / WANDERER_TILES)}**`).join(' | ')} |`);
+  lines.push('', `| densità | gradino (voxel) | piani raggiunti a piedi (voxel dal suolo) | stanze | porte |`, '|---|---|---|---|---|');
+  for (const a of at) lines.push(`| ${a.vpt} | ${a.step} | ${a.storeys.join(', ')} | ${a.rooms} | ${a.doors} |`);
   lines.push('');
 }
 lines.push(`Il corpo del gioco sale un gradino di \`stepOf\`: ${DENSITIES.map((d) => `${stepOf(d)} voxel a ${d}`).join(', ')} (un quinto di casella).`);

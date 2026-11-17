@@ -5,7 +5,7 @@
 
 import type { Kernel } from './kernel';
 import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
-import { classOf, densityFor, guessClass, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
+import { classOf, densityFor, growsByRules, guessClass, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
 import type { ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -45,11 +45,13 @@ export function reuseQuestions(library: Array<{ id: string; name: string }>, cls
 
 /**
  * What a model's index entry says of its size (ADR-0092): the size, if not its class's own, and the coarser density
- * the large boxes run at (ADR-0049), so that the library runs it in the box it was sculpted in.
+ * the large boxes run at (ADR-0049), so that the library runs it in the box it was sculpted in. A structure that grows by rules says
+ * no density (T405): without one it is at `STRUCTURE_VPT` (`vptOf`), and a `vpt` would make it an entry of before (`entryBox`).
  */
 export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(req.classe), t = sizeOf(req.taglia);
   if (!cls || !t || t.id === cls.taglia) return {};
+  if (growsByRules(cls, t.id)) return { size: t.id };
   const vpt = densityFor(cls, t.id);
   return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
 }

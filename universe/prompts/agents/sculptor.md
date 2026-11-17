@@ -164,7 +164,7 @@ measures: never shrink a door, a storey or a room for a ratio.
   <map scale="1/5 1/5 1" values="BHE…every letter of the plan…" symmetry="()">
     <rule in="E" out="E"/><rule in="H" out="H"/>
     <sequence symmetry="(xy)">
-      <!-- A. the composition, on the plan (z=0) of a grid five times smaller: a cell is 5 voxels, a quarter of a tile -->
+      <!-- A. the composition, on the plan (z=0) of a grid five times smaller: a cell is 5 voxels, a third of a tile -->
     </sequence>
     <map scale="5 5 1" values="BE…every letter of the full grid, the parts' too…" symmetry="()">
       <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/> …one rule per plan letter: a block of 5 × 5…
@@ -178,14 +178,14 @@ measures: never shrink a door, a storey or a room for a ratio.
 </sequence>
 ```
 `soil="E"` is the soil of the world (the kernel writes it over the bottom layer at every size) and `origin="bottom"` puts H at its centre; the
-first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **20 × 20 cells at Large (100 × 100 × 80 voxels, 5 × 5
-tiles), 30 × 30 at Huge (150, 7.5 × 7.5), 100 × 100 at Gargantuan (500, 25 × 25: the land of four places)**: write rules that do not depend on it, anchored to H, to
+first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **20 × 20 cells at Large (100 × 100 × 80 voxels, 6.25 × 6.25
+tiles), 30 × 30 at Huge (150, 9.4 × 9.4), 100 × 100 at Gargantuan (500, 31.25 × 31.25: the land of four places)**: write rules that do not depend on it, anchored to H, to
 what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
 same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
 of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of
 the parts you include too (T k #90 #91 #92; O o N; M; U). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
 
-## A. The composition (the plan, a cell a quarter of a tile)
+## A. The composition (the plan, a cell a third of a tile)
 Tested building blocks; combine and change them for the concept. A random decision for the whole building is a rule on **one cell** (the end
 of a line, the centre), never a `prl` with `p` on every cell of an edge (that frays the edge):
 ```xml
@@ -227,12 +227,12 @@ of a line, the centre), never a `prl` with `p` on every cell of an edge (that fr
   stair's zone taken away, still leaves a square of 7 cells (35 voxels).
 
 ## What fits: the size decides what is built, not how big
-A tile is always 20 voxels, so a larger size is a larger area at the same scale: the parts one lives in never shrink (a door at least 11 × 30,
+A tile is always 16 voxels and a person 24 tall, so a larger size is a larger area at the same scale: the parts one lives in never shrink (a door at least 11 × 30,
 a storey at least 30 clear, a room at least 28 a side, a lean-to at least 30 clear and 20 deep), a program too small for the whole building
 builds **less** of it, a larger area holds **more**, never the same building bigger (the checks compare the two sizes: the larger needs
-another kind of part, or a quarter more parts). Decide first what fits at each size: a fort is a keep inside a thin ring at 5 × 5, a yard with
-a well at 7.5, the full fort with a moat at 10; a country house is the house and its porch at 5 × 5, then the hedge and the trees, then an
-orchard and a well. Then write it with rules that choose from the area, not from numbers:
+another kind of part, or a quarter more parts). Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
+a well at Huge, the full fort with a moat and more at Gargantuan; a country house is the house and its porch at Large, then the hedge and the
+trees, then an orchard and a well. Then write it with rules that choose from the area, not from numbers:
 ```xml
 <!-- the yard grows four more where six cells of ground go on past it (once: steps="1"), three more where seven go on; always a rectangle -->
 <all in="cEEEEEE" out="*cccc**" steps="1"/><all in="cE/*c" out="*c/**"/>
@@ -253,7 +253,7 @@ The soil `E` stays as it is, hidden.
 ## B. The heights: columns by steps
 After the second `map` every plan letter is a block of 5 × 5 on the bottom layer. A letter rises by moving its head up and leaving a letter at
 each step: `in="B h" out="h f"` makes the head h go up one layer and leave f below; `in="B w" out="w *"` grows a solid column of w. **The
-heights are numbers of steps**: a storey is 32 (a floor, 31 of air, the slab); a person is 30 tall. The floors of a room with two storeys
+heights are numbers of steps**: a storey is 32 (a floor, 31 of air, the slab); a person is 24 tall, a door 30: a quarter taller than a person. The floors of a room with two storeys
 (f the planks, F the slab, R the roof letter), beside the walls that rise 64 and take the roof letter on top:
 ```xml
 <all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>   <!-- plaster, a band for the windows, plaster -->

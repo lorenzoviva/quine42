@@ -10,14 +10,14 @@ import { Kernel } from '../../../../src/kernel/kernel';
 import { memoryStore } from '../../../../src/kernel/repo';
 import { MockAiModels } from '../../../../src/kernel/ai/mock';
 import { boxOf, classOf, RARE_SIZES } from '../../../../src/mj/classes';
-import { cellarOf, rootTag, vptOf, type ModelInfo } from '../../../../src/kernel/forms';
+import { cellarVoxels, rootTag, type ModelInfo } from '../../../../src/kernel/forms';
 import { modelErrors } from '../../../../src/kernel/validator';
 import { withSize } from '../../../../src/kernel/agents/sculptor';
 import type { ChunkPlan } from '../../../../src/kernel/agents/cartography';
 import type { ChunkRecord } from '../../../../src/kernel/chunks';
 import type { FileMap } from '../../../../src/kernel/types';
 import { leggiUniverso, negozioMappe, prefissoMappe } from './carica';
-import { migratePlanRecord } from '../../../../src/kernel/migrations';
+import { migratePlanRecord, MIGRATIONS } from '../../../../src/kernel/migrations';
 import { internalName } from '../../../../src/kernel/internalNames';
 import { prepareUniverse, SEED_FILE } from '../../../../src/kernel/universes';
 import { checkKernelVersion, KERNEL_VERSION } from '../../../../src/kernel/version';
@@ -51,7 +51,17 @@ export const UNIVERSI: Universo[] = [
  */
 export function leggi(u: Universo): { files: FileMap; maps: Record<string, ChunkRecord> } {
   const disk = leggiDisco(u);
-  return { files: diQuestoKernel(disk.files), maps: Object.fromEntries(Object.entries(disk.maps).map(([k, r]) => [k, migratePlanRecord(r)])) };
+  // aurora is the seed with its maps (T273), whose lots were cut at 20 voxels a tile: its structures keep the 20 they were placed at, as
+  // the migration 0.8 → 0.9 gives every universe of before (T405, ADR-0209); the seed's new world is at 16.
+  const files = u.radice === 'universe' ? cutAt20(disk.files) : disk.files;
+  return { files: diQuestoKernel(files), maps: Object.fromEntries(Object.entries(disk.maps).map(([k, r]) => [k, migratePlanRecord(r)])) };
+}
+
+/** The structures of a universe whose plans were cut at 20 voxels a tile (T405): what the migration 0.8 → 0.9 writes, `vpt: 20`. */
+function cutAt20(files: FileMap): FileMap {
+  const step = MIGRATIONS.find((m) => m.from === '0.8' && m.to === '0.9')!;
+  const { [SEED_FILE]: _, ...out } = step.migrate(files);
+  return files[SEED_FILE] === undefined ? out : { ...out, [SEED_FILE]: files[SEED_FILE] };
 }
 
 /** The files of a universe of an older contract, ported and given the seed of today; one of this kernel as it is. */
@@ -265,7 +275,7 @@ export function erroriModello(files: FileMap, id: string): string[] {
   const cls = classOf(info.class);
   if (!cls) return [`${path}: classe sconosciuta ${info.class}`];
   const [X, Y, Z] = boxOf(cls, info.size);
-  return modelErrors(path, withSize(xml, [X, Y, Z + cellarOf(info) * vptOf(info)]), info.time ?? 8000);
+  return modelErrors(path, withSize(xml, [X, Y, Z + cellarVoxels(info)]), info.time ?? 8000);
 }
 
 // --- Sidera's common houses ----------------------------------------------------------------------------------------------------------------

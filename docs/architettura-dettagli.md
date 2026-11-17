@@ -1200,12 +1200,12 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   suffisso) o se il programma scala (`shareableProgram`); la voce dice i suoi semi (`ModelInfo.seeds`, `seedsOf`). Il validatore prova un
   programma senza `size` della classe `structure` nella scatola della sua voce (`Validator.modelBox`, `Forms.structureBox`).
 - **Ciò che entra, non l'edificio rimpicciolito** (ADR-0179, T338): una struttura che cresce a regole (`growsByRules` in `src/mj/classes.ts`)
-  gira a `TILE` (20) voxel per casella a ogni taglia fino a `STRUCTURE_SIDE` (500 dal T370, 200 prima): Grande 100, Enorme 150, Gargantuesca 500 voxel di lato (25 × 25 caselle sul lotto di un blocco, sotto)
-  (`densityFor`), così una taglia più grande è un'area più grande alla stessa scala. Una voce scolpita prima tiene la sua scatola: la scatola di
+  gira alla stessa densità a ogni taglia fino a `STRUCTURE_SIDE` (500 dal T370, 200 prima): Grande 100, Enorme 150, Gargantuesca 500 voxel di lato
+  (`densityFor`; a `TILE`, 20, fino a T405, a `STRUCTURE_VPT`, 16, dopo: sotto), così una taglia più grande è un'area più grande alla stessa scala. Una voce scolpita prima tiene la sua scatola: la scatola di
   una voce è la sua taglia alla densità che la voce dice (`entryBox` in `forms.ts`: `vpt` 16 all'Enorme, 120 voxel), una nuova non scrive
   `vpt` (`modelSize`); una carta portata tiene il suo (`bring.ts`). Le parti abitabili hanno misure minime in caselle, le stesse a ogni
-  taglia (`PARTS`, `partVoxels`): porta 0,55 × 1,5 (11 × 30 a 20), piano 1,5 di luce, stanza 1,4 di lato, tettoia 1,5 di luce e 1 di
-  fondo. `habitableParts` (`forms.ts`) le misura sulla griglia: i piani raggiunti a piedi (`reachableStoreys`), le stanze su ogni
+  taglia (`PARTS`, `partVoxels`): porta 0,6875 × 1,875 (11 × 30 a 16), piano 1,875 di luce, stanza 1,75 di lato, tettoia 1,875 di luce e
+  1,25 di fondo (fino a T405 0,55 × 1,5, 1,5, 1,4, 1,5 e 1: gli stessi voxel a 20). `habitableParts` (`forms.ts`) le misura sulla griglia: i piani raggiunti a piedi (`reachableStoreys`), le stanze su ogni
   pavimento coperto dove sta un corpo, raggiunto o no (il lato del quadrato più grande con il soffitto ad almeno la luce di un piano,
   il corpo compreso), le porte dalle celle che l'azione `open` cambia. In `checkProgram` (`checkOnce`) una parte sotto la sua misura
   è un errore col motivo (`partErrors` in `src/mj/check.ts`: la fattoria di 5 × 5 di prima ha la stanza di 0,6-1,3 caselle); al primo seme
@@ -1294,7 +1294,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   struttura che cresce a regole è un insieme di parti a terra, ciò che poggia sul fondo è un corpo solo e staccato è ciò che galleggia
   (`analyse(…, { groundJoins })`, `Validator.modelGrows`, `checkProgram`; `addModel` prova una voce nuova col suo `time` e la sua crescita):
   la fattoria a 20 caselle non cade più per i recinti e i campi. Il prompt dello Scultore: il piano a 1/5 è 100 × 100 celle alla gargantuesca. Le
-  misure col forte dell'autore (7,2 s, mesh 77 MB, 197 fps dentro) sono nel banco `lab/banco/taglie/`.
+  misure col forte dell'autore (7,2 s, mesh 77 MB, 197 fps dentro) sono nel banco `lab/banco/taglie/`. Dal T405 la gargantuesca nuova è
+  31,25 × 31,25 caselle a 16 voxel per casella, su un blocco di 2 × 2 col lotto di 32 (sotto).
 - **Il blocco grande quanto la sua struttura** (ADR-0208, T404, kernel 0.8.2, D60 A e D61 A2): il forte dell'autore è a **10 voxel per
   casella**, la densità della sua voce (`{ class: 'structure', size: 'gargantuan', vpt: 10, time: 30000 }`): 500 × 500 × 148 voxel sono
   50 × 50 × 14,8 caselle, e tutto ciò che il gioco misura sulla forma scala con lei (il gradino `stepOf(10)` = 2 voxel, l'alzata delle sue
@@ -1318,16 +1319,38 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `lab/banco/riferimento/misure/`) il 3 × 3 si pianifica in 1,9 s, il forte arriva in 11,5 s, 184 fps accanto (il 2 × 2 a 20: 1,4 s, 12,2 s,
   192 fps), i buffer a 200 MB in tutti e due; a piedi il viandante entra dalla porta del mastio e sale la rampa al secondo piano
   (`docs/img/forte-gioco-10-*.jpg`). Le mura di 1,5 viandanti sono il disegno dell'autore: le alza il programma, non il kernel.
+- **Le strutture a 16 voxel per casella** (ADR-0209, T405, contratto 0.9, kernel 0.9.0, D61 B2): una struttura che cresce a regole è a
+  `STRUCTURE_VPT` (16) voxel per casella con i voxel che aveva a 20 (`structureVoxels`: 100 × 100 × 80 alla Grande, 150 × 150 × 120
+  all'Enorme, 500 × 500 × 160 alla Gargantuesca, multipli dei piani a 1/5 e 1/10), così è un quarto più grande accanto al viandante: 6,25,
+  9,375 e 31,25 caselle di lato (`tilesOf`), una porta di 30 voxel 1,875 caselle (1,25 viandanti), un piano di 32 da pavimento a pavimento
+  1,33 viandanti; il corpo vi sale gradini di 3 voxel (`stepOf(16)`), è largo 7 e ha la testa a 11. **La scelta** (14, 15 e 16 provati
+  sulle strutture del banco, `lab/scripts/strutture-scala.ts -- --densita 20,16,15,14`, `lab/banco/riferimento/forte-scala.md` (§ «14, 15 o 16», T405)): a
+  tutte e tre il corpo sale ogni piano; 16 tiene la gargantuesca su un blocco di 2 × 2 (lotto di 32, a 15 e 14 vorrebbe 3 × 3) e la Grande
+  in un lotto di 7, ed è la densità della locanda Enorme del seme. **`PARTS`** sono i voxel di prima letti a 16 (`partVoxels(16)` = 11 × 30,
+  30, 28, 30 × 20): lo Scultore scrive le stesse misure, che ora sono più grandi del viandante, e il prompt lo dice («a tile is always 16
+  voxels and a person 24 tall», `bodyLine`). **Le voci**: una della classe `structure` da Grande in su che non dice `vpt` è a 16
+  (`vptOf`); `modelSize` non lo scrive, una carta portata lo tiene se c'è (`sized` in `bring.ts`); una che lo dice resta com'era
+  (`entryBox`: la scala di D&D alla sua densità); la cantina resta di 20 voxel per casella dichiarata (`cellarVoxels`: 1,25 caselle a 16). **Il lotto** prende a ogni taglia le caselle della voce che la struttura indosserà
+  (`lotTiles` → `Forms.entryTiles`): una voce di prima sta dove stava, una nuova vuole un lotto di 7 alla Grande e di 10 all'Enorme, e su uno
+  più piccolo scende (`claimSizes`); il prompt del Cartografo chiede edifici di 7 × 7 per una Grande. I timbri del kernel e i programmi
+  degli ambienti del seme non cambiano (i piani di prima tengono le modifiche per casella): una struttura senza taglia vi sporge di 0,1-0,6
+  caselle per lato, come la Grande di 5 sui lotti di 5 × 4 prima. **Gli universi di prima** (la migrazione 0.8 → 0.9, `migrate0_9`): ogni
+  voce della classe `structure` da Grande in su senza `vpt` prende `vpt: 20` e tiene scatola e caselle; una gargantuesca senza `vpt` (T370,
+  500 voxel a 20) dice anche la scatola nel suo programma (`size`, con la cantina); `models/index.json` smette di seguire il seme
+  (riceve solo le voci nuove, `mergeEntries`); ciò che lo Scultore scolpisce dopo è a 16. **Il laboratorio 3D** mostra il banco delle
+  taglie e i programmi degli Scultori a 16 (`lab/3d/catalog.ts`) e il comando «voxel per casella» ha il 16.
 
 <a id="taglie"></a>
 ## Le taglie
 
 - **Le taglie** (ADR-0092, T54): le taglie di D&D (`SIZE_TIERS` in `src/mj/classes.ts`: minuscola, piccola, media, grande, enorme,
   gargantuesca, la massima), la stessa scala per creature e strutture: la classe dà la forma e la scatola della sua taglia solita
-  (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`). `appearance.size`,
+  (`AssetClass.taglia`), la taglia la scala (`tilesOf`, `boxOf(cls, taglia)`, più rada oltre 120 voxel, `densityOf`); la classe `structure`
+  da Grande in su ha i voxel della scala a 20 a 16 voxel per casella (`structureVoxels`, `STRUCTURE_VPT`, ADR-0209: Grande 6,25, Enorme
+  9,375, Gargantuesca 31,25 caselle). `appearance.size`,
   `structures[].size` del Cartografo, `struttura.taglia`, `SculptRequest.taglia`, `ModelInfo.size`/`vpt` (`modelSize`). Rare: una
   **Enorme** (il castello «importante» di prima) per zona di 56 × 56 luoghi (`zoneOf`), una **Gargantuesca** per **reame** di 4 × 4 zone
-  (`realmOf`), una per luogo, con il modello migliore dello Scultore, la struttura sul lotto di un blocco di 2 × 2 luoghi (ADR-0206, `#lotti`); `claimSizes` le adatta al lotto e alla rarità (`rareAllowed`),
+  (`realmOf`), una per luogo, con il modello migliore dello Scultore, la struttura sul lotto di un blocco di più luoghi (ADR-0206, ADR-0208, `#lotti`); `claimSizes` le adatta al lotto e alla rarità (`rareAllowed`),
   `stato.json → rari` (un `importanti` vecchio è `rari.enorme`).
 
 <a id="grafo"></a>

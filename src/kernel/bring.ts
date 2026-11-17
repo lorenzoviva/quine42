@@ -132,12 +132,14 @@ export type BringSource =
 function sized(classe: string, size: unknown, own?: unknown, handmade = false): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(classe), t = sizeOf(typeof size === 'string' ? size : undefined);
   if (!cls || !t || t.id === cls.taglia) return {};
-  // A structure that grows by rules keeps the density it was sculpted at (ADR-0179): 16 at Huge before, TILE at every size now.
+  // A structure that grows by rules keeps the density it was sculpted at (ADR-0179): 16 at Huge before, TILE at every size after, and
+  // one that does not say it is at STRUCTURE_VPT (T405), which its entry does not write either (`vptOf`).
   const kept = growsByRules(cls, t.id) && typeof own === 'number' && Number.isInteger(own) && own >= 4 && own <= TILE ? own : undefined;
   // A handmade card runs where it was tried, under MAX_SIDE (its ceilings, ADR-0161), at the scale of D&D (T370).
   const vpt = kept ?? (handmade ? densityOf(scaledTiles(cls, t.id)) : densityFor(cls, t.id));
   // A Gargantuan structure that says its density is of before the lot of more places (T370): it keeps saying it, and its box.
   const old = kept !== undefined && cls.id === 'structure' && t.id === 'gargantuan';
+  if (growsByRules(cls, t.id) && !handmade) return { size: t.id, ...(kept !== undefined ? { vpt: kept } : {}) };
   return { size: t.id, ...(vpt !== TILE || old ? { vpt } : {}) };
 }
 

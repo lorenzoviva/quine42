@@ -139,7 +139,7 @@ describe('the prompt of the structures without a skeleton (T354)', () => {
     expect(calls[0].prompt).toMatch(/Parts of the seed the program includes with <import file="…"\/>/);
     expect(calls[0].prompt).toContain('<import file="part-stair"/>');
     expect(calls[0].prompt).toMatch(/The same program also serves the size gargantuan/);
-    expect(calls[0].prompt).toMatch(/a tile is 20 voxels, a step 4/);
+    expect(calls[0].prompt).toMatch(/a tile is 16 voxels, a step 3, a person 24 tall/);
     expect(calls[0].prompt).toMatch(/a door at least 11 × 30, a room at least 28 a side/);
     expect(calls[1].prompt).toContain('## Your program so far');
     expect(calls[1].prompt).toContain('## What the game made of it');
@@ -193,11 +193,11 @@ describe('one program for two sizes (ADR-0160)', () => {
     expect(s.xml).toBe(k.files[`models/${huge.id}.xml`]);
     expect(s.info).toMatchObject({ class: 'structure', ...modelSize(gar), seeds: STRUCTURE_SEEDS });
     expect(k.addModel(gar.id, s.xml, s.info, 'prova')).toBe(true);
-    // The same text, two areas at the same scale (T338, ADR-0179): a tile is 20 voxels at both, the Gargantuan box is larger.
+    // The same text, two areas at the same scale (T338, ADR-0179): a tile is 16 voxels at both (T405), the Gargantuan box is larger.
     expect(k.forms.request(gar.id, 1)!.size).toEqual([500, 500, 160]);
     expect(k.forms.request(huge.id, 1)!.size).toEqual([150, 150, 120]);
-    expect(k.forms.request(gar.id, 1)!.vpt).toBe(20);
-    expect(k.forms.request(huge.id, 1)!.vpt).toBe(20);
+    expect(k.forms.request(gar.id, 1)!.vpt).toBe(16);
+    expect(k.forms.request(huge.id, 1)!.vpt).toBe(16);
     // An entry sculpted before, at 16 voxels a tile, keeps the box it was sculpted in.
     expect(entryBox(structure, { size: 'huge', vpt: 16 })).toEqual([120, 120, 96]);
     expect(entryBox(structure, { size: 'gargantuan', vpt: 12 })).toEqual([120, 120, 96]);
