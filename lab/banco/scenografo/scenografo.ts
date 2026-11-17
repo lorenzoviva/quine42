@@ -253,6 +253,9 @@ export function arredaProgramma(s: Scena, semeArredo: number, senza = -1): Arred
  * of a voxel sideways and of a stair's rise up or down. A piece of furniture may take centres away only if what is left is in as many
  * pieces as before: no room, storey or stair cut off.
  */
+/** Who guards the furniture of a scene: the bench's own (`Guardia`) or the kernel's (`guardiaDelKernel` in `misura.ts`, T409). */
+export type FaGuardia = (s: Scena) => { ammetti(voxels: Iterable<number>): boolean };
+
 export class Guardia {
   private key: Int32Array;
   private xs: Int32Array;
@@ -475,7 +478,7 @@ export interface Scelta {
   vietata?: (i: number, z: number) => boolean;
 }
 
-export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mobile>, scelta?: Scelta): Arredato {
+export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mobile>, scelta?: Scelta, faGuardia: FaGuardia = (t) => new Guardia(t)): Arredato {
   const t0 = performance.now();
   const g = copy(s.e.grid);
   const { X, Y } = g;
@@ -497,7 +500,7 @@ export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mob
     }));
   const voxel = new Set<number>();
   let pezzi = 0;
-  const guardia = new Guardia(s);
+  const guardia = faGuardia(s);
   const sopra = ps.filter((p) => !p.cantina);
   for (const p of ps) {
     if (p.cantina) continue; // a low top under the ground is a floor no body reaches: the cellar keeps only what reaches its ceiling
