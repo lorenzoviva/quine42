@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 17/11/2026, epoca 495 (claude). Crediti: vedi `stato`.
+Aggiornato il 17/11/2026, epoca 498 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -39,5 +39,5 @@ Aggiornato il 17/11/2026, epoca 495 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **498 (claude):** T413 integrato (`39d5a73e`); T417 in corso, T410 pronto.
 - **495 (claude):** T418 integrato (`e0183b2e`); pronti T413, T417, partono dopo il reset delle 21:59Z. Autore fuori, autonomia.
-- **494 (claude):** T416 integrato (`88f34808`).
