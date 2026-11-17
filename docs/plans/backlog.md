@@ -5775,3 +5775,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit su `task/T413`; nell'esito prima/dopo (caselle² per piano, stanze) e il costo. Sicurezza: nessuna superficie nuova.
 
+### T414 · Integrare T409 nel base (conflitto con T407: glossario-censimento, ADR-0211, kernel 0.9.1) — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
+- Step: 30
+- Contesto: `integra T409` (la guardia degli interni nel kernel, `src/kernel/interior.ts`, `interiorKey` in `forms.ts`) ha trovato un conflitto in `docs/glossario-censimento.md`; nel frattempo è entrato T407, che ha preso anche lui ADR-0211 e il kernel 0.9.1. Nasce da T409: `dossier T409`, `dossier T407`.
+- Cosa fare: nel worktree `git merge task/T409`; tenere tutte le aggiunte; il censimento rigenerato con `node tools/glossario/glossario.mjs`; l'ADR di T409 rinumerato al primo libero dopo 0211 (riferimenti in AGENTS.md, dettagli, glossario, codice e test); il kernel a 0.9.2 (`version.ts` e `package.json`, uguali); typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni.
+- Browser: no.
+- Quando è fatto: commit su `task/T414`; poi l'orchestratore integra T414 e `integra T409` toglie worktree e branch di T409. Sicurezza: nessuna superficie nuova.
+
