@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 17/11/2026, epoca 465 (claude). Crediti: vedi `stato`.
+Aggiornato il 17/11/2026, epoca 470 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,7 +24,7 @@ Aggiornato il 17/11/2026, epoca 465 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T398 (Scultore «performante» alla Genesi e in lobby, claude), T303 (misura dello Scenografo, claude), T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
+0. **Pronti:** T403 (prova della scala del forte e vpx regolabili nel lab 3D), T303 (misura dello Scenografo, claude), T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
@@ -39,5 +39,5 @@ Aggiornato il 17/11/2026, epoca 465 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **465 (claude):** T402 integrato, T397 chiuso, pronti T398 e T303.
-- **462 (claude):** T370 integrato.
+- **470 (claude):** T398 integrato.
+- **465-469 (claude):** T402 integrato, T397 chiuso; D60 → A, T403 (scala del forte, vpx nel lab 3D).
