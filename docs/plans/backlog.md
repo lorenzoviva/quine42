@@ -5739,7 +5739,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit su `task/T409`. Sicurezza: nessuna superficie nuova.
 
-### T410 · Lo Scenografo nel gioco, la via dei dati (§ 10.2 di `scenografo.md`) — `da fare` (dipende da T409)
+### T410 · Lo Scenografo nel gioco, la via dei dati (§ 10.2 di `scenografo.md`) — `da fare` (dipende da T409, T413)
 - Pipeline: claude · sforzo extra · stima 7% · approvato · priorità 2
 - Step: 30
 - Contesto: richiesta dell'autore (17/11): lo Scenografo base serve alla rigenerazione degli universi (T411). § 10.2 di `docs/design/scenografo.md`; banco in `lab/banco/scenografo/` (`dossier T303`, `dossier T406`, `dossier T409`).
