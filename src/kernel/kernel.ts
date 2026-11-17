@@ -2643,12 +2643,13 @@ export class Kernel {
   }
 
   /**
-   * The tiles a structure of a concept takes at a size (ADR-0092): its class's (`tilesOf`), but a Gargantuan one takes the tiles of the
-   * entry it would wear, at that entry's density (T404, `Forms.entryTiles`): one sculpted before the lot of more places (its entry says
-   * `vpt` 20, T370) the 10 × 10 tiles it was sculpted for, the author's fort (500 voxels at 10 a tile) 50 × 50.
+   * The tiles a structure of a concept takes at a size (ADR-0092): its class's (`tilesOf`), but a structure takes the tiles of the entry
+   * it would wear, at that entry's density (T404, `Forms.entryTiles`): a Gargantuan one sculpted before the lot of more places (its entry
+   * says `vpt` 20, T370) the 10 × 10 tiles it was sculpted for, the author's fort (500 voxels at 10 a tile) 50 × 50; since T405 every
+   * size, so an entry of before (at 20, ADR-0209) fits the lot it fitted and a new one (at 16) the lot its tiles ask for.
    */
   private lotTiles(cls: AssetClass, t: SizeTier, concept: string): [number, number, number] {
-    if (cls.id !== 'structure' || t !== 'gargantuan') return tilesOf(cls, t);
+    if (cls.id !== 'structure') return tilesOf(cls, t);
     const id = this.structureModelFor(concept, t);
     return (this.forms.info(id)?.class === 'structure' && this.forms.entryTiles(id)) || tilesOf(cls, t);
   }

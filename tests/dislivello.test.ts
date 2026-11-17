@@ -60,8 +60,9 @@ ${kind === 'chiusa' ? box(0, 99, 0, 99, 0, 9) : [box(60, 99, 0, 99, 0, 9), ...[1
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index['platea-scala'] = { classe: 'structure', nome: 'platea con la scala' };
-  index['platea-chiusa'] = { classe: 'structure', nome: 'platea senza scala' };
+  // At 20 voxels a tile, as the case was measured (T405: a structure that does not say its density is at 16).
+  index['platea-scala'] = { classe: 'structure', vpt: 20, nome: 'platea con la scala' };
+  index['platea-chiusa'] = { classe: 'structure', vpt: 20, nome: 'platea senza scala' };
   return { ...bundledFiles, 'models/platea-scala.xml': platform('scala'), 'models/platea-chiusa.xml': platform('chiusa'), 'models/index.json': JSON.stringify(index) };
 };
 

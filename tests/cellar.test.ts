@@ -31,8 +31,9 @@ ${stair
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index['cantina-prova'] = { classe: 'structure', nome: 'casa con cantina', sotto: 1 };
-  index['chiusa-prova'] = { classe: 'structure', nome: 'cantina senza scala', sotto: 1 };
+  // At 20 voxels a tile, as the cellar was measured (T405: a structure that does not say its density is at 16).
+  index['cantina-prova'] = { classe: 'structure', vpt: 20, nome: 'casa con cantina', sotto: 1 };
+  index['chiusa-prova'] = { classe: 'structure', vpt: 20, nome: 'cantina senza scala', sotto: 1 };
   return { ...bundledFiles, 'models/cantina-prova.xml': house(true), 'models/chiusa-prova.xml': house(false), 'models/index.json': JSON.stringify(index) };
 };
 

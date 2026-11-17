@@ -9,7 +9,8 @@
 // (T310b, ADR-0190): the values the Council's schemas still listed in Italian (where a thing stands in a plan, the type of an
 // environment, the ways of a mind, the places of the things, the roles of the stamps, the bonuses) and the kind of every bond as an id;
 // then 0.7 → 0.8 (T370, ADR-0206): the lot of 2 × 2 places of the Gargantuan structures, a contract of the ground and of the plans that
-// changes no file (a plan of before has no block, and stays as it is).
+// changes no file (a plan of before has no block, and stays as it is); then 0.8 → 0.9 (T405, ADR-0209): the structures that grow by rules
+// at 16 voxels a tile, which the entries of before do not take (they say the 20 they were sculpted at).
 // The universe's places live apart (`maps/`, a chunk store): a migration says how a place's plan is ported too (`migratePlan`), and the
 // kernel ports every plan it reads (`migratePlanRecord`). The kernel runs the chain at boot (`Kernel.boot`), before the files are read; the
 // pages, the worlds of many and the tools run it before they take the seed (`prepareUniverse`, universes.ts), so the seed's new files
@@ -94,6 +95,13 @@ export const MIGRATIONS: readonly Migration[] = [
     descrizione:
       'il lotto di 2 × 2 luoghi delle strutture gargantuesche (T370): una gargantuesca nuova è 25 × 25 caselle (500 voxel di lato) e sta nel mezzo di quattro luoghi, che i loro piani segnano (block) e lo stato ricorda (blocks); una gargantuesca di prima dice in models/index.json la sua densità (vpt 20) e resta di 10 × 10 caselle, nel lotto del suo luogo',
     migrate: (files) => migrate0_8(files),
+  },
+  {
+    from: '0.8',
+    to: '0.9',
+    descrizione:
+      'le strutture che crescono a regole a 16 voxel per casella (T405): una voce nuova è più grande di un quarto in caselle con gli stessi voxel (porte e piani di 1,25 viandanti); una voce di prima dice in models/index.json la densità a cui è stata scolpita (vpt 20) e resta com’era, una gargantuesca di prima anche la sua scatola nel programma (size), sul lotto che ha',
+    migrate: (files) => migrate0_9(files),
   },
 ];
 
@@ -1225,7 +1233,8 @@ export const patternFileFor0_6 = (text: string): string => patternLines0_6(text)
  * The steps of MIGRATIONS that carry a program on its own (a handmade card's) to the next contract, by the contract they read. A step
  * not here does not: a card of before it stays of its contract, kept and not offered (ADR-0161), as the cards of 0.4 stayed in 0.5.
  */
-const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml, '0.7': (xml) => xml };
+// 0.8 → 0.9 (T405) changes the density of the entries, not the programs: a handmade card keeps its own (ADR-0161).
+const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml, '0.7': (xml) => xml, '0.8': (xml) => xml };
 
 /**
  * A program alone, of the contract `contract` (`X.Y`), as this kernel reads it (a handmade card's, T342): ported by every step from there
@@ -1267,6 +1276,61 @@ function migrate0_8(files: FileMap): FileMap {
   const out: FileMap = {};
   for (const [p, text] of Object.entries(files)) if (p !== SEED) out[p] = p === 'models/index.json' ? rewriteJson(text, index0_8) : text;
   return withSeedFollowing(files, out);
+}
+
+// --- 0.8 → 0.9 (T405, ADR-0209): the structures that grow by rules at 16 voxels a tile ---------------------------------------------------
+// An entry of a structure that grows by rules (the class `structure` from Large up) that does not say its density is at 16 since 0.9 (`vptOf`):
+// the same voxels, a quarter larger in tiles. One of before was sculpted at 20 and stands on lots cut for it: it says it (`vpt: 20`), and
+// keeps its box (`entryBox`: the scale of D&D at its density, 100 at Large, 150 at Huge). A Gargantuan one without a density was 500 voxels
+// (T370), which the scale of D&D at 20 is not (200): its program says its box (`size`, its cellar under it), as the author's fort does.
+// The plans and the blocks are as they were.
+
+/** The sizes of the class `structure` that grow by rules (`growsByRules`): Large, its own, and up. */
+const GROWING = new Set([undefined, 'large', 'huge', 'gargantuan']);
+
+/** The root of a program (its first tag, comments skipped) with `size`, if it does not say one. */
+function withRootSize(xml: string, size: [number, number, number]): string {
+  const bare = xml.replace(/<!--[\s\S]*?-->/g, (c) => ' '.repeat(c.length));
+  const m = /<[a-z]+\b[^>]*>/i.exec(bare);
+  if (!m || /\ssize="/.test(m[0])) return xml;
+  const at = m.index + m[0].length - (m[0].endsWith('/>') ? 2 : 1);
+  return `${xml.slice(0, at)} size="${size.join(' ')}"${xml.slice(at)}`;
+}
+
+function migrate0_9(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) if (p !== SEED) out[p] = text;
+  const raw = files['models/index.json'];
+  if (raw === undefined) return withSeedFollowing(files, out);
+  const boxed: Record<string, [number, number, number]> = {};
+  out['models/index.json'] = rewriteJson(raw, (index) => {
+    if (!isRecord(index)) return index;
+    const next: Record<string, unknown> = {};
+    for (const [id, info] of Object.entries(index)) {
+      const size = isRecord(info) && typeof info.size === 'string' ? info.size : undefined;
+      if (!isRecord(info) || info.class !== 'structure' || !GROWING.has(size) || info.vpt !== undefined || (info.size !== undefined && typeof info.size !== 'string')) {
+        next[id] = info;
+        continue;
+      }
+      next[id] = { ...info, vpt: 20 };
+      const cellar = typeof info.cellar === 'number' && Number.isInteger(info.cellar) && info.cellar >= 1 && info.cellar <= 3 ? info.cellar : 0;
+      if (size === 'gargantuan') boxed[id] = [500, 500, 160 + cellar * 20];
+    }
+    return next;
+  });
+  for (const [id, size] of Object.entries(boxed)) {
+    const path = `models/${id}.xml`;
+    if (out[path] !== undefined) out[path] = withRootSize(out[path], size);
+  }
+  const ported = withSeedFollowing(files, out);
+  // The index stops following the seed: the seed's entries at 16 would replace the ones of before, whose places were cut at 20. It still
+  // receives the seed's new entries (`mergeEntries`), as an index the Sculptor wrote.
+  const base = ported[SEED] !== undefined ? parseJson(ported[SEED]) : undefined;
+  const before = files[SEED] !== undefined ? parseJson(files[SEED]) : undefined;
+  if (isRecord(base) && isRecord(before) && out['models/index.json'] !== raw && before['models/index.json'] !== undefined) {
+    ported[SEED] = JSON.stringify({ ...base, 'models/index.json': before['models/index.json'] }, null, 1) + '\n';
+  }
+  return ported;
 }
 
 function migrate0_6(files: FileMap): FileMap {

@@ -36,8 +36,9 @@ const CRATES = TOWER.replace('</sequence>', [box(50, 69, 85, 104, 3, 18, 'S'), b
 
 const files = () => {
   const index = JSON.parse(bundledFiles['models/index.json']!);
-  index.torre = { classe: 'structure', nome: 'torre di prova' };
-  index['torre-casse'] = { classe: 'structure', nome: 'torre con le casse' };
+  // At 20 voxels a tile, as the tower was measured (T405: a structure that does not say its density is at 16).
+  index.torre = { classe: 'structure', vpt: 20, nome: 'torre di prova' };
+  index['torre-casse'] = { classe: 'structure', vpt: 20, nome: 'torre con le casse' };
   return { ...bundledFiles, 'models/torre.xml': TOWER, 'models/torre-casse.xml': CRATES, 'models/index.json': JSON.stringify(index) };
 };
 

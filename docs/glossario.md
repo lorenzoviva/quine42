@@ -153,7 +153,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Blocco
 - **Inglese**: `block`, `Block`, `BlockMark`, `blocks`, `blockLot`, `blockPlaces`, `blockOfPlace`; il suo lato in luoghi `side` (`sideOf`, `BLOCK`, `MAX_BLOCK`), il lato del suo lotto in caselle `lot` (`lotSideOf`), la sua forma `BlockShape` (`blockShapeFor`), l'anello `RING`
-- **Definizione**: luoghi in un quadrato, 2 × 2 o 3 × 3, con nel mezzo il lotto di una struttura gargantuesca (25 × 25 caselle, o quanto la struttura, fino a 50 × 50 su 3 × 3) e attorno l'anello dei loro sentieri; il luogo che l'ha chiesta tiene la struttura, gli altri hanno il piano del kernel (T370, ADR-0206; il lato dalla voce della struttura, T404, ADR-0208). Il lato di un blocco non è la taglia di una struttura (`size`).
+- **Definizione**: luoghi in un quadrato, 2 × 2 o 3 × 3, con nel mezzo il lotto di una struttura gargantuesca (quanto la struttura e mai sotto 25 × 25 caselle: 32 × 32 per una nuova a 16 voxel per casella, fino a 50 × 50 su 3 × 3) e attorno l'anello dei loro sentieri; il luogo che l'ha chiesta tiene la struttura, gli altri hanno il piano del kernel (T370, ADR-0206; il lato dalla voce della struttura, T404, ADR-0208). Il lato di un blocco non è la taglia di una struttura (`size`).
 - **Dove vive**: `src/kernel/block.ts`, `src/kernel/kernel.ts`
 - **Da non usare**: `megachunk`, `quadrante`, `gruppo di luoghi`
 - **Fermo**: `block` nei piani di `maps/` (con `side` e `lot`) e nel protocollo, `blocks` in `world/state.json` (`anchor`, `side`, `lot`).
@@ -271,9 +271,16 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «struttura parametrica»
 - **Fermo**: il campo `seeds` in `models/index.json`; il suffisso della taglia negli id `struttura-<concetto>-<taglia>`.
 
+### Densità delle strutture
+- **Inglese**: `STRUCTURE_VPT`, `structureVoxels`, `vptOf`
+- **Definizione**: i voxel per casella a cui si mostra una struttura che cresce a regole: 16 dal T405 (ADR-0209), con i voxel che aveva a 20 (100, 150, 500 di lato), un quarto più grande accanto al viandante; una voce che non dice la sua densità (`vpt`) è a 16, una che la dice resta alla sua. È la densità per voce (`vpt`, ADR-0049) quando la voce non la scrive.
+- **Dove vive**: `src/mj/classes.ts`, `src/kernel/forms.ts`, `src/kernel/migrations.ts`
+- **Da non usare**: «scala delle strutture» (la scala è quella di D&D, le taglie), «zoom»
+- **Fermo**: il campo `vpt` in `models/index.json` (la migrazione 0.8 → 0.9 lo scrive, 20, nelle voci di prima).
+
 ### Parti abitabili
 - **Inglese**: `PARTS`, `partVoxels`, `habitableParts`, `partErrors`, `HabitableMeasure`
-- **Definizione**: le parti di una struttura in cui si vive (porta, piano, stanza, tettoia), con le loro misure minime in caselle, le stesse a ogni taglia: una struttura piccola ne ha meno, non più piccole (ADR-0179).
+- **Definizione**: le parti di una struttura in cui si vive (porta, piano, stanza, tettoia), con le loro misure minime in caselle, le stesse a ogni taglia: una struttura piccola ne ha meno, non più piccole (ADR-0179); dal T405 i voxel di prima letti a 16 voxel per casella, una porta e un piano di 1,25 viandanti (ADR-0209).
 - **Dove vive**: `src/mj/classes.ts`, `src/mj/check.ts`, `src/kernel/forms.ts`, `src/kernel/agents/sculptor.ts`
 - **Da non usare**: «stanze minime», «misure abitabili»
 - **Fermo**: nessuno (le misure stanno nel codice, non su disco).

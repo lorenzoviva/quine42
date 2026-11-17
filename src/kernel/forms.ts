@@ -9,7 +9,7 @@
 
 import type { SoundPurpose } from '../mj/sound';
 import { areasOf, type AreaMap } from '../mj/areas';
-import { boxOf, classOf, CLASSES, growsByRules, scaledTiles, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
+import { boxOf, classOf, CLASSES, growsByRules, scaledTiles, STRUCTURE_VPT, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
@@ -31,16 +31,29 @@ export const JUMP_UP = 1.05;
 /** How far a jump reaches (tiles). */
 export const JUMP_FAR = 2.6;
 
-/** The density a model's index entry asks for, if it is a sane one (the corona's buildings: 8). */
-export function vptOf(info: ModelInfo | undefined): number {
+/**
+ * The density a model's index entry asks for, if it is a sane one (the corona's buildings: 8); else 20, but a structure that grows by
+ * rules is at `STRUCTURE_VPT` (T405, ADR-0209: the same voxels, shown a quarter larger).
+ */
+export function vptOf(info: Pick<ModelInfo, 'class' | 'size' | 'vpt'> | undefined): number {
   const v = info?.vpt;
-  return typeof v === 'number' && Number.isInteger(v) && v >= 4 && v <= 40 ? v : VPT;
+  if (typeof v === 'number' && Number.isInteger(v) && v >= 4 && v <= 40) return v;
+  const cls = info && classOf(info.class);
+  return cls && growsByRules(cls, info.size) ? STRUCTURE_VPT : VPT;
 }
 
 /**
  * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `sotto`, from 1 to 3
  * (a cellar, a crypt); 0 for anything else.
  */
+/**
+ * The voxels of a model under the ground (T52b): its cellar's tiles at the density its entry says, at 20 if it says none (T405, ADR-0209:
+ * a structure at 16 keeps the cellar of 20 voxels a tile its program writes, 1.25 tiles deep).
+ */
+export function cellarVoxels(info: Pick<ModelInfo, 'class' | 'size' | 'vpt' | 'cellar'> | undefined): number {
+  return cellarOf(info as ModelInfo) * (typeof info?.vpt === 'number' ? vptOf(info) : VPT);
+}
+
 export function cellarOf(info: ModelInfo | undefined): number {
   const n = info?.cellar;
   return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
@@ -201,13 +214,14 @@ export const rootTag = (xml: string) => /<[a-z]+\b[^>]*>/i.exec(xml.replace(/<!-
 
 /**
  * The box of a library entry in voxels: its class's at its size; a structure that grows by rules at the density its entry says
- * (ADR-0179), so an entry sculpted before keeps the box it was sculpted in (`vpt` 16 at Huge, 120 voxels) and a new one, at
- * TILE voxels a tile, has a larger area at every larger size. An entry that says its density was sculpted before the lot of more places
- * too (T370, ADR-0206): its area is the scale of D&D (`scaledTiles`), a Gargantuan one 10 × 10 tiles and not the 25 of today.
+ * (ADR-0179), so an entry sculpted before keeps the box it was sculpted in (`vpt` 16 at Huge, 120 voxels) and a new one has a larger
+ * area at every larger size. An entry that says its density was sculpted before the lot of more places too (T370, ADR-0206): its area
+ * is the scale of D&D (`scaledTiles`), a Gargantuan one 10 × 10 tiles and not the 25 of then. One that does not say it is at
+ * `STRUCTURE_VPT` since T405 (ADR-0209): the box it had at 20 (100, 150, 500 voxels), larger in tiles.
  */
 export function entryBox(cls: AssetClass, info: Pick<ModelInfo, 'size' | 'vpt'> | undefined): Vec3 {
   if (!growsByRules(cls, info?.size)) return boxOf(cls, info?.size);
-  return voxelsOf(typeof info?.vpt === 'number' ? scaledTiles(cls, info.size) : tilesOf(cls, info?.size), vptOf(info as ModelInfo));
+  return voxelsOf(typeof info?.vpt === 'number' ? scaledTiles(cls, info.size) : tilesOf(cls, info?.size), vptOf({ class: cls.id, ...info }));
 }
 
 /**
@@ -943,7 +957,7 @@ export class Forms {
     const info = this.library[model];
     const cls = this.classOf(model);
     const vpt = vptOf(info);
-    const under = cellarOf(info) * vpt;
+    const under = cellarVoxels(info);
     // The tint as the palette reads it (T288): the packs write `hsl(…)`, and a letter with a colour the meshes cannot read vanished.
     const color = info?.tint ? hexColor(tint) : undefined;
     // The letter as the engine holds it: `#12` is one character (T342).
@@ -975,7 +989,7 @@ export class Forms {
     const req = this.request(model, seed, tint)!;
     const cls = this.classOf(model);
     const vpt = req.vpt;
-    const under = cellarOf(info) * vpt;
+    const under = cellarVoxels(info);
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
     this.forms.set(key, f);
     const form = f;
@@ -1089,7 +1103,7 @@ export class Forms {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), info, cellarOf(info) * vptOf(info));
+    const size = sizeFor(xml, this.classOf(model), info, cellarVoxels(info));
     const files = this.includesOf(model);
     return compileMjx(xml, { ...(size ? { size } : {}), ...(Object.keys(files).length ? { files, self: model } : {}) });
   }

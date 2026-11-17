@@ -216,8 +216,8 @@ describe('the migration 0.5 → 0.6', () => {
   const { files, applied } = migrateUniverse(universe05());
 
   it('is the fifth migration of the chain, and the universe runs on this kernel', () => {
-    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`).slice(-3)).toEqual(['0.5→0.6', '0.6→0.7', '0.7→0.8']);
-    expect(applied).toHaveLength(3);
+    expect(MIGRATIONS.map((m) => `${m.from}→${m.to}`).slice(-4)).toEqual(['0.5→0.6', '0.6→0.7', '0.7→0.8', '0.8→0.9']);
+    expect(applied).toHaveLength(4);
     expect(applied[0]).toMatch(/^0\.5→0\.6: i simboli dei programmi MarkovJunior/);
     const cfg = json(files['universe.json']);
     expect(cfg).toMatchObject({ kernel: KERNEL_VERSION, kernels: { from: KERNEL_CONTRACT } });

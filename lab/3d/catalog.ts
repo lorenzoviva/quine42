@@ -3,6 +3,7 @@
 
 import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
+import { STRUCTURE_VPT } from '../../src/mj/classes';
 import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
 
@@ -82,8 +83,8 @@ const MODELS: Array<[string, string, Role, number?]> = [
   ['sasso', 'Sasso', 'rock'],
   ['barile', 'Barile', 'prop'],
   ['falo', 'Falò', 'prop'],
-  ['casa', 'Casa a graticcio', 'structure'],
-  ['fattoria', 'Fattoria (5 × 5 caselle)', 'structure'],
+  ['casa', 'Casa a graticcio', 'structure', STRUCTURE_VPT],
+  ['fattoria', 'Fattoria (6,25 × 6,25 caselle, T405)', 'structure', STRUCTURE_VPT],
   ['casetta', 'Casetta', 'structure', 8],
   ['pozzo', 'Pozzo', 'structure', 8],
   ['fontana', 'Fontana', 'structure', 8],
@@ -161,22 +162,29 @@ for (const [file, xml] of Object.entries(pieced)) {
   if (p) CATALOG.push({ id: `pezzi:${base}`, name: p.name, role: 'structure', xml, vpt: p.vpt, size: p.size, source: sourceOf(xml), pieces: true });
 }
 
-// The bench of the sizes (T338, T346, lab/banco/taglie/): the farm and the fort that fit their size, each at its three sizes at 20
-// voxels a tile, with the seed's parts included. Only for the developers.
+// The bench of the sizes (T338, T346, lab/banco/taglie/): the farm and the fort that fit their size, each at its three sizes at the
+// density of the structures in the game (`STRUCTURE_VPT`, 16 since T405, ADR-0209), with the seed's parts included. Only for the developers.
 const sized = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 const SIZED: Record<string, string> = { fattoria: 'Fattoria', forte: 'Forte', 'scultore-rocca': 'Rocca, come la scrive lo Scultore (T354)', 'scultore-villetta': 'Villetta, come la scrive lo Scultore (la risposta offline, T354)' };
 // The fourth box is past today's Gargantuan (T356): the same program at 20 × 20 tiles, what a lot of several places would hold.
-const SIZES: Array<[string, string, Vec3]> = [['large', 'Grande, 5 × 5', [100, 100, 80]], ['huge', 'Enorme, 7,5 × 7,5', [150, 150, 120]], ['gargantuan', 'Gargantuesca, 10 × 10', [200, 200, 160]], ['gargantuan-20', 'Gargantuesca a 20 × 20, T356', [400, 400, 160]]];
+const tilesAt = (v: number) => (v / STRUCTURE_VPT).toLocaleString('it', { maximumFractionDigits: 2 });
+const SIZES: Array<[string, string, Vec3]> = [
+  ['large', `Grande, ${tilesAt(100)} × ${tilesAt(100)}`, [100, 100, 80]],
+  ['huge', `Enorme, ${tilesAt(150)} × ${tilesAt(150)}`, [150, 150, 120]],
+  ['gargantuan', `Gargantuesca di prima (200 voxel), ${tilesAt(200)} × ${tilesAt(200)}`, [200, 200, 160]],
+  ['gargantuan-20', `400 voxel (T356), ${tilesAt(400)} × ${tilesAt(400)}`, [400, 400, 160]],
+];
 // The offline answer of the Sculptor (T354, ADR-0183): the country house written as the prompt without a skeleton asks, from its constant.
 const sizedPrograms: Array<[string, string]> = [...Object.entries(sized), ...(import.meta.env.MODE !== 'production' ? [['scultore-villetta.xml', MOCK_STRUCTURE_PROGRAM] as [string, string]] : [])];
 for (const [file, xml] of sizedPrograms) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const name = SIZED[base];
-  if (name) for (const [id, label, size] of SIZES) CATALOG.push({ id: `taglie:${base}-${id}`, name: `${name} che si adatta alla taglia (${label} caselle)`, role: 'structure', xml, vpt: 20, size, source: sourceOf(xml), sizes: true });
+  if (name) for (const [id, label, size] of SIZES) CATALOG.push({ id: `taglie:${base}-${id}`, name: `${name} che si adatta alla taglia (${label} caselle)`, role: 'structure', xml, vpt: STRUCTURE_VPT, size, source: sourceOf(xml), sizes: true });
 }
 
 // The Sculptors at the sizes (T391, T402, lab/banco/taglie/modelli/): every program a model wrote for the farm and the fort, at the box
-// of its size at 20 voxels a tile, to see them beside the wanderer and at other densities (T403). Only for the developers.
+// of its size, shown at the density of the structures in the game (16 since T405), to see them beside the wanderer and at other densities
+// (T403). Only for the developers.
 const sculpted = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/modelli/**/programma.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 const SIZE_BOX: Record<string, Vec3> = { large: [100, 100, 80], huge: [150, 150, 120], gargantuan: [200, 200, 160] };
 for (const [file, xml] of Object.entries(sculpted)) {
@@ -185,7 +193,7 @@ for (const [file, xml] of Object.entries(sculpted)) {
   if (!path || !box) continue;
   const [, run, concept, size] = path;
   const who = run.replace(/^openrouter\/(.+?)\//, '$1 via OpenRouter/').replace(/\//g, ' · ');
-  CATALOG.push({ id: `scultori:${run}/${concept}-${size}`, name: `${concept} ${size} · ${who}`, role: 'structure', xml, vpt: 20, size: box, source: sourceOf(xml), sculpted: true, ...withIncludes(xml) });
+  CATALOG.push({ id: `scultori:${run}/${concept}-${size}`, name: `${concept} ${size} · ${who}`, role: 'structure', xml, vpt: STRUCTURE_VPT, size: box, source: sourceOf(xml), sculpted: true, ...withIncludes(xml) });
 }
 
 /**

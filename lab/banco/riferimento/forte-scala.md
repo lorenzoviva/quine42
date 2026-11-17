@@ -175,3 +175,88 @@ forte è la stessa, e i luoghi attorno a un viandante sono comunque una trentina
 Resta il disegno: **le mura sono di 1,5 viandanti** a 10. Il kernel non le tocca; se l'autore le vuole più alte dei piani, è un ritocco del
 programma del forte (T371 o un task suo).
 
+
+## 14, 15 o 16: la densità di tutte le strutture (T405, D61 B2)
+
+Le quattro strutture della sezione sopra, seme 1, con le misure del gioco a ogni densità (`habitableParts` col gradino e il corpo di
+quella densità, le parti di `PARTS` dal T405: i voxel di prima letti a 16, per cui a 20 le stanze sotto 38 voxel di luce non contano più).
+Tutte e tre le densità di mezzo fanno salire ogni piano; T405 sceglie 16 nell'intervallo dell'autore (ADR-0209): la gargantuesca resta su 2 × 2 luoghi
+(31,25 caselle, lotto di 32), la Grande vuole un lotto di 7.
+
+```bash
+npx vite-node lab/scripts/strutture-scala.ts -- --densita 20,16,15,14
+```
+
+**Villetta (risposta offline dello Scultore, T354), Grande** (`taglie:scultore-villetta-large`, 100 × 100 × 80 voxel, seme 1)
+
+| misura | voxel | a 20: caselle · **viandanti** | a 16: caselle · **viandanti** | a 15: caselle · **viandanti** | a 14: caselle · **viandanti** |
+|---|---|---|---|---|---|
+| porta, luce | 30 | 1,5 · **1** | 1,88 · **1,25** | 2 · **1,33** | 2,14 · **1,43** |
+| porta, larghezza | 11 | 0,55 · **0,37** | 0,69 · **0,46** | 0,73 · **0,49** | 0,79 · **0,52** |
+| piano 1 → 2, da pavimento a pavimento | 32 | 1,6 · **1,07** | 2 · **1,33** | 2,13 · **1,42** | 2,29 · **1,52** |
+| gradino della scala (part-stair), alzata | 2 | 0,1 · **0,07** | 0,13 · **0,08** | 0,13 · **0,09** | 0,14 · **0,1** |
+
+| densità | gradino (voxel) | piani raggiunti a piedi (voxel dal suolo) | stanze | porte |
+|---|---|---|---|---|
+| 20 | 4 | 1, 33 | 0 | 2 |
+| 16 | 3 | 1, 33 | 3 | 2 |
+| 15 | 3 | 1, 33 | 3 | 2 |
+| 14 | 3 | 1, 33 | 3 | 2 |
+
+**Rocca (come la scrive lo Scultore, T354), Grande** (`taglie:scultore-rocca-large`, 100 × 100 × 80 voxel, seme 1)
+
+| misura | voxel | a 20: caselle · **viandanti** | a 16: caselle · **viandanti** | a 15: caselle · **viandanti** | a 14: caselle · **viandanti** |
+|---|---|---|---|---|---|
+| porta, luce | 30 | 1,5 · **1** | 1,88 · **1,25** | 2 · **1,33** | 2,14 · **1,43** |
+| porta, larghezza | 15 | 0,75 · **0,5** | 0,94 · **0,63** | 1 · **0,67** | 1,07 · **0,71** |
+| piano 1 → 2, da pavimento a pavimento | 32 | 1,6 · **1,07** | 2 · **1,33** | 2,13 · **1,42** | 2,29 · **1,52** |
+| gradino della scala (part-stair), alzata | 2 | 0,1 · **0,07** | 0,13 · **0,08** | 0,13 · **0,09** | 0,14 · **0,1** |
+
+| densità | gradino (voxel) | piani raggiunti a piedi (voxel dal suolo) | stanze | porte |
+|---|---|---|---|---|
+| 20 | 4 | 1, 33 | 0 | 2 |
+| 16 | 3 | 1, 33 | 3 | 2 |
+| 15 | 3 | 1, 33 | 3 | 2 |
+| 14 | 3 | 1, 33 | 3 | 2 |
+
+**Forte del banco (T346), Gargantuesca a 10 × 10** (`taglie:forte-gargantuan`, 200 × 200 × 160 voxel, seme 1)
+
+| misura | voxel | a 20: caselle · **viandanti** | a 16: caselle · **viandanti** | a 15: caselle · **viandanti** | a 14: caselle · **viandanti** |
+|---|---|---|---|---|---|
+| porta, luce | 30 | 1,5 · **1** | 1,88 · **1,25** | 2 · **1,33** | 2,14 · **1,43** |
+| porta, larghezza | 11 | 0,55 · **0,37** | 0,69 · **0,46** | 0,73 · **0,49** | 0,79 · **0,52** |
+| piano 1 → 2, da pavimento a pavimento | 32 | 1,6 · **1,07** | 2 · **1,33** | 2,13 · **1,42** | 2,29 · **1,52** |
+| gradino della scala (part-stair), alzata | 2 | 0,1 · **0,07** | 0,13 · **0,08** | 0,13 · **0,09** | 0,14 · **0,1** |
+
+| densità | gradino (voxel) | piani raggiunti a piedi (voxel dal suolo) | stanze | porte |
+|---|---|---|---|---|
+| 20 | 4 | 1, 33 | 0 | 1 |
+| 16 | 3 | 1, 33 | 2 | 1 |
+| 15 | 3 | 1, 33 | 2 | 1 |
+| 14 | 3 | 1, 33 | 3 | 1 |
+
+**Fattoria di Opus 5.5 via OpenRouter (T402, giro 1, voto 8), Enorme** (`scultori:openrouter/claude-opus-5-5/giro1/fattoria-huge`, 150 × 150 × 120 voxel, seme 1)
+
+| misura | voxel | a 20: caselle · **viandanti** | a 16: caselle · **viandanti** | a 15: caselle · **viandanti** | a 14: caselle · **viandanti** |
+|---|---|---|---|---|---|
+| porta, luce | 30 | 1,5 · **1** | 1,88 · **1,25** | 2 · **1,33** | 2,14 · **1,43** |
+| porta, larghezza | 15 | 0,75 · **0,5** | 0,94 · **0,63** | 1 · **0,67** | 1,07 · **0,71** |
+| piano 1 → 2, da pavimento a pavimento | 32 | 1,6 · **1,07** | 2 · **1,33** | 2,13 · **1,42** | 2,29 · **1,52** |
+| stanza più alta, luce | 39 | 1,95 · **1,3** | 2,44 · **1,63** | 2,6 · **1,73** | 2,79 · **1,86** |
+| gradino della scala (part-stair), alzata | 2 | 0,1 · **0,07** | 0,13 · **0,08** | 0,13 · **0,09** | 0,14 · **0,1** |
+
+| densità | gradino (voxel) | piani raggiunti a piedi (voxel dal suolo) | stanze | porte |
+|---|---|---|---|---|
+| 20 | 4 | 1, 33 | 2 | 1 |
+| 16 | 3 | 1, 33 | 3 | 1 |
+| 15 | 3 | 1, 33 | 3 | 1 |
+| 14 | 3 | 1, 33 | 3 | 1 |
+
+Il corpo del gioco sale un gradino di `stepOf`: 4 voxel a 20, 3 voxel a 16, 3 voxel a 15, 3 voxel a 14 (un quinto di casella).
+
+Nel gioco a 16 (T405, preview della build, `?skip&offline`): le case del borgo del seme (il programma `structure`, 72 × 72 × 90 voxel,
+4,5 × 4,5 × 5,6 caselle) accanto al viandante, e il viandante che entra dalla porta ovest (il renderer taglia la casa in cui si sta).
+
+| la casa davanti al viandante | il borgo |
+|---|---|
+| ![](../../../docs/img/strutture-16-gioco-casa.jpg) | ![](../../../docs/img/strutture-16-gioco-borgo.jpg) |

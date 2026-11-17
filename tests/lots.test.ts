@@ -227,9 +227,9 @@ describe('lots and structures', () => {
 
   it('keeps one Huge structure per zone and one Gargantuan per realm, fitted to their lots, and remembers which', async () => {
     const k = await boot();
-    // Lots of 12 × 12 tiles (they hold a Gargantuan box) and of 6 × 6 (a Large one: 5 × 5).
+    // Lots of 12 × 12 tiles (they hold a Huge box: 9.375 × 9.375 at 16 voxels a tile, T405) and of 7 × 7 (a Large one: 6.25 × 6.25).
     const lot = (n: number) => ({ x0: 0, y0: 0, x1: n - 1, y1: n - 1, walls: [], floor: [], doors: [] });
-    const claim = (key: string, cx: number, cy: number, plan: Partial<ChunkPlan>, sides = [12, 6]) => (k as any).claimSizes({ key, cx, cy, lots: sides.map(lot) }, plan);
+    const claim = (key: string, cx: number, cy: number, plan: Partial<ChunkPlan>, sides = [12, 7]) => (k as any).claimSizes({ key, cx, cy, lots: sides.map(lot) }, plan);
     // Zones are about a thousand tiles wide, centred on the start; realms are 4 × 4 zones.
     expect(IMPORTANT_ZONE * k.config.chunkSize).toBeGreaterThanOrEqual(1000);
     expect(zoneOf(0, 0)).toBe(zoneOf(IMPORTANT_ZONE / 2 - 1, -IMPORTANT_ZONE / 2));
@@ -239,7 +239,7 @@ describe('lots and structures', () => {
     // The plans before ADR-0092 said «importante»: that castle is Huge.
     const a: Partial<ChunkPlan> = { structures: [{ concetto: 'il castello', importante: true } as any, { concept: 'la torre', size: 'huge' }] };
     claim('5,5', 5, 5, a);
-    // One rare per place: the second goes down to Large (and fits its lot of 6).
+    // One rare per place: the second goes down to Large (and fits its lot of 7).
     expect(a.structures!.map((s) => s.size)).toEqual(['huge', 'large']);
     // Another place of the same zone may not have a Huge one, but may have the Gargantuan one of the realm.
     const b: Partial<ChunkPlan> = { structures: [{ concept: 'il tempio', size: 'huge' }] };
@@ -247,18 +247,21 @@ describe('lots and structures', () => {
     expect(b.structures![0].size).toBe('large');
     expect(k.rareAllowed({ key: '6,5', cx: 6, cy: 5 })).toEqual(['gargantuan']);
     expect(k.rareAllowed({ key: '5,5', cx: 5, cy: 5 })).toEqual(['huge', 'gargantuan']);
-    // A Gargantuan structure stands on the lot of a block, 25 × 25 tiles (T370): the largest of its place's lots.
+    // A Gargantuan structure stands on the lot of a block (T370), 32 × 32 tiles at 16 voxels a tile (T405): the largest of its place's lots.
     const g: Partial<ChunkPlan> = { structures: [{ concept: 'la cittadella', size: 'gargantuan' }] };
-    claim('7,5', 7, 5, g, [25, 6]);
+    claim('7,5', 7, 5, g, [32, 7]);
     expect(g.structures![0].size).toBe('gargantuan');
     // In another zone of the same realm: a Huge one yes, the Gargantuan one no (it goes down to Huge).
     const c: Partial<ChunkPlan> = { structures: [{ concept: 'la piramide', size: 'gargantuan' }] };
     claim(`${IMPORTANT_ZONE},0`, IMPORTANT_ZONE, 0, c);
     expect(c.structures![0].size).toBe('huge');
-    // A size that does not fit its lot goes down to the largest that does: Huge (7.5 tiles) on a lot of 6 is Large.
+    // A size that does not fit its lot goes down to the largest that does: Huge (9.375 tiles) on a lot of 7 is Large, on one of 6 Medium.
     const d: Partial<ChunkPlan> = { structures: [{ concept: 'la rocca', size: 'huge' }] };
-    claim(`${2 * IMPORTANT_ZONE},0`, 2 * IMPORTANT_ZONE, 0, d, [6]);
+    claim(`${2 * IMPORTANT_ZONE},0`, 2 * IMPORTANT_ZONE, 0, d, [7]);
     expect(d.structures![0].size).toBe('large');
+    const e: Partial<ChunkPlan> = { structures: [{ concept: 'il granaio', size: 'large' }] };
+    claim(`${3 * IMPORTANT_ZONE},0`, 3 * IMPORTANT_ZONE, 0, e, [6]);
+    expect(e.structures![0].size).toBe('medium');
     expect(k.rareAllowed({ key: '0,0', cx: 2 * IMPORTANT_ZONE, cy: 0 })).toContain('huge');
     // The structure carries its size.
     const ch = { ...k.chunks.get('0,0')!, lots: [lot(12)] };

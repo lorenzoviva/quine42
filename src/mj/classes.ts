@@ -71,11 +71,21 @@ export const RARE_SIZES: SizeTier[] = ['huge', 'gargantuan'];
 export const sizeRank = (t: SizeTier) => SIZE_TIERS.findIndex((x) => x.id === t);
 
 /**
- * The side, in tiles, of the lot of a Gargantuan structure (T370, ADR-0206): it stands on a lot of 2 × 2 places (`src/kernel/block.ts`),
- * 36 × 36 tiles, in the middle, with a ring of five or six tiles for the paths between the gates. 25 tiles at 20 voxels a tile are the
- * 500 voxels of the author's fort (`lab/mjx/models/handmade/forte-handmade.xml`), the reference of the size (D53).
+ * The side, in tiles, of the lot of a Gargantuan structure of before (T370, ADR-0206), and the least lot of a block: it stands on a lot of
+ * 2 × 2 places (`src/kernel/block.ts`), 36 × 36 tiles, in the middle, with a ring of five or six tiles for the paths between the gates.
+ * 25 tiles at 20 voxels a tile are the 500 voxels of the author's fort (`lab/mjx/models/handmade/forte-handmade.xml`), the reference of
+ * the size (D53). Since T405 a new Gargantuan structure is the same 500 voxels at `STRUCTURE_VPT`, 31.25 tiles, on a lot of 32.
  */
 export const GARGANTUAN_LOT = 25;
+
+/**
+ * The voxels per tile a structure that grows by rules is shown at (T405, D61 B2, ADR-0209): its box in voxels is the one it had at TILE
+ * (100 at Large, 150 at Huge, 500 at Gargantuan: what the programs are written for, multiples of the plans at 1/5 and 1/10), its tiles are
+ * that box at this density (6.25, 9.375, 31.25). At 20 the parts one lives in were at their least, a door as tall as a wanderer: at 16 the
+ * same 30 voxels are 1.25 wanderers, a storey of 32 floor to floor 1.33, the step of the body (`stepOf`) 3 voxels, which the stairs of the seed take.
+ * An entry that says its density (`vpt`) keeps it (the universes of before, ported to 20 by the migration 0.8 → 0.9).
+ */
+export const STRUCTURE_VPT = 16;
 
 /**
  * The box in tiles of a class at a size by the scale of D&D alone (its own if none): the class's box scaled by the ratio of the spaces.
@@ -89,12 +99,22 @@ export function scaledTiles(c: AssetClass, taglia?: string): [number, number, nu
 }
 
 /**
- * The box in tiles of a class at a size (its own if none): the scale of D&D (`scaledTiles`). A Gargantuan structure (the class
- * `structure`) is the exception: its area is the lot of more places (`GARGANTUAN_LOT`), its height the scale's (T370, ADR-0206).
+ * The box in tiles of a class at a size (its own if none): the scale of D&D (`scaledTiles`). A structure that grows by rules is the
+ * exception (T405): its box in voxels at TILE (`structureVoxels`) at `STRUCTURE_VPT`, so it is larger than the scale's by TILE/16.
  */
 export function tilesOf(c: AssetClass, taglia?: string): [number, number, number] {
+  if (!growsByRules(c, taglia)) return scaledTiles(c, taglia);
+  return structureVoxels(c, taglia).map((v) => v / STRUCTURE_VPT) as [number, number, number];
+}
+
+/**
+ * The box in voxels of a structure that grows by rules (T405): the scale of D&D at TILE, a Gargantuan one the lot of more places at TILE
+ * (`GARGANTUAN_LOT` × 20 = 500, `STRUCTURE_SIDE`, T370), its height the scale's. The same voxels it had before T405, shown larger.
+ */
+export function structureVoxels(c: AssetClass, taglia?: string): Vec3 {
   const scaled = scaledTiles(c, taglia);
-  return c.id === 'structure' && sizeOf(taglia)?.id === 'gargantuan' ? [GARGANTUAN_LOT, GARGANTUAN_LOT, scaled[2]] : scaled;
+  const area = c.id === 'structure' && sizeOf(taglia)?.id === 'gargantuan' ? [GARGANTUAN_LOT, GARGANTUAN_LOT] : [scaled[0], scaled[1]];
+  return voxelsOf([...area, scaled[2]], TILE);
 }
 
 /** The largest side, in voxels, a model is run at: past it the model is written coarser (ADR-0049). */
@@ -104,8 +124,8 @@ export const MAX_SIDE = 120;
 export const densityOf = (tiles: [number, number, number]) => Math.min(TILE, Math.floor(MAX_SIDE / Math.max(...tiles)));
 
 /**
- * The largest side, in voxels, a structure that grows by rules runs at (T338, ADR-0179): up to it a tile stays TILE voxels at
- * every size, so a larger size is a larger area at the same scale, where more fits, and not the same building drawn bigger.
+ * The largest side, in voxels, a structure that grows by rules runs at (T338, ADR-0179): up to it a tile stays the same voxels at
+ * every size (TILE before T405, `STRUCTURE_VPT` since), so a larger size is a larger area at the same scale, where more fits, and not the same building drawn bigger.
  * 500 since T370 (ADR-0206): the Gargantuan structure, 25 × 25 tiles on its lot of 2 × 2 places; 200 before.
  */
 export const STRUCTURE_SIDE = 500;
@@ -113,10 +133,13 @@ export const STRUCTURE_SIDE = 500;
 /** The structures that grow by rules (ADR-0160): the class `structure` from Large up. Their parts keep their size in tiles. */
 export const growsByRules = (c: AssetClass, taglia?: string): boolean => c.id === 'structure' && sizeRank(sizeOf(taglia)?.id ?? c.taglia) >= sizeRank('large');
 
-/** Voxels per tile a class runs at, at a size: `densityOf`, but a structure that grows by rules keeps TILE up to STRUCTURE_SIDE (ADR-0179). */
+/**
+ * Voxels per tile a class runs at, at a size: `densityOf`, but a structure that grows by rules is at `STRUCTURE_VPT` at every size up to
+ * STRUCTURE_SIDE (ADR-0179; 20 before T405).
+ */
 export function densityFor(c: AssetClass, taglia?: string): number {
   const tiles = tilesOf(c, taglia);
-  if (growsByRules(c, taglia)) return Math.min(TILE, Math.floor(STRUCTURE_SIDE / Math.max(...tiles)));
+  if (growsByRules(c, taglia)) return Math.min(STRUCTURE_VPT, Math.floor(STRUCTURE_SIDE / Math.max(...tiles)));
   return taglia ? densityOf(tiles) : TILE;
 }
 
@@ -144,17 +167,18 @@ export function boxOf(c: AssetClass, taglia?: string): Vec3 {
  * The parts one lives in (T338, ADR-0179), their least measures in tiles: the same at every size. A small structure does not get
  * a smaller door, a lower storey or a narrower room: what does not fit is left out (a small fort is a tower, a small farm a house
  * with a lean-to). A person is 1 × 0.75 × 1.5 tiles and passes where the body (0.44 tiles) does; a room is the side of the largest
- * square of covered floor where one stands, the bays of the skeleton (29 voxels at 20) are the least.
+ * square of covered floor where one stands. Since T405 (ADR-0209) they are the voxels they were at 20 (a door 11 × 30, a storey 30, a
+ * room 28, a lean-to 30 × 20) read at `STRUCTURE_VPT`: a door and a storey 1.875 tiles, 1.25 wanderers, where at 20 they were one.
  */
 export const PARTS = {
-  /** A door: as wide as a body passes and as tall as a person. */
-  door: { width: 0.55, height: 1.5 },
-  /** A storey: the clear height where one stands, floor to ceiling. */
-  storey: { clear: 1.5 },
+  /** A door: as wide as a body passes, a quarter taller than a person (11 × 30 voxels at 16). */
+  door: { width: 11 / 16, height: 30 / 16 },
+  /** A storey: the clear height where one stands, floor to ceiling, a quarter more than a person. */
+  storey: { clear: 30 / 16 },
   /** A room: the side of the largest square of covered floor where one stands. */
-  room: { side: 1.4 },
+  room: { side: 28 / 16 },
   /** A lean-to (a roof on posts, open on the sides): one stands under it, and it is deep enough to keep something dry. */
-  shelter: { clear: 1.5, depth: 1 },
+  shelter: { clear: 30 / 16, depth: 20 / 16 },
 } as const;
 
 /** The least measures of the parts in voxels at a density (rounded up: never under the measure in tiles). */

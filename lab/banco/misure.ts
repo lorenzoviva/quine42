@@ -56,7 +56,8 @@ function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id:
   // The bench of T154-T182 keeps the scale of its time, under MAX_SIDE (16 voxels a tile at Huge, 12 at Gargantuan): its targets,
   // its fixtures and its reports were measured there. The structures of today at TILE at every size are the bench of T338 (ADR-0179).
   const cls = classOf(b.classe), tiles = cls && scaledTiles(cls, b.taglia);
-  const before = tiles && b.taglia && densityOf(tiles) !== TILE ? { vpt: densityOf(tiles) } : {};
+  // It says its density at every size (T405): an entry that does not say it is at 16 now (ADR-0209), and the bench is of 20.
+  const before = tiles ? { vpt: b.taglia ? densityOf(tiles) : TILE } : {};
   const info = { class: b.classe, ...modelSize(b), ...before, ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
   // The parts of the seed a program imports (`part-stair`, `part-door`…, ADR-0182), from universe/models as the game has them (T303).
