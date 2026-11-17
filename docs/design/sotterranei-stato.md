@@ -140,3 +140,37 @@ quando la Fase I lo permette, in quest'ordine:
 3. la cantina nella via dei dati dello Scenografo (dopo T410), con i mobili del § 10.4;
 4. T52f, se le strutture nuove devono avere cantine: prima di T411, se si vuole che le abbiano anche i modelli rigenerati;
 5. T52d per ultimo, ridotto ai predefiniti del seme.
+
+## 6. Dopo T415: il buco a copertura
+
+Fatto il primo passo del § 5 (kernel 0.9.3). Il terreno si apre su tutta l'impronta della cantina e solo lì: una casella che la
+cantina copre in parte si apre sulle sue sotto-celle, 16 per lato (`holeCover`, `HOLE_CELLS`), con i fianchi dove incontrano il resto.
+Dove il terreno resta il kernel sta sul terreno, dove si apre sui pavimenti della cantina: disegno e corpo dicono la stessa cosa,
+quindi non ci sono fosse in cui si cammina a mezz'aria. Sul buco non si posano alberi né rocce del terreno.
+
+`lab/scripts/misura-cantine.ts` dice ora anche le caselle aperte prima (il centro della casella sulla cantina) e l'area aperta dopo,
+col modello posato al centro di una casella e non girato:
+
+| voci | vpt | caselle toccate | aperte prima | area aperta dopo (caselle²) |
+|---|---|---|---|---|
+| fucina, locanda, torre di guardia (seme), bistrot (neapolis) | 16 | 15 | 3 | 7,32 (tutto il buco) |
+| fucina nanica, torre del mago, locanda del cinghiale (seme), officina meccanica (orichalcum) | 16 | 15 | 6 | 7,37 (tutto il buco) |
+| 8 voci «prime» degli universi di Claude Cloud | 20 | 12 | 3 | 4,72 (buco 4,68) |
+| 8 voci «gemelle» degli universi di Claude Cloud | 20 | 8 | 6 | 4,77 (buco 4,72) |
+
+A 16 voxel per casella le sotto-celle stanno sui voxel e l'area aperta è il buco esatto. A 20 (le voci di prima) una sotto-cella
+prende la colonna sotto il suo centro e il bordo si sposta al più di 1/32 di casella: lo 0,04 caselle² in più. `tests/cellar.test.ts`
+prova ora le due densità: a 16 la casa di prova tocca 5 × 5 caselle, 16 in parte, e ogni sua colonna di voxel sta sotto il terreno aperto,
+il terreno attorno resta intero, e le facce del terreno che il renderer abbassa coprono proprio i 60 × 60 voxel della cantina.
+
+Nel browser (`?skip&offline`, la locanda posata come nel § 2 a (−19,5, −10,5)): `holesIn` dà 15 caselle, 12 in parte, 7,32 caselle²
+aperte. Dal piano terra la tromba scende sui gradini di pietra, non più nell'erba; si scende per la scala fino a −19 voxel e in cantina
+si vede tutta la cantina, coi suoi muri, il pavimento e la scala, anche con la camera girata; si risale a +2 voxel lungo lo stesso cammino.
+
+| | |
+|---|---|
+| ![sulla scala](sotterranei-stato/6-dopo-sulla-scala.jpg) sulla scala, a −7 voxel | ![in cantina](sotterranei-stato/7-dopo-in-cantina.jpg) in cantina, a −19: tutta la cantina aperta |
+| ![girata](sotterranei-stato/8-dopo-in-cantina-girata.jpg) la stessa, la camera girata: la scala | ![piano terra](sotterranei-stato/9-dopo-piano-terra.jpg) risalito al piano terra: la tromba sui gradini |
+
+Resta T52e: il taglio attorno a chi sta sotto, gli strati e la luce attenuata. Con la cantina larga 1,75 caselle la camera in 3/4 la vede già
+quasi tutta; una cantina più larga ne avrà bisogno.

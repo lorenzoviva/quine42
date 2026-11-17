@@ -5788,7 +5788,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: T409 fuso in T414: il censimento del glossario rigenerato per risolvere il conflitto, la guardia degli interni come ADR-0212 coi rimandi giusti, il kernel a 0.9.2 (`version.ts`, `package.json`, `universe/universe.json`, ADR-0212 e la sua riga nell'indice); typecheck e suite verdi (3433 passati, 1 saltato); `package-lock.json` resta a 0.7.7 come prima del task. Sicurezza: nessuna superficie nuova.
 
 
-### T415 · La cantina si vede: il buco su tutta la cantina, col test a 16 — `da fare`
+### T415 · La cantina si vede: il buco su tutta la cantina, col test a 16 — `fatto` (`b06b6352`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 13
 - Contesto: proposta dell'orchestratore da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 4-5): le cantine tengono a 16 vpx, ma `holesIn` apre il terreno solo su 3 caselle su 15 della locanda; il resto della cantina, compresa la tromba vista dal piano terra, resta sotto l'erba. Il difetto si vede già oggi in aurora dovunque è posata una delle 6 voci del seme. `tests/cellar.test.ts` misura ancora a 20 vpx.
@@ -5796,6 +5796,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: `cellar.test.ts` a 16; suite e typecheck coi turni.
 - Browser: sì — `?skip&offline`, `struttura-locanda` posata come in T412: dal piano terra si vede la cantina e la tromba, si scende e si risale; screenshot.
 - Quando è fatto: commit su `task/T415`; nell'esito caselle aperte prima/dopo. Sicurezza: nessuna superficie nuova.
+- Esito: il terreno si apre su tutta l'impronta della cantina a sotto-celle di 1/16 di casella (`holeCover`, `HOLE_CELLS`; `holesIn` dà profondità e copertura, il renderer disegna le sotto-celle coi fianchi), disegno e `floorAt` coincidono; locanda e altre 3 voci del seme da 3 a 15 caselle (7,32 caselle²), le altre 3 da 6 a 15 (7,37), le voci di Claude Cloud a 20 da 3 o 6 a 12 o 8 caselle (4,72-4,77); `tests/cellar.test.ts` anche a 16 voxel per casella, `misura-cantine.ts` prima/dopo, kernel 0.9.3, docs e 4 screenshot. A 20 voxel per casella il bordo può spostarsi al più di 1/32 di casella. Manca T52e. Il cammino dalla porta della locanda non è provato (la ricerca automatica del cammino non l'ha trovato). Sicurezza: nessuna superficie nuova.
 
 ### T416 · Vedere sotto terra, senza strati (T52e ridotto) — `da fare` (dipende da T415)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2

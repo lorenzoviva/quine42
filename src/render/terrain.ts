@@ -13,7 +13,7 @@ import type { TerrainDef } from '../kernel/types';
 import { TERRAIN_THING } from './cartoon';
 import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
-import type { Form } from '../kernel/forms';
+import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 
 export const WALL_H = 1.6;
 const WATER_Y = -0.18;
@@ -176,8 +176,16 @@ export function tileForms(k: Kernel, code: string): Array<{ form: Form; geo: Mod
   return out;
 }
 
-/** The cellars' holes in a chunk (T52b), as a key: tile and depth. */
-const holesKey = (k: Kernel, ch: Chunk) => [...k.holesIn(ch)].map(([i, d]) => `${i}:${d.toFixed(2)}`).join(',');
+/** A hole's sub-cells (T415) as a short string, for the key. */
+const coverHash = (c: Uint8Array) => {
+  let h = 2166136261;
+  for (let i = 0; i < c.length; i++) h = Math.imul(h ^ c[i]!, 16777619);
+  return (h >>> 0).toString(36);
+};
+
+/** The cellars' holes in a chunk (T52b), as a key: tile, depth and where in the tile (T415). */
+const holesKey = (k: Kernel, ch: Chunk) =>
+  [...k.holesIn(ch)].map(([i, h]) => `${i}:${h.depth.toFixed(2)}${h.cover ? `:${coverHash(h.cover)}` : ''}`).join(',');
 
 /** What a chunk's meshes depend on: its tiles and levels, its neighbours' (banks and walls look across the edge), the terrains' models, the cellars' holes. */
 export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
@@ -203,13 +211,76 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
   const formsOf = new Map<string, ReturnType<typeof tileForms>>();
   // Where a model has its cellar the terrain goes down to the cellar's bottom (T52b, the hole): its banks are the hole's sides.
-  const holes = new Map<string, number>();
+  // A tile only partly over the cellar (T415) goes down only on its sub-cells over the hole, with sides where they meet the rest.
+  const holes = new Map<string, TileHole>();
   for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
     const o = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
-    if (o) for (const [i, d] of k.holesIn(o)) holes.set(`${o.cx * S + (i % S)},${o.cy * S + Math.floor(i / S)}`, d);
+    if (o) for (const [i, h] of k.holesIn(o)) holes.set(`${o.cx * S + (i % S)},${o.cy * S + Math.floor(i / S)}`, h);
   }
-  const ground0 = (x: number, z: number) => k.groundAt(x, z) - (holes.get(`${x},${z}`) ?? 0);
+  const holeAt = (x: number, z: number) => holes.get(`${x},${z}`);
+  const ground0 = (x: number, z: number) => {
+    const h = holeAt(x, z);
+    return k.groundAt(x, z) - (h && !h.cover ? h.depth : 0);
+  };
   const top = (x: number, z: number) => ground0(x, z) + groundY(tile(x, z));
+  const N = HOLE_CELLS;
+  /** The top of a tile at one of its sub-cells (s along x, t along z). */
+  const subTop = (x: number, z: number, s: number, t: number) => {
+    const h = holeAt(x, z);
+    return h?.cover?.[t * N + s] ? k.groundAt(x, z) - h.depth + groundY(tile(x, z)) : top(x, z);
+  };
+  /** A side facing (dx, dz) on the plane `p`, from `a` to `b` along it, from `y` down to `ny`; wound counter-clockwise seen from outside, like the boxes. */
+  const side = (dx: number, dz: number, p: number, a: number, b: number, y: number, ny: number, rgb: number[]) => {
+    if (dx === 1) ground.quad([p, y, b], [p, ny, b], [p, ny, a], [p, y, a], [1, 0, 0], rgb, true);
+    if (dx === -1) ground.quad([p, y, a], [p, ny, a], [p, ny, b], [p, y, b], [-1, 0, 0], rgb, true);
+    if (dz === 1) ground.quad([a, y, p], [a, ny, p], [b, ny, p], [b, y, p], [0, 0, 1], rgb, true);
+    if (dz === -1) ground.quad([b, y, p], [b, ny, p], [a, ny, p], [a, y, p], [0, 0, -1], rgb, true);
+  };
+  /**
+   * The sides of a tile towards a neighbour when one of the two is only partly over a cellar (T415): sub-cell by sub-cell
+   * along the edge, where this tile's is higher than the neighbour's next to it; a run of the same heights is one quad.
+   */
+  const subSides = (x: number, z: number, dx: number, dz: number, earth: number[]) => {
+    const mine = (j: number) => (dx === 1 ? subTop(x, z, N - 1, j) : dx === -1 ? subTop(x, z, 0, j) : dz === 1 ? subTop(x, z, j, N - 1) : subTop(x, z, j, 0));
+    const theirs = (j: number) =>
+      dx === 1 ? subTop(x + 1, z, 0, j) : dx === -1 ? subTop(x - 1, z, N - 1, j) : dz === 1 ? subTop(x, z + 1, j, 0) : subTop(x, z - 1, j, N - 1);
+    const p = dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z;
+    const o = dx ? z : x;
+    for (let j = 0; j < N; ) {
+      const y = mine(j), ny = theirs(j);
+      let e = j + 1;
+      while (e < N && mine(e) === y && theirs(e) === ny) e++;
+      if (ny < y) side(dx, dz, p, o + j / N, o + e / N, y, ny, earth);
+      j = e;
+    }
+  };
+  /** A tile partly over a cellar (T415): its top sub-cell by sub-cell (a run of a row is one quad), and the sides inside it. */
+  const partTile = (x: number, z: number, base: number[]) => {
+    const H = (s: number, t: number) => subTop(x, z, s, t);
+    const earth = base.map((v) => v * 0.72);
+    for (let t = 0; t < N; t++)
+      for (let s = 0; s < N; ) {
+        const y = H(s, t);
+        let e = s + 1;
+        while (e < N && H(e, t) === y) e++;
+        const x0 = x + s / N, x1 = x + e / N, z0 = z + t / N, z1 = z + (t + 1) / N;
+        ground.quad([x0, y, z0], [x0, y, z1], [x1, y, z1], [x1, y, z0], [0, 1, 0], base);
+        s = e;
+      }
+    // Between two sub-cells of different heights the higher one has the side.
+    for (let t = 0; t < N; t++)
+      for (let s = 0; s + 1 < N; s++) {
+        const a = H(s, t), b = H(s + 1, t), p = x + (s + 1) / N, z0 = z + t / N, z1 = z + (t + 1) / N;
+        if (b < a) side(1, 0, p, z0, z1, a, b, earth);
+        else if (a < b) side(-1, 0, p, z0, z1, b, a, earth);
+      }
+    for (let s = 0; s < N; s++)
+      for (let t = 0; t + 1 < N; t++) {
+        const a = H(s, t), b = H(s, t + 1), p = z + (t + 1) / N, x0 = x + s / N, x1 = x + (s + 1) / N;
+        if (b < a) side(0, 1, p, x0, x1, a, b, earth);
+        else if (a < b) side(0, -1, p, x0, x1, b, a, earth);
+      }
+  };
   // A terrain is a part (its code), so the ink follows where one meets another and never the tiles of one.
   const terrainPart = new Map(Object.keys(pal).map((code, i) => [code, 1 + (i % (SIDE_PART - 1))]));
   const place = (code: string, x: number, y: number, z: number, h: number, every: number): boolean => {
@@ -241,19 +312,21 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
       const base = rgbOf(t?.color, k0);
       ground.fixedPart = terrainPart.get(code) ?? 0;
       solid.fixedPart = undefined;
-      ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
+      const holed = holeAt(x, z);
+      if (holed?.cover) partTile(x, z, base);
+      else ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
       // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
       // banks of earth down to the water.
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const n = tile(x + dx, z + dz);
+        const earth = n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
+        if (holed?.cover || holeAt(x + dx, z + dz)?.cover) {
+          subSides(x, z, dx, dz, earth);
+          continue;
+        }
         const ny = top(x + dx, z + dz);
         if (ny >= y) continue;
-        const earth = n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
-        // Wound counter-clockwise seen from outside, like the boxes.
-        if (dx === 1) ground.quad([x + 1, y, z + 1], [x + 1, ny, z + 1], [x + 1, ny, z], [x + 1, y, z], [1, 0, 0], earth, true);
-        if (dx === -1) ground.quad([x, y, z], [x, ny, z], [x, ny, z + 1], [x, y, z + 1], [-1, 0, 0], earth, true);
-        if (dz === 1) ground.quad([x, y, z + 1], [x, ny, z + 1], [x + 1, ny, z + 1], [x + 1, y, z + 1], [0, 0, 1], earth, true);
-        if (dz === -1) ground.quad([x + 1, y, z], [x + 1, ny, z], [x, ny, z], [x, y, z], [0, 0, -1], earth, true);
+        side(dx, dz, dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z, dx ? z : x, dx ? z + 1 : x + 1, y, ny, earth);
       }
       switch (t?.layer) {
         case 'wall':
@@ -266,10 +339,11 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
           solid.box(x, g0 + WALL_H - 0.35, z, x + 1, g0 + WALL_H, z + 1, rgbOf(t.color, 0.8));
           break;
         case 'vegetation':
-          if (!place(code, x, y, z, h, 2)) standInTree(solid, x, y, z, h, rgbOf(t.color));
+          // Nothing grows over a cellar (T415): the hole is the cellar's.
+          if (!holed && !place(code, x, y, z, h, 2)) standInTree(solid, x, y, z, h, rgbOf(t.color));
           break;
         case 'rock':
-          if (!place(code, x, y, z, h, 1)) standInRock(solid, x, y, z, h, rgbOf(t.color));
+          if (!holed && !place(code, x, y, z, h, 1)) standInRock(solid, x, y, z, h, rgbOf(t.color));
           break;
       }
     }

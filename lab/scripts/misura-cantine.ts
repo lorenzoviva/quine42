@@ -1,6 +1,7 @@
 // The cellars of the seed (T412): every library entry with `cellar`, run as the game runs it (`Forms`, inline), each seed;
 // whether the form keeps its cellar (`hole`), how deep and how large the floor under the ground one reaches from the ground
-// floor, and why a cellar is lost (floors under the ground the stair does not reach). No models, no browser.
+// floor, and why a cellar is lost (floors under the ground the stair does not reach); the tiles where the terrain opened
+// before T415 (the middle of the tile) and the area it opens now (the cellar's footprint). No models, no browser.
 //
 //   npx vite-node lab/scripts/misura-cantine.ts -- [--universo <cartella>] [--solo id] [--json f]
 // With --universo, the entries of a universe on the disk (its `models/` and `universe.json`, ported to this contract by the migrations).
@@ -8,7 +9,7 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { portedFiles } from '../../src/kernel/migrations';
 import { bundledFiles } from '../../src/kernel/bundle';
-import { Forms, InlineRunner, bodyGround, holesOf, stepOf, cellarVoxels, reachableStoreys, type ModelInfo } from '../../src/kernel/forms';
+import { Forms, HOLE_CELLS, InlineRunner, bodyGround, holeCover, holesOf, stepOf, cellarVoxels, reachableStoreys, toLocal, type ModelInfo } from '../../src/kernel/forms';
 import { surfaces } from '../../src/mj/mesh';
 
 const args = process.argv.slice(2);
@@ -63,6 +64,18 @@ for (const id of ids) {
         }
       }
     }
+    // The terrain over the cellar (T415), the model laid in the middle of a tile as the lots and the console lay it, unturned:
+    // before, a tile opened if the column under its middle was of the hole; now the hole is the cellar's footprint, sub-cell by sub-cell.
+    let before = 0, touched = 0, open = 0;
+    if (f.hole)
+      for (const [at, cover] of holeCover(f, f.hole, 0.5, 0.5, 0)) {
+        const [col, row] = at.split(',').map(Number) as [number, number];
+        const [lx, lz] = toLocal(col, row, 0);
+        const vx = Math.floor(lx * vpt + g.X / 2), vy = Math.floor(lz * vpt + g.Y / 2);
+        if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && f.hole[vx + vy * g.X]) before++;
+        touched++;
+        open += cover === true ? 1 : cover.reduce((a, b) => a + b, 0) / HOLE_CELLS ** 2;
+      }
     const storeys = reachableStoreys(g, f.result.palette, vpt, base).map((h) => +(h / vpt).toFixed(2));
     rows.push({
       id,
@@ -81,6 +94,9 @@ for (const id of ids) {
       reachedTiles: +(reached / (vpt * vpt)).toFixed(2),
       floorBelowGround: Number.isFinite(lowest) ? +((lowest - base) / vpt).toFixed(3) : undefined,
       storeys: storeys.join(' '),
+      tilesOpenBefore: before,
+      tilesTouched: touched,
+      openTilesAfter: +open.toFixed(2),
       ms,
     });
   }

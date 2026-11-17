@@ -41,7 +41,7 @@ import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
-import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
+import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
 import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
@@ -3151,27 +3151,41 @@ export class Kernel {
 
   /**
    * The tiles of a place over which a model has its cellar (T52b), with how deep the terrain goes down there (tiles
-   * under the ground): the renderer lowers the terrain to the cellar's bottom, the hole. A tile is of the cellar if
-   * the voxel column under its middle is.
+   * under the ground) and where: the renderer lowers the terrain to the cellar's bottom, the hole. The hole covers the
+   * cellar's whole footprint (T415, `holeCover`): a tile only partly over it has the sub-cells that are (`cover`).
    */
-  holesIn(ch: Chunk): Map<number, number> {
+  holesIn(ch: Chunk): Map<number, TileHole> {
     const S = this.config.chunkSize;
-    const out = new Map<number, number>();
-    for (const { x, y, yaw, form: f, hole } of this.cellars) {
+    const out = new Map<number, TileHole>();
+    for (const s of this.cellars) {
+      const { x, y, form: f, hole } = s;
       if (!hole || x + f.reach < ch.cx * S || y + f.reach < ch.cy * S || x - f.reach >= (ch.cx + 1) * S || y - f.reach >= (ch.cy + 1) * S) continue;
-      const g = f.result!.grid;
       const bottom = this.groundAt(x, y) - f.base / f.vpt;
-      for (let row = Math.floor(y - f.reach); row <= Math.floor(y + f.reach); row++)
-        for (let col = Math.floor(x - f.reach); col <= Math.floor(x + f.reach); col++) {
-          const c = col - ch.cx * S, r = row - ch.cy * S;
-          if (c < 0 || r < 0 || c >= S || r >= S) continue;
-          const [lx, lz] = toLocal(col + 0.5 - x, row + 0.5 - y, yaw);
-          const vx = Math.floor(lx * f.vpt + g.X / 2), vy = Math.floor(lz * f.vpt + g.Y / 2);
-          if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y || !hole[vx + vy * g.X]) continue;
-          out.set(r * S + c, Math.max(out.get(r * S + c) ?? 0, this.groundAt(col + 0.5, row + 0.5) - bottom));
+      for (const [at, cover] of this.coverOf(s)) {
+        const [col, row] = at.split(',').map(Number) as [number, number];
+        const c = col - ch.cx * S, r = row - ch.cy * S;
+        if (c < 0 || r < 0 || c >= S || r >= S) continue;
+        const i = r * S + c, depth = this.groundAt(col + 0.5, row + 0.5) - bottom, was = out.get(i);
+        if (!was) out.set(i, cover === true ? { depth } : { depth, cover });
+        else {
+          // Two cellars on one tile: the deeper bottom, the sub-cells of both.
+          const both = !was.cover || cover === true ? undefined : was.cover.map((v, j) => v | cover[j]!);
+          out.set(i, { depth: Math.max(was.depth, depth), ...(both ? { cover: both } : {}) });
         }
+      }
     }
     return out;
+  }
+
+  /** Where a cellar's hole is, tile by tile (T415): kept while the model, its place and its hole stay (the renderer asks every frame). */
+  private holeCovers = new WeakMap<Uint8Array, { at: string; cover: Map<string, Uint8Array | true> }>();
+  private coverOf(s: SolidForm): Map<string, Uint8Array | true> {
+    const at = `${s.x},${s.y},${s.yaw},${s.form.key}`;
+    const c = this.holeCovers.get(s.hole!);
+    if (c?.at === at) return c.cover;
+    const cover = holeCover(s.form, s.hole!, s.x, s.y, s.yaw);
+    this.holeCovers.set(s.hole!, { at, cover });
+    return cover;
   }
 
   /** The highest floor (tiles) at a point of the simulation no higher than `top`: where a jump that clears it lands (T70). */
