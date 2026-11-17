@@ -1,0 +1,131 @@
+{
+ "richiesta": {
+  "via": "programma",
+  "n": 2,
+  "chiamate": [
+   {
+    "model": "claude-opus-5-5",
+    "input": 2,
+    "written5m": 0,
+    "written1h": 358,
+    "read": 5672,
+    "output": 3240,
+    "usd": 0.06880639999999999,
+    "usdCli": 0.06880639999999999,
+    "task": "interior.programma",
+    "seconds": 26
+   }
+  ],
+  "secondi": 27,
+  "testo": "<!-- Fattoria: ground hall (z=1) gets a hearth, chests, benches and a central table; upper hall (z=33) gets beds, chests and shelves.\n     Barn (A) only gets troughs and hay along its edges. Placement is random per seed (one/prl), so every seed differs. -->\n<sequence values=\"BWFCPAHTLSKMNOQRYmtlh\">\n  <color symbol=\"W\" hidden=\"True\"/>\n  <color symbol=\"F\" hidden=\"True\"/>\n  <color symbol=\"C\" hidden=\"True\"/>\n  <color symbol=\"P\" hidden=\"True\"/>\n  <color symbol=\"A\" hidden=\"True\"/>\n  <color symbol=\"m\" hidden=\"True\"/>\n  <color symbol=\"t\" hidden=\"True\"/>\n  <color symbol=\"l\" hidden=\"True\"/>\n  <color symbol=\"h\" hidden=\"True\"/>\n  <color symbol=\"H\" value=\"7a4a2a\" name=\"camino\"/>\n  <color symbol=\"O\" value=\"ffa040\" glow=\"True\" name=\"fuoco\"/>\n  <color symbol=\"T\" value=\"8a5a34\" name=\"tavolo\"/>\n  <color symbol=\"L\" value=\"6b4a2e\" name=\"letto\"/>\n  <color symbol=\"S\" value=\"5a3a22\" name=\"scaffale\"/>\n  <color symbol=\"K\" value=\"7b5232\" name=\"cassapanca\"/>\n  <color symbol=\"M\" value=\"9a6a3c\" name=\"panca\"/>\n  <color symbol=\"N\" value=\"5b4a3a\" name=\"mangiatoia\"/>\n  <color symbol=\"Q\" value=\"d8c060\" name=\"fieno\"/>\n  <color symbol=\"R\" value=\"b8b0a0\" name=\"lenzuolo\"/>\n  <color symbol=\"Y\" value=\"c09050\" name=\"botte\"/>\n\n  <!-- hearth: one, against a wall -->\n  <one in=\"WFFFFFFFFFFFF\" out=\"*HHH*********\" steps=\"1\"/>\n  <all in=\"B H\" out=\"H *\" steps=\"14\"/>\n  <one in=\"H/F\" out=\"*/O\" steps=\"1\"/>\n\n  <!-- beds against walls (few) -->\n  <one in=\"WFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFF\" out=\"*LLLLLLLLLL**********/*LLLLLLLLLL**********/*LLLLLLLLLL**********/*LLLLLLLLLL**********/*LLLLLLLLLL**********/*LLLLLLLLLL**********\" steps=\"2\"/>\n  <all in=\"B L\" out=\"l *\" steps=\"1\"/>\n  <all in=\"B l\" out=\"l *\" steps=\"3\"/>\n  <all in=\"l\" out=\"L\"/>\n  <one in=\"L B\" out=\"* R\" steps=\"40\"/>\n\n  <!-- chests and barrels against walls -->\n  <one in=\"WFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFF\" out=\"*KKKKK**********/*KKKKK**********/*KKKKK**********/*KKKKK**********\" steps=\"3\"/>\n  <all in=\"B K\" out=\"m *\" steps=\"1\"/>\n  <all in=\"B m\" out=\"m *\" steps=\"5\"/>\n  <all in=\"m\" out=\"K\"/>\n  <one in=\"WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF\" out=\"*YYYY**********/*YYYY**********/*YYYY**********/*YYYY**********\" steps=\"2\"/>\n  <all in=\"B Y\" out=\"t *\" steps=\"1\"/>\n  <all in=\"B t\" out=\"t *\" steps=\"8\"/>\n  <all in=\"t\" out=\"Y\"/>\n\n  <!-- shelves: thin, tall -->\n  <one in=\"WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF\" out=\"*SS***********/*SS***********/*SS***********/*SS***********/*SS***********/*SS***********\" steps=\"2\"/>\n  <all in=\"B S\" out=\"h *\" steps=\"1\"/>\n  <all in=\"B h\" out=\"h *\" steps=\"22\"/>\n  <all in=\"h\" out=\"S\"/>\n\n  <!-- table in the middle, with free ring of 11 around -->\n  <one steps=\"1\">\n    <in>FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</in>\n    <out>******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/***********TTTTTTTT***********/***********TTTTTTTT***********/***********TTTTTTTT***********/***********TTTTTTTT***********/***********TTTTTTTT***********/***********TTTTTTTT***********/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************/******************************</out>\n  </one>\n  <all in=\"B T\" out=\"T *\" steps=\"7\"/>\n\n  <!-- benches against walls, low -->\n  <one in=\"WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF\" out=\"*MMM**********/*MMM**********/*MMM**********/*MMM**********/*MMM**********/*MMM**********/*MMM**********/*MMM**********\" steps=\"2\"/>\n  <all in=\"B M\" out=\"M *\" steps=\"3\"/>\n\n  <!-- barn: troughs and hay along walls only -->\n  <one in=\"WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA\" out=\"*NN***********/*NN***********/*NN***********/*NN***********/*NN***********/*NN***********\" steps=\"2\"/>\n  <all in=\"B N\" out=\"N *\" steps=\"4\"/>\n  <one in=\"WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA/WAAAAAAAAAAAAA\" out=\"*QQ***********/*QQ***********/*QQ***********/*QQ***********\" steps=\"2\"/>\n  <all in=\"B Q\" out=\"Q *\" steps=\"5\"/>\n</sequence>",
+  "correzioni": 0
+ },
+ "usd": 0.06880639999999999,
+ "usdCli": 0.06880639999999999,
+ "semi": [
+  {
+   "seme": 1,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 237,
+   "pezzi": 2,
+   "voxel": 2770,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8890912770694192,
+   "scartati": 1
+  },
+  {
+   "seme": 2,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 242,
+   "pezzi": 2,
+   "voxel": 2770,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8890912770694192,
+   "scartati": 1
+  },
+  {
+   "seme": 3,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 224,
+   "pezzi": 2,
+   "voxel": 2770,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8890912770694192,
+   "scartati": 1
+  },
+  {
+   "seme": 4,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 232,
+   "pezzi": 2,
+   "voxel": 2770,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8890912770694192,
+   "scartati": 1
+  }
+ ]
+}

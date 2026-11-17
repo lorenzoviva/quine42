@@ -7,6 +7,7 @@
 // T397: `--via openrouter` sends the Sculptor's calls to OpenRouter through the game's own adapter (OpenRouterAiModels: the schema, the
 // reasoning, the system instructions in the cache, the cost it says), with OPENROUTER_API_KEY from <root>/.env; the Artist stays on Gemini.
 // Then --tetto counts OpenRouter's dollars as well. --offline answers with a fake OpenRouter (the offline Sculptor's program, a cost of 0).
+// T303: `--interno` asks the structure with its interior in the same program (the Scenografo's way (a), `lab/scripts/scenografo-misura.ts`).
 //
 //   npx vite-node lab/scripts/scultore-gemini.ts -- [--root ../../..] [--giro giro1] [--pensiero low|medium|high] [--scultore <modello>] [--solo forte,fattoria] [--taglie large,huge] [--tetto 10] [--out lab/banco/taglie/gemini]
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-carbon,claude-sonnet-5-5 [--ripeti 2] [--sforzo low] [--cli-cmd "claude"] [--senza-immagini] [--finestra 80] [--offline] --out lab/banco/taglie/modelli
@@ -102,12 +103,20 @@ function viaOpenRouter(rest: AiModels, openrouter: (call: TextCall) => Promise<s
 /** A Sculptor at every size (the structures' model and the important ones'), the rest of the game's. */
 const sculptors = (model?: string): SculptorAiModels => (model ? { ...DEFAULT_SCULPTORS, structure: model, important: model } : DEFAULT_SCULPTORS);
 
+/**
+ * T303, the Scenografo's way (a): the interior asked to the Sculptor in the same program (`--interno`), the rest of the request as the
+ * game's. The furniture's colours begin with «arredo» so that the bench counts them (`lab/banco/scenografo/misura.ts`).
+ */
+export const INTERNO_TESTO =
+  'Furnished inside, in the same program: every room of every storey has its furniture (beds, tables, benches, shelves, chests, a hearth, barrels; mangers and hay where animals stay), standing on the floor against the walls, each piece a small body of its own material. Keep free what a body needs, the checks are the same: the door and the straight way in from it, two cells of free floor before every stair and where it comes out, a passage at least 11 voxels wide between the pieces to every room and every stair. Give every furniture material a colour of its own whose name begins with «arredo» (arredo letto, arredo tavolo…).';
+const INTERNO = args.includes('--interno') ? INTERNO_TESTO : undefined;
+
 /** As the ModelDirector words a structure (`modeldirector.ts`, the Cartographer's concept without a place). */
 const CONCETTI = ['forte', 'fattoria'];
 const request = (concept: string, taglia: SizeTier): SculptRequest => ({
   id: structureModel(concept, taglia),
   nome: concept,
-  aspetto: `${concept}: a building one enters, with the door at the front`,
+  aspetto: `${concept}: a building one enters, with the door at the front${INTERNO ? `. ${INTERNO}` : ''}`,
   classe: 'structure',
   taglia,
 });

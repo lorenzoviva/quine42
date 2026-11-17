@@ -1,0 +1,75 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "claude-opus-5-5",
+ "chiamate": 4,
+ "secondi": 407,
+ "usd": 1.3176,
+ "usdGemini": 0,
+ "usdClaude": 1.3176,
+ "usdCli": 1.3176,
+ "claude": [
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 359,
+   "read": 9964,
+   "output": 3220,
+   "usd": 0.06927280000000001,
+   "usdCli": 0.0692728,
+   "task": "model.sculpt",
+   "seconds": 34
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 7078,
+   "read": 8031,
+   "output": 20377,
+   "usd": 0.46577820000000003,
+   "usdCli": 0.46577820000000003,
+   "task": "model.sculpt",
+   "seconds": 215
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 26438,
+   "read": 8031,
+   "output": 10218,
+   "usd": 0.4174782,
+   "usdCli": 0.4174782,
+   "task": "model.sculpt",
+   "seconds": 90
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 26347,
+   "read": 8031,
+   "output": 7633,
+   "usd": 0.3650502,
+   "usdCli": 0.3650502,
+   "task": "model.sculpt",
+   "seconds": 58
+  }
+ ],
+ "token": {
+  "prompt": 94287,
+  "output": 41448,
+  "thoughts": 0
+ },
+ "perCompito": [
+  {
+   "model": "claude-opus-5-5",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 1.3176
+  }
+ ],
+ "errore": "nessun programma valido"
+}

@@ -1,0 +1,58 @@
+{
+ "concetto": "villetta",
+ "taglia": "large",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 8,
+ "chiamate": 3,
+ "secondi": 291,
+ "usd": 0.5993,
+ "usdGemini": 0.0074,
+ "usdClaude": 0.5918,
+ "usdCli": 0.5918,
+ "claude": [
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 2290,
+   "read": 8031,
+   "output": 4435,
+   "usd": 0.1086342,
+   "usdCli": 0.1086342,
+   "task": "model.sculpt",
+   "seconds": 48
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 6874,
+   "read": 8031,
+   "output": 21330,
+   "usd": 0.48320620000000003,
+   "usdCli": 0.4832062,
+   "task": "model.sculpt",
+   "seconds": 235
+  }
+ ],
+ "token": {
+  "prompt": 28379,
+  "output": 25933,
+  "thoughts": 133
+ },
+ "perCompito": [
+  {
+   "model": "claude-opus-5-5",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.5918
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0074
+  }
+ ]
+}

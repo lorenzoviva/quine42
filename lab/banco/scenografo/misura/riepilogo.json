@@ -1,0 +1,1478 @@
+{
+ "villetta": {
+  "edificio": "lab\\banco\\scenografo\\misura\\vuoto\\claude-opus-5-5\\giro1\\villetta-large\\programma.xml",
+  "insieme-1": {
+   "esito": {
+    "chiamate": 3,
+    "secondi": 291,
+    "usd": 0.5993,
+    "usdClaude": 0.5918,
+    "usdCli": 0.5918,
+    "usdGemini": 0.0074,
+    "voto": 8,
+    "claude": [
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 2290,
+      "read": 8031,
+      "output": 4435,
+      "usd": 0.1086342,
+      "usdCli": 0.1086342,
+      "task": "model.sculpt",
+      "seconds": 48
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 6874,
+      "read": 8031,
+      "output": 21330,
+      "usd": 0.48320620000000003,
+      "usdCli": 0.4832062,
+      "task": "model.sculpt",
+      "seconds": 235
+     }
+    ]
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "pezzi": 6,
+     "voxel": 1100,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "e",
+      "l",
+      "c",
+      "j"
+     ]
+    },
+    {
+     "seme": 2,
+     "pezzi": 6,
+     "voxel": 1100,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "e",
+      "l",
+      "c",
+      "j"
+     ]
+    },
+    {
+     "seme": 3,
+     "pezzi": 6,
+     "voxel": 1100,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "e",
+      "l",
+      "c",
+      "j"
+     ]
+    },
+    {
+     "seme": 4,
+     "pezzi": 6,
+     "voxel": 1100,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze",
+      "salti"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "e",
+      "l",
+      "c",
+      "j"
+     ]
+    }
+   ]
+  },
+  "insieme-2": {
+   "esito": {
+    "chiamate": 4,
+    "secondi": 289,
+    "usd": 0.6947,
+    "usdClaude": 0.6858,
+    "usdCli": 0.6858,
+    "usdGemini": 0.0089,
+    "voto": 9,
+    "claude": [
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 357,
+      "read": 9962,
+      "output": 2839,
+      "usd": 0.0616364,
+      "usdCli": 0.061636399999999994,
+      "task": "model.sculpt",
+      "seconds": 32
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 6485,
+      "read": 8031,
+      "output": 19002,
+      "usd": 0.43353420000000004,
+      "usdCli": 0.43353420000000004,
+      "task": "model.sculpt",
+      "seconds": 201
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 8017,
+      "read": 8031,
+      "output": 6243,
+      "usd": 0.1906102,
+      "usdCli": 0.19061019999999998,
+      "task": "model.sculpt",
+      "seconds": 44
+     }
+    ]
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "pezzi": 7,
+     "voxel": 1400,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "u",
+      "i",
+      "l",
+      "A",
+      "D",
+      "Z",
+      "X",
+      "Y",
+      "b",
+      "K"
+     ]
+    },
+    {
+     "seme": 2,
+     "pezzi": 7,
+     "voxel": 1400,
+     "stanzeArredate": [
+      3,
+      3
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "u",
+      "i",
+      "l",
+      "A",
+      "D",
+      "Z",
+      "X",
+      "Y",
+      "b",
+      "K"
+     ]
+    },
+    {
+     "seme": 3,
+     "pezzi": 7,
+     "voxel": 1400,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "u",
+      "i",
+      "l",
+      "A",
+      "D",
+      "Z",
+      "X",
+      "Y",
+      "b",
+      "K"
+     ]
+    },
+    {
+     "seme": 4,
+     "pezzi": 7,
+     "voxel": 1400,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "u",
+      "i",
+      "l",
+      "A",
+      "D",
+      "Z",
+      "X",
+      "Y",
+      "b",
+      "K"
+     ]
+    }
+   ]
+  },
+  "programma-1": {
+   "usd": 0.078368,
+   "usdCli": 0.07836800000000001,
+   "chiamate": 1,
+   "secondi": 15,
+   "correzioni": 0,
+   "token": {
+    "input": 5952,
+    "cache": 0,
+    "output": 1538
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 133,
+     "pezzi": 13,
+     "voxel": 1117,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8680042238648363,
+     "scartati": 0
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 95,
+     "pezzi": 13,
+     "voxel": 1117,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8680042238648363,
+     "scartati": 0
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 92,
+     "pezzi": 11,
+     "voxel": 1089,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 1,
+     "scartati": 1
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 90,
+     "pezzi": 11,
+     "voxel": 1069,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 1,
+     "scartati": 2
+    }
+   ]
+  },
+  "programma-2": {
+   "usd": 0.0618622,
+   "usdCli": 0.0618622,
+   "chiamate": 1,
+   "secondi": 24,
+   "correzioni": 0,
+   "token": {
+    "input": 5950,
+    "cache": 5591,
+    "output": 2894
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 480,
+     "pezzi": 0,
+     "voxel": 0,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      0,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 1,
+     "scartati": 3
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 424,
+     "pezzi": 0,
+     "voxel": 0,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      0,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 1,
+     "scartati": 3
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 405,
+     "pezzi": 3,
+     "voxel": 7546,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.6236854877851481,
+     "scartati": 2
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 420,
+     "pezzi": 3,
+     "voxel": 14024,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.723784510921786,
+     "scartati": 2
+    }
+   ]
+  },
+  "dati-1": {
+   "usd": 0.023744,
+   "usdCli": 0.023744,
+   "chiamate": 1,
+   "secondi": 3,
+   "correzioni": 0,
+   "token": {
+    "input": 2539,
+    "cache": 0,
+    "output": 172
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 3,
+     "ms": 363,
+     "pezzi": 4,
+     "voxel": 6249,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [
+      "stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: se l'area è piccola fai meno parti, non più piccole"
+     ],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.9346815183302692
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 80,
+     "pezzi": 3,
+     "voxel": 5221,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7068633739576652
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 2,
+     "ms": 430,
+     "pezzi": 5,
+     "voxel": 8390,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8233626962849483
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 92,
+     "pezzi": 4,
+     "voxel": 7460,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7969035331480746
+    }
+   ]
+  },
+  "dati-2": {
+   "usd": 0.006748,
+   "usdCli": 0.0067480000000000005,
+   "chiamate": 1,
+   "secondi": 4,
+   "correzioni": 0,
+   "token": {
+    "input": 2540,
+    "cache": 2180,
+    "output": 172
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 3,
+     "ms": 307,
+     "pezzi": 4,
+     "voxel": 6249,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [
+      "stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: se l'area è piccola fai meno parti, non più piccole"
+     ],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.9346815183302692
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 69,
+     "pezzi": 3,
+     "voxel": 5221,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7068633739576652
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 2,
+     "ms": 485,
+     "pezzi": 5,
+     "voxel": 8390,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8233626962849483
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 102,
+     "pezzi": 4,
+     "voxel": 7460,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7969035331480746
+    }
+   ]
+  }
+ },
+ "fattoria": {
+  "edificio": "lab\\banco\\scenografo\\misura\\vuoto\\claude-opus-5-5\\giro1\\fattoria-large\\programma.xml",
+  "insieme-1": {
+   "esito": {
+    "chiamate": 3,
+    "secondi": 172,
+    "usd": 0.4007,
+    "usdClaude": 0.3926,
+    "usdCli": 0.3926,
+    "usdGemini": 0.0081,
+    "voto": 8,
+    "claude": [
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 2292,
+      "read": 8031,
+      "output": 3796,
+      "usd": 0.0958702,
+      "usdCli": 0.0958702,
+      "task": "model.sculpt",
+      "seconds": 42
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 6781,
+      "read": 8031,
+      "output": 12044,
+      "usd": 0.2967422,
+      "usdCli": 0.2967422,
+      "task": "model.sculpt",
+      "seconds": 122
+     }
+    ]
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "pezzi": 5,
+     "voxel": 428,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "X",
+      "Y",
+      "P",
+      "Z",
+      "J"
+     ]
+    },
+    {
+     "seme": 2,
+     "pezzi": 5,
+     "voxel": 428,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "X",
+      "Y",
+      "P",
+      "Z",
+      "J"
+     ]
+    },
+    {
+     "seme": 3,
+     "pezzi": 5,
+     "voxel": 428,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "X",
+      "Y",
+      "P",
+      "Z",
+      "J"
+     ]
+    },
+    {
+     "seme": 4,
+     "pezzi": 5,
+     "voxel": 428,
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "lettere": [
+      "X",
+      "Y",
+      "P",
+      "Z",
+      "J"
+     ]
+    }
+   ]
+  },
+  "insieme-2": {
+   "esito": {
+    "chiamate": 4,
+    "secondi": 407,
+    "usd": 1.3176,
+    "usdClaude": 1.3176,
+    "usdCli": 1.3176,
+    "usdGemini": 0,
+    "errore": "nessun programma valido",
+    "claude": [
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 359,
+      "read": 9964,
+      "output": 3220,
+      "usd": 0.06927280000000001,
+      "usdCli": 0.0692728,
+      "task": "model.sculpt",
+      "seconds": 34
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 7078,
+      "read": 8031,
+      "output": 20377,
+      "usd": 0.46577820000000003,
+      "usdCli": 0.46577820000000003,
+      "task": "model.sculpt",
+      "seconds": 215
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 26438,
+      "read": 8031,
+      "output": 10218,
+      "usd": 0.4174782,
+      "usdCli": 0.4174782,
+      "task": "model.sculpt",
+      "seconds": 90
+     },
+     {
+      "model": "claude-opus-5-5",
+      "input": 2,
+      "written5m": 0,
+      "written1h": 26347,
+      "read": 8031,
+      "output": 7633,
+      "usd": 0.3650502,
+      "usdCli": 0.3650502,
+      "task": "model.sculpt",
+      "seconds": 58
+     }
+    ]
+   }
+  },
+  "programma-1": {
+   "usd": 0.076922,
+   "usdCli": 0.076922,
+   "chiamate": 1,
+   "secondi": 25,
+   "correzioni": 0,
+   "token": {
+    "input": 6032,
+    "cache": 4370,
+    "output": 3138
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 97,
+     "pezzi": 10,
+     "voxel": 2208,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8332892998678996,
+     "scartati": 0
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 83,
+     "pezzi": 10,
+     "voxel": 2208,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8332892998678996,
+     "scartati": 0
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 84,
+     "pezzi": 10,
+     "voxel": 2208,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8332892998678996,
+     "scartati": 0
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 92,
+     "pezzi": 10,
+     "voxel": 2208,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8332892998678996,
+     "scartati": 0
+    }
+   ]
+  },
+  "programma-2": {
+   "usd": 0.06880639999999999,
+   "usdCli": 0.06880639999999999,
+   "chiamate": 1,
+   "secondi": 27,
+   "correzioni": 0,
+   "token": {
+    "input": 6032,
+    "cache": 5672,
+    "output": 3240
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 237,
+     "pezzi": 2,
+     "voxel": 2770,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8890912770694192,
+     "scartati": 1
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 242,
+     "pezzi": 2,
+     "voxel": 2770,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8890912770694192,
+     "scartati": 1
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 224,
+     "pezzi": 2,
+     "voxel": 2770,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8890912770694192,
+     "scartati": 1
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 232,
+     "pezzi": 2,
+     "voxel": 2770,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8890912770694192,
+     "scartati": 1
+    }
+   ]
+  },
+  "dati-1": {
+   "usd": 0.0178998,
+   "usdCli": 0.0178998,
+   "chiamate": 1,
+   "secondi": 4,
+   "correzioni": 0,
+   "token": {
+    "input": 2621,
+    "cache": 959,
+    "output": 221
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 105,
+     "pezzi": 4,
+     "voxel": 6640,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7648809523809523
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 3,
+     "ms": 285,
+     "pezzi": 4,
+     "voxel": 5918,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7520725969079095
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 91,
+     "pezzi": 4,
+     "voxel": 7204,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.6283143023030773
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 38,
+     "pezzi": 2,
+     "voxel": 2260,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      1,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8191489361702128
+    }
+   ]
+  },
+  "dati-2": {
+   "usd": 0.0072042,
+   "usdCli": 0.007204199999999999,
+   "chiamate": 1,
+   "secondi": 4,
+   "correzioni": 0,
+   "token": {
+    "input": 2621,
+    "cache": 2261,
+    "output": 194
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 97,
+     "pezzi": 4,
+     "voxel": 6640,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7648809523809523
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 3,
+     "ms": 287,
+     "pezzi": 4,
+     "voxel": 5918,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.7520725969079095
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 91,
+     "pezzi": 4,
+     "voxel": 7204,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      2,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.6283143023030773
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 38,
+     "pezzi": 2,
+     "voxel": 2260,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      2,
+      2
+     ],
+     "stanzeArredate": [
+      1,
+      2
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8191489361702128
+    }
+   ]
+  }
+ },
+ "finestra": [
+  {
+   "prima": {
+    "session": 57,
+    "week": 47,
+    "read": "2026-11-17T01:04:16.657Z"
+   },
+   "dopo": {
+    "session": 62,
+    "week": 47,
+    "read": "2026-11-17T01:07:09.635Z"
+   },
+   "letture": [
+    {
+     "session": 57,
+     "week": 47,
+     "read": "2026-11-17T01:04:26.532Z"
+    },
+    {
+     "session": 58,
+     "week": 47,
+     "read": "2026-11-17T01:05:29.433Z"
+    },
+    {
+     "session": 62,
+     "week": 47,
+     "read": "2026-11-17T01:06:47.823Z"
+    }
+   ]
+  }
+ ]
+}

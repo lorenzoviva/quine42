@@ -1,0 +1,68 @@
+Registro di H:\projects\rune\.claude\worktrees\t303\lab\banco\scenografo\misura\insieme: $0.0000 di Gemini prima del giro, tetto $2.00
+Claude prima: 5 ore 51 %, settimana 46 %
+  giro1 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro1 villetta-large [sculptor] propone: «villetta» (struttura grande, claude-opus-5-5)
+  giro1 fattoria-large [artist → sculptor] approva: «fattoria»: 8/10 — Le finestrelle sulla facciata frontale sono disposte in modo irregolare e un po' caotico.
+giro1 fattoria-large: fatto (claude-opus-5-5, voto 8) in 172 s · 3 chiamate · $0.40 · input 28k (cache 16k) · risposta 16k · ragionamento 225
+  giro1 villetta-large [artist → sculptor] approva: «villetta»: 8/10 — La porta principale risulta come un varco buio e vuoto anziché mostrare il serramento in legno staccato dalle pareti.
+giro1 villetta-large: fatto (claude-opus-5-5, voto 8) in 291 s · 3 chiamate · $0.60 · input 28k (cache 16k) · risposta 26k · ragionamento 133
+
+claude-opus-5-5\giro1: $1.00 a listino, 6 chiamate, registro di Gemini $0.02
+  giro2 villetta-large [sculptor] propone: «villetta» (struttura grande, claude-opus-5-5)
+  giro2 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro2 villetta-large [kernel → sculptor] scarta: «villetta»: taglia Grande, seme 1: il simbolo "#20" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="#20" value="rrggbb"/>
+  giro2 fattoria-large [kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+  giro2 villetta-large [artist → sculptor] approva: «villetta»: 9/10 — Le finestre sui lati sono molto piccole e disposte in modo un po' disordinato sulla facciata bianca.
+giro2 villetta-large: fatto (claude-opus-5-5, voto 9) in 289 s · 4 chiamate · $0.69 · input 44k (cache 26k) · risposta 28k · ragionamento 325
+  giro2 fattoria-large [kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+  giro2 fattoria-large [kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+  giro2 fattoria-large [sculptor] errore: «fattoria»: nessun programma valido
+giro2 fattoria-large: NON riuscito (nessun programma valido) in 407 s · 4 chiamate · $1.32 · input 94k (cache 34k) · risposta 41k · ragionamento 0
+
+claude-opus-5-5\giro2: $2.01 a listino, 8 chiamate, registro di Gemini $0.02
+Claude dopo: 5 ore 62 %, settimana 47 % · il giro ha preso 1 punti della settimana
+
+villetta-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 282 ms, 102543 voxel, parti 45 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 1, house 11, path 1
+   seme 2: 320 ms, 102543 voxel, parti 46 (17 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 63 · z1 lato 36 (1.80 c) soffitto 63 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 1, house 11, path 1
+ huge (150×150×120)
+   seme 1: 514 ms, 119941 voxel, parti 56 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 19, house 6, path 2, porch 4
+   seme 2: 529 ms, 119941 voxel, parti 56 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 19, house 6, path 2, porch 4
+ gargantuan (500×500×160)
+   seme 1: 3916 ms, 132529 voxel, parti 54 (22 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 25, house 7, path 10, porch 3
+   seme 2: 3916 ms, 132529 voxel, parti 55 (22 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30 15×30; aree garden 25, house 7, path 10, porch 3
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+fattoria-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 332 ms, 103629 voxel, parti 43 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 64 · z1 lato 36 (1.80 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 2, house 7, pasture 5, yard 6
+   seme 2: 314 ms, 103629 voxel, parti 45 (20 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 64 · z1 lato 36 (1.80 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 2, house 7, pasture 5, yard 6
+ huge (150×150×120)
+   seme 1: 530 ms, 120325 voxel, parti 43 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 64 · z1 lato 36 (1.80 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 2, house 4, pasture 1, yard 31
+   seme 2: 489 ms, 120325 voxel, parti 42 (21 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 64 · z1 lato 36 (1.80 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 2, house 4, pasture 1, yard 31
+ gargantuan (500×500×160)
+   seme 1: 3907 ms, 298437 voxel, parti 700 (23 lettere); piani 0,33; stanze z0 lato 36 (1.80 c) soffitto 64 · z1 lato 36 (1.80 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 1, house 6, orchard 329, pasture 8, yard 42
+   seme 2: 4167 ms, 298437 voxel, parti 700 (23 lettere); piani 0,33; stanze z0 lato 35 (1.75 c) soffitto 64 · z1 lato 35 (1.75 c) soffitto 64 · z33 lato 36 (1.80 c) soffitto 31; porte 11×30 15×30; aree barn 1, house 6, orchard 329, pasture 8, yard 42
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+villetta-large (include part-stair.xml, part-door.xml)
+ large (100×100×80)
+   seme 1: 464 ms, 108349 voxel, parti 49 (23 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 12, house 7, porch 1
+   seme 2: 434 ms, 108349 voxel, parti 48 (23 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 12, house 7, porch 1
+ huge (150×150×120)
+   seme 1: 651 ms, 129089 voxel, parti 64 (25 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 15, house 6, porch 2
+   seme 2: 636 ms, 128891 voxel, parti 61 (25 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 15, house 6, porch 2
+ gargantuan (500×500×160)
+   seme 1: 3918 ms, 203614 voxel, parti 715 (25 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 15, house 7, porch 1
+   seme 2: 3868 ms, 204802 voxel, parti 724 (25 lettere); piani 1,33; stanze z0 lato 36 (1.80 c) soffitto 33 · z1 lato 36 (1.80 c) soffitto 33 · z33 lato 36 (1.80 c) soffitto 31; porte 15×30; aree garden 15, house 7, porch 1
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
