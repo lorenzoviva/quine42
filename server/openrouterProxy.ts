@@ -52,6 +52,11 @@ const CHAT_PATH = /\/v1\/chat\/completions$/;
 const DECISIONS_PATH = /\/alpha\/decisions$/;
 const QUESTION_TYPES = new Set(['choice', 'noul', 'score']);
 const CHAT_MODELS = new Set(Object.values(OPENROUTER_MODELS).map((m) => m.id));
+/**
+ * The ceiling of an answer's tokens of a model of the list that has one (Opus 5.5, Fable 5.1: T398): the gate writes it again, never above, so
+ * that one call of the dearest model costs a known most (about 1,60 $ of Fable's output) and the daily ceiling holds whatever the body asked.
+ */
+const CHAT_MAX_TOKENS = new Map(Object.values(OPENROUTER_MODELS).flatMap((m) => (m.maxTokens ? [[m.id, m.maxTokens] as const] : [])));
 const JEV_MODELS = new Set(Object.values(OPENROUTER_JEV));
 /** What a chat call may carry to OpenRouter: the rest (fallback `models`, `route`, `plugins`, `transforms`, another `provider`) is dropped. */
 const CHAT_FIELDS = ['model', 'messages', 'temperature', 'response_format', 'reasoning', 'max_tokens'] as const;
@@ -109,6 +114,11 @@ export function chatRequest(body: string): { model: string; body: string } | { e
   if (!Array.isArray(r.messages) || !r.messages.length) return { status: 400, error: 'messaggi mancanti' };
   const out: Record<string, unknown> = {};
   for (const k of CHAT_FIELDS) if (r[k] !== undefined) out[k] = r[k];
+  const most = CHAT_MAX_TOKENS.get(r.model);
+  if (most !== undefined) {
+    const asked = out.max_tokens;
+    out.max_tokens = typeof asked === 'number' && Number.isInteger(asked) && asked > 0 ? Math.min(asked, most) : most;
+  }
   out.provider = { require_parameters: true, data_collection: 'deny' };
   return { model: r.model, body: JSON.stringify(out) };
 }

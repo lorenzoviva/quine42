@@ -44,10 +44,16 @@ export const PRICES: Record<string, Price> = {
   // Opus 5.5 through OpenRouter (anthropic/claude-opus-5.5, T397, D57), read on OPUS_PRICES_READ_ON: the same as Anthropic's list
   // (ANTHROPIC_PRICES). A prompt written to the cache costs 5,00 (for an hour 8,00): not here, the calls say what they cost.
   'claude-opus-5-5': { input: 4.0, output: 20.0, cached: 0.2, note: 'OpenRouter, 16/11/2026; scrittura in cache 5,00' },
+  // Fable 5.1 through OpenRouter (anthropic/claude-fable-5.1, T398): the structures' Sculptor of the tier `max`, read on FABLE_PRICES_READ_ON,
+  // the same as Anthropic's list; a prompt written to the cache 12,50 (for an hour 20,00), one regional endpoint 10 % more.
+  'claude-fable-5-1': { input: 10.0, output: 50.0, cached: 0.25, note: 'OpenRouter, 17/11/2026; scrittura in cache 12,50' },
 };
 
 /** When the price of Opus 5.5 was read on OpenRouter (T397): its endpoints at the list price (a few regional ones ask 10 % more). */
 export const OPUS_PRICES_READ_ON = '2026-11-16';
+
+/** When the price of Fable 5.1 was read on OpenRouter (T398). */
+export const FABLE_PRICES_READ_ON = '2026-11-17';
 
 /** When the price of Gemini 3.5 Flash was read on OpenRouter (T395). */
 export const FLASH_3_5_READ_ON = '2026-11-14';

@@ -556,7 +556,7 @@ describe('la lobby', () => {
     const { root, done, enter } = open({});
     const before = root.find((f) => f.className === 'estimate-row')!.textContent;
     expect(root.byId('lobby-knob-words').disabled).toBe(false);
-    for (const id of ['lobby-preset', 'lobby-modello-testo', 'lobby-scultore-figure', 'lobby-ragionamento', 'lobby-budget-maxText', 'lobby-budget-maxPieces', 'lobby-minimo-tetto', 'lobby-minimo-words', 'lobby-attore']) expect(root.byId(id), id).toBeDefined();
+    for (const id of ['lobby-preset', 'lobby-modello-testo', 'lobby-scultore-livello', 'lobby-scultore-figure', 'lobby-ragionamento', 'lobby-budget-maxText', 'lobby-budget-maxPieces', 'lobby-minimo-tetto', 'lobby-minimo-words', 'lobby-attore']) expect(root.byId(id), id).toBeDefined();
     // One slider for every coefficient, and what it does at 0 written beside it.
     for (const k of COEFFICIENT_KEYS) {
       expect(root.byId(`lobby-knob-${k}`), k).toBeDefined();

@@ -2,7 +2,7 @@
 // (`endpoint`), two doors: `/v1/chat/completions` for the models that write (OpenRouterAiModels, beside GeminiAiModels) and `/alpha/decisions`
 // for Jev (OpenRouterDecisionModels, beside JevDecisionModels). The key never comes here: the gate of the server (T363) or a script of the lab adds it.
 //
-// The ids are fixed and on a list (OPENROUTER_MODELS, OPENROUTER_JEV; Google's models and, from T397, Opus 5.5 for the Sculptor): never an alias that moves (`~…-latest`), `openrouter/auto` or a tier
+// The ids are fixed and on a list (OPENROUTER_MODELS, OPENROUTER_JEV; Google's models and, from T397, Opus 5.5 for the Sculptor; from T398 Fable 5.1 for the tier `max`): never an alias that moves (`~…-latest`), `openrouter/auto` or a tier
 // (`:floor`, `:nitro`); a model off the list is never asked. The Council's schema becomes a JSON Schema in `response_format` (`toJsonSchema`), with
 // `require_parameters`, so that only an endpoint that takes every parameter answers; the reasoning is `reasoning.effort` (Gemini's `thinkingLevel`,
 // one to one) and does not come back; the Artist's photos are `image_url` parts with the data URLs of today. What a call cost is what OpenRouter
@@ -77,7 +77,13 @@ export const OPENROUTER_MODELS: Readonly<Record<string, OpenRouterModel>> = {
   // The Sculptor of the structures on this route from 1/12 (T397, D57): read on OPUS_READ_ON. No endpoint takes a temperature; every one takes
   // `response_format` and `reasoning`; none caches by itself.
   'claude-opus-5-5': { id: 'anthropic/claude-opus-5.5', snapshot: 'anthropic/claude-opus-5.5-20260921', temperature: false, cacheSystem: true, maxTokens: 32_000 },
+  // The structures' Sculptor of the tier `max` (T398, D57), read on FABLE_READ_ON: as Opus, no endpoint takes a temperature, every one takes
+  // `response_format` and `reasoning`, none caches by itself. The same ceiling of tokens: an answer that runs away costs at most 1,60 $.
+  'claude-fable-5-1': { id: 'anthropic/claude-fable-5.1', snapshot: 'anthropic/claude-fable-5.1-20260831', temperature: false, cacheSystem: true, maxTokens: 32_000 },
 };
+
+/** When the endpoints of Fable 5.1 were read (T398). */
+export const FABLE_READ_ON = '2026-11-17';
 
 /** When the endpoints of Opus 5.5 were read (T397). */
 export const OPUS_READ_ON = '2026-11-16';

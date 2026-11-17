@@ -5,7 +5,7 @@ import type { AiConfig, AiMinimums, AiSettings, FileMap, ModuleEntry, UniverseCo
 import { repairActor, repairCoefficients, repairGameSetup, type Validator } from './validator';
 import { DEFAULT_GAME_SETUP } from './gameSetup';
 import { COEFFICIENT_KEYS, pricedAiModels, type Coefficients } from './coefficients';
-import { DEFAULT_SCULPTORS, type SculptorAiModels } from './agents/sculptor';
+import { DEFAULT_SCULPTORS, repairSculptorTier, SCULPTOR_TIERS, type SculptorAiModels } from './agents/sculptor';
 import { priceOf } from './ai/prices';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
@@ -109,6 +109,11 @@ export function repairAiSettings(raw: unknown): { settings: AiSettings; riparati
     if (typeof s.importanteFino === 'number' && Number.isFinite(s.importanteFino) && s.importanteFino >= 0) sculptors.importanteFino = s.importanteFino;
     if (Object.keys(sculptors).length) settings.sculptors = sculptors as Partial<SculptorAiModels>;
   }
+  // The structures' Sculptor (T398): one of the three tiers, whose models are on a list (TIER_MODELS), never a model's name.
+  if (r.sculptorTier !== undefined) {
+    if (typeof r.sculptorTier === 'string' && (SCULPTOR_TIERS as readonly string[]).includes(r.sculptorTier)) settings.sculptorTier = repairSculptorTier(r.sculptorTier);
+    else riparati.push('Scultore delle strutture: scelta sconosciuta, resta quella di prima');
+  }
   if (r.actor !== undefined) {
     const a = repairActor(r.actor);
     const m = model(a.model, "modello dell'Attore");
@@ -158,6 +163,8 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           coefficients: repairCoefficients(parsed.ai?.coefficients),
           minimums: repairMinimums(parsed.ai?.minimums),
           actor: repairActor(parsed.ai?.actor),
+          // Absent, or a word that is not a tier (a universe.json written by hand), is `standard` (T398).
+          ...(parsed.ai?.sculptorTier !== undefined ? { sculptorTier: repairSculptorTier(parsed.ai.sculptorTier) } : {}),
         }),
         game: repairGameSetup(parsed.game),
         // Only what the store writes opens the choice of the cards (T295): anything else is closed.

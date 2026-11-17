@@ -1256,6 +1256,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/ai/openrouter.ts`, `lab/scripts/openrouter-prova.ts`
 - **Da non usare**: «proxy» (il varco è un'altra cosa, sul server), «router dei modelli» (è `RoutedAiModels`, gli abbonamenti)
 
+### Livello dello Scultore
+- **Inglese**: `SculptorTier`, `sculptorTier`, `TIER_MODELS`, `repairSculptorTier`, `sculptorTiers`
+- **Definizione**: la manopola del master che sceglie lo Scultore delle strutture e delle importanti (T398, ADR-0207): `standard` (il predefinito della via), `strong` «performante» (Opus 5.5 su OpenRouter da subito), `max` «massimo» (Fable 5.1 su OpenRouter); sulla via di Google ogni livello è Argon. In `universe.json → ai`, scelta nella Genesi e nella lobby col costo per struttura, ferma a partita in corso, pagata da chi paga la partita.
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `src/kernel/coefficients.ts`, `src/ui/sculptortier.ts`
+- **Da non usare**: «Scultore premium», «qualità dello Scultore», «tier» nei testi italiani
+- **Fermo**: le parole `standard`, `strong`, `max` su disco.
+
 ### Via dei modelli
 - **Inglese**: `AiRoute`, `aiRoute`, `sculptorsOn`
 - **Definizione**: da dove passano le chiamate del Concilio di un mondo: la chiave di Google (`google`) o OpenRouter (`openrouter`, `OpenRouterAiModels`); il kernel la sa da ciò con cui scrive e ne fa dipendere lo Scultore delle strutture (Opus 5.5 su OpenRouter dall'1/12, Argon su Google; T397, ADR-0205) e la stima oraria.

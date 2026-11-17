@@ -7,7 +7,7 @@
 
 import { cacheable, costOf, EXPLICIT_CACHE, priceOf } from './ai/prices';
 import { JEV_MODEL } from './ai/decisions';
-import { sculptorsOn, type AiRoute, type SculptorAiModels } from './agents/sculptor';
+import { repairSculptorTier, sculptorsOn, type AiRoute, type SculptorAiModels, type SculptorTier } from './agents/sculptor';
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
@@ -351,6 +351,30 @@ const WALL_WEIGHT = { prompt: 900, cached: 0, output: 0 };
 /** Tokens of a `text.guard` call: five questions (about 700), the door and a sentence of the wanderer. */
 const GUARD_WEIGHT = { prompt: 900, cached: 0, output: 0 };
 
+/** What a structure of a new concept costs on a model (T397's weights, `STRUCTURE_SCULPT`): about three calls; 0 for a model off the list. */
+export function structureCost(model: string, date?: string): number {
+  const call = costOf(model, { prompt: STRUCTURE_SCULPT.prompt, cached: NO_IMPLICIT_CACHE.has(model) ? 0 : Math.round(STRUCTURE_SCULPT.prefix * IMPLICIT_CACHE_SHARE), output: STRUCTURE_SCULPT.output }, date) ?? 0;
+  return STRUCTURE_SCULPT.calls * call;
+}
+
+/**
+ * The three tiers of the structures' Sculptor as the Genesis and the lobby show them (T398): on a route, on a day, the model a tier writes the
+ * structures with and what one of them costs. On Google's route every tier is Argon (only Gemini there).
+ */
+export interface TierView {
+  tier: SculptorTier;
+  name: string;
+  model: string;
+  perStructure: number;
+}
+export const TIER_NAMES: Readonly<Record<SculptorTier, string>> = { standard: 'standard', strong: 'performante', max: 'massimo' };
+export function sculptorTiers(ai: Pick<AiConfig, 'sculptors'>, route: AiRoute = 'google', date?: string): TierView[] {
+  return (Object.keys(TIER_NAMES) as SculptorTier[]).map((tier) => {
+    const model = sculptorsOn(internalSculptors(ai.sculptors ?? {}), route, date, tier).structure;
+    return { tier, name: TIER_NAMES[tier], model, perStructure: structureCost(model, date) };
+  });
+}
+
 export interface HourLine {
   voce: string;
   modo: 'diretta' | 'indiretta' | 'non regolabile';
@@ -365,7 +389,7 @@ export interface HourLine {
 export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: boolean; guards?: boolean; route?: AiRoute } = {}): { righe: HourLine[]; chiamate: number; dollari: number } {
   const c = repairCoefficients(ai.coefficients);
   // The structures' Sculptor depends on the route (T397): Argon on Google's, Opus 5.5 on OpenRouter from 1/12.
-  const sc: SculptorAiModels = sculptorsOn(internalSculptors(ai.sculptors ?? {}), opts.route ?? 'google', date);
+  const sc: SculptorAiModels = sculptorsOn(internalSculptors(ai.sculptors ?? {}), opts.route ?? 'google', date, repairSculptorTier(ai.sculptorTier));
   const actor = repairActor(ai.actor);
   const text = (n: number, task: string | string[]) => n * callCost(ai.textModel, task, date);
   // Who plays the people: the Actor's model when the option is on (T157), else the text model.
@@ -429,10 +453,9 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   const others = models - structures;
   const writes = others * (0.5 * plan.semplici + 0.5 * (1 + (plan.revisione ? 0.5 : 0))) + structures * STRUCTURE_SCULPT.calls;
   const judges = plan.giudizio ? writes : 0;
-  const structureCall = costOf(sc.structure, { prompt: STRUCTURE_SCULPT.prompt, cached: NO_IMPLICIT_CACHE.has(sc.structure) ? 0 : Math.round(STRUCTURE_SCULPT.prefix * IMPLICIT_CACHE_SHARE), output: STRUCTURE_SCULPT.output }, date) ?? 0;
   const sculptCost =
     others * (0.5 * plan.semplici * callCost(sc.simple, 'model.sculpt', date) + 0.5 * (1 + (plan.revisione ? 0.5 : 0)) * callCost(sc.figure, 'model.sculpt', date)) +
-    structures * STRUCTURE_SCULPT.calls * structureCall;
+    structures * structureCost(sc.structure, date);
   add(COEFFICIENT_INFO.models.nome, 'diretta', writes, sculptCost);
   add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * callCost(sc.artist, 'model.judge', date));
   // The Musician: a program for each environment that has none, a third of them sent back once.
