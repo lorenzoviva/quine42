@@ -1070,6 +1070,20 @@ export class Forms {
     return [...entryBox(this.classOf(model), info)] as Vec3;
   }
 
+  /**
+   * The tiles a structure's entry stands on (T404): its box at its density (`vptOf`), the program's own box if it says one (the author's
+   * fort: `size="500 500 150"` at 10 voxels a tile, 50 × 50 × 15 tiles), else its entry's (`entryBox`); undefined for another class.
+   */
+  entryTiles(model: string): [number, number, number] | undefined {
+    const info = this.library[model];
+    if (!info || info.class !== 'structure') return undefined;
+    const xml = this.files[`${MODELS_DIR}${model}.xml`];
+    const own = xml && /\ssize="(\d+)\s+(\d+)\s+(\d+)"/.exec(rootTag(xml));
+    const box = own ? [Number(own[1]), Number(own[2]), Number(own[3])] : entryBox(this.classOf(model), info);
+    const vpt = vptOf(info);
+    return box.map((v) => v / vpt) as [number, number, number];
+  }
+
   /** The program of a model, compiled (for actions). */
   compiled(model: string) {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];

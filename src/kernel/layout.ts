@@ -215,8 +215,10 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const stages = gated && { gated, programmed: rows() };
   const doorTiles: number[] = [];
   for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door' && !reserved.has(i)) doorTiles.push(i);
-  const mustReach = [...gateTiles.slice(1), ...doorTiles, ...apron].filter((i) => !reserved.has(i));
-  let reach = flood(rows(), size, palette, [gateTiles[0]], reserved);
+  // From the first gate the lot of a block does not cover (T404: in a block of 3 × 3 an edge may lie under it whole); the first gate elsewhere.
+  const first = Math.max(0, gateTiles.findIndex((g) => !reserved.has(g)));
+  const mustReach = [...gateTiles.filter((_, i) => i !== first), ...doorTiles, ...apron].filter((i) => !reserved.has(i));
+  let reach = flood(rows(), size, palette, [gateTiles[first]], reserved);
   const frozen = new Set([...border].filter((b) => !gateTiles.includes(b)));
   for (const r of reserved) frozen.add(r);
   const join = (from: number) => {
@@ -231,7 +233,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
         carved++;
       }
     }
-    reach = flood(rows(), size, palette, [gateTiles[0]], reserved);
+    reach = flood(rows(), size, palette, [gateTiles[first]], reserved);
   };
   for (const target of mustReach) if (!reach.has(target)) join(target);
   // Sizeable walkable pockets are joined too; tiny ones are left as scenery.
@@ -240,7 +242,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
     if (visited.has(i) || !walkable(i)) continue;
     const pocket = flood(rows(), size, palette, [i], reserved);
     for (const p of pocket) visited.add(p);
-    if (pocket.size >= 4 && !pocket.has(gateTiles[0])) join(i);
+    if (pocket.size >= 4 && !pocket.has(gateTiles[first])) join(i);
   }
 
   const grid = rows();

@@ -5,10 +5,18 @@
 // Chrome runs at about 1 Hz: `docs/architettura-dettagli.md#convalida-browser`). With a preview already serving the build:
 //
 //   node lab/scripts/misura-frame.mjs <port> [--secondi 8] [--chrome <chrome.exe>] [--json out.json] [--modello <file.xml> --scatola 400,400,160]
+//   node lab/scripts/misura-frame.mjs <port> --blocco <file.xml> [--vpt 10] [--luogo 20,24] [--json out.json]
 //
 // `--modello` (T356): after the cold load, the program of that file is put in the library at that box (as a structure at 20 voxels a tile,
 // straight into the repository: the validator's quality checks are not the question here) and worn by an entity beside the wanderer; the
 // frame is measured while the worker makes it and once it is drawn, from inside it.
+//
+// `--blocco` (T404, ADR-0208): after the cold load, the program of that file enters the library as a Gargantuan structure at its own box
+// and at `--vpt` voxels a tile (the author's fort: 10, a block of 3 × 3 places; 20, the block of 2 × 2 of T370), the Cartographer of the
+// offline models asks for it at `--luogo`, the block is taken, the wanderer goes three tiles south of its lot: how long until every place
+// of the block is planned and the form is ready, the JS heap and the buffers (the meshes) before and after a garbage collection, the places
+// loaded, the frames there.
+// Only that: the other phases are not run.
 //
 // Nothing of the game changes: the probe wraps requestAnimationFrame, WebGL and Worker before the page, and the kernel's and the
 // renderer's methods from the console (`window.quine`, `window.view`), as an instance property over the prototype's. The wanderer's
@@ -331,7 +339,7 @@ try {
   await page.eval(RESET);
   const settled = await settle(page);
   rows.push({ ...summary(`caricamento a freddo (fino a ${settled} s dopo il kernel)`, await page.eval(TAKE)), settled, kernelAt });
-  for (const [scene, go] of Object.entries(SCENES)) {
+  for (const [scene, go] of Object.entries(opt('blocco') ? {} : SCENES)) {
     await page.eval(go);
     await settle(page, 60);
     await page.eval(RESET);
@@ -367,6 +375,74 @@ try {
     await sleep(seconds * 1000);
     rows.push(summary(`dentro il modello di ${box.join('×')}, disegnato`, await page.eval(TAKE)));
   }
+  // A block of places (T404): the program at a density, the block it asks for, its places loaded together.
+  const blockFile = opt('blocco');
+  if (blockFile) {
+    const vpt = Number(opt('vpt', '10'));
+    const [bx, by] = (opt('luogo') ?? '20,24').split(',').map(Number);
+    const xml = fs.readFileSync(blockFile, 'utf8');
+    const heap = async () => {
+      await page.send('HeapProfiler.collectGarbage').catch(() => {});
+      const m = await page.send('Performance.getMetrics');
+      const get = (n) => m.metrics.find((x) => x.name === n)?.value ?? 0;
+      // The ArrayBuffers (the meshes the workers send) are outside the JS heap: `backingStorageSize` where the browser says it.
+      const u = await page.send('Runtime.getHeapUsage').catch(() => ({}));
+      return { heapMB: get('JSHeapUsedSize') / 2 ** 20, totalMB: get('JSHeapTotalSize') / 2 ** 20, buffersMB: (u.backingStorageSize ?? NaN) / 2 ** 20 };
+    };
+    await page.send('Performance.enable');
+    const before = { ...(await heap()), ...(await page.eval('(() => { const k = window.quine; return { loaded: k.chunks.size, planned: [...k.chunks.values()].filter((c) => c.stage === "planned").length }; })()')) };
+    await page.eval(RESET);
+    const made = await page.eval(`(async () => {
+      const k = window.quine; const xml = ${JSON.stringify(xml)};
+      const id = 'struttura-il-forte-gargantuan';
+      const index = JSON.parse(k.repo.working['models/index.json']);
+      index[id] = { class: 'structure', size: 'gargantuan', vpt: ${vpt}, time: 30000, name: 'il forte' };
+      k.repo.write('models/' + id + '.xml', xml);
+      k.repo.write('models/index.json', JSON.stringify(index, null, 1) + '\\n');
+      k.applyFiles({ ...k.repo.working });
+      const text = k.ai.text.bind(k.ai);
+      k.ai.text = async (call) => {
+        const out = await text(call);
+        const d = call.data;
+        if (call.task !== 'chunk.plan' || !d || d.cx !== ${bx} || d.cy !== ${by}) return out;
+        const a = JSON.parse(out);
+        a.structures = [{ concept: 'il forte', size: 'gargantuan' }];
+        return JSON.stringify(a);
+      };
+      const t0 = performance.now();
+      const answer = await k.planAhead(${bx}, ${by});
+      const block = k.blockOfPlace(${bx}, ${by});
+      if (!block) return { answer, block: null, tiles: k.forms.entryTiles(id) };
+      const n = block.side ?? 2, lot = block.lot ?? 25, S = k.config.chunkSize;
+      const x0 = block.x * S + Math.floor((n * S - Math.min(lot, n * S - 4)) / 2), mid = x0 + Math.min(lot, n * S - 4) / 2;
+      const y0 = block.y * S + Math.floor((n * S - Math.min(lot, n * S - 4)) / 2), midY = y0 + Math.min(lot, n * S - 4) / 2;
+      const c = k.carpet(); c.active = false;
+      c.ox = mid; c.oy = midY + Math.min(lot, n * S - 4) / 2 + 3; Object.assign(k.wandererPos(), { x: 0, y: 0 });
+      const keys = []; for (let dy = 0; dy < n; dy++) for (let dx = 0; dx < n; dx++) keys.push((block.x + dx) + ',' + (block.y + dy));
+      let planned = 0, f, plannedAt = 0;
+      for (let i = 0; i < 480; i++) {
+        planned = keys.filter((key) => k.chunks.get(key)?.stage === 'planned').length;
+        if (planned === keys.length && !plannedAt) plannedAt = performance.now() - t0;
+        const sid = k.ecs.query('structure', 'form').find((e) => k.ecs.get(e, 'structure').size === 'gargantuan');
+        if (sid !== undefined) f = k.forms.get(k.ecs.get(sid, 'form').model, k.ecs.get(sid, 'form').seed);
+        if (planned === keys.length && f && f.status !== 'pending') break;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      return { answer, block, places: keys.length, planned, plannedMs: Math.round(plannedAt), formMs: Math.round(performance.now() - t0), status: f && f.status, error: f && f.error, tiles: k.forms.entryTiles(id), loaded: k.chunks.size };
+    })()`);
+    console.log(`\nblocco: ${JSON.stringify(made)}`);
+    rows.push({ ...summary(`il blocco di ${made.block ? (made.block.side ?? 2) + ' × ' + (made.block.side ?? 2) : '—'} luoghi e il forte a ${vpt} voxel per casella che arrivano (${((made.formMs ?? 0) / 1000).toFixed(1)} s)`, await page.eval(TAKE)), made });
+    await settle(page, 60);
+    const after = { ...(await heap()), ...(await page.eval('(() => { const k = window.quine; return { loaded: k.chunks.size, planned: [...k.chunks.values()].filter((c) => c.stage === "planned").length }; })()')) };
+    console.log(`memoria JS: prima ${before.heapMB.toFixed(0)} MB, buffer ${before.buffersMB.toFixed(0)} MB (${before.loaded} luoghi caricati, ${before.planned} pianificati), dopo ${after.heapMB.toFixed(0)} MB, buffer ${after.buffersMB.toFixed(0)} MB (${after.loaded} caricati, ${after.planned} pianificati)`);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`accanto al forte, il blocco caricato e disegnato`, await page.eval(TAKE)), before, after });
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+    process.exitCode = made.block ? 0 : 1;
+  } else {
   // Water: a hollow dug beside it, the flow measured while it moves.
   await page.eval(RESET);
   const dug = await page.eval(WATER);
@@ -383,6 +459,7 @@ try {
   await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
   ws.close();
   if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+  }
 } finally {
   browser.kill();
   await sleep(1000);

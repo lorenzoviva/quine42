@@ -136,9 +136,42 @@ di `B × B` luoghi è al più `18·B − 4` caselle (`blockLot`: un anello di al
 - **Il cerchio**: a 5 il forte (100 caselle) è più largo del cerchio di simulazione (raggio 42, 84 caselle): da nessun punto lo si vede
   tutto; a 10 (50 caselle) ci sta.
 
-## Ciò che non è provato
+## Ciò che non era provato, e T404 ha provato
 
-- Il forte nel gioco a una densità diversa da 20 (è T404: la densità per voce e il lotto parametrico); qui solo il laboratorio.
-- Le scale percorse a piedi: il laboratorio fa salire un gradino di `stepOf` del modello come il gioco, ma le foto mettono il viandante
-  sul camminatoio e sulle torri dalla console, non a piedi.
-- Il costo dei luoghi di un blocco grande (sopra).
+L'autore ha scelto il fattore 2 (D61, A2: **10 voxel per casella**, 50 × 50 caselle, un blocco di 3 × 3 luoghi). T404 l'ha messo nel gioco
+(ADR-0208: la voce del forte `vpt: 10`, il blocco grande quanto la sua struttura) e ha misurato ciò che qui mancava.
+
+**Le scale a piedi, col cammino del kernel** (`npx vite-node lab/scripts/forte-scala.ts -- --semi 1 --cammina 20,10,5`: `reachableStoreys`,
+la stessa funzione del gioco, con il gradino `stepOf` della densità, il salto e la larghezza del corpo; senza chiamate):
+
+| densità | piani raggiunti a piedi dal suolo | dove (voxel sopra il selciato, viandanti) | il cammino |
+|---|---|---|---|
+| 20 | 2 | il suolo; 35 (1,17) | 1,7 s |
+| **10** | **4** | il suolo; il camminatoio a 23 (1,53); il secondo piano del mastio a 35 (2,33) e il terzo a 59 (3,93) | 1,3 s |
+| 5 | 1 | solo il suolo: le scale non si salgono | 0,9 s |
+
+**Nel gioco, a piedi** (la build, `?skip&offline`, Claude in Chrome, i tasti tenuti e i tick del kernel con le collisioni vere): la voce
+`{ class: 'structure', size: 'gargantuan', vpt: 10, time: 30000 }` entra con `addModel` (validata in 7,9 s), il Cartografo chiede «il forte»
+gargantuesco al luogo 20,24 e il blocco 20,24-22,26 è preso (3 × 3, lotto di 50); il forte (seme 1, girato di 90°) sta nel mezzo del luogo di
+mezzo. Il viandante entra dalla porta del mastio, attraversa il salone e sale la rampa fino al secondo piano: i piedi da 0,85 a 4,35 caselle
+(35 voxel a 10), senza salto.
+
+| | |
+|---|---|
+| ![il forte nel gioco a 10](../../../docs/img/forte-gioco-10-insieme.jpg) | ![davanti alla porta del mastio](../../../docs/img/forte-gioco-10-porta.jpg) |
+| ![nel salone del mastio](../../../docs/img/forte-gioco-10-salone.jpg) | ![al secondo piano, la rampa sotto](../../../docs/img/forte-gioco-10-scala.jpg) |
+
+**Il costo dei luoghi di un blocco grande** (Chrome headless sulla RTX 2070, `node lab/scripts/misura-frame.mjs <porta> --blocco
+lab/mjx/models/handmade/forte-handmade.xml --vpt 10|20`, `misure/blocco-*.json`):
+
+| | il blocco pianificato | il forte dal worker | accanto al forte | memoria dopo (JS, buffer) | luoghi caricati |
+|---|---|---|---|---|---|
+| a 20, blocco 2 × 2 (4 luoghi) | 1,4 s | 12,2 s | 192 fps, 4,0 ms JS, 3,9 ms GPU | 30 MB, 200 MB | 30 |
+| **a 10, blocco 3 × 3 (9 luoghi)** | **1,9 s** | **11,5 s** | **184 fps, 3,8 ms JS, 3,4 ms GPU** | **31 MB, 200 MB** | **31** |
+
+I cinque luoghi in più costano mezzo secondo di pianificazione (il piano del kernel, senza chiamate) e quasi niente in memoria: la mesh del
+forte è la stessa, e i luoghi attorno a un viandante sono comunque una trentina. Il viandante accanto al forte vede già i luoghi del blocco.
+
+Resta il disegno: **le mura sono di 1,5 viandanti** a 10. Il kernel non le tocca; se l'autore le vuole più alte dei piani, è un ritocco del
+programma del forte (T371 o un task suo).
+

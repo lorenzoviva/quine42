@@ -4,12 +4,16 @@
 // palette: the paving A, the road V, the walls S, their walk D and merlons M, the gatehouse G, the keep's wood f and floors F, its
 // walls K (also the barracks', solid), the towers T, the stairs Q.
 //
-//   npx vite-node lab/scripts/forte-scala.ts -- [--semi 1,2,3] [--json lab/banco/riferimento/forte-scala.json] [--file <xml>]
+//   npx vite-node lab/scripts/forte-scala.ts -- [--semi 1,2,3] [--json lab/banco/riferimento/forte-scala.json] [--file <xml>] [--cammina 20,10,5]
+//
+// `--cammina` (T404): the storeys the game's body reaches on foot from the ground outside at each density (`reachableStoreys`, the same
+// walk as the kernel: a step of `stepOf`, the jump, the body's width), so whether the stairs are climbed is read, not reckoned.
 
 import fs from 'node:fs';
 import { compileMjx } from '../../src/mj/model';
 import { runMjx } from '../../src/mj/run';
 import type { Grid3 } from '../../src/mj/engine';
+import { reachableStoreys } from '../../src/kernel/forms';
 
 const args = process.argv.slice(2);
 const opt = (name: string, fallback?: string) => {
@@ -20,6 +24,7 @@ const FILE = opt('file', 'lab/mjx/models/handmade/forte-handmade.xml')!;
 const SEEDS = opt('semi', '1')!.split(',').map(Number);
 const JSON_OUT = opt('json');
 const DENSITIES = [20, 10, 5];
+const WALK = opt('cammina')?.split(',').map(Number).filter((n) => Number.isInteger(n) && n >= 4) ?? [];
 /** The wanderer: 30 voxels tall at 20 a tile (lab/mjx/models/viandante.xml, size 20 15 30), 1.5 tiles. */
 const WANDERER_TILES = 1.5;
 
@@ -124,11 +129,14 @@ export interface FortMeasures {
   spots: Record<'keepDoor' | 'hall' | 'wall' | 'tower' | 'gate', [number, number, number]>;
   /** Out of the keep's door, towards the courtyard: a unit step in the grid (x, y). */
   keepDoorOut: [number, number];
+  /** `--cammina`: by density, the storeys reached on foot (voxels over the ground) and how long the walk took. */
+  walked?: Record<number, { storeys: number[]; ms: number }>;
 }
 
 function measure(xml: string, seed: number): FortMeasures {
   const t0 = performance.now();
-  const r = runMjx(compileMjx(xml, {}), seed, { deadline: 600_000 });
+  const model = compileMjx(xml, {});
+  const r = runMjx(model, seed, { deadline: 600_000 });
   const ms = Math.round(performance.now() - t0);
   const g = r.grid;
   const { list, has } = stands(g);
@@ -233,6 +241,17 @@ function measure(xml: string, seed: number): FortMeasures {
       gate: [gate?.cx ?? 0, gate?.cy ?? 0, ground],
     },
     keepDoorOut: [nx * outSign, ny * outSign],
+    ...(WALK.length
+      ? {
+          walked: Object.fromEntries(
+            WALK.map((d) => {
+              const t = performance.now();
+              const storeys = reachableStoreys(g, model.program.palette, d).map(over);
+              return [d, { storeys, ms: Math.round(performance.now() - t) }];
+            }),
+          ),
+        }
+      : {}),
   };
 }
 
@@ -275,4 +294,8 @@ const lines = [
   }),
 ];
 console.log(lines.join('\n'));
+for (const d of WALK) {
+  const w = all[0].walked?.[d];
+  if (w) console.log(`a ${d} voxel per casella: ${w.storeys.length} piani raggiunti a piedi dal suolo (${w.storeys.map((z) => `${z} voxel, ${fmt(z / d / WANDERER_TILES)} viandanti`).join('; ')}), il cammino in ${w.ms} ms`);
+}
 if (JSON_OUT) fs.writeFileSync(JSON_OUT, JSON.stringify({ file: FILE, wandererTiles: WANDERER_TILES, densities: DENSITIES, seeds: all }, null, 1) + '\n');
