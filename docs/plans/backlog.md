@@ -5828,7 +5828,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T418`. Sicurezza: nessuna superficie nuova.
 - Esito: terreni `stratum` del seme in `world.terrain → strata` (`SEED_STRATA`, `strataPalette`, il validatore li vuole lì e mai fra le caselle), bozza per colonna dal bioma e dal seme (`draftStrata`, 4 righe), `ChunkPlan.strata` scritto alla pianificazione e ricalcolato per i piani di prima (`Kernel.strataOf`, `stratumAt`), `ChunkView.strata` una volta per luogo, tappi del colore dello strato e fianchi a bande nel taglio (`strataSide`); kernel 0.9.5, ADR-0091, architettura, glossario, AGENTS, sotterranei-stato § 8, `tests/strata.test.ts`. Mancano (da proporre come task): il Cartografo che scrive gli strati alla Genesi, il programma `sottosuolo`, la profondità dalla cantina più profonda (oggi 4 righe fisse), le bande sui fianchi del buco, l'ombra della casa tagliata. Non provato: una cantina vera di 2 caselle (le bande si sono viste col taglio abbassato a mano). Sicurezza: nessuna superficie nuova.
 
-### T419 · La cantina arredata: la cantina nella via dei dati dello Scenografo — `da fare` (dipende da T410, T416, T417)
+### T419 · La cantina arredata: la cantina nella via dei dati dello Scenografo — `da fare` (dipende da T410, T416, T417, T420)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
 - Step: 13
 - Contesto: decisione dell'autore (17/11, chat, D63): l'arredo delle cantine si rimanda solo fino a dopo T52, non dopo la rigenerazione: va prima di T411. Nasce da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «cantina nella via dei dati»; `docs/design/scenografo.md` § 10.4).
