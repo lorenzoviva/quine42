@@ -24,7 +24,7 @@ Aggiornato il 17/11/2026, epoca 472 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T303 in corso (misura dello Scenografo, claude); T403 integrato (lab 3D «voxel per casella», tabella `lab/banco/riferimento/forte-scala.md`) → D61 chiusa (A2: forte a 10 vpx, blocco 3 × 3; B2: edifici a 14-16 vpx) → T404 pronto (claude, extra), poi T405 (scala degli edifici), T371 (fable, sospeso al 84 % della settimana: aspetta il reset del 19/11). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
+0. **Pronti:** T303 in corso (misura dello Scenografo, claude); T403 integrato (lab 3D «voxel per casella», tabella `lab/banco/riferimento/forte-scala.md`) → D61 chiusa (A2: forte a 10 vpx, blocco 3 × 3; B2: edifici a 14-16 vpx) → T404 pronto (claude, extra, approvato), poi T405 (scala degli edifici); T371 pronto su fable in parallelo a T404 (sbloccato dall'autore il 17/11; nota: in `stato` le percentuali sono il **residuo**, non il consumato). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
 1. **Da approvare dall'autore:** T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
@@ -39,5 +39,6 @@ Aggiornato il 17/11/2026, epoca 472 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **473 (claude):** Fable riattivato, T371 sbloccato e senza dipendenza da T404, T403 segnato fatto, T404 approvato.
 - **472 (claude):** D61 chiusa → T404 riscritto e pronto, T405 aggiunto.
 - **471 (claude):** T403 integrato, D61 chiesta; T303 lanciato.
