@@ -5731,7 +5731,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T408`; poi l'orchestratore integra T408 e `integra T371` toglie worktree e branch di T371. Sicurezza: nessuna superficie nuova.
 - Esito: T371 integrato (ADR-0210) sopra T404-T406: conflitti in AGENTS, dettagli e prompt dello Scultore risolti tenendo tutto; il metro del forte nel prompt detto in voxel (500 × 500 come la gargantuesca dello Scultore) con le misure di T405, 16 010 caratteri sotto i 16 023 del base dopo T405 (soglia del test portata lì); `banco-ottima.ts` e `lab/tests/ottima.test.ts` misurano le taglie degli Scultori con `structureVoxels` a `vptOf` (16) e non più a 20; riferimento a 10 invariato, tabella e giudizi rifatti (Scultori 4,6-6,5, T339 e rocca di T181 5,9, villetta 4,3); README, ADR-0210, indice e dettagli aggiornati; kernel non toccato (0.9.0); suite 3408 verdi e typecheck verde coi turni. Non provato: lo Scultore vero col metro nuovo (nessuna chiamata). Sicurezza: nessuna superficie nuova.
 
-### T409 · La guardia degli interni nel kernel (§ 10.1 di `scenografo.md`) — `da fare`
+### T409 · La guardia degli interni nel kernel (§ 10.1 di `scenografo.md`) — `fatto` (`2714f0ef`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
 - Step: 30
 - Contesto: richiesta dell'autore (17/11, chat): rigenerare gli universi con lo Scultore stabile e una versione base dello Scenografo. Il primo pezzo è il § 10.1 di `docs/design/scenografo.md` (riscritto da T406): nasce da T303 e T406 (`dossier T303`, `dossier T406`).
@@ -5739,6 +5739,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: con gli edifici di `misura/` (a 20), di `misura16/` (a 16) e i 6 di T259; suite e typecheck coi turni. Senza modelli.
 - Browser: no.
 - Quando è fatto: commit su `task/T409`. Sicurezza: nessuna superficie nuova.
+- Esito: guardia degli interni nel kernel (`src/kernel/interior.ts`: palco `W F C P A` solo sul pavimento coperto, piano piccolo sotto 2 caselle², posto degli animali, guardia pezzo per pezzo con il cammino vero del kernel; non dentro `forms.ts` come diceva il task, ma un modulo a parte) e chiave dell'interno nella cache (`interiorKey`, `furnishedResult` in `forms.ts`); ADR-0211, kernel 0.9.1; diverso dal previsto: la guardia di T259 lasciava passare uno scaffale accanto alla scala della locanda e del laboratorio che toglieva il piano di sopra, quella del kernel lo rifiuta; tutti gli edifici reggono col programma offline, i 32 arredi a dati di T303/T406 tengono la stanza dello Scultore a 28 (prima 22-27 in 8 casi), animali liberi al 100 % sulla fattoria seme 3 (prima 63 % e 94 %); `tests/interior.test.ts`, suite e typecheck verdi; non provato: i salti non sono difesi, arredare costa 0,6-1,1 s a edificio (T259 stimava 100-450 ms), nessun agente usa ancora la guardia. Sicurezza: nessuna superficie nuova.
 
 ### T410 · Lo Scenografo nel gioco, la via dei dati (§ 10.2 di `scenografo.md`) — `da fare` (dipende da T409, T413)
 - Pipeline: claude · sforzo extra · stima 7% · approvato · priorità 2
