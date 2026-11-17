@@ -1,0 +1,131 @@
+{
+ "richiesta": {
+  "via": "dati",
+  "n": 1,
+  "chiamate": [
+   {
+    "model": "claude-opus-5-5",
+    "input": 2,
+    "written5m": 0,
+    "written1h": 2776,
+    "read": 0,
+    "output": 181,
+    "usd": 0.025836,
+    "usdCli": 0.025835999999999998,
+    "task": "interior.dati",
+    "seconds": 4
+   }
+  ],
+  "secondi": 4,
+  "testo": "```json\n{\"rules\": [\n  {\"storey\": 0, \"area\": \"house\", \"room\": \"hall\", \"furniture\": [\"credenza\", \"banco\", \"barile\", \"furniture\"], \"count\": 4},\n  {\"storey\": 1, \"area\": \"house\", \"room\": \"hall\", \"furniture\": [\"letto\", \"letto\", \"furniture\", \"credenza\"], \"count\": 3},\n  {\"room\": \"small\", \"furniture\": [\"furniture\", \"barile\"], \"count\": 1},\n  {\"furniture\": [\"credenza\", \"furniture\"], \"count\": 2}\n]}\n```",
+  "correzioni": 0
+ },
+ "usd": 0.025836,
+ "usdCli": 0.025835999999999998,
+ "semi": [
+  {
+   "seme": 1,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 89,
+   "pezzi": 7,
+   "voxel": 7158,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8619816100581723
+  },
+  {
+   "seme": 2,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 117,
+   "pezzi": 6,
+   "voxel": 5943,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [
+    "stanza: la più grande in cui si sta in piedi ha il lato di 23 voxel (1,44 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: se l'area è piccola fai meno parti, non più piccole"
+   ],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.7907867596503291
+  },
+  {
+   "seme": 3,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 99,
+   "pezzi": 7,
+   "voxel": 6055,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [
+    "stanza: la più grande in cui si sta in piedi ha il lato di 22 voxel (1,38 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: se l'area è piccola fai meno parti, non più piccole"
+   ],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8949669736719694
+  },
+  {
+   "seme": 4,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 90,
+   "pezzi": 7,
+   "voxel": 5218,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.839148033924441
+  }
+ ]
+}

@@ -1,0 +1,121 @@
+<!-- fattoria: sculpted by claude-opus-5-5 (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhwvadrmysp" symmetry="()">
+    <rule in="E" out="E"/><rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- the house body -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="3"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="5"/>
+      <prl in="h/E" out="*/h" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="4"/>
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+      <!-- the barn wing on one side -->
+      <one in="Ew/Ew/Ew/Ew/Ew" out="**/**/a*/**/**" symmetry="(x)" steps="1"/>
+      <all in="aE" out="*a" symmetry="(x)" steps="2"/>
+      <prl in="aE" out="*a" p="0.5" steps="1" symmetry="(x)"/>
+      <all in="E/a" out="a/*" symmetry="()" steps="2"/><all in="a/E" out="*/a" symmetry="()" steps="2"/>
+      <all in="aE" out="*v"/><all in="vE/*v" out="*v/**"/>
+      <!-- the door and the road to the front -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/><all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dr]/E" out="*/r" symmetry="()"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/><all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
+      <!-- the stair zone -->
+      <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
+      <!-- the haystacks behind the house -->
+      <one in="EEE/EEE/EEE/www" out="***/*y*/***/***" symmetry="()" steps="1"/>
+      <one in="EEEEE/EEEEE/EEEEE/EEEEE" out="*****/*****/**y**/*****" symmetry="()" steps="1"/>
+      <!-- the fields, where the ground allows -->
+      <one in="EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE/EEEEEEEEE" out="*********/*********/*********/*********/****p****/*********/*********/*********/*********"/>
+      <all in="pE" out="*p" steps="2"/>
+    </sequence>
+    <map scale="5 5 1" values="BEwWdOoNhfFsTkRvVagyYprXLK" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="y" out="yyyyy/yyyyy/yyyyy/yyyyy/yyyyy"/>
+      <rule in="p" out="ppppp/ppppp/ppppp/ppppp/ppppp"/>
+      <sequence symmetry="(xy)">
+        <!-- B. house walls: plaster, window band, plaster, twice -->
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w X" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <all in="B w" out="w W" steps="6"/><all in="B w" out="w X" steps="14"/><all in="B w" out="w W" steps="12"/>
+        <prl in="w" out="R"/>
+        <!-- the door column: the seed at the floor, wall above -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d W" steps="63"/>
+        <prl in="d" out="R"/>
+        <!-- house floors and slab -->
+        <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/><all in="B s" out="s B" steps="30"/>
+        <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
+        <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
+        <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+        <!-- barn: lower, one tall storey -->
+        <all in="B v" out="v V" steps="40"/>
+        <prl in="v" out="R"/>
+        <all in="B a" out="a g" steps="1"/>
+        <all in="B a" out="a B" steps="39"/>
+        <prl in="a" out="R"/>
+        <!-- hay -->
+        <all in="B y" out="y Y" steps="18"/>
+        <prl in="y" out="Y"/>
+        <!-- C. the door and the stair -->
+        <union symbol="+" values="WX"/>
+        <union symbol="=" values="fF"/>
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <!-- windows in the bands -->
+        <one steps="12" in="BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB BXXXXXB/BXXXXXB/BXXXXXB" out="*LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL* *LLLLL*/*LLLLL*/*LLLLL*"/>
+        <prl in="X" out="W"/>
+        <!-- roofs: eaves, hip, chimney -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="12" symmetry="()"/>
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="10"/>
+      </sequence>
+    </map>
+  </map>
+  <color symbol="E" hidden="True"/>
+  <color symbol="h" value="b08a5a" name="pavimento casa"/>
+  <color symbol="w" value="e8dcc0" name="muro casa"/>
+  <color symbol="a" value="8a6a40" name="pavimento fienile"/>
+  <color symbol="v" value="a0402c" name="muro fienile"/>
+  <color symbol="d" value="5a3a20" name="porta"/>
+  <color symbol="s" value="7a5a3a" name="scala"/>
+  <color symbol="H" value="ff0000" name="centro"/>
+  <color symbol="m" value="ff00ff" name="segno"/>
+  <color symbol="W" value="e8dcc0" name="intonaco"/>
+  <color symbol="X" value="e8dcc0" name="intonaco"/>
+  <color symbol="R" value="a8432e" name="tetto di coppi"/>
+  <color symbol="f" value="b08a5a" name="assito" area="house"/>
+  <color symbol="F" value="8c6a44" name="solaio"/>
+  <color symbol="V" value="9a3c28" name="assi del fienile"/>
+  <color symbol="g" value="8a6a40" name="terra battuta" area="barn"/>
+  <color symbol="Y" value="e0c050" name="fieno" area="hay"/>
+  <color symbol="y" value="e0c050" name="fieno" area="hay"/>
+  <color symbol="p" value="9aa850" name="campo" area="field"/>
+  <color symbol="r" value="c8b48a" name="strada" area="road"/>
+  <color symbol="L" value="5a7a9a" name="finestra"/>
+  <color symbol="K" value="6e6a66" name="camino"/>
+  <color symbol="O" value="6a4424" name="porta"/>
+  <color symbol="o" value="3e2614" name="assi della porta"/>
+  <color symbol="N" value="4a4038" name="stipiti"/>
+  <color symbol="k" value="7a5a3a" name="gradini"/>
+  <color symbol="T" value="7a5a3a" name="scala"/>
+  <color symbol="#20" hidden="True"/>
+  <color symbol="#21" hidden="True"/>
+  <action name="open" label="Apri la porta">
+    <all><rule in="O" out="#20"/><rule in="o" out="#21"/></all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all><rule in="#20" out="O"/><rule in="#21" out="o"/></all>
+  </action>
+</sequence>

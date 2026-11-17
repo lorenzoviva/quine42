@@ -8,10 +8,11 @@
 //       correction with the kernel's reason when the answer is not one the kernel takes (rule 2).
 //
 //   npx vite-node lab/scripts/scenografo-misura.ts -- [--vie programma,dati] [--ripeti 2] [--solo villetta,fattoria] [--finestra 80]
-//       [--offline] [--cli-cmd "node lab/scripts/claude-finta.mjs …"] [--misura] [--out lab/banco/scenografo/misura]
+//       [--densita gioco|20] [--offline] [--cli-cmd "node lab/scripts/claude-finta.mjs …"] [--misura] [--out lab/banco/scenografo/misura]
 //
 // The buildings are <out>/vuoto/claude-opus-5-5/giro1/<edificio>-large/programma.xml (the same Sculptor without the interior). With
-// --misura no call: every answer kept is measured again. --offline answers (b) and (c) with the files of `offline/` (no call).
+// --misura no call: every answer kept is measured again. --densita: the buildings at the game's density (`gioco`, the default: 16 voxels a
+// tile since T405, ADR-0209, the measure of T406) or at the bench's 20 (T303's measure, `--densita 20 --out lab/banco/scenografo/misura`). --offline answers (b) and (c) with the files of `offline/` (no call).
 // → <out>/<edificio>/<via>-<n>/{richiesta.md, risposta.md, programma.xml | regole.json, esito.json}, <out>/<edificio>.png (rows: empty, a1, a2,
 //   b1, b2, c1, c2; two columns per seed of the building, the ground floor and the one above, cut above the head), <out>/riepilogo.md, <out>/riepilogo.json.
 
@@ -39,10 +40,12 @@ const SOLO_MISURA = args.includes('--misura');
 const MODELLO = 'claude-opus-5-5';
 const SFORZO = 'low';
 const SEMI = STRUCTURE_SEEDS;
+/** The density of the buildings: the game's (16 since T405) or the bench's 20 (T303). */
+const GIOCO = (opt('densita') ?? 'gioco') === 'gioco';
 /** The floors of an interior: covered only, a storey of at least 2 tiles² is furnished (the storeys at Large are 3-4 tiles²). */
 const OPZIONI = { piccolo: 2, coperto: true };
 
-const bersaglio = (nome: string): Bersaglio => ({ id: nome, nome, stile: '', descrizione: '', classe: 'structure', taglia: 'large' });
+const bersaglio = (nome: string): Bersaglio => ({ id: nome, nome, stile: '', descrizione: '', classe: 'structure', taglia: 'large', ...(GIOCO ? { gioco: true } : {}) });
 const edificioXml = (nome: string) => path.join(OUT, 'vuoto', MODELLO, 'giro1', `${nome}-large`, 'programma.xml');
 
 // ---------------------------------------------------------------- the prompts
@@ -57,9 +60,9 @@ function linguaggio(): string {
     .join('\n');
 }
 
-function sistema(via: 'programma' | 'dati', mobili: Map<string, Mobile>, vpt: number): string {
+function sistema(via: 'programma' | 'dati', mobili: Map<string, Mobile>, vpt: number, corpo: number): string {
   const t = fs.readFileSync(`lab/banco/scenografo/prompt-${via}.md`, 'utf8');
-  if (via === 'programma') return t.replace('@@LINGUAGGIO@@', linguaggio());
+  if (via === 'programma') return t.replace('@@LINGUAGGIO@@', linguaggio()).replaceAll('@@CORPO@@', String(corpo));
   const index = JSON.parse(fs.readFileSync('universe/models/index.json', 'utf8')) as Record<string, { name?: string }>;
   const righe = MOBILI.filter((id) => mobili.has(id)).map((id) => {
     const m = mobili.get(id)!;
@@ -266,7 +269,7 @@ for (const nome of EDIFICI) {
 
   // (b) and (c): asked here.
   for (const via of VIE) {
-    const system = sistema(via, mobili, vpt);
+    const system = sistema(via, mobili, vpt, scene[0].e.scatola.corpo);
     const prompt = `${descrizione}\n\nFurnish this building.`;
     for (let n = 1; n <= RIPETI; n++) {
       const dir = path.join(OUT, nome, `${via}-${n}`);
@@ -358,7 +361,7 @@ function tabella(r: Record<string, Record<string, Record<string, unknown>>>): vo
       lines.push(`| ${nome} | ${via === 'programma' ? '(b) programma' : '(c) dati'} | ${n} | ${n2(Number(v.usd))} $ | ${n2(Number(v.usdCli))} $ | ${v.chiamate} | ${v.correzioni} | ${t.input} (${t.cache}) | ${t.output} | ${v.secondi} | ${semi.length ? `${semi.filter((x) => x.tentativi === 1).length}/${semi.length}` : v.errore ? `no: ${String(v.errore).slice(0, 60)}` : '—'} | ${semi.length ? `${semi.filter((x) => x.regge).length}/${semi.length}` : '—'} | ${semi.length ? n2(media((x) => x.pezzi)) : '—'} | ${stanze} | ${semi.length ? pct(media((x) => x.animaliLiberi)) : '—'} | ${piani} | ${perso} | ${semi.length ? n2(media((x) => x.varianza)) : '—'} |`);
     }
   }
-  const md = `# Lo Scenografo misurato (T303): ${Object.keys(r).filter((k) => k !== 'finestra').join(', ')}, tre vie\n\nOgni costo è in dollari al listino API di Anthropic dai token che la CLI riporta (Opus 5.5, sforzo \`low\`); accanto quello che la CLI stessa dice (\`total_cost_usd\`). I semi dell'edificio sono ${SEMI}; «regge» è la guardia e le misure del banco (\`regge\` di \`scenografo.ts\`) con al più 4 semi d'arredo.\n\n${lines.join('\n')}\n`;
+  const md = `# Lo Scenografo misurato (${GIOCO ? 'T406, gli edifici a 16 voxel per casella' : 'T303, gli edifici a 20 voxel per casella'}): ${Object.keys(r).filter((k) => k !== 'finestra').join(', ')}, tre vie\n\nOgni costo è in dollari al listino API di Anthropic dai token che la CLI riporta (Opus 5.5, sforzo \`low\`); accanto quello che la CLI stessa dice (\`total_cost_usd\`). I semi dell'edificio sono ${SEMI}; «regge» è la guardia e le misure del banco (\`regge\` di \`scenografo.ts\`) con al più 4 semi d'arredo.\n\n${lines.join('\n')}\n`;
   fs.writeFileSync(path.join(OUT, 'riepilogo.md'), md);
   console.log(md);
 }

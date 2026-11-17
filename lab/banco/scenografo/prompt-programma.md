@@ -28,9 +28,9 @@ animals' floor still free. A program that does not compile or does not finish in
 
 ## How to furnish well
 - Against the walls: a pattern with W on one side and F on the other finds a wall (`in="WFFF"`). Shelves, chests, beds, benches,
-  a hearth against the walls; a table in the middle of a large room, with a body's passage (11 voxels) on every side.
+  a hearth against the walls; a table in the middle of a large room, with a body's passage (@@CORPO@@ voxels) on every side.
 - Keep a passage: a piece is a pattern that includes the F in front of it and leaves it F (`*` in `out`), so that a body still passes:
-  a bed of 6 × 10 against a wall wants 11 more cells of F in front of it and on its sides.
+  a bed of 6 × 10 against a wall wants @@CORPO@@ more cells of F in front of it and on its sides.
 - Grow upward: a marker on the floor, then `<all in="B m" out="m *" steps="N"/>` to give it height (a table 8, a bed 5, a chest 7,
   a shelf up to the ceiling: without steps, until it meets W).
 - The size of the room decides how much: a hall holds more than a small room; read the rooms of the request, seed by seed.

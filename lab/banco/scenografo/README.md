@@ -42,3 +42,26 @@ npx vitest run lab/tests/scenografo-misura.test.ts
 Le scene della misura leggono i piani con due opzioni (`OpzioniPiante` di `scenografo.ts`): solo il pavimento coperto è delle stanze (il cortile e
 i campi non si arredano) e un piano si arreda da 2 caselle² coperte (i piani di Opus a Grande sono di 3-4 caselle²; la soglia di T259, 4, li
 lascerebbe vuoti). Senza opzioni il banco di T259 non cambia.
+
+## Di nuovo a 16 voxel per casella (T406)
+
+Gli edifici di oggi sono a 16 voxel per casella (T405, ADR-0209). La stessa misura su due edifici nuovi scritti dallo Scultore col prompt a 16,
+letti alla densità del gioco, e lo spazio calpestabile di questi e di quelli di T303 a 20 e a 16; i numeri sono al § 9.1 di
+[`docs/design/scenografo.md`](../../../docs/design/scenografo.md).
+
+```bash
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude-opus-5-5 --solo villetta,fattoria --taglie large --tetto 2 --out lab/banco/scenografo/misura16/vuoto
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --interno --modelli claude-opus-5-5 --ripeti 2 --solo villetta,fattoria --taglie large --tetto 2 --out lab/banco/scenografo/misura16/insieme
+npx vite-node lab/scripts/scenografo-misura.ts -- --ripeti 2 --out lab/banco/scenografo/misura16          # --densita gioco, il predefinito
+npx vite-node lab/scripts/scenografo-misura.ts -- --misura --densita 20 --out lab/banco/scenografo/misura # T303 di nuovo, senza chiamate
+npx vite-node lab/scripts/scenografo-spazio.ts                                                             # lo spazio prima e dopo, senza chiamate
+```
+
+| file | cosa |
+|---|---|
+| `misura16/` | come `misura/`, sugli edifici a 16; `giro-misura.txt` le misure di tutte e tre le vie senza chiamate |
+| `misura16/spazio.md`, `spazio.json` | il pavimento calpestabile per piano e per stanza, il lato della stanza del kernel, il soffitto, le porte e i mobili che entrano, a 20 e a 16, degli edifici di T303 e di T406 |
+
+Il banco delle misure (`lab/banco/misure.ts`) legge un edificio a 20 voxel per casella se non gli si dice altro; `gioco: true` nel bersaglio
+lo legge come il gioco scrive le voci dello Scultore (senza `vpt`: 16), `vpt` lo fissa. Le parti abitabili (`misura.ts`, `PARTI`) si misurano
+sugli stessi voxel a ogni densità (i `PARTS` di oggi letti a 16: una stanza 28, un piano 30, una porta 11 × 30), così che 20 rifà T303.

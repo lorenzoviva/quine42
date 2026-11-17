@@ -1,0 +1,5 @@
+[sculptor] propone: «villetta» (struttura grande, claude-opus-5-5)
+[kernel → sculptor] scarta: «villetta»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 11 × 6 voxel (0,69 × 0,38 caselle), una porta è almeno 11 × 30 a ogni taglia
+[kernel → sculptor] scarta: «villetta»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «villetta»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «villetta»: nessun programma valido

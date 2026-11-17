@@ -1,5 +1,5 @@
-// The Scenografo measured for real (T303): what the kernel gives the three ways, and every program and choice the CLI wrote run again
-// in the engine, through the guard and the checks.
+// The Scenografo measured for real (T303, at 20 voxels a tile; T406, the buildings of today at the game's 16): what the kernel gives the
+// three ways, and every program and choice the CLI wrote run again in the engine, through the guard and the checks.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,14 +8,24 @@ import type { Bersaglio } from '../banco/misure';
 import { arredaValidato, catalogo, regge, scena } from '../banco/scenografo/scenografo';
 import { arredaConProgramma, arredaConRegole, arredoInsieme, CLASSI, compilaArredo, controlli, descrivi, leggiRegole, MOBILI, palco } from '../banco/scenografo/misura';
 
-const DIR = path.resolve(__dirname, '../banco/scenografo/misura');
 const OPZIONI = { piccolo: 2, coperto: true };
-const b = (nome: string): Bersaglio => ({ id: nome, nome, stile: '', descrizione: '', classe: 'structure', taglia: 'large' });
-const edificio = (nome: string) => fs.readFileSync(path.join(DIR, 'vuoto/claude-opus-5-5/giro1', `${nome}-large`, 'programma.xml'), 'utf8');
+const MISURE = [
+  { task: 'T303', DIR: path.resolve(__dirname, '../banco/scenografo/misura'), gioco: false, vpt: 20 },
+  { task: 'T406', DIR: path.resolve(__dirname, '../banco/scenografo/misura16'), gioco: true, vpt: 16 },
+];
 
-describe('lo Scenografo misurato (T303)', () => {
+for (const { task, DIR, gioco, vpt } of MISURE)
+describe(`lo Scenografo misurato (${task}, ${vpt} voxel per casella)`, () => {
+  const b = (nome: string): Bersaglio => ({ id: nome, nome, stile: '', descrizione: '', classe: 'structure', taglia: 'large', ...(gioco ? { gioco } : {}) });
+  const edificio = (nome: string) => fs.readFileSync(path.join(DIR, 'vuoto/claude-opus-5-5/giro1', `${nome}-large`, 'programma.xml'), 'utf8');
   const s = scena(edificio('fattoria'), b('fattoria'), 1, OPZIONI);
-  const mobili = catalogo(20, MOBILI);
+  const mobili = catalogo(vpt, MOBILI);
+
+  it("l'edificio alla sua densità: gli stessi 100 voxel, a 20 o a 16 per casella (T405)", () => {
+    expect(s.e.scatola.vpt).toBe(vpt);
+    expect(s.e.grid.X).toBe(100);
+    expect(s.e.scatola.corpo).toBe(Math.ceil(0.44 * vpt) + 2);
+  }, 120_000);
 
   it('il palco: il programma vede solo le classi, il pavimento coperto libero e il protetto', () => {
     const st = palco(s);

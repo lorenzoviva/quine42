@@ -4,7 +4,8 @@ Decisione dell'autore del 04/11 (`docs/pipeline/domande/T182.md`, domanda 2, opz
 Scultore ma un agente a parte, lo **Scenografo**, come il Cartografo passa allo Scultore. Questo documento risponde ai punti di T259 con un
 banco che gira davvero (`lab/banco/scenografo/`, `lab/scripts/banco-scenografo.ts`) e propone la strada. In T259 nessun modello è stato
 chiamato e i costi del § 7 erano stime; **la misura vera l'ha fatta T303** (17/11) con lo Scultore di oggi e la CLI di Claude: i numeri e la
-raccomandazione che ne esce sono al § 9.
+raccomandazione che ne esce sono al § 9. **T406** (17/11) l'ha rifatta sugli edifici a 16 voxel per casella (T405, ADR-0209) e ha misurato lo
+spazio calpestabile prima e dopo il riscalamento: § 9.1.
 
 ## 1. Il problema
 
@@ -130,6 +131,8 @@ Perché:
 
 ## 9. La misura vera (T303, 17/11)
 
+I numeri di questo paragrafo sono per gli edifici a 20 voxel per casella; a 16, quelli del gioco da T405, sono al § 9.1.
+
 Due edifici del banco delle taglie scritti dallo **Scultore di oggi** (Opus 5.5 sulla CLI dell'abbonamento, lo strumento di T391, il `sculpt`
 del gioco con le correzioni e il voto dell'Artista), a Grande, e le tre vie con **2 richieste ciascuna**, tutte alla CLI di Claude (Opus 5.5,
 sforzo `low` come il ragionamento del gioco), mai a una chiave a consumo; l'Artista della via (a) sul suo modello di Gemini, come nel gioco
@@ -200,18 +203,97 @@ centesimo e mezzo a tipo e non rompono niente; il programma, a 7 centesimi, si a
 soffitto, decori ai muri) e per la ricchezza delle sale, con un pavimento di qualità nel kernel che rimandi indietro un programma povero.
 L'interno insieme all'edificio no: costa mezzo dollaro in più a tipo, rischia l'edificio intero e non varia col proprio seme.
 
+### 9.1 Di nuovo, a 16 voxel per casella (T406, 17/11)
+
+T405 (ADR-0209) legge le strutture che crescono a regole a **16 voxel per casella** invece di 20: gli stessi voxel (la Grande resta
+100 × 100 × 80), un quarto più grandi in caselle (6,25 × 6,25), porte e piani di 1,25 viandanti. I numeri sopra sono per gli edifici a 20.
+T406 ha rifatto la misura così: due edifici nuovi scritti dallo Scultore di oggi col prompt a 16 (Opus 5.5 sulla CLI, `scultore-gemini.ts`, la
+stessa strada di T303), lo spazio calpestabile di questi e di quelli di T303 letti a 20 e a 16, e le tre vie sugli edifici nuovi con 2
+richieste ciascuna, letti alla densità del gioco (`scenografo-misura.ts --densita gioco`, il predefinito; `--densita 20` rifà T303).
+Tutto in `lab/banco/scenografo/misura16/`.
+
+**Lo spazio calpestabile prima e dopo il riscalamento** (`lab/scripts/scenografo-spazio.ts`, nessuna chiamata, `misura16/spazio.md`): il
+pavimento coperto dove sta il centro di un corpo, tagliato ai passaggi stretti, in caselle², media dei 4 semi; le parti misurate a ogni
+densità sugli stessi voxel (una stanza 28, un piano 30), così che 20 è la misura di T303. «Mobili che entrano»: ogni stanza chiede 6 pezzi fra
+i 10 mobili del seme ricampionati alla densità, il kernel li posa con la sua guardia (`arredaDati`).
+
+| edificio | a 20: terra, sopra (caselle²) | a 16: terra, sopra | lato della stanza (caselle, 20 → 16) | soffitto di sopra (viandanti, 20 → 16) | mobili che entrano (20 → 16) |
+|---|---|---|---|---|---|
+| villetta di T303 | 4,0 · 3,4 | **6,3 · 5,2** | 2,05 → 2,44 | 1,03 → 1,29 | 6,5 → **9,8** |
+| villetta di T406 | 4,0 · 3,8 | **6,2 · 6,0** | 2,30 → 2,75 | 1,03 → 1,29 | 6,0 → **9,0** |
+| fattoria di T303 | 3,1 · 2,9 | **5,8 · 4,5** (a terra 2 stanze) | 1,80 → 2,13 | 1,03 → 1,29 | 5,3 → **8,0** |
+| fattoria di T406 | 3,1 · 2,9 | **5,0 · 4,5** | 1,80 → 2,13 | 1,03 → 1,29 | 5,3 → **6,8** |
+
+Le porte passano da 0,55-0,75 × 1,50 a 0,69-0,94 × 1,88 caselle. Cosa dice:
+
+- **Il riscalamento da solo dà circa una volta e mezza il pavimento** (1,25², di più dove il corpo, più stretto in voxel, separa una
+  stanza in più) e circa metà dei mobili in più: da 5-6 a 7-10 pezzi per casa.
+- **Il prompt a 16 non ha fatto case più grandi in voxel.** Lo Scultore usa gli stessi blocchi di prima: la casa sta in un corpo di 35-45
+  voxel di lato dentro un lotto di 100, il resto è giardino, aia, portico; a ogni piano c'è **una stanza sola** (la sala di 4,5-6 caselle²,
+  2,1-2,75 caselle di lato). La villetta di T406 è un poco più larga (6,0 caselle² di sopra contro 5,2), la fattoria è la stessa. Lo spazio
+  calpestabile dentro resta quello che l'autore trova piccolo: una stanza di 2,5 × 2,5 caselle per piano, il soffitto di sopra a 1,3
+  viandanti. **La leva non è più la densità ma quanto della Grande lo Scultore dà alla casa** (task proposto al § 10).
+
+**Le tre vie sugli edifici nuovi, a 16** (Opus 5.5, sforzo `low`, `misura16/riepilogo.md`; i fogli di contatto `misura16/<edificio>.png`, una
+riga per via: vuoto, a1, a2, b1, b2, c1, c2, due colonne per seme):
+
+| | (a) insieme | (b) programma | (c) dati |
+|---|---|---|---|
+| costo a richiesta | **1,29 $** (nessun programma), 0,89 $ villetta; 0,50 $, 0,41 $ fattoria | 0,12 $, 0,06 $ villetta; 0,09 $, 0,07 $ fattoria | 0,026 $, 0,007 $ villetta; 0,017 $, 0,007 $ fattoria |
+| media | 0,77 $ a richiesta, **1,03 $ a edificio riuscito** (T303: 1,00 $) | **0,082 $** (T303: 0,071 $) | **0,014 $** (T303: 0,014 $) |
+| riuscite | 3 su 4 (la villetta del giro 1: tre volte «piani: 1», come la fattoria di T303) | 4 su 4 alla prima risposta | 4 su 4 alla prima risposta |
+| regge, sui semi | — | 15 su 16 al primo, 16 su 16 entro 4 | **16 su 16 al primo** (T303: 10 su 16) |
+| pezzi a edificio (media dei semi) | 7 villetta, 10 e 13 fattoria | 8 e 2 villetta, 8 e 9 fattoria | **6,75** villetta, **5,5** fattoria (T303: 4 e 3,5) |
+| stanze arredate | tutte, tranne 2 su 11 nella fattoria 2 | 8/8 e **4/8** villetta, 9/9 e 9/9 fattoria | 8/8 villetta, 8/9 fattoria |
+| il posto degli animali libero | 100 % | 100 % villetta, **90 % e 98 %** fattoria | 100 % |
+| ciò che l'arredo fa perdere | `stanze` sempre; nella fattoria 1 anche `piani` e `murato`, nella 2 `dominante` | `stanze` nella fattoria | la stanza dello Scultore (lato sotto 28) su un seme, in 3 richieste su 4 |
+| varianza fra due semi d'arredo | nessuna | 0,92-0,97 villetta; **0,35** e 0,89 fattoria | 0,79-0,87 |
+| le due richieste | due edifici diversi | per la villetta uno ricco e uno povero, come in T303; per la fattoria due ricchi | fattoria **identiche**, villetta quasi |
+
+Le basi: gli edifici vuoti allo stesso Scultore 0,36 $ (fattoria) e 0,81 $ (villetta, con una correzione), 1,17 $ in tutto. La misura è
+costata **4,65 $ a listino** (vuoti 1,17 $, insieme 3,09 $, programma 0,33 $, dati 0,06 $) più 0,06 $ dell'Artista su Gemini. **La finestra
+delle 5 ore** è passata dal 49 % al 56 % (con altri agenti al lavoro), la settimana dal 51 al 52 %.
+
+Cosa cambia rispetto a T303:
+
+- **La raccomandazione resta: separare, con la via dei dati come base e il programma come secondo passo.** L'interno insieme costa ancora
+  mezzo dollaro in più a tipo (1,03 $ a edificio riuscito contro 0,36-0,81 $ del vuoto) e una volta su quattro rifà l'edificio senza
+  riuscirci (1,29 $ persi, ora sulla villetta); i costi a parte sono gli stessi (8 e 1,4 centesimi a tipo).
+- **A 16 la via dei dati sta meglio**: i mobili ricampionati sono più piccoli in voxel, i pezzi posati passano da 3,5-4 a 5,5-6,75 e reggono
+  16 su 16 al primo seme (la guardia ne scarta meno). Resta la stanza dello Scultore che scende sotto 28 voxel su un seme: un mobile contro il
+  muro accorcia il quadrato più grande; è la guardia del kernel che deve difenderla (task 1).
+- **La via del programma ha un difetto nuovo: scrive sul posto degli animali.** Nella fattoria le due risposte coprono il 2-10 % di `A`
+  (il prompt dice di lasciarlo libero, la guardia non lo protegge) e una delle due varia poco col seme (0,35). Il kernel deve togliere ciò
+  che sta su `A` come toglie ciò che sta su `W`, e il pavimento di qualità deve guardare anche la varianza (task 3).
+- **Il programma povero c'è ancora** (la villetta 2: 2 pezzi, metà delle stanze): il pavimento di qualità resta necessario.
+
 ## 10. Task che ne nascono (proposta per l'autore)
 
+Riscritti da T406 sugli edifici a 16 voxel per casella (la prima stesura, di T303, era sugli edifici a 20). L'ordine proposto: 0, poi 1 e 2
+insieme, poi 3, 4 e 5. I primi due non chiamano modelli; lo 0 chiama lo Scultore per misurare.
+
+0. **La casa che usa la Grande** (nuovo, nasce dal § 9.1): lo spazio calpestabile non cresce col riscalamento oltre una volta e mezza, perché
+   lo Scultore dà alla casa un corpo di 35-45 voxel su 100 e un piano di una stanza sola. Nel prompt dello Scultore (`sculptor.md`, «What
+   fits») il pavimento coperto che una casa vuole a Grande (per esempio almeno 10-12 caselle² per piano e due stanze a terra, la sala e una
+   stanza, misurate come qui) e un controllo del kernel che lo misura (`habitableParts` sa già il lato della stanza; serve l'area coperta per
+   piano, la funzione di `stanzeDi`). Si misura con `scenografo-spazio.ts` su due edifici nuovi per concetto, prima e dopo il prompt, e con
+   la via dei dati sopra. Tocca un'abitazione, non un forte o una torre: la soglia dipende dal concetto (da decidere con l'autore: quanto
+   pavimento vuole in una casa Grande).
 1. **La guardia nel kernel** (`src/kernel/forms.ts`): classi dello strato dei piedi solo sul pavimento coperto, guardia, cache con la chiave
-   dell'interno; la soglia del piano piccolo alla scala di oggi (a 20 voxel per casella i piani di Opus a Grande sono di 3-4 caselle²: con la
-   soglia di T259, 4, resterebbero tutti vuoti; T303 usa 2) e la stanza dello Scultore (`partErrors`) fra ciò che la guardia difende. Test
-   con gli edifici di questo banco e i 6 di T259. Senza modelli.
+   dell'interno; la soglia del piano piccolo (a 16 i piani di Opus a Grande sono di 4,5-6,3 caselle²: la soglia di T259, 4, ora li arreda
+   tutti, ma lascia un margine stretto; 2, come in T303 e T406, è più sicura); la stanza dello Scultore (`partErrors`) fra ciò che la guardia
+   difende (oggi un mobile contro il muro la porta sotto 28 voxel su un seme in 3 richieste di dati su 4); il posto degli animali (`A`)
+   protetto come `W`. Test con gli edifici di `misura/` (a 20) e di `misura16/` (a 16) e i 6 di T259. Senza modelli.
 2. **Lo Scenografo, la via dei dati**: prompt in `prompts/agents/scenografo.md` (da `lab/banco/scenografo/prompt-dati.md`), compito
    `interior.design` con lo schema delle regole, risposta in `MockAiModels`, voce nel registro, `CENSUS` con la manopola `interni`, una
-   postazione nello studio; il catalogo dai mobili della libreria (classe `furniture`). La risposta è di 200 token: da provare anche su un
-   modello che costi meno (Flash-Lite) con lo stesso banco.
-3. **Lo Scenografo, la via del programma**: il palco a classi nel kernel, il prompt di `prompt-programma.md`, il pavimento di qualità che
-   rimanda indietro un programma povero; dopo il 2.
-4. **Mobili per la cantina**: modelli che arrivano al soffitto (scaffali, botti grandi), perché la via dei dati non la lasci vuota.
+   postazione nello studio; il catalogo dai mobili della libreria (classe `furniture`), ricampionati alla densità dell'edificio come nel banco.
+   La risposta è di 200 token e due richieste uguali danno la stessa risposta: una per tipo basta; da provare anche su un modello che costi
+   meno (Flash-Lite) con lo stesso banco.
+3. **Lo Scenografo, la via del programma**: il palco a classi nel kernel, il prompt di `prompt-programma.md` (il passaggio del corpo dalla
+   densità, `@@CORPO@@`), il pavimento di qualità che rimanda indietro un programma povero (stanze arredate e pezzi per caselle², misurati sui
+   semi) o che varia poco col seme (T406: 0,35 su una fattoria); dopo il 2.
+4. **Mobili per la cantina**: modelli che arrivano al soffitto (scaffali, botti grandi), perché la via dei dati non la lasci vuota. Nessuno
+   degli edifici misurati (T303, T406) ha una cantina: va provato su uno che ce l'ha.
 5. **Le misure dello Scultore sull'edificio vuoto**: dirlo in `lab/banco/README.md` e nel prompt, perché `stanze` non è una misura degli
-   interni (confermato in T303 su tutti gli edifici della via (a)).
+   interni (confermato in T303 e in T406 su tutti gli edifici della via (a); in T406 cadono anche `piani`, `murato` e `dominante` di
+   `giudica` su una fattoria arredata insieme, con i controlli dello Scultore che passano).

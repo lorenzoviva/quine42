@@ -5708,7 +5708,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (il borgo del seme con `?skip&offline`: le case intere sui loro lotti, nessuna che sporge o scende di taglia).
 - Quando è fatto: commit su `task/T407`.
 
-### T406 · Di nuovo la misura dello Scenografo, sugli edifici dello Scultore di oggi riscalati ai voxel per casella nuovi — `da fare` (dipende da T405)
+### T406 · Di nuovo la misura dello Scenografo, sugli edifici dello Scultore di oggi riscalati ai voxel per casella nuovi — `fatto` (`8ed8d797`) (dipende da T405)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3
 - Step: 30
 - Contesto: l'autore (17/11, epoca 477) su T303: lo spazio calpestabile dentro le abitazioni è troppo piccolo, e i voxel per casella nuovi (D61, T404 e T405) lo cambiano; i numeri di T303 (`docs/design/scenografo.md` § 9-10) valgono per gli edifici a 20 voxel per casella. Prima si generano i modelli con lo Scultore di oggi e si scalano bene coi voxel per casella, poi si rifà la prova d'arredamento e si procede. I cinque task proposti da T303 (guardia nel kernel, Scenografo a dati, Scenografo a programma, mobili per la cantina, misure sull'edificio vuoto) aspettano questo. `dossier T303`, `dossier T405`.
@@ -5716,3 +5716,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: i programmi provati girano nel motore e passano i controlli; typecheck col suo turno.
 - Browser: non serve; fogli di contatto nel commit.
 - Quando è fatto: commit su `task/T406`. Dipende da T405 (la densità degli edifici).
+- Esito: villetta e fattoria a Grande scritte da Opus 5.5 col prompt a 16 e lette a 16; spazio calpestabile prima e dopo (`scenografo-spazio.ts`): ×1,5 col riscalamento (villetta 4,0 → 6,3 caselle² a terra, mobili da 5-6 a 7-10), ma ancora una stanza per piano in un corpo di 35-45 voxel su 100; tre vie, 2 richieste ciascuna: (a) 1,03 $ a edificio riuscito (3 su 4, la villetta del giro 1 caduta su «piani: 1»), (b) 0,082 $ (4 su 4, 15/16 al primo, nella fattoria scrive sul posto degli animali, villetta ricca e povera), (c) 0,014 $ (4 su 4, 16/16 al primo, 5,5-6,75 pezzi); misura 4,65 $ a listino + 0,06 $ dell'Artista su Gemini, finestra 49 → 56 %, settimana 51 → 52 %; § 9.1 e § 10 di `docs/design/scenografo.md` (raccomandazione confermata, task riscritti più uno nuovo, «la casa che usa la Grande», con la soglia di pavimento da decidere con l'autore); banco con `gioco`/`vpt`, `--densita`, `PARTI`; `scultore-gemini.ts` misurava le taglie a 125 voxel dopo T405, corretto; suite e typecheck verdi; non provati: il forte (quello di T404 è dell'autore, non dello Scultore) e la cantina (nessun edificio ne ha una).

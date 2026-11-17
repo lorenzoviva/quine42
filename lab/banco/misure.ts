@@ -29,6 +29,13 @@ export interface Bersaglio {
   taglia?: SizeTier;
   /** Tiles under the ground (ADR-0091). */
   sotto?: number;
+  /**
+   * The entry as the game writes a structure of today's Sculptor (T406): it says no density, so a structure that grows by rules is at
+   * STRUCTURE_VPT (16 since T405, ADR-0209), the same voxels a quarter larger. Without, the bench keeps its 20.
+   */
+  gioco?: boolean;
+  /** The density the entry says (a handmade card: the author's fort at 10, T404), over everything else. */
+  vpt?: number;
 }
 
 export interface Scatola {
@@ -57,7 +64,7 @@ function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id:
   // its fixtures and its reports were measured there. The structures of today at TILE at every size are the bench of T338 (ADR-0179).
   const cls = classOf(b.classe), tiles = cls && scaledTiles(cls, b.taglia);
   // It says its density at every size (T405): an entry that does not say it is at 16 now (ADR-0209), and the bench is of 20.
-  const before = tiles ? { vpt: b.taglia ? densityOf(tiles) : TILE } : {};
+  const before = b.vpt ? { vpt: b.vpt } : tiles && !b.gioco ? { vpt: b.taglia ? densityOf(tiles) : TILE } : {};
   const info = { class: b.classe, ...modelSize(b), ...before, ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
   // The parts of the seed a program imports (`part-stair`, `part-door`…, ADR-0182), from universe/models as the game has them (T303).
