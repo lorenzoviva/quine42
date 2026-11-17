@@ -1294,7 +1294,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (`analyse(…, { groundJoins })`, `Validator.modelGrows`, `checkProgram`; `addModel` prova una voce nuova col suo `time` e la sua crescita):
   la fattoria a 20 caselle non cade più per i recinti e i campi. Il prompt dello Scultore: il piano a 1/5 è 100 × 100 celle alla gargantuesca. Le
   misure col forte dell'autore (7,2 s, mesh 77 MB, 197 fps dentro) sono nel banco `lab/banco/taglie/`.
-- **Il riferimento dell'ottima** (ADR-0208, T371, D53): il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 ×
+- **Il riferimento dell'ottima** (ADR-0210, T371, D53): il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 ×
   150 voxel, 50 × 50 caselle a 10 voxel per casella, D61) è il metro della qualità migliore: nessun modello di oggi deve raggiungerlo, è il
   riferimento. Nel banco è **versionato** (`lab/banco/riferimento/ottima/forte-v1.json`: i tratti di tre semi, l'impronta SHA-256 del file, il
   commit; `forte-v1.png` i quattro lati a cartone, `forte-v1-viste.txt` le viste in testo che lo Scultore vedrebbe, `forte-v1-lab3d.png` nel

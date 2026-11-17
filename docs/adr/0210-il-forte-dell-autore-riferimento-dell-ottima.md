@@ -1,4 +1,4 @@
-# ADR-0208 — Il forte dell'autore come riferimento dell'ottima: versionato nel banco, un metro nel prompt dello Scultore, una scala di giudizio
+# ADR-0210 — Il forte dell'autore come riferimento dell'ottima: versionato nel banco, un metro nel prompt dello Scultore, una scala di giudizio
 
 Data: 2026-11-17 · Stato: accettato (task T371 del backlog, step 30; D53 dell'autore del 13/11, il forte pronto il 15/11, la scala di D61 del
 17/11) · Riferimenti: ADR-0183 (lo Scultore senza scheletro: un programma nel prompt si copia), ADR-0179 (ciò che entra nella taglia, le parti

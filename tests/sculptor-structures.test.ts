@@ -59,7 +59,7 @@ describe('the prompt of the structures without a skeleton (T354)', () => {
     expect(structures).toContain('Never use S nor #90-#97');
   });
 
-  it('names the measure of «done well», the author’s fort, and does not grow past the size measured before it (T371, ADR-0208)', () => {
+  it('names the measure of «done well», the author’s fort, and does not grow past the size measured before it (T371, ADR-0210)', () => {
     const structures = sculptorRole(bundledFiles, true);
     expect(structures).toContain('## The measure of «done well»: the reference fort');
     expect(structures).toContain('union of rectangles');

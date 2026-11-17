@@ -5,7 +5,7 @@ cortili come unioni di rettangoli, mura irregolari con torri agli angoli, mastio
 ci si aspetta che i modelli di oggi lo raggiungano: è il riferimento. La prima versione è quella del commit del 15/11 (**v1**); altre possono
 arrivare, quindi qui il riferimento è **versionato**: una versione nuova sostituisce le misure, la scala resta. La scala del forte è quella di
 D61 (A2): **10 voxel per casella, 50 × 50 caselle** (`REFERENCE_VPT`); il programma e i suoi 500 × 500 × 150 voxel non cambiano, la sua voce
-nella libreria è di T404. La decisione è [ADR-0208](../../../../docs/adr/0208-il-forte-dell-autore-riferimento-dell-ottima.md).
+nella libreria è di T404. La decisione è [ADR-0210](../../../../docs/adr/0210-il-forte-dell-autore-riferimento-dell-ottima.md).
 
 ```bash
 npx vite-node lab/scripts/banco-ottima.ts -- --riferimento [--versione v2] [--semi 1,2,3]   # il forte: forte-<v>.json (i tratti, l'impronta), .png (i quattro lati), -viste.txt; 7-8 s a seme
@@ -100,7 +100,7 @@ Che cosa dicono:
   fa 4,2 con zero su cortile, angoli, torri e merlature: la scala misura la distanza dal forte, non giudica una fattoria. I piani raggiunti sono
   quelli della camminata del kernel (il corpo largo 0,44 caselle, un gradino di un quinto): il forte dell'autore ne ha 3-4 raggiunti su più che ha.
 
-## Il metro nel prompt dello Scultore (ADR-0208)
+## Il metro nel prompt dello Scultore (ADR-0210)
 
 Nel prompt delle strutture (`universe/prompts/agents/sculptor.md` dopo `<!-- strutture -->`) il forte è **un metro, non un esempio**: ADR-0183 ha
 misurato che un programma nel prompt si copia (T337), quindi la sezione «The measure of «done well»: the reference fort» lo descrive in dieci righe
