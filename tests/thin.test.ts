@@ -291,13 +291,15 @@ describe('what is carried, among many (T39b)', () => {
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(2);
     // Dropped: gone from the slot at once, on the ground in front of her for the server and for her.
     const before = anna.k.ecs.query('pickup').length;
+    const lying = new Set(anna.k.ecs.query('pickup'));
     anna.k.dropSlot(free, 1);
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(1);
     await flush(server, [anna]);
     expect(countItem(serverInv(), 'item.mela-rossa')).toBe(1);
     expect(countItem(anna.k.inventory(), 'item.mela-rossa')).toBe(1);
     expect(anna.k.ecs.query('pickup').length).toBe(before + 1);
-    const dropped = anna.k.ecs.query('pickup').find((e) => anna.k.ecs.get(e, 'pickup').item === 'item.mela-rossa')!;
+    // The apple just put down (a place may have one lying already).
+    const dropped = anna.k.ecs.query('pickup').find((e) => !lying.has(e) && anna.k.ecs.get(e, 'pickup').item === 'item.mela-rossa')!;
     expect(Math.hypot(anna.k.ecs.get(dropped, 'pos').x - start.x, anna.k.ecs.get(dropped, 'pos').y - start.y)).toBeLessThan(1.5);
     // The bag opens here; the bread goes in at once and on the server; then it comes out again.
     const bag = slotOf(anna.k, 'item.sacca');

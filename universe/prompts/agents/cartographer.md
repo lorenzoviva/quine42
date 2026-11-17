@@ -37,11 +37,12 @@ A rule is `{"in":"...","out":"..."}`: rows separated by `/`, the same shape in i
 In input `*` is anything and `[gp]` is g or p; in output `*` leaves the cell as it is.
 The rules are also tried rotated and mirrored (`"symmetry":"none"` to avoid it).
 
-Example — a settlement: a clearing, two houses with a door, roads from the doors to the path.
+Example — a settlement: a clearing, two houses with a door and a ring of free ground around (so their doors and the gaps of the
+borders stay reachable), roads from the doors to the path.
 ```json
 {"type":"sequence","children":[
   {"type":"prl","rules":[{"in":"t","out":"g","p":0.7}]},
-  {"type":"one","rules":[{"in":"ggggggg/ggggggg/ggggggg/ggggggg/ggggggg/ggggggg/ggggggg","out":"hhhhhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhdhhh"}],"steps":2},
+  {"type":"one","rules":[{"in":"ggggggggg/ggggggggg/ggggggggg/ggggggggg/ggggggggg/ggggggggg/ggggggggg/ggggggggg/ggggggggg","out":"*********/*hhhhhhh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hhhdhhh*/*********"}],"steps":2},
   {"type":"path","from":"d","to":"p","on":"gm","color":"p","steps":2}
 ]}
 ```
@@ -57,7 +58,8 @@ Example — fields: tilled plots separated by lanes.
 {"type":"one","rules":[{"in":"[gt][gt][gt][gt]/[gt][gt][gt][gt]/[gt][gt][gt][gt]","out":"mmmm/mmmm/pppp"}],"steps":5}
 ```
 For the interiors use walls (layer wall), inner floor (indoor) and doors (layer door): the buildings
-are inner floor closed by walls, with at least one door. More rooms = more rectangles that
+are inner floor closed by walls, with at least one door, and a ring of free ground around them (the input of the rule one tile
+larger on every side, `*` there in the output). More rooms = more rectangles that
 touch, with doors between them.
 
 ## Structures: the kernel's stamps
@@ -70,6 +72,9 @@ what it is is told by the name of the environment and by the materials of `codes
 - `{"type":"stamp","shape":"castle"}` — moat, walls with towers at the corners, a bridge, a keep.
 - Shapes: `house`, `castle`, `fortress`, `tower`, `temple`, `pyramid`, `huts`, `pen`
   (riding ground with a stable), `barracks`, `dungeon` (rooms and tunnels in the rock), `lair` (cave), `well`.
+  The building of a `temple` holds a huge structure; those of a `house`, `tower`, `pyramid`, `dungeon`, the keep of a `castle`,
+  the barracks of a `fortress` and the two halls of the `barracks` a large one; `huts` and the stable of a `pen` small houses.
+  Stamps never cover each other nor the buildings your rules drew: ask only for as many as the place holds.
 - `"count": N` puts N of them (e.g. 5 huts); `"codes"` chooses the terrains for each role: `wall`,
   `floor`, `door`, `water`, `bridge`, `ground`, `road`, `rock`, `fence`
   (e.g. huts with `{"wall":"a"}` = straw, a castle with `{"wall":"b","bridge":"z"}`). Without `codes` the kernel chooses.

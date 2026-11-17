@@ -64,6 +64,8 @@ export function seedHashes(seed: FileMap): Record<string, string> {
  * universe always wins. New seed files arrive; files the universe deleted or rewrote stay as they are.
  * The models in universe.json always follow the kernel (they are infrastructure, not content).
  * A universe out of the range of the kernels it runs on (T302, ADR-0152) takes nothing: the seed is of another contract.
+ * The environments a universe has keep their programs (T407, ADR-0211): its places were laid out with them and its plans keep their edits per
+ * tile; it takes only the seed's new environments, as from a manifest it rewrote (`keepEnvironments`).
  */
 export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap; changes: Record<string, string | null>; updated: string[] } {
   if (!runsOnThisKernel(files['universe.json'])) return { files, changes: {}, updated: [] };
@@ -85,7 +87,9 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
       out[p] = changes[p] = content;
       updated.push(p);
     } else if (was !== undefined && h(mine) === was && mine !== content) {
-      out[p] = changes[p] = content;
+      const next = keepEnvironments(mine, content);
+      if (next === mine) continue;
+      out[p] = changes[p] = next;
       updated.push(p);
     }
   }
@@ -133,6 +137,30 @@ export function prepareUniverse(files: FileMap, seed: FileMap): { files: FileMap
 }
 
 const KEYED = ['tiles', 'layouts', 'runes', 'spells'] as const;
+
+/**
+ * The seed's manifest as a universe takes it (T407, ADR-0211): an environment it already has stays as it is (its places were laid out
+ * with its program, their plans keep their edits per tile), the rest is the seed's. What is not JSON, or has no environments, is the seed's.
+ */
+export function keepEnvironments(mine: string, seed: string): string {
+  try {
+    const m = JSON.parse(mine);
+    const s = JSON.parse(seed);
+    const own = m?.layouts, next = s?.layouts;
+    if (!own || typeof own !== 'object' || !next || typeof next !== 'object') return seed;
+    let kept = false;
+    for (const [id, v] of Object.entries(own)) {
+      if (!(id in next) || JSON.stringify(next[id]) === JSON.stringify(v)) continue;
+      next[id] = v;
+      kept = true;
+    }
+    if (!kept) return seed;
+    const out = JSON.stringify(s, null, 2) + '\n';
+    return out === mine ? mine : out;
+  } catch {
+    return seed;
+  }
+}
 
 /** The seed's top-level entries the universe lacks, added; the universe's own never replaced. */
 function mergeEntries(mine: string, seed: string): string | undefined {

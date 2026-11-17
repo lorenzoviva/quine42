@@ -1,0 +1,672 @@
+{
+  "id": "world.layouts",
+  "name": "Ambienti",
+  "kind": "data",
+  "version": "0.1.0",
+  "description": "Gli ambienti del mondo come programmi di riscrittura (stile MarkovJunior) applicati alla bozza del terreno. Li scrive il Cartografo; il kernel li prova prima di accettarli.",
+  "layouts": {
+    "village": {
+      "name": "Borgo",
+      "description": "case di pietra con porte sulla strada, orti e cortili",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.85
+              },
+              {
+                "in": "w",
+                "out": "g",
+                "p": 0.6
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]",
+                "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg",
+                "out": "mmm/mmm"
+              }
+            ],
+            "steps": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gm",
+            "color": "p",
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "woods": {
+      "name": "Bosco",
+      "description": "alberi fitti con radure e sentieri di animali",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "t",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ttt/ttt/ttt",
+                "out": "ggg/ggg/ggg"
+              }
+            ],
+            "steps": 3
+          }
+        ]
+      }
+    },
+    "fields": {
+      "name": "Campi",
+      "description": "appezzamenti coltivati divisi da viottoli, un capanno",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "mmmm/mmmm/pppp"
+              }
+            ],
+            "steps": 5
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg/gggg",
+                "out": "hhhh/hffh/hffh/hhdh"
+              }
+            ],
+            "steps": 1
+          }
+        ]
+      }
+    },
+    "ruins": {
+      "name": "Rovine",
+      "description": "colonne spezzate e muri crollati di un edificio dimenticato",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "ggg/ggg/ggg",
+                "out": "r*r/***/r*r"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg",
+                "out": "hh*h"
+              }
+            ],
+            "steps": 4
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "p",
+                "p": 0.08
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "inn": {
+      "name": "Locanda",
+      "description": "un grande edificio con sala comune e stanze, cortile intorno",
+      "environment": "indoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]",
+                "out": "hhhhhhhhh/hfffhfffh/hfffdfffh/hfffhhdhh/hfffffffh/hfffffffh/hhhhdhhhh"
+              }
+            ],
+            "steps": 1,
+            "symmetry": "none"
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "p",
+            "on": "gm",
+            "color": "p",
+            "steps": 1
+          }
+        ]
+      }
+    },
+    "castle": {
+      "name": "Castello",
+      "description": "un castello di pietra con fossato, ponte levatoio, mura e torri; un mastio nel cortile",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "castle",
+            "codes": {
+              "wall": "b",
+              "floor": "l",
+              "bridge": "z"
+            }
+          }
+        ]
+      }
+    },
+    "fortress": {
+      "name": "Fortezza",
+      "description": "una fortezza a doppia cinta di mura, con caserma interna",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "fortress",
+            "codes": {
+              "wall": "b",
+              "floor": "l"
+            }
+          }
+        ]
+      }
+    },
+    "huts": {
+      "name": "Villaggio di capanne",
+      "description": "capanne di paglia sparse attorno a un pozzo",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "well"
+          },
+          {
+            "type": "stamp",
+            "shape": "huts",
+            "codes": {
+              "wall": "a",
+              "floor": "f"
+            },
+            "count": 5
+          }
+        ]
+      }
+    },
+    "stables": {
+      "name": "Maneggio",
+      "description": "recinti di staccionata per cavalli, una stalla",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "pen",
+            "codes": {
+              "fence": "c"
+            },
+            "count": 2
+          }
+        ]
+      }
+    },
+    "barracks": {
+      "name": "Caserma",
+      "description": "la caserma delle guardie, lunga e bassa, con il cortile per le esercitazioni",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[tw]",
+                "out": "g",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "barracks",
+            "codes": {
+              "wall": "b",
+              "floor": "l"
+            }
+          },
+          {
+            "type": "stamp",
+            "shape": "pen",
+            "codes": {
+              "fence": "c"
+            }
+          }
+        ]
+      }
+    },
+    "dungeon": {
+      "name": "Sotterraneo",
+      "description": "cunicoli e stanze scavati nella roccia, umidi e bui",
+      "environment": "indoor",
+      "program": {
+        "type": "stamp",
+        "shape": "dungeon",
+        "codes": {
+          "rock": "k",
+          "floor": "l"
+        }
+      }
+    },
+    "wizard_tower": {
+      "name": "Torre del mago",
+      "description": "una torre rotonda di pietra in una radura silenziosa",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "tower",
+            "codes": {
+              "wall": "b",
+              "floor": "l"
+            }
+          }
+        ]
+      }
+    },
+    "dragon_lair": {
+      "name": "Tana del drago",
+      "description": "una caverna nella montagna, con pozze di lava e ossa sparse",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "k",
+                "p": 0.35
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "lair",
+            "codes": {
+              "rock": "k",
+              "ground": "s"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "k",
+                "out": "v",
+                "p": 0.04
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "temple": {
+      "name": "Tempio",
+      "description": "un tempio di pietra con colonne, in cima a una scalinata",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "temple",
+            "codes": {
+              "wall": "b",
+              "floor": "l"
+            }
+          }
+        ]
+      }
+    },
+    "pyramid": {
+      "name": "Piramide",
+      "description": "una piramide di pietra nel deserto, con una camera segreta",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gtw]",
+                "out": "s",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "pyramid",
+            "codes": {
+              "wall": "b",
+              "floor": "l"
+            }
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "s",
+                "out": "r",
+                "p": 0.02
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "desert": {
+      "name": "Deserto",
+      "description": "dune di sabbia, rocce bruciate dal sole, rare oasi",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "s",
+                "p": 1
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "s",
+                "out": "r",
+                "p": 0.04
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "jungle": {
+      "name": "Giungla",
+      "description": "una giungla fitta, umida, con radure e sentieri di animali",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "[gt]",
+                "out": "j",
+                "p": 0.62
+              }
+            ]
+          },
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "jjj/jjj",
+                "out": "ggg/ggg"
+              }
+            ],
+            "steps": 4
+          }
+        ]
+      }
+    },
+    "mountains": {
+      "name": "Montagne",
+      "description": "pareti di roccia, passi stretti e neve sulle cime",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "r",
+                "p": 0.25
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "r",
+                "out": "k",
+                "p": 0.5
+              }
+            ]
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "g",
+                "out": "n",
+                "p": 0.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "lake": {
+      "name": "Lago",
+      "description": "un lago tranquillo tra i canneti",
+      "environment": "outdoor",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "one",
+            "rules": [
+              {
+                "in": "gggg/gggg/gggg",
+                "out": "wwww/wwww/wwww"
+              }
+            ],
+            "steps": 3
+          },
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "w",
+                "out": "g",
+                "p": 0.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "brick_village": {
+      "name": "Borgo di mattoni",
+      "description": "case di mattoni rossi strette attorno a una piazza",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.9
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "house",
+            "codes": {
+              "wall": "q",
+              "floor": "f"
+            },
+            "count": 4
+          },
+          {
+            "type": "stamp",
+            "shape": "well"
+          }
+        ]
+      }
+    }
+  }
+}

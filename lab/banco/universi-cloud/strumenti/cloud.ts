@@ -58,9 +58,12 @@ export function leggi(u: Universo): { files: FileMap; maps: Record<string, Chunk
 }
 
 /** The structures of a universe whose plans were cut at 20 voxels a tile (T405): what the migration 0.8 → 0.9 writes, `vpt: 20`. */
+// And the environments its plans were laid out with (T407, ADR-0211): the seed's of before, as a universe born from that seed keeps them
+// (`keepEnvironments`); its plans do not say `vpt`, so their stamps are the ones of before too.
 function cutAt20(files: FileMap): FileMap {
   const step = MIGRATIONS.find((m) => m.from === '0.8' && m.to === '0.9')!;
-  const { [SEED_FILE]: _, ...out } = step.migrate(files);
+  const before = readFileSync(join(LAB, 'universi-cloud/ambienti-prima-T407.json'), 'utf8');
+  const { [SEED_FILE]: _, ...out } = step.migrate({ ...files, 'modules/world.layouts/manifest.json': before });
   return files[SEED_FILE] === undefined ? out : { ...out, [SEED_FILE]: files[SEED_FILE] };
 }
 
