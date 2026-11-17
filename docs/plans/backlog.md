@@ -5750,7 +5750,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (`?skip&offline`: una casa del borgo arredata dentro, nessun mobile nei muri o sulle porte, si cammina).
 - Quando è fatto: commit su `task/T410`. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410, T413, T417, T418, T419)
+### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410, T413, T417, T418, T419, T420)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
 - Step: 31
 - Contesto: richiesta dell'autore (17/11, chat): gli universi in `universes/` (aurora, orichalcum, neapolis, sidera) sono stati fatti con versioni dello Scultore di prima (senza 16 vpx, senza Scenografo, alcuni da Claude Cloud via T273): rigenerarli, almeno i modelli, con lo Scultore stabile e lo Scenografo base, sulla CLI di Claude Code con **Opus 5.5**, così l'autore approva T153 e si passa agli altri universi. Nasce da T207, T88 (`dossier T207`, `dossier T88`), T405 (`dossier T405`). Decisione dell'autore che supera la vecchia «aurora non si tocca»: lo stato di prima resta nella storia git dell'universo (un tag `prima-della-rigenerazione`).
@@ -5837,3 +5837,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — `?skip&offline`: una casa con la cantina arredata, si scende e si cammina fra i mobili; screenshot.
 - Quando è fatto: commit su `task/T419`; nell'esito il costo dei modelli nuovi. Sicurezza: nessuna superficie nuova.
 
+
+### T420 · Integrare T417 nel base (conflitto con T413: AGENTS.md, sculptor.ts, mockStructure.ts, modeldirector.ts) — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
+- Step: 30
+- Contesto: `integra T417` (le cantine chieste dal Cartografo e scolpite dallo Scultore, `part-cellar`, cose `under`, componente `below`) ha trovato conflitti in `AGENTS.md`, `src/kernel/agents/sculptor.ts`, `src/kernel/ai/mockStructure.ts` e `src/kernel/modeldirector.ts`: nel frattempo è entrato T413 (la casa che usa la Grande, `DWELLING`, `dwellingErrors`, `isDwelling`, villetta offline abitazione, ADR-0213, kernel 0.9.6). Nasce da T417: `dossier T417`, `dossier T413`.
+- Cosa fare: nel worktree `git merge task/T417`; tenere tutte le aggiunte: i controlli dello Scultore vogliono sia la casa abitabile di T413 sia la cantina che regge e si raggiunge di T417; la villetta offline resta un'abitazione (≥ 10 caselle² coperte al piano terra e a un altro piano, due stanze a terra) **e** ha la cantina; nel `ModelDirector` la richiesta dice sia l'abitazione sia la cantina; `storeyFloors`/`dwellingErrors` non contano la cantina come piano (come `reachableStoreys`); kernel 0.9.7 (T413 ha preso 0.9.6) in `version.ts` e `package.json`; in `AGENTS.md` e nei dettagli le righe di entrambi; rifare le misure e le fixture toccate da entrambi (determinismo, banco di T155) se cambiano; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/cellar-asked.test.ts` e i test di T413 verdi insieme.
+- Browser: sì, breve — `?skip&offline`: la villetta offline con la cantina, si scende e si risale come in T417; screenshot.
+- Quando è fatto: commit su `task/T420`; poi l'orchestratore integra T420 e `integra T417` toglie worktree e branch di T417. Sicurezza: nessuna superficie nuova.
