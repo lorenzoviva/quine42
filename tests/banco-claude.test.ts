@@ -82,13 +82,13 @@ describe('T391 — i prezzi', () => {
     expect(PRICES['gemini-4-hydrogen'].output / PRICES['gemini-4-argon'].output).toBe(0.75);
   });
 
-  it('il listino di Anthropic: scritture in cache a 1,25 (5 minuti) e 2 volte (un’ora) l’ingresso, letture al prezzo della cache; in priceOf solo Opus 5.5, che il gioco chiama via OpenRouter (T397)', () => {
+  it('il listino di Anthropic: scritture in cache a 1,25 (5 minuti) e 2 volte (un’ora) l’ingresso, letture al prezzo della cache; in priceOf solo Opus 5.5 e Fable 5.1, che il gioco chiama via OpenRouter (T397, T398)', () => {
     expect(anthropicCost('claude-opus-5-5', { input: 1e6, output: 0 })).toBe(4);
     expect(anthropicCost('claude-opus-5-5', { input: 0, written5m: 1e6, written1h: 1e6, read: 1e6, output: 1e6 })).toBeCloseTo(5 + 8 + 0.2 + 20, 9);
     expect(anthropicCost('claude-haiku-5-5', { input: 1, output: 1 })).toBeUndefined();
     for (const id of Object.keys(ANTHROPIC_PRICES)) {
       const { write: _, ...list } = ANTHROPIC_PRICES[id];
-      if (id === 'claude-opus-5-5') expect(priceOf(id)).toMatchObject(list);
+      if (id === 'claude-opus-5-5' || id === 'claude-fable-5-1') expect(priceOf(id)).toMatchObject(list);
       else expect(priceOf(id)).toBeUndefined();
     }
   });

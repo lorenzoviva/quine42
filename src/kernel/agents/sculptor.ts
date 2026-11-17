@@ -69,6 +69,18 @@ export const DEFAULT_SCULPTORS: SculptorAiModels = {
   openRouterFrom: '2026-12-01',
 };
 
+/**
+ * How far the master goes for the structures' Sculptor (T398, D57), chosen at the Genesis and in the lobby, fixed while a match is under way
+ * (`ai.sculptorTier`, absent `standard`): `standard` is T397's (Argon, Opus 5.5 on OpenRouter from `openRouterFrom`); `strong` Opus 5.5 on
+ * OpenRouter from today; `max` Fable 5.1 on OpenRouter. On Google's route only Gemini: every tier is Argon there. Whoever pays the match pays it.
+ */
+export type SculptorTier = 'standard' | 'strong' | 'max';
+export const SCULPTOR_TIERS: readonly SculptorTier[] = ['standard', 'strong', 'max'];
+/** The structures' Sculptor of a tier above `standard` on OpenRouter: ids of the adapter's list (`OPENROUTER_MODELS`), never another. */
+export const TIER_MODELS: Readonly<Record<Exclude<SculptorTier, 'standard'>, string>> = { strong: 'claude-opus-5-5', max: 'claude-fable-5-1' };
+/** A tier as it came (universe.json, the wire): one of the three, else `standard`. */
+export const repairSculptorTier = (v: unknown): SculptorTier => (typeof v === 'string' && (SCULPTOR_TIERS as readonly string[]).includes(v) ? (v as SculptorTier) : 'standard');
+
 /** Whether a model is called through Google's key: the others only through OpenRouter. */
 const onGoogle = (model: string): boolean => /^(models\/)?gemini-/.test(model);
 
@@ -76,11 +88,15 @@ const onGoogle = (model: string): boolean => /^(models\/)?gemini-/.test(model);
  * The Sculptor's models of a world (T397): the defaults under what the universe says (`ai.sculptors`), then, on OpenRouter from
  * `openRouterFrom`, `openRouterStructure` for the structures and the important ones the master left as the defaults (Low Detail, a model
  * chosen in the lobby stay); on Google's route a model Google does not have goes back to the default (a universe.json written by hand).
+ * A tier above `standard` (T398) puts its model on the structures and the important ones on OpenRouter, whatever the classes say: it is the
+ * master's latest word on them; on Google's route it changes nothing.
  */
-export function sculptorsOn(configured: Partial<SculptorAiModels>, route: AiRoute, today = new Date().toISOString().slice(0, 10)): SculptorAiModels {
+export function sculptorsOn(configured: Partial<SculptorAiModels>, route: AiRoute, today = new Date().toISOString().slice(0, 10), tier: SculptorTier = 'standard'): SculptorAiModels {
   const m: SculptorAiModels = { ...DEFAULT_SCULPTORS, ...configured };
+  const chosen = tier === 'standard' ? undefined : TIER_MODELS[tier];
   for (const k of ['structure', 'important'] as const) {
     if (route === 'google' && !onGoogle(m[k])) m[k] = DEFAULT_SCULPTORS[k];
+    else if (route === 'openrouter' && chosen) m[k] = chosen;
     else if (route === 'openrouter' && m.openRouterStructure && m.openRouterFrom && today >= m.openRouterFrom && m[k] === DEFAULT_SCULPTORS[k]) m[k] = m.openRouterStructure;
   }
   return m;

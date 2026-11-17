@@ -7,7 +7,7 @@
 
 import { collectionOf } from '../kernel/cards';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, repairActor, repairCoefficients, type CoefficientKey } from '../kernel/coefficients';
-import { DEFAULT_SCULPTORS, type AiRoute, type SculptorAiModels } from '../kernel/agents/sculptor';
+import { DEFAULT_SCULPTORS, repairSculptorTier, type AiRoute, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { internalSculptors } from '../kernel/internalNames';
 import { BUDGET_KEYS, BUDGET_SCALE, readConfig, SCULPTOR_CLASSES, withinMinimums, type BudgetKey } from '../kernel/universe';
 import type { AiSettings, FileMap, GameExpenses, LobbySettings } from '../kernel/types';
@@ -17,6 +17,7 @@ import type { BringAnswer, BringRef, KinView } from '../kernel/bring';
 import { CardChoicePanel } from './cardchoice';
 import { el } from './dom';
 import { openRouterBox, PROPOSED_LIMIT, type OpenRouterLink } from './openrouter';
+import { tierPicker } from './sculptortier';
 
 export interface LobbyOptions {
   name: string;
@@ -123,7 +124,10 @@ export class LobbyScreen {
     const estimateRow = el('div', { class: 'estimate-row' });
     const estimateLines = el('div', { class: 'note' });
     let read: () => AiSettings = () => ({});
+    // The structures' Sculptor (T398): its labels follow the structures' model and who pays; set after the selects below exist.
+    let showTier = () => {};
     const showEstimate = () => {
+      showTier();
       const h = hourlyEstimate(withinMinimums({ ...ai, ...read() } as typeof ai), undefined, { decisions: !!this.opts.decisions, guards: !!this.opts.guards, route: this.opts.route });
       const budget = (read().maxText as number | undefined) ?? ai.maxText;
       estimateRow.textContent = `Stima oraria: circa ${usd(h.dollari)} (${h.chiamate} chiamate/ora). Budget sessione: ${budget} chiamate testo.`;
@@ -176,6 +180,8 @@ export class LobbyScreen {
     // The models.
     const text = pick(ai.textModel, 'lobby-modello-testo');
     const sculptors = new Map(SCULPTOR_CLASSES.map((k) => [k, pick(String(sculpt[k]), `lobby-scultore-${k}`)]));
+    const tier = tierPicker('lobby-scultore-livello', repairSculptorTier(ai.sculptorTier), this.opts.route, showEstimate);
+    lockIf(tier.select);
     const thinking = lockIf(el('select', { id: 'lobby-ragionamento' }, ...THINKING.map(([v, n]) => el('option', { value: v }, n))) as HTMLSelectElement);
     thinking.value = ai.thinking ?? 'low';
     thinking.onchange = showEstimate;
@@ -213,6 +219,7 @@ export class LobbyScreen {
         thinking: thinking.value as AiSettings['thinking'],
         actor: { on: actorOn.checked, model: actorModel.value },
         sculptors: { ...Object.fromEntries([...sculptors].map(([k, s]) => [k, s.value])), importanteFino: sculpt.importanteFino } as Partial<SculptorAiModels>,
+        sculptorTier: tier.value(),
         coefficients: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as AiSettings['coefficients'],
         ...Object.fromEntries([...budgets].map(([k, i]) => [k, Number(i.value)])),
         minimums: {
@@ -236,11 +243,10 @@ export class LobbyScreen {
         values.get(k)!.textContent = chosen.coefficients[k].toFixed(2);
       }
       for (const [k, s] of sculptors) if (chosen.sculptors[k]) s.value = String(chosen.sculptors[k]);
+      // Low Detail saves on the structures too: the tier goes back to standard (T398).
+      if (preset.value === 'low') tier.select.value = 'standard';
       showEstimate();
     };
-    showPreset();
-    showEstimate();
-
     // Who pays for the match (T372): the master chooses, everyone reads it; alone there is nobody to pay for.
     const expenses = lockIf(
       el('select', { id: 'lobby-spese' }, el('option', { value: 'shared' }, 'Ognuno paga le sue richieste'), el('option', { value: 'master' }, isMaster ? 'Pago io tutta la partita' : 'Paga il master')) as HTMLSelectElement,
@@ -257,8 +263,25 @@ export class LobbyScreen {
           ? 'In questo mondo paga il master: entri senza usare i tuoi crediti. Le carte che nascono sono del master. Se i suoi crediti finiscono, tutti giocano con i modelli locali.'
           : 'Ognuno paga le richieste che fa; le spese comuni del mondo si dividono fra chi è collegato.';
     };
-    expenses.onchange = showExpenses;
+    expenses.onchange = () => {
+      showExpenses();
+      showTier();
+    };
     showExpenses();
+    // Who pays a structure, in words (T398): whoever pays the match.
+    showTier = () =>
+      tier.refresh(
+        { sculptors: read().sculptors },
+        alone
+          ? 'la paghi tu, con i tuoi crediti o la tua chiave.'
+          : expenses.value === 'master'
+            ? isMaster
+              ? 'la paghi tu, che paghi tutta la partita.'
+              : 'la paga il master, che paga la partita.'
+            : 'la paga chi paga la partita: con «Ognuno paga le sue richieste» è una spesa comune del mondo, divisa fra chi è collegato.',
+      );
+    showPreset();
+    showEstimate();
     // In the same grid as the other selectors, so that it looks like them (T382).
     const expensesRow = alone ? '' : el('div', { class: 'expenses-row' }, el('div', { class: 'settings-grid' }, field('Chi paga la partita', expenses)), expensesNote);
     /** What the lobby brings in: the knobs, and (not alone) who pays. */
@@ -277,6 +300,8 @@ export class LobbyScreen {
       estimateRow,
       el('div', { class: 'settings-grid' }, field('Dettaglio', preset), field('Modello del Concilio', text), field('Ragionamento', thinking)),
       el('div', { class: 'settings-title' }, 'Modelli'),
+      el('div', { class: 'settings-grid' }, el('label', { class: 'tier-field' }, 'Scultore delle strutture', tier.select)),
+      tier.note,
       el('div', { class: 'settings-grid sculpt-row' }, ...SCULPTOR_CLASSES.map((k) => field(CLASS_NAMES[k], sculptors.get(k)!))),
       actorRow,
       el('div', { class: 'settings-title' }, 'Quanto spesso si chiede ai modelli (0: mai; 1: sempre)'),

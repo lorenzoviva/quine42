@@ -46,7 +46,7 @@ import { classOf, growsByRules, guessClass, RARE_SIZES, scaledTiles, sizeOf, siz
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
-import { categoryOf, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
+import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
 import { entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
@@ -6010,7 +6010,7 @@ export class Kernel {
 
   /** The Sculptor's models per class (universe.json → ai.sculptors over the defaults), on the route the world's models go along (T397). */
   sculptors(): SculptorAiModels {
-    return sculptorsOn(internalSculptors(this.config.ai.sculptors ?? {}), this.aiRoute());
+    return sculptorsOn(internalSculptors(this.config.ai.sculptors ?? {}), this.aiRoute(), undefined, repairSculptorTier(this.config.ai.sculptorTier));
   }
 
   /** The route of the world's models (T397): OpenRouter when the Council writes through it (also behind the subscriptions' router), Google's key otherwise. */

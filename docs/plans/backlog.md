@@ -5647,7 +5647,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T402` col rapporto; esito coi numeri accanto a quelli della CLI (11/12, 0,75 $, 207 s).
 - Esito: giro pagato di Opus 5.5 via OpenRouter: 4 su 4, 0,61 $ a riuscita (CLI 11/12, 0,75 $, 207 s), 228 s di media, 1 chiamata su 17 oltre 120 s (124 s), cache letta (8004 token dalla seconda chiamata), 2,42 $ spesi su 4 $; soglia superata, `DEFAULT_SCULPTORS` invariato; rapporto in `lab/banco/taglie/modelli/README.md` e uscite in `openrouter/`, domanda T397 chiusa; codice non toccato, suite e typecheck non rilanciati; un giro solo, meno solido dei tre di T392.
 
-### T398 · Lo Scultore «performante» scelto alla Genesi e nella lobby, pagato da chi lo sceglie (D57) — `da fare`
+### T398 · Lo Scultore «performante» scelto alla Genesi e nella lobby, pagato da chi lo sceglie (D57) — `fatto` (`7e465113`)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
 - Step: 30
 - Contesto: l'autore (16/11, con la risposta a D57): «a regime deve poter essere impostata una versione più performante dalla genesi. Se un folle volesse spendere di propria tasca 3 $ a struttura con Fable, dovrebbe essergli concesso». Oggi lo Scultore per classe lo decide `DEFAULT_SCULPTORS` (`sculptor.ts`) e T397 lo lega alla via (Google → Argon, OpenRouter → Opus 5.5). Le regolazioni del consumo stanno in `universe.json → ai`, si scelgono alla Genesi e nella lobby e si fissano quando entra il primo viandante (regola 8b-bis, ADR-0133); chi paga lo risolve `billedTo` (ADR-0113, ADR-0188); i modelli del varco sono a elenco (regola 9). `dossier T397`, `dossier T352` (stima della lobby), `dossier T372`.
@@ -5655,6 +5655,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite, typecheck e `npm run test:sicurezza` coi turni.
 - Browser: sì (Genesi e lobby con le tre scelte e la stima che cambia, offline).
 - Quando è fatto: commit su `task/T398`. Dipende da T397. Sicurezza: dire se l'elenco dei modelli del varco cambia (un id più caro: il tetto lo regge).
+- Esito: `ai.sculptorTier` (standard/performante/massimo): su OpenRouter Opus 5.5 da subito o Fable 5.1 per strutture e importanti, sulla via di Google sempre Argon; Fable 5.1 nell'elenco dell'adattatore e nel listino (`anthropic/claude-fable-5.1-20260831`, 10/50 $ letti il 17/11); Genesi e lobby con le tre scelte, il modello, il costo per struttura (0,29/0,58/1,44 $), la stima oraria che segue (2,67/3,83/7,29 $ su OpenRouter) e chi paga; fermo a partita in corso, accettato dal varco solo come una delle tre parole; il varco riscrive `max_tokens` di Opus e Fable (≤ 32 000); ADR-0207, AGENTS, architettura `#lobby`, glossario, `site/ia.html`, V-040 aggiornata, kernel 0.8.1; suite (3352), typecheck e `test:sicurezza` verdi; non provato: nessuna chiamata vera a Fable (il costo per riuscita è una stima coi pesi di Opus); Fable 5.2 (8/40 $) è su OpenRouter ma resta fuori; sicurezza: l'elenco del varco ha un id in più, il più caro, tenuto nel tetto al giorno dal tetto dei token.
 
 ### T399 · La pagina web dell'orchestratore non perde lo scroll — `fatto` (`7e27c4d3`)
 - Pipeline: hydrogen · sforzo high · stima 2% · approvato · priorità 1

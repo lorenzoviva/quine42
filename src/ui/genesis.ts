@@ -9,12 +9,13 @@ import { DEATH_LEVELS } from '../kernel/gameSetup';
 import type { AiConfig, GameSetup } from '../kernel/types';
 import { COEFFICIENT_INFO, COEFFICIENT_KEYS, CENSUS, FULL_DETAIL, hourlyEstimate, isLowDetail, LOW_DETAIL, pricedAiModels, type Coefficients } from '../kernel/coefficients';
 import { keepsNothing } from '../kernel/ai/decisions';
-import { DEFAULT_SCULPTORS, type SculptorAiModels } from '../kernel/agents/sculptor';
+import { DEFAULT_SCULPTORS, repairSculptorTier, type SculptorAiModels } from '../kernel/agents/sculptor';
 import { usd } from '../kernel/ai/prices';
 import { themeOfText, WORLD_THEMES } from '../kernel/themes';
 import { feedLine } from './feed';
 import { CardChoicePanel } from './cardchoice';
 import { $, el } from './dom';
+import { tierPicker } from './sculptortier';
 
 export class GenesisScreen {
   private root = $('#genesis');
@@ -75,7 +76,7 @@ export class GenesisScreen {
    * The detail of generation (T45b): a preset, a coefficient per rhythm of the Council, the agents' models, and what an
    * hour of play costs with them. Unlike the game it can change, but only before a match (T247): the lobby. `read` gives what goes into universe.json → ai.
    */
-  private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor'>; lock: (on: boolean) => void } {
+  private aiForm(): { form: HTMLElement; read: () => Pick<AiConfig, 'textModel' | 'sculptors' | 'sculptorTier' | 'coefficients' | 'actor'>; lock: (on: boolean) => void } {
     const ai = this.k.config.ai;
     const coef: Coefficients = this.k.coefficients();
     const sculptors: SculptorAiModels = this.k.sculptors();
@@ -97,10 +98,13 @@ export class GenesisScreen {
     const sliders = new Map<keyof Coefficients, HTMLInputElement>();
     const preset = el('select', {}, el('option', { value: 'pieno' }, 'Pieno dettaglio'), el('option', { value: 'low' }, 'Low Detail (a risparmio)'), el('option', { value: 'misura' }, 'Su misura')) as HTMLSelectElement;
     const estimate = el('div', { class: 'note' });
-    const read = (): Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor'> => ({
+    // The structures' Sculptor (T398): three tiers, with the model and the cost of a structure on this world's route.
+    const tier = tierPicker('genesi-scultore-livello', repairSculptorTier(ai.sculptorTier), this.k.aiRoute(), () => show());
+    const read = (): Pick<AiConfig, 'textModel' | 'sculptors' | 'sculptorTier' | 'coefficients' | 'actor'> => ({
       textModel: text.value,
       actor: { on: actorOn.checked, model: actorModel.value },
       sculptors: { ...Object.fromEntries([...sculpt].map(([k, s]) => [k, s.value])), importanteFino: sculptors.importanteFino } as Partial<SculptorAiModels>,
+      sculptorTier: tier.value(),
       coefficients: Object.fromEntries([...sliders].map(([k, s]) => [k, Number(s.value)])) as Coefficients,
     });
     const show = () => {
@@ -108,6 +112,7 @@ export class GenesisScreen {
       const c = r.coefficients as Coefficients;
       preset.value = isLowDetail(c) ? 'low' : COEFFICIENT_KEYS.every((k) => c[k] === 1) ? 'pieno' : 'misura';
       for (const s of sliders.values()) (s.nextElementSibling as HTMLElement).textContent = Number(s.value).toFixed(2);
+      tier.refresh(r, 'la paghi tu, che giochi questo mondo: con i tuoi crediti o la tua chiave; in una partita di molti, chi paga la partita.');
       const h = hourlyEstimate({ ...ai, ...r }, undefined, { decisions: this.k.council.decisions !== this.k.council.localAiModels, guards: keepsNothing(this.k.council.decisions), route: this.k.aiRoute() });
       estimate.replaceChildren(
         el('div', {}, `Un'ora di gioco costa circa ${usd(h.dollari)} (${h.chiamate} chiamate), con ${ai.maxText} chiamate al più per sessione.`),
@@ -129,6 +134,8 @@ export class GenesisScreen {
       for (const [k, s] of sliders) s.value = String(c[k]);
       const models: Partial<SculptorAiModels> = preset.value === 'low' ? LOW_DETAIL.sculptors : DEFAULT_SCULPTORS;
       for (const [k, s] of sculpt) if (models[k]) s.value = String(models[k]);
+      // Low Detail saves on the structures too: the tier goes back to standard (T398).
+      if (preset.value === 'low') tier.select.value = 'standard';
       show();
     };
     for (const s of [text, actorModel, ...sculpt.values()]) s.onchange = show;
@@ -142,12 +149,14 @@ export class GenesisScreen {
       el('label', {}, 'Dettaglio', preset),
       ...rows,
       el('label', {}, 'Modello del Concilio', text),
+      el('label', { for: 'genesi-scultore-livello' }, 'Scultore delle strutture', tier.select),
+      tier.note,
       el('div', { class: 'row' }, ...classes.map(([k, name]) => el('label', {}, k === 'musician' ? name : `Scultore, ${name}`, sculpt.get(k)!))),
       el('div', { class: 'row' }, el('label', { for: 'genesi-attore' }, actorOn, "L'Attore interpreta gli individui (con le schede del Narratore)"), el('label', { for: 'genesi-attore-modello' }, "Modello dell'Attore", actorModel)),
       el('div', { class: 'note' }, "Spento, il Narratore interpreta gli individui come sempre e nessuna chiamata si aggiunge. Acceso, il Narratore scrive una scheda per individuo alla sua prima battuta e l'Attore la recita con il suo modello."),
       estimate,
     );
-    const lock = (on: boolean) => [preset, text, actorOn, actorModel, ...sculpt.values(), ...sliders.values()].forEach((c) => (c.disabled = on || this.k.settingsLocked));
+    const lock = (on: boolean) => [preset, text, tier.select, actorOn, actorModel, ...sculpt.values(), ...sliders.values()].forEach((c) => (c.disabled = on || this.k.settingsLocked));
     lock(false);
     return { form, read, lock };
   }

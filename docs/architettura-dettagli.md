@@ -310,6 +310,16 @@
 
   **Le spese della partita** (ADR-0188, T372): con le regolazioni il master sceglie chi paga, `settings.game.expenses` (`LobbySettings`): `shared` (assente: ognuno le sue, le comuni divise) o `master` (ogni chiamata del mondo e dei viandanti al master). È l'unico campo di `game` che cambia dopo la Genesi, e solo da qui: `applySettings` lo ripara (`expensesIn`: da soli non c'è nessuno per cui pagare, un valore ignoto resta quello di prima) e lo scrive (`setExpenses`, `shared` come niente), rifiutato a partita in corso come il resto; `keepGame` riscrive un `universe.json` che dice altro. Esce ai client in `GAME_FIELDS`: la lobby di un giocatore dice «paga il master», non chiede un tetto né il tetto minimo (il server non applica `minimums.cap` né `setSessionCap` a chi non paga, e il suo tetto non si somma ai budget); quella del master ha la scelta (`#lobby-spese`) e dice che il suo tetto è quello di tutti.
 
+  **Lo Scultore delle strutture** (ADR-0207, T398, D57): una manopola come le altre, `ai.sculptorTier` (`SculptorTier`): `standard` (assente: ADR-0205,
+  Argon e su OpenRouter Opus 5.5 dall'1/12), `strong` «performante» (Opus 5.5 su OpenRouter da subito), `max` «massimo» (Fable 5.1 su OpenRouter,
+  `claude-fable-5-1` nell'elenco dell'adattatore). Solo le strutture e le importanti; sopra `standard` vince sul modello della classe; sulla via di
+  Google solo i Gemini, ogni livello è Argon (`sculptorsOn(…, tier)`, `TIER_MODELS`). Entra solo come una delle tre parole (`repairAiSettings`,
+  `repairSculptorTier` in `readConfig`), si fissa entrando come il resto. La Genesi e la lobby (`src/ui/sculptortier.ts`: `#genesi-scultore-livello`,
+  `#lobby-scultore-livello`) mostrano per ogni livello il modello e il costo di una struttura di un concetto nuovo sulla via del mondo (`sculptorTiers`,
+  `structureCost` coi pesi di `STRUCTURE_SCULPT`: 0,29 $ Argon, 0,58 Opus, 1,44 Fable al 17/11), la stima oraria che segue (2,67 / 3,83 / 7,29 $ su
+  OpenRouter) e chi la paga (chi gioca da soli; il master se paga la partita; altrimenti le spese comuni); Low Detail rimette `standard`. Il varco
+  riscrive `max_tokens` dei modelli dell'elenco che ne hanno uno (Opus e Fable, 32 000), così il tetto al giorno regge il modello più caro.
+
   **Il ritmo del mondo** (ADR-0188 punto 3, ADR-0196, T373): l'eccezione «solo verso il basso» alla partita in corso. Il master, in ogni momento, può
   rallentare (`slow`: `placesPerMinute` al più quello della lobby, 4 se non dice altro, anche da soli dove la lobby non ha quota; le pause dello Scultore e
   del Musicista doppie, almeno 60 s) o fermare (`hold`) ciò che il mondo fa da sé, mai accelerarlo: `src/kernel/worldPace.ts` (`readPace`,

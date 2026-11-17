@@ -53,7 +53,7 @@ describe('Opus 5.5 nell’elenco di OpenRouter', () => {
     expect(sent.messages[0].content[0].cache_control).toEqual({ type: 'ephemeral' });
     expect(sent.max_tokens).toBe(32_000);
     expect(sent.provider).toEqual({ require_parameters: true, data_collection: 'deny' });
-    for (const model of ['anthropic/claude-opus-5', 'anthropic/claude-fable-5.1', 'anthropic/claude-opus-5.5:batch', 'claude-opus-5-5']) {
+    for (const model of ['anthropic/claude-opus-5', 'anthropic/claude-fable-5.2','anthropic/claude-opus-5.5:batch', 'claude-opus-5-5']) {
       expect(chatRequest(JSON.stringify({ model, messages: [{ role: 'user', content: 'x' }] })), model).toMatchObject({ status: 403 });
     }
   });

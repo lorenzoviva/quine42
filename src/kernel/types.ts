@@ -369,6 +369,8 @@ export interface AiConfig {
   maxCast?: number;
   /** The Sculptor's model per class and the Artist's (agents/sculptor.ts → DEFAULT_SCULPTORS). */
   sculptors?: Partial<import('./agents/sculptor').SculptorAiModels>;
+  /** The structures' Sculptor (T398, D57): `standard` (absent), `strong` (Opus 5.5) or `max` (Fable 5.1), on OpenRouter; on Google's route Argon. */
+  sculptorTier?: import('./agents/sculptor').SculptorTier;
   /** New models the Sculptor writes by itself per session. */
   maxModels?: number;
   /** Pieces the Musician writes by themselves in a session (T225; default 8). */
@@ -392,7 +394,7 @@ export interface AiConfig {
 }
 
 /** What the master sets before entering (T247, ADR-0133): every knob of the consumption, none of the providers'. */
-export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'sculptors' | 'coefficients' | 'actor' | 'minimums' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxPieces' | 'placesPerMinute' | 'thinking'>>;
+export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'sculptors' | 'sculptorTier' | 'coefficients' | 'actor' | 'minimums' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxPieces' | 'placesPerMinute' | 'thinking'>>;
 
 /** Quality and spending minimums of an universe (T45d). */
 export interface AiMinimums {

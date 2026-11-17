@@ -191,6 +191,18 @@ describe('V-040 il varco di OpenRouter: le chiavi dei giocatori', () => {
     expect(payersIn(undefined)).toEqual([]);
   });
 
+  it('V-040 i modelli più cari dell’elenco (Opus 5.5, Fable 5.1: T397, T398) hanno un tetto ai token che il varco riscrive: una chiamata costa al più quanto si sa', () => {
+    const msg = [{ role: 'user', content: 'x' }];
+    for (const model of ['anthropic/claude-opus-5.5', 'anthropic/claude-fable-5.1']) {
+      for (const max_tokens of [undefined, 128_000, 1e9, -1, 1.5, 'tutti']) {
+        const ok = chatRequest(JSON.stringify({ model, messages: msg, ...(max_tokens === undefined ? {} : { max_tokens }) }));
+        expect('body' in ok && JSON.parse(ok.body).max_tokens, `${model} ${max_tokens}`).toBe(32_000);
+      }
+    }
+    // Un altro Fable, un alias, il lotto a metà prezzo: fuori dall'elenco.
+    for (const model of ['anthropic/claude-fable-5.2', '~anthropic/claude-fable-latest', 'anthropic/claude-fable-5.1:batch']) expect(chatRequest(JSON.stringify({ model, messages: msg })), model).toMatchObject({ status: 403 });
+  });
+
   it('V-040 per il canale: la chiamata va sulla prima chiave di chi può pagare; un 402 la mette fuori dal turno e passa alla seguente, un 401 la dimentica; il mondo sa chi ha pagato, mai la chiave', async () => {
     const changes: string[] = [];
     const { calls, impl } = upstream((_url, key) => {
