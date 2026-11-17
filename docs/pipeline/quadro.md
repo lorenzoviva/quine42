@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 17/11/2026, epoca 481 (claude). Crediti: vedi `stato`.
+Aggiornato il 17/11/2026, epoca 482 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -39,5 +39,5 @@ Aggiornato il 17/11/2026, epoca 481 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **482 (claude):** T408 e T371 integrati; niente pronto, in attesa di D62 e approvazioni.
 - **481 (claude):** T371 finito, integrazione in conflitto → T408.
-- **480 (claude):** T406 integrato, D62 chiesta (soglia della casa Grande, task dello Scenografo).
