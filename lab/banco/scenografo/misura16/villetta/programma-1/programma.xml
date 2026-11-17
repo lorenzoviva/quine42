@@ -1,0 +1,48 @@
+<!-- Villetta: a living hall below and a sleeping hall above, both large single rooms.
+     Against the walls: a bed or two, chests, shelves rising to the ceiling, a hearth with embers.
+     In the middle of a large room: a table with a free passage on every side.
+     Every piece is placed at random along the walls, so each seed arranges the house differently.
+     Pieces that would cut off a passage are removed by the kernel's guard. -->
+<sequence values="BWFCPALkstOh" symmetry="(xy)">
+  <color symbol="W" hidden="True"/>
+  <color symbol="F" hidden="True"/>
+  <color symbol="C" hidden="True"/>
+  <color symbol="P" hidden="True"/>
+  <color symbol="A" hidden="True"/>
+  <color symbol="L" value="b8a07a" name="letto"/>
+  <color symbol="k" value="6b4a2e" name="cassapanca"/>
+  <color symbol="s" value="5a3d24" name="scaffale"/>
+  <color symbol="t" value="8a6040" name="tavolo"/>
+  <color symbol="h" value="6e6a66" name="camino"/>
+  <color symbol="O" value="ff8a33" glow="True" name="brace"/>
+
+  <!-- Table: a 6 by 6 top with 8 voxels free on every side, in the middle of the room. -->
+  <one steps="1" in="FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFF"
+       out="**********************/**********************/**********************/**********************/**********************/**********************/**********************/**********************/********tttttt********/********tttttt********/********tttttt********/********tttttt********/********tttttt********/********tttttt********/**********************/**********************/**********************/**********************/**********************/**********************/**********************/**********************"/>
+
+  <!-- Beds: 6 wide and 10 long against a wall, with 8 voxels of floor left free in front. -->
+  <one steps="2" in="WWWWWW/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF"
+       out="******/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/LLLLLL/******/******/******/******/******/******/******/******"/>
+
+  <!-- Hearth: 6 wide and 2 deep against a wall, with floor free in front. -->
+  <one steps="1" in="WWWWWW/FFFFFF/FFFFFF/FFFFFF/FFFFFF/FFFFFF"
+       out="******/hhhhhh/hhhhhh/******/******/******"/>
+
+  <!-- Shelves: 8 wide and 2 deep against a wall. -->
+  <one steps="3" in="WWWWWWWW/FFFFFFFF/FFFFFFFF/FFFFFFFF/FFFFFFFF/FFFFFFFF/FFFFFFFF"
+       out="********/ssssssss/ssssssss/********/********/********/********"/>
+
+  <!-- Chests: 4 wide and 2 deep against a wall. -->
+  <one steps="4" in="WWWW/FFFF/FFFF/FFFF/FFFF/FFFF"
+       out="****/kkkk/kkkk/****/****/****"/>
+
+  <!-- Grow each piece upward to its height; shelves grow until they meet the ceiling. -->
+  <all in="B t" out="t *" steps="7"/>
+  <all in="B L" out="L *" steps="4"/>
+  <all in="B k" out="k *" steps="6"/>
+  <all in="B h" out="h *" steps="12"/>
+  <all in="B s" out="s *" steps="22"/>
+
+  <!-- Embers: one glowing cell on the floor in front of the hearth. -->
+  <one steps="1" in="hF" out="*O"/>
+</sequence>

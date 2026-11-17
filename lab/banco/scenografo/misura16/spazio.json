@@ -1,0 +1,898 @@
+[
+ {
+  "nome": "villetta",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 20,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.855,
+      "sala": 3.855,
+      "lato": 2.05,
+      "soffitto": 1.65
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.37,
+      "sala": 3.37,
+      "lato": 2.05,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,55 × 1,50",
+     "0,55 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 1904
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.8175,
+      "sala": 3.8175,
+      "lato": 2.05,
+      "soffitto": 1.65
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.37,
+      "sala": 3.37,
+      "lato": 2.05,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,55 × 1,50",
+     "0,55 × 1,50"
+    ],
+    "mobili": 7,
+    "ms": 1113
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.2125,
+      "sala": 4.2125,
+      "lato": 2.05,
+      "soffitto": 1.65
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.37,
+      "sala": 3.37,
+      "lato": 2.05,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,55 × 1,50",
+     "0,55 × 1,50"
+    ],
+    "mobili": 8,
+    "ms": 1319
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.2125,
+      "sala": 4.2125,
+      "lato": 2.05,
+      "soffitto": 1.65
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.37,
+      "sala": 3.37,
+      "lato": 2.05,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,55 × 1,50",
+     "0,55 × 1,50"
+    ],
+    "mobili": 5,
+    "ms": 1426
+   }
+  ]
+ },
+ {
+  "nome": "villetta",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 5.9921875,
+      "sala": 5.9921875,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 1256
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 5.93359375,
+      "sala": 5.93359375,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 1066
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.55078125,
+      "sala": 6.55078125,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 1010
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.55078125,
+      "sala": 6.55078125,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 888
+   }
+  ]
+ },
+ {
+  "nome": "villetta",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 20,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.9825,
+      "sala": 3.9825,
+      "lato": 2.3,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.8325,
+      "sala": 3.8325,
+      "lato": 2.3,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 954
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.9825,
+      "sala": 3.9825,
+      "lato": 2.3,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.8325,
+      "sala": 3.8325,
+      "lato": 2.3,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 7,
+    "ms": 949
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.9825,
+      "sala": 3.9825,
+      "lato": 2.3,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.8325,
+      "sala": 3.8325,
+      "lato": 2.3,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 4,
+    "ms": 898
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.9825,
+      "sala": 3.9825,
+      "lato": 2.3,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 3.8325,
+      "sala": 3.8325,
+      "lato": 2.3,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 7,
+    "ms": 933
+   }
+  ]
+ },
+ {
+  "nome": "villetta",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 786
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 799
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 863
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 786
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 20,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 724
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 780
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 4,
+    "ms": 775
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 5,
+    "ms": 796
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 7,
+    "ms": 712
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 7,
+    "ms": 751
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 746
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 8,
+    "ms": 786
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 20,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 910
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 6,
+    "ms": 1070
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 4,
+    "ms": 786
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 3.0575,
+      "sala": 3.0575,
+      "lato": 1.8,
+      "soffitto": 3.15
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 2.9075,
+      "sala": 2.9075,
+      "lato": 1.8,
+      "soffitto": 1.55
+     }
+    ],
+    "porte": [
+     "0,75 × 1,50"
+    ],
+    "mobili": 5,
+    "ms": 853
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 5,
+    "ms": 1074
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 6,
+    "ms": 777
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 950
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 6,
+    "ms": 997
+   }
+  ]
+ }
+]

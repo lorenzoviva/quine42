@@ -1,0 +1,58 @@
+{
+ "concetto": "fattoria",
+ "taglia": "large",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 8,
+ "chiamate": 3,
+ "secondi": 191,
+ "usd": 0.4228,
+ "usdGemini": 0.0095,
+ "usdClaude": 0.4134,
+ "usdCli": 0.4134,
+ "claude": [
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 358,
+   "read": 9992,
+   "output": 2785,
+   "usd": 0.0605704,
+   "usdCli": 0.060570399999999996,
+   "task": "model.sculpt",
+   "seconds": 29
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 6799,
+   "read": 8055,
+   "output": 14839,
+   "usd": 0.352791,
+   "usdCli": 0.35279099999999997,
+   "task": "model.sculpt",
+   "seconds": 154
+  }
+ ],
+ "token": {
+  "prompt": 28387,
+  "output": 17777,
+  "thoughts": 371
+ },
+ "perCompito": [
+  {
+   "model": "claude-opus-5-5",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.4134
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0095
+  }
+ ]
+}

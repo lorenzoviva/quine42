@@ -32,7 +32,7 @@ import type { AiModels, TextCall, Thinking } from '../../src/kernel/ai/models';
 import { MockAiModels } from '../../src/kernel/ai/mock';
 import { checkProgram, DEFAULT_SCULPTORS, sculpt, STRUCTURE_SEEDS, type SculptorAiModels, type SculptRequest } from '../../src/kernel/agents/sculptor';
 import { structureModel } from '../../src/kernel/modeldirector';
-import { classOf, SIZE_TIERS, tilesOf, voxelsOf, type SizeTier } from '../../src/mj/classes';
+import { classOf, densityFor, SIZE_TIERS, structureVoxels, type SizeTier } from '../../src/mj/classes';
 import { varietyError, type Composition } from '../../src/mj/check';
 import { compileMjx, mjxIncludes, type MjxFiles } from '../../src/mj/model';
 import { cartoonRender, render, sheet, type Picture } from '../../src/mj/photo';
@@ -337,7 +337,7 @@ const fortifiedSeen = new Map<string, boolean>();
 export function fortified(xml: string): boolean {
   const seen = fortifiedSeen.get(xml);
   if (seen !== undefined) return seen;
-  const model = compileMjx(xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), { size: voxelsOf(tilesOf(STRUCTURE, 'huge'), 20), files: seedFiles(xml) });
+  const model = compileMjx(xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''), { size: structureVoxels(STRUCTURE, 'huge'), files: seedFiles(xml) });
   const grid = runMjx(model, 1, { deadline: 30_000 }).grid;
   const letters = Object.entries(model.program.palette).filter(([, v]) => /merl|battlement|crenel/i.test(v.name ?? '')).map(([k]) => k);
   const yes = letters.some((l) => Object.keys(merlonRuns(grid, l)).length > 0);
@@ -355,7 +355,9 @@ function misura(dir: string, taglia: SizeTier): Record<string, unknown> | undefi
   const prima: Record<string, Composition> = {};
   console.log(`\n${path.basename(dir)} (include ${Object.keys(files).join(', ') || 'niente'})`);
   for (const t of TAGLIE) {
-    const box = voxelsOf(tilesOf(STRUCTURE, t), 20);
+    // The box in voxels the game runs it at, and its density (T405, ADR-0209: the same voxels at 16 a tile).
+    const box = structureVoxels(STRUCTURE, t);
+    const vpt = densityFor(STRUCTURE, t);
     let model;
     try {
       model = compileMjx(xml, { size: box, files });
@@ -364,9 +366,9 @@ function misura(dir: string, taglia: SizeTier): Record<string, unknown> | undefi
       righe[t] = { errore: (e as Error).message };
       continue;
     }
-    const giri = Array.from({ length: SEMI }, (_, i) => giro(model, 20, i + 1));
+    const giri = Array.from({ length: SEMI }, (_, i) => giro(model, vpt, i + 1));
     console.log(` ${t} (${box.join('×')})`);
-    for (const g of giri) console.log(`   ${riga(g, 20)}`);
+    for (const g of giri) console.log(`   ${riga(g, vpt)}`);
     const animali = animalLetters(model.program.palette);
     if (animali.length) console.log(`   animali: ✗ ${animali.join(' ')}`);
     const merli = Object.entries(model.program.palette).find(([, v]) => /merl|battlement|crenel/i.test(v.name ?? ''))?.[0];
@@ -419,7 +421,7 @@ const modelloDi = (nome: string, xml: string) => /sculpted by ([^ (]+)/.exec(xml
  * The feet are the layer above the soil. → <out>/concetti.json, <out>/concetti.png (a row per program, seed by seed, from the front).
  */
 function concetti(): void {
-  const box = voxelsOf(tilesOf(STRUCTURE, 'large'), 20);
+  const box = structureVoxels(STRUCTURE, 'large');
   const tenuti = programmiIn(BASE);
   const insiemi: Record<string, Array<{ nome: string; concetto: string; xml: string }>> = {};
   for (const p of tenuti) (insiemi[modelloDi(p.nome, p.xml)] ??= []).push(p);

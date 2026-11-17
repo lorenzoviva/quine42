@@ -17,13 +17,20 @@ import { habitableParts } from '../../../src/kernel/forms';
 import { WORLD_NODE_LIMITS, worldNodeErrors } from '../../../src/kernel/validator';
 import { areasOf, type AreaMap } from '../../../src/mj/areas';
 import { partErrors } from '../../../src/mj/check';
-import { partVoxels } from '../../../src/mj/classes';
+import { partVoxels, STRUCTURE_VPT } from '../../../src/mj/classes';
 import { Mj3Error, runOn, type Grid3, type PaletteEntry } from '../../../src/mj/engine';
 import { compileMjx } from '../../../src/mj/model';
 import { FORM_LIMITS } from '../../../src/mj/run';
 import { symbolName } from '../../../src/mj/symbols';
 import { giudica, misura } from '../misure';
 import { copy, Guardia, gruppi, piante, stanze, withGrid, arredaDati, type Arredato, type Mobile, type Scelta, type Scena } from './scenografo';
+
+/**
+ * The density whose voxels the parts one lives in are measured against (T406): PARTS are the voxels of before read at STRUCTURE_VPT
+ * (T405, ADR-0209: a room 28, a storey 30, a door 11 × 30), so a building read at the bench's 20 (T303) and at the game's 16 is held to
+ * the same voxels, those its Sculptor was asked for.
+ */
+const PARTI = STRUCTURE_VPT;
 
 /** The areas where animals stand (T346 takes them out of the program: the program marks where they go). */
 export const ANIMALI = /pasture|paddock|pen|fold|barn|stable|stall|byre|coop|sty|corral|meadow|pascol|stall|recint|ovil|porcil|pollai/i;
@@ -113,7 +120,7 @@ export function descrivi(nome: string, scene: Scena[]): string {
   ];
   for (const s of scene) {
     const g = s.e.grid;
-    const parts = habitableParts(s.e.result.grid, s.e.model.program.palette, vpt, partVoxels(vpt).storey.clear, s.e.scatola.base, s.e.model.actions, s.seme);
+    const parts = habitableParts(s.e.result.grid, s.e.model.program.palette, vpt, partVoxels(PARTI).storey.clear, s.e.scatola.base, s.e.model.actions, s.seme);
     const areas = areeDi(s);
     const an = animali(s);
     lines.push('', `Seed ${s.seme}:`);
@@ -285,7 +292,7 @@ export function arredoInsieme(s: Scena): { voxel: Set<number>; pezzi: number; le
 /** What the Sculptor's checks and the bench say of a furnished building: storeys reached, the parts, `giudica`, the animals' floor. */
 export function controlli(s: Scena, a: { e: Arredato['e']; m: Arredato['m']; voxel: Set<number> }): { piani: number; parti: string[]; giudica: string[]; animaliLiberi: number; stanzeArredate: [number, number] } {
   const { vpt, base } = s.e.scatola;
-  const parts = habitableParts(a.e.grid, a.e.model.program.palette, vpt, partVoxels(vpt).storey.clear, base, [], s.seme);
+  const parts = habitableParts(a.e.grid, a.e.model.program.palette, vpt, partVoxels(PARTI).storey.clear, base, [], s.seme);
   const g = s.e.grid;
   const XY = g.X * g.Y;
   const an = suAnimali(s, animali(s).caselle);
@@ -311,7 +318,7 @@ export function controlli(s: Scena, a: { e: Arredato['e']; m: Arredato['m']; vox
     }
   return {
     piani: parts.storeys.length,
-    parti: [...(parts.storeys.length < 2 ? [`piani: ${parts.storeys.length}`] : []), ...partErrors(parts, vpt)],
+    parti: [...(parts.storeys.length < 2 ? [`piani: ${parts.storeys.length}`] : []), ...partErrors(parts, PARTI)],
     giudica: giudica(a.m, a.e.scatola).difetti.map((d) => d.split(':')[0]),
     animaliLiberi: tot ? free / tot : 1,
     stanzeArredate: [furnished, rooms],

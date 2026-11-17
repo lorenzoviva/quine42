@@ -1,0 +1,44 @@
+Registro di H:\projects\rune\.claude\worktrees\t406\lab\banco\scenografo\misura16\vuoto: $0.0000 di Gemini prima del giro, tetto $2.00
+Claude prima: 5 ore 49 %, settimana 51 %
+  giro1 fattoria-large [sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+  giro1 villetta-large [sculptor] propone: «villetta» (struttura grande, claude-opus-5-5)
+  giro1 fattoria-large [artist → sculptor] approva: «fattoria»: 8/10 — Le finestre sono ridotte a strette fessure scure poco leggibili come finestre da fattoria
+giro1 fattoria-large: fatto (claude-opus-5-5, voto 8) in 118 s · 3 chiamate · $0.36 · input 28k (cache 8055) · risposta 11k · ragionamento 249
+  giro1 villetta-large [artist → sculptor] approva: «villetta»: 9/10 — La porta d'ingresso sul fronte è un po' cupa e si confonde con le ombre interne del portico.
+giro1 villetta-large: fatto (claude-opus-5-5, voto 9) in 249 s · 5 chiamate · $0.81 · input 64k (cache 16k) · risposta 23k · ragionamento 494
+
+claude-opus-5-5\giro1: $1.17 a listino, 8 chiamate, registro di Gemini $0.02
+Claude dopo: 5 ore 52 %, settimana 52 % · il giro ha preso 1 punti della settimana
+
+villetta-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 331 ms, 118445 voxel, parti 109 (18 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 33, house 14, porch 1
+   seme 2: 296 ms, 119177 voxel, parti 125 (19 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 26, house 15, porch 1
+   merli (M) per lunghezza: {}
+ huge (150×150×120)
+   seme 1: 594 ms, 132102 voxel, parti 155 (21 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 53, house 14, porch 3
+   seme 2: 566 ms, 131375 voxel, parti 157 (21 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 52, house 12, porch 3
+   merli (M) per lunghezza: {}
+ gargantuan (500×500×160)
+   seme 1: 3894 ms, 420631 voxel, parti 1231 (21 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 592, house 13, porch 14
+   seme 2: 3696 ms, 417723 voxel, parti 1224 (21 lettere); piani 1,33; stanze z0 lato 44 (2.75 c) soffitto 63 · z1 lato 44 (2.75 c) soffitto 63 · z33 lato 44 (2.75 c) soffitto 31; porte 15×30; aree garden 609, house 11, porch 14
+   merli (M) per lunghezza: {}
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no
+
+fattoria-large (include part-door.xml, part-stair.xml)
+ large (100×100×80)
+   seme 1: 296 ms, 104147 voxel, parti 29 (14 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 3, hay 5, house 12, road 4
+   seme 2: 367 ms, 104145 voxel, parti 30 (14 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 3, hay 2, house 12, road 4
+ huge (150×150×120)
+   seme 1: 490 ms, 106957 voxel, parti 35 (15 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 4, field 37, hay 2, house 14, road 6
+   seme 2: 570 ms, 106632 voxel, parti 34 (15 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 4, field 32, hay 2, house 14, road 6
+ gargantuan (500×500×160)
+   seme 1: 3377 ms, 173282 voxel, parti 166 (15 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 4, field 795, hay 4, house 14, road 28
+   seme 2: 3061 ms, 173607 voxel, parti 158 (15 lettere); piani 1,33; stanze z0 lato 34 (2.13 c) soffitto 63 · z1 lato 34 (2.13 c) soffitto 63 · z33 lato 34 (2.13 c) soffitto 31; porte 15×30; aree barn 4, field 779, hay 2, house 14, road 28
+   varietà: large → huge: cresce · huge → gargantuan: cresce
+   checkProgram large: passa
+   checkProgram huge: passa
+   fortificato (merli disegnati a Enorme, seme 1): no

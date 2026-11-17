@@ -1,0 +1,42 @@
+{
+ "regole": [
+  {
+   "storey": 0,
+   "room": "hall",
+   "furniture": [
+    "credenza",
+    "banco",
+    "barile",
+    "furniture"
+   ],
+   "count": 4
+  },
+  {
+   "storey": 1,
+   "room": "hall",
+   "furniture": [
+    "letto",
+    "furniture",
+    "fantasy-libreria-alchemica"
+   ],
+   "count": 3
+  },
+  {
+   "room": "room",
+   "furniture": [
+    "letto",
+    "furniture"
+   ],
+   "count": 2
+  },
+  {
+   "room": "small",
+   "furniture": [
+    "furniture",
+    "barile"
+   ],
+   "count": 1
+  }
+ ],
+ "ignoti": []
+}

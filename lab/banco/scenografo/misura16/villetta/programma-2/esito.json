@@ -1,0 +1,131 @@
+{
+ "richiesta": {
+  "via": "programma",
+  "n": 2,
+  "chiamate": [
+   {
+    "model": "claude-opus-5-5",
+    "input": 2,
+    "written5m": 0,
+    "written1h": 358,
+    "read": 5829,
+    "output": 2666,
+    "usd": 0.0573578,
+    "usdCli": 0.0573578,
+    "task": "interior.programma",
+    "seconds": 24
+   }
+  ],
+  "secondi": 24,
+  "testo": "<!-- Villetta: a small two-storey house, one hall per storey (about 6 tiles², ceiling 31).\n     Ground floor: hearth/credenza against walls, a few chests and shelves, a table in the middle.\n     Upper floor: beds against walls, chests, a small wardrobe.\n     Markers are scattered randomly along walls, so every seed varies; the counts are small for a small house. -->\n<sequence values=\"BWFCPAXYZQNOHhRrDdTL\" symmetry=\"(xy)\">\n  <color symbol=\"W\" hidden=\"True\"/>\n  <color symbol=\"F\" hidden=\"True\"/>\n  <color symbol=\"C\" hidden=\"True\"/>\n  <color symbol=\"P\" hidden=\"True\"/>\n  <color symbol=\"A\" hidden=\"True\"/>\n  <color symbol=\"X\" hidden=\"True\"/>\n  <color symbol=\"Y\" hidden=\"True\"/>\n  <color symbol=\"Z\" hidden=\"True\"/>\n  <color symbol=\"Q\" hidden=\"True\"/>\n  <color symbol=\"N\" value=\"6b4a2e\" name=\"cassapanca\"/>\n  <color symbol=\"O\" value=\"ff8a2a\" glow=\"True\" name=\"brace del focolare\"/>\n  <color symbol=\"H\" value=\"8a8070\" name=\"focolare\"/>\n  <color symbol=\"h\" value=\"7a5a36\" name=\"scaffale\"/>\n  <color symbol=\"R\" value=\"a83a3a\" name=\"letto\"/>\n  <color symbol=\"r\" value=\"e8dcc8\" name=\"cuscino\"/>\n  <color symbol=\"D\" value=\"5a3e26\" name=\"armadio\"/>\n  <color symbol=\"d\" value=\"8a6440\" name=\"credenza\"/>\n  <color symbol=\"T\" value=\"9a7048\" name=\"tavolo\"/>\n  <color symbol=\"L\" value=\"6a4a30\" name=\"sedia\"/>\n\n  <!-- hearth: a single one on ground floor, against a wall, with passage in front -->\n  <one in=\"WFFFFFFFFFFFF B B B B B B B B B B B B/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF\" out=\"*************\" steps=\"0\"/>\n  <one steps=\"1\">\n    <rule in=\"WFFFFFFFFFF/WFFFFFFFFFF/WFFFFFFFFFF/WFFFFFFFFFF/WFFFFFFFFFF/WFFFFFFFFFF\" out=\"*HHHH******/*HOOH******/*HOOH******/*HHHH******/*HHHH******/*HHHH******\"/>\n  </one>\n  <all in=\"B H\" out=\"H *\" steps=\"9\"/>\n\n  <!-- chests and shelves along walls, few -->\n  <prl in=\"WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF/WFFFFFFFFFFFFF\" out=\"*XXXX*********/*XXXX*********/*XXXX*********/*XXXX*********/*XXXX*********/*XXXX*********\" p=\"0.004\" steps=\"1\"/>\n  <prl in=\"WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF/WFFFFFFFFFFFF\" out=\"*YYY*********/*YYY*********/*YYY*********/*YYY*********/*YYY*********/*YYY*********/*YYY*********/*YYY*********\" p=\"0.003\" steps=\"1\"/>\n  <!-- beds: 6 wide, 10 long, needing space -->\n  <prl in=\"WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFFFFFF\" out=\"*ZZZZZZZZZZ***********/*ZZZZZZZZZZ***********/*ZZZZZZZZZZ***********/*ZZZZZZZZZZ***********/*ZZZZZZZZZZ***********/*ZZZZZZZZZZ***********/**********************/**********************\" p=\"0.002\" steps=\"1\"/>\n\n  <!-- grow -->\n  <all in=\"B X\" out=\"X *\" steps=\"6\"/>\n  <all in=\"B Y\" out=\"Y *\" steps=\"22\"/>\n  <all in=\"B Z\" out=\"Z *\" steps=\"4\"/>\n  <all in=\"X\" out=\"N\"/>\n  <all in=\"Y\" out=\"h\"/>\n  <all in=\"Z B\" out=\"r *\"/>\n  <all in=\"Z\" out=\"R\"/>\n  <all in=\"r\" out=\"R\"/>\n  <one in=\"WRR B B\" out=\"*rr * *\" steps=\"0\"/>\n\n  <!-- table in the middle: needs wide F all around -->\n  <one in=\"FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFFF\" out=\"**************************/**************************/**************************/**************************/**************************/**************************/**************************/**************************/**********QQQQQQ**********/**********QQQQQQ**********/**********QQQQQQ**********/**********QQQQQQ**********/**************************/**************************/**************************/**************************/**************************/**************************/**************************/**************************/**************************/**************************\" steps=\"1\"/>\n  <all in=\"B Q\" out=\"Q *\" steps=\"7\"/>\n  <all in=\"Q B\" out=\"T *\"/>\n  <all in=\"Q\" out=\"B\"/>\n  <all in=\"T Q\" out=\"T T\"/>\n  <all in=\"T B\" out=\"* Q\"/>\n  <all in=\"Q\" out=\"F\"/>\n  <all in=\"B T\" out=\"T *\" steps=\"0\"/>\n</sequence>",
+  "correzioni": 0
+ },
+ "usd": 0.0573578,
+ "usdCli": 0.0573578,
+ "semi": [
+  {
+   "seme": 1,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 60,
+   "pezzi": 2,
+   "voxel": 372,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    1,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.9195402298850575,
+   "scartati": 0
+  },
+  {
+   "seme": 2,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 58,
+   "pezzi": 2,
+   "voxel": 372,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    1,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.9195402298850575,
+   "scartati": 0
+  },
+  {
+   "seme": 3,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 65,
+   "pezzi": 2,
+   "voxel": 372,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    1,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.9195402298850575,
+   "scartati": 0
+  },
+  {
+   "seme": 4,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 59,
+   "pezzi": 2,
+   "voxel": 372,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    1,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.9195402298850575,
+   "scartati": 0
+  }
+ ]
+}
