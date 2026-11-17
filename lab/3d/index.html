@@ -57,6 +57,16 @@
           <button id="ins-seed">Nuovo seme</button>
           <button id="ins-grow">Cresci</button>
         </div>
+        <!-- The voxels a tile (T403): any model at 5, 10, 20 or a value typed, the wanderer at the game's scale -->
+        <div class="row" id="ins-scale" role="group" aria-label="voxel per casella">
+          <span class="small">voxel per casella</span>
+          <button type="button" data-vpt="">del modello</button>
+          <button type="button" data-vpt="5">5</button>
+          <button type="button" data-vpt="10">10</button>
+          <button type="button" data-vpt="20">20</button>
+          <input id="ins-vpt" type="number" min="2" max="40" step="1" inputmode="numeric" title="un altro valore, da 2 a 40" />
+        </div>
+        <div id="ins-measure" class="small"></div>
         <div id="ins-info" class="small"></div>
         <textarea id="ins-xml" spellcheck="false"></textarea>
         <div class="row"><button id="ins-run">Esegui l'XML</button> <span id="ins-err" class="err"></span></div>

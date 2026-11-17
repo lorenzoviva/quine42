@@ -1,0 +1,184 @@
+{
+ "wandererTiles": 1.5,
+ "densities": [
+  20,
+  10,
+  5
+ ],
+ "structures": [
+  {
+   "id": "taglie:scultore-villetta-large",
+   "seed": 1,
+   "ms": 402,
+   "box": [
+    100,
+    100,
+    80
+   ],
+   "storeys": [
+    1,
+    33
+   ],
+   "storeyGaps": [
+    32
+   ],
+   "door": {
+    "width": 11,
+    "height": 30
+   },
+   "rooms": [
+    {
+     "z": 0,
+     "area": 1516,
+     "room": 36,
+     "clear": 33
+    },
+    {
+     "z": 1,
+     "area": 1516,
+     "room": 36,
+     "clear": 33
+    },
+    {
+     "z": 33,
+     "area": 1163,
+     "room": 36,
+     "clear": 31
+    }
+   ],
+   "stair": {
+    "rise": 2,
+    "n": 150
+   }
+  },
+  {
+   "id": "taglie:scultore-rocca-large",
+   "seed": 1,
+   "ms": 268,
+   "box": [
+    100,
+    100,
+    80
+   ],
+   "storeys": [
+    1,
+    33
+   ],
+   "storeyGaps": [
+    32
+   ],
+   "door": {
+    "width": 15,
+    "height": 30
+   },
+   "rooms": [
+    {
+     "z": 0,
+     "area": 1286,
+     "room": 36,
+     "clear": 31
+    },
+    {
+     "z": 1,
+     "area": 1286,
+     "room": 36,
+     "clear": 31
+    },
+    {
+     "z": 33,
+     "area": 1163,
+     "room": 36,
+     "clear": 31
+    }
+   ],
+   "stair": {
+    "rise": 2,
+    "n": 150
+   }
+  },
+  {
+   "id": "taglie:forte-gargantuan",
+   "seed": 1,
+   "ms": 487,
+   "box": [
+    200,
+    200,
+    160
+   ],
+   "storeys": [
+    1,
+    33
+   ],
+   "storeyGaps": [
+    32
+   ],
+   "door": {
+    "width": 11,
+    "height": 30
+   },
+   "rooms": [
+    {
+     "z": 0,
+     "area": 1147,
+     "room": 33,
+     "clear": 31
+    },
+    {
+     "z": 1,
+     "area": 1147,
+     "room": 33,
+     "clear": 31
+    }
+   ],
+   "stair": {
+    "rise": 2,
+    "n": 165
+   }
+  },
+  {
+   "id": "scultori:openrouter/claude-opus-5-5/giro1/fattoria-huge",
+   "seed": 1,
+   "ms": 384,
+   "box": [
+    150,
+    150,
+    120
+   ],
+   "storeys": [
+    1,
+    33
+   ],
+   "storeyGaps": [
+    32
+   ],
+   "door": {
+    "width": 15,
+    "height": 30
+   },
+   "rooms": [
+    {
+     "z": 0,
+     "area": 1314,
+     "room": 36,
+     "clear": 39
+    },
+    {
+     "z": 1,
+     "area": 1314,
+     "room": 36,
+     "clear": 39
+    },
+    {
+     "z": 33,
+     "area": 1163,
+     "room": 36,
+     "clear": 31
+    }
+   ],
+   "stair": {
+    "rise": 2,
+    "n": 150
+   }
+  }
+ ]
+}

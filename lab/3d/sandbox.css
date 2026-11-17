@@ -111,6 +111,7 @@ button:hover {
   margin: 2px 2px 0 0;
   font-size: 12px;
 }
+#ins-scale button.on,
 #models button.on {
   border-color: var(--accent);
   color: var(--accent);
@@ -130,6 +131,15 @@ button:hover {
   border: 1px solid var(--line);
   font: 11px/1.35 ui-monospace, Consolas, monospace;
   white-space: pre;
+}
+/* The voxels a tile (T403): the field as narrow as the buttons, wide enough for two digits and a finger */
+#ins-vpt {
+  width: 4.5em;
+  min-height: 28px;
+}
+#ins-scale button {
+  min-width: 34px;
+  min-height: 28px;
 }
 .err {
   color: var(--err);

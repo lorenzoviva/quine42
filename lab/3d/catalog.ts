@@ -35,6 +35,8 @@ export interface Entry {
   pieces?: boolean;
   /** A structure of the bench of the sizes (T338, T346, lab/banco/taglie/) at one of its three sizes: only for the developers. */
   sizes?: boolean;
+  /** A program a Sculptor wrote on the bench of the sizes (T391, T402, lab/banco/taglie/modelli/): only for the developers. */
+  sculpted?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -173,6 +175,19 @@ for (const [file, xml] of sizedPrograms) {
   if (name) for (const [id, label, size] of SIZES) CATALOG.push({ id: `taglie:${base}-${id}`, name: `${name} che si adatta alla taglia (${label} caselle)`, role: 'structure', xml, vpt: 20, size, source: sourceOf(xml), sizes: true });
 }
 
+// The Sculptors at the sizes (T391, T402, lab/banco/taglie/modelli/): every program a model wrote for the farm and the fort, at the box
+// of its size at 20 voxels a tile, to see them beside the wanderer and at other densities (T403). Only for the developers.
+const sculpted = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/taglie/modelli/**/programma.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+const SIZE_BOX: Record<string, Vec3> = { large: [100, 100, 80], huge: [150, 150, 120], gargantuan: [200, 200, 160] };
+for (const [file, xml] of Object.entries(sculpted)) {
+  const path = /modelli\/(.+)\/([a-z]+)-([a-z]+)\/programma\.xml$/.exec(file);
+  const box = path && SIZE_BOX[path[3]];
+  if (!path || !box) continue;
+  const [, run, concept, size] = path;
+  const who = run.replace(/^openrouter\/(.+?)\//, '$1 via OpenRouter/').replace(/\//g, ' · ');
+  CATALOG.push({ id: `scultori:${run}/${concept}-${size}`, name: `${concept} ${size} · ${who}`, role: 'structure', xml, vpt: 20, size: box, source: sourceOf(xml), sculpted: true, ...withIncludes(xml) });
+}
+
 // Hand drawn models
 const handmade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../mjx/models/handmade/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
 for (const [file, xml] of Object.entries(handmade)) {
@@ -207,12 +222,13 @@ export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && ['prop', 'structure'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && ['prop', 'structure'].includes(e.role)],
   ...(DEV_TOOLS
     ? ([
       ['MarkovJunior (originali)', (e) => e.role === 'official'],
       ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
       ['Banco: strutture che si adattano alla taglia (T338, T346)', (e) => !!e.sizes],
+      ['Banco: gli Scultori sulle taglie (T391, T402)', (e) => !!e.sculpted],
       ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
       ['Modelli dell\'editor', (e) => !!e.handmade],
       ['Modelli del banco', (e) => !!e.bench],

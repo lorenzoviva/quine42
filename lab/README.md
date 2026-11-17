@@ -40,6 +40,11 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   zoom, tasto destro trascina per orbitare, E agisce (la porta della casa si apre), clic su un modello per
   ispezionarlo: XML modificabile («Esegui»), «Nuovo seme», «Cresci», «Mettilo davanti a me». In console
   `window.sandbox`.
+  **Voxel per casella** (T403): nell'ispettore «del modello», 5, 10, 20 o un valore da 2 a 40, per qualunque modello; il
+  viandante resta alla scala del gioco, il modello si riscala senza rifare il programma, si posa lontano quanto è grande,
+  blocca e si cammina (anche oltre il terreno, sulla pianura); la riga sotto dice la sua misura in caselle e in viandanti.
+  L'indirizzo tiene la scelta (`?vpt=5`) e apre un modello (`?modello=<id>`). In console `sandbox.showModel(id, vpt)`,
+  `toWorld`, `putPlayer`, `frame`, `follow`, `cut` (le foto di `lab/scripts/foto-scala.mjs`, `lab/banco/riferimento/forte-scala.md`).
   Solo con `npm run dev`: gli XML di `lab/mjx/models/` entrano nella pagina quando si costruisce, quindi
   `vite preview` mostra quelli dell'ultima `npm run build` (anche il seme `universe/` del gioco), e un file
   cambiato si vede solo dopo una nuova build. Con `npm run dev` la pagina si ricarica appena il file cambia.

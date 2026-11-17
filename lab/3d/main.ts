@@ -17,6 +17,7 @@ import { glowing, U, windy } from '../../src/render/materials';
 import { bindLookButton, LabLook } from '../look';
 import { startCardsList } from './cards';
 import { attachPreviewTouch, COMPACT_QUERY, mountStick } from '../touch';
+import { measureAt, readVpt, scaleFrom, showcaseDistance, shownVpt, withScale } from './scale';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -70,7 +71,8 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.localClippingEnabled = true;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 300);
+// Far enough for a model of a hundred tiles shown at 5 voxels a tile (T403).
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 3000);
 const hemi = new THREE.HemisphereLight(0xdcecff, 0x5a4a3a, 1.1);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff0d8, 2.2);
@@ -208,13 +210,20 @@ let showcase: Entity | undefined;
 let land: Land;
 const buckets = new Map<number, Entity[]>();
 
-function place(a: Asset, x: number, z: number, yaw: number): Entity {
-  const e = a.entry;
+/**
+ * An asset in the world at (x, z). At another density than the one it was built at (T403) the same meshes are scaled, not built
+ * again: the entity's entry says the density it stands at, which the footprint, the floors and the collisions read.
+ */
+function place(a: Asset, x: number, z: number, yaw: number, vpt = a.entry.vpt): Entity {
+  const e = vpt === a.entry.vpt ? a.entry : { ...a.entry, vpt };
   const root = new THREE.Group();
   root.position.set(x, 0, z);
   root.rotation.y = yaw;
-  const mat = look.of(e.role === 'structure' ? matCut : sways(e) ? matSway : matStatic);
-  const glass = look.of(e.role === 'structure' ? matCutGlass : matGlass);
+  root.scale.setScalar(a.entry.vpt / vpt);
+  // What is not a figure nor a plant is cut over the wanderer's head when inside (T403: also the editor's and the bench's structures).
+  const cuts = !isFigure(e) && !sways(e);
+  const mat = look.of(cuts ? matCut : sways(e) ? matSway : matStatic);
+  const glass = look.of(cuts ? matCutGlass : matGlass);
   const mesh = (g: THREE.BufferGeometry) => {
     const m = new THREE.Mesh(g, g.groups.length > 0 ? [mat, glass] : mat);
     m.castShadow = true;
@@ -259,6 +268,15 @@ function place(a: Asset, x: number, z: number, yaw: number): Entity {
   return t;
 }
 
+function bucketRemove(t: Entity) {
+  for (const [k, list] of buckets) {
+    const at = list.indexOf(t);
+    if (at < 0) continue;
+    list.splice(at, 1);
+    if (!list.length) buckets.delete(k);
+  }
+}
+
 function bucketAdd(t: Entity) {
   if (!t.foot || !t.grid) return;
   const r = (Math.hypot(t.grid.X, t.grid.Y) / 2) / t.entry.vpt;
@@ -281,8 +299,10 @@ function local(t: Entity, wx: number, wz: number): [number, number] | undefined 
 
 function blocked(wx: number, wz: number): boolean {
   const tx = Math.floor(wx), tz = Math.floor(wz);
-  if (tx < 0 || tz < 0 || tx >= land.W || tz >= land.H) return true;
-  if (land.tiles[tx + tz * land.W] === 'water') return true;
+  // Past the land the meadow goes on (T403: a model of a hundred tiles stands beside the wanderer), as far as the plain is drawn.
+  if (Math.abs(wx - land.W / 2) > PLAIN || Math.abs(wz - land.H / 2) > PLAIN) return true;
+  const inLand = tx >= 0 && tz >= 0 && tx < land.W && tz < land.H;
+  if (inLand && land.tiles[tx + tz * land.W] === 'water') return true;
   for (const t of buckets.get(tx + tz * 4096) ?? []) {
     const p = local(t, wx, wz);
     if (p && t.foot![p[0] + p[1] * t.grid!.X]) return true;
@@ -368,6 +388,8 @@ function wander(t: Entity, dt: number) {
 
 // ------------------------------------------------------------------ the land
 
+/** How far the plain goes from the land's centre, in tiles: room for a model of a hundred tiles and more (T403). */
+const PLAIN = 320;
 let ground: THREE.Mesh | undefined;
 function buildGround(l: Land, seed: number) {
   if (ground) {
@@ -418,6 +440,14 @@ function buildGround(l: Land, seed: number) {
           }
         }
     }
+  // The plain around the land (T403): meadow as far as PLAIN from its centre, where a large model shown beside the wanderer stands.
+  const cx = l.W / 2, cz = l.H / 2;
+  const meadow = COL.meadow.map((v) => v * 0.97);
+  const flat = (x0: number, z0: number, x1: number, z1: number) => quad([x0, 0, z0], [x0, 0, z1], [x1, 0, z1], [x1, 0, z0], [0, 1, 0], meadow);
+  flat(cx - PLAIN, cz - PLAIN, 0, cz + PLAIN);
+  flat(l.W, cz - PLAIN, cx + PLAIN, cz + PLAIN);
+  flat(0, cz - PLAIN, l.W, 0);
+  flat(0, l.H, l.W, cz + PLAIN);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
@@ -514,12 +544,14 @@ function doAction(t: Entity, name: string) {
   const clip = m.actions.find((a) => a.name === name)!;
   act(t.grid!, clip, 1);
   const pal = m.program.palette;
-  t.body.geometry = geometry(meshVoxels(t.grid!, pal, { vpt: t.entry.vpt }));
+  // The meshes at the density the asset was built at: the root scales them to the entity's (T403).
+  const built = t.asset.entry.vpt;
+  t.body.geometry = geometry(meshVoxels(t.grid!, pal, { vpt: built }));
   // The animation frames start again from the changed model.
   const anim = m.animations[0];
   if (anim) {
     const fr = clipFrames(t.grid!, anim, 1);
-    t.frames.forEach((f, i) => (f.geometry = geometry(meshVoxels(fr[i], pal, { vpt: t.entry.vpt }))));
+    t.frames.forEach((f, i) => (f.geometry = geometry(meshVoxels(fr[i], pal, { vpt: built }))));
   }
   t.foot = footprint(t.grid!, pal, stepOf(t.entry) + 1, Math.ceil(0.7 * t.entry.vpt));
   t.floor = floors(t.grid!, pal, stepOf(t.entry));
@@ -554,14 +586,17 @@ addEventListener('pointermove', (e) => {
   cam.pitch = THREE.MathUtils.clamp(cam.pitch + (e.clientY - drag.y) * 0.004, 0.2, 1.45);
   drag = { x: e.clientX, y: e.clientY };
 });
-canvas.addEventListener('wheel', (e) => (cam.dist = THREE.MathUtils.clamp(cam.dist * (e.deltaY > 0 ? 1.12 : 0.89), 2.5, 45)), { passive: true });
+canvas.addEventListener('wheel', (e) => (cam.dist = THREE.MathUtils.clamp(cam.dist * (e.deltaY > 0 ? 1.12 : 0.89), 2.5, MAX_DIST)), { passive: true });
 
+/** The farthest the camera goes: a model of a hundred tiles whole in view (T403). */
+const MAX_DIST = 400;
 const ray = new THREE.Raycaster();
 function pick(e: { clientX: number; clientY: number }) {
   const r = canvas.getBoundingClientRect();
   ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
   const hit = ray.intersectObjects(world.children, true).find((h) => h.object.userData.thing);
-  if (hit) inspect(hit.object.userData.thing.entry, hit.object.userData.thing.asset.seed);
+  // The entry as built: the density it is shown at is the lab's choice (T403).
+  if (hit) inspect(hit.object.userData.thing.asset.entry, hit.object.userData.thing.asset.seed);
   return !!hit;
 }
 
@@ -583,7 +618,7 @@ attachPreviewTouch(canvas, {
     cam.yaw = cam.yawGoal;
     cam.pitch = THREE.MathUtils.clamp(cam.pitch + dy * 0.004, 0.2, 1.45);
   },
-  zoom: (factor) => (cam.dist = THREE.MathUtils.clamp(cam.dist * factor, 2.5, 45)),
+  zoom: (factor) => (cam.dist = THREE.MathUtils.clamp(cam.dist * factor, 2.5, MAX_DIST)),
   tap: (x, y) => {
     if (pick({ clientX: x, clientY: y }) && compact.matches) openPanel(true);
   },
@@ -603,6 +638,7 @@ resize();
 // ------------------------------------------------------------------ day and night
 
 let hour = 10;
+let shadowScale = 1;
 const sky = { day: new THREE.Color(0x9cc8e8), dusk: new THREE.Color(0xe8a070), night: new THREE.Color(0x0e1424) };
 function light() {
   const a = ((hour - 6) / 12) * Math.PI;
@@ -621,7 +657,15 @@ function light() {
   }
   const bg = day > 0.25 ? sky.day.clone() : day > 0 ? sky.dusk.clone().lerp(sky.day, day * 4) : sky.night.clone().lerp(sky.dusk, Math.max(0, 1 + elev * 4));
   scene.background = bg;
-  const air = look.cartoon ? aerial(cam.dist, day) : { near: 30, far: 70 };
+  // A large model far away (T403): the sun stands back and its shadows cover what the camera sees; the classic fog recedes.
+  const far = Math.max(1, cam.dist / 12);
+  if (far !== shadowScale) {
+    shadowScale = far;
+    Object.assign(sun.shadow.camera, { left: -16 * far, right: 16 * far, top: 16 * far, bottom: -16 * far, far: 80 * far });
+    sun.shadow.camera.updateProjectionMatrix();
+  }
+  sun.position.sub(cam.target).multiplyScalar(far).add(cam.target);
+  const air = look.cartoon ? aerial(cam.dist, day) : { near: 30 * far, far: 70 * far };
   scene.fog = new THREE.Fog(bg, air.near, air.far);
   for (const t of [...things, ...(showcase ? [showcase] : [])]) if (t.light) t.light.intensity = (day > 0.3 ? 0.8 : 3.5) * (0.85 + 0.15 * Math.sin(uTime.value * 13 + Math.sin(uTime.value * 7)));
 }
@@ -662,7 +706,7 @@ function tick(now: number) {
       moved = step(player, dx, dz, dt);
     }
     animateFigure(player, moved, dt);
-    cam.target.lerp(new THREE.Vector3(player.x, 0.6, player.z), Math.min(1, dt * 6));
+    if (!hold) cam.target.lerp(new THREE.Vector3(player.x, player.root.position.y + 0.6, player.z), Math.min(1, dt * 6));
   }
   for (const t of things) if (t.mover && t !== player) wander(t, dt);
 
@@ -688,11 +732,11 @@ function tick(now: number) {
   let inside = false;
   let found: typeof near;
   if (player)
-    for (const t of things) {
-      if (!t.grid || Math.hypot(t.x - player.x, t.z - player.z) > 4) continue;
+    for (const t of [...things, ...(showcase ? [showcase] : [])]) {
+      if (!t.grid || Math.hypot(t.x - player.x, t.z - player.z) > Math.hypot(t.grid.X, t.grid.Y) / 2 / t.entry.vpt + 4) continue;
       const p = local(t, player.x, player.z);
-      // Inside: standing on the structure's floor (its voxels at z = 0).
-      if (p && t.entry.role === 'structure' && t.grid.cells[p[0] + p[1] * t.grid.X] && t.asset.built.palette[t.grid.alphabet[t.grid.cells[p[0] + p[1] * t.grid.X]]]?.color) inside = true;
+      // Inside: something of the structure over the wanderer's head (T403: a courtyard is not inside, a hall is).
+      if (p && (t.entry.role === 'structure' || t === showcase) && roofOver(t, p, player.root.position.y)) inside = true;
       if (!found && t.asset.built.actions.length) {
         // Near enough: within a tile of any of its blocking columns.
         let close = false;
@@ -711,7 +755,7 @@ function tick(now: number) {
   near = found;
   prompt.hidden = !near;
   if (near) prompt.textContent = `E — ${near.a.label}`;
-  cut.constant = inside ? 1.05 : 1000;
+  cut.constant = cutAt ?? (inside ? (player?.root.position.y ?? 0) + 1.05 : 1000);
 
   cam.yaw += (cam.yawGoal - cam.yaw) * Math.min(1, dt * 8);
   const off = new THREE.Vector3(Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), Math.cos(cam.yaw) * Math.cos(cam.pitch)).multiplyScalar(cam.dist);
@@ -722,6 +766,23 @@ function tick(now: number) {
   $('stats').textContent = `${Math.round(fps)} fps · ${renderer.info.render.triangles.toLocaleString('it')} triangoli disegnati · ${renderer.info.render.calls} chiamate · lavori in coda ${pool.busy}`;
   requestAnimationFrame(tick);
 }
+
+/** Whether a column of a structure has a coloured voxel over a wanderer standing at `y` (tiles). */
+function roofOver(t: Entity, p: [number, number], y: number): boolean {
+  const g = t.grid!;
+  const XY = g.X * g.Y;
+  const pal = t.asset.built.palette;
+  for (let z = Math.ceil((y + 1.5) * t.entry.vpt); z < g.Z; z++) {
+    const c = g.cells[p[0] + p[1] * g.X + z * XY];
+    if (c && pal[g.alphabet[c]]?.color) return true;
+  }
+  return false;
+}
+
+/** The height the structures are cut at, from the console (T403: a hall seen whole from above); null: the wanderer decides. */
+let cutAt: number | null = null;
+/** The camera held where the console put it (T403), not on the wanderer. */
+let hold = false;
 
 function startGrowth(t: Entity) {
   t.grown = true;
@@ -742,6 +803,29 @@ function startGrowth(t: Entity) {
 // ------------------------------------------------------------------ panel
 
 let current: { e: Entry; seed: number; xml: string } | undefined;
+/** The voxels a tile the inspected model is shown at (T403): undefined, its entry's own. The address keeps it (`?vpt=`). */
+let chosenVpt = scaleFrom(location.search);
+
+function setScale(v: number | undefined, reshow = true) {
+  chosenVpt = v;
+  history.replaceState(null, '', withScale(location.href, v));
+  showScale();
+  void info();
+  if (reshow && current && showcase) void show(false);
+}
+
+/** The buttons and the field say the density now. */
+function showScale() {
+  const on = chosenVpt === undefined ? '' : String(chosenVpt);
+  document.querySelectorAll<HTMLButtonElement>('#ins-scale button').forEach((b) => b.classList.toggle('on', b.dataset.vpt === on));
+  $<HTMLInputElement>('ins-vpt').value = String(current ? shownVpt(current.e.vpt, chosenVpt) : (chosenVpt ?? ''));
+}
+document.querySelectorAll<HTMLButtonElement>('#ins-scale button').forEach((b) => (b.onclick = () => setScale(readVpt(b.dataset.vpt))));
+$<HTMLInputElement>('ins-vpt').onchange = (ev) => {
+  const v = readVpt((ev.target as HTMLInputElement).value);
+  if (v !== undefined) setScale(v);
+  else showScale();
+};
 
 function listModels() {
   const box = $('models');
@@ -770,6 +854,7 @@ function inspect(e: Entry, seed: number) {
   $('ins-err').textContent = '';
   $('ins-info').textContent = '';
   document.querySelectorAll('#models button').forEach((b) => b.classList.toggle('on', (b as HTMLElement).dataset.id === e.id));
+  showScale();
   void info();
 }
 
@@ -782,6 +867,8 @@ async function info() {
   }
   const i = a.built.info;
   const g = a.built.grid;
+  const vpt = shownVpt(current.e.vpt, chosenVpt);
+  $('ins-measure').textContent = measureAt([g.X, g.Y, g.Z], vpt).text + (vpt === current.e.vpt ? ' (quella del modello)' : ` (il modello: ${current.e.vpt})`);
   $('ins-info').textContent = [
     `seme ${current.seed} · griglia ${g.X}×${g.Y}×${g.Z} · ${i.steps} passi in ${i.ms} ms${i.finished ? '' : ' (interrotto)'}`,
     a.built.clips.length ? `animazioni: ${a.built.clips.map((c) => c.name).join(', ')}` : '',
@@ -804,9 +891,20 @@ async function show(grow: boolean) {
     $('ins-err').textContent = a;
     return;
   }
-  if (showcase) world.remove(showcase.root);
-  const fx = player.x + Math.sin(player.yaw) * 2.4, fz = player.z + Math.cos(player.yaw) * 2.4;
-  showcase = place(a, fx, fz, player.yaw + Math.PI);
+  if (showcase) {
+    world.remove(showcase.root);
+    bucketRemove(showcase);
+  }
+  // At the density chosen (T403), as far as its size asks: a fort of a hundred tiles is not put on the wanderer's toes.
+  const vpt = shownVpt(current.e.vpt, chosenVpt);
+  const g = a.built.grid;
+  const d = Math.max(2.4, showcaseDistance([g.X, g.Y, g.Z], vpt));
+  const fx = player.x + Math.sin(player.yaw) * d, fz = player.z + Math.cos(player.yaw) * d;
+  showcase = place(a, fx, fz, player.yaw + Math.PI, vpt);
+  // A structure is walked: it blocks and has floors, as the village's (a figure walks its own way).
+  if (!isFigure(a.entry)) bucketAdd(showcase);
+  // Large: the camera stands back to see it whole, once.
+  cam.dist = Math.min(MAX_DIST, Math.max(cam.dist, (Math.max(g.X, g.Y) / vpt) * 1.6));
   if (isFigure(a.entry)) showcase.mover = { speed: 0, tx: fx, tz: fz, wait: 1e9, phase: 0, moving: false, home: [fx, fz], face: player.yaw + Math.PI };
   showcase.grown = !grow;
   if (grow) startGrowth(showcase);
@@ -865,7 +963,63 @@ void startCardsList({
 });
 
 listModels();
-void buildWorld(7);
+// A model of the address (`?modello=<id>`, T403) is put in front of the wanderer as soon as there is one, at the density of `?vpt=`.
+const askedModel = new URLSearchParams(location.search).get('modello');
+void buildWorld(7).then(() => {
+  const e = askedModel ? byId(askedModel) : undefined;
+  if (!e) return;
+  inspect(e, 1);
+  void show(!!e.grows);
+});
 requestAnimationFrame(tick);
-// For the console: the sandbox's state.
-(window as unknown as { sandbox: unknown }).sandbox = { things: () => things, player: () => player, cam, camera, scene, CATALOG, asset, blocked, floorAt, local, step, doAction, actionFor };
+
+/**
+ * For the console and the photos of the scale (T403, lab/scripts/foto-scala.mjs): a model shown at a density, where a voxel of it is
+ * in the world, the wanderer and the camera put somewhere, the cut over the head.
+ */
+const sandboxTools = {
+  /** Inspects a model of the catalogue and puts it in front of the wanderer at `vpt` (undefined: its own); resolves when it is there. */
+  async showModel(id: string, vpt?: number, seed = 1): Promise<boolean> {
+    const e = byId(id);
+    if (!e || !player) return false;
+    setScale(readVpt(vpt), false);
+    inspect(e, seed);
+    await show(false);
+    return !!showcase && showcase.asset.entry.id === e.id;
+  },
+  /** A voxel of the shown model (grid coordinates, z up) in the world's tiles. */
+  toWorld(vx: number, vy: number, vz: number): [number, number, number] | undefined {
+    if (!showcase) return undefined;
+    const g = showcase.asset.built.grid;
+    const s = 1 / showcase.asset.entry.vpt;
+    const p = showcase.root.localToWorld(new THREE.Vector3((vx + 0.5 - g.X / 2) * s, vz * s, (vy + 0.5 - g.Y / 2) * s));
+    return [p.x, p.y, p.z];
+  },
+  /** The wanderer at (x, z), standing at height y, looking towards `face` (radians). */
+  putPlayer(x: number, z: number, y = 0, face = 0): void {
+    if (!player?.mover) return;
+    player.x = x;
+    player.z = z;
+    player.root.position.set(x, y, z);
+    player.yaw = player.mover.face = face;
+    player.root.rotation.y = face;
+  },
+  /** The camera on (x, y, z) at a distance, a yaw and a pitch (radians), at once. */
+  frame(x: number, y: number, z: number, dist: number, yaw = cam.yaw, pitch = cam.pitch): void {
+    cam.target.set(x, y, z);
+    cam.dist = dist;
+    cam.yaw = cam.yawGoal = yaw;
+    cam.pitch = pitch;
+    hold = true;
+  },
+  /** The camera follows the wanderer again. */
+  follow(): void {
+    hold = false;
+  },
+  /** The structures cut at a height (tiles), or as the wanderer decides (null). */
+  cut(y: number | null): void {
+    cutAt = y;
+  },
+  showcase: () => showcase,
+};
+(window as unknown as { sandbox: unknown }).sandbox = { things: () => things, player: () => player, cam, camera, scene, CATALOG, asset, blocked, floorAt, local, step, doAction, actionFor, ...sandboxTools };
