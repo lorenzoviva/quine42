@@ -65,7 +65,8 @@ export interface ItemSpec {
   controls?: Record<string, string>;
 }
 
-export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock';
+/** How a terrain is drawn; `stratum` (T418) only for the strata under the ground, a generator's `strata`, never a tile of a map. */
+export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock' | 'stratum';
 
 export interface TerrainDef {
   /**
@@ -291,6 +292,8 @@ export interface Manifest {
   origin?: string;
   prompts?: Record<string, string>;
   tiles?: Record<string, TerrainDef>;
+  /** The strata under the ground (generator modules, T418, ADR-0091): code → terrain of layer `stratum`; the seed's where it lacks them. */
+  strata?: Record<string, TerrainDef>;
   /** Roof of buildings (generator modules). */
   roof?: { color: string };
   /** What this world's common houses are like, when not the seed's cottages (ADR-0134). */

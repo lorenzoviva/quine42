@@ -15,6 +15,7 @@ import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
+import { STRATA_DEPTH, stratumRow } from '../kernel/strata';
 
 export const WALL_H = 1.6;
 const WATER_Y = -0.18;
@@ -383,8 +384,27 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   return { key: ch.key, sig: chunkSig(k, ch, models), group };
 }
 
-/** The colour of the earth where the terrain is cut under the ground (T416): the strata's bands come with T418. */
+/** The colour of the earth where the terrain is cut under the ground (T416), where a column has no strata (off the places). */
 export const CUT_EARTH = '#5f4632';
+
+/** The colour of a column's stratum at a depth under its ground (T418), times `shade`: its terrain's, or the earth's. */
+export function stratumColour(k: Kernel, x: number, z: number, depth: number, shade = 1): number[] {
+  return rgbOf(k.stratumAt(x, z, depth)?.color ?? CUT_EARTH, shade);
+}
+
+/**
+ * A side of the column at (x, z) from `y` down to `ny` in the bands of its strata (T418, ADR-0091 point 6): a band a tile deep from its ground
+ * down (`stratumRow`), the last one deeper down, the first one above the ground. Facing (dx, dz) on the plane `p`, from `a` to `e` along it.
+ */
+export function strataSide(k: Kernel, b: Builder, x: number, z: number, dx: number, dz: number, p: number, a: number, e: number, y: number, ny: number, shade: number): void {
+  const g = k.groundAt(x, z);
+  for (let top = y; top > ny; ) {
+    const row = stratumRow(g - top + 1e-6);
+    const bottom = row >= STRATA_DEPTH - 1 ? ny : Math.max(ny, g - row - 1);
+    sideQuad(b, dx, dz, p, a, e, top, bottom, stratumColour(k, x, z, g - top + 1e-6, shade));
+    top = bottom;
+  }
+}
 
 /** What the cut's caps depend on: where and how high, towards where, and the chunks under the disc (their tiles, levels and holes). */
 export function cutSig(k: Kernel, u: Underground, towards: Towards): string {
@@ -401,9 +421,9 @@ export function cutSig(k: Kernel, u: Underground, towards: Towards): string {
 
 /**
  * The cut under the ground (T416, ADR-0091 point 6): the caps of what the shaders do not draw in the disc (`U.cutY`, materials.ts). Every
- * tile of the disc whose top is over the cut has a cap of earth at the cut (on its sub-cells over it, where a cellar opens part of the
- * tile), and every tile around the disc that stands over the cut has its side towards the disc down to the cut: the columns cut, never
- * their empty inside. Undefined if nothing is over the cut. In carpet coordinates, with the chunks.
+ * tile of the disc whose top is over the cut has a cap at the cut (on its sub-cells over it, where a cellar opens part of the tile) in the
+ * colour of the stratum it reaches there, and every tile around the disc that stands over the cut has its side towards the disc down to the
+ * cut in the bands of its strata (T418): the columns cut, never their empty inside. Undefined if nothing is over the cut. In carpet coordinates, with the chunks.
  */
 export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mesh | undefined {
   const S = k.config.chunkSize;
@@ -424,10 +444,10 @@ export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mes
   // Over the cut by more than the shaders' nudge (`CUT_VERTEX`): what they do not draw.
   const over = (y: number) => y > u.cut + 0.01;
   const b = new Builder();
-  const cap = rgbOf(CUT_EARTH);
-  const wall = cap.map((v) => v * 0.78);
   for (const { x, y: z } of cutDisc(u.tile, towards)) {
     if (!loaded(x, z)) continue;
+    // The stratum the column reaches at the cut (T418).
+    const cap = stratumColour(k, x, z, k.groundAt(x, z) - u.cut);
     const parted = !!holeAt(x, z)?.cover;
     const n = parted ? N : 1;
     // The cap: a run of sub-cells over the cut along a row is one quad (a whole tile, one).
@@ -463,7 +483,8 @@ export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mes
         const y = high(j);
         let e = j + 1;
         while (e < m && high(e) === y) e++;
-        if (over(y)) sideQuad(b, -dx, -dz, p, o + j / m, o + e / m, y, u.cut, wall);
+        // The neighbour's side, in the bands of its strata.
+        if (over(y)) strataSide(k, b, nx, nz, -dx, -dz, p, o + j / m, o + e / m, y, u.cut, 0.78);
         j = e;
       }
     }

@@ -196,3 +196,28 @@ il pavimento e la scala. Girata la camera, il disco si allunga dall'altra parte.
 Le ombre restano: la casa tagliata ombreggia ancora la cantina e il disco (la sua ombra si vede sulla terra). Con le cantine del seme il taglio
 cade appena sotto il suolo, quindi il disco cambia colore più che altezza; con una cantina di 2 caselle (T52f) il taglio scende di quasi una
 casella e le colonne tagliate si vedranno sui fianchi.
+
+## 8. Dopo T418: gli strati, ridotti
+
+Fatto il terzo passo del § 5 nella forma ridotta (kernel 0.9.5, ADR-0091 «Attuazione»). Sotto ogni casella ci sono quattro righe di strati,
+una per casella di profondità, scelte dalla bozza procedurale (terra e argilla sopra la roccia viva, sabbia compatta sotto la sabbia, fango
+sotto l'acqua, roccia sotto la roccia) e da un hash della casella e del seme: lo stesso mondo ha sempre gli stessi strati. I terreni degli
+strati sono `strata` del generatore (cinque nel seme); il piano li tiene, un piano di prima li ricalcola. Nel taglio i tappi hanno il colore
+dello strato a cui la colonna arriva, e i fianchi attorno al disco sono a bande, una per strato.
+
+Nel browser (`?skip&offline`, la locanda posata come nel § 2 a (−19,5, −10,5), il viandante messo sul pavimento della cantina a (−19,75, −12),
+−1,19 caselle): in cantina il taglio è a −0,04 dal suolo, quindi i tappi sono tutti della prima riga, terra marrone, e i fianchi sono alti
+4 centesimi: le bande non si vedono (14). Per vederle, solo per l'aspetto, il taglio è stato abbassato dalla console di 1,9 caselle (come
+avrebbe una cantina di due o tre caselle, T52f): i tappi sono della seconda riga, a chiazze di terra e argilla rossa secondo le colonne, e
+le pareti attorno al disco hanno la terra in alto, l'argilla e più giù la roccia viva; i colori della mesh del taglio lo confermano (terra,
+argilla, roccia viva e fango sotto il lago a nord). Le pareti stanno nell'ombra della casa tagliata, che resta (§ 7), e la luce a cartone
+sui fianchi le smorza: le bande si leggono soprattutto dalle linee d'inchiostro fra uno strato e l'altro (15-17). Rimesso il taglio vero e
+risaliti, il taglio si spegne.
+
+| | |
+|---|---|
+| ![in cantina](sotterranei-stato/14-strati-in-cantina.jpg) in cantina, col taglio vero: i tappi di terra | ![taglio basso](sotterranei-stato/15-strati-taglio-basso.jpg) il taglio 1,9 caselle più giù: terra e argilla sui tappi, le pareti a bande |
+| ![girata](sotterranei-stato/16-strati-girata.jpg) la stessa, la camera girata di mezzo giro | ![parete](sotterranei-stato/17-strati-parete.png) una parete da vicino, nell'ombra della casa |
+
+Restano, per un task dopo: il Cartografo che scrive gli strati del suo mondo alla Genesi, il programma `sottosuolo` degli ambienti, la
+profondità dalla cantina più profonda, le bande sui fianchi del buco (coperti dai muri della cantina) e l'ombra della casa tagliata.
