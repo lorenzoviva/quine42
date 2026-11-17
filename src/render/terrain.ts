@@ -14,6 +14,7 @@ import { TERRAIN_THING } from './cartoon';
 import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
+import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
 
 export const WALL_H = 1.6;
 const WATER_Y = -0.18;
@@ -134,6 +135,35 @@ export class Builder {
 
 const groundY = (t: TerrainDef | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
 
+/**
+ * The tops of the terrain as the chunks draw them (T52b, T415): the relief, the water a little lower, a floor a little higher, and over a
+ * cellar the hole, on the whole tile or on its sub-cells (`HOLE_CELLS` a side). `holeAt`: the hole of a tile, if any.
+ */
+function terrainTops(k: Kernel, holeAt: (x: number, z: number) => TileHole | undefined) {
+  const pal = k.palette;
+  const N = HOLE_CELLS;
+  const tile = (col: number, row: number) => pal[k.tileAt(col, row) ?? ''];
+  const ground0 = (x: number, z: number) => {
+    const h = holeAt(x, z);
+    return k.groundAt(x, z) - (h && !h.cover ? h.depth : 0);
+  };
+  const top = (x: number, z: number) => ground0(x, z) + groundY(tile(x, z));
+  /** The top of a tile at one of its sub-cells (s along x, t along z). */
+  const subTop = (x: number, z: number, s: number, t: number) => {
+    const h = holeAt(x, z);
+    return h?.cover?.[t * N + s] ? k.groundAt(x, z) - h.depth + groundY(tile(x, z)) : top(x, z);
+  };
+  return { tile, ground0, top, subTop };
+}
+
+/** A side facing (dx, dz) on the plane `p`, from `a` to `e` along it, from `y` down to `ny`; wound counter-clockwise seen from outside, like the boxes. */
+function sideQuad(b: Builder, dx: number, dz: number, p: number, a: number, e: number, y: number, ny: number, rgb: number[]): void {
+  if (dx === 1) b.quad([p, y, e], [p, ny, e], [p, ny, a], [p, y, a], [1, 0, 0], rgb, true);
+  if (dx === -1) b.quad([p, y, a], [p, ny, a], [p, ny, e], [p, y, e], [-1, 0, 0], rgb, true);
+  if (dz === 1) b.quad([a, y, p], [a, ny, p], [e, ny, p], [e, y, p], [0, 0, 1], rgb, true);
+  if (dz === -1) b.quad([e, y, p], [e, ny, p], [a, ny, p], [a, y, p], [0, 0, -1], rgb, true);
+}
+
 /** A tree in voxel style on ground at height y: trunk and three shrinking layers of foliage, size and colour varied per tile. */
 function standInTree(b: Builder, x: number, y: number, z: number, h: number, rgb: number[]): void {
   const s = 0.75 + (h % 7) / 20;
@@ -206,7 +236,6 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   const ground = new Builder();
   const solid = new Builder();
   const X0 = ch.cx * S, Z0 = ch.cy * S;
-  const tile = (col: number, row: number) => pal[k.tileAt(col, row) ?? ''];
   // Instances of the terrains' models, by form: where, how turned, how big.
   const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
   const formsOf = new Map<string, ReturnType<typeof tileForms>>();
@@ -218,24 +247,9 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
     if (o) for (const [i, h] of k.holesIn(o)) holes.set(`${o.cx * S + (i % S)},${o.cy * S + Math.floor(i / S)}`, h);
   }
   const holeAt = (x: number, z: number) => holes.get(`${x},${z}`);
-  const ground0 = (x: number, z: number) => {
-    const h = holeAt(x, z);
-    return k.groundAt(x, z) - (h && !h.cover ? h.depth : 0);
-  };
-  const top = (x: number, z: number) => ground0(x, z) + groundY(tile(x, z));
+  const { tile, ground0, top, subTop } = terrainTops(k, holeAt);
   const N = HOLE_CELLS;
-  /** The top of a tile at one of its sub-cells (s along x, t along z). */
-  const subTop = (x: number, z: number, s: number, t: number) => {
-    const h = holeAt(x, z);
-    return h?.cover?.[t * N + s] ? k.groundAt(x, z) - h.depth + groundY(tile(x, z)) : top(x, z);
-  };
-  /** A side facing (dx, dz) on the plane `p`, from `a` to `b` along it, from `y` down to `ny`; wound counter-clockwise seen from outside, like the boxes. */
-  const side = (dx: number, dz: number, p: number, a: number, b: number, y: number, ny: number, rgb: number[]) => {
-    if (dx === 1) ground.quad([p, y, b], [p, ny, b], [p, ny, a], [p, y, a], [1, 0, 0], rgb, true);
-    if (dx === -1) ground.quad([p, y, a], [p, ny, a], [p, ny, b], [p, y, b], [-1, 0, 0], rgb, true);
-    if (dz === 1) ground.quad([a, y, p], [a, ny, p], [b, ny, p], [b, y, p], [0, 0, 1], rgb, true);
-    if (dz === -1) ground.quad([b, y, p], [b, ny, p], [a, ny, p], [a, y, p], [0, 0, -1], rgb, true);
-  };
+  const side = (dx: number, dz: number, p: number, a: number, b: number, y: number, ny: number, rgb: number[]) => sideQuad(ground, dx, dz, p, a, b, y, ny, rgb);
   /**
    * The sides of a tile towards a neighbour when one of the two is only partly over a cellar (T415): sub-cell by sub-cell
    * along the edge, where this tile's is higher than the neighbour's next to it; a run of the same heights is one quad.
@@ -367,6 +381,98 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
     group.add(im);
   }
   return { key: ch.key, sig: chunkSig(k, ch, models), group };
+}
+
+/** The colour of the earth where the terrain is cut under the ground (T416): the strata's bands come with T418. */
+export const CUT_EARTH = '#5f4632';
+
+/** What the cut's caps depend on: where and how high, towards where, and the chunks under the disc (their tiles, levels and holes). */
+export function cutSig(k: Kernel, u: Underground, towards: Towards): string {
+  const S = k.config.chunkSize;
+  const R = CUT_REACH + 1;
+  const parts = [`${u.tile.x},${u.tile.y},${u.cut.toFixed(3)},${towards.x},${towards.y}`];
+  for (let cy = Math.floor((u.tile.y - R) / S); cy <= Math.floor((u.tile.y + R) / S); cy++)
+    for (let cx = Math.floor((u.tile.x - R) / S); cx <= Math.floor((u.tile.x + R) / S); cx++) {
+      const ch = k.chunks.get(`${cx},${cy}`);
+      parts.push(ch ? `${ch.version}.${ch.levels ?? 0}.${k.holesIn(ch).size}` : '-');
+    }
+  return parts.join('|');
+}
+
+/**
+ * The cut under the ground (T416, ADR-0091 point 6): the caps of what the shaders do not draw in the disc (`U.cutY`, materials.ts). Every
+ * tile of the disc whose top is over the cut has a cap of earth at the cut (on its sub-cells over it, where a cellar opens part of the
+ * tile), and every tile around the disc that stands over the cut has its side towards the disc down to the cut: the columns cut, never
+ * their empty inside. Undefined if nothing is over the cut. In carpet coordinates, with the chunks.
+ */
+export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mesh | undefined {
+  const S = k.config.chunkSize;
+  const N = HOLE_CELLS;
+  const byChunk = new Map<string, Map<number, TileHole>>();
+  const holeAt = (x: number, z: number) => {
+    const cx = Math.floor(x / S), cy = Math.floor(z / S), key = `${cx},${cy}`;
+    let m = byChunk.get(key);
+    if (!m) {
+      const ch = k.chunks.get(key);
+      byChunk.set(key, (m = ch ? k.holesIn(ch) : new Map<number, TileHole>()));
+    }
+    return m.get((z - cy * S) * S + (x - cx * S));
+  };
+  const { subTop } = terrainTops(k, holeAt);
+  const loaded = (x: number, z: number) => k.tileAt(x, z) !== undefined;
+  const inDisc = (x: number, z: number) => inCutDisc(x - u.tile.x, z - u.tile.y, towards);
+  // Over the cut by more than the shaders' nudge (`CUT_VERTEX`): what they do not draw.
+  const over = (y: number) => y > u.cut + 0.01;
+  const b = new Builder();
+  const cap = rgbOf(CUT_EARTH);
+  const wall = cap.map((v) => v * 0.78);
+  for (const { x, y: z } of cutDisc(u.tile, towards)) {
+    if (!loaded(x, z)) continue;
+    const parted = !!holeAt(x, z)?.cover;
+    const n = parted ? N : 1;
+    // The cap: a run of sub-cells over the cut along a row is one quad (a whole tile, one).
+    for (let t = 0; t < n; t++)
+      for (let s = 0; s < n; ) {
+        if (!over(subTop(x, z, s, t))) {
+          s++;
+          continue;
+        }
+        let e = s + 1;
+        while (e < n && over(subTop(x, z, e, t))) e++;
+        const x0 = x + s / n, x1 = x + e / n, z0 = z + t / n, z1 = z + (t + 1) / n;
+        b.quad([x0, u.cut, z0], [x0, u.cut, z1], [x1, u.cut, z1], [x1, u.cut, z0], [0, 1, 0], cap);
+        s = e;
+      }
+    // The sides of the tiles around the disc, towards it: from as high as both stood (higher, the chunk draws it) down to the cut.
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const nx = x + dx, nz = z + dz;
+      if (inDisc(nx, nz) || !loaded(nx, nz)) continue;
+      const fine = parted || !!holeAt(nx, nz)?.cover;
+      const m = fine ? N : 1;
+      // Sub-cell j along the edge: this tile's (`mine`) and the neighbour's next to it (`theirs`).
+      const mine = (j: number) => (dx === 1 ? subTop(x, z, N - 1, j) : dx === -1 ? subTop(x, z, 0, j) : dz === 1 ? subTop(x, z, j, N - 1) : subTop(x, z, j, 0));
+      const theirs = (j: number) => (dx === 1 ? subTop(nx, nz, 0, j) : dx === -1 ? subTop(nx, nz, N - 1, j) : dz === 1 ? subTop(nx, nz, j, 0) : subTop(nx, nz, j, N - 1));
+      const high = (j: number) => {
+        const at = fine ? j : 0;
+        const y = mine(at);
+        return over(y) ? Math.min(y, theirs(at)) : -Infinity;
+      };
+      const p = dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z;
+      const o = dx ? z : x;
+      for (let j = 0; j < m; ) {
+        const y = high(j);
+        let e = j + 1;
+        while (e < m && high(e) === y) e++;
+        if (over(y)) sideQuad(b, -dx, -dz, p, o + j / m, o + e / m, y, u.cut, wall);
+        j = e;
+      }
+    }
+  }
+  if (b.empty) return undefined;
+  const mesh = new THREE.Mesh(b.geometry(), MAT.world);
+  mesh.receiveShadow = true;
+  mesh.userData.inkThing = TERRAIN_THING;
+  return mesh;
 }
 
 export function disposeChunk(v: TerrainView): void {

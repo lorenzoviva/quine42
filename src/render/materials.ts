@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { addShade, CARTOON, thingOf, toon } from './cartoon';
+import { CUT_RADIUS, CUT_STRETCH } from '../kernel/underground';
 
 /** Shared uniforms: time (wind, flicker), wind strength, the radius beyond which the simulation is cut. */
 export const U = {
@@ -15,6 +16,14 @@ export const U = {
   glow: { value: 1.4 },
   /** 1 while the renderer draws into its bloom target (alpha = 1 - glow there); 0 for icons and the lab. */
   glowMask: { value: 0 },
+  /**
+   * Under the ground (T416, ADR-0091 point 6): over this height (world y) what stands in the disc around `cutTile` (the tile one
+   * stands on, in carpet coordinates) stretched towards `cutDir` is not drawn; 1e9 on the ground. `cutOff`: world → carpet.
+   */
+  cutY: { value: 1e9 },
+  cutTile: { value: new THREE.Vector2() },
+  cutDir: { value: new THREE.Vector2(0, 1) },
+  cutOff: { value: new THREE.Vector2() },
 };
 
 /** In the cartoon a glowing voxel is this much of its colour, plus `U.glow`: about what it is in the classic look by day. */
@@ -141,6 +150,29 @@ const CLIP_VERTEX = `vec4 clipP = vec4(transformed, 1.0);
   #endif
   vClipXZ = (modelMatrix * clipP).xz;`;
 
+/**
+ * Where a vertex stands for the cut under the ground (T416), after `CLIP_VERTEX`: a little inside what its face belongs to (against
+ * its normal), so a side on the edge between two tiles is cut with its own tile, not with the neighbour it faces.
+ */
+const CUT_VERTEX = `vCut = (modelMatrix * clipP).xyz - normalize((modelMatrix * vec4(normal, 0.0)).xyz + vec3(0.0, 1e-6, 0.0)) * 0.01;`;
+
+/** The varying of the cut under the ground in the vertex shader, and its uniforms in the fragment shader. */
+const CUT_PARS_VERTEX = `varying vec3 vCut;`;
+const CUT_PARS_FRAGMENT = `uniform float uCutY;
+uniform vec2 uCutTile;
+uniform vec2 uCutDir;
+uniform vec2 uCutOff;
+varying vec3 vCut;`;
+
+/** The disc of `inCutDisc` (src/kernel/underground.ts), on whole tiles: what stands over `uCutY` in it is not drawn. */
+const CUT_FRAGMENT = `if (vCut.y > uCutY) {
+    vec2 cutQ = floor(vCut.xz + uCutOff) - uCutTile;
+    vec2 cutR = cutQ - uCutDir * clamp(dot(cutQ, uCutDir), 0.0, ${CUT_STRETCH.toFixed(1)});
+    if (dot(cutR, cutR) <= ${(CUT_RADIUS * CUT_RADIUS + 0.5).toFixed(1)}) discard;
+  }`;
+
+const cutUniforms = () => ({ uCutY: U.cutY, uCutTile: U.cutTile, uCutDir: U.cutDir, uCutOff: U.cutOff });
+
 /** The wind without the circle clip, for what stands beyond the circle (T218): the corona's trees. */
 export function windy<M extends THREE.Material>(m: M, key: string): M {
   m.onBeforeCompile = (sh) => {
@@ -155,21 +187,29 @@ export function windy<M extends THREE.Material>(m: M, key: string): M {
   return m;
 }
 
-/** Adds the circle clip (in world xz) to a material. */
-export function clipped<M extends THREE.Material>(m: M, key: string, sway = false): M {
+/**
+ * Adds the circle clip (in world xz) to a material, and the cut under the ground (T416) unless `cut` is false: the shadows' depth
+ * keeps what is cut, so a house over a cellar still shades it.
+ */
+export function clipped<M extends THREE.Material>(m: M, key: string, sway = false, cut = true): M {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = U.time;
     sh.uniforms.uWind = U.wind;
     sh.uniforms.uClipR = U.clipR;
-    sh.vertexShader = `${sway ? 'attribute float sway;\n' : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${sh.vertexShader}`
+    if (cut) Object.assign(sh.uniforms, cutUniforms());
+    sh.vertexShader = `${sway ? 'attribute float sway;\n' : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${cut ? CUT_PARS_VERTEX : ''}\n${sh.vertexShader}`
       .replace('#include <begin_vertex>', sway ? WIND_VERTEX : '#include <begin_vertex>')
-      .replace('#include <project_vertex>', `#include <project_vertex>\n  ${CLIP_VERTEX}`);
-    sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${sh.fragmentShader}`.replace('void main() {', 'void main() {\n  if (length(vClipXZ) > uClipR) discard;');
+      .replace('#include <project_vertex>', `#include <project_vertex>\n  ${CLIP_VERTEX}\n  ${cut ? CUT_VERTEX : ''}`);
+    sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${cut ? CUT_PARS_FRAGMENT : ''}\n${sh.fragmentShader}`.replace(
+      'void main() {',
+      `void main() {\n  if (length(vClipXZ) > uClipR) discard;\n  ${cut ? CUT_FRAGMENT : ''}`,
+    );
     addGlow(sh);
   };
   m.customProgramCacheKey = () => key;
   noGlow(m);
   m.userData.clipped = true;
+  m.userData.cut = cut;
   m.userData.clipKey = key;
   m.userData.sway = sway;
   return m;
@@ -190,9 +230,10 @@ export function idsOf(m: THREE.Material): THREE.Material | undefined {
   let ids = idsCache.get(m);
   if (!ids) {
     const clip = !!m.userData?.clipped;
+    const cut = clip && !!m.userData?.cut;
     const sway = !!m.userData?.sway;
     const material = new THREE.ShaderMaterial({
-      uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR },
+      uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR, ...(cut ? cutUniforms() : {}) },
       side: m.side,
       clipping: true,
       clippingPlanes: m.clippingPlanes ?? null,
@@ -201,6 +242,7 @@ ${sway ? 'attribute float sway;' : ''}
 uniform float uTime;
 uniform float uWind;
 ${clip ? 'varying vec2 vClipXZ;' : ''}
+${cut ? CUT_PARS_VERTEX : ''}
 varying vec2 vIds;
 #include <clipping_planes_pars_vertex>
 void main() {
@@ -212,15 +254,18 @@ void main() {
   ${sway ? WIND_VERTEX : '#include <begin_vertex>'}
   #include <project_vertex>
   ${clip ? CLIP_VERTEX : ''}
+  ${cut ? CUT_VERTEX : ''}
   #include <clipping_planes_vertex>
 }`,
       fragmentShader: `uniform float uThing;
 uniform float uClipR;
 ${clip ? 'varying vec2 vClipXZ;' : ''}
+${cut ? CUT_PARS_FRAGMENT : ''}
 varying vec2 vIds;
 #include <clipping_planes_pars_fragment>
 void main() {
   ${clip ? 'if (length(vClipXZ) > uClipR) discard;' : ''}
+  ${cut ? CUT_FRAGMENT : ''}
   #include <clipping_planes_fragment>
   gl_FragColor = vec4(uThing / 255.0, vIds, 1.0);
 }`,
@@ -236,8 +281,8 @@ void main() {
   return ids;
 }
 
-/** The shadow pass draws with its own depth material: clipped too, or what is cut still casts its shadow. */
-const CLIPPED_DEPTH = clipped(new THREE.MeshDepthMaterial(), 'depth');
+/** The shadow pass draws with its own depth material: clipped too, or what is cut still casts its shadow; not under the ground (T416), where what is cut still shades. */
+const CLIPPED_DEPTH = clipped(new THREE.MeshDepthMaterial(), 'depth', false, false);
 
 /** A mesh that casts shadows: if its material is clipped, so is its shadow. */
 export function casts<T extends THREE.Mesh>(m: T, receive = false): T {
