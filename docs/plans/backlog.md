@@ -5748,7 +5748,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (`?skip&offline`: una casa del borgo arredata dentro, nessun mobile nei muri o sulle porte, si cammina).
 - Quando è fatto: commit su `task/T410`. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410)
+### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410, T413)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
 - Step: 31
 - Contesto: richiesta dell'autore (17/11, chat): gli universi in `universes/` (aurora, orichalcum, neapolis, sidera) sono stati fatti con versioni dello Scultore di prima (senza 16 vpx, senza Scenografo, alcuni da Claude Cloud via T273): rigenerarli, almeno i modelli, con lo Scultore stabile e lo Scenografo base, sulla CLI di Claude Code con **Opus 5.5**, così l'autore approva T153 e si passa agli altri universi. Nasce da T207, T88 (`dossier T207`, `dossier T88`), T405 (`dossier T405`). Decisione dell'autore che supera la vecchia «aurora non si tocca»: lo stato di prima resta nella storia git dell'universo (un tag `prima-della-rigenerazione`).
@@ -5756,3 +5756,21 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: offline con la coda finta: un universo di prima rigenerato nei modelli, ripresa dopo interruzione, tetto, rifiuto con un mondo acceso; suite e typecheck coi turni.
 - Browser: no (lo fa T153).
 - Quando è fatto: commit su `task/T411`; nell'esito il costo misurato di un tipo e la stima per universo. Sicurezza: nessuna superficie nuova (o le voci).
+### T412 · I sotterranei funzionano? Una verifica, poi la scelta se arredarli — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Step: 13
+- Contesto: domanda dell'autore (17/11, chat): «credo che i sotterranei non siano mai riusciti allo Scultore: fammi capire se funzionano e in caso li arrediamo; se è troppo complesso li rimandiamo». Nasce da T52 (`dossier T52`, ADR-0091): T52b (il modello che scende, `cellar` nella voce, `Form.base`, `tests/cellar.test.ts`) è fatto; T52d (strati), T52e (vedere sotto terra) e T52f (Cartografo e Scultore chiedono le cantine) risultano `da fare`: oggi nessun agente chiede una cantina, e `universe/models/index.json` ha 6 voci con `cellar` scritte a mano. Lo Scenografo (§ 10.4 di `docs/design/scenografo.md`) non ha mai misurato una cantina.
+- Cosa fare: senza modelli e senza cambiare codice di gioco. (1) Nel kernel di oggi (0.9.x, 16 vpx) le 6 voci del seme con `cellar`: la forma tiene la cantina (`groundOfForm`), si scende e si risale, dove sta il pavimento; `tests/cellar.test.ts` ancora vero a 16 vpx? (2) Nel browser (`?skip&offline`, `addModel` accanto al borgo come T52b): si scende, si vede qualcosa (senza T52e il terreno copre?), si risale; screenshot. (3) Gli universi in `universes/`: qualche voce con `cellar`? (4) Quanto costa finire: T52d, T52e, T52f rivisti sul kernel di oggi (stima di ognuno, cosa è cambiato da ADR-0091), e i mobili per la cantina (§ 10.4). Scrivi la risposta in `docs/design/sotterranei-stato.md` con una raccomandazione: arredarli ora (e in che ordine) o rimandarli.
+- Test: nessuno nuovo; `tests/cellar.test.ts` col turno test.
+- Browser: sì (sopra).
+- Quando è fatto: commit su `task/T412` col documento e gli screenshot citati; nell'esito la raccomandazione in tre righe. Sicurezza: nessuna superficie nuova.
+
+### T413 · La casa che usa la Grande (§ 10.0 di `scenografo.md`) — `da fare`
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
+- Step: 30
+- Contesto: approvato dall autore (17/11, chat, D62). Nasce da T406 (`dossier T406`): a 16 vpx lo Scultore dà alla casa un corpo di 35-45 voxel su 100 e una stanza per piano, così lo spazio calpestabile cresce al più di una volta e mezza. Serve prima della rigenerazione (T411), perché le case rifatte abbiano spazio da arredare.
+- Cosa fare: nel prompt dello Scultore (`universe/prompts/agents/sculptor.md`, «What fits») il pavimento coperto che un'abitazione vuole a Grande e un controllo del kernel che lo misura (l'area coperta per piano, dalla funzione `stanzeDi` del banco, accanto a `habitableParts`/`partErrors`), solo per le abitazioni (non forti, torri, templi). Soglia: quella proposta nel § 10.0, **almeno 10 caselle² coperte per piano e due stanze a terra** (la sala e una stanza); se la misura dice che è troppo o troppo poco, scrivilo nell'esito con il valore che proponi. Misura con `lab/scripts/scenografo-spazio.ts` su due edifici nuovi per concetto, prima e dopo il prompt, e con la via dei dati del banco. Tetto della spesa: 3 $ sul registro intero. Versione del kernel, ADR se la decisione è architetturale.
+- Test: il controllo su edifici del banco (`misura16/`) che passano e non passano; suite e typecheck coi turni.
+- Browser: no.
+- Quando è fatto: commit su `task/T413`; nell'esito prima/dopo (caselle² per piano, stanze) e il costo. Sicurezza: nessuna superficie nuova.
+
