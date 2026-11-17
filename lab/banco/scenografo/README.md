@@ -54,13 +54,33 @@ npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude
 npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --interno --modelli claude-opus-5-5 --ripeti 2 --solo villetta,fattoria --taglie large --tetto 2 --out lab/banco/scenografo/misura16/insieme
 npx vite-node lab/scripts/scenografo-misura.ts -- --ripeti 2 --out lab/banco/scenografo/misura16          # --densita gioco, il predefinito
 npx vite-node lab/scripts/scenografo-misura.ts -- --misura --densita 20 --out lab/banco/scenografo/misura # T303 di nuovo, senza chiamate
-npx vite-node lab/scripts/scenografo-spazio.ts                                                             # lo spazio prima e dopo, senza chiamate
+npx vite-node lab/scripts/scenografo-spazio.ts -- --senza-casa --out lab/banco/scenografo/misura16       # lo spazio prima e dopo, senza chiamate
 ```
 
 | file | cosa |
 |---|---|
 | `misura16/` | come `misura/`, sugli edifici a 16; `giro-misura.txt` le misure di tutte e tre le vie senza chiamate |
 | `misura16/spazio.md`, `spazio.json` | il pavimento calpestabile per piano e per stanza, il lato della stanza del kernel, il soffitto, le porte e i mobili che entrano, a 20 e a 16, degli edifici di T303 e di T406 |
+
+## La casa che usa la Grande (T413)
+
+Lo Scultore col prompt dell'abitazione (ADR-0213: almeno 10 caselle² coperte al piano terra e a un altro piano, due stanze a terra; la
+richiesta lo dice, i suoi controlli lo misurano con `storeyFloors` del kernel, la stessa misura di `stanzeDi`): due giri, villetta e fattoria
+a Grande; poi lo spazio di queste accanto a quelle di T303 e T406 lette a 16, e la via dei dati sulle case del primo giro. I numeri sono al
+§ 9.2 di [`docs/design/scenografo.md`](../../../docs/design/scenografo.md).
+
+```bash
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude-opus-5-5 --solo villetta,fattoria --taglie large --tetto 2 --out lab/banco/scenografo/casa/vuoto            # giro1
+npx vite-node lab/scripts/scultore-gemini.ts -- --root ../../.. --modelli claude-opus-5-5 --primo 2 --solo villetta,fattoria --taglie large --tetto 2 --out lab/banco/scenografo/casa/vuoto  # giro2
+npx vite-node lab/scripts/scenografo-spazio.ts                                                  # lo spazio prima e dopo e il controllo dell'abitazione, senza chiamate
+npx vite-node lab/scripts/scenografo-misura.ts -- --vie dati --ripeti 1 --out lab/banco/scenografo/casa  # la via dei dati sulle case del giro1
+```
+
+| file | cosa |
+|---|---|
+| `casa/vuoto/claude-opus-5-5/giro<n>/` | le case scritte col prompt dell'abitazione, come le scrive `scultore-gemini.ts` (chiamate, registro, esito, programma, foto) |
+| `casa/spazio.md`, `spazio.json` | pavimento per piano e per stanza, stanza del kernel, soffitto, porte, mobili che entrano e semi che passano il controllo dell'abitazione, di T303 e T406 (prima) e di T413 (dopo), a 16 |
+| `casa/<edificio>/dati-1/`, `casa/<edificio>.png`, `casa/riepilogo.md` | la via dei dati (lo Scenografo, una richiesta a Opus) sulle case del giro1 |
 
 Il banco delle misure (`lab/banco/misure.ts`) legge un edificio a 20 voxel per casella se non gli si dice altro; `gioco: true` nel bersaglio
 lo legge come il gioco scrive le voci dello Scultore (senza `vpt`: 16), `vpt` lo fissa. Le parti abitabili (`misura.ts`, `PARTI`) si misurano

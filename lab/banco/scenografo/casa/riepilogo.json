@@ -1,0 +1,265 @@
+{
+ "villetta": {
+  "edificio": "lab\\banco\\scenografo\\casa\\vuoto\\claude-opus-5-5\\giro1\\villetta-large\\programma.xml",
+  "dati-1": {
+   "usd": 0.027768,
+   "usdCli": 0.027768,
+   "chiamate": 1,
+   "secondi": 4,
+   "correzioni": 0,
+   "token": {
+    "input": 2932,
+    "cache": 0,
+    "output": 216
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 150,
+     "pezzi": 12,
+     "voxel": 10202,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      4,
+      4
+     ],
+     "stanzeArredate": [
+      3,
+      4
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8287945034353529
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 395,
+     "pezzi": 9,
+     "voxel": 8514,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      4,
+      4
+     ],
+     "stanzeArredate": [
+      3,
+      4
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.9263501517667946
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 188,
+     "pezzi": 12,
+     "voxel": 10426,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      4,
+      4
+     ],
+     "stanzeArredate": [
+      4,
+      4
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8566176470588236
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 113,
+     "pezzi": 12,
+     "voxel": 11332,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      4,
+      4
+     ],
+     "stanzeArredate": [
+      3,
+      4
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [],
+     "animaliLiberi": 1,
+     "varianza": 0.8777838427947598
+    }
+   ]
+  }
+ },
+ "fattoria": {
+  "edificio": "lab\\banco\\scenografo\\casa\\vuoto\\claude-opus-5-5\\giro1\\fattoria-large\\programma.xml",
+  "dati-1": {
+   "usd": 0.0216158,
+   "usdCli": 0.0216158,
+   "chiamate": 1,
+   "secondi": 5,
+   "correzioni": 0,
+   "token": {
+    "input": 2738,
+    "cache": 959,
+    "output": 360
+   },
+   "semi": [
+    {
+     "seme": 1,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 296,
+     "pezzi": 12,
+     "voxel": 7387,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      3,
+      3
+     ],
+     "stanzeArredate": [
+      3,
+      3
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "varianza": 0.8769920985670283
+    },
+    {
+     "seme": 2,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 199,
+     "pezzi": 12,
+     "voxel": 9803,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      3,
+      3
+     ],
+     "stanzeArredate": [
+      3,
+      3
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "varianza": 0.8832542450403065
+    },
+    {
+     "seme": 3,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 220,
+     "pezzi": 12,
+     "voxel": 10864,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      3,
+      3
+     ],
+     "stanzeArredate": [
+      3,
+      3
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "varianza": 0.8724202626641651
+    },
+    {
+     "seme": 4,
+     "regge": true,
+     "tentativi": 1,
+     "ms": 217,
+     "pezzi": 11,
+     "voxel": 9210,
+     "raggiunte": 1,
+     "stanzePercorribili": [
+      4,
+      4
+     ],
+     "stanzeArredate": [
+      4,
+      4
+     ],
+     "piani": [
+      2,
+      2
+     ],
+     "parti": [],
+     "giudicaPerso": [
+      "stanze"
+     ],
+     "animaliLiberi": 1,
+     "varianza": 0.8485961378983533
+    }
+   ]
+  }
+ },
+ "finestra": [
+  {
+   "prima": {
+    "session": 15,
+    "week": 65,
+    "read": "2026-11-17T22:14:27.661Z"
+   },
+   "dopo": {
+    "session": 15,
+    "week": 65,
+    "read": "2026-11-17T22:15:02.260Z"
+   },
+   "letture": [
+    {
+     "session": 15,
+     "week": 65,
+     "read": "2026-11-17T22:14:36.686Z"
+    }
+   ]
+  }
+ ]
+}

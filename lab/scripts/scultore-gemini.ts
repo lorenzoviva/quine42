@@ -10,7 +10,7 @@
 // T303: `--interno` asks the structure with its interior in the same program (the Scenografo's way (a), `lab/scripts/scenografo-misura.ts`).
 //
 //   npx vite-node lab/scripts/scultore-gemini.ts -- [--root ../../..] [--giro giro1] [--pensiero low|medium|high] [--scultore <modello>] [--solo forte,fattoria] [--taglie large,huge] [--tetto 10] [--out lab/banco/taglie/gemini]
-//   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-carbon,claude-sonnet-5-5 [--ripeti 2] [--sforzo low] [--cli-cmd "claude"] [--senza-immagini] [--finestra 80] [--offline] --out lab/banco/taglie/modelli
+//   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-carbon,claude-sonnet-5-5 [--ripeti 2] [--primo 1] [--sforzo low] [--cli-cmd "claude"] [--senza-immagini] [--finestra 80] [--offline] --out lab/banco/taglie/modelli
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli claude-opus-5-5 --via openrouter --tetto 4 [--offline] --out lab/banco/taglie/modelli/openrouter
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --misura [--out lab/banco/taglie/gemini]     # no call: measures and photographs the programs kept
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --concetti                                   # no call: concepts against seeds (T337), Gemini's and the hand-written
@@ -559,8 +559,10 @@ const giri = solo.flatMap((c) => taglie.map((t) => [c, t] as const));
 /** With --modelli: every Sculptor, every repetition, in its folder; otherwise T355's one round in --giro. */
 const MODELLI = opt('modelli')?.split(',').filter(Boolean);
 const RIPETI = Number(opt('ripeti') ?? 1);
+/** The number of the first round (T413: a second round alone, `--primo 2` is giro2, without writing the first again). */
+const PRIMO = Number(opt('primo') ?? 1);
 const rounds: Array<{ out: string; scultore?: string }> = MODELLI
-  ? MODELLI.flatMap((m) => Array.from({ length: RIPETI }, (_, i) => ({ out: path.join(BASE, m, `${opt('giro') ?? 'giro'}${i + 1}`), scultore: m })))
+  ? MODELLI.flatMap((m) => Array.from({ length: RIPETI }, (_, i) => ({ out: path.join(BASE, m, `${opt('giro') ?? 'giro'}${i + PRIMO}`), scultore: m })))
   : [{ out: path.join(BASE, opt('giro') ?? 'giro1'), scultore: opt('scultore') }];
 
 if (args.includes('--concetti')) {

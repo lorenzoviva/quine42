@@ -1,0 +1,62 @@
+{
+ "regole": [
+  {
+   "storey": 0,
+   "room": "hall",
+   "furniture": [
+    "banco",
+    "barile",
+    "furniture"
+   ],
+   "count": 4
+  },
+  {
+   "storey": 0,
+   "room": "room",
+   "furniture": [
+    "credenza",
+    "barile",
+    "banco"
+   ],
+   "count": 3
+  },
+  {
+   "storey": 0,
+   "room": "small",
+   "furniture": [
+    "barile",
+    "furniture"
+   ],
+   "count": 1
+  },
+  {
+   "storey": 1,
+   "room": "hall",
+   "furniture": [
+    "letto",
+    "letto",
+    "furniture",
+    "credenza"
+   ],
+   "count": 6
+  },
+  {
+   "storey": 1,
+   "room": "room",
+   "furniture": [
+    "letto",
+    "furniture"
+   ],
+   "count": 3
+  },
+  {
+   "room": "small",
+   "furniture": [
+    "furniture",
+    "barile"
+   ],
+   "count": 1
+  }
+ ],
+ "ignoti": []
+}

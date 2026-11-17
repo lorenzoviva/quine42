@@ -292,6 +292,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «stanze minime», «misure abitabili»
 - **Fermo**: nessuno (le misure stanno nel codice, non su disco).
 
+### Abitazione
+- **Inglese**: `dwelling`, `DWELLING`, `isDwelling`, `dwellingOf`, `dwellingErrors`, `storeyFloors`, `StoreyFloor`
+- **Definizione**: una struttura che cresce a regole in cui si abita (una casa, una fattoria, una baita, una locanda), detta dalla richiesta (le case comuni del mondo) o dalle parole del suo concetto, e nessuna di un forte, una torre, un tempio; dà alla casa il pavimento della sua taglia: almeno 10 caselle² di pavimento coperto dove sta il centro di un corpo al piano terra e a un altro piano, il piano terra in almeno due stanze (la sala e una stanza di 1,5 caselle² o più), misurato come il banco dello Scenografo (T413, ADR-0213).
+- **Dove vive**: `src/mj/classes.ts`, `src/mj/check.ts`, `src/kernel/interior.ts`, `src/kernel/agents/sculptor.ts`
+- **Da non usare**: «casa» per il concetto del controllo (una casa è una delle abitazioni), «residenza»
+- **Fermo**: nessuno (nulla su disco: la misura e la soglia stanno nel codice).
+
 ### Guardia degli interni
 - **Inglese**: `InteriorGuard`, `interiorPlan`, `stageGrid`, `STAGE`, `furnishFromStage`, `interiorKey`, `Refusal`
 - **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0212).

@@ -5768,7 +5768,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T412` col documento e gli screenshot citati; nell'esito la raccomandazione in tre righe. Sicurezza: nessuna superficie nuova.
 - Esito: scritti `docs/design/sotterranei-stato.md` (misure, browser, universi, stime di T52d/e/f e dei mobili, raccomandazione), 5 screenshot in `docs/design/sotterranei-stato/` e `lab/scripts/misura-cantine.ts`. Le 24 voci con `cellar` tengono la cantina a 16 voxel per casella; si scende, si risale e da sotto non si esce; ma `holesIn` apre solo 3 caselle su 15 della locanda e senza T52e la cantina resta sotto il terreno. Nessun agente chiede cantine. Raccomandazione: rimandare l'arredo; subito il buco su tutta la cantina (1 %, nuovo task); poi T52e senza strati, cantina nella via dei dati dello Scenografo dopo T410, T52f prima di T411, T52d ridotto per ultimo. `cellar.test.ts` misura ancora a 20 voxel per casella: nessun test a 16. Codice di gioco invariato. Sicurezza: nessuna superficie nuova.
 
-### T413 · La casa che usa la Grande (§ 10.0 di `scenografo.md`) — `da fare`
+### T413 · La casa che usa la Grande (§ 10.0 di `scenografo.md`) — `fatto` (`764aae59`)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
 - Step: 30
 - Contesto: approvato dall autore (17/11, chat, D62). Nasce da T406 (`dossier T406`): a 16 vpx lo Scultore dà alla casa un corpo di 35-45 voxel su 100 e una stanza per piano, così lo spazio calpestabile cresce al più di una volta e mezza. Serve prima della rigenerazione (T411), perché le case rifatte abbiano spazio da arredare.
@@ -5776,6 +5776,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: il controllo su edifici del banco (`misura16/`) che passano e non passano; suite e typecheck coi turni.
 - Browser: no.
 - Quando è fatto: commit su `task/T413`; nell'esito prima/dopo (caselle² per piano, stanze) e il costo. Sicurezza: nessuna superficie nuova.
+- Esito: controllo dell'abitazione nel kernel (`storeyFloors`, `dwellingErrors`, `DWELLING`: 10 caselle² al piano terra e a un altro piano, 2 stanze a terra di 1,5 o più) nei controlli e nella richiesta dello Scultore, prompt delle strutture col corpo dell'abitazione sotto i 16 023 caratteri, villetta offline ridisegnata, ADR-0213, kernel 0.9.6; prima → dopo: villetta 6,2 → 13,2 caselle² a terra (1 → 3 stanze) e 6,0 → 13,3 sopra, fattoria 5,0 → 11,0 (1 → 2-3) e 4,5 → 14,1, mobili 7-10 → 14-15, via dei dati 5,5-6,75 → 11-12 pezzi; soglia 10 confermata, ma una casa costa allo Scultore 2-3 volte quella di prima (1,18 $ e 1,64 $); spesa 2,90 $; manca il secondo edificio nuovo per concetto (fuori dal tetto); un giro doppio lanciato per errore fermato dopo due minuti (due chiamate a Opus perse, fuori dal registro); non provato: un'abitazione che passa grazie al portico coperto; sicurezza: nessuna superficie nuova.
 
 ### T414 · Integrare T409 nel base (conflitto con T407: glossario-censimento, ADR-0211, kernel 0.9.1) — `fatto` (`3763d8c2`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1

@@ -267,12 +267,60 @@ Cosa cambia rispetto a T303:
   che sta su `A` come toglie ciò che sta su `W`, e il pavimento di qualità deve guardare anche la varianza (task 3).
 - **Il programma povero c'è ancora** (la villetta 2: 2 pezzi, metà delle stanze): il pavimento di qualità resta necessario.
 
+### 9.2 La casa che usa la Grande (T413, 17/11)
+
+Il § 10.0 fatto (ADR-0213): un'abitazione vuole almeno **10 caselle² coperte al piano terra e a un altro piano e due stanze a terra** (la
+sala e una stanza di 1,5 caselle² o più), misurate dal kernel come qui (`storeyFloors` in `src/kernel/interior.ts`, le stesse stanze di
+`stanzeDi` seme per seme sugli edifici di `misura/` e `misura16/`), rimandate allo Scultore dai suoi controlli (`dwellingErrors`) e dette
+nella richiesta e nel prompt (il corpo di un'abitazione: 6 celle dietro il centro, 6 davanti, 7 per lato). Lo stesso Scultore di T406 (Opus
+5.5 sulla CLI, `scultore-gemini.ts`) ha riscritto villetta e fattoria a Grande col prompt nuovo; tutto in `lab/banco/scenografo/casa/`.
+
+**Prima e dopo** (`scenografo-spazio.ts`, `casa/spazio.md`; a 16 voxel per casella, media dei 4 semi; «prima» sono le case di T303 e T406
+lette alla densità del gioco):
+
+| edificio | piano terra: caselle², stanze (la sala) | di sopra | lato della stanza a terra (caselle) | mobili che entrano | il controllo dell'abitazione | costo dello Scultore |
+|---|---|---|---|---|---|---|
+| villetta di T303 | 6,3, 1 | 5,2 | 2,44 | 9,8 | 0 semi su 4 | — |
+| villetta di T406 | 6,2, 1 | 6,0 | 2,75 | 9,0 | 0 su 4 | 0,81 $ (5 chiamate) |
+| **villetta di T413** | **13,2, 3 (5,7)** | **13,3** | 1,81 | **14,8** | **4 su 4** | 1,64 $ (7 chiamate, voto 6) |
+| fattoria di T303 | 5,8, 2 (4,75 e 1,06) | 4,5 | 2,13 | 8,0 | 0 su 4 | — |
+| fattoria di T406 | 5,0, 1,3 | 4,5 | 2,13 | 6,8 | 0 su 4 | 0,36 $ (3 chiamate) |
+| **fattoria di T413** | **11,0, 2,3 (6,0)** | **14,1** | 1,81 | **14,3** | **4 su 4** | 1,18 $ (5 chiamate, voto 8) |
+
+Seme per seme la villetta nuova ha a terra 12,3-14,1 caselle² in tre stanze (5,2-6,1, 4,7-5,7 e 2,35: il corridoio dalla porta con una
+stanza per lato), di sopra 12,1-14,5; la fattoria 10,8-11,1 in due o tre stanze (la sala 5,9-6,1, la stanza della scala 3,6-5,0), di sopra
+14,1. **La via dei dati** sulle case nuove (`scenografo-misura.ts --vie dati`, una richiesta per edificio, `casa/riepilogo.md`, i fogli
+`casa/<edificio>.png`): 11,25 pezzi nella villetta e 11,75 nella fattoria (T406: 6,75 e 5,5), reggono 4 semi su 4 al primo seme d'arredo,
+13 stanze arredate su 16 e su 13, il posto degli animali libero, 0,03 $ e 0,02 $.
+
+Cosa dice:
+
+- **La soglia di 10 è giusta, non troppa**: tutte e due le case la passano su ogni seme con margine (11-14 caselle² per piano), lo spazio
+  calpestabile raddoppia (a terra da 5-6 a 11-13, di sopra da 4,5-6 a 13-14) e i mobili che entrano anche (da 7-10 a 14-15 pezzi; la via
+  dei dati da 5,5-6,75 a 11-12). Il lato della stanza più grande a terra scende a 29 voxel (1,81 caselle): le stanze sono più lunghe che
+  larghe, sopra la misura dello Scultore (28) ma vicino.
+- **Costa i rifacimenti**: le prime risposte cadono sulla soglia (la fattoria due volte con 9,2-9,3 caselle² a terra, la villetta una con
+  5,4 di sopra sotto il tetto, poi una su «piani: 1»), e una casa costa due o tre volte quella di T406 (1,18 $ e 1,64 $ contro 0,36 $ e
+  0,81 $). La leva per rientrare è che la prima risposta arrivi già sopra 10 (la richiesta dice 75 × 65 voxel dentro i muri), non una soglia
+  più bassa: a 9 la fattoria sarebbe passata alla seconda risposta, ma con lo spazio di prima di sopra.
+- **Il corpo del prompt si copia**: la fattoria ha esattamente il corpo detto (6, 6, 7: la stessa casa della villetta offline, 14,08
+  caselle² di sopra su ogni seme), la villetta lo ha cambiato (8 dietro, 4 davanti). Una proposta per la prossima stesura del prompt: «almeno»
+  e qualcosa in più per seme, perché due concetti non abbiano lo stesso corpo.
+- **L'Artista** trova il tetto troppo alto e massiccio su un corpo più grande (il tetto a padiglione sale di più): voto 6 alla villetta.
+
+La misura è costata **2,82 $ a listino** per le due case (4 + 5 chiamate a Opus: composizione, programma, due correzioni del controllo; la
+villetta anche la revisione per il voto sotto 7) più 0,03 $ dell'Artista su Gemini (3 giudizi) e 0,05 $ della via dei dati:
+**2,90 $** sul registro, sotto il tetto di 3 $; per questo **un edificio nuovo per concetto e non due** (un secondo giro avrebbe portato il
+registro a 5-6 $). Due chiamate a Opus di un giro lanciato due volte per errore sono state fermate dopo circa due minuti, senza risposta e
+fuori dal registro. La finestra delle 5 ore è passata dal 3 al 15 %, la settimana dal 64 al 65 %.
+
 ## 10. Task che ne nascono (proposta per l'autore)
 
 Riscritti da T406 sugli edifici a 16 voxel per casella (la prima stesura, di T303, era sugli edifici a 20). L'ordine proposto: 0, poi 1 e 2
 insieme, poi 3, 4 e 5. I primi due non chiamano modelli; lo 0 chiama lo Scultore per misurare.
 
-0. **La casa che usa la Grande** (nuovo, nasce dal § 9.1): lo spazio calpestabile non cresce col riscalamento oltre una volta e mezza, perché
+0. **Fatto da T413** (ADR-0213, le misure al § 9.2: la soglia di 10 caselle² e due stanze a terra tiene, con un costo dello Scultore due o
+   tre volte quello di prima). **La casa che usa la Grande** (nuovo, nasce dal § 9.1): lo spazio calpestabile non cresce col riscalamento oltre una volta e mezza, perché
    lo Scultore dà alla casa un corpo di 35-45 voxel su 100 e un piano di una stanza sola. Nel prompt dello Scultore (`sculptor.md`, «What
    fits») il pavimento coperto che una casa vuole a Grande (per esempio almeno 10-12 caselle² per piano e due stanze a terra, la sala e una
    stanza, misurate come qui) e un controllo del kernel che lo misura (`habitableParts` sa già il lato della stanza; serve l'area coperta per

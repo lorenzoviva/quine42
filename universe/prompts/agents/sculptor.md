@@ -185,8 +185,8 @@ other parts: take the standard, not the fort.
 </sequence>
 ```
 `soil="E"` is the soil of the world (the kernel writes it over the bottom layer at every size) and `origin="bottom"` puts H at its centre; the
-first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **20 × 20 cells at Large (100 × 100 × 80 voxels, 6.25 × 6.25
-tiles), 30 × 30 at Huge (150, 9.4 × 9.4), 100 × 100 at Gargantuan (500, 31.25 × 31.25: the land of four places)**: write rules that do not depend on it, anchored to H, to
+first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is **a fifth of the
+box: 20 × 20 cells at Large, 30 × 30 at Huge, 100 × 100 at Gargantuan**: write rules that do not depend on it, anchored to H, to
 what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
 same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
 of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of
@@ -231,13 +231,13 @@ of a line, the centre), never a `prl` with `p` on every cell of an edge (that fr
 - **The stair** (`part-stair`) climbs toward large x and a body walks onto its first step **in line**: its zone has two cells of free floor
   before it (the landing) and floor after it, where it comes out one storey up.
 - **A room** is at least 28 voxels clear from wall to wall at every size, counting where a body stands.
+- **An inner wall**: a row of its letter from wall to wall (`<all in="[Hj]h" out="*j" symmetry="(x)"/>`, then `[hj]E`), a storey high.
 
 ## What fits: the size decides what is built, not how big
-A tile is always 16 voxels and a person 24 tall, so a larger size is a larger area at the same scale: the parts one lives in never shrink (the request says their least
-measures), a program too small for the whole building builds **less** of it, a larger area holds **more**, never the same building bigger.
-Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
+A tile is always 16 voxels: a larger size is a larger area at the same scale, and holds **more**, never the same building bigger. Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
 a well at Huge, the full fort with a moat at Gargantuan; a country house is the house and its porch at Large, then the hedge and the trees, then an
-orchard and a well. Then write it with rules that choose from the area, not from numbers:
+orchard and a well. **A dwelling** (the request says it) takes most of the area: its body 6 cells behind H, 6 in front, 7 to each side (not
+3 and 5), two rooms below; porch and garden take the rest. Then write it with rules that choose from the area, not from numbers:
 ```xml
 <!-- the yard grows four more where six cells of ground go on past it (once: steps="1"), three more where seven go on; always a rectangle -->
 <all in="cEEEEEE" out="*cccc**" steps="1"/><all in="cE/*c" out="*c/**"/>
@@ -276,7 +276,8 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more
 - **The doors** come from the plan: where the road (or the paving) meets the foot of a wall, the seed `O` through the whole thickness of the
   wall, with wall above it; `part-door` raises it. For a wall of one cell: `<all in="W/q" out="O/*" symmetry="()" steps="1"/><all in="W/O"
   out="O/*" symmetry="()" steps="4"/>`; between two rooms, a seed in the shared wall widened to 11: `<one in="fWWWWWf" out="*OOOOO*"
-  symmetry="(x)" steps="1"/><all in="O/W" out="*/O" symmetry="()" steps="5"/><all in="W/O" out="O/*" symmetry="()" steps="5"/>`. The
+  symmetry="(x)" steps="1"/><all in="O/W" out="*/O" symmetry="()" steps="5"/><all in="W/O" out="O/*" symmetry="()" steps="5"/>`; turned
+  (`f/W/W/W/W/W/f`) in a wall along x. The
   actions are yours: `<action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>` and
   `close` back, with hidden letters.
 - **The parts of the seed** the request lists are the parts one lives in, already right: include each with `<import file="…"/>` at the point
@@ -297,10 +298,9 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more
   used under half; `name` in the language of the world.
 
 ## What the game checks on every seed, at both sizes
-A door at least 11 × 30 that the action `open` takes away; **at least 2 covered storeys one reaches on foot** from the front, through the
-door, on stairs of `part-stair` (the body is 9 wide, never a stair from the side); a room of at least 28 a side under a
-ceiling at least 30 up; the larger size contains more (another kind of part, or a quarter more parts); nothing floating, everything on the
-bottom; at least 40 tall; under 85 % of the box full; finished in 8 seconds at every size. Then the Artist looks at the photographs: at least
+The door the action `open` takes away and the parts at the request's measures; **at least 2 covered storeys one reaches on foot** from the
+front, through the door, on stairs of `part-stair` (the body is 9 wide, never a stair from the side); a dwelling's floor; the larger size contains more; nothing floating, everything on the
+bottom; under 85 % of the box full; finished in 8 seconds at every size. Then the Artist looks at the photographs: at least
 6 windows on 3 sides, 6 materials, details on all sides, 4 heights of the top. The time: a pattern that starts with `*` or with air
 costs a lot, a rare letter in the first cell little.
 

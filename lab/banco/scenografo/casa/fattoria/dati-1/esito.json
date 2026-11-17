@@ -1,0 +1,135 @@
+{
+ "richiesta": {
+  "via": "dati",
+  "n": 1,
+  "chiamate": [
+   {
+    "model": "claude-opus-5-5",
+    "input": 2,
+    "written5m": 0,
+    "written1h": 1777,
+    "read": 959,
+    "output": 360,
+    "usd": 0.0216158,
+    "usdCli": 0.0216158,
+    "task": "interior.dati",
+    "seconds": 5
+   }
+  ],
+  "secondi": 5,
+  "testo": "```json\n{\"rules\": [\n  {\"storey\": 0, \"room\": \"hall\", \"furniture\": [\"banco\", \"barile\", \"furniture\"], \"count\": 4},\n  {\"storey\": 0, \"room\": \"room\", \"furniture\": [\"credenza\", \"barile\", \"banco\"], \"count\": 3},\n  {\"storey\": 0, \"room\": \"small\", \"furniture\": [\"barile\", \"furniture\"], \"count\": 1},\n  {\"storey\": 1, \"room\": \"hall\", \"furniture\": [\"letto\", \"letto\", \"furniture\", \"credenza\"], \"count\": 6},\n  {\"storey\": 1, \"room\": \"room\", \"furniture\": [\"letto\", \"furniture\"], \"count\": 3},\n  {\"room\": \"small\", \"furniture\": [\"furniture\", \"barile\"], \"count\": 1}\n]}\n```",
+  "correzioni": 0
+ },
+ "usd": 0.0216158,
+ "usdCli": 0.0216158,
+ "semi": [
+  {
+   "seme": 1,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 296,
+   "pezzi": 12,
+   "voxel": 7387,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    3,
+    3
+   ],
+   "stanzeArredate": [
+    3,
+    3
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [
+    "stanze"
+   ],
+   "animaliLiberi": 1,
+   "varianza": 0.8769920985670283
+  },
+  {
+   "seme": 2,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 199,
+   "pezzi": 12,
+   "voxel": 9803,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    3,
+    3
+   ],
+   "stanzeArredate": [
+    3,
+    3
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [
+    "stanze"
+   ],
+   "animaliLiberi": 1,
+   "varianza": 0.8832542450403065
+  },
+  {
+   "seme": 3,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 220,
+   "pezzi": 12,
+   "voxel": 10864,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    3,
+    3
+   ],
+   "stanzeArredate": [
+    3,
+    3
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [
+    "stanze"
+   ],
+   "animaliLiberi": 1,
+   "varianza": 0.8724202626641651
+  },
+  {
+   "seme": 4,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 217,
+   "pezzi": 11,
+   "voxel": 9210,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    4,
+    4
+   ],
+   "stanzeArredate": [
+    4,
+    4
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [
+    "stanze"
+   ],
+   "animaliLiberi": 1,
+   "varianza": 0.8485961378983533
+  }
+ ]
+}

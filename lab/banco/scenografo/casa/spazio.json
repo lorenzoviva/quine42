@@ -1,0 +1,752 @@
+[
+ {
+  "nome": "villetta",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 5.9921875,
+      "sala": 5.9921875,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 1790,
+    "casa": [
+     "casa: pavimento coperto 6,0 · 5,2 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,0 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 5.93359375,
+      "sala": 5.93359375,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 1151,
+    "casa": [
+     "casa: pavimento coperto 5,9 · 5,2 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (5,9 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.55078125,
+      "sala": 6.55078125,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 1139,
+    "casa": [
+     "casa: pavimento coperto 6,6 · 5,2 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,6 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.55078125,
+      "sala": 6.55078125,
+      "lato": 2.4375,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.234375,
+      "sala": 5.234375,
+      "lato": 2.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,69 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 1091,
+    "casa": [
+     "casa: pavimento coperto 6,6 · 5,2 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,6 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   }
+  ]
+ },
+ {
+  "nome": "villetta",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 1229,
+    "casa": [
+     "casa: pavimento coperto 6,2 · 6,0 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,2 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 1295,
+    "casa": [
+     "casa: pavimento coperto 6,2 · 6,0 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,2 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 1156,
+    "casa": [
+     "casa: pavimento coperto 6,2 · 6,0 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,2 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 6.19140625,
+      "sala": 6.19140625,
+      "lato": 2.75,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 5.95703125,
+      "sala": 5.95703125,
+      "lato": 2.75,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 9,
+    "ms": 950,
+    "casa": [
+     "casa: pavimento coperto 6,2 · 6,0 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (6,2 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   }
+  ]
+ },
+ {
+  "nome": "villetta",
+  "chi": "T413 giro1 (abitazione)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 3,
+      "caselle": 13.265625,
+      "sala": 5.66796875,
+      "lato": 1.8125,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 13.375,
+      "sala": 13.375,
+      "lato": 3.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 13,
+    "ms": 1916,
+    "casa": []
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 3,
+      "caselle": 13.0703125,
+      "sala": 5.66796875,
+      "lato": 1.8125,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 13.1796875,
+      "sala": 13.1796875,
+      "lato": 3.4375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 15,
+    "ms": 1500,
+    "casa": []
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 3,
+      "caselle": 14.125,
+      "sala": 6.09765625,
+      "lato": 1.8125,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 14.48828125,
+      "sala": 14.48828125,
+      "lato": 3.6875,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 18,
+    "ms": 1392,
+    "casa": []
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 3,
+      "caselle": 12.26953125,
+      "sala": 5.23828125,
+      "lato": 1.8125,
+      "soffitto": 2.0625
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 12.125,
+      "sala": 12.125,
+      "lato": 3.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 13,
+    "ms": 1895,
+    "casa": []
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T303 (prompt a 20)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 7,
+    "ms": 784,
+    "casa": [
+     "casa: pavimento coperto 5,8 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 · 1,1 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 7,
+    "ms": 811,
+    "casa": [
+     "casa: pavimento coperto 5,8 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 · 1,1 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 855,
+    "casa": [
+     "casa: pavimento coperto 5,8 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 · 1,1 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 8,
+    "ms": 939,
+    "casa": [
+     "casa: pavimento coperto 5,8 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 · 1,1 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T406 (prompt a 16)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 5,
+    "ms": 996,
+    "casa": [
+     "casa: pavimento coperto 4,7 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 6,
+    "ms": 792,
+    "casa": [
+     "casa: pavimento coperto 4,7 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 5.80859375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 10,
+    "ms": 856,
+    "casa": [
+     "casa: pavimento coperto 5,8 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 · 1,1 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 1,
+      "caselle": 4.74609375,
+      "sala": 4.74609375,
+      "lato": 2.125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 4.51171875,
+      "sala": 4.51171875,
+      "lato": 2.125,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,94 × 1,88"
+    ],
+    "mobili": 6,
+    "ms": 784,
+    "casa": [
+     "casa: pavimento coperto 4,7 · 4,5 caselle² per piano, un'abitazione ne vuole almeno 10 al piano terra e a un altro piano: dai alla casa più del lotto (un corpo più largo e più profondo), non un giardino più grande",
+     "casa: il piano terra ha una stanza sola (4,7 caselle²), un'abitazione vuole a terra almeno 2 stanze di 1,5 caselle² o più, la sala e una stanza, divise da un muro con una porta"
+    ]
+   }
+  ]
+ },
+ {
+  "nome": "fattoria",
+  "chi": "T413 giro1 (abitazione)",
+  "vpt": 16,
+  "semi": [
+   {
+    "seme": 1,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 11.06640625,
+      "sala": 6.1015625,
+      "lato": 1.8125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 14.08203125,
+      "sala": 14.08203125,
+      "lato": 3.375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 15,
+    "ms": 1405,
+    "casa": []
+   },
+   {
+    "seme": 2,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 11.06640625,
+      "sala": 6.1015625,
+      "lato": 1.8125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 14.08203125,
+      "sala": 14.08203125,
+      "lato": 3.375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 14,
+    "ms": 1285,
+    "casa": []
+   },
+   {
+    "seme": 3,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 2,
+      "caselle": 11.06640625,
+      "sala": 6.1015625,
+      "lato": 1.8125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 14.08203125,
+      "sala": 14.08203125,
+      "lato": 3.375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 13,
+    "ms": 1243,
+    "casa": []
+   },
+   {
+    "seme": 4,
+    "piani": [
+     {
+      "piano": 0,
+      "stanze": 3,
+      "caselle": 10.83203125,
+      "sala": 5.8671875,
+      "lato": 1.8125,
+      "soffitto": 3.9375
+     },
+     {
+      "piano": 1,
+      "stanze": 1,
+      "caselle": 14.08203125,
+      "sala": 14.08203125,
+      "lato": 3.375,
+      "soffitto": 1.9375
+     }
+    ],
+    "porte": [
+     "0,69 × 1,88",
+     "0,94 × 1,88"
+    ],
+    "mobili": 15,
+    "ms": 1220,
+    "casa": []
+   }
+  ]
+ }
+]

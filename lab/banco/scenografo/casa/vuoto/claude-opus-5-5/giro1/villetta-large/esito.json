@@ -1,0 +1,94 @@
+{
+ "concetto": "villetta",
+ "taglia": "large",
+ "scultore": "claude-opus-5-5",
+ "modello": "claude-opus-5-5",
+ "voto": 6,
+ "chiamate": 7,
+ "secondi": 461,
+ "usd": 1.6432,
+ "usdGemini": 0.0209,
+ "usdClaude": 1.6222,
+ "usdCli": 1.6222,
+ "claude": [
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 357,
+   "read": 9923,
+   "output": 7481,
+   "usd": 0.1544686,
+   "usdCli": 0.1544686,
+   "task": "model.sculpt",
+   "seconds": 84
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 7002,
+   "read": 8031,
+   "output": 16598,
+   "usd": 0.3895902,
+   "usdCli": 0.38959020000000005,
+   "task": "model.sculpt",
+   "seconds": 179
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 28206,
+   "read": 8031,
+   "output": 5876,
+   "usd": 0.34478220000000004,
+   "usdCli": 0.3447822,
+   "task": "model.sculpt",
+   "seconds": 43
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 28222,
+   "read": 8031,
+   "output": 6037,
+   "usd": 0.3481302,
+   "usdCli": 0.3481302,
+   "task": "model.sculpt",
+   "seconds": 47
+  },
+  {
+   "model": "claude-opus-5-5",
+   "input": 2,
+   "written5m": 0,
+   "written1h": 28933,
+   "read": 8031,
+   "output": 7610,
+   "usd": 0.3852782,
+   "usdCli": 0.3852782,
+   "task": "model.sculpt",
+   "seconds": 70
+  }
+ ],
+ "token": {
+  "prompt": 141005,
+  "output": 44042,
+  "thoughts": 849
+ },
+ "perCompito": [
+  {
+   "model": "claude-opus-5-5",
+   "task": "model.sculpt",
+   "calls": 5,
+   "usd": 1.6222
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 2,
+   "usd": 0.0209
+  }
+ ]
+}
