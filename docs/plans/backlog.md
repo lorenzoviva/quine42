@@ -5838,7 +5838,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T419`; nell'esito il costo dei modelli nuovi. Sicurezza: nessuna superficie nuova.
 
 
-### T420 · Integrare T417 nel base (conflitto con T413: AGENTS.md, sculptor.ts, mockStructure.ts, modeldirector.ts) — `da fare`
+### T420 · Integrare T417 nel base (conflitto con T413: AGENTS.md, sculptor.ts, mockStructure.ts, modeldirector.ts) — `fatto` (`e7117157`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 30
 - Contesto: `integra T417` (le cantine chieste dal Cartografo e scolpite dallo Scultore, `part-cellar`, cose `under`, componente `below`) ha trovato conflitti in `AGENTS.md`, `src/kernel/agents/sculptor.ts`, `src/kernel/ai/mockStructure.ts` e `src/kernel/modeldirector.ts`: nel frattempo è entrato T413 (la casa che usa la Grande, `DWELLING`, `dwellingErrors`, `isDwelling`, villetta offline abitazione, ADR-0213, kernel 0.9.6). Nasce da T417: `dossier T417`, `dossier T413`.
@@ -5846,3 +5846,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/cellar-asked.test.ts` e i test di T413 verdi insieme.
 - Browser: sì, breve — `?skip&offline`: la villetta offline con la cantina, si scende e si risale come in T417; screenshot.
 - Quando è fatto: commit su `task/T420`; poi l'orchestratore integra T420 e `integra T417` toglie worktree e branch di T417. Sicurezza: nessuna superficie nuova.
+- Esito: merge di T417 su T413: i controlli dello Scultore vogliono insieme abitazione e cantina (`CheckOptions { dwelling, cellar }`), `storeyFloors`/`dwellingErrors` non contano la cantina (sotto più di un gradino, come `reachableStoreys`), `habitablePartsOf` con `base`, il ModelDirector chiede abitazione e cantina; villetta offline con la cantina anche sotto il muro interno e corpo largo 8 celle per lato (il buco della scala la portava a 9,8 caselle² a terra al seme 2; ora 11,8-13,0 con la cantina, 13,5-14,3 senza, sempre ≥ 2 stanze); prompt delle strutture entro 16 023 caratteri; kernel 0.9.7 (version.ts, package.json, seme); AGENTS, dettagli, ADR-0091, ADR-0213, sotterranei-stato § 9; fixture e misure del banco invariate. Suite intera: 3 fallimenti, tutti per la versione del seme, corretti e riprovati verdi sui loro file (la suite intera non rilanciata dopo la correzione); typecheck verde. Non provati: una cantina scolpita da Gemini, il multigiocatore. Sicurezza: nessuna superficie nuova.

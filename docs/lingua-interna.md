@@ -247,18 +247,18 @@ posto di un pannello sul filo).
 | [Campi dei piani dei luoghi (`maps/*.json`)](#campi-piani) | campi | 15 | disco, filo | T308a (0.4) |
 | [Campi di `models/index.json` e attributi dei programmi](#campi-modelli) | campi | 17 | disco, prompt | T308a (0.4) |
 | [Percorsi dell’universo e del server](#percorsi) | percorsi | 17 | disco, filo | T308a (0.4) |
-| [Messaggi del protocollo (`t`)](#messaggi) | valori | 31 | filo | T308b (0.5) |
+| [Messaggi del protocollo (`t`)](#messaggi) | valori | 33 | filo | T308b (0.5) |
 | [Operazioni e stati sul filo](#valori-filo) | valori | 24 | filo | T308b (0.5) |
 | [Campi dei messaggi](#campi-filo) | campi | 53 | filo | T308b (0.5) |
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
 | [Campi dei componenti](#campi-componenti) | campi | 34 | filo, Lua, prompt | T308b (0.5) |
 | [Nomi dell’API Lua, eventi del bus, chiavi del magazzino](#api-lua) | valori | 6 | Lua, prompt | T308b (0.5) |
-| [«Dove» di una cosa in un piano (dentro o fuori i lotti)](#dove-piano) | valori | 3 | disco, filo, prompt | T310b (0.7) |
+| [«Dove» di una cosa in un piano (dentro o fuori i lotti)](#dove-piano) | valori | 4 | disco, filo, prompt | T310b (0.7) |
 | [Tipi di ambiente (all’aperto, al chiuso, misto)](#tipi-ambiente) | valori | 3 | disco, prompt | T310b (0.7) |
 | [Direzioni della bussola](#direzioni) | valori | 9 | prompt, solo codice | T310b (0.7) |
 | [Tipi di ciò che la Fucina crea](#tipi-fucina) | valori | 3 | prompt, solo codice | T310b (0.7) |
 | [Azioni di un individuo in un dialogo e modi della sua mente (`mind.mode`)](#azioni-npc) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
-| [Incarichi del Referente e interventi della sessione del Concilio](#incarichi) | valori | 12 | prompt, solo codice | T310b (0.7) |
+| [Incarichi del Referente e interventi della sessione del Concilio](#incarichi) | valori | 14 | prompt, solo codice | T310b (0.7) |
 | [Posti degli oggetti (dove si indossano o si impugnano)](#posti) | valori | 10 | disco, Lua, filo, prompt | T310b (0.7) |
 | [Ruoli dei codici di un timbro (`codes`)](#ruoli-timbri) | valori | 9 | disco, prompt | T310b (0.7) |
 | [Interazioni di un concetto della Fucina](#interazioni) | valori | 4 | prompt, solo codice | T310b (0.7) |
@@ -266,7 +266,7 @@ posto di un pannello sul filo).
 | [Dove si riapre gli occhi dopo la morte](#ripartenza) | valori | 2 | prompt, solo codice | T310b (0.7) |
 | [Bonus di una cosa indossata o impugnata](#bonus) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
 | [Campi delle risposte del Concilio (gli schemi delle richieste)](#campi-risposte) | campi | 164 | prompt | T310b (0.7) |
-| **totale** | | **1165** | | T307a: 192 · T307b: 301 · T308a: 275 · T308b: 164 · T310b: 233 |
+| **totale** | | **1170** | | T307a: 192 · T307b: 301 · T308a: 275 · T308b: 166 · T310b: 236 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -1528,7 +1528,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/session/protocol.ts (ClientMsg, ServerMsg)`, `src/session/server.ts (LIMITS)`, `src/session/thin.ts`, `src/session/client.ts`
 - **Tocca**: filo · **lingua**: inglese · **task**: T308b, contratto 0.5
-- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata) e `pace` (T373, ADR-0196: il ritmo del mondo) nascono inglesi; `carta` e `ritmo` sono solo le parole del concetto, nessun client le ha mandate
+- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo) e `region` (T375, ADR-0201: le regioni del master) nascono inglesi; `carta`, `ritmo` e `regione` sono solo le parole del concetto, nessun client le ha mandate
 
 | italiano | interno |
 |---|---|
@@ -1564,6 +1564,7 @@ posto di un pannello sul filo).
 | `file` | `file` |
 | `carta` | `card` |
 | `ritmo` | `pace` |
+| `regione` | `region` |
 
 <a id="valori-filo"></a>
 ### Operazioni e stati sul filo (`valori-filo`)
@@ -1760,6 +1761,7 @@ posto di un pannello sul filo).
 | `dentro` | `inside` |
 | `fuori` | `outside` |
 | `ovunque` | `anywhere` |
+| `sotto` | `under` |
 
 <a id="tipi-ambiente"></a>
 ### Tipi di ambiente (all’aperto, al chiuso, misto) (`tipi-ambiente`)

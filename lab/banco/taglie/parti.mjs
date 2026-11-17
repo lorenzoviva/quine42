@@ -188,7 +188,86 @@ your colour); #91, #92 and #94 its own markers.`,
 `;
 }
 
-export const PARTS = { 'part-stair': stair(), 'part-door': door(), 'part-battlements': battlements(), 'part-slits': slits() };
+/**
+ * The cellar's stair (T417): treads of 5 and risers of 3 (a step at 16 voxels a tile), so that a body's width (9 voxels) never stands over
+ * two risers: over a cellar a body needs a floor within a step under every column it covers (`rampBlocks`, T52b). A landing of 5 at its
+ * foot; 6 treads climb the 20 voxels of a cellar of one tile; 5 of floor past the top, under the floor above, where one steps off the stair;
+ * a deeper cellar needs a longer room (13 treads for two).
+ */
+const CELLAR_LANDING = 5;
+const CELLAR_TOP = 5;
+const CELLAR_TREAD = 5;
+const CELLAR_RISE = 3;
+const CELLAR_STAIR = 6 * CELLAR_TREAD;
+const CELLAR_WIDTH = 10;
+/** The air a body needs over a tread (0.7 of a tile at 16, as `surfaces` measures it): a tread nearer than this to the floor above opens it. */
+const CELLAR_HEADROOM = 10;
+
+function cellar() {
+  const L = CELLAR_LANDING + CELLAR_STAIR + CELLAR_TOP;
+  const T = CELLAR_TREAD;
+  // The strip: along the front wall of the cellar (V beside it toward large y, where the door is), just above the floor (D under it); the
+  // landing and the floor past the top left as they are, the stair marked. Along the wall, the rest of the cellar stays one room.
+  const stripIn = layers(`${rows(rep('#90', L), CELLAR_WIDTH)}/${rep('V', L)}`, rows(rep('D', L), CELLAR_WIDTH + 1));
+  const stripOut = layers(`${rows(rep('*', CELLAR_LANDING) + rep('#91', CELLAR_STAIR) + rep('*', CELLAR_TOP), CELLAR_WIDTH)}/${rep('*', L)}`, rows(rep('*', L), CELLAR_WIDTH + 1));
+  // The first tread: the first T cells of the strip, its top a riser up (the head on its last column); then every tread one riser up and T forward.
+  const room = rep('#90', T);
+  const firstIn = layers(...Array(CELLAR_RISE - 1).fill(room), '#91' + rep('#92', T - 1));
+  const firstOut = layers(rep('k', T - 1) + '#93', ...Array(CELLAR_RISE - 2).fill(rep('*', T)), rep('k', T));
+  const climbIn = layers(...Array(CELLAR_RISE).fill('*' + room), '#93' + rep('*', T));
+  const climbOut = layers('*' + rep('k', T - 1) + '#93', ...Array(CELLAR_RISE - 1).fill(rep('*', T + 1)), 'k' + rep('*', T));
+  return `${note(
+    `The cellar (part-cellar): a part one lives in under the ground, included with <import file="part-cellar"/> after your floors have risen
+and before part-stair, when the request asks for a cellar: the box then has that many voxels under the soil. You mark with D the first
+layer under the soil, under the floor of the rooms the cellar goes under, before anything else is written there: <all in="h B" out="* D"/>
+under a plan letter h on the soil, before it rises. D must hold ${L + 4} × ${CELLAR_WIDTH + 4} at least (${L + 4} along x) and room beside the stair, and stay
+10 voxels back from your front wall: the floor opens over the upper treads (${4 * T} × ${CELLAR_WIDTH} for a cellar of one tile), and one walks between them and the door. It digs the cellar down to the bottom of the box: D is its floor, V its
+walls, two thick along its edge; from a landing of ${CELLAR_LANDING}, its stair climbs along its front wall (the side of large y) toward large x by treads of ${T} and risers of ${CELLAR_RISE} until your floor, with ${CELLAR_TOP} of floor past its top (a
+deeper cellar needs a longer room: a tread more for every ${CELLAR_RISE} voxels). Without room under the soil it does nothing. Its letters: D (yours, then
+the floor of the cellar), V the walls, k the steps (give D, V and k your colours), #90-#93 its own markers; the union "=" is the letters of
+your floors and slabs (<union symbol="=" values="…"/> in your program wins over this one).`,
+    'Alone it builds a house of two storeys on the soil from its origin and digs its cellar, so that it is validated on its own (its entry has a cellar of one tile).',
+  )}
+<sequence values="BSDVk#90#91#92#93#94#95#96I#97" size="60 40 92" symmetry="()" origin="bottom" soil="#93">
+  <union symbol="=" values="#96#95"/>
+  <color symbol="D" value="6f655a" name="pavimento della cantina"/><color symbol="V" value="8a8172" name="muro della cantina"/><color symbol="k" value="9a7048" name="scala"/>
+  <color symbol="S" value="7d766c" name="muro di prova"/><color symbol="#93" hidden="True" name="terreno di prova"/><color symbol="#96" value="8e6a44" name="pavimento di prova"/>
+  <color symbol="#95" value="8e6a44" name="solaio di prova"/><color symbol="#94" value="7a4a26" name="porta di prova"/><color symbol="#97" hidden="True"/>
+  <color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="I" hidden="True"/>
+${house({ floor: '#96', slab: '#95', ground: '#93', door: '#94' })}
+  <all in="#96 B" out="* D"/>
+
+  <!-- 1. The cellar: D goes down to the bottom of the box; what has D under it is the room (#90), the bottom stays D, the floor. -->
+  <all in="D B" out="* D"/>
+  <prl in="D D" out="#90 *" steps="1"/>
+  <!-- 2. The walls: the room's cells beside the earth (the air outside D) become V, two thick. -->
+  <prl in="#90B" out="VB" steps="1" symmetry="(xy)"/>
+  <prl in="#90V" out="VV" steps="1" symmetry="(xy)"/>
+  <!-- 3. The strip of the stair, ${L} × ${CELLAR_WIDTH} of the room along its front wall (large y), just above the floor: the first ${CELLAR_LANDING} toward small x stay free (the landing), then the stair, then ${CELLAR_TOP} free past its top. -->
+  <one in="${stripIn}" out="${stripOut}" symmetry="()" steps="1"/>
+  <!-- 4. The first tread: the first ${T} cells of the strip, ${CELLAR_RISE} high (the head on its last column); the rest of the strip waits. Every tread then
+       goes ${CELLAR_RISE} up and ${T} forward through the room, until the floor above stops it (the last tread is one or two under it). -->
+  <prl in="#91#91" out="*#92" steps="1"/>
+  <all in="${firstIn}" out="${firstOut}" symmetry="()" steps="1"/>
+  <all in="${climbIn}" out="${climbOut}" symmetry="()"/>
+  <prl in="#93" out="k" steps="1"/>
+  <!-- 5. Solid under the treads, down to the strip, which is their foot; the rest of the strip goes back to the room. -->
+  <all in="k #90" out="* k"/>
+  <prl in="k #92" out="* k" steps="1"/>
+  <prl in="#92" out="#90" steps="1"/>
+  <!-- 6. The opening: over every tread the room's air rises ${CELLAR_HEADROOM}; where it meets the floor above, the floor opens, through all its layers. -->
+  <all in="#90 k" out="#93 *"/>
+  <all in="#90 #93" out="#93 *" steps="${CELLAR_HEADROOM}"/>
+  <all in="= #93" out="#93 *"/>
+  <prl in="#93" out="B" steps="1"/>
+  <prl in="#90" out="B" steps="1"/>
+</sequence>
+<action name="open" label="Apri la porta"><all><rule in="#94" out="#97"/></all></action>
+<action name="close" label="Chiudi la porta"><all><rule in="#97" out="#94"/></all></action>
+`;
+}
+
+export const PARTS = { 'part-stair': stair(), 'part-door': door(), 'part-battlements': battlements(), 'part-slits': slits(), 'part-cellar': cellar() };
 
 const dir = new URL('../../../universe/models/', import.meta.url);
 for (const [id, xml] of Object.entries(PARTS)) fs.writeFileSync(new URL(`${id}.xml`, dir), xml);

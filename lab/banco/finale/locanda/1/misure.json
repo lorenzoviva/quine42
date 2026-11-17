@@ -11,10 +11,8 @@
   "dollari": 1.3941558,
   "ms": 746108,
   "caratteriXml": 11046,
-  "passa": false,
-  "difetti": [
-    "murato: 0.38 (serve ≤ 0.25)"
-  ],
+  "passa": true,
+  "difetti": [],
   "voci": [
     {
       "id": "finisce",
@@ -31,19 +29,19 @@
     {
       "id": "piani",
       "ok": true,
-      "valore": "3",
+      "valore": "4",
       "richiesto": "≥ 2"
     },
     {
       "id": "testa",
       "ok": true,
-      "valore": "1.6 1.7 1.8",
+      "valore": "1.6 1.7 1.8 1.6",
       "richiesto": "≥ 1.5 caselle per piano"
     },
     {
       "id": "stanze",
       "ok": true,
-      "valore": "3",
+      "valore": "5",
       "richiesto": "≥ 3"
     },
     {
@@ -54,8 +52,8 @@
     },
     {
       "id": "murato",
-      "ok": false,
-      "valore": "0.38",
+      "ok": true,
+      "valore": "0",
       "richiesto": "≤ 0.25"
     },
     {
@@ -144,12 +142,19 @@
         "area": 2.7325,
         "testa": 1.8,
         "stanze": 1
+      },
+      {
+        "z": 58,
+        "quota": 1.9,
+        "area": 4.3675,
+        "testa": 1.6,
+        "stanze": 2
       }
     ],
     "cantina": 2.91,
-    "terrazze": 0,
-    "stanze": 3,
-    "murato": 0.3764274940745529,
+    "terrazze": 1,
+    "stanze": 5,
+    "murato": 0,
     "porta": {
       "x": 49,
       "y": 87,

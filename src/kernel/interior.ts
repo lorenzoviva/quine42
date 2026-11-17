@@ -580,7 +580,8 @@ export function storeyFloors(w: Walked, vpt: number, base = 0): StoreyFloor[] {
   }
   return zs.map((z, k) => {
     const rooms = roomsOf(centres[k], X, Y, Math.round(NARROW * vpt)).map((r) => r.length / (vpt * vpt)).sort((a, b) => b - a);
-    return { z, cellar: z < base, rooms, area: rooms.reduce((s, r) => s + r, 0) };
+    // Under the ground as `reachableStoreys` leaves it out (T417): more than a step under it, so a cellar is never a storey of the house.
+    return { z, cellar: z < base - stepOf(vpt), rooms, area: rooms.reduce((s, r) => s + r, 0) };
   });
 }
 

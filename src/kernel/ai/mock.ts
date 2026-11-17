@@ -88,6 +88,13 @@ export const MOCK_FIELD_PROGRAM = `<sequence values="BCRGW" ground="C" symmetry=
   <all in="B W" out="W *"/>
   <prl><rule in="R" out="W"/><rule in="G" out="W"/></prl>
 </sequence>`;
+/** The offline plans' house with a cellar (T417): how often a place has one, its concept, what goes down there. */
+export const CELLAR_CHANCE = 0.2;
+/** How far from the start (places) the offline plans may have one. */
+export const CELLAR_FROM = 2;
+export const CELLAR_HOUSE = 'la casa con la cantina';
+export const CELLAR_THING = 'obj.chest';
+
 export class MockAiModels implements AiModels, DecisionModels {
   readonly name = 'offline';
   readonly usage = emptyUsage();
@@ -542,15 +549,18 @@ export class MockAiModels implements AiModels, DecisionModels {
       const t = tokenize(runes[0]);
       runes[0] = t.length > 1 ? t.slice(0, -1).join(' ') : `${runes[0]} =`;
     }
+    // Now and then a house with a cellar and a chest down there (T417, ADR-0091 point 4), drawn apart: the rest of the plan stays the one it was;
+    // never around the start, whose places the offline worlds and their tests know as they were.
+    const cellar = Math.max(Math.abs(ctx.cx), Math.abs(ctx.cy)) >= CELLAR_FROM && ctx.catalog.some((m) => m.id === CELLAR_THING) && new Rng(hashStr(`cellar|${ctx.cx}|${ctx.cy}`)).chance(CELLAR_CHANCE);
     return {
       place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
       environment: ambiente,
-      objects,
+      objects: cellar ? [...objects, { module: CELLAR_THING, where: 'under' }] : objects,
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,
       // The start has its bakery: a structure of its own, which the Sculptor writes.
-      structures: ctx.start ? [{ concept: 'il forno del borgo' }] : [],
+      structures: ctx.start ? [{ concept: 'il forno del borgo' }] : cellar ? [{ concept: CELLAR_HOUSE, cellar: true }] : [],
     };
   }
 

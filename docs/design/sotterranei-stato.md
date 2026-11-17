@@ -221,3 +221,61 @@ risaliti, il taglio si spegne.
 
 Restano, per un task dopo: il Cartografo che scrive gli strati del suo mondo alla Genesi, il programma `sottosuolo` degli ambienti, la
 profondità dalla cantina più profonda, le bande sui fianchi del buco (coperti dai muri della cantina) e l'ombra della casa tagliata.
+
+## 9. Dopo T417: il Cartografo e lo Scultore chiedono le cantine
+
+Fatto il quarto passo del § 5 (T52f, kernel 0.9.6, ADR-0091 «Attuazione»). Il Cartografo può dire `cellar: true` su una struttura del piano e
+mettere cose `under`; il `ModelDirector` chiede la voce con la cantina (una casella, due per le taglie rare), solo per le strutture che crescono
+a regole; lo Scultore la scava con una parte del seme nuova, `part-cellar`, e i suoi controlli vogliono la cantina che regge e che si raggiunge
+dalla porta, o la struttura entra senza. La cantina non conta più come piano. Le cose `under` vanno sul pavimento della cantina, lontane dal
+piede della scala.
+
+- **La scala della cantina** non è quella di `part-stair`: sopra la cantina il kernel vuole, per ogni colonna sotto il corpo, un pavimento
+  entro un gradino dai piedi (la regola della tromba, T52b). Una scala che sale di due voxel per uno in avanti non la passa, perché il corpo è
+  largo 9 voxel. La scala di `part-cellar` va quindi a pedate di 5 e alzate di 3, come quelle delle cantine del seme: sei pedate per una
+  cantina di 20 voxel, una striscia di 40 × 10 voxel lungo il muro davanti della cantina. Per una cantina di due caselle (40 voxel) le pedate
+  sono 13, quindi serve una stanza di più di 70 voxel.
+- **Le correzioni del kernel**, emerse dalle cantine scritte dallo Scultore e dal browser. (1) La regola della tromba faceva aria anche del
+  pavimento del piano terra sopra la cantina e della scala del piano di sopra posata lì, perciò la villetta con la cantina non saliva più al
+  primo piano: ora è tromba solo una colonna vuota al livello del suolo. (2) Chi sta in cantina era fermato dai mobili del piano terra sopra
+  di lui: un modello tutto sopra la testa non ferma. (3) `floorAt` posava una cosa della cantina sul ripiano della credenza sopra di essa: un
+  pavimento più di un gradino sopra i piedi non è sotto di essi. (4) Il kernel e il renderer posavano ogni cosa al suolo sotto il suo
+  centro: la cassapanca in cantina sbarrava la scala come se fosse al piano terra e non si vedeva (era dentro il taglio). Ora una cosa in
+  cantina sta alla sua altezza (`SolidForm.stand`, `restsAt`) e la sua altezza va ai client (`below`, fra le `ENTITY_PARTS`). (5) «Un
+  modello tutto sotto i piedi non ferma» guardava la scatola del modello, non i suoi voxel: chi stava sulle pedate alte si fermava sopra la
+  cassapanca. (6) Le cose del piano terra si posavano sulla pedata più alta, che il pavimento conta come piano terra, e sporgevano sulla
+  tromba; ora stanno a tre quarti di casella dalla tromba, e le cose della cantina a 1,2 caselle dal piede della scala e a tre quarti dai
+  suoi fianchi.
+- **Offline** la villetta dello Scultore ha la cantina quando la richiesta la vuole (a Grande, Enorme e Gargantuesca con una casella; con due la
+  sua stanza è corta e la villetta entra senza) e i piani di `MockAiModels` chiedono ogni tanto «la casa con la cantina» con una cassapanca
+  giù. Il test `tests/cellar-asked.test.ts` pianifica il borgo con quella casa, la fa scolpire offline e ripianifica: la cassapanca sta sul
+  pavimento della cantina, sotto il suolo, raggiunta dalla porta e lontana dalla scala.
+
+Nel browser (`?skip&offline`): due luoghi accanto all'inizio chiedevano «la casa con la cantina» con una cassapanca giù (prima della regola
+che li tiene lontani dall'inizio; restano nel profilo del browser). La casa `0,-1` portava la generica finché il `ModelDirector`, chiamato
+dalla console, non ha fatto scolpire offline la villetta: la voce `struttura-la-casa-con-la-cantina` ha `cellar: 1`. Ripianificato il luogo,
+la cassapanca sta sul pavimento della cantina, a −0,44 caselle, con il suolo a 0,75. Il viandante, mosso a passi di un quarto di voxel lungo la
+scala come il corpo (`free` e `floorAt`), scende dal piano terra fino al pavimento della cantina senza un passo bloccato. Lì il taglio di
+T416 apre la cantina, e si vedono la cassapanca, la scala a pedate lungo il muro davanti e i muri; la cassapanca lo ferma a 0,72 caselle. Poi
+risale al piano terra e il taglio si spegne.
+
+| | |
+|---|---|
+| ![cima](sotterranei-stato/18-cantina-scala-cima.jpg) in cima alla scala della cantina, al piano terra | ![metà](sotterranei-stato/19-cantina-scala-meta.jpg) a metà scala, 0,62 caselle sotto il suolo |
+| ![cantina](sotterranei-stato/20-cantina-cassapanca.jpg) in cantina, a −1,19: la cassapanca, la scala | ![vicino](sotterranei-stato/21-cantina-cassapanca-vicino.png) la stessa, da vicino |
+| ![girata](sotterranei-stato/22-cantina-girata.jpg) la camera girata: le pedate davanti, la cassapanca | |
+
+Con la casa che usa la Grande (T420, kernel 0.9.7, dopo T413): la villetta offline è insieme un'abitazione e una casa con la cantina.
+Nel browser (`?skip&offline`, una porta nuova): pianificati i luoghi fino all'anello 4, «la casa con la cantina» di `-6,0` scolpita offline dalla
+console passa i controlli con l'abitazione e la cantina (la voce ha `cellar: 1`); ricaricato il luogo, la cassapanca sta sul pavimento della
+cantina a −0,44 caselle (suolo 0,75). Aperta la porta, il viandante va dalla porta alla cima della scala al piano terra (0,81, nella stanza
+dietro il muro interno), scende a passi di un quarto di voxel fino alla cantina e risale alla porta, con `free` e `floorAt`, senza un passo
+bloccato (il salto più grande è un'alzata, 0,19); a metà scala il taglio si accende, in cantina si vedono la cassapanca e le pedate, risalito
+si spegne.
+
+| | |
+|---|---|
+| ![piano terra](sotterranei-stato/23-casa-cantina-piano-terra.jpg) in cima alla scala: il piano terra in due stanze | ![metà](sotterranei-stato/24-casa-cantina-meta.jpg) a metà scala, −0,25 |
+| ![giù](sotterranei-stato/25-casa-cantina-giu.jpg) in cantina: la cassapanca, le pedate | |
+
+Restano: l'arredo della cantina nella via dei dati dello Scenografo (T419) e la rigenerazione dei modelli con le cantine (T411).

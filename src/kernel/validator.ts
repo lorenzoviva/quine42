@@ -7,7 +7,7 @@ import type { Effect, FileMap, ItemDef, EnvironmentDef, Manifest, ModuleKind, Ga
 import { DEATH_LEVELS, DEFAULT_GAME_SETUP, isMultiplayer } from './gameSetup';
 import { SOLO, validWandererId } from './wanderers';
 import { ITEM_CATEGORIES } from './types';
-import type { ChunkPlan } from './agents/cartography';
+import type { ChunkPlan, Where } from './agents/cartography';
 import { lex, TOKEN_RE, tokenize } from './runes';
 import { compile, writtenCodes, MjError } from './mj';
 import { layout } from './layout';
@@ -72,15 +72,22 @@ export const MODEL_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
  * A model of the library must compile, finish and build something that stands: what the front-end can
  * mend it mends (ADR-0036), the rest goes back with the line of the error.
  */
-export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number], files?: MjxFiles, opts: { groundJoins?: boolean } = {}): string[] {
+/**
+ * `opts.base` (T417): the voxels of its cellar under the ground, as its entry says (`cellarVoxels`): the box without a `size` of its own goes that
+ * much deeper, the soil is that high, and what rests on it stands, as the world runs it.
+ */
+export function modelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number], files?: MjxFiles, opts: { groundJoins?: boolean; base?: number } = {}): string[] {
   // The Musician's program was measured a moment ago: a piece costs up to two seconds on the page, and the answer would be the same.
   if (xml === lastCleanSound) return [];
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
-    const size = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? undefined : (box ?? boxOf(classOf('object')!));
+    const base = opts.base && opts.base > 0 ? opts.base : 0;
+    const own = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml);
+    const [X, Y, Z] = box ?? boxOf(classOf('object')!);
+    const size: [number, number, number] | undefined = own ? undefined : [X, Y, Z + base];
     const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
-    const m = compileMjx(xml, { ...(size ? { size } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
+    const m = compileMjx(xml, { ...(size ? { size } : {}), ...(base ? { base } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
     const nodes = worldNodeErrors(m, xml, files ?? {});
     if (nodes.length) return nodes.map((e) => `${path}: ${e}`);
     if (m.sound) {
@@ -93,7 +100,7 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     // What is worn (T290, ADR-0180): every section tried on the kernel's two bodies, as the world will try it on any.
     const worn = wornErrors(xml, { background: symbolName(m.background), palette: m.program.palette });
     // A structure that grows by rules is a whole of parts on the ground (T370): what rests on the bottom is one body.
-    return [...analyse(r, m.program.palette, { grounded: true, groundJoins: !!opts.groundJoins }).errors, ...worn].map((e) => `${path}: ${e}`);
+    return [...analyse(r, m.program.palette, { grounded: true, groundJoins: !!opts.groundJoins, base: base < r.grid.Z ? base : 0 }).errors, ...worn].map((e) => `${path}: ${e}`);
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
@@ -310,6 +317,8 @@ export class Validator {
   modelBox: (id: string) => [number, number, number] | undefined = () => undefined;
   /** Whether a model of the library is a structure that grows by rules (T370): its pieces on the ground are one body. Set by the kernel. */
   modelGrows: (id: string) => boolean = () => false;
+  /** The voxels of a model's cellar under the ground (T417, `cellarVoxels` of its entry), set by the kernel: it is tried as the world runs it. */
+  modelBase: (id: string) => number = () => 0;
   /** A file of models/ by its name there (`torre.xml`, `porta.txt`), for the programs that read others (T333), set by the kernel. */
   modelFile: (name: string) => string | undefined = () => undefined;
 
@@ -406,12 +415,12 @@ export class Validator {
   }
 
   /** `entry`: what the index entry of a model not in the library yet says (its own time, whether it grows by rules, T370). */
-  validateFile(path: string, content: string, box?: [number, number, number], entry?: { time?: number; grows?: boolean }): string[] {
+  validateFile(path: string, content: string, box?: [number, number, number], entry?: { time?: number; grows?: boolean; base?: number }): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
     if (/^models\/[^/]+\.xml$/.test(path) && isTileset(content)) return tilesetErrors(path, content, (f) => this.modelFile(f));
     if (/^models\/[^/]+\.xml$/.test(path)) {
       const id = path.slice('models/'.length, -'.xml'.length);
-      return modelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)), { groundJoins: entry?.grows ?? this.modelGrows(id) });
+      return modelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)), { groundJoins: entry?.grows ?? this.modelGrows(id), base: entry?.base ?? this.modelBase(id) });
     }
     if (/^models\/[^/]+\.txt$/.test(path)) return ruleFileErrors(path, content);
     // The master's directives (T374): sections the Council reads, within their caps; what breaks the fourth wall is left out, not an error.
@@ -538,6 +547,9 @@ export class Validator {
       if (!ok) dropped.push(`struttura «${s.concept}»: non valida`);
       return ok;
     }).map((s) => {
+      // A cellar is said true or not at all (T417).
+      const { cellar, ...plain } = s;
+      s = cellar === true ? { ...plain, cellar } : plain;
       // A size that is not one of D&D's (ADR-0092) is dropped: the structure keeps its lot's.
       if (s.size === undefined || sizeOf(s.size)) return s;
       const size = sizeOf(internalName('taglie', s.size));
@@ -546,7 +558,10 @@ export class Validator {
       const { size: _, ...rest } = s;
       return rest;
     });
-    return { errors, dropped, plan: { ...plan, objects, runes, fresh, structures: strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
+    // What goes under (T417, ADR-0091 point 4) needs a structure with a cellar: without one it goes inside.
+    const below = strutture.some((s) => s.cellar);
+    const down = <T extends { where: Where }>(o: T): T => (o.where === 'under' && !below ? { ...o, where: 'inside' } : o);
+    return { errors, dropped, plan: { ...plan, objects: objects.map(down), runes, fresh: fresh.map(down), structures: strutture, ground: plan.ground.filter((g) => g.trim().length >= 2 && g.length <= 60) } };
   }
 }
 

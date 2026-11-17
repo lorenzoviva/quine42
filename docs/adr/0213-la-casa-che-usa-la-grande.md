@@ -39,6 +39,11 @@ blocco del corpo nel prompt (3 celle dietro il centro, 5 davanti, 4 per lato) fa
    sopra aperto (14,1); l'ala, gli alberi (ora in 5 × 5 di prato) e il pozzo solo dove c'è posto, cioè dall'Enorme.
 6. **Kernel 0.9.6**: nessun formato cambia, nessun universo è toccato; cambia ciò che lo Scultore riceve e ciò che i suoi controlli
    rimandano indietro per un'abitazione.
+7. **Con la cantina** (T420, kernel 0.9.7, quando T417 entra accanto a T413): un'abitazione con la cantina vuole le due cose, la casa e
+   la cantina che regge e si raggiunge (`checkProgram(…, { dwelling, cellar })`); `storeyFloors` segna cantina ciò che sta più di un gradino
+   sotto il suolo, come `reachableStoreys` (ADR-0162), e `dwellingErrors` non la conta come piano; il buco della sua scala toglie al piano terra
+   circa una casella², per questo la villetta offline ha il corpo largo 8 celle per lato (non 7): 13,5-14,3 caselle² a terra senza cantina,
+   11,8-13,0 con, sempre in due stanze o più.
 
 ## Conseguenze
 

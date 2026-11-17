@@ -189,8 +189,8 @@ first `map` brings them down (`in="E" out="E"`, `in="H" out="H"`). The plan is *
 box: 20 × 20 cells at Large, 30 × 30 at Huge, 100 × 100 at Gargantuan**: write rules that do not depend on it, anchored to H, to
 what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
 same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
-of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of
-the parts you include too (T k #90 #91 #92; O o N; M; U). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
+of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the included
+parts' letters too (T k #90 #91 #92; O o N; M; U; D V). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
 
 ## A. The composition (the plan, a cell a third of a tile)
 Tested building blocks; combine and change them for the concept. A random decision for the whole building is a rule on **one cell** (the end

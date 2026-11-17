@@ -83,7 +83,7 @@ describe('the prompt of the structures without a skeleton (T354)', () => {
 
   it('lists the parts of the seed in the request, each with the contract at the top of its file', () => {
     const parts = partResources(bundledFiles);
-    expect(parts.map((p) => /file="([^"]+)"/.exec(p)![1])).toEqual(['part-battlements', 'part-door', 'part-slits', 'part-stair']);
+    expect(parts.map((p) => /file="([^"]+)"/.exec(p)![1])).toEqual(['part-battlements', 'part-cellar', 'part-door', 'part-slits', 'part-stair']);
     expect(parts.find((p) => p.includes('part-stair'))).toMatch(/union "=" is the letters of your floors and slabs/);
     expect(parts.find((p) => p.includes('part-stair'))).not.toMatch(/Written by|Alone it builds/);
     expect(parts.find((p) => p.includes('part-door'))).toMatch(/at least 11 wide/);
