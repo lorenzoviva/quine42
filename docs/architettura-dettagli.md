@@ -1339,6 +1339,23 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   500 voxel a 20) dice anche la scatola nel suo programma (`size`, con la cantina); `models/index.json` smette di seguire il seme
   (riceve solo le voci nuove, `mergeEntries`); ciò che lo Scultore scolpisce dopo è a 16. **Il laboratorio 3D** mostra il banco delle
   taglie e i programmi degli Scultori a 16 (`lab/3d/catalog.ts`) e il comando «voxel per casella» ha il 16.
+- **Il riferimento dell'ottima** (ADR-0210, T371, D53): il forte disegnato a mano dall'autore (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 ×
+  150 voxel, 50 × 50 caselle a 10 voxel per casella, D61) è il metro della qualità migliore: nessun modello di oggi deve raggiungerlo, è il
+  riferimento. Nel banco è **versionato** (`lab/banco/riferimento/ottima/forte-v1.json`: i tratti di tre semi, l'impronta SHA-256 del file, il
+  commit; `forte-v1.png` i quattro lati a cartone, `forte-v1-viste.txt` le viste in testo che lo Scultore vedrebbe, `forte-v1-lab3d.png` nel
+  laboratorio 3D a 10): una versione nuova del forte si misura con `banco-ottima.ts -- --riferimento --versione v2` e sostituisce i numeri, la
+  scala resta (`REFERENCE_VERSION` in `lab/banco/riferimento/ottima.ts`; `lab/tests/ottima.test.ts` controlla che le misure salvate siano del
+  forte su disco). **La scala** (`fortTraits`, `SCALE`, `scoreOf`): quattordici tratti letti dai soli voxel, mai dalle lettere della palette
+  (così un forte di Gemini, di Claude o a mano si misura allo stesso modo): il cortile e i suoi angoli rientranti (un'unione di rettangoli),
+  gli angoli del contorno, le torri sugli angoli convessi, le masse più alte delle mura, l'altezza delle mura e della cima in viandanti, la
+  sagoma, i piani raggiunti a piedi dal portone (girato verso il fronte, su qualunque lato stia), i piani in quota, i piani con stanze, le
+  merlature come denti del perimetro, le aperture, il mastio lontano dal portone; ogni tratto vale la quota del riferimento che raggiunge (al
+  più 1), il voto su 10 è la media; ogni forte degli Scultori (T355, T391, T392, T402) e del banco è nella tabella del README, le taglie degli Scultori alla densità
+  della loro voce (`structureVoxels`, `vptOf`: 16 dal T405). **Nel prompt
+  delle strutture** il forte è un metro, non un esempio (ADR-0183: un programma nel prompt si copia): la sezione «The measure of done well»
+  lo descrive in dieci righe, in voxel (500 × 500, la scatola della gargantuesca, non le sue 50 caselle a 10), entro la misura che il prompt aveva prima (16 023 caratteri dopo il
+  T405, `tests/sculptor-structures.test.ts`), coi doppioni
+  di ciò che la richiesta già dice tolti.
 
 <a id="taglie"></a>
 ## Le taglie

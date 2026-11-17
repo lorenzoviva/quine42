@@ -19,6 +19,11 @@ npx vitest run lab/tests/riferimento.test.ts                                    
 I fogli di contatto (`<nome>-<bersaglio>.png`): una riga per taglia, un seme per colonna, sotto la prima riga le piante del piano terra.
 La misura di partenza (T180, `../varianza/riepilogo.md`) era 31 programmi su 31 statici e 1 su 27 che reggeva a Enorme.
 
+## Il riferimento dell'ottima (`ottima/`, T371)
+
+Il forte disegnato a mano dall'autore è il metro della qualità migliore: misurato, fotografato e versionato in [`ottima/`](ottima/README.md), con la scala
+(`ottima.ts`) che dice quanto un forte scritto dagli Scultori gli si avvicina; la rocca di frontiera qui sotto è fra i forti giudicati.
+
 ## Lo scheletro del prompt (`cantiere.xml`, T182)
 
 La stessa idea della palazzina con regole corte e `steps` (`../pattern.md`, pattern 13): 9 kB invece di 25. È dentro `../prompt.md`. Regge 19-20 semi su 20 a Grande e Enorme (cade su un salto o sulla sagoma) e varia: voxel 0,68 / 0,67, pianta 0,56, perimetro 0,24 / 0,30, interno 0,72 / 0,68, architetture 5/5.

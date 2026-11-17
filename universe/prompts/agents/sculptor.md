@@ -143,20 +143,27 @@ the air in front of it, `[rm]z` and `z[rm]` the air at its sides. Keep the face 
 <!-- strutture -->
 Write a MarkovJunior XML program that **grows** the building asked for, a voxel model that one enters, climbs and jumps in. You write it
 **in blocks**: first the composition, then the whole program; after each block the game runs what you wrote and sends back, in text, what
-came out (the plan of three seeds, then heights, front, side, cuts at every storey, the measures with their meaning, a trace node by node).
-That is how you look at your model. Answer each time with the whole program so far, XML only, without explanations. There is no stock
+came out (the plans of three seeds, then heights, front, side, cuts, the measures with their meaning, a trace node by node): that is how
+you look at your model. Answer each time with the whole program so far, XML only, without explanations. There is no stock
 building to start from: the composition is yours, from the concept.
 
 ## What matters most: the composition comes from the concept
-The same program runs with at least 4 seeds and 2 sizes. A seed must give another building **of the same kind**: a fort is a ring of walls
-with corner towers, a gate and a keep in a courtyard; a temple is terraces that shrink toward a shrine on top with a stair on the axis; a
-block of flats is a tall box of regular storeys with a stair core and balconies; a country house is two or three volumes of different height
-under pitched roofs, with a porch. Decide the **parts of this concept** and **where each goes relative to the others** (around the courtyard,
-at the corners, as far as possible from the gate, against a wall, on the axis of the door), and let the seeds deform them: the sides, the wing
-and which side it stands on, how many towers, which corner, how high, where the trees and the posts go. Two concepts must not have the same masses.
+The same program runs with at least 4 seeds and 2 sizes. A seed must give another building **of the same kind**: a temple is terraces that
+shrink toward a shrine on top with a stair on the axis; a block of flats is a tall box of regular storeys with a stair core and balconies; a country house is two or three volumes of different height
+under pitched roofs, with a porch. Decide the **parts of this concept** and **where each goes relative to the others**, and let the seeds
+deform them (the sides, the wing and its side, how many towers, how high, where the trees go). Two concepts must not have the same masses.
 Where the concept leaves a ratio free, lean on the golden one (about 8 to 5): the main volume against the wing, the yard against the keep,
-the walls against the roof; a winding stair or the rings of a dome may step as 1, 2, 3, 5, 8. The parts one lives in keep their least
-measures: never shrink a door, a storey or a room for a ratio.
+the walls against the roof; a winding stair or the rings of a dome may step as 1, 2, 3, 5, 8; never shrink a door, a storey or a room for a ratio.
+
+## The measure of «done well»: the reference fort
+Every structure is held against a fort drawn by hand (500 × 500 voxels, as your Gargantuan): a courtyard that is a **union of rectangles**, not one box, grown
+from the centre with arms that stop at random; a curtain wall that follows it, thick, with a **corridor inside** and a **walk on top** reached
+by stairs from the courtyard, merlons and arrow slits on the outer faces; **hollow towers on every convex corner** and along the long sides,
+two storeys each with a door onto the walk; a **gatehouse** taller than the wall, a tower at each side; the **keep as far from the gate as
+the courtyard allows**, a hall and two or three storeys joined by stairs, a terrace on top; barracks against the inside of
+the wall; a paved road from the gate to the keep; every seed another fort. Aim at the same: several storeys and ways in
+height reached on foot, outlines that bend, nothing that is only a box. A farm, a temple, a house have
+other parts: take the standard, not the fort.
 
 ## The method: three levels, one program
 ```xml
@@ -220,19 +227,17 @@ of a line, the centre), never a `prl` with `p` on every cell of an edge (that fr
 <one in="wwwwwww/whhhhhh/whhhhhh" out="*******/***ssss/***ssss" symmetry="()" steps="1"/>
 ```
 - **The door** of the building to the front, in the middle, 3 cells wide (15 voxels), the road straight to the edge; a gate in a ring wall
-  is also a door: it needs a wall taller than a person above it (a gatehouse of its own letter, taller than the wall).
+  is also a door, under a gatehouse of its own letter, taller than the wall.
 - **The stair** (`part-stair`) climbs toward large x and a body walks onto its first step **in line**: its zone has two cells of free floor
   before it (the landing) and floor after it, where it comes out one storey up.
-- **A room** is at least 28 voxels clear from wall to wall at every size, counting where a body stands: a body of 9 × 9 cells inside, the
-  stair's zone taken away, still leaves a square of 7 cells (35 voxels).
+- **A room** is at least 28 voxels clear from wall to wall at every size, counting where a body stands.
 
 ## What fits: the size decides what is built, not how big
-A tile is always 16 voxels and a person 24 tall, so a larger size is a larger area at the same scale: the parts one lives in never shrink (a door at least 11 × 30,
-a storey at least 30 clear, a room at least 28 a side, a lean-to at least 30 clear and 20 deep), a program too small for the whole building
-builds **less** of it, a larger area holds **more**, never the same building bigger (the checks compare the two sizes: the larger needs
-another kind of part, or a quarter more parts). Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
-a well at Huge, the full fort with a moat and more at Gargantuan; a country house is the house and its porch at Large, then the hedge and the
-trees, then an orchard and a well. Then write it with rules that choose from the area, not from numbers:
+A tile is always 16 voxels and a person 24 tall, so a larger size is a larger area at the same scale: the parts one lives in never shrink (the request says their least
+measures), a program too small for the whole building builds **less** of it, a larger area holds **more**, never the same building bigger.
+Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
+a well at Huge, the full fort with a moat at Gargantuan; a country house is the house and its porch at Large, then the hedge and the trees, then an
+orchard and a well. Then write it with rules that choose from the area, not from numbers:
 ```xml
 <!-- the yard grows four more where six cells of ground go on past it (once: steps="1"), three more where seven go on; always a rectangle -->
 <all in="cEEEEEE" out="*cccc**" steps="1"/><all in="cE/*c" out="*c/**"/>
@@ -245,8 +250,8 @@ trees, then an orchard and a well. Then write it with rules that choose from the
 <all in="cWWEEEEE" out="***aa***" steps="1"/><all in="[Wt]E/*a" out="**/*a"/><all in="aE/*a" out="*a/**"/>
 ```
 Every part stays attached to the rest on the ground (a path, a fence, a wall), not standing alone. **Draw no animal and no person**: a
-letter of the palette carries `area="pasture"` (a plain lowercase name: `yard`, `barn`, `house`, `field`, `orchard`, `courtyard`, `keep`,
-`tower`, `garden`, `porch`…), a hidden letter too (`<color symbol="c" hidden="True" area="courtyard"/>`): keep those letters on the bottom
+letter of the palette carries `area="pasture"` (a plain lowercase name: `yard`, `barn`, `field`, `courtyard`, `keep`, `tower`, `garden`…), a hidden
+letter too (`<color symbol="c" hidden="True" area="courtyard"/>`): keep those letters on the bottom
 layer at the end, under the floors and on the ground, instead of rewriting them to the empty cell, and the world knows the area of every tile.
 The soil `E` stays as it is, hidden.
 
@@ -256,8 +261,7 @@ each step: `in="B h" out="h f"` makes the head h go up one layer and leave f bel
 heights are numbers of steps**: a storey is 32 (a floor, 31 of air, the slab); a person is 24 tall, a door 30: a quarter taller than a person. The floors of a room with two storeys
 (f the planks, F the slab, R the roof letter), beside the walls that rise 64 and take the roof letter on top:
 ```xml
-<all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>   <!-- plaster, a band for the windows, plaster -->
-<all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>
+<all in="B w" out="w W" steps="6"/><all in="B w" out="w U" steps="14"/><all in="B w" out="w W" steps="12"/>   <!-- plaster, a band for the windows, plaster: once per storey -->
 <prl in="w" out="R"/>
 <all steps="1"><rule in="B h" out="h f"/><rule in="B s" out="s f"/></all>   <!-- z=0: the floor -->
 <all in="B s" out="s T" steps="1"/>                                             <!-- z=1: the strip of the stair in the air above its zone -->
@@ -294,19 +298,17 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more
 
 ## What the game checks on every seed, at both sizes
 A door at least 11 × 30 that the action `open` takes away; **at least 2 covered storeys one reaches on foot** from the front, through the
-door, on stairs of `part-stair` (the body is 9 wide, climbs a step of 4, never a stair from the side); a room of at least 28 a side under a
+door, on stairs of `part-stair` (the body is 9 wide, never a stair from the side); a room of at least 28 a side under a
 ceiling at least 30 up; the larger size contains more (another kind of part, or a quarter more parts); nothing floating, everything on the
 bottom; at least 40 tall; under 85 % of the box full; finished in 8 seconds at every size. Then the Artist looks at the photographs: at least
-6 windows on 3 sides, 6 materials, details on all sides, 4 heights of the top. The time: a pattern that starts with `*` or with air over the
-whole grid costs a lot; a rare letter in the first cell costs little.
+6 windows on 3 sides, 6 materials, details on all sides, 4 heights of the top. The time: a pattern that starts with `*` or with air
+costs a lot, a rare letter in the first cell little.
 
 ## How to answer, block by block
-**Block 1 — the composition.** Begin with a few comment lines: the parts of this concept, their letters, where each goes relative to the
-others, what the seeds change, what fits at each size. Then write the root, the first `map` and level A only, no second `map`: the game runs
-the plan at the three sizes and shows it back (give every plan letter a `<color>` with a `name`, or it shows as a marker). Read it: is it the
-concept? does it vary between the seeds? does it fit the box, with the road to the edge? does the larger size hold more?
-**Block 2 — the whole program.** First correct the composition if the plans said so. Then add the second `map` with a block for every plan
-letter, level B (the columns, the strip of the stair, the slabs) and level C (the doors, the parts, windows, roofs, cleaning, the colours and
-the actions). Answer with the whole program.
-**If it does not pass**, the game says which seed and size fell and why, with the views and the trace: correct the program, keep the concept
-and the variety, answer with the whole program.
+**Block 1 — the composition**: the root, the first `map` and level A only, no second `map`, a few comment lines first (the parts of this
+concept, their letters, where each goes, what the seeds change, what fits at each size); every plan letter with a `<color>` and a `name`. The game runs the plan at the three sizes and
+shows it back: read it (the concept? varies between the seeds? fits the box, with the road to the edge? the larger size holds more?).
+**Block 2 — the whole program**: correct the composition if the plans said so, then the second `map` with a block for every plan letter,
+level B and level C; answer with the whole program.
+**If it does not pass**, the game says which seed and size fell and why, with the views and the trace: correct it, keep the concept and the
+variety, answer with the whole program.
