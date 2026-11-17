@@ -5785,3 +5785,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit su `task/T414`; poi l'orchestratore integra T414 e `integra T409` toglie worktree e branch di T409. Sicurezza: nessuna superficie nuova.
 
+
+### T415 · La cantina si vede: il buco su tutta la cantina, col test a 16 — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · priorità 2
+- Step: 13
+- Contesto: proposta dell'orchestratore da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 4-5): le cantine tengono a 16 vpx, ma `holesIn` apre il terreno solo su 3 caselle su 15 della locanda; il resto della cantina, compresa la tromba vista dal piano terra, resta sotto l'erba. Il difetto si vede già oggi in aurora dovunque è posata una delle 6 voci del seme. `tests/cellar.test.ts` misura ancora a 20 vpx.
+- Cosa fare: il buco a copertura del § 4 (il terreno aperto su tutta l'impronta della cantina, non solo sulla scala), senza modelli né chiamate; `tests/cellar.test.ts` anche a 16 vpx; `lab/scripts/misura-cantine.ts` prima/dopo sulle 24 voci. Versione del kernel (Z o Y secondo AGENTS.md).
+- Test: `cellar.test.ts` a 16; suite e typecheck coi turni.
+- Browser: sì — `?skip&offline`, `struttura-locanda` posata come in T412: dal piano terra si vede la cantina e la tromba, si scende e si risale; screenshot.
+- Quando è fatto: commit su `task/T415`; nell'esito caselle aperte prima/dopo. Sicurezza: nessuna superficie nuova.
