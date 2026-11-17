@@ -5757,7 +5757,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: offline con la coda finta: un universo di prima rigenerato nei modelli, ripresa dopo interruzione, tetto, rifiuto con un mondo acceso; suite e typecheck coi turni.
 - Browser: no (lo fa T153).
 - Quando è fatto: commit su `task/T411`; nell'esito il costo misurato di un tipo e la stima per universo. Sicurezza: nessuna superficie nuova (o le voci).
-### T412 · I sotterranei funzionano? Una verifica, poi la scelta se arredarli — `da fare`
+### T412 · I sotterranei funzionano? Una verifica, poi la scelta se arredarli — `fatto` (`814912a9`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
 - Step: 13
 - Contesto: domanda dell'autore (17/11, chat): «credo che i sotterranei non siano mai riusciti allo Scultore: fammi capire se funzionano e in caso li arrediamo; se è troppo complesso li rimandiamo». Nasce da T52 (`dossier T52`, ADR-0091): T52b (il modello che scende, `cellar` nella voce, `Form.base`, `tests/cellar.test.ts`) è fatto; T52d (strati), T52e (vedere sotto terra) e T52f (Cartografo e Scultore chiedono le cantine) risultano `da fare`: oggi nessun agente chiede una cantina, e `universe/models/index.json` ha 6 voci con `cellar` scritte a mano. Lo Scenografo (§ 10.4 di `docs/design/scenografo.md`) non ha mai misurato una cantina.
@@ -5765,6 +5765,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo; `tests/cellar.test.ts` col turno test.
 - Browser: sì (sopra).
 - Quando è fatto: commit su `task/T412` col documento e gli screenshot citati; nell'esito la raccomandazione in tre righe. Sicurezza: nessuna superficie nuova.
+- Esito: scritti `docs/design/sotterranei-stato.md` (misure, browser, universi, stime di T52d/e/f e dei mobili, raccomandazione), 5 screenshot in `docs/design/sotterranei-stato/` e `lab/scripts/misura-cantine.ts`. Le 24 voci con `cellar` tengono la cantina a 16 voxel per casella; si scende, si risale e da sotto non si esce; ma `holesIn` apre solo 3 caselle su 15 della locanda e senza T52e la cantina resta sotto il terreno. Nessun agente chiede cantine. Raccomandazione: rimandare l'arredo; subito il buco su tutta la cantina (1 %, nuovo task); poi T52e senza strati, cantina nella via dei dati dello Scenografo dopo T410, T52f prima di T411, T52d ridotto per ultimo. `cellar.test.ts` misura ancora a 20 voxel per casella: nessun test a 16. Codice di gioco invariato. Sicurezza: nessuna superficie nuova.
 
 ### T413 · La casa che usa la Grande (§ 10.0 di `scenografo.md`) — `da fare`
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
