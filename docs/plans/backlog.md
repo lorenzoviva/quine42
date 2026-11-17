@@ -5666,7 +5666,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T399`.
 - Esito: estratto `tools/pipeline/domPatch.mjs` (`patchHtml`, `patchText`, `patchValue`, `captureScroll`, `restoreScroll`) e applicato a tutti i riquadri e campi di `tools/pipeline/web.mjs` con test in `tests/pipeline-web-scroll.test.ts` (187/187 test pipeline e `typecheck` verdi; in `npm test` intero 2 test temporizzati in `mj-pieces.test.ts` e `nucleus.test.ts` sono falliti per carico e passati al rilancio singolo; verifica nel browser non eseguita, demandata all'autore).
 
-### T403 · I voxel per casella regolabili nel lab 3D, e il forte e le strutture generate a 20, 10 e 5 accanto al viandante (D60, la prova) — `da fare`
+### T403 · I voxel per casella regolabili nel lab 3D, e il forte e le strutture generate a 20, 10 e 5 accanto al viandante (D60, la prova) — `in attesa`
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 1
 - Step: 30
 - Contesto: D60 (autore 17/11): il forte di `lab/mjx/models/handmade/forte-handmade.xml` (500 × 500 voxel) è pensato per 100 caselle, il gioco e il lab 3D lo mostrano a 20 voxel per casella (25 caselle): le mura sono alte un viandante, la sala del trono lo contiene una volta sola in altezza, la porta del mastio è a misura di viandante. L'autore ha scelto l'opzione A (scala piena) ma il fattore 4 è stimato a occhio: prima di toccare il kernel vuole la prova. La densità per voce esiste già (`vpt` della voce del modello); il lotto è di 2 × 2 luoghi (T370, ADR-0206, `src/kernel/block.ts`).
@@ -5675,6 +5675,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite e typecheck coi turni se cambia codice del lab.
 - Browser: sì (le foto sono il risultato).
 - Quando è fatto: commit su `task/T403` col comando del lab, foto e tabella; l'autore conferma il fattore (D60) per il forte e dice se scalare tutti i modelli (che sarebbe un task a parte nel kernel, come T404) e approva T404.
+- Esito: fatti il comando «voxel per casella» del lab 3D (`lab/3d/scale.ts`, `main.ts`, `catalog.ts`, test `tests/lab-scale.test.ts`), le misure lette dal programma (`lab/scripts/forte-scala.ts`, `strutture-scala.ts`), le foto (`foto-scala.mjs`, 3 del forte e 12 di villetta, rocca, forte del banco e fattoria di Opus T402 in `docs/img/`), la tabella e il costo del lotto in `lab/banco/riferimento/forte-scala.md`; risultato: il fattore 4 dà l'esterno giusto ma piani di 2,5 viandanti e scale che non si salgono (gradino 0,4 caselle contro 0,2), il fattore 2 l'interno giusto e le mura di 1,5 viandanti, le strutture del banco sono a misura a 20 ma al minimo; manca la decisione dell'autore (fattore, scalare tutti i modelli, via a T404) in `docs/pipeline/domande/T403.md`; non provati il costo dei luoghi di un blocco grande e le scale percorse a piedi.
 
 ### T404 · La scala piena del forte: densità per voce e lotto di più luoghi parametrico (D60, opzione A) — `da fare` (dipende da T403)
 - Pipeline: claude · sforzo extra · stima 6% · da approvare · browser · priorità 2

@@ -1,0 +1,271 @@
+{
+ "file": "lab/mjx/models/handmade/forte-handmade.xml",
+ "wandererTiles": 1.5,
+ "densities": [
+  20,
+  10,
+  5
+ ],
+ "seeds": [
+  {
+   "seed": 1,
+   "ms": 7660,
+   "box": [
+    500,
+    500,
+    148
+   ],
+   "ground": 1,
+   "walls": {
+    "walk": 23,
+    "merlons": 25,
+    "corridor": 19
+   },
+   "gate": {
+    "width": 28,
+    "height": 31
+   },
+   "hall": {
+    "floor": 0,
+    "clear": 31
+   },
+   "keepDoor": {
+    "width": 12,
+    "depth": 4,
+    "height": 27
+   },
+   "keepStoreys": [
+    {
+     "floor": 35,
+     "clear": 20
+    },
+    {
+     "floor": 59,
+     "clear": 20
+    }
+   ],
+   "keepTop": 83,
+   "towerStoreys": [
+    {
+     "floor": 3,
+     "clear": 19
+    },
+    {
+     "floor": 23,
+     "clear": 19
+    }
+   ],
+   "towerTop": 43,
+   "stair": {
+    "rise": 2,
+    "flights": [
+     32,
+     22
+    ]
+   },
+   "spots": {
+    "keepDoor": [
+     253.5,
+     317.5,
+     1
+    ],
+    "hall": [
+     407,
+     293,
+     1
+    ],
+    "wall": [
+     291,
+     168,
+     24
+    ],
+    "tower": [
+     49.5,
+     37.5,
+     44
+    ],
+    "gate": [
+     61.5,
+     177.5,
+     1
+    ]
+   },
+   "keepDoorOut": [
+    -1,
+    0
+   ]
+  },
+  {
+   "seed": 2,
+   "ms": 7248,
+   "box": [
+    500,
+    500,
+    148
+   ],
+   "ground": 1,
+   "walls": {
+    "walk": 23,
+    "merlons": 25,
+    "corridor": 19
+   },
+   "gate": {
+    "width": 28,
+    "height": 31
+   },
+   "hall": {
+    "floor": 0,
+    "clear": 31
+   },
+   "keepDoor": {
+    "width": 12,
+    "depth": 4,
+    "height": 27
+   },
+   "keepStoreys": [
+    {
+     "floor": 35,
+     "clear": 20
+    },
+    {
+     "floor": 59,
+     "clear": 20
+    }
+   ],
+   "keepTop": 83,
+   "towerStoreys": [
+    {
+     "floor": 3,
+     "clear": 19
+    },
+    {
+     "floor": 23,
+     "clear": 19
+    }
+   ],
+   "towerTop": 43,
+   "stair": {
+    "rise": 2,
+    "flights": [
+     32,
+     22
+    ]
+   },
+   "spots": {
+    "keepDoor": [
+     313.5,
+     157.5,
+     1
+    ],
+    "hall": [
+     286,
+     131,
+     1
+    ],
+    "wall": [
+     224,
+     186,
+     24
+    ],
+    "tower": [
+     177.5,
+     201.5,
+     44
+    ],
+    "gate": [
+     197.5,
+     337.5,
+     1
+    ]
+   },
+   "keepDoorOut": [
+    0,
+    1
+   ]
+  },
+  {
+   "seed": 3,
+   "ms": 7015,
+   "box": [
+    500,
+    500,
+    148
+   ],
+   "ground": 1,
+   "walls": {
+    "walk": 23,
+    "merlons": 25,
+    "corridor": 19
+   },
+   "gate": {
+    "width": 28,
+    "height": 31
+   },
+   "hall": {
+    "floor": 0,
+    "clear": 31
+   },
+   "keepDoor": {
+    "width": 12,
+    "depth": 4,
+    "height": 27
+   },
+   "keepStoreys": [
+    {
+     "floor": 35,
+     "clear": 20
+    }
+   ],
+   "keepTop": 59,
+   "towerStoreys": [
+    {
+     "floor": 3,
+     "clear": 19
+    },
+    {
+     "floor": 23,
+     "clear": 19
+    }
+   ],
+   "towerTop": 43,
+   "stair": {
+    "rise": 2,
+    "flights": [
+     32,
+     22
+    ]
+   },
+   "spots": {
+    "keepDoor": [
+     153.5,
+     197.5,
+     1
+    ],
+    "hall": [
+     150,
+     130,
+     1
+    ],
+    "wall": [
+     116,
+     175,
+     24
+    ],
+    "tower": [
+     265.5,
+     37.5,
+     44
+    ],
+    "gate": [
+     377.5,
+     253.5,
+     1
+    ]
+   },
+   "keepDoorOut": [
+    0,
+    1
+   ]
+  }
+ ]
+}
