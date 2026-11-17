@@ -5817,7 +5817,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — Genesi offline o `?skip&offline`: una struttura generata con la cantina, si scende e si vedono le cose `under`.
 - Quando è fatto: commit su `task/T417`. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T418 · Gli strati del terreno, ridotti ai predefiniti del seme (T52d ridotto) — `da fare` (dipende da T416)
+### T418 · Gli strati del terreno, ridotti ai predefiniti del seme (T52d ridotto) — `fatto` (`720baa41`) (dipende da T416)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 13
 - Contesto: decisione dell'autore (17/11, chat, D63): T52 si chiude prima dell'arredo e della rigenerazione. Nasce da T52 e T412 (`dossier T52`, `docs/design/sotterranei-stato.md` § 6, riga «T52d», versione ridotta raccomandata; ADR-0091 punto 5).
@@ -5825,6 +5825,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: stesso seme stessi strati, piani di prima; suite e typecheck coi turni.
 - Browser: sì — in una cantina le colonne tagliate a bande; screenshot.
 - Quando è fatto: commit su `task/T418`. Sicurezza: nessuna superficie nuova.
+- Esito: terreni `stratum` del seme in `world.terrain → strata` (`SEED_STRATA`, `strataPalette`, il validatore li vuole lì e mai fra le caselle), bozza per colonna dal bioma e dal seme (`draftStrata`, 4 righe), `ChunkPlan.strata` scritto alla pianificazione e ricalcolato per i piani di prima (`Kernel.strataOf`, `stratumAt`), `ChunkView.strata` una volta per luogo, tappi del colore dello strato e fianchi a bande nel taglio (`strataSide`); kernel 0.9.5, ADR-0091, architettura, glossario, AGENTS, sotterranei-stato § 8, `tests/strata.test.ts`. Mancano (da proporre come task): il Cartografo che scrive gli strati alla Genesi, il programma `sottosuolo`, la profondità dalla cantina più profonda (oggi 4 righe fisse), le bande sui fianchi del buco, l'ombra della casa tagliata. Non provato: una cantina vera di 2 caselle (le bande si sono viste col taglio abbassato a mano). Sicurezza: nessuna superficie nuova.
 
 ### T419 · La cantina arredata: la cantina nella via dei dati dello Scenografo — `da fare` (dipende da T410, T416, T417)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2

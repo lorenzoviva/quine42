@@ -1,6 +1,6 @@
 # ADR-0091 — I sotterranei
 
-Data: 2026-10-30 · Stato: accettato, attuato in parte (progetto di T52a; T52b, il buco a copertura di T415 e T52e senza strati di T416 fatti; codice ancora in T52c, T52d, T52f e le bande degli strati, T418) · Riferimenti: Regola 10,
+Data: 2026-10-30 · Stato: accettato, attuato in parte (progetto di T52a; T52b, il buco a copertura di T415, T52e senza strati di T416 e T52d ridotto di T418 fatti; codice ancora in T52c, T52f e il resto di T52d: il Cartografo, il programma `sottosuolo`, la profondità dalla cantina) · Riferimenti: Regola 10,
 ADR-0043 (lotti, strutture, rampe di T53a, piani di T53b), ADR-0048 (il rilievo), ADR-0049 (gli edifici della corona come modelli),
 ADR-0059 (il client sottile), ADR-0080 (il salto)
 
@@ -124,6 +124,29 @@ centro (`floorAt`), il renderer taglia solo la struttura in cui si è, sopra il 
   le aggiunge T418, con T52d); il disco è allungato verso la camera a quarti, non con l'angolo esatto. Con le cantine del seme (pavimento
   a −1,19 caselle) il taglio cade 4 centesimi sotto il suolo: il disco è un cerchio di terra attorno alla cantina e tutto ciò che vi sta
   sopra sparisce.
+- **T418** (T52d ridotto, punto 5, e le bande del punto 6; kernel 0.9.5). I terreni degli strati non stanno fra le caselle (`tiles`):
+  sono `strata` del generatore, codice → terreno con `layer: 'stratum'` (che il validatore vuole lì e mai in `tiles`), così nessuno
+  li sceglie per una casella, nessun prompt li elenca come terreni delle mappe e la Genesi, che riscrive solo `tiles`, non li tocca. Il seme
+  ne ha cinque (`SEED_STRATA` in `src/kernel/strata.ts`, gli stessi nel manifest di `world.terrain`): terra, argilla, sabbia compatta,
+  fango, roccia viva; un universo senza i suoi ha quelli del seme, e quelli che ha vanno sopra codice per codice (`strataPalette`). La bozza
+  cerca gli strati per `id` (`topsoil`, `clay`, `sandbed`, `mud`, `bedrock`; `roleCodes`): una colonna, dal codice della sua casella
+  nella bozza procedurale (il bioma: acqua e mare, roccia e montagna, sabbia, il resto) e da un hash della casella e del seme del mondo, ha
+  terra per una o due caselle, argilla e la roccia viva da due o tre; sabbia compatta sotto la sabbia, fango sotto l'acqua (la roccia una
+  casella più giù), roccia viva sotto la roccia (`columnRoles`, `draftStrata`). Il piano tiene `strata`: `STRATA_DEPTH` = 4 righe di
+  `S × S` codici, la prima la prima casella sotto il suolo, scritte quando il luogo si pianifica (anche i luoghi di un blocco e i riempitivi);
+  un piano di prima non le ha e le ricalcola dalla bozza (`Kernel.strataOf`, tenute sul luogo, non salvate); ciò che si legge da un piano o
+  dal filo passa da `readStrata` (righe intere, codici degli strati). `ChunkView.strata` le porta al client sottile la prima volta che
+  riceve il luogo e quando cambiano (da quelle della bozza a quelle del piano), non a ogni versione: il client le tiene.
+  `kernel.stratumAt(x, y, profondità)` dà il terreno della riga in cui cade la profondità sotto il suolo della colonna (l'ultima più giù,
+  la prima sopra il suolo). Nel taglio i tappi hanno il colore dello strato a cui la colonna arriva all'altezza del taglio, e i fianchi delle
+  colonne attorno al disco sono a bande, una per riga di strato, col colore dello strato della colonna (`strataSide`); ogni cambio di colore
+  ha la sua linea d'inchiostro. Diverso dal previsto: niente Cartografo che scrive gli strati alla Genesi né programma `sottosuolo`
+  dell'ambiente (un task dopo, se servirà: la bozza basta a dare le bande); `D` fisso a 4 righe, non la cantina più profonda più 2
+  (le cantine del seme scendono di al più 3 caselle, e sotto l'ultima riga vale l'ultima); la bozza guarda la bozza procedurale e non le
+  caselle dell'ambiente, così il client sottile non deve ricavarla e un lago che l'ambiente scava resta sopra la terra; i fianchi del buco
+  della cantina restano di un colore (i muri della cantina li coprono). Con le cantine del seme il taglio cade appena sotto il suolo:
+  i tappi sono della prima riga, la terra (o fango, roccia, sabbia dove la bozza lo dice), e le bande si vedono dove il terreno attorno al
+  disco sta più in alto del taglio di più di una casella (un pendio, una cantina più profonda).
 
 ## Conseguenze
 - Il mondo resta uno: una cantina sta davvero sotto la sua casa, la si vede scendere e il terreno attorno ha i suoi strati.

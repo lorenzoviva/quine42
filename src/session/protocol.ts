@@ -57,6 +57,8 @@ export interface ChunkView {
   /** The ground dug or raised and the water that has flowed (T51b): cell → levels, cell → bed and water. */
   digs?: Record<string, number>;
   water?: Record<string, [number, number] | [number, number, string]>;
+  /** The strata under its ground (T418, ADR-0091): rows of codes of the generator's `strata`; sent when the client has not had them yet. */
+  strata?: string[];
   version: number;
 }
 

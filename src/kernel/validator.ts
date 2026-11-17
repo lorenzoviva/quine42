@@ -26,6 +26,7 @@ import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
 import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
+import { strataErrors } from './strata';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -372,6 +373,7 @@ export class Validator {
         if (t.layer !== undefined && !LAYERS.includes(t.layer)) err(`tile "${code}": layer deve essere uno tra ${LAYERS.join(', ')}`);
       }
     }
+    if (m.strata !== undefined) for (const e of strataErrors(m.strata)) err(e);
     if (m.container && (!Number.isInteger(m.container.size) || m.container.size < 1 || m.container.size > 24 || typeof m.container.loot !== 'string')) err('container: size 1..24 e loot');
     if (m.actions && (!Array.isArray(m.actions) || m.actions.some((a: any) => typeof a?.id !== 'string' || typeof a?.label !== 'string'))) err('actions: lista di {id, label}');
     if (m.items) errors.push(...this.validateItems(m.items).map((e) => `${path}: ${e}`));

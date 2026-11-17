@@ -314,11 +314,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `sotto` nelle voci dei modelli e nel piano.
 
 ### Taglio sotto terra
-- **Inglese**: `underground`, `Underground`, `cutDisc`, `inCutDisc`, `towardsCamera`, `buildCut`, `CUT_EARTH`, `dimAt`
-- **Definizione**: ciò che si vede quando si sta in una cantina (il pavimento più di un gradino sotto il suolo): in un disco di caselle attorno al viandante (raggio 6, 3 caselle più lungo verso la camera) non si disegna ciò che sta più di 1,15 caselle sopra il suo pavimento, terreno, strutture e cose; le colonne tagliate hanno un tappo di terra all'altezza del taglio, e il sole e il cielo si attenuano con la profondità (ADR-0091 punto 6, T416).
+- **Inglese**: `underground`, `Underground`, `cutDisc`, `inCutDisc`, `towardsCamera`, `buildCut`, `CUT_EARTH`, `dimAt`, `strataSide`
+- **Definizione**: ciò che si vede quando si sta in una cantina (il pavimento più di un gradino sotto il suolo): in un disco di caselle attorno al viandante (raggio 6, 3 caselle più lungo verso la camera) non si disegna ciò che sta più di 1,15 caselle sopra il suo pavimento, terreno, strutture e cose; le colonne tagliate hanno un tappo all'altezza del taglio, del colore dello strato a cui arrivano, i fianchi attorno al disco sono a bande di strati (T418), e il sole e il cielo si attenuano con la profondità (ADR-0091 punto 6, T416).
 - **Dove vive**: `src/kernel/underground.ts`, `src/kernel/kernel.ts`, `src/render/terrain.ts`, `src/render/materials.ts`, `src/render/renderer.ts`
 - **Da non usare**: «clipping», «scavo» (il kernel non scava)
 - **Fermo**: nessuno (nulla su disco né sul filo: ogni client lo calcola da sé).
+
+### Strato
+- **Inglese**: `stratum`, `strata`, `SEED_STRATA`, `strataPalette`, `draftStrata`, `readStrata`, `stratumAt`, `strataOf`, `STRATA_DEPTH`
+- **Definizione**: ciò che sta sotto una casella, una riga per casella di profondità: un terreno con `layer: 'stratum'` fra gli `strata` del generatore (terra, argilla, sabbia compatta, fango, roccia viva nel seme), scelto per colonna dalla bozza degli strati (il bioma della bozza procedurale e un hash della casella e del seme). Solo aspetto: si vede nei tagli sotto terra (ADR-0091 punto 5, T418).
+- **Dove vive**: `src/kernel/strata.ts`, `src/kernel/kernel.ts`, `src/render/terrain.ts`, `universe/modules/world.terrain/manifest.json`
+- **Da non usare**: «strato» per `TerrainDef.layer` in generale (è il tipo di disegno di un terreno: `ground`, `wall`…; uno strato del terreno è `stratum`), `sottosuolo` (è il programma dell'ambiente, ancora da fare), `layer` per uno strato sotto terra
+- **Fermo**: `strata` nei manifest dei generatori, nel piano (`maps/`, `ChunkPlan.strata`) e sul filo (`ChunkView.strata`); `stratum` in `TerrainLayer`.
 
 ### Dispositivo
 - **Inglese**: `device`, `DEVICE_MARGIN`, `DEVICE_SLOTS`

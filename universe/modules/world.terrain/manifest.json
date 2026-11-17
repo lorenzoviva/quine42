@@ -221,6 +221,48 @@
       }
     }
   },
+  "strata": {
+    "1": {
+      "id": "topsoil",
+      "name": "terra",
+      "description": "terra scura con radici e sassi",
+      "color": "#6b4a30",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "2": {
+      "id": "clay",
+      "name": "argilla",
+      "description": "argilla rossiccia, compatta e umida",
+      "color": "#a0643f",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "3": {
+      "id": "sandbed",
+      "name": "sabbia compatta",
+      "description": "sabbia pressata in falde chiare",
+      "color": "#bfa064",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "4": {
+      "id": "mud",
+      "name": "fango",
+      "description": "fango nero sotto le acque",
+      "color": "#463a2e",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "5": {
+      "id": "bedrock",
+      "name": "roccia viva",
+      "description": "la roccia su cui poggia tutto",
+      "color": "#6d6a68",
+      "solid": true,
+      "layer": "stratum"
+    }
+  },
   "roof": {
     "color": "#9a4632"
   }

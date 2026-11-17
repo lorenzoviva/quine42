@@ -83,6 +83,11 @@ export interface ChunkPlan {
    * (its edits, its things and the forms of its lots are per tile).
    */
   vpt?: number;
+  /**
+   * The strata under its ground (T418, ADR-0091 point 5): `STRATA_DEPTH` rows of `S × S` codes of the generator's `strata`, the first row the
+   * first tile under the ground; written by the kernel from the draft when the place is planned. Absent, a plan of before: the draft says them again.
+   */
+  strata?: string[];
 }
 
 export interface PlanContext {

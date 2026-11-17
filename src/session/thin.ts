@@ -23,6 +23,7 @@ import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS } from './protocol';
 import { SEA_DRAFT } from '../kernel/relief';
+import { readStrata } from '../kernel/strata';
 import { readPace } from '../kernel/worldPace';
 import type { Region, RegionAnswer, RegionRequest } from '../kernel/atlas';
 
@@ -315,6 +316,11 @@ export class ThinClient {
         ...(Array.isArray(v.block) && v.block.length === 5 && v.block.every(Number.isFinite) ? { blockLot: { x0: v.block[0], y0: v.block[1], x1: v.block[2], y1: v.block[3], level: v.block[4] } } : {}),
         ...(v.digs ? { digs: v.digs } : {}),
         ...(v.water ? { water: v.water } : {}),
+        // The strata (T418): the server's when it sends them, else the ones already had; never what is not good.
+        ...(() => {
+          const strata = readStrata(v.strata, this.k.config.chunkSize, this.k.strata) ?? this.k.chunks.get(v.key)?.strata;
+          return strata ? { strata } : {};
+        })(),
       });
     }
   }

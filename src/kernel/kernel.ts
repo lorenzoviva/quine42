@@ -79,6 +79,7 @@ import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { undergroundAt, type Underground } from './underground';
+import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
@@ -143,6 +144,8 @@ export interface Chunk {
   /** In a thin client (T51b): the ground dug and the water that has flowed, as the server's plan has them. */
   digs?: Record<string, number>;
   water?: Record<string, WaterRecord>;
+  /** The strata under its ground (T418): from its plan or its draft (`Kernel.strataOf`), from the server's place in a thin client. */
+  strata?: string[];
 }
 
 export interface LineState {
@@ -530,6 +533,8 @@ export class Kernel {
   systems: ModuleEntry[] = [];
   terrain?: ModuleEntry;
   palette: Record<string, TerrainDef> = {};
+  /** The terrains of the strata under the ground (T418): the generator's `strata` over the seed's (`strataPalette`). */
+  strata: Record<string, TerrainDef> = strataPalette(undefined);
   fragments: RuneFragment[] = [];
 
   readonly chunks = new Map<string, Chunk>();
@@ -1540,6 +1545,7 @@ export class Kernel {
     this.systems = modules.filter((m) => m.manifest.kind === 'system').sort((a, b) => (a.manifest.order ?? 50) - (b.manifest.order ?? 50));
     this.terrain = modules.find((m) => m.manifest.kind === 'generator');
     this.palette = { '?': VOID_TILE, ...(this.terrain?.manifest.tiles ?? {}) };
+    this.strata = strataPalette(this.terrain?.manifest.strata);
     this.fragments = modules.flatMap((m) => m.manifest.fragments ?? []);
     this.content.rebuild(modules);
 
@@ -1811,6 +1817,7 @@ export class Kernel {
 
   private regenerateDraft(ch: Chunk): void {
     ch.draft = ch.tiles = this.genDraft(ch.cx, ch.cy);
+    ch.strata = undefined;
     ch.version++;
   }
 
@@ -1922,7 +1929,7 @@ export class Kernel {
       if (!this.alive(ch)) return;
       if (anchor) {
         ch.held = false;
-        const plan = this.blockPlan(block, anchor);
+        const plan = { ...this.blockPlan(block, anchor), strata: this.strataOf(ch) };
         await this.chunkStore.save(this.recordKey(ch), { plan });
         if (this.alive(ch)) this.applyPlan(ch, plan);
         return;
@@ -1939,7 +1946,7 @@ export class Kernel {
     }
     if (kind === 'filler' && this.content.layouts[region!.environment]) {
       ch.held = false;
-      const plan = this.fillerPlan(region!);
+      const plan = { ...this.fillerPlan(region!), strata: this.strataOf(ch) };
       await this.chunkStore.save(this.recordKey(ch), { plan });
       this.council.say('kernel', 'info', `luogo ${ch.key}: riempitivo «${region!.name}» (${this.content.layouts[plan.layout]?.name ?? plan.layout}), senza chiamate`, 'cartographer', 'chunk.plan');
       if (this.alive(ch)) this.applyPlan(ch, plan);
@@ -1960,6 +1967,8 @@ export class Kernel {
       plan = await this.makePlan(ch);
       // A new plan's stamps cut their buildings for the structures at 16 (T407); a plan of before does not say it, and keeps its stamps.
       plan.vpt = STRUCTURE_VPT;
+      // And its strata, from its draft (T418): the plan keeps them.
+      plan.strata = this.strataOf(ch);
       this.cardChunk(ch, plan, ch.chi);
     } finally {
       end();
@@ -2487,6 +2496,8 @@ export class Kernel {
     const { result, tiles, block } = this.layoutOf(ch, plan, pathCode);
     ch.plan = plan;
     ch.place = plan.place;
+    // Its strata (T418): the plan's, or, for a plan of before, the draft's again.
+    ch.strata = readStrata(plan.strata, S, this.strata);
     // A place of a block (T370): the world knows its block from its plan too, and its ground lies flat on the lot.
     if (block) this.knowBlock(block, ch, plan);
     ch.blockLot = block ? this.blockLotBox(block, ch) : undefined;
@@ -3477,6 +3488,25 @@ export class Kernel {
   }
 
   // --- Space & collisions ----------------------------------------------------------------------
+
+  /**
+   * The strata under a place (T418, ADR-0091 point 5): its plan's, or the draft's (`draftStrata`, deterministic: a plan of before and a place
+   * still a draft have them from there, not saved). Kept on the place until its draft changes.
+   */
+  strataOf(ch: Chunk): string[] {
+    const S = this.config.chunkSize;
+    // What is kept was read (`readStrata`) or drafted here: whole, with codes of the strata.
+    return (ch.strata ??= draftStrata(ch.draft, ch.cx, ch.cy, S, this.config.seed, this.palette, this.strata));
+  }
+
+  /** The stratum of a column at a depth under its ground (tiles, T418): the row it falls in (the last one deeper down), or undefined off the places. */
+  stratumAt(col: number, row: number, depth: number): TerrainDef | undefined {
+    const S = this.config.chunkSize;
+    const cx = Math.floor(col / S), cy = Math.floor(row / S);
+    const ch = this.chunks.get(this.chunkKey(cx, cy));
+    if (!ch) return undefined;
+    return this.strata[this.strataOf(ch)[stratumRow(depth)]?.[(row - cy * S) * S + (col - cx * S)] ?? ''];
+  }
 
   /** Tile at a carpet cell, or undefined if its chunk is not loaded (never generates: may be called from Lua). */
   tileAt(col: number, row: number): string | undefined {

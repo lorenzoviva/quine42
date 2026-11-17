@@ -237,6 +237,8 @@ interface Client {
   me?: string;
   state?: string;
   places: Map<string, number>;
+  /** The strata of each place as last sent (T418): sent again only when the place has others (its plan's in place of its draft's). */
+  strata?: Map<string, string[]>;
   /** What the client knows of each entity in sight: what it is, and where it last was. */
   things: Map<number, { look: string; x: number; y: number }>;
   others: Map<string, string>;
@@ -1029,6 +1031,10 @@ export class SessionServer {
       const far = Math.max(Math.abs(ch.cx * S + S / 2 - centre.x), Math.abs(ch.cy * S + S / 2 - centre.y)) - S / 2;
       if (far > this.near || c.places.get(ch.key) === ch.version) continue;
       c.places.set(ch.key, ch.version);
+      const strata = k.strataOf(ch);
+      const sent = (c.strata ??= new Map());
+      const newStrata = sent.get(ch.key) !== strata;
+      if (newStrata) sent.set(ch.key, strata);
       chunks.push({
         key: ch.key,
         cx: ch.cx,
@@ -1042,6 +1048,7 @@ export class SessionServer {
         ...(ch.draft.includes(SEA_DRAFT) ? { sea: [...ch.draft].flatMap((c, i) => (c === SEA_DRAFT ? [i] : [])) } : {}),
         ...(ch.plan?.digs && Object.keys(ch.plan.digs).length ? { digs: { ...ch.plan.digs } } : {}),
         ...(ch.plan?.water && Object.keys(ch.plan.water).length ? { water: { ...ch.plan.water } } : {}),
+        ...(newStrata ? { strata: [...strata] } : {}),
       });
     }
     if (chunks.length) out.chunks = chunks;
