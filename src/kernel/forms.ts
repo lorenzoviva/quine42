@@ -1171,6 +1171,45 @@ export function footBlocks(f: Form, foot: Uint8Array, lx: number, lz: number): b
   return vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && !!foot[vx + vy * g.X];
 }
 
+/**
+ * Sub-cells per side of a tile where the terrain opens over a cellar (T415): the hole follows the cellar's footprint,
+ * not whole tiles, since at 16 voxels a tile a cellar's edges are not on the tiles' edges.
+ */
+export const HOLE_CELLS = 16;
+
+/** A tile of a place over a cellar (T415): how deep the terrain goes down, and where (`cover`, `HOLE_CELLS`² sub-cells, row by row; none: the whole tile). */
+export interface TileHole {
+  depth: number;
+  cover?: Uint8Array;
+}
+
+/**
+ * The tiles a cellar's hole covers (T415), `col,row` → which of its sub-cells are over the hole (`true`: all of them).
+ * A sub-cell is of the hole if the voxel column under its middle is: the terrain opens on the whole footprint of the cellar,
+ * and only there, where the kernel stands on the cellar's floors and not on the ground (`floorAt`).
+ */
+export function holeCover(f: Pick<Form, 'result' | 'vpt' | 'reach'>, hole: Uint8Array, x: number, y: number, yaw: number): Map<string, Uint8Array | true> {
+  const out = new Map<string, Uint8Array | true>();
+  const g = f.result?.grid;
+  if (!g) return out;
+  const N = HOLE_CELLS;
+  for (let row = Math.floor(y - f.reach); row <= Math.floor(y + f.reach); row++)
+    for (let col = Math.floor(x - f.reach); col <= Math.floor(x + f.reach); col++) {
+      const cover = new Uint8Array(N * N);
+      let n = 0;
+      for (let t = 0; t < N; t++)
+        for (let s = 0; s < N; s++) {
+          const [lx, lz] = toLocal(col + (s + 0.5) / N - x, row + (t + 0.5) / N - y, yaw);
+          const vx = Math.floor(lx * f.vpt + g.X / 2), vy = Math.floor(lz * f.vpt + g.Y / 2);
+          if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y || !hole[vx + vy * g.X]) continue;
+          cover[t * N + s] = 1;
+          n++;
+        }
+      if (n) out.set(`${col},${row}`, n === N * N || cover);
+    }
+  return out;
+}
+
 /** World offset → the model's own frame (the inverse of turning it by yaw about the vertical). */
 export function toLocal(dx: number, dz: number, yaw: number): [number, number] {
   const c = Math.cos(yaw), s = Math.sin(yaw);
