@@ -1,0 +1,48 @@
+<!-- Villetta: ground floor hall = soggiorno/cucina: hearth/credenza and shelves against walls, a table in the middle
+     with clearance, benches along walls. Upper hall = camera: beds and chests against walls, a wardrobe.
+     Counts are small and placed at random matches, so each seed differs; growth always has steps. -->
+<sequence values="BWFCPAMNHOTKDRSV" symmetry="(xy)">
+  <color symbol="W" hidden="True"/>
+  <color symbol="F" hidden="True"/>
+  <color symbol="C" hidden="True"/>
+  <color symbol="P" hidden="True"/>
+  <color symbol="A" hidden="True"/>
+  <color symbol="M" hidden="True"/>
+  <color symbol="N" value="6b4a2e" name="armadio"/>
+  <color symbol="H" value="8a6f30" name="cassapanca"/>
+  <color symbol="O" value="ffa040" glow="True" name="focolare"/>
+  <color symbol="T" value="7a5436" name="tavolo"/>
+  <color symbol="K" value="b03a3a" name="letto"/>
+  <color symbol="D" value="5f574f" name="camino"/>
+  <color symbol="R" value="a07850" name="panca"/>
+  <color symbol="S" value="9c8060" name="scaffale"/>
+  <color symbol="V" hidden="True"/>
+  <!-- hearth against a wall: base marker, then stone stack -->
+  <one in="WFFFFFFFFFFFFFFF" out="*VVVF**********" steps="1"/>
+  <all in="B V" out="V *" steps="10"/>
+  <all in="V" out="D"/>
+  <one in="WDFF" out="**O*" steps="1"/>
+  <!-- shelves to the ceiling, a few -->
+  <one in="WFFFFFFFFFFFFFFF" out="*SS*************" steps="3"/>
+  <all in="B S" out="S *" steps="30"/>
+  <!-- chests against walls -->
+  <one in="WFFFFFFFFFFFFFFF" out="*HHHH***********" steps="3"/>
+  <all in="B H" out="H *" steps="6"/>
+  <!-- benches -->
+  <one in="WFFFFFFFFFFFFFFF" out="*RRRR***********" steps="2"/>
+  <all in="B R" out="R *" steps="4"/>
+  <!-- beds: wide footprint on the floor, kept low -->
+  <one in="WFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFFFF" out="*KKKKKKKKK********/*KKKKKKKKK********/*KKKKKKKKK********/*KKKKKKKKK********/*KKKKKKKKK********/*KKKKKKKKK********" steps="2"/>
+  <all in="B K" out="K *" steps="4"/>
+  <!-- wardrobe -->
+  <one in="WFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFF/WFFFFFFFFFFFFFFF" out="*NNN************/*NNN************/*NNN************" steps="1"/>
+  <all in="B N" out="N *" steps="24"/>
+  <!-- table in the middle: 5x5 FF ring of free floor around a 3x3 top marker -->
+  <one steps="1">
+    <in>FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF/FFFFFFFFFFFFFFFFFFFFFFFFF</in>
+    <out>*************************/*************************/*************************/***********M*************/*************************/*************************/*************************</out>
+  </one>
+  <all in="B M" out="M *" steps="7"/>
+  <all in="B M" out="T *" steps="1"/>
+  <all in="M" out="T"/>
+</sequence>

@@ -11,7 +11,9 @@ import { boxUnderMaxSide, classOf, densityOf, scaledTiles, TILE, type SizeTier }
 import { analyse, type Analysis } from '../../src/mj/check';
 import { Mj3Error, type Grid3, type PaletteEntry, type RunResult, type Vec3 } from '../../src/mj/engine';
 import { colorTable, surfaces, type Levels } from '../../src/mj/mesh';
-import { compileMjx, type MjxModel } from '../../src/mj/model';
+import { compileMjx, mjxIncludes, type MjxModel } from '../../src/mj/model';
+import fs from 'node:fs';
+import path from 'node:path';
 import { turn } from '../../src/mj/photo';
 import { act, FORM_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../../src/mj/run';
 
@@ -42,6 +44,12 @@ export interface Scatola {
   corpo: number;
 }
 
+/** A file of the seed's models/, by name (`part-stair.xml`), if it is there. */
+function seedModel(f: string): string | undefined {
+  const p = path.resolve(__dirname, '../../universe/models', f);
+  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : undefined;
+}
+
 /** The library's own idea of a model of this class, size and cellar: how it would run in the game. */
 function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id: string; vpt: number; size?: Vec3 } {
   const id = 'prova';
@@ -51,7 +59,9 @@ function voce(b: Bersaglio, xml = '<sequence values="B"/>'): { forms: Forms; id:
   const before = tiles && b.taglia && densityOf(tiles) !== TILE ? { vpt: densityOf(tiles) } : {};
   const info = { class: b.classe, ...modelSize(b), ...before, ...(b.sotto ? { cellar: b.sotto } : {}) };
   const forms = new Forms(new InlineRunner(new FormCache()));
-  forms.load({ [`models/${id}.xml`]: xml, 'models/index.json': JSON.stringify({ [id]: info }) });
+  // The parts of the seed a program imports (`part-stair`, `part-door`…, ADR-0182), from universe/models as the game has them (T303).
+  const parts = Object.fromEntries(Object.entries(mjxIncludes(xml, seedModel)).map(([f, t]) => [`models/${f}`, t]));
+  forms.load({ ...parts, [`models/${id}.xml`]: xml, 'models/index.json': JSON.stringify({ [id]: info }) });
   const q = forms.request(id, 1)!;
   return { forms, id, vpt: q.vpt, size: q.size };
 }
@@ -82,9 +92,9 @@ export function esegui(xml: string, b: Bersaglio, seme = 1, tempo?: number): Ese
   const scritto = withSize(xml, scatola.box);
   const { forms, id } = voce(b, scritto);
   const q = forms.request(id, seme)!;
-  const model = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}) });
+  const model = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}), ...(q.files ? { files: q.files } : {}) });
   // The nodes of T333-T335 as the world takes them (T336, ADR-0176): what the validator refuses, the bench refuses.
-  const nodes = worldNodeErrors(model, q.xml);
+  const nodes = worldNodeErrors(model, q.xml, q.files);
   if (nodes.length) throw new Mj3Error(nodes.join('; '));
   const result = runMjx(model, seme, { deadline: Math.min(tempo ?? q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_LIMITS, ceilings: WORLD_NODE_LIMITS });
   const g = result.grid;

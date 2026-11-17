@@ -1,0 +1,29 @@
+Claude prima: 5 ore 57 %, settimana 47 %
+villetta insieme 1: voto 8 · 0.5993 $ · seme 1 pezzi 6 voxel 1100 stanze 2/2 animali 100 % · seme 2 pezzi 6 voxel 1100 stanze 2/2 animali 100 % · seme 3 pezzi 6 voxel 1100 stanze 2/2 animali 100 % · seme 4 pezzi 6 voxel 1100 stanze 2/2 animali 100 %
+villetta programma 1: preso · 1 chiamate, 0 correzioni, 15 s, 0.078 $ · seme 1 regge (1) pezzi 13 stanze 2/2 animali 100 % · seme 2 regge (1) pezzi 13 stanze 2/2 animali 100 % · seme 3 regge (1) pezzi 11 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 11 stanze 2/2 animali 100 %
+villetta programma 2: preso · 1 chiamate, 0 correzioni, 24 s, 0.062 $ · seme 1 regge (1) pezzi 0 stanze 0/2 animali 100 % · seme 2 regge (1) pezzi 0 stanze 0/2 animali 100 % · seme 3 regge (1) pezzi 3 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 3 stanze 2/2 animali 100 %
+villetta dati 1: preso · 1 chiamate, 0 correzioni, 3 s, 0.024 $ · seme 1 regge (3) pezzi 4 stanze 2/2 animali 100 % · seme 2 regge (1) pezzi 3 stanze 2/2 animali 100 % · seme 3 regge (2) pezzi 5 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 4 stanze 2/2 animali 100 %
+villetta dati 2: preso · 1 chiamate, 0 correzioni, 4 s, 0.007 $ · seme 1 regge (3) pezzi 4 stanze 2/2 animali 100 % · seme 2 regge (1) pezzi 3 stanze 2/2 animali 100 % · seme 3 regge (2) pezzi 5 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 4 stanze 2/2 animali 100 %
+fattoria insieme 1: voto 8 · 0.4007 $ · seme 1 pezzi 5 voxel 428 stanze 2/2 animali 100 % · seme 2 pezzi 5 voxel 428 stanze 2/2 animali 100 % · seme 3 pezzi 5 voxel 428 stanze 2/2 animali 100 % · seme 4 pezzi 5 voxel 428 stanze 2/2 animali 100 %
+fattoria programma 1: preso · 1 chiamate, 0 correzioni, 25 s, 0.077 $ · seme 1 regge (1) pezzi 10 stanze 2/2 animali 100 % · seme 2 regge (1) pezzi 10 stanze 2/2 animali 100 % · seme 3 regge (1) pezzi 10 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 10 stanze 2/2 animali 100 %
+fattoria programma 2: preso · 1 chiamate, 0 correzioni, 27 s, 0.069 $ · seme 1 regge (1) pezzi 2 stanze 2/2 animali 100 % · seme 2 regge (1) pezzi 2 stanze 2/2 animali 100 % · seme 3 regge (1) pezzi 2 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 2 stanze 2/2 animali 100 %
+fattoria dati 1: preso · 1 chiamate, 0 correzioni, 4 s, 0.018 $ · seme 1 regge (1) pezzi 4 stanze 2/2 animali 100 % · seme 2 regge (3) pezzi 4 stanze 2/2 animali 100 % · seme 3 regge (1) pezzi 4 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 2 stanze 1/2 animali 100 %
+fattoria dati 2: preso · 1 chiamate, 0 correzioni, 4 s, 0.007 $ · seme 1 regge (1) pezzi 4 stanze 2/2 animali 100 % · seme 2 regge (3) pezzi 4 stanze 2/2 animali 100 % · seme 3 regge (1) pezzi 4 stanze 2/2 animali 100 % · seme 4 regge (1) pezzi 2 stanze 1/2 animali 100 %
+Claude dopo: 5 ore 62 %, settimana 47 %
+# Lo Scenografo misurato (T303): villetta, fattoria, tre vie
+
+Ogni costo è in dollari al listino API di Anthropic dai token che la CLI riporta (Opus 5.5, sforzo `low`); accanto quello che la CLI stessa dice (`total_cost_usd`). I semi dell'edificio sono 4; «regge» è la guardia e le misure del banco (`regge` di `scenografo.ts`) con al più 4 semi d'arredo.
+
+| edificio | via | richiesta | costo (listino API) | costo detto dalla CLI | chiamate | correzioni | token in (cache) | token out | secondi | regge al primo | regge entro 4 | pezzi (media) | stanze arredate | animali liberi | piani prima → dopo | perso | varianza |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| villetta | (a) insieme | 1 | 0,59 $ (+ 0,01 $ dell'Artista) | 0,59 $ | 2 | 0 | 25230 (16062) | 25765 | 291 | voto 8 | — | 6,00 | 8/8 | 100 % | 2→2 | stanze, salti | — |
+| villetta | (b) programma | 1 | 0,08 $ | 0,08 $ | 1 | 0 | 5952 (0) | 1538 | 15 | 4/4 | 4/4 | 12,00 | 8/8 | 100 % | 2→2 | — | 0,93 |
+| villetta | (b) programma | 2 | 0,06 $ | 0,06 $ | 1 | 0 | 5950 (5591) | 2894 | 24 | 4/4 | 4/4 | 1,50 | 4/8 | 100 % | 2→2 | — | 0,84 |
+| villetta | (c) dati | 1 | 0,02 $ | 0,02 $ | 1 | 0 | 2539 (0) | 172 | 3 | 2/4 | 4/4 | 4,00 | 8/8 | 100 % | 2→2 | stanza | 0,82 |
+| villetta | (c) dati | 2 | 0,01 $ | 0,01 $ | 1 | 0 | 2540 (2180) | 172 | 4 | 2/4 | 4/4 | 4,00 | 8/8 | 100 % | 2→2 | stanza | 0,82 |
+| fattoria | (a) insieme | 1 | 0,39 $ (+ 0,01 $ dell'Artista) | 0,39 $ | 2 | 0 | 25139 (16062) | 15840 | 172 | voto 8 | — | 5,00 | 8/8 | 100 % | 2→2 | stanze | — |
+| fattoria | (b) programma | 1 | 0,08 $ | 0,08 $ | 1 | 0 | 6032 (4370) | 3138 | 25 | 4/4 | 4/4 | 10,00 | 8/8 | 100 % | 2→2 | — | 0,83 |
+| fattoria | (b) programma | 2 | 0,07 $ | 0,07 $ | 1 | 0 | 6032 (5672) | 3240 | 27 | 4/4 | 4/4 | 2,00 | 8/8 | 100 % | 2→2 | — | 0,89 |
+| fattoria | (c) dati | 1 | 0,02 $ | 0,02 $ | 1 | 0 | 2621 (959) | 221 | 4 | 3/4 | 4/4 | 3,50 | 7/8 | 100 % | 2→2 | — | 0,74 |
+| fattoria | (c) dati | 2 | 0,01 $ | 0,01 $ | 1 | 0 | 2621 (2261) | 194 | 4 | 3/4 | 4/4 | 3,50 | 7/8 | 100 % | 2→2 | — | 0,74 |
+

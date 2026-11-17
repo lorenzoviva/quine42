@@ -1,0 +1,5 @@
+[sculptor] propone: «fattoria» (struttura grande, claude-opus-5-5)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «fattoria»: taglia Grande, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «fattoria»: nessun programma valido

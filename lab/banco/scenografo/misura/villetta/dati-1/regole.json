@@ -1,0 +1,42 @@
+{
+ "regole": [
+  {
+   "storey": 0,
+   "area": "house",
+   "room": "hall",
+   "furniture": [
+    "credenza",
+    "banco",
+    "barile"
+   ],
+   "count": 3
+  },
+  {
+   "storey": 1,
+   "area": "house",
+   "room": "hall",
+   "furniture": [
+    "letto",
+    "furniture"
+   ],
+   "count": 2
+  },
+  {
+   "room": "room",
+   "furniture": [
+    "letto",
+    "furniture"
+   ],
+   "count": 2
+  },
+  {
+   "room": "small",
+   "furniture": [
+    "barile",
+    "furniture"
+   ],
+   "count": 1
+  }
+ ],
+ "ignoti": []
+}

@@ -1,0 +1,3 @@
+[sculptor] propone: «villetta» (struttura grande, claude-opus-5-5)
+[kernel → sculptor] scarta: «villetta»: taglia Grande, seme 1: porta: 11 × 6 voxel (0,55 × 0,30 caselle), una porta è almeno 11 × 30 a ogni taglia
+[artist → sculptor] obietta: «villetta»: 6/10 — Il tetto principale risulta sproporzionato ed troppo alto rispetto alla struttura.

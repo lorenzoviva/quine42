@@ -1,0 +1,129 @@
+{
+ "richiesta": {
+  "via": "dati",
+  "n": 1,
+  "chiamate": [
+   {
+    "model": "claude-opus-5-5",
+    "input": 2,
+    "written5m": 0,
+    "written1h": 2537,
+    "read": 0,
+    "output": 172,
+    "usd": 0.023744,
+    "usdCli": 0.023744,
+    "task": "interior.dati",
+    "seconds": 3
+   }
+  ],
+  "secondi": 3,
+  "testo": "```json\n{\"rules\": [\n  {\"storey\": 0, \"area\": \"house\", \"room\": \"hall\", \"furniture\": [\"credenza\", \"banco\", \"barile\"], \"count\": 3},\n  {\"storey\": 1, \"area\": \"house\", \"room\": \"hall\", \"furniture\": [\"letto\", \"furniture\"], \"count\": 2},\n  {\"room\": \"room\", \"furniture\": [\"letto\", \"furniture\"], \"count\": 2},\n  {\"room\": \"small\", \"furniture\": [\"barile\", \"furniture\"], \"count\": 1}\n]}\n```",
+  "correzioni": 0
+ },
+ "usd": 0.023744,
+ "usdCli": 0.023744,
+ "semi": [
+  {
+   "seme": 1,
+   "regge": true,
+   "tentativi": 3,
+   "ms": 363,
+   "pezzi": 4,
+   "voxel": 6249,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [
+    "stanza: la più grande in cui si sta in piedi ha il lato di 26 voxel (1,30 caselle), una stanza ne vuole almeno 28 (1,40) a ogni taglia: se l'area è piccola fai meno parti, non più piccole"
+   ],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.9346815183302692
+  },
+  {
+   "seme": 2,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 80,
+   "pezzi": 3,
+   "voxel": 5221,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.7068633739576652
+  },
+  {
+   "seme": 3,
+   "regge": true,
+   "tentativi": 2,
+   "ms": 430,
+   "pezzi": 5,
+   "voxel": 8390,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.8233626962849483
+  },
+  {
+   "seme": 4,
+   "regge": true,
+   "tentativi": 1,
+   "ms": 92,
+   "pezzi": 4,
+   "voxel": 7460,
+   "raggiunte": 1,
+   "stanzePercorribili": [
+    2,
+    2
+   ],
+   "stanzeArredate": [
+    2,
+    2
+   ],
+   "piani": [
+    2,
+    2
+   ],
+   "parti": [],
+   "giudicaPerso": [],
+   "animaliLiberi": 1,
+   "varianza": 0.7969035331480746
+  }
+ ]
+}

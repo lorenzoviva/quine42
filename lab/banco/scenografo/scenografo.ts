@@ -33,14 +33,25 @@ export interface Scena {
   seme: number;
   e: Eseguito;
   m: Misure;
+  opzioni?: OpzioniPiante;
 }
 
-export function scena(xml: string, b: Bersaglio, seme: number): Scena {
+/**
+ * How the kernel reads the floors for an interior (T303): `piccolo` the covered tiles² under which a storey stays empty (`PIANO_PICCOLO`
+ * if not said: the storeys of today's Sculptor at Large are 3-4 tiles², T259's were measured at the bench's older scale); `coperto` only
+ * the floor with something above it is a room's (the yard and the fields outside are not furnished).
+ */
+export interface OpzioniPiante {
+  piccolo?: number;
+  coperto?: boolean;
+}
+
+export function scena(xml: string, b: Bersaglio, seme: number, opzioni?: OpzioniPiante): Scena {
   const e = esegui(xml, b, seme);
-  return { b, seme, e, m: misura(e, b) };
+  return { b, seme, e, m: misura(e, b), ...(opzioni ? { opzioni } : {}) };
 }
 
-const copy = (g: Grid3): Grid3 => ({ ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 });
+export const copy = (g: Grid3): Grid3 => ({ ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 });
 
 /** The storey of a body-centre cell, or -1 on a stair or a ramp (between storeys). */
 function storeyOf(m: Misure, z: number): number {
@@ -72,10 +83,17 @@ export function piante(s: Scena): Pianta[] {
   const out: Pianta[] = m.piani.map((p) => ({ z: p.z, area: p.area, cantina: p.z < base, centri: new Set<number>(), libero: new Uint8Array(XY), protetto: new Uint8Array(XY) }));
   // Stairs and ramps: centres between storeys; they protect the cells of the storeys they touch.
   const ramps: Array<{ x: number; y: number; z: number }> = [];
+  const piccolo = s.opzioni?.piccolo ?? PIANO_PICCOLO;
+  const coperto = (x: number, y: number, z: number) => {
+    for (let zz = z + 1; zz < g.Z; zz++) if (g.cells[x + y * g.X + zz * XY]) return true;
+    return false;
+  };
   for (const c of m.celle) {
     const k = storeyOf(m, c.z);
     // The ground outside is not a stair.
-    if (k >= 0) out[k].centri.add(c.x + c.y * g.X);
+    if (k >= 0) {
+      if (!s.opzioni?.coperto || coperto(c.x, c.y, c.z)) out[k].centri.add(c.x + c.y * g.X);
+    }
     else if (Math.abs(c.z - base) > stepOf(vpt)) ramps.push(c);
   }
   const air = (x: number, y: number, z: number) => x >= 0 && y >= 0 && x < g.X && y < g.Y && z < g.Z && g.cells[x + y * g.X + z * XY] === 0;
@@ -116,7 +134,7 @@ export function piante(s: Scena): Pianta[] {
   // A small room stays empty, and so does what belongs to no room (a cell of a temple too small to have a core, the neck of a stair):
   // a storey keeps the floor that makes it a storey.
   for (const p of out) {
-    if (p.area < PIANO_PICCOLO) for (const i of p.centri) mark(p.protetto, i % g.X, Math.floor(i / g.X), p.z, r + 1);
+    if (p.area < piccolo) for (const i of p.centri) mark(p.protetto, i % g.X, Math.floor(i / g.X), p.z, r + 1);
     const inRoom = new Set<number>();
     for (const room of stanze(p, g.X, g.Y, Math.round(0.4 * vpt)))
       if (room.length >= PICCOLA * vpt * vpt) for (const i of room) inRoom.add(i);
@@ -177,7 +195,7 @@ export interface Arredato {
   pezzi: number;
 }
 
-function withGrid(e: Eseguito, g: Grid3, colori: Record<string, PaletteEntry>): Eseguito {
+export function withGrid(e: Eseguito, g: Grid3, colori: Record<string, PaletteEntry>): Eseguito {
   const palette = { ...e.model.program.palette, ...colori };
   return { ...e, grid: g, result: { ...e.result, grid: g }, model: { ...e.model, program: { ...e.model.program, palette } } };
 }
@@ -314,7 +332,7 @@ export class Guardia {
 }
 
 /** Pieces of furniture: the 6-connected groups of its voxels. */
-function gruppi(voxel: Set<number>, X: number, XY: number): number[][] {
+export function gruppi(voxel: Set<number>, X: number, XY: number): number[][] {
   const seen = new Set<number>();
   const out: number[][] = [];
   for (const s0 of voxel) {
@@ -353,9 +371,8 @@ export const CATALOGO = {
 const ROOT = path.resolve(__dirname, '../../..');
 
 /** The furniture models of the seed, run once at 20 voxels a tile and resampled to `vpt`. */
-export function catalogo(vpt: number): Map<string, Mobile> {
+export function catalogo(vpt: number, ids: string[] = [...new Set(Object.values(CATALOGO).flat())]): Map<string, Mobile> {
   const dir = path.join(ROOT, 'universe/models');
-  const ids = [...new Set(Object.values(CATALOGO).flat())];
   const files: Record<string, string> = { 'models/index.json': fs.readFileSync(path.join(dir, 'index.json'), 'utf8') };
   for (const id of ids) files[`models/${id}.xml`] = fs.readFileSync(path.join(dir, `${id}.xml`), 'utf8');
   const forms = new Forms(new InlineRunner(new FormCache()));
@@ -390,7 +407,7 @@ export function catalogo(vpt: number): Map<string, Mobile> {
 }
 
 /** A model turned a quarter `q` times around z. */
-function turned(mo: Mobile, q: number): Mobile {
+export function turned(mo: Mobile, q: number): Mobile {
   let cur = mo;
   for (let n = 0; n < q; n++) {
     const { X, Y, Z } = cur;
@@ -402,7 +419,7 @@ function turned(mo: Mobile, q: number): Mobile {
 }
 
 /** The rooms of a storey: its centres, cut at the narrow passages, each passage cell given back to the nearest piece. */
-function stanze(p: Pianta, X: number, Y: number, stretto: number): number[][] {
+export function stanze(p: Pianta, X: number, Y: number, stretto: number): number[][] {
   let mask = new Uint8Array(X * Y);
   for (const i of p.centri) mask[i] = 1;
   const all = mask;
@@ -438,7 +455,27 @@ function stanze(p: Pianta, X: number, Y: number, stretto: number): number[][] {
   return out.filter((r) => r.length >= 16);
 }
 
-export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mobile>): Arredato {
+/** A room as the kernel finds it, for a choice of furniture (T303): its storey above the ground (0 the ground floor), its kind, its size. */
+export interface StanzaVista {
+  piano: number;
+  tipo: 'sala' | 'stanza' | 'piccola';
+  /** Tiles² of body centres. */
+  caselle: number;
+  /** Its body centres, `x + y·X`, on the storey at `z`. */
+  celle: number[];
+  z: number;
+}
+
+/**
+ * Who chooses the furniture of each room instead of `CATALOGO` (T303, the Scenografo's choice as data): the models and how many, or none;
+ * `vietata` the feet cells no piece may stand on (the place of the animals).
+ */
+export interface Scelta {
+  per(r: StanzaVista): { mobili: string[]; quanti: number } | undefined;
+  vietata?: (i: number, z: number) => boolean;
+}
+
+export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mobile>, scelta?: Scelta): Arredato {
   const t0 = performance.now();
   const g = copy(s.e.grid);
   const { X, Y } = g;
@@ -461,15 +498,20 @@ export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mob
   const voxel = new Set<number>();
   let pezzi = 0;
   const guardia = new Guardia(s);
+  const sopra = ps.filter((p) => !p.cantina);
   for (const p of ps) {
     if (p.cantina) continue; // a low top under the ground is a floor no body reaches: the cellar keeps only what reaches its ceiling
+    const piano = sopra.indexOf(p);
     const centri = new Set(p.centri);
     const rooms = stanze(p, X, Y, Math.round(0.4 * vpt)).sort((a, b) => b.length - a.length);
     rooms.forEach((room, n) => {
       const area = room.length / (vpt * vpt);
       const kind = n === 0 ? 'sala' : area >= 1.5 ? 'stanza' : 'piccola';
-      const want = Math.min(4, Math.max(1, Math.floor(area / 1.2)));
-      const list = CATALOGO[kind];
+      const chosen = scelta?.per({ piano, tipo: kind, caselle: area, celle: room, z: p.z });
+      if (scelta && !chosen) return;
+      const want = chosen ? Math.min(6, Math.max(0, Math.round(chosen.quanti))) : Math.min(4, Math.max(1, Math.floor(area / 1.2)));
+      const list = chosen ? chosen.mobili.filter((id) => mobili.has(id)) : CATALOGO[kind];
+      if (!list.length) return;
       const inRoom = new Set(room);
       for (let k = 0; k < want; k++) {
         const mo = turned(mobili.get(list[rng.int(list.length)])!, rng.int(4));
@@ -488,7 +530,7 @@ export function arredaDati(s: Scena, semeArredo: number, mobili: Map<string, Mob
           for (let y = 0; y < mo.Y && ok; y++)
             for (let x = 0; x < mo.X && ok; x++) {
               const i = x0 + x + (y0 + y) * X;
-              if (!p.libero[i] || g.cells[i + p.z * XY] !== 0) ok = false;
+              if (!p.libero[i] || g.cells[i + p.z * XY] !== 0 || scelta?.vietata?.(i, p.z)) ok = false;
               for (const j of [i - 2, i + 2, i - 2 * X, i + 2 * X]) if (g.cells[j + p.z * XY] !== 0 && !p.libero[j] && !p.protetto[j]) wall = true;
             }
           if (!ok || !wall) continue;

@@ -1,0 +1,8 @@
+<!-- The offline answer of the Scenografo's program (T303, no call): shelves against the walls up to the ceiling, a passage of 11 in front. -->
+<sequence values="BWFCPAsS" symmetry="(xy)">
+  <color symbol="W" hidden="True"/><color symbol="F" hidden="True"/><color symbol="C" hidden="True"/><color symbol="P" hidden="True"/><color symbol="A" hidden="True"/>
+  <color symbol="s" value="7a5634" name="scaffale"/><color symbol="S" value="7a5634" name="scaffale"/>
+  <one steps="6" in="WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF/WFFFFFFFFFFFFFF" out="*sss***********/*sss***********/*sss***********/*sss***********/*sss***********/*sss***********/*sss***********/*sss***********"/>
+  <all in="B s" out="s *" steps="20"/>
+  <prl in="s" out="S"/>
+</sequence>
