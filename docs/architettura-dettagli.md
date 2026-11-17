@@ -1356,7 +1356,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   lo descrive in dieci righe, in voxel (500 × 500, la scatola della gargantuesca, non le sue 50 caselle a 10), entro la misura che il prompt aveva prima (16 023 caratteri dopo il
   T405, `tests/sculptor-structures.test.ts`), coi doppioni
   di ciò che la richiesta già dice tolti.
-- **Gli interni, la parte del kernel** (ADR-0211, T409; il progetto in `docs/design/scenografo.md`): un edificio che cresce a regole cambia
+- **Gli interni, la parte del kernel** (ADR-0212, T409; il progetto in `docs/design/scenografo.md`): un edificio che cresce a regole cambia
   a ogni seme, e il suo interno lo scrive lo Scenografo sull'edificio fatto (i suoi task sono il § 10.2-10.3). Il kernel dà il pavimento,
   in `src/kernel/interior.ts`: il piano (`interiorPlan`) sullo strato dei piedi di ogni piano raggiunto (`walkIn`, `storeysOf`), il
   pavimento libero solo sotto un tetto, il protetto (porta e strada dritta, piedi e teste delle scale, ciò che non è di una stanza, le stanze

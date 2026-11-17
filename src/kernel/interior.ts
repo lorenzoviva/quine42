@@ -1,4 +1,4 @@
-// The interiors of a building, the kernel's part (T409, ADR-0211; `docs/design/scenografo.md` § 2 and § 10.1). A building that grows by
+// The interiors of a building, the kernel's part (T409, ADR-0212; `docs/design/scenografo.md` § 2 and § 10.1). A building that grows by
 // rules changes with every seed, so its interior is written apart from it (the Scenografo, T259, T303, T406) and placed on the building
 // already made. The kernel measures what a body uses and what must stay as it is, and keeps only the furniture that breaks nothing:
 //

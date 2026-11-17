@@ -544,7 +544,7 @@ export interface StandingCell {
  * Every column's covered floors where a body stands, reached or not (the door open), and the heights a room is measured at: those with
  * covered floor, the floors of a voxel more or less with it (a rug, a threshold), at least a body's square, so a room smaller than a
  * storey is measured too and says how small it is. What `habitableParts` measures the rooms on, and what the interior's guard keeps
- * (T409, ADR-0211).
+ * (T409, ADR-0212).
  */
 export function standingCells(w: Walked, vpt: number): { cells: StandingCell[]; heights: number[] } {
   const { g, levels } = w;
@@ -713,7 +713,7 @@ export function formKey(q: FormRequest): string {
 }
 
 /**
- * What an interior is made of (T409, ADR-0211): the way (`program`, a MarkovJunior program of a second stage run on the stage of
+ * What an interior is made of (T409, ADR-0212): the way (`program`, a MarkovJunior program of a second stage run on the stage of
  * `interior.ts`; `data`, the choice of furniture that exists), its whole text (the program, or the rules and the catalogue as JSON) and
  * the seed of the furnishing.
  */
@@ -724,7 +724,7 @@ export interface InteriorRequest {
 }
 
 /**
- * The key of a furnished building (T409, ADR-0211): everything the empty building depends on (`formKey`) and everything its interior
+ * The key of a furnished building (T409, ADR-0212): everything the empty building depends on (`formKey`) and everything its interior
  * does, so the same building with another program, other rules or another seed of the furnishing is another entry, and the empty
  * building keeps its own. The head is JSON that a `formKey` never starts with (a seed is a number): the two are never taken for one.
  */

@@ -287,7 +287,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Guardia degli interni
 - **Inglese**: `InteriorGuard`, `interiorPlan`, `stageGrid`, `STAGE`, `furnishFromStage`, `interiorKey`, `Refusal`
-- **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0211).
+- **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0212).
 - **Dove vive**: `src/kernel/interior.ts`, `src/kernel/forms.ts`
 - **Da non usare**: «Guardia» da sola fuori dal banco (`lab/banco/scenografo/`, la guardia del banco di T259), «palcoscenico»
 - **Fermo**: nessuno (nulla su disco: un interno è una funzione dell'edificio e della sua chiave).

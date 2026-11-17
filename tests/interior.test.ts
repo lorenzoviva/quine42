@@ -1,4 +1,4 @@
-// The interiors' guard in the kernel (T409, ADR-0211): the plan and the stage of `src/kernel/interior.ts` and its guard, on the buildings of
+// The interiors' guard in the kernel (T409, ADR-0212): the plan and the stage of `src/kernel/interior.ts` and its guard, on the buildings of
 // the Scenografo's measures (T303 at 20 voxels a tile, T406 at the game's 16) and the six of T259, and the key of a furnished building.
 
 import fs from 'node:fs';

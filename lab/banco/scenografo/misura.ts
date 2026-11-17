@@ -60,7 +60,7 @@ function suAnimali(s: Scena, caselle: Set<string>): (i: number) => boolean {
 }
 
 /**
- * The kernel's guard on a scene of the bench (T409, ADR-0211): the plan of `interior.ts` on the building as built, the Sculptor's parts
+ * The kernel's guard on a scene of the bench (T409, ADR-0212): the plan of `interior.ts` on the building as built, the Sculptor's parts
  * measured at the bench's `PARTI`. It keeps what the bench's `Guardia` keeps and also the Sculptor's room and the place of the animals.
  */
 export function guardiaDelKernel(s: Scena): { ammetti(voxels: Iterable<number>): boolean; guardia: InteriorGuard } {
@@ -222,7 +222,7 @@ export function arredaConProgramma(s: Scena, model: ReturnType<typeof compileMjx
 }
 
 /**
- * The way (b) all in the kernel (T409, ADR-0211): the stage of `interior.ts`, the program run on it, what it wrote put into the building
+ * The way (b) all in the kernel (T409, ADR-0212): the stage of `interior.ts`, the program run on it, what it wrote put into the building
  * through the kernel's guard (`furnishFromStage`); measured by the bench as the others, the door open.
  */
 export function arredaNelKernel(s: Scena, model: ReturnType<typeof compileMjx>, semeArredo: number): Arredato & { finito: boolean; rifiutati: Record<Refusal, number> } {

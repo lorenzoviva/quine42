@@ -1,4 +1,4 @@
-# ADR-0211 — La guardia degli interni nel kernel: il palco a classi e il cammino che nessun mobile chiude
+# ADR-0212 — La guardia degli interni nel kernel: il palco a classi e il cammino che nessun mobile chiude
 
 Data: 2026-11-17 · Stato: accettato (task T409 del backlog, step 30; § 10.1 di `docs/design/scenografo.md`, riscritto da T406) ·
 Riferimenti: ADR-0179 (le parti abitabili, `PARTS`, `partErrors`), ADR-0182 (le aree di una struttura, `areasOf`), ADR-0209 (le strutture a
