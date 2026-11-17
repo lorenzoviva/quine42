@@ -14,6 +14,7 @@
 // (`habitableParts`), the areas (`areasOf`) and the place of the animals (the tiles of an area that names them).
 
 import { habitableParts } from '../../../src/kernel/forms';
+import { furnishFromStage, InteriorGuard, interiorPlan, stageGrid, type Refusal } from '../../../src/kernel/interior';
 import { WORLD_NODE_LIMITS, worldNodeErrors } from '../../../src/kernel/validator';
 import { areasOf, type AreaMap } from '../../../src/mj/areas';
 import { partErrors } from '../../../src/mj/check';
@@ -23,7 +24,7 @@ import { compileMjx } from '../../../src/mj/model';
 import { FORM_LIMITS } from '../../../src/mj/run';
 import { symbolName } from '../../../src/mj/symbols';
 import { giudica, misura } from '../misure';
-import { copy, Guardia, gruppi, piante, stanze, withGrid, arredaDati, type Arredato, type Mobile, type Scelta, type Scena } from './scenografo';
+import { copy, Guardia, gruppi, piante, stanze, withGrid, arredaDati, type Arredato, type FaGuardia, type Mobile, type Scelta, type Scena } from './scenografo';
 
 /**
  * The density whose voxels the parts one lives in are measured against (T406): PARTS are the voxels of before read at STRUCTURE_VPT
@@ -56,6 +57,17 @@ function suAnimali(s: Scena, caselle: Set<string>): (i: number) => boolean {
   const { X } = s.e.grid;
   const vpt = s.e.scatola.vpt;
   return (i) => caselle.has(`${Math.floor((i % X) / vpt)},${Math.floor(Math.floor(i / X) / vpt)}`);
+}
+
+/**
+ * The kernel's guard on a scene of the bench (T409, ADR-0212): the plan of `interior.ts` on the building as built, the Sculptor's parts
+ * measured at the bench's `PARTI`. It keeps what the bench's `Guardia` keeps and also the Sculptor's room and the place of the animals.
+ */
+export function guardiaDelKernel(s: Scena): { ammetti(voxels: Iterable<number>): boolean; guardia: InteriorGuard } {
+  const { vpt, base } = s.e.scatola;
+  const plan = interiorPlan({ grid: s.e.result.grid, palette: s.e.model.program.palette, vpt, base, actions: s.e.model.actions, seed: s.seme, partsVpt: PARTI });
+  const guardia = new InteriorGuard(plan);
+  return { guardia, ammetti: (voxels) => guardia.admit([...voxels]) };
 }
 
 // ---------------------------------------------------------------- what the Scenografo receives
@@ -165,7 +177,7 @@ export function compilaArredo(xml: string, box: [number, number, number]): Retur
 }
 
 /** Runs the Scenografo's program on the stage of a seed and puts what it wrote into the building, piece by piece through the guard. */
-export function arredaConProgramma(s: Scena, model: ReturnType<typeof compileMjx>, semeArredo: number): Arredato & { finito: boolean; scartati: number } {
+export function arredaConProgramma(s: Scena, model: ReturnType<typeof compileMjx>, semeArredo: number, faGuardia: FaGuardia = (t) => new Guardia(t)): Arredato & { finito: boolean; scartati: number } {
   const t0 = performance.now();
   const stage = palco(s);
   const before = new Uint8Array(stage.cells);
@@ -191,7 +203,7 @@ export function arredaConProgramma(s: Scena, model: ReturnType<typeof compileMjx
     g.cells[i] = code.get(c)!;
     voxel.add(i);
   }
-  const guardia = new Guardia(s);
+  const guardia = faGuardia(s);
   let pezzi = 0, scartati = 0;
   for (const group of gruppi(voxel, g.X, XY)) {
     if (guardia.ammetti(group)) {
@@ -207,6 +219,31 @@ export function arredaConProgramma(s: Scena, model: ReturnType<typeof compileMjx
   const e = withGrid(s.e, g, colori);
   const ms = performance.now() - t0;
   return { e, m: misura(e, s.b), ms, voxel, pezzi, finito: r.finished, scartati };
+}
+
+/**
+ * The way (b) all in the kernel (T409, ADR-0212): the stage of `interior.ts`, the program run on it, what it wrote put into the building
+ * through the kernel's guard (`furnishFromStage`); measured by the bench as the others, the door open.
+ */
+export function arredaNelKernel(s: Scena, model: ReturnType<typeof compileMjx>, semeArredo: number): Arredato & { finito: boolean; rifiutati: Record<Refusal, number> } {
+  const t0 = performance.now();
+  const { vpt, base } = s.e.scatola;
+  const plan = interiorPlan({ grid: s.e.result.grid, palette: s.e.model.program.palette, vpt, base, actions: s.e.model.actions, seed: s.seme, partsVpt: PARTI });
+  const stage = stageGrid(plan);
+  const r = runOn(stage, model.program, semeArredo, 200_000, FORM_LIMITS, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
+  const f = furnishFromStage(plan, stage, model.program.palette);
+  const g = copy(s.e.grid);
+  const code = new Map<number, number>();
+  for (const v of f.voxels) {
+    const c = f.grid.cells[v];
+    if (!code.has(c)) {
+      const ch = f.grid.alphabet[c];
+      code.set(c, g.alphabet.includes(ch) ? g.alphabet.indexOf(ch) : g.alphabet.push(ch) - 1);
+    }
+    g.cells[v] = code.get(c)!;
+  }
+  const e = withGrid(s.e, g, f.palette);
+  return { e, m: misura(e, s.b), ms: performance.now() - t0, voxel: f.voxels, pezzi: f.pieces, finito: r.finished, rifiutati: f.refused };
 }
 
 // ---------------------------------------------------------------- (c) the choice as data
@@ -270,8 +307,8 @@ export function leggiRegole(text: string, catalogo: Map<string, Mobile>): { rego
   return { regole, ignoti: [...ignoti] };
 }
 
-export function arredaConRegole(s: Scena, semeArredo: number, mobili: Map<string, Mobile>, regole: Regola[]): Arredato {
-  return arredaDati(s, semeArredo, mobili, sceltaDi(s, regole));
+export function arredaConRegole(s: Scena, semeArredo: number, mobili: Map<string, Mobile>, regole: Regola[], faGuardia?: FaGuardia): Arredato {
+  return arredaDati(s, semeArredo, mobili, sceltaDi(s, regole), faGuardia);
 }
 
 // ---------------------------------------------------------------- (a) the interior in the building's own program

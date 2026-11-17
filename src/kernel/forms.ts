@@ -436,17 +436,17 @@ export function topUnder(f: Form, levels: Levels, x0: number, z0: number, x1: nu
 }
 
 /** How far up the first solid above a floor starts, in voxels; undefined under the open sky. */
-function testaSopra(levels: Levels, i: number, z: number): number | undefined {
+export function headroomAbove(levels: Levels, i: number, z: number): number | undefined {
   for (let l = levels.start[i]; l < levels.start[i + 1]; l++) if (levels.base[l] > z && levels.z[l] > z) return levels.base[l] - z;
   return undefined;
 }
 
 /** The heights with a floor large enough, the largest first, never closer than a body's height. */
-function picchi(perZ: Map<number, number>, minimo: number, lontano: number): number[] {
+function peaks(perZ: Map<number, number>, least: number, apart: number): number[] {
   const out: number[] = [];
   for (const [z] of [...perZ].sort((a, b) => b[1] - a[1])) {
     const area = (perZ.get(z - 1) ?? 0) + perZ.get(z)! + (perZ.get(z + 1) ?? 0);
-    if (area < minimo || out.some((o) => Math.abs(o - z) < lontano)) continue;
+    if (area < least || out.some((o) => Math.abs(o - z) < apart)) continue;
     out.push(z);
   }
   return out.sort((a, b) => a - b);
@@ -462,7 +462,7 @@ export function reachableStoreys(grid: VoxelGrid, palette: Record<string, Palett
 }
 
 /** Where a body walks in a model, from the outside ground through the open door: every cell and the height its feet are at. */
-interface Walked {
+export interface Walked {
   /** The grid as the body finds it: the door open. */
   g: VoxelGrid;
   levels: Levels;
@@ -471,17 +471,17 @@ interface Walked {
   opened?: number[];
   /** Whether a body standing with its feet `at` voxels up, centred on a column, hits something. */
   blocks: (x: number, y: number, at: number) => boolean;
+  /** Whether a body got to a column with its feet `at` voxels up: also the columns just out of the grid, at the height of the ground. */
+  reached: (x: number, y: number, at: number) => boolean;
 }
 
-function storeysOf(w: Walked, vpt: number): number[] {
-  const coperte = new Map<number, number>();
+export function storeysOf(w: Walked, vpt: number): number[] {
+  const covered = new Map<number, number>();
   for (const c of w.celle) {
     const i = c.x + c.y * w.g.X;
-    if (testaSopra(w.levels, i, c.z) !== undefined) coperte.set(c.z, (coperte.get(c.z) ?? 0) + 1);
+    if (headroomAbove(w.levels, i, c.z) !== undefined) covered.set(c.z, (covered.get(c.z) ?? 0) + 1);
   }
-  const minArea = (1.1 * vpt) ** 2;
-  const lontano = Math.ceil(0.7 * vpt);
-  return picchi(coperte, minArea, lontano);
+  return peaks(covered, (1.1 * vpt) ** 2, Math.ceil(0.7 * vpt));
 }
 
 /** A floor of a model one lives on (T338): its height, and the largest room where one stands. */
@@ -514,26 +514,9 @@ export interface HabitableMeasure {
  */
 export function habitableParts(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, clear: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): HabitableMeasure {
   const w = walkIn(grid, palette, vpt, base, actions, seed);
-  const { g, levels } = w;
+  const { g } = w;
   const body = Math.round(2 * BODY_R * vpt);
-  // Every column's covered floors where a body stands: the height of the feet, the ceiling above them.
-  const cells: Array<{ i: number; z: number; head: number }> = [];
-  const perZ = new Map<number, number>();
-  for (let y = 0; y < g.Y; y++)
-    for (let x = 0; x < g.X; x++) {
-      const i = x + y * g.X;
-      for (let l = levels.start[i]; l < levels.start[i + 1]; l++) {
-        const z = levels.z[l];
-        const head = testaSopra(levels, i, z);
-        if (head === undefined || head <= stepOf(vpt) || w.blocks(x, y, z)) continue;
-        cells.push({ i, z, head });
-        perZ.set(z, (perZ.get(z) ?? 0) + 1);
-      }
-    }
-
-  // Every height with covered floor, the floors of a voxel more or less with it (a rug, a threshold): a room smaller than a
-  // storey is measured too, so it says how small it is.
-  const heights = [...perZ.keys()].filter((z) => (perZ.get(z - 1) ?? 0) + perZ.get(z)! + (perZ.get(z + 1) ?? 0) >= body * body).sort((a, b) => a - b);
+  const { cells, heights } = standingCells(w, vpt);
   const rooms = heights.map((z): RoomMeasure => {
     const mask = new Uint8Array(g.X * g.Y);
     const seen = new Uint8Array(g.X * g.Y);
@@ -550,8 +533,41 @@ export function habitableParts(grid: VoxelGrid, palette: Record<string, PaletteE
   return { storeys: storeysOf(w, vpt), rooms, doors: w.opened ? doorsOf(w.opened, g.X, g.Y) : [] };
 }
 
+/** A covered floor of a column where a body stands (T338): the column, the height of the feet, the ceiling above them. */
+export interface StandingCell {
+  i: number;
+  z: number;
+  head: number;
+}
+
+/**
+ * Every column's covered floors where a body stands, reached or not (the door open), and the heights a room is measured at: those with
+ * covered floor, the floors of a voxel more or less with it (a rug, a threshold), at least a body's square, so a room smaller than a
+ * storey is measured too and says how small it is. What `habitableParts` measures the rooms on, and what the interior's guard keeps
+ * (T409, ADR-0212).
+ */
+export function standingCells(w: Walked, vpt: number): { cells: StandingCell[]; heights: number[] } {
+  const { g, levels } = w;
+  const body = Math.round(2 * BODY_R * vpt);
+  const cells: StandingCell[] = [];
+  const perZ = new Map<number, number>();
+  for (let y = 0; y < g.Y; y++)
+    for (let x = 0; x < g.X; x++) {
+      const i = x + y * g.X;
+      for (let l = levels.start[i]; l < levels.start[i + 1]; l++) {
+        const z = levels.z[l];
+        const head = headroomAbove(levels, i, z);
+        if (head === undefined || head <= stepOf(vpt) || w.blocks(x, y, z)) continue;
+        cells.push({ i, z, head });
+        perZ.set(z, (perZ.get(z) ?? 0) + 1);
+      }
+    }
+  const heights = [...perZ.keys()].filter((z) => (perZ.get(z - 1) ?? 0) + perZ.get(z)! + (perZ.get(z + 1) ?? 0) >= body * body).sort((a, b) => a - b);
+  return { cells, heights };
+}
+
 /** The side of the largest square of ones in a mask of X × Y. */
-function largestSquare(mask: Uint8Array, X: number, Y: number): number {
+export function largestSquare(mask: Uint8Array, X: number, Y: number): number {
   const row = new Uint16Array(X + 1);
   let best = 0;
   for (let y = 0; y < Y; y++) {
@@ -596,7 +612,7 @@ function doorsOf(cells: number[], X: number, Y: number): Array<{ width: number; 
   return out;
 }
 
-function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, actions: readonly MjxClip[], seed: number): Walked {
+export function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, actions: readonly MjxClip[], seed: number): Walked {
   let g = grid;
   let opened: number[] | undefined;
   // The door opens with the action `open` (`apri` before the contract 0.5, T308b): measured open, as a body finds it.
@@ -677,7 +693,7 @@ function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: num
       }
     }
   }
-  return { g, levels, celle, blocks, ...(opened ? { opened } : {}) };
+  return { g, levels, celle, blocks, reached: (x, y, at) => seen.has(key(x, y, at)), ...(opened ? { opened } : {}) };
 }
 
 /** The most forms the process keeps, and the most memory they may take (ADR-0108): a server lives long, and many universes share it. */
@@ -694,6 +710,32 @@ export const FORM_CACHE_BYTES = 256 * 1024 * 1024;
 export function formKey(q: FormRequest): string {
   const files = q.files && Object.keys(q.files).length ? JSON.stringify(Object.entries(q.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : '';
   return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml + files;
+}
+
+/**
+ * What an interior is made of (T409, ADR-0212): the way (`program`, a MarkovJunior program of a second stage run on the stage of
+ * `interior.ts`; `data`, the choice of furniture that exists), its whole text (the program, or the rules and the catalogue as JSON) and
+ * the seed of the furnishing.
+ */
+export interface InteriorRequest {
+  way: 'program' | 'data';
+  text: string;
+  seed: number;
+}
+
+/**
+ * The key of a furnished building (T409, ADR-0212): everything the empty building depends on (`formKey`) and everything its interior
+ * does, so the same building with another program, other rules or another seed of the furnishing is another entry, and the empty
+ * building keeps its own. The head is JSON that a `formKey` never starts with (a seed is a number): the two are never taken for one.
+ */
+export function interiorKey(q: FormRequest, interior: InteriorRequest): string {
+  return JSON.stringify(['interior', interior.way, String(interior.seed), interior.text]) + formKey(q);
+}
+
+/** A furnished building from the cache, or made once and kept under its interior's key (T409): the interior is a function of (building, interior). */
+export function furnishedResult(cache: FormCache, q: FormRequest, interior: InteriorRequest, make: () => FormResult): FormResult {
+  const key = interiorKey(q, interior);
+  return cache.get(key) ?? cache.set(key, make());
 }
 
 /** Results somewhere slower than memory, under a `formKey`: only the tests have one (`tests/setup/forms-disk.ts`). */

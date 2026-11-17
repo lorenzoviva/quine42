@@ -279,7 +279,7 @@ insieme, poi 3, 4 e 5. I primi due non chiamano modelli; lo 0 chiama lo Scultore
    piano, la funzione di `stanzeDi`). Si misura con `scenografo-spazio.ts` su due edifici nuovi per concetto, prima e dopo il prompt, e con
    la via dei dati sopra. Tocca un'abitazione, non un forte o una torre: la soglia dipende dal concetto (da decidere con l'autore: quanto
    pavimento vuole in una casa Grande).
-1. **La guardia nel kernel** (`src/kernel/forms.ts`): classi dello strato dei piedi solo sul pavimento coperto, guardia, cache con la chiave
+1. **Fatto da T409** (ADR-0212, `src/kernel/interior.ts`; la guardia del banco non vedeva un passo della scala chiuso da uno scaffale accanto, sulla locanda e sul laboratorio: quella del kernel cammina come il kernel). **La guardia nel kernel** (`src/kernel/forms.ts`): classi dello strato dei piedi solo sul pavimento coperto, guardia, cache con la chiave
    dell'interno; la soglia del piano piccolo (a 16 i piani di Opus a Grande sono di 4,5-6,3 caselle²: la soglia di T259, 4, ora li arreda
    tutti, ma lascia un margine stretto; 2, come in T303 e T406, è più sicura); la stanza dello Scultore (`partErrors`) fra ciò che la guardia
    difende (oggi un mobile contro il muro la porta sotto 28 voxel su un seme in 3 richieste di dati su 4); il posto degli animali (`A`)
