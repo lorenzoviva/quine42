@@ -382,6 +382,15 @@ export function levelAt(levels: Levels, i: number, at: number): number {
 }
 
 /**
+ * Whether a voxel column of a model is solid at its ground (T417): something of it between a step under the ground and the ground, a floor
+ * of the ground floor or what stands on it. Over a cellar, a column that is not is the stairwell.
+ */
+export function solidAtGround(levels: Levels, i: number, ground: number, step: number): boolean {
+  for (let l = levels.start[i]; l < levels.start[i + 1]; l++) if (levels.base[l] <= ground && levels.z[l] >= ground - step && levels.z[l] > levels.base[l]) return true;
+  return false;
+}
+
+/**
  * Whether a body whose box covers a rectangle of the model's own frame (tiles from its centre) and whose feet are
  * at height `at` (voxels above the model's base) is blocked: under it, the floor of a column nearest to its feet
  * is one where it cannot stand, or two neighbouring columns have floors more than a step apart (the edge of a
@@ -403,8 +412,9 @@ export function rampBlocks(f: Form, ground: Ground, x0: number, z0: number, x1: 
       const i = x + y * g.X;
       const l = levelAt(levels, i, at);
       if (levels.block[l]) return true;
-      // Over the cellar, with no floor near the feet, is air (T52b): one does not walk or land over the stairwell.
-      if (hole?.[i] && Math.abs(levels.z[l] - at) > step) return true;
+      // Over the cellar, with no floor near the feet, is air (T52b): one does not walk or land over the stairwell. A column over the cellar
+      // solid at the ground (the ground floor over the cellar, a stair on it) is not the stairwell (T417): a stair there climbs as elsewhere.
+      if (hole?.[i] && Math.abs(levels.z[l] - at) > step && !solidAtGround(levels, i, f.base, step)) return true;
       h[x - vx0 + (y - vy0) * w] = levels.z[l];
     }
   for (let y = 0; y <= vy1 - vy0; y++)
@@ -455,10 +465,25 @@ function peaks(perZ: Map<number, number>, least: number, apart: number): number[
 /**
  * The covered floors reached on foot from the outside ground through the door (ramps/stairs and jumps as the game allows):
  * their heights (voxels from the base), lowest first. A storey needs at least (1.1 tiles)² of covered floor where a body
- * can stand, separated from other storeys by at least 0.7 tiles.
+ * can stand, separated from other storeys by at least 0.7 tiles. A cellar is not a storey (T417, ADR-0162): what stands more than a step
+ * under the ground is left out, so a house of one storey with a cellar is a house of one storey (`cellarStoreys` says the floors down there).
  */
 export function reachableStoreys(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base = 0, actions: readonly MjxClip[] = [], seed = 1): number[] {
-  return storeysOf(walkIn(grid, palette, vpt, base, actions, seed), vpt);
+  return aboveGround(storeysOf(walkIn(grid, palette, vpt, base, actions, seed), vpt), base, vpt);
+}
+
+/** The storeys over the ground (T417): those no more than a step under it. */
+export const aboveGround = (storeys: number[], base: number, vpt: number): number[] => storeys.filter((z) => z >= base - stepOf(vpt));
+
+/**
+ * The floors under the ground a body reaches on foot from the door (T417): the heights more than a step under it where the walk stood at
+ * least on a body's square of covered floor. A cellar is small, so not a storey's measure (`storeysOf`): a room one goes down to.
+ */
+export function cellarStoreys(w: Walked, base: number, vpt: number): number[] {
+  const body = Math.round(2 * BODY_R * vpt);
+  const perZ = new Map<number, number>();
+  for (const c of w.celle) if (c.z < base - stepOf(vpt) && headroomAbove(w.levels, c.x + c.y * w.g.X, c.z) !== undefined) perZ.set(c.z, (perZ.get(c.z) ?? 0) + 1);
+  return [...perZ].filter(([, n]) => n >= body * body).map(([z]) => z).sort((a, b) => a - b);
 }
 
 /** Where a body walks in a model, from the outside ground through the open door: every cell and the height its feet are at. */
@@ -498,8 +523,10 @@ export interface RoomMeasure {
 
 /** The parts of a model one lives in, measured (T338, ADR-0179): its storeys, its rooms, its doors. */
 export interface HabitableMeasure {
-  /** The storeys reached on foot (`reachableStoreys`). */
+  /** The storeys reached on foot (`reachableStoreys`): over the ground, a cellar is not one (T417). */
   storeys: number[];
+  /** The floors under the ground reached on foot from the door (T417): a cellar's, if the model has one. */
+  cellar: number[];
   /** Every floor with covered ground where a body stands, at least as large as a storey, reached or not. */
   rooms: RoomMeasure[];
   /** Every door leaf the action `open` takes away: its widest horizontal side and its height, in voxels. */
@@ -530,7 +557,7 @@ export function habitableParts(grid: VoxelGrid, palette: Record<string, PaletteE
     const side = largestSquare(mask, g.X, g.Y);
     return { z, area, room: side ? side + body : 0, clear: top };
   }).filter((r) => r.room > 0);
-  return { storeys: storeysOf(w, vpt), rooms, doors: w.opened ? doorsOf(w.opened, g.X, g.Y) : [] };
+  return { storeys: aboveGround(storeysOf(w, vpt), base, vpt), cellar: base > 0 ? cellarStoreys(w, base, vpt) : [], rooms, doors: w.opened ? doorsOf(w.opened, g.X, g.Y) : [] };
 }
 
 /** A covered floor of a column where a body stands (T338): the column, the height of the feet, the ceiling above them. */

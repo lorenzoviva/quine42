@@ -307,11 +307,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: nessuno.
 
 ### Cantina
-- **Inglese**: `cellar`, `cellarOf`, `sunk`
-- **Definizione**: la parte di una struttura sotto il suolo, con il buco nel terreno (`Form.hole`).
-- **Dove vive**: `src/kernel/forms.ts`, `src/kernel/kernel.ts`
-- **Da non usare**: `sottoOf`
-- **Fermo**: `sotto` nelle voci dei modelli e nel piano.
+- **Inglese**: `cellar`, `cellarOf`, `cellarVoxels`, `sunk`, `restsAt`, `cellarHeight`, `cellarFor`, `hasCellar`, `cellarOfRequest`, `cellarStoreys`, `cellarPoints`, `cellarLots`, `solidAtGround`, `part-cellar`
+- **Definizione**: la parte di una struttura sotto il suolo, con il buco nel terreno (`Form.hole`). La chiede il Cartografo (`structures[].cellar`), la scava lo Scultore con la parte del seme `part-cellar` (T417); non è un piano (`reachableStoreys` non la conta, ADR-0162).
+- **Dove vive**: `src/kernel/forms.ts`, `src/kernel/kernel.ts`, `src/kernel/agents/cartography.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/modeldirector.ts`, `universe/models/part-cellar.xml`
+- **Da non usare**: `sottoOf`, «seminterrato» per la cantina di una struttura (è l'edificio della corona, T52c)
+- **Fermo**: `cellar` nelle voci dei modelli (`sotto` prima del contratto 0.4), nel piano (`structures[].cellar`) e nel componente `structure`.
+
+### Sotto (dove di una cosa)
+- **Inglese**: `under` (`Where`)
+- **Definizione**: il quarto «dove» di una cosa di un piano (T417, ADR-0091 punto 4): sul pavimento della cantina di una struttura del piano che ne ha una; senza, dentro.
+- **Dove vive**: `src/kernel/agents/cartography.ts`, `src/kernel/kernel.ts` (`placementsOf`, `placeInside`), `src/kernel/validator.ts`
+- **Da non usare**: `sotto` sul disco o sul filo (lo si legge, si scrive `under`)
+- **Fermo**: `under` in `objects[].where` e `fresh[].where` dei piani; il componente `below` (`{z}`, l’altezza del pavimento della cantina, sul filo fra le `ENTITY_PARTS`).
 
 ### Taglio sotto terra
 - **Inglese**: `underground`, `Underground`, `cutDisc`, `inCutDisc`, `towardsCamera`, `buildCut`, `CUT_EARTH`, `dimAt`, `strataSide`

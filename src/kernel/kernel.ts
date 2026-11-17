@@ -41,13 +41,13 @@ import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
-import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
+import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
 import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
-import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
+import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
 import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
-import { entryBox, MODELS_INDEX, type ModelInfo } from './forms';
+import { cellarVoxels, entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
@@ -78,7 +78,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
-import { undergroundAt, type Underground } from './underground';
+import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
@@ -91,6 +91,11 @@ interface SolidForm extends Ground {
   yaw: number;
   form: Form;
   foot: Uint8Array;
+  /**
+   * Where the model's ground is (tiles) when it is not the ground under its middle (T417): a thing that stands in a cellar, its height.
+   * Every other model stands on the ground under its middle (`standOf`).
+   */
+  stand?: number;
 }
 
 /** A jump under way (T56b), on the wanderer: from and to in carpet space, the floors there, how high it goes, its clock. */
@@ -249,7 +254,8 @@ interface ChunkLot {
   x: number;
   y: number;
   form: FormComp;
-  structure: { concept: string; class: string; size?: SizeTier; model?: string; stage?: number };
+  /** `cellar` (T417): tiles of cellar the Cartographer asked for, which the `ModelDirector` asks the Sculptor for. */
+  structure: { concept: string; class: string; size?: SizeTier; model?: string; stage?: number; cellar?: number };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -763,6 +769,7 @@ export class Kernel {
     k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.validator.modelBox = (id) => k.forms.structureBox(id);
     k.validator.modelGrows = (id) => !!k.forms.info(id) && growsByRules(k.forms.classOf(id), k.forms.info(id)?.size);
+    k.validator.modelBase = (id) => cellarVoxels(k.forms.info(id));
     k.validator.modelFile = (name) => k.forms.file(name);
     // A brought card that fails here is isolated (T296): a program that throws or stops its worker, a form with nothing to see.
     k.forms.onReady = (f) => k.formReady(f);
@@ -1710,11 +1717,24 @@ export class Kernel {
    */
   private formBlocks(x: number, y: number, r: number, z?: number): boolean {
     // The box in the model's own frame (exact for quarter turns, a little larger otherwise). A model wholly under the
-    // feet (a sign on the ground under the floor above, T70) does not stop who walks over it.
+    // feet (a sign on the ground under the floor above, T70; its voxels, not its box: a chest in a cellar under its stair, T417) does not
+    // stop who walks over it; nor one wholly over the head (T417: a chest on the floor over a cellar, for who walks in the cellar).
     return this.formsUnder(x, y, r).some(({ s, box }) => {
       const at = this.levelIn(s, z);
-      return at <= s.form.result!.grid.Z + stepOf(s.form.vpt) && rampBlocks(s.form, s, ...box, at);
+      return at <= this.topOf(s.levels) + stepOf(s.form.vpt) && at + Math.ceil(0.7 * s.form.vpt) > 0 && rampBlocks(s.form, s, ...box, at);
     });
+  }
+
+  /** The highest floor of a model (voxels up its grid), its top: kept per form's floors, which change only with the form (T417). */
+  private tops = new WeakMap<Ground['levels'], number>();
+  private topOf(levels: Ground['levels']): number {
+    let top = this.tops.get(levels);
+    if (top === undefined) {
+      top = 0;
+      for (let l = 0; l < levels.z.length; l++) if (levels.z[l] > top) top = levels.z[l];
+      this.tops.set(levels, top);
+    }
+    return top;
   }
 
   private glyphOf(app: NonNullable<Manifest['appearance']>) {
@@ -2433,11 +2453,15 @@ export class Kernel {
     const indoorSet = new Set(result.lots.flatMap((b) => b.floor));
     const reach = [...result.reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
+    // What goes under (T417): on the floor of a lot whose structure has a cellar; else inside, as without one.
+    const cellars = this.cellarLots({ ...ch, lots: result.lots }, plan);
+    const belowSet = new Set(result.lots.flatMap((b, i) => (cellars.has(i) ? b.floor : [])));
+    const below = indoor.filter((i) => belowSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
     const freeTiles = new Set<number>(result.reachable);
     let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
-      let pool = (where === 'inside' && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      let pool = (where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
       if (solid) pool = pool.filter((i) => !arts.has(i));
       if (!pool.length) return undefined;
       const tile = pool[rng.int(pool.length)];
@@ -2539,7 +2563,7 @@ export class Kernel {
       if (m.manifest.persona && !declared && !this.kept(origin, coef.people)) continue;
       const p = at(cell);
       const sid = inLot(cell);
-      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y));
+      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y), plan.objects[index].where === 'under');
       else this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
     }
 
@@ -2695,6 +2719,22 @@ export class Kernel {
     if (anchor === ch.key) this.blockAnchors.set(key, plan);
   }
 
+  /**
+   * The lots of a place whose structure the plan asks with a cellar it can have (T417): by the order `lotsOf` gives the lots their structures
+   * (the largest first), only a structure that grows by rules. Where the things `under` go.
+   */
+  private cellarLots(ch: Pick<Chunk, 'cx' | 'cy' | 'lots'>, plan: ChunkPlan): Set<number> {
+    const wanted = (plan.structures ?? []).map(readStructure);
+    const out = new Set<number>();
+    if (!wanted.some((s) => s.cellar)) return out;
+    const order = this.structureLots(ch, plan).map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+    order.forEach(({ b, i }, n) => {
+      const req = wanted[n];
+      if (req?.cellar && hasCellar(Math.max(b.x1 - b.x0 + 1, b.y1 - b.y0 + 1) >= 5 ? 'structure' : 'building', req.size)) out.add(i);
+    });
+    return out;
+  }
+
   private lotsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key' | 'draft' | 'tiles' | 'lots'>, plan: ChunkPlan, pathCode: string): { tiles: string; lots: ChunkLot[] } {
     const S = this.config.chunkSize;
     const tiles = [...ch.tiles];
@@ -2737,7 +2777,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        structure: { concept: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), class: classe, ...(req?.size ? { size: req.size } : {}), ...(own ? { model: own } : {}) },
+        structure: { concept: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), class: classe, ...(req?.size ? { size: req.size } : {}), ...(own ? { model: own } : {}), ...(req?.cellar && hasCellar(classe, req.size) ? { cellar: cellarFor(req.size) } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };
@@ -2862,8 +2902,13 @@ export class Kernel {
     const g = f.result!.grid;
     const X = g.X, Y = g.Y, W = INDOOR_REACH;
     const ground = this.groundOf(sid, fc, f);
-    const { foot, floor, block } = ground;
+    const { foot, floor, block, hole, levels } = ground;
     const step = stepOf(f.vpt);
+    // The cellar's stairwell (T417): the columns over the cellar not solid at the ground. Nothing stands on its top tread nor beside it, where
+    // it would hang over the way down: a thing's middle stays three quarters of a tile from it.
+    const well: number[] = [];
+    if (hole) for (let i = 0; i < X * Y; i++) if (hole[i] && !solidAtGround(levels, i, f.base, step)) well.push(i);
+    const keep = 0.75 * f.vpt;
     // A column where nothing goes: something at body height, no floor of the model, a floor higher than a step (what goes
     // indoors does not go up the stairs), a floor where a body does not stand (a ceiling too low, out of reach; over a cellar
     // the stairwell, T52b). Counted in a summed table, so a window is clear when it has none.
@@ -2872,7 +2917,7 @@ export class Kernel {
     for (let y = 0; y < Y; y++)
       for (let x = 0; x < X; x++) {
         const i = x + y * X;
-        const bad = foot[i] || !floor[i] || floor[i] > step || block[i] ? 1 : 0;
+        const bad = foot[i] || !floor[i] || floor[i] > step || block[i] || (hole?.[i] && !solidAtGround(levels, i, f.base, step)) ? 1 : 0;
         sum[x + 1 + (y + 1) * W1] = bad + sum[x + (y + 1) * W1] + sum[x + 1 + y * W1] - sum[x + y * W1];
       }
     const badIn = (x0: number, y0: number, x1: number, y1: number) => sum[x1 + 1 + (y1 + 1) * W1] - sum[x0 + (y1 + 1) * W1] - sum[x1 + 1 + y0 * W1] + sum[x0 + y0 * W1];
@@ -2882,6 +2927,7 @@ export class Kernel {
     for (let vy = W; vy < Y - W; vy += 4)
       for (let vx = W; vx < X - W; vx += 4) {
         if (badIn(vx - W, vy - W, vx + W, vy + W)) continue;
+        if (well.some((i) => Math.hypot((i % X) - vx, Math.floor(i / X) - vy) < keep)) continue;
         // And what `free` asks besides: no two neighbouring floors more than a step apart, measured as it measures (at the ground).
         if (rampBlocks(f, ground, local(vx - W, X), local(vy - W, Y), local(vx + W, X), local(vy + W, Y), f.base)) continue;
         const lx = local(vx, X), lz = local(vy, Y);
@@ -2891,10 +2937,70 @@ export class Kernel {
   }
 
   /**
+   * Points of a structure's cellar (T417, ADR-0091 point 4), for what goes under: the middle of a window of INDOOR_REACH voxels each way
+   * where every column is the cellar's floor (the most common floor under the ground a body stands on, reached from the ground floor, its
+   * stair, ADR-0064), not nearer than 1.2 tiles to the foot of its stair (the columns a step above the floor), as nothing solid stands
+   * before a door, nor than three quarters of a tile to the rest of it, over which a thing as tall as a body would hang: the way up stays
+   * free. With the height of that floor (tiles). Empty without a cellar that holds.
+   */
+  private cellarPoints(sid: Id): Array<{ x: number; y: number; z: number }> {
+    const fc: FormComp | undefined = this.ecs.get(sid, 'form');
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const p = this.ecs.get(sid, 'pos');
+    if (!fc || !f?.floor || !p || f.base <= 0 || (this.ecs.get(sid, 'structure')?.stage ?? 1) < 0.9) return [];
+    const ground = this.groundOf(sid, fc, f);
+    const { levels, hole } = ground;
+    if (!hole) return [];
+    const g = f.result!.grid;
+    const X = g.X, Y = g.Y, W = INDOOR_REACH, step = stepOf(f.vpt);
+    // Every column's floor under the ground where a body stands (the lowest), and the cellar's floor: the most common of them.
+    const low = new Int32Array(X * Y).fill(-1);
+    const count = new Map<number, number>();
+    for (let i = 0; i < X * Y; i++) {
+      if (!hole[i]) continue;
+      for (let l = levels.start[i]; l < levels.start[i + 1]; l++)
+        if (levels.z[l] < f.base - step && !levels.block[l] && (low[i] < 0 || levels.z[l] < low[i])) low[i] = levels.z[l];
+      if (low[i] >= 0) count.set(low[i], (count.get(low[i]) ?? 0) + 1);
+    }
+    if (!count.size) return [];
+    const floorZ = [...count].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0];
+    // The stair: the columns down there above the cellar's floor; its foot, those a step above it.
+    const stair: number[] = [];
+    const foot: number[] = [];
+    for (let i = 0; i < X * Y; i++) if (low[i] > floorZ + 1) (low[i] <= floorZ + step + 1 ? foot : stair).push(i);
+    const keep = 1.2 * f.vpt, beside = 0.75 * f.vpt;
+    const W1 = X + 1;
+    const sum = new Int32Array(W1 * (Y + 1));
+    for (let y = 0; y < Y; y++)
+      for (let x = 0; x < X; x++) {
+        const i = x + y * X;
+        const bad = low[i] < 0 || Math.abs(low[i] - floorZ) > 1 ? 1 : 0;
+        sum[x + 1 + (y + 1) * W1] = bad + sum[x + (y + 1) * W1] + sum[x + 1 + y * W1] - sum[x + y * W1];
+      }
+    const badIn = (x0: number, y0: number, x1: number, y1: number) => sum[x1 + 1 + (y1 + 1) * W1] - sum[x0 + (y1 + 1) * W1] - sum[x1 + 1 + y0 * W1] + sum[x0 + y0 * W1];
+    const local = (v: number, n: number) => (v + 0.5 - n / 2) / f.vpt;
+    const z = this.groundAt(p.x, p.y) + (floorZ - f.base) / f.vpt;
+    const out: Array<{ x: number; y: number; z: number }> = [];
+    const c = Math.cos(fc.yaw), s = Math.sin(fc.yaw);
+    for (let vy = W; vy < Y - W; vy += 4)
+      for (let vx = W; vx < X - W; vx += 4) {
+        if (badIn(vx - W, vy - W, vx + W, vy + W)) continue;
+        if (foot.some((i) => Math.hypot((i % X) - vx, Math.floor(i / X) - vy) < keep)) continue;
+        // Nor beside it: a thing as tall as a body would hang over the treads one climbs.
+        if (stair.some((i) => Math.hypot((i % X) - vx, Math.floor(i / X) - vy) < beside)) continue;
+        if (rampBlocks(f, ground, local(vx - W, X), local(vy - W, Y), local(vx + W, X), local(vy + W, Y), floorZ)) continue;
+        const lx = local(vx, X), lz = local(vy, Y);
+        out.push({ x: p.x + lx * c + lz * s, y: p.y - lx * s + lz * c, z });
+      }
+    return out;
+  }
+
+  /**
    * Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). A solid thing with
    * no room in any structure of the place stands beside its own, outside the lots, where `beside` lets it (T407: the rule of putting down).
+   * `under` (T417): in the structure's cellar, on its floor (`cellarPoints`), with its height; without room down there, inside as the rest.
    */
-  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void, solid = false, beside?: (x: number, y: number) => boolean): Promise<void> {
+  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => Id | void, solid = false, beside?: (x: number, y: number) => boolean, under = false): Promise<void> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     // As long as its program runs (T281): in the browser a structure comes from a worker in tens of seconds, and what goes in
     // would otherwise go where the plan said, inside its walls.
@@ -2907,6 +3013,19 @@ export class Kernel {
     const taken = this.ecs.query('pos').filter((id) => id !== sid).map((id) => this.ecs.get(id, 'pos'));
     const S = this.config.chunkSize;
     const doorPositions = solid ? ch.lots.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
+    // Down in the cellar (T417): a point of its floor where nothing stands, away from what is there, at the height of that floor.
+    if (under) {
+      const down = this.cellarPoints(sid).filter((q) => !this.formBlocks(q.x, q.y, INDOOR_R, q.z) && taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9 || Math.abs((t.z ?? this.floorAt(t.x, t.y)) - q.z) > 0.5));
+      if (down.length) {
+        const q = down[hash32(sid, down.length, this.ecs.query('pos').length) % down.length];
+        const id = spawn(q.x, q.y);
+        const pos = id !== undefined ? this.ecs.get(id, 'pos') : undefined;
+        if (pos) pos.z = q.z;
+        // Its floor's height goes with it to the clients, whose mirror has no plan (ENTITY_PARTS): there it stands down there too.
+        if (id !== undefined && pos) this.ecs.set(id, 'below', { z: q.z });
+        return;
+      }
+    }
     const inside = this.interiorPoints(sid);
     const roomyOf = (points: Array<{ x: number; y: number }>, near = taken) =>
       points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
@@ -3124,12 +3243,17 @@ export class Kernel {
     return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
   }
 
+  /** Where a solid entity's model stands (tiles): the ground under its middle, or, for a thing in a cellar, its height (T417). */
+  private standOf(s: SolidForm): number {
+    return s.stand ?? this.groundAt(s.x, s.y);
+  }
+
   /**
    * A height of the world (tiles) as voxels up the grid of a solid entity (it stands on the ground under its middle,
    * its lowest `base` voxels under it, T52b); none is its ground floor.
    */
   private levelIn(s: SolidForm, z: number | undefined): number {
-    return z === undefined || !Number.isFinite(z) ? s.form.base : (z - this.groundAt(s.x, s.y)) * s.form.vpt + s.form.base;
+    return z === undefined || !Number.isFinite(z) ? s.form.base : (z - this.standOf(s)) * s.form.vpt + s.form.base;
   }
 
   /**
@@ -3145,11 +3269,14 @@ export class Kernel {
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
       if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
       const i = vx + vy * g.X;
-      const f = s.levels.z[levelAt(s.levels, i, this.levelIn(s, z))];
+      const at = this.levelIn(s, z);
+      const f = s.levels.z[levelAt(s.levels, i, at)];
       const hole = !!s.hole?.[i];
       cellar ||= hole;
+      // A floor more than a step over the feet is not under them (T417): the top of a chest on the floor over a cellar, for who stands in it.
+      if (z !== undefined && Number.isFinite(z) && f - at > stepOf(s.form.vpt) + 1) continue;
       // A model stands on the ground under its middle.
-      if (hole || f > s.form.base) h = Math.max(h, this.groundAt(s.x, s.y) + (f - s.form.base) / s.form.vpt);
+      if (hole || f > s.form.base) h = Math.max(h, this.standOf(s) + (f - s.form.base) / s.form.vpt);
     }
     return cellar ? h : Math.max(h, this.groundAt(x, y));
   }
@@ -3163,6 +3290,22 @@ export class Kernel {
     if (!at && this.zone !== 'sim') return undefined;
     const p = at ?? { ...this.wandererCarpet(), z: this.wandererPos().z };
     return undergroundAt(p.x, p.y, this.floorAt(p.x, p.y, p.z), this.groundAt(p.x, p.y));
+  }
+
+  /**
+   * The height (tiles) of a thing that stands in a cellar (T417): its `pos.z`, if it is more than a step under the ground there (on the
+   * server where `placeInside` put it; in a mirror from its `below`, which the client receives); undefined for anything else, and for a structure.
+   */
+  private cellarHeight(id: Id, p: { x: number; y: number; z?: number } | undefined): number | undefined {
+    if (!p || this.ecs.has(id, 'structure') || !Number.isFinite(p.z)) return undefined;
+    return p.z! < this.groundAt(p.x, p.y) - UNDER_STEP ? p.z : undefined;
+  }
+
+  /** Where an entity's model is laid (tiles): on the ground under its middle, its cellar under it (T52b); a thing in a cellar on its floor (T417). */
+  restsAt(id: Id): number {
+    const p = this.ecs.get(id, 'pos');
+    if (!p) return 0;
+    return this.cellarHeight(id, p) ?? this.groundAt(p.x, p.y) - this.sunk(id);
   }
 
   /** How far under the ground (tiles) an entity's model goes (T52b): the renderer lays it this much lower. */
@@ -3222,7 +3365,7 @@ export class Kernel {
       const { start, z } = s.levels, i = vx + vy * g.X, lim = this.levelIn(s, top), B = s.form.base;
       // Never into a cellar (T52b): over the hole only floors no lower than a step under the ground.
       const low = s.hole?.[i] ? B - stepOf(s.form.vpt) : B + 1;
-      for (let l = start[i]; l < start[i + 1]; l++) if (z[l] >= low && z[l] <= lim) h = Math.max(h, this.groundAt(s.x, s.y) + (z[l] - B) / s.form.vpt);
+      for (let l = start[i]; l < start[i + 1]; l++) if (z[l] >= low && z[l] <= lim) h = Math.max(h, this.standOf(s) + (z[l] - B) / s.form.vpt);
     }
     return h;
   }
@@ -3630,7 +3773,7 @@ export class Kernel {
     let h = this.groundAt(x, y);
     for (const { s, box } of this.formsUnder(x, y, r)) {
       const t = topUnder(s.form, s.levels, ...box, this.levelIn(s, base), JUMP_UP * s.form.vpt);
-      if (t !== undefined) h = Math.max(h, this.groundAt(s.x, s.y) + t);
+      if (t !== undefined) h = Math.max(h, this.standOf(s) + t);
     }
     return h;
   }
@@ -4549,7 +4692,7 @@ export class Kernel {
       // Over a cellar there is no ground to stand on.
       if (s.hole?.[i]) return true;
       // The thing's heights in the model's voxels: it stands on the ground under its middle, the model on the ground under its own.
-      const at = (z: number) => (z - this.groundAt(s.x, s.y)) * s.form.vpt + s.form.base;
+      const at = (z: number) => (z - this.standOf(s)) * s.form.vpt + s.form.base;
       const lo = at(ground) + stepOf(s.form.vpt), hi = at(ground + height);
       for (let l = s.levels.start[i]; l < s.levels.start[i + 1]; l++) if (s.levels.base[l] < hi && s.levels.z[l] > lo) return true;
     }
@@ -6214,7 +6357,8 @@ export class Kernel {
     // A large structure's program without a box of its own runs in its class's at its size (ADR-0160): it is tried there.
     // Its own time and whether it grows by rules are its entry's, which is not in the library yet (T370).
     const cls = classOf(info.class);
-    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, info) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && growsByRules(cls, info.size) });
+    // With its cellar (T417): tried as deep as the library will run it.
+    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, info) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && growsByRules(cls, info.size), base: cellarVoxels(info) });
     if (errors.length) {
       this.council.say('kernel', 'scarta', errors.join('; '), card?.author === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
       return false;
@@ -9546,7 +9690,9 @@ export class Kernel {
         continue;
       }
       // An entity with a model blocks with its voxels: it is listed in every cell its footprint may reach.
-      const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f) };
+      // A thing that stands in a cellar (T417) stands at its height, not on the ground over it.
+      const stand = this.cellarHeight(id, p);
+      const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f), ...(stand !== undefined ? { stand } : {}) };
       if (s.hole) this.cellars.push(s);
       for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
         for (let cx = Math.floor(p.x - f.reach); cx <= Math.floor(p.x + f.reach); cx++) {
@@ -9609,7 +9755,10 @@ export class Kernel {
       // What lies on furniture rests on the highest floor no higher than where it was put (T291): its shelf, or, if the furniture is
       // not there (gone, or its form still on its way), what is under it. Where it was put stays, so the shelf takes it back.
       const placed = this.ecs.get(id, 'placed');
+      // What stands in a cellar (T417) stays on its floor: in a mirror, where its height did not come, from `below`.
+      const below = this.ecs.get(id, 'below');
       if (placed && Number.isFinite(placed.z)) p.z = this.floorBelow(p.x, p.y, placed.z + REST_SLACK);
+      else if (below && Number.isFinite(below.z) && this.solidForms.has(`${Math.floor(p.x)},${Math.floor(p.y)}`)) p.z = this.floorAt(p.x, p.y, Number.isFinite(p.z) ? p.z : below.z);
       else settle(p, p.x, p.y);
     }
   }

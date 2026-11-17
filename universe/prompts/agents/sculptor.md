@@ -190,7 +190,7 @@ tiles), 30 × 30 at Huge (150, 9.4 × 9.4), 100 × 100 at Gargantuan (500, 31.25
 what is there, to the edge. The second `map` comes back to the box (5 × 5 × 1 for every cell: a plan letter without a rule leaves air), so the
 same program serves every size. **One letter, one meaning**: a letter that is a wall must never also be a step or a marker. The plan letters
 of the first grid and the letters of the full grid are two alphabets: list every letter you use in the `values` of its grid, the letters of
-the parts you include too (T k #90 #91 #92; O o N; M; U). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
+the parts you include too (T k #90 #91 #92; O o N; M; U; D V). **Never use S nor #90-#97 for your own letters**: they belong to the parts.
 
 ## A. The composition (the plan, a cell a third of a tile)
 Tested building blocks; combine and change them for the concept. A random decision for the whole building is a rule on **one cell** (the end

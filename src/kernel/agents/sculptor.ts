@@ -20,7 +20,7 @@ import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
-import { habitableParts } from '../forms';
+import { cellarVoxels, groundOfForm, habitableParts, holesOf } from '../forms';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
@@ -120,6 +120,12 @@ export interface SculptRequest {
   shareWith?: string[];
   /** It is worn there (T290, ADR-0180): the program has its `<worn>` section for that zone of the body. */
   worn?: WornZone;
+  /**
+   * Tiles of cellar under it (T417, ADR-0091 point 4): a structure that grows by rules, its box that many tiles of 20 voxels deeper under the
+   * soil (`cellarVoxels`), where `part-cellar` digs it. The checks want it to hold and to be reached from the door; one that does not comes in
+   * without (`SculptResult.cellar` absent).
+   */
+  cellar?: number;
 }
 
 /** Where a thing is worn, as the request says it. */
@@ -138,6 +144,8 @@ export interface SculptResult {
   model: string;
   score?: number;
   calls: number;
+  /** The cellar it has (T417): the request's, if the program holds it; absent if none was asked or it came in without. */
+  cellar?: number;
 }
 
 const CRITIQUE_SCHEMA: Schema = {
@@ -262,6 +270,12 @@ export interface Checked {
   /** What a procedural structure contains at this size (T338): a larger size must contain more. */
   composition?: Composition;
   error?: string;
+  /** The voxels of its cellar under the ground it was checked with (T417): 0 or absent, none. */
+  base?: number;
+  /** The only reason it does not pass is its cellar (T417): without the cellar it may still come in. */
+  cellarOnly?: boolean;
+  /** It came in without the cellar the request asked for (T417, ADR-0091 point 3). */
+  cellarless?: boolean;
 }
 
 /** The files of models/ a program reads (T333-T335), from the universe's: tilesets, tiles, samples, rule files, programs it imports. */
@@ -305,8 +319,16 @@ export function partResources(files: FileMap): string[] {
   return out.sort();
 }
 
-/** The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. `files` are the universe's (`filesOf`). */
-export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}): Checked {
+/** The voxels of cellar a request asks for (T417): only a structure that grows by rules has one, `cellar` tiles of 20 voxels (`cellarVoxels`). */
+export const cellarOfRequest = (cls: AssetClass, taglia: string | undefined, cellar: number | undefined): number =>
+  cellar && procedural(cls, taglia) ? cellarVoxels({ class: cls.id, ...(taglia ? { size: taglia } : {}), cellar }) : 0;
+
+/**
+ * The kernel's checks on a program: what makes it unusable goes back to the Sculptor with the reason. `files` are the universe's (`filesOf`).
+ * `cellar` (T417): the tiles of cellar the request asks for; the box is that much deeper and the cellar must hold and be reached from the door.
+ */
+export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}, cellar?: number): Checked {
+  const base = cellarOfRequest(cls, taglia, cellar);
   if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1, files);
   // A procedural structure (ADR-0160): every seed the world shows at its size, and the first at the next size, which shares it.
   xml = withoutSize(xml);
@@ -320,13 +342,13 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
   const besides = (shown: number): Checked['others'] => {
     for (let seed = 1; seed <= 3 && ran.size < 3; seed++) {
       if (ran.has(seed)) continue;
-      const r = checkOnce(xml, cls, own, seed, files).result;
+      const r = checkOnce(xml, cls, own, seed, files, base).result;
       if (r) ran.set(seed, r);
     }
     return [...ran.entries()].filter(([seed]) => seed !== shown).slice(0, 2).map(([seed, result]) => ({ seed, result }));
   };
   for (const [t, seed] of tries) {
-    const c = checkOnce(xml, cls, t, seed, files);
+    const c = checkOnce(xml, cls, t, seed, files, base);
     first ??= c;
     if (t === next) other = c;
     else if (c.result) ran.set(seed, c.result);
@@ -346,35 +368,56 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
  */
 export const leastHeight = (cls: AssetClass, taglia?: string): number => Math.round((cls.minHeight ?? 0) * boxOf(cls, procedural(cls, taglia) ? undefined : taglia)[2]);
 
-function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}): Checked {
-  const box = boxOf(cls, taglia);
+/** The box a program is checked in: its class's at its size, `base` voxels deeper for a cellar (T417), as the library runs it (`sizeFor`). */
+const checkBox = (cls: AssetClass, taglia: string | undefined, base = 0): Vec3 => {
+  const [X, Y, Z] = boxOf(cls, taglia);
+  return [X, Y, Z + base];
+};
+
+/** Why a structure's cellar does not hold (T417), or undefined if it does: something under the ground, every floor there reached, by the door. */
+function cellarError(result: RunResult, palette: Record<string, PaletteEntry>, vpt: number, base: number, reached: number[]): string | undefined {
+  if (!holesOf(result.grid, palette, base)) return 'cantina: niente sotto il suolo (D sotto il pavimento e <import file="part-cellar"/>)';
+  if (!groundOfForm(result.grid, palette, vpt, base).hole) return 'cantina: un pavimento sotto il suolo non si raggiunge dal piano terra';
+  if (!reached.length) return 'cantina: dalla porta non si scende in cantina';
+  return undefined;
+}
+
+function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}, base = 0): Checked {
+  const box = checkBox(cls, taglia, base);
   try {
     // A program that decides on a coarse grid and maps up keeps its own size; the others get the class's box.
-    const model = compileMjx(xml, { ...(scales(xml) ? {} : { size: box }), ...(Object.keys(files).length ? { files } : {}) });
+    const model = compileMjx(xml, { ...(scales(xml) ? {} : { size: box }), ...(base ? { base } : {}), ...(Object.keys(files).length ? { files } : {}) });
     // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176), as the validator will want them.
     const nodes = worldNodeErrors(model, xml, files);
     if (nodes.length) return { xml, model, error: nodes.join('; ') };
     const result = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
     // A structure that grows by rules is a whole of parts on the ground (T370, ADR-0206): what rests on the bottom is one body.
-    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia), groundJoins: procedural(cls, taglia) });
+    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia), groundJoins: procedural(cls, taglia), base });
     const notes = [...a.errors];
     // What is worn (T290): its sections tried on the kernel's two bodies, as the validator and the world will.
     if (wornSections(xml).length) notes.push(...wornErrors(xml, { background: symbolName(model.background), palette: model.program.palette }));
     const cells = result.grid.X * result.grid.Y * result.grid.Z;
     if (a.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((a.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
     let composition: Composition | undefined;
+    let cellarOnly = false;
     if (procedural(cls, taglia) && !notes.length) {
       // The storeys reached (ADR-0162) and the parts one lives in at their least measures, the same at every size (T338, ADR-0179).
+      // A cellar is not a storey (T417): what is under the ground is counted apart, and it must hold and be reached from the door.
       const vpt = densityFor(cls, taglia);
-      const parts = habitableParts(result.grid, model.program.palette, vpt, partVoxels(vpt).storey.clear, 0, model.actions, seed);
+      const parts = habitableParts(result.grid, model.program.palette, vpt, partVoxels(vpt).storey.clear, base, model.actions, seed);
       if (parts.storeys.length < 2) notes.push(`piani: ${parts.storeys.length} (serve ≥ 2)`);
       notes.push(...partErrors(parts, vpt));
+      const down = base ? cellarError(result, model.program.palette, vpt, base, parts.cellar) : undefined;
+      if (down) {
+        cellarOnly = !notes.length;
+        notes.push(down);
+      }
       if (seed === 1) composition = compositionOf(result.grid, model.program.palette);
     }
-    return { xml, model, result, ...(composition ? { composition } : {}), ...(notes.length ? { error: notes.join('; ') } : {}) };
+    return { xml, model, result, ...(base ? { base } : {}), ...(composition ? { composition } : {}), ...(notes.length ? { error: notes.join('; ') } : {}), ...(cellarOnly ? { cellarOnly } : {}) };
   } catch (e) {
-    return { xml, error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` };
+    return { xml, ...(base ? { base } : {}), error: e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}` };
   }
 }
 
@@ -399,9 +442,21 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     req.tinta && 'It serves many things of this kind: the main colour is the letter C (the game recolours it for each one).',
     req.worn && `It is worn ${WORN_ON[req.worn]}: after the program write its <worn zone="${req.worn}"> section (see «Worn things»).`,
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
+    cellarLine(req, cls),
   ]
     .filter(Boolean)
     .join('\n');
+}
+
+/**
+ * What the request says of a cellar (T417, ADR-0091 point 4): how deep it goes, where the soil is, the part that digs it and what is checked.
+ * Only in the request that asks for one: the prompt of the structures does not grow.
+ */
+function cellarLine(req: SculptRequest, cls: AssetClass): string | undefined {
+  const base = cellarOfRequest(cls, req.taglia, req.cellar);
+  if (!base) return undefined;
+  const vpt = densityFor(cls, req.taglia);
+  return `It has a cellar under it: the box goes ${base} voxels (${(base / vpt).toFixed(2)} tiles) under the soil, which the kernel writes at z=${base}; z=0 to ${base - 1} are under the ground. Dig it with part-cellar: mark D under the floor of a room on the soil, away from the door and from the foot of the stair, then include part-cellar after the floors rise and before part-stair, and give D, V and k your colours. The cellar must hold: a body goes down to it on foot from the door, and every floor down there is reached; if it does not, the building comes in without it.`;
 }
 
 /**
@@ -425,9 +480,9 @@ function bodyLine(cls: AssetClass, taglia?: string): string {
 }
 
 /** What a procedural program did, node by node (T179), where it fell or at its first seed: the second request carries it. `files` are those it includes. */
-export function traceOf(c: Pick<Checked, 'xml' | 'failedAt'>, cls: AssetClass, taglia?: string, files: MjxFiles = {}): string | undefined {
+export function traceOf(c: Pick<Checked, 'xml' | 'failedAt' | 'base'>, cls: AssetClass, taglia?: string, files: MjxFiles = {}): string | undefined {
   try {
-    return traceText(compileMjx(c.xml, { size: boxOf(cls, c.failedAt?.taglia ?? taglia), ...(Object.keys(files).length ? { files } : {}) }), c.failedAt?.seed ?? 1, { deadline: 8_000, tetto: 2500, forma: 'nodes' });
+    return traceText(compileMjx(c.xml, { size: checkBox(cls, c.failedAt?.taglia ?? taglia, c.base), ...(c.base ? { base: c.base } : {}), ...(Object.keys(files).length ? { files } : {}) }), c.failedAt?.seed ?? 1, { deadline: 8_000, tetto: 2500, forma: 'nodes' });
   } catch {
     return undefined;
   }
@@ -469,6 +524,7 @@ const MEANINGS: Array<[RegExp, string]> = [
   [/^il programma non finisce/, 'the time at the largest size: every growth needs steps'],
   [/^(non tocca terra|il corpo principale galleggia|pezzi staccati)/, 'everything must rest on the bottom and be attached to the main body'],
   [/^troppo basso/, 'the height of the top against the box of the class'],
+  [/^cantina:/, 'the cellar under the ground: something there, every floor down there reached from the ground floor, a body going down to it on foot from the door'],
 ];
 
 /** A reason of the checks with what it measures, where the measure is not plain. */
@@ -600,9 +656,17 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
       calls++;
       xml = await call(i === 0 ? prompt : `${prompt}\n\nThe program you wrote:\n${last!.xml.slice(0, proc ? 24_000 : 6000)}\nIt does not pass: ${proc ? withMeaning(last!.error!) : last!.error}${seen(last!)}\nFix it and answer with the whole program.`);
     }
-    last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files));
+    last = checkProgram(xml, cls, req.taglia, filesOf(xml, c.files), req.cellar);
     if (!last.error) return { checked: last, calls };
     c.say('kernel', 'scarta', `«${req.nome}»: ${last.error.slice(0, 160)}`, 'sculptor', 'model.sculpt');
+  }
+  // A structure whose cellar does not hold comes in without it (ADR-0091 point 3): the same program, nothing under the ground, if it passes so.
+  if (last?.cellarOnly) {
+    const without = checkProgram(last.xml, cls, req.taglia, filesOf(last.xml, c.files));
+    if (!without.error) {
+      c.say('kernel', 'scarta', `«${req.nome}»: la cantina non regge, entra senza`, 'sculptor', 'model.sculpt');
+      return { checked: { ...without, cellarless: true }, calls };
+    }
   }
   return { calls, error: last?.error };
 }
@@ -643,7 +707,9 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   const place = (x: string) => (procedural(cls, req.taglia) ? withoutSize(x) : withSize(x, boxOf(cls, req.taglia)));
   if (best.critique) c.say('artist', score !== undefined && score >= 7 ? 'approva' : 'obietta', `«${req.nome}»: ${score}/10${best.critique.problems.length ? ` — ${best.critique.problems[0]}` : ''}`, 'sculptor', 'model.judge');
   const xml = `<!-- ${req.nome}: sculpted by ${model} (step 9)${score !== undefined ? `, the Artist's vote ${score}/10` : ''} -->\n${place(best.checked.xml.replace(/^\s*<!--[\s\S]*?-->\s*/, ''))}\n`;
-  return { xml, model, score, calls };
+  // Its cellar (T417): the request's, unless the program came in without it.
+  const cellar = cellarOfRequest(cls, req.taglia, req.cellar) && !best.checked.cellarless ? req.cellar : undefined;
+  return { xml, model, score, calls, ...(cellar ? { cellar } : {}) };
 }
 
 // Actions as rules (ADR-0044): what the wanderer does to an entity that changes its shape (it opens, cracks,

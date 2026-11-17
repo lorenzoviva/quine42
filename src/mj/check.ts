@@ -30,9 +30,11 @@ const visibleCodes = (g: Grid3, palette: Record<string, PaletteEntry>) => g.alph
 /**
  * `groundJoins` (T370, ADR-0206): the pieces that rest on the bottom of the grid are one body, joined by the ground they stand on. A
  * structure that grows by rules is a whole of parts (the fences of the pastures, the fields, the towers of a long wall), not a body in one
- * piece: what is detached is what floats.
+ * piece: what is detached is what floats. `base` (T417, ADR-0091): the voxels of a cellar under the ground, the lowest of the grid; the ground
+ * is `base` voxels up, so what rests on it is on the ground as what goes down to the bottom is, and the height counts from it.
  */
-export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opts: { grounded?: boolean; minHeight?: number; groundJoins?: boolean } = {}): Analysis {
+export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opts: { grounded?: boolean; minHeight?: number; groundJoins?: boolean; base?: number } = {}): Analysis {
+  const base = opts.base && opts.base > 0 ? opts.base : 0;
   const g = r.grid;
   const vis = visibleCodes(g, palette);
   const XY = g.X * g.Y;
@@ -55,7 +57,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
       min[a] = Math.min(min[a], p[a]);
       max[a] = Math.max(max[a], p[a]);
     }
-    if (p[2] === 0) ground++;
+    if (p[2] <= base) ground++;
   }
   // Connected pieces (26-neighbourhood).
   const seen = new Uint8Array(g.cells.length);
@@ -74,7 +76,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
       const c = stack.pop()!;
       size++;
       const x = c % g.X, y = Math.floor(c / g.X) % g.Y, z = Math.floor(c / XY);
-      if (z === 0) grounded = true;
+      if (z <= base) grounded = true;
       for (let dz = -1; dz <= 1; dz++)
         for (let dy = -1; dy <= 1; dy++)
           for (let dx = -1; dx <= 1; dx++) {
@@ -122,7 +124,7 @@ export function analyse(r: RunResult, palette: Record<string, PaletteEntry>, opt
     else if (parts > 1 && a.mainPart < 1) a.warnings.push(`${parts - 1} frammenti staccati (${pct(1 - a.mainPart)} dei voxel)`);
     if (a.fill > 0.8 && !hasTranslucent) a.errors.push(`riempie ${pct(a.fill)} della griglia: sembra un blocco, non una forma`);
     if (voxels < 12) a.errors.push(`troppo piccolo: solo ${voxels} voxel`);
-    if (opts.minHeight && bbox && max[2] + 1 < opts.minHeight) a.errors.push(`troppo basso: alto ${max[2] + 1} voxel, la sua classe chiede almeno ${opts.minHeight} (le cose simili hanno le stesse proporzioni)`);
+    if (opts.minHeight && bbox && max[2] + 1 - base < opts.minHeight) a.errors.push(`troppo basso: alto ${max[2] + 1 - base} voxel, la sua classe chiede almeno ${opts.minHeight} (le cose simili hanno le stesse proporzioni)`);
     if (Object.keys(colors).length < 2) a.warnings.push('un solo colore: poca leggibilità, usa toni chiari e scuri');
     if (bbox && (min[0] === 0 || min[1] === 0 || max[0] === g.X - 1 || max[1] === g.Y - 1)) a.warnings.push('tocca i bordi laterali della griglia: forse è tagliato');
     if (bbox && max[2] === g.Z - 1) a.warnings.push('tocca il soffitto della griglia: forse è tagliato in alto');

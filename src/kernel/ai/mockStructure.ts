@@ -1,14 +1,15 @@
 // The structure the Sculptor answers with offline (T354, ADR-0183): a country house written by hand as the Sculptor writes one from the
 // prompt without a skeleton — the composition of the concept on a plan at a fifth of the scale (a cell is a quarter of a tile), the
 // `map` back to the box so that one program serves every size, the columns that rise by steps, the parts one lives in included
-// from the seed (`part-stair`, `part-door`). It passes the kernel's checks at Large, Huge and Gargantuan (`tests/sculptor-structures.test.ts`)
+// from the seed (`part-stair`, `part-door`), and a cellar under the body when the request asks for one (`part-cellar`, T417: without room under
+// the soil it digs nothing). It passes the kernel's checks at Large, Huge and Gargantuan (`tests/sculptor-structures.test.ts`)
 // and the bench of the sizes measures it beside the fort of the bench (`lab/scripts/banco-taglie.ts`). Here, not in the prompt: a program
 // in the prompt is copied (T337).
 
 export const MOCK_STRUCTURE_PROGRAM = `<!--
 Country house (villetta): a body of two storeys under a hip roof, a one-storey wing on one side with its own roof, a porch along the front
 on posts, a garden with a hedge where the ground goes on, trees and a well where more ground is left. The seeds change the depth of the
-body, the side and the place of the wing, the posts, the trees.
+body, the side and the place of the wing, the posts, the trees. With a cellar asked for, the middle of the body has one, under its floor.
 Plan letters (a cell is 5 voxels): H the centre, h the floor of the body, w its walls, s the zone of the stair, d the door, m the way to it,
 a the floor of the wing, v its walls, p the porch, q the road on the porch, r the road, g the garden, b a post, x the hedge, t a tree, Q the well.
 Not S nor #90-#97: they belong to the parts.
@@ -55,7 +56,7 @@ Not S nor #90-#97: they belong to the parts.
       <one in="EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE" out="*******/*******/*******/***t***/*******/*******/*******"/>
     </sequence>
     <!-- B. To the voxels: every cell five by five. -->
-    <map scale="5 5 1" values="BEhwsavpqrgbGYQAfWUFRLOoNkT#90#91#92KJyCP#20#21" symmetry="()">
+    <map scale="5 5 1" values="BEhwsavpqrgbGYQAfWUFRLOoNkT#90#91#92#93KJyCPDV#20#21" symmetry="()">
       <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
       <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
       <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
@@ -74,7 +75,10 @@ Not S nor #90-#97: they belong to the parts.
       <!-- C. The detail at full scale. -->
       <sequence symmetry="(xy)">
         <union symbol="+" values="WU"/>
-        <union symbol="=" values="F"/>
+        <union symbol="=" values="Ff"/>
+        <!-- 0. The cellar's place, if the box goes under the soil: under the body's floor (the stair's zone too: its floor stays), ten voxels back from its front wall (one walks from the door past its stair). -->
+        <all in="[hs] B" out="* D"/>
+        <prl in="D/B" out="B/*" symmetry="()" steps="10"/>
         <!-- 1. The walls rise and leave plaster, a band for the windows, plaster: the body two storeys of 32, the wing one; the roof letter on top. -->
         <all steps="6"><rule in="B w" out="w W"/><rule in="B v" out="v W"/></all>
         <all steps="14"><rule in="B w" out="w U"/><rule in="B v" out="v U"/></all>
@@ -94,6 +98,8 @@ Not S nor #90-#97: they belong to the parts.
         <all steps="1"><rule in="B h" out="h F"/><rule in="B s" out="s F"/></all>
         <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
         <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>
+        <!-- 1b. The cellar: part-cellar digs it under D and opens the floor over its stair. -->
+        <import file="part-cellar"/>
         <!-- 2. The doors: where the road meets the foot of the front wall, the seed O through the wall; between the wing and the body, a seed through the shared wall, 11 wide. part-door raises them. -->
         <all in="W/q" out="O/*" symmetry="()" steps="1"/>
         <all in="W/O" out="O/*" symmetry="()" steps="4"/>
@@ -131,11 +137,12 @@ Not S nor #90-#97: they belong to the parts.
   <color symbol="f" value="8e6a44" name="assito" area="house"/><color symbol="W" value="e8dcc0" name="intonaco"/><color symbol="F" value="7a5634" name="solaio"/>
   <color symbol="R" value="a5482e" name="coppi"/><color symbol="L" value="86b8c8" alpha="0.5" name="vetro"/><color symbol="K" value="8e8578" name="comignolo"/>
   <color symbol="O" value="7a4a26" name="porta"/><color symbol="o" value="5e3a1e" name="asse scura"/><color symbol="N" value="6b4a2e" name="telaio"/><color symbol="k" value="9a7048" name="scala"/>
+  <color symbol="D" value="6f655a" name="pavimento della cantina"/><color symbol="V" value="8a8172" name="muro della cantina"/>
   <color symbol="p" value="a89c86" name="pietra del portico" area="porch"/><color symbol="b" value="7a5634" name="pali"/><color symbol="J" value="8a6a3a" name="tetto del portico"/>
   <color symbol="P" value="c2ad84" name="ghiaia"/><color symbol="G" value="3f6f2f" name="siepe"/><color symbol="Y" value="6b4a2e" name="tronco"/><color symbol="C" value="4e7f34" name="chioma"/>
   <color symbol="Q" value="8a8274" name="pozzo"/><color symbol="A" value="3a78c8" name="acqua"/>
   <color symbol="g" hidden="True" name="giardino" area="garden"/><color symbol="E" hidden="True" name="prato"/>
-  <color symbol="H" hidden="True"/><color symbol="h" hidden="True"/><color symbol="w" hidden="True"/><color symbol="s" hidden="True"/><color symbol="d" hidden="True"/><color symbol="m" hidden="True"/><color symbol="a" hidden="True"/><color symbol="v" hidden="True"/><color symbol="q" hidden="True"/><color symbol="r" hidden="True"/><color symbol="x" hidden="True"/><color symbol="t" hidden="True"/><color symbol="U" hidden="True"/><color symbol="y" hidden="True"/><color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#20" hidden="True"/><color symbol="#21" hidden="True"/>
+  <color symbol="H" hidden="True"/><color symbol="h" hidden="True"/><color symbol="w" hidden="True"/><color symbol="s" hidden="True"/><color symbol="d" hidden="True"/><color symbol="m" hidden="True"/><color symbol="a" hidden="True"/><color symbol="v" hidden="True"/><color symbol="q" hidden="True"/><color symbol="r" hidden="True"/><color symbol="x" hidden="True"/><color symbol="t" hidden="True"/><color symbol="U" hidden="True"/><color symbol="y" hidden="True"/><color symbol="T" hidden="True"/><color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#93" hidden="True"/><color symbol="#20" hidden="True"/><color symbol="#21" hidden="True"/>
   <action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>
   <action name="close" label="Chiudi la porta"><all><rule in="#20" out="O"/><rule in="#21" out="o"/></all></action>
 </sequence>
