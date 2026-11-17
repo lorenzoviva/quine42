@@ -5,8 +5,8 @@
 
 import type { Kernel } from './kernel';
 import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
-import { classOf, densityFor, growsByRules, guessClass, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
-import type { ModelInfo } from './forms';
+import { classOf, densityFor, growsByRules, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
+import { cellarOf, type ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
 import { hashStr, hex } from './rng';
@@ -82,6 +82,18 @@ export function structureModel(concept: string, size?: SizeTier): string {
   return `struttura-${ownModelId(concept).slice(0, 30 - suffix.length)}${suffix}`;
 }
 
+/**
+ * The tiles of cellar a structure the Cartographer asks with one gets (T417, ADR-0091 point 4): one, two for the rare sizes (Huge, Gargantuan,
+ * the important ones of ADR-0092). Only a structure that grows by rules has one (`hasCellar`).
+ */
+export const cellarFor = (size?: SizeTier): number => (size && RARE_SIZES.includes(size) ? 2 : 1);
+
+/** Whether a structure of a class and a size can have a cellar (T417): the Sculptor digs one only in a structure that grows by rules. */
+export const hasCellar = (classe: string, size?: SizeTier): boolean => {
+  const cls = classOf(classe);
+  return !!cls && growsByRules(cls, size);
+};
+
 /** The entries of the same concept at every size: where a program to share is looked for. */
 export const structureSiblings = (concept: string): string[] => [...new Set([structureModel(concept), ...SIZE_TIERS.map((t) => structureModel(concept, t.id))])];
 
@@ -152,10 +164,12 @@ export class ModelDirector {
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
     // Gargantuan per realm, the kernel sees to it) by the best model.
     for (const id of k.ecs.query('structure')) {
-      const s = k.ecs.get(id, 'structure') as { model?: string; concept: string; class: string; size?: SizeTier };
+      const s = k.ecs.get(id, 'structure') as { model?: string; concept: string; class: string; size?: SizeTier; cellar?: number };
       if (!lacks(s.model)) continue;
       const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
-      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}) });
+      // With its cellar, if the Cartographer asked for one (T417): the request says how deep, the Sculptor digs it.
+      const cellar = s.cellar && hasCellar(s.class, s.size) ? s.cellar : undefined;
+      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}) });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
@@ -205,7 +219,9 @@ export class ModelDirector {
     const k = this.k;
     const out: Array<{ id: string; name: string; xml: string }> = [];
     for (const [id, info] of Object.entries(k.forms.models())) {
-      if (id === req.id || id === REUSE_NEW || info.class !== req.classe || info.sound || /^(corona-|schermo-|circuito-)/.test(id)) continue;
+      // Not the parts of the seed (`part-…`, T417: a stair, a cellar alone is not a building); a request with a cellar only what has one.
+      if (id === req.id || id === REUSE_NEW || info.class !== req.classe || info.sound || /^(corona-|schermo-|circuito-|part-)/.test(id)) continue;
+      if (req.cellar && !cellarOf(info)) continue;
       const s = k.forms.usable(id) ? this.wearable(req, id) : undefined;
       if (s) out.push({ id, name: info.name ?? id, xml: s.xml });
     }
@@ -292,7 +308,8 @@ export class ModelDirector {
         this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
         return false;
       }
-      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.score !== undefined ? { score: r.score } : {}), ...(req.tinta ? { tint: 'C' } : {}) }, `scultore: ${req.nome}`, SCULPTED);
+      // Its cellar (T417): the one the program holds, which the entry says, so the library runs it under the ground.
+      const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.score !== undefined ? { score: r.score } : {}), ...(req.tinta ? { tint: 'C' } : {}), ...(r.cellar ? { cellar: r.cellar } : {}) }, `scultore: ${req.nome}`, SCULPTED);
       if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
       return added;
     } catch (e) {

@@ -274,5 +274,7 @@
  "suolo/locanda/1/seconda/modello@large#1": "144f4881fa1d21ee 875 · inutili 5e76c784 · apri 0a7e8dbf80425e2d 1",
  "suolo/locanda/1/seconda/modello@huge#1": "89b603e7b02a72f8 964 · apri 5e6a2cb588d772e3 1",
  "suolo/locanda/2/seconda/modello@large#1": "dacb1f0556719362 831 · inutili 77ddee43 · apri 2b0eb07b80e8d2af 1",
- "suolo/locanda/2/seconda/modello@huge#1": "c0dfd646683f5729 931 · inutili be4c49f5 · apri 7b8ad7d8c7ac88ef 1"
+ "suolo/locanda/2/seconda/modello@huge#1": "c0dfd646683f5729 931 · inutili be4c49f5 · apri 7b8ad7d8c7ac88ef 1",
+ "universe/part-cellar#1": "4448b29ac0534c34 267 · inutili 50379ff8 · open 5c77e7567c829122 1 · close 4448b29ac0534c34 0",
+ "universe/part-cellar#2": "7b41dafbf4047e45 267 · inutili 50379ff8 · open dbc49a6ef579ad12 1 · close 7b41dafbf4047e45 0"
 }

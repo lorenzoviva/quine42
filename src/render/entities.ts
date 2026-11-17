@@ -212,13 +212,13 @@ export class Entities {
       }
       if (v.kind === 'item') {
         // Things to pick up hover a little and turn, so they are seen among the grass.
-        v.root.position.set(p.x, k.groundAt(p.x, p.y) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);
+        v.root.position.set(p.x, k.restsAt(id) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);
         v.root.rotation.y = t * 0.8 + id;
         continue;
       }
       if (v.kind !== 'figure') {
-        // An entity (a structure too) stands on the ground under its middle; its cellar under it (T52b).
-        v.root.position.set(p.x, k.groundAt(p.x, p.y) - k.sunk(id), p.y);
+        // An entity (a structure too) stands on the ground under its middle; its cellar under it (T52b); a thing in a cellar on its floor (T417).
+        v.root.position.set(p.x, k.restsAt(id), p.y);
         const cut = id === inside;
         if (v.cut !== cut) {
           v.cut = cut;

@@ -11,8 +11,11 @@ import { sizeOf, type SizeTier } from '../../mj/classes';
 import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 
-/** Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere. */
-export type Where = 'inside' | 'outside' | 'anywhere';
+/**
+ * Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere; `under` (T417, ADR-0091 point 4) in the cellar
+ * of a structure the plan asks with one, on its floors under the ground reached from the door; without a cellar, inside.
+ */
+export type Where = 'inside' | 'outside' | 'anywhere' | 'under';
 
 export interface PlacedObject {
   module: string;
@@ -53,7 +56,7 @@ export interface ChunkPlan {
    * environment (the largest first); the Sculptor writes the ones that do not exist yet. Their size (ADR-0092)
    * is a size of D&D, fitted by the kernel to the lot and to the rarity of the two largest.
    */
-  structures?: Array<{ concept: string; size?: SizeTier }>;
+  structures?: PlanStructure[];
   /** Tiles changed after the layout (by effects, spells, Lua): cell index → tile code. */
   edits?: Record<string, string>;
   /** The day of the world each edit was written (T245b, ADR-0140): what ripens counts from there. An edit without one is of today. */
@@ -90,6 +93,16 @@ export interface ChunkPlan {
   strata?: string[];
 }
 
+/**
+ * A structure of a plan (ADR-0043): its concept, its size of D&D (ADR-0092), and whether it has a cellar (T417, ADR-0091 point 4): then the
+ * `ModelDirector` asks its model with one (1 tile, 2 for the rare sizes), if it grows by rules, and the things `under` go down there.
+ */
+export interface PlanStructure {
+  concept: string;
+  size?: SizeTier;
+  cellar?: boolean;
+}
+
 export interface PlanContext {
   cx: number;
   cy: number;
@@ -117,7 +130,7 @@ export interface PlanContext {
   brought?: Array<{ concept: string; size?: SizeTier }>;
 }
 
-export const WHERE: Where[] = ['inside', 'outside', 'anywhere'];
+export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under'];
 
 /** Where a thing stands, as the Cartographer wrote it (or a plan of before T310b, in Italian): one of the three, `anywhere` otherwise. */
 export const whereOf = (w: unknown): Where => {
@@ -134,19 +147,19 @@ const PLAN_SCHEMA: Schema = {
     ground: { type: 'ARRAY', items: { type: 'STRING' } },
     fresh: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE }, takeable: { type: 'BOOLEAN' } }, required: ['concept', 'where'] } },
     runes: { type: 'ARRAY', items: { type: 'STRING' } },
-    structures: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, size: { type: 'STRING', enum: internalValues('taglie') } }, required: ['concept'] } },
+    structures: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, size: { type: 'STRING', enum: internalValues('taglie') }, cellar: { type: 'BOOLEAN' } }, required: ['concept'] } },
   },
   required: ['place', 'environment', 'objects', 'runes'],
 };
 
 /**
  * A structure of a plan, as the Cartographer wrote it or as a saved plan has it: a size of D&D, or `importante`
- * of the plans before ADR-0092 (the castle of then is Huge).
+ * of the plans before ADR-0092 (the castle of then is Huge); its cellar only if said true (T417).
  */
-export function readStructure(s: any): { concept: string; size?: SizeTier } {
+export function readStructure(s: any): PlanStructure {
   // A plan of before the contract 0.4 says `taglia` and `concetto`; a size in the Italian of 0.1 is still the one it means.
   const size = sizeOf(internalName('taglie', String(s?.size ?? s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
-  return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}) };
+  return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}), ...(s?.cellar === true ? { cellar: true } : {}) };
 }
 
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
@@ -156,11 +169,11 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     `Available environments ("environment" = one of these ids):\n${ctx.layouts.map((l) => `- ${l.id}: ${l.name} [${l.environment}] — ${l.description}`).join('\n')}`,
     ctx.start ? 'It is the starting square: choose an inhabited, welcoming environment.' : '',
     ctx.region ? `This place belongs to the region «${ctx.region.name}» (${ctx.region.description}): its name and what is in it must belong to the region (e.g. «${ctx.region.name} — the north gate», in the language of the world).` : '',
-    `Things and characters: 2-6 entries in "objects", "module" = EXACTLY one of the ids below; "where": inside (in the buildings), outside, anywhere. Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
+    `Things and characters: 2-6 entries in "objects", "module" = EXACTLY one of the ids below; "where": inside (in the buildings), outside, anywhere, under (in the cellar of a structure with "cellar": true). Furnish the interiors (beds, tables, cupboards, chests) and people the place: about one place in two has at least one character; vary the characters (do not always put the same kind, and never the same as the neighbouring places).\n${ctx.catalog.map((m) => `- ${m.id} «${m.name}» [${m.kind}]: ${m.context}`).join('\n')}`,
     `"ground": 0-4 names of common things lying on the ground here (new ones too, if consistent).${ctx.wanted.length ? ` If it makes sense, include something people have talked about: ${ctx.wanted.join(', ')}.` : ''}`,
     '"fresh": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
     `"runes": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
-    '"structures": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses).',
+    '"structures": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses). "cellar": true, now and then, for one that has rooms under the ground (the barrel cellar of an inn, the crypt of a temple, the vault of a bank): then put what belongs down there in "objects" with "where": under.',
     ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "structures".` : '',
     `"size" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
     ctx.rari?.length

@@ -837,7 +837,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     reach: ['disco', 'filo', 'prompt'],
     lang: 'en',
     step: 'T310b',
-    names: { dentro: 'inside', fuori: 'outside', ovunque: 'anywhere' },
+    names: { dentro: 'inside', fuori: 'outside', ovunque: 'anywhere', sotto: 'under' },
     note: 'non è il «dove» della routine (`dove`, T307b): quello dice un posto della vita di un individuo, questo se una cosa sta dentro i lotti o fuori',
   }),
   d({

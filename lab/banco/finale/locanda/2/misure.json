@@ -53,7 +53,7 @@
     {
       "id": "murato",
       "ok": true,
-      "valore": "0.18",
+      "valore": "0",
       "richiesto": "≤ 0.25"
     },
     {
@@ -147,7 +147,7 @@
     "cantina": 3.0325,
     "terrazze": 1,
     "stanze": 4,
-    "murato": 0.17989221334324476,
+    "murato": 0,
     "porta": {
       "x": 49,
       "y": 95,
