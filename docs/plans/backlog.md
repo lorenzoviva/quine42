@@ -5750,7 +5750,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (`?skip&offline`: una casa del borgo arredata dentro, nessun mobile nei muri o sulle porte, si cammina).
 - Quando è fatto: commit su `task/T410`. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410, T413)
+### T411 · Rigenerare i modelli di un universo con lo Scultore stabile, dalla coda degli abbonamenti — `da fare` (dipende da T407, T410, T413, T417, T418, T419)
 - Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
 - Step: 31
 - Contesto: richiesta dell'autore (17/11, chat): gli universi in `universes/` (aurora, orichalcum, neapolis, sidera) sono stati fatti con versioni dello Scultore di prima (senza 16 vpx, senza Scenografo, alcuni da Claude Cloud via T273): rigenerarli, almeno i modelli, con lo Scultore stabile e lo Scenografo base, sulla CLI di Claude Code con **Opus 5.5**, così l'autore approva T153 e si passa agli altri universi. Nasce da T207, T88 (`dossier T207`, `dossier T88`), T405 (`dossier T405`). Decisione dell'autore che supera la vecchia «aurora non si tocca»: lo stato di prima resta nella storia git dell'universo (un tag `prima-della-rigenerazione`).
@@ -5789,10 +5789,47 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 
 ### T415 · La cantina si vede: il buco su tutta la cantina, col test a 16 — `da fare`
-- Pipeline: claude · sforzo high · stima 2% · priorità 2
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 13
 - Contesto: proposta dell'orchestratore da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 4-5): le cantine tengono a 16 vpx, ma `holesIn` apre il terreno solo su 3 caselle su 15 della locanda; il resto della cantina, compresa la tromba vista dal piano terra, resta sotto l'erba. Il difetto si vede già oggi in aurora dovunque è posata una delle 6 voci del seme. `tests/cellar.test.ts` misura ancora a 20 vpx.
 - Cosa fare: il buco a copertura del § 4 (il terreno aperto su tutta l'impronta della cantina, non solo sulla scala), senza modelli né chiamate; `tests/cellar.test.ts` anche a 16 vpx; `lab/scripts/misura-cantine.ts` prima/dopo sulle 24 voci. Versione del kernel (Z o Y secondo AGENTS.md).
 - Test: `cellar.test.ts` a 16; suite e typecheck coi turni.
 - Browser: sì — `?skip&offline`, `struttura-locanda` posata come in T412: dal piano terra si vede la cantina e la tromba, si scende e si risale; screenshot.
 - Quando è fatto: commit su `task/T415`; nell'esito caselle aperte prima/dopo. Sicurezza: nessuna superficie nuova.
+
+### T416 · Vedere sotto terra, senza strati (T52e ridotto) — `da fare` (dipende da T415)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Step: 13
+- Contesto: decisione dell'autore (17/11, chat, D63): le cantine si finiscono tutte (T52) prima della rigenerazione (T411), e l'arredo subito dopo. Nasce da T52 e T412 (`dossier T52`, `dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «T52e senza strati»; ADR-0091 punto 6).
+- Cosa fare: `kernel.underground()`; il taglio a caselle in un disco attorno a chi sta sotto (raggio 6, verso la camera) di terreno, strutture e cose sopra `1,15 + floorAt`; le colonne tagliate di un colore di terra (le bande degli strati le aggiunge T418); sole e cielo attenuati con la profondità. Mai la corona dal cerchio (regola 8). Versione del kernel, ADR-0091 aggiornato.
+- Test: `underground()` e il disco su una cantina di prova; suite e typecheck coi turni.
+- Browser: sì — `?skip&offline`, `struttura-locanda` posata come in T412: si scende, dalla camera in 3/4 si vede tutta la cantina, si risale; screenshot sopra e sotto.
+- Quando è fatto: commit su `task/T416`. Sicurezza: nessuna superficie nuova.
+
+### T417 · Il Cartografo e lo Scultore chiedono le cantine (T52f) — `da fare` (dipende da T415)
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
+- Step: 13
+- Contesto: decisione dell'autore (17/11, chat, D63): i modelli rigenerati da T411 devono avere le cantine, quindi T52f va prima di T411 (il forte dell'autore non ne ha: l'autore forse le aggiungerà). Nasce da T52 e T412 (`dossier T52`, `dossier T412`, `docs/design/sotterranei-stato.md` § 5-6, riga «T52f»; ADR-0091 punto 4).
+- Cosa fare: il Cartografo chiede `structures[].cellar` e mette cose `under`; il `ModelDirector` chiede la voce con `cellar` (1, 2 per le importanti); una parte del seme `part-cellar` (scala che scende) e il prompt dello Scultore con la cantina alla densità di 16 vpx (§ 5: `cellar · 20` voxel, 1,25 caselle); `reachableStoreys` senza contare la cantina (ADR-0162); le cose `under` sui pavimenti sotto il suolo raggiunti dalla porta (ADR-0064); una struttura che non regge la cantina torna senza; anche `--rigenera modelli` (T411) deve poterla chiedere. Schema, `MockAiModels`, validatore, glossario, versione del kernel, ADR-0091 aggiornato.
+- Test: offline, un luogo con una struttura con cantina, cose giù, tutto raggiungibile; suite e typecheck coi turni.
+- Browser: sì — Genesi offline o `?skip&offline`: una struttura generata con la cantina, si scende e si vedono le cose `under`.
+- Quando è fatto: commit su `task/T417`. Sicurezza: nessuna superficie nuova (o le voci).
+
+### T418 · Gli strati del terreno, ridotti ai predefiniti del seme (T52d ridotto) — `da fare` (dipende da T416)
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 13
+- Contesto: decisione dell'autore (17/11, chat, D63): T52 si chiude prima dell'arredo e della rigenerazione. Nasce da T52 e T412 (`dossier T52`, `docs/design/sotterranei-stato.md` § 6, riga «T52d», versione ridotta raccomandata; ADR-0091 punto 5).
+- Cosa fare: terreni `stratum` predefiniti nel seme, la bozza degli strati per colonna (deterministica dalla casella e dal bioma), `strata` nel piano e in `PlaceView` (i piani di prima ricalcolano dalla bozza), le bande nei tagli di T416. Senza Cartografo né programma `subsoil` (restano un task dopo, da proporre nell'esito). Versione del kernel (Y se il formato del piano cambia), ADR-0091 aggiornato.
+- Test: stesso seme stessi strati, piani di prima; suite e typecheck coi turni.
+- Browser: sì — in una cantina le colonne tagliate a bande; screenshot.
+- Quando è fatto: commit su `task/T418`. Sicurezza: nessuna superficie nuova.
+
+### T419 · La cantina arredata: la cantina nella via dei dati dello Scenografo — `da fare` (dipende da T410, T416, T417)
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Step: 13
+- Contesto: decisione dell'autore (17/11, chat, D63): l'arredo delle cantine si rimanda solo fino a dopo T52, non dopo la rigenerazione: va prima di T411. Nasce da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «cantina nella via dei dati»; `docs/design/scenografo.md` § 10.4).
+- Cosa fare: la cantina come classe di stanza dello Scenografo (il pavimento coperto sotto `base`, raggiunto dalla scala) con la guardia degli interni (ADR-0212); i mobili da cantina (il seme ha `barile`; 2-3 modelli dello Scultore della classe dei mobili: scaffali, botti grandi), un edificio con la cantina nel banco dello Scenografo; offline in `MockAiModels`. Versione del kernel.
+- Test: offline, una cantina arredata, la scala e il cammino liberi; suite e typecheck coi turni.
+- Browser: sì — `?skip&offline`: una casa con la cantina arredata, si scende e si cammina fra i mobili; screenshot.
+- Quando è fatto: commit su `task/T419`; nell'esito il costo dei modelli nuovi. Sicurezza: nessuna superficie nuova.
+

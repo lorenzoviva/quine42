@@ -79,7 +79,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 10 | Il mondo è coerente: canone, lessico, società, trame, grafo | I | raggiunto | T07 T08 T09 T10 T11 T12 T13 T65 |
 | 11 | Il 3D si guarda bene: voxel luminosi e camera che gira | I | raggiunto | T14 T15 T55 |
 | 12 | Il terreno ha altezze, mare e acqua che scorre | I | raggiunto | T16 T17 T51 T51b T57c |
-| 13 | Le strutture hanno piani, scale, taglie, sotterranei; si salta | I | in corso | T52a T52b T53a T53b T54 T56a T56b T70 T92 T94 T412 T415 |
+| 13 | Le strutture hanno piani, scale, taglie, sotterranei; si salta | I | in corso | T52a T52b T53a T53b T54 T56a T56b T70 T92 T94 T412 T415 T416 T417 T418 T419 |
 | 14 | Le rune sono codice: sequenze, effetti, rune nuove dal Concilio | I | raggiunto | T57 T57b T99 T115 T143 |
 | 15 | La corona è uno studio abitato, dentro e fuori, visibile solo fuori dal tappeto | I | raggiunto | T18 T19 T20 T21 T22 T23 T24 T25 T26 T27 T28 T31 T32 T46 T47a T47b T48 T49 T50 T58a T58b T60 T63 T64 T113 T217 T218 T219 T220 T226 |
 | 16 | Il gioco si chiama QUINE42 e si fa vedere | I | raggiunto | T59 T30 T141 |
