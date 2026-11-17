@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 17/11/2026, epoca 478 (claude). Crediti: vedi `stato`.
+Aggiornato il 17/11/2026, epoca 479 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,8 +24,8 @@ Aggiornato il 17/11/2026, epoca 478 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-0. **Pronti:** T303 integrato (misura dello Scenografo, `docs/design/scenografo.md` § 9-10: interno insieme 1,00 $/edificio 3/4, programma di secondo stadio 0,071 $/tipo, mobili come dati 0,014 $/tipo; raccomanda dati come base e programma come secondo passo; 5 task proposti, da approvare); T404 integrato (`0e405ad0`, ADR-0208, kernel 0.8.2, contratto 0.8: forte dell'autore a 10 vpx su blocco 3 × 3 parametrico, visto nel browser; mancano il forte nel seme (decide T371), mura alte, blocchi oltre 3 × 3) → T405 approvato e pronto (edifici a 14-16 vpx, D61 B2), poi T406; T371 interrotto, Fable sospeso dall'autore il 17/11 ( nota: in `stato` le percentuali sono il **residuo**, non il consumato). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
-1. **Da approvare dall'autore:** T369 (dopo).
+0. **Pronti:** T303 integrato (misura dello Scenografo, `docs/design/scenografo.md` § 9-10: interno insieme 1,00 $/edificio 3/4, programma di secondo stadio 0,071 $/tipo, mobili come dati 0,014 $/tipo; raccomanda dati come base e programma come secondo passo; 5 task proposti, da approvare); T404 integrato (`0e405ad0`, ADR-0208, kernel 0.8.2, contratto 0.8: forte dell'autore a 10 vpx su blocco 3 × 3 parametrico, visto nel browser; mancano il forte nel seme (decide T371), mura alte, blocchi oltre 3 × 3) ; T405 integrato (`488251a1`, ADR-0209, kernel 0.9.0, contratto 0.9: strutture a regole a 16 vpx, voci senza `vpt` a 16, migrazione 0.8→0.9; visto nel browser, confronto 20/16 solo in numeri) → T406 parte ora; T407 proposto (timbri e ambienti del seme allargati a 16: le case del borgo 6 × 5 non bastano più), da approvare; T371 interrotto, Fable sospeso dall'autore il 17/11 ( nota: in `stato` le percentuali sono il **residuo**, non il consumato). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
+1. **Da approvare dall'autore:** T407, T369 (dopo).
 2. **Crediti (16/11 16:10 CET):** Claude settimana 60 %, 5h 100 % (reset 21:10 CET), reset settimanale 19/11 16:59; Fable settimana 84 %, sospeso; Gemini/Hydrogen/Argon/Orchestrator 99 % (reset 20/11 e 21/11); agy Claude 100 % (reset 23/11).
 
 ## Attese dall'autore
@@ -39,5 +39,5 @@ Aggiornato il 17/11/2026, epoca 478 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **479 (claude):** T405 integrato, T406 sbloccato, T407 proposto.
 - **478 (claude):** T404 integrato, T405 approvato.
-- **477 (claude):** Fable sospeso, T371 interrotto; T406 (Scenografo di nuovo dopo T405) aggiunto e approvato.

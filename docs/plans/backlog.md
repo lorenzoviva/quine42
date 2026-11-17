@@ -5699,6 +5699,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T405`. Dipende da T404 (il blocco parametrico).
 - Esito: le strutture che crescono a regole a 16 voxel per casella (`STRUCTURE_VPT`) con gli stessi voxel (100/150/500), un quarto più grandi in caselle (6,25/9,375/31,25), porte e piani di 1,25 viandanti (`PARTS` = i voxel di prima letti a 16); voce senza `vpt` a 16 (`vptOf`), lo Scultore non la scrive, cantina di 20 voxel per casella (`cellarVoxels`); lotto dalle caselle della voce a ogni taglia (Grande su lotto di 7, gargantuesca su 2 × 2 col lotto di 32); prompt di Scultore e Cartografo; migrazione 0.8 → 0.9 (`vpt: 20` alle voci di prima, `size` nella gargantuesca di T370, indice che non segue più il seme; aurora passa dalla stessa migrazione); laboratorio 3D a 16; ADR-0209, contratto 0.9, kernel 0.9.0; suite 3386 verdi, typecheck e sicurezza (675) verdi. Manca: timbri e ambienti del seme non allargati (sulle case del borgo di 6 × 5 una Grande con la taglia scende alla Media, una senza taglia sporge di 0,1-0,6 caselle), da fare in un task a parte; confronto visivo 20/16 nel browser non ottenuto.
 
+### T407 · Timbri e ambienti del seme allargati alle strutture a 16 voxel per casella — `da fare` (dipende da T405)
+- Pipeline: claude · sforzo high · stima 4% · browser · priorità 3
+- Step: 30
+- Contesto: proposta dell'orchestratore (epoca 479) da ciò che T405 lascia: con le strutture a 16 voxel per casella (ADR-0209, kernel 0.9.0) le case del borgo del seme (6 × 5) non bastano più: una Grande con la taglia scende alla Media, una senza taglia sporge di 0,1-0,6 caselle. `dossier T405`, `traccia T405`.
+- Cosa fare: (1) censire timbri (`stamps.ts`) e ambienti del seme i cui lotti non contengono più la taglia che chiedono a 16; (2) allargarli (o dire la taglia giusta) perché ogni lotto contenga la sua struttura senza scendere né sporgere, senza rompere la regola 10 (varchi, sentieri, porte sul sentiero); (3) un test che lo afferma per ogni timbro e ambiente del seme; se cambia il contratto, la migrazione e la versione come dice AGENTS.
+- Test: suite, typecheck coi turni.
+- Browser: sì (il borgo del seme con `?skip&offline`: le case intere sui loro lotti, nessuna che sporge o scende di taglia).
+- Quando è fatto: commit su `task/T407`.
+
 ### T406 · Di nuovo la misura dello Scenografo, sugli edifici dello Scultore di oggi riscalati ai voxel per casella nuovi — `da fare` (dipende da T405)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3
 - Step: 30
