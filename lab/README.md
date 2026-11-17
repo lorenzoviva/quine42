@@ -50,6 +50,9 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   Solo con `npm run dev`: gli XML di `lab/mjx/models/` entrano nella pagina quando si costruisce, quindi
   `vite preview` mostra quelli dell'ultima `npm run build` (anche il seme `universe/` del gioco), e un file
   cambiato si vede solo dopo una nuova build. Con `npm run dev` la pagina si ricarica appena il file cambia.
+- Il riferimento dell'ottima (T371, ADR-0210): il forte dell'autore misurato come metro e ogni forte degli Scultori contro di lui, `npx vite-node
+  lab/scripts/banco-ottima.ts` (`lab/banco/riferimento/ottima/README.md`); la sua foto nel laboratorio 3D a 10 voxel per casella con
+  `lab/scripts/foto-ottima.mjs` (Chrome headless sulla build di sviluppo), o a mano con `?modello=forte-handmade&vpt=10`.
 - Un programma che non riesce: `npx vite-node lab/scripts/mjx-slice.ts -- <id> [seme] [z …]` stampa le sezioni
   in lettere; `mjx-render.ts -- <id> --frames --act apri` lo fotografa da quattro lati, con i fotogrammi delle
   animazioni e il risultato delle azioni; `mjx-stats.ts` dà tempi, voxel e triangoli di tutti i modelli.

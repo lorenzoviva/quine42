@@ -206,7 +206,8 @@ uno della fattoria 0,3-0,7; `checkProgram` a una taglia (quattro semi e uno alla
   le riceveranno in un task loro.
 - **Le 30 caselle e oltre**: il lotto di 2 × 2 luoghi è fatto (T370, ADR-0206) a 25 caselle; 30 non entrano con l'anello e vorrebbero una mesh
   per pezzo; la fattoria di 50 × 50 a 20 voxel per casella non entra in un browser (160 milioni di celle).
-- **Il forte dell'autore come riferimento «ottima»** (T371): la sua voce con `time`, il prompt dello Scultore che lo cita.
+- **Il forte dell'autore come riferimento «ottima»** (T371): fatto in [`../riferimento/ottima/`](../riferimento/ottima/README.md), con la scala e i voti
+  dei forti di questo banco e dei giri degli Scultori; la sua voce nella libreria con `time` e la densità 10 è di T404.
 - **La varietà degli appezzamenti a 10 × 10**: in 20 celle restano 2-5 celle di campo attorno al cortile, quindi pochi tracciati e due o
   tre tipi di appezzamento per seme; la varianza dei campi di T339 vuole l'area di T356.
 - **Le torri del forte** hanno la porta dal camminamento ma il camminamento non ha una scala dal cortile: la cinta si raggiunge dalle
