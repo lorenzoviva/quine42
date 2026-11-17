@@ -265,4 +265,17 @@ risale al piano terra e il taglio si spegne.
 | ![cantina](sotterranei-stato/20-cantina-cassapanca.jpg) in cantina, a −1,19: la cassapanca, la scala | ![vicino](sotterranei-stato/21-cantina-cassapanca-vicino.png) la stessa, da vicino |
 | ![girata](sotterranei-stato/22-cantina-girata.jpg) la camera girata: le pedate davanti, la cassapanca | |
 
+Con la casa che usa la Grande (T420, kernel 0.9.7, dopo T413): la villetta offline è insieme un'abitazione e una casa con la cantina.
+Nel browser (`?skip&offline`, una porta nuova): pianificati i luoghi fino all'anello 4, «la casa con la cantina» di `-6,0` scolpita offline dalla
+console passa i controlli con l'abitazione e la cantina (la voce ha `cellar: 1`); ricaricato il luogo, la cassapanca sta sul pavimento della
+cantina a −0,44 caselle (suolo 0,75). Aperta la porta, il viandante va dalla porta alla cima della scala al piano terra (0,81, nella stanza
+dietro il muro interno), scende a passi di un quarto di voxel fino alla cantina e risale alla porta, con `free` e `floorAt`, senza un passo
+bloccato (il salto più grande è un'alzata, 0,19); a metà scala il taglio si accende, in cantina si vedono la cassapanca e le pedate, risalito
+si spegne.
+
+| | |
+|---|---|
+| ![piano terra](sotterranei-stato/23-casa-cantina-piano-terra.jpg) in cima alla scala: il piano terra in due stanze | ![metà](sotterranei-stato/24-casa-cantina-meta.jpg) a metà scala, −0,25 |
+| ![giù](sotterranei-stato/25-casa-cantina-giu.jpg) in cantina: la cassapanca, le pedate | |
+
 Restano: l'arredo della cantina nella via dei dati dello Scenografo (T419) e la rigenerazione dei modelli con le cantine (T411).
