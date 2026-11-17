@@ -285,6 +285,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «stanze minime», «misure abitabili»
 - **Fermo**: nessuno (le misure stanno nel codice, non su disco).
 
+### Guardia degli interni
+- **Inglese**: `InteriorGuard`, `interiorPlan`, `stageGrid`, `STAGE`, `furnishFromStage`, `interiorKey`, `Refusal`
+- **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0211).
+- **Dove vive**: `src/kernel/interior.ts`, `src/kernel/forms.ts`
+- **Da non usare**: «Guardia» da sola fuori dal banco (`lab/banco/scenografo/`, la guardia del banco di T259), «palcoscenico»
+- **Fermo**: nessuno (nulla su disco: un interno è una funzione dell'edificio e della sua chiave).
+
 ### Composizione
 - **Inglese**: `Composition`, `compositionOf`, `varietyError`, `MIN_PART`
 - **Definizione**: ciò che una struttura contiene a una taglia, contato in parti (i pezzi di una lettera di almeno `MIN_PART` voxel) e tipi di parti (le lettere): a una taglia più grande lo stesso programma deve contenere di più, «ciò che entra» (ADR-0179).

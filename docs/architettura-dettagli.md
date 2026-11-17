@@ -1356,6 +1356,18 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   lo descrive in dieci righe, in voxel (500 × 500, la scatola della gargantuesca, non le sue 50 caselle a 10), entro la misura che il prompt aveva prima (16 023 caratteri dopo il
   T405, `tests/sculptor-structures.test.ts`), coi doppioni
   di ciò che la richiesta già dice tolti.
+- **Gli interni, la parte del kernel** (ADR-0211, T409; il progetto in `docs/design/scenografo.md`): un edificio che cresce a regole cambia
+  a ogni seme, e il suo interno lo scrive lo Scenografo sull'edificio fatto (i suoi task sono il § 10.2-10.3). Il kernel dà il pavimento,
+  in `src/kernel/interior.ts`: il piano (`interiorPlan`) sullo strato dei piedi di ogni piano raggiunto (`walkIn`, `storeysOf`), il
+  pavimento libero solo sotto un tetto, il protetto (porta e strada dritta, piedi e teste delle scale, ciò che non è di una stanza, le stanze
+  sotto 0,6 caselle², i piani sotto `SMALL_STOREY` 2 caselle²), il posto degli animali (le aree che li nominano, `ANIMAL_AREAS`); il palco
+  (`stageGrid`: `W` l'edificio, `F` libero, `C` cantina, `P` protetto, `A` animali), l'unica cosa che un programma di secondo stadio
+  legge; la guardia (`InteriorGuard`) che tiene un pezzo solo se non scrive sull'edificio né sugli animali, sotto il suolo arriva al
+  soffitto, lascia la stanza dello Scultore (`partErrors`) e non toglie a nessun posto raggiunto prima la via dalla porta: il cammino del
+  kernel senza i salti, coi passi vicino al pezzo riprovati sul terreno rifatto (`groundOfForm`, `rampBlocks`); `furnishFromStage` porta
+  nell'edificio ciò che il programma ha scritto, pezzo per pezzo. Un edificio arredato sta nella cache delle forme con la chiave
+  dell'interno (`interiorKey`, `furnishedResult`: la via, il testo, il seme dell'arredo, poi la `formKey` dell'edificio). Nessun agente
+  lo chiama ancora.
 
 <a id="taglie"></a>
 ## Le taglie
