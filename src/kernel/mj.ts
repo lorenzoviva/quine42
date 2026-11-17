@@ -17,7 +17,7 @@
 // and mirrors of each rule.
 
 import { Rng } from './rng';
-import { stamp, STAMP_ROLES, STAMP_SHAPES, type StampCodes, type StampShape } from './stamps';
+import { stamp, STAMP_ROLES, STAMP_SHAPES, type StampCodes, type StampCut, type StampShape } from './stamps';
 import { internalName } from './internalNames';
 
 /** A stamp's shape, internal: the Cartographer still writes the Italian of the contract 0.1 until its prompts change (T307a, T310). */
@@ -42,6 +42,8 @@ export interface MjGrid {
   cells: string[];
   /** Cells the program may read but never write (borders shared with neighbours, gates). */
   fixed?: Set<number>;
+  /** How the stamps cut their lots (T407): for the structures at which density, and what they took. Without it, at STRUCTURE_VPT. */
+  cut?: StampCut;
 }
 
 interface Pattern {
@@ -309,7 +311,7 @@ class StampRunner extends Runner {
     this.count++;
     // Codes are resolved by the layout from the palette; a lone stamp falls back to the base codes.
     const codes = { wall: 'h', floor: 'f', door: 'd', water: 'w', bridge: 'p', ground: 'g', road: 'p', rock: 'r', fence: 'h', ...(this.node.codes ?? {}) } as StampCodes;
-    return stamp(g.cells, g.w, g.h, g.fixed, this.node.shape, codes, rng, this.node.on);
+    return stamp(g.cells, g.w, g.h, g.fixed, this.node.shape, codes, rng, this.node.on, g.cut);
   }
 }
 

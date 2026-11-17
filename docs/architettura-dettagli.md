@@ -668,6 +668,24 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
+- **I timbri e gli ambienti per le strutture a 16** (ADR-0211, T407, kernel 0.9.1): ogni edificio che un timbro o un ambiente del seme
+  disegna tiene la struttura per cui è tagliato, nei due versi, senza scendere né sporgere (`STAMP_SIZES` in `stamps.ts`: il tempio
+  di 10 × 10 un'Enorme; casa (7-8), mastio del castello, caserma della fortezza (14 di lato), torre, piramide (7 × 9), sotterraneo (le
+  stanze verso gli angoli), le due sale della caserma (14 × 7) una Grande; capanne e stalla del recinto una casetta; il borgo 7 × 7,
+  la locanda 10 × 10 per un'Enorme, un lotto solo). A 16 i timbri **non si coprono** (`StampCut.claimed`: tutta la scatola di ognuno)
+  né coprono o toccano gli edifici delle regole (`built`: i codici di muri, porte e pavimenti interni), un loro muro o recinto **non
+  tocca il bordo** né le caselle ferme (un varco del luogo resta raggiunto attorno), e ogni ingresso sul loro bordo (porta, ponte, strada)
+  dà su una casella raggiungibile, che poi resta loro; le case delle regole del borgo, della locanda e dei campi hanno **un anello di
+  terreno libero** attorno (l'ingresso della regola più largo di una casella, `*` nell'uscita), così né un varco né la porta di un'altra
+  casa restano chiusi (regola 10; il prompt del Cartografo lo insegna); il borgo le mette con `all` (al più quattro, mai addossate).
+  Un mobile solido che non entra in nessuna casa del luogo sta accanto alla sua, fuori dai lotti, dove il controllo del posare lo ammette
+  (`placeInside` con `spotFailure`), mai sulla casella del piano dentro i muri; un lotto rifatto al caricamento lascia com'erano le
+  caselle che il piano ha cambiato (`edits`). **I piani di prima**: il kernel scrive
+  `vpt: 16` su ogni piano che fa (`ChunkPlan.vpt`, Cartografo, blocco, riempitivo); un piano che non lo dice è di prima e i suoi timbri
+  sono quelli di allora (`layout(…, { vpt: TILE })`, `patternAt20`), perché le sue modifiche, le cose e le forme dei lotti sono per
+  casella. **Gli ambienti che un universo ha** restano suoi (`keepEnvironments` in `upgradeFromSeed`): un programma del seme cambiato
+  non arriva dove l'universo ha già quell'ambiente, arrivano solo gli ambienti nuovi. `tests/stamp-lots.test.ts` lo afferma per ogni
+  timbro e ambiente del seme.
 - **Le regioni del master** (ADR-0201, T375, kernel 0.7.11; ADR-0188 § 5, D54.6): una regione dell'atlante con `master: true` l'ha dichiarata
   il master, e vince su quella del Cartografo dove copre un luogo (`regionAt`; fra le sue la più vicina, così un'isola è una regione piccola dentro
   la grande); non toglie il suo ambiente al resto del mondo (`environmentsFor`). `kind` dice che cosa fa ai luoghi nuovi: assente, li pianifica il
@@ -1333,8 +1351,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (`entryBox`: la scala di D&D alla sua densità); la cantina resta di 20 voxel per casella dichiarata (`cellarVoxels`: 1,25 caselle a 16). **Il lotto** prende a ogni taglia le caselle della voce che la struttura indosserà
   (`lotTiles` → `Forms.entryTiles`): una voce di prima sta dove stava, una nuova vuole un lotto di 7 alla Grande e di 10 all'Enorme, e su uno
   più piccolo scende (`claimSizes`); il prompt del Cartografo chiede edifici di 7 × 7 per una Grande. I timbri del kernel e i programmi
-  degli ambienti del seme non cambiano (i piani di prima tengono le modifiche per casella): una struttura senza taglia vi sporge di 0,1-0,6
-  caselle per lato, come la Grande di 5 sui lotti di 5 × 4 prima. **Gli universi di prima** (la migrazione 0.8 → 0.9, `migrate0_9`): ogni
+  degli ambienti del seme sono tagliati per le strutture a 16 dal T407 (ADR-0211, § «Geografia»): ogni lotto tiene la sua struttura;
+  i piani di prima tengono i timbri di prima. **Gli universi di prima** (la migrazione 0.8 → 0.9, `migrate0_9`): ogni
   voce della classe `structure` da Grande in su senza `vpt` prende `vpt: 20` e tiene scatola e caselle; una gargantuesca senza `vpt` (T370,
   500 voxel a 20) dice anche la scatola nel suo programma (`size`, con la cantina); `models/index.json` smette di seguire il seme
   (riceve solo le voci nuove, `mergeEntries`); ciò che lo Scultore scolpisce dopo è a 16. **Il laboratorio 3D** mostra il banco delle

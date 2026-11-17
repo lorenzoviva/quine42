@@ -124,10 +124,14 @@ describe('lots and structures', () => {
     for (const sid of structures) {
       if (!kk.interiorPoints(sid).length) continue;
       let p = fallback;
+      kk.rebuildSolids();
+      const freeLeft = (kk.interiorPoints(sid) as Array<{ x: number; y: number }>).some((q) => k.free(q.x, q.y, INDOOR_R));
       await kk.placeInside(ch, sid, fallback, (x: number, y: number) => (p = { x, y }));
       expect(p).not.toEqual(fallback);
       expect(k.structureAt(p.x, p.y)).toBe(sid);
-      expect(k.free(p.x, p.y, INDOOR_R), `${p.x},${p.y}`).toBe(true);
+      // A free point while the floor has one; a full house (a house of the seed has a small floor) still its floor.
+      if (freeLeft) expect(k.free(p.x, p.y, INDOOR_R), `${p.x},${p.y}`).toBe(true);
+      else expect(k.floorAt(p.x, p.y)).toBeGreaterThan(k.groundAt(p.x, p.y));
     }
     // Outside the structure one stands on the ground.
     const sid = structures[0];
@@ -174,9 +178,10 @@ describe('lots and structures', () => {
     const S = k.config.chunkSize;
     const b = ch.lots[0];
     const lotTiles = new Set(ch.lots.flatMap((l) => [...l.floor, ...l.walls, ...l.doors]));
-    // The lot is ground again: the terrain of the tiles around it.
-    const code = ch.tiles[b.floor[0]];
+    // The lot is ground again: the terrain of the tiles around it (its draft, or the path where the draft was not ground).
     const mid = { x: ch.cx * S + (b.x0 + b.x1 + 1) / 2, y: ch.cy * S + (b.y0 + b.y1 + 1) / 2 };
+    const code = ch.tiles[(Math.floor(mid.y) - ch.cy * S) * S + (Math.floor(mid.x) - ch.cx * S)];
+    expect(b.floor).toContain((Math.floor(mid.y) - ch.cy * S) * S + (Math.floor(mid.x) - ch.cx * S));
     expect(k.tileAt(Math.floor(mid.x), Math.floor(mid.y))).toBe(code);
     const t = k.findTile(code, mid.x, mid.y, 12)!;
     expect(t).toBeDefined();

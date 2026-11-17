@@ -12,6 +12,7 @@
 import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
 import { defaultCodes } from './stamps';
+import { STRUCTURE_VPT } from '../mj/classes';
 import type { TerrainDef } from './types';
 
 export interface Lot {
@@ -53,6 +54,11 @@ export interface LayoutOptions {
   gates?: number[];
   /** Cells that must be walked and reached from the gates (the edge of the lot of a block, T370): path where they block, frozen for the program. */
   apron?: ReadonlySet<number>;
+  /**
+   * The voxels a tile of the structures the stamps cut their buildings for (T407, `StampCut`): STRUCTURE_VPT if not said, TILE for the
+   * plans of before (`ChunkPlan.vpt` absent), whose places keep the stamps they were drawn with.
+   */
+  vpt?: number;
 }
 
 const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -204,7 +210,10 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   // The layout program shapes the interior; the border ring stays exactly as the draft.
   let steps = 0;
   if (opts.program) {
-    const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border };
+    // The stamps keep off each other and off the buildings the rules drew (T407): one lot, one structure.
+    const built = Object.entries(palette).filter(([, t]) => t.layer === 'wall' || t.layer === 'door' || t.indoor).map(([c]) => c).join('');
+    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>() };
+    const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border, cut };
     steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];
   }

@@ -278,6 +278,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «scala delle strutture» (la scala è quella di D&D, le taglie), «zoom»
 - **Fermo**: il campo `vpt` in `models/index.json` (la migrazione 0.8 → 0.9 lo scrive, 20, nelle voci di prima).
 
+### Timbro
+- **Inglese**: `stamp`, `StampShape`, `STAMP_SIZES`, `StampCut`
+- **Definizione**: una struttura che il kernel disegna nel programma di un ambiente (castello, fortezza, torre, tempio, capanne…), con i codici del mondo per ogni ruolo; dal T407 (ADR-0211) ogni suo edificio tiene la struttura della taglia che `STAMP_SIZES` dice, nei due versi, i timbri di un luogo non si coprono e i loro ingressi danno su caselle raggiungibili; un piano di prima (senza `vpt`) ha i timbri di prima.
+- **Dove vive**: `src/kernel/stamps.ts`, `src/kernel/mj.ts`, `src/kernel/layout.ts`
+- **Da non usare**: «stampo», «prefabbricato»
+- **Fermo**: i nomi delle forme (`castle`, `fortress`…) nei programmi degli ambienti; il campo `vpt` dei piani dei luoghi (`maps/`, scritto dal kernel, 16).
+
 ### Parti abitabili
 - **Inglese**: `PARTS`, `partVoxels`, `habitableParts`, `partErrors`, `HabitableMeasure`
 - **Definizione**: le parti di una struttura in cui si vive (porta, piano, stanza, tettoia), con le loro misure minime in caselle, le stesse a ogni taglia: una struttura piccola ne ha meno, non più piccole (ADR-0179); dal T405 i voxel di prima letti a 16 voxel per casella, una porta e un piano di 1,25 viandanti (ADR-0209).

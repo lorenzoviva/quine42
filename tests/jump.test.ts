@@ -75,7 +75,8 @@ describe('the jump', () => {
     let highest = 0;
     for (let i = 0; i < 60; i++) {
       k.tick(1 / 60);
-      highest = Math.max(highest, (k.jumping()?.y ?? 0) - k.groundAt(x0, y0));
+      // Over the crate: above the ground it stands on (the row may step down a level between the start and the crate).
+      highest = Math.max(highest, (k.jumping()?.y ?? 0) - k.groundAt(x0 + 2, y0));
     }
     expect(k.jumping()).toBeUndefined();
     const at = k.wandererCarpet();

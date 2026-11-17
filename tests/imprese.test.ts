@@ -122,6 +122,37 @@ const placeOf = (k: Kernel) => {
   return { key: `${Math.floor(pc.x / S)},${Math.floor(pc.y / S)}`, cx: Math.floor(pc.x / S), cy: Math.floor(pc.y / S), S };
 };
 
+/**
+ * A planned place near the wanderer with free ground for a common house (4 × 4 tiles of ground, off the paths and a tile off the lots, two from the
+ * border): the place of the wanderer if it has it. Since T407 the village of the start may be full (two houses of 7 × 7 with their ring).
+ */
+const roomyPlace = (k: Kernel) => {
+  const here = placeOf(k);
+  const S = here.S;
+  const path = (k as unknown as { pathCode(): string }).pathCode();
+  const roomy = (key: string) => {
+    const ch = k.chunks.get(key);
+    if (ch?.stage !== 'planned') return false;
+    const inLot = (c: number, r: number) => ch.lots.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
+    const ground = (c: number, r: number) => {
+      const t = k.palette[ch.tiles[r * S + c]];
+      return !!t && !t.solid && !t.indoor && (t.layer ?? 'ground') === 'ground' && ch.tiles[r * S + c] !== path && !inLot(c, r);
+    };
+    for (let y0 = 2; y0 + 4 <= S - 2; y0++)
+      for (let x0 = 2; x0 + 4 <= S - 2; x0++) {
+        let ok = true;
+        for (let r = y0; r < y0 + 4 && ok; r++) for (let c = x0; c < x0 + 4 && ok; c++) ok = ground(c, r);
+        if (ok) return true;
+      }
+    return false;
+  };
+  for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const cx = here.cx + dx, cy = here.cy + dy, key = `${cx},${cy}`;
+    if (roomy(key)) return { key, cx, cy, S };
+  }
+  throw new Error('nessun luogo con terreno libero');
+};
+
 /** The people of the world: who they are in `people.json` (what the team is made from). */
 function setPeople(k: Kernel, list: Array<{ nome: string; mestiere: string; origine: string; famiglia?: Array<{ nome: string; legame: string }> }>): void {
   const src = JSON.stringify({ persone: list.map((p) => ({ tipo: 'npc.villager', routine: [], famiglia: [], ...p })), attesi: [] }, null, 2) + '\n';
@@ -310,7 +341,7 @@ describe('the ventures in a world', () => {
 
   it('three families more than the houses of a place, and free ground that keeps the place joined: a common house; built, it stands', async () => {
     const k = await world();
-    const { key, S } = placeOf(k);
+    const { key, S } = roomyPlace(k);
     const lots = k.chunks.get(key)!.lots.length;
     setPeople(k, Array.from({ length: lots + 3 }, (_, i) => ({ nome: `Abitante ${i}`, mestiere: i === 0 ? 'fabbro' : 'contadino', origine: `${key}#t${i}` })));
     k.time = at(2, 'morning');

@@ -77,6 +77,12 @@ export interface ChunkPlan {
    * at once without a call. The lot's cells are reserved in the layout of each.
    */
   block?: { x: number; y: number; side?: number; lot?: number };
+  /**
+   * The voxels a tile of the structures its stamps cut their buildings for (T407, ADR-0211): 16 (`STRUCTURE_VPT`), written by the kernel
+   * on every plan it makes, so a Large structure stands inside its lot; absent, a plan of before, whose stamps were cut at 20 and stay so
+   * (its edits, its things and the forms of its lots are per tile).
+   */
+  vpt?: number;
 }
 
 export interface PlanContext {

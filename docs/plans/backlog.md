@@ -5701,7 +5701,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T405`. Dipende da T404 (il blocco parametrico).
 - Esito: le strutture che crescono a regole a 16 voxel per casella (`STRUCTURE_VPT`) con gli stessi voxel (100/150/500), un quarto più grandi in caselle (6,25/9,375/31,25), porte e piani di 1,25 viandanti (`PARTS` = i voxel di prima letti a 16); voce senza `vpt` a 16 (`vptOf`), lo Scultore non la scrive, cantina di 20 voxel per casella (`cellarVoxels`); lotto dalle caselle della voce a ogni taglia (Grande su lotto di 7, gargantuesca su 2 × 2 col lotto di 32); prompt di Scultore e Cartografo; migrazione 0.8 → 0.9 (`vpt: 20` alle voci di prima, `size` nella gargantuesca di T370, indice che non segue più il seme; aurora passa dalla stessa migrazione); laboratorio 3D a 16; ADR-0209, contratto 0.9, kernel 0.9.0; suite 3386 verdi, typecheck e sicurezza (675) verdi. Manca: timbri e ambienti del seme non allargati (sulle case del borgo di 6 × 5 una Grande con la taglia scende alla Media, una senza taglia sporge di 0,1-0,6 caselle), da fare in un task a parte; confronto visivo 20/16 nel browser non ottenuto.
 
-### T407 · Timbri e ambienti del seme allargati alle strutture a 16 voxel per casella — `da fare` (dipende da T405)
+### T407 · Timbri e ambienti del seme allargati alle strutture a 16 voxel per casella — `fatto` (`af73ced2`) (dipende da T405)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 3
 - Step: 30
 - Contesto: proposta dell'orchestratore (epoca 479) da ciò che T405 lascia: con le strutture a 16 voxel per casella (ADR-0209, kernel 0.9.0) le case del borgo del seme (6 × 5) non bastano più: una Grande con la taglia scende alla Media, una senza taglia sporge di 0,1-0,6 caselle. `dossier T405`, `traccia T405`.
@@ -5709,6 +5709,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite, typecheck coi turni.
 - Browser: sì (il borgo del seme con `?skip&offline`: le case intere sui loro lotti, nessuna che sporge o scende di taglia).
 - Quando è fatto: commit su `task/T407`.
+- Esito: ogni lotto di timbri e ambienti del seme tiene la sua struttura a 16 nei due versi (STAMP_SIZES); timbri che non si coprono e ingressi raggiungibili, borgo e locanda con l'anello (0 lotti che sporgono, 0 porte e varchi chiusi sui bozzetti); `vpt: 16` sui piani nuovi, timbri di prima per i piani di prima; `keepEnvironments`; mobile solido senza posto accanto alla casa; modifiche del piano che vincono sul lotto al caricamento; prompt del Cartografo; ADR-0211, kernel 0.9.1; tests/stamp-lots.test.ts e cinque test adattati; suite 3415 e typecheck verdi. Non provato: castello visto solo nei dati (oltre il cerchio); borgo più rado (16 case su 100 luoghi contro 18); le strutture senza taglia sporgono ancora sui lotti piccoli dei programmi scritti dal Cartografo.
 
 ### T406 · Di nuovo la misura dello Scenografo, sugli edifici dello Scultore di oggi riscalati ai voxel per casella nuovi — `fatto` (`8ed8d797`) (dipende da T405)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3

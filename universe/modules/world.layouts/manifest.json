@@ -28,14 +28,13 @@
             ]
           },
           {
-            "type": "one",
+            "type": "all",
             "rules": [
               {
-                "in": "[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm]",
-                "out": "hhhhhh/hffffh/hffffh/hffffh/hhdhhh"
+                "in": "[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]",
+                "out": "*********/*hhhhhhh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hhhdhhh*/*********"
               }
-            ],
-            "steps": 2
+            ]
           },
           {
             "type": "one",
@@ -119,8 +118,8 @@
             "type": "one",
             "rules": [
               {
-                "in": "gggg/gggg/gggg/gggg",
-                "out": "hhhh/hffh/hffh/hhdh"
+                "in": "[gmp][gmp][gmp][gmp][gmp][gmp]/[gmp]gggg[gmp]/[gmp]gggg[gmp]/[gmp]gggg[gmp]/[gmp]gggg[gmp]/[gmp][gmp][gmp][gmp][gmp][gmp]",
+                "out": "******/*hhhh*/*hffh*/*hffh*/*hhdh*/******"
               }
             ],
             "steps": 1
@@ -189,8 +188,8 @@
             "type": "one",
             "rules": [
               {
-                "in": "[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]/[gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr]",
-                "out": "hhhhhhhhh/hfffhfffh/hfffdfffh/hfffhhdhh/hfffffffh/hfffffffh/hhhhdhhhh"
+                "in": "[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpmr][gpm]/[gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm][gpm]",
+                "out": "************/*hhhhhhhhhh*/*hfffhffffh*/*hfffhffffh*/*hfhhhhhfhh*/*hffffffffh*/*hffffffffh*/*hffffffffh*/*hffffffffh*/*hffffffffh*/*hhhhdhhhhh*/************"
               }
             ],
             "steps": 1,

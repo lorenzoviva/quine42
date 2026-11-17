@@ -50,6 +50,23 @@ describe('rilievo effect validation and description', () => {
 });
 
 describe('the kernel’s rilievo effect (T57c)', () => {
+  /**
+   * A tile of the place at the origin with open ground around it, off every lot (a lot lies at a level of its own) and off the border:
+   * since T407 the village of the start has two houses of 7 × 7.
+   */
+  function openTile(k: Kernel): { col: number; row: number } {
+    const ch = k.chunks.get('0,0')!;
+    const S = k.config.chunkSize;
+    const off = (c: number, r: number) => !ch.lots.some((b) => c >= b.x0 - 1 && c <= b.x1 + 1 && r >= b.y0 - 1 && r <= b.y1 + 1);
+    for (let row = 2; row < S - 2; row++)
+      for (let col = 2; col < S - 5; col++) {
+        let ok = true;
+        for (let r = row - 1; r <= row + 1 && ok; r++) for (let c = col - 1; c <= col + 4 && ok; c++) ok = off(c, r) && k.palette[ch.tiles[r * S + c]]?.solid === false;
+        if (ok) return { col, row };
+      }
+    throw new Error('nessuna casella aperta');
+  }
+
   async function bootKernel() {
     const files = {
       ...bundledFiles,
@@ -68,7 +85,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
     const ch = k.chunks.get('0,0')!;
     expect(ch.stage).toBe('planned');
 
-    const col = 5, row = 5;
+    const { col, row } = openTile(k);
     const initial = k.groundAt(col, row) / LEVEL;
 
     // Apply raising effect
@@ -138,7 +155,7 @@ describe('the kernel’s rilievo effect (T57c)', () => {
 
     // Position player facing east on a known flat area
     const { ox, oy } = k.offset();
-    const px = 5, py = 5;
+    const { col: px, row: py } = openTile(k);
     Object.assign(k.wandererPos(), { x: px - ox, y: py - oy });
     k.wandererComp().facing = 'right';
     const [dx, dy] = (k as any).facingDelta();

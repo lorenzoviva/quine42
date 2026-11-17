@@ -42,7 +42,7 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground } from './forms';
-import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
+import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { stageGrid } from '../mj/mesh';
 import { commonHouseModel, GENERIC, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
@@ -1957,6 +1957,8 @@ export class Kernel {
     let plan: ChunkPlan;
     try {
       plan = await this.makePlan(ch);
+      // A new plan's stamps cut their buildings for the structures at 16 (T407); a plan of before does not say it, and keeps its stamps.
+      plan.vpt = STRUCTURE_VPT;
       this.cardChunk(ch, plan, ch.chi);
     } finally {
       end();
@@ -2003,7 +2005,7 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b) };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT };
   }
 
   /**
@@ -2119,7 +2121,7 @@ export class Kernel {
    */
   private fillerPlan(region: Region): ChunkPlan {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [] };
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT };
   }
 
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
@@ -2343,7 +2345,8 @@ export class Kernel {
     // A place of a block (T370): the lot's cells reserved, the gates inside the block in the ring, the edge of the lot walked (`blockLayout`).
     const block = this.blockFor(ch, plan);
     // Quiet is the model of places: it shows the phases too.
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, ...(block ? this.blockLayout(block, ch) : {}) };
+    // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, ...(block ? this.blockLayout(block, ch) : {}) };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program: this.content.layouts[plan.layout]?.program });
     } catch (e) {
@@ -2524,7 +2527,7 @@ export class Kernel {
       if (m.manifest.persona && !declared && !this.kept(origin, coef.people)) continue;
       const p = at(cell);
       const sid = inLot(cell);
-      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m));
+      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y));
       else this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
     }
 
@@ -2686,6 +2689,7 @@ export class Kernel {
     const wanted = (plan.structures ?? []).map(readStructure);
     const lots: ChunkLot[] = [];
     const order = this.structureLots(ch, plan).map((b, i) => ({ b, i, area: (b.x1 - b.x0 + 1) * (b.y1 - b.y0 + 1) })).sort((a, b) => b.area - a.area || a.i - b.i);
+    const edited = (c: number) => !!plan.edits && Object.hasOwn(plan.edits, String(c));
     for (const { b, i } of order) {
       const w = b.x1 - b.x0 + 1, h = b.y1 - b.y0 + 1;
       const classe = Math.max(w, h) >= 5 ? 'structure' : 'building';
@@ -2694,6 +2698,9 @@ export class Kernel {
       const house = req ? undefined : this.terrain?.manifest.commonHouse;
       const own = req ? this.structureModelFor(req.concept, req.size) : house ? commonHouseModel(house, classe) : undefined;
       for (const c of [...b.walls, ...b.floor, ...b.doors]) {
+        // A tile changed after the layout (an edit of the plan: a building site, a spell) stays as it was changed (T407): before, a lot
+        // laid again on a load made it ground.
+        if (edited(c)) continue;
         const d = this.palette[ch.draft[c]];
         tiles[c] = d && !d.solid && (d.layer ?? 'ground') === 'ground' ? ch.draft[c] : pathCode;
       }
@@ -2705,7 +2712,7 @@ export class Kernel {
         const dc = door % S, dr = Math.floor(door / S);
         const [dx, dy] = dr === b.y1 ? [0, -1] : dr === b.y0 ? [0, 1] : dc === b.x0 ? [1, 0] : [-1, 0];
         yaw = dr === b.y1 ? 0 : dr === b.y0 ? Math.PI : dc === b.x0 ? -Math.PI / 2 : Math.PI / 2;
-        for (let s = 0, c = dc, r = dr; s < 2 && c > b.x0 - 1 && c < b.x1 + 1 && r > b.y0 - 1 && r < b.y1 + 1; s++, c += dx, r += dy) tiles[r * S + c] = pathCode;
+        for (let s = 0, c = dc, r = dr; s < 2 && c > b.x0 - 1 && c < b.x1 + 1 && r > b.y0 - 1 && r < b.y1 + 1; s++, c += dx, r += dy) if (!edited(r * S + c)) tiles[r * S + c] = pathCode;
       }
       const origin = `${ch.key}#s${i}`;
       const model = this.forms.resolve(own, classe);
@@ -2871,8 +2878,11 @@ export class Kernel {
     return out;
   }
 
-  /** Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). */
-  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void, solid = false): Promise<void> {
+  /**
+   * Puts something inside a structure, on its floor, when its form is ready (or where the plan said, if it never is). A solid thing with
+   * no room in any structure of the place stands beside its own, outside the lots, where `beside` lets it (T407: the rule of putting down).
+   */
+  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => void, solid = false, beside?: (x: number, y: number) => boolean): Promise<void> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     // As long as its program runs (T281): in the browser a structure comes from a worker in tens of seconds, and what goes in
     // would otherwise go where the plan said, inside its walls.
@@ -2886,10 +2896,40 @@ export class Kernel {
     const S = this.config.chunkSize;
     const doorPositions = solid ? ch.lots.flatMap((b) => b.doors).map((d) => ({ x: ch.cx * S + (d % S) + 0.5, y: ch.cy * S + Math.floor(d / S) + 0.5 })) : [];
     const inside = this.interiorPoints(sid);
+    const roomyOf = (points: Array<{ x: number; y: number }>, near = taken) =>
+      points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
     const open = inside.filter((q) => this.free(q.x, q.y, INDOOR_R));
-    const roomy = open.filter((q) => taken.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
+    let roomy = roomyOf(inside);
+    // A solid thing with no room in its structure goes into another of the place that has some (T407), never where the plan said:
+    // that tile may be inside the walls, or under the roof.
+    if (!roomy.length && solid) {
+      const others = this.ecs.query('structure', 'chunk').filter((id) => id !== sid && this.ecs.get(id, 'chunk').key === ch.key).sort((a, b) => a - b);
+      for (const id of others) {
+        const other: FormComp | undefined = this.ecs.get(id, 'form');
+        if (other) await this.forms.settled(other.model, other.seed, other.tint);
+        if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
+        if (!this.ecs.alive.has(id)) continue;
+        this.rebuildSolids();
+        const now = this.ecs.query('pos').filter((e) => e !== id).map((e) => this.ecs.get(e, 'pos'));
+        if ((roomy = roomyOf(this.interiorPoints(id), now)).length) break;
+      }
+    }
     const pool = roomy.length ? roomy : solid ? [] : open.length ? open : inside;
-    const p = pool.length ? pool[hash32(sid, pool.length, this.ecs.query('pos').length) % pool.length] : fallback;
+    let p = pool.length ? pool[hash32(sid, pool.length, this.ecs.query('pos').length) % pool.length] : undefined;
+    if (!p && solid && beside) {
+      // The nearest tiles of the place outside every lot, by distance from the structure, then by index: the first where it may stand.
+      const at = this.ecs.get(sid, 'pos');
+      const lots = new Set(ch.lots.flatMap((b) => [...b.floor, ...b.walls, ...b.doors]));
+      const tiles = Array.from({ length: S * S }, (_, i) => i)
+        .filter((i) => !lots.has(i))
+        .map((i) => ({ x: ch.cx * S + (i % S) + 0.5, y: ch.cy * S + Math.floor(i / S) + 0.5 }))
+        .map((q, i) => ({ q, i, d: Math.hypot(q.x - at.x, q.y - at.y) }))
+        .sort((a, b) => a.d - b.d || a.i - b.i)
+        .slice(0, 40);
+      const now = this.ecs.query('pos').filter((e) => e !== sid).map((e) => this.ecs.get(e, 'pos'));
+      p = tiles.find(({ q }) => now.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && beside(q.x, q.y))?.q;
+    }
+    p ??= fallback;
     spawn(p.x, p.y);
   }
 
