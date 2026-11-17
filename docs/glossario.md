@@ -313,6 +313,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `sottoOf`
 - **Fermo**: `sotto` nelle voci dei modelli e nel piano.
 
+### Taglio sotto terra
+- **Inglese**: `underground`, `Underground`, `cutDisc`, `inCutDisc`, `towardsCamera`, `buildCut`, `CUT_EARTH`, `dimAt`
+- **Definizione**: ciò che si vede quando si sta in una cantina (il pavimento più di un gradino sotto il suolo): in un disco di caselle attorno al viandante (raggio 6, 3 caselle più lungo verso la camera) non si disegna ciò che sta più di 1,15 caselle sopra il suo pavimento, terreno, strutture e cose; le colonne tagliate hanno un tappo di terra all'altezza del taglio, e il sole e il cielo si attenuano con la profondità (ADR-0091 punto 6, T416).
+- **Dove vive**: `src/kernel/underground.ts`, `src/kernel/kernel.ts`, `src/render/terrain.ts`, `src/render/materials.ts`, `src/render/renderer.ts`
+- **Da non usare**: «clipping», «scavo» (il kernel non scava)
+- **Fermo**: nessuno (nulla su disco né sul filo: ogni client lo calcola da sé).
+
 ### Dispositivo
 - **Inglese**: `device`, `DEVICE_MARGIN`, `DEVICE_SLOTS`
 - **Definizione**: ciò che sta al centro di un piano terra dello studio: vetrina, grafo, tavolo, banco.

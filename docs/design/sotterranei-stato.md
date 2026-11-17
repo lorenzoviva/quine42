@@ -174,3 +174,25 @@ si vede tutta la cantina, coi suoi muri, il pavimento e la scala, anche con la c
 
 Resta T52e: il taglio attorno a chi sta sotto, gli strati e la luce attenuata. Con la cantina larga 1,75 caselle la camera in 3/4 la vede già
 quasi tutta; una cantina più larga ne avrà bisogno.
+
+## 7. Dopo T416: vedere sotto terra, senza strati
+
+Fatto il secondo passo del § 5 (kernel 0.9.4, ADR-0091 «Attuazione»). Chi sta più di un gradino sotto il suolo (`kernel.underground()`) ha
+attorno un disco di caselle (raggio 6, 3 caselle più lungo verso la camera) in cui non si disegna ciò che sta più di 1,15 caselle sopra il
+suo pavimento: terreno, strutture, alberi, cose. Le colonne tagliate hanno in cima un tappo di terra, quelle attorno al disco il fianco fino
+al taglio; il sole e il cielo scendono con la profondità, fino a un terzo a 2 caselle. Le bande degli strati sui tagli verranno con T418.
+
+Nel browser (`?skip&offline`, la locanda posata come nel § 2 a (−19,5, −10,5), il cammino del corpo dalla cantina al piano terra trovato con
+`free` e `floorAt` a passi di 0,05): sul piano terra non si è sotto terra e non si taglia niente. Scendendo, il taglio si accende al primo
+gradino sotto il suolo (−0,25 caselle, taglio a +0,9) e scende con il viandante fino a −1,19 (taglio a −0,04). In cantina il disco è un
+cerchio di terra attorno a lei: la casa sopra, gli alberi e la neve non ci sono, e dalla camera in 3/4 si vede tutta la cantina, coi muri,
+il pavimento e la scala. Girata la camera, il disco si allunga dall'altra parte. Risaliti, il terreno torna intero.
+
+| | |
+|---|---|
+| ![piano terra](sotterranei-stato/10-taglio-piano-terra.jpg) sul piano terra: nessun taglio | ![in cantina](sotterranei-stato/11-taglio-in-cantina.jpg) in cantina, a −1,19: il disco di terra, tutta la cantina |
+| ![girata](sotterranei-stato/12-taglio-girata.jpg) la stessa, la camera girata di un quarto | ![risalito](sotterranei-stato/13-taglio-risalito.jpg) risalito al piano terra: il terreno intero |
+
+Le ombre restano: la casa tagliata ombreggia ancora la cantina e il disco (la sua ombra si vede sulla terra). Con le cantine del seme il taglio
+cade appena sotto il suolo, quindi il disco cambia colore più che altezza; con una cantina di 2 caselle (T52f) il taglio scende di quasi una
+casella e le colonne tagliate si vedranno sui fianchi.

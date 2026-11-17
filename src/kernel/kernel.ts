@@ -78,6 +78,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
+import { undergroundAt, type Underground } from './underground';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 
@@ -3140,6 +3141,17 @@ export class Kernel {
       if (hole || f > s.form.base) h = Math.max(h, this.groundAt(s.x, s.y) + (f - s.form.base) / s.form.vpt);
     }
     return cellar ? h : Math.max(h, this.groundAt(x, y));
+  }
+
+  /**
+   * Whether one stands under the ground (T416, ADR-0091 point 6): the floor more than a step under the ground, in a cellar. Then the
+   * renderer cuts what stands over `cut` in a disc of tiles around `tile` (`cutDisc`) and dims the sun and the sky with `depth`.
+   * At a point of the simulation with the height of the feet; without one, the wanderer, only in the simulation.
+   */
+  underground(at?: { x: number; y: number; z?: number }): Underground | undefined {
+    if (!at && this.zone !== 'sim') return undefined;
+    const p = at ?? { ...this.wandererCarpet(), z: this.wandererPos().z };
+    return undergroundAt(p.x, p.y, this.floorAt(p.x, p.y, p.z), this.groundAt(p.x, p.y));
   }
 
   /** How far under the ground (tiles) an entity's model goes (T52b): the renderer lays it this much lower. */

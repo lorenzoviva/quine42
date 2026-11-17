@@ -5798,7 +5798,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T415`; nell'esito caselle aperte prima/dopo. Sicurezza: nessuna superficie nuova.
 - Esito: il terreno si apre su tutta l'impronta della cantina a sotto-celle di 1/16 di casella (`holeCover`, `HOLE_CELLS`; `holesIn` dà profondità e copertura, il renderer disegna le sotto-celle coi fianchi), disegno e `floorAt` coincidono; locanda e altre 3 voci del seme da 3 a 15 caselle (7,32 caselle²), le altre 3 da 6 a 15 (7,37), le voci di Claude Cloud a 20 da 3 o 6 a 12 o 8 caselle (4,72-4,77); `tests/cellar.test.ts` anche a 16 voxel per casella, `misura-cantine.ts` prima/dopo, kernel 0.9.3, docs e 4 screenshot. A 20 voxel per casella il bordo può spostarsi al più di 1/32 di casella. Manca T52e. Il cammino dalla porta della locanda non è provato (la ricerca automatica del cammino non l'ha trovato). Sicurezza: nessuna superficie nuova.
 
-### T416 · Vedere sotto terra, senza strati (T52e ridotto) — `da fare` (dipende da T415)
+### T416 · Vedere sotto terra, senza strati (T52e ridotto) — `fatto` (`0168f962`) (dipende da T415)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
 - Step: 13
 - Contesto: decisione dell'autore (17/11, chat, D63): le cantine si finiscono tutte (T52) prima della rigenerazione (T411), e l'arredo subito dopo. Nasce da T52 e T412 (`dossier T52`, `dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «T52e senza strati»; ADR-0091 punto 6).
@@ -5806,6 +5806,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: `underground()` e il disco su una cantina di prova; suite e typecheck coi turni.
 - Browser: sì — `?skip&offline`, `struttura-locanda` posata come in T412: si scende, dalla camera in 3/4 si vede tutta la cantina, si risale; screenshot sopra e sotto.
 - Quando è fatto: commit su `task/T416`. Sicurezza: nessuna superficie nuova.
+- Esito: `kernel.underground()` (src/kernel/underground.ts: taglio = pavimento + 1,15, profondità, casella; sotto terra se il pavimento è più di 0,2 caselle sotto il suolo); disco di caselle di raggio 6 allungato di 3 verso la camera, a quarti (`inCutDisc`, a numeri interi); gli shader della simulazione (`clipped`, anche l'inchiostro) non disegnano nel disco ciò che sta sopra il taglio, terreno, strutture e cose; `buildCut` mette i tappi color terra e i fianchi attorno al disco; sole e cielo fino a un terzo con la profondità (`dimAt`); viandante e ombre non tagliati, corona intatta; kernel 0.9.4, ADR-0091, architettura, glossario, AGENTS, sotterranei-stato § 7 con 4 screenshot; test in `cellar.test.ts`. Mancano le bande degli strati (T418). Non provati: una cantina di 2 caselle e il disco seguendo un altro viandante. Con le cantine del seme il taglio cade 4 cm sotto il suolo, quindi il disco è un cerchio di terra; l'ombra della casa tagliata resta. Sicurezza: nessuna superficie nuova.
 
 ### T417 · Il Cartografo e lo Scultore chiedono le cantine (T52f) — `da fare` (dipende da T415)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2

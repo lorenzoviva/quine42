@@ -1,6 +1,6 @@
 # ADR-0091 — I sotterranei
 
-Data: 2026-10-30 · Stato: accettato, attuato in parte (progetto di T52a; T52b fatto; codice ancora in T52c, T52d, T52e, T52f) · Riferimenti: Regola 10,
+Data: 2026-10-30 · Stato: accettato, attuato in parte (progetto di T52a; T52b, il buco a copertura di T415 e T52e senza strati di T416 fatti; codice ancora in T52c, T52d, T52f e le bande degli strati, T418) · Riferimenti: Regola 10,
 ADR-0043 (lotti, strutture, rampe di T53a, piani di T53b), ADR-0048 (il rilievo), ADR-0049 (gli edifici della corona come modelli),
 ADR-0059 (il client sottile), ADR-0080 (il salto)
 
@@ -103,6 +103,27 @@ centro (`floorAt`), il renderer taglia solo la struttura in cui si è, sopra il 
   `kernel.holesIn(chunk)` dà le caselle il cui centro cade su una colonna della cantina, con la profondità: il terreno lì scende
   al fondo del modello e i fianchi delle caselle vicine fanno le pareti del buco (senza strati, T52e). Test in
   `tests/cellar.test.ts`.
+- **T415** (il buco a copertura): il terreno si apre su tutta l'impronta della cantina, a sotto-celle di 1/16 di casella
+  (`holeCover`, `HOLE_CELLS`), non solo sulle caselle col centro sulla cantina (`docs/design/sotterranei-stato.md` § 6).
+- **T416** (T52e senza strati, punto 6). `kernel.underground(at?)` dice se il viandante (o il punto, con l'altezza dei piedi) sta
+  sotto il suolo: il pavimento (`floorAt`) più di `UNDER_STEP` = 0,2 caselle (un gradino) sotto `groundAt`; dà l'altezza del taglio
+  (`cut` = pavimento + `CUT_ABOVE` 1,15), la profondità e la casella. Il disco sta in `src/kernel/underground.ts`, funzioni pure a
+  numeri interi: una casella a `(dx, dy)` da quella del viandante è nel disco se dista al più `CUT_RADIUS` = 6 dal segmento lungo
+  `CUT_STRETCH` = 3 caselle verso la camera (`inCutDisc`, una capsula; `towardsCamera` arrotonda l'angolo della camera al quarto più
+  vicino, così il disco cambia solo a ogni quarto di giro). Il taglio è in due parti. Gli shader dei materiali della simulazione
+  (`clipped`, anche quello degli id dell'inchiostro) scartano ciò che sta sopra `cut` nelle caselle del disco: terreno, strutture,
+  alberi, cose, persone, rune; un frammento conta per la casella della sua faccia (spostato di 0,01 contro la normale), così il fianco
+  tra due caselle si taglia con la sua. Una mesh piccola (`buildCut`) mette i tappi: ogni casella del disco col piano sopra il taglio
+  ha un tappo di terra (`CUT_EARTH`) all'altezza del taglio, sulle sole sotto-celle sopra di esso dove una cantina apre parte della
+  casella, e le caselle attorno al disco hanno il fianco verso il disco fino al taglio: si vedono le colonne tagliate, mai il loro
+  interno vuoto. Si rifà quando cambiano casella, taglio, verso o i luoghi sotto il disco (`cutSig`). Il viandante e ciò che porta
+  (`MAT.corona`) non si tagliano; le ombre restano (la profondità delle ombre non ha il taglio: la casa sopra la cantina la ombreggia).
+  Il sole e il cielo si attenuano con la profondità fino a un terzo a 2 caselle (`dimAt`), con un passaggio dolce; le luci delle cose
+  restano. Il disco non tocca la corona e non aggiunge niente a ciò che si disegna (regola 8): toglie soltanto, ed è spento negli interni
+  dello studio e fuori dalla simulazione. Diverso dal previsto: le colonne tagliate hanno un solo colore di terra (le bande degli strati
+  le aggiunge T418, con T52d); il disco è allungato verso la camera a quarti, non con l'angolo esatto. Con le cantine del seme (pavimento
+  a −1,19 caselle) il taglio cade 4 centesimi sotto il suolo: il disco è un cerchio di terra attorno alla cantina e tutto ciò che vi sta
+  sopra sparisce.
 
 ## Conseguenze
 - Il mondo resta uno: una cantina sta davvero sotto la sua casa, la si vede scendere e il terreno attorno ha i suoi strati.

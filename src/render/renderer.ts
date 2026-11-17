@@ -15,7 +15,8 @@ import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, C
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
-import { buildChunk, chunkSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { buildChunk, buildCut, chunkSig, cutSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
 import { ZOOM, wheelFactor, zoomDistance } from './camera';
@@ -49,6 +50,10 @@ export class Renderer {
   /** The simulation, in carpet coordinates. */
   private world = new THREE.Group();
   private chunks = new Map<string, TerrainView>();
+  /** The caps of the cut under the ground (T416): built again when one changes tile or floor down there, or the camera turns. */
+  private cut?: { sig: string; mesh?: THREE.Mesh };
+  /** How much of the sun and the sky is left (T416): less the deeper one is under the ground, eased. */
+  private dim = 1;
   private entities: Entities;
   private runes: Runes;
   private wanderer: Wanderer;
@@ -134,6 +139,7 @@ export class Renderer {
       disposeChunk(v);
     }
     this.chunks.clear();
+    this.syncCut(undefined);
     this.corona?.reset();
     this.entities.clear();
   }
@@ -275,15 +281,21 @@ export class Renderer {
     this.world.visible = !interior;
     this.world.position.set(-ox, 0, -oy);
     U.clipR.value = revealed ? k.config.circleRadius : 1e9;
+    let under: Underground | undefined;
     if (!interior) {
       this.syncChunks();
       // Inside a structure what is above the floor one is on is cut away, so the wanderer is seen (T53b).
       const pc = watch ?? { ...k.wandererCarpet(), z: k.wandererPos().z };
       const inside = k.structureAt(pc.x, pc.y);
       CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y, pc.z) : 1e9;
+      // Under the ground (T416): what stands over the head in a disc around is cut, terrain too; the corona has nothing of it.
+      under = watch ? k.underground(watch) : k.underground();
+      this.syncCut(under);
+      U.cutOff.value.set(ox, oy);
       this.entities.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
+    if (interior) this.syncCut(undefined);
     this.wanderer.update(k, dt, this.t);
     this.wanderer.view.root.visible = !watch;
     if (watch) this.wanderer.hideShadow();
@@ -324,6 +336,10 @@ export class Renderer {
         this.sun.color.setHSL(0.09, 0.6, 0.6 + 0.3 * day);
         this.hemi.intensity = 0.22 + 0.9 * Math.min(1, day * 1.3);
       }
+      // Under the ground the sun and the sky are dimmer, the deeper the dimmer (T416); the lights of things stay.
+      this.dim += (dimAt(under?.depth ?? 0) - this.dim) * Math.min(1, dt * 3);
+      this.sun.intensity *= this.dim;
+      this.hemi.intensity *= this.dim;
       const bg = day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
       this.scene.background = bg;
       this.fog.color.copy(bg);
@@ -403,6 +419,29 @@ export class Renderer {
     this.gl.setRenderTarget(null);
     this.gl.shadowMap.autoUpdate = updateShadows;
     this.world.visible = worldShown;
+  }
+
+  /**
+   * The cut under the ground (T416): the shaders' uniforms (`U.cutY`…) and the caps of the disc, built again only when what they depend
+   * on changes. Undefined: nothing is cut.
+   */
+  private syncCut(under: Underground | undefined): void {
+    const k = this.kernel;
+    const towards = towardsCamera(this.yawGoal);
+    U.cutY.value = under ? under.cut : 1e9;
+    if (under) {
+      U.cutTile.value.set(under.tile.x, under.tile.y);
+      U.cutDir.value.set(towards.x, towards.y);
+    }
+    const sig = under ? cutSig(k, under, towards) : '';
+    if (this.cut?.sig === sig) return;
+    if (this.cut?.mesh) {
+      this.world.remove(this.cut.mesh);
+      this.cut.mesh.geometry.dispose();
+    }
+    const mesh = under ? buildCut(k, under, towards) : undefined;
+    if (mesh) this.world.add(mesh);
+    this.cut = { sig, mesh };
   }
 
   /** Builds the chunks that are new or changed (a few per frame), drops the unloaded ones. */

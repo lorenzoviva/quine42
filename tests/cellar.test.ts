@@ -11,7 +11,8 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { Forms, HOLE_CELLS, InlineRunner, cellarOf, type FormComp } from '../src/kernel/forms';
-import { buildChunk } from '../src/render/terrain';
+import { buildChunk, buildCut } from '../src/render/terrain';
+import { CUT_ABOVE, CUT_RADIUS, CUT_STRETCH, cutDisc, dimAt, DIM_FLOOR, inCutDisc, towardsCamera, undergroundAt, type Towards } from '../src/kernel/underground';
 
 // A box from voxel x0..x1, y0..y1, z0..z1 (inclusive): `at` is the middle in x and y, the bottom in z.
 const box = (x0: number, x1: number, y0: number, y1: number, z0: number, z1: number) =>
@@ -98,6 +99,67 @@ function openAt(k: Kernel, x: number, y: number): boolean {
   const s = Math.floor((x - Math.floor(x)) * HOLE_CELLS), t = Math.floor((y - Math.floor(y)) * HOLE_CELLS);
   return !!h.cover[t * HOLE_CELLS + s];
 }
+
+/** The area of a mesh's triangles facing `n` (a unit axis), and the heights they stand at. */
+function facing(mesh: THREE.Mesh, n: [number, number, number]) {
+  const pos = mesh.geometry.getAttribute('position'), nor = mesh.geometry.getAttribute('normal');
+  let area = 0;
+  const ys = new Set<number>();
+  for (let i = 0; i < pos.count; i += 3) {
+    if (nor.getX(i) !== n[0] || nor.getY(i) !== n[1] || nor.getZ(i) !== n[2]) continue;
+    const a = new THREE.Vector3().fromBufferAttribute(pos, i), b = new THREE.Vector3().fromBufferAttribute(pos, i + 1), d = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
+    area += b.clone().sub(a).cross(d.clone().sub(a)).length() / 2;
+    for (const v of [a, b, d]) ys.add(Math.round(v.y * 1e6) / 1e6);
+  }
+  return { area, ys };
+}
+
+describe('the disc of the cut under the ground (T416)', () => {
+  it('is whole tiles within the radius, stretched towards the camera', () => {
+    const south: Towards = { x: 0, y: 1 };
+    expect(inCutDisc(0, 0, south)).toBe(true);
+    expect(inCutDisc(CUT_RADIUS, 0, south)).toBe(true);
+    expect(inCutDisc(CUT_RADIUS + 1, 0, south)).toBe(false);
+    expect(inCutDisc(0, -CUT_RADIUS, south)).toBe(true);
+    expect(inCutDisc(0, -CUT_RADIUS - 1, south)).toBe(false);
+    // Towards the camera it goes `CUT_STRETCH` tiles further.
+    expect(inCutDisc(0, CUT_RADIUS + CUT_STRETCH, south)).toBe(true);
+    expect(inCutDisc(0, CUT_RADIUS + CUT_STRETCH + 1, south)).toBe(false);
+    expect(inCutDisc(CUT_RADIUS, CUT_STRETCH, south)).toBe(true);
+    // Turned with the camera: the same disc, a quarter turn on.
+    for (const t of [south, { x: 1, y: 0 }, { x: 0, y: -1 }, { x: -1, y: 0 }] as Towards[]) {
+      const tiles = cutDisc({ x: 10, y: -4 }, t);
+      expect(tiles.length).toBe(cutDisc({ x: 0, y: 0 }, south).length);
+      expect(tiles.every(({ x, y }) => inCutDisc(x - 10, y + 4, t))).toBe(true);
+      expect(tiles.some(({ x, y }) => x === 10 + t.x * (CUT_RADIUS + CUT_STRETCH) && y === -4 + t.y * (CUT_RADIUS + CUT_STRETCH))).toBe(true);
+    }
+  });
+
+  it('turns with the camera by quarters, and dims the sun down to a third', () => {
+    expect(towardsCamera(0)).toEqual({ x: 0, y: 1 });
+    expect(towardsCamera(Math.PI / 2)).toEqual({ x: 1, y: 0 });
+    expect(towardsCamera(Math.PI)).toEqual({ x: 0, y: -1 });
+    expect(towardsCamera(-Math.PI / 2)).toEqual({ x: -1, y: 0 });
+    expect(towardsCamera(0.6)).toEqual({ x: 0, y: 1 });
+    expect(towardsCamera(5 * Math.PI)).toEqual({ x: 0, y: -1 });
+    expect(dimAt(0)).toBe(1);
+    expect(dimAt(NaN)).toBe(1);
+    expect(dimAt(1)).toBeGreaterThan(DIM_FLOOR);
+    expect(dimAt(1)).toBeLessThan(1);
+    expect(dimAt(50)).toBeCloseTo(DIM_FLOOR, 9);
+  });
+
+  it('is under the ground only more than a step under it', () => {
+    expect(undergroundAt(3.5, -2.5, 0, 0)).toBeUndefined();
+    expect(undergroundAt(3.5, -2.5, -0.2, 0)).toBeUndefined();
+    expect(undergroundAt(3.5, -2.5, NaN, 0)).toBeUndefined();
+    expect(undergroundAt(3.5, -2.5, 0.5, 0)).toBeUndefined();
+    const u = undergroundAt(3.5, -2.5, 0.75, 2)!;
+    expect(u.depth).toBeCloseTo(1.25, 9);
+    expect(u.cut).toBeCloseTo(0.75 + CUT_ABOVE, 9);
+    expect(u.tile).toEqual({ x: 3, y: -3 });
+  });
+});
 
 describe('the model that goes down (T52b)', () => {
   it('reads `sotto` from the index entry, from 1 to 3', () => {
@@ -225,6 +287,61 @@ describe('the model that goes down (T52b)', () => {
         }
       }
       expect(low).toBeCloseTo((60 * 60) / (vpt * vpt), 6);
+    }, 30_000);
+
+    it('in the cellar one is under the ground, and the cut caps the terrain in the disc (T416)', async () => {
+      const { k, at, ground } = await scene(model, vpt);
+      const { ox, oy } = k.offset();
+      const put = (x: number, y: number, z: number) => Object.assign(k.wandererPos(), { x: x - ox, y: y - oy, z });
+      // Outside, on the ground; on the house's floor over the cellar: not under the ground.
+      put(...at(10, 50), ground);
+      expect(k.underground()).toBeUndefined();
+      put(...at(74, 30), ground);
+      expect(k.underground()).toBeUndefined();
+      // In the cellar, past the stair: under the ground, the cut over the head.
+      const [x, y] = at(74, 50);
+      put(x, y, ground + floor);
+      const u = k.underground()!;
+      expect(u).toBeDefined();
+      expect(u.depth).toBeCloseTo(-floor, 9);
+      expect(u.cut).toBeCloseTo(ground + floor + CUT_ABOVE, 9);
+      expect(u.tile).toEqual({ x: Math.floor(x), y: Math.floor(y) });
+      // The same point asked for, as the master following a player does; and nothing out of the simulation.
+      expect(k.underground({ x, y, z: ground + floor })).toEqual(u);
+      k.zone = 'corona';
+      expect(k.underground()).toBeUndefined();
+      k.zone = 'sim';
+
+      const towards: Towards = { x: 0, y: 1 };
+      // Under a deeper cellar the cut is under the ground: every tile of the disc over it has its cap at the cut, the hole has none.
+      const cut = ground - 0.5;
+      const mesh = buildCut(k, { ...u, cut }, towards)!;
+      expect(mesh).toBeDefined();
+      const caps = facing(mesh, [0, 1, 0]);
+      expect([...caps.ys]).toEqual([Math.round(cut * 1e6) / 1e6]);
+      // What should be capped, tile by tile: the tops over the cut (the water lower, the hole on its sub-cells).
+      const S = k.config.chunkSize;
+      let expected = 0;
+      for (const t of cutDisc(u.tile, towards)) {
+        const code = k.tileAt(t.x, t.y);
+        if (code === undefined) continue;
+        const layer = k.palette[code]?.layer;
+        const top = k.groundAt(t.x, t.y) + (layer === 'liquid' ? -0.18 : layer === 'floor' ? 0.02 : 0);
+        if (top <= cut + 0.01) continue;
+        const ch = k.chunkAt(t.x, t.y)!;
+        const h = k.holesIn(ch).get((t.y - ch.cy * S) * S + (t.x - ch.cx * S));
+        expected += !h ? 1 : h.cover ? h.cover.reduce((a, b) => a + (b ? 0 : 1), 0) / HOLE_CELLS ** 2 : 0;
+      }
+      expect(caps.area).toBeCloseTo(expected, 6);
+      // The cellar's 60 × 60 voxels are not capped: the disc is around it.
+      const tiles = cutDisc(u.tile, towards).filter((t) => k.tileAt(t.x, t.y) !== undefined).length;
+      expect(expected).toBeLessThanOrEqual(tiles - (60 * 60) / (vpt * vpt) + 1e-9);
+      // The tiles around the disc show their sides towards it, down to the cut, never under it.
+      const sides = [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]].map((n) => facing(mesh, n as [number, number, number]));
+      expect(sides.reduce((a, s) => a + s.area, 0)).toBeGreaterThan(0);
+      for (const s of sides) expect(Math.min(...s.ys)).toBeCloseTo(cut, 6);
+      // Over the cut nothing to cap: no mesh.
+      expect(buildCut(k, { ...u, cut: ground + 5 }, towards)).toBeUndefined();
     }, 30_000);
 
     it('a jump crosses the stairwell and never falls into the cellar', async () => {
