@@ -5696,3 +5696,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite, typecheck, `npm run test:sicurezza` coi turni.
 - Browser: sì (le strutture del seme nel gioco accanto al viandante, foto a confronto con prima).
 - Quando è fatto: commit su `task/T405`. Dipende da T404 (il blocco parametrico).
+
+### T406 · Di nuovo la misura dello Scenografo, sugli edifici dello Scultore di oggi riscalati ai voxel per casella nuovi — `da fare` (dipende da T405)
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 3
+- Step: 30
+- Contesto: l'autore (17/11, epoca 477) su T303: lo spazio calpestabile dentro le abitazioni è troppo piccolo, e i voxel per casella nuovi (D61, T404 e T405) lo cambiano; i numeri di T303 (`docs/design/scenografo.md` § 9-10) valgono per gli edifici a 20 voxel per casella. Prima si generano i modelli con lo Scultore di oggi e si scalano bene coi voxel per casella, poi si rifà la prova d'arredamento e si procede. I cinque task proposti da T303 (guardia nel kernel, Scenografo a dati, Scenografo a programma, mobili per la cantina, misure sull'edificio vuoto) aspettano questo. `dossier T303`, `dossier T405`.
+- Cosa fare: (1) villetta e fattoria (e il forte se T404 lo porta a scala) scritte dallo Scultore delle strutture di oggi (Opus 5.5 sulla CLI dell'abbonamento, lo strumento di T391/T303) alla densità scelta da T405, misurate: spazio calpestabile per stanza e per piano, prima e dopo il riscalamento; (2) le tre vie di T303 (interno insieme, programma di secondo stadio, mobili come dati) rifatte su questi edifici con `lab/scripts/scenografo-misura.ts`, 2 richieste per via, costo detto dalla CLI; (3) § 9-10 di `docs/design/scenografo.md` aggiornati accanto ai numeri di T303, la raccomandazione confermata o cambiata, i task proposti riscritti per l'approvazione. Solo `lab/` e `docs/design/`, mai una chiave a consumo.
+- Test: i programmi provati girano nel motore e passano i controlli; typecheck col suo turno.
+- Browser: non serve; fogli di contatto nel commit.
+- Quando è fatto: commit su `task/T406`. Dipende da T405 (la densità degli edifici).
