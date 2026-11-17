@@ -1,0 +1,100 @@
+{
+ "version": "v1",
+ "file": "lab/mjx/models/handmade/forte-handmade.xml",
+ "sha256": "55a918f7c64134d85fb7cc46593d290706948caa8b5833406deb79a053168fdf",
+ "commit": "394783b5",
+ "date": "2026-11-17",
+ "vpt": 10,
+ "box": [
+  500,
+  500,
+  148
+ ],
+ "seeds": [
+  {
+   "seed": 1,
+   "ms": 6762,
+   "traits": {
+    "footprintTiles": 854,
+    "courtyard": 0.48198103266596415,
+    "courtyardBends": 21,
+    "wallBends": 52,
+    "corners": 56,
+    "cornerTowers": 0.9642857142857143,
+    "towers": 12,
+    "wallHeight": 1.711111068725586,
+    "topHeight": 5.866666666666667,
+    "skyline": 9,
+    "storeys": 4,
+    "upperStoreys": 3,
+    "roomFloors": 9,
+    "crenels": 0.8057577763070815,
+    "openings": 0.11383189940436797,
+    "keepFromGate": 0.7173871122767363
+   }
+  },
+  {
+   "seed": 2,
+   "ms": 6446,
+   "traits": {
+    "footprintTiles": 586,
+    "courtyard": 0.45072152287381023,
+    "courtyardBends": 25,
+    "wallBends": 33,
+    "corners": 37,
+    "cornerTowers": 0.8648648648648649,
+    "towers": 7,
+    "wallHeight": 1.711111068725586,
+    "topHeight": 5.866666666666667,
+    "skyline": 7,
+    "storeys": 3,
+    "upperStoreys": 2,
+    "roomFloors": 4,
+    "crenels": 0.8083018867924529,
+    "openings": 0.07358490566037736,
+    "keepFromGate": 0.5121439184565953
+   }
+  },
+  {
+   "seed": 3,
+   "ms": 6200,
+   "traits": {
+    "footprintTiles": 797,
+    "courtyard": 0.44273774565168283,
+    "courtyardBends": 22,
+    "wallBends": 34,
+    "corners": 38,
+    "cornerTowers": 0.8157894736842105,
+    "towers": 10,
+    "wallHeight": 1.6888889312744142,
+    "topHeight": 4.266666666666667,
+    "skyline": 6,
+    "storeys": 3,
+    "upperStoreys": 2,
+    "roomFloors": 6,
+    "crenels": 0.8312460864120226,
+    "openings": 0.054477144646211645,
+    "keepFromGate": 0.4895500269139787
+   }
+  }
+ ],
+ "traits": {
+  "footprintTiles": 745.667,
+  "courtyard": 0.458,
+  "courtyardBends": 22.667,
+  "wallBends": 39.667,
+  "corners": 43.667,
+  "cornerTowers": 0.882,
+  "towers": 9.667,
+  "wallHeight": 1.704,
+  "topHeight": 5.333,
+  "skyline": 7.333,
+  "storeys": 3.333,
+  "upperStoreys": 2.333,
+  "roomFloors": 6.333,
+  "crenels": 0.815,
+  "openings": 0.081,
+  "keepFromGate": 0.573
+ },
+ "variety": 0.929
+}
