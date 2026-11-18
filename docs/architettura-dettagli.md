@@ -360,9 +360,15 @@
   teneva quello del seme di prima (T407), le regole-scatola del Cartografo allargate di 20/16 e almeno 7 (`stretchBoxes`, `stretchRule`: righe e
   colonne interne ripetute, la porta una sola, `steps` diviso per (20/16)²) o, se così un luogo perde spazio, solo fino a 7 (`least`), i timbri a 16;
   i piani di quell'ambiente prendono `vpt: 16`. Si prende la prima via che il validatore degli ambienti accetta e con cui **nessun luogo perde una
-  struttura** che i suoi lotti tengono oggi (`structureLotSizes`, come `claimSizes`); altrimenti l'ambiente resta com'era e le strutture che vi stanno
-  si riscolpiscono **a 20** (`vpt: 20` nella voce, gli stessi voxel: la taglia non cambia al caricamento). Un ambiente già ritagliato non si ritaglia
-  di nuovo. Prima di scrivere, la testa dell'universo prende il tag `prima-della-rigenerazione` (una volta, `tagUniverse` con il git di `server/git.ts`).
+  struttura** che i suoi lotti tengono oggi (`structureLotSizes`, come `claimSizes`); altrimenti **lo riscrive il Cartografo** (T422, ADR-0218,
+  `ambiente:<id>` col compito `environment.recut`, `recutEnvironment` in `agents/cartography.ts`): gli si dice il programma, il lato che i suoi edifici
+  devono avere (7 una Grande a 16, 10 un'Enorme; mura comprese), i suoi luoghi con le strutture, gli edifici di oggi e la bozza (le quote dei terreni,
+  intera per i luoghi con una struttura); il kernel prova la risposta col validatore e sulle bozze vere dei luoghi (`recutFaults`: ogni struttura del
+  piano trova un edificio che la tiene, ogni edificio di 5 o più sul lato lungo tiene una casa comune riscolpita), e ciò che non tiene gli torna col
+  motivo, fino a 3 volte (`RECUT_TRIES`); scritto (commit del kernel), i suoi piani prendono `vpt: 16` e le densità si ricalcolano sui lotti nuovi.
+  Se il Cartografo non riesce l'ambiente resta com'era (una mancanza) e le strutture che vi stanno si riscolpiscono **a 20** (`vpt: 20` nella voce,
+  gli stessi voxel: la taglia non cambia al caricamento). Un ambiente già ritagliato non si ritaglia di nuovo. Cosa farebbe la rigenerazione a un
+  universo sul disco, senza chiamate: `lab/scripts/piano-rigenerazione.ts`. Prima di scrivere, la testa dell'universo prende il tag `prima-della-rigenerazione` (una volta, `tagUniverse` con il git di `server/git.ts`).
   Il progresso sta in `universes/.generation/<nome>.rigenera-modelli.json`; il comando aspetta fino a 2 minuti chi serve la coda, poi si ferma. Nella
   pipeline una voce di `generazione` con `"rigenera": "modelli"` lancia `comandoRigenera` e ha il suo posto nello stato (`<nome>:rigenera-modelli`, T88).
 
