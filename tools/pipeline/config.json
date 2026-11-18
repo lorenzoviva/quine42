@@ -2,20 +2,63 @@
   "base": "3d",
   "orchestratore": "claude",
   "generazione": [
-    { "universo": "aurora", "rigenera": "modelli", "tettoSettimana": 25 },
-    { "universo": "orichalcum", "rigenera": "modelli", "tettoSettimana": 25 },
-    { "universo": "neapolis", "rigenera": "modelli", "tettoSettimana": 25 },
-    { "universo": "sidera", "rigenera": "modelli", "tettoSettimana": 25 }
+    {
+      "universo": "aurora",
+      "rigenera": "modelli",
+      "tettoSettimana": 25
+    },
+    {
+      "universo": "orichalcum",
+      "rigenera": "modelli",
+      "tettoSettimana": 25
+    },
+    {
+      "universo": "sidera",
+      "rigenera": "modelli",
+      "tettoSettimana": 25
+    },
+    {
+      "universo": "neapolis",
+      "rigenera": "modelli",
+      "tettoSettimana": 25
+    }
   ],
   "generatore": {
     "acceso": true,
     "provider": "claude",
-    "minimo": 10,
-    "sessioneMinima": 30,
-    "sessioneArresto": 15,
-    "comando": ["npm", "run", "genera", "--", "{universo}", "--tema", "{ambientazione}", "--partita", "{partita}", "--tetto", "{tetto}"],
-    "comandoRigenera": ["npm", "run", "genera", "--", "{universo}", "--rigenera", "{rigenera}", "--tetto", "{tetto}"],
-    "coda": ["npm", "run", "abbonamento"]
+    "minimo": 0,
+    "sessioneMinima": 2,
+    "sessioneArresto": 1,
+    "comando": [
+      "npm",
+      "run",
+      "genera",
+      "--",
+      "{universo}",
+      "--tema",
+      "{ambientazione}",
+      "--partita",
+      "{partita}",
+      "--tetto",
+      "{tetto}"
+    ],
+    "comandoRigenera": [
+      "npm",
+      "run",
+      "genera",
+      "--",
+      "{universo}",
+      "--rigenera",
+      "{rigenera}",
+      "--tetto",
+      "{tetto}"
+    ],
+    "coda": [
+      "npm",
+      "run",
+      "abbonamento"
+    ],
+    "esaurisci": true
   },
   "abbonamenti": {
     "claude": "max5x",
@@ -244,7 +287,11 @@
         "--model",
         "gemini-3.8-flash-high"
       ],
-      "livelli": ["low", "medium", "high"],
+      "livelli": [
+        "low",
+        "medium",
+        "high"
+      ],
       "resume": [
         "--conversation",
         "{sessione}"
@@ -266,7 +313,11 @@
         "--model",
         "gemini-4-argon-high"
       ],
-      "livelli": ["low", "medium", "high"],
+      "livelli": [
+        "low",
+        "medium",
+        "high"
+      ],
       "resume": [
         "--conversation",
         "{sessione}"
@@ -289,7 +340,11 @@
         "--model",
         "claude-opus-5-5-high"
       ],
-      "livelli": ["low", "medium", "high"],
+      "livelli": [
+        "low",
+        "medium",
+        "high"
+      ],
       "resume": [
         "--conversation",
         "{sessione}"
@@ -311,7 +366,11 @@
         "--model",
         "claude-sonnet-5-5-high"
       ],
-      "livelli": ["low", "medium", "high"],
+      "livelli": [
+        "low",
+        "medium",
+        "high"
+      ],
       "resume": [
         "--conversation",
         "{sessione}"
@@ -334,7 +393,12 @@
         "--model",
         "gemini-4-hydrogen-high"
       ],
-      "livelli": ["low", "medium", "high", "xhigh"],
+      "livelli": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
       "resume": [
         "--conversation",
         "{sessione}"
@@ -364,7 +428,7 @@
       "resetSettimanale": "",
       "contatori": "^(Gemini Models|Gemini 4 Argon)$",
       "browser": false,
-      "orchestrabile": false,
+      "orchestrabile": true,
       "stessoContoDi": "argon",
       "abbonamento": "google",
       "ratioSessioneSettimana": 1

@@ -356,6 +356,8 @@ export function refreshConfig() {
   if (!disk) return;
   if (disk.piani) CONFIG.piani = disk.piani;
   if (disk.abbonamenti) CONFIG.abbonamenti = disk.abbonamenti;
+  if (disk.generatore) CONFIG.generatore = disk.generatore;
+  if (disk.generazione) CONFIG.generazione = disk.generazione;
   for (const [prov, conf] of Object.entries(CONFIG.providers)) {
     const value = disk.providers?.[prov]?.orchestrabile;
     if (value !== undefined) conf.orchestrabile = value;

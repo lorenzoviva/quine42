@@ -49,6 +49,8 @@ export function generatorConf(config = {}) {
     acceso: g.acceso !== false,
     provider: g.provider ?? 'claude',
     minimo: g.minimo ?? 10,
+    // Until the week is spent (the author, 18/11): the leftover is the week's residue, not the forecast at the reset.
+    esaurisci: g.esaurisci === true,
     sessioneMinima: g.sessioneMinima ?? 30,
     sessioneArresto: g.sessioneArresto ?? 15,
     comando: g.comando ?? ['npm', 'run', 'genera', '--', '{universo}', '--tema', '{ambientazione}', '--partita', '{partita}', '--tetto', '{tetto}'],
@@ -139,7 +141,8 @@ export function nextUniverse(list = [], state = {}, { reset, nowMs = Date.now(),
  */
 export function generatorDecision({ conf, list = [], state = {}, b = {}, live = 0, ceiling = 1, wanting = false, stopping = false, running = false, nowMs = Date.now(), giorni = 3, riserva = 3, progressOf }) {
   const reset = b.resetSettimana;
-  const leftover = leftoverAtReset({ residuo: b.residuo, storia: b.storia, reset, slot: b.slot, tetto: b.tetto, nowMs, giorni });
+  const leftover = conf.esaurisci && b.residuo !== undefined ? b.residuo
+    : leftoverAtReset({ residuo: b.residuo, storia: b.storia, reset, slot: b.slot, tetto: b.tetto, nowMs, giorni });
   const session = b.sessione ?? b.residuo ?? 100;
   const halted = (b.fermoFino && Date.parse(b.fermoFino) > nowMs) || b.sospeso;
   const why = stopping ? 'la pipeline si spegne'
@@ -222,7 +225,7 @@ export class Generator {
     if (s.corrente && !this.isAlive(s.corrente.pid)) this.ended(s, b, nowMs);
     const d = generatorDecision({
       conf, list: this.config.generazione ?? [], state: { ...s, spento: this.isOff() }, b, live, ceiling, wanting, stopping,
-      running: Boolean(s.corrente), nowMs, giorni: this.config.giorniPrevisione ?? 3, riserva: this.config.riserva ?? 3, progressOf: this.progressOf,
+      running: Boolean(s.corrente), nowMs, giorni: this.config.giorniPrevisione ?? 3, riserva: conf.esaurisci ? 0 : this.config.riserva ?? 3, progressOf: this.progressOf,
     });
     s.avanzo = d.leftover;
     s.controllo = new Date(nowMs).toISOString();

@@ -114,6 +114,15 @@ describe('il generatore sui crediti che avanzano', () => {
     expect(w.gen.describe(budget()).join('\n')).toMatch(/genera orichalcum .* tetto 9 %, speso 0 % in questa esecuzione/);
   });
 
+  it('fino a esaurimento (esaurisci) → parte anche se la previsione dice che niente avanza, e si ferma solo a settimana finita', () => {
+    const w = world();
+    Object.assign(w.config.generatore, { esaurisci: true, minimo: 0, sessioneMinima: 2, sessioneArresto: 1 });
+    const d = w.gen.tick({ budget: budget({ slot: 1, residuo: 20, sessione: 20, storia: storia(20) }), live: 0, ceiling: 3, nowMs: NOW });
+    expect(d).toMatchObject({ azione: 'avvia', leftover: 20, tetto: 20 });
+    expect(w.gen.tick({ budget: budget({ slot: 1, residuo: 1, sessione: 1, storia: storia(1) }), live: 0, ceiling: 3, nowMs: NOW + 60_000 }).azione).toBe('continua');
+    expect(w.gen.tick({ budget: budget({ slot: 1, residuo: 0, sessione: 0, storia: storia(0) }), live: 0, ceiling: 3, nowMs: NOW + 120_000 }).azione).toBe('ferma');
+  });
+
   it('niente avanza, slot non pieni, la finestra delle 5 ore bassa o nessun posto sotto il tetto → non parte', () => {
     const w = world();
     expect(w.gen.tick({ budget: budget({ slot: 1 }), live: 0, ceiling: 3, nowMs: NOW })).toMatchObject({ azione: 'attende', motivo: expect.stringMatching(/avanzerebbe il -84 %/) });
