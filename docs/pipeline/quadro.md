@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 18/11/2026, epoca 500 (claude). Crediti: vedi `stato`.
+Aggiornato il 18/11/2026, epoca 501 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,10 +34,11 @@ Aggiornato il 18/11/2026, epoca 500 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- Autore assente fino al 18/11 18:30: autonomia; integrare e lanciare la catena senza aspettare.
 - Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable a regime normale (autore 14/11): niente spostamenti liberi, solo i task più difficili.
 - Domande per intero in chat con raccomandazione. Finestra 5h con l'ora del reset. Sforzo: qualità prima del tempo. Mai `git commit -a` nel base.
 
 ## Ultime 2 epoche
 
+- **501 (claude):** T411 a sforzo max, stima 8 % (autore: «voglio dei bei modelli»); autore assente fino al 18/11 18:30: catena T410 → T419 → T411, poi generatore (confermato) e T153.
 - **500 (claude):** T420 e T417 integrati (`3cdb4d66`, `37277d34`, kernel 0.9.7); T410 pronto.
-- **499 (claude):** T417 fatto, `integra` in conflitto con T413 → T420.
