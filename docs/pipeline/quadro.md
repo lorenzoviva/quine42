@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 18/11/2026, epoca 501 (claude). Crediti: vedi `stato`.
+Aggiornato il 18/11/2026, epoca 502 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -40,5 +40,5 @@ Aggiornato il 18/11/2026, epoca 501 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **502 (claude):** T410 integrato (`aa1eb4b9`, ADR-0214, kernel 0.9.8: Scenografo via dei dati, `furnish.ts`, `InteriorDirector`; visto nel browser sul forno offline, case generiche del borgo nude perché piccole); T419 sbloccato (il parser leggeva «dopo T52») e pronto.
 - **501 (claude):** T411 a sforzo max, stima 8 % (autore: «voglio dei bei modelli»); autore assente fino al 18/11 18:30: catena T410 → T419 → T411, poi generatore (confermato) e T153.
-- **500 (claude):** T420 e T417 integrati (`3cdb4d66`, `37277d34`, kernel 0.9.7); T410 pronto.
