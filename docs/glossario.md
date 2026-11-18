@@ -52,6 +52,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `coda dei commit` (non ha solo commit; «coda» è quella degli abbonamenti)
 - **Fermo**: la chiave `quine:owed:` e la forma delle scritture salvate.
 
+### Base di una scrittura
+- **Inglese**: `base`, `madeHere`, `COMMIT_ID_RE`
+- **Definizione**: la testa dell'universo su cui una scrittura della fila è stata fatta; lo store la prende solo nel repository che ha quel commit nella sua storia, mai in un universo nato dopo con lo stesso nome (ADR-0217).
+- **Dove vive**: `src/kernel/universes.ts` (`OwedWrite`, `UniverseClient`), `server/universeStore.ts`
+- **Da non usare**: `radice` (la radice di un contratto è comune a tutti gli universi nati dal suo seme)
+- **Fermo**: il campo `base` del corpo di `commit`, `branch`, `merge` e il parametro `?base=` del piano di un luogo.
+
 ### Seme
 - **Inglese**: `seed`, `seedLua`, `rngFor`
 - **Definizione**: il numero da cui escono le estrazioni: quello dell'universo e quello che fa di un modello un'istanza.

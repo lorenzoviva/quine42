@@ -51,6 +51,7 @@ import { HandmadeArchive } from './handmade';
 import type { ProgramChecker } from './programCheck';
 import { withCardChoice } from '../src/kernel/bring';
 import { KERNEL_CONTRACT } from '../src/kernel/version';
+import { COMMIT_ID_RE } from '../src/kernel/universes';
 import { CampaignArchive, guestsAnswer, paceAnswer, type GuestsContext, type PaceContext } from './campaign';
 import { campaignAnswer, type CampaignSiteContext } from './campaignSite';
 
@@ -276,6 +277,22 @@ async function log(root: string): Promise<Array<{ id: string; author: string; ti
     .map(([id, author, time, , ...msg]) => ({ id, author, time: Number(time) * 1000, message: msg.join('\t') }));
 }
 
+/**
+ * Whether a write made on `base` belongs to this repository (T421): `base` is a commit of its history. A write that says no base (a line saved
+ * before T421, a caller that never read the universe) is taken as always; one made on a universe that was replaced under the same name is not.
+ */
+async function madeHere(root: string, base: unknown): Promise<boolean> {
+  if (base === undefined) return true;
+  if (typeof base !== 'string' || !COMMIT_ID_RE.test(base)) return false;
+  return git(root, ['merge-base', '--is-ancestor', base, 'HEAD']).then(
+    () => true,
+    () => false,
+  );
+}
+
+/** What a write made on another universe of the same name is told: refused, never tried again (a 4xx). */
+const NOT_MADE_HERE = 'la scrittura è di un universo che aveva questo nome prima: non entra in questo';
+
 async function writeFiles(root: string, changes: Record<string, string | null>): Promise<void> {
   // All of them or none: a refused path leaves no half of a commit in the working tree.
   for (const rel of Object.keys(changes)) safePath(root, rel);
@@ -465,11 +482,14 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
       if (req.method === 'PUT') {
         if (!isJson(req)) return send(res, 415, { error: 'solo JSON' });
         const body = await readBody(req);
-        await serial(name, async () => {
+        const base = new URL(req.url ?? '', 'http://x').searchParams.get('base') ?? undefined;
+        const taken = await serial(name, async () => {
+          if (!(await madeHere(root, base))) return false;
           await fs.mkdir(path.dirname(file), { recursive: true });
           await fs.writeFile(file, body, 'utf8');
+          return true;
         });
-        return send(res, 200, { ok: true });
+        return taken ? send(res, 200, { ok: true }) : send(res, 409, { error: NOT_MADE_HERE });
       }
     }
     if (op === 'branch' && arg && req.method === 'GET') {
@@ -528,6 +548,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
         }
         case 'commit':
           if (!(await exists(path.join(root, '.git')))) throw new Error('universo sconosciuto');
+          if (!(await madeHere(root, body.base))) return { notHere: true };
           await writeFiles(root, body.changes ?? {});
           return { head: await commitAll(root, String(body.message ?? 'commit'), String(body.author ?? 'kernel')) };
         case 'checkout': {
@@ -542,8 +563,10 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
           return { head: await head(root), files: await readTree(root) };
         }
         case 'branch':
+          if (!(await madeHere(root, body.base))) return { notHere: true };
           return { head: await writeBranch(root, String(body.branch), body.files ?? {}, String(body.message ?? 'ramo'), String(body.author ?? 'player')) };
         case 'merge':
+          if (!(await madeHere(root, body.base))) return { notHere: true };
           await mergeBranch(root, String(body.branch), String(body.message ?? 'pubblicazione'));
           return { head: await head(root) };
         case 'clone': {
@@ -566,6 +589,7 @@ export function universeHandler(baseDir: string, opts: UniverseStoreOptions = {}
     const owner = op === 'create' ? who.id : op === 'clone' ? String(body.master ?? '') : undefined;
     const r = owner ? await serial(`quota:${owner}`, async () => ((await noRoom(owner)) ? undefined : work())) : await work();
     if (!r) return send(res, 403, { error: full() });
+    if ('notHere' in r) return send(res, 409, { error: NOT_MADE_HERE });
     return send(res, 200, r);
   };
 
