@@ -15,7 +15,7 @@ import { bundledFiles } from '../../src/kernel/bundle';
 import { Kernel } from '../../src/kernel/kernel';
 import { memoryStore } from '../../src/kernel/repo';
 import { fakeLink } from '../../src/session/protocol';
-import { buildCliCommand, cliEnv, IsolationCheck, ISOLATION_ARGS, serveOne } from '../../tools/abbonamenti/servi';
+import { buildCliCommand, cliEnv, IsolationCheck, ISOLATION_ARGS, serveOne, SYSTEM_FILE } from '../../tools/abbonamenti/servi';
 import { playerFiles, SessionServer } from '../../src/session/server';
 
 // The server's routes as `npm run sicurezza:prove` measures them, without a server: see docs/sicurezza/README.md. Each test
@@ -320,6 +320,10 @@ describe('la coda delle CLI', () => {
     expect(stdin).toBe(queued.prompt);
     expect(args).not.toContain(queued.prompt);
     expect(args.slice(0, ISOLATION_ARGS.length)).toEqual([...ISOLATION_ARGS]);
+    // The system prompt neither (T427): a file next to the empty folder, the argument a path the queue chose.
+    expect(args).not.toContain(queued.system);
+    expect(args).not.toContain('--system-prompt');
+    expect(value('--system-prompt-file')).toBe(path.resolve('.', SYSTEM_FILE));
   });
 
   it('V-009 la CLI non eredita i segreti', () => {

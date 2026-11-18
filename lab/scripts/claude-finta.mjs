@@ -1,6 +1,7 @@
 // A fake CLI of Claude for the offline proof of the bench (T391): it says the `init` of a run with nothing to act with (ADR-0106),
 // reads the prompt from stdin (plain, or one user message of events with `--input-format stream-json`, images included), answers with
-// the program in <file.xml> and a `result` with the usage per model the real one gives. What it received goes to <log.jsonl>.
+// the program in <file.xml> and a `result` with the usage per model the real one gives. The system prompt it reads from the file of
+// `--system-prompt-file` (T427), as the real one; an argument `--system-prompt` is refused. What it received goes to <log.jsonl>.
 //
 //   --cli-cmd "node <abs>/lab/scripts/claude-finta.mjs <abs>/program.xml <abs>/log.jsonl [--irraggiungibile <modello>]"
 // With --irraggiungibile the model named answers as one the subscription does not reach: an error, no token.
@@ -24,8 +25,14 @@ process.stdin.on('end', () => {
     images = content.filter((c) => c.type === 'image').length;
     prompt = content.filter((c) => c.type === 'text').map((c) => c.text).join('\n');
   }
-  const system = arg('--system-prompt') ?? '';
-  fs.appendFileSync(log, `${JSON.stringify({ model, effort: arg('--effort'), tools: arg('--tools'), images, prompt: prompt.length, system: system.length, isolation: ['--strict-mcp-config', '--safe-mode', '--restricted', '--no-session-persistence'].every((k) => rest.includes(k)) })}\n`);
+  if (rest.includes('--system-prompt')) {
+    console.error('claude-finta: the system prompt goes from a file (--system-prompt-file), never as an argument');
+    process.exit(2);
+  }
+  const systemFile = arg('--system-prompt-file');
+  const system = systemFile ? fs.readFileSync(systemFile, 'utf8') : '';
+  const argChars = process.argv.slice(2).reduce((n, a) => n + a.length + 1, 0);
+  fs.appendFileSync(log, `${JSON.stringify({ model, effort: arg('--effort'), tools: arg('--tools'), images, prompt: prompt.length, system: system.length, systemFile, systemHead: system.slice(0, 40), cwd: process.cwd(), inCwd: fs.readdirSync(process.cwd()), argChars, isolation: ['--strict-mcp-config', '--safe-mode', '--restricted', '--no-session-persistence'].every((k) => rest.includes(k)) })}\n`);
   console.log(JSON.stringify({ type: 'system', subtype: 'init', tools: [], mcp_servers: [], skills: [], slash_commands: [], plugins: [{ path: 'builtin' }], model }));
   if (arg('--irraggiungibile') === model) {
     console.log(JSON.stringify({ type: 'result', subtype: 'error', is_error: true, result: `There's an issue with the selected model (${model}). It may not exist or you may not have access to it.`, total_cost_usd: 0, usage: { input_tokens: 0, output_tokens: 0 } }));

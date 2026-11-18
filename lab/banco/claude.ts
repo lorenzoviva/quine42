@@ -2,9 +2,8 @@
 // queue (ADR-0106): no tools, no MCP, no hooks, no settings, no files of the project, a reduced environment, confirmed by the CLI's own `init`.
 
 import { promises as fs } from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { cliEnv, IsolationCheck, ISOLATION_ARGS, runCli } from '../../tools/abbonamenti/servi';
+import { cliEnv, IsolationCheck, ISOLATION_ARGS, runCli, runFolders, SYSTEM_FILE, writeSystemPrompt } from '../../tools/abbonamenti/servi';
 // @ts-expect-error pipeline.mjs is untyped plain JS
 import { cliSaid, usageLimit } from '../../tools/pipeline/pipeline.mjs';
 
@@ -61,12 +60,19 @@ export function leggiEventi(stdout: string): { testo?: string; errore?: string; 
 }
 
 export async function chiedi(system: string, bersaglio: string, opts: { modello?: string; timeoutMs?: number } = {}): Promise<Risposta> {
-  const args = [...ISOLATION_ARGS, '--system-prompt', system, ...(opts.modello ? ['--model', opts.modello] : [])];
   const check = new IsolationCheck();
-  const vuota = await fs.mkdtemp(path.join(os.tmpdir(), 'quine-banco-'));
+  const { root, empty: vuota } = await runFolders('quine-banco-');
+  // The system prompt from a file next to the empty folder, as the queue does (T427): on Windows an argument does not hold it.
+  const file = path.join(root, SYSTEM_FILE);
+  const args = [...ISOLATION_ARGS, '--system-prompt-file', file, ...(opts.modello ? ['--model', opts.modello] : [])];
   const t0 = Date.now();
-  const run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 25 * 60_000, onLine: (l) => check.see(l) });
-  await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+  let run: Awaited<ReturnType<typeof runCli>>;
+  try {
+    await writeSystemPrompt({ system: { file, text: system } });
+    run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 25 * 60_000, onLine: (l) => check.see(l) });
+  } finally {
+    await fs.rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+  }
   if (check.breach) throw new Error(`isolamento della CLI non confermato: ${check.breach}`);
   const reset = usageLimit(cliSaid(run.combined));
   if (reset) throw new LimiteAbbonamento(reset);

@@ -33,7 +33,7 @@ function diskFetch(d: string): typeof fetch {
 }
 
 describe('servi (T68b) — comando e argomenti delle CLI', () => {
-  it('Claude: -p, gli eventi, --tools "", --system-prompt se presente, il testo su stdin', () => {
+  it('Claude: -p, gli eventi, --tools "", il prompt di sistema da un file se presente, il testo su stdin', () => {
     const cmd = buildCliCommand('claude', {
       id: '1',
       provider: 'claude',
@@ -49,8 +49,10 @@ describe('servi (T68b) — comando e argomenti delle CLI', () => {
     expect(cmd.args).toContain('stream-json');
     expect(cmd.args).toContain('--tools');
     expect(cmd.args).toContain('');
-    expect(cmd.args).toContain('--system-prompt');
-    expect(cmd.args).toContain('Sei lo Scultore');
+    expect(cmd.args).not.toContain('--system-prompt');
+    expect(cmd.args).toContain('--system-prompt-file');
+    expect(cmd.args).not.toContain('Sei lo Scultore');
+    expect(cmd.system?.text).toBe('Sei lo Scultore');
     expect(cmd.stdin).toBe('Scolpisci una roccia');
     expect(cmd.args).not.toContain('Scolpisci una roccia');
   });
