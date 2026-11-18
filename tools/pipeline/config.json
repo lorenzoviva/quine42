@@ -2,9 +2,10 @@
   "base": "3d",
   "orchestratore": "claude",
   "generazione": [
-    { "universo": "orichalcum", "ambientazione": "steampunk", "tettoSettimana": 25 },
-    { "universo": "neapolis", "ambientazione": "moderno", "tettoSettimana": 25 },
-    { "universo": "sidera", "ambientazione": "futuristico", "tettoSettimana": 25 }
+    { "universo": "aurora", "rigenera": "modelli", "tettoSettimana": 25 },
+    { "universo": "orichalcum", "rigenera": "modelli", "tettoSettimana": 25 },
+    { "universo": "neapolis", "rigenera": "modelli", "tettoSettimana": 25 },
+    { "universo": "sidera", "rigenera": "modelli", "tettoSettimana": 25 }
   ],
   "generatore": {
     "acceso": true,
@@ -13,6 +14,7 @@
     "sessioneMinima": 30,
     "sessioneArresto": 15,
     "comando": ["npm", "run", "genera", "--", "{universo}", "--tema", "{ambientazione}", "--partita", "{partita}", "--tetto", "{tetto}"],
+    "comandoRigenera": ["npm", "run", "genera", "--", "{universo}", "--rigenera", "{rigenera}", "--tetto", "{tetto}"],
     "coda": ["npm", "run", "abbonamento"]
   },
   "abbonamenti": {

@@ -1,6 +1,6 @@
 {
   "name": "aurora",
-  "kernel": "0.9.9",
+  "kernel": "0.9.10",
   "kernels": {
     "from": "0.9"
   },

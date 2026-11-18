@@ -10,6 +10,7 @@
 
 import { emptyUsage, Semaphore, type Limits, type AiModels, type TextCall } from './models';
 import type { CallRecord } from './usage';
+import { ANTHROPIC_PRICES } from './prices';
 import { internalAgent } from '../internalNames';
 
 /** `api`: Gemini, paid per call. The others: a subscription's CLI, through the queue. */
@@ -19,6 +20,18 @@ export const SUBSCRIPTIONS: readonly Exclude<Provider, 'api'>[] = ['claude'];
 
 /** The name a subscription's calls have in the usage ledger (prices.ts prices them at zero). */
 export const SUBSCRIPTION_MODEL: Record<Exclude<Provider, 'api'>, string> = { claude: 'abbonamento-claude' };
+
+/**
+ * The models of the CLI a request of the queue may name (T411, ADR-0216): the ones of Anthropic's list, never another id. A request that names
+ * none goes to the CLI's own (ADR-0077); the deferred generation names one (the regeneration of the models, Opus 5.5).
+ */
+export const CLI_MODELS: readonly string[] = Object.keys(ANTHROPIC_PRICES);
+/** The efforts of the CLI a request may say (`--effort`), never another word. */
+export const CLI_EFFORTS: readonly string[] = ['low', 'medium', 'high', 'xhigh', 'max'];
+/** A model of the CLI, if it is one of `CLI_MODELS`. */
+export const cliModelOf = (m: unknown): string | undefined => (typeof m === 'string' && CLI_MODELS.includes(m) ? m : undefined);
+/** An effort of the CLI, if it is one of `CLI_EFFORTS`. */
+export const cliEffortOf = (e: unknown): string | undefined => (typeof e === 'string' && CLI_EFFORTS.includes(e) ? e : undefined);
 
 /**
  * The tasks already slow enough that a CLI answering in seconds or minutes changes nothing for whoever plays.
@@ -127,6 +140,13 @@ export interface QueueOptions {
   timeout?: number;
   /** Requests waiting at once (default 2: the CLI serves them one by one anyway). */
   parallel?: number;
+  /**
+   * The model of the CLI for the calls that do not name one of `CLI_MODELS` (T411): undefined, the CLI's own (ADR-0077). A call that names a
+   * model of the CLI (`claude-opus-5-5`) goes to it whatever this says; one that names an API model (`gemini-…`) goes to this.
+   */
+  model?: string;
+  /** The effort of the CLI for every call (`--effort`, one of `CLI_EFFORTS`); undefined, the CLI's own. */
+  effort?: string;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -249,7 +269,10 @@ export class QueueAiModels implements AiModels {
         report(undefined, { failed: kind });
         throw new Error(`${this.opts.provider}: ${why} (non ripetuta)`);
       };
-      // `data` is for the offline models; the rest is the request as the API would get it.
+      // `data` is for the offline models; the rest is the request as the API would get it. The model and the effort of the CLI only
+      // when said (T411): a model of the CLI the call names, else the one of this queue; never an API model.
+      const cliModel = cliModelOf(call.model) ?? cliModelOf(this.opts.model);
+      const effort = cliEffortOf(this.opts.effort);
       const request = {
         provider: this.opts.provider,
         agent: call.agent,
@@ -261,6 +284,8 @@ export class QueueAiModels implements AiModels {
         ...(call.temperature !== undefined ? { temperature: call.temperature } : {}),
         ...(call.thinking ? { thinking: call.thinking } : {}),
         ...(call.chi ? { chi: call.chi } : {}),
+        ...(cliModel ? { model: cliModel } : {}),
+        ...(effort ? { effort } : {}),
       };
       let id: string;
       try {

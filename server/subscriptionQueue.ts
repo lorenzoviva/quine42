@@ -17,7 +17,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { QUEUE_SECRET_HEADER, SUBSCRIPTIONS, type Provider, type QueuedAnswer } from '../src/kernel/ai/subscription';
+import { CLI_EFFORTS, CLI_MODELS, QUEUE_SECRET_HEADER, SUBSCRIPTIONS, type Provider, type QueuedAnswer } from '../src/kernel/ai/subscription';
 import { accessRefusal } from './geminiProxy';
 
 const MAX_BODY = 24 * 1024 * 1024;
@@ -36,6 +36,10 @@ export interface QueuedRequest {
   temperature?: number;
   thinking?: string;
   chi?: string;
+  /** The model of the CLI (T411, ADR-0216): one of `CLI_MODELS`, else the request is refused; absent, the CLI's own. */
+  model?: string;
+  /** The effort of the CLI (`--effort`): one of `CLI_EFFORTS`; absent, the CLI's own. */
+  effort?: string;
   /** ISO time it entered the queue. */
   creata: string;
 }
@@ -65,14 +69,17 @@ export function checkRequest(raw: unknown): string | undefined {
   if (!SUBSCRIPTIONS.includes(r.provider as Exclude<Provider, 'api'>)) return `provider sconosciuto: ${String(r.provider)}`;
   for (const k of ['agent', 'task', 'system', 'prompt'] as const) if (typeof r[k] !== 'string') return `manca ${k}`;
   if (r.images !== undefined && (!Array.isArray(r.images) || r.images.some((i) => typeof i !== 'string'))) return 'immagini non valide';
+  // What the CLI runs with (T411): a model and an effort of the lists only, never a word that the CLI could read as something else.
+  if (r.model !== undefined && !CLI_MODELS.includes(r.model as string)) return `modello della CLI non ammesso: ${String(r.model).slice(0, 40)}`;
+  if (r.effort !== undefined && !CLI_EFFORTS.includes(r.effort as string)) return `sforzo della CLI non ammesso: ${String(r.effort).slice(0, 20)}`;
   return undefined;
 }
 
 export async function enqueue(dir: string, raw: Omit<QueuedRequest, 'id' | 'creata'>, now = new Date()): Promise<string> {
   await fs.mkdir(dir, { recursive: true });
   const id = `${now.getTime().toString(36).padStart(10, '0')}-${(counter++ % 1296).toString(36).padStart(2, '0')}${Math.random().toString(36).slice(2, 6)}`;
-  const { provider, agent, task, system, prompt, schema, images, temperature, thinking, chi } = raw;
-  const req: QueuedRequest = { id, provider, agent, task, system, prompt, schema, images, temperature, thinking, chi, creata: now.toISOString() };
+  const { provider, agent, task, system, prompt, schema, images, temperature, thinking, chi, model, effort } = raw;
+  const req: QueuedRequest = { id, provider, agent, task, system, prompt, schema, images, temperature, thinking, chi, model, effort, creata: now.toISOString() };
   await writeAtomic(file(dir, id, 'richiesta'), req);
   return id;
 }

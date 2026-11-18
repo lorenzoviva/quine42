@@ -198,6 +198,38 @@ describe('il generatore sui crediti che avanzano', () => {
     w.gen.tick({ budget: budget(), live: 0, ceiling: 3, nowMs: NOW });
     expect(w.gen.tick({ budget: budget({ sessione: 12 }), live: 0, ceiling: 3, nowMs: NOW + 60_000 })).toMatchObject({ azione: 'ferma', motivo: expect.stringMatching(/finestra delle 5 ore al 12 %/) });
   });
+
+  it('una voce di rigenerazione (T411): il suo comando, il suo progresso e il suo posto nello stato, separati dalla generazione', () => {
+    const w = world();
+    w.config.generazione = [
+      { universo: 'orichalcum', rigenera: 'modelli', tettoSettimana: 25 },
+      { universo: 'neapolis', rigenera: 'tutto', tettoSettimana: 25 },
+      { universo: 'neapolis', rigenera: 'modelli', tettoSettimana: 25 },
+    ] as never;
+    // The generation of orichalcum finished long ago and spent its ceiling this week: neither holds back its regeneration.
+    w.spend('orichalcum', 25);
+    const state = path.join(w.dir, 'generatore.json');
+    fs.writeFileSync(state, JSON.stringify({ universi: { orichalcum: { stato: 'finito', t: new Date(NOW - 100 * H).toISOString() } } }));
+    const d = w.gen.tick({ budget: budget(), live: 0, ceiling: 3, nowMs: NOW });
+    expect(d).toMatchObject({ azione: 'avvia', universo: { universo: 'orichalcum', rigenera: 'modelli' }, tetto: 9 });
+    expect(w.procs.map((p) => p.args)).toEqual([['npm', 'run', 'genera', '--', 'orichalcum', '--rigenera', 'modelli', '--tetto', '9']]);
+    expect(w.gen.load().corrente).toMatchObject({ universo: 'orichalcum', rigenera: 'modelli', chiave: 'orichalcum:rigenera-modelli' });
+    expect(w.gen.describe(budget()).join('\n')).toMatch(/rigenera i modelli di orichalcum/);
+    // Its own progress: what the regeneration spent is in its file.
+    const progress = path.join(w.dir, 'universes', '.generation', 'orichalcum.rigenera-modelli.json');
+    fs.writeFileSync(progress, JSON.stringify({ passi: [], tetto: 25, consumo: { reset: RESET, ultimo: 0, speso: 25 } }));
+    w.end('tetto: usato 25 % della settimana, il tetto è 25 % — 4 passi in questa esecuzione');
+    // At its ceiling it is out, under its own key; the mode nobody knows is skipped; the next is neapolis's regeneration.
+    const next = w.gen.tick({ budget: budget(), live: 0, ceiling: 3, nowMs: NOW + 60_000 });
+    expect(w.gen.load().universi).toMatchObject({ orichalcum: { stato: 'finito' }, 'orichalcum:rigenera-modelli': { stato: 'tetto', fino: RESET } });
+    expect(w.gen.load().ultimo).toMatchObject({ universo: 'orichalcum', rigenera: 'modelli', esito: 'tetto' });
+    expect(next).toMatchObject({ azione: 'avvia', universo: { universo: 'neapolis', rigenera: 'modelli' } });
+    expect(w.procs.at(-1)!.args.slice(4)).toEqual(['neapolis', '--rigenera', 'modelli', '--tetto', '9']);
+    w.end('finito — 12 passi in questa esecuzione');
+    expect(w.gen.tick({ budget: budget(), live: 0, ceiling: 3, nowMs: NOW + 120_000 })).toMatchObject({ azione: 'attende', motivo: 'nessun universo da generare' });
+    expect(w.gen.load().universi['neapolis:rigenera-modelli']).toMatchObject({ stato: 'finito' });
+    expect(w.gen.describe(budget()).join('\n')).toMatch(/neapolis \(rigenera modelli\): speso 0 di 25 % questa settimana, finito/);
+  });
 });
 
 describe('il posto del generatore tra i task', () => {

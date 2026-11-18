@@ -3,7 +3,7 @@
 // settings, the Sculptor's system prompt in place of the CLI's, each run confirmed), with the model and the effort the bench
 // chooses and the images of the revision as one message of events. The dollars are what the call would cost on Anthropic's API
 // (`anthropicCost`, the list in `prices.ts`), from the tokens the CLI says; the CLI's own figure is kept beside them.
-// Nothing of the game changes: the queue still says no model and sends no images.
+// Since T411 (ADR-0216) the queue of the game does the same when a request says them: a model and an effort of the lists, the images.
 
 import { execFileSync } from 'node:child_process';
 import type { AiModels, TextCall } from '../../src/kernel/ai/models';

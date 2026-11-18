@@ -76,20 +76,30 @@ export function takeGeneration(dir: string, name: string, pid = process.pid): { 
   return { error: `«${name}»: il lucchetto della generazione non si prende` };
 }
 
+/**
+ * The file of the progress of a universe's generation (`<nome>.json`) or of a regeneration (T411: `<nome>.<modo>.json`, `rigenera-modelli`):
+ * a universe's name has no dot (`UNIVERSE_NAME_RE`), so the two never meet.
+ */
+export function progressPath(dir: string, name: string, kind?: string): string {
+  return path.join(serverPath(dir, 'generation'), `${name}${kind ? `.${kind}` : ''}.json`);
+}
+
 /** The progress of a generation, a file beside the universes: what it did and the ceiling the author may change while it runs. */
-export function progressFile(dir: string, name: string, defaults: { tetto: number }): DeferredStorage {
-  const file = path.join(serverPath(dir, 'generation'), `${name}.json`);
+export function progressFile(dir: string, name: string, defaults: { tetto: number }, kind?: string): DeferredStorage {
+  const file = progressPath(dir, name, kind);
   return {
     load(): DeferredProgress {
       try {
         const j = JSON.parse(fs.readFileSync(file, 'utf8'));
         const tetto = Number(j.tetto);
+        const tries = j.tries && typeof j.tries === 'object' && !Array.isArray(j.tries) ? Object.entries(j.tries as Record<string, unknown>).filter(([, n]) => Number.isInteger(n) && (n as number) > 0) : [];
         return {
           passi: Array.isArray(j.passi) ? j.passi.filter((s: unknown): s is string => typeof s === 'string') : [],
           tetto: Number.isFinite(tetto) && tetto >= 0 ? tetto : defaults.tetto,
           // The progress of before T307b says the game in Italian (`singola`): read internal.
           ...(typeof j.partita === 'string' && ['single', 'multiplayer'].includes(internalName('partita', j.partita)) ? { partita: internalName('partita', j.partita) as 'single' | 'multiplayer' } : {}),
           ...(j.consumo && typeof j.consumo === 'object' ? { consumo: { reset: typeof j.consumo.reset === 'string' ? j.consumo.reset : undefined, ultimo: Number(j.consumo.ultimo) || 0, speso: Number(j.consumo.speso) || 0 } } : {}),
+          ...(tries.length ? { tries: Object.fromEntries(tries) as Record<string, number> } : {}),
         };
       } catch {
         return { passi: [], tetto: defaults.tetto };

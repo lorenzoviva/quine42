@@ -180,6 +180,25 @@ export async function mergeBranch(root: string, branch: string, message: string)
   await git(root, ['update-ref', '-d', ref]);
 }
 
+/**
+ * A tag on the head of a universe, once (T411, ADR-0216: `prima-della-rigenerazione`, the state of before the regeneration kept in its history):
+ * `made` if it was put now, `there` if the universe had it (it is never moved), `none` without a commit to put it on. What the folder has and the
+ * history not yet (the plans the store writes without a commit, which the next commit would carry) is committed first, so the tag holds the state
+ * of before whole. A plain tag of simple name only, by git of `server/git.ts` as everything the server runs.
+ */
+export async function tagUniverse(root: string, tag: string, pending = 'lo stato di prima: i file non ancora nella storia'): Promise<'made' | 'there' | 'none'> {
+  if (!/^[a-z0-9][a-z0-9-]{0,60}$/.test(tag)) throw new Error(`tag non valido: ${tag}`);
+  if (!(await exists(path.join(root, '.git')))) throw new Error('universo sconosciuto');
+  return holdGit(root, async () => {
+    if (await revParse(root, `refs/tags/${tag}`)) return 'there';
+    if (await revParse(root, 'HEAD')) await commitAll(root, pending, 'kernel');
+    const head = await revParse(root, 'HEAD');
+    if (!head) return 'none';
+    await git(root, ['tag', tag, head]);
+    return 'made';
+  });
+}
+
 // --- Clones (T42d) ------------------------------------------------------------------------------
 // The master of a multiplayer game never changes: another master means another universe, copied whole — history, maps,
 // the state of every wanderer — with its name and master changed (and the old master's cards, if they pass) in one

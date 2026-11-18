@@ -83,6 +83,10 @@ describe('servi (T68b) — parsing output e token usage', () => {
     expect(usage).toEqual({ prompt: 120, output: 45, cached: 300, thoughts: 10 });
   });
 
+  it('i token che la CLI di Claude scrive nella cache del prompt sono ingresso anche loro (T411)', () => {
+    expect(extractUsage({ usage: { input_tokens: 4, cache_creation_input_tokens: 9000, cache_read_input_tokens: 12000, output_tokens: 800 } })).toEqual({ prompt: 9004, cached: 12000, output: 800 });
+  });
+
   it('legge JSON su riga singola o multilinea con log su altre righe', () => {
     const out = readCliOutput(`avvisi di debug\n${JSON.stringify({ result: 'OK', usage: { prompt_tokens: 20, output_tokens: 5 } })}\n`);
     expect(out.result).toBe('OK');
@@ -166,25 +170,59 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     expect(res.usage).toEqual({ prompt: 150, output: 200 });
   });
 
-  it('rifiuta le richieste con immagini perché non supportate da CLI da riga di comando', async () => {
+  it('le immagini vanno alla CLI come un messaggio di eventi, col modello e lo sforzo che la richiesta dice (T411, ADR-0216)', async () => {
     const d = dir();
+    const scriptPath = path.join(d, 'mock-images.mjs');
+    // The fake CLI answers with what it got: how the prompt came, the model and the effort, the kinds of the blocks of the message.
+    await fs.writeFile(
+      scriptPath,
+      `
+      ${INIT}
+      let input = '';
+      process.stdin.on('data', (c) => (input += c));
+      process.stdin.on('end', () => {
+        const args = process.argv.slice(2);
+        const at = (k) => (args.includes(k) ? args[args.indexOf(k) + 1] : null);
+        const msg = JSON.parse(input.trim());
+        const result = JSON.stringify({ input: at('--input-format'), model: at('--model'), effort: at('--effort'), kinds: msg.message.content.map((c) => c.type) });
+        console.log(JSON.stringify({ type: 'result', result, usage: { input_tokens: 10, output_tokens: 5 } }));
+      });
+      `,
+      'utf8',
+    );
     const id = await enqueue(d, {
       provider: 'claude',
       agent: 'artist',
       task: 'model.judge',
       system: '',
       prompt: 'Giudica',
-      images: ['data:image/png;base64,abc'],
+      images: ['data:image/png;base64,iVBORw0KGgo='],
+      model: 'claude-opus-5-5',
+      effort: 'low',
     });
+    const res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res.status).toBe('ok');
+    expect(JSON.parse(res.text!)).toEqual({ input: 'stream-json', model: 'claude-opus-5-5', effort: 'low', kinds: ['image', 'text'] });
+    expect((await look(d, id)).stato).toBe('fatta');
+  });
 
-    const res = await serveOne(d, 'claude');
-    expect(res.served).toBe(true);
-    expect(res.status).toBe('error');
-    expect(res.errore).toMatch(/non supporta immagini/);
-
-    const looked = await look(d, id);
-    expect(looked.stato).toBe('fallita');
-    expect(looked.errore).toMatch(/non supporta immagini/);
+  it('un modello o uno sforzo fuori elenco, o un’immagine che non lo è, non arrivano alla CLI', async () => {
+    const d = dir();
+    // A CLI that is never run: what reaches it would be answered.
+    const scriptPath = path.join(d, 'mock-never.mjs');
+    await fs.writeFile(scriptPath, `${INIT}\nconsole.log(JSON.stringify({ type: 'result', result: 'eseguita' }));`, 'utf8');
+    const base = { provider: 'claude' as const, agent: 'artist', task: 'model.judge', system: '', prompt: 'Giudica' };
+    // Written on the disk past the queue's checks (a request file of someone who can already write there): `serveOne` reads it again.
+    const model = await enqueue(d, { ...base, model: '--dangerously-skip-permissions' });
+    let res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res).toMatchObject({ id: model, status: 'error', errore: expect.stringMatching(/modello della CLI non ammesso/) });
+    const effort = await enqueue(d, { ...base, effort: 'tutto' });
+    res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res).toMatchObject({ id: effort, status: 'error', errore: expect.stringMatching(/sforzo della CLI non ammesso/) });
+    const image = await enqueue(d, { ...base, images: ['javascript:alert(1)'] });
+    res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res).toMatchObject({ id: image, status: 'error', errore: expect.stringMatching(/immagine non valida/) });
+    expect((await look(d, image)).stato).toBe('fallita');
   });
 
   it('rileva un limite di abbonamento, genera errore chiaro e data di reset', async () => {
@@ -255,6 +293,36 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     expect(q.usage.text).toBe(1);
     expect(q.usage.inputTokens).toBe(10);
     expect(q.usage.outputTokens).toBe(5);
+  });
+
+  it('QueueAiModels: il modello della CLI che la chiamata nomina, se no quello della coda; mai un modello delle API (T411)', async () => {
+    const sent: Array<Record<string, unknown>> = [];
+    const fetchImpl = (async (url: string, init?: RequestInit) => {
+      const route = String(url).slice('/api/coda'.length).replace(/^\//, '');
+      if (!route && init?.method === 'POST') {
+        sent.push(JSON.parse(String(init.body)));
+        return { ok: true, status: 200, json: async () => ({ id: `r${sent.length}` }) } as Response;
+      }
+      return { ok: true, status: 200, json: async () => ({ stato: 'fatta', text: 'ok' }) } as Response;
+    }) as typeof fetch;
+    const call = { agent: 'sculptor', task: 'model.sculpt', system: '', prompt: 'p' };
+    const plain = new QueueAiModels({ provider: 'claude', fetchImpl, poll: 1 });
+    await plain.text({ ...call, model: 'gemini-4-argon' });
+    await plain.text({ ...call, model: 'claude-sonnet-5-5' });
+    const opus = new QueueAiModels({ provider: 'claude', fetchImpl, poll: 1, model: 'claude-opus-5-5', effort: 'low' });
+    await opus.text({ ...call, model: 'gemini-3.8-flash' });
+    await opus.text({ ...call, model: 'claude-fable-5-1' });
+    await opus.text(call);
+    const odd = new QueueAiModels({ provider: 'claude', fetchImpl, poll: 1, model: 'gpt-9', effort: '--tools' });
+    await odd.text(call);
+    expect(sent.map((r) => [r.model, r.effort])).toEqual([
+      [undefined, undefined],
+      ['claude-sonnet-5-5', undefined],
+      ['claude-opus-5-5', 'low'],
+      ['claude-fable-5-1', 'low'],
+      ['claude-opus-5-5', 'low'],
+      [undefined, undefined],
+    ]);
   });
 });
 

@@ -344,6 +344,27 @@
   spirale da `(0, 0)` con i loro individui, modelli, brani) si scrivono solo se finiscono validi (`StepGate`); il progresso e il tetto in percentuale
   della settimana (riletto a ogni passo, misurato da `/usage`) stanno in `universes/.generation/<nome>.json`; il comando non parte su un universo con
   un mondo acceso (`universes/.running/`, `server/generation.ts`) e un mondo non si accende su un universo che si genera. Un universo di un'altra `X.Y` del kernel non si genera.
+  Un passo che finisce in errore si conta nel progresso (`tries`) e dopo `MAX_STEP_TRIES` (3) giri si lascia, così una cosa che non viene non ferma il resto (T411).
+
+  **La rigenerazione dei modelli** (ADR-0216, T411): `npm run genera -- <universo> --rigenera modelli [--tipi …] [--classi …] [--modelli n] [--tetto %]`
+  riscolpisce i tipi di `models/index.json` che il mondo indossa (`wearersOf`: moduli, oggetti, le strutture dei piani di tutti i luoghi pianificati
+  dell'universo, le case comuni) delle classi `furniture`, `structure`, `person`, `animal`, `beast` (`REGEN_CLASSES`), mai quelli del kernel
+  (`kernelModel`: i generici, la corona, gli schermi, le parti `part-…`, i suoni), i corpi dei viandanti né le carte portate (`regenerationTargets`).
+  Allo Scultore la richiesta dal concetto, come il `ModelDirector` (la taglia, la cantina della voce o del piano, l'abitazione per le case comuni), mai il
+  programma di prima; il giudizio dell'Artista con le sue foto e la revisione come in gioco (`sculptPlan` delle manopole); poi l'interno dallo
+  Scenografo (`interno:<modello>`, l'autore il modello della CLI). Tutto sulla coda col **modello e lo sforzo della CLI detti dalla richiesta**
+  (`QueueAiModels` `model`/`effort`, a elenco: `CLI_MODELS`, `CLI_EFFORTS`, controllati da `checkRequest` all'ingresso e da `serveOne` che li rilegge;
+  le immagini come un messaggio di eventi, la via di T391): per la rigenerazione Opus 5.5 a sforzo `low` (`REGEN_MODEL`, `REGEN_EFFORT`), lo Scultore
+  stabile del banco di T406 e T413. **I lotti** (`regenerationPlan`): dove una struttura riscolpita a 16 non starebbe nel suo lotto di prima (tagliato
+  per 20: le case di 5 × 5, 6 × 5), il suo ambiente si ritaglia prima delle strutture (`ambiente:<id>`): il programma del seme di oggi se l'universo
+  teneva quello del seme di prima (T407), le regole-scatola del Cartografo allargate di 20/16 e almeno 7 (`stretchBoxes`, `stretchRule`: righe e
+  colonne interne ripetute, la porta una sola, `steps` diviso per (20/16)²) o, se così un luogo perde spazio, solo fino a 7 (`least`), i timbri a 16;
+  i piani di quell'ambiente prendono `vpt: 16`. Si prende la prima via che il validatore degli ambienti accetta e con cui **nessun luogo perde una
+  struttura** che i suoi lotti tengono oggi (`structureLotSizes`, come `claimSizes`); altrimenti l'ambiente resta com'era e le strutture che vi stanno
+  si riscolpiscono **a 20** (`vpt: 20` nella voce, gli stessi voxel: la taglia non cambia al caricamento). Un ambiente già ritagliato non si ritaglia
+  di nuovo. Prima di scrivere, la testa dell'universo prende il tag `prima-della-rigenerazione` (una volta, `tagUniverse` con il git di `server/git.ts`).
+  Il progresso sta in `universes/.generation/<nome>.rigenera-modelli.json`; il comando aspetta fino a 2 minuti chi serve la coda, poi si ferma. Nella
+  pipeline una voce di `generazione` con `"rigenera": "modelli"` lancia `comandoRigenera` e ha il suo posto nello stato (`<nome>:rigenera-modelli`, T88).
 
 <a id="concilio"></a>
 ## Il Concilio al lavoro: registro, Luogo, Fucina, Genesi

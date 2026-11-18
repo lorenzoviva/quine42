@@ -21,7 +21,7 @@ import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from
 import type { Rule } from './types';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { STAMP_SHAPES } from './stamps';
-import { repairProgram } from './mj';
+import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { dayPhase, declaredFor, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
 import { Npc, type NpcHost } from './npc';
@@ -1941,6 +1941,85 @@ export class Kernel {
     return n;
   }
 
+  // --- The regeneration of the models (T411, ADR-0216): what `src/kernel/regenerate.ts` asks of the world, without loading a place ---
+
+  /** Every place of this world the universe has a plan of: from its maps (`listMaps`), each read (ported) through the store of plans. */
+  async plannedPlaces(): Promise<Array<{ cx: number; cy: number; plan: ChunkPlan }>> {
+    const prefix = this.recordKey({ cx: 0, cy: 0, key: '' } as Chunk).replace(/[:,]/g, '_');
+    const out: Array<{ cx: number; cy: number; plan: ChunkPlan }> = [];
+    const seen = new Set<string>();
+    for (const m of (await this.repo.backend?.listMaps?.().catch(() => [])) ?? []) {
+      if (!m.file.startsWith(prefix)) continue;
+      const parts = m.file.slice(prefix.length).split('_').map(Number);
+      if (parts.length !== 2 || !parts.every(Number.isInteger)) continue;
+      const [cx, cy] = parts;
+      const key = this.chunkKey(cx, cy);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const rec = await this.chunkStore.load(this.recordKey({ cx, cy, key } as Chunk)).catch(() => undefined);
+      if (rec?.plan) out.push({ cx, cy, plan: rec.plan });
+    }
+    return out.sort((a, b) => a.cy - b.cy || a.cx - b.cx);
+  }
+
+  /** A place's plan written again through the store of plans (a place this kernel has not loaded: the one loaded keeps its own until reloaded). */
+  async savePlan(cx: number, cy: number, plan: ChunkPlan): Promise<void> {
+    await this.chunkStore.save(this.recordKey({ cx, cy, key: this.chunkKey(cx, cy) } as Chunk), { plan });
+  }
+
+  /**
+   * The lots a plan's structures would stand on, largest first as `claimSizes` gives them out: the place laid out as `applyPlan` lays it, with
+   * another program of its environment if given, without loading it.
+   */
+  structureLotSizes(cx: number, cy: number, plan: ChunkPlan, program?: MjNode): Array<{ w: number; h: number }> {
+    const draft = this.genDraft(cx, cy);
+    const { result } = this.layoutOf({ cx, cy, draft }, plan, this.pathCode(), true, program ?? this.content.layouts[plan.layout]?.program);
+    return this.structureLots({ cx, cy, lots: result.lots }, plan)
+      .map((b, i) => ({ i, w: b.x1 - b.x0 + 1, h: b.y1 - b.y0 + 1 }))
+      .sort((a, b) => b.w * b.h - a.w * a.h || a.i - b.i)
+      .map(({ w, h }) => ({ w, h }));
+  }
+
+  /** The entry a structure of a plan wears (ADR-0160): its concept at its size, as the lots give it out. */
+  structureModelOf(concept: string, size?: SizeTier): string {
+    return this.structureModelFor(concept, size);
+  }
+
+  /** The description of this world's common houses (ADR-0134), if it has its own. */
+  commonHouse(): string | undefined {
+    return this.terrain?.manifest.commonHouse;
+  }
+
+  /** The models the wanderers wear (the bodies of the modules of kind `player`): the kernel's, never regenerated. */
+  wandererModels(): string[] {
+    const out = new Set(['viandante']);
+    for (const m of this.modules.values()) if (m.manifest.kind === 'player' && m.manifest.appearance?.model) out.add(m.manifest.appearance.model);
+    return [...out];
+  }
+
+  /**
+   * An environment's program changed by the kernel (T411: a universe of before cut again for the structures at 16): tried as the Cartographer's
+   * (`validateLayout` on real drafts), written in the manifest that has it, committed by the kernel. Why not, or undefined if it is written.
+   */
+  setEnvironmentProgram(id: string, program: MjNode, message: string): string | undefined {
+    const m = [...this.modules.values()].find((x) => x.manifest.layouts?.[id]);
+    if (!m) return `ambiente sconosciuto: ${id}`;
+    const errs = this.validator.validateLayout(id, { ...m.manifest.layouts![id], program }, this.palette, this.sampleDrafts());
+    if (errs.length) return errs.join('; ');
+    let man: { layouts?: Record<string, Record<string, unknown>> };
+    try {
+      man = JSON.parse(this.repo.working[m.manifestPath] ?? '');
+    } catch {
+      return `${m.manifestPath} non si legge`;
+    }
+    if (!man.layouts?.[id]) return `${m.manifestPath} non ha l'ambiente ${id}`;
+    man.layouts[id] = { ...man.layouts[id], program };
+    this.repo.write(m.manifestPath, JSON.stringify(man, null, 2) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(message, 'kernel');
+    return undefined;
+  }
+
   /** Brings a chunk from draft to planned, reusing the cached plan when possible. */
   private async develop(ch: Chunk, noQuota = false): Promise<void> {
     const rec = await this.chunkStore.load(this.recordKey(ch));
@@ -2374,7 +2453,7 @@ export class Kernel {
    * A plan laid out on its draft (deterministic): the environment's program, the guaranteed paths, the lots,
    * the Cartographer's edits. `quiet` for the model of places (T26): a program that fails there is not news.
    */
-  private layoutOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, pathCode: string, quiet = false): { result: LayoutResult; tiles: string; block?: BlockMark } {
+  private layoutOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, pathCode: string, quiet = false, program: MjNode | undefined = this.content.layouts[plan.layout]?.program): { result: LayoutResult; tiles: string; block?: BlockMark } {
     const S = this.config.chunkSize;
     let result: LayoutResult;
     // A place of a block (T370): the lot's cells reserved, the gates inside the block in the ring, the edge of the lot walked (`blockLayout`).
@@ -2383,7 +2462,7 @@ export class Kernel {
     // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
     const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, ...(block ? this.blockLayout(block, ch) : {}) };
     try {
-      result = layout(this.rows(ch.draft), this.palette, { ...opts, program: this.content.layouts[plan.layout]?.program });
+      result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
       if (!quiet) this.council.say('kernel', 'errore', `ambiente ${plan.layout} non eseguibile: ${(e as Error).message}`);
       result = layout(this.rows(ch.draft), this.palette, opts);
