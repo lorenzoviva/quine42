@@ -29,9 +29,11 @@ export const regenKind = (mode: RegenMode): string => `rigenera-${mode}`;
 
 /**
  * The classes the regeneration of the models sculpts again, in the order of its steps (T411: «strutture, mobili, figure»): the furniture first,
- * which the Scenografo then chooses from, the structures each with its interior, the figures.
+ * which the Scenografo then chooses from, the structures each with its interior, the small buildings, the figures. The small buildings since T428
+ * (ADR-0219): the common house of the lots under 5 tiles and the buildings the modules wear (a newsstand, a well) are buildings one sees, and
+ * neapolis kept its handmade ones of T273, drawn as small as a piece of furniture, after its regeneration.
  */
-export const REGEN_CLASSES: readonly string[] = ['furniture', 'structure', 'person', 'animal', 'beast'];
+export const REGEN_CLASSES: readonly string[] = ['furniture', 'structure', 'building', 'person', 'animal', 'beast'];
 
 /** The tag the state of before stays under, in the universe's history (the author, 17/11): put once, before the first regeneration. */
 export const BEFORE_REGENERATION = 'prima-della-rigenerazione';
@@ -112,7 +114,8 @@ export interface RegenTarget {
 
 /**
  * What the Sculptor is asked for a type of before (as the `ModelDirector` asks for the missing ones): a structure by its concept, at its size,
- * with its cellar and as a dwelling for the common houses; a thing or a figure by who wears it, or by its own name when many do (a model shared
+ * with its cellar and as a dwelling for the common houses, and so a small building that stands on a lot (the common house of the lots under 5
+ * tiles, T428) at its own class; a thing or a figure by who wears it, or by its own name when many do (a model shared
  * by several kinds of people is not one of them). Never its program of before: today's prompt composes from the concept.
  */
 export function requestOf(id: string, info: ModelInfo, wearers: readonly Wearer[]): SculptRequest {
@@ -120,7 +123,8 @@ export function requestOf(id: string, info: ModelInfo, wearers: readonly Wearer[
   const size = sizeOf(info.size)?.id;
   const taglia = size && size !== cls?.taglia ? size : undefined;
   const tinta = info.tint ? { tinta: true } : {};
-  if (info.class === 'structure') {
+  const onLot = info.class === 'building' && wearers.some((w) => w.kind === 'house' || w.kind === 'structure');
+  if (info.class === 'structure' || onLot) {
     const s = wearers.find((w) => w.kind === 'structure');
     const house = wearers.find((w) => w.kind === 'house');
     const concept = s?.name ?? house?.name ?? info.name ?? id;
@@ -131,7 +135,7 @@ export function requestOf(id: string, info: ModelInfo, wearers: readonly Wearer[
       id,
       nome: info.name ?? concept,
       aspetto: `${concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}»${place.description ? ` (${place.description})` : ''}` : ''}`,
-      classe: 'structure',
+      classe: info.class,
       ...(taglia ? { taglia } : {}),
       ...(place ? { contesto: place.name } : {}),
       ...(house ? { dwelling: true } : {}),
@@ -561,7 +565,7 @@ export async function* regenerationSteps(k: Kernel, o: RegenOptions, done: Set<s
   const targets = regenerationTargets(k, places, o);
   const plan = regenerationPlan(k, places, targets, o.seedLayouts, done);
   const count = (c: string) => targets.filter((t) => t.info.class === c).length;
-  log(`rigenerazione dei modelli: ${targets.length} tipi (${count('furniture')} mobili, ${count('structure')} strutture, ${count('person') + count('animal') + count('beast')} figure) su ${places.length} luoghi pianificati`);
+  log(`rigenerazione dei modelli: ${targets.length} tipi (${count('furniture')} mobili, ${count('structure')} strutture, ${count('building')} edifici, ${count('person') + count('animal') + count('beast')} figure) su ${places.length} luoghi pianificati`);
   const asked = plan.environments.filter((e) => e.how === 'cartographer');
   for (const e of plan.environments) {
     const how = e.how === 'cartographer' ? `da riscrivere dal Cartografo, edifici di ${e.need} × ${e.need} (${e.why})` : `${VIA[e.how]}${e.how === 'kept' ? ` (${e.why})` : `, ${e.places.length} luoghi`}`;

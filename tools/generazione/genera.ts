@@ -16,7 +16,7 @@
 // state of before stays in the universe's history under the tag `prima-della-rigenerazione`.
 //
 //   --tipi <id,id…>                    only these types of the library (a proof on one type)
-//   --classi <classe,…>                the classes sculpted again (default furniture,structure,person,animal,beast)
+//   --classi <classe,…>                the classes sculpted again (default furniture,structure,building,person,animal,beast)
 //   --modelli <n>                      at most this many types in this run
 //   --tetto <%>                        as above, in universes/.generation/<universo>.rigenera-modelli.json
 //   --modello <id>, --sforzo <livello>  default claude-opus-5-5, low (the stable Sculptor of T406 and T413)

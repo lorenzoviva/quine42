@@ -348,7 +348,7 @@
 
   **La rigenerazione dei modelli** (ADR-0216, T411): `npm run genera -- <universo> --rigenera modelli [--tipi …] [--classi …] [--modelli n] [--tetto %]`
   riscolpisce i tipi di `models/index.json` che il mondo indossa (`wearersOf`: moduli, oggetti, le strutture dei piani di tutti i luoghi pianificati
-  dell'universo, le case comuni) delle classi `furniture`, `structure`, `person`, `animal`, `beast` (`REGEN_CLASSES`), mai quelli del kernel
+  dell'universo, le case comuni) delle classi `furniture`, `structure`, `building` (da T428, ADR-0219: la casa comune dei lotti sotto 5 caselle, chiesta come in gioco, e gli edifici dei moduli), `person`, `animal`, `beast` (`REGEN_CLASSES`), mai quelli del kernel
   (`kernelModel`: i generici, la corona, gli schermi, le parti `part-…`, i suoni), i corpi dei viandanti né le carte portate (`regenerationTargets`).
   Allo Scultore la richiesta dal concetto, come il `ModelDirector` (la taglia, la cantina della voce o del piano, l'abitazione per le case comuni), mai il
   programma di prima; il giudizio dell'Artista con le sue foto e la revisione come in gioco (`sculptPlan` delle manopole); poi l'interno dallo
