@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 18/11/2026, epoca 522 (claude). Crediti: vedi `stato`.
+Aggiornato il 18/11/2026, epoca 524 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,6 +34,7 @@ Aggiornato il 18/11/2026, epoca 522 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- **18/11 19:08 (epoca 524):** T426 integrato (`820b6d23`, kernel 0.9.12: la porta delle strutture grandi si apre da fuori e da dentro, visto nel browser con la Casa del borgomastro; non provato con la Palazzina di orichalcum né in multigiocatore); la pipeline si spegne col `ferma --dopo`. L’autore aveva `npm run dev` acceso: causa probabile delle uscite senza esito (ADR-0143).
 - **18/11 18:55 (epoca 522):** orichalcum uscito senza esito alle 18:52Z (ultimo passo `ambiente:inn`, log vuoti col codice di prima di T425); fatti `generatore spegni` e `ferma --dopo` (aspetta T426). Al riavvio: `generatore accendi`, leggere il primo log vero e capire perché aurora e orichalcum escono senza esito.
 - Autore assente fino al 18/11 18:30: autonomia; integrare e lanciare la catena senza aspettare.
 - Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable a regime normale (autore 14/11): niente spostamenti liberi, solo i task più difficili.
