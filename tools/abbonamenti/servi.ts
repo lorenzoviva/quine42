@@ -34,6 +34,36 @@ export interface CliCommand {
   args: string[];
   /** What the CLI reads as its prompt: never an argument, where a text beginning with a dash could become an option. */
   stdin: string;
+  /**
+   * The system prompt and the file the CLI reads it from (`--system-prompt-file`, T427): never an argument, which grows with the request
+   * past the 32 767 characters of a command line on Windows (`spawn ENAMETOOLONG`). Whoever runs the command writes it first.
+   */
+  system?: { file: string; text: string };
+}
+
+/** The name of the system prompt's file in the folder of a run (T427), next to the empty folder the CLI runs in, never inside it. */
+export const SYSTEM_FILE = 'system-prompt.txt';
+
+/** The empty folder the CLI runs in, inside the folder of the run (`runFolders`). */
+export const EMPTY_DIR = 'empty';
+
+/**
+ * The folders of a run (T427): `root` from `mkdtemp` (0700 where the system has the bits), with the system prompt's file, and `empty` inside
+ * it, the CLI's working folder, empty as ADR-0106 wants. Removing `root` removes both.
+ */
+export async function runFolders(prefix: string): Promise<{ root: string; empty: string }> {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
+  const empty = path.join(root, EMPTY_DIR);
+  await fs.mkdir(empty, { mode: 0o700 });
+  return { root, empty };
+}
+
+/**
+ * Writes the system prompt of a command in the folder of its run: only the run's user may read it (0600 where the system has the bits),
+ * never over a file that is there already. It goes with the folder when the run ends.
+ */
+export async function writeSystemPrompt(command: Pick<CliCommand, 'system'>): Promise<void> {
+  if (command.system) await fs.writeFile(command.system.file, command.system.text, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
 }
 
 export interface CliRunResult {
@@ -111,12 +141,16 @@ export function imageBlock(url: string): { type: 'image'; source: { type: 'base6
   return { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } };
 }
 
-/** Builds the non-interactive CLI command and arguments for the chosen subscription provider. */
+/**
+ * Builds the non-interactive CLI command and arguments for the chosen subscription provider; `runDir` is the folder of the run
+ * (`runFolders`), where its system prompt is written (`writeSystemPrompt`). No argument grows with the request.
+ */
 export function buildCliCommand(
   provider: SubscriptionProvider,
   req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
   customCmd?: string,
   choice: CliChoice = {},
+  runDir = '.',
 ): CliCommand {
   if (provider !== 'claude') throw new Error(`${String(provider)} non serve la coda: non può escludere gli strumenti`);
   for (const v of [choice.model, choice.effort]) if (v !== undefined && !CHOICE_RE.test(v)) throw new Error(`scelta della CLI non valida: ${v}`);
@@ -128,12 +162,13 @@ export function buildCliCommand(
     ...(choice.effort ? ['--effort', choice.effort] : []),
     ...(images.length ? ['--input-format', 'stream-json'] : []),
   ];
-  // `--system-prompt` takes the next argument whatever it says.
-  const args = [...parts.slice(1), ...ISOLATION_ARGS, ...chosen, ...(req.system ? ['--system-prompt', req.system] : [])];
+  // The system prompt in place of the CLI's, from its file: the argument is a path we chose, whatever the request says.
+  const system = req.system ? { file: path.resolve(runDir, SYSTEM_FILE), text: req.system } : undefined;
+  const args = [...parts.slice(1), ...ISOLATION_ARGS, ...chosen, ...(system ? ['--system-prompt-file', system.file] : [])];
   const stdin = images.length
     ? `${JSON.stringify({ type: 'user', message: { role: 'user', content: [...images.map(imageBlock), { type: 'text', text }] } })}\n`
     : text;
-  return { cmd: parts[0], args, stdin };
+  return { cmd: parts[0], args, stdin, ...(system ? { system } : {}) };
 }
 
 /** What the CLI needs to run and to find the subscription's login, by name; everything else (keys, the `.env`) stays here. */
@@ -344,11 +379,17 @@ export async function runIsolated(
   req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
   opts: { cmd?: string; timeoutMs?: number; choice?: CliChoice } = {},
 ): Promise<IsolatedRun> {
-  const { cmd, args, stdin } = buildCliCommand(provider, req, opts.cmd, opts.choice);
   const check = new IsolationCheck();
-  const empty = await fs.mkdtemp(path.join(os.tmpdir(), 'quine-coda-'));
-  const run = await runCli({ cmd, args, stdin, cwd: empty, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
-  await fs.rm(empty, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+  const { root, empty } = await runFolders('quine-coda-');
+  let run: CliRunResult;
+  try {
+    const command = buildCliCommand(provider, req, opts.cmd, opts.choice, root);
+    await writeSystemPrompt(command);
+    run = await runCli({ cmd: command.cmd, args: command.args, stdin: command.stdin, cwd: empty, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
+  } finally {
+    // The folders go with the system prompt, whatever happened.
+    await fs.rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+  }
 
   // 0. It had something to act with: no answer from that run, and no more runs.
   if (check.breach) return { status: 'isolation', errore: `isolamento della CLI non confermato: ${check.breach}` };

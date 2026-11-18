@@ -3,10 +3,10 @@
 // Offline: a fake CLI, no model is called.
 
 import { describe, expect, it } from 'vitest';
-import { mkdtempSync, promises as fs } from 'node:fs';
+import { existsSync, mkdtempSync, promises as fs } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { buildCliCommand, imageBlock, runIsolated } from '../tools/abbonamenti/servi';
+import { buildCliCommand, EMPTY_DIR, imageBlock, runCli, runIsolated, SYSTEM_FILE } from '../tools/abbonamenti/servi';
 import { ANTHROPIC_PRICES, anthropicCost, priceOf, PRICES } from '../src/kernel/ai/prices';
 import { claudeCliModels, priceRun, routed } from '../lab/scripts/claude-cli';
 import { MockAiModels } from '../src/kernel/ai/mock';
@@ -24,8 +24,9 @@ describe('T391 — la CLI isolata con la scelta del banco', () => {
 
     const cmd = buildCliCommand('claude', req, undefined, { model: 'claude-opus-5-5', effort: 'low', images: true });
     expect(cmd.args).toEqual(expect.arrayContaining(['--model', 'claude-opus-5-5', '--effort', 'low', '--input-format', 'stream-json', '--tools', '', '--strict-mcp-config']));
-    // The system prompt still last, in place of the CLI's.
-    expect(cmd.args.slice(-2)).toEqual(['--system-prompt', 'Sei lo Scultore']);
+    // The system prompt still last, in place of the CLI's, from its file (T427).
+    expect(cmd.args.slice(-2)).toEqual(['--system-prompt-file', cmd.system!.file]);
+    expect(cmd.system!.text).toBe('Sei lo Scultore');
     const msg = JSON.parse(cmd.stdin.trim());
     expect(msg.type).toBe('user');
     expect(msg.message.content[0]).toEqual({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: 'iVBORw0KGgo=' } });
@@ -106,5 +107,47 @@ describe('T391 — i prezzi', () => {
     expect(p.written1h).toBe(100);
     expect(p.written5m).toBe(300);
     expect(p.usd).toBeCloseTo((1000 * 2 + 300 * 2.5 + 100 * 4 + 500 * 0.2 + 2000 * 10) / 1e6 + 0.001, 9);
+  });
+});
+
+describe('T427 — il prompt di sistema da un file accanto alla cartella vuota della corsa', () => {
+  const finta = path.resolve('lab/scripts/claude-finta.mjs');
+
+  it('nessun argomento cresce con il prompt di sistema', () => {
+    const corto = buildCliCommand('claude', { system: 's', prompt: 'p' }, undefined, { model: 'claude-opus-5-5' }, '/corsa');
+    const lungo = buildCliCommand('claude', { system: 's'.repeat(100_000), prompt: 'p' }, undefined, { model: 'claude-opus-5-5' }, '/corsa');
+    expect(lungo.args).toEqual(corto.args);
+    expect(lungo.args.join(' ').length).toBeLessThan(2_000);
+    expect(lungo.system).toEqual({ file: path.resolve('/corsa', SYSTEM_FILE), text: 's'.repeat(100_000) });
+    expect(buildCliCommand('claude', { system: '', prompt: 'p' }).args).not.toContain('--system-prompt-file');
+  });
+
+  it('100 000 caratteri arrivano alla CLI finta, che li legge dal file accanto alla sua cartella vuota; poi file e cartelle non ci sono più', async () => {
+    const d = mkdtempSync(path.join(tmpdir(), 'banco-t427-'));
+    const xml = path.join(d, 'p.xml');
+    const log = path.join(d, 'log.jsonl');
+    await fs.writeFile(xml, '<sequence values="BA"><one in="B" out="A"/></sequence>', 'utf8');
+    // A text that begins with dashes, spans lines and is not ASCII arrives as it is.
+    const head = '--tools Bash\nè lo Scultore\n';
+    const system = head + 'x'.repeat(100_000 - head.length);
+    expect(system.length).toBe(100_000);
+    const r = await runIsolated('claude', { system, prompt: 'Scolpisci un forte' }, { cmd: `node ${finta} ${xml} ${log}`, choice: { model: 'claude-opus-5-5', effort: 'low' } });
+    expect(r.status, r.errore).toBe('ok');
+    const seen = JSON.parse((await fs.readFile(log, 'utf8')).trim());
+    expect(seen).toMatchObject({ model: 'claude-opus-5-5', effort: 'low', tools: '', system: 100_000, prompt: 'Scolpisci un forte'.length, isolation: true });
+    expect(seen.argChars).toBeLessThan(2_000);
+    expect(seen.systemHead).toBe(system.slice(0, 40));
+    expect(path.basename(seen.systemFile)).toBe(SYSTEM_FILE);
+    // The file next to the CLI's folder, which stays empty (V-009), and both gone with the run.
+    expect(path.join(path.dirname(seen.systemFile), EMPTY_DIR).toLowerCase()).toBe(path.resolve(seen.cwd).toLowerCase());
+    expect(seen.inCwd).toEqual([]);
+    expect(existsSync(seen.systemFile)).toBe(false);
+    expect(existsSync(path.dirname(seen.systemFile))).toBe(false);
+  });
+
+  it('la CLI finta rifiuta il prompt di sistema come argomento', async () => {
+    const d = mkdtempSync(path.join(tmpdir(), 'banco-t427-'));
+    const run = await runCli({ cmd: 'node', args: [finta, path.join(d, 'p.xml'), path.join(d, 'log.jsonl'), '--system-prompt', 's'], stdin: 'p' });
+    expect(run.code).toBe(2);
   });
 });
