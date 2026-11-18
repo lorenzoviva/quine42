@@ -273,6 +273,12 @@
   "author": "dal Gerboa Artista, a mano (T225)",
   "vpt": 20
  },
+ "corona-gerboa-scenographer": {
+  "class": "person",
+  "name": "Gerboa Scenografo (corona)",
+  "author": "dal Gerboa Musicista, a mano (T410)",
+  "vpt": 20
+ },
  "corona-gerboa-sculptor": {
   "class": "person",
   "name": "Gerboa Scultore (corona)",

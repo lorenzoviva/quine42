@@ -10,48 +10,49 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Universo | `reame` | 0 (0) | 0 (0) | 22 (10) | 1 (1) |
 | Universo | `realm` | 18 (6) | 0 (0) | 2 (2) | 0 (0) |
 | Partita | `Partita` | 85 (23) | 0 (0) | 180 (57) | 8 (3) |
-| Luogo | `place` | 1227 (114) | 24 (6) | 79 (29) | 55 (10) |
-| Luogo | `chunk` | 933 (64) | 0 (0) | 147 (40) | 5 (1) |
-| Luogo | `Place` | 1227 (114) | 24 (6) | 79 (29) | 55 (10) |
+| Luogo | `place` | 1240 (115) | 23 (5) | 81 (29) | 55 (10) |
+| Luogo | `chunk` | 936 (65) | 0 (0) | 150 (40) | 5 (1) |
+| Luogo | `Place` | 1240 (115) | 23 (5) | 81 (29) | 55 (10) |
 | Piano del luogo | `mappa` | 3 (3) | 0 (0) | 22 (14) | 1 (1) |
-| Piano del luogo | `piano` | 28 (12) | 0 (0) | 368 (75) | 4 (4) |
-| Casella | `cell` | 1185 (66) | 37 (3) | 13 (9) | 98 (9) |
+| Piano del luogo | `piano` | 33 (12) | 0 (0) | 409 (76) | 4 (4) |
+| Casella | `cell` | 1186 (66) | 38 (3) | 13 (9) | 98 (9) |
 | Casella | `cella` | 12 (4) | 0 (0) | 53 (19) | 0 (0) |
-| Terreno | `tile` | 1357 (75) | 29 (5) | 108 (32) | 34 (4) |
+| Terreno | `tile` | 1388 (76) | 28 (5) | 108 (32) | 34 (4) |
 | Ambiente | `layout` | 328 (39) | 1 (1) | 55 (21) | 7 (3) |
-| Ambiente | `bioma` | 0 (0) | 0 (0) | 3 (2) | 0 (0) |
-| Lotto | `building` | 410 (37) | 19 (4) | 15 (11) | 0 (0) |
-| Lotto | `Building` | 410 (37) | 19 (4) | 15 (11) | 0 (0) |
-| Lotto | `buildings` | 64 (17) | 6 (3) | 1 (1) | 0 (0) |
+| Ambiente | `bioma` | 0 (0) | 0 (0) | 4 (3) | 0 (0) |
+| Lotto | `building` | 442 (41) | 18 (4) | 15 (11) | 0 (0) |
+| Lotto | `Building` | 442 (41) | 18 (4) | 15 (11) | 0 (0) |
+| Lotto | `buildings` | 69 (20) | 6 (3) | 1 (1) | 0 (0) |
 | Blocco | `megachunk` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Blocco | `quadrante` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Corona | `crown` | 4 (4) | 5 (2) | 0 (0) | 0 (0) |
 | Corona | `anello` | 3 (2) | 0 (0) | 85 (23) | 4 (1) |
-| Edificio | `edificio` | 10 (6) | 0 (0) | 96 (32) | 0 (0) |
-| Piano | `Floor` | 835 (85) | 14 (3) | 35 (11) | 29 (17) |
-| Piano | `floors` | 35 (8) | 3 (1) | 1 (1) | 0 (0) |
+| Edificio | `edificio` | 12 (7) | 0 (0) | 99 (33) | 0 (0) |
+| Piano | `Floor` | 936 (87) | 15 (3) | 46 (14) | 29 (17) |
+| Piano | `floors` | 48 (12) | 3 (1) | 10 (6) | 0 (0) |
+| Sotto (dove di una cosa) | `sotto` | 24 (13) | 0 (0) | 389 (90) | 21 (14) |
 | Strato | `sottosuolo` | 0 (0) | 0 (0) | 5 (3) | 0 (0) |
-| Strato | `layer` | 217 (39) | 13 (3) | 5 (4) | 0 (0) |
-| Entità | `thing` | 712 (78) | 41 (9) | 28 (8) | 0 (0) |
-| Entità | `Things` | 216 (53) | 21 (9) | 5 (4) | 0 (0) |
-| Entità | `cosa` | 50 (19) | 0 (0) | 271 (101) | 13 (4) |
+| Strato | `layer` | 229 (40) | 13 (3) | 6 (4) | 0 (0) |
+| Entità | `thing` | 729 (79) | 41 (9) | 29 (9) | 0 (0) |
+| Entità | `Things` | 220 (55) | 21 (9) | 5 (4) | 0 (0) |
+| Entità | `cosa` | 50 (19) | 0 (0) | 274 (103) | 13 (4) |
 | Modulo | `mod` | 52 (7) | 0 (0) | 0 (0) | 0 (0) |
 | Magazzino | `store` | 358 (54) | 5 (1) | 78 (21) | 22 (9) |
 | Magazzino | `deposito` | 12 (3) | 0 (0) | 37 (7) | 0 (0) |
-| Struttura | `edificio` | 10 (6) | 0 (0) | 96 (32) | 0 (0) |
-| Struttura | `building` | 410 (37) | 19 (4) | 15 (11) | 0 (0) |
-| Modello | `modello` | 103 (36) | 0 (0) | 444 (99) | 20 (8) |
-| Programma | `codice` | 43 (17) | 0 (0) | 204 (82) | 10 (3) |
-| Programma | `xml` | 620 (39) | 13 (2) | 110 (34) | 6 (2) |
+| Struttura | `edificio` | 12 (7) | 0 (0) | 99 (33) | 0 (0) |
+| Struttura | `building` | 442 (41) | 18 (4) | 15 (11) | 0 (0) |
+| Modello | `modello` | 103 (36) | 0 (0) | 450 (99) | 20 (8) |
+| Programma | `codice` | 45 (18) | 0 (0) | 204 (82) | 10 (3) |
+| Programma | `xml` | 625 (39) | 13 (2) | 111 (34) | 6 (2) |
 | Simbolo | `lettera` | 19 (10) | 0 (0) | 98 (39) | 0 (0) |
-| Simbolo | `#12` | 233 (66) | 6 (2) | 112 (47) | 34 (14) |
-| Simbolo | `codice` | 43 (17) | 0 (0) | 204 (82) | 10 (3) |
+| Simbolo | `#12` | 233 (66) | 6 (2) | 113 (48) | 34 (14) |
+| Simbolo | `codice` | 45 (18) | 0 (0) | 204 (82) | 10 (3) |
 | Simbolo | `colore` | 21 (9) | 0 (0) | 64 (26) | 6 (3) |
-| Programma incluso | `include` | 317 (86) | 2 (1) | 46 (11) | 10 (7) |
+| Programma incluso | `include` | 321 (87) | 1 (1) | 48 (12) | 10 (7) |
 | Programma incluso | `sottoprogramma` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Programma incluso | `percorso` | 11 (4) | 0 (0) | 31 (23) | 0 (0) |
-| Parte abitabile | `componente` | 10 (4) | 0 (0) | 64 (30) | 0 (0) |
-| Parte abitabile | `blocco` | 2 (2) | 0 (0) | 144 (34) | 1 (1) |
+| Parte abitabile | `componente` | 10 (4) | 0 (0) | 68 (31) | 0 (0) |
+| Parte abitabile | `blocco` | 2 (2) | 0 (0) | 146 (35) | 1 (1) |
 | Parte abitabile | `modulo` | 22 (10) | 0 (0) | 127 (46) | 0 (0) |
 | Area di un modello | `zona` | 3 (1) | 0 (0) | 80 (18) | 0 (0) |
 | Area di un modello | `regione` | 43 (11) | 0 (0) | 61 (14) | 6 (1) |
@@ -62,10 +63,10 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Tileset | `tilemap` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Campione | `esempio` | 8 (4) | 0 (0) | 29 (20) | 1 (1) |
 | Campione | `immagine` | 2 (2) | 0 (0) | 59 (19) | 2 (2) |
-| Griglia a pezzi | `chunk` | 933 (64) | 0 (0) | 147 (40) | 5 (1) |
+| Griglia a pezzi | `chunk` | 936 (65) | 0 (0) | 150 (40) | 5 (1) |
 | Griglia a pezzi | `blocchi` | 0 (0) | 0 (0) | 112 (25) | 0 (0) |
 | Griglia a pezzi | `tessere` | 11 (6) | 0 (0) | 31 (7) | 0 (0) |
-| Griglia a pezzi | `finestre` | 3 (3) | 0 (0) | 34 (15) | 1 (1) |
+| Griglia a pezzi | `finestre` | 3 (3) | 0 (0) | 35 (16) | 1 (1) |
 | Programma sonoro | `preset` | 36 (7) | 0 (0) | 21 (9) | 2 (1) |
 | Partitura | `spartito` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Direttore del suono | `jukebox` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -74,12 +75,12 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Ritocco | `correzione` | 1 (1) | 0 (0) | 18 (12) | 0 (0) |
 | Inchiostro | `outline` | 27 (8) | 6 (2) | 0 (0) | 21 (4) |
 | Inchiostro | `bordo` | 10 (7) | 0 (0) | 91 (28) | 2 (2) |
-| Fondo di una mesh | `base` | 461 (51) | 2 (1) | 98 (35) | 18 (5) |
-| Fondo di una mesh | `bottom` | 127 (27) | 12 (2) | 6 (5) | 91 (12) |
-| Fondo di una mesh | `sotto` | 19 (11) | 0 (0) | 366 (89) | 21 (14) |
-| Taglia | `size` | 1272 (117) | 26 (4) | 93 (25) | 177 (21) |
-| Taglia | `Taglia` | 148 (14) | 0 (0) | 174 (37) | 0 (0) |
-| Taglia | `TAGLIE` | 14 (6) | 0 (0) | 116 (26) | 0 (0) |
+| Fondo di una mesh | `base` | 551 (53) | 2 (1) | 107 (35) | 18 (5) |
+| Fondo di una mesh | `bottom` | 130 (28) | 12 (2) | 6 (5) | 91 (12) |
+| Fondo di una mesh | `sotto` | 24 (13) | 0 (0) | 389 (90) | 21 (14) |
+| Taglia | `size` | 1300 (117) | 26 (4) | 93 (25) | 177 (21) |
+| Taglia | `Taglia` | 160 (14) | 0 (0) | 177 (38) | 0 (0) |
+| Taglia | `TAGLIE` | 14 (6) | 0 (0) | 122 (28) | 0 (0) |
 | Viandante | `player` | 530 (87) | 8 (5) | 70 (29) | 8 (5) |
 | Viandante | `giocatore` | 11 (8) | 0 (0) | 196 (67) | 3 (2) |
 | Viandante | `hero` | 0 (0) | 0 (0) | 40 (6) | 126 (12) |
@@ -91,13 +92,13 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | God mode | `dio` | 0 (0) | 0 (0) | 3 (2) | 0 (0) |
 | Individuo | `npc` | 367 (45) | 0 (0) | 216 (35) | 0 (0) |
 | Individuo | `persona` | 130 (20) | 0 (0) | 81 (38) | 6 (2) |
-| Individuo | `person` | 112 (27) | 10 (4) | 8 (6) | 0 (0) |
-| Individuo | `Person` | 112 (27) | 10 (4) | 8 (6) | 0 (0) |
+| Individuo | `person` | 112 (27) | 9 (4) | 8 (6) | 0 (0) |
+| Individuo | `Person` | 112 (27) | 9 (4) | 8 (6) | 0 (0) |
 | Programma di mestiere | `routine` | 79 (13) | 0 (0) | 25 (14) | 1 (1) |
 | Programma di mestiere | `script` | 29 (11) | 0 (0) | 132 (50) | 85 (12) |
 | Programma di mestiere | `job` | 293 (26) | 2 (2) | 44 (10) | 7 (2) |
 | Comportamento | `azione` | 47 (14) | 0 (0) | 73 (33) | 1 (1) |
-| Comportamento | `task` | 452 (34) | 0 (0) | 398 (148) | 0 (0) |
+| Comportamento | `task` | 456 (34) | 0 (0) | 399 (149) | 0 (0) |
 | Deposito del luogo | `magazzino` | 6 (3) | 0 (0) | 42 (12) | 0 (0) |
 | Deposito del luogo | `granaio` | 0 (0) | 0 (0) | 3 (1) | 0 (0) |
 | Deposito del luogo | `scorta` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
@@ -111,13 +112,13 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Squadra di un'impresa | `gruppo` | 0 (0) | 0 (0) | 18 (8) | 0 (0) |
 | Squadra di un'impresa | `ciurma` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Stadio di un edificio | `fase` | 39 (10) | 0 (0) | 87 (48) | 0 (0) |
-| Stadio di un edificio | `livello` | 5 (4) | 0 (0) | 74 (25) | 1 (1) |
-| Stadio di un edificio | `step` | 1029 (83) | 97 (6) | 201 (76) | 84 (14) |
-| Stadio di un edificio | `stage` | 210 (22) | 1 (1) | 22 (6) | 54 (11) |
+| Stadio di un edificio | `livello` | 5 (4) | 0 (0) | 76 (25) | 1 (1) |
+| Stadio di un edificio | `step` | 1056 (83) | 97 (6) | 203 (77) | 84 (14) |
+| Stadio di un edificio | `stage` | 211 (22) | 1 (1) | 22 (6) | 54 (11) |
 | Impalcatura | `ponteggio` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Impalcatura | `scaffold` | 3 (1) | 0 (0) | 1 (1) | 0 (0) |
 | Contabilità fuori vista | `simulazione` | 6 (5) | 0 (0) | 56 (25) | 1 (1) |
-| Contabilità fuori vista | `offline` | 94 (24) | 0 (0) | 112 (48) | 1 (1) |
+| Contabilità fuori vista | `offline` | 101 (24) | 0 (0) | 122 (49) | 1 (1) |
 | Contabilità fuori vista | `background` | 149 (15) | 0 (0) | 2 (2) | 148 (10) |
 | Ritorno | `reload` | 22 (13) | 0 (0) | 5 (4) | 2 (2) |
 | Ritorno | `ricarica` | 25 (8) | 0 (0) | 59 (21) | 20 (6) |
@@ -127,16 +128,16 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Maturazione | `crescita` | 4 (4) | 0 (0) | 9 (7) | 0 (0) |
 | Maturazione | `ripen` | 16 (8) | 0 (0) | 3 (2) | 0 (0) |
 | Scheda | `Scheda` | 19 (10) | 0 (0) | 127 (35) | 7 (6) |
-| Legame | `tipo` | 171 (26) | 0 (0) | 136 (58) | 9 (3) |
+| Legame | `tipo` | 173 (26) | 0 (0) | 136 (58) | 9 (3) |
 | Posto di una cosa | `posizione` | 3 (1) | 0 (0) | 41 (22) | 0 (0) |
 | Posto di una cosa | `zona` | 3 (1) | 0 (0) | 80 (18) | 0 (0) |
 | Trama | `storia` | 23 (13) | 0 (0) | 49 (29) | 8 (4) |
 | Missione | `quest` | 151 (17) | 0 (0) | 10 (7) | 0 (0) |
-| Oggetto | `cosa` | 50 (19) | 0 (0) | 271 (101) | 13 (4) |
+| Oggetto | `cosa` | 50 (19) | 0 (0) | 274 (103) | 13 (4) |
 | Tasca | `pocket` | 7 (3) | 0 (0) | 0 (0) | 0 (0) |
 | Mobile | `arredo` | 0 (0) | 0 (0) | 3 (3) | 0 (0) |
-| Mobile | `furniture` | 95 (23) | 1 (1) | 6 (5) | 0 (0) |
-| Ripiano | `piano` | 28 (12) | 0 (0) | 368 (75) | 4 (4) |
+| Mobile | `furniture` | 120 (25) | 1 (1) | 6 (5) | 0 (0) |
+| Ripiano | `piano` | 33 (12) | 0 (0) | 409 (76) | 4 (4) |
 | Ripiano | `superficie` | 0 (0) | 0 (0) | 56 (48) | 0 (0) |
 | Impronta di un oggetto | `footprint` | 15 (4) | 0 (0) | 0 (0) | 0 (0) |
 | Oggetto posato | `appoggiato` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -150,10 +151,10 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Capo indossato | `abito` | 1 (1) | 0 (0) | 2 (1) | 0 (0) |
 | Capo indossato | `vestito` | 0 (0) | 0 (0) | 14 (5) | 0 (0) |
 | Zona del corpo | `slot` | 735 (38) | 10 (1) | 111 (23) | 5 (2) |
-| Zona del corpo | `parte` | 19 (10) | 0 (0) | 247 (102) | 9 (5) |
+| Zona del corpo | `parte` | 19 (10) | 0 (0) | 252 (102) | 9 (5) |
 | Corpo vestito | `skin` | 86 (4) | 0 (0) | 61 (6) | 892 (34) |
 | Ricetta | `crafting` | 5 (4) | 0 (0) | 3 (2) | 0 (0) |
-| Stato | `status` | 438 (41) | 0 (0) | 13 (8) | 78 (12) |
+| Stato | `status` | 441 (41) | 0 (0) | 13 (8) | 78 (12) |
 | Stato | `buff` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Runa | `simbolo` | 18 (3) | 0 (0) | 29 (9) | 0 (0) |
 | Runa | `glifo` | 1 (1) | 0 (0) | 14 (11) | 0 (0) |
@@ -170,12 +171,12 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Registro del Concilio | `log` | 204 (50) | 1 (1) | 32 (22) | 6 (5) |
 | Sessione del Concilio | `sessione` | 37 (15) | 0 (0) | 122 (52) | 12 (1) |
 | Generazione differita | `pregenerazione` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
-| Modello di IA | `modello` | 103 (36) | 0 (0) | 444 (99) | 20 (8) |
-| Modello di IA | `Models` | 787 (102) | 8 (3) | 261 (67) | 6 (4) |
+| Modello di IA | `modello` | 103 (36) | 0 (0) | 450 (99) | 20 (8) |
+| Modello di IA | `Models` | 793 (102) | 8 (3) | 264 (67) | 6 (4) |
 | Vite degli individui | `realismo` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gioco al tocco | `joystick` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
-| Gioco al tocco | `mobile` | 7 (5) | 0 (0) | 41 (10) | 2 (2) |
-| Croce di una finestra | `X` | 3977 (132) | 50 (3) | 187 (56) | 212 (16) |
+| Gioco al tocco | `mobile` | 7 (5) | 0 (0) | 42 (11) | 2 (2) |
+| Croce di una finestra | `X` | 4028 (133) | 52 (3) | 189 (57) | 212 (16) |
 | Eredità | `Eredita` | 6 (2) | 0 (0) | 11 (6) | 5 (1) |
 | Eredità | `EREDITA` | 6 (2) | 0 (0) | 11 (6) | 5 (1) |
 | Eredità | `Origine` | 11 (4) | 0 (0) | 82 (30) | 2 (1) |

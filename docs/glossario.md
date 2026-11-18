@@ -1159,6 +1159,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `Compositore`, `MusicDirector`
 - **Fermo**: il valore `musicista` di `AgentId`, `scultori.musicista`, il coefficiente `brani`, `ai.maxPieces`.
 
+### Scenografo
+- **Inglese**: `scenographer`, `designInterior`, `InteriorDirector`, `furnishing`, `InteriorRule`, `InteriorSpec`, `furnishWithRules`, `interiorRooms`, `INTERIOR_TASK`
+- **Definizione**: l'agente che arreda gli edifici che lo Scultore scrive, la via dei dati: per ogni tipo di edificio sceglie una volta quali mobili della libreria vanno in quale tipo di stanza (sala, stanza, piccola) e quanti, le **regole**; il kernel li posa a ogni seme contro i muri con la guardia degli interni (T410, ADR-0214). Abita nella casa dell'Artista; la sua manopola è «Interni degli edifici».
+- **Dove vive**: `src/kernel/agents/scenographer.ts`, `src/kernel/interiordirector.ts`, `src/kernel/furnish.ts`, `src/kernel/forms.ts`
+- **Da non usare**: «arredatore», «decoratore», «arredo» per le regole (l'arredo è ciò che il kernel posa)
+- **Fermo**: l'id `scenographer` di `AgentId` (`scenografo` letto come lui), il compito `interior.design`, il coefficiente `interiors`, il campo `interior` (`rules`, `author`) di una voce di `models/index.json`.
+
 ### Attore
 - **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`
 - **Definizione**: l'agente, se il master lo accende, che recita gli individui dalle loro schede.

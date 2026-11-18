@@ -283,6 +283,14 @@ async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGene
     composed.add(what(req));
     yield { id: `brano:${what(req)}`, run: async () => ((await k.composing.make(req)), true) };
   }
+  // The interiors of the buildings sculpted (T410, ADR-0214): one per type, on the queue like everything else here.
+  const furnished = new Set<string>();
+  for (;;) {
+    const model = k.furnishing.missing().find((m) => !furnished.has(m));
+    if (!model) break;
+    furnished.add(model);
+    yield { id: `interno:${model}`, run: async () => ((await k.furnishing.make(model)), true) };
+  }
 }
 
 /** Reads the week; the first reading of a run only sets where it starts (what was used between two runs is not this universe's). */
