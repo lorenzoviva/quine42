@@ -2084,3 +2084,80 @@
 - [2026-11-18T17:07:00.000Z] orchestratore (epoca 506): l'autore vuole la settimana di Claude spesa fino a 0 (D1 sì: neapolis di nuovo in `generazione`; D2 sì: Cartografo su sidera dopo il reset). Lanciata a mano la rigenerazione aurora → orichalcum → sidera → neapolis (`.pipeline/orchestra/esaurisci.mjs`, coda inclusa, tetto 25 % ciascuno); generatore: `esaurisci: true` (l'avanzo è il residuo della settimana, riserva 0), soglie 5h 2/1 %, `refreshConfig` rilegge `generatore` e `generazione` (vale dal prossimo riavvio dell'orchestra).
 - [2026-11-18T17:07:19.700Z] orchestratore: epoca 507 su claude (contesto a 53 % della finestra)
 - [2026-11-18T18:00:00.000Z] orchestratore (epoca 507): la rigenerazione a mano (`esaurisci.mjs`) si è fermata alle 17:09Z su un falso limite (reset di ripiego a 1 h, 5 ore al 95 %): probabile parola come «quota» nella risposta letta da `usageLimit` → T423 (claude, medium, priorità 1). Fermati `esaurisci.mjs`, la sua coda e una coda orfana di T411; aurora (2 tipi fatti) e orichalcum (ambienti a 16 fatti) tengono il progresso. Il generatore con `esaurisci` vale dal riavvio dell'orchestra: detto all'autore di fare `ferma --ora` e riavviare.
+- [2026-11-18T17:56:26.587Z] lancio T423 su claude (Opus 5.5, sforzo medium) in H:\projects\rune\.claude\worktrees\t423
+- [2026-11-18T17:56:28.017Z] orchestratore: epoca 508 su claude (contesto a 51 % della finestra)
+- [2026-11-18T17:58:33.675Z] ferma --dopo: niente lanci nuovi, aspetto T423
+- [2026-11-18T17:58:35.832Z] orchestratore: epoca 509 su claude (contesto a 43 % della finestra)
+- [2026-11-18T18:09:47.452Z] T423: ESITO: fatto — il limite si cerca solo in ciò che dice la CLI (`cliSaid` in pipeline.mjs), mai nella risposta del modello, per la coda, i task, l'orchestratore e i banchi; test offline aggiunti; typecheck verde; la suite ha 3 fallimenti già presenti in `tests/pipeline.test.ts` (T360 e interfaccia web), dovuti a `config.json` dopo il commit 1ae81b57 (Orchestrator orchestrabile), non a questo task; la causa del fermo del 18/11 non è dimostrata (output non salvato) e il formato di `rate_limit_event` non è provato su un output reale. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T423)
+- [2026-11-18T18:09:51.328Z] pipeline spenta (ferma --dopo)
+- [2026-11-18T18:10:06.558Z] task/T423 integrato in 3d; worktree e branch tolti.
+- [2026-11-18T18:10:43.208Z] orchestratore: epoca 510 su claude (contesto a 43 % della finestra)
+- [2026-11-18T18:13:10.368Z] generatore: rigenera i modelli di aurora su claude, tetto 22 % della settimana (speso finora 0 %, al reset avanzerebbe il 22 %)
+- [2026-11-18T18:13:35.164Z] orchestratore: epoca 512 su claude (contesto a 43 % della finestra)
+- [2026-11-18T18:15:34.906Z] orchestratore: epoca 513 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:16:16.241Z] generatore: aurora uscito senza esito, speso 0 % in questa esecuzione
+- [2026-11-18T18:16:24.157Z] lancio T424 su claude (Opus 5.5, sforzo medium) in H:\projects\rune\.claude\worktrees\t424
+- [2026-11-18T18:16:49.846Z] orchestratore: epoca 514 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:17:25.900Z] generatore: rigenera i modelli di orichalcum su claude, tetto 22 % della settimana (speso finora 0 %, al reset avanzerebbe il 22 %)
+- [2026-11-18T18:21:41.237Z] orchestratore: epoca 515 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:25:04.466Z] orchestratore: epoca 516 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:27:07.334Z] generatore: fermo orichalcum (un task pronto vuole lo slot), il lavoro fatto resta e riprende da lì
+- [2026-11-18T18:27:14.445Z] lancio T425 su claude (Opus 5.5, sforzo medium) in H:\projects\rune\.claude\worktrees\t425
+- [2026-11-18T18:27:38.903Z] orchestratore: epoca 517 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:28:16.242Z] generatore: rigenera i modelli di orichalcum su claude, tetto 22 % della settimana (speso finora 0 %, al reset avanzerebbe il 22 %)
+- [2026-11-18T18:28:37.893Z] T424: ESITO: fatto — i 3 test di `tests/pipeline.test.ts` (T69 POST /api/config, T360 provider nuovi su agy, T360 ordine dell'orchestratore) leggono la copia fissa `tests/fixtures/pipeline-config.json` (il config di oggi con l'Orchestrator non spuntato) invece di `tools/pipeline/config.json`; il controllo dei livelli di agy resta sul file vero; per la scelta dell'orchestratore il test mette per la prova le spunte della copia nella configurazione caricata e le rimette dopo; `config.json` e la pipeline invariati; suite (3514 passati) e typecheck verdi coi turni; la copia fissa va aggiornata a mano se le prove dovranno conoscere un provider nuovo. Sicurezza: nessuna superficie nuova. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T424)
+- [2026-11-18T18:28:58.809Z] task/T424 integrato in 3d; worktree e branch tolti.
+- [2026-11-18T18:29:11.633Z] orchestratore: epoca 518 su claude (contesto a 43 % della finestra)
+- [2026-11-18T18:29:35.541Z] orchestratore: epoca 519 su claude (contesto a 43 % della finestra)
+- [2026-11-18T18:42:18.826Z] T425: ESITO: ? (senza riga) (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T425)
+- [2026-11-18T18:42:43.309Z] task/T425 integrato in 3d; worktree e branch tolti.
+- [2026-11-18T18:43:23.937Z] generatore: fermo orichalcum (un task pronto vuole lo slot), il lavoro fatto resta e riprende da lì
+- [2026-11-18T18:43:28.054Z] lancio T425 da capo su claude (Opus 5.5, sforzo medium) in H:\projects\rune\.claude\worktrees\t425
+- [2026-11-18T18:43:55.142Z] orchestratore: epoca 520 su claude (contesto a 44 % della finestra)
+- [2026-11-18T18:44:30.996Z] generatore: rigenera i modelli di orichalcum su claude, tetto 22 % della settimana (speso finora 1 %, al reset avanzerebbe il 21 %)
+- [2026-11-18T18:44:54.747Z] orchestratore: epoca 521 su claude (contesto a 49 % della finestra)
+- [2026-11-18T18:48:34.760Z] T425: interrotto dall'orchestratore (riprende con riprendi T425)
+- [2026-11-18T18:48:34.792Z] T425: interrotto (riprende con riprendi T425)
+- [2026-11-18T18:48:35.499Z] generatore: fermo orichalcum (un task pronto vuole lo slot), il lavoro fatto resta e riprende da lì
+- [2026-11-18T18:48:40.722Z] lancio T426 su claude (Opus 5.5, sforzo high) in H:\projects\rune\.claude\worktrees\t426
+- [2026-11-18T18:48:42.894Z] nota: Epoca 521: T425 era ripartito da capo dopo l'integrazione (backlog rimasto da fare): segnato fatto e interrotto. T426 (porta delle strutture grandi) approvato dall'autore, claude high 2 %, pronto.
+- [2026-11-18T18:48:47.293Z] orchestratore: epoca 522 su claude (contesto a 47 % della finestra)
+- [2026-11-18T18:49:41.758Z] generatore: rigenera i modelli di orichalcum su claude, tetto 22 % della settimana (speso finora 1 %, al reset avanzerebbe il 21 %)
+- [2026-11-18T18:52:57.137Z] generatore: orichalcum uscito senza esito, speso 0 % in questa esecuzione
+- [2026-11-18T18:52:57.216Z] generatore: rigenera i modelli di sidera su claude, tetto 21 % della settimana (speso finora 0 %, al reset avanzerebbe il 21 %)
+- [2026-11-18T18:53:29.592Z] generatore: spento (la pipeline lo ferma al prossimo controllo, il lavoro fatto resta)
+- [2026-11-18T18:53:30.522Z] ferma --dopo: niente lanci nuovi, aspetto T426
+- [2026-11-18T18:53:30.802Z] generatore: fermo sidera (la pipeline si spegne), il lavoro fatto resta e riprende da lì
+- [2026-11-18T18:53:41.424Z] orchestratore: epoca 523 su claude (contesto a 45 % della finestra)
+- [2026-11-18T18:59:24.303Z] orchestratore: epoca 524 su claude (contesto a 43 % della finestra)
+- [2026-11-18T19:07:20.238Z] T426: ESITO: fatto — `E` e il tasto destro trovano una struttura dalla sua impronta (`builtAt`) quando dal centro non c'è niente, quindi la porta di una Grande si apre e si chiude da fuori e da dentro; la porta chiusa blocca senza modifiche; test offline nuovo in `tests/forms.test.ts`, kernel 0.9.12; non provato con la Palazzina di orichalcum (non è su questo disco) né in multigiocatore · BROWSER: verificato — con la Casa del borgomastro modificata perché la porta si apra e si chiuda: «Apri la porta» con `E`, entrato camminando, «Chiudi la porta» da dentro con `E`, la porta chiusa ferma il viandante; nessun errore del gioco in console (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T426)
+- [2026-11-18T19:07:24.184Z] pipeline spenta (ferma --dopo)
+- [2026-11-18T19:07:37.703Z] task/T426 integrato in 3d; worktree e branch tolti.
+- [2026-11-18T19:07:53.653Z] orchestratore: epoca 525 su claude (contesto a 44 % della finestra)
+- [2026-11-18T19:25:34.896Z] generatore: acceso
+- [2026-11-18T19:25:47.142Z] orchestratore: epoca 527 su claude (contesto a 44 % della finestra)
+- [2026-11-18T19:26:18.194Z] generatore: rigenera i modelli di sidera su claude, tetto 20 % della settimana (speso finora 0 %, al reset avanzerebbe il 20 %)
+- [2026-11-18T19:28:19.479Z] generatore: sidera errore (rigenera:sidera-capsula-criogenica: claude: richiesta non servita: spawn ENAMETOOLONG (non ripetuta)), speso 0 % in questa esecuzione
+- [2026-11-18T19:28:19.538Z] generatore: rigenera i modelli di neapolis su claude, tetto 20 % della settimana (speso finora 0 %, al reset avanzerebbe il 20 %)
+- [2026-11-18T19:28:55.827Z] nota: epoca 527: sidera esce con spawn ENAMETOOLONG (--system-prompt oltre i 32767 caratteri di Windows) → T427 (claude, 2 %, approvato, priorità 1); il generatore passa a neapolis
+- [2026-11-18T19:29:01.443Z] orchestratore: epoca 528 su claude (contesto a 46 % della finestra)
+- [2026-11-18T19:29:20.373Z] generatore: fermo neapolis (un task pronto vuole lo slot), il lavoro fatto resta e riprende da lì
+- [2026-11-18T19:29:24.763Z] lancio T427 su claude (Opus 5.5, sforzo high) in H:\projects\rune\.claude\worktrees\t427
+- [2026-11-18T19:30:38.751Z] generatore: rigenera i modelli di neapolis su claude, tetto 20 % della settimana (speso finora 0 %, al reset avanzerebbe il 20 %)
+- [2026-11-18T19:44:52.529Z] T427: ESITO: fatto — la coda (`runIsolated`/`serveOne`), il banco dello Scultore e `lab/banco/claude.ts` passano il prompt di sistema da `system-prompt.txt` (0600, scritto in esclusiva) accanto alla cartella vuota della CLI, con `--system-prompt-file`; nessun argomento cresce con la richiesta; la cartella della corsa si cancella alla fine anche dopo un errore; la CLI finta legge il file e rifiuta `--system-prompt`; test offline con 100 000 caratteri e V-009 verdi; richiesta vera dalla coda (100 009 caratteri, sforzo low) servita; suite (3520) e typecheck verdi; sicurezza: nessuna superficie nuova; non verificato se aurora e orichalcum fallivano per la stessa causa. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T427)
+- [2026-11-18T19:45:10.255Z] task/T427 integrato in 3d; worktree e branch tolti.
+- [2026-11-18T19:45:19.928Z] generatore: spento (la pipeline lo ferma al prossimo controllo, il lavoro fatto resta)
+- [2026-11-18T19:45:20.058Z] generatore: acceso
+- [2026-11-18T19:45:38.366Z] orchestratore: epoca 529 su claude (contesto a 45 % della finestra)
+- [2026-11-18T19:50:29.657Z] orchestratore: epoca 530 su claude (contesto a 43 % della finestra)
+- [2026-11-18T20:28:19.947Z] orchestratore: epoca 531 su claude (contesto a 46 % della finestra)
+- [2026-11-18T20:51:08.575Z] orchestratore: epoca 532 su claude (contesto a 47 % della finestra)
+- [2026-11-18T21:06:46.889Z] orchestratore: epoca 533 su claude (contesto a 47 % della finestra)
+- [2026-11-18T21:30:27.136Z] generatore: neapolis finito, speso 3 % in questa esecuzione
+- [2026-11-18T21:41:30.670Z] lancio T422 su claude (Opus 5.5, sforzo high) in H:\projects\rune\.claude\worktrees\t422
+- [2026-11-18T21:57:42.293Z] orchestratore: epoca 534 su orchestrator (claude sotto il 10 %)
+- [2026-11-18T22:02:44.608Z] orchestratore: epoca 535 su claude (claude ha di nuovo crediti)
+- [2026-11-18T22:45:30.968Z] T422: ESITO: fatto — sidera: `vicoli_pioggia` e `cantiere_fusione` riscritti dal Cartografo (Opus 5.5, dalla coda, compito nuovo `environment.recut`, ADR-0218, kernel 0.9.13), 15 luoghi tagliati a 16; le 6 strutture che restavano a 20 (casa comune, laboratorio del plasma, laboratorio di fusione, residenza modulare, scalo navette, stazione di transito; 6, non 8) riscolpite a 16 e arredate; 47 chiamate, circa 50 minuti, almeno 7 $ a listino, settimana 80→85 %; `piano-rigenerazione.ts` (nuovo) non trova ambienti da ritagliare né strutture a 20, `controlla-universo.ts` legge i 56 piani; le altre strutture di sidera restano coi programmi di prima finché il generatore non fa la rigenerazione intera; test offline in `tests/rigenera.test.ts` e `tests/rigenera-sidera.test.ts`; typecheck verde, suite verde tranne `site-video` per il disco C: pieno (passa con la cartella temporanea su H:); sicurezza: nessuna superficie nuova. · BROWSER: verificato — copia di sidera in preview, luogo (1, 0) «Vicolo delle Cuoche»: la stazione di transito rifatta, taglia large, su un edificio 7×7 (lotti 7×7, 4×4, 4×4), nessun guasto né errore in console. (riepilogo e conversazione: node tools/pipeline/pipeline.mjs traccia T422)
+- [2026-11-18T22:45:48.942Z] task/T422 integrato in 3d; worktree e branch tolti.
+
+- 18/11 22:46 (epoca 535, claude): T422 integrato (`39f1f180`); generatore: neapolis finito, aurora/orichalcum/sidera riprovano dopo mezzanotte UTC.
