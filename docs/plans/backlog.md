@@ -5862,10 +5862,10 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T422 · sidera: due ambienti riscritti dal Cartografo per portare le 8 strutture a 16 vpx — `da fare` (dipende da T411)
 - Step: 
-- Contesto: proposta di T411 (`dossier T411`), approvata dall'autore il 18/11 (D2): in sidera 2 ambienti non si ritagliano per i lotti a 16 (ADR-0211) e 8 strutture restano a 20 vpx nella rigenerazione dei modelli (ADR-0216). Da lanciare dopo il reset settimanale di Claude del 19/11 (15:59Z).
+- Contesto: proposta di T411 (`dossier T411`), approvata dall'autore il 18/11 (D2): in sidera 2 ambienti non si ritagliano per i lotti a 16 (ADR-0211) e 8 strutture restano a 20 vpx nella rigenerazione dei modelli (ADR-0216). L'autore ha chiesto di lanciarlo subito (18/11 19:50Z), prima del reset settimanale; il generatore ha un lucchetto per universo (ADR-0143): se sidera è occupato, aspettare o fermarlo con `generatore spegni` scritto nell'esito.
 - Cosa fare: far riscrivere al Cartografo (dalla coda degli abbonamenti, Opus 5.5) i due ambienti di sidera in modo che i loro lotti tengano le strutture a 16; rifare i lotti dei luoghi toccati e rigenerare le 8 strutture a 16 (`npm run genera -- sidera --rigenera modelli --tipi …`), con il tag prima del cambio; mai riscrivere la storia del repository dell'universo.
 - Quando è fatto: sidera senza strutture a 20 che si possano portare a 16, i piani letti tutti (`lab/scripts/controlla-universo.ts`), visto nel browser un luogo con una struttura rifatta; test offline del ritaglio degli ambienti nuovi.
-- Pipeline: claude, sforzo high, dopo il 19/11 15:59Z.
+- Pipeline: claude · sforzo high · stima 5% · approvato · browser · priorità 1
 
 ### T423 · La coda degli abbonamenti scambia per un limite la risposta del modello — `fatto` (`3a8ac065`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
