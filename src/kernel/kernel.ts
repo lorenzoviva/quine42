@@ -43,7 +43,7 @@ import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE,
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
 import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
-import { stageGrid } from '../mj/mesh';
+import { footprint, stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
 import { InteriorDirector, MAX_INTERIORS } from './interiordirector';
@@ -3672,6 +3672,39 @@ export class Kernel {
     return best;
   }
 
+  /**
+   * The solid thing whose voxels stand in a square of the simulation (centre x, y, half side `half`, tiles): a structure is found where
+   * its walls and its door are, not by its middle (T426), which for a Large one at 16 voxels a tile is more than three tiles away. Its
+   * columns over the ground as it was made (a door open is still its door); of two, the one more of the square meets.
+   */
+  private builtAt(x: number, y: number, half: number): Id | undefined {
+    const n = 8;
+    const hits = new Map<Id, number>();
+    for (let j = 0; j <= n; j++)
+      for (let i = 0; i <= n; i++) {
+        const px = x - half + (2 * half * i) / n, py = y - half + (2 * half * j) / n;
+        for (const s of this.solidForms.get(`${Math.floor(px)},${Math.floor(py)}`) ?? []) {
+          if (s.id < 0 || s.id === this.wandererEntity || !this.ecs.alive.has(s.id) || this.otherWanderer(s.id) !== undefined) continue;
+          const [lx, lz] = toLocal(px - s.x, py - s.y, s.yaw);
+          const g = s.form.result!.grid;
+          const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+          if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y || !this.builtColumns(s.form)[vx + vy * g.X]) continue;
+          hits.set(s.id, (hits.get(s.id) ?? 0) + 1);
+        }
+      }
+    let best: Id | undefined;
+    for (const [id, c] of hits) if (best === undefined || c > hits.get(best)!) best = id;
+    return best;
+  }
+
+  /** The voxel columns of a model with something over the ground (its `base` voxels up), kept per form. */
+  private built = new WeakMap<Form, Uint8Array>();
+  private builtColumns(f: Form): Uint8Array {
+    let c = this.built.get(f);
+    if (!c) this.built.set(f, (c = footprint(f.result!.grid, f.result!.palette, f.base, f.result!.grid.Z)));
+    return c;
+  }
+
   private hasTag(id: Id, tag: string): boolean {
     const pk = this.ecs.get(id, 'pickup');
     if (pk) return this.itemInfo(pk.item).tags.includes(tag);
@@ -5249,16 +5282,12 @@ export class Kernel {
   async interact(): Promise<void> {
     if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
     if (this.pickUpRune()) return;
-    const target = this.targetInFront();
+    const { id: target, col, row } = this.inFront();
     if (target !== undefined && this.ecs.has(target, 'pickup')) {
       this.pickUpEntity(target);
       return;
     }
     // The menu of the tile in front, with what stands on it.
-    const pc = this.wandererCarpet();
-    const [dx, dy] = this.facingDelta();
-    const col = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').x) : Math.floor(pc.x + dx);
-    const row = target !== undefined ? Math.floor(this.ecs.get(target, 'pos').y) : Math.floor(pc.y + dy);
     this.openTileMenu(col, row, target);
   }
 
@@ -5269,7 +5298,8 @@ export class Kernel {
   tileMenu(col: number, row: number, entity?: Id): { title: string; options: ActionOption[]; entity?: Id } {
     const code = this.tileAt(col, row);
     const t = code ? this.palette[code] : undefined;
-    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75);
+    // What stands on it, else the structure whose walls or door are there (T426).
+    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75) ?? this.builtAt(col + 0.5, row + 0.5, 0.5);
     const options: ActionOption[] = [];
     if (on !== undefined) for (const o of this.actionsFor(on)) options.push({ ...o, id: `e:${o.id}`, label: o.id === 'altro' ? `Altro… (${this.nameOf(on)})` : o.label });
     // A thing of the world carried goes down here (T292); the kernel says why when it does not.
@@ -5335,9 +5365,25 @@ export class Kernel {
 
   /** The entity you are facing (or standing next to). */
   targetInFront(): Id | undefined {
+    return this.inFront().id;
+  }
+
+  /**
+   * What the wanderer faces and the tile of its menu: a thing by its middle, as before; else a structure whose walls or door are just
+   * ahead (T426: its middle is far), with the tile in front; else a thing beside; else the tile in front.
+   */
+  private inFront(): { id?: Id; col: number; row: number } {
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
-    return this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4) ?? this.nearest(pc.x, pc.y, 1.2);
+    const tileOf = (id: Id) => ({ id, col: Math.floor(this.ecs.get(id, 'pos').x), row: Math.floor(this.ecs.get(id, 'pos').y) });
+    const ahead = this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4);
+    if (ahead !== undefined) return tileOf(ahead);
+    const col = Math.floor(pc.x + dx), row = Math.floor(pc.y + dy);
+    // From just ahead of the body to a tile beyond: a door one stands against may be in one's own tile.
+    const built = this.builtAt(pc.x + dx * 0.75, pc.y + dy * 0.75, 0.45);
+    if (built !== undefined) return { id: built, col, row };
+    const beside = this.nearest(pc.x, pc.y, 1.2);
+    return beside !== undefined ? tileOf(beside) : { col, row };
   }
 
   async perform(id: Id, action: string): Promise<void> {

@@ -439,7 +439,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   ricomincia dal seme); dopo la corona non si muore e non si perde nulla.
 - **Menu delle caselle** (ADR-0029): `E`/clic destro su una casella → azioni dell'entità, della casella, «Altro…»;
   le azioni libere ripetibili si imparano per tipo di terreno (`TerrainDef.actions`). Le `<action>` del modello di una
-  cosa sono voci del suo menu (`modello:<nome>`), anche quelle nate da «Altro…» (ADR-0044).
+  cosa sono voci del suo menu (`modello:<nome>`), anche quelle nate da «Altro…» (ADR-0044). Una cosa si trova dal suo centro
+  (`nearest`: davanti 1,4 caselle per `E`, 0,75 dalla casella cliccata); se lì non c'è niente, dalla sua impronta (T426,
+  `builtAt`): la cosa solida i cui voxel sopra il suolo, come il programma li ha fatti, stanno nella casella cliccata o subito
+  davanti al viandante (da 0,3 a 1,2 caselle), così la porta di una struttura Grande, che ha il centro a più di tre caselle, si
+  apre e si chiude da fuori e da dentro. La porta chiusa blocca: il corpo urta l'impronta dell'istanza (`groundOf`, con `done`),
+  mentre il cammino che il validatore misura nelle forme la apre (`walkIn`).
 - **Il salto** (ADR-0080, T56b): Spazio (`kernel.jump()`) nella simulazione: verso dove si cammina o si guarda, sopra ciò che non va più in alto di `JUMP_UP` (1,05 caselle, `topUnder` sui `Form.levels`) e sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a `JUMP_FAR` (2,6) caselle dove il corpo sta, altrimenti salto sul posto. Con i piani (T70) si salta dal pavimento su cui si sta (`pos.z`), conta il pieno che comincia sotto `JUMP_UP` (non il soffitto) e si atterra sul pavimento più alto che si supera (`floorBelow`). Componente `jump` del viandante (`salto` fino al contratto 0.4) portato da `jumpTick` dopo i sistemi; `kernel.jumping()` per arco e ombra. Nella corona, nello studio e nel kernel specchio Spazio fa ciò che fa `E`.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).

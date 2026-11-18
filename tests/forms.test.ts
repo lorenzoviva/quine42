@@ -11,7 +11,7 @@ import { boxOf, classOf } from '../src/mj/classes';
 import { withSize } from '../src/kernel/agents/sculptor';
 import { SOUND_CLASS } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
-import { cellarVoxels, InlineRunner, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
+import { bodyFoot, cellarVoxels, InlineRunner, instanceGrid, rootTag, type FormComp, type FormRequest, type FormResult } from '../src/kernel/forms';
 import { formCacheKey, restoreFormResult, MemoryFormStore, WorkerRunner } from '../src/render/forms';
 
 const boot = () => Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
@@ -129,6 +129,76 @@ describe('forms in the kernel', () => {
     await k.perform(house, 'modello:close');
     expect(fc.done).toEqual([]);
   }, 30_000);
+
+  it('finds a Large structure by its door, not by its middle: E and the right click open it, and a closed door stops the body (T426)', async () => {
+    // A Large structure of the seed, its door at the edge of its box (part-door), with a door that closes as well as opens (an oak
+    // leaf that becomes a letter without colour and back), like the Palazzina of orichalcum.
+    const model = 'test-palazzina';
+    const xml = bundledFiles['models/struttura-casa-del-borgomastro.xml']
+      .replace('knryql" symmetry', 'knryqlZ" symmetry')
+      .replace('<color symbol="k"', '<color symbol="Z" hidden="True" name="porta aperta"/><color symbol="k"')
+      .replace(/<action name="open"[\s\S]*$/, '<action name="open" label="Apri la porta"><prl in="k" out="Z"/></action>\n<action name="close" label="Chiudi la porta"><prl in="Z" out="k"/></action>\n');
+    const index = JSON.parse(bundledFiles['models/index.json']);
+    index[model] = { ...index['struttura-casa-del-borgomastro'], name: 'Palazzina di prova' };
+    const k = await Kernel.boot({ files: { ...bundledFiles, [`models/${model}.xml`]: xml, 'models/index.json': JSON.stringify(index) }, store: memoryStore(), ai: new MockAiModels() });
+    const [x, y] = [5.5, 5.5];
+    const house = k.spawnModuleEntity(k.modules.get('object.well')!, x, y, undefined, 'test#palazzina');
+    const fc = k.ecs.get(house, 'form') as FormComp;
+    Object.assign(fc, { model, seed: 1, yaw: 0 });
+    const form = (await k.forms.wait(model, 1))!;
+    k.tick(1 / 60);
+    // A Large structure at 16 voxels a tile: its middle is far from its door.
+    expect(form.vpt).toBe(16);
+    expect(form.reach).toBeGreaterThan(3);
+    // The door: the columns the action `open` empties at body height.
+    const g = form.result!.grid;
+    const opened = bodyFoot(instanceGrid(k.forms, form, ['open']), form.result!.palette, form.vpt, form.base);
+    const door: Array<[number, number]> = [];
+    for (let vy = 0; vy < g.Y; vy++) for (let vx = 0; vx < g.X; vx++) if (form.foot![vx + vy * g.X] && !opened[vx + vy * g.X]) door.push([vx, vy]);
+    expect(door.length).toBeGreaterThan(0);
+    const mid = door.reduce((a, d) => [a[0] + d[0] / door.length, a[1] + d[1] / door.length], [0, 0]);
+    const at = (vx: number, vy: number) => [x + (vx + 0.5 - g.X / 2) / form.vpt, y + (vy + 0.5 - g.Y / 2) / form.vpt] as const;
+    const [doorX, doorY] = at(mid[0], mid[1]);
+    expect(Math.hypot(doorX - x, doorY - y)).toBeGreaterThan(1.4 + 0.6);
+    // Outside, a tile from the door, facing it: the way out of the box along the door's nearer side.
+    const ex = mid[0] - g.X / 2, ey = mid[1] - g.Y / 2;
+    const [ux, uy] = Math.abs(ex) / g.X > Math.abs(ey) / g.Y ? [Math.sign(ex), 0] : [0, Math.sign(ey)];
+    const facing = ux > 0 ? 'left' : ux < 0 ? 'right' : uy > 0 ? 'up' : 'down';
+    // The carpet moves the world under the wanderer at every tick: where one stands is set in the simulation's frame of now.
+    const standAt = (sx: number, sy: number, towards: string) => {
+      const { ox, oy } = k.offset();
+      Object.assign(k.wandererPos(), { x: sx - ox, y: sy - oy });
+      k.wandererComp().facing = towards;
+    };
+    standAt(doorX + ux * 0.8, doorY + uy * 0.8, facing);
+    // A closed door stops a body; the menu of E has the structure's action, with the tile in front.
+    expect(k.free(doorX, doorY, 0.22)).toBe(false);
+    expect(k.targetInFront()).toBe(house);
+    const menus: Array<{ id: number; options: Array<{ id: string; label: string }> }> = [];
+    k.bus.on('ui:actions', (m: any) => menus.push(m));
+    await k.interact();
+    expect(menus.at(-1)?.id).toBe(house);
+    expect(menus.at(-1)?.options.some((o) => o.id === 'e:modello:open' && o.label === 'Apri la porta')).toBe(true);
+    // The right click on the door's tile finds it too.
+    const col = Math.floor(doorX), row = Math.floor(doorY);
+    expect(k.tileMenu(col, row).entity).toBe(house);
+    await k.performMenu('e:modello:open', house, col, row);
+    expect(fc.done).toEqual(['open']);
+    k.tick(1 / 60);
+    // Open, a body passes; from inside, the door is found again and closes; closed, it stops a body again.
+    expect(k.free(doorX, doorY, 0.22)).toBe(true);
+    expect(k.tileMenu(col, row).options.some((o) => o.id === 'e:modello:close')).toBe(true);
+    standAt(doorX - ux * 0.8, doorY - uy * 0.8, ({ left: 'right', right: 'left', up: 'down', down: 'up' } as const)[facing]);
+    expect(k.targetInFront()).toBe(house);
+    await k.interact();
+    expect(menus.at(-1)?.options.some((o) => o.id === 'e:modello:close')).toBe(true);
+    await k.performMenu('e:modello:close', house, col, row);
+    expect(fc.done).toEqual([]);
+    k.tick(1 / 60);
+    expect(k.free(doorX, doorY, 0.22)).toBe(false);
+    // Far from it nothing of it is found: an empty tile is just a tile.
+    expect(k.tileMenu(Math.floor(x + form.reach + 3), Math.floor(y)).entity).toBeUndefined();
+  }, 60_000);
 });
 
 describe('precalculated variants and form cache (T64)', () => {
