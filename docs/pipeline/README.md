@@ -154,7 +154,9 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   `--tetto` = `min(tettoSettimana, speso + avanzo − riserva)` (e `npm run abbonamento` se nessuno serve la coda). Occupa uno dei posti del tetto,
   che non cambia, e lo cede subito a un task pronto della stessa CLI: lo uccide, il passo in corso non si scrive, quelli prima restano, e riparte
   quando il posto torna libero. Si ferma anche sotto `sessioneArresto` % di finestra, con l'autore (`generatore spegni`) e con `ferma`. Tetto
-  dell'universo raggiunto → il prossimo; `finito` → non ci torna; `errore` → riprova dopo 6 ore. Stato in `.pipeline/generatore.json`, `stato` lo dice;
+  dell'universo raggiunto → il prossimo; `finito` → non ci torna; `errore` → riprova dopo 6 ore. Stato in `.pipeline/generatore.json`, `stato` lo dice.
+  Una voce con `"rigenera": "modelli"` lancia invece la rigenerazione dei modelli di quell'universo (`npm run genera -- <u> --rigenera modelli`,
+  T411, ADR-0216), col suo progresso (`universes/.generation/<nome>.rigenera-modelli.json`) e il suo posto nello stato (`<nome>:rigenera-modelli`);
 - **nessun ripiego** (ADR-0119): un task gira solo sul suo provider; se quello non ha slot o crediti, aspetta. Il ripiego automatico mandava task complessi su modelli meno capaci. Solo l'orchestratore o l'autore lo spostano, con `assegna`;
 - **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser**, **una suite intera** di vitest,
   **un typecheck** e **una build** alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test|typecheck|build -- <comando>`, che aspetta il turno
@@ -333,7 +335,9 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   `--tetto` = `min(tettoSettimana, speso + avanzo − riserva)` (e `npm run abbonamento` se nessuno serve la coda). Occupa uno dei posti del tetto,
   che non cambia, e lo cede subito a un task pronto della stessa CLI: lo uccide, il passo in corso non si scrive, quelli prima restano, e riparte
   quando il posto torna libero. Si ferma anche sotto `sessioneArresto` % di finestra, con l'autore (`generatore spegni`) e con `ferma`. Tetto
-  dell'universo raggiunto → il prossimo; `finito` → non ci torna; `errore` → riprova dopo 6 ore. Stato in `.pipeline/generatore.json`, `stato` lo dice;
+  dell'universo raggiunto → il prossimo; `finito` → non ci torna; `errore` → riprova dopo 6 ore. Stato in `.pipeline/generatore.json`, `stato` lo dice.
+  Una voce con `"rigenera": "modelli"` lancia invece la rigenerazione dei modelli di quell'universo (`npm run genera -- <u> --rigenera modelli`,
+  T411, ADR-0216), col suo progresso (`universes/.generation/<nome>.rigenera-modelli.json`) e il suo posto nello stato (`<nome>:rigenera-modelli`);
 - **nessun ripiego** (ADR-0119): un task gira solo sul suo provider; se quello non ha slot o crediti, aspetta. Il ripiego automatico mandava task complessi su modelli meno capaci. Solo l'orchestratore o l'autore lo spostano, con `assegna`;
 - **turni delle operazioni pesanti** (ADR-0088): in tutta la pipeline al più **una verifica nel browser**, **una suite intera** di vitest,
   **un typecheck** e **una build** alla volta; chi le vuole fare le lancia con `node tools/pipeline/pipeline.mjs turno browser|test|typecheck|build -- <comando>`, che aspetta il turno

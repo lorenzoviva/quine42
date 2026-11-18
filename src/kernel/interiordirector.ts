@@ -90,9 +90,11 @@ export class InteriorDirector {
 
   /**
    * Asks the Scenografo for a building's interior now and keeps it on its entry; `chi` pays, else the world (`interior.design` is a common
-   * task: the interior is part of the type, as its model). A building where nothing could be furnished is not asked for.
+   * task: the interior is part of the type, as its model). A building where nothing could be furnished is not asked for. `error` says that the
+   * call itself failed (the queue, the network), not that the Scenografo found nothing: who asked may try again (T411). `author` is who the
+   * entry says wrote it, if not the world's text model (the regeneration on the queue: the model of the CLI).
    */
-  async make(model: string, chi?: string): Promise<{ ok: boolean; summary: string }> {
+  async make(model: string, chi?: string, author?: string): Promise<{ ok: boolean; summary: string; error?: string }> {
     const k = this.k;
     const forms = k.forms;
     const name = forms.info(model)?.name ?? model;
@@ -131,8 +133,8 @@ export class InteriorDirector {
         lacking('invalid', k.lastDiscard('scenographer', INTERIOR_TASK));
         return { ok: false, summary: `Lo Scenografo non ha trovato un interno per «${name}».` };
       }
-      const author = k.ai.name === 'offline' ? 'offline' : (k.config.ai.textModel ?? k.ai.name);
-      if (!k.setInterior(model, { rules: r.rules, author }, `scenografo: ${name}`)) {
+      const by = k.ai.name === 'offline' ? 'offline' : (author ?? k.config.ai.textModel ?? k.ai.name);
+      if (!k.setInterior(model, { rules: r.rules, author: by }, `scenografo: ${name}`)) {
         this.skip.add(model);
         lacking('invalid', `l'interno di «${name}» non si è potuto scrivere`);
         return { ok: false, summary: `L'interno di «${name}» non si è potuto scrivere.` };
@@ -143,7 +145,7 @@ export class InteriorDirector {
       k.council.say('scenographer', 'errore', (e as Error).message, undefined, INTERIOR_TASK);
       this.skip.add(model);
       lacking('error', (e as Error).message);
-      return { ok: false, summary: `Lo Scenografo non ha potuto arredare: ${(e as Error).message}` };
+      return { ok: false, summary: `Lo Scenografo non ha potuto arredare: ${(e as Error).message}`, error: (e as Error).message };
     } finally {
       this.busy = false;
     }

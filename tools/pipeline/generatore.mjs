@@ -4,6 +4,10 @@
 // of its CLI (`limiti.provider`), which does not change, and always gives it back to a ready task; stopping it keeps the work
 // done (the generation writes only whole valid steps, and resumes from them). The author turns it off with `generatore spegni`.
 //
+// An entry of `generazione` may ask for a regeneration instead (T411, ADR-0216: `"rigenera": "modelli"`, `npm run genera -- <u> --rigenera
+// modelli`): it has its own progress (`<nome>.rigenera-modelli.json`) and its own place in the state (`<nome>:rigenera-modelli`), so a
+// universe whose generation finished is still regenerated, and the other way round.
+//
 // No dependency on pipeline.mjs (which imports this): the decisions are pure functions of the budget, the state and the
 // universes' progress; `Generator` adds the processes and the state file (`.pipeline/generatore.json`).
 import { spawn } from 'node:child_process';
@@ -48,6 +52,7 @@ export function generatorConf(config = {}) {
     sessioneMinima: g.sessioneMinima ?? 30,
     sessioneArresto: g.sessioneArresto ?? 15,
     comando: g.comando ?? ['npm', 'run', 'genera', '--', '{universo}', '--tema', '{ambientazione}', '--partita', '{partita}', '--tetto', '{tetto}'],
+    comandoRigenera: g.comandoRigenera ?? ['npm', 'run', 'genera', '--', '{universo}', '--rigenera', '{rigenera}', '--tetto', '{tetto}'],
     coda: g.coda ?? ['npm', 'run', 'abbonamento'],
     cartellaUniversi: g.cartellaUniversi ?? 'universes',
   };
@@ -82,9 +87,20 @@ export function leftoverAtReset({ residuo = 100, storia = [], reset, slot = 1, t
   return round(residuo - full * until);
 }
 
-/** The progress of a universe's generation (`universes/.generation/<nome>.json`, `.generazione/` before the contract 0.4). */
-export function readProgress(dir, name) {
-  return readJson(path.join(dir, '.generation', `${name}.json`), undefined) ?? readJson(path.join(dir, '.generazione', `${name}.json`), undefined);
+/** The modes a regeneration may have (T411): today only the models. */
+export const REGEN_MODES = ['modelli'];
+/** The progress's name of a regeneration (`rigenera-modelli`), as `regenKind` of src/kernel/regenerate.ts; undefined for a generation. */
+export const kindOf = (entry) => (entry?.rigenera ? `rigenera-${entry.rigenera}` : undefined);
+/** Where an entry of `generazione` stands in the state: the universe for a generation, `<nome>:rigenera-<modo>` for a regeneration. */
+export const entryKey = (entry) => (entry?.rigenera ? `${entry.universo}:${kindOf(entry)}` : entry?.universo);
+
+/**
+ * The progress of a universe's generation (`universes/.generation/<nome>.json`, `.generazione/` before the contract 0.4), or of its
+ * regeneration (`<nome>.<kind>.json`, T411).
+ */
+export function readProgress(dir, name, kind) {
+  const file = `${name}${kind ? `.${kind}` : ''}.json`;
+  return readJson(path.join(dir, '.generation', file), undefined) ?? (kind ? undefined : readJson(path.join(dir, '.generazione', file), undefined));
 }
 
 /** What a universe's generation has spent of this week (the reset it measured is this week's), or of the one it knows. */
@@ -103,12 +119,13 @@ export function isOut(entry, nowMs = Date.now()) {
   return Boolean(entry.fino) && nowMs < Date.parse(entry.fino);
 }
 
-/** The next universe of `generazione` to generate, with what it spent this week; undefined if none is left. */
+/** The next universe of `generazione` to generate (or regenerate), with what it spent this week; undefined if none is left. */
 export function nextUniverse(list = [], state = {}, { reset, nowMs = Date.now(), progressOf = () => undefined } = {}) {
   for (const u of list) {
     if (!NAME_RE.test(u.universo ?? '') || (u.ambientazione && !NAME_RE.test(u.ambientazione))) continue;
-    if (isOut(state.universi?.[u.universo], nowMs)) continue;
-    const speso = weekSpent(progressOf(u.universo), reset);
+    if (u.rigenera !== undefined && !REGEN_MODES.includes(u.rigenera)) continue;
+    if (isOut(state.universi?.[entryKey(u)], nowMs)) continue;
+    const speso = weekSpent(progressOf(u.universo, kindOf(u)), reset);
     if (speso >= (u.tettoSettimana ?? 10)) continue;
     return { ...u, speso };
   }
@@ -165,10 +182,11 @@ export function settle(state, run, outcome, { speso = 0, reset, nowMs = Date.now
   const t = new Date(nowMs).toISOString();
   const esito = outcome?.esito ?? 'errore';
   const motivo = outcome ? outcome.motivo : 'uscito senza esito';
-  if (esito === 'finito') universi[run.universo] = { stato: 'finito', t };
-  else if (esito === 'tetto' && speso >= (run.tettoSettimana ?? Infinity)) universi[run.universo] = { stato: 'tetto', t, fino: reset ?? new Date(nowMs + 7 * DAY).toISOString() };
-  else if (esito === 'errore') universi[run.universo] = { stato: 'errore', t, motivo, fino: new Date(nowMs + RETRY_MS).toISOString() };
-  state.ultimo = { universo: run.universo, esito, ...(motivo ? { motivo } : {}), fine: t, speso: round(speso - (run.speso0 ?? 0)) };
+  const key = run.chiave ?? run.universo;
+  if (esito === 'finito') universi[key] = { stato: 'finito', t };
+  else if (esito === 'tetto' && speso >= (run.tettoSettimana ?? Infinity)) universi[key] = { stato: 'tetto', t, fino: reset ?? new Date(nowMs + 7 * DAY).toISOString() };
+  else if (esito === 'errore') universi[key] = { stato: 'errore', t, motivo, fino: new Date(nowMs + RETRY_MS).toISOString() };
+  state.ultimo = { universo: run.universo, ...(run.rigenera ? { rigenera: run.rigenera } : {}), esito, ...(motivo ? { motivo } : {}), fine: t, speso: round(speso - (run.speso0 ?? 0)) };
   return state;
 }
 
@@ -187,7 +205,7 @@ export function fillCommand(cmd, values) {
 export class Generator {
   constructor({ config, stateFile, switchFile, repo, logs, spawnFn = spawn, kill, isAlive, say = () => {}, progressOf } = {}) {
     Object.assign(this, { config, stateFile, switchFile, repo, logs, spawnFn, kill, isAlive, say });
-    this.progressOf = progressOf ?? ((name) => readProgress(path.resolve(repo, generatorConf(config).cartellaUniversi), name));
+    this.progressOf = progressOf ?? ((name, kind) => readProgress(path.resolve(repo, generatorConf(config).cartellaUniversi), name, kind));
   }
 
   get conf() { return generatorConf(this.config); }
@@ -218,16 +236,18 @@ export class Generator {
   start(s, d, b, nowMs) {
     const u = d.universo;
     const conf = this.conf;
-    const args = fillCommand(conf.comando, { universo: u.universo, ambientazione: u.ambientazione ?? 'medievale', partita: u.partita ?? 'singola', tetto: d.tetto });
-    if (!args) { s.universi = { ...s.universi, [u.universo]: { stato: 'errore', motivo: 'comando non valido', t: new Date(nowMs).toISOString(), fino: new Date(nowMs + RETRY_MS).toISOString() } }; return; }
+    const args = u.rigenera
+      ? fillCommand(conf.comandoRigenera, { universo: u.universo, rigenera: u.rigenera, tetto: d.tetto })
+      : fillCommand(conf.comando, { universo: u.universo, ambientazione: u.ambientazione ?? 'medievale', partita: u.partita ?? 'singola', tetto: d.tetto });
+    if (!args) { s.universi = { ...s.universi, [entryKey(u)]: { stato: 'errore', motivo: 'comando non valido', t: new Date(nowMs).toISOString(), fino: new Date(nowMs + RETRY_MS).toISOString() } }; return; }
     fs.mkdirSync(this.logs, { recursive: true });
     const stamp = new Date(nowMs).toISOString().replace(/[:.]/g, '-');
     const log = path.join(this.logs, `generatore-${u.universo}-${stamp}.log`);
     const coda = this.serveQueue(stamp, nowMs);
     const pid = this.spawnLogged(args, log);
     if (!pid) { if (coda) this.kill(coda); return; }
-    s.corrente = { universo: u.universo, tettoSettimana: u.tettoSettimana ?? 10, tetto: d.tetto, speso0: u.speso, pid, ...(coda ? { coda } : {}), dal: new Date(nowMs).toISOString(), log, avanzo: d.leftover };
-    this.say(`generatore: genera ${u.universo} (${u.ambientazione ?? 'medievale'}) su ${conf.provider}, tetto ${d.tetto} % della settimana (speso finora ${u.speso} %, al reset avanzerebbe il ${d.leftover} %)`);
+    s.corrente = { universo: u.universo, ...(u.rigenera ? { rigenera: u.rigenera, chiave: entryKey(u) } : {}), tettoSettimana: u.tettoSettimana ?? 10, tetto: d.tetto, speso0: u.speso, pid, ...(coda ? { coda } : {}), dal: new Date(nowMs).toISOString(), log, avanzo: d.leftover };
+    this.say(`generatore: ${u.rigenera ? `rigenera i ${u.rigenera} di ${u.universo}` : `genera ${u.universo} (${u.ambientazione ?? 'medievale'})`} su ${conf.provider}, tetto ${d.tetto} % della settimana (speso finora ${u.speso} %, al reset avanzerebbe il ${d.leftover} %)`);
   }
 
   /** The process that serves the subscription's queue, if nobody serves it (its heartbeat): the pid of the one started. */
@@ -254,7 +274,7 @@ export class Generator {
     const run = s.corrente;
     if (run.coda) this.kill(run.coda);
     const outcome = readOutcome(readText(run.log));
-    const speso = weekSpent(this.progressOf(run.universo), b.resetSettimana);
+    const speso = weekSpent(this.progressOf(run.universo, kindOf(run)), b.resetSettimana);
     settle(s, run, outcome, { speso, reset: b.resetSettimana, nowMs });
     s.corrente = undefined;
     this.say(`generatore: ${run.universo} ${outcome?.esito ?? 'uscito senza esito'}${outcome?.motivo ? ` (${outcome.motivo})` : ''}, speso ${s.ultimo.speso} % in questa esecuzione`);
@@ -266,8 +286,8 @@ export class Generator {
     if (!run) return;
     this.kill(run.pid);
     if (run.coda) this.kill(run.coda);
-    const speso = weekSpent(this.progressOf(run.universo), b.resetSettimana);
-    s.ultimo = { universo: run.universo, esito: 'fermato', motivo, fine: new Date(nowMs).toISOString(), speso: round(speso - (run.speso0 ?? 0)) };
+    const speso = weekSpent(this.progressOf(run.universo, kindOf(run)), b.resetSettimana);
+    s.ultimo = { universo: run.universo, ...(run.rigenera ? { rigenera: run.rigenera } : {}), esito: 'fermato', motivo, fine: new Date(nowMs).toISOString(), speso: round(speso - (run.speso0 ?? 0)) };
     s.corrente = undefined;
     this.say(`generatore: fermo ${run.universo} (${motivo}), il lavoro fatto resta e riprende da lì`);
   }
@@ -288,14 +308,14 @@ export class Generator {
     const lines = [`generatore (${conf.provider}): ${!conf.acceso ? 'spento in config.json' : this.isOff() ? 'spento dall’autore (generatore accendi)' : 'acceso'}`
       + (s.avanzo !== undefined ? `, al reset avanzerebbe il ${s.avanzo} %` : '')];
     if (s.corrente && this.running(s)) {
-      const speso = weekSpent(this.progressOf(s.corrente.universo), reset);
-      lines.push(`  genera ${s.corrente.universo} dal ${s.corrente.dal} (processo ${s.corrente.pid}), tetto ${s.corrente.tetto} %, speso ${round(speso - (s.corrente.speso0 ?? 0))} % in questa esecuzione, log ${s.corrente.log}`);
+      const speso = weekSpent(this.progressOf(s.corrente.universo, kindOf(s.corrente)), reset);
+      lines.push(`  ${s.corrente.rigenera ? `rigenera i ${s.corrente.rigenera} di` : 'genera'} ${s.corrente.universo} dal ${s.corrente.dal} (processo ${s.corrente.pid}), tetto ${s.corrente.tetto} %, speso ${round(speso - (s.corrente.speso0 ?? 0))} % in questa esecuzione, log ${s.corrente.log}`);
     } else if (s.attesa) lines.push(`  fermo: ${s.attesa}`);
-    if (s.ultimo) lines.push(`  ultima: ${s.ultimo.universo} ${s.ultimo.esito}${s.ultimo.motivo ? ` (${s.ultimo.motivo})` : ''} il ${s.ultimo.fine}, speso ${s.ultimo.speso} %`);
+    if (s.ultimo) lines.push(`  ultima: ${s.ultimo.universo}${s.ultimo.rigenera ? ` (rigenera ${s.ultimo.rigenera})` : ''} ${s.ultimo.esito}${s.ultimo.motivo ? ` (${s.ultimo.motivo})` : ''} il ${s.ultimo.fine}, speso ${s.ultimo.speso} %`);
     for (const u of this.config.generazione ?? []) {
-      const e = s.universi?.[u.universo];
-      const speso = weekSpent(this.progressOf(u.universo), reset);
-      lines.push(`  ${u.universo}: speso ${speso} di ${u.tettoSettimana ?? 10} % questa settimana${e && isOut(e) ? `, ${e.stato}${e.fino ? ` fino al ${e.fino}` : ''}${e.motivo ? ` (${e.motivo})` : ''}` : ''}`);
+      const e = s.universi?.[entryKey(u)];
+      const speso = weekSpent(this.progressOf(u.universo, kindOf(u)), reset);
+      lines.push(`  ${u.universo}${u.rigenera ? ` (rigenera ${u.rigenera})` : ''}: speso ${speso} di ${u.tettoSettimana ?? 10} % questa settimana${e && isOut(e) ? `, ${e.stato}${e.fino ? ` fino al ${e.fino}` : ''}${e.motivo ? ` (${e.motivo})` : ''}` : ''}`);
     }
     return lines;
   }

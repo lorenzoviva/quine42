@@ -203,7 +203,10 @@ export interface WeeklyUsage {
   reset?: string;
 }
 
-/** What a generation has done, outside the universe (`universes/.generation/<nome>.json`): it is the machine's, not the world's. */
+/**
+ * What a generation has done, outside the universe (`universes/.generation/<nome>.json`; a regeneration has its own file, `<nome>.<modo>.json`,
+ * T411): it is the machine's, not the world's.
+ */
 export interface DeferredProgress {
   /** The steps ended valid. */
   passi: string[];
@@ -212,6 +215,20 @@ export interface DeferredProgress {
   partita?: 'single' | 'multiplayer';
   /** The week measured so far: its reset, the last reading, what the steps used of it (%). */
   consumo?: { reset?: string; ultimo?: number; speso: number };
+  /**
+   * The runs a step ended in error (T411): a step that failed `MAX_STEP_TRIES` times is left, so one thing that never comes (a type the CLI
+   * cannot write, a place that never plans) does not hold the rest of the universe for ever.
+   */
+  tries?: Record<string, number>;
+}
+
+/** How many runs a step may end in error before the generation leaves it (T411). */
+export const MAX_STEP_TRIES = 3;
+
+/** One step of a generation: its id in the progress (`genesi`, `luogo:x,y`, `rigenera:<modello>`…) and what it does; true, or why it is not valid. */
+export interface DeferredStep {
+  id: string;
+  run: () => Promise<string | true>;
 }
 
 export interface DeferredStorage {
@@ -228,7 +245,8 @@ export interface DeferredRun {
   weekly: () => Promise<WeeklyUsage | undefined>;
   /** The Genesis's text, when the universe needs one. */
   theme: string;
-  partita: 'single' | 'multiplayer';
+  /** The game chosen at the start; undefined for a regeneration (T411), which keeps the universe's. */
+  partita?: 'single' | 'multiplayer';
   /** How many places from the centre. */
   luoghi: number;
   /** Models and pieces at most in this run (default the universe's `ai.maxModels`, `ai.maxPieces`). */
@@ -237,6 +255,11 @@ export interface DeferredRun {
   /** True once whoever started it asked to stop (Ctrl+C): the step under way is not written. */
   interrupted?: () => boolean;
   log?: (line: string) => void;
+  /**
+   * The steps of another mode (T411: the regeneration of the models, `regenerationSteps`), in place of the generation's; the steps already
+   * done are in `done`. The ceiling, the gate, the progress and the stops are the same.
+   */
+  steps?: (k: Kernel, done: Set<string>) => AsyncGenerator<DeferredStep>;
 }
 
 export interface DeferredOutcome {
@@ -247,11 +270,11 @@ export interface DeferredOutcome {
 }
 
 /** The steps, in order, as the state of the world says them now (a step already done is not in the list twice). */
-async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGenerator<{ id: string; run: () => Promise<string | true> }> {
+async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGenerator<DeferredStep> {
   if (k.needsGenesis())
     yield {
       id: 'genesi',
-      run: async () => ((await k.runGenesis(r.theme, (s) => r.log?.(`  ${s}`), { mode: r.partita })) ? true : 'la Genesi non è riuscita'),
+      run: async () => ((await k.runGenesis(r.theme, (s) => r.log?.(`  ${s}`), { mode: r.partita ?? 'single' })) ? true : 'la Genesi non è riuscita'),
     };
   for (const [cx, cy] of spiral(r.luoghi)) {
     const id = `luogo:${cx},${cy}`;
@@ -312,17 +335,27 @@ export async function runDeferred(r: DeferredRun): Promise<DeferredOutcome> {
   // ledger. Without this, in a universe of many with nobody connected every common call would go to the local models instead of the queue.
   k.council.hasCredits = undefined;
   let p = r.progress.load();
-  if (!k.needsGenesis() && k.gameSetup().mode !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().mode === 'multiplayer' ? 'multigiocatore' : 'in singola'}`);
-  if (p.partita && p.partita !== r.partita && !k.needsGenesis()) return out('errore', `la generazione era cominciata per una partita ${p.partita}`);
-  p.partita = r.partita;
+  // The game is chosen once (ADR-0053); a regeneration (T411) says none and keeps the universe's.
+  if (r.partita !== undefined) {
+    if (!k.needsGenesis() && k.gameSetup().mode !== r.partita) return out('errore', `l'universo è già una partita ${k.gameSetup().mode === 'multiplayer' ? 'multigiocatore' : 'in singola'}`);
+    if (p.partita && p.partita !== r.partita && !k.needsGenesis()) return out('errore', `la generazione era cominciata per una partita ${p.partita}`);
+    p.partita = r.partita;
+  }
+  const game = (q: DeferredProgress) => (r.partita !== undefined ? { partita: r.partita } : q.partita ? { partita: q.partita } : {});
   const why = await measure(r, p, true);
   r.progress.save(p);
   if (why) return out('errore', why);
   const done = new Set(p.passi);
-  for await (const step of stepsOf(k, r, done)) {
+  // A step that failed too many runs is left (T411): as done for this run's list, never written as done.
+  for (const [id, n] of Object.entries(p.tries ?? {})) if (n >= MAX_STEP_TRIES && !done.has(id)) {
+    done.add(id);
+    r.log?.(`passo ${id} lasciato: fallito ${n} volte`);
+  }
+  for await (const step of r.steps ? r.steps(k, done) : stepsOf(k, r, done)) {
     if (r.interrupted?.()) return out('interrotto');
     // The ceiling and the week, read again before each step: the author may change the first while it runs.
-    p = { ...r.progress.load(), partita: r.partita, consumo: p.consumo };
+    const now = r.progress.load();
+    p = { ...now, ...game(now), consumo: p.consumo };
     const unread = await measure(r, p, false);
     r.progress.save(p);
     if (unread) return out('errore', unread);
@@ -341,10 +374,17 @@ export async function runDeferred(r: DeferredRun): Promise<DeferredOutcome> {
       r.gate.discard();
       return out('interrotto');
     }
-    const stop = r.models.stopped ?? (result === true ? undefined : result);
+    // A task that would have gone to the API stopped the models (it never spends): the table's doing, not the step's.
+    const routed = r.models.stopped;
+    const stop = routed ?? (result === true ? undefined : result);
     if (stop) {
       const lost = r.gate.discard();
       r.models.stop(stop);
+      // One run more this step ended in error (T411): counted, so that one that never comes is left after `MAX_STEP_TRIES`.
+      if (routed === undefined) {
+        const read = r.progress.load();
+        r.progress.save({ ...read, ...game(read), consumo: p.consumo, tries: { ...(read.tries ?? {}), [step.id]: (read.tries?.[step.id] ?? 0) + 1 } });
+      }
       return out('errore', `${step.id}: ${stop}${lost ? ` (${lost} scritture del passo non scritte)` : ''}`);
     }
     try {
@@ -353,7 +393,10 @@ export async function runDeferred(r: DeferredRun): Promise<DeferredOutcome> {
       return out('errore', `${step.id}: ${(e as Error).message}`);
     }
     fatti.push(step.id);
-    p = { ...r.progress.load(), partita: r.partita, consumo: p.consumo };
+    const kept = r.progress.load();
+    const { [step.id]: _tried, ...tries } = kept.tries ?? {};
+    p = { ...kept, ...game(kept), consumo: p.consumo, ...(Object.keys(tries).length ? { tries } : {}) };
+    if (!Object.keys(tries).length) delete p.tries;
     if (!p.passi.includes(step.id)) p.passi.push(step.id);
     r.progress.save(p);
   }

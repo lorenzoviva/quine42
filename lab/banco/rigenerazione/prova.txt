@@ -1,0 +1,10 @@
+lo stato di prima resta nella storia dell'universo: tag prima-della-rigenerazione
+rigenerazione dei modelli: 1 tipi (0 mobili, 1 strutture, 0 figure) su 93 luoghi pianificati
+  ambiente quartiere_telai: i timbri a 16, 6 luoghi; strutture sui lotti che le tengono 2 di 2 (prima 2)
+passo ambiente:quartiere_telai
+  quartiere_telai: 6 luoghi tagliati a 16
+passo rigenera:struttura-palazzina-degli-inventori
+  «Palazzina degli inventori (palazzina a due piani)»: riscolpito da claude-opus-5-5, l'Artista 6/10; 7 chiamate, 108851 token in ingresso, 35084 dalla cache, 44390 in uscita, almeno 1.33 $ al listino di claude-opus-5-5
+passo interno:struttura-palazzina-degli-inventori
+  Lo Scenografo ha arredato «Palazzina degli inventori (palazzina a due piani)» (6 regole). 1 chiamata, 6076 token in ingresso, 0 dalla cache, 397 in uscita, almeno 0.03 $ al listino di claude-opus-5-5
+finito — 3 passi in questa esecuzione

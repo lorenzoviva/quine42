@@ -279,6 +279,18 @@ describe('la coda delle CLI', () => {
     });
   });
 
+  it('V-009 il modello e lo sforzo della CLI che una richiesta dice sono di un elenco, mai un\'opzione (T411)', async () => {
+    await queue(async (base, coda) => {
+      const headers = { 'x-quine-coda': await secretOf(base) };
+      const post = (extra: Record<string, unknown>) => fetch(`${base}/api/coda`, { method: 'POST', body: JSON.stringify({ ...JSON.parse(request), ...extra }), headers });
+      for (const bad of [{ model: '--dangerously-skip-permissions' }, { model: 'gemini-4-argon' }, { model: 12 }, { effort: '--tools' }, { effort: 'tutto' }]) expect((await post(bad)).status, JSON.stringify(bad)).toBe(400);
+      expect(existsSync(coda)).toBe(false);
+      expect((await post({ model: 'claude-opus-5-5', effort: 'low' })).status).toBe(200);
+      const [file] = readdirSync(coda).filter((f) => f.endsWith('.richiesta.json'));
+      expect(JSON.parse(readFileSync(path.join(coda, file), 'utf8'))).toMatchObject({ model: 'claude-opus-5-5', effort: 'low' });
+    });
+  });
+
   it('V-009 non da loopback o con un altro nome è rifiutata', () => {
     let handler: Handler | undefined;
     (subscriptionQueue('non-usata', { enabled: true }).configureServer as unknown as (s: unknown) => void)({ middlewares: { use: (h: Handler) => (handler = h) } });

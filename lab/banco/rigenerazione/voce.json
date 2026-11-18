@@ -1,0 +1,77 @@
+{
+ "struttura-palazzina-degli-inventori": {
+  "class": "structure",
+  "name": "Palazzina degli inventori (palazzina a due piani)",
+  "author": "claude-opus-5-5",
+  "seeds": 4,
+  "score": 6,
+  "interior": {
+   "rules": [
+    {
+     "storey": 0,
+     "room": "hall",
+     "furniture": [
+      "banco",
+      "steampunk-banco-da-orologiaio",
+      "banco-orologiaio",
+      "steampunk-caldaia-a-pressione",
+      "valvola-manometro",
+      "steampunk-pompa-idraulica"
+     ],
+     "count": 4
+    },
+    {
+     "storey": 0,
+     "room": "room",
+     "furniture": [
+      "credenza",
+      "steampunk-archivio-pneumatico",
+      "cassaforte-ghisa",
+      "furniture"
+     ],
+     "count": 2
+    },
+    {
+     "storey": 1,
+     "room": "hall",
+     "furniture": [
+      "letto",
+      "steampunk-stufa-in-ghisa",
+      "credenza",
+      "steampunk-telegrafo-a-vapore",
+      "banco-orologiaio",
+      "steampunk-archivio-pneumatico"
+     ],
+     "count": 5
+    },
+    {
+     "room": "room",
+     "furniture": [
+      "letto",
+      "credenza",
+      "steampunk-stufa-in-ghisa"
+     ],
+     "count": 2
+    },
+    {
+     "room": "small",
+     "furniture": [
+      "furniture",
+      "credenza"
+     ],
+     "count": 1
+    },
+    {
+     "room": "cellar",
+     "furniture": [
+      "cellar-shelf",
+      "cellar-rack",
+      "barile"
+     ],
+     "count": 3
+    }
+   ],
+   "author": "claude-opus-5-5"
+  }
+ }
+}

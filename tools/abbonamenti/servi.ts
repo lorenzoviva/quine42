@@ -198,7 +198,10 @@ export function extractUsage(rawJson: unknown): QueuedAnswer['usage'] | undefine
   const u = (obj.usage ?? obj.stats ?? obj) as Record<string, unknown>;
   if (!u || typeof u !== 'object') return undefined;
 
-  const prompt = u.input_tokens ?? u.prompt_tokens ?? u.prompt ?? u.inputTokens;
+  // Claude's CLI says apart the prompt's tokens it wrote to its cache (`cache_creation_input_tokens`): they are input too (T411), read or not.
+  const written = Number(u.cache_creation_input_tokens);
+  const said = u.input_tokens ?? u.prompt_tokens ?? u.prompt ?? u.inputTokens;
+  const prompt = said !== undefined && Number.isFinite(written) && written > 0 ? Number(said) + written : said;
   const output = u.output_tokens ?? u.completion_tokens ?? u.output ?? u.outputTokens;
   const cached = u.cache_read_tokens ?? u.cache_read_input_tokens ?? u.cached ?? u.cachedTokens;
   const thoughts = u.thinking_tokens ?? u.thoughtTokens ?? u.thoughts;
@@ -382,24 +385,33 @@ export async function runIsolated(
   return { status: 'ok', text, usage: parsed.usage, raw };
 }
 
-/** Takes the oldest request for this provider and serves it through the CLI. */
+/**
+ * Takes the oldest request for this provider and serves it through the CLI. The model and the effort the request says (T411, ADR-0216: one
+ * of the lists, `checkRequest` read again here, as the file on disk may not have come through the queue) and its images, as one message of
+ * events (T391's way, `imageBlock`: png or jpeg data URLs only); the CLI has nothing to act with whatever the request says (ADR-0106).
+ */
 export async function serveOne(
   dir: string,
   provider: SubscriptionProvider,
   opts: { cmd?: string; timeoutMs?: number } = {},
 ): Promise<ServeStepResult> {
-  const { take } = await import('../../server/subscriptionQueue');
+  const { take, checkRequest } = await import('../../server/subscriptionQueue');
   const req = await take(dir, provider);
   if (!req) return { served: false };
 
-  // Images check: the queue of the game sends no images to the CLI (the bench may, T391).
-  if (req.images && req.images.length > 0) {
-    const errore = `la CLI di ${provider} non supporta immagini da riga di comando`;
-    await answer(dir, req.id, { errore });
-    return { served: true, id: req.id, status: 'error', errore };
+  const refused = checkRequest(req);
+  if (refused) {
+    await answer(dir, req.id, { errore: refused });
+    return { served: true, id: req.id, status: 'error', errore: refused };
   }
-
-  const r = await runIsolated(provider, req, opts);
+  const choice: CliChoice = { ...(req.model ? { model: req.model } : {}), ...(req.effort ? { effort: req.effort } : {}), images: !!req.images?.length };
+  let r: IsolatedRun;
+  try {
+    r = await runIsolated(provider, req, { ...opts, choice });
+  } catch (e) {
+    // An image that is not one (`imageBlock`), a choice the CLI could misread: the request fails, the process goes on serving.
+    r = { status: 'error', errore: `richiesta non servita: ${(e as Error).message}` };
+  }
   await answer(dir, req.id, r.status === 'ok' ? { text: r.text, usage: r.usage } : { errore: r.errore, ...(r.usage ? { usage: r.usage } : {}) });
   return {
     served: true,
