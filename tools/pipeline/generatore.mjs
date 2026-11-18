@@ -204,6 +204,34 @@ export function fillCommand(cmd, values) {
   return out;
 }
 
+const SHELL_CHARS = /["'`$&|<>;%^()*?!]/;
+
+/** The file a package's command runs (`bin` of its package.json in node_modules), or undefined. */
+function binOf(repo, name) {
+  if (!/^[\w.-]+$/.test(name)) return undefined;
+  const dir = path.join(repo, 'node_modules', name);
+  const bin = readJson(path.join(dir, 'package.json'), undefined)?.bin;
+  const file = typeof bin === 'string' ? bin : bin?.[name];
+  return typeof file === 'string' && fs.existsSync(path.join(dir, file)) ? path.join(dir, file) : undefined;
+}
+
+/**
+ * `npm run <script> [-- args]` as the node process it ends in, without npm nor a shell (T425): a script of plain words that starts
+ * with `node` or with a package's command (`vite-node --script tools/…`) becomes `[process.execPath, <its file>, …words, …args]`.
+ * Anything else is left as it is (and is then started without a shell).
+ */
+export function directCommand(command, repo, { execPath = process.execPath } = {}) {
+  const [cmd, run, name, ...rest] = command;
+  if (cmd !== 'npm' || run !== 'run' || typeof name !== 'string') return command;
+  const script = readJson(path.join(repo, 'package.json'), undefined)?.scripts?.[name];
+  if (typeof script !== 'string' || SHELL_CHARS.test(script)) return command;
+  const [bin, ...words] = script.trim().split(/\s+/);
+  const extra = rest[0] === '--' ? rest.slice(1) : rest;
+  if (bin === 'node') return [execPath, ...words, ...extra];
+  const file = binOf(repo, bin);
+  return file ? [execPath, file, ...words, ...extra] : command;
+}
+
 /** The generator's processes and its state file. Every check calls `tick`; `stop` for the shutdown. */
 export class Generator {
   constructor({ config, stateFile, switchFile, repo, logs, spawnFn = spawn, kill, isAlive, say = () => {}, progressOf } = {}) {
@@ -262,10 +290,16 @@ export class Generator {
     return this.spawnLogged(this.conf.coda, path.join(this.logs, `generatore-coda-${stamp}.log`));
   }
 
-  spawnLogged([cmd, ...args], log) {
+  /**
+   * Starts a command detached (it outlives the pipeline, `taskkill /T` ends it) with stdout and stderr in its log. Never through a
+   * shell (T425): on Windows a detached `cmd` has no console, so the `npm` → `node` it starts got a new one, visible, and wrote
+   * there instead of the log; `npm run <script>` becomes node with the script's own program (`directCommand`).
+   */
+  spawnLogged(command, log) {
+    const [cmd, ...args] = directCommand(command, this.repo);
     const fd = fs.openSync(log, 'w');
     try {
-      const child = this.spawnFn(cmd, args, { cwd: this.repo, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, shell: process.platform === 'win32' });
+      const child = this.spawnFn(cmd, args, { cwd: this.repo, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, shell: false });
       child.on?.('error', (e) => fs.appendFileSync(log, `\n${e.message}\n`));
       child.unref?.();
       return child.pid;

@@ -14,12 +14,14 @@ type Gen = {
   weekSpent(progress: unknown, reset?: string): number;
   readOutcome(text: string): { esito: string; motivo?: string } | undefined;
   fillCommand(cmd: string[], values: Record<string, unknown>): string[] | undefined;
+  directCommand(cmd: string[], repo: string, o?: { execPath?: string }): string[];
   Generator: new (o: Record<string, unknown>) => {
     tick(o: { budget: Budget; live?: number; ceiling?: number; wanting?: boolean; stopping?: boolean; nowMs?: number }): Decision;
     load(): Record<string, any>;
     running(): boolean;
     stop(motivo: string, budget?: Budget): void;
     describe(budget?: Budget): string[];
+    spawnLogged(cmd: string[], log: string): number | undefined;
   };
   setGeneratorSwitch(file: string, spento: boolean, chi?: string): void;
 };
@@ -258,5 +260,46 @@ describe('il posto del generatore tra i task', () => {
     expect(P.generatorPlace([task('T1', 'gemini')], { budget, live, config }).wanting).toBe(false);
     expect(P.generatorPlace([task('T1', 'claude', 200)], { budget, live, config }).wanting).toBe(false);
     expect(P.generatorPlace([], { budget, live, config }).wanting).toBe(false);
+  });
+});
+
+describe('i processi del generatore scrivono nel loro log, senza shell (T425)', () => {
+  const temp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'gen-cmd-'));
+
+  it('npm run <script> diventa node col programma dello script, senza npm né shell', () => {
+    const repo = temp();
+    try {
+      fs.writeFileSync(path.join(repo, 'package.json'), JSON.stringify({ scripts: { genera: 'vite-node --script tools/generazione/genera.ts', semplice: 'node x.mjs', shell: 'node x.mjs && echo y' } }));
+      const bin = path.join(repo, 'node_modules', 'vite-node');
+      fs.mkdirSync(path.join(bin, 'dist'), { recursive: true });
+      fs.writeFileSync(path.join(bin, 'package.json'), JSON.stringify({ bin: { 'vite-node': './dist/cli.mjs' } }));
+      fs.writeFileSync(path.join(bin, 'dist', 'cli.mjs'), '');
+      const o = { execPath: 'NODE' };
+      expect(G.directCommand(['npm', 'run', 'genera', '--', 'aurora', '--tetto', '9'], repo, o))
+        .toEqual(['NODE', path.join(bin, 'dist', 'cli.mjs'), '--script', 'tools/generazione/genera.ts', 'aurora', '--tetto', '9']);
+      expect(G.directCommand(['npm', 'run', 'semplice'], repo, o)).toEqual(['NODE', 'x.mjs']);
+      // Ciò che vuole una shell, uno script che non c'è o un altro comando restano come sono.
+      expect(G.directCommand(['npm', 'run', 'shell'], repo, o)).toEqual(['npm', 'run', 'shell']);
+      expect(G.directCommand(['npm', 'run', 'manca'], repo, o)).toEqual(['npm', 'run', 'manca']);
+      expect(G.directCommand(['genera', 'x'], repo, o)).toEqual(['genera', 'x']);
+    } finally { fs.rmSync(repo, { recursive: true, force: true }); }
+  });
+
+  it('spawnLogged passa al processo i descrittori del log, staccato e senza shell, anche su Windows', () => {
+    const repo = temp();
+    try {
+      const calls: Array<{ cmd: string; args: string[]; opts: Record<string, any> }> = [];
+      const spawnFn = (cmd: string, args: string[], opts: Record<string, any>) => { calls.push({ cmd, args, opts }); return { pid: 7, on() {}, unref() {} }; };
+      const gen = new G.Generator({ config: {}, repo, logs: repo, spawnFn, kill() {}, isAlive: () => false });
+      const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      try { expect(gen.spawnLogged(['node', 'x.mjs'], path.join(repo, 'a.log'))).toBe(7); } finally { Object.defineProperty(process, 'platform', platform); }
+      const [{ cmd, args, opts }] = calls;
+      expect([cmd, ...args]).toEqual(['node', 'x.mjs']);
+      expect(opts).toMatchObject({ cwd: repo, detached: true, windowsHide: true, shell: false });
+      expect(opts.stdio[0]).toBe('ignore');
+      expect(typeof opts.stdio[1]).toBe('number');
+      expect(opts.stdio[2]).toBe(opts.stdio[1]);
+    } finally { fs.rmSync(repo, { recursive: true, force: true }); }
   });
 });

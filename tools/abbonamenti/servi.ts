@@ -277,7 +277,7 @@ export function runCli(opts: { cmd: string; args: string[]; stdin?: string; cwd?
     const kill = () => {
       try {
         if (process.platform === 'win32' && child.pid) {
-          execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+          execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true });
         } else if (child.pid) {
           child.kill('SIGTERM');
         }
