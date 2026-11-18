@@ -265,3 +265,49 @@ export function varietyError(small: Composition, large: Composition, smallName: 
   if (large.letters > small.letters || large.parts >= want) return undefined;
   return `varietà: alla taglia ${largeName} ${large.letters} tipi di parti e ${large.parts} parti, alla ${smallName} ${small.letters} e ${small.parts}: in un'area più grande entra di più (annessi, recinti, campi, mura, torri: un tipo nuovo, o almeno ${want} parti), non lo stesso edificio più grande`;
 }
+
+/** How much of its class's box a model takes as it is shown (T428, ADR-0219). */
+export interface ClassFit {
+  /** Its visible voxels' box, in tiles at the density it is shown at. */
+  tiles: Vec3;
+  /** The box of its class at its size, in tiles (`tilesOf`). */
+  box: [number, number, number];
+  /** Its longest side over the class's longest, its height over the class's. */
+  side: number;
+  height: number;
+  /** Under `share` of its class both in side and in height: drawn as small as a thing of a smaller class (a building as a piece of furniture). */
+  small: boolean;
+  /**
+   * The density that shows the same voxels at its class's measure: its longest side or its height (the first to get there) as the class's,
+   * never under 4 (`vptOf`); for one that is not small, the density it is shown at. What an entry can say (`vpt`, ADR-0049) to show a program
+   * written too small at its class's measure.
+   */
+  fit: number;
+}
+
+/**
+ * How much of its class's box a model takes as it is shown (T428, ADR-0219): its visible voxels at `vpt` voxels a tile against `box`, the box
+ * of its class at its size in tiles. The Sculptor's checks want a class's least height (`minHeight`); what did not pass them (a program written
+ * by hand, a universe installed from elsewhere) may be a building of 25 voxels at 20 a tile, 1.25 tiles on a lot of 4 × 4: here it is measured.
+ */
+export function classFit(g: Pick<Grid3, 'X' | 'Y' | 'Z' | 'cells' | 'alphabet'>, palette: Record<string, PaletteEntry>, vpt: number, box: readonly [number, number, number], share = 0.6): ClassFit {
+  const vis = visibleCodes(g as Grid3, palette);
+  const min = [Infinity, Infinity, Infinity], max = [-1, -1, -1];
+  const XY = g.X * g.Y;
+  for (let i = 0; i < g.cells.length; i++) {
+    if (!vis[g.cells[i]]) continue;
+    const p = [i % g.X, Math.floor(i / g.X) % g.Y, Math.floor(i / XY)];
+    for (let a = 0; a < 3; a++) {
+      if (p[a] < min[a]) min[a] = p[a];
+      if (p[a] > max[a]) max[a] = p[a];
+    }
+  }
+  const voxels = max[0] < 0 ? [0, 0, 0] : [0, 1, 2].map((a) => max[a] - min[a] + 1);
+  const tiles = voxels.map((v) => v / vpt) as Vec3;
+  const side = Math.max(tiles[0], tiles[1]) / Math.max(box[0], box[1]);
+  const height = tiles[2] / box[2];
+  const need = Math.max(Math.max(voxels[0], voxels[1]) / Math.max(box[0], box[1]), voxels[2] / box[2]);
+  const small = side < share && height < share;
+  const fit = small && need > 0 ? Math.min(vpt, Math.max(4, Math.ceil(need))) : vpt;
+  return { tiles, box: [box[0], box[1], box[2]], side, height, small, fit };
+}

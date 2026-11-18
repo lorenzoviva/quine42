@@ -1233,10 +1233,17 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Rigenerazione dei modelli
 - **Inglese**: `regenerationSteps`, `regenerationTargets`, `regenerationPlan`, `RegenMode`
-- **Definizione**: i tipi di modello che un universo indossa (mobili, strutture, figure) riscolpiti con lo Scultore di oggi, le strutture a 16 voxel per casella e arredate dallo Scenografo, i lotti dei luoghi di prima rifatti dove non le terrebbero; passo dopo passo dalla coda degli abbonamenti, come la generazione differita; bibbia, luoghi e persone restano (ADR-0216).
+- **Definizione**: i tipi di modello che un universo indossa (mobili, strutture, edifici piccoli da T428, figure) riscolpiti con lo Scultore di oggi, le strutture a 16 voxel per casella e arredate dallo Scenografo, i lotti dei luoghi di prima rifatti dove non le terrebbero; passo dopo passo dalla coda degli abbonamenti, come la generazione differita; bibbia, luoghi e persone restano (ADR-0216).
 - **Dove vive**: `src/kernel/regenerate.ts`, `tools/generazione/genera.ts` (`--rigenera modelli`), `tools/pipeline/generatore.mjs` (`"rigenera"` nelle voci di `generazione`)
 - **Da non usare**: `riscolpitura`, `rigenerazione dell'universo` (si rigenerano i modelli, non il mondo)
 - **Fermo**: il file `universes/.generation/<nome>.rigenera-modelli.json` (passi, tetto, consumo, `tries`), il tag `prima-della-rigenerazione` nella storia dell'universo, i passi `ambiente:<id>`, `rigenera:<modello>`, `interno:<modello>`; il compito `environment.recut` del Cartografo (T422, ADR-0218: l'ambiente che il kernel non sa allargare, riscritto).
+
+### Misura della classe
+- **Inglese**: `classFit`, `ClassFit`
+- **Definizione**: quanto della scatola della sua classe (alla sua taglia) un modello occupa come si vede, coi voxel visibili alla densità a cui si mostra; «piccolo» sotto il 60 % sia nel lato sia nell'altezza (un edificio disegnato come un mobile), e la densità che lo riporta alla classe (ADR-0219).
+- **Dove vive**: `src/mj/check.ts`, `lab/scripts/edifici-piccoli.ts`
+- **Da non usare**: `scala del modello` (la scala è delle taglie, ADR-0092)
+- **Fermo**: `vpt` nella voce di `models/index.json` (ADR-0049) è ciò che la riparazione scrive.
 
 ### Ambientazione
 - **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`
