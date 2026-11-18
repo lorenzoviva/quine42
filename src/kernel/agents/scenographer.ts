@@ -56,9 +56,9 @@ export function interiorSchema(ids: readonly string[]): Schema {
         items: {
           type: 'OBJECT',
           properties: {
-            storey: { type: 'INTEGER', description: '0 the ground floor, 1 the one above…; left out, every storey' },
+            storey: { type: 'INTEGER', description: '0 the ground floor, 1 the one above…; left out, every storey (leave it out for the cellar)' },
             area: { type: 'STRING', description: 'the area of the ground under the room, as the request names it; left out, every area' },
-            room: { type: 'STRING', enum: [...ROOM_KINDS], description: `hall the largest room of its storey, room another of at least ${ROOM_LEAST} tiles², small the others; left out, every room` },
+            room: { type: 'STRING', enum: [...ROOM_KINDS], description: `hall the largest room of its storey, room another of at least ${ROOM_LEAST} tiles², small the others, cellar the floor under the ground its stair reaches (only a rule that names it furnishes it); left out, every room above the ground` },
             furniture: { type: 'ARRAY', items: { type: 'STRING', ...(ids.length ? { enum: [...ids] } : {}) }, description: 'ids of the list; for each piece one of them at random' },
             count: { type: 'INTEGER', description: `how many pieces, 1 to ${INTERIOR_LIMITS.count}` },
           },
@@ -97,10 +97,10 @@ export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box'
     const above = plan.storeys.filter((p) => !p.cellar);
     const cellar = plan.storeys.filter((p) => p.cellar).reduce((s, p) => s + p.area, 0);
     lines.push('', `Seed ${seed}:`);
-    lines.push(`- storeys one reaches on foot (z of the floor, covered tiles²): ${above.map((p) => `z=${p.z} (${n1(p.area)})`).join(', ') || 'none'}${cellar ? `; a cellar of ${n1(cellar)} tiles² (it stays empty)` : ''}`);
+    lines.push(`- storeys one reaches on foot (z of the floor, covered tiles²): ${above.map((p) => `z=${p.z} (${n1(p.area)})`).join(', ') || 'none'}${cellar ? `; a cellar of ${n1(cellar)} tiles² under the ground, reached by its stair (rooms of kind cellar)` : ''}`);
     if (plan.door) lines.push(`- the door: x=${plan.door.x}, y=${plan.door.y} (tile ${Math.floor(plan.door.x / vpt)}, ${Math.floor(plan.door.y / vpt)})`);
     lines.push(`- habitable parts (kernel): ${parts.storeys.length} storeys reached; rooms ${parts.rooms.map((r) => `z=${r.z} side ${r.room} ceiling ${r.clear}`).join(', ') || 'none'}; doors ${parts.doors.map((d) => `${d.width} × ${d.height}`).join(', ') || 'none'}`);
-    lines.push('- rooms (where a body stands, cut at the narrow passages; a hall is the largest of its storey; tiles x0,y0 → x1,y1):');
+    lines.push('- rooms (where a body stands, cut at the narrow passages; a hall is the largest of its storey, c. the cellar; tiles x0,y0 → x1,y1):');
     const count = new Map<number, number>();
     for (const r of rooms) {
       const n = (count.get(r.storey) ?? 0) + 1;
@@ -121,7 +121,8 @@ export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box'
       heads.sort((a, b) => a - b);
       const ceiling = heads[Math.floor(heads.length / 2)];
       const where = [x0 / vpt, y0 / vpt, (x1 + 1) / vpt, (y1 + 1) / vpt].map((v) => Math.round(v * 10) / 10).join(',');
-      lines.push(`  ${r.storey}.${n}: storey ${r.storey} (z=${z0}), ${r.kind === 'small' ? 'small room' : r.kind}, ${n1(r.tiles)} tiles², ceiling ${ceiling === Infinity ? 'open sky' : ceiling}, area ${r.area ?? '—'}, ${where}`);
+      const at = r.kind === 'cellar' ? `c.${n}: the cellar (z=${z0})` : `${r.storey}.${n}: storey ${r.storey} (z=${z0})`;
+      lines.push(`  ${at}, ${r.kind === 'small' ? 'small room' : r.kind}, ${n1(r.tiles)} tiles², ceiling ${ceiling === Infinity ? 'open sky' : ceiling}, area ${r.area ?? '—'}, ${where}`);
     }
     const named = Object.entries(areas).map(([a, ts]) => `${a} ${ts.length} (${ts.slice(0, 24).map(([x, y]) => `${x},${y}`).join(' ')}${ts.length > 24 ? ' …' : ''})`);
     lines.push(`- areas of the ground (tiles of ${vpt} × ${vpt}): ${named.join('; ') || 'none'}`);

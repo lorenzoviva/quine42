@@ -94,6 +94,8 @@ export const CELLAR_CHANCE = 0.2;
 export const CELLAR_FROM = 2;
 export const CELLAR_HOUSE = 'la casa con la cantina';
 export const CELLAR_THING = 'obj.chest';
+/** What the local models put in a cellar (T419): the seed's shelf and rack, and a barrel. */
+export const CELLAR_FURNITURE = ['cellar-shelf', 'cellar-rack', 'barile'];
 
 export class MockAiModels implements AiModels, DecisionModels {
   readonly name = 'offline';
@@ -523,7 +525,8 @@ export class MockAiModels implements AiModels, DecisionModels {
   /**
    * Offline the Scenografo answers as the bench's offline answer (`lab/banco/scenografo/offline/dati.json`, T303): a bench, a sideboard and a
    * barrel in the hall of the ground floor, a bed and a chest in a room, a barrel in the others; what the catalogue lacks is left out, and a
-   * catalogue with none of them gives its first pieces.
+   * catalogue with none of them gives its first pieces. And the cellar (T419): the seed's shelf and rack, which the kernel brings up to its
+   * ceiling, and a barrel, four pieces; only if the catalogue has one of them.
    */
   private interior(catalogue: string[]): unknown {
     const have = (ids: string[]) => {
@@ -531,11 +534,13 @@ export class MockAiModels implements AiModels, DecisionModels {
       return own.length ? own : catalogue.slice(0, 2);
     };
     if (!catalogue.length) return { rules: [] };
+    const cellar = CELLAR_FURNITURE.filter((id) => catalogue.includes(id));
     return {
       rules: [
         { storey: 0, room: 'hall', furniture: have(['banco', 'credenza', 'barile']), count: 3 },
         { room: 'room', furniture: have(['letto', 'furniture']), count: 2 },
         { furniture: have(['barile']), count: 1 },
+        ...(cellar.length ? [{ room: 'cellar', furniture: cellar, count: 4 }] : []),
       ],
     };
   }

@@ -1,0 +1,32 @@
+<!-- Scaffale della cantina: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 3/10 -->
+<sequence values="B P S J b a c D" size="40 40 40" symmetry="(x)">
+  <color symbol="P" value="5c3a21" name="montante"/>
+  <color symbol="S" value="8c532b" name="ripiano"/>
+  <color symbol="J" value="a65e44" name="vaso"/>
+  <color symbol="b" value="2e4e6b" name="bottiglia"/>
+  <color symbol="a" value="d9c5a0" name="sacco"/>
+  <color symbol="c" value="f2d257" name="forma di formaggio"/>
+  <color symbol="D" value="3d2a1b" name="ombra"/>
+
+  <!-- Struttura: 4 montanti agli angoli -->
+  <box at="5 15 0" size="2 2 40" color="P"/>
+  <box at="33 15 0" size="2 2 40" color="P"/>
+  <box at="5 23 0" size="2 2 40" color="P"/>
+  <box at="33 23 0" size="2 2 40" color="P"/>
+
+  <!-- Ripiani -->
+  <box at="5 15 5" size="30 10 2" color="S"/>
+  <box at="5 15 15" size="30 10 2" color="S"/>
+  <box at="5 15 25" size="30 10 2" color="S"/>
+  <box at="5 15 35" size="30 10 2" color="S"/>
+
+  <!-- Oggetti sparsi sui ripiani -->
+  <prl in="B S" out="J *" p="0.08" steps="1"/>
+  <prl in="B S" out="b *" p="0.06" steps="1"/>
+  <prl in="B S" out="a *" p="0.04" steps="1"/>
+  <prl in="B S" out="c *" p="0.03" steps="1"/>
+
+  <!-- Dettagli: ombra sotto i ripiani -->
+  <all in="B S" out="D *" steps="1"/>
+  <all in="B P" out="D *" steps="1"/>
+</sequence>

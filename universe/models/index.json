@@ -1012,5 +1012,17 @@
   "name": "Parte: la cantina (da sola, la casa di prova con la cantina)",
   "author": "a mano (Claude Code, T417): un sottoblocco del seme da includere con <import>, ADR-0182, ADR-0091",
   "cellar": 1
+ },
+ "cellar-shelf": {
+  "class": "furniture",
+  "size": "large",
+  "name": "Scaffale della cantina",
+  "author": "gemini-3.8-flash, lo Scultore del gioco (T419, voto dell'Artista 9/10)"
+ },
+ "cellar-rack": {
+  "class": "furniture",
+  "size": "large",
+  "name": "Rastrelliera delle botti",
+  "author": "gemini-3.8-flash, lo Scultore del gioco (T419, voto dell'Artista 5/10)"
  }
 }

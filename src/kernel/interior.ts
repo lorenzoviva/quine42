@@ -9,8 +9,9 @@
 //   - the stage (`stageGrid`): those classes as letters, `W` any part of the building, `F` free floor, `C` free floor under the ground,
 //     `P` kept, `A` the free floor of the animals; a program of a second stage reads only these, so one program serves every seed;
 //   - the guard (`InteriorGuard`): a piece of furniture is kept only if it writes on no part of the building, no place of the animals,
-//     cuts nothing off (every centre a body stands on, storeys, stairs and the ground, in as many pieces as before) and leaves the room
-//     the Sculptor's checks want (`partErrors`: the side of the largest room, never under the least, or under what it was if it was less).
+//     leaves the cellar holding (T419: what `groundOfForm` measures on the furnished building), cuts nothing off (every centre a body
+//     stands on, storeys, stairs and the ground, in as many pieces as before) and leaves the room the Sculptor's checks want (`partErrors`:
+//     the side of the largest room, never under the least, or under what it was if it was less).
 //
 // Furniture never touches the building: what a program writes on `W` is not written, what it writes on `A` or cuts off is taken away.
 
@@ -96,6 +97,9 @@ export interface InteriorPlan {
   person: number;
   /** The density of the Sculptor's parts. */
   partsVpt: number;
+  /** How the door opens and the seed it opens with: the kernel's walk on the furnished building (`walkIn`, T419). */
+  actions: readonly MjxClip[];
+  seed: number;
 }
 
 /**
@@ -162,6 +166,21 @@ export function interiorPlan(b: InteriorBuilding): InteriorPlan {
     for (let i = 0; i < XY; i++) if (top[i] <= p.z) p.free[i] = 0;
   }
   for (const c of ramps) for (const p of storeys) if (Math.abs(p.z - c.z) <= step * 3) flood(p.kept, c.x, c.y, p.z, keep + r);
+  // A stair solid under its treads (the cellar's of `part-cellar`, T419) has no air at the storey's feet over them: its foot is the centres of
+  // the storey a step from its first tread, and what is kept is flooded from there.
+  const rampAt = new Map<number, number[]>();
+  for (const c of ramps) {
+    const i = c.x + c.y * X;
+    const zs = rampAt.get(i);
+    if (zs) zs.push(c.z);
+    else rampAt.set(i, [c.z]);
+  }
+  for (const p of storeys)
+    for (const i of p.centres) {
+      const x = i % X;
+      const near = [x > 0 ? i - 1 : -1, x < X - 1 ? i + 1 : -1, i - X, i + X].some((j) => rampAt.get(j)?.some((z) => Math.abs(z - p.z) <= step * 3));
+      if (near) flood(p.kept, x, (i - x) / X, p.z, keep + r);
+    }
   const ground = storeys.find((p) => !p.cellar);
   const door = frontDoor(w, vpt, base);
   if (door && storeys.length) {
@@ -189,6 +208,8 @@ export function interiorPlan(b: InteriorBuilding): InteriorPlan {
     X, Y, Z, vpt, base, walked: w, built: b.grid, palette: b.palette, storeys, ...(door ? { door } : {}), animals, animalAreas, ...(ground ? { ground } : {}),
     person: Math.ceil(1.5 * vpt),
     partsVpt: b.partsVpt ?? vpt,
+    actions: b.actions ?? [],
+    seed: b.seed ?? 1,
   };
 }
 
@@ -213,8 +234,8 @@ export function stageGrid(plan: InteriorPlan): Grid3 {
 
 /**
  * The kernel's guard on furniture (T259, T409), the same for every way: a piece is kept only if it writes on air of the building, not on
- * the place of the animals, leaves no top under the ground a body could not reach, keeps the Sculptor's room and cuts nothing off. The
- * last is the kernel's own walk (`walkIn`, without the jumps): from the front, every step a body takes with the floors and the edges of
+ * the place of the animals, leaves the cellar holding (no top under the ground a body could stand on and not reach, T419), keeps the
+ * Sculptor's room and cuts nothing off. The last is the kernel's own walk (`walkIn`, without the jumps): from the front, every step a body takes with the floors and the edges of
  * `rampBlocks`; with a piece the floors are made again and the steps into the columns near it tried again, and every place reached
  * before that the piece does not take (a body would stand in it, `touched`) must still be reached.
  */
@@ -249,6 +270,8 @@ export class InteriorGuard {
   private work: VoxelGrid;
   private workPalette: Record<string, PaletteEntry>;
   private furniture: number;
+  /** The building's cellar holds (`groundOfForm` keeps its hole, T52b): a piece must leave it so (T419). */
+  private readonly holds: boolean;
 
   constructor(private plan: InteriorPlan) {
     const { X, Y, Z, vpt, base } = plan;
@@ -266,6 +289,7 @@ export class InteriorGuard {
     this.furniture = this.work.alphabet.length - 1;
     this.workPalette = { ...plan.palette, [letter]: { color: '808080' } };
     const ground = groundOfForm(this.work, this.workPalette, vpt, base);
+    this.holds = base > 0 && !!ground.hole;
     // The walk, as `walkIn` makes it without the jumps: every place and every step.
     this.node(Math.floor(X / 2), Y + this.m - 1, base);
     for (let a = 0; a < this.xs.length; a++)
@@ -414,18 +438,28 @@ export class InteriorGuard {
   /** Why a piece is refused (`Refusal`), or undefined if it is kept; kept, the places it takes are gone and the walk is of the new floors. */
   refusal(voxels: readonly number[]): Refusal | undefined {
     const { built, walked, animals, base, vpt } = this.plan;
+    let under = false;
     for (const v of voxels) {
       if (!(v >= 0 && v < this.N) || built.cells[v] || walked.g.cells[v] || this.work.cells[v]) return 'wall';
       const z = Math.floor(v / this.XY);
       if (animals[v % this.XY] && z >= base && z < this.animalTop) return 'animals';
+      if (z < base) under = true;
     }
-    if (base > 0 && !this.reachesCeiling(voxels)) return 'cellar';
+    // Under the ground of a building whose cellar does not hold, the earth fills it (T52b): nothing goes there.
+    if (under && !this.holds) return 'cellar';
     const lost = this.roomTouched(voxels);
     const sides = this.rooms.map((room, k) => (lost[k].size ? this.side(room, lost[k]) : room.side));
     if (this.roomSide > 0 && Math.max(0, ...sides.map((s) => (s ? s + this.body : 0))) < this.roomSide) return 'room';
     const taken = this.touched(voxels);
     for (const v of voxels) this.work.cells[v] = this.furniture;
-    const { ok, changed } = this.walk(taken, voxels, groundOfForm(this.work, this.workPalette, vpt, base));
+    const ground = groundOfForm(this.work, this.workPalette, vpt, base);
+    // The cellar still holds (T52b, ADR-0135): a top under the ground a body could stand on and no body reaches would undo it, and the game
+    // would fill it with earth. What the game measures on the furnished building, not that every column reaches the ceiling (T419).
+    if (this.holds && !ground.hole) {
+      for (const v of voxels) this.work.cells[v] = 0;
+      return 'cellar';
+    }
+    const { ok, changed } = this.walk(taken, voxels, ground);
     if (!ok) {
       for (const v of voxels) this.work.cells[v] = 0;
       return 'cut';
@@ -439,24 +473,6 @@ export class InteriorGuard {
     return undefined;
   }
 
-  /** Under the ground, every column of the piece goes up to something of the building: no top a body could stand on and not reach. */
-  private reachesCeiling(voxels: readonly number[]): boolean {
-    const { built, walked, base } = this.plan;
-    const top = new Map<number, number>();
-    for (const v of voxels) {
-      const i = v % this.XY, z = Math.floor(v / this.XY);
-      if (z < base) top.set(i, Math.max(top.get(i) ?? -1, z));
-    }
-    const set = new Set(voxels);
-    for (const [i, z] of top) {
-      let up = z + 1;
-      while (set.has(i + up * this.XY)) up++;
-      const at = i + up * this.XY;
-      if (up < base && !built.cells[at] && !walked.g.cells[at]) return false;
-    }
-    return true;
-  }
-
   /** Keeps the piece if the guard lets it, and takes its places away. */
   admit(voxels: readonly number[]): boolean {
     return this.refusal(voxels) === undefined;
@@ -464,9 +480,9 @@ export class InteriorGuard {
 }
 
 /**
- * Why the guard takes a piece away: it writes on the building (`wall`), on the place of the animals (`animals`), leaves under the ground
- * a top that does not reach the ceiling (`cellar`: a floor no body reaches, the cellar would not hold, ADR-0135), takes the Sculptor's
- * room under its least (`room`), or cuts something off (`cut`).
+ * Why the guard takes a piece away: it writes on the building (`wall`), on the place of the animals (`animals`), under the ground of a
+ * cellar that does not hold or so that the cellar would hold no more (`cellar`: a top a body could stand on and no body reaches, ADR-0135,
+ * T419), takes the Sculptor's room under its least (`room`), or cuts something off (`cut`).
  */
 export type Refusal = 'wall' | 'animals' | 'cellar' | 'room' | 'cut';
 
@@ -503,6 +519,8 @@ export interface Furnished {
   pieces: number;
   /** Pieces the guard took away, by reason. */
   refused: Record<Refusal, number>;
+  /** The way of data (`furnishWithRules`, T419): every piece kept, which furniture, in which kind of room, on which storey (-1 the cellar). */
+  items?: Array<{ id: string; room: string; storey: number; voxels: number }>;
 }
 
 /**

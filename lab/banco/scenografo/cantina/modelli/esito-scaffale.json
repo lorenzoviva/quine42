@@ -1,0 +1,103 @@
+{
+ "sculptor": "gemini-3.8-flash",
+ "report": [
+  {
+   "id": "cellar-shelf",
+   "ok": true,
+   "seconds": 185.12,
+   "usd": 0.14395485,
+   "entry": {
+    "class": "furniture",
+    "size": "large",
+    "name": "Scaffale della cantina",
+    "author": "gemini-3.8-flash",
+    "score": 9,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.143955
+    }
+   }
+  },
+  {
+   "id": "cellar-rack",
+   "ok": true,
+   "seconds": 55.334,
+   "usd": 0.03872357500000001,
+   "entry": {
+    "class": "furniture",
+    "size": "large",
+    "name": "Rastrelliera delle botti",
+    "author": "gemini-3.1-flash-lite",
+    "score": 5,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.038724
+    }
+   }
+  },
+  {
+   "id": "cellar-cask",
+   "ok": false,
+   "seconds": 47.995,
+   "usd": 0.0285484
+  }
+ ],
+ "total": {
+  "calls": 19,
+  "prompt": 152602,
+  "cached": 69337,
+  "output": 22011,
+  "thoughts": 37282,
+  "stored": 0,
+  "usd": 0.211226825,
+  "retries": 0,
+  "timeouts": 0,
+  "failures": 0,
+  "unpriced": 0
+ },
+ "byModel": {
+  "gemini-3.8-flash": {
+   "calls": 5,
+   "prompt": 49075,
+   "cached": 6118,
+   "output": 13614,
+   "thoughts": 12153,
+   "stored": 0,
+   "usd": 0.12930285,
+   "retries": 0,
+   "timeouts": 0,
+   "failures": 0,
+   "unpriced": 0
+  },
+  "gemini-3.5-flash": {
+   "calls": 3,
+   "prompt": 8548,
+   "cached": 0,
+   "output": 422,
+   "thoughts": 817,
+   "stored": 0,
+   "usd": 0.023972999999999998,
+   "retries": 0,
+   "timeouts": 0,
+   "failures": 0,
+   "unpriced": 0
+  },
+  "gemini-3.1-flash-lite": {
+   "calls": 11,
+   "prompt": 94979,
+   "cached": 63219,
+   "output": 7975,
+   "thoughts": 24312,
+   "stored": 0,
+   "usd": 0.05795097500000001,
+   "retries": 0,
+   "timeouts": 0,
+   "failures": 0,
+   "unpriced": 0
+  }
+ }
+}

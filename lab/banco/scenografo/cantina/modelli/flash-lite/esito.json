@@ -1,0 +1,62 @@
+{
+ "report": [
+  {
+   "id": "cellar-shelf",
+   "ok": true,
+   "seconds": 40.153,
+   "usd": 0,
+   "entry": {
+    "class": "furniture",
+    "size": "large",
+    "name": "Scaffale della cantina",
+    "author": "gemini-3.1-flash-lite",
+    "score": 3,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.028906
+    }
+   }
+  },
+  {
+   "id": "cellar-rack",
+   "ok": true,
+   "seconds": 24.197,
+   "usd": 0,
+   "entry": {
+    "class": "furniture",
+    "size": "large",
+    "name": "Rastrelliera delle botti",
+    "author": "gemini-3.1-flash-lite",
+    "score": 3,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.0273
+    }
+   }
+  },
+  {
+   "id": "cellar-cask",
+   "ok": false,
+   "seconds": 43.297,
+   "usd": 0
+  }
+ ],
+ "total": {
+  "calls": 0,
+  "prompt": 0,
+  "cached": 0,
+  "output": 0,
+  "thoughts": 0,
+  "stored": 0,
+  "usd": 0,
+  "retries": 0,
+  "timeouts": 0,
+  "failures": 0,
+  "unpriced": 0
+ },
+ "byModel": {}
+}

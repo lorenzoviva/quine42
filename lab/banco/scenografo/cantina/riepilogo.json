@@ -1,0 +1,461 @@
+{
+ "rules": [
+  {
+   "storey": 0,
+   "room": "hall",
+   "furniture": [
+    "banco",
+    "credenza",
+    "barile"
+   ],
+   "count": 3
+  },
+  {
+   "room": "room",
+   "furniture": [
+    "letto",
+    "furniture"
+   ],
+   "count": 2
+  },
+  {
+   "furniture": [
+    "barile"
+   ],
+   "count": 1
+  },
+  {
+   "room": "cellar",
+   "furniture": [
+    "cellar-shelf",
+    "cellar-rack",
+    "barile"
+   ],
+   "count": 4
+  }
+ ],
+ "rows": [
+  {
+   "edificio": "villetta",
+   "seme": 1,
+   "base": 20,
+   "cantina": 10.94921875,
+   "soffitto": 19,
+   "pezzi": 11,
+   "pezziCantina": 4,
+   "voxelCantina": 8559,
+   "mobiliCantina": [
+    "cellar-shelf",
+    "barile"
+   ],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 8
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     21,
+     53
+    ],
+    [
+     1,
+     21,
+     53
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 1253
+  },
+  {
+   "edificio": "villetta",
+   "seme": 2,
+   "base": 20,
+   "cantina": 10.94921875,
+   "soffitto": 19,
+   "pezzi": 9,
+   "pezziCantina": 3,
+   "voxelCantina": 6024,
+   "mobiliCantina": [
+    "cellar-shelf",
+    "barile"
+   ],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 8
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     21,
+     53
+    ],
+    [
+     1,
+     21,
+     53
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 1367
+  },
+  {
+   "edificio": "villetta",
+   "seme": 3,
+   "base": 20,
+   "cantina": 10.94921875,
+   "soffitto": 19,
+   "pezzi": 8,
+   "pezziCantina": 2,
+   "voxelCantina": 4564,
+   "mobiliCantina": [
+    "cellar-rack",
+    "cellar-shelf"
+   ],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 8
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     21,
+     53
+    ],
+    [
+     1,
+     21,
+     53
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 1900
+  },
+  {
+   "edificio": "villetta",
+   "seme": 4,
+   "base": 20,
+   "cantina": 10.94921875,
+   "soffitto": 19,
+   "pezzi": 10,
+   "pezziCantina": 3,
+   "voxelCantina": 3937,
+   "mobiliCantina": [
+    "cellar-rack",
+    "barile"
+   ],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 7
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     21,
+     53
+    ],
+    [
+     1,
+     21,
+     53
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 1363
+  },
+  {
+   "edificio": "struttura-fucina-nanica",
+   "seme": 1,
+   "base": 20,
+   "cantina": 3.1796875,
+   "soffitto": 42,
+   "pezzi": 6,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 20
+   },
+   "regge": true,
+   "piani": [
+    [
+     10,
+     22,
+     54
+    ],
+    [
+     10,
+     22,
+     54
+    ]
+   ],
+   "cantine": [
+    [
+     10
+    ],
+    [
+     10
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 556
+  },
+  {
+   "edificio": "struttura-fucina",
+   "seme": 1,
+   "base": 20,
+   "cantina": 2.52734375,
+   "soffitto": 51,
+   "pezzi": 8,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 8,
+    "cut": 71
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     22,
+     54
+    ],
+    [
+     1,
+     22,
+     54
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 706
+  },
+  {
+   "edificio": "struttura-locanda-del-cinghiale",
+   "seme": 1,
+   "base": 16,
+   "cantina": 3.2265625,
+   "soffitto": 42,
+   "pezzi": 4,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 1,
+    "cut": 1
+   },
+   "regge": true,
+   "piani": [
+    [
+     6,
+     18,
+     50
+    ],
+    [
+     6,
+     18,
+     50
+    ]
+   ],
+   "cantine": [
+    [
+     6
+    ],
+    [
+     6
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 559
+  },
+  {
+   "edificio": "struttura-locanda",
+   "seme": 1,
+   "base": 20,
+   "cantina": 2.52734375,
+   "soffitto": 51,
+   "pezzi": 8,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 8,
+    "cut": 71
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     22,
+     54
+    ],
+    [
+     1,
+     22,
+     54
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 658
+  },
+  {
+   "edificio": "struttura-torre-del-mago",
+   "seme": 1,
+   "base": 20,
+   "cantina": 3.1953125,
+   "soffitto": 42,
+   "pezzi": 6,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 0,
+    "cut": 20
+   },
+   "regge": true,
+   "piani": [
+    [
+     10,
+     22,
+     54
+    ],
+    [
+     10,
+     22,
+     54
+    ]
+   ],
+   "cantine": [
+    [
+     10
+    ],
+    [
+     10
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 525
+  },
+  {
+   "edificio": "struttura-torre-di-guardia",
+   "seme": 1,
+   "base": 20,
+   "cantina": 2.52734375,
+   "soffitto": 51,
+   "pezzi": 8,
+   "pezziCantina": 0,
+   "voxelCantina": 0,
+   "mobiliCantina": [],
+   "rifiutati": {
+    "wall": 0,
+    "animals": 0,
+    "cellar": 0,
+    "room": 8,
+    "cut": 71
+   },
+   "regge": true,
+   "piani": [
+    [
+     1,
+     22,
+     54
+    ],
+    [
+     1,
+     22,
+     54
+    ]
+   ],
+   "cantine": [
+    [
+     1
+    ],
+    [
+     1
+    ]
+   ],
+   "piedeLibero": true,
+   "ms": 694
+  }
+ ]
+}

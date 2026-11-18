@@ -222,7 +222,8 @@ describe('lo Scenografo nel Concilio (T410)', () => {
     const mock = new MockAiModels();
     mock.latency = 0;
     const answer = JSON.parse(await mock.text({ agent: 'scenographer', task: INTERIOR_TASK, system: '', prompt: '', data: { catalogue: ['banco', 'barile', 'letto', 'furniture'] } }));
-    expect(answer).toEqual({ rules: [{ storey: 0, room: 'hall', furniture: ['banco', 'barile'], count: 3 }, { room: 'room', furniture: ['letto', 'furniture'], count: 2 }, { furniture: ['barile'], count: 1 }] });
+    // And the cellar (T419): the pieces of the cellar the catalogue has, here the barrel.
+    expect(answer).toEqual({ rules: [{ storey: 0, room: 'hall', furniture: ['banco', 'barile'], count: 3 }, { room: 'room', furniture: ['letto', 'furniture'], count: 2 }, { furniture: ['barile'], count: 1 }, { room: 'cellar', furniture: ['barile'], count: 4 }] });
   });
 
   it('offline: il forno del borgo scolpito dallo Scultore, arredato dallo Scenografo, a ogni seme (la verifica nel browser)', async () => {

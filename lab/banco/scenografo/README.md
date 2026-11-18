@@ -85,3 +85,21 @@ npx vite-node lab/scripts/scenografo-misura.ts -- --vie dati --ripeti 1 --out la
 Il banco delle misure (`lab/banco/misure.ts`) legge un edificio a 20 voxel per casella se non gli si dice altro; `gioco: true` nel bersaglio
 lo legge come il gioco scrive le voci dello Scultore (senza `vpt`: 16), `vpt` lo fissa. Le parti abitabili (`misura.ts`, `PARTI`) si misurano
 sugli stessi voxel a ogni densità (i `PARTS` di oggi letti a 16: una stanza 28, un piano 30, una porta 11 × 30), così che 20 rifà T303.
+
+## La cantina (T419)
+
+La cantina come stanza dello Scenografo (`room: "cellar"`) e i mobili che il kernel porta al suo soffitto (ADR-0215); i numeri sono al § 9.4 di
+[`docs/design/scenografo.md`](../../../docs/design/scenografo.md).
+
+```bash
+npx vite-node lab/scripts/scenografo-cantina.ts -- [--semi 4] [--solo villetta,struttura-locanda]   # nessuna chiamata
+npx vite-node lab/scripts/mobili-cantina.ts -- --root ../../.. --scultore gemini-3.8-flash --tetto 0.5  # lo Scultore del gioco su Gemini: costa
+npx vitest run tests/cellar-furnished.test.ts
+```
+
+| file | cosa |
+|---|---|
+| `cantina/riepilogo.md`, `riepilogo.json` | la villetta offline con la cantina (4 semi) e le sei cantine del seme arredate con le regole dei modelli locali: pezzi in cantina, rifiuti, la cantina che regge, i piani, il piede della scala, il tempo |
+| `cantina/<edificio>.png` | la cantina tagliata al suolo, dal davanti: sopra vuota, sotto arredata, un seme per colonna |
+| `cantina/modelli/` | i mobili della cantina dello Scultore con 3.8 Flash (programma, foto dei quattro lati ridotte in jpg, `esito-scaffale.json` e `esito.json` con le chiamate e il costo): `cellar-shelf` e `cellar-rack` sono nel seme, `cellar-cask` no (3/10) |
+| `cantina/modelli/flash-lite/` | il primo giro con Flash-Lite, il modello delle cose semplici: uno scaffale a pezzi e una rastrelliera di rumore (3/10) |

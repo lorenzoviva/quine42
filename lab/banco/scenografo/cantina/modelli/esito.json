@@ -1,0 +1,83 @@
+{
+ "sculptor": "gemini-3.8-flash",
+ "report": [
+  {
+   "id": "cellar-rack",
+   "ok": true,
+   "seconds": 103.849,
+   "usd": 0.09788954999999999,
+   "entry": {
+    "class": "furniture",
+    "size": "large",
+    "name": "Rastrelliera delle botti",
+    "author": "gemini-3.8-flash",
+    "score": 5,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.09789
+    }
+   }
+  },
+  {
+   "id": "cellar-cask",
+   "ok": true,
+   "seconds": 54.789,
+   "usd": 0.06232057500000002,
+   "entry": {
+    "class": "furniture",
+    "name": "Botte grande",
+    "author": "gemini-3.8-flash",
+    "score": 3,
+    "card": {
+     "author": "sculptor",
+     "payer": "comune",
+     "holder": "me",
+     "usd": 0.062321
+    }
+   }
+  }
+ ],
+ "total": {
+  "calls": 12,
+  "prompt": 99736,
+  "cached": 12215,
+  "output": 21683,
+  "thoughts": 607,
+  "stored": 0,
+  "usd": 0.160210125,
+  "retries": 0,
+  "timeouts": 0,
+  "failures": 0,
+  "unpriced": 0
+ },
+ "byModel": {
+  "gemini-3.8-flash": {
+   "calls": 10,
+   "prompt": 94078,
+   "cached": 12215,
+   "output": 21181,
+   "thoughts": 0,
+   "stored": 0,
+   "usd": 0.14174212500000002,
+   "retries": 0,
+   "timeouts": 0,
+   "failures": 0,
+   "unpriced": 0
+  },
+  "gemini-3.5-flash": {
+   "calls": 2,
+   "prompt": 5658,
+   "cached": 0,
+   "output": 502,
+   "thoughts": 607,
+   "stored": 0,
+   "usd": 0.018468,
+   "retries": 0,
+   "timeouts": 0,
+   "failures": 0,
+   "unpriced": 0
+  }
+ }
+}

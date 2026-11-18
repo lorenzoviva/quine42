@@ -1,0 +1,48 @@
+<!-- Rastrelliera delle botti: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 5/10 -->
+<sequence values="BWwkKIGc" size="40 40 40" origin="True" name="Rastrelliera delle botti">
+  <color symbol="W" value="6b4528" name="legno telaio scuro"/>
+  <color symbol="w" value="a87b50" name="legno telaio chiaro"/>
+  <color symbol="K" value="8c532b" name="legno botte"/>
+  <color symbol="k" value="ad6f3d" name="legno botte chiaro"/>
+  <color symbol="I" value="424754" name="cerchio ferro"/>
+  <color symbol="G" value="00ffff" name="bottiglia vetro"/>
+  <color symbol="c" value="4b692f" name="tappo"/>
+  
+  <!-- Struttura: Telaio -->
+  <box at="5 20 0" size="2 10 40" color="W"/>
+  <box at="35 20 0" size="2 10 40" color="W"/>
+  <box at="20 20 10" size="30 10 2" color="W"/>
+  <box at="20 20 20" size="30 10 2" color="W"/>
+  <box at="20 20 30" size="30 10 2" color="W"/>
+  
+  <!-- Botti -->
+  <box at="15 20 12" size="8 8 8" color="K"/>
+  <box at="25 20 12" size="8 8 8" color="K"/>
+  <box at="15 20 22" size="8 8 8" color="K"/>
+  <box at="25 20 22" size="8 8 8" color="K"/>
+  <box at="20 20 32" size="8 8 8" color="K"/>
+  
+  <!-- Cerchi di ferro -->
+  <box at="15 20 13" size="9 9 1" color="I"/>
+  <box at="15 20 18" size="9 9 1" color="I"/>
+  <box at="25 20 13" size="9 9 1" color="I"/>
+  <box at="25 20 18" size="9 9 1" color="I"/>
+  <box at="15 20 23" size="9 9 1" color="I"/>
+  <box at="15 20 28" size="9 9 1" color="I"/>
+  <box at="25 20 23" size="9 9 1" color="I"/>
+  <box at="25 20 28" size="9 9 1" color="I"/>
+  <box at="20 20 33" size="9 9 1" color="I"/>
+  <box at="20 20 38" size="9 9 1" color="I"/>
+  
+  <!-- Bottiglie -->
+  <box at="10 20 32" size="2 2 4" color="G"/>
+  <box at="10 20 36" size="1 1 1" color="c"/>
+  <box at="30 20 32" size="2 2 4" color="G"/>
+  <box at="30 20 36" size="1 1 1" color="c"/>
+  
+  <!-- Rifinitura: Bordi e luci -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="W" out="w" values="W" sum="1..26"/>
+    <rule in="K" out="k" values="K" sum="1..26"/>
+  </convolution>
+</sequence>
