@@ -588,7 +588,48 @@ function lastReset(spec, from = new Date()) {
   return d;
 }
 
-/** Recognises the message of a usage limit in a CLI's output; gives when it resets, if it says so. */
+/**
+ * What the CLI itself said in its output, never the model's answer (T423): a word like «quota» or «429» in a program the
+ * model wrote is not a limit. The output is the CLI's JSON (one object or one event per line, or an array of events) with its
+ * stderr: a `result` or an answer of agy that says it went well settles it (nothing said); otherwise what is not JSON (the
+ * CLI's own lines, stderr), the text of an error `result`, the `error` of an answer that failed, a `rate_limit_event` that
+ * refuses and the system events after `init`. What the model wrote (`assistant`, `user`, a successful `result`) is never read.
+ */
+export function cliSaid(output) {
+  const said = [];
+  let fine = false;
+  const see = (v) => {
+    if (Array.isArray(v)) { v.forEach(see); return; }
+    if (!v || typeof v !== 'object') return;
+    if (v.type === 'result' || 'status' in v && !v.type) {
+      const failed = v.type === 'result' ? v.is_error === true : v.status !== 'SUCCESS';
+      if (!failed) { fine = true; return; }
+      for (const k of ['error', 'subtype', ...(v.type === 'result' ? ['result'] : ['status'])]) if (typeof v[k] === 'string') said.push(v[k]);
+      return;
+    }
+    if (v.type === 'rate_limit_event') {
+      const info = v.rate_limit_info ?? {};
+      if (info.status === 'rejected') said.push(`usage limit reached${Number.isInteger(info.resetsAt) ? `|${info.resetsAt}` : ''}`);
+      return;
+    }
+    if (v.type === 'system' && v.subtype !== 'init') { said.push(JSON.stringify(v)); return; }
+    if (!v.type && typeof v.error === 'string') said.push(v.error);
+  };
+  const text = String(output ?? '');
+  let whole;
+  try { whole = JSON.parse(text); } catch { whole = undefined; }
+  // A JSON written on more lines is one answer: its lines are not the CLI's.
+  if (whole && typeof whole === 'object') see(whole);
+  else for (const line of text.split('\n')) {
+    let v;
+    try { v = JSON.parse(line); } catch { v = undefined; }
+    if (v && typeof v === 'object') see(v);
+    else if (line.trim()) said.push(line);
+  }
+  return fine ? '' : said.join('\n');
+}
+
+/** Recognises the message of a usage limit in a CLI's output; gives when it resets, if it says so. Give it what the CLI said (`cliSaid`), not the answer. */
 export function usageLimit(output, from = new Date()) {
   if (!/usage limit|limit reached|hit your (?:[\w-]+ )?limit|rate limit|quota|resource_exhausted|\b429\b/i.test(output)) return undefined;
   const epoch = /\|(\d{10})\b/.exec(output);
@@ -1112,7 +1153,7 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     saveRuns(run.id);
     return;
   }
-  const limit = usageLimit(out.error || code !== 0 ? text : '');
+  const limit = usageLimit(out.error || code !== 0 ? cliSaid(text) : '');
   const stale = readJson(BUDGET, {});
   if (stale[run.provider]) { delete stale[run.provider].letto; writeJson(BUDGET, stale); }
   const budget = loadBudget();

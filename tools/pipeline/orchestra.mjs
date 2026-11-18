@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
+import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, cliSaid, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
 const STATE = path.join(DIR, 'stato.json');
@@ -336,7 +336,7 @@ export async function orchestra({ agente, porta } = {}) {
         process.stdout.write(`\n· orchestratore (${st.provider}, epoca ${st.epoca}) al lavoro…\n`);
         const r = await runTurn(st.provider, st.sessione, prompt);
         const out = readOutput(r.text);
-        const limit = usageLimit(out.error || r.code !== 0 ? r.text : '');
+        const limit = usageLimit(out.error || r.code !== 0 ? cliSaid(r.text) : '');
         if (limit) {
           // Its credits are over: the provider is stopped until it resets, the turn goes to the next one, whole.
           const b = readJson(BUDGET, {});

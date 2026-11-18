@@ -15,6 +15,7 @@ type Pipeline = {
   parseUsage(provider: string, text: string): Counter[] | undefined;
   canOrchestrate(provider: string, config?: unknown): boolean;
   usageLimit(output: string, from?: Date): Date | undefined;
+  cliSaid(output: string): string;
   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; slot?: number; tetto?: number; threshold: number; urgent?: boolean; resuming?: boolean }): number;
   ceilingOf(provider: string, config: unknown): number;
@@ -289,6 +290,33 @@ describe('computeBudget', () => {
       { nome: 'SoloSettimanale', finestra: 'settimana', residuo: 35 },
     ];
     expect(P.computeBudget('custom', {}, counters)).toEqual({ residuo: 35, sessione: 35 });
+  });
+});
+
+describe('cliSaid (T423)', () => {
+  const line = (v: unknown) => JSON.stringify(v);
+
+  it('la risposta del modello non si legge: un `result` riuscito, o una risposta di agy riuscita, non dice niente', () => {
+    const answer = 'la quota del tetto è 429, rate limit della scala';
+    const claude = [line({ type: 'system', subtype: 'init', tools: [] }), line({ type: 'assistant', message: { content: [{ type: 'text', text: answer }] } }), line({ type: 'result', is_error: false, result: answer })].join('\n');
+    expect(P.cliSaid(claude)).toBe('');
+    expect(P.usageLimit(P.cliSaid(claude))).toBeUndefined();
+    expect(P.cliSaid(line({ status: 'SUCCESS', response: answer }))).toBe('');
+    // A process that ends badly after a good answer (a log with the `result` and the code ≠ 0): still the model's words.
+    expect(P.usageLimit(P.cliSaid(`${line({ type: 'result', is_error: false, result: answer })}\nwarning: something`))).toBeUndefined();
+    // Even an answer written on more lines.
+    expect(P.usageLimit(P.cliSaid(JSON.stringify({ type: 'result', is_error: false, result: answer }, null, 2)))).toBeUndefined();
+  });
+
+  it('ciò che la CLI dice: stderr, il `result` di errore, l\'errore di agy, il rifiuto del limite', () => {
+    expect(P.usageLimit(P.cliSaid("You've hit your 5-hour limit · resets 10pm"))).toBeDefined();
+    expect(P.usageLimit(P.cliSaid(line({ type: 'result', is_error: true, result: 'Claude AI usage limit reached|1761735600' })))).toEqual(new Date(1761735600 * 1000));
+    expect(P.usageLimit(P.cliSaid(line({ status: 'ERROR', error: 'Quota exceeded' })))).toBeDefined();
+    expect(P.usageLimit(P.cliSaid(line({ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: 1761735600 } })))).toEqual(new Date(1761735600 * 1000));
+    expect(P.usageLimit(P.cliSaid(line({ type: 'rate_limit_event', rate_limit_info: { status: 'allowed', resetsAt: 1761735600 } })))).toBeUndefined();
+    // An error that is not a limit, with the model's words before it: no limit.
+    const failed = [line({ type: 'assistant', message: { content: [{ type: 'text', text: 'quota 429' }] } }), line({ type: 'result', is_error: true, subtype: 'error_max_turns' })].join('\n');
+    expect(P.usageLimit(P.cliSaid(failed))).toBeUndefined();
   });
 });
 

@@ -9,7 +9,7 @@ import path from 'node:path';
 import { costOf } from '../../src/kernel/ai/prices';
 import { cliEnv, runCli } from '../../tools/abbonamenti/servi';
 // @ts-expect-error pipeline.mjs is untyped plain JS
-import { usageLimit } from '../../tools/pipeline/pipeline.mjs';
+import { cliSaid, usageLimit } from '../../tools/pipeline/pipeline.mjs';
 import { LimiteAbbonamento, type Risposta, type Token } from './claude';
 
 /** Characters of a command line on Windows, with room for the rest of the arguments. */
@@ -59,7 +59,7 @@ export async function chiediAgy(system: string, bersaglio: string, opts: { model
   await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
   const letto = leggiAgy(run.stdout);
   if (!letto.testo) {
-    const reset = usageLimit(run.combined);
+    const reset = usageLimit(cliSaid(run.combined));
     if (reset) throw new LimiteAbbonamento(reset);
   }
   if (run.code !== 0 || letto.errore || letto.testo === undefined) throw new Error(`errore di agy: ${letto.errore ?? (run.stderr.trim().slice(0, 400) || `codice ${run.code}`)}`);
