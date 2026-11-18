@@ -5833,7 +5833,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 ### T419 · La cantina arredata: la cantina nella via dei dati dello Scenografo — `da fare` (dipende da T410, T416, T417, T420)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
 - Step: 13
-- Contesto: decisione dell'autore (17/11, chat, D63): l'arredo delle cantine si rimanda solo fino a dopo T52, non dopo la rigenerazione: va prima di T411. Nasce da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «cantina nella via dei dati»; `docs/design/scenografo.md` § 10.4).
+- Contesto: decisione dell'autore (17/11, chat, D63): l'arredo delle cantine si rimanda solo fino alla chiusura di T52, non oltre la rigenerazione: va prima di T411. Nasce da T412 (`dossier T412`, `docs/design/sotterranei-stato.md` § 6, riga «cantina nella via dei dati»; `docs/design/scenografo.md` § 10.4).
 - Cosa fare: la cantina come classe di stanza dello Scenografo (il pavimento coperto sotto `base`, raggiunto dalla scala) con la guardia degli interni (ADR-0212); i mobili da cantina (il seme ha `barile`; 2-3 modelli dello Scultore della classe dei mobili: scaffali, botti grandi), un edificio con la cantina nel banco dello Scenografo; offline in `MockAiModels`. Versione del kernel.
 - Test: offline, una cantina arredata, la scala e il cammino liberi; suite e typecheck coi turni.
 - Browser: sì — `?skip&offline`: una casa con la cantina arredata, si scende e si cammina fra i mobili; screenshot.
