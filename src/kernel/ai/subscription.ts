@@ -22,9 +22,10 @@ export const SUBSCRIPTION_MODEL: Record<Exclude<Provider, 'api'>, string> = { cl
 
 /**
  * The tasks already slow enough that a CLI answering in seconds or minutes changes nothing for whoever plays.
- * The Artist's judgement (`model.judge`) looks at photos: it stays on the API.
+ * The Artist's judgement (`model.judge`) looks at photos: it stays on the API. The Scenografo's interior (`interior.design`, T410) is asked
+ * once per type of building, while the bare building is already there: it may wait for the queue.
  */
-const SLOW = [/^genesis\./, /^forge\./, /^model\.(sculpt|resculpt)$/, /^council\.session$/, /^mechanic\.design$/];
+const SLOW = [/^genesis\./, /^forge\./, /^model\.(sculpt|resculpt)$/, /^council\.session$/, /^mechanic\.design$/, /^interior\.design$/];
 
 export const slowTask = (task: string): boolean => SLOW.some((r) => r.test(task));
 

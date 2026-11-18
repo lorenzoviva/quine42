@@ -1384,8 +1384,29 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   soffitto, lascia la stanza dello Scultore (`partErrors`) e non toglie a nessun posto raggiunto prima la via dalla porta: il cammino del
   kernel senza i salti, coi passi vicino al pezzo riprovati sul terreno rifatto (`groundOfForm`, `rampBlocks`); `furnishFromStage` porta
   nell'edificio ciò che il programma ha scritto, pezzo per pezzo. Un edificio arredato sta nella cache delle forme con la chiave
-  dell'interno (`interiorKey`, `furnishedResult`: la via, il testo, il seme dell'arredo, poi la `formKey` dell'edificio). Nessun agente
-  lo chiama ancora.
+  dell'interno (`interiorKey`, `furnishedResult`: la via, il testo, il seme dell'arredo, poi la `formKey` dell'edificio).
+- **Lo Scenografo, la via dei dati** (ADR-0214, T410; § 10.2 di `docs/design/scenografo.md`): l'agente `scenographer` (lo Scenografo,
+  nella casa dell'Artista, `prompts/agents/scenographer.md`) sceglie **una volta per tipo di edificio** quali mobili della libreria vanno in
+  quale stanza e quanti: il compito `interior.design` (`src/kernel/agents/scenographer.ts`, `designInterior`) riceve ciò che il kernel misura
+  dell'edificio nudo ai semi 1 e 2 (`describeBuilding`: piani, porta, parti abitabili, stanze col tipo `hall`/`room`/`small`, l'area sotto, il
+  soffitto, il riquadro; le aree del suolo; gli animali), mai il programma, e nelle istruzioni il catalogo (la classe `furniture` indossata ora,
+  mai la corona, `Forms.furniture`, con la misura in caselle a cui il kernel la posa); risponde con regole `{ storey?, area?, room?,
+  furniture[], count }` (lo schema elenca gli id), che tornano una volta col motivo se nessuna è usabile. Le regole stanno sulla voce
+  dell'edificio in `models/index.json` (`interior: { rules, author }`, `Kernel.setInterior`, un commit del Concilio senza carta: l'interno è
+  della carta dell'edificio), lette senza fidarsi (`readInterior`). **La posa** è del kernel, `src/kernel/furnish.ts`: le stanze dei piani
+  sopra il suolo (`interiorRooms`), la prima regola che corrisponde, un pezzo alla volta a caso fra i suoi id, girato, sul pavimento libero
+  contro un muro, mai sugli animali né oltre metà dei centri della stanza, prima un filtro (i centri del piano restano in tanti pezzi quanti
+  prima) e poi **la guardia** (al più 4 rifiuti per pezzo; 0,75-1,2 s per edificio); i mobili (`pieceOf`) col primo seme, ritagliati e
+  ricampionati alla densità dell'edificio, tenuti dal processo (`furniturePiece`); i loro colori una lettera per aspetto, mai oltre 255; la
+  cantina vuota. **Un edificio con l'interno è una forma**: `Forms.request` gli dà `interior` (regole, programmi dei mobili, seme, cantina),
+  `runForm` lo arreda (il worker, `InlineRunner`, `TurnRunner`), la chiave è quella dell'interno; `Forms.get` è l'arredato, `Forms.bare` il
+  nudo, `Forms.ready` il nudo finché l'arredato non è pronto, un arredato che fallisce è il nudo. **Il direttore** (`InteriorDirector`,
+  `kernel.furnishing`) chiede ogni pochi secondi, un tipo alla volta, l'interno dei modelli propri delle strutture caricate che crescono a
+  regole e non ne hanno (mai il generico della classe; un edificio senza stanze da arredare non si chiede), entro la manopola `interiors` e 16
+  per sessione; non da sé coi modelli locali (offline lo si chiama a mano: la console, `tests/scenografo.test.ts`), e un interno dei modelli
+  locali (`author: offline`) si richiede quando non lo sono. Compito comune, lento quanto basta per la coda degli abbonamenti, con il passo
+  `interno:<modello>` della generazione differita. Le case del borgo del seme portano la casa generica `structure` (1,7 caselle² a terra):
+  restano nude.
 - **La casa che usa la Grande** (ADR-0213, T413): un'abitazione che cresce a regole dà alla casa il pavimento della sua taglia, non un
   corpo di 35-45 voxel in un giardino. Chi lo è lo dice la richiesta (`SculptRequest.dwelling`: le case comuni del mondo) o il concetto
   (`isDwelling` in `src/mj/classes.ts`, le parole di una casa e nessuna di un forte, una torre, un tempio, in italiano e in inglese). Il

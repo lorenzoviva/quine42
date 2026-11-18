@@ -238,7 +238,8 @@ describe('a room with two teams', () => {
   it('the house of the Artist holds both, each at its own place before the screen, with no building more', async () => {
     const k = await bootWith(new MockAiModels());
     const gallery = k.corona.building('galleria')!;
-    expect(gallery.teams).toEqual(['artist', 'musician']);
+    // The Scenografo works there too since T410 (ADR-0214): a third place before the screen.
+    expect(gallery.teams).toEqual(['artist', 'musician', 'scenographer']);
     k.archive.tick(30);
     k.archive.tick(30);
     const screen = gallery.storeys[0].items.find((i) => i.kind === 'screen')!;
@@ -247,6 +248,9 @@ describe('a room with two teams', () => {
     expect([artist.x, artist.y]).toEqual([screen.x + 1.5, screen.y - 0.5]);
     expect([musician.x, musician.y]).toEqual([screen.x + 3, screen.y - 0.5]);
     expect(k.corona.free(musician.x, musician.y)).toBe(true);
+    const scenographer = k.archive.avatars.get('scenographer@galleria')!;
+    expect([scenographer.x, scenographer.y]).toEqual([screen.x + 4.5, screen.y - 0.5]);
+    expect(k.corona.free(scenographer.x, scenographer.y)).toBe(true);
     // No building of its own, no team of its own anywhere else.
     expect(k.corona.buildings.filter((b) => b.teams.includes('musician')).map((b) => b.id)).toEqual(['galleria']);
     expect(k.corona.buildings.map((b) => b.id)).not.toContain('musica');
@@ -254,7 +258,7 @@ describe('a room with two teams', () => {
 
   it('the door says both, the rooms with one team say one; every seat and teleport of the round table is free of the others', async () => {
     const k = await bootWith(new MockAiModels());
-    for (const b of k.corona.buildings) expect(b.teams.length, b.id).toBe(b.id === 'galleria' || b.id === 'persone' ? 2 : 1);
+    for (const b of k.corona.buildings) expect(b.teams.length, b.id).toBe(b.id === 'galleria' ? 3 : b.id === 'persone' ? 2 : 1);
     const items = k.corona.building('concilio')!.storeys[0].items.filter((i) => i.kind === 'desk' || i.kind === 'portal' || i.kind === 'table');
     const cells = items.map((i) => `${i.x},${i.y}`);
     expect(new Set(cells).size).toBe(cells.length);

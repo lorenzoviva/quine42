@@ -314,6 +314,21 @@ villetta anche la revisione per il voto sotto 7) più 0,03 $ dell'Artista su Gem
 registro a 5-6 $). Due chiamate a Opus di un giro lanciato due volte per errore sono state fermate dopo circa due minuti, senza risposta e
 fuori dal registro. La finestra delle 5 ore è passata dal 3 al 15 %, la settimana dal 64 al 65 %.
 
+### 9.3 Nel gioco (T410, 18/11)
+
+La via dei dati è nel gioco (ADR-0214): le regole dello Scenografo sulla voce dell'edificio, la posa del kernel con la guardia di T409,
+l'edificio arredato come forma. Nel browser (`?skip&offline`, una porta nuova): le case del borgo portano la casa generica `structure`, 1,7
+caselle² a terra, sotto il piano piccolo, e restano nude; il forno del borgo, scolpito offline dalla console (la villetta, 14 caselle² a terra
+in due stanze), lo Scenografo offline lo arreda con le regole del banco (`offline/dati.json`) in un commit «scenografo: il forno del borgo».
+Il worker dà la forma arredata del seme 4 con 5 943 voxel di mobili e nessun voxel dell'edificio cambiato. Aperta la porta, il viandante
+entra camminando coi tasti fino al muro interno della sala, passa il varco del muro interno nella stanza dietro e si ferma contro il letto;
+a passi di un quarto di casella il pianterreno si percorre dalla porta fra i mobili della sala e attorno al letto. Nessun mobile nei muri
+né sulla porta (i mobili stanno solo dove l'edificio aveva aria, il protetto resta libero: `tests/scenografo.test.ts`).
+
+| | |
+|---|---|
+| ![sala](scenografo/01-forno-sala.jpg) la sala del forno: casse e credenze contro i muri, il passaggio dalla porta libero; dietro, il letto e la scala | ![stanza](scenografo/02-forno-stanza.jpg) il viandante nella stanza dietro, accanto al letto |
+
 ## 10. Task che ne nascono (proposta per l'autore)
 
 Riscritti da T406 sugli edifici a 16 voxel per casella (la prima stesura, di T303, era sugli edifici a 20). L'ordine proposto: 0, poi 1 e 2
@@ -332,7 +347,11 @@ insieme, poi 3, 4 e 5. I primi due non chiamano modelli; lo 0 chiama lo Scultore
    tutti, ma lascia un margine stretto; 2, come in T303 e T406, è più sicura); la stanza dello Scultore (`partErrors`) fra ciò che la guardia
    difende (oggi un mobile contro il muro la porta sotto 28 voxel su un seme in 3 richieste di dati su 4); il posto degli animali (`A`)
    protetto come `W`. Test con gli edifici di `misura/` (a 20) e di `misura16/` (a 16) e i 6 di T259. Senza modelli.
-2. **Lo Scenografo, la via dei dati**: prompt in `prompts/agents/scenografo.md` (da `lab/banco/scenografo/prompt-dati.md`), compito
+2. **Fatto da T410** (ADR-0214; l'agente è `scenographer` e il prompt `prompts/agents/scenographer.md`, la lingua interna; la posa in
+   `src/kernel/furnish.ts` con un filtro sulla connessione del piano prima della guardia, che porta la casa del borgomastro da 3,6 s a 0,5 s
+   con gli stessi pezzi; il modello è quello del Concilio, Flash-Lite, non misurato; offline il forno del borgo scolpito e arredato ha circa
+   5 000 voxel di mobili a seme, mentre le case del borgo del seme, la casa generica `structure` di 1,7 caselle² a terra, restano nude).
+   **Lo Scenografo, la via dei dati**: prompt in `prompts/agents/scenografo.md` (da `lab/banco/scenografo/prompt-dati.md`), compito
    `interior.design` con lo schema delle regole, risposta in `MockAiModels`, voce nel registro, `CENSUS` con la manopola `interni`, una
    postazione nello studio; il catalogo dai mobili della libreria (classe `furniture`), ricampionati alla densità dell'edificio come nel banco.
    La risposta è di 200 token e due richieste uguali danno la stessa risposta: una per tipo basta; da provare anche su un modello che costi

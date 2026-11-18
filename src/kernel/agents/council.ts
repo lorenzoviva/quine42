@@ -17,7 +17,7 @@ import { internalAnswer, internalFields, italianName } from '../internalNames';
 import { languageBlock, languageOf } from '../language';
 import { CAMPAIGN_FILE, campaignPrompt, readCampaign, type CampaignRead } from '../campaign';
 
-export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician';
+export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician' | 'scenographer';
 
 /**
  * The agents whose system instructions go in an explicit cache of Gemini (T351, ADR-0186, D45.7): the Actor, on 3.8 Flash, which
@@ -38,6 +38,8 @@ export const AGENTS: Record<AgentId, { name: string; color: string; sigil: strin
   actor: { name: 'Attore', color: '#5ce0c8', sigil: '◐' },
   /** Writes the sound programs of what the world asks for (T225): in the Artist's house. */
   musician: { name: 'Musicista', color: '#8fb8ff', sigil: '♪' },
+  /** Furnishes the Sculptor's buildings with the library's furniture (T410, ADR-0214): in the Artist's house. */
+  scenographer: { name: 'Scenografo', color: '#d9a066', sigil: '⌂' },
 };
 
 export type FeedKind = 'propone' | 'obietta' | 'approva' | 'corregge' | 'scolpisce' | 'scarta' | 'info' | 'errore';
@@ -315,6 +317,10 @@ export class Council {
         break;
       case 'musician':
         parts.push(`## The world\n${bibleHead(bible)}`);
+        break;
+      // The Scenografo chooses what the people of the world use (T410): the head of the bible and the style, never the catalogue of modules.
+      case 'scenographer':
+        parts.push(`## The world\n${bibleHead(bible)}`, `## Style guide\n${style}`);
         break;
       case 'physicist':
         parts.push(`## Terrains\n${paletteSummary(v.palette)}`, `## Tone\n${bible?.tone ?? ''}`);

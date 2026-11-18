@@ -870,6 +870,7 @@ posto di un pannello sul filo).
 | `referente` | `liaison` |
 | `attore` | `actor` |
 | `musicista` | `musician` |
+| `scenografo` | `scenographer` |
 
 <a id="classi-scultore"></a>
 ### Classi dello Scultore (`ai.scultori`) (`classi-scultore`)
@@ -913,6 +914,7 @@ posto di un pannello sul filo).
 | `riparazioni` | `repairs` |
 | `studio` | `studio` |
 | `vite` | `lives` |
+| `interni` | `interiors` |
 
 <a id="carte"></a>
 ### Tipi delle carte e dei nodi del grafo (`carte`)

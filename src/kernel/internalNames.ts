@@ -389,7 +389,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     step: 'T307b',
     names: {
       narratore: 'narrator', cartografo: 'cartographer', artista: 'artist', scultore: 'sculptor', fisico: 'physicist', ingegnere: 'engineer',
-      arbitro: 'arbiter', referente: 'liaison', attore: 'actor', musicista: 'musician',
+      arbitro: 'arbiter', referente: 'liaison', attore: 'actor', musicista: 'musician', scenografo: 'scenographer',
     },
   }),
   d({
@@ -413,7 +413,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     names: {
       sessioni: 'sessions', dialoghi: 'dialogues', trame: 'plots', revisioni: 'reviews', modelli: 'models', persone: 'people',
       abitanti: 'inhabitants', pacchetti: 'packs', cose: 'entities', brani: 'pieces', luoghi: 'chunks', parole: 'words', sguardi: 'looks',
-      azioni: 'actions', magia: 'magic', morte: 'death', riparazioni: 'repairs', studio: 'studio', vite: 'lives',
+      azioni: 'actions', magia: 'magic', morte: 'death', riparazioni: 'repairs', studio: 'studio', vite: 'lives', interni: 'interiors',
     },
   }),
   d({

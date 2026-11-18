@@ -11,15 +11,15 @@ import { repairSculptorTier, sculptorsOn, type AiRoute, type SculptorAiModels, t
 import type { AiConfig } from './types';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
-export const COEFFICIENT_KEYS = ['sessions', 'dialogues', 'plots', 'reviews', 'models', 'people', 'inhabitants', 'packs', 'entities', 'pieces', 'chunks', 'words', 'looks', 'actions', 'magic', 'death', 'repairs', 'studio', 'lives'] as const;
+export const COEFFICIENT_KEYS = ['sessions', 'dialogues', 'plots', 'reviews', 'models', 'people', 'inhabitants', 'packs', 'entities', 'pieces', 'chunks', 'words', 'looks', 'actions', 'magic', 'death', 'repairs', 'studio', 'lives', 'interiors'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
 export type Coefficients = Record<CoefficientKey, number>;
 
-export const FULL_DETAIL: Coefficients = { sessions: 1, dialogues: 1, plots: 1, reviews: 1, models: 1, people: 1, inhabitants: 1, packs: 1, entities: 1, pieces: 1, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 1 };
+export const FULL_DETAIL: Coefficients = { sessions: 1, dialogues: 1, plots: 1, reviews: 1, models: 1, people: 1, inhabitants: 1, packs: 1, entities: 1, pieces: 1, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 1, interiors: 1 };
 
 /** «Low Detail»: about a fifth of the calls the world makes by itself, and the cheap model for every figure; what the wanderer asks stays answered. */
 export const LOW_DETAIL: { coefficients: Coefficients; sculptors: Partial<SculptorAiModels> } = {
-  coefficients: { sessions: 0.25, dialogues: 0.2, plots: 0.34, reviews: 0.25, models: 0.34, people: 0.5, inhabitants: 0.25, packs: 0.25, entities: 0.34, pieces: 0.34, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 0.2 },
+  coefficients: { sessions: 0.25, dialogues: 0.2, plots: 0.34, reviews: 0.25, models: 0.34, people: 0.5, inhabitants: 0.25, packs: 0.25, entities: 0.34, pieces: 0.34, chunks: 1, words: 1, looks: 1, actions: 1, magic: 1, death: 1, repairs: 1, studio: 1, lives: 0.2, interiors: 0.34 },
   sculptors: { figure: 'gemini-3.1-flash-lite', structure: 'gemini-3.1-flash-lite', important: 'gemini-3.8-flash', artist: 'gemini-3.1-flash-lite', musician: 'gemini-3.1-flash-lite' },
 };
 
@@ -77,6 +77,7 @@ export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: st
   death: { nome: 'Racconto della morte', agente: 'narrator', modo: 'diretta', testo: 'la parte delle morti che il Narratore racconta', minimo: 'vale la punizione scelta alla Genesi, alla lettera' },
   repairs: { nome: 'Riparazioni del codice', agente: 'engineer', modo: 'diretta', testo: "la parte dei moduli guasti che l'Ingegnere ripara", minimo: 'il modulo guasto resta isolato finché la partita non ricomincia' },
   studio: { nome: 'Richieste nello studio', agente: 'liaison', modo: 'diretta', testo: 'la parte delle richieste al Referente e alle squadre, nella corona, che va ai modelli', minimo: 'nello studio rispondono i modelli locali' },
+  interiors: { nome: 'Interni degli edifici', agente: 'scenographer', modo: 'diretta', testo: "un interno per ogni tipo di edificio che ne è senza: nessuna pausa a 1, un minuto a 0,5", minimo: 'gli edifici restano vuoti, validi e percorribili' },
   lives: { nome: 'Vite degli individui', agente: 'narrator', modo: 'diretta', testo: 'Cronaca a 0, Vita a 0,5, Teatro a 1: quanto spesso gli individui scelgono, riflettono e hanno mestieri e imprese scritti apposta', minimo: 'Cronaca: gli individui vivono dei loro mestieri come li sa il mondo, nessuno cambia idea' },
 };
 
@@ -137,6 +138,8 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
   { compito: 'review.fourthwall', agente: 'narrator', modo: 'indiretta', coefficiente: 'sessions', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
   { compito: 'sound.compose', agente: 'musician', modo: 'diretta', coefficiente: 'pieces', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },
+  // T410: the Scenografo's way of data, once per type of building that grows by rules.
+  { compito: 'interior.design', agente: 'scenographer', modo: 'diretta', coefficiente: 'interiors', nota: 'una volta per tipo di edificio: quali mobili della libreria in quale stanza; li posa il kernel con la sua guardia' },
   // The closed decisions (ADR-0157): the knob at 0 means today's rule, without a call.
   { compito: 'model.reuse', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', via: 'decide', nota: 'prima di scolpire: un modello che c’è già va bene? Una scelta, non un testo' },
   // T350: the fourth wall on what the Council writes for the world, with `metaBreak` in front; the knob of the Council's sessions, as `review.fourthwall`.
@@ -225,6 +228,9 @@ export function sculptPlan(c: number): { semplici: number; revisione: boolean; g
 /** Seconds of pause after a piece of music, for the coefficient of pieces (Infinity at 0: the music there is). */
 export const pieceGap = (c: number): number => (c <= 0 ? Infinity : Math.round(120 / c));
 
+/** Seconds of pause after an interior, for the coefficient of interiors (T410; Infinity at 0: the buildings stay bare), as after a model. */
+export const interiorGap = (c: number): number => (c <= 0 ? Infinity : Math.round(60 * (1 / c - 1)));
+
 /** Seconds of pause after a model, for the coefficient of models (Infinity at 0: generic models only). */
 export const modelGap = (c: number): number => (c <= 0 ? Infinity : Math.round(60 * (1 / c - 1)));
 
@@ -294,6 +300,12 @@ export const CALL_TOKENS: Record<string, CallTokens> = {
   /** With the photo (about 1.100 tokens). */
   'model.judge': { prompt: 2876, prefix: 1548, output: 300 },
   'sound.compose': { prompt: 5597, prefix: 2388, output: 3000 },
+  /**
+   * Not in the walk (T410): the bakery of the seed's village sculpted offline, two seeds, 13 pieces of furniture, about 2.200 tokens at 4
+   * characters a token (1.650 of instructions: role, principles, style, catalogue), a little more for the bible of a real world; the output
+   * T303 measured on Opus (172-221 tokens of rules).
+   */
+  'interior.design': { prompt: 2600, prefix: 1650, output: 220 },
 };
 /**
  * The share of the stable prefix the implicit cache serves in a session (T325: about 0,6 with calls of mixed sessions, all of it warm; never
@@ -462,6 +474,9 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   const pause = pieceGap(c.pieces);
   const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxPieces ?? 8) * 1.34 : 0;
   add(COEFFICIENT_INFO.pieces.nome, 'diretta', pieces, pieces * callCost(sc.musician, 'sound.compose', date));
+  // The Scenografo (T410): an interior for every structure of a new concept the hour sculpts, one in ten sent back once, on the text model.
+  const interiors = c.interiors > 0 ? Math.min(H.strutture, structures) * 1.1 : 0;
+  add(COEFFICIENT_INFO.interiors.nome, 'diretta', interiors, text(interiors, 'interior.design'));
   // What the wanderer asks: the share of it the knobs let through to the models.
   add(COEFFICIENT_INFO.words.nome, 'diretta', H.parole * c.words, played(H.parole * c.words, 'npc.reply'));
   add(COEFFICIENT_INFO.actions.nome, 'diretta', H.azioni * c.actions, text(H.azioni * c.actions, 'action.judge'));

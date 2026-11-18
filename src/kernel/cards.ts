@@ -130,7 +130,7 @@ export class CardCosts {
  * people do among themselves, the reviews and repairs, the models the library lacks. Every other call is paid
  * by the wanderer it is made for (the place they explore, their chats, their «Altro…», their requests).
  */
-const COMMON_TASK = /^(genesis\.|council\.|plot\.|review\.|npc\.dialogue$|forge\.fix$|model\.(sculpt|judge|resculpt|reuse)$|sound\.compose$|content\.)/;
+const COMMON_TASK = /^(genesis\.|council\.|plot\.|review\.|npc\.dialogue$|forge\.fix$|model\.(sculpt|judge|resculpt|reuse)$|sound\.compose$|interior\.design$|content\.)/;
 
 export function isCommonTask(task: string): boolean {
   return COMMON_TASK.test(task);

@@ -19,6 +19,7 @@ import { symbolOf } from '../mj/symbols';
 import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
+import { furnishForm, furnitureOf, INTERIOR_LIMITS, interiorText, readInterior, type InteriorData, type InteriorSpec } from './furnish';
 
 export const MODELS_DIR = 'models/';
 export const MODELS_INDEX = 'models/index.json';
@@ -89,6 +90,11 @@ export interface ModelInfo {
    * Cartographer and the Sculptor are told of these; nothing else of the game reads it.
    */
   brought?: string;
+  /**
+   * The interior of a building that grows by rules (T410, ADR-0214): the Scenografo's rules over the library's furniture, once for the type;
+   * the kernel places them on every seed (`src/kernel/furnish.ts`). Read without trusting it (`readInterior`).
+   */
+  interior?: InteriorSpec;
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */
@@ -127,6 +133,8 @@ export interface FormRequest {
   base?: number;
   /** The files of models/ the program reads (`<import>`, rule files; T333, ADR-0171), only if it reads any. */
   files?: Record<string, string>;
+  /** Its interior (T410, ADR-0214), for a building whose entry has one: `runForm` places the furniture on the grid it makes. */
+  interior?: InteriorData;
 }
 
 /** How long a model's program may run, unless its entry in the index says otherwise. */
@@ -182,6 +190,8 @@ export interface Form {
   footless?: boolean;
   /** The areas its program marks on its ground, in its own tiles (T346, ADR-0182), read once by `formAreas`. */
   areas?: AreaMap;
+  /** A building with its interior (T410, ADR-0214): the furniture its entry's rules place is in its grid. */
+  furnished?: boolean;
   /**
    * Asks the runner again for the meshes it let go of (`FormResult.meshesGone`); whoever draws calls it, as often as it likes. `arrived` runs as soon as they
    * are here: the runner may let go of them at the next arrival, before whoever draws comes back.
@@ -739,6 +749,11 @@ export const FORM_CACHE_BYTES = 256 * 1024 * 1024;
  * The files a program reads are part of it (T333): changing one changes the key of whoever reads it; a program that reads none keeps its key.
  */
 export function formKey(q: FormRequest): string {
+  // A building with its interior (T410) is the furnished entry of T409's key: the bare building keeps its own.
+  if (q.interior) {
+    const { interior, ...bare } = q;
+    return interiorKey(bare, { way: 'data', text: interiorText(interior), seed: interior.seed });
+  }
   const files = q.files && Object.keys(q.files).length ? JSON.stringify(Object.entries(q.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : '';
   return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml + files;
 }
@@ -870,14 +885,17 @@ export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof
   // A program with pieces may be larger, and its pieces have their own time besides the model's (T339, ADR-0178).
   const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_RUN_LIMITS });
   const g = r.grid;
-  return {
+  const out = {
     model: m,
     finished: r.finished,
-    grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet },
+    grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet } as VoxelGrid,
     palette: m.program.palette,
     actions: m.actions.map((a) => ({ name: a.name, label: a.label })),
     animations: m.animations.map((a) => a.name),
   };
+  // Its interior (T410): placed on the building only when the building is whole; what cannot be placed leaves it as built.
+  const furnished = q.interior && r.finished ? furnishForm(q.interior, out, q.vpt, m.actions) : undefined;
+  return furnished ? { ...out, grid: furnished.grid, palette: furnished.palette } : out;
 }
 
 export class Forms {
@@ -897,6 +915,9 @@ export class Forms {
    * program written anew is another program, and may be worn again.
    */
   private isolated = new Map<string, number>();
+  /** The interiors of the buildings (T410) and the furniture they may hold, read once per load of the files. */
+  private interiors = new Map<string, { data: Omit<InteriorData, 'seed'>; hash: number } | null>();
+  private offered?: string[];
   /** Bumped whenever a form becomes ready (renderers rebuild what used stand-ins). */
   version = 0;
   onReady?: (f: Form) => void;
@@ -910,6 +931,8 @@ export class Forms {
     this.files = files;
     this.hashes.clear();
     this.includes.clear();
+    this.interiors.clear();
+    this.offered = undefined;
     try {
       // The class and size of a model as the contract 0.1 wrote them are read as the internal ones (T307a), and so are the fields of 0.3
       // (`classe`, `taglia`, T308a): the values first, their repair reads the fields of before.
@@ -968,6 +991,9 @@ export class Forms {
   isolate(model: string): void {
     const h = this.hashOf(model);
     if (h !== undefined) this.isolated.set(model, h);
+    // A piece of furniture nobody wears is not placed either (T410).
+    this.interiors.clear();
+    this.offered = undefined;
   }
 
   /**
@@ -977,6 +1003,8 @@ export class Forms {
   release(model: string): void {
     this.isolated.delete(model);
     for (const [key, f] of this.forms) if (f.model === model) this.forms.delete(key);
+    this.interiors.clear();
+    this.offered = undefined;
   }
 
   /** Whether a model may be worn: the library has it, and it is not isolated as it is written now. */
@@ -1023,8 +1051,11 @@ export class Forms {
     return 1 + (hashStr(who) % this.seedsOf(model));
   }
 
-  /** What running a program with a seed takes (the site's card pictures run it in a worker of their own). */
-  request(model: string, seed: number, tint?: string): FormRequest | undefined {
+  /**
+   * What running a program with a seed takes (the site's card pictures run it in a worker of their own). A building whose entry has an
+   * interior (T410) carries it, unless `bare` is asked: the building as the Sculptor wrote it.
+   */
+  request(model: string, seed: number, tint?: string, opts: { bare?: boolean } = {}): FormRequest | undefined {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.library[model];
@@ -1035,6 +1066,7 @@ export class Forms {
     const color = info?.tint ? hexColor(tint) : undefined;
     // The letter as the engine holds it: `#12` is one character (T342).
     const symbol = symbolOf(info?.tint);
+    const interior = opts.bare ? undefined : this.interiorOf(model, seed);
     return {
       xml,
       seed,
@@ -1047,23 +1079,92 @@ export class Forms {
       ...(info?.time ? { tempo: info.time } : {}),
       ...(under && /\s(?:soil|suolo)="/.test(rootTag(xml)) ? { base: under } : {}),
       ...(Object.keys(this.includesOf(model)).length ? { files: this.includesOf(model) } : {}),
+      ...(interior ? { interior } : {}),
     };
   }
 
-  /** The form of a program with a seed, if ready; starts running it otherwise. */
+  /**
+   * The furniture a building may hold (T410): the library's class `furniture`, as it is worn now, never the corona's own (the studio's
+   * lamp posts, benches and train are not things of the world, rule 0); in the order of their ids, the same on every machine whatever order the
+   * files came in (the rules are read against it), at most `INTERIOR_LIMITS.catalogue`.
+   */
+  furniture(): string[] {
+    return (this.offered ??= Object.keys(this.models())
+      .filter((id) => this.library[id]?.class === 'furniture' && !id.startsWith('corona-') && this.usable(id))
+      .sort()
+      .slice(0, INTERIOR_LIMITS.catalogue));
+  }
+
+  /** A building's interior as its entry says it, read without trusting it (`readInterior`), or undefined: only a structure that grows by rules. */
+  interiorSpec(model: string): InteriorSpec | undefined {
+    const info = this.library[model];
+    const cls = info && classOf(info.class);
+    if (!info?.interior || !cls || !growsByRules(cls, info.size) || !this.info(model)) return undefined;
+    const offered = new Set(this.furniture());
+    return readInterior(info.interior, (id) => offered.has(id));
+  }
+
+  /** A building's interior without its seed, and the hash of what it is: read once per load of the files (forms ask at every frame). */
+  private interiorBase(model: string): { data: Omit<InteriorData, 'seed'>; hash: number } | undefined {
+    const known = this.interiors.get(model);
+    if (known !== undefined) return known ?? undefined;
+    let out: { data: Omit<InteriorData, 'seed'>; hash: number } | undefined;
+    const spec = this.interiorSpec(model);
+    if (spec) {
+      const furniture: Record<string, FormRequest> = {};
+      for (const id of furnitureOf(spec.rules)) {
+        const q = this.request(id, 1, undefined, { bare: true });
+        if (q) furniture[id] = { xml: q.xml, seed: 1, vpt: q.vpt, model: id, ...(q.size ? { size: q.size } : {}), ...(q.tempo ? { tempo: q.tempo } : {}), ...(q.files ? { files: q.files } : {}) };
+      }
+      const data = { rules: spec.rules, furniture, base: cellarVoxels(this.library[model]) };
+      if (Object.keys(furniture).length) out = { data, hash: hashStr(interiorText({ ...data, seed: 0 })) };
+    }
+    this.interiors.set(model, out ?? null);
+    return out;
+  }
+
+  /** What a form of a building with an interior carries (T410): its rules, the furniture they name as each runs, the seed, the cellar. */
+  private interiorOf(model: string, seed: number): InteriorData | undefined {
+    const b = this.interiorBase(model);
+    return b && { ...b.data, seed };
+  }
+
+  /** The key of a form: the interior's hash before the program's, so a furnished form is of its program as it is written now (`current`). */
+  private keyOf(model: string, seed: number, tint: string | undefined, h: number, furnished: boolean): string {
+    const info = this.library[model];
+    const ih = furnished ? this.interiorBase(model)?.hash : undefined;
+    return `${model}#${seed}#${info?.tint && tint ? tint : ''}${ih !== undefined ? `#~${ih}` : ''}#${h}`;
+  }
+
+  /**
+   * The form of a program with a seed, if ready; starts running it otherwise. A building with an interior (T410) is its furnished form; if
+   * that fails, the bare one (rule 7: an interior never breaks a building).
+   */
   get(model: string, seed: number, tint?: string): Form | undefined {
+    const f = this.form(model, seed, tint, false);
+    return f?.furnished && f.status === 'failed' ? this.form(model, seed, tint, true) : f;
+  }
+
+  /** The bare building (T410): the form of its program without the interior, for whoever measures what the Sculptor made. */
+  bare(model: string, seed: number, tint?: string): Form | undefined {
+    return this.form(model, seed, tint, true);
+  }
+
+  private form(model: string, seed: number, tint: string | undefined, bare: boolean): Form | undefined {
     const h = this.hashOf(model);
     if (h === undefined) return undefined;
     const info = this.library[model];
-    const key = `${model}#${seed}#${info?.tint && tint ? tint : ''}#${h}`;
+    const interior = bare ? undefined : this.interiorOf(model, seed);
+    const key = this.keyOf(model, seed, tint, h, !!interior);
     let f = this.forms.get(key);
     if (f) return f;
     // Asked at every frame: only what is not there yet costs a request.
-    const req = this.request(model, seed, tint)!;
+    const req = this.request(model, seed, tint, { bare: true })!;
+    if (interior) req.interior = interior;
     const cls = this.classOf(model);
     const vpt = req.vpt;
     const under = cellarVoxels(info);
-    f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0 };
+    f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0, ...(interior ? { furnished: true } : {}) };
     this.forms.set(key, f);
     const form = f;
     form.remake = (arrived) => this.remake(form, req, arrived);
@@ -1119,23 +1220,36 @@ export class Forms {
       .finally(() => this.remaking.delete(form));
   }
 
+  /**
+   * The form if ready. A building whose furniture is not in yet (T410: the Scenografo has just answered) is the bare one meanwhile, if that
+   * has run: it never goes back to a stand-in, and the guard says the furniture breaks nothing the bare one has.
+   */
   ready(model: string, seed: number, tint?: string): Form | undefined {
     const f = this.get(model, seed, tint);
-    return f?.status === 'ready' ? f : undefined;
+    if (f?.status === 'ready') return f;
+    if (!f?.furnished) return undefined;
+    const h = this.hashOf(model);
+    const bare = h === undefined ? undefined : this.forms.get(this.keyOf(model, seed, tint, h, false));
+    return bare?.status === 'ready' ? bare : undefined;
   }
 
   /**
    * A form once its program has run, ready or failed, however long the runner takes (T281: in the browser a structure comes from a
    * worker in tens of seconds, and `wait` gives up after two to six, as the timers go); at most `cap` ms. Undefined if there is no such program.
+   * `bare`: the building without its interior (T410); a furnished one that failed is the bare one, as `get` says.
    */
-  async settled(model: string, seed: number, tint?: string, cap = SETTLE_CAP_MS): Promise<Form | undefined> {
-    const f = this.get(model, seed, tint);
-    const run = f && this.running.get(f);
-    if (run) {
+  async settled(model: string, seed: number, tint?: string, cap = SETTLE_CAP_MS, opts: { bare?: boolean } = {}): Promise<Form | undefined> {
+    const until = Date.now() + cap;
+    const run = async (f: Form | undefined) => {
+      const r = f && this.running.get(f);
+      if (!r) return;
       let timer: ReturnType<typeof setTimeout> | undefined;
-      await Promise.race([run, new Promise<void>((r) => (timer = setTimeout(r, cap)))]);
+      await Promise.race([r, new Promise<void>((done) => (timer = setTimeout(done, Math.max(0, until - Date.now()))))]);
       clearTimeout(timer);
-    }
+    };
+    let f = opts.bare ? this.bare(model, seed, tint) : this.get(model, seed, tint);
+    await run(f);
+    if (!opts.bare && f?.furnished && f.status === 'failed') await run((f = this.bare(model, seed, tint)));
     return f;
   }
 

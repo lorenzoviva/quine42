@@ -199,6 +199,7 @@ export const SEATS: Array<{ agent: string; room: string }> = [
   { agent: 'artist', room: 'galleria' },
   { agent: 'sculptor', room: 'galleria' },
   { agent: 'musician', room: 'galleria' },
+  { agent: 'scenographer', room: 'galleria' },
   { agent: 'physicist', room: 'oggetti' },
   { agent: 'engineer', room: 'sistemi' },
   { agent: 'arbiter', room: 'universo' },
@@ -372,7 +373,7 @@ const ROOMS: Record<string, { name: string; color: string; teams: string[] }> = 
   persone: { name: 'Studio dei Personaggi', color: '#ffb38a', teams: ['narrator', 'actor'] },
   magia: { name: 'Torre della Magia', color: '#c48aff', teams: ['narrator'] },
   altro: { name: 'Archivio', color: '#9fb2a8', teams: ['engineer'] },
-  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artist', 'musician'] },
+  galleria: { name: "Galleria dell'Artista", color: '#ff8ad8', teams: ['artist', 'musician', 'scenographer'] },
 };
 
 /** Which building a file lives in. */
@@ -525,8 +526,9 @@ export class Corona {
         if (council && f === 0) {
           placed.push({ kind: 'table', label: "il tavolo del Concilio: al centro, l'universo", x: ox + Math.floor(TABLE.cx), y: oy + Math.floor(TABLE.cy) });
           SEATS.forEach((s, i) => {
-            // Half a step off the top, so that with an even number of seats none falls on the column of the exit.
-            const a = -Math.PI / 2 + ((i + 0.5) / SEATS.length) * Math.PI * 2;
+            // Half a step off the exit's side (the bottom), whatever the number of seats: none falls on the column of the exit (T410:
+            // the Scenografo made them eleven, and an odd number from the top put one there).
+            const a = Math.PI / 2 + ((i + 0.5) / SEATS.length) * Math.PI * 2;
             placed.push({ kind: 'desk', label: `il posto ${ofThe(AGENTS[s.agent as keyof typeof AGENTS].name)}`, target: s.agent, x: ox + Math.round(TABLE.cx + Math.cos(a) * 5), y: oy + Math.round(TABLE.cy + Math.sin(a) * 3.4) });
             placed.push({ kind: 'portal', label: s.room ? `teletrasporto: ${ROOMS[s.room]?.name ?? s.room}` : 'teletrasporto: fuori, sul viale', target: s.room, x: ox + Math.round(TABLE.cx + Math.cos(a) * 7.6), y: oy + Math.max(1, Math.min(ROOM_H - 2, Math.round(TABLE.cy + Math.sin(a) * 4.9))) });
           });

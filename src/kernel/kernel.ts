@@ -46,6 +46,9 @@ import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_T
 import { stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
+import { InteriorDirector, MAX_INTERIORS } from './interiordirector';
+import { INTERIOR_TASK } from './agents/scenographer';
+import type { InteriorSpec } from './furnish';
 import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
 import { cellarVoxels, entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
@@ -523,6 +526,8 @@ export class Kernel {
   readonly sculpting = new ModelDirector(this);
   /** The Musician at work on the music the world lacks. */
   readonly composing = new ScoreDirector(this);
+  /** The Scenografo at work on the interiors the buildings lack (T410, ADR-0214). */
+  readonly furnishing = new InteriorDirector(this);
   private lastSculptPump = 0;
   council!: Council;
   sandbox!: Sandbox;
@@ -6009,7 +6014,7 @@ export class Kernel {
       'corona-drone', 'corona-treno',
       'corona-gerboa', 'corona-gerboa-narrator', 'corona-gerboa-cartographer',
       'corona-gerboa-artist', 'corona-gerboa-sculptor', 'corona-gerboa-physicist',
-      'corona-gerboa-engineer', 'corona-gerboa-arbiter', 'corona-gerboa-liaison', 'corona-gerboa-musician', 'corona-gerboa-actor',
+      'corona-gerboa-engineer', 'corona-gerboa-arbiter', 'corona-gerboa-liaison', 'corona-gerboa-musician', 'corona-gerboa-actor', 'corona-gerboa-scenographer',
       'schermo-scritte', 'schermo-struttura', 'circuito-3D'
     ];
     for (const m of extra) {
@@ -6379,6 +6384,26 @@ export class Kernel {
     return true;
   }
 
+  /**
+   * The Scenografo's interior of a building, on its entry of the library (T410, ADR-0214): only a structure the index has; a commit of the
+   * Council (`models/` is its to write), with no card of its own (the interior is part of the building's, as its model).
+   */
+  setInterior(id: string, spec: InteriorSpec, message: string): boolean {
+    let index: Record<string, ModelInfo> = {};
+    try {
+      index = JSON.parse(this.repo.working[MODELS_INDEX] ?? '{}');
+    } catch {
+      return false;
+    }
+    if (!index[id] || index[id].class !== 'structure' || this.repo.working[`models/${id}.xml`] === undefined) return false;
+    index[id] = { ...index[id], interior: spec };
+    this.repo.write(MODELS_INDEX, JSON.stringify(index, null, 1) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    const c = this.commitContent(message, INTERIOR_TASK, 'scenographer');
+    this.council.say('kernel', 'approva', `interno di «${index[id].name ?? id}» (${id}) → ${spec.rules.length} regole, commit ${c.id}`, undefined, INTERIOR_TASK);
+    return true;
+  }
+
   // --- The cards that do not work here (T296, ADR-0172) -----------------------------------------------------------------------
 
   /** Whether a model of the library is a card that came with a choice (T295): only those are isolated and taken away like this. */
@@ -6569,7 +6594,8 @@ export class Kernel {
     if (t.startsWith('content.')) return 'modules/items.base/manifest.json';
     if (t === 'action.judge') return 'modules/core.effects/logic.lua';
     if (t === 'spell.name') return this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json';
-    if (t.startsWith('model.')) return 'world/style.md';
+    // The Scenografo works where the models are, in the Artist's house (T410).
+    if (t.startsWith('model.') || t === INTERIOR_TASK) return 'world/style.md';
     // The Actor's lines are about no file: it speaks from its post in the Studio of the Characters.
     if (e.from === 'actor') return undefined;
     return e.from === 'kernel' ? undefined : `prompts/agents/${e.from}.md`;
@@ -6597,6 +6623,8 @@ export class Kernel {
       return { say: r.say, forged: env.summary };
     }
     if (agent === 'musician') return { say: r.say, forged: (await this.composing.make({ richiesta: r.forge }, chi, here)).summary };
+    // The Scenografo furnishes the types of building by itself (T410): what it accepts in a talk is not a module for the Forge.
+    if (agent === 'scenographer') return { say: r.say };
     const f = await this.forgeModule(r.forge, 'agente', undefined, true);
     return { say: r.say, forged: f.summary };
   }
@@ -8535,6 +8563,7 @@ export class Kernel {
       { nome: 'tipi nuovi', usati: this.castUsed, max: ai.maxCast ?? 3 },
       { nome: 'modelli', usati: this.sculpting.count, max: ai.maxModels ?? 40 },
       { nome: 'brani', usati: this.composing.count, max: ai.maxPieces ?? 8 },
+      { nome: 'interni', usati: this.furnishing.count, max: MAX_INTERIORS },
     ];
     return {
       time: timeline(log, Math.max(0, i), (c) => (c.parent ? this.repo.find(c.parent) : undefined)),
@@ -9603,6 +9632,7 @@ export class Kernel {
       this.lastSculptPump = this.time;
       this.sculpting.pump();
       this.composing.pump();
+      this.furnishing.pump();
     }
     this.rebuildSolids();
     for (const w of this.wanderersById.keys()) this.as(w, () => (this.wandererComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));

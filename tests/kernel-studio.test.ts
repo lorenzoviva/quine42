@@ -121,11 +121,11 @@ describe('the neon studio', () => {
     const f0 = hall.storeys[0].items;
     expect(f0.some((i) => i.kind === 'table')).toBe(true);
     const seats = f0.filter((i) => i.kind === 'desk' && i.target);
-    expect(seats.map((s) => s.target).sort()).toEqual(['actor', 'arbiter', 'artist', 'cartographer', 'engineer', 'liaison', 'musician', 'narrator', 'physicist', 'sculptor']);
+    expect(seats.map((s) => s.target).sort()).toEqual(['actor', 'arbiter', 'artist', 'cartographer', 'engineer', 'liaison', 'musician', 'narrator', 'physicist', 'scenographer', 'sculptor']);
     for (const s of seats) expect([...k.archive.avatars.values()].some((a) => a.agent === s.target && a.building === 'concilio')).toBe(true);
     const portals = f0.filter((i) => i.kind === 'portal');
-    expect(portals.length).toBe(10);
-    // Ten at the table and nothing collides: every item on its own cell, in the room, off the table, the teleports walkable.
+    expect(portals.length).toBe(11);
+    // Eleven at the table (the Scenografo since T410) and nothing collides: every item on its own cell, in the room, off the table, the teleports walkable.
     const footprints = f0.map((i) => `${i.x},${i.y}`);
     expect(new Set(footprints).size).toBe(footprints.length);
     const f = hall.storeys[0];

@@ -161,6 +161,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         const program = String(d.example ?? '').replace(/bpm="(\d+)"/, (_, b) => `bpm="${Number(b) + (n % 13) - 6}"`);
         return { name: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, program, use: r.uso ?? 'music', environments: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a) || String(r.richiesta).includes(italianName('ambienti', a))), moments: r.momenti ?? [] };
       }
+      case 'interior.design':
+        return this.interior((d.catalogue ?? []) as string[]);
       case 'model.action': {
         // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).
         const ls: Array<{ lettera: string }> = d.letters ?? [];
@@ -516,6 +518,26 @@ export class MockAiModels implements AiModels, DecisionModels {
       out.push({ name, category, description, weight, stack, tags, effects: e ? { hunger: e.hunger, thirst: e.thirst, energy: e.energy, health: e.health } : undefined, equippable: category === 'tool', look: description, shape: category === 'food' ? 'fruit' : category === 'drink' ? 'bottle' : category === 'tool' ? 'tool' : 'sack' });
     }
     return out;
+  }
+
+  /**
+   * Offline the Scenografo answers as the bench's offline answer (`lab/banco/scenografo/offline/dati.json`, T303): a bench, a sideboard and a
+   * barrel in the hall of the ground floor, a bed and a chest in a room, a barrel in the others; what the catalogue lacks is left out, and a
+   * catalogue with none of them gives its first pieces.
+   */
+  private interior(catalogue: string[]): unknown {
+    const have = (ids: string[]) => {
+      const own = ids.filter((id) => catalogue.includes(id));
+      return own.length ? own : catalogue.slice(0, 2);
+    };
+    if (!catalogue.length) return { rules: [] };
+    return {
+      rules: [
+        { storey: 0, room: 'hall', furniture: have(['banco', 'credenza', 'barile']), count: 3 },
+        { room: 'room', furniture: have(['letto', 'furniture']), count: 2 },
+        { furniture: have(['barile']), count: 1 },
+      ],
+    };
   }
 
   private plan(ctx: PlanContext): unknown {

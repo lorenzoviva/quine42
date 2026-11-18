@@ -104,7 +104,8 @@ describe('the wall of screens', () => {
       { time: now - 5_000, from: 'cartographer' as const, kind: 'propone' as const, text: 'un borgo sul fiume', task: 'chunk.plan' },
     ];
     const live = liveFeed(feed, { sculptor: { model: 'gemini-3.8-flash', task: 'model.sculpt', time: now - 20_000 } }, now, 'gemini-3.1-flash-lite');
-    expect(live.desks.length).toBe(10);
+    // Eleven agents since the Scenografo (T410).
+    expect(live.desks.length).toBe(11);
     expect(live.desks.filter((d) => d.working).map((d) => d.agent)).toEqual(['cartographer', 'sculptor']);
     expect(live.desks[0]).toMatchObject({ agent: 'cartographer', task: 'chunk.plan', model: 'gemini-3.1-flash-lite', ago: 5, text: 'un borgo sul fiume' });
     expect(live.desks[1]).toMatchObject({ agent: 'sculptor', task: 'model.sculpt', model: 'gemini-3.8-flash' });
@@ -153,7 +154,7 @@ describe('the wall of screens', () => {
     stand(k, mid.x + 2.5, mid.y + 1.5);
     await k.interact();
     expect(opened.map((o) => o.field)).toEqual(['feed']);
-    expect(opened[0].screens.feed.desks.length).toBe(10);
+    expect(opened[0].screens.feed.desks.length).toBe(11);
     stand(k, wall[2].x + 2.5, wall[2].y + 1.5);
     expect(k.clickStudio(wall[2].x + 1.5, wall[2].y + 0.5)).toBe(true);
     expect(opened.at(-1).field).toBe('costs');

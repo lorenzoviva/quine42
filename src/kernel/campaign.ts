@@ -54,6 +54,8 @@ export function campaignSectionsFor(agent: AgentId): readonly CampaignSection[] 
       return ['all', 'cartographer'];
     case 'sculptor':
     case 'artist':
+    // The Scenografo furnishes what the Sculptor builds (T410): it reads what the master says of the look of things.
+    case 'scenographer':
       return ['all', 'sculptor-artist'];
     case 'engineer':
     case 'physicist':
