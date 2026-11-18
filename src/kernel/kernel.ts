@@ -1980,6 +1980,11 @@ export class Kernel {
       .map(({ w, h }) => ({ w, h }));
   }
 
+  /** A place's draft, the terrain before its environment (T422: what the Cartographer is told of the places of an environment it cuts again). */
+  placeDraft(cx: number, cy: number): string[] {
+    return this.rows(this.genDraft(cx, cy));
+  }
+
   /** The entry a structure of a plan wears (ADR-0160): its concept at its size, as the lots give it out. */
   structureModelOf(concept: string, size?: SizeTier): string {
     return this.structureModelFor(concept, size);

@@ -424,6 +424,18 @@ export class MockAiModels implements AiModels, DecisionModels {
           region: { name: elves ? 'Bosco degli Elfi' : t.slice(0, 30), description: 'dove la luce cade a fili', direction: 'north-east', distance: 4, radius: 1 },
         };
       }
+      case 'environment.recut': {
+        // Offline the Cartographer clears the draft and draws two buildings as large as the structures need (T422), with the world's codes.
+        const c = d.codes ?? {};
+        const n = Math.max(5, Math.min(12, Math.round(Number(d.need) || 7)));
+        const ground: string[] = c.ground?.length ? c.ground : ['g'];
+        const [wall, floor, door] = [c.wall?.[0] ?? 'h', c.floor?.[0] ?? 'f', c.door?.[0] ?? 'd'];
+        const any = ground.length > 1 ? `[${ground.join('')}]` : ground[0];
+        const rows = Array.from({ length: n }, (_, y) => (y === 0 ? wall.repeat(n) : y === n - 1 ? wall.repeat(n >> 1) + door + wall.repeat(n - (n >> 1) - 1) : wall + floor.repeat(n - 2) + wall));
+        const clear = (c.clear ?? []).length ? [{ type: 'prl', rules: (c.clear as string[]).map((x) => ({ in: x, out: ground[0], p: 1 })) }] : [];
+        const program = { type: 'sequence', children: [...clear, { type: 'one', rules: [{ in: Array(n).fill(any.repeat(n)).join('/'), out: rows.join('/') }], steps: 2 }] };
+        return { program_json: JSON.stringify(program), note: `due edifici di ${n} × ${n}` };
+      }
       case 'council.session':
         return { assessment: 'Il mondo cresce, ma la piazza è vuota di mestieri.', action: 'inhabitant', request: 'una guaritrice che conosce le erbe del bosco' };
       case 'craft.free': {

@@ -386,3 +386,85 @@ export async function designEnvironment(
     region: { name: String(r.name ?? raw.name ?? request).slice(0, 40), description: String(r.description ?? raw.description ?? '').slice(0, 200), environment: '', direction: internalName('direzioni', String(r.direction ?? 'north')), distance: Math.max(2, Math.min(12, Math.round(Number(r.distance) || 4))), radius: Math.max(1, Math.min(3, Math.round(Number(r.radius) || 1))) },
   };
 }
+
+/** The task of an environment cut again for the structures at 16 (T422): only in the regeneration of the models (`npm run genera --rigenera modelli`). */
+export const RECUT_TASK = 'environment.recut';
+
+/** A place on an environment cut again, as the Cartographer is told it: its name, its structures and what each needs, the lots it has now, its draft. */
+export interface RecutPlace {
+  name: string;
+  structures: Array<{ concept: string; size?: SizeTier; need: number }>;
+  /** The lots its buildings make now, `w×h`, largest first. */
+  lots: string[];
+  /** The terrains of its draft, the most common first, with their share (`t 40%`). */
+  draft: string;
+  /** Its whole draft, a row of codes a line: only for a place with structures. */
+  rows?: string[];
+}
+
+/** What the Cartographer is told when an environment's buildings are too small for the structures at 16 (T422). */
+export interface RecutContext {
+  id: string;
+  def: EnvironmentDef;
+  palette: Record<string, TerrainDef>;
+  /** The least side, walls included, of a building that holds a structure (7 a Large at 16, 10 a Huge). */
+  need: number;
+  /** The longer side under which a building is a small house that holds no structure (`STRUCTURE_LOT`: 5, so at most 4 × 4). */
+  small: number;
+  places: RecutPlace[];
+  feedback?: string;
+}
+
+const RECUT_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    program_json: { type: 'STRING', description: 'the whole MarkovJunior program of the environment, as JSON' },
+    note: { type: 'STRING', description: 'one sentence: what changed' },
+  },
+  required: ['program_json'],
+};
+
+/**
+ * T422: an environment of before whose buildings are too small for the structures at 16 voxels a tile (ADR-0209), which the kernel could not grow
+ * by itself (`stretchBoxes`): the Cartographer writes its program again, the same environment with buildings that hold them. The program only:
+ * its name, description, type and terrains stay; the kernel checks it on the real drafts of its places (`regenerate.ts`).
+ */
+export async function recutEnvironment(c: Council, ctx: RecutContext): Promise<{ program?: MjNode; note: string; error?: string }> {
+  const n = ctx.need;
+  const raw = await c.ask<{ program_json?: string; note?: string }>(
+    'cartographer',
+    RECUT_TASK,
+    [
+      `The environment «${ctx.id}» (${ctx.def.name}, ${ctx.def.environment}: ${ctx.def.description}) was written when buildings were smaller. Its buildings no longer hold the structures of its places: a structure now needs a building at least ${n} × ${n} tiles, walls included.`,
+      `Its program now:\n${JSON.stringify(ctx.def.program)}`,
+      `Write the program again: the same environment (its character, its terrains, its streets and details), with buildings that hold the structures.\n- Every building of ${ctx.small} tiles or more on its longer side must be at least ${n} × ${n}, walls included (inner floor closed by walls, a door, a ring of free ground around: the input one tile larger on every side, \`*\` there in the output); smaller buildings stay at most ${ctx.small - 1} × ${ctx.small - 1}.\n- Each place below must get at least as many buildings of ${n} × ${n} as the structures it lists: put the big buildings first, with enough "steps", then the small ones.\n- A rule is placed only where its whole input matches the draft: clear first what would stop a big building (vegetation, rocks, the scrub of the draft) with a "prl" at p 1 where needed, and let the input take every walkable terrain of the draft.\n- The place is 18 × 18 tiles and its border does not change: two buildings of ${n} × ${n} with their ring fit, three only on open ground.`,
+      `The places on this environment (the kernel runs your program on their drafts):\n${ctx.places.map((p) => `- «${p.name}»: ${p.structures.length ? `structures ${p.structures.map((s) => `${s.concept}${s.size ? ` (${s.size})` : ''}, ${s.need} × ${s.need}`).join('; ')}` : 'no structures (common houses on its big buildings)'}; buildings now ${p.lots.join(', ') || 'none'}; draft ${p.draft}${p.rows ? `:\n${p.rows.map((r) => `    ${r}`).join('\n')}` : ''}`).join('\n')}`,
+      `Terrains:\n${paletteSummary(ctx.palette)}`,
+      ctx.feedback ? `THE PREVIOUS PROGRAM DID NOT HOLD THEM: ${ctx.feedback}. Fix it.` : '',
+    ]
+      .filter(Boolean)
+      .join('\n\n'),
+    RECUT_SCHEMA,
+    { data: { ...ctx, palette: undefined, codes: recutCodes(ctx.palette) }, temperature: 0.4 },
+  );
+  const note = String(raw?.note ?? '').slice(0, 200);
+  if (typeof raw?.program_json !== 'string' || !raw.program_json.trim()) return { note, error: 'program_json mancante' };
+  try {
+    return { program: JSON.parse(raw.program_json) as MjNode, note };
+  } catch (e) {
+    return { note, error: `program_json non è JSON valido (${(e as Error).message})` };
+  }
+}
+
+/** The codes of a palette by role, for the local models' answer to `environment.recut`: walls, inner floor, doors, the ground one walks on, the rest. */
+export function recutCodes(palette: Record<string, TerrainDef>): { wall: string[]; floor: string[]; door: string[]; ground: string[]; clear: string[] } {
+  const all = Object.entries(palette).filter(([c]) => c !== '?');
+  const of = (f: (t: TerrainDef) => boolean) => all.filter(([, t]) => f(t)).map(([c]) => c);
+  return {
+    wall: of((t) => t.layer === 'wall'),
+    floor: of((t) => t.layer === 'floor' && !t.solid),
+    door: of((t) => t.layer === 'door'),
+    ground: of((t) => (t.layer ?? 'ground') === 'ground' && !t.solid),
+    clear: of((t) => t.layer === 'vegetation' || t.layer === 'rock'),
+  };
+}

@@ -106,6 +106,8 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'genesis.cast', agente: 'narrator', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'chunk.plan', agente: 'cartographer', modo: 'diretta', coefficiente: 'chunks', nota: 'uno per luogo nuovo: quanto si esplora' },
   { compito: 'cartographer.environment', agente: 'cartographer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona' },
+  // T422: only in the regeneration of the models (`npm run genera --rigenera modelli`, ADR-0216), never in a world that plays.
+  { compito: 'environment.recut', agente: 'cartographer', modo: 'diretta', coefficiente: 'models', nota: 'solo nella rigenerazione dei modelli: un ambiente di prima i cui edifici non tengono le strutture a 16 e il kernel non sa allargare' },
   { compito: 'forge.concept', agente: 'narrator', modo: 'indiretta', coefficiente: 'entities', nota: 'anche abitanti e sessioni' },
   { compito: 'forge.physics', agente: 'physicist', modo: 'indiretta', coefficiente: 'entities' },
   { compito: 'forge.code', agente: 'engineer', modo: 'indiretta', coefficiente: 'entities' },

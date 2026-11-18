@@ -11,7 +11,9 @@ import { QueueAiModels } from '../src/kernel/ai/subscription';
 import type { WeeklyUsage } from '../src/kernel/deferred';
 import { MAX_STEP_TRIES } from '../src/kernel/deferred';
 import type { MjNode } from '../src/kernel/mj';
-import { BEFORE_REGENERATION, hasStamps, kernelModel, REGEN_MODEL, requestOf, stretchBoxes, stretchRule } from '../src/kernel/regenerate';
+import { BEFORE_REGENERATION, hasStamps, kernelModel, RECUT_TRIES, REGEN_MODEL, requestOf, stretchBoxes, stretchRule } from '../src/kernel/regenerate';
+import { RECUT_TASK } from '../src/kernel/agents/cartography';
+import { readShortfalls } from '../src/kernel/shortfalls';
 import { answer, beat, diskQueueFetch, take } from '../server/subscriptionQueue';
 import { isGenerating, progressFile, worldLit, worldOut } from '../server/generation';
 import { generateUniverse, parseArgs, regenerateUniverse } from '../tools/generazione/genera';
@@ -330,6 +332,90 @@ describe('la rigenerazione dei modelli (T411): un universo di prima, dalla coda'
     expect(served.length).toBeGreaterThan(0);
     expect(served.every((s) => s.model === REGEN_MODEL && s.effort === 'low')).toBe(true);
     expect(served.filter((s) => s.task === 'model.judge').every((s) => s.images === 1)).toBe(true);
+    noApi();
+  }, 300_000);
+});
+
+// T422: an environment of before that the kernel cannot grow (its houses drawn by a rule whose input is not one set everywhere, not the seed's,
+// no stamps), on the start with the bakery: the Cartographer writes it again, the kernel checks the program on the place's draft.
+const LANES = 'vicoli';
+/** Houses of 6 × 5 with a porch row: the first row of the input is another set, so `stretchRule` does not take it. */
+const LANES_PROGRAM: MjNode = {
+  type: 'sequence',
+  children: [
+    { type: 'prl', rules: [{ in: 't', out: 'g', p: 0.8 }] },
+    { type: 'one', rules: [{ in: `${'[gp]'.repeat(6)}/${'g'.repeat(6)}/${'g'.repeat(6)}/${'g'.repeat(6)}/${'g'.repeat(6)}`, out: 'hhhhhh/hffffh/hffffh/hffffh/hhhdhh' }], steps: 3 },
+  ],
+};
+
+async function lanesOfBefore(name: string): Promise<void> {
+  await universeOfBefore(name);
+  const lm = json(name, 'modules/world.layouts/manifest.json');
+  lm.layouts[LANES] = { name: 'Vicoli', description: 'case strette tra i vicoli', environment: 'mixed', program: LANES_PROGRAM };
+  write(name, 'modules/world.layouts/manifest.json', lm);
+  const file = `maps/${mapOf(name, 0, 0)}`;
+  const rec = json(name, file);
+  rec.plan.layout = LANES;
+  write(name, file, rec);
+  git(name, 'add', '-A');
+  git(name, 'commit', '-qm', 'i vicoli di prima (T422)');
+}
+
+describe("la rigenerazione dei modelli (T422): l'ambiente che il kernel non sa allargare lo riscrive il Cartografo", () => {
+  it('il Cartografo lo riscrive, il kernel lo prova sul luogo; i lotti a 16 e la struttura a 16', async () => {
+    await lanesOfBefore('vicoli');
+    const q = new FakeQueue();
+    const lines: string[] = [];
+    const out = await regenerateUniverse({ name: 'vicoli', dir, queue: q, weekly: still, classi: ['structure'], log: (l) => lines.push(l) });
+    expect(out.esito).toBe('finito');
+    expect(out.fatti).toEqual([`ambiente:${LANES}`, `rigenera:${FORNO}`, `interno:${FORNO}`]);
+    noApi();
+    expect(lines.some((l) => /ambiente vicoli: da riscrivere dal Cartografo, edifici di 7 × 7/.test(l))).toBe(true);
+    expect(lines.some((l) => /vicoli: riscritto dal Cartografo al tentativo 1/.test(l))).toBe(true);
+    expect(lines.some((l) => /dopo il Cartografo: nessuna struttura a 20/.test(l))).toBe(true);
+    // One call of the Cartographer, told the place, its structure and what it needs; the program it wrote is the environment's now.
+    const asked = q.calls.filter((c) => c.task === RECUT_TASK);
+    expect(asked).toHaveLength(1);
+    expect(asked[0].agent).toBe('cartographer');
+    expect(asked[0].prompt).toMatch(/il forno del borgo/);
+    expect(asked[0].prompt).toMatch(/at least 7 × 7 tiles, walls included/);
+    const program = json('vicoli', 'modules/world.layouts/manifest.json').layouts[LANES].program;
+    expect(JSON.stringify(program)).not.toBe(JSON.stringify(LANES_PROGRAM));
+    expect(JSON.stringify(program)).toMatch(/hhhhhhh\/hfffffh/);
+    // The start cut at 16, its place as it was; the bakery at 16, no `vpt`.
+    const plan = json('vicoli', `maps/${mapOf('vicoli', 0, 0)}`).plan;
+    expect(plan.vpt).toBe(16);
+    expect(plan.layout).toBe(LANES);
+    expect(json('vicoli', 'models/index.json')[FORNO].vpt).toBeUndefined();
+    expect(git('vicoli', 'log', '--format=%s')).toMatch(/l'ambiente vicoli per le strutture a 16 \(riscritto dal Cartografo\)/);
+  }, 300_000);
+
+  it(`un programma che non tiene torna al Cartografo col motivo; dopo ${RECUT_TRIES} l'ambiente resta e la struttura a 20`, async () => {
+    await lanesOfBefore('ostinati');
+    // A Cartographer that answers with the houses of before, every time.
+    class Stubborn extends FakeQueue {
+      async text(call: TextCall): Promise<string> {
+        if (call.task === RECUT_TASK) {
+          this.calls.push(call);
+          return JSON.stringify({ program_json: JSON.stringify(LANES_PROGRAM), note: 'come prima' });
+        }
+        return super.text(call);
+      }
+    }
+    const q = new Stubborn();
+    const lines: string[] = [];
+    const out = await regenerateUniverse({ name: 'ostinati', dir, queue: q, weekly: still, classi: ['structure'], log: (l) => lines.push(l) });
+    expect(out.esito).toBe('finito');
+    expect(out.fatti).toEqual([`ambiente:${LANES}`, `rigenera:${FORNO}`, `interno:${FORNO}`]);
+    const asked = q.calls.filter((c) => c.task === RECUT_TASK);
+    expect(asked).toHaveLength(RECUT_TRIES);
+    // The second is told why the first did not hold.
+    expect(asked[1].prompt).toMatch(/THE PREVIOUS PROGRAM DID NOT HOLD THEM: .*«il forno del borgo» vuole 7 × 7/);
+    expect(json('ostinati', 'modules/world.layouts/manifest.json').layouts[LANES].program).toEqual(LANES_PROGRAM);
+    expect(json('ostinati', `maps/${mapOf('ostinati', 0, 0)}`).plan.vpt).toBeUndefined();
+    expect(json('ostinati', 'models/index.json')[FORNO].vpt).toBe(20);
+    expect(lines.some((l) => /vicoli: resta come prima/.test(l))).toBe(true);
+    expect(readShortfalls(read('ostinati', 'world/shortfalls.json')).some((s) => s.task === RECUT_TASK && s.agent === 'cartographer')).toBe(true);
     noApi();
   }, 300_000);
 });
