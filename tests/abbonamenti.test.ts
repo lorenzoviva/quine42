@@ -256,6 +256,43 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
     expect(looked.errore).toMatch(/limite abbonamento claude raggiunto/);
   });
 
+  it('la risposta del modello non è un limite: «quota», «rate limit» e «429» nel programma (T423)', async () => {
+    const d = dir();
+    const scriptPath = path.join(d, 'mock-quota.mjs');
+    const xml = '<sequence><!-- quota del tetto: 429 voxel, rate limit della scala --><prl in="B" out="W"/></sequence>';
+    await fs.writeFile(
+      scriptPath,
+      `
+      ${INIT}
+      console.log(JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: ${JSON.stringify(xml)} }] } }));
+      console.log(JSON.stringify({ type: 'result', is_error: false, result: ${JSON.stringify(xml)}, usage: { input_tokens: 10, output_tokens: 5 } }));
+      `,
+      'utf8',
+    );
+    await enqueue(d, { provider: 'claude', agent: 'sculptor', task: 'model.sculpt', system: '', prompt: 'Credenza' });
+    const res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res.status).toBe('ok');
+    expect(res.text).toBe(xml);
+  });
+
+  it('il limite che la CLI dice nel suo `result` di errore ferma la coda fino al reset che dice (T423)', async () => {
+    const d = dir();
+    const scriptPath = path.join(d, 'mock-said-limit.mjs');
+    await fs.writeFile(
+      scriptPath,
+      `
+      ${INIT}
+      console.log(JSON.stringify({ type: 'result', is_error: true, result: 'Claude AI usage limit reached|1761735600' }));
+      process.exit(1);
+      `,
+      'utf8',
+    );
+    await enqueue(d, { provider: 'claude', agent: 'sculptor', task: 'model.sculpt', system: '', prompt: 'Credenza' });
+    const res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
+    expect(res.status).toBe('limit');
+    expect(res.reset).toEqual(new Date(1761735600 * 1000));
+  });
+
   it('funziona end-to-end con QueueAiModels', async () => {
     const d = dir();
     const scriptPath = path.join(d, 'mock-server.mjs');

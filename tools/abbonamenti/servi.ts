@@ -14,7 +14,7 @@ import { answer, beat, type QueuedRequest } from '../../server/subscriptionQueue
 import { parseJson } from '../../src/kernel/ai/models';
 import type { Provider, QueuedAnswer } from '../../src/kernel/ai/subscription';
 // @ts-expect-error pipeline.mjs is untyped plain JS
-import { usageLimit } from '../pipeline/pipeline.mjs';
+import { cliSaid, usageLimit } from '../pipeline/pipeline.mjs';
 import { serverPath } from '../../server/folders';
 
 export type SubscriptionProvider = Exclude<Provider, 'api'>;
@@ -354,7 +354,7 @@ export async function runIsolated(
   if (check.breach) return { status: 'isolation', errore: `isolamento della CLI non confermato: ${check.breach}` };
 
   // 1. Subscription usage limit check
-  const reset = usageLimit(run.combined);
+  const reset = usageLimit(cliSaid(run.combined));
   if (reset) return { status: 'limit', errore: `limite abbonamento ${provider} raggiunto, reset alle ${reset.toISOString()}`, reset };
 
   // 2. Process failure, or a run that never said what it had

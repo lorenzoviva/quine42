@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { cliEnv, IsolationCheck, ISOLATION_ARGS, runCli } from '../../tools/abbonamenti/servi';
 // @ts-expect-error pipeline.mjs is untyped plain JS
-import { usageLimit } from '../../tools/pipeline/pipeline.mjs';
+import { cliSaid, usageLimit } from '../../tools/pipeline/pipeline.mjs';
 
 export interface Token {
   /** Input not read from the cache. */
@@ -68,7 +68,7 @@ export async function chiedi(system: string, bersaglio: string, opts: { modello?
   const run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 25 * 60_000, onLine: (l) => check.see(l) });
   await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
   if (check.breach) throw new Error(`isolamento della CLI non confermato: ${check.breach}`);
-  const reset = usageLimit(run.combined);
+  const reset = usageLimit(cliSaid(run.combined));
   if (reset) throw new LimiteAbbonamento(reset);
   const letto = leggiEventi(run.stdout);
   if (run.code === 0 && !check.confirmed) throw new Error('isolamento della CLI non confermato: nessun evento di avvio');
