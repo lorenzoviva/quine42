@@ -1,0 +1,892 @@
+{
+ "about": "T422: i due ambienti di sidera riscritti dal Cartografo (Opus 5.5, dalla coda) per le strutture a 16, quelli di prima, la tavolozza e le bozze vere dei loro luoghi; tests/rigenera-sidera.test.ts ne prova i lotti offline",
+ "seed": 2177,
+ "pathCode": "p",
+ "palette": {
+  "?": {
+   "name": "vuoto",
+   "color": "#2a0612",
+   "solid": false,
+   "layer": "ground"
+  },
+  "g": {
+   "name": "asfalto bagnato",
+   "description": "asfalto scuro e lucido di pioggia, con pozzanghere che riflettono le insegne",
+   "color": "#3b4250",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1
+  },
+  "p": {
+   "name": "passerella",
+   "description": "lastre di lega antiscivolo con le strisce gialle consumate",
+   "color": "#8a8f9c",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1.15
+  },
+  "t": {
+   "model": "sidera-albero-vetro",
+   "name": "boschetto di vetro",
+   "description": "alberi dal tronco ambrato e la chioma a faccette, che tintinnano col vento",
+   "color": "#3fb8a8",
+   "solid": true,
+   "layer": "vegetation"
+  },
+  "w": {
+   "name": "canale",
+   "description": "acqua di canale scura, increspata dalla pioggia",
+   "color": "#1f4f73",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "r": {
+   "model": "sidera-cristallo",
+   "name": "speroni di cristallo",
+   "description": "punte di cristallo violetto alte come una persona, fredde al tatto",
+   "color": "#8c6ad8",
+   "solid": true,
+   "layer": "rock"
+  },
+  "h": {
+   "name": "paratia",
+   "description": "paratie di lega opaca rivettata, rigate di pioggia",
+   "color": "#596273",
+   "solid": true,
+   "layer": "wall"
+  },
+  "f": {
+   "name": "pavimento grigliato",
+   "description": "grata d'acciaio sopra le condotte, che risuona sotto i passi",
+   "color": "#6f7787",
+   "solid": false,
+   "layer": "floor",
+   "indoor": true
+  },
+  "d": {
+   "name": "portello",
+   "description": "un portello scorrevole con la guarnizione di gomma",
+   "color": "#f0b43c",
+   "solid": false,
+   "layer": "door"
+  },
+  "m": {
+   "name": "vasca idroponica",
+   "description": "vasche basse di soluzione nutritiva con file di germogli",
+   "color": "#4f9a52",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.8
+  },
+  "s": {
+   "name": "sabbia vitrea",
+   "description": "sabbia grossa di vetro macinato dal vento, che scricchiola",
+   "color": "#c9b98e",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.85
+  },
+  "j": {
+   "model": "sidera-felce-spirale",
+   "name": "felceto",
+   "description": "felci a spirale alte fino alla vita, fitte e umide",
+   "color": "#2e7d5b",
+   "solid": true,
+   "layer": "vegetation"
+  },
+  "o": {
+   "id": "sea",
+   "name": "mare",
+   "description": "il mare grigio che si è preso la vecchia costa",
+   "color": "#173b63",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "k": {
+   "name": "rupe di basalto",
+   "description": "pareti di basalto nero, lisce e bagnate, che non si scalano",
+   "color": "#2c2f36",
+   "solid": true,
+   "layer": "rock"
+  },
+  "n": {
+   "name": "brina",
+   "description": "brina azzurrina che si posa nelle zone fredde, scivolosa",
+   "color": "#cfe6f2",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.7
+  },
+  "b": {
+   "name": "muro di cemento",
+   "description": "cemento armato delle mura e dei piloni dei viadotti",
+   "color": "#7b7f86",
+   "solid": true,
+   "layer": "wall"
+  },
+  "q": {
+   "name": "vetro della cupola",
+   "description": "vetro curvo e spesso, appannato dall'umidità delle serre",
+   "color": "#9fd8e8",
+   "solid": true,
+   "layer": "wall"
+  },
+  "a": {
+   "name": "lamiera di relitto",
+   "description": "lamiere antiche, piegate e corrose, di uno scafo che nessuno ricorda",
+   "color": "#8a5a3c",
+   "solid": true,
+   "layer": "wall"
+  },
+  "c": {
+   "name": "recinzione di rete",
+   "description": "rete metallica tesa tra paletti, con cartelli di pericolo",
+   "color": "#9aa3ad",
+   "solid": true,
+   "layer": "wall"
+  },
+  "z": {
+   "name": "ponte di grata",
+   "description": "un ponte di grata metallica sopra l'acqua",
+   "color": "#a3a9b3",
+   "solid": false,
+   "layer": "floor"
+  },
+  "l": {
+   "name": "piastrelle dei laboratori",
+   "description": "piastrelle bianche lavabili, con le fughe azzurre",
+   "color": "#d9dee6",
+   "solid": false,
+   "layer": "floor",
+   "indoor": true
+  },
+  "v": {
+   "name": "canale di plasma",
+   "description": "una canaletta dove scorre plasma azzurro, caldissimo",
+   "color": "#5fd3ff",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "e": {
+   "name": "pista",
+   "description": "cemento della pista d'atterraggio, segnato da bruciature",
+   "color": "#5d6470",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1.1
+  },
+  "u": {
+   "name": "vasca seminata",
+   "description": "una vasca idroponica appena seminata, con i semi sotto il velo di soluzione: tra un giorno germogliano i frutti",
+   "color": "#3f7a5a",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.8,
+   "ripens": {
+    "after": 1,
+    "in": "y"
+   }
+  },
+  "y": {
+   "name": "vasca in frutto",
+   "description": "una vasca carica di frutti di vetro ambrati, pronti da staccare",
+   "color": "#c9a54a",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.7
+  }
+ },
+ "before": {
+  "vicoli_pioggia": {
+   "type": "sequence",
+   "children": [
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "[tj]",
+       "out": "g",
+       "p": 0.8
+      }
+     ]
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+       "out": "hhhhhh/hffffh/hffffh/hffffh/hhhdhh"
+      }
+     ],
+     "steps": 4
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn]",
+       "out": "hhhh/hffh/hffh/hdhh"
+      }
+     ],
+     "steps": 3
+    },
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "g",
+       "out": "p",
+       "p": 0.2
+      }
+     ]
+    },
+    {
+     "type": "path",
+     "from": "d",
+     "to": "p",
+     "on": "gsn",
+     "color": "p",
+     "steps": 3
+    }
+   ]
+  },
+  "cantiere_fusione": {
+   "type": "sequence",
+   "children": [
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "[tjr]",
+       "out": "g",
+       "p": 1
+      },
+      {
+       "in": "w",
+       "out": "g",
+       "p": 0.5
+      }
+     ]
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+       "out": "bbbbbbb/blllllb/blllllb/blllllb/bbbdbbb"
+      }
+     ],
+     "steps": 2
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gsn][gsn][gsn][gsn][gsn]",
+       "out": "vvvvv"
+      }
+     ],
+     "steps": 3
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gsn][gsn][gsn]",
+       "out": "ccc"
+      }
+     ],
+     "steps": 5
+    },
+    {
+     "type": "path",
+     "from": "d",
+     "to": "p",
+     "on": "gsn",
+     "color": "p",
+     "steps": 3
+    }
+   ]
+  }
+ },
+ "after": {
+  "vicoli_pioggia": {
+   "type": "sequence",
+   "children": [
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "[tj]",
+       "out": "g",
+       "p": 1
+      }
+     ]
+    },
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "r",
+       "out": "s",
+       "p": 1
+      }
+     ]
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]",
+       "out": "*********/*hhhhhhh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hfffffh*/*hhhdhhh*/*********"
+      }
+     ],
+     "steps": 2
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+       "out": "******/*hhhh*/*hffh*/*hffh*/*hdhh*/******"
+      }
+     ],
+     "steps": 3
+    },
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "g",
+       "out": "p",
+       "p": 0.2
+      }
+     ]
+    },
+    {
+     "type": "path",
+     "from": "d",
+     "to": "p",
+     "on": "gsn",
+     "color": "p",
+     "steps": 5
+    }
+   ]
+  },
+  "cantiere_fusione": {
+   "type": "sequence",
+   "children": [
+    {
+     "type": "prl",
+     "rules": [
+      {
+       "in": "[tjr]",
+       "out": "g",
+       "p": 1
+      },
+      {
+       "in": "w",
+       "out": "g",
+       "p": 0.5
+      }
+     ]
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]/[gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw][gpsnw]",
+       "out": "*********/*bbbbbbb*/*blllllb*/*blllllb*/*blllllb*/*blllllb*/*blllllb*/*bbbdbbb*/*********"
+      }
+     ],
+     "steps": 2
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]/[gpsn][gpsn][gpsn][gpsn][gpsn][gpsn]",
+       "out": "******/*bbbb*/*bllb*/*bllb*/*bdbb*/******"
+      }
+     ],
+     "steps": 1
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gsn][gsn][gsn][gsn][gsn]",
+       "out": "vvvvv"
+      }
+     ],
+     "steps": 3
+    },
+    {
+     "type": "one",
+     "rules": [
+      {
+       "in": "[gsn][gsn][gsn]",
+       "out": "ccc"
+      }
+     ],
+     "steps": 5
+    },
+    {
+     "type": "path",
+     "from": "d",
+     "to": "p",
+     "on": "gsnw",
+     "color": "p",
+     "steps": 3
+    }
+   ]
+  }
+ },
+ "places": [
+  {
+   "cx": -1,
+   "cy": -5,
+   "layout": "vicoli_pioggia",
+   "name": "Borgo del Re Muto",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "kppppppppppppppppp",
+    "kpppppppppppprrrrr",
+    "kppppppppprsrrrssr",
+    "kppppppppssrssrrrr",
+    "kpppppppsrsssrrrsr",
+    "ppppppprrrrsssrrrr",
+    "ppppppprrrrrrrrrsr",
+    "ppppppsrrsrrsrsrsr",
+    "pppppprrrsssrrrrsr",
+    "pppppprrrssssrrrsr",
+    "ppppppsrrgsrsrrsss",
+    "ppppppsrsgsrrsrsrr",
+    "pppppprrgggrssggjg",
+    "ppppppgggggsrjjjjj",
+    "ppppppprgggrrggjjj",
+    "ppppppppprrjggggjg"
+   ]
+  },
+  {
+   "cx": 0,
+   "cy": -5,
+   "layout": "vicoli_pioggia",
+   "name": "Borgo del Nastro",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "ppppprrrjgjggsrsrs",
+    "ppppsssrjgjgsrrsrr",
+    "ppprrrrrjgjrsrrsrs",
+    "rssrsrrrrjrssrssrr",
+    "srrrrrrrgggrssrrrs",
+    "rsrrssrggjgrrrrggg",
+    "rrsrsssjjggrssjggg",
+    "ssrsrrrgjjgjrgjggg",
+    "sssrrssjgjjggjjjgg",
+    "ssrrrrrgjgjjggjjjg",
+    "rsrrsrrjgjgjgggjjg",
+    "rrrrsrssrssjjggggg",
+    "rrrsrrsrsssrgjgggg",
+    "srrrrrssrsrrjjgggg",
+    "ggjjgsrrrsrsjggggg",
+    "gjggjrrsrssrgjgggg",
+    "jjjjjsrrssrsrggggg",
+    "jggjssrrrsrrsjgrgg"
+   ]
+  },
+  {
+   "cx": -4,
+   "cy": -4,
+   "layout": "cantiere_fusione",
+   "name": "Campagna dei Sussurri",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "gggggggggggggggggg",
+    "grgggggggggggggggg",
+    "ggggggggggggggggww",
+    "nnnnnnnnnnnwwwwwww",
+    "nnnnnnnwwwwwwwwwww",
+    "nnnnwwwwwwwwwwnnnn",
+    "nnwwwwwwwwnnnnnnnn",
+    "wwwwwwwnnnnnnnnnnn",
+    "wwwwwnnnnnnnnnnnnn",
+    "wwwnnnnnnnnnnnnnnn",
+    "wnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "rnnnnnnnnnnnnnnnnn",
+    "rrnnnnnnnnnnnnnnnn",
+    "rrnnnnnnnnnnnnnnnn",
+    "rrrnnnnnnnnnnnnnnn"
+   ]
+  },
+  {
+   "cx": -3,
+   "cy": -4,
+   "layout": "cantiere_fusione",
+   "name": "Piana dei Sussurri",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "ggggggggggggpppppp",
+    "ggggggggggggrgpppp",
+    "wwwwwwwwwwwwgggppp",
+    "wwwwwwwwwwwwwwwppp",
+    "wwnnnnnnnwwwwwwwwp",
+    "nnnnnnnnnnnnnwwwww",
+    "nnnnnnnnnnnnnnnwww",
+    "nnnnnnnnnnnnnnnnww",
+    "nnnnnnnnnnnnnnnnpp",
+    "nnnnnnnnnnnnnnnnpp",
+    "nnnnnnnnnnnnnnnnpp",
+    "nnnnnnnnnnnnnnnnpp",
+    "nnnnnnnnnnnnnnnnpp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp"
+   ]
+  },
+  {
+   "cx": -2,
+   "cy": -4,
+   "layout": "cantiere_fusione",
+   "name": "Piana dei Sussurri",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "ppppppppggsrrrpppp",
+    "ppppgggggrssrrsssr",
+    "ppgggggggsrsrrrsrr",
+    "ppnnnnnnnrrrrrrrrr",
+    "pnnnnnnnrrrrrrrrrr",
+    "pnnnnnnrrrrrrrrrrr",
+    "wnnnnnrrrrrrrrrrrr",
+    "wwnnnnrrrrrrrrrrrr",
+    "wwwnnnnrrrrrrrrrrr",
+    "nwwwnnnnrrrrrrrrrr",
+    "nwwwnnnnrrrrrrrrrr",
+    "nnwwwnnnnrrrrrrrnn",
+    "nnnwwnnnnnnnrrnnnn",
+    "nnnwwwnnnnnnnnnnnn",
+    "nnnnwwnnnnnnnnnwgg",
+    "nnnnwwnnnnnnnggggg"
+   ]
+  },
+  {
+   "cx": -4,
+   "cy": -3,
+   "layout": "cantiere_fusione",
+   "name": "Piana dell'Eco",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "rrrnnnnnnnnnnnnnnn",
+    "nrrnnnnnnnnnnnnnnn",
+    "nnrrnnnnnnnnnnnnnn",
+    "nnrrnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnn",
+    "pnnnnnnrrrnnnnnnnn",
+    "pppnnnnrrrnnnnnnnn",
+    "npppppnnrrnnnnnnnn",
+    "nnnnppppnnnnnnnnnn"
+   ]
+  },
+  {
+   "cx": -3,
+   "cy": -3,
+   "layout": "cantiere_fusione",
+   "name": "Borgo del Nastro",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnnnp",
+    "nnnnnnnnnnnnnnnngp",
+    "nnnnnnnnnnnnnnngwg",
+    "nnnnnnnnnnnnnngggg",
+    "nnnnnnnnnnnnnggggg",
+    "nnnnnnnnnnnngggggg",
+    "nnnnnnnnnnnwgggggg",
+    "nnnnnnnnnngggggggg",
+    "nnnnnnnnnggggwwggg",
+    "nnnnnnnngggggggggg",
+    "nnnnnnnggggggggggg"
+   ]
+  },
+  {
+   "cx": -2,
+   "cy": -3,
+   "layout": "cantiere_fusione",
+   "name": "Borgo delle Rune",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "nnnnwwwnnngggggttg",
+    "nnnnwwwngggggggttg",
+    "nnnnnwwggggwgggggg",
+    "nnnnnwwgggggggttgg",
+    "nnnggwwggggggggggg",
+    "nngggwwggggtggtttg",
+    "nggggwwgggtgttgggg",
+    "pggggwwgggggggggtg",
+    "pggggwwggtggtggttt",
+    "ppgggwwgggttggtgtt",
+    "ppgggwwtggtgttggtt",
+    "gppgtwwggtgggggtgg",
+    "ggpppwwttgtggggggp",
+    "gggppwwppppppppppp",
+    "gtggtwwppppppppppp",
+    "gtttgwwtgggggggggg",
+    "wtgttwwtggggggggwg",
+    "ggggtwwgggggggggwg"
+   ]
+  },
+  {
+   "cx": -4,
+   "cy": -2,
+   "layout": "cantiere_fusione",
+   "name": "Radura del Primo Passo",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "nnnnnnppppnnnnnnnn",
+    "nnnnnnnnppppnnnnnn",
+    "nnnnnnnnnnpppppnnn",
+    "nnnnnnnntnnnpppppp",
+    "nnnnnnttntntnrpppp",
+    "nnnnnnntttnnnrrrrp",
+    "nnnnnttnntnntrrrrr",
+    "nnnnttntnnnnnrrrrr",
+    "nntnntttnntttrrrrr",
+    "nnntttttnntnnrrrrr",
+    "nnnnttntntntnrrrrr",
+    "nnntnttttnntnrrrrr",
+    "tnnntnntnnttnrrrrr",
+    "tntnnnttnnnntrrrrr",
+    "tntnnnnntnttnnrrrr",
+    "ntnntnttntnntnrrrr",
+    "nnnnttntnnnttnrrrg",
+    "ntnntnntnnnntnnrgt"
+   ]
+  },
+  {
+   "cx": -3,
+   "cy": -2,
+   "layout": "cantiere_fusione",
+   "name": "Radura delle Rune",
+   "structures": [],
+   "vpt": 16,
+   "draft": [
+    "nnnnnnnggggggggwgg",
+    "nnnnnngggggggggggg",
+    "nnnnnggggggggggggg",
+    "pprngggggggggggggg",
+    "pppppppgggwggggttg",
+    "ppppppppggggggtggg",
+    "rrrgpppppggggggggg",
+    "rrrgggpppggggggggg",
+    "rrrrrgppppgggggggg",
+    "rrrrrrrpppgggggwgg",
+    "rrrrrrrpppgggggggg",
+    "rrrrrrrpppggwggggg",
+    "rrrkrrrpppgggggggg",
+    "rrrrrrrrpppggggggg",
+    "rrrrrkkkppprrwgggg",
+    "rrrrrrkkrppprggggg",
+    "trrrrrrrrrppprgggg",
+    "grrrrrrrrrrpppgggg"
+   ]
+  },
+  {
+   "cx": -2,
+   "cy": -2,
+   "layout": "cantiere_fusione",
+   "name": "Cantiere della Fusione",
+   "structures": [
+    {
+     "concept": "laboratorio del plasma",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "ggtggwwggggggggggg",
+    "gggggwwgggwggggggg",
+    "ggttgwwgggggwggggg",
+    "ggtgwwwggggggggggg",
+    "wgggwwwggwgggwwggg",
+    "gggwwwwgggggggggwg",
+    "ggggwwwggggggggggg",
+    "ggggwwwggggggggggg",
+    "gwggwwwgggggwggggw",
+    "ggggwwwggggggggggg",
+    "ggggwwwggggggwgggg",
+    "ggggwwwggggggggggg",
+    "ggggwwwggggggggggg",
+    "gggwwwwggggggggggg",
+    "gggwwwwggggggggggg",
+    "gggwwwwwgggggggggg",
+    "gggwwwwggwgwggggwg",
+    "gggwwwwggggggggggg"
+   ]
+  },
+  {
+   "cx": -1,
+   "cy": -1,
+   "layout": "vicoli_pioggia",
+   "name": "Rampa dei Turni",
+   "structures": [
+    {
+     "concept": "laboratorio di fusione",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "gggpgggggggggggggg",
+    "ggppggggggggwggggg",
+    "wppgggggggwggggggg",
+    "ppgggggggggggggggg",
+    "gwgggggggggggggggg",
+    "gggggggggggwgggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "ggggggggwggggggggg",
+    "gggggggggggggggttt",
+    "ggggggggggggggttgg",
+    "gggwgggggggggtgggg",
+    "ggggggggggggttttgt",
+    "ggggggwggggggggggg",
+    "tgggtgggggggggggtt",
+    "gtgtttgggggggggggt",
+    "gtgtttggggggwgggpp",
+    "tggttgtgggggggggpp"
+   ]
+  },
+  {
+   "cx": 0,
+   "cy": -1,
+   "layout": "vicoli_pioggia",
+   "name": "Ponte dei Canali",
+   "structures": [
+    {
+     "concept": "residenza modulare",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "gggggwgggggggggggg",
+    "gggggggggggggggggg",
+    "gggwgggggggggggggg",
+    "ggggggggwggggggggg",
+    "gggggwgggwgggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggp",
+    "ggggggggggggggggpp",
+    "ggtggggggggggggppw",
+    "gtggggggggggggpppw",
+    "ggttggggggggggppww",
+    "tgggggtgtttggpppww",
+    "ttgtttgtgggggpppww",
+    "tgggggggtttgpppgww",
+    "pppggttggtttpppwww",
+    "pppgggggtggtpppwwt"
+   ]
+  },
+  {
+   "cx": -1,
+   "cy": 0,
+   "layout": "vicoli_pioggia",
+   "name": "Scalinata dei Corrieri",
+   "structures": [
+    {
+     "concept": "scalo navette",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "tttgttggggggggggpp",
+    "gggtggggggggggggpp",
+    "ggttttgggwggggggpp",
+    "ggggttgtgggggggggg",
+    "ggggtgttgggggggggg",
+    "ggggggggtttgggtggg",
+    "ggggggggtgggtttggg",
+    "ggggggggtttgtgwggg",
+    "gggggwggggggttgggg",
+    "ggggggggggggtggggg",
+    "gggggggggggggggwgg",
+    "ggggwggggggwgggggg",
+    "gggwggwgwgggwggwgg",
+    "wggggggggggggggggg",
+    "ggggggwggggggggggw",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "wggggggggggggggggg"
+   ]
+  },
+  {
+   "cx": 1,
+   "cy": 0,
+   "layout": "vicoli_pioggia",
+   "name": "Vicolo delle Cuoche",
+   "structures": [
+    {
+     "concept": "stazione di transito",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "ttggggttgggttttggg",
+    "ggggggggtggttggttg",
+    "gggggggttggggttgtg",
+    "gggggtgtgggtttttgg",
+    "gggggggggggggggttg",
+    "gggggggggggtttgggg",
+    "gggggggggggttggggg",
+    "gggggggggggggggggg",
+    "ggggwgggggggwggggg",
+    "gggggwwggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggwgg",
+    "gggggggggggggggggg",
+    "ggggggggggwggggggg",
+    "gggggggggggggggggg",
+    "gwggggggggggwggggg"
+   ]
+  }
+ ]
+}

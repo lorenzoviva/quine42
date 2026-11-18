@@ -15,3 +15,20 @@ npm run genera -- orichalcum --rigenera modelli --tipi struttura-palazzina-degli
 
 Il costo: 8 chiamate (7 dello Scultore e dell'Artista, 1 dello Scenografo), 9 minuti, almeno 1,36 $ al listino di Opus 5.5 senza i token scritti
 nella cache del prompt; la settimana dell'abbonamento 75 → 76 %, la finestra delle 5 ore 14 → 21 %, con altri agenti al lavoro.
+
+## Sidera, i due ambienti riscritti dal Cartografo (T422, ADR-0218)
+
+Il 18/11, sull'universo vero (`universes/sidera` della cartella del generatore), dopo i quattro ambienti già ritagliati da T411:
+
+```bash
+npx vite-node --script tools/abbonamenti/servi.ts -- --coda <universi>/.queue
+npm run genera -- sidera --rigenera modelli --tetto 20 --universi <universi> \
+  --tipi casa-comune-structure-052c7ac8,struttura-laboratorio-del-plasma,struttura-laboratorio-di-fusione,struttura-residenza-modulare,struttura-scalo-navette,struttura-stazione-di-transito
+```
+
+- `vicoli_pioggia` e `cantiere_fusione` riscritti dal Cartografo al primo tentativo (una chiamata ciascuno, 0,13 $): edifici di 7 × 7 col loro anello,
+  poi case di 4 × 4; sgombrati boschetti, felci e speroni; nel cantiere le sale anche sopra i canali. 15 luoghi tagliati a 16, ogni struttura sul
+  suo 7 × 7. I programmi, quelli di prima e le bozze vere dei luoghi: `sidera-ambienti.json` (lo prova `tests/rigenera-sidera.test.ts`).
+- Le sei strutture che sarebbero rimaste a 20 riscolpite a 16 e arredate: 39 chiamate dello Scultore e dell'Artista, 6 dello Scenografo; voti 4-6/10.
+- In tutto 47 chiamate in circa 50 minuti, almeno 7,0 $ al listino di Opus 5.5; la settimana 80 → 85 % con altri agenti al lavoro (1 % contato a sidera).
+- Dopo: `lab/scripts/piano-rigenerazione.ts` non trova ambienti da ritagliare né strutture a 20; `lab/scripts/controlla-universo.ts` legge i 56 piani.
