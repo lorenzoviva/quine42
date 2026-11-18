@@ -1461,7 +1461,8 @@ describe('interfaccia web della pipeline (T69)', () => {
 
   it('POST /api/config cambia piani e «Può orchestrare» sul file e in memoria (ADR-0119)', () => {
     const sandbox = makeSandbox();
-    const real = JSON.parse(fsMod.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+    // Una configurazione di prova, non config.json vero: le scelte dell'autore non rompono il test (T424).
+    const real = JSON.parse(fsMod.readFileSync(path.resolve(__dirname, 'fixtures/pipeline-config.json'), 'utf8'));
     const configFile = path.join(tmpRepo, 'config.json');
     fsMod.writeFileSync(configFile, JSON.stringify(real));
     const config = structuredClone(real);
@@ -2506,7 +2507,9 @@ describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrat
     accountOf(provider: string, config?: unknown): string;
   };
   const A = () => P as unknown as Agy;
-  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  // Una configurazione di prova (T424): ciò che l'autore spunta in config.json non rompe le proprietà affermate qui.
+  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/pipeline-config.json'), 'utf8'));
+  const realConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
   const NUOVI = ['hydrogen', 'orchestrator'];
   const SFORZI = ['low', 'medium', 'high', 'extra', 'xhigh', 'max'];
   const model = (provider: string, sforzo?: string, run: Record<string, unknown> = {}, cfg = config) => {
@@ -2615,7 +2618,7 @@ describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrat
     delete vecchio.providers.argon.livelli;
     expect(model('argon', 'max', {}, vecchio)).toBe('gemini-4-argon-high');
     // Ogni modello di agy in config.json gira a un livello che ha, e lo dice.
-    for (const [p, c] of Object.entries(config.providers) as [string, any][]) {
+    for (const [p, c] of Object.entries(realConfig.providers) as [string, any][]) {
       if (c.cmd !== 'agy') continue;
       const id = c.args[c.args.indexOf('--model') + 1];
       const fine = /-(low|medium|high|xhigh|max)$/.exec(id)?.[1];
@@ -2640,7 +2643,15 @@ describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrat
     const O = (await import(/* @vite-ignore */ url)) as { pickOrchestrator(order: string[], budget: unknown, threshold: number): string | undefined };
     const pieno = { residuo: 90, sessione: 90 };
     const budget = { claude: { residuo: 2, sessione: 2 }, orchestrator: pieno, argon: pieno, hydrogen: pieno, gemini: pieno };
-    expect(O.pickOrchestrator(ordine, budget, 10)).toBe('argon');
+    // pickOrchestrator legge la configurazione caricata: per la prova vi mettono le spunte di quella di prova, poi si rimettono (T424).
+    const loaded = (P as unknown as { CONFIG: typeof config }).CONFIG;
+    const before = Object.fromEntries(Object.entries(loaded.providers).map(([p, c]: [string, any]) => [p, c.orchestrabile]));
+    try {
+      for (const [p, c] of Object.entries(loaded.providers) as [string, any][]) c.orchestrabile = config.providers[p]?.orchestrabile;
+      expect(O.pickOrchestrator(ordine, budget, 10)).toBe('argon');
+    } finally {
+      for (const [p, c] of Object.entries(loaded.providers) as [string, any][]) c.orchestrabile = before[p];
+    }
   });
 
   it('la pagina web offre i due modelli nuovi col loro nome', async () => {

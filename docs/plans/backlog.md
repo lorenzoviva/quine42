@@ -5874,11 +5874,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T423`, test offline, suite e typecheck coi turni. Sicurezza: nessuna superficie nuova.
 - Esito: il limite si cerca solo in ciò che dice la CLI (`cliSaid` in pipeline.mjs), mai nella risposta del modello, per la coda, i task, l'orchestratore e i banchi; test offline aggiunti; typecheck verde; la suite ha 3 fallimenti già presenti in `tests/pipeline.test.ts` (T360 e interfaccia web), dovuti a `config.json` dopo il commit 1ae81b57 (Orchestrator orchestrabile), non a questo task; la causa del fermo del 18/11 non è dimostrata (output non salvato) e il formato di `rate_limit_event` non è provato su un output reale.
 
-### T424 · I test della pipeline leggono una configurazione loro, non `config.json` vero — `da fare`
+### T424 · I test della pipeline leggono una configurazione loro, non `config.json` vero — `fatto` (`cfdd2ceb`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
 - Contesto: dopo `1ae81b57` (l'Orchestrator orchestrabile, neapolis in generazione) 3 test di `tests/pipeline.test.ts` falliscono perché leggono `tools/pipeline/config.json` vero: «POST /api/config cambia piani e «Può orchestrare»» (T69), «i provider nuovi su agy… nessuno orchestra da solo» e «l'ordine dell'orchestratore… accesi solo se spuntati» (T360). Approvato dall'autore il 18/11.
 - Cosa fare: dare ai test una configurazione di prova (copia fissa o costruita nel test) invece del file vero, così che le scelte dell'autore in `config.json` non li rompano; le proprietà che affermano (tetto 1, accesi solo se spuntati, POST che scrive file e memoria) restano le stesse; non cambiare `config.json` né il comportamento della pipeline.
 - Quando è fatto: `tests/pipeline.test.ts` verde con il `config.json` di oggi, suite e typecheck coi turni. Sicurezza: nessuna superficie nuova.
+- Esito: i 3 test di `tests/pipeline.test.ts` (T69 POST /api/config, T360 provider nuovi su agy, T360 ordine dell'orchestratore) leggono la copia fissa `tests/fixtures/pipeline-config.json` (il config di oggi con l'Orchestrator non spuntato) invece di `tools/pipeline/config.json`; il controllo dei livelli di agy resta sul file vero; per la scelta dell'orchestratore il test mette per la prova le spunte della copia nella configurazione caricata e le rimette dopo; `config.json` e la pipeline invariati; suite (3514 passati) e typecheck verdi coi turni; la copia fissa va aggiornata a mano se le prove dovranno conoscere un provider nuovo. Sicurezza: nessuna superficie nuova.
 
 ### T425 · Il generatore scrive davvero nei suoi log, senza aprire console — `da fare`
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
