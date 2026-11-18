@@ -1,0 +1,43 @@
+<!-- Rastrelliera delle botti: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 3/10 -->
+<sequence values="B W L D I S T k" size="40 40 40">
+  <color symbol="W" value="8c532b" name="legno struttura"/>
+  <color symbol="L" value="ad6f3d" name="legno doghe"/>
+  <color symbol="D" value="4e2c14" name="fessura"/>
+  <color symbol="I" value="424754" name="cerchio ferro"/>
+  <color symbol="S" value="83769c" name="vetro bottiglia"/>
+  <color symbol="T" value="6a3b1a" name="tappo"/>
+  <color symbol="k" hidden="True" name="supporto"/>
+
+  <!-- Struttura: Montanti e ripiani -->
+  <box at="5 5 0" size="4 2 40" color="W"/>
+  <box at="35 5 0" size="4 2 40" color="W"/>
+  <box at="20 5 10" size="40 2 4" color="W"/>
+  <box at="20 5 25" size="40 2 4" color="W"/>
+  <box at="20 5 38" size="40 2 4" color="W"/>
+  <box at="20 5 0" size="40 2 4" color="W"/>
+
+  <!-- Botti (cilindri orizzontali) -->
+  <!-- Creiamo degli spazi per le botti: un cilindro giacente -->
+  <cylinder at="12 5 16" size="12 12 8" color="L"/>
+  <cylinder at="28 5 16" size="12 12 8" color="L"/>
+  <cylinder at="12 5 31" size="12 12 8" color="L"/>
+  <cylinder at="28 5 31" size="12 12 8" color="L"/>
+
+  <!-- Aggiungiamo dettagli alle botti -->
+  <all steps="1">
+    <rule in="L" out="I" symmetry="(y)"/> <!-- Cerchi di ferro -->
+    <rule in="L" out="D" symmetry="(xyz)"/> <!-- Venature -->
+  </all>
+
+  <!-- Bottiglie negli spazi vuoti tra i ripiani -->
+  <prl in="B W" out="S *" p="0.05" steps="1"/> 
+  <one in="S B" out="S T" steps="20"/> <!-- Tappi sulle bottiglie -->
+
+  <!-- Pulizia: rimuoviamo parti fluttuanti o eccessi -->
+  <convolution neighborhood="NoCorners" steps="2">
+    <rule in="B" out="B" values="B" sum="0..1"/>
+  </convolution>
+  
+  <!-- Dettagli finali: fessure sul legno -->
+  <all in="W B" out="W D" steps="1"/>
+</sequence>

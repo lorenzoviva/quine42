@@ -301,7 +301,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Guardia degli interni
 - **Inglese**: `InteriorGuard`, `interiorPlan`, `stageGrid`, `STAGE`, `furnishFromStage`, `interiorKey`, `Refusal`
-- **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0212).
+- **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la cantina che regge (T419, ADR-0215), lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0212).
 - **Dove vive**: `src/kernel/interior.ts`, `src/kernel/forms.ts`
 - **Da non usare**: «Guardia» da sola fuori dal banco (`lab/banco/scenografo/`, la guardia del banco di T259), «palcoscenico»
 - **Fermo**: nessuno (nulla su disco: un interno è una funzione dell'edificio e della sua chiave).
@@ -1161,10 +1161,17 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Scenografo
 - **Inglese**: `scenographer`, `designInterior`, `InteriorDirector`, `furnishing`, `InteriorRule`, `InteriorSpec`, `furnishWithRules`, `interiorRooms`, `INTERIOR_TASK`
-- **Definizione**: l'agente che arreda gli edifici che lo Scultore scrive, la via dei dati: per ogni tipo di edificio sceglie una volta quali mobili della libreria vanno in quale tipo di stanza (sala, stanza, piccola) e quanti, le **regole**; il kernel li posa a ogni seme contro i muri con la guardia degli interni (T410, ADR-0214). Abita nella casa dell'Artista; la sua manopola è «Interni degli edifici».
+- **Definizione**: l'agente che arreda gli edifici che lo Scultore scrive, la via dei dati: per ogni tipo di edificio sceglie una volta quali mobili della libreria vanno in quale tipo di stanza (sala, stanza, piccola, cantina) e quanti, le **regole**; il kernel li posa a ogni seme contro i muri con la guardia degli interni (T410, ADR-0214; la cantina T419, ADR-0215). Abita nella casa dell'Artista; la sua manopola è «Interni degli edifici».
 - **Dove vive**: `src/kernel/agents/scenographer.ts`, `src/kernel/interiordirector.ts`, `src/kernel/furnish.ts`, `src/kernel/forms.ts`
 - **Da non usare**: «arredatore», «decoratore», «arredo» per le regole (l'arredo è ciò che il kernel posa)
-- **Fermo**: l'id `scenographer` di `AgentId` (`scenografo` letto come lui), il compito `interior.design`, il coefficiente `interiors`, il campo `interior` (`rules`, `author`) di una voce di `models/index.json`.
+- **Fermo**: l'id `scenographer` di `AgentId` (`scenografo` letto come lui), il compito `interior.design`, il coefficiente `interiors`, il campo `interior` (`rules`, `author`) di una voce di `models/index.json`; i tipi di stanza `hall`, `room`, `small`, `cellar` di `rules[].room`.
+
+### Mobile della cantina
+- **Inglese**: `cellar` (il tipo di stanza), `cellarSafe`, `toHeight`, `CELLAR_GROWTH`, `CELLAR_FURNITURE`, `cellar-shelf`, `cellar-rack`
+- **Definizione**: un mobile della libreria che lo Scenografo mette nella cantina di un edificio (una regola con `room: "cellar"`): il kernel lo posa con la schiena a contatto del muro, lo porta al soffitto (tagliato se più alto, stirato se gli manca un gradino) e lo rende tale che la cantina lo regga (nessuna sua cima sotto il suolo dove un corpo starebbe senza arrivarci); nel seme lo scaffale e la rastrelliera delle botti dello Scultore, e il barile (T419, ADR-0215).
+- **Dove vive**: `src/kernel/furnish.ts`, `src/kernel/interior.ts`, `universe/models/cellar-shelf.xml`, `universe/models/cellar-rack.xml`, `src/kernel/ai/mock.ts`
+- **Da non usare**: «arredo della cantina» per le regole (l'arredo è ciò che il kernel posa), «seminterrato»
+- **Fermo**: il valore `cellar` di `rules[].room`; gli id dei modelli `cellar-shelf` e `cellar-rack`.
 
 ### Attore
 - **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`

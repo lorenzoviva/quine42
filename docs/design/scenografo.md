@@ -329,6 +329,37 @@ né sulla porta (i mobili stanno solo dove l'edificio aveva aria, il protetto re
 |---|---|
 | ![sala](scenografo/01-forno-sala.jpg) la sala del forno: casse e credenze contro i muri, il passaggio dalla porta libero; dietro, il letto e la scala | ![stanza](scenografo/02-forno-stanza.jpg) il viandante nella stanza dietro, accanto al letto |
 
+### 9.4 La cantina (T419, 18/11)
+
+Il § 10.4 fatto (ADR-0215). La cantina è un tipo di stanza dello Scenografo (`room: "cellar"`), che arreda solo una regola che la nomina;
+i mobili della cantina del seme sono uno scaffale e una rastrelliera delle botti scritti dallo Scultore del gioco (taglia Grande, due caselle
+d'altezza: tagliati al soffitto di una cantina di una casella, interi sotto una di due). Il kernel, in cantina, prova solo i posti con la schiena
+del pezzo a contatto del muro, porta il pezzo al soffitto (tagliato se più alto, stirato se gli manca un gradino) e lo rende tale che la
+cantina lo regga: ogni cima che il terreno del kernel conterebbe come un pavimento che nessuno raggiunge (meno di 4 o almeno 12 voxel d'aria
+sopra) si riempie fino a ciò che ha sopra (`cellarSafe`). La guardia ora vuole esattamente ciò che il terreno misura: la cantina regge ancora.
+
+Ciò che non ha funzionato prima: la regola di T409 (ogni colonna fino al soffitto) non la passava nessun mobile; schiacciare lo scaffale al
+soffitto stringeva le assi a 3 voxel (una fessura conta come pavimento: +111 % per reggere); un pezzo girato a caso si metteva di traverso,
+o a due voxel dal muro lasciava una striscia di pavimento chiusa. E sulla villetta offline il primo piano si raggiunge **solo saltando**, che la
+guardia non cammina: al seme 3 un barile del piano terra lo toglieva (anche senza la cantina, T410). Ora alla fine il kernel guarda i piani del
+suo cammino coi salti e toglie il pezzo che li fa perdere.
+
+**Il banco** (`lab/scripts/scenografo-cantina.ts`, nessuna chiamata, `lab/banco/scenografo/cantina/riepilogo.md`; le regole dei modelli
+locali, quattro pezzi in cantina fra scaffale, rastrelliera e barile): sulla villetta offline con la cantina (10,95 caselle², soffitto a 19 voxel)
+**2-4 pezzi in cantina a seme**, 3 900-8 600 voxel, nessun rifiuto `cellar`, la cantina regge, si raggiunge, il piede della scala resta libero,
+i piani sono quelli di prima; l'arredo intero dell'edificio 1,3-1,9 s. Le sei cantine del seme (2,5-3,2 caselle², quasi tutte sotto la loro
+tromba, soffitto a 42-51 voxel) restano vuote: nessun muro abbastanza lungo per la schiena di uno scaffale, e un barile lì sarebbe una cima
+che nessuno raggiunge.
+
+**I modelli** (`lab/scripts/mobili-cantina.ts`, lo Scultore e l'Artista del gioco su Gemini, `lab/banco/scenografo/cantina/modelli/`): con
+Flash-Lite, il modello delle cose semplici, uno scaffale a pezzi e una rastrelliera di rumore (3/10) e nessuna botte (giro non registrato nel
+conto: circa 0,05-0,08 $); con 3.8 Flash lo scaffale (9/10, **0,144 $**, 5 chiamate) e la rastrelliera (5/10, **0,098 $**); la botte grande
+3/10 (in piedi invece che sdraiata, 0,062 $) non è entrata nel seme. In tutto 0,37 $ registrati, 0,24 $ per i due modelli tenuti.
+
+| | |
+|---|---|
+| ![banco](../../lab/banco/scenografo/cantina/villetta.png) la cantina della villetta ai semi 1-4, vuota e arredata (tagliata al suolo, dal davanti) | ![cantina](sotterranei-stato/28-arredata-cantina.jpg) nel gioco: in cantina, gli scaffali contro i muri |
+
 ## 10. Task che ne nascono (proposta per l'autore)
 
 Riscritti da T406 sugli edifici a 16 voxel per casella (la prima stesura, di T303, era sugli edifici a 20). L'ordine proposto: 0, poi 1 e 2
@@ -359,7 +390,8 @@ insieme, poi 3, 4 e 5. I primi due non chiamano modelli; lo 0 chiama lo Scultore
 3. **Lo Scenografo, la via del programma**: il palco a classi nel kernel, il prompt di `prompt-programma.md` (il passaggio del corpo dalla
    densità, `@@CORPO@@`), il pavimento di qualità che rimanda indietro un programma povero (stanze arredate e pezzi per caselle², misurati sui
    semi) o che varia poco col seme (T406: 0,35 su una fattoria); dopo il 2.
-4. **Mobili per la cantina**: modelli che arrivano al soffitto (scaffali, botti grandi), perché la via dei dati non la lasci vuota. Nessuno
+4. **Fatto da T419** (ADR-0215, § 9.4: la cantina un tipo di stanza, i mobili portati al soffitto e resi tali che la cantina li regga,
+   lo scaffale e la rastrelliera dello Scultore nel seme). **Mobili per la cantina**: modelli che arrivano al soffitto (scaffali, botti grandi), perché la via dei dati non la lasci vuota. Nessuno
    degli edifici misurati (T303, T406) ha una cantina: va provato su uno che ce l'ha.
 5. **Le misure dello Scultore sull'edificio vuoto**: dirlo in `lab/banco/README.md` e nel prompt, perché `stanze` non è una misura degli
    interni (confermato in T303 e in T406 su tutti gli edifici della via (a); in T406 cadono anche `piani`, `murato` e `dominante` di

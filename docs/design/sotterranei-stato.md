@@ -279,3 +279,26 @@ si spegne.
 | ![giù](sotterranei-stato/25-casa-cantina-giu.jpg) in cantina: la cassapanca, le pedate | |
 
 Restano: l'arredo della cantina nella via dei dati dello Scenografo (T419) e la rigenerazione dei modelli con le cantine (T411).
+
+## 10. Dopo T419: la cantina arredata
+
+Fatto il passo «cantina nella via dei dati» del § 4 (kernel 0.9.9, ADR-0215; il banco e i numeri nel § 9.4 di `scenografo.md`). Lo
+Scenografo arreda la cantina con una regola che la nomina (`room: "cellar"`); i modelli locali ci mettono quattro pezzi fra lo scaffale e la
+rastrelliera della cantina del seme, scritti dallo Scultore, e il barile. Il kernel li mette con la schiena al muro, li porta al soffitto e li
+rende tali che la cantina li regga; la guardia vuole la cantina che regge come la misura il terreno.
+
+Nel browser (`?skip&offline`, un universo nuovo): «la casa con la cantina» del luogo `-6,0` scolpita offline dalla console e arredata dallo
+Scenografo offline (`k.furnishing.make`, il commit «scenografo: la casa con la cantina», quattro regole con quella della cantina). La forma
+arredata ha 14 090 voxel di mobili, 8 559 sotto il suolo. Col tappeto fermo e lo scostamento sul luogo, il viandante va dalla cima della scala
+al piano terra (0,81) al pavimento della cantina (−0,44) e indietro a passi di un quarto di voxel con `free` e `floorAt`, senza un passo
+bloccato (il salto più grande un'alzata, 0,19); in cantina il taglio di T416 apre la cantina: due scaffali contro il muro di fondo, uno contro
+quello di sinistra, la scala e, accanto alla sua cima, un barile (al seme 1 del banco: tre scaffali e un barile). Il viandante cammina fra i mobili fino a uno scaffale, che lo ferma; risalito,
+il taglio si spegne.
+
+| | |
+|---|---|
+| ![piano terra](sotterranei-stato/26-arredata-piano-terra.jpg) al piano terra, in cima alla scala della cantina: la casa arredata | ![metà](sotterranei-stato/27-arredata-meta-scala.jpg) a metà scala |
+| ![cantina](sotterranei-stato/28-arredata-cantina.jpg) in cantina: gli scaffali contro i muri, la scala, il barile | ![vicino](sotterranei-stato/29-arredata-cantina-vicino.png) la stessa, da vicino |
+| ![scaffali](sotterranei-stato/30-arredata-fra-gli-scaffali.jpg) davanti allo scaffale di fondo, che lo ferma | ![risalito](sotterranei-stato/31-arredata-risalito.jpg) risalito al piano terra: il taglio spento |
+
+Resta la rigenerazione dei modelli con le cantine (T411).

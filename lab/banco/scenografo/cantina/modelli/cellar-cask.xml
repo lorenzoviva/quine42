@@ -1,0 +1,67 @@
+<!-- Botte grande: sculpted by gemini-3.8-flash (step 9), the Artist's vote 3/10 -->
+<sequence values="BWLDISETshk" size="20 20 20" name="Botte grande">
+  <color symbol="W" value="5a341a" name="legno botte"/>
+  <color symbol="L" value="7b4926" name="legno chiaro"/>
+  <color symbol="D" value="381e0e" name="legno scuro culla"/>
+  <color symbol="I" value="363a45" name="cerchio ferro"/>
+  <color symbol="S" value="5c6475" name="ferro lucido"/>
+  <color symbol="E" value="9e6434" name="spina cannella"/>
+  <color symbol="T" value="2c170b" name="foro d'uscita"/>
+  <color symbol="s" hidden="True" name="sagoma botte"/>
+  <color symbol="h" hidden="True" name="pancia botte"/>
+  <color symbol="k" hidden="True" name="maschera"/>
+
+  <!-- Cradle / support trestle resting solidly on z=0 -->
+  <box at="3 2 0" size="14 16 2" color="D"/>
+  <box at="3 4 2" size="14 3 6" color="D"/>
+  <box at="3 13 2" size="14 3 6" color="D"/>
+  <box at="4 2 0" size="12 16 1" color="B"/>
+
+  <!-- Horizontal cask body: slices along Y to build horizontal barrel -->
+  <!-- Wider bulge in the center, tapering toward the ends -->
+  <cylinder at="10 10 2" size="14 14 16" color="s"/>
+  <cylinder at="10 10 3" size="16 16 14" color="s"/>
+  <cylinder at="10 10 4" size="17 17 12" color="s"/>
+  <cylinder at="10 10 6" size="18 18 8" color="h"/>
+
+  <!-- Combine cask volumes into W -->
+  <all in="[hs]" out="W"/>
+
+  <!-- Make sure the barrel and cradle are firmly fused together -->
+  <all in="D B" out="D D" steps="2"/>
+  <all in="D W" out="D D" steps="1"/>
+
+  <!-- Scoop cradle under the barrel sides -->
+  <all in="B/D/B B/W/B" out="*/*/* */D/*" steps="2"/>
+
+  <!-- Recessed flat barrel heads front (y=18) and back (y=1) -->
+  <box at="3 18 3" size="14 1 14" color="B" on="W"/>
+  <box at="3 1 3" size="14 1 14" color="B" on="W"/>
+  <cylinder at="10 18 5" size="12 12 1" color="L"/>
+  <cylinder at="10 1 5" size="12 12 1" color="L"/>
+
+  <!-- Rim of the staves around the heads -->
+  <all in="B/L/B" out="B/W/B"/>
+
+  <!-- Iron hoops encircling the barrel -->
+  <box at="0 4 0" size="20 2 20" color="I" on="W"/>
+  <box at="0 7 0" size="20 1 20" color="I" on="W"/>
+  <box at="0 12 0" size="20 1 20" color="I" on="W"/>
+  <box at="0 15 0" size="20 2 20" color="I" on="W"/>
+
+  <!-- Wooden tap firmly attached to front head -->
+  <box at="9 17 6" size="2 2 2" color="E" on="L"/>
+  <box at="9 18 6" size="2 2 2" color="E"/>
+  <box at="9 18 5" size="2 1 1" color="T"/>
+  <box at="9 18 8" size="2 1 1" color="E"/>
+  <box at="8 18 9" size="4 1 1" color="E"/>
+
+  <!-- Bung on top belly -->
+  <box at="9 9 18" size="2 2 1" color="D" on="W"/>
+  <box at="9 9 19" size="2 2 1" color="E"/>
+
+  <!-- Texturing: highlight bands and stave seams -->
+  <prl in="B I" out="B S" p="0.3" steps="1"/>
+  <prl in="B W" out="B L" p="0.2" steps="1"/>
+  <all in="W/W/W W/W/W" out="*/*/* */D/*" steps="6"/>
+</sequence>

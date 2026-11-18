@@ -1,0 +1,182 @@
+<!-- Rastrelliera delle botti: sculpted by gemini-3.8-flash (step 9), the Artist's vote 5/10 -->
+<sequence values="BWLDKISmefg" size="40 40 40" symmetry="()" name="Rastrelliera delle botti">
+  <!-- Wooden frame & structure -->
+  <color symbol="W" value="5a361e" name="trave scura"/>
+  <color symbol="L" value="7e4c29" name="trave chiara"/>
+  <color symbol="D" value="382112" name="incastro e fessura"/>
+  <!-- Barrels and iron bands -->
+  <color symbol="K" value="8c532b" name="doghe botte"/>
+  <color symbol="I" value="3b3e47" name="cerchio ferro"/>
+  <color symbol="S" value="5c6270" name="ferro chiaro"/>
+  <!-- Wine bottles in gaps -->
+  <color symbol="m" value="234a2e" name="vetro bottiglia scuro"/>
+  <color symbol="e" value="396843" name="vetro bottiglia chiaro"/>
+  <color symbol="f" value="9e2835" name="sigillo ceralacca"/>
+  <color symbol="g" value="c29d62" name="sughero"/>
+
+  <!-- Main Rack Frame: 4 main upright pillars (shallow depth: y=15 to y=25) -->
+  <!-- Left uprights -->
+  <box at="5 15 0" size="4 4 40" color="W"/>
+  <box at="5 23 0" size="4 4 40" color="W"/>
+  <!-- Right uprights -->
+  <box at="31 15 0" size="4 4 40" color="W"/>
+  <box at="31 23 0" size="4 4 40" color="W"/>
+
+  <!-- Horizontal crossbeams (supporting tiers) at heights z=2, z=15, z=28, z=38 -->
+  <!-- Bottom tier beam -->
+  <box at="4 15 2" size="32 3 2" color="W"/>
+  <box at="4 24 2" size="32 3 2" color="W"/>
+  <!-- Middle tier beam -->
+  <box at="4 15 15" size="32 3 2" color="W"/>
+  <box at="4 24 15" size="32 3 2" color="W"/>
+  <!-- Upper tier beam -->
+  <box at="4 15 28" size="32 3 2" color="W"/>
+  <box at="4 24 28" size="32 3 2" color="W"/>
+  <!-- Top crown beam -->
+  <box at="4 15 38" size="32 3 2" color="W"/>
+  <box at="4 24 38" size="32 3 2" color="W"/>
+
+  <!-- Side ties between front and back uprights -->
+  <box at="5 19 2" size="4 4 2" color="W"/>
+  <box at="31 19 2" size="4 4 2" color="W"/>
+  <box at="5 19 15" size="4 4 2" color="W"/>
+  <box at="31 19 15" size="4 4 2" color="W"/>
+  <box at="5 19 28" size="4 4 2" color="W"/>
+  <box at="31 19 28" size="4 4 2" color="W"/>
+  <box at="5 19 38" size="4 4 2" color="W"/>
+  <box at="31 19 38" size="4 4 2" color="W"/>
+
+  <!-- Diagonal back braces against the wall (y=15) -->
+  <line at="5 15 4" to="19 15 14" r="1" color="D"/>
+  <line at="34 15 4" to="21 15 14" r="1" color="D"/>
+  <line at="5 15 17" to="19 15 27" r="1" color="D"/>
+  <line at="34 15 17" to="21 15 27" r="1" color="D"/>
+
+  <!-- Barrels: horizontal cylinders lying along Y (built with ellipsoids flattened into cylinders) -->
+  <!-- Tier 1: Two barrels (left at x=14, right at x=26) resting on z=4 -->
+  <ellipsoid at="14 16 9" size="10 2 10" color="K"/>
+  <ellipsoid at="14 17 9" size="11 2 11" color="K"/>
+  <ellipsoid at="14 18 9" size="11 2 11" color="K"/>
+  <ellipsoid at="14 19 9" size="12 2 12" color="K"/>
+  <ellipsoid at="14 20 9" size="12 2 12" color="K"/>
+  <ellipsoid at="14 21 9" size="11 2 11" color="K"/>
+  <ellipsoid at="14 22 9" size="11 2 11" color="K"/>
+  <ellipsoid at="14 23 9" size="10 2 10" color="K"/>
+
+  <ellipsoid at="26 16 9" size="10 2 10" color="K"/>
+  <ellipsoid at="26 17 9" size="11 2 11" color="K"/>
+  <ellipsoid at="26 18 9" size="11 2 11" color="K"/>
+  <ellipsoid at="26 19 9" size="12 2 12" color="K"/>
+  <ellipsoid at="26 20 9" size="12 2 12" color="K"/>
+  <ellipsoid at="26 21 9" size="11 2 11" color="K"/>
+  <ellipsoid at="26 22 9" size="11 2 11" color="K"/>
+  <ellipsoid at="26 23 9" size="10 2 10" color="K"/>
+
+  <!-- Tier 2: Two barrels resting on z=17 -->
+  <ellipsoid at="14 16 22" size="10 2 10" color="K"/>
+  <ellipsoid at="14 17 22" size="11 2 11" color="K"/>
+  <ellipsoid at="14 18 22" size="11 2 11" color="K"/>
+  <ellipsoid at="14 19 22" size="12 2 12" color="K"/>
+  <ellipsoid at="14 20 22" size="12 2 12" color="K"/>
+  <ellipsoid at="14 21 22" size="11 2 11" color="K"/>
+  <ellipsoid at="14 22 22" size="11 2 11" color="K"/>
+  <ellipsoid at="14 23 22" size="10 2 10" color="K"/>
+
+  <ellipsoid at="26 16 22" size="10 2 10" color="K"/>
+  <ellipsoid at="26 17 22" size="11 2 11" color="K"/>
+  <ellipsoid at="26 18 22" size="11 2 11" color="K"/>
+  <ellipsoid at="26 19 22" size="12 2 12" color="K"/>
+  <ellipsoid at="26 20 22" size="12 2 12" color="K"/>
+  <ellipsoid at="26 21 22" size="11 2 11" color="K"/>
+  <ellipsoid at="26 22 22" size="11 2 11" color="K"/>
+  <ellipsoid at="26 23 22" size="10 2 10" color="K"/>
+
+  <!-- Tier 3: One central barrel resting on z=30 -->
+  <ellipsoid at="20 16 34" size="10 2 10" color="K"/>
+  <ellipsoid at="20 17 34" size="11 2 11" color="K"/>
+  <ellipsoid at="20 18 34" size="11 2 11" color="K"/>
+  <ellipsoid at="20 19 34" size="12 2 12" color="K"/>
+  <ellipsoid at="20 20 34" size="12 2 12" color="K"/>
+  <ellipsoid at="20 21 34" size="11 2 11" color="K"/>
+  <ellipsoid at="20 22 34" size="11 2 11" color="K"/>
+  <ellipsoid at="20 23 34" size="10 2 10" color="K"/>
+
+  <!-- Iron hoops on barrels -->
+  <!-- Tier 1 hoops -->
+  <box at="9 17 4" size="11 1 11" color="I" on="K"/>
+  <box at="9 22 4" size="11 1 11" color="I" on="K"/>
+  <box at="21 17 4" size="11 1 11" color="I" on="K"/>
+  <box at="21 22 4" size="11 1 11" color="I" on="K"/>
+
+  <!-- Tier 2 hoops -->
+  <box at="9 17 17" size="11 1 11" color="I" on="K"/>
+  <box at="9 22 17" size="11 1 11" color="I" on="K"/>
+  <box at="21 17 17" size="11 1 11" color="I" on="K"/>
+  <box at="21 22 17" size="11 1 11" color="I" on="K"/>
+
+  <!-- Tier 3 hoops -->
+  <box at="15 17 29" size="11 1 11" color="I" on="K"/>
+  <box at="15 22 29" size="11 1 11" color="I" on="K"/>
+
+  <!-- Barrel flat faces recessed with dark rings -->
+  <box at="10 15 5" size="9 1 9" color="D" on="K"/>
+  <box at="10 24 5" size="9 1 9" color="D" on="K"/>
+  <box at="22 15 5" size="9 1 9" color="D" on="K"/>
+  <box at="22 24 5" size="9 1 9" color="D" on="K"/>
+  <box at="10 15 18" size="9 1 9" color="D" on="K"/>
+  <box at="10 24 18" size="9 1 9" color="D" on="K"/>
+  <box at="22 15 18" size="9 1 9" color="D" on="K"/>
+  <box at="22 24 18" size="9 1 9" color="D" on="K"/>
+  <box at="16 15 30" size="9 1 9" color="D" on="K"/>
+  <box at="16 24 30" size="9 1 9" color="D" on="K"/>
+
+  <!-- Barrel bungs on top center of each barrel -->
+  <box at="14 19 15" size="1 1 1" color="D"/>
+  <box at="26 19 15" size="1 1 1" color="D"/>
+  <box at="14 19 28" size="1 1 1" color="D"/>
+  <box at="26 19 28" size="1 1 1" color="D"/>
+  <box at="20 19 39" size="1 1 1" color="D"/>
+
+  <!-- Bottles lying horizontally along Y in the gaps -->
+  <!-- Tier 1 center gap: bottle -->
+  <line at="20 16 4" to="20 21 4" r="1" color="m"/>
+  <line at="20 22 4" to="20 23 4" r="0" color="f"/>
+  <box at="20 24 4" size="1 1 1" color="g"/>
+
+  <!-- Tier 2 center gap: two bottles side by side -->
+  <line at="19 16 17" to="19 21 17" r="1" color="m"/>
+  <line at="19 22 17" to="19 23 17" r="0" color="f"/>
+  <box at="19 24 17" size="1 1 1" color="g"/>
+  <line at="21 16 17" to="21 21 17" r="1" color="e"/>
+  <line at="21 22 17" to="21 23 17" r="0" color="g"/>
+  <box at="21 24 17" size="1 1 1" color="f"/>
+
+  <!-- Tier 3 flanks: bottles resting beside the top central barrel -->
+  <!-- Left flank -->
+  <line at="10 16 30" to="10 21 30" r="1" color="m"/>
+  <line at="10 22 30" to="10 23 30" r="0" color="f"/>
+  <box at="10 24 30" size="1 1 1" color="g"/>
+  <line at="12 16 30" to="12 21 30" r="1" color="e"/>
+  <line at="12 22 30" to="12 23 30" r="0" color="g"/>
+  <box at="12 24 30" size="1 1 1" color="f"/>
+  <line at="11 16 32" to="11 21 32" r="1" color="m"/>
+  <line at="11 22 32" to="11 23 32" r="0" color="f"/>
+  <box at="11 24 32" size="1 1 1" color="g"/>
+
+  <!-- Right flank -->
+  <line at="28 16 30" to="28 21 30" r="1" color="m"/>
+  <line at="28 22 30" to="28 23 30" r="0" color="g"/>
+  <box at="28 24 30" size="1 1 1" color="f"/>
+  <line at="30 16 30" to="30 21 30" r="1" color="e"/>
+  <line at="30 22 30" to="30 23 30" r="0" color="f"/>
+  <box at="30 24 30" size="1 1 1" color="g"/>
+  <line at="29 16 32" to="29 21 32" r="1" color="m"/>
+  <line at="29 22 32" to="29 23 32" r="0" color="f"/>
+  <box at="29 24 32" size="1 1 1" color="g"/>
+
+  <!-- Shading and texture highlights -->
+  <prl in="B W" out="B L" p="0.35" steps="1"/>
+  <prl in="W B" out="L B" p="0.2" steps="1"/>
+  <prl in="B I" out="B S" p="0.35" steps="1"/>
+  <prl in="I B" out="S B" p="0.25" steps="1"/>
+</sequence>

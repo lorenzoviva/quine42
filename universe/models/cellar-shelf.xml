@@ -1,0 +1,121 @@
+<!-- Scaffale della cantina: sculpted by gemini-3.8-flash (step 9), the Artist's vote 9/10 -->
+<sequence values="BWDLIGCKYOSb" size="40 40 40" symmetry="()">
+  <color symbol="W" value="5a3a22" name="legno montanti"/>
+  <color symbol="D" value="382212" name="legno scuro mensole"/>
+  <color symbol="L" value="784e2e" name="legno chiaro"/>
+  <color symbol="I" value="303642" name="ferro chiodi e staffe"/>
+  <color symbol="G" value="448855" name="vetro bottiglia"/>
+  <color symbol="C" value="70b090" name="vetro chiaro damigiana"/>
+  <color symbol="K" value="8a3d24" name="coccio vasetto"/>
+  <color symbol="Y" value="e6b840" name="forma formaggio"/>
+  <color symbol="O" value="b87028" name="crosta formaggio"/>
+  <color symbol="S" value="a89470" name="sacco canapa"/>
+  <color symbol="b" value="6e5c40" name="legaccio sacco"/>
+
+  <!-- I 4 montanti verticali poggiano a terra z=0 e salgono fino alla sommità z=39 -->
+  <!-- Montanti posteriori (parete nord, y=4) -->
+  <box at="5 4 0" size="3 3 40" color="W"/>
+  <box at="35 4 0" size="3 3 40" color="W"/>
+  <!-- Montanti anteriori (verso l'osservatore, y=12) -->
+  <box at="5 12 0" size="3 3 40" color="W"/>
+  <box at="35 12 0" size="3 3 40" color="W"/>
+
+  <!-- Cinque robuste mensole orizzontali perfettamente incastrate nei montanti -->
+  <!-- Ripiano 1 (z=2, spessore 2, piano a z=4) -->
+  <box at="20 8 2" size="33 11 2" color="D"/>
+  <!-- Ripiano 2 (z=10, spessore 2, piano a z=12) -->
+  <box at="20 8 10" size="33 11 2" color="D"/>
+  <!-- Ripiano 3 (z=18, spessore 2, piano a z=20) -->
+  <box at="20 8 18" size="33 11 2" color="D"/>
+  <!-- Ripiano 4 (z=26, spessore 2, piano a z=28) -->
+  <box at="20 8 26" size="33 11 2" color="D"/>
+  <!-- Ripiano 5 (z=34, spessore 2, piano a z=36) -->
+  <box at="20 8 34" size="33 11 2" color="D"/>
+
+  <!-- Bordi anteriori rifiniti in legno chiaro su ciascun ripiano -->
+  <box at="20 13 2" size="33 1 2" color="L"/>
+  <box at="20 13 10" size="33 1 2" color="L"/>
+  <box at="20 13 18" size="33 1 2" color="L"/>
+  <box at="20 13 26" size="33 1 2" color="L"/>
+  <box at="20 13 34" size="33 1 2" color="L"/>
+
+  <!-- Barre di rinforzo posteriori contro la parete -->
+  <box at="20 4 3" size="31 1 1" color="W"/>
+  <box at="20 4 11" size="31 1 1" color="W"/>
+  <box at="20 4 19" size="31 1 1" color="W"/>
+  <box at="20 4 27" size="31 1 1" color="W"/>
+  <box at="20 4 35" size="31 1 1" color="W"/>
+
+  <!-- Contenuto del Ripiano 1 (piano a z=4): sacchi pesanti e damigiana -->
+  <!-- Sacco tozzo a sinistra -->
+  <box at="11 8 4" size="7 7 5" color="S"/>
+  <box at="11 8 9" size="5 5 1" color="b"/>
+  <box at="11 8 10" size="5 5 1" color="S"/>
+
+  <!-- Damigiana centrale in vetro chiaro -->
+  <cylinder at="20 8 4" size="8 8 5" color="C"/>
+  <cylinder at="20 8 9" size="2 2 2" color="C"/>
+  <cylinder at="20 8 11" size="2 2 1" color="W"/>
+
+  <!-- Sacco a destra -->
+  <box at="28 8 4" size="6 6 4" color="S"/>
+  <box at="28 8 8" size="4 4 1" color="b"/>
+  <box at="28 8 9" size="4 4 1" color="S"/>
+
+  <!-- Contenuto del Ripiano 2 (piano a z=12): forme di formaggio e vasetti di coccio -->
+  <!-- Forme di formaggio impilate a sinistra -->
+  <cylinder at="11 8 12" size="6 6 3" color="Y"/>
+  <cylinder at="11 8 12" size="6 6 1" color="O" on="Y"/>
+  <cylinder at="11 8 15" size="4 4 2" color="Y"/>
+
+  <!-- Vasetti di conserve in coccio con coperchio -->
+  <cylinder at="18 8 12" size="4 4 4" color="K"/>
+  <cylinder at="18 8 16" size="4 4 1" color="W"/>
+  <cylinder at="23 8 12" size="4 4 3" color="K"/>
+  <cylinder at="23 8 15" size="4 4 1" color="W"/>
+
+  <!-- Forma di formaggio stagionato a destra -->
+  <cylinder at="29 8 12" size="6 6 3" color="O"/>
+  <cylinder at="29 8 13" size="5 5 1" color="Y"/>
+
+  <!-- Contenuto del Ripiano 3 (piano a z=20): serie di bottiglie di vino e barattoli -->
+  <!-- Bottiglie di vetro verde scuro -->
+  <cylinder at="10 8 20" size="3 3 5" color="G"/>
+  <cylinder at="10 8 25" size="1 1 2" color="G"/>
+
+  <cylinder at="14 8 20" size="3 3 5" color="G"/>
+  <cylinder at="14 8 25" size="1 1 2" color="G"/>
+
+  <cylinder at="18 8 20" size="3 3 5" color="G"/>
+  <cylinder at="18 8 25" size="1 1 2" color="G"/>
+
+  <cylinder at="22 8 20" size="3 3 5" color="G"/>
+  <cylinder at="22 8 25" size="1 1 2" color="G"/>
+
+  <!-- Barattoli in terracotta -->
+  <cylinder at="27 8 20" size="4 4 3" color="K"/>
+  <cylinder at="27 8 23" size="3 3 1" color="W"/>
+  <cylinder at="31 8 20" size="3 3 2" color="K"/>
+
+  <!-- Contenuto del Ripiano 4 (piano a z=28): fiasco, forma piccola e caraffa -->
+  <cylinder at="11 8 28" size="6 6 4" color="C"/>
+  <cylinder at="11 8 32" size="2 2 2" color="C"/>
+
+  <cylinder at="18 8 28" size="5 5 3" color="Y"/>
+  <cylinder at="18 8 28" size="5 5 1" color="O" on="Y"/>
+
+  <cylinder at="24 8 28" size="4 4 4" color="K"/>
+
+  <cylinder at="29 8 28" size="3 3 4" color="G"/>
+  <cylinder at="29 8 32" size="1 1 2" color="G"/>
+
+  <!-- Contenuto del Ripiano 5 (piano a z=36): cassetta e recipienti in cima -->
+  <box at="12 8 36" size="6 6 3" color="L"/>
+  <cylinder at="21 8 36" size="5 5 2" color="K"/>
+  <cylinder at="28 8 36" size="4 4 3" color="C"/>
+  <cylinder at="28 8 39" size="1 1 1" color="C"/>
+
+  <!-- Dettagli: chiodi in ferro sui montanti e sfumature del legno -->
+  <prl steps="1" in="B W" out="B I" p="0.04"/>
+  <prl steps="1" in="B D" out="B L" p="0.05"/>
+</sequence>
