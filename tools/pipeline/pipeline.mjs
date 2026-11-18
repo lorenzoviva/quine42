@@ -868,8 +868,9 @@ export function launch(t, run, saveRuns = () => {}, opts = {}) {
   fs.mkdirSync(logsDir, { recursive: true });
   const log = runLog(logsDir, run);
   const fd = fs.openSync(log, 'w');
-  // PIPELINE_TASK: who holds a turn (`turno`) started by the task.
-  const child = spawnFn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, env: { ...process.env, PIPELINE_TASK: t.id } });
+  // PIPELINE_TASK: who holds a turn (`turno`) started by the task. Never through a shell (T425): a detached process has no console
+  // on Windows, and a shell would start the CLI in a new one, visible, that gets its output instead of the log.
+  const child = spawnFn(conf.cmd, args, { cwd: run.dir, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, shell: false, env: { ...process.env, PIPELINE_TASK: t.id } });
   fs.closeSync(fd);
   Object.assign(run, { pid: child.pid, log });
   saveRuns(run.id);
@@ -1302,7 +1303,8 @@ export async function runInTurn(kind, command, { dir = lockDir(), every = Number
   const me = { chi: process.env.PIPELINE_TASK ?? path.basename(process.cwd()), pid: process.pid, comando: command.join(' '), arrivo: Date.now() };
   const inherited = process.env.PIPELINE_TURNO;
   const spawnIt = (stdio, env) => new Promise((resolve) => {
-    const child = spawn(command.join(' '), { stdio, shell: true, env: { ...process.env, ...env } });
+    // Not detached: the shell shares the caller's console (a hidden one under a task), so it opens no window (T425).
+    const child = spawn(command.join(' '), { stdio, shell: true, windowsHide: true, env: { ...process.env, ...env } });
     child.on('error', (e) => { console.error(e.message); resolve(1); });
     child.on('close', (c) => resolve(c ?? 1));
   });
