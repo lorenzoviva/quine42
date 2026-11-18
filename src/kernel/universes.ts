@@ -227,12 +227,20 @@ export const OWED_MAX = 256;
 /** Characters of the saved line: localStorage holds about 5 million per site, shared with the rest of the game. */
 export const OWED_MAX_BYTES = 2 * 1024 * 1024;
 
-/** A write the store has not taken yet: commits, places' plans, branches and merges, in one line (T265). Saved as it is, never a token. */
-export type OwedWrite =
+/**
+ * A write the store has not taken yet: commits, places' plans, branches and merges, in one line (T265). Saved as it is, never a token.
+ * `base` is the head of the universe the write was made on (T421): the store takes it only into the repository that has that commit, so a
+ * line left for a universe that was replaced under the same name (gone to the bin, installed again) never lands in the new one.
+ */
+export type OwedWrite = (
   | { kind: 'commit'; changes: Record<string, string | null>; message: string; author: Author; folded?: number }
   | { kind: 'map'; key: string; data: unknown }
   | { kind: 'branch'; branch: string; files: Record<string, string | null>; message: string; author: Author }
-  | { kind: 'merge'; branch: string; message: string };
+  | { kind: 'merge'; branch: string; message: string }
+) & { base?: string };
+
+/** A commit of the universe as the store names it (`head`, short or whole): what a write's `base` may be. */
+export const COMMIT_ID_RE = /^[0-9a-f]{4,40}$/;
 
 /** One in line: what to write, what the store answered, its size when saved. */
 interface Owed {
@@ -258,6 +266,12 @@ export function owedWrite(v: unknown): OwedWrite | undefined {
   const w = v as Partial<Record<string, unknown>> | undefined;
   if (!w || typeof w !== 'object') return undefined;
   const text = (k: string) => typeof w[k] === 'string';
+  const write = owedKind(w, text);
+  // A line saved before T421 has no base: it goes as it always went.
+  return write && typeof w.base === 'string' && COMMIT_ID_RE.test(w.base) ? { ...write, base: w.base } : write;
+}
+
+function owedKind(w: Partial<Record<string, unknown>>, text: (k: string) => boolean): OwedWrite | undefined {
   if (w.kind === 'commit' && isChanges(w.changes) && text('message') && AUTHORS.has(String(w.author)))
     return { kind: 'commit', changes: w.changes, message: w.message as string, author: w.author as Author };
   if (w.kind === 'map' && text('key') && w.data !== undefined) return { kind: 'map', key: w.key as string, data: w.data };
@@ -419,6 +433,8 @@ export class UniverseClient implements UniverseBackend {
    */
   private owed: Owed[] = [];
   private owedBytes = 0;
+  /** The last head of the main line the store gave (T421): every write entered from now on is made on it, and says so. */
+  private known?: string;
   /** The first in line has used its tries: until it passes, one try each time, not to make the queue wait at every write. */
   private waiting = false;
   private retry?: ReturnType<typeof setTimeout>;
@@ -485,11 +501,19 @@ export class UniverseClient implements UniverseBackend {
   async load(): Promise<UniverseSnapshot> {
     if (this.owed.length) await this.inLine(() => this.writeOwed());
     const r = await fetch(this.url(), { headers: this.headers });
-    return r.json();
+    const snap = (await r.json()) as UniverseSnapshot;
+    this.saw(snap?.head);
+    return snap;
   }
 
   async create(files: FileMap, message: string): Promise<string | null> {
-    return (await this.post('create', { files: this.admitted(files), message })).head ?? null;
+    return this.saw((await this.post('create', { files: this.admitted(files), message })).head) ?? null;
+  }
+
+  /** A head the store gave of the main line: the base of the writes from now on (T421), if it names a commit. Returns it as it came. */
+  private saw<T>(head: T): T {
+    if (typeof head === 'string' && COMMIT_ID_RE.test(head)) this.known = head;
+    return head;
   }
 
   /**
@@ -509,6 +533,8 @@ export class UniverseClient implements UniverseBackend {
    * whose answer is this write's.
    */
   private enter(write: OwedWrite, save = true): Owed {
+    // A write of this page is made on the universe it read; one left by the page before keeps the base it had (or none).
+    if (save && write.base === undefined && this.known) write = { ...write, base: this.known };
     const bytes = JSON.stringify(write).length;
     const full = this.owed.length >= OWED_MAX || this.owedBytes + bytes > OWED_MAX_BYTES;
     const into = full ? this.foldTarget(write) : undefined;
@@ -598,11 +624,12 @@ export class UniverseClient implements UniverseBackend {
   /** One write, as the store wants it. */
   private async send(o: Owed): Promise<void> {
     const w = o.write;
-    if (w.kind === 'commit') o.head = (await this.post('commit', { changes: w.changes, message: w.message, author: w.author })).head ?? null;
-    else if (w.kind === 'branch') o.head = (await this.post('branch', { branch: w.branch, files: w.files, message: w.message, author: w.author })).head ?? null;
-    else if (w.kind === 'merge') await this.post('merge', { branch: w.branch, message: w.message });
+    const base = w.base ? { base: w.base } : {};
+    if (w.kind === 'commit') o.head = this.saw((await this.post('commit', { changes: w.changes, message: w.message, author: w.author, ...base })).head) ?? null;
+    else if (w.kind === 'branch') o.head = (await this.post('branch', { branch: w.branch, files: w.files, message: w.message, author: w.author, ...base })).head ?? null;
+    else if (w.kind === 'merge') this.saw((await this.post('merge', { branch: w.branch, message: w.message, ...base })).head);
     else {
-      const r = await fetch(this.url(`map/${encodeURIComponent(w.key)}`), { method: 'PUT', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify(w.data) });
+      const r = await fetch(this.url(`map/${encodeURIComponent(w.key)}${w.base ? `?base=${w.base}` : ''}`), { method: 'PUT', headers: { 'Content-Type': 'application/json', ...this.headers }, body: JSON.stringify(w.data) });
       if (!r.ok) throw new StoreAnswer((await r.json().catch(() => ({}))).error ?? `HTTP ${r.status}`, r.status);
     }
   }
@@ -667,13 +694,16 @@ export class UniverseClient implements UniverseBackend {
 
   async checkout(id: string): Promise<FileMap | null> {
     await this.afterCommits();
-    return (await this.post('checkout', { id })).files ?? null;
+    const r = await this.post('checkout', { id });
+    this.saw(r.head);
+    return r.files ?? null;
   }
 
   async reset(): Promise<void> {
     await this.inLine(() => this.writeOwed());
     await this.post('reset', {});
-    // The universe went to the bin: what was still owed to it has nowhere to go.
+    // The universe went to the bin: what was still owed to it has nowhere to go, and the one born after has other commits.
+    this.known = undefined;
     this.owed = [];
     this.owedBytes = 0;
     this.waiting = false;
