@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 18/11/2026, epoca 511 (claude). Crediti: vedi `stato`.
+Aggiornato il 18/11/2026, epoca 519 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,7 +34,7 @@ Aggiornato il 18/11/2026, epoca 511 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
-- **Autore 18/11 18:21: non fermare niente ora.** Prima T425 (log del generatore) integrato; poi, **appena orichalcum finisce** la rigenerazione, `generatore spegni` e `ferma --dopo`: l’autore riavvia la pipeline col codice di T425, così i log dei prossimi universi rigenerati (voti e prezzi) si scrivono. Non interrompere orichalcum.
+- **Autore 18/11 18:21: non fermare niente ora.** T425 integrato (`c53c9854`, 18/11 18:42; suite pipeline 167/167 e typecheck verdi); ora, **appena orichalcum finisce** la rigenerazione, `generatore spegni` e `ferma --dopo`: l’autore riavvia la pipeline col codice di T425, così i log dei prossimi universi rigenerati (voti e prezzi) si scrivono. Non interrompere orichalcum.
 - Autore assente fino al 18/11 18:30: autonomia; integrare e lanciare la catena senza aspettare.
 - Tetti dell'autore (3 Claude, 1 agy); finestra 5h protetta dallo script; nessun ripiego; Argon solo task piccoli; Fable a regime normale (autore 14/11): niente spostamenti liberi, solo i task più difficili.
 - Domande per intero in chat con raccomandazione. Finestra 5h con l'ora del reset. Sforzo: qualità prima del tempo. Mai `git commit -a` nel base.
