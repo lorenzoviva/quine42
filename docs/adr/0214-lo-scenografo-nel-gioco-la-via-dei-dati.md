@@ -24,7 +24,7 @@ rigenerazione degli universi (T411) abbia case arredate.
    ciò che il kernel non sa usare torna una volta col motivo (regola 2). Usa il modello del Concilio (`ai.textModel`): la risposta è una
    scelta fra pochi id, non un programma.
 2. **Il catalogo** è la libreria della classe `furniture` com'è indossata ora (`Forms.furniture`: non i mobili isolati, mai quelli della
-   corona, `corona-*`, che non sono cose del mondo), al più 32; ogni mobile è il suo programma col primo seme, ritagliato a ciò che disegna e
+   corona, `corona-*`, che non sono cose del mondo), in ordine di id (lo stesso su ogni macchina: le regole si leggono su di lui), al più 32; ogni mobile è il suo programma col primo seme, ritagliato a ciò che disegna e
    ricampionato alla densità dell'edificio (`pieceOf`: un mobile di una casella a 20 resta una casella in un edificio a 16), come il banco.
 3. **Una risposta per tipo, come i modelli**: le regole stanno sulla voce dell'edificio in `models/index.json` (`interior: { rules, author }`),
    scritte da un commit del Concilio (`Kernel.setInterior`, `models/` è suo, ADR-0109), senza una carta loro: l'interno è parte del tipo, e
