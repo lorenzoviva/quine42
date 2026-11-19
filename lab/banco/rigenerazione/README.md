@@ -66,7 +66,7 @@ npm run genera -- neapolis --rigenera modelli --giro t436 --tetto 10 --universi 
   del Fabbro) e la fa indossare agli 11 mestieri `npc.*` al posto di `person`, il generico del kernel che la rigenerazione non tocca; poi lo
   Scultore la riscolpisce («Cittadino di Neapolis (anni Novanta)», giacca, pantaloni, scarpe; il colore principale è quello di ogni mestiere).
 - **`porto`** (i magazzini di 7 × 5 del Porto commerciale e del Molo Vecchio): il Cartografo ha fallito sette volte (gli edifici 7 × 7 trovavano
-  posto per uno solo: la riva di (1, 2) ha nove righe di terra e il bordo del luogo resta sabbia anche sotto una regola) e ha riuscito
+  posto per uno solo: la riva di (1, 2) ha nove righe di terra e il bordo del luogo resta sabbia anche sotto una regola) ed è riuscito
   all'ottavo, il secondo col prompt che dice il bordo (ADR-0223): i magazzini 7 × 7 con l'anello anche sulla banchina e sulla strada del bordo,
   due per luogo. Il programma: `neapolis-porto.json`. Prima di riprovarlo, un programma scritto a mano provato con
   `piano-rigenerazione.ts --prova porto <file>` aveva mostrato che due 7 × 7 ci stanno.
