@@ -2,6 +2,11 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
+- **D65 (T185 — I nomi dei tre nuovi universi: Far West, Pirati, Spazio):** né T184 né T432 hanno proposto nomi nuovi. Proposte in latino e greco antico (stile di T153, cartelle in `universes/`):
+  1. **Far West (`western`, pronto a partire sul generatore appena scelto il nome — ADR-0217: il nome entra nei piani e non si cambia dopo):** `aridus` *(raccomandata: l'arido, la terra secca)*, `deserta`, `pulvis`, `occidens` (alternative: `mesa`, `polvere`, `frontiera`, `sierra`, `canyon`).
+  2. **Pirati (`pirates`, dopo i task del kernel di T432/D64):** `thalassa` *(raccomandata: il mare)*, `pelagos`, `naufragium`, `aequor`.
+  3. **Spazio (`space`, dopo i task del kernel di T432/D64):** `aether` *(raccomandata: il cielo più alto)*, `kosmos`, `astra`, `vacuum`.
+
 - **D64 (T432 — L'acqua dei Pirati e lo spazio: nuoto, isole, pianeti, ordine, `docs/design/acqua-spazio.md` e `docs/pipeline/domande/T432.md`):**
   1. **Dove si nuota:** A1 **solo nei mondi la cui natura lo dice (`universe.json → nature`)** *(raccomandata: Pirati e pianeti con il mare; Valmora resta coi ponti e i fossati che fermano)*; oppure A2 in ogni universo nuovo dalla Genesi.
   2. **La regola 10 con le isole:** B1 **le isole sono connesse a nuoto entro 4 luoghi dall'atlante** *(raccomandata: ogni riva camminabile è un approdo, niente strade scavate sull'acqua)*; oppure B2 il mare resta un muro con una barca su ogni approdo.
