@@ -304,6 +304,18 @@ const needOf = (tiles: readonly number[] | undefined): number => Math.ceil(Math.
 const holds = (lot: { w: number; h: number } | undefined, need: number): boolean => !!lot && Math.max(lot.w, lot.h) >= STRUCTURE_LOT && Math.min(lot.w, lot.h) >= need;
 
 /**
+ * Whether a place cut again loses a structure of its plan (T435): one its lots hold now that the new lots would not hold, or one that stands on a
+ * lot now and would stand on none. Every lot gives a structure of the plan, largest first (`lotsOf`), even one that does not hold it: so the
+ * start of sidera showed its two Large on houses of 5 × 4 at 20, which hold neither, and the houses grown to 7 × 7 found no room on its draft.
+ * `needs`: the tiles each structure wants on its lot, now and after; the lots largest first, as `structureLotSizes` gives them out.
+ */
+export function losesStructure(needs: ReadonlyArray<{ now: number; after: number }>, now: ReadonlyArray<{ w: number; h: number }>, cut: ReadonlyArray<{ w: number; h: number }>): boolean {
+  const held = (lots: ReadonlyArray<{ w: number; h: number }>, when: 'now' | 'after') => needs.filter((n, i) => holds(lots[i], n[when])).length;
+  const standing = (lots: ReadonlyArray<unknown>) => Math.min(needs.length, lots.length);
+  return held(cut, 'after') < held(now, 'now') || standing(cut) < standing(now);
+}
+
+/**
  * What to do to the lots (see above): for each environment with a place where a structure the regeneration sculpts at 16 would not stand on its
  * lot, the first way that loses no structure of its places and passes the validator; then the density of each structure, 20 where a lot that wears
  * it still would not hold it. `seedLayouts` are the seed's environments of today.
@@ -339,12 +351,19 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
     const now = list.map((p) => ({ p, lots: k.structureLotSizes(p.cx, p.cy, p.plan) }));
     // Only where a structure the regeneration sculpts (a plan's own, or a common house when they are sculpted again) would not stand on its lot
     // at 16, and never twice: an environment a run already cut again keeps what it got.
-    const touched = !done.has(`ambiente:${id}`) && now.some(({ p, lots }) => wearing(p, lots).some((s) => growing.has(s.id) && !holds(s.lot, needOf(tilesOf(S, s.size)))));
+    // A structure of a plan that stands on no lot (T435) is one that does not stand on its lot either.
+    const lotless = (p: PlannedPlace, lots: ReadonlyArray<unknown>) => (p.plan.structures ?? []).map(readStructure).some((s, i) => !lots[i] && growing.has(k.structureModelOf(s.concept, s.size)));
+    const touched = !done.has(`ambiente:${id}`) && now.some(({ p, lots }) => lotless(p, lots) || wearing(p, lots).some((s) => growing.has(s.id) && !holds(s.lot, needOf(tilesOf(S, s.size)))));
     if (!touched) {
       for (const { p, lots } of now) after.set(`${p.cx},${p.cy}`, lots);
       continue;
     }
     const own = (p: PlannedPlace, lots: Array<{ w: number; h: number }>, tiles: typeof tilesNow) => (p.plan.structures ?? []).map(readStructure).filter((s, i) => holds(lots[i], needOf(tiles(k.structureModelOf(s.concept, s.size), s.size)))).length;
+    const needs = (p: PlannedPlace) =>
+      (p.plan.structures ?? []).map(readStructure).map((s) => {
+        const model = k.structureModelOf(s.concept, s.size);
+        return { now: needOf(tilesNow(model, s.size)), after: needOf(tilesAfter(model, s.size)) };
+      });
     const before = now.reduce((n, { p, lots }) => n + own(p, lots, tilesNow), 0);
     const total = list.reduce((n, p) => n + (p.plan.structures?.length ?? 0), 0);
     const current = k.content.layouts[id].program;
@@ -367,8 +386,8 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
         }
       }
       const cut = list.map((p) => ({ p, lots: k.structureLotSizes(p.cx, p.cy, { ...p.plan, vpt: STRUCTURE_VPT }, c.program) }));
-      // No place loses a structure that its lots hold now.
-      const lost = cut.find(({ p, lots }, i) => own(p, lots, tilesAfter) < own(p, now[i].lots, tilesNow));
+      // No place loses a structure that its lots hold now, nor one that stands on a lot now (T435).
+      const lost = cut.find(({ p, lots }, i) => losesStructure(needs(p), now[i].lots, lots));
       if (lost) {
         why.push(`${c.how}: «${lost.p.plan.place?.name ?? `${lost.p.cx},${lost.p.cy}`}» perderebbe una struttura`);
         continue;

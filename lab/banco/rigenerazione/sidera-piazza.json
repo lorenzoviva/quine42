@@ -1,0 +1,423 @@
+{
+ "about": "T435: l'ambiente piazza_neon di sidera e le bozze dei suoi due luoghi. before: il programma della Genesi (case 5 × 4); stretched: allargato di 20/16 dalla rigenerazione (T411), che su (0,0) non trova posto; after: con la riserva di T435, una coppia di case 7 × 7 dove le prime non entrano.",
+ "seed": 2177,
+ "pathCode": "p",
+ "palette": {
+  "?": {
+   "name": "vuoto",
+   "color": "#2a0612",
+   "solid": false,
+   "layer": "ground"
+  },
+  "g": {
+   "name": "asfalto bagnato",
+   "color": "#3b4250",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1
+  },
+  "p": {
+   "name": "passerella",
+   "color": "#8a8f9c",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1.15
+  },
+  "t": {
+   "name": "boschetto di vetro",
+   "color": "#3fb8a8",
+   "solid": true,
+   "layer": "vegetation"
+  },
+  "w": {
+   "name": "canale",
+   "color": "#1f4f73",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "r": {
+   "name": "speroni di cristallo",
+   "color": "#8c6ad8",
+   "solid": true,
+   "layer": "rock"
+  },
+  "h": {
+   "name": "paratia",
+   "color": "#596273",
+   "solid": true,
+   "layer": "wall"
+  },
+  "f": {
+   "name": "pavimento grigliato",
+   "color": "#6f7787",
+   "solid": false,
+   "layer": "floor",
+   "indoor": true
+  },
+  "d": {
+   "name": "portello",
+   "color": "#f0b43c",
+   "solid": false,
+   "layer": "door"
+  },
+  "m": {
+   "name": "vasca idroponica",
+   "color": "#4f9a52",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.8
+  },
+  "s": {
+   "name": "sabbia vitrea",
+   "color": "#c9b98e",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.85
+  },
+  "j": {
+   "name": "felceto",
+   "color": "#2e7d5b",
+   "solid": true,
+   "layer": "vegetation"
+  },
+  "o": {
+   "name": "mare",
+   "color": "#173b63",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "k": {
+   "name": "rupe di basalto",
+   "color": "#2c2f36",
+   "solid": true,
+   "layer": "rock"
+  },
+  "n": {
+   "name": "brina",
+   "color": "#cfe6f2",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.7
+  },
+  "b": {
+   "name": "muro di cemento",
+   "color": "#7b7f86",
+   "solid": true,
+   "layer": "wall"
+  },
+  "q": {
+   "name": "vetro della cupola",
+   "color": "#9fd8e8",
+   "solid": true,
+   "layer": "wall"
+  },
+  "a": {
+   "name": "lamiera di relitto",
+   "color": "#8a5a3c",
+   "solid": true,
+   "layer": "wall"
+  },
+  "c": {
+   "name": "recinzione di rete",
+   "color": "#9aa3ad",
+   "solid": true,
+   "layer": "wall"
+  },
+  "z": {
+   "name": "ponte di grata",
+   "color": "#a3a9b3",
+   "solid": false,
+   "layer": "floor"
+  },
+  "l": {
+   "name": "piastrelle dei laboratori",
+   "color": "#d9dee6",
+   "solid": false,
+   "layer": "floor",
+   "indoor": true
+  },
+  "v": {
+   "name": "canale di plasma",
+   "color": "#5fd3ff",
+   "solid": true,
+   "layer": "liquid"
+  },
+  "e": {
+   "name": "pista",
+   "color": "#5d6470",
+   "solid": false,
+   "layer": "ground",
+   "speed": 1.1
+  },
+  "u": {
+   "name": "vasca seminata",
+   "color": "#3f7a5a",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.8
+  },
+  "y": {
+   "name": "vasca in frutto",
+   "color": "#c9a54a",
+   "solid": false,
+   "layer": "ground",
+   "speed": 0.7
+  }
+ },
+ "before": {
+  "type": "sequence",
+  "children": [
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "[tjr]",
+      "out": "g",
+      "p": 0.9
+     },
+     {
+      "in": "[wo]",
+      "out": "g",
+      "p": 0.6
+     }
+    ]
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns]",
+      "out": "hhhhh/hfffh/hfffh/hhdhh"
+     }
+    ],
+    "steps": 3
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gp][gp][gp]/[gp][gp][gp]/[gp][gp][gp]",
+      "out": "***/*b*/***"
+     }
+    ],
+    "steps": 4
+   },
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "g",
+      "out": "p",
+      "p": 0.45
+     }
+    ]
+   },
+   {
+    "type": "path",
+    "from": "d",
+    "to": "p",
+    "on": "gs",
+    "color": "p",
+    "steps": 3
+   }
+  ]
+ },
+ "stretched": {
+  "type": "sequence",
+  "children": [
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "[tjr]",
+      "out": "g",
+      "p": 0.9
+     },
+     {
+      "in": "[wo]",
+      "out": "g",
+      "p": 0.6
+     }
+    ]
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]",
+      "out": "hhhhhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhdhhh"
+     }
+    ],
+    "steps": 2
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gp][gp][gp]/[gp][gp][gp]/[gp][gp][gp]",
+      "out": "***/*b*/***"
+     }
+    ],
+    "steps": 4
+   },
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "g",
+      "out": "p",
+      "p": 0.45
+     }
+    ]
+   },
+   {
+    "type": "path",
+    "from": "d",
+    "to": "p",
+    "on": "gs",
+    "color": "p",
+    "steps": 3
+   }
+  ]
+ },
+ "after": {
+  "type": "sequence",
+  "children": [
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "[tjr]",
+      "out": "g",
+      "p": 0.9
+     },
+     {
+      "in": "[wo]",
+      "out": "g",
+      "p": 0.6
+     }
+    ]
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]/[gpns][gpns][gpns][gpns][gpns][gpns][gpns]",
+      "out": "hhhhhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhdhhh"
+     }
+    ],
+    "steps": 2
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[?gptwrmsjoknzveuy][?gptwrmsjoknzveuy][?gptwrmsjoknzveuy][?gptwrmsjoknzveuy][?gptwrmsjoknzveuy][?gptwrmsjoknzveuy][?gptwrmsjoknzveuy]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw][gpnsw]/[?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy][?gpmsneuy]",
+      "out": "*******/hhhdhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhhhhh/*******/hhhhhhh/hfffffh/hfffffh/hfffffh/hfffffh/hfffffh/hhhdhhh/*******"
+     }
+    ],
+    "steps": 1
+   },
+   {
+    "type": "one",
+    "rules": [
+     {
+      "in": "[gp][gp][gp]/[gp][gp][gp]/[gp][gp][gp]",
+      "out": "***/*b*/***"
+     }
+    ],
+    "steps": 4
+   },
+   {
+    "type": "prl",
+    "rules": [
+     {
+      "in": "g",
+      "out": "p",
+      "p": 0.45
+     }
+    ]
+   },
+   {
+    "type": "path",
+    "from": "d",
+    "to": "p",
+    "on": "gs",
+    "color": "p",
+    "steps": 3
+   }
+  ]
+ },
+ "places": [
+  {
+   "cx": 0,
+   "cy": 0,
+   "layout": "piazza_neon",
+   "name": "Piazza dei Viadotti",
+   "structures": [
+    {
+     "concept": "bar orbitale",
+     "size": "large"
+    },
+    {
+     "concept": "santuario della luce",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "pppgggggggggpppwwg",
+    "pppgggggggggpppwwt",
+    "pppgggggggggpppwwg",
+    "gggtgggggggwpppwwg",
+    "ggggggggggggpppwwg",
+    "gwggwgggggggpppwwg",
+    "gggggggggggggppwwg",
+    "gggggggwgggggpwwwg",
+    "gggggggggggggpwwgg",
+    "ggwggggggggggpwwgg",
+    "wggggggggwgggwwwgg",
+    "gwgggggggggggwwpwg",
+    "ggwgggwgggggwwwpgg",
+    "ggggggggggggwwppgg",
+    "gggggggggggwwwppgg",
+    "gggwggggggwwwggpgg",
+    "gggggggggwwwwggppg",
+    "ggggggggwwwwgggppg"
+   ]
+  },
+  {
+   "cx": -1,
+   "cy": 1,
+   "layout": "piazza_neon",
+   "name": "Fermata del Treno Sospeso",
+   "structures": [
+    {
+     "concept": "santuario quantico",
+     "size": "large"
+    }
+   ],
+   "vpt": 16,
+   "draft": [
+    "wwwwgggggggggggggg",
+    "wwwwwwwwgggggggggg",
+    "wwwwwwwwwwwwwwwwgg",
+    "wwwwwwwwwwwwwwwwww",
+    "gggggwwwwwwwwwwwww",
+    "gggggggggggwggwwww",
+    "gggggwgggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "ggggggggggggggggwg",
+    "gggggggggggggggggg",
+    "gggggggggggggggggg",
+    "gggggggggggggwgggg",
+    "ggggwggggwgggggggg",
+    "gggggwgggggggggggg",
+    "gggggwgwgggggggggg",
+    "ppgggggggggggggggg",
+    "pppggggggggggggggg"
+   ]
+  }
+ ]
+}
