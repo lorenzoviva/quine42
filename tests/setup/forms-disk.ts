@@ -10,19 +10,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sharedForms, type FormBacking, type FormResult } from '../../src/kernel/forms';
 
-/** What a result is made by: the engine, its random numbers (`src/mj/` imports them from the kernel) and `runForm`. */
+/**
+ * What a result is made by: the engine, its random numbers (`src/mj/` imports them from the kernel), `runForm`, the furnishing it does for
+ * a building with an interior (`furnish.ts`, `interior.ts`) and how a result is written here (this file: T431 added `furniture`).
+ */
 export function engineVersion(root = process.cwd()): string {
   const dir = path.join(root, 'src/mj');
-  const sources = [...fs.readdirSync(dir).sort().map((f) => path.join(dir, f)), path.join(root, 'src/kernel/rng.ts'), path.join(root, 'src/kernel/forms.ts')];
+  const kernel = ['rng.ts', 'forms.ts', 'furnish.ts', 'interior.ts'].map((f) => path.join(root, 'src/kernel', f));
+  const sources = [...fs.readdirSync(dir).sort().map((f) => path.join(dir, f)), ...kernel, path.join(root, 'tests/setup/forms-disk.ts')];
   const hash = crypto.createHash('sha256');
-  for (const f of sources) hash.update(fs.readFileSync(f));
+  // A file that is not there (a root made by a test) adds its name only.
+  for (const f of sources) hash.update(fs.existsSync(f) ? fs.readFileSync(f) : f);
   return hash.digest('hex').slice(0, 24);
 }
 
 /** A length, the result without its cells as JSON, the cells. */
 function encode(r: FormResult): Buffer {
   const { X, Y, Z, alphabet } = r.grid;
-  const head = Buffer.from(JSON.stringify({ X, Y, Z, alphabet, palette: r.palette, actions: r.actions, animations: r.animations }));
+  const head = Buffer.from(JSON.stringify({ X, Y, Z, alphabet, palette: r.palette, actions: r.actions, animations: r.animations, ...(r.furniture ? { furniture: r.furniture } : {}) }));
   const size = Buffer.alloc(4);
   size.writeUInt32LE(head.length);
   return Buffer.concat([size, head, r.grid.cells]);
@@ -34,10 +39,10 @@ function decode(b: Buffer): FormResult | undefined {
   const end = 4 + b.readUInt32LE(0);
   if (end > b.length) return undefined;
   try {
-    const { X, Y, Z, alphabet, palette, actions, animations } = JSON.parse(b.toString('utf8', 4, end));
+    const { X, Y, Z, alphabet, palette, actions, animations, furniture } = JSON.parse(b.toString('utf8', 4, end));
     if (X * Y * Z !== b.length - end) return undefined;
     // A copy: the buffer of a small file may be shared with others in node's pool.
-    return { grid: { X, Y, Z, alphabet, cells: new Uint8Array(b.subarray(end)) }, palette, actions, animations };
+    return { grid: { X, Y, Z, alphabet, cells: new Uint8Array(b.subarray(end)) }, palette, actions, animations, ...(furniture ? { furniture } : {}) };
   } catch {
     return undefined;
   }

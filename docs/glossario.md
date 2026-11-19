@@ -1187,6 +1187,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «arredo della cantina» per le regole (l'arredo è ciò che il kernel posa), «seminterrato»
 - **Fermo**: il valore `cellar` di `rules[].room`; gli id dei modelli `cellar-shelf` e `cellar-rack`.
 
+### Piano del viandante
+- **Inglese**: `onFloor`, `feetNow`, `FLOOR_UNDER`, `FLOOR_ABOVE`, `furnitureAt`, `PieceBox`, `FURNISHING`
+- **Definizione**: il piano su cui stanno i piedi del viandante, da cui `E`, il tasto destro e il cursore scelgono ciò che trovano: una cosa la cui altezza sta da mezza casella sotto i piedi a meno di 1,5 sopra (il piano di sotto e quello di sopra no), una struttura su ogni suo piano; i mobili che il kernel ha posato in un edificio si trovano dalla loro scatola nella griglia (T431).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/interior.ts`, `src/kernel/forms.ts`, `src/render/renderer.ts`
+- **Da non usare**: «livello» (è il rilievo), «quota»
+- **Fermo**: nessuno.
+
 ### Attore
 - **Inglese**: `Actor`, `ActorConfig`, `repairActor`, `attore`, `ACTOR_MODEL`
 - **Definizione**: l'agente, se il master lo accende, che recita gli individui dalle loro schede.

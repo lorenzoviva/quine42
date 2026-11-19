@@ -20,6 +20,7 @@ import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
 import { furnishForm, furnitureOf, INTERIOR_LIMITS, interiorText, readInterior, type InteriorData, type InteriorSpec } from './furnish';
+import type { PieceBox } from './interior';
 
 export const MODELS_DIR = 'models/';
 export const MODELS_INDEX = 'models/index.json';
@@ -151,6 +152,11 @@ export interface FormResult {
   meshes?: unknown;
   /** The runner let go of the meshes, to stay within its limit (ADR-0108): the rest is all here, and asked again they come back. */
   meshesGone?: boolean;
+  /**
+   * A furnished building (T410): every piece of furniture placed, its library id and its box in the grid (T431), so the cursor finds a piece
+   * that is voxels of the building and not an entity, on the storey one stands on.
+   */
+  furniture?: Array<{ id: string; box: PieceBox }>;
 }
 
 export interface FormRunner {
@@ -800,6 +806,7 @@ function sealed(r: FormResult): FormResult {
     palette: Object.freeze(palette),
     actions: Object.freeze(r.actions.map((a) => Object.freeze({ ...a }))) as FormResult['actions'],
     animations: Object.freeze([...r.animations]) as string[],
+    ...(r.furniture ? { furniture: Object.freeze(r.furniture.map((p) => Object.freeze({ id: p.id, box: Object.freeze([...p.box]) as PieceBox }))) as FormResult['furniture'] } : {}),
   });
 }
 
@@ -895,7 +902,7 @@ export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof
   };
   // Its interior (T410): placed on the building only when the building is whole; what cannot be placed leaves it as built.
   const furnished = q.interior && r.finished ? furnishForm(q.interior, out, q.vpt, m.actions) : undefined;
-  return furnished ? { ...out, grid: furnished.grid, palette: furnished.palette } : out;
+  return furnished ? { ...out, grid: furnished.grid, palette: furnished.palette, furniture: (furnished.items ?? []).map((p) => ({ id: p.id, box: p.box })) } : out;
 }
 
 export class Forms {

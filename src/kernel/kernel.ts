@@ -426,6 +426,15 @@ export const INDOOR_R = 0.15;
 /** How far (tiles) the middle of what goes indoors stays from the cellar's stairwell (T417), and a solid thing from a door and from it (T429). */
 const WELL_KEEP = 0.75;
 const DOOR_KEEP = 1.2;
+/**
+ * What `E`, the right button and the cursor find is on the storey one stands on (T431): its height from this much under the feet (tiles)
+ * to less than `FLOOR_ABOVE` over them, a table's top and a high shelf with it; the storey under and the one over (a storey is
+ * `PARTS.storey.clear` high, 1.9 tiles) not.
+ */
+const FLOOR_UNDER = 0.5;
+const FLOOR_ABOVE = 1.5;
+/** How high (tiles over the floor) the first treads of a stair go, that nothing solid put indoors stands at the foot of (T431). */
+const TREAD_TOP = 1;
 /** How far above its height (tiles) a thing lying on furniture still finds its shelf: the rounding of a save, far less than a voxel. */
 const REST_SLACK = 0.01;
 /** The option of a tile's menu that puts down what is carried (T292): in `moving.ts`, so that the server reads it without the kernel. */
@@ -2988,7 +2997,8 @@ export class Kernel {
    * no obstacle (T281: the same `rampBlocks`, on every column of the window, not one in two). `wellKeep` is how far (tiles) a point's middle
    * stays from the cellar's stairwell: three quarters of a tile, more for a solid thing (T429).
    */
-  private interiorPoints(sid: Id, wellKeep = WELL_KEEP): Array<{ x: number; y: number }> {
+  /** `stairKeep` (T431, tiles): how far a middle stays from the first treads of a stair up; 0 (people, what does not stop a body) not at all. */
+  private interiorPoints(sid: Id, wellKeep = WELL_KEEP, stairKeep = 0): Array<{ x: number; y: number }> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
     const p = this.ecs.get(sid, 'pos');
@@ -3000,10 +3010,38 @@ export class Kernel {
     const { foot, floor, block, hole, levels } = ground;
     const step = stepOf(f.vpt);
     // The cellar's stairwell (T417): the columns over the cellar not solid at the ground. Nothing stands on its top tread nor beside it, where
-    // it would hang over the way down: a thing's middle stays three quarters of a tile from it (`wellKeep`).
+    // it would hang over the way down: a thing's middle stays three quarters of a tile from it (`wellKeep`), a solid thing more (`DOOR_KEEP`).
     const well: number[] = [];
     if (hole) for (let i = 0; i < X * Y; i++) if (hole[i] && !solidAtGround(levels, i, f.base, step)) well.push(i);
-    const keep = wellKeep * f.vpt;
+    // And, for a solid thing (`stairKeep`), the first treads of a stair up (T431): a floor a body reaches more than a step over the ground
+    // floor and no more than `TREAD_TOP`. A thing at the foot of the stair, a counter turned across it, closed the way from the door to the
+    // storey above. Not for people: where they stand and work stops nobody for long.
+    const treads: number[] = [];
+    const treadTop = TREAD_TOP * f.vpt;
+    if (stairKeep > 0)
+      for (let i = 0; i < X * Y; i++)
+        for (let l = levels.start[i]; l < levels.start[i + 1]; l++) {
+          const up = levels.z[l] - f.base;
+          if (!levels.block[l] && up > step && up <= treadTop) {
+            treads.push(i);
+            break;
+          }
+        }
+    // The columns a middle is too near them for: marked once, a stair has hundreds of columns and a large building thousands of windows.
+    const nearWell = new Uint8Array(X * Y);
+    const mark = (cols: number[], keep: number) => {
+      const K = Math.ceil(keep);
+      for (const i of cols) {
+        const wx = i % X, wy = Math.floor(i / X);
+        for (let dy = -K; dy <= K; dy++)
+          for (let dx = -K; dx <= K; dx++) {
+            const x = wx + dx, y = wy + dy;
+            if (x >= 0 && y >= 0 && x < X && y < Y && Math.hypot(dx, dy) < keep) nearWell[x + y * X] = 1;
+          }
+      }
+    };
+    mark(well, wellKeep * f.vpt);
+    mark(treads, stairKeep * f.vpt);
     // A column where nothing goes: something at body height, no floor of the model, a floor higher than a step (what goes
     // indoors does not go up the stairs), a floor where a body does not stand (a ceiling too low, out of reach; over a cellar
     // the stairwell, T52b). Counted in a summed table, so a window is clear when it has none.
@@ -3022,7 +3060,7 @@ export class Kernel {
     for (let vy = W; vy < Y - W; vy += 4)
       for (let vx = W; vx < X - W; vx += 4) {
         if (badIn(vx - W, vy - W, vx + W, vy + W)) continue;
-        if (well.some((i) => Math.hypot((i % X) - vx, Math.floor(i / X) - vy) < keep)) continue;
+        if (nearWell[vx + vy * X]) continue;
         // And what `free` asks besides: no two neighbouring floors more than a step apart, measured as it measures (at the ground).
         if (rampBlocks(f, ground, local(vx - W, X), local(vy - W, Y), local(vx + W, X), local(vy + W, Y), f.base)) continue;
         const lx = local(vx, X), lz = local(vy, Y);
@@ -3114,6 +3152,7 @@ export class Kernel {
       if (down.length) {
         const q = down[hash32(sid, down.length, this.ecs.query('pos').length) % down.length];
         const id = spawn(q.x, q.y);
+        if (solid && id !== undefined) this.squareIndoors(id);
         const pos = id !== undefined ? this.ecs.get(id, 'pos') : undefined;
         if (pos) pos.z = q.z;
         // Its floor's height goes with it to the clients, whose mirror has no plan (ENTITY_PARTS): there it stands down there too.
@@ -3124,7 +3163,7 @@ export class Kernel {
     // A solid thing (a counter, a chest) stays away from the cellar's stairwell as from a door (T429): with its middle three quarters of a
     // tile from it, a thing a tile long could still close the way off the top tread.
     const keep = solid ? DOOR_KEEP : WELL_KEEP;
-    const inside = this.interiorPoints(sid, keep);
+    const inside = this.interiorPoints(sid, keep, solid ? DOOR_KEEP : 0);
     const roomyOf = (points: Array<{ x: number; y: number }>, near = taken) =>
       points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > DOOR_KEEP)));
     const open = inside.filter((q) => this.free(q.x, q.y, INDOOR_R));
@@ -3140,7 +3179,7 @@ export class Kernel {
         if (!this.ecs.alive.has(id)) continue;
         this.rebuildSolids();
         const now = this.ecs.query('pos').filter((e) => e !== id).map((e) => this.ecs.get(e, 'pos'));
-        if ((roomy = roomyOf(this.interiorPoints(id, keep), now)).length) break;
+        if ((roomy = roomyOf(this.interiorPoints(id, keep, solid ? DOOR_KEEP : 0), now)).length) break;
       }
     }
     const pool = roomy.length ? roomy : solid ? [] : open.length ? open : inside;
@@ -3159,7 +3198,19 @@ export class Kernel {
       p = tiles.find(({ q }) => now.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && beside(q.x, q.y))?.q;
     }
     p ??= fallback;
-    spawn(p.x, p.y);
+    const id = spawn(p.x, p.y);
+    if (solid && roomy.length && id !== undefined) this.squareIndoors(id);
+  }
+
+  /**
+   * A solid thing put inside a structure stands square to its walls (T431): its turn to the nearest quarter, as the structures' own. Turned any
+   * other way its box is larger than the thing (`formsUnder`), and a counter across the room closed the way between two others.
+   */
+  private squareIndoors(id: Id): void {
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (!fc || !Number.isFinite(fc.yaw)) return;
+    const q = Math.PI / 2;
+    fc.yaw = Math.round(fc.yaw / q) * q;
   }
 
   /** The relief of the simulation (ADR-0048), made the first time it is asked for, again if the seed or the program change. */
@@ -3673,12 +3724,14 @@ export class Kernel {
     return this.ecs.spawn(comps);
   }
 
-  private nearest(x: number, y: number, r: number, tag?: string, exclude: Id[] = []): Id | undefined {
+  /** `feet` (T431): only what is on the storey of feet that high (tiles), `onFloor`. */
+  private nearest(x: number, y: number, r: number, tag?: string, exclude: Id[] = [], feet?: number): Id | undefined {
     let best: Id | undefined;
     let bestD = r;
     for (const id of this.ecs.query('pos')) {
       if (id === this.wandererEntity || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote'))) continue;
       if (tag && !this.hasTag(id, tag)) continue;
+      if (feet !== undefined && !this.onFloor(id, feet)) continue;
       const p = this.ecs.get(id, 'pos');
       const d = Math.hypot(p.x - x, p.y - y);
       if (d < bestD) [best, bestD] = [id, d];
@@ -3686,12 +3739,35 @@ export class Kernel {
     return best;
   }
 
+  /** The height (tiles) of the feet of the wanderer acting (T431): the floor they stand on, else the ground under them. */
+  private feetNow(): number {
+    const z = this.wandererPos()?.z;
+    if (typeof z === 'number' && Number.isFinite(z)) return z;
+    const c = this.wandererCarpet();
+    return this.groundAt(c.x, c.y);
+  }
+
+  /**
+   * Whether a thing is on the storey of feet `feet` high (tiles, T431): its height (`pos.z`, which the kernel keeps where models stand; else
+   * the ground floor there) from half a tile under the feet to less than `FLOOR_ABOVE` over them, a table's top and a high shelf with it, the
+   * storey under or over (a storey is `PARTS.storey.clear`, 1.9 tiles, high) not. A structure is on every storey of itself; another wanderer
+   * whose height is not known, on the wanderer's own.
+   */
+  private onFloor(id: Id, feet: number): boolean {
+    if (this.ecs.has(id, 'structure')) return true;
+    const p = this.ecs.get(id, 'pos');
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return false;
+    const h = typeof p.z === 'number' && Number.isFinite(p.z) ? p.z : this.ecs.has(id, 'remote') ? feet : this.floorAt(p.x, p.y);
+    return h - feet > -FLOOR_UNDER && h - feet < FLOOR_ABOVE;
+  }
+
   /**
    * The solid thing whose voxels stand in a square of the simulation (centre x, y, half side `half`, tiles): a structure is found where
    * its walls and its door are, not by its middle (T426), which for a Large one at 16 voxels a tile is more than three tiles away. Its
-   * columns over the ground as it was made (a door open is still its door); of two, the one more of the square meets.
+   * columns over the ground as it was made (a door open is still its door); of two, the one more of the square meets. With `feet` (T431)
+   * a thing that is not a structure only on that storey (`onFloor`).
    */
-  private builtAt(x: number, y: number, half: number): Id | undefined {
+  private builtAt(x: number, y: number, half: number, feet?: number): Id | undefined {
     const n = 8;
     const hits = new Map<Id, number>();
     for (let j = 0; j <= n; j++)
@@ -3699,6 +3775,7 @@ export class Kernel {
         const px = x - half + (2 * half * i) / n, py = y - half + (2 * half * j) / n;
         for (const s of this.solidForms.get(`${Math.floor(px)},${Math.floor(py)}`) ?? []) {
           if (s.id < 0 || s.id === this.wandererEntity || !this.ecs.alive.has(s.id) || this.otherWanderer(s.id) !== undefined) continue;
+          if (feet !== undefined && !this.onFloor(s.id, feet)) continue;
           const [lx, lz] = toLocal(px - s.x, py - s.y, s.yaw);
           const g = s.form.result!.grid;
           const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
@@ -3709,6 +3786,27 @@ export class Kernel {
     let best: Id | undefined;
     for (const [id, c] of hits) if (best === undefined || c > hits.get(best)!) best = id;
     return best;
+  }
+
+  /**
+   * The piece of furniture of a furnished building at a point of the simulation (T431): its box (`FormResult.furniture`) over the point's voxel
+   * column, standing on the storey of feet `feet` high (tiles): its foot within half a tile of them. Its name, and the building's concept.
+   */
+  private furnitureAt(x: number, y: number, feet: number): { name: string; in?: string } | undefined {
+    for (const s of this.solidForms.get(`${Math.floor(x)},${Math.floor(y)}`) ?? []) {
+      const list = s.form.result?.furniture;
+      if (!list?.length || s.id < 0 || !this.ecs.alive.has(s.id)) continue;
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      const at = this.levelIn(s, feet);
+      const near = 0.5 * s.form.vpt;
+      const piece = list.find(({ box: b }) => vx >= b[0] && vx <= b[3] && vy >= b[1] && vy <= b[4] && Math.abs(b[2] - at) <= near);
+      if (!piece) continue;
+      const concept = this.ecs.get(s.id, 'structure')?.concept;
+      return { name: this.forms.info(piece.id)?.name ?? piece.id, ...(typeof concept === 'string' && concept ? { in: concept } : {}) };
+    }
+    return undefined;
   }
 
   /** The voxel columns of a model with something over the ground (its `base` voxels up), kept per form. */
@@ -4394,7 +4492,7 @@ export class Kernel {
     if (isThing(item)) return void this.placeCarried(this.inventory().equipped!);
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
-    const t = target ?? this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1) ?? null;
+    const t = target ?? this.nearest(pc.x + dx * 0.9, pc.y + dy * 0.9, 1.1, undefined, [], this.feetNow()) ?? null;
     const def = this.content.get(item);
     if (def?.module && this.sandbox.has(def.module, 'on_action')) {
       const { value, failed } = this.runModule(def.module, 'on_action', this.wandererEntity, t, item);
@@ -5313,7 +5411,9 @@ export class Kernel {
     const code = this.tileAt(col, row);
     const t = code ? this.palette[code] : undefined;
     // What stands on it, else the structure whose walls or door are there (T426).
-    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75) ?? this.builtAt(col + 0.5, row + 0.5, 0.5);
+    // Only on the storey one stands on (T431): upstairs, not the chest on the floor under it.
+    const feet = this.feetNow();
+    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75, undefined, [], feet) ?? this.builtAt(col + 0.5, row + 0.5, 0.5, feet);
     const options: ActionOption[] = [];
     if (on !== undefined) for (const o of this.actionsFor(on)) options.push({ ...o, id: `e:${o.id}`, label: o.id === 'altro' ? `Altro… (${this.nameOf(on)})` : o.label });
     // A thing of the world carried goes down here (T292); the kernel says why when it does not.
@@ -5345,7 +5445,7 @@ export class Kernel {
       return false;
     }
     // What is under the pointer, as the hover says (T44c): of two wanderers side by side, the one clicked.
-    this.openTileMenu(col, row, this.nearest(rx + ox, ry + oy, 0.6));
+    this.openTileMenu(col, row, this.nearest(rx + ox, ry + oy, 0.6, undefined, [], this.feetNow()));
     return true;
   }
 
@@ -5390,13 +5490,15 @@ export class Kernel {
     const pc = this.wandererCarpet();
     const [dx, dy] = this.facingDelta();
     const tileOf = (id: Id) => ({ id, col: Math.floor(this.ecs.get(id, 'pos').x), row: Math.floor(this.ecs.get(id, 'pos').y) });
-    const ahead = this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4);
+    // Only what is on the storey one stands on (T431): upstairs, not the chest on the floor under it.
+    const feet = this.feetNow();
+    const ahead = this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4, undefined, [], feet);
     if (ahead !== undefined) return tileOf(ahead);
     const col = Math.floor(pc.x + dx), row = Math.floor(pc.y + dy);
     // From just ahead of the body to a tile beyond: a door one stands against may be in one's own tile.
-    const built = this.builtAt(pc.x + dx * 0.75, pc.y + dy * 0.75, 0.45);
+    const built = this.builtAt(pc.x + dx * 0.75, pc.y + dy * 0.75, 0.45, feet);
     if (built !== undefined) return { id: built, col, row };
-    const beside = this.nearest(pc.x, pc.y, 1.2);
+    const beside = this.nearest(pc.x, pc.y, 1.2, undefined, [], feet);
     return beside !== undefined ? tileOf(beside) : { col, row };
   }
 
@@ -8877,10 +8979,9 @@ export class Kernel {
       const doc = mr ? `${mr.glyph} ${mr.name} — runa magica (${italianName('elementi', mr.element)}): ${mr.description}. Tienila in mano e premi T.` : SYMBOL_DOCS[rune.token];
       return { kind: 'rune', token: rune.token, doc, symbol, line: this.lineOfRune(id), source: rune.source };
     }
-    for (const eid of this.ecs.query('pos', 'glyph')) {
-      if (eid === this.wandererEntity) continue;
-      const ep = this.ecs.get(eid, 'pos');
-      if (Math.hypot(ep.x - cx, ep.y - cy) >= 0.6) continue;
+    // What is on the storey one stands on (T431): upstairs, not the chest on the floor under it.
+    const feet = this.feetNow();
+    const describe = (eid: Id): HoverInfo => {
       // Another wanderer (T44c): their name and the first line of what they say of themselves.
       if (this.otherWanderer(eid) !== undefined) return { kind: 'entity', name: this.nameOf(eid), description: this.introOf(eid)?.split('\n')[0] ?? '' };
       const pk = this.ecs.get(eid, 'pickup');
@@ -8895,7 +8996,19 @@ export class Kernel {
       const extra = mind ? `${doing ? `${doing} · ` : ''}umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
       const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.bond[0].toUpperCase()}${f.bond.slice(1)} di ${f.name}`).join(', ')}.` : '';
       return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
+    };
+    for (const eid of this.ecs.query('pos', 'glyph')) {
+      if (eid === this.wandererEntity) continue;
+      const ep = this.ecs.get(eid, 'pos');
+      if (Math.hypot(ep.x - cx, ep.y - cy) >= 0.6 || !this.onFloor(eid, feet)) continue;
+      return describe(eid);
     }
+    // A thing by its model, where its middle is not under the cursor (the end of a counter, T431), on this storey.
+    const built = this.builtAt(cx, cy, 0.05, feet);
+    if (built !== undefined && !this.ecs.has(built, 'structure') && this.ecs.has(built, 'glyph')) return describe(built);
+    // A piece of furniture the kernel placed in a building (T410): voxels of the building, found by its box on this storey.
+    const piece = this.furnitureAt(cx, cy, feet);
+    if (piece) return { kind: 'entity', name: piece.name, description: piece.in ? `Arredo — ${piece.in}` : 'Arredo' };
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
     return t ? { kind: 'tile', name: `${this.palette[t]?.name ?? t}${this.palette[t]?.solid ? ' (invalicabile)' : ''}` } : null;
   }

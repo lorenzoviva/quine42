@@ -98,7 +98,7 @@ self.onmessage = (ev: MessageEvent<{ id: number; req: FormRequest } | { id: numb
     const g = r.grid;
     const pal = r.palette;
     const meshes: FormMeshes = formMeshes(r, req);
-    const result: FormResult = { grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet }, palette: pal, actions: r.actions, animations: r.animations, meshes };
+    const result: FormResult = { grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet }, palette: pal, actions: r.actions, animations: r.animations, meshes, ...(r.furniture ? { furniture: r.furniture } : {}) };
     (self as unknown as Worker).postMessage({ id, ok: true, result, finished: r.finished } satisfies WorkerAnswer, meshBuffers(meshes));
   } catch (e) {
     const msg = e instanceof Mj3Error ? e.message : `errore: ${(e as Error).message}`;
