@@ -91,6 +91,11 @@ export interface ChunkPlan {
    * first tile under the ground; written by the kernel from the draft when the place is planned. Absent, a plan of before: the draft says them again.
    */
   strata?: string[];
+  /**
+   * The mark of the layout that swims (T438, ADR-0224): true, written by the kernel on every plan it makes, the water one swims joins the
+   * place and is never dug; absent, a plan of before, whose layout keeps the paths it dug on the water (they are its bridges and piers).
+   */
+  swim?: boolean;
 }
 
 /**

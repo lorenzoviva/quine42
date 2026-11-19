@@ -8,7 +8,8 @@ import type { Id } from '../kernel/ecs';
 import type { Kernel } from '../kernel/kernel';
 import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
-import { Builder } from './terrain';
+import { Builder, WATER_Y } from './terrain';
+import { SWIM_SINK } from '../kernel/swim';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
 import { geoOf, isSharedGeometry, modelObject, showFrame, type ModelGeo } from './models';
 import type { Form, FormComp } from '../kernel/forms';
@@ -118,6 +119,26 @@ export function animateLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: nu
   }
   v.body.position.y = moving ? Math.abs(Math.sin(v.phase)) * 0.03 : 0;
 }
+
+/**
+ * A figure in the water (T438): the arms take turns over the head and back, the legs kick a little, the body bobs; still, it keeps afloat
+ * with slow strokes. What it holds stays in hand (a thing over the head never comes in: the shore stops who carries one).
+ */
+export function swimLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: number }, moving: boolean, dt: number, t: number): void {
+  const pace = moving ? 1 : 0.35;
+  const ease = Math.min(1, dt * 12);
+  for (const l of v.limbs) {
+    const stroke = Math.sin(v.phase + (l.phase < 0 ? Math.PI : 0));
+    if (l.part === 'arm') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, -1.6 + stroke * 1.2 * pace, ease);
+    else if (l.part === 'leg') l.pivot.rotation.x = THREE.MathUtils.lerp(l.pivot.rotation.x, Math.sin(v.phase * 2 + l.phase) * 0.35 * pace, ease);
+    else if (l.part === 'tail') l.pivot.rotation.y = Math.sin(t * 5 + v.phase) * 0.35;
+    else if (l.part === 'head') l.pivot.rotation.x = -0.15;
+  }
+  v.body.position.y = Math.sin(t * 2.2) * 0.03;
+}
+
+/** Where the feet of a swimmer are (T438): under the water drawn on the tile, so the body is in it to the chest. */
+export const swimFloor = (k: Kernel, x: number, y: number): number => k.groundAt(x, y) + WATER_Y - SWIM_SINK;
 
 /** Turns a view towards its heading, smoothly. */
 export function turnTowards(v: { yaw: number; root: THREE.Object3D }, goal: number, dt: number): void {
@@ -254,8 +275,9 @@ export class Entities {
         }
         continue;
       }
-      // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b).
-      v.root.position.set(p.x, climb(v.root, k.floorAt(p.x, p.y, p.z), dt), p.y);
+      // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b); another wanderer in the water swims (T438).
+      const swims = k.swimsAt(p.x, p.y, p.z);
+      v.root.position.set(p.x, climb(v.root, swims ? swimFloor(k, p.x, p.y) : k.floorAt(p.x, p.y, p.z), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'activity');
       v.root.rotation.z = att?.kind === 'sleep' && att.still ? Math.PI / 2.2 : 0;
@@ -263,7 +285,8 @@ export class Entities {
         turnTowards(v, Math.atan2(dx, dy), dt);
         v.phase += moved * 7;
       }
-      animateLimbs(v, moved > 0.0005 && moved < 2, dt, t);
+      if (swims) swimLimbs(v, moved > 0.0005 && moved < 2, dt, t);
+      else animateLimbs(v, moved > 0.0005 && moved < 2, dt, t);
       // What they hold, in hand (T288): another wanderer's as the server says, an individual's if it has one.
       hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id), heldSeedOf(k, id));
     }
@@ -294,6 +317,8 @@ export class Wanderer {
   private sig = '';
   /** How high above its floor a jump carries it (T56b): the camera does not follow it up. */
   lift = 0;
+  /** How far under its floor the body has sunk swimming (T438): the camera does not follow it down either. */
+  sunk = 0;
   /** The shadow on the floor under a jump. */
   private shadow: THREE.Mesh;
   constructor(private scene: THREE.Object3D) {
@@ -334,11 +359,15 @@ export class Wanderer {
     const moved = Math.hypot(dx, dy);
     this.last = { x: p.x, y: p.y };
     const pcf = k.wandererCarpet();
-    const floor = climb(this.view.root, k.zone === 'sim' ? k.floorAt(pcf.x, pcf.y, p.z) : 0, dt);
+    // In the water (T438) the body sinks to the chest; the camera does not follow it down (`lift`).
+    const swims = k.zone === 'sim' && k.swimming();
+    const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) : k.floorAt(pcf.x, pcf.y, p.z)) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
     const y = jump ? Math.max(floor, jump.y) : floor;
     this.lift = y - floor;
+    const sink = swims ? Math.max(0, k.floorAt(pcf.x, pcf.y, p.z) - swimFloor(k, pcf.x, pcf.y)) : 0;
+    this.sunk += (sink - this.sunk) * Math.min(1, dt * 14);
     this.view.root.position.set(p.x, y, p.y);
     this.shadow.visible = !!jump;
     if (jump) {
@@ -353,8 +382,10 @@ export class Wanderer {
     this.view.root.userData.cx = pc.x;
     this.view.root.userData.cy = pc.y;
     turnTowards(this.view, goal, dt);
-    if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * 7;
-    animateLimbs(this.view, walking && !jump, dt, t);
+    if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * (swims ? 4 : 7);
+    else if (swims) this.view.phase += dt * 1.5;
+    if (swims) swimLimbs(this.view, walking, dt, t);
+    else animateLimbs(this.view, walking && !jump, dt, t);
     // What it wields, in hand (T288), with the wanderer's material: never cut, as its body.
     hold(k, this.view, heldBy(k, k.wandererEntity), MAT.corona, t, (o) => (o.userData.player = true), heldSeedOf(k, k.wandererEntity));
   }

@@ -1232,10 +1232,26 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   liquido, profondità e fatica dove non si nuota, il passo dell'acqua fuori dal suo intervallo).
 - **L'acqua si nuota in ogni universo**: `w` (fiumi, laghi, stagni, fossati, `shallow`) e `o` (il mare, `deep`) sono `cross: swim` nei
   codici di base (`BASE_CODES`, `WATER_CODES`), nel seme e, con la migrazione `0.9 → 0.10` (`migrate0_10`), nei manifest di ogni universo; la
-  lava del seme e ogni liquido che nessuno dice resta `none`. **Il kernel 0.10.0 scava ancora l'acqua e il corpo non nuota**: lo fanno da T438,
-  il layout solo per i piani col suo segno (come `vpt`, ADR-0211), così i luoghi pianificati restano come sono. `tests/luoghi-campione.test.ts`
+  lava del seme e ogni liquido che nessuno dice resta `none`. Il kernel 0.10.0 scavava ancora l'acqua e il corpo non nuotava; da T438
+  (ADR-0225, kernel 0.10.1) il layout la conta come via solo per i piani col suo segno (`swim`, come `vpt`, ADR-0211), così i luoghi
+  pianificati restano come sono. `tests/luoghi-campione.test.ts`
   fissa la bozza e il layout di tre luoghi del seme (la partenza con lo stagno, la costa a (5, -5), il mare aperto a (-7, 6): 0, 16 e 37
   caselle d'acqua scavate) e dice che cosa fare se cambiano.
+- **Il layout che non scava l'acqua** (T438, ADR-0225): ogni piano che il kernel fa dice `swim: true` (`ChunkPlan.swim`: il piano del
+  Cartografo, del blocco, del riempitivo); il suo layout (`LayoutOptions.swim`) attraversa le caselle che si nuotano nel flood della connessione e
+  nel percorso più economico (a costo 1) e non le scava mai, un varco sull'acqua resta acqua, una sacca si misura da ciò che si cammina, e
+  `reachable` resta ciò che si cammina (niente si posa sull'acqua). Da un'isola chiusa dagli scogli si scava la roccia fino all'acqua. Un piano
+  senza segno tiene i sentieri che ha scavato. Il validatore e la stanza dei campioni provano i programmi col layout dei piani nuovi.
+- **Il corpo che nuota** (T438, ADR-0225, `src/kernel/swim.ts`): la collisione del viandante è `bodyFree` (`world.free_real`, il salto,
+  `stepWanderer` del server): le caselle che si nuotano lasciano entrare, l'acqua profonda no a chi porta più di metà della portata o una cosa
+  sopra la testa (`SWIM_LOAD`, «Sei troppo carico per nuotare…» ogni 4 secondi, anche nello specchio); `free` resta l'acqua solida per NPC,
+  cose e vie: gli NPC non nuotano. Il passo è la casella (`world.speed_at` → `terrainPhysics`), il server dà il passo del nuoto a chi ha
+  intorno solo acqua (`paceOf`). La fatica e l'annegare sono del kernel (`swimmingTick`, ogni viandante, anche dei client): `fatigue − 1`
+  volte l'energia di un secondo di cammino del seme (`WALK_ENERGY`), poi la salute (`DROWN_HEALTH`), e a zero `die('annegato')` col livello
+  della morte; non gli dei, non chi è trasceso da solo. Il salto atterra sulla terra entro la sua portata o, se non c'è, nella prima acqua
+  (`swimsAt`), ed esce dall'acqua sulla riva. A schermo il corpo è immerso fino al petto (`swimFloor`, `SWIM_SINK`) con le bracciate
+  (`swimLimbs`), la camera ferma (`Wanderer.sunk`); gli altri viandanti nuotano a schermo dalle caselle dello specchio (`swimsAt`), senza campi
+  sul filo. `tests/nuoto.test.ts`.
 - **Il Fisico alla Genesi** (`genesis.physics`): lo schema dice `cross`, `speed`, `fatigue`, `depth`; `toPalette` scrive ogni terreno con
   `physicsOf` dentro lo strato (muri, vegetazione e roccia mai, pavimenti e porte sempre, la terra a piedi o no, un altro liquido a nuoto o no) e i
   limiti; dei codici di base il Fisico dice solo il passo e la fatica dell'acqua; un passo fuori dall'intervallo del nuoto (l'1 del Cartografo) è

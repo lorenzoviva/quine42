@@ -8,7 +8,8 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
-import { repairNature, sameNature, type WorldNature } from './nature';
+import { crossingOf, repairNature, sameNature, terrainPhysics, type WorldNature } from './nature';
+import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
@@ -571,6 +572,9 @@ export class Kernel {
   readonly wanted = new Set<string>();
   /** Entity cells blocked by solid bodies, rebuilt every tick. */
   private solidTiles = new Set<string>();
+  /** The shore stopped the wanderer acting this tick because they are too loaded to swim (T438); when the world last said so, by wanderer. */
+  private loadStopped = new Set<string>();
+  private loadSaid = new Map<string, number>();
   /** Solid entities with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
@@ -927,7 +931,10 @@ export class Kernel {
       tile: (x, y) => this.tileAt(Math.floor(x), Math.floor(y)) ?? '',
       speed_at: (x, y) => {
         const t = this.tileAt(Math.floor(x), Math.floor(y));
-        return (t && this.palette[t]?.speed) || 1;
+        const def = t ? this.palette[t] : undefined;
+        // In the water one swims, the swimming pace within the kernel's limits (T438); elsewhere the tile's, as always.
+        if (crossingOf(def) === 'swim') return terrainPhysics(def).pace;
+        return (t && def?.speed) || 1;
       },
       player_get: (key) => (key === 'x' || key === 'y' ? this.wandererPos()[key] : (this.wandererComp() as any)[key]),
       player_set: (key, v) => {
@@ -1353,11 +1360,18 @@ export class Kernel {
       const pl: any = this.wandererComp();
       const { x, y } = this.wandererCarpet();
       let terrain = 1;
+      // Swimming (T438): where all that is crossed around is water, the fastest swimming pace of it; at the shore the walk's.
+      let swum = 0, walked = false;
       for (let dy = -1; dy <= 1; dy++)
         for (let dx = -1; dx <= 1; dx++) {
           const t = this.tileAt(Math.floor(x) + dx, Math.floor(y) + dy);
-          terrain = Math.max(terrain, (t && Number(this.palette[t]?.speed)) || 1);
+          const def = t ? this.palette[t] : undefined;
+          const cross = crossingOf(def);
+          if (cross === 'swim') swum = Math.max(swum, terrainPhysics(def).pace);
+          else if (cross === 'walk') walked = true;
+          terrain = Math.max(terrain, (cross !== 'swim' && t && Number(def?.speed)) || 1);
         }
+      if (swum && !walked) terrain = swum;
       const speed = Math.max(0, Math.min(60, Number(pl?.speed) || 0));
       const passo = Math.max(0.2, Math.min(4, Number(pl?.step) || 1));
       return speed * passo * Math.min(4, terrain);
@@ -1387,9 +1401,10 @@ export class Kernel {
       // The floor they walk on goes with them (T53b): up a stair, on the floor above.
       let z = this.wandererPos().z;
       for (let i = 0; i < n; i++) {
-        const stuck = !this.free(x, y, r, z);
-        if (stuck || this.free(x + dx / n, y, r, z)) x += dx / n;
-        if (stuck || this.free(x, y + dy / n, r, z)) y += dy / n;
+        // The wanderer's body (T438): in the water one swims, not in the deep one too loaded; never on the water as on ground.
+        const stuck = !this.bodyFree(x, y, r, z);
+        if (stuck || this.bodyFree(x + dx / n, y, r, z)) x += dx / n;
+        if (stuck || this.bodyFree(x, y + dy / n, r, z)) y += dy / n;
         z = this.floorAt(x, y, z);
       }
       const pl = this.wandererComp();
@@ -2113,6 +2128,8 @@ export class Kernel {
       plan = await this.makePlan(ch);
       // A new plan's stamps cut their buildings for the structures at 16 (T407); a plan of before does not say it, and keeps its stamps.
       plan.vpt = STRUCTURE_VPT;
+      // And it swims (T438, ADR-0224): its layout joins it through the water one swims and never digs it; a plan of before does not say it.
+      plan.swim = true;
       // And its strata, from its draft (T418): the plan keeps them.
       plan.strata = this.strataOf(ch);
       this.cardChunk(ch, plan, ch.chi);
@@ -2161,7 +2178,7 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true };
   }
 
   /**
@@ -2277,7 +2294,7 @@ export class Kernel {
    */
   private fillerPlan(region: Region): ChunkPlan {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT };
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
   }
 
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
@@ -2502,7 +2519,7 @@ export class Kernel {
     const block = this.blockFor(ch, plan);
     // Quiet is the model of places: it shows the phases too.
     // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, ...(block ? this.blockLayout(block, ch) : {}) };
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...(block ? this.blockLayout(block, ch) : {}) };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
@@ -3975,7 +3992,40 @@ export class Kernel {
     return !this.formBlocks(x, y, r, z);
   }
 
-  /** Real-space collision: carpet inside the circle, corona walkable, nothing beyond it. */
+  /**
+   * A tile for the wanderer's body (T438, ADR-0224): what `freeTile` lets through, and the water one swims, but the deep one not for who is
+   * too loaded to swim (`heavy`: then the shore stops them, and the world says why once in a while).
+   */
+  private bodyTile(col: number, row: number, heavy: boolean): boolean {
+    const t = this.tileAt(col, row);
+    const def = t ? this.palette[t] : undefined;
+    if (def?.solid) {
+      const p = terrainPhysics(def);
+      if (p.cross !== 'swim') return false;
+      if (heavy && p.depth === 'deep') {
+        this.loadStopped.add(this.wanderer().id);
+        return false;
+      }
+    }
+    return !this.solidTiles.has(`${col},${row}`);
+  }
+
+  /** The wanderer acting is too loaded for the deep water (T438): more than half of what they carry without slowing down, or a thing over the head. */
+  private tooLoaded(): boolean {
+    const inv = this.inventory();
+    if (!inv?.slots) return false;
+    return tooLoadedToSwim(totalWeight(inv, this.itemSpec) / this.carryCapacity(), inv.slots.some((s) => !!s && isThing(s.item)));
+  }
+
+  /** Carpet-space collision of the wanderer acting (T438): as `free`, but they swim where the water is swum (NPCs and things do not). */
+  bodyFree(x: number, y: number, r: number, z?: number): boolean {
+    if (![x, y, r].every(Number.isFinite)) return false;
+    const heavy = this.tooLoaded();
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
+    return !this.formBlocks(x, y, r, z);
+  }
+
+  /** Real-space collision of the wanderer (`world.free_real`): carpet inside the circle (where they swim, T438), corona walkable, nothing beyond it. */
   freeReal(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     const R = this.config.circleRadius;
@@ -3983,6 +4033,7 @@ export class Kernel {
     // Inside the studio's buildings: rooms with walls, shelves and desks.
     if (this.corona.isInterior(x)) return [[-r, -r], [r, -r], [-r, r], [r, r]].every(([dx, dy]) => this.corona.free(x + dx, y + dy));
     let sim = false;
+    let heavy: boolean | undefined;
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
       const px = x + dx;
       const py = y + dy;
@@ -3993,7 +4044,7 @@ export class Kernel {
         continue;
       }
       sim = true;
-      if (!this.freeTile(Math.floor(px + ox), Math.floor(py + oy))) return false;
+      if (!this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
     }
     return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
@@ -4045,7 +4096,7 @@ export class Kernel {
 
   /**
    * A jump (T56b, Space): towards where the wanderer walks (or faces), over what is no higher than JUMP_UP, to the
-   * nearest place a tile or more away and within JUMP_FAR where the feet can rest (not water, not a floor out of
+   * nearest place a tile or more away and within JUMP_FAR where the feet can rest or the body swims (T438: into the water and out of it; not a floor out of
    * reach); with none, a jump on the spot. Only in the simulation: false in the corona and the studio (nothing
    * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
    */
@@ -4067,6 +4118,8 @@ export class Kernel {
     // From the floor one stands on (T70): the ground floor, the floor above, the roof.
     const h0 = this.floorAt(from.x, from.y, real.z);
     let land: { d: number; h: number } | undefined;
+    // The water it may fall in (T438): the first place it swims, if no ground is within reach (a stream is jumped over, a lake jumped into).
+    let wet: { d: number; h: number; clear: number } | undefined;
     let clear = 0;
     for (let i = 1; i * 0.1 <= JUMP_FAR + 1e-6 && !land; i++) {
       const d = i * 0.1, x = from.x + dx * d, y = from.y + dy * d;
@@ -4078,6 +4131,11 @@ export class Kernel {
       // It lands on the highest floor it clears, if the body stands there.
       const h = this.floorBelow(x, y, h0 + JUMP_UP);
       if (this.free(x, y, r, h)) land = { d, h };
+      else if (!wet && this.swimsAt(x, y) && this.bodyFree(x, y, r, h)) wet = { d, h, clear };
+    }
+    if (!land && wet) {
+      land = { d: wet.d, h: wet.h };
+      clear = wet.clear;
     }
     const to = land ? { x: from.x + dx * land.d, y: from.y + dy * land.d } : from;
     const jc: JumpComp = { from, to, h0, h1: land?.h ?? h0, peak: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
@@ -4085,6 +4143,58 @@ export class Kernel {
     if (pl && land) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
     this.bus.emit('wanderer:jumped', { id: this.wanderer().id, far: land?.d ?? 0 });
     return true;
+  }
+
+  /**
+   * Whether a body at (x, y) of the carpet, its feet at `z`, swims (T438): on a tile one swims, not on a floor over it (a bridge, a deck).
+   * The renderer asks it of every figure: who swims is seen without a field on the wire, the mirror has the tiles.
+   */
+  swimsAt(x: number, y: number, z?: number): boolean {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    const t = this.tileAt(Math.floor(x), Math.floor(y));
+    if (!t || crossingOf(this.palette[t]) !== 'swim') return false;
+    return !(typeof z === 'number' && Number.isFinite(z) && z > this.groundAt(x, y) + 0.3);
+  }
+
+  /** Whether the wanderer acting swims now (T438): in the simulation (not in the corona, not in the studio), not in the air of a jump. */
+  swimming(): boolean {
+    const p = this.wandererPos();
+    if (!p || this.corona.isInterior(p.x) || !(Math.hypot(p.x, p.y) < this.config.circleRadius) || this.ecs.has(this.wandererEntity, 'jump')) return false;
+    const c = this.wandererCarpet();
+    return this.swimsAt(c.x, c.y, p.z);
+  }
+
+  /** The tile's physics under the wanderer acting, when they swim. */
+  private swimTile(): ReturnType<typeof terrainPhysics> | undefined {
+    if (!this.swimming()) return undefined;
+    const c = this.wandererCarpet();
+    const t = this.tileAt(Math.floor(c.x), Math.floor(c.y));
+    return terrainPhysics(t ? this.palette[t] : undefined);
+  }
+
+  /**
+   * The water for the wanderer acting (T438, ADR-0224 § 4): swimming costs energy, `fatigue − 1` times a walk's more (the walk's own is
+   * `sys.needs`'s), and out of energy the health; drowned, they die of it (`player.death`, with the level of death of the game). Gods,
+   * who reached the corona alone and who is already dying do not drown. Then the shore that stopped them, said.
+   */
+  private swimmingTick(dt: number): void {
+    const id = this.wanderer().id;
+    const tile = this.swimTile();
+    const n = this.needs() as (Needs & { dead?: boolean }) | undefined;
+    if (tile && n && !this.dying.has(id) && !this.deathVerdicts.has(id) && !(this.manyPlayers() && this.godMode(id)) && !(id === SOLO && this.exitedOnce)) {
+      if (swimTick(n, tile.fatigue, dt)) this.die(DROWNED);
+    }
+    this.sayTooLoaded();
+  }
+
+  /** «Too loaded to swim», once in a while, when the shore stopped the wanderer acting (not to who is already in the water). */
+  private sayTooLoaded(): void {
+    const id = this.wanderer().id;
+    if (!this.loadStopped.delete(id) || this.swimming()) return;
+    const last = this.loadSaid.get(id);
+    if (last !== undefined && this.time - last < TOO_LOADED_EVERY) return;
+    this.loadSaid.set(id, this.time);
+    this.message(TOO_LOADED, 'warn');
   }
 
   /** The jump under way, if any: how far along it is (0-1) and the height of the feet (tiles), for the renderer. */
@@ -6090,7 +6200,7 @@ export class Kernel {
     let error: string | undefined;
     drafts.forEach((draft, i) => {
       try {
-        const r = layout(draft, this.palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: this.pathCode() });
+        const r = layout(draft, this.palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: this.pathCode(), swim: true });
         const before = draft.join(''), tiles = r.grid.join('');
         const changed = [...tiles].filter((c, j) => c !== before[j]).length;
         if (!best || changed > best.changed) best = { draft: i, changed, tiles };
@@ -9992,6 +10102,8 @@ export class Kernel {
     // The tick's budget (ADR-0105): a fault of its own, not of the modules that had to wait.
     if (this.sandbox.tickEnd() > 0) this.faults.raise('tick:budget', 'budget del tick esaurito: alcune chiamate sono saltate');
     else this.faults.clear('tick:budget');
+    // The water (T438): who swims tires and drowns, whoever moves them (this kernel or their client); then the jumps.
+    for (const w of this.wanderersById.keys()) this.as(w, () => this.swimmingTick(dt));
     for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.jumpTick(dt));
     this.keepGods();
     this.syncRunes();
@@ -10018,6 +10130,8 @@ export class Kernel {
       this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;
     }
+    // The shore that stopped them (T438): the client walks its wanderer, so it says why (the needs are the server's).
+    this.sayTooLoaded();
     this.sanitize();
     this.settleHeights();
     this.updateZone();

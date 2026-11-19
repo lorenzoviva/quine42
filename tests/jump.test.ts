@@ -1,5 +1,5 @@
-// The jump (T56b): Space carries the wanderer over a crate on a path, not over a wall, not into deep water; the
-// small rises of the relief are still walked up.
+// The jump (T56b): Space carries the wanderer over a crate on a path, not over a wall, over a stream and into a water too wide
+// (T438: one swims it); the small rises of the relief are still walked up.
 
 import { describe, expect, it } from 'vitest';
 import { Kernel, JUMP_UP } from '../src/kernel/kernel';
@@ -101,9 +101,9 @@ describe('the jump', () => {
     expect(k.wandererCarpet().x).toBeCloseTo(x0 + 0.5, 5);
   }, 30_000);
 
-  it('jumps a narrow stream, not into deep water', async () => {
+  it('jumps a narrow stream, and into a water too wide to jump (T438)', async () => {
     const { k, x0, y0, stand } = await scene();
-    const water = Object.keys(k.palette).find((c) => k.palette[c].layer === 'liquid')!;
+    const water = Object.keys(k.palette).find((c) => k.palette[c].layer === 'liquid' && k.palette[c].cross === 'swim')!;
     expect(water).toBeDefined();
     const col = Math.floor(x0), row = Math.floor(y0);
     expect(k.setTile(col + 2, row, water)).toBe(true);
@@ -111,12 +111,20 @@ describe('the jump', () => {
     k.jump();
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
     expect(k.wandererCarpet().x).toBeGreaterThan(x0 + 2.5);
-    // A wide water: nowhere to land within reach.
+    // A wide water: no ground within reach, the wanderer falls in it and swims (T438).
     stand(x0 + 0.5, y0);
     for (let c = 2; c <= 5; c++) expect(k.setTile(col + c, row, water)).toBe(true);
+    expect(k.swimming()).toBe(false);
     k.jump();
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
-    expect(k.wandererCarpet().x).toBeCloseTo(x0 + 0.5, 5);
+    expect(k.wandererCarpet().x).toBeGreaterThanOrEqual(col + 2);
+    expect(k.swimming()).toBe(true);
+    // And out of it, on the ground beyond: towards the bank behind, as far as a jump goes.
+    k.wandererComp().facing = 'left';
+    k.jump();
+    for (let i = 0; i < 60; i++) k.tick(1 / 60);
+    expect(k.swimming()).toBe(false);
+    expect(k.wandererCarpet().x).toBeLessThan(col + 2);
   }, 30_000);
 
   it('still walks up a rise of a level, and does nothing in the corona', async () => {

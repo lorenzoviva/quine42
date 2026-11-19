@@ -500,7 +500,7 @@ export class Validator {
     if (errors.length) return errors;
     drafts.forEach((draft, i) => {
       try {
-        const r = layout(draft, palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: 'p' });
+        const r = layout(draft, palette, { cx: 100 + i, cy: -100, seed: 1, program: def.program, pathCode: 'p', swim: true });
         const open = (rows: string[]) => rows.join('').split('').filter((c) => palette[c]?.solid === false).length;
         // Judged against what the draft offered: a forest draft is allowed to stay mostly forest.
         const cells = draft.length * draft.length;

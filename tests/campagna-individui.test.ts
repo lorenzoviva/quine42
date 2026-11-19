@@ -84,7 +84,8 @@ describe('gli individui dichiarati dal master', () => {
     const { k } = await world();
     const env = Object.keys(k.content.layouts)[0];
     const atlas = readAtlas(k.files);
-    k.saveFile(ATLAS_FILE, writeAtlas({ regions: [...atlas.regions, { id: 'corvi', name: 'Valle dei Corvi', description: 'una valle stretta e fredda', environment: env, center: [40, 0], radius: 0 }] }));
+    // A valley on land (T438: on the open sea at (40, 0) nothing stands any more, the water is not dug).
+    k.saveFile(ATLAS_FILE, writeAtlas({ regions: [...atlas.regions, { id: 'corvi', name: 'Valle dei Corvi', description: 'una valle stretta e fredda', environment: env, center: [30, 0], radius: 0 }] }));
     const made = await k.declareIndividual({ facts: 'Ortensia, erborista, conosce le erbe della valle e non si fida dei forestieri', name: 'Ortensia', where: 'valle dei corvi' });
     expect(made).toMatchObject({ ok: true, name: 'Ortensia', awaited: true });
     const people = readPeople(k.files);
@@ -94,9 +95,9 @@ describe('gli individui dichiarati dal master', () => {
     const node = [...buildGraph(k.files, []).nodes.values()].find((n) => n.label === 'Ortensia')!;
     expect(node).toMatchObject({ atteso: true, dichiarato: true });
     // The place is planned: they are there.
-    expect(await k.planAhead(40, 0)).toBe('nuovo');
+    expect(await k.planAhead(30, 0)).toBe('nuovo');
     const p = readPeople(k.files).people.find((x) => x.name === 'Ortensia')!;
-    expect(p.origin).toMatch(/^40,0#o\d+$/);
+    expect(p.origin).toMatch(/^30,0#o\d+$/);
     expect(awaitedDeclared(readPeople(k.files))).toEqual([]);
     expect(k.ecs.query('origin').some((e) => k.ecs.get(e, 'origin').key === p.origin)).toBe(true);
   });
