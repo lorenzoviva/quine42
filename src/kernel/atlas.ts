@@ -8,6 +8,7 @@ import { Rng } from './rng';
 import { internalFields, internalName, internalValues, italianName } from './internalNames';
 import { cleanText } from './cleantext';
 import { metaBreak } from './fourthwall';
+import { NATURE_ACCEPTS } from './nature';
 
 /**
  * What a region the master declared does to the new places inside it (T375, ADR-0188 §5, D54.6): `filler` repeats an environment the world
@@ -31,6 +32,11 @@ export interface Region {
   master?: true;
   /** Only on a region of the master: what it does to the new places inside it. */
   kind?: RegionKind;
+  /**
+   * Only on a region of the master (T447, ADR-0225): the gravity of its places, within what the kernel accepts of the nature's (0.2-2); absent,
+   * the world's. An asteroid, a moon. It changes how a body jumps and walks there, never what is reachable (`leapOf`).
+   */
+  gravity?: number;
 }
 
 export interface Atlas {
@@ -75,6 +81,17 @@ export function regionKind(r: Region | undefined): RegionKind | undefined {
   return r?.master && REGION_KINDS.includes(r.kind as RegionKind) ? r.kind : undefined;
 }
 
+/**
+ * The gravity a region gives its places (T447): only a region of the master that is the world's (not held: its places are the master's plan,
+ * not the world's yet, and the players' clients do not see it), and only within what the kernel accepts. Undefined: the world's.
+ */
+export function regionGravity(r: Region | undefined): number | undefined {
+  if (!r?.master || r.kind === 'held') return undefined;
+  const g = r.gravity;
+  const [lo, hi] = NATURE_ACCEPTS.gravity;
+  return typeof g === 'number' && Number.isFinite(g) && g >= lo && g <= hi ? g : undefined;
+}
+
 /** The kinds in the words of the master's tools. */
 export const REGION_KIND_NAME: Record<RegionKind | 'plan', string> = { plan: 'ambiente', filler: 'riempitivo', held: 'trattenuta' };
 /** What each kind means, for the master. */
@@ -98,6 +115,8 @@ export interface RegionRequest {
   /** `plan` (or absent): the Cartographer plans with the environment. */
   kind?: RegionKind | 'plan';
   environment?: string;
+  /** The gravity of its places (T447): a number within the kernel's range; absent, none of its own. */
+  gravity?: number;
 }
 
 const has = (o: Record<string, unknown>, k: string) => Object.prototype.hasOwnProperty.call(o, k);
@@ -131,6 +150,10 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
   const environment = typeof r.environment === 'string' ? r.environment : '';
   if (kind !== 'held' && !has(environments, environment)) errors.push("l'ambiente: uno di quelli che il mondo ha già");
   if (kind === 'held' && environment && !has(environments, environment)) errors.push("l'ambiente: uno di quelli che il mondo ha già, o nessuno");
+  const [glo, ghi] = NATURE_ACCEPTS.gravity;
+  const gravity = r.gravity === undefined || r.gravity === null || r.gravity === '' ? undefined : typeof r.gravity === 'number' && Number.isFinite(r.gravity) && r.gravity >= glo && r.gravity <= ghi ? Math.round(r.gravity * 100) / 100 : null;
+  if (gravity === null) errors.push(`la gravità: un numero da ${glo} a ${ghi} (1 è quella della terra), o nessuna`);
+  else if (gravity !== undefined && kind === 'held') errors.push('la gravità: una regione trattenuta non è ancora del mondo, non ne ha una');
   const regions = atlas.regions.slice();
   const id = r.id === undefined ? undefined : typeof r.id === 'string' ? r.id : null;
   const at = id ? regions.findIndex((x) => x.id === id) : -1;
@@ -148,6 +171,7 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
     radius: radius!,
     master: true,
     ...(kind ? { kind } : {}),
+    ...(gravity !== undefined && gravity !== null ? { gravity } : {}),
   };
   if (at >= 0) regions[at] = region;
   else regions.push(region);

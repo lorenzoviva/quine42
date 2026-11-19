@@ -1293,6 +1293,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `fisica del mondo` (per la natura), `reame`, `bioma` (sono le lettere del generatore), `clima`
 - **Fermo**: `nature` in universe.json, `world.nature()`.
 
+### Gravità
+- **Inglese**: `gravity` (nella natura e nelle regioni), `gravityOf`, `gravityAt`, `regionGravity`, `leapOf`, `gaitOf`, `jumpUp`, `jumpFar`
+- **Definizione**: il peso di un corpo contro quello della terra (1), da 0,2 a 2: il salto scala con 1/g (più alto, lontano e lento) ma mai sotto quello della terra, il passo appena. Del mondo (la natura) o di una regione del master che la dice (ADR-0225).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/atlas.ts`, `src/kernel/kernel.ts`, `src/ui/regions.ts`
+- **Da non usare**: `peso` (per la gravità del mondo), `gravità zero` (esclusa: non è camminare)
+- **Fermo**: `gravity` in `nature` e nelle regioni dell'atlante, il campo `gravity` del messaggio `region`.
+
 ### Bibbia
 - **Inglese**: `bible`, `readBible`, `biblePages`
 - **Definizione**: la memoria del Narratore: prologo, luoghi, personaggi, fatti, misteri.

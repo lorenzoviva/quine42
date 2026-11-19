@@ -174,13 +174,13 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
  * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` T441, `void` and `stars` and the day T445,
- * the oxygen T446, the gravity 0.2-2 T447).
+ * the oxygen T446; the gravity 0.2-2 is open since T447).
  */
 export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
   geography: ['continent'],
   sky: ['earth'],
   day: [600, 600],
-  gravity: [1, 1],
+  gravity: [0.2, 2],
   oxygen: [false],
 };
 
@@ -200,3 +200,32 @@ export function repairNature(raw: unknown): WorldNature {
 
 /** Whether two natures are the same world. */
 export const sameNature = (a: WorldNature, b: WorldNature): boolean => (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]);
+
+// --- The gravity: how a body leaps and walks (T447, ADR-0225) ------------------------------------------------------------------------
+
+/** The gravity a nature says, as the kernel uses it: within the range this kernel accepts, 1 (the earth's) otherwise (rule 7). */
+export function gravityOf(nature: Pick<WorldNature, 'gravity'> | undefined): number {
+  const g = nature?.gravity;
+  const [lo, hi] = NATURE_ACCEPTS.gravity;
+  return finite(g) && g >= lo && g <= hi ? g : 1;
+}
+
+/**
+ * How a jump changes under a gravity, against the earth's (`docs/design/acqua-spazio.md` § 2.5): the same push, so how high and how far
+ * it goes scale with 1/g, and so does the time of its arc. Never shorter nor lower than on the earth (`reach` at least 1): the kernel
+ * checks what is reachable with the earth's jump (`reachableStoreys`, rule 10), and what it guarantees stays so under a heavy gravity,
+ * which shows in a quicker, flatter arc and a heavier gait.
+ */
+export function leapOf(gravity: number): { reach: number; time: number } {
+  const g = finite(gravity) && gravity > 0 ? gravity : 1;
+  return { reach: 1 / Math.min(1, g), time: 1 / g };
+}
+
+/**
+ * How the gait changes under a gravity: barely (`docs/design/acqua-spazio.md` § 2.5). A body made for the earth walks a little slower
+ * away from it, light (it bounces, its feet grip less) or heavy (it drags): 1 on the earth, 0.9 at the ends of the range (0.2 and 5).
+ */
+export function gaitOf(gravity: number): number {
+  const g = finite(gravity) && gravity > 0 ? gravity : 1;
+  return 1 - 0.1 * Math.min(1, Math.abs(Math.log(g)) / Math.log(5));
+}
