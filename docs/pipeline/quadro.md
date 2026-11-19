@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 19/11/2026, epoca 542 (claude). Crediti: vedi `stato`.
+Aggiornato il 19/11/2026, epoca 543 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,6 +34,7 @@ Aggiornato il 19/11/2026, epoca 542 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- **19/11 01:53 (epoca 543):** T431 integrato (`c1400472`, kernel 0.9.17 alzato dall'orchestratore: E, tasto destro e cursore scelgono sul piano del viandante, hover sui mobili dello Scenografo, cose solide fuori dal piede della scala; visto nel browser col forno del borgo; non in multigiocatore né su un universo rigenerato). Pronti T184, T432; generatore su orichalcum.
 - **19/11 01:30 (epoca 542):** T430 integrato (ADR-0220, kernel 0.9.16 alzato dall'orchestratore: la stella che pulsa al posto della pozione; visto nel browser; non su un universo vero). Disco C: al 99 % (3,9 GB liberi): causa dei rossi ENOSPC di `site-video`. In corso T431; pronti T184, T432; generatore su orichalcum.
 - **19/11 00:4x (epoca 541):** T429 integrato (`95917407`, kernel 0.9.15 dopo la correzione `e1396784`: il letto, coperta col telaio; cantina e vano scala più sicuri; visto nel browser offline). T430 in corso; pronti T431, T184, T432.
 - **19/11 00:3x (epoca 540):** autore assente fino al 19/11 18:00 locale (17:00Z): autonomia, non sprecare i crediti (reset settimana 16:00Z). Sbloccati T184 (temi western, pirati, spazio) e T432 (specifica acqua dei Pirati e spazio, `docs/design/acqua-spazio.md`); dopo T184 aggiungere `mesa` (western, multigiocatore) a `generazione` (T185).
