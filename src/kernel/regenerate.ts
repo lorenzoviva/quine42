@@ -16,7 +16,7 @@ import { procedural, sculpt, STRUCTURE_SEEDS, type SculptorAiModels, type Sculpt
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, modelSize } from './modeldirector';
 import { cellarOf } from './forms';
 import { sculptPlan } from './coefficients';
-import { classOf, growsByRules, isFortified, sizeOf, STRUCTURE_VPT, TILE, tilesOf, type SizeTier } from '../mj/classes';
+import { classOf, growsByRules, isFortified, SIZE_TIERS, sizeOf, sizeRank, STRUCTURE_VPT, TILE, tilesOf, type SizeTier } from '../mj/classes';
 import { SOUND_CLASS } from '../mj/sound';
 import { anthropicCost } from './ai/prices';
 import type { Usage } from './ai/models';
@@ -304,6 +304,16 @@ export interface RegenerationPlan {
 const needOf = (tiles: readonly number[] | undefined): number => Math.ceil(Math.max(tiles?.[0] ?? 0, tiles?.[1] ?? 0) - 1e-9);
 /** Whether a lot holds a structure of `need` tiles, both ways, and is a structure's lot. */
 const holds = (lot: { w: number; h: number } | undefined, need: number): boolean => !!lot && Math.max(lot.w, lot.h) >= STRUCTURE_LOT && Math.min(lot.w, lot.h) >= need;
+/**
+ * The size a lot shows a structure at, as `claimSizes` takes it down (T436): the rank of the largest size, from its own down, whose tiles at
+ * `ratio` of the class's (0.8 at 20 voxels a tile, 1 at 16) the lot holds; -1 if none.
+ */
+export function shownRank(lot: { w: number; h: number } | undefined, size: SizeTier | undefined, ratio: number): number {
+  const S = classOf('structure')!;
+  let r = sizeRank(size ?? (S.taglia as SizeTier));
+  while (r >= 0 && !holds(lot, needOf((tilesOf(S, SIZE_TIERS[r].id) ?? []).map((t) => t * ratio)))) r--;
+  return r;
+}
 
 /**
  * Whether a place cut again loses a structure of its plan (T435): one its lots hold now that the new lots would not hold, or one that stands on a
@@ -320,9 +330,10 @@ export function losesStructure(needs: ReadonlyArray<{ now: number; after: number
 /**
  * What to do to the lots (see above): for each environment with a place where a structure the regeneration sculpts at 16 would not stand on its
  * lot, the first way that loses no structure of its places and passes the validator; then the density of each structure, 20 where a lot that wears
- * it still would not hold it. `seedLayouts` are the seed's environments of today.
+ * it still would not hold it. `seedLayouts` are the seed's environments of today. `rewrite` (T436, `--ambienti`): environments the Cartographer
+ * writes again even where a way of the kernel loses no structure but leaves one at 20 (a Huge on houses of 7 × 8), unless this run did them.
  */
-export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], targets: readonly RegenTarget[], seedLayouts: Record<string, { program?: MjNode }>, done: ReadonlySet<string> = new Set()): RegenerationPlan {
+export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], targets: readonly RegenTarget[], seedLayouts: Record<string, { program?: MjNode }>, done: ReadonlySet<string> = new Set(), rewrite: ReadonlySet<string> = new Set()): RegenerationPlan {
   const S = classOf('structure')!;
   const growing = new Map(targets.filter((t) => t.info.class === 'structure' && growsByRules(S, t.info.size)).map((t) => [t.id, t]));
   const environments: EnvironmentRedo[] = [];
@@ -355,7 +366,8 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
     // at 16, and never twice: an environment a run already cut again keeps what it got.
     // A structure of a plan that stands on no lot (T435) is one that does not stand on its lot either.
     const lotless = (p: PlannedPlace, lots: ReadonlyArray<unknown>) => (p.plan.structures ?? []).map(readStructure).some((s, i) => !lots[i] && growing.has(k.structureModelOf(s.concept, s.size)));
-    const touched = !done.has(`ambiente:${id}`) && now.some(({ p, lots }) => lotless(p, lots) || wearing(p, lots).some((s) => growing.has(s.id) && !holds(s.lot, needOf(tilesOf(S, s.size)))));
+    const forced = rewrite.has(id) && !done.has(`ambiente:${id}`);
+    const touched = forced || (!done.has(`ambiente:${id}`) && now.some(({ p, lots }) => lotless(p, lots) || wearing(p, lots).some((s) => growing.has(s.id) && !holds(s.lot, needOf(tilesOf(S, s.size))))));
     if (!touched) {
       for (const { p, lots } of now) after.set(`${p.cx},${p.cy}`, lots);
       continue;
@@ -370,15 +382,15 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
     const total = list.reduce((n, p) => n + (p.plan.structures?.length ?? 0), 0);
     const current = k.content.layouts[id].program;
     const candidates: Array<{ how: EnvironmentRedo['how']; program?: MjNode }> = [];
-    const seed = seedLayouts[id]?.program;
+    const seed = forced ? undefined : seedLayouts[id]?.program;
     if (seed && JSON.stringify(seed) !== JSON.stringify(current)) candidates.push({ how: 'seed', program: seed });
-    const stretched = current ? stretchBoxes(current, k.palette) : undefined;
+    const stretched = current && !forced ? stretchBoxes(current, k.palette) : undefined;
     if (stretched?.rules) candidates.push({ how: 'stretched', program: stretched.program });
-    const least = current ? stretchBoxes(current, k.palette, true) : undefined;
+    const least = current && !forced ? stretchBoxes(current, k.palette, true) : undefined;
     if (least?.rules && JSON.stringify(least.program) !== JSON.stringify(stretched?.program)) candidates.push({ how: 'least', program: least.program });
-    if (hasStamps(current) || list.some((p) => p.plan.vpt === STRUCTURE_VPT)) candidates.push({ how: 'stamps' });
+    if (!forced && (hasStamps(current) || list.some((p) => p.plan.vpt === STRUCTURE_VPT))) candidates.push({ how: 'stamps' });
     let chosen: EnvironmentRedo | undefined;
-    const why: string[] = [];
+    const why: string[] = forced ? ['chiesto dal comando'] : [];
     for (const c of candidates) {
       if (c.program) {
         const errs = k.validator.validateLayout(id, { ...k.content.layouts[id], program: c.program }, k.palette, k.sampleDrafts());
@@ -415,7 +427,10 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
       if (!growing.has(s.id)) continue;
       const c = short.get(s.id) ?? { n: 0, of: 0 };
       c.of++;
-      if (!holds(s.lot, needOf(tilesOf(S, s.size)))) c.n++;
+      // Short only where 16 shows it smaller than its density now does (T436): a lot that holds it at neither (the Huge bistrot of neapolis on a
+      // house of 7 × 8, which wants 8 at 20 and 10 at 16) shows it a size down either way, and at 16 it is as large as its new size can be.
+      const ratio = (tilesNow(s.id, s.size)?.[0] ?? 0) / (tilesOf(S, s.size)?.[0] || 1) || 1;
+      if (shownRank(s.lot, s.size, ratio) > shownRank(s.lot, s.size, 1)) c.n++;
       short.set(s.id, c);
     }
   }
@@ -440,10 +455,7 @@ export function recutFaults(k: Kernel, places: readonly PlannedPlace[], program:
     const lots = k.structureLotSizes(p.cx, p.cy, { ...p.plan, vpt: STRUCTURE_VPT }, program);
     const shown = lots.map((l) => `${l.w}×${l.h}`).join(', ') || 'nessuno';
     const asked = (p.plan.structures ?? []).map(readStructure);
-    const needOfIt = (s: (typeof asked)[number]) => {
-      const id = k.structureModelOf(s.concept, s.size);
-      return needOf(growing.has(id) ? tilesOf(S, s.size) : (k.forms.entryTiles(id) ?? tilesOf(S, s.size)));
-    };
+    const needOfIt = (s: (typeof asked)[number]) => needAt16(k, growing, s);
     const short = asked.filter((s, i) => !holds(lots[i], needOfIt(s)));
     if (short.length) out.push(`«${name}» ha gli edifici ${shown}: ${short.map((s) => `«${s.concept}» vuole ${needOfIt(s)} × ${needOfIt(s)}`).join(', ')} e non lo trova`);
     if (houseGrows) {
@@ -452,6 +464,13 @@ export function recutFaults(k: Kernel, places: readonly PlannedPlace[], program:
     }
   }
   return out;
+}
+
+/** The tiles a structure of a plan wants on its lot once the regeneration is done: at 16 if it is sculpted again, else as its entry says now. */
+function needAt16(k: Kernel, growing: ReadonlySet<string>, s: { concept: string; size?: SizeTier }): number {
+  const S = classOf('structure')!;
+  const id = k.structureModelOf(s.concept, s.size);
+  return needOf(growing.has(id) ? tilesOf(S, s.size) : (k.forms.entryTiles(id) ?? tilesOf(S, s.size)));
 }
 
 /** A place as the Cartographer and the log say it: its name and where it is (two places may have the same name). */
@@ -489,18 +508,21 @@ async function recutStep(k: Kernel, e: EnvironmentRedo, all: readonly PlannedPla
   const on = new Set(e.places.map((p) => `${p.cx},${p.cy}`));
   const places = all.filter((p) => on.has(`${p.cx},${p.cy}`));
   const S = classOf('structure')!;
+  const growing = new Set(targets.filter((t) => t.info.class === 'structure' && growsByRules(S, t.info.size)).map((t) => t.id));
   const nameOf = (p: PlannedPlace) => placeName(p);
   const told: RecutPlace[] = places.map((p) => ({
     name: nameOf(p),
-    structures: (p.plan.structures ?? []).map(readStructure).map((s) => ({ concept: s.concept, ...(s.size ? { size: s.size } : {}), need: needOf(tilesOf(S, s.size)) })),
+    // What each wants as the kernel will check it (T436): a structure not sculpted again keeps the tiles of its entry.
+    structures: (p.plan.structures ?? []).map(readStructure).map((s) => ({ concept: s.concept, ...(s.size ? { size: s.size } : {}), need: needAt16(k, growing, s) })),
     lots: k.structureLotSizes(p.cx, p.cy, p.plan).map((l) => `${l.w}×${l.h}`),
     draft: draftShares(k.placeDraft(p.cx, p.cy), k.palette),
     ...(p.plan.structures?.length ? { rows: k.placeDraft(p.cx, p.cy) } : {}),
   }));
   const before = { ...k.ai.usage };
   let feedback = '';
+  let why = '';
   for (let attempt = 1; attempt <= RECUT_TRIES; attempt++) {
-    const r = await recutEnvironment(k.council, { id: e.id, def, palette: k.palette, need: e.need ?? LEAST_LOT, small: STRUCTURE_LOT, places: told, ...(feedback ? { feedback } : {}) });
+    const r = await recutEnvironment(k.council, { id: e.id, def, palette: k.palette, need: e.need ?? LEAST_LOT, least: LEAST_LOT, small: STRUCTURE_LOT, places: told, ...(feedback ? { feedback } : {}) });
     const program = r.program ? repairProgram(r.program, []) : null;
     const errs = !program ? [r.error ?? 'programma mancante o incomprensibile'] : k.validator.validateLayout(e.id, { ...def, program }, k.palette, k.sampleDrafts());
     const faults = program && !errs.length ? recutFaults(k, places, program, targets) : [];
@@ -517,11 +539,16 @@ async function recutStep(k: Kernel, e: EnvironmentRedo, all: readonly PlannedPla
       log(`  ${e.id}: riscritto dal Cartografo al tentativo ${attempt}${r.note ? ` («${r.note}»)` : ''}, ${cut} luoghi tagliati a 16; edifici: ${lots.join('; ')}; ${spentLine(before, k.ai.usage, o.model)}`);
       return true;
     }
-    feedback = [...errs, ...faults].join('; ').slice(0, 1500);
-    k.council.say('kernel', 'scarta', `ambiente «${def.name}» riscritto: ${feedback}`, 'cartographer', RECUT_TASK);
-    log(`  ${e.id}: il programma del Cartografo (tentativo ${attempt}) non va: ${feedback.slice(0, 400)}`);
+    // With the places that did not hold as the program laid them out (T436): the Cartographer sees the draft, not what its own rules drew on it.
+    const shown = program && faults.length ? places.filter((p) => faults.some((f) => f.includes(`«${nameOf(p)}»`))).slice(0, 2) : [];
+    const grids = shown.map((p) => `«${nameOf(p)}» after your program:\n${k.placeLaidOut(p.cx, p.cy, { ...p.plan, vpt: STRUCTURE_VPT }, program!).map((r) => `    ${r}`).join('\n')}`);
+    why = [...errs, ...faults].join('; ').slice(0, 1500);
+    feedback = [why, ...grids].join('\n');
+    k.council.say('kernel', 'scarta', `ambiente «${def.name}» riscritto: ${why}`, 'cartographer', RECUT_TASK);
+    log(`  ${e.id}: il programma del Cartografo (tentativo ${attempt}) non va: ${why.slice(0, 400)}`);
+    if (program) log(`    il suo programma: ${JSON.stringify(program).slice(0, 2000)}`);
   }
-  k.noteShortfall({ request: `l'ambiente ${e.id} per le strutture a 16`, agent: 'cartographer', task: RECUT_TASK, outcome: 'invalid', reason: feedback });
+  k.noteShortfall({ request: `l'ambiente ${e.id} per le strutture a 16`, agent: 'cartographer', task: RECUT_TASK, outcome: 'invalid', reason: why });
   log(`  ${e.id}: resta come prima, le sue strutture a 20 voxel per casella; ${spentLine(before, k.ai.usage, o.model)}`);
   return true;
 }
@@ -555,6 +582,8 @@ export interface RegenOptions {
   only?: readonly string[];
   /** At most this many types sculpted this run (the environments and the interiors do not count). */
   max?: number;
+  /** Environments the Cartographer writes again whatever the kernel could do (T436, `regenerationPlan`'s `rewrite`). */
+  environments?: readonly string[];
   /** The model of the CLI (`REGEN_MODEL`): the Sculptor, the Artist and the Scenografo. */
   model: string;
   /** The seed's environments of today (`universe/` as the kernel ships it). */
@@ -584,15 +613,17 @@ export async function* regenerationSteps(k: Kernel, o: RegenOptions, done: Set<s
   const log = (l: string) => o.log?.(l);
   const places = await k.plannedPlaces();
   const targets = regenerationTargets(k, places, o);
-  const plan = regenerationPlan(k, places, targets, o.seedLayouts, done);
+  const asked = new Set(o.environments ?? []);
+  const plan = regenerationPlan(k, places, targets, o.seedLayouts, done, asked);
+  for (const id of asked) if (!done.has(`ambiente:${id}`) && !plan.environments.some((e) => e.id === id)) log(`  ambiente ${id}: nessun luogo pianificato lo usa, non si riscrive`);
   const count = (c: string) => targets.filter((t) => t.info.class === c).length;
   log(`rigenerazione dei modelli: ${targets.length} tipi (${count('furniture')} mobili, ${count('structure')} strutture, ${count('building')} edifici, ${count('person') + count('animal') + count('beast')} figure) su ${places.length} luoghi pianificati`);
-  const asked = plan.environments.filter((e) => e.how === 'cartographer');
+  const recut = plan.environments.filter((e) => e.how === 'cartographer');
   for (const e of plan.environments) {
     const how = e.how === 'cartographer' ? `da riscrivere dal Cartografo, edifici di ${e.need} × ${e.need} (${e.why})` : `${VIA[e.how]}${e.how === 'kept' ? ` (${e.why})` : `, ${e.places.length} luoghi`}`;
     log(`  ambiente ${e.id}: ${how}; strutture sui lotti che le tengono ${e.held} di ${e.total} (prima ${e.before})`);
   }
-  for (const [id, why] of plan.at20) log(`  ${id}: a 20 voxel per casella${asked.length ? ' se il Cartografo non riesce' : ''}, ${why}`);
+  for (const [id, why] of plan.at20) log(`  ${id}: a 20 voxel per casella${recut.length ? ' se il Cartografo non riesce' : ''}, ${why}`);
   for (const e of plan.environments) {
     if (e.how === 'kept' || done.has(`ambiente:${e.id}`)) continue;
     if (e.how === 'cartographer') {
@@ -621,7 +652,7 @@ export async function* regenerationSteps(k: Kernel, o: RegenOptions, done: Set<s
   }
   // The Cartographer's environments are written now (each step ended valid before this line runs): the densities from the lots they have.
   let densities = plan.at20;
-  if (asked.length) {
+  if (recut.length) {
     const after = new Set([...done, ...plan.environments.filter((e) => e.how !== 'kept').map((e) => `ambiente:${e.id}`)]);
     densities = regenerationPlan(k, await k.plannedPlaces(), targets, o.seedLayouts, after).at20;
     log(`  dopo il Cartografo: ${densities.size ? [...densities].map(([id, why]) => `${id} a 20 (${why})`).join('; ') : 'nessuna struttura a 20'}`);

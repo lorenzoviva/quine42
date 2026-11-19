@@ -11,7 +11,8 @@ import { QueueAiModels } from '../src/kernel/ai/subscription';
 import type { WeeklyUsage } from '../src/kernel/deferred';
 import { MAX_STEP_TRIES } from '../src/kernel/deferred';
 import type { MjNode } from '../src/kernel/mj';
-import { BEFORE_REGENERATION, hasStamps, kernelModel, RECUT_TRIES, REGEN_MODEL, requestOf, stretchBoxes, stretchRule } from '../src/kernel/regenerate';
+import { BEFORE_REGENERATION, hasStamps, kernelModel, RECUT_TRIES, REGEN_MODEL, requestOf, shownRank, stretchBoxes, stretchRule } from '../src/kernel/regenerate';
+import { sizeRank } from '../src/mj/classes';
 import { RECUT_TASK } from '../src/kernel/agents/cartography';
 import { readShortfalls } from '../src/kernel/shortfalls';
 import { answer, beat, diskQueueFetch, take } from '../server/subscriptionQueue';
@@ -416,6 +417,53 @@ describe("la rigenerazione dei modelli (T422): l'ambiente che il kernel non sa a
     expect(json('ostinati', 'models/index.json')[FORNO].vpt).toBe(20);
     expect(lines.some((l) => /vicoli: resta come prima/.test(l))).toBe(true);
     expect(readShortfalls(read('ostinati', 'world/shortfalls.json')).some((s) => s.task === RECUT_TASK && s.agent === 'cartographer')).toBe(true);
+    noApi();
+  }, 300_000);
+});
+
+// T436: an environment the kernel would cut without losing a structure, but that leaves one at 20 (neapolis: the Huge bistrot on houses of
+// 7 × 8), goes to the Cartographer when the command names it (`--ambienti`); a run of its own (`--giro`) keeps its own progress.
+describe('la rigenerazione dei modelli (T436): gli ambienti chiesti al Cartografo e il giro a parte', () => {
+  it('resta a 20 solo dove il 16 la mostrerebbe più piccola: un lotto che non la tiene né a 20 né a 16 la scala comunque', () => {
+    // The bistrot of neapolis: Huge (7.5 tiles at 20, 9.375 at 16) on a house of 7 × 8: Large either way, so it goes to 16.
+    expect(shownRank({ w: 7, h: 8 }, 'huge', 0.8)).toBe(sizeRank('large'));
+    expect(shownRank({ w: 7, h: 8 }, 'huge', 1)).toBe(sizeRank('large'));
+    // The tower of the port: Large on a warehouse of 7 × 5, held at 20 (5 tiles), not at 16 (6.25): 20 keeps it.
+    expect(shownRank({ w: 7, h: 5 }, 'large', 0.8)).toBe(sizeRank('large'));
+    expect(shownRank({ w: 7, h: 5 }, 'large', 1)).toBeLessThan(sizeRank('large'));
+    expect(shownRank({ w: 10, h: 10 }, 'huge', 1)).toBe(sizeRank('huge'));
+    expect(shownRank(undefined, 'large', 1)).toBe(-1);
+  });
+
+  it('il comando: --ambienti e --giro; un giro dal nome che non sta in un file si rifiuta', () => {
+    expect(parseArgs(['neapolis', '--rigenera', 'modelli', '--ambienti', 'uffici, porto', '--giro', 't436'], dir)).toMatchObject({ ambienti: ['uffici', 'porto'], giro: 't436' });
+    expect(parseArgs(['neapolis', '--rigenera', 'modelli', '--giro', '../fuori'], dir)).toMatch(/giro: lettere minuscole/);
+    expect(parseArgs(['neapolis', '--rigenera', 'modelli', '--ambienti', ','], dir)).toMatch(/ambienti/);
+    expect(parseArgs(['neapolis', '--ambienti', 'uffici'], dir)).toMatch(/opzione sconosciuta/);
+  });
+
+  it("l'ambiente chiesto va al Cartografo anche dove il seme di oggi lo taglierebbe; il giro ha il suo progresso e non rifà ciò che ha fatto", async () => {
+    await universeOfBefore('chiesti');
+    const q = new FakeQueue();
+    const lines: string[] = [];
+    const out = await regenerateUniverse({ name: 'chiesti', dir, queue: q, weekly: still, classi: ['structure'], ambienti: ['village', 'nessuno'], giro: 'prova', log: (l) => lines.push(l) });
+    expect(out.esito).toBe('finito');
+    expect(out.fatti).toEqual(['ambiente:village', `rigenera:${FORNO}`, `interno:${FORNO}`]);
+    expect(lines.some((l) => /ambiente village: da riscrivere dal Cartografo, edifici di 7 × 7 \(chiesto dal comando\)/.test(l))).toBe(true);
+    expect(lines.some((l) => /ambiente nessuno: nessun luogo pianificato lo usa/.test(l))).toBe(true);
+    expect(q.calls.filter((c) => c.task === RECUT_TASK)).toHaveLength(1);
+    // The village is the Cartographer's, not the seed's of today nor the one of before; the start at 16.
+    const program = json('chiesti', 'modules/world.layouts/manifest.json').layouts.village.program;
+    expect(program).not.toEqual(OLD_VILLAGE.program);
+    expect(git('chiesti', 'log', '--format=%s')).toMatch(/l'ambiente village per le strutture a 16 \(riscritto dal Cartografo\)/);
+    expect(json('chiesti', `maps/${mapOf('chiesti', 0, 0)}`).plan.vpt).toBe(16);
+    // Its own progress; the generator's file is not written.
+    expect(progressFile(dir, 'chiesti', { tetto: 10 }, 'rigenera-modelli-prova').load().passi).toEqual(out.fatti);
+    expect(existsSync(path.join(dir, '.generation', 'chiesti.rigenera-modelli.json'))).toBe(false);
+    // Again, the same run: nothing to do, the Cartographer is not asked twice.
+    const again = await regenerateUniverse({ name: 'chiesti', dir, queue: q, weekly: still, classi: ['structure'], ambienti: ['village'], giro: 'prova' });
+    expect(again).toMatchObject({ esito: 'finito', fatti: [] });
+    expect(q.calls.filter((c) => c.task === RECUT_TASK)).toHaveLength(1);
     noApi();
   }, 300_000);
 });

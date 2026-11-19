@@ -1995,6 +1995,15 @@ export class Kernel {
       .map(({ w, h }) => ({ w, h }));
   }
 
+  /**
+   * A place laid out by a program of its environment, as `structureLotSizes` lays it (T436: what the Cartographer is shown of a program of his
+   * that did not hold a place's structures): the grid after the program, before the paths.
+   */
+  placeLaidOut(cx: number, cy: number, plan: ChunkPlan, program?: MjNode): string[] {
+    const { result } = this.layoutOf({ cx, cy, draft: this.genDraft(cx, cy) }, plan, this.pathCode(), true, program ?? this.content.layouts[plan.layout]?.program);
+    return result.stages?.programmed ?? result.grid;
+  }
+
   /** A place's draft, the terrain before its environment (T422: what the Cartographer is told of the places of an environment it cuts again). */
   placeDraft(cx: number, cy: number): string[] {
     return this.rows(this.genDraft(cx, cy));
