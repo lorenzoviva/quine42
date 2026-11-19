@@ -6,7 +6,8 @@
   "circleRadius": 42,
   "chunkSize": 18,
   "partita": {
-    "modalita": "singola",
+    "modalita": "multigiocatore",
+    "master": "io",
     "morte": 2,
     "pvp": false,
     "altroTraGiocatori": true
