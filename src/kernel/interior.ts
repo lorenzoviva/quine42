@@ -520,7 +520,25 @@ export interface Furnished {
   /** Pieces the guard took away, by reason. */
   refused: Record<Refusal, number>;
   /** The way of data (`furnishWithRules`, T419): every piece kept, which furniture, in which kind of room, on which storey (-1 the cellar). */
-  items?: Array<{ id: string; room: string; storey: number; voxels: number }>;
+  items?: Array<{ id: string; room: string; storey: number; voxels: number; box: PieceBox }>;
+}
+
+/** The box of a piece of furniture in its building's grid, voxels, both ends inside (T431): what the cursor finds it by. */
+export type PieceBox = [x0: number, y0: number, z0: number, x1: number, y1: number, z1: number];
+
+/** The box of some voxels of a grid `x + y·X + z·X·Y` (T431). */
+export function boxOf(voxels: readonly number[], X: number, Y: number): PieceBox {
+  const b: PieceBox = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+  for (const v of voxels) {
+    const x = v % X, y = Math.floor(v / X) % Y, z = Math.floor(v / (X * Y));
+    if (x < b[0]) b[0] = x;
+    if (y < b[1]) b[1] = y;
+    if (z < b[2]) b[2] = z;
+    if (x > b[3]) b[3] = x;
+    if (y > b[4]) b[4] = y;
+    if (z > b[5]) b[5] = z;
+  }
+  return b;
 }
 
 /**

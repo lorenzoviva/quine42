@@ -23,6 +23,8 @@ import { ZOOM, wheelFactor, zoomDistance } from './camera';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
+/** How far (tiles) from the ground the feet stand when the cursor points at their floor and not at the ground (T431): a storey, a cellar. */
+const FEET_OFF = 0.5;
 
 export class Renderer {
   showWalk = false;
@@ -242,11 +244,20 @@ export class Renderer {
     return k.groundAt(x + ox, y + oy);
   }
 
-  /** Screen → real-space point on the ground: the ray meets the plane of the ground where it lands, a few times over (the relief). */
+  /**
+   * Screen → real-space point on the ground: the ray meets the plane of the ground where it lands, a few times over (the relief). Who stands
+   * on a storey of a building or in a cellar (feet more than `FEET_OFF` from the ground, T431) points at the floor they stand on: the ray
+   * meets the plane of their feet, so the cursor upstairs is on what is upstairs, not on the ground under it.
+   */
   toReal(sx: number, sy: number): { x: number; y: number } {
     this.ray.setFromCamera(new THREE.Vector2((sx / this.w) * 2 - 1, -(sy / this.h) * 2 + 1), this.camera);
     const hit = new THREE.Vector3();
-    const p = this.kernel.watched() ? { x: 0, y: 0 } : this.kernel.wandererPos();
+    const p: { x: number; y: number; z?: number } = this.kernel.watched() ? { x: 0, y: 0 } : this.kernel.wandererPos();
+    const feet = p.z;
+    if (typeof feet === 'number' && Number.isFinite(feet) && Math.abs(feet - this.groundReal(p.x, p.y)) > FEET_OFF) {
+      this.ground.constant = -feet;
+      return this.ray.ray.intersectPlane(this.ground, hit) ? { x: hit.x, y: hit.z } : { x: p.x, y: p.y };
+    }
     this.ground.constant = -this.groundReal(p.x, p.y);
     for (let i = 0; i < 4; i++) {
       if (!this.ray.ray.intersectPlane(this.ground, hit)) return { ...p };

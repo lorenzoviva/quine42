@@ -236,8 +236,11 @@ describe('the forms on disk of the tests', () => {
     fs.writeFileSync(path.join(d, 'src/mj/engine.ts'), 'a');
     fs.writeFileSync(path.join(d, 'src/kernel/rng.ts'), 'b');
     fs.writeFileSync(path.join(d, 'src/kernel/forms.ts'), 'c');
+    fs.mkdirSync(path.join(d, 'tests/setup'), { recursive: true });
+    for (const f of ['src/kernel/furnish.ts', 'src/kernel/interior.ts', 'tests/setup/forms-disk.ts']) fs.writeFileSync(path.join(d, f), 'd');
     let last = engineVersion(d);
-    for (const f of ['src/mj/engine.ts', 'src/kernel/rng.ts', 'src/kernel/forms.ts']) {
+    // The furnishing and the way a result is written too (T431).
+    for (const f of ['src/mj/engine.ts', 'src/kernel/rng.ts', 'src/kernel/forms.ts', 'src/kernel/furnish.ts', 'src/kernel/interior.ts', 'tests/setup/forms-disk.ts']) {
       fs.appendFileSync(path.join(d, f), '!');
       const v = engineVersion(d);
       expect(v).not.toBe(last);

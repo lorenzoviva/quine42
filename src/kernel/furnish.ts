@@ -22,7 +22,7 @@ import type { PaletteEntry } from '../mj/engine';
 import { colorTable, type VoxelGrid } from '../mj/mesh';
 import type { MjxClip } from '../mj/model';
 import { BODY_R, formKey, runForm, stepOf, storeysOf, walkIn, type FormRequest, type FormResult } from './forms';
-import { InteriorGuard, interiorPlan, NARROW, roomsOf, type Furnished, type InteriorPlan, type Refusal, type StoreyPlan } from './interior';
+import { boxOf, InteriorGuard, interiorPlan, NARROW, roomsOf, type Furnished, type InteriorPlan, type Refusal, type StoreyPlan } from './interior';
 import { hashStr, Rng } from './rng';
 
 /**
@@ -114,7 +114,13 @@ export function readInterior(raw: unknown, known: (id: string) => boolean): Inte
 /** The ids of furniture the rules name, once each, in the order they are named. */
 export const furnitureOf = (rules: readonly InteriorRule[]): string[] => [...new Set(rules.flatMap((r) => r.furniture))];
 
-/** What an interior is for the key of its form (`interiorKey`): the rules, the base, each piece by the key of its program. */
+/**
+ * What a furnishing gives, as a number: raised when it changes, so a furnished form kept before (the page's cache on disk) is made again.
+ * 2 (T431): the box of every piece (`FormResult.furniture`).
+ */
+export const FURNISHING = 2;
+
+/** What an interior is for the key of its form (`interiorKey`): the rules, the base, each piece by the key of its program, the furnishing's number. */
 export function interiorText(i: InteriorData): string {
   const pieces = Object.keys(i.furniture)
     .sort()
@@ -122,7 +128,7 @@ export function interiorText(i: InteriorData): string {
       const k = formKey(i.furniture[id]);
       return [id, i.furniture[id].vpt, hashStr(k), k.length];
     });
-  return JSON.stringify([i.rules, i.base, pieces]);
+  return JSON.stringify([i.rules, i.base, pieces, FURNISHING]);
 }
 
 // ---------------------------------------------------------------- the rooms
@@ -610,7 +616,7 @@ export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRul
           voxels.add(at);
         });
         kept.push(vox);
-        items.push({ id: piece.id, room: room.kind, storey: room.storey, voxels: vox.length });
+        items.push({ id: piece.id, room: room.kind, storey: room.storey, voxels: vox.length, box: boxOf(vox, X, Y) });
         for (const i of lost) inRoom.delete(i);
         for (const i of gone) live.delete(i);
         parts.set(p, piecesOf(live, X));
