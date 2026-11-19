@@ -360,7 +360,9 @@
   teneva quello del seme di prima (T407), le regole-scatola del Cartografo allargate di 20/16 e almeno 7 (`stretchBoxes`, `stretchRule`: righe e
   colonne interne ripetute, la porta una sola, `steps` diviso per (20/16)²) o, se così un luogo perde spazio, solo fino a 7 (`least`), i timbri a 16;
   i piani di quell'ambiente prendono `vpt: 16`. Si prende la prima via che il validatore degli ambienti accetta e con cui **nessun luogo perde una
-  struttura** che i suoi lotti tengono oggi (`structureLotSizes`, come `claimSizes`); altrimenti **lo riscrive il Cartografo** (T422, ADR-0218,
+  struttura** che i suoi lotti tengono oggi (`structureLotSizes`, come `claimSizes`) **né una che oggi sta su un lotto, anche se non la tiene**
+  (`losesStructure`, T435: ogni lotto dà una struttura del piano, e la partenza di sidera mostrava le sue due Grandi su case di 5 × 4 che le case
+  allargate a 7 × 7 non trovavano più sulla sua bozza; un ambiente con una struttura senza lotto si ritaglia anche lui); altrimenti **lo riscrive il Cartografo** (T422, ADR-0218,
   `ambiente:<id>` col compito `environment.recut`, `recutEnvironment` in `agents/cartography.ts`): gli si dice il programma, il lato che i suoi edifici
   devono avere (7 una Grande a 16, 10 un'Enorme; mura comprese), i suoi luoghi con le strutture, gli edifici di oggi e la bozza (le quote dei terreni,
   intera per i luoghi con una struttura); il kernel prova la risposta col validatore e sulle bozze vere dei luoghi (`recutFaults`: ogni struttura del
