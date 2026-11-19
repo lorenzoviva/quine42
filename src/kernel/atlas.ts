@@ -33,7 +33,7 @@ export interface Region {
   /** Only on a region of the master: what it does to the new places inside it. */
   kind?: RegionKind;
   /**
-   * Only on a region of the master (T447, ADR-0225): the gravity of its places, within what the kernel accepts of the nature's (0.2-2); absent,
+   * Only on a region of the master (T447, ADR-0226): the gravity of its places, within what the kernel accepts of the nature's (0.2-2); absent,
    * the world's. An asteroid, a moon. It changes how a body jumps and walks there, never what is reachable (`leapOf`).
    */
   gravity?: number;

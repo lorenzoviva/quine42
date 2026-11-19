@@ -1248,7 +1248,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
-- **La gravità** (ADR-0225, T447, kernel 0.10.1): `nature.gravity` da 0,2 a 2 (`NATURE_ACCEPTS`), letta da `gravityOf` (1 fuori). Il salto ha
+- **La gravità** (ADR-0226, T447, kernel 0.10.1): `nature.gravity` da 0,2 a 2 (`NATURE_ACCEPTS`), letta da `gravityOf` (1 fuori). Il salto ha
   la stessa spinta (`leapOf`): altezza e portata scalano con 1/g ma **mai sotto quelle della terra**, perché `reachableStoreys` e i controlli
   dello Scultore verificano con `JUMP_UP` e `JUMP_FAR` (regola 10); la durata dell'arco con 1/g (0,32 s per 1/g più 0,08 s a casella); il
   kernel salta con `jumpUp()` e `jumpFar()`. Il passo appena (`gaitOf`: 1 sulla terra, 0,9 a 0,2), moltiplicato in `player.step`

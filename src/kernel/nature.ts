@@ -201,7 +201,7 @@ export function repairNature(raw: unknown): WorldNature {
 /** Whether two natures are the same world. */
 export const sameNature = (a: WorldNature, b: WorldNature): boolean => (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]);
 
-// --- The gravity: how a body leaps and walks (T447, ADR-0225) ------------------------------------------------------------------------
+// --- The gravity: how a body leaps and walks (T447, ADR-0226) ------------------------------------------------------------------------
 
 /** The gravity a nature says, as the kernel uses it: within the range this kernel accepts, 1 (the earth's) otherwise (rule 7). */
 export function gravityOf(nature: Pick<WorldNature, 'gravity'> | undefined): number {

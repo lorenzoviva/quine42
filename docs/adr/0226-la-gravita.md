@@ -1,4 +1,4 @@
-# ADR-0225 — La gravità
+# ADR-0226 — La gravità
 
 Data: 2026-11-19 · Stato: accettato (task T447 del backlog, S3 di [`docs/design/acqua-spazio.md`](../design/acqua-spazio.md) § 2.5) ·
 Riferimenti: ADR-0224 (la fisica rimodellabile e la natura del mondo), ADR-0201 (le regioni del master), ADR-0041 e ADR-0064 (la regola 10),

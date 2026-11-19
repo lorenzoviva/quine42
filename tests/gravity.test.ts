@@ -1,4 +1,4 @@
-// The gravity (T447, ADR-0225, `docs/design/acqua-spazio.md` § 2.5): `universe.json → nature.gravity` (0.2-2) scales the jump with 1/g,
+// The gravity (T447, ADR-0226, `docs/design/acqua-spazio.md` § 2.5): `universe.json → nature.gravity` (0.2-2) scales the jump with 1/g,
 // how high, how far and how long, never below the earth's (what the kernel guarantees reachable stays so); the gait barely; the earth's
 // gravity changes nothing.
 

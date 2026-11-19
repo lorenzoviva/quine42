@@ -4045,7 +4045,7 @@ export class Kernel {
   }
 
   /**
-   * The gravity where the wanderer acting is (T447, ADR-0225): in the world, that of the place they stand on (`gravityAt`); in the corona
+   * The gravity where the wanderer acting is (T447, ADR-0226): in the world, that of the place they stand on (`gravityAt`); in the corona
    * and in the studio the earth's, as everything there is of the studio and not of the world.
    */
   gravity(): number {
