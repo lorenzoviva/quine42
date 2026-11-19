@@ -26,7 +26,7 @@ export function itemIcon(k: Kernel, item: string, size = 32): HTMLElement {
   const info = k.itemInfo(item);
   // An item without a model of its own is the star (T430), and here too it turns and stretches, each out of step.
   const star = isStar(k.itemLook(item).model);
-  const delay = star ? `;--star-delay:-${(hashStr(item) % 34) / 10}s` : '';
+  const delay = star ? `;animation-delay:-${(hashStr(item) % 34) / 10}s` : '';
   const box = el('span', { class: star ? 'icon star' : 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px${delay}` }, info.glyph);
   void icons.get?.(item).then((src) => {
     if (src) box.replaceChildren(el('img', { src, alt: info.name, width: String(size), height: String(size) }));

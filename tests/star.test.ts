@@ -11,7 +11,7 @@ describe('the star of what has no model of its own', () => {
   it('is the generic thing of the seed: a flat star, its four points as long as its box, its colour the thing\'s', () => {
     const xml = bundledFiles['models/object.xml'];
     const info = JSON.parse(bundledFiles['models/index.json'])[STAR];
-    expect(info).toMatchObject({ class: 'object', tint: 'C', vpt: 28 });
+    expect(info).toMatchObject({ class: 'object', tint: 'C', vpt: 32 });
     const { grid: g } = runMjx(compileMjx(xml), 1);
     expect([g.X, g.Y, g.Z]).toEqual([17, 17, 17]);
     const at = (x: number, y: number, z: number) => g.alphabet[g.cells[x + y * g.X + z * g.X * g.Y]];
@@ -28,8 +28,8 @@ describe('the star of what has no model of its own', () => {
     expect(at(8, 5, 8)).toBe('W');
     expect(at(8, 11, 8)).toBe('W');
     expect(at(6, 7, 8)).toBe('C');
-    // As tall as wide at its density: 17 voxels at 28 a tile, the 0.6 tiles of a small object.
-    expect(17 / info.vpt).toBeCloseTo(0.6, 1);
+    // As tall as wide at its density: 17 voxels at 32 a tile, half a tile and a little, so that it lies on a barrel's lid as on a shelf.
+    expect(17 / info.vpt).toBeCloseTo(0.53, 2);
   });
 
   it('turns and stretches in height and width, out of step by its phase, always finite and never flat', () => {
@@ -62,7 +62,7 @@ describe('the star of what has no model of its own', () => {
     const up = upgradeFromSeed(before, bundledFiles);
     expect(up.files['models/object.xml']).toBe(bundledFiles['models/object.xml']);
     const now = JSON.parse(up.files['models/index.json']);
-    expect(now.object).toMatchObject({ vpt: 28, name: 'Cosa (stella)', tint: 'C', seeds: 3 });
+    expect(now.object).toMatchObject({ vpt: 32, name: 'Cosa (stella)', tint: 'C', seeds: 3 });
     expect(now.lanterna).toEqual({ class: 'object', name: 'Lanterna' });
     // One that wrote its own thing keeps it, and its entry.
     const mine: FileMap = { ...before, 'models/object.xml': OLD.replace('4 4 4', '5 5 5') };

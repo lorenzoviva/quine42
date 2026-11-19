@@ -15,8 +15,9 @@ di uno schermo a tubo che si spegne, che gira e si deforma in altezza e larghezz
 1. **Il generico della classe `object` è una stella** (`universe/models/object.xml`, a mano): in piedi, le quattro punte che si
    assottigliano a gradini (ogni `box` è un gradino della curva |x|^0,65 + |z|^0,65 = 1; a 0,55 le punte erano fili e da lontano si leggeva
    una croce), più spessa verso il mezzo come una lente e con una scintilla chiara che sporge dalle due facce; la lettera `C` resta la tinta,
-   così il colore è quello dell'oggetto, e un oggetto che non dice il suo colore ne ha uno dal suo id (`itemLook`, una tinta `hsl`). 17 voxel di lato per avere le punte, alla densità 28
-   della sua voce (`vpt`, ADR-0049): 0,6 caselle, la misura di un oggetto piccolo. Non è luminosa: i simboli che brillano nel terreno sono le
+   così il colore è quello dell'oggetto, e un oggetto che non dice il suo colore ne ha uno dal suo id (`itemLook`, una tinta `hsl`). 17 voxel di lato per avere le punte, alla densità 32
+   della sua voce (`vpt`, ADR-0049): 0,53 caselle; a 28 (0,6 caselle, la scatola della classe) non entrava sul coperchio del barile, dove il
+   vaso di prima entrava (`findSpot`, ADR-0150). Non è luminosa: i simboli che brillano nel terreno sono le
    rune (regola 0).
 2. **Il movimento è del renderer**, al suo fotogramma e mai a ogni tick del kernel: `starPulse` (`src/render/star.ts`, pura) dà il giro, la
    larghezza e l'altezza, con un respiro (più larga mentre è più bassa) e ogni tanto una stretta rapida, il lampo che si chiude; ogni oggetto ha
@@ -41,4 +42,6 @@ di uno schermo a tubo che si spegne, che gira e si deforma in altezza e larghezz
 
 - Anche un'entità della classe `object` senza modello (un vaso del Narratore che lo Scultore non ha ancora scolpito) è una stella, ferma.
 - Un programma del seme che cambia la sua densità porta con sé la voce negli universi che lo prendono.
-- `tests/star.test.ts` afferma la forma, il movimento e il passaggio agli universi.
+- `tests/star.test.ts` afferma la forma, il movimento e il passaggio agli universi; `tests/posare.test.ts` che la stella si posa su ogni
+  mobile del seme, e prova i ripiani con il vaso di prima come modello solo del test; le impronte di `object` nelle fixture del motore
+  (`mj-engine-hashes.json`, `griglie-visive.json`) sono riscritte, il motore non cambia.
