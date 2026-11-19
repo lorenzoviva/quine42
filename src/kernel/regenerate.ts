@@ -16,7 +16,7 @@ import { procedural, sculpt, STRUCTURE_SEEDS, type SculptorAiModels, type Sculpt
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, modelSize } from './modeldirector';
 import { cellarOf } from './forms';
 import { sculptPlan } from './coefficients';
-import { classOf, growsByRules, sizeOf, STRUCTURE_VPT, TILE, tilesOf, type SizeTier } from '../mj/classes';
+import { classOf, growsByRules, isFortified, sizeOf, STRUCTURE_VPT, TILE, tilesOf, type SizeTier } from '../mj/classes';
 import { SOUND_CLASS } from '../mj/sound';
 import { anthropicCost } from './ai/prices';
 import type { Usage } from './ai/models';
@@ -139,6 +139,8 @@ export function requestOf(id: string, info: ModelInfo, wearers: readonly Wearer[
       ...(taglia ? { taglia } : {}),
       ...(place ? { contesto: place.name } : {}),
       ...(house ? { dwelling: true } : {}),
+      // A fortification by the concept the world wears it as, when the entry's own name does not say it (T434).
+      ...(isFortified(concept) ? { fortified: true } : {}),
       ...(cellar ? { cellar } : {}),
       ...tinta,
     };

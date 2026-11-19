@@ -10,7 +10,7 @@
 import type { Schema } from '../ai/models';
 import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
 import { analyse, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, isFortified, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -129,10 +129,21 @@ export interface SculptRequest {
    * without (`SculptResult.cellar` absent).
    */
   cellar?: number;
+  /** A military fortification (T434), if who asks knows it; else the words of its concept say it (`fortifiedOf`). */
+  fortified?: boolean;
 }
 
 /** Whether a structure asked for is a dwelling (T413, ADR-0213): the request says it, or its concept (`isDwelling`). */
 export const dwellingOf = (req: Pick<SculptRequest, 'nome' | 'dwelling'>): boolean => req.dwelling ?? isDwelling(req.nome);
+
+/**
+ * Whether a structure asked for is a military fortification (T434): the request says it, or its concept (`isFortified`). Only a fortification
+ * is offered the parts of a fort (`FORT_PARTS`) and may wear merlons and arrow slits; any other is told it does not.
+ */
+export const fortifiedOf = (req: Pick<SculptRequest, 'nome' | 'fortified'>): boolean => req.fortified ?? isFortified(req.nome);
+
+/** The parts of the seed that only a fortification includes (T434): the merlons and the arrow slits under them. */
+export const FORT_PARTS = ['part-battlements', 'part-slits'] as const;
 
 /** Where a thing is worn, as the request says it. */
 const WORN_ON: Record<WornZone, string> = { head: 'on the head', torso: 'on the torso', back: 'on the back' };
@@ -311,13 +322,15 @@ export function libraryResources(files: FileMap): string[] {
 /**
  * The parts one lives in that a structure may include (T354, ADR-0183): the programs `models/part-*.xml` of the universe (the sub-blocks
  * of the seed, ADR-0182), each with its contract for the program that includes it, the first paragraph of the comment at its top. One
- * entry per part, for the request; empty if the universe has none.
+ * entry per part, for the request; empty if the universe has none. Without `fortified` (T434), not the parts of a fort (`FORT_PARTS`).
  */
-export function partResources(files: FileMap): string[] {
+export function partResources(files: FileMap, fortified = true): string[] {
   const out: string[] = [];
   for (const [path, text] of Object.entries(files)) {
     const name = /^models\/(part-[a-z0-9-]+)\.xml$/.exec(path);
     if (!name || typeof text !== 'string') continue;
+    // The parts of a fort only to a fortification (T434): offered to a cathedral or a station, the Sculptor crowned them with merlons (T153).
+    if (!fortified && (FORT_PARTS as readonly string[]).includes(name[1])) continue;
     const comment = /^\s*<!--([\s\S]*?)-->/.exec(text)?.[1]?.trim();
     const contract = comment?.split(/\n\s*\n/)[0]?.replace(/\s*\n\s*/g, ' ').trim();
     out.push(`- <import file="${name[1]}"/>: ${contract || 'a part of the seed (no contract written at its top)'}`);
@@ -458,6 +471,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     req.worn && `It is worn ${WORN_ON[req.worn]}: after the program write its <worn zone="${req.worn}"> section (see «Worn things»).`,
     procedural(cls, req.taglia) && bodyLine(cls, req.taglia),
     procedural(cls, req.taglia) && dwellingOf(req) && DWELLING_LINE,
+    procedural(cls, req.taglia) && (fortifiedOf(req) ? FORTIFIED_LINE : UNFORTIFIED_LINE),
     cellarLine(req, cls),
   ]
     .filter(Boolean)
@@ -531,6 +545,13 @@ export function textViews(c: Pick<Checked, 'model' | 'result' | 'others' | 'fail
 
 /** What a dwelling's request says of its floor (T413, ADR-0213): the same at every size, measured as the check does. */
 const DWELLING_LINE = `It is a dwelling (see «What fits»): the house takes most of the area, not a cottage in a garden. At least ${DWELLING.floor} tiles² of covered floor where a body stands (its centre, half a body off every wall) on the ground floor and on another storey, the ground floor in ${DWELLING.groundRooms} rooms or more of at least ${String(DWELLING.room)} tiles² each (the hall and a room) divided by an inner wall with a door: about 75 × 65 voxels inside the outer walls at every size, two storeys.`;
+
+/**
+ * What the request of a structure says of merlons and arrow slits (T434): a fortification may wear them (its parts are listed), any other
+ * does not, and is told what crowns its flat tops instead. The fort of the prompt measures richness, never form (ADR-0210).
+ */
+const FORTIFIED_LINE = 'It is a fortification: merlons (part-battlements) and arrow slits (part-slits) belong to it.';
+const UNFORTIFIED_LINE = 'It is not a fortification: no merlons, no arrow slits, nothing of a fort; its flat tops end in a cornice, a solid parapet, a railing, a skylight or a dome, as its world builds them.';
 
 /** What each measure of the checks means, for who reads only the reason (T354): the key is how the reason begins. */
 const MEANINGS: Array<[RegExp, string]> = [
@@ -643,7 +664,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   const resources = libraryResources(c.files);
   if (resources.length) prompt += `\n\nFiles of models/ the program may read (wfc tileset or sample, convchain sample, rules with file/fin/fout):\n${resources.join('\n')}`;
   // The parts one lives in (ADR-0182), with their contracts: a structure includes them instead of writing them (T354).
-  const parts = proc ? partResources(c.files) : [];
+  const parts = proc ? partResources(c.files, fortifiedOf(req)) : [];
   if (parts.length) prompt += `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`;
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;

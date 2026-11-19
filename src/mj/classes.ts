@@ -211,6 +211,22 @@ export function isDwelling(concept: string): boolean {
   return DWELLING_WORDS.yes.some((re) => re.test(t)) && !DWELLING_WORDS.no.some((re) => re.test(t));
 }
 
+/**
+ * The words of a concept that say a military fortification (T434), Italian and English like `DWELLING_WORDS`: only these structures wear
+ * merlons and arrow slits (`part-battlements`, `part-slits`). A tower alone is not one (a lighthouse, a panoramic tower, a bell tower): a
+ * watchtower is. A barracks only when it says it is fortified.
+ */
+const FORTIFIED_WORDS = [
+  /\b(forte|forti|fortezza|fortezze|fortino|fortini|fortilizio|fortificat[oaie]|fortificazion[ei]|piazzaforte|roccaforte|castell[oi]|rocca|rocche|mastio|torrione|torrioni|bastione|bastioni|cittadella|ridotta|mura|cinta muraria|torre di (guardia|vedetta|avvistamento)|torri di (guardia|vedetta|avvistamento))\b/,
+  /\b(forts?|fortress(es)?|fortified|fortifications?|castles?|citadels?|strongholds?|bastions?|keep|ramparts?|redoubts?|watchtowers?|guard ?towers?|city walls)\b/,
+];
+
+/** Whether a structure's concept says a military fortification (T434): a fort, a castle, a keep, a bastion, a watchtower, walls. */
+export function isFortified(concept: string): boolean {
+  const t = concept.toLowerCase();
+  return FORTIFIED_WORDS.some((re) => re.test(t));
+}
+
 /** The least measures of the parts in voxels at a density (rounded up: never under the measure in tiles). */
 export function partVoxels(vpt: number) {
   const v = (t: number) => Math.ceil(t * vpt - 1e-9);
