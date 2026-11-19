@@ -4,6 +4,7 @@
 
 import type { Kernel } from '../kernel/kernel';
 import { MASTER_REGION_LIMITS, REGION_KIND_NAME, REGION_KIND_NOTE, regionKind, type Region, type RegionKind } from '../kernel/atlas';
+import { NATURE_ACCEPTS } from '../kernel/nature';
 import { el } from './dom';
 
 type Kind = RegionKind | 'plan';
@@ -28,7 +29,8 @@ export function regionColor(r: Region): string {
 export function regionLine(k: Kernel, r: Region): string {
   const kind: Kind = regionKind(r) ?? 'plan';
   const env = r.environment ? (k.content.layouts[r.environment]?.name ?? r.environment) : '';
-  return `«${r.name}» — ${REGION_KIND_NAME[kind]}${env ? ` (${env})` : ''}, centro ${r.center[0]},${r.center[1]}, raggio ${r.radius}`;
+  const gravity = typeof r.gravity === 'number' ? `, gravità ${r.gravity}` : '';
+  return `«${r.name}» — ${REGION_KIND_NAME[kind]}${env ? ` (${env})` : ''}, centro ${r.center[0]},${r.center[1]}, raggio ${r.radius}${gravity}`;
 }
 
 export interface RegionFormOptions {
@@ -42,8 +44,8 @@ export interface RegionFormOptions {
 }
 
 /**
- * The form: name, description, centre, radius, what it does (filler, held, the Cartographer's environment) and the environment among those the
- * world has. «Dichiara» asks the kernel; what does not hold stays here with every reason.
+ * The form: name, description, centre, radius, what it does (filler, held, the Cartographer's environment), the environment among those the
+ * world has and the gravity of its places (T447: empty, the world's). «Dichiara» asks the kernel; what does not hold stays here with every reason.
  */
 export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
   const L = MASTER_REGION_LIMITS;
@@ -60,6 +62,8 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
   const layouts = Object.entries(k.content.layouts).sort((a, b) => a[1].name.localeCompare(b[1].name));
   const environment = el('select', { 'data-region': 'environment' }, el('option', { value: '' }, 'nessun ambiente'), ...layouts.map(([id, l]) => el('option', { value: id }, l.name))) as HTMLSelectElement;
   environment.value = r?.environment ?? layouts[0]?.[0] ?? '';
+  const [glo, ghi] = NATURE_ACCEPTS.gravity;
+  const gravity = el('input', { type: 'number', min: String(glo), max: String(ghi), step: '0.1', placeholder: 'del mondo', value: typeof r?.gravity === 'number' ? String(r.gravity) : '', style: 'width:6em', 'data-region': 'gravity' }) as HTMLInputElement;
   const meaning = el('div', { class: 'note' });
   const said = el('div', { class: 'note', 'data-region': 'said' });
   const explain = () => {
@@ -79,6 +83,7 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
       radius: Number(radius.value),
       kind: kind.value,
       environment: environment.value,
+      ...(gravity.value.trim() ? { gravity: Number(gravity.value) } : {}),
     };
     void k
       .declareRegion(request)
@@ -96,6 +101,7 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
     el('div', { class: 'row' }, description),
     el('div', { class: 'row' }, 'centro ', cx, ' ', cy, ' raggio ', radius, ' luoghi'),
     el('div', { class: 'row' }, kind, ' ', environment),
+    el('div', { class: 'row', title: `il salto e il passo nei suoi luoghi; 1 è la terra, da ${glo} a ${ghi}` }, 'gravità ', gravity),
     meaning,
     said,
     el('div', { class: 'row' }, declare, cancel),

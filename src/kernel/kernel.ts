@@ -8,7 +8,7 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
-import { crossingOf, repairNature, sameNature, terrainPhysics, type WorldNature } from './nature';
+import { crossingOf, gaitOf, gravityOf, leapOf, repairNature, sameNature, terrainPhysics, type WorldNature } from './nature';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
@@ -22,7 +22,7 @@ import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
@@ -4073,9 +4073,10 @@ export class Kernel {
    * starts below base + JUMP_UP (on a floor above, the ceiling over it does not count, T70); the ground if nothing is there.
    */
   private heightOver(x: number, y: number, r: number, base: number): number {
+    const up = this.jumpUp();
     let h = this.groundAt(x, y);
     for (const { s, box } of this.formsUnder(x, y, r)) {
-      const t = topUnder(s.form, s.levels, ...box, this.levelIn(s, base), JUMP_UP * s.form.vpt);
+      const t = topUnder(s.form, s.levels, ...box, this.levelIn(s, base), up * s.form.vpt);
       if (t !== undefined) h = Math.max(h, this.standOf(s) + t);
     }
     return h;
@@ -4091,13 +4092,45 @@ export class Kernel {
       const def = t ? this.palette[t] : undefined;
       if (!t || (def?.solid && def.layer !== 'liquid')) return false;
     }
-    return this.heightOver(x, y, r, base) - base <= JUMP_UP;
+    return this.heightOver(x, y, r, base) - base <= this.jumpUp();
+  }
+
+  /**
+   * The gravity where the wanderer acting is (T447, ADR-0226): in the world, that of the place they stand on (`gravityAt`); in the corona
+   * and in the studio the earth's, as everything there is of the studio and not of the world.
+   */
+  gravity(): number {
+    const p = this.wandererPos();
+    if (!p || this.corona.isInterior(p.x) || Math.hypot(p.x, p.y) >= this.config.circleRadius) return 1;
+    const { x, y } = this.wandererCarpet();
+    return this.gravityAt(x, y);
+  }
+
+  /**
+   * The gravity of a point of the world (carpet space): that of the master's region the place falls in, if it says one and is the world's
+   * (`regionGravity`: not a region held, not the first place), else the world's nature (`gravityOf`). Always within the kernel's range.
+   */
+  gravityAt(x: number, y: number): number {
+    const S = this.config.chunkSize;
+    const cx = Math.floor(x / S), cy = Math.floor(y / S);
+    const region = cx === 0 && cy === 0 ? undefined : regionAt(this.atlasNow(), cx, cy);
+    return regionGravity(region) ?? gravityOf(this.config.nature);
+  }
+
+  /** How high a jump clears and lands in this world (tiles): JUMP_UP under the earth's gravity, more under a lighter one (T447). */
+  jumpUp(): number {
+    return JUMP_UP * leapOf(this.gravity()).reach;
+  }
+
+  /** How far a jump reaches in this world (tiles): JUMP_FAR under the earth's gravity, farther under a lighter one (T447). */
+  jumpFar(): number {
+    return JUMP_FAR * leapOf(this.gravity()).reach;
   }
 
   /**
    * A jump (T56b, Space): towards where the wanderer walks (or faces), over what is no higher than JUMP_UP, to the
    * nearest place a tile or more away and within JUMP_FAR where the feet can rest or the body swims (T438: into the water and out of it; not a floor out of
-   * reach); with none, a jump on the spot. Only in the simulation: false in the corona and the studio (nothing
+   * reach); with none, a jump on the spot. Under a lighter gravity higher, farther and slower (T447, `leapOf`). Only in the simulation: false in the corona and the studio (nothing
    * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
    */
   jump(): boolean {
@@ -4121,7 +4154,9 @@ export class Kernel {
     // The water it may fall in (T438): the first place it swims, if no ground is within reach (a stream is jumped over, a lake jumped into).
     let wet: { d: number; h: number; clear: number } | undefined;
     let clear = 0;
-    for (let i = 1; i * 0.1 <= JUMP_FAR + 1e-6 && !land; i++) {
+    const leap = leapOf(this.gravity());
+    const up = JUMP_UP * leap.reach, far = JUMP_FAR * leap.reach;
+    for (let i = 1; i * 0.1 <= far + 1e-6 && !land; i++) {
       const d = i * 0.1, x = from.x + dx * d, y = from.y + dy * d;
       // Never out of the circle: what lies beyond is not jumped into.
       if (Math.hypot(real.x + dx * d, real.y + dy * d) > this.config.circleRadius - r - 0.5) break;
@@ -4129,7 +4164,7 @@ export class Kernel {
       clear = Math.max(clear, this.heightOver(x, y, r, h0) - h0);
       if (i < 10) continue;
       // It lands on the highest floor it clears, if the body stands there.
-      const h = this.floorBelow(x, y, h0 + JUMP_UP);
+      const h = this.floorBelow(x, y, h0 + up);
       if (this.free(x, y, r, h)) land = { d, h };
       else if (!wet && this.swimsAt(x, y) && this.bodyFree(x, y, r, h)) wet = { d, h, clear };
     }
@@ -4138,7 +4173,9 @@ export class Kernel {
       clear = wet.clear;
     }
     const to = land ? { x: from.x + dx * land.d, y: from.y + dy * land.d } : from;
-    const jc: JumpComp = { from, to, h0, h1: land?.h ?? h0, peak: Math.min(JUMP_UP + 0.25, Math.max(0.45, clear + 0.25)), t: 0, dur: 0.32 + 0.08 * (land?.d ?? 0) };
+    // The same push under another gravity (T447): the arc of the earth's jump is 0.32 s and 0.08 s a tile; the time of the leap scales
+    // with 1/g, the pace along the line does not.
+    const jc: JumpComp = { from, to, h0, h1: land?.h ?? h0, peak: Math.min(up + 0.25, Math.max(0.45 * leap.time, clear + 0.25)), t: 0, dur: 0.32 * leap.time + 0.08 * (land?.d ?? 0) };
     this.ecs.set(this.wandererEntity, 'jump', jc);
     if (pl && land) pl.facing = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
     this.bus.emit('wanderer:jumped', { id: this.wanderer().id, far: land?.d ?? 0 });
@@ -10150,6 +10187,8 @@ export class Kernel {
         if (!states[k] || typeof states[k] !== 'object') delete states[k];
         else step *= Number(states[k].speed) || 1;
       }
+    // The gravity of the world barely changes the gait (T447, `gaitOf`): the same on the earth.
+    step *= gaitOf(this.gravity());
     const pl = this.ecs.get(this.wandererEntity, 'player');
     if (pl) pl.step = Math.max(0.2, Math.min(4, step));
   }
