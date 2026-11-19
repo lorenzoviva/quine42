@@ -407,8 +407,13 @@ export interface RecutContext {
   id: string;
   def: EnvironmentDef;
   palette: Record<string, TerrainDef>;
-  /** The least side, walls included, of a building that holds a structure (7 a Large at 16, 10 a Huge). */
+  /** The least side, walls included, of a building that holds the largest structure of its places (7 a Large at 16, 10 a Huge). */
   need: number;
+  /**
+   * The least side of every building that is not a small house (7: a Large, a common house at 16), when it is under `need` (T436): only the
+   * structure that needs more needs a building of `need`. Absent: `need`.
+   */
+  least?: number;
   /** The longer side under which a building is a small house that holds no structure (`STRUCTURE_LOT`: 5, so at most 4 × 4). */
   small: number;
   places: RecutPlace[];
@@ -431,13 +436,32 @@ const RECUT_SCHEMA: Schema = {
  */
 export async function recutEnvironment(c: Council, ctx: RecutContext): Promise<{ program?: MjNode; note: string; error?: string }> {
   const n = ctx.need;
+  // T436: a Huge on one place of the environment asks for one building that large, not for every building of every place.
+  const least = Math.min(n, ctx.least ?? n);
+  const walled = (m: number) => `at least ${m} × ${m}, walls included (inner floor closed by walls, a door, a ring of free ground around: the input one tile larger on every side, \`*\` there in the output)`;
+  const clear = `- A rule is placed only where its whole input matches the draft: clear first what would stop a big building (vegetation, rocks, the scrub of the draft) with a "prl" at p 1 where needed, and let the input take every walkable terrain of the draft and those your own rules draw before it (a paving, a quay).\n- A "one" rule lands anywhere its input matches: where the draft has streets (a row or column of one code across the place), a building whose input begins with that street row and column sits in its block and leaves room for the next.`;
+  const sizes =
+    least < n
+      ? [
+          `- Every building of ${ctx.small} tiles or more on its longer side must be ${walled(least)}; smaller buildings stay at most ${ctx.small - 1} × ${ctx.small - 1}.`,
+          `- Only a structure that says so needs a larger building (the largest ${n} × ${n}): draw that one first and at most one per place ("steps" 1), then the buildings of ${least} × ${least}, so that a place still gets them beside it.`,
+          `- Each place below must get, for each structure it lists, its own building at least as large as that structure needs.`,
+          clear,
+          `- The place is 18 × 18 tiles and its border does not change (its outer rows and columns keep the terrain of the draft even under a rule that writes there, so an input that covers the border must take the draft's terrains there: sand stays sand): two buildings of ${least} × ${least} with their ring fit; one of ${n} × ${n} and one of ${least} × ${least} fit only in opposite corners, so keep the large one off the middle.`,
+        ]
+      : [
+          `- Every building of ${ctx.small} tiles or more on its longer side must be ${walled(n)}; smaller buildings stay at most ${ctx.small - 1} × ${ctx.small - 1}.`,
+          `- Each place below must get at least as many buildings of ${n} × ${n} as the structures it lists: put the big buildings first, with enough "steps", then the small ones.`,
+          clear,
+          `- The place is 18 × 18 tiles and its border does not change (its outer rows and columns keep the terrain of the draft even under a rule that writes there, so an input that covers the border must take the draft's terrains there: sand stays sand): two buildings of ${n} × ${n} with their ring fit, three only on open ground.`,
+        ];
   const raw = await c.ask<{ program_json?: string; note?: string }>(
     'cartographer',
     RECUT_TASK,
     [
-      `The environment «${ctx.id}» (${ctx.def.name}, ${ctx.def.environment}: ${ctx.def.description}) was written when buildings were smaller. Its buildings no longer hold the structures of its places: a structure now needs a building at least ${n} × ${n} tiles, walls included.`,
+      `The environment «${ctx.id}» (${ctx.def.name}, ${ctx.def.environment}: ${ctx.def.description}) was written when buildings were smaller. Its buildings no longer hold the structures of its places: a structure now needs a building at least ${least < n ? `${least} × ${least} tiles, walls included, the largest ${n} × ${n}` : `${n} × ${n} tiles, walls included`}.`,
       `Its program now:\n${JSON.stringify(ctx.def.program)}`,
-      `Write the program again: the same environment (its character, its terrains, its streets and details), with buildings that hold the structures.\n- Every building of ${ctx.small} tiles or more on its longer side must be at least ${n} × ${n}, walls included (inner floor closed by walls, a door, a ring of free ground around: the input one tile larger on every side, \`*\` there in the output); smaller buildings stay at most ${ctx.small - 1} × ${ctx.small - 1}.\n- Each place below must get at least as many buildings of ${n} × ${n} as the structures it lists: put the big buildings first, with enough "steps", then the small ones.\n- A rule is placed only where its whole input matches the draft: clear first what would stop a big building (vegetation, rocks, the scrub of the draft) with a "prl" at p 1 where needed, and let the input take every walkable terrain of the draft.\n- The place is 18 × 18 tiles and its border does not change: two buildings of ${n} × ${n} with their ring fit, three only on open ground.`,
+      `Write the program again: the same environment (its character, its terrains, its streets and details), with buildings that hold the structures.\n${sizes.join('\n')}`,
       `The places on this environment (the kernel runs your program on their drafts):\n${ctx.places.map((p) => `- «${p.name}»: ${p.structures.length ? `structures ${p.structures.map((s) => `${s.concept}${s.size ? ` (${s.size})` : ''}, ${s.need} × ${s.need}`).join('; ')}` : 'no structures (common houses on its big buildings)'}; buildings now ${p.lots.join(', ') || 'none'}; draft ${p.draft}${p.rows ? `:\n${p.rows.map((r) => `    ${r}`).join('\n')}` : ''}`).join('\n')}`,
       `Terrains:\n${paletteSummary(ctx.palette)}`,
       ctx.feedback ? `THE PREVIOUS PROGRAM DID NOT HOLD THEM: ${ctx.feedback}. Fix it.` : '',

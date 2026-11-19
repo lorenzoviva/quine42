@@ -20,6 +20,10 @@
 //   --modelli <n>                      at most this many types in this run
 //   --tetto <%>                        as above, in universes/.generation/<universo>.rigenera-modelli.json
 //   --modello <id>, --sforzo <livello>  default claude-opus-5-5, low (the stable Sculptor of T406 and T413)
+//   --ambienti <id,…>                  these environments are written again by the Cartographer (environment.recut, ADR-0218), even where the
+//                                      kernel's own cut would lose no structure and leave one at 20 (T436)
+//   --giro <nome>                      a run of its own (T436): its progress in universes/.generation/<universo>.rigenera-modelli-<nome>.json,
+//                                      so types and environments a run of the generator did are done again; the generator's file stays
 //
 // Local only: it never runs on the production server (which does not have it) and never on a universe with a world lit.
 
@@ -90,7 +94,14 @@ export interface RegenerateOptions extends CommonOptions {
   modelli?: number;
   /** How long to wait for whoever serves the queue (`QUEUE_WAIT_MS`). */
   queueWait?: number;
+  /** Environments the Cartographer writes again (T436). */
+  ambienti?: string[];
+  /** A run of its own, with its own progress (T436). */
+  giro?: string;
 }
+
+/** The name of a run of its own (`--giro`): it goes into a file name beside the universes. */
+export const RUN_NAME_RE = /^[a-z0-9][a-z0-9-]{0,31}$/;
 
 /** The subscription's week from the CLI's `/usage`, as the pipeline reads it (no model is called). */
 export async function cliWeekly(cmd = 'claude'): Promise<WeeklyUsage | undefined> {
@@ -240,7 +251,8 @@ export async function regenerateUniverse(o: RegenerateOptions): Promise<Deferred
       o.log?.(tag === 'made' ? `lo stato di prima resta nella storia dell'universo: tag ${BEFORE_REGENERATION}` : tag === 'there' ? `tag ${BEFORE_REGENERATION}: c'era già, resta dov'era` : `nessun commit da segnare con ${BEFORE_REGENERATION}`);
     });
     if ('esito' in up) return up;
-    const progress: DeferredStorage = progressFile(o.dir, o.name, { tetto: DEFAULT_CEILING }, regenKind(mode));
+    if (o.giro !== undefined && !RUN_NAME_RE.test(o.giro)) return failed(`nome del giro non valido: ${o.giro}`);
+    const progress: DeferredStorage = progressFile(o.dir, o.name, { tetto: DEFAULT_CEILING }, `${regenKind(mode)}${o.giro ? `-${o.giro}` : ''}`);
     if (o.tetto !== undefined) progress.save({ ...progress.load(), tetto: o.tetto });
     const queue = o.queue ?? diskQueue(o.dir, { model, effort });
     const { kernel, models, gate } = await bootDeferred(up.files, client, snap, queue);
@@ -255,14 +267,14 @@ export async function regenerateUniverse(o: RegenerateOptions): Promise<Deferred
       luoghi: 0,
       interrupted: o.interrupted,
       log: o.log,
-      steps: (k, done) => regenerationSteps(k, { ...(o.classi ? { classes: o.classi } : {}), ...(o.tipi ? { only: o.tipi } : {}), ...(o.modelli !== undefined ? { max: o.modelli } : {}), model, seedLayouts: layouts, log: o.log }, done),
+      steps: (k, done) => regenerationSteps(k, { ...(o.classi ? { classes: o.classi } : {}), ...(o.tipi ? { only: o.tipi } : {}), ...(o.modelli !== undefined ? { max: o.modelli } : {}), ...(o.ambienti ? { environments: o.ambienti } : {}), model, seedLayouts: layouts, log: o.log }, done),
     });
   });
 }
 
 const USAGE = [
   'uso: npm run genera -- <universo> [--partita singola|multigiocatore] [--tema <id> | --testo "<testo>"] [--luoghi <n>] [--modelli <n>] [--brani <n>] [--tetto <%>] [--modello <id>] [--sforzo <livello>] [--universi <cartella>]',
-  '     npm run genera -- <universo> --rigenera modelli [--tipi <id,…>] [--classi <classe,…>] [--modelli <n>] [--tetto <%>] [--modello <id>] [--sforzo <livello>] [--universi <cartella>]',
+  '     npm run genera -- <universo> --rigenera modelli [--tipi <id,…>] [--classi <classe,…>] [--modelli <n>] [--tetto <%>] [--modello <id>] [--sforzo <livello>] [--ambienti <id,…>] [--giro <nome>] [--universi <cartella>]',
 ].join('\n');
 
 /** The words of the command: a generation's options or a regeneration's (`--rigenera`), or why not. */
@@ -309,6 +321,13 @@ export function parseArgs(argv: string[], cwd = process.cwd()): ({ rigenera?: un
         const n = Number(v);
         if (!Number.isInteger(n) || n < 0) return 'modelli: un numero intero, 0 o più';
         o.modelli = n;
+      } else if (k === '--ambienti') {
+        const ids = v.split(',').map((s) => s.trim()).filter(Boolean);
+        if (!ids.length) return 'ambienti: uno o più id, separati da virgole';
+        o.ambienti = ids;
+      } else if (k === '--giro') {
+        if (!RUN_NAME_RE.test(v)) return `giro: lettere minuscole, cifre e trattini, non ${v}`;
+        o.giro = v;
       } else return `opzione sconosciuta con --rigenera: ${k}`;
     }
     return o;

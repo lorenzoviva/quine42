@@ -1257,7 +1257,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: i tipi di modello che un universo indossa (mobili, strutture, edifici piccoli da T428, figure) riscolpiti con lo Scultore di oggi, le strutture a 16 voxel per casella e arredate dallo Scenografo, i lotti dei luoghi di prima rifatti dove non le terrebbero; passo dopo passo dalla coda degli abbonamenti, come la generazione differita; bibbia, luoghi e persone restano (ADR-0216).
 - **Dove vive**: `src/kernel/regenerate.ts`, `tools/generazione/genera.ts` (`--rigenera modelli`), `tools/pipeline/generatore.mjs` (`"rigenera"` nelle voci di `generazione`)
 - **Da non usare**: `riscolpitura`, `rigenerazione dell'universo` (si rigenerano i modelli, non il mondo)
-- **Fermo**: il file `universes/.generation/<nome>.rigenera-modelli.json` (passi, tetto, consumo, `tries`), il tag `prima-della-rigenerazione` nella storia dell'universo, i passi `ambiente:<id>`, `rigenera:<modello>`, `interno:<modello>`; il compito `environment.recut` del Cartografo (T422, ADR-0218: l'ambiente che il kernel non sa allargare, riscritto).
+- **Fermo**: il file `universes/.generation/<nome>.rigenera-modelli.json` (passi, tetto, consumo, `tries`), il tag `prima-della-rigenerazione` nella storia dell'universo, i passi `ambiente:<id>`, `rigenera:<modello>`, `interno:<modello>`; il compito `environment.recut` del Cartografo (T422, ADR-0218: l'ambiente che il kernel non sa allargare, riscritto); il **giro** di un compito (`--giro <nome>`, T436, ADR-0223) col suo file `<nome>.rigenera-modelli-<giro>.json`, e gli ambienti chiesti al Cartografo (`--ambienti`).
 
 ### Misura della classe
 - **Inglese**: `classFit`, `ClassFit`
