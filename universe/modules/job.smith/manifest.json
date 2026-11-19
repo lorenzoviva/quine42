@@ -21,7 +21,10 @@
         "fonditore",
         "fonditrice",
         "operaio",
-        "operaia"
+        "operaia",
+        "carpentiere",
+        "carpentiera",
+        "calafato"
       ],
       "workplace": {
         "entity": "banco"

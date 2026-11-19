@@ -23,7 +23,10 @@
         "tecnico",
         "tecnica",
         "esattore",
-        "esattrice"
+        "esattrice",
+        "telegrafista",
+        "capitano di porto",
+        "quartiermastro"
       ],
       "day": {
         "morning": [

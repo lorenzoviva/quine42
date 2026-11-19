@@ -34,7 +34,9 @@
         "fattore",
         "fattora",
         "coltivatore",
-        "coltivatrice"
+        "coltivatrice",
+        "piantatore",
+        "piantatrice"
       ],
       "workplace": {
         "tile": "m"

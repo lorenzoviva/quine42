@@ -1,9 +1,9 @@
-// The four themes offered by the Genesis screen (T152, ADR-0134): plain text, the same free text the player can rewrite.
+// The themes offered by the Genesis screen (T152, ADR-0134; the frontier, the islands and the far world, T184): plain text, the same free text the player can rewrite.
 // A theme is not a seed of its own: what a universe keeps of it is `prompts/theme.md`, like any theme written by hand.
 // A theme is a prompt of the Council, so it is English (T310, ADR-0165); the world it makes speaks the language of its universe.
 
 export interface WorldTheme {
-  id: 'medievale' | 'steampunk' | 'moderno' | 'futuristico';
+  id: 'medievale' | 'steampunk' | 'moderno' | 'futuristico' | 'western' | 'pirates' | 'space';
   /** The name the Genesis screen shows (the interface, Italian until T239). */
   name: string;
   text: string;
@@ -71,6 +71,58 @@ Stories are born from the people: work, families, loves, debts, shifts, smugglin
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the mud as
 on the asphalt. The companies buy them, couriers smuggle them, street sellers sell fake ones; on the street
 some call what they do magic, unashamed. What they really do is written in the canon of the runes.`,
+  },
+  {
+    id: 'western',
+    name: 'Far West',
+    text: `# Theme: Dust and Rails
+
+The far west of the frontier: prairies of yellow grass, red canyons and mesas, rivers with fords, a railway that
+is still being laid; towns of planks along a single street, with the saloon, the general store, the sheriff's office,
+the stable and the church with a bell; around, ranches with corrals, mining camps in the hills, wagon trails, the
+desert. Cowhands, ranchers, sheriffs and deputies, saloon keepers, farriers, prospectors, telegraph clerks, preachers,
+schoolteachers, cardsharps, outlaws, horses, cattle, mules and coyotes. Revolvers and rifles are tools of the world, with their weight.
+
+Tone: concrete, warm, dusty, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, cattle drives, land claims, feuds, robberies, journeys.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the dust as
+in the riverbed. Prospectors pick them up with the nuggets, the store buys them by weight, the preacher warns against them;
+whoever has spoken one does not boast of it at the bar. What they really do is written in the canon of the runes.`,
+  },
+  {
+    id: 'pirates',
+    name: 'Pirati',
+    text: `# Theme: The Islands of the Brethren
+
+An archipelago of warm seas in the age of sail: islands close to one another, joined by sandbanks, reefs and rope
+bridges, walked from cove to cove; harbour towns of timber and coral stone, quays with ships at anchor in the bay,
+shipyards, taverns of the port, a fort on the headland, plantations, palm beaches, jungle in the heart of the islands,
+wrecks on the shoals. Sailors, boatswains, ship's cooks, carpenters, fishermen, smugglers, harbour masters, tavern
+keepers, governors' soldiers, freebooters, parrots, goats, crabs and ship's cats. Pistols and cutlasses are tools of the world, with their weight.
+
+Tone: concrete, warm, salty, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, crews, families, loves, debts, shares of a prize, mutinies, rivalries, voyages told on the quay.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the sand as
+in the jungle. Sailors keep them for luck, smugglers trade them, harbour masters tax them; whoever has spoken
+one tells it only to their own crew. What they really do is written in the canon of the runes.`,
+  },
+  {
+    id: 'space',
+    name: 'Spazio',
+    text: `# Theme: The Far Colony
+
+A world far from the one where people were born, settled generations ago: ochre plains and deep canyons under a pale sky,
+fields of lichen and orchards under glass, frozen lakes, craters, the old landing field where the shuttles come down
+from the ship that stays in orbit; settlements of prefabricated modules, workshops of salvage, water towers, greenhouses,
+the first stone houses of those born here. The air can be breathed, thin and cold. Technicians, shuttle pilots,
+growers, ice miners, medics, cooks, teachers, traders of spare parts, the colony's wardens, prospectors, hardy goats,
+woolly beasts of this world and the cats that came on the ship.
+
+Tone: concrete, warm against the cold, with a pinch of wonder. The world is alive and consistent, and for those who live in it, it is real.
+Stories are born from the people: work, families, loves, debts, shifts, harvests, water rights, rivalries, journeys between settlements.
+Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the dust as
+in the ice. They were here before the colony: the technicians measure them and understand nothing, the growers keep
+them in the greenhouse, the children collect them. What they really do is written in the canon of the runes.`,
   },
 ];
 
