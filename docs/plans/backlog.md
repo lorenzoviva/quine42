@@ -6067,12 +6067,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T446`; suite e typecheck verdi.
 
-### T447 · S3 · La gravità — `da fare` (dipende da T437)
+### T447 · S3 · La gravità — `fatto` (`fecfd05b`) (dipende da T437)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · browser · priorità 6
 - Step: 37
 - Contesto e cosa fare: § 2.5 dello studio; la gravità fra le primitive rimodellabili di T437.
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T447`; suite e typecheck verdi.
+- Esito: gravità 0,2-2 (`nature.gravity`, ADR-0225, kernel 0.10.1): il salto scala con 1/g (più alto, lontano, lento), mai sotto quello della terra con cui il kernel verifica ciò che si raggiunge; il passo appena (0,9 a 0,2); una regione del master dice la sua (`Region.gravity`, mai su una trattenuta, la riga nel modulo «Dichiara regione», il campo nel messaggio `region`); corona, studio e primo luogo a 1; tests/gravity.test.ts, suite e typecheck verdi; mancano la riga nella pagina della campagna del sito, la gravità per ambiente dal Fisico, i pianeti (T449); in multigiocatore il client non prevede la gravità delle regioni del master (scarto ≤10 % del passo, dentro la tolleranza del server); sicurezza: un numero in più nel messaggio `region`, controllato da `regionAsked` e `masterRegion`.
 
 ### T453 · Integrare T447 nel base (conflitto con T438: AGENTS.md, kernel.ts, kernel 0.10.1) — `fatto` (`3e45a42d`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 1
