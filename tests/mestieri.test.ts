@@ -96,12 +96,12 @@ function deposit(id: number, item: string, set?: number): number {
 }
 
 describe('the programs of the seed', () => {
-  it('are twelve, all valid, each with names for the four settings', () => {
+  it('are twelve, all valid, each with names for the settings', () => {
     expect(PROGRAMS.map((p) => p.id).sort()).toEqual(['clerk', 'cook', 'farmer', 'fisher', 'guard', 'innkeeper', 'merchant', 'priest', 'scribe', 'shepherd', 'smith', 'woodcutter']);
     for (const p of PROGRAMS) expect(k.jobPrograms().some((q) => q.id === p.id), p.id).toBe(true);
-    expect(WORLD_THEMES.length).toBe(4);
-    // A trade of each epoch finds its program: the same day in a medieval village and in a city of the nineties.
-    for (const [trade, id] of [['fornaia', 'cook'], ['chef', 'cook'], ['maniscalco', 'smith'], ['meccanica', 'smith'], ['locandiera', 'innkeeper'], ['barista', 'innkeeper'], ['gendarme', 'guard'], ['poliziotta', 'guard'], ['copista', 'scribe'], ['giornalista', 'scribe'], ['monaca', 'priest'], ['sciamano', 'priest'], ['rigattiere', 'merchant'], ['commessa', 'clerk'], ['funzionario del catasto', 'clerk'], ['capraio', 'shepherd']])
+    expect(WORLD_THEMES.length).toBe(7);
+    // A trade of each epoch finds its program: the same day in a medieval village, in a city of the nineties, on the frontier, in a harbour, in a colony.
+    for (const [trade, id] of [['fornaia', 'cook'], ['chef', 'cook'], ['maniscalco', 'smith'], ['meccanica', 'smith'], ['locandiera', 'innkeeper'], ['barista', 'innkeeper'], ['gendarme', 'guard'], ['poliziotta', 'guard'], ['copista', 'scribe'], ['giornalista', 'scribe'], ['monaca', 'priest'], ['sciamano', 'priest'], ['rigattiere', 'merchant'], ['commessa', 'clerk'], ['funzionario del catasto', 'clerk'], ['capraio', 'shepherd'], ['vicesceriffo', 'guard'], ['bovaro', 'shepherd'], ['telegrafista', 'clerk'], ['nostromo', 'fisher'], ['cuoco di bordo', 'cook'], ['carpentiere', 'smith'], ['contrabbandiera', 'merchant'], ['piantatrice', 'farmer'], ['capitano di porto', 'clerk']])
       expect(matchJob(trade, PROGRAMS)?.id, trade).toBe(id);
     // No name in two programs: who has it would not know which day is theirs.
     const names = PROGRAMS.flatMap((p) => p.names);

@@ -196,8 +196,8 @@ export const DWELLING = { floor: 10, storeys: 2, groundRooms: 2, room: 1.5 } as 
  */
 const DWELLING_WORDS = {
   yes: [
-    /\b(casa|case|casetta|casette|casupola|casale|casali|casolare|casolari|cascina|cascine|villa|ville|villetta|villette|villino|fattoria|fattorie|masseria|masserie|podere|poderi|baita|baite|chalet|capanna|capanne|dimora|dimore|abitazione|abitazioni|palazzina|palazzine|locanda|locande|osteria|osterie|taverna|taverne|ostello|rifugio|maniero|magione|residenza)\b/,
-    /\b(house|houses|home|homes|cottage|cottages|villa|villas|farm|farms|farmhouse|farmstead|homestead|cabin|cabins|hut|huts|lodge|lodges|chalet|manor|mansion|dwelling|dwellings|residence|inn|inns|tavern|taverns|hostel)\b/,
+    /\b(casa|case|casetta|casette|casupola|casale|casali|casolare|casolari|cascina|cascine|villa|ville|villetta|villette|villino|fattoria|fattorie|masseria|masserie|podere|poderi|baita|baite|chalet|capanna|capanne|dimora|dimore|abitazione|abitazioni|palazzina|palazzine|locanda|locande|osteria|osterie|taverna|taverne|ostello|rifugio|maniero|magione|residenza|saloon|ranch)\b/,
+    /\b(house|houses|home|homes|cottage|cottages|villa|villas|farm|farms|farmhouse|farmstead|homestead|cabin|cabins|hut|huts|lodge|lodges|chalet|manor|mansion|dwelling|dwellings|residence|inn|inns|tavern|taverns|hostel|saloon|saloons|ranch|ranches)\b/,
   ],
   no: [
     /\b(fort[ei]|fortezza|fortino|castell[oi]|rocca|torre|torri|torrione|tempio|templi|santuario|chiesa|cappella|monastero|abbazia|convento|mulino|faro|caserma|bastione|mura|cittadella)\b/,

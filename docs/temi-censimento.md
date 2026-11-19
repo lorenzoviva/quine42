@@ -64,3 +64,48 @@ Nulla di questo si vede offline: i modelli locali scrivono Valmora.
 7. **Le leggende**: i misteri tendono a re e draghi; il tema moderno ne vuole di altre.
 8. **La magia**: se in «moderno» la gente parla di maghi e incantesimi come in un borgo, invece che sottovoce.
 9. **La musica**: il brano che suona in un quartiere prima che il Musicista ne scriva uno.
+
+## La frontiera, le isole e la colonia (T184, ADR-0221)
+
+Tre ambientazioni in più: `western` («Far West»), `pirates` («Pirati»), `space` («Spazio»). Il censimento di T152 vale anche per loro (i prompt parlano di epoca, il canone dice che ogni epoca parla delle rune a modo suo, le case comuni le dice l'Artista); qui ciò che non aveva considerato.
+
+### Reso neutro o dipendente dal tema
+
+| Dove | Che cosa mancava | Ora |
+|---|---|---|
+| `universe/modules/job.*/manifest.json` | i mestieri della frontiera, del porto e della colonia non trovavano il loro programma | `vicesceriffo`, `secondino` (guardia); `cowboy`, `bovaro`, `buttero` (pastore); `telegrafista`, `capitano di porto`, `quartiermastro` (impiegato); `nostromo`, `mozzo` (pescatore); `contrabbandiere` (mercante); `carpentiere`, `calafato` (fabbro); `piantatore`, `piantatrice` (contadino; `marinaio`, `timoniere` e `serricoltrice` no: sono di programmi propri di neapolis, orichalcum e sidera). `sceriffo` e `cuoco` (anche «di bordo») c'erano già |
+| `src/kernel/agents/forge.ts` (`STRUCTURES`) | saloon, ranch, faro, molo, fortino diventavano oggetti di una casella | sono ambienti del Cartografo, in italiano e in inglese |
+| `src/mj/classes.ts` (`DWELLING_WORDS`) | un saloon o un ranch non era un'abitazione | lo è, come la taverna e la fattoria; il fortino del ranch no |
+| `src/kernel/agents/genesis.ts` (terreni) | esempi solo per il borgo e la città | anche la frontiera (assi, terra battuta, recinto), le isole (assi, corallo, sartiame), un mondo lontano (regolite, ghiaccio, vetro delle serre) |
+
+### Lo spazio: cosa funziona e cosa no
+
+Il tema `space` è **la superficie di un mondo lontano** colonizzato da generazioni, con l'aria che si respira: è ciò che il kernel di oggi sa fare.
+
+**Funziona** (senza toccare il kernel): pianure ocra, canyon, crateri e laghi gelati sono terreni e ambienti come gli altri (il Cartografo li colora e li nomina, `BASE_CODES` dice «adattati al tema»: la neve diventa ghiaccio, la sabbia regolite); i moduli prefabbricati, le serre, le torri dell'acqua e il campo delle navette sono strutture dello Scultore; i mestieri hanno il loro programma (tecnico, meccanico, coltivatore, cuoco, guardia); la navetta posata è un modello come un altro; le rune c'erano prima della colonia, il canone non cambia.
+
+**Non funziona, e il testo non lo chiede** (lo spec è di T432):
+- il **vuoto**: camminare fuori dall'aria, tute e ossigeno come stato che si consuma, la morte per asfissia (i bisogni sono fame e sete, `sys.needs`);
+- la **gravità** diversa o assente: il passo, il salto e le cadute sono quelli del kernel;
+- **volare** e viaggiare tra i mondi: la nave resta in orbita, le navette scendono e basta; nessun luogo sta «sopra»;
+- **il cielo**: il renderer ha un cielo solo (`SKY.day`, `dusk`, `night`), azzurro di giorno, un sole e il suo giro; niente due lune, niente stelle diverse, niente cielo nero;
+- **l'acqua e il clima**: l'acqua è quella dell'automa (`water.ts`) e il mare quello della bozza; non c'è meteo, né ghiaccio che si scioglie;
+- **la bozza naturale** ha boschi, giungle e prati: il pianeta lo fanno i terreni (un bosco può diventare «bosco di licheni»), ma la forma resta quella di una terra temperata.
+
+### I pirati e l'acqua
+
+Le isole del testo sono **vicine e unite da secche, scogli e ponti di corda**: si camminano. Non si naviga (le barche non si guidano, il mare blocca come l'acqua profonda), quindi le navi stanno all'ancora nella baia e il mare si attraversa nei racconti. La bozza non fa un arcipelago: il mare è dove lo dice lei (`o`, `relief.sea`), le isole le fa il Cartografo con gli ambienti (spiagge, insenature) o non vengono.
+
+### Cosa può tradire il tema (da guardare in T185)
+
+Nulla si vede offline: i modelli locali scrivono Valmora.
+
+1. **Il porto senza mare**: un luogo «porto» lontano dal mare della bozza; il Cartografo sa di dover mettere le coste dove sono, ma l'atlante può sbagliare.
+2. **Le barche**: il Narratore e la Fucina possono proporre una nave da salire o una scialuppa da guidare; il kernel non ha una meccanica per navigare (T183 la misura): ne verrebbe un oggetto con un'azione che non porta da nessuna parte.
+3. **Le armi**: revolver, fucili, pistole e sciabole sono cose del mondo (i principi: «a weapon… is made possible»), ma il loro effetto è un insieme chiuso (`core.effects`): ferire a distanza può diventare un colpo a contatto.
+4. **I cavalli**: «a saddled horse» è un esempio dei principi, ma montare a cavallo non è una meccanica del kernel; il bovaro senza cavallo cammina.
+5. **Lo spazio che torna terra**: boschi verdi, cielo azzurro, il sole che tramonta come altrove; e i mestieri: un medico o un pilota non hanno un programma loro (stanno fermi o fanno il giro della guardia se il nome glielo trova).
+6. **Il filtro**: tra le navette `computer` e `server` sono vietati (anche in italiano); una bibbia della colonia può essere chiesta di nuovo per una parola. Le parole del mondo: calcolatore, terminale.
+7. **Le leggende**: nei pirati il tesoro sepolto e la nave fantasma vanno bene; «il mare che non si può attraversare» o «chi naviga troppo lontano torna al porto» sono la quarta parete (il filtro li cerca in parte: `confini invalicabili`, `senza tornare sui propri passi`).
+8. **Le case comuni**: baracche di assi, case di corallo, moduli prefabbricati li dice l'Artista in `case_comuni`; se lo lascia vuoto il saloon sta tra le casette di paglia del seme.
+9. **Le stampe**: il timbro `castello` può diventare il forte sul promontorio (va bene) ma anche la stazione della colonia, con fossato e mura.

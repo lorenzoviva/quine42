@@ -1,4 +1,4 @@
-// The four themes of the Genesis (T152, ADR-0134): each gives a universe that starts, none touches a universe that exists.
+// The themes of the Genesis (T152, ADR-0134; three more, T184): each gives a universe that starts, none touches a universe that exists.
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../src/kernel/bundle';
 import { COUNCIL_PRINCIPLES, metaBreak } from '../src/kernel/fourthwall';
@@ -6,6 +6,8 @@ import { Kernel } from '../src/kernel/kernel';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { memoryStore } from '../src/kernel/repo';
 import { commonHouseModel } from '../src/kernel/modeldirector';
+import { isStructure } from '../src/kernel/agents/forge';
+import { isDwelling } from '../src/mj/classes';
 import { themeOfText, WORLD_THEMES } from '../src/kernel/themes';
 import { seedHashes, SEED_FILE, upgradeFromSeed } from '../src/kernel/universes';
 import { wordsOf } from '../src/kernel/agents/council';
@@ -28,7 +30,7 @@ class Listening extends MockAiModels {
 
 describe('the themes of the Genesis', () => {
   it('the medieval theme is the seed as it was; the others are not', () => {
-    expect(WORLD_THEMES.map((t) => t.id)).toEqual(['medievale', 'steampunk', 'moderno', 'futuristico']);
+    expect(WORLD_THEMES.map((t) => t.id)).toEqual(['medievale', 'steampunk', 'moderno', 'futuristico', 'western', 'pirates', 'space']);
     expect(themeOfText(bundledFiles['prompts/theme.md'])?.id).toBe('medievale');
     expect(themeOfText(`  ${WORLD_THEMES[2].text.replace(/\n/g, '\r\n')}\n`)?.id).toBe('moderno');
     expect(themeOfText(`${WORLD_THEMES[2].text} E il mare.`)).toBeUndefined();
@@ -79,6 +81,25 @@ describe('the themes of the Genesis', () => {
     expect(ids).toContain('darsena');
     expect(ids).toContain('woods');
     for (const old of ['castle', 'wizard_tower', 'dragon_lair', 'huts', 'inn', 'village']) expect(ids).not.toContain(old);
+  });
+});
+
+describe('the frontier, the islands and the far world (T184)', () => {
+  it('the buildings of their ages are the Cartographer’s, never one-tile objects; a saloon and a ranch are lived in', () => {
+    for (const name of ['il saloon', 'un ranch', 'il faro', 'il vecchio molo', 'il cantiere navale', 'il fortino', 'la serra', 'the lighthouse', 'a wharf', 'the old fort', 'a greenhouse'])
+      expect(isStructure({ name, type: 'object' }), name).toBe(true);
+    for (const name of ['una sella', 'un revolver', 'una bussola', 'il sestante', 'una tuta termica', 'a spyglass'])
+      expect(isStructure({ name, type: 'item' }), name).toBe(false);
+    for (const c of ['il saloon della via', 'un ranch con il recinto', 'a saloon']) expect(isDwelling(c), c).toBe(true);
+    expect(isDwelling('il fortino del ranch')).toBe(false);
+  });
+
+  it('none asks for water to sail or a void to cross: what the kernel cannot do yet waits for T432', () => {
+    for (const t of WORLD_THEMES.filter((x) => ['western', 'pirates', 'space'].includes(x.id))) {
+      expect(t.text, t.id).not.toMatch(/\b(?:sail(?:s|ing)? (?:to|across|between)|zero gravity|weightless|vacuum|airless|spacewalk)/i);
+    }
+    expect(WORLD_THEMES.find((x) => x.id === 'pirates')!.text).toMatch(/walked from cove to cove/);
+    expect(WORLD_THEMES.find((x) => x.id === 'space')!.text).toMatch(/The air can be breathed/);
   });
 });
 
