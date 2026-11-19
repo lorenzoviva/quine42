@@ -18,7 +18,8 @@ import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '.
 import { STRATA_DEPTH, stratumRow } from '../kernel/strata';
 
 export const WALL_H = 1.6;
-const WATER_Y = -0.18;
+/** The water drawn under the level of its tiles (the swimmer sinks under it, T438). */
+export const WATER_Y = -0.18;
 
 /** What the sides of a part add to it: a step of the relief has its line at the top and at the foot, though the depth does not jump seen from the front. */
 const SIDE_PART = 128;

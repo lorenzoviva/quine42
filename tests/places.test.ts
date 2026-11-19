@@ -222,12 +222,12 @@ describe('the sample of environments (T26d)', () => {
     const S = k.config.chunkSize;
     expect(sample.mini.tiles).toHaveLength(S * S);
     const draft = k.sampleDrafts()[sample.draft];
-    const r = layout(draft, k.palette, { cx: 100 + sample.draft, cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p' });
+    const r = layout(draft, k.palette, { cx: 100 + sample.draft, cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p', swim: true });
     expect(sample.mini.tiles).toBe(r.grid.join(''));
     expect(sample.changed).toBe([...sample.mini.tiles].filter((c, i) => c !== draft.join('')[i]).length);
     for (const other of k.sampleDrafts()) {
       const before = other.join('');
-      const t = layout(other, k.palette, { cx: 100 + k.sampleDrafts().indexOf(other), cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p' }).grid.join('');
+      const t = layout(other, k.palette, { cx: 100 + k.sampleDrafts().indexOf(other), cy: -100, seed: 1, program: k.content.layouts[id].program, pathCode: 'p', swim: true }).grid.join('');
       expect([...t].filter((c, i) => c !== before[i]).length).toBeLessThanOrEqual(sample.changed);
     }
     // Every environment of the seed runs and changes its draft; another kernel shows the same.

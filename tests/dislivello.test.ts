@@ -284,7 +284,8 @@ describe('back on foot (what T280 could not try)', () => {
     }
     expect(k.ventures().find((x) => x.origin === origin)!.worked).toBeGreaterThanOrEqual(200);
     // Back on foot: a step of the walk at every tick (`stepWanderer`, what the server does with a client's steps), toward the next
-    // point of the way to a goal at most 40 tiles ahead on the road home; the places load as they are reached.
+    // point of the way to a goal at most 40 tiles ahead on the road home, swimming where the road crosses the water (T438); the places load as
+    // they are reached.
     const r = Number(k.ecs.get(k.wandererEntity, 'body')?.r) || 0.22;
     const route = k.npc.routeStep.bind(k.npc);
     const start = k.wandererCarpet();
@@ -303,6 +304,9 @@ describe('back on foot (what T280 could not try)', () => {
         if (spot) (goal = spot), (next = route(p.x, p.y, spot.x, spot.y, r));
       }
       next ??= goal;
+      // In the water (T438: the places planned since swim, and their rivers are not dug any more) the ways of the kernel do not start:
+      // one swims straight home, to the next shore.
+      if (k.swimming()) next = { x: p.x + (home.x - p.x) / d, y: p.y + (home.y - p.y) / d };
       k.stepWanderer(me, next, 0.2);
       k.tick(STEP);
       if (i % 10 === 0) await new Promise((res) => setTimeout(res, 2));

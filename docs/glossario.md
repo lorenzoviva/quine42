@@ -158,6 +158,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `velocità` (per il passo di un terreno), `pescaggio` (per l'acqua: è dello scafo; l'acqua ha la profondità), `stamina`
 - **Fermo**: `speed`, `fatigue`, `depth`, `air` nei manifest.
 
+### Nuotare
+- **Inglese**: `swim`, `swimming`, `swimsAt`, `bodyFree`, `swimmingTick`, `swimTick`, `tooLoadedToSwim`, `SWIM_LOAD`, `SWIM_SINK`, `WALK_ENERGY`, `DROWN_HEALTH`
+- **Definizione**: ciò che fa il corpo di un viandante su una casella che si nuota: il passo del terreno, la fatica che il kernel aggiunge, immerso fino al petto; nell'acqua profonda non entra chi porta più di metà della portata o una cosa sopra la testa. Gli NPC e le cose non nuotano (`free`); il viandante sì (`bodyFree`, anche nel passo del server) (T438, ADR-0225).
+- **Dove vive**: `src/kernel/swim.ts`, `src/kernel/kernel.ts`, `src/render/entities.ts` (`swimLimbs`, `swimFloor`)
+- **Da non usare**: `camminare sull'acqua`, `guadare` (non esiste un guado: l'acqua bassa si nuota anche lei), `galleggiare` (per il corpo; è degli scafi, T439)
+- **Fermo**: la causa `annegato` di `player.death`.
+
+### Annegare
+- **Inglese**: `drown`, `DROWNED`
+- **Definizione**: morire nell'acqua: a energia finita la salute scende come per la fame e la sete, e a zero è una morte della partita, con il suo livello (`player.death`, causa «annegato») (T438, ADR-0225).
+- **Dove vive**: `src/kernel/swim.ts`, `Kernel.swimmingTick`
+- **Da non usare**: `affogare`, `affondare` (per il corpo: è delle navi, T440)
+- **Fermo**: la causa `annegato`.
+
+### Segno del nuoto
+- **Inglese**: `ChunkPlan.swim`, `LayoutOptions`
+- **Definizione**: il segno che il kernel scrive su ogni piano che fa da T438: il layout di quel luogo conta come via l'acqua che si nuota e non la scava mai; un piano senza segno è di prima e tiene i sentieri che ha scavato sull'acqua (ADR-0225, come `vpt` per i timbri a 16).
+- **Dove vive**: `src/kernel/agents/cartography.ts`, `src/kernel/layout.ts`, `Kernel.layoutOf`
+- **Da non usare**: `nuoto` (per il segno), `water` (per il campo)
+- **Fermo**: `swim` nei piani dei luoghi.
+
 ### Ambiente
 - **Inglese**: `environment`, `EnvironmentDraft`, `EnvironmentDef`, `environmentsFor`
 - **Definizione**: un programma di riscrittura che dà forma a un luogo (bosco, villaggio…), scritto dal Cartografo.

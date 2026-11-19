@@ -1,5 +1,6 @@
 import wasmUri from 'wasmoon/dist/glue.wasm?url';
 import { Kernel } from './kernel/kernel';
+import { DROWNED } from './kernel/swim';
 import { bundledFiles } from './kernel/bundle';
 import { localStore, memoryStore } from './kernel/repo';
 import { prepareUniverse, SEED_FILE, seedHashes, UniverseChunks, UniverseClient, WANDERER_HEADER, type PastCommit, type UniverseSnapshot } from './kernel/universes';
@@ -400,7 +401,7 @@ async function main() {
     t.textContent = 'SEI MORTO';
     const why = document.createElement('div');
     why.className = 'why';
-    why.textContent = cause === 'sete' ? 'La sete ti ha vinto. La strada era lunga e i pozzi lontani.' : cause === 'fame' ? 'La fame ti ha vinto. Le dispense erano vuote, i campi lontani.' : 'Le ferite ti hanno vinto.';
+    why.textContent = cause === 'sete' ? 'La sete ti ha vinto. La strada era lunga e i pozzi lontani.' : cause === 'fame' ? 'La fame ti ha vinto. Le dispense erano vuote, i campi lontani.' : cause === DROWNED ? "L'acqua ti ha vinto. La riva era troppo lontana per le tue forze." : 'Le ferite ti hanno vinto.';
     const cost = document.createElement('div');
     cost.className = 'why';
     cost.textContent = `In questo universo la morte è ${punizione.nome}: ${punizione.testo}.`;
@@ -424,7 +425,7 @@ async function main() {
     t.className = 'title';
     t.textContent = 'SEI MORTO';
     const lines = [
-      cause === 'sete' ? 'La sete ti ha vinto.' : cause === 'fame' ? 'La fame ti ha vinto.' : 'Le ferite ti hanno vinto.',
+      cause === 'sete' ? 'La sete ti ha vinto.' : cause === 'fame' ? 'La fame ti ha vinto.' : cause === DROWNED ? "L'acqua ti ha vinto." : 'Le ferite ti hanno vinto.',
       lost.length ? `Hai perso: ${lost.join(', ')}.` : 'Non hai perso nulla di ciò che portavi.',
       where === 'square' ? 'Riparti dalla piazza.' : 'Riparti da dove sei caduto.',
       text,
