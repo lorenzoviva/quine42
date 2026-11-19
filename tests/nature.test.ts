@@ -113,21 +113,20 @@ describe('the palette of a Genesis (T437)', () => {
 describe('the nature of the world (T437)', () => {
   it('is repaired to what this kernel can make true: anything else is the world of today', () => {
     expect(repairNature(undefined)).toEqual(DEFAULT_NATURE);
-    expect(repairNature({ geography: 'archipelago', sky: 'stars', day: 0, gravity: 0.3, oxygen: true })).toEqual(DEFAULT_NATURE);
+    expect(repairNature({ geography: 'archipelago', sky: 'stars', day: 0, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
+    // The gravity is open since T447: 0.2-2, anything else the earth's.
+    expect(repairNature({ geography: 'archipelago', gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
+    expect(repairNature({ gravity: 0.1 }).gravity).toBe(1);
     expect(repairNature({ geography: 'continent', day: NaN, gravity: '1' })).toEqual(DEFAULT_NATURE);
     expect(repairNature([1, 2])).toEqual(DEFAULT_NATURE);
-    // What it accepts is a list a task widens: today, only the world of today.
-    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent'], sky: ['earth'], day: [600, 600], gravity: [1, 1], oxygen: [false] });
+    // What it accepts is a list a task widens: the world of today, and the gravity of T447.
+    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent'], sky: ['earth'], day: [600, 600], gravity: [0.2, 2], oxygen: [false] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
     for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(DEFAULT_NATURE);
   });
 
   it('is fixed like the game: a universe.json that says otherwise later is written back', async () => {
-    // Today the kernel accepts only the world of today: the gravity of T447 is opened for this test alone, to see the mechanism.
-    const accepts = NATURE_ACCEPTS as { gravity: readonly [number, number] };
-    const kept = accepts.gravity;
-    accepts.gravity = [0.2, 2];
-    try {
+    {
       const cfg = JSON.parse(bundledFiles['universe.json']);
       const light = { ...DEFAULT_NATURE, gravity: 0.4 };
       const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, nature: light }, null, 2) + '\n' }, store: memoryStore(), ai: new MockAiModels() });
@@ -137,8 +136,6 @@ describe('the nature of the world (T437)', () => {
       expect(k.nature()).toEqual(light);
       expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual(light);
       expect(k.feed().some((e) => /natura del mondo/.test(e.text))).toBe(true);
-    } finally {
-      accepts.gravity = kept;
     }
   });
 

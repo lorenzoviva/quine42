@@ -104,7 +104,7 @@ function regionAsked(raw: unknown): Record<string, unknown> | undefined {
   const text = (v: unknown, n: number) => (typeof v === 'string' ? v.slice(0, n) : undefined);
   const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
   const center = Array.isArray(r.center) && r.center.length === 2 ? [num(r.center[0]), num(r.center[1])] : undefined;
-  return { id: text(r.id, 64), name: text(r.name, 200), description: text(r.description, 600), center, radius: num(r.radius), kind: text(r.kind, 16), environment: text(r.environment, 120) };
+  return { id: text(r.id, 64), name: text(r.name, 200), description: text(r.description, 600), center, radius: num(r.radius), kind: text(r.kind, 16), environment: text(r.environment, 120), gravity: num(r.gravity) };
 }
 
 /** Words from the wire, as long as they may be. */
