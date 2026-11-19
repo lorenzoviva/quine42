@@ -1,6 +1,7 @@
 <!-- Bed, procedural (Cantiere 2): frame, straw mattress, wool blanket and pillow of the original. The seed picks how long the bed is
-     (from a cot to a full bed), how high the headboard rises, whether there is a footboard, where the blanket is folded and whether there are one or
-     two pillows. -->
+     (from a short bed to a full one, always the length of a body), how high the headboard rises, whether there is a footboard, where the blanket is folded and whether there are one or
+     two pillows. The blanket lies on the mattress and ends where the frame ends (T429): the cut stays marked until the blanket and the
+     pillows are laid, so they never hang past the foot over nothing. -->
 <sequence values="BNnWCRPtcfkhpq" size="20 20 20" symmetry="(xy)" name="Letto">
   <color symbol="N" value="6b4a2e" name="legno"/>
   <color symbol="n" value="4e3420" name="legno in ombra"/>
@@ -27,7 +28,7 @@
   <all in="c" out="N"/>
   <all in="t" out="B"/>
   <!-- The length: from the foot, everything beyond the chosen row disappears -->
-  <box at="0 15 0" size="1 9 1" color="h"/>
+  <box at="0 17 0" size="1 5 1" color="h"/>
   <one in="h" out="k" steps="1"/>
   <all in="h" out="B"/>
   <all symmetry="()">
@@ -38,7 +39,6 @@
   </all>
   <!-- The foot of the frame: perhaps it becomes the footboard, from 3 to 6 rows high -->
   <all in="N/k" out="q/*" symmetry="()"/>
-  <all in="k" out="B"/>
   <one steps="1">
     <rule in="q" out="c"/>
     <rule in="q" out="N"/>
@@ -53,11 +53,13 @@
   <all in="B/c" out="*/*"/>
   <all in="c" out="N"/>
   <!-- The blanket: from the chosen fold down to the foot -->
-  <box at="10 5 7" size="12 12 1" color="f" on="B"/>
+  <box at="10 4 7" size="12 9 1" color="f" on="B"/>
   <box at="10 13 7" size="13 14 1" color="C" on="B"/>
   <one in="f/C" out="C/*" symmetry="()" steps="1"/>
   <prl in="f/C" out="C/*" symmetry="()" p="0.5" steps="5"/>
   <all in="f" out="B"/>
+  <!-- Where it is wider than the mattress it falls down the sides onto the frame -->
+  <all in="C B" out="C C" symmetry="()"/>
   <!-- The pillows: one in the centre or two at the sides -->
   <box at="10 4 7" size="8 3 2" color="p" on="B"/>
   <one steps="1">
@@ -69,6 +71,8 @@
   <all in="p P" out="P P"/>
   <all in="R" out="B"/>
   <all in="p" out="B"/>
+  <!-- Only now the cut is empty: the blanket and the pillows were laid on the bed that is left -->
+  <all in="k" out="B"/>
   <prl in="C" out="R" p="0.15" steps="1"/>
   <prl in="N B" out="n *" p="0.5" steps="1" symmetry="()"/>
 </sequence>

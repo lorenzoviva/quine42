@@ -423,6 +423,9 @@ export const MAX_PLACED = 4000;
  */
 export const INDOOR_REACH = 6;
 export const INDOOR_R = 0.15;
+/** How far (tiles) the middle of what goes indoors stays from the cellar's stairwell (T417), and a solid thing from a door and from it (T429). */
+const WELL_KEEP = 0.75;
+const DOOR_KEEP = 1.2;
 /** How far above its height (tiles) a thing lying on furniture still finds its shelf: the rounding of a save, far less than a voxel. */
 const REST_SLACK = 0.01;
 /** The option of a tile's menu that puts down what is carried (T292): in `moving.ts`, so that the server reads it without the kernel. */
@@ -2980,9 +2983,10 @@ export class Kernel {
   /**
    * Points of a structure's floor, inside its walls (world, carpet space), for what goes indoors: the middle of a window of
    * INDOOR_REACH voxels each way where every column is ground floor one stands on, and where `Kernel.free` finds the structure
-   * no obstacle (T281: the same `rampBlocks`, on every column of the window, not one in two).
+   * no obstacle (T281: the same `rampBlocks`, on every column of the window, not one in two). `wellKeep` is how far (tiles) a point's middle
+   * stays from the cellar's stairwell: three quarters of a tile, more for a solid thing (T429).
    */
-  private interiorPoints(sid: Id): Array<{ x: number; y: number }> {
+  private interiorPoints(sid: Id, wellKeep = WELL_KEEP): Array<{ x: number; y: number }> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
     const p = this.ecs.get(sid, 'pos');
@@ -2994,10 +2998,10 @@ export class Kernel {
     const { foot, floor, block, hole, levels } = ground;
     const step = stepOf(f.vpt);
     // The cellar's stairwell (T417): the columns over the cellar not solid at the ground. Nothing stands on its top tread nor beside it, where
-    // it would hang over the way down: a thing's middle stays three quarters of a tile from it.
+    // it would hang over the way down: a thing's middle stays three quarters of a tile from it (`wellKeep`).
     const well: number[] = [];
     if (hole) for (let i = 0; i < X * Y; i++) if (hole[i] && !solidAtGround(levels, i, f.base, step)) well.push(i);
-    const keep = 0.75 * f.vpt;
+    const keep = wellKeep * f.vpt;
     // A column where nothing goes: something at body height, no floor of the model, a floor higher than a step (what goes
     // indoors does not go up the stairs), a floor where a body does not stand (a ceiling too low, out of reach; over a cellar
     // the stairwell, T52b). Counted in a summed table, so a window is clear when it has none.
@@ -3115,9 +3119,12 @@ export class Kernel {
         return;
       }
     }
-    const inside = this.interiorPoints(sid);
+    // A solid thing (a counter, a chest) stays away from the cellar's stairwell as from a door (T429): with its middle three quarters of a
+    // tile from it, a thing a tile long could still close the way off the top tread.
+    const keep = solid ? DOOR_KEEP : WELL_KEEP;
+    const inside = this.interiorPoints(sid, keep);
     const roomyOf = (points: Array<{ x: number; y: number }>, near = taken) =>
-      points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > 1.2)));
+      points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > DOOR_KEEP)));
     const open = inside.filter((q) => this.free(q.x, q.y, INDOOR_R));
     let roomy = roomyOf(inside);
     // A solid thing with no room in its structure goes into another of the place that has some (T407), never where the plan said:
@@ -3131,7 +3138,7 @@ export class Kernel {
         if (!this.ecs.alive.has(id)) continue;
         this.rebuildSolids();
         const now = this.ecs.query('pos').filter((e) => e !== id).map((e) => this.ecs.get(e, 'pos'));
-        if ((roomy = roomyOf(this.interiorPoints(id), now)).length) break;
+        if ((roomy = roomyOf(this.interiorPoints(id, keep), now)).length) break;
       }
     }
     const pool = roomy.length ? roomy : solid ? [] : open.length ? open : inside;

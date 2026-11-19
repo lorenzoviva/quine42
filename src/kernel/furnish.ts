@@ -19,7 +19,7 @@
 
 import { areasOf, type AreaMap } from '../mj/areas';
 import type { PaletteEntry } from '../mj/engine';
-import type { VoxelGrid } from '../mj/mesh';
+import { colorTable, type VoxelGrid } from '../mj/mesh';
 import type { MjxClip } from '../mj/model';
 import { BODY_R, formKey, runForm, stepOf, storeysOf, walkIn, type FormRequest, type FormResult } from './forms';
 import { InteriorGuard, interiorPlan, NARROW, roomsOf, type Furnished, type InteriorPlan, type Refusal, type StoreyPlan } from './interior';
@@ -449,6 +449,17 @@ export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRul
     ceilings.set(p, c);
     return c;
   };
+  /**
+   * Whether the ceiling over a column is one the building as walked has (T429): a voxel with a colour of `plan.walked`, the building with
+   * its doors open, which the guard and the kernel's ground measure. Under a door's threshold or a hatch the walked building has air: a top
+   * of a piece in a cellar there would be a floor nobody reaches (`cellarSafe` takes the closed door for its ceiling), and the guard would
+   * take the piece away after its walk.
+   */
+  const walkedColours = colorTable(plan.walked.g.alphabet, plan.palette);
+  const shut = (p: StoreyPlan, i: number): boolean => {
+    const c = ceilingOf(p)[i];
+    return c >= Z || !!walkedColours[open[i + c * XY]];
+  };
   /** Per storey, its centres no piece kept so far has taken, and in how many pieces they are. */
   const alive = new Map<StoreyPlan, Set<number>>();
   const parts = new Map<StoreyPlan, number>();
@@ -523,8 +534,13 @@ export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRul
           // The cellar's ceiling over the piece, the lowest: a piece as tall or a step short of it goes up to it, a taller one is brought
           // down to it; its top would otherwise be a floor a body stands on and no body reaches, and the cellar would not hold (T419).
           let clear = Z;
-          for (let y = 0; y < chosen.Y; y++) for (let x = 0; x < chosen.X; x++) clear = Math.min(clear, ceiling[x0 + x + (y0 + y) * X] - p.z);
-          if (clear < 1) continue;
+          let under = false;
+          for (let y = 0; y < chosen.Y; y++)
+            for (let x = 0; x < chosen.X; x++) {
+              clear = Math.min(clear, ceiling[x0 + x + (y0 + y) * X] - p.z);
+              if (!shut(p, x0 + x + (y0 + y) * X)) under = true;
+            }
+          if (clear < 1 || under) continue;
           const beside = (x: number, y: number) => {
             const j = x0 + x + (y0 + y) * X;
             return x0 + x >= 0 && y0 + y >= 0 && x0 + x < X && y0 + y < Y && p.free[j] === 1 && !solidAt(j + p.z * XY);
