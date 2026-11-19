@@ -145,9 +145,10 @@ describe('la guardia del kernel sugli edifici dello Scenografo (T409)', () => {
       const s = scena(misurato('misura16', nome), grande(nome, true), seme, OPZIONI);
       const regole: Regola[] = JSON.parse(fs.readFileSync(path.join(SCENOGRAFO, 'misura16', nome, 'dati-1', 'regole.json'), 'utf8')).regole;
       expect(vuoto(s).parti).toEqual([]);
-      // With the bench's guard (T406): the room under 28 voxels.
+      // With the bench's guard (T406): the room under 28 voxels. The villetta lost it only with the bed of before T429, whose blanket hung
+      // past its frame and made it half again as long: the farm still does.
       const prima = arredaValidato(s, (k) => arredaDati(s, k, mobili, sceltaDi(s, regole)), 1);
-      expect(controlli(s, prima.a).parti.join(' ')).toMatch(/^stanza/);
+      if (nome === 'fattoria') expect(controlli(s, prima.a).parti.join(' ')).toMatch(/^stanza/);
       // With the kernel's: the room kept, and everything holds.
       const dopo = arredaValidato(s, (k) => arredaDati(s, k, mobili, sceltaDi(s, regole), guardiaDelKernel), 1);
       expect(regge(dopo.c)).toBe(true);
