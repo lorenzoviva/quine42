@@ -6100,3 +6100,10 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto e cosa fare: § 1.7 dello studio (facoltativo).
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T451`; suite e typecheck verdi.
+
+### T452 · N0b · Il Fisico a mondo acceso — `da fare` (dipende da T438)
+- Pipeline: claude · sforzo high · stima 3% · priorità 5
+- Step: 37
+- Contesto: T437 (`dossier T437`) ha messo le primitive della fisica come dati (`src/kernel/nature.ts`), che il Fisico scrive solo alla Genesi (`genesis.physics`, `physicsOf`); manca la via per rimodellarle a mondo acceso, come l'autore chiede in D64 (il kernel accoglie quante più modifiche può).
+- Cosa fare: il Fisico riscrive `cross`, passo, fatica e profondità di un terreno, o la `nature` del mondo, a mondo acceso (su richiesta del Referente o di una regola), entro i tetti del kernel, col validatore, in un commit del Concilio (`councilMayWrite`), con i client di una partita di molti che vedono il cambio; mai da Lua; la regola 10 resta vera (un cambio che sconnetterebbe un luogo si rifiuta col motivo).
+- Quando è fatto: commit su `task/T452`; test offline del cambio e del rifiuto; suite e typecheck verdi. Sicurezza: multigiocatore, Concilio.
