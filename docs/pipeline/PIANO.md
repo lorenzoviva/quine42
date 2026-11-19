@@ -1,43 +1,39 @@
 # Il piano della pipeline
 
-> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-19T22:31:18.482Z: non modificarlo a mano,
+> Generato da `node tools/pipeline/pipeline.mjs stato` il 2026-11-19T22:33:47.079Z: non modificarlo a mano,
 > la fonte è `docs/plans/backlog.md` (righe `- Pipeline:`).
 
 ## Budget
 
 Orchestratore: **orchestrator** (sotto il 10 % nessun task su di lui; si cambia con `orchestratore <provider>`).
 
-- **claude** (Opus 5.5): settimana 92 %, 5 ore 0 %, fermo fino a 2026-11-19T22:30:00.000Z; tetto 3, slot 1 (task in programma 13), esaurimento previsto 2026-11-23T03:20:11.835Z, reset 2026-11-26T16:00:00.000Z (letto da /usage il 2026-11-19T22:28:31.805Z)
-  - session, 5h: 0 % residuo, reset 2026-11-19T22:30:00.000Z
+- **claude** (Opus 5.5): settimana 92 %, 5 ore 92 %; tetto 3, slot 1 (task in programma 13), esaurimento previsto 2026-11-23T04:45:19.465Z, reset 2026-11-26T16:00:00.000Z (letto da /usage il 2026-11-19T22:33:44.562Z)
   - week (all models), settimana: 92 % residuo, reset 2026-11-26T16:00:00.000Z
-- **gemini** (Gemini 3.8 Flash): settimana 96 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2027-01-05T17:14:39.945Z, reset 2026-11-26T12:30:10.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
+- **gemini** (Gemini 3.8 Flash): settimana 96 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2027-01-05T19:24:57.745Z, reset 2026-11-26T12:30:10.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
   - Gemini Models, settimana: 96 % residuo, reset 2026-11-26T12:30:10.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-11-20T03:28:34.000Z
-- **argon** (Gemini 4 Argon): settimana 76 %, 5 ore 76 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-26T02:27:23.278Z, reset 2026-11-26T12:22:46.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
-  - Gemini 4 Argon, settimana: 76 % residuo, reset 2026-11-26T12:22:46.000Z
-- **fable** (Fable 5.2): settimana 92 %, 5 ore 0 %, fermo fino a 2026-11-19T22:30:00.000Z, sospeso; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T00:10:24.225Z, reset 2026-11-26T16:00:00.000Z (letto da /usage il 2026-11-19T22:27:27.166Z)
-  - session, 5h: 0 % residuo, reset 2026-11-19T22:30:00.000Z
-  - week (all models), settimana: 92 % residuo, reset 2026-11-26T16:00:00.000Z
+  - Gemini Models, 5h: 98 % residuo, reset 2026-11-20T03:30:17.000Z
+- **argon** (Gemini 4 Argon): settimana 72 %, 5 ore 72 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-24T22:57:03.091Z, reset 2026-11-26T12:22:46.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
+  - Gemini 4 Argon, settimana: 72 % residuo, reset 2026-11-26T12:22:46.000Z
+- **fable** (Fable 5.2): settimana 92 %, 5 ore 92 %, sospeso; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T01:15:38.688Z, reset 2026-11-26T15:59:00.000Z (letto da /usage il 2026-11-19T22:32:40.322Z)
+  - week (all models), settimana: 92 % residuo, reset 2026-11-26T15:59:00.000Z
   - week (Fable), settimana: 100 % residuo, reset 2026-11-26T16:00:00.000Z
-- **sonnet** (Sonnet 5.5): settimana 92 %, 5 ore 0 %, fermo fino a 2026-11-19T22:30:00.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T00:10:24.225Z, reset 2026-11-26T16:00:00.000Z (letto da /usage il 2026-11-19T22:27:27.166Z)
-  - session, 5h: 0 % residuo, reset 2026-11-19T22:30:00.000Z
-  - week (all models), settimana: 92 % residuo, reset 2026-11-26T16:00:00.000Z
-- **haiku** (Haiku 5.5): settimana 92 %, 5 ore 0 %, fermo fino a 2026-11-19T22:30:00.000Z; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T00:10:24.225Z, reset 2026-11-26T16:00:00.000Z (letto da /usage il 2026-11-19T22:27:27.166Z)
-  - session, 5h: 0 % residuo, reset 2026-11-19T22:30:00.000Z
-  - week (all models), settimana: 92 % residuo, reset 2026-11-26T16:00:00.000Z
-- **agy-opus** (Opus 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-26T22:28:34.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
-  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-26T22:28:34.000Z
-  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-20T03:28:34.000Z
-- **agy-sonnet** (Sonnet 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-26T22:28:34.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
-  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-26T22:28:34.000Z
-  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-20T03:28:34.000Z
-- **hydrogen** (Gemini 4 Hydrogen): settimana 96 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2027-01-05T16:00:38.841Z, reset 2026-11-26T12:30:10.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
+- **sonnet** (Sonnet 5.5): settimana 92 %, 5 ore 92 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T01:15:38.688Z, reset 2026-11-26T15:59:00.000Z (letto da /usage il 2026-11-19T22:32:40.322Z)
+  - week (all models), settimana: 92 % residuo, reset 2026-11-26T15:59:00.000Z
+- **haiku** (Haiku 5.5): settimana 92 %, 5 ore 92 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-23T01:15:38.688Z, reset 2026-11-26T15:59:00.000Z (letto da /usage il 2026-11-19T22:32:40.322Z)
+  - week (all models), settimana: 92 % residuo, reset 2026-11-26T15:59:00.000Z
+- **agy-opus** (Opus 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-26T22:33:47.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-26T22:33:47.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-20T03:33:47.000Z
+- **agy-sonnet** (Sonnet 5.5 (agy)): settimana 100 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto mai a questo ritmo, reset 2026-11-26T22:33:47.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
+  - Claude and GPT models, settimana: 100 % residuo, reset 2026-11-26T22:33:47.000Z
+  - Claude and GPT models, 5h: 100 % residuo, reset 2026-11-20T03:33:47.000Z
+- **hydrogen** (Gemini 4 Hydrogen): settimana 96 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2027-01-05T18:10:56.641Z, reset 2026-11-26T12:30:10.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
   - Gemini Models, settimana: 96 % residuo, reset 2026-11-26T12:30:10.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-11-20T03:28:34.000Z
-- **orchestrator** (Orchestrator (Argon)): settimana 76 %, 5 ore 100 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-26T02:27:23.278Z, reset 2026-11-26T12:22:46.000Z (letto da /usage il 2026-11-19T22:28:34.339Z)
+  - Gemini Models, 5h: 98 % residuo, reset 2026-11-20T03:30:17.000Z
+- **orchestrator** (Orchestrator (Argon)): settimana 72 %, 5 ore 98 %; tetto 1, slot 1 (task in programma 0), esaurimento previsto 2026-11-24T22:57:03.091Z, reset 2026-11-26T12:22:46.000Z (letto da /usage il 2026-11-19T22:33:47.052Z)
   - Gemini Models, settimana: 96 % residuo, reset 2026-11-26T12:30:10.000Z
-  - Gemini Models, 5h: 100 % residuo, reset 2026-11-20T03:28:34.000Z
-  - Gemini 4 Argon, settimana: 76 % residuo, reset 2026-11-26T12:22:46.000Z
+  - Gemini Models, 5h: 98 % residuo, reset 2026-11-20T03:30:17.000Z
+  - Gemini 4 Argon, settimana: 72 % residuo, reset 2026-11-26T12:22:46.000Z
 
 ## In corso (0)
 

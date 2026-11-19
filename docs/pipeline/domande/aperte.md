@@ -2,11 +2,6 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
-- **D66 (T153 — Pulizia dei luoghi finti, rigenerazione strutture coi merli e modalità multigiocatore di `orichalcum`, `neapolis` e `sidera`, `lab/banco/universi-t153/README.md`):**
-  1. **Chiusa (autore 19/11 → A1, T454):** tolti i luoghi/individui `?offline` e gli ambienti medievali del seme e ripianificati i luoghi mancanti col Cartografo vero.
-  2. **Chiusa (autore 19/11 → B1, T455):** rigenerate senza merli né feritoie le strutture non fortificate e le 6 fallite in T411.
-  3. **Modalità di gioco dei tre universi di T273:** oggi `universe.json → game.mode` dice `single` (il 03/11 li volevi multigiocatore, e la scelta è fissa alla Genesi): **C1** *(raccomandata)* convertirli in multigiocatore prima di portarli sul server della beta (T45f) così i tester ci giocano insieme; oppure **C2** lasciarli `single` e tenere il multigiocatore per i nuovi universi (`aridus`, ecc.).
-
 - **D35 (T240 → T378 il 14/11 — Il piano di lancio, `docs/lancio/piano.md`, § «Le decisioni (D35)»; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, a nome tuo (consiglio: sì, la voce più importante); D4.6 il volto del lancio sei tu, nome e cognome, Boa Lodger mai portavoce (consiglio: sì).
   - **Senza consiglio, tue:** D5.1 10 ore a settimana di promozione?; D6.2 chiave del server in open beta: nessuna oppure una tua con tetto piccolo per un universo vetrina (proposta 10-20 $/giorno); D6.4 quanti mondi accesi sul server ufficiale (proposta 4-8, chi trova pieno va alla demo offline e alla guida d'installazione); D7.3 codice o pacchetto pubblico con licenza, ora requisito della Fase IV (da decidere prima che T367 pubblichi l'immagine).
@@ -14,6 +9,8 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
   - **Consiglio sì, approvabili in blocco:** D1.1-D1.5, D2.1-D2.3, D3.2, D3.3, D3.6, D3.7 (niente incassi in open beta), D4.1, D4.2, D4.4 (tua voce vera o nessuna), D4.7-D4.9 (post scritti da te, una frase uguale ovunque, niente PNL: le cinque regole del § 4 bis), D5.2-D5.4, D6.1, D6.3, D6.5, D7.1, D7.2.
   - **Facoltativa:** D4.3 Boa Lodger easter egg. **Tolte:** D4.5 (bot Discord), D3.5 (rimandata con D3.4).
   - **Non verificato (V1-V12):** regole di HN/Reddit/itch.io, GDPR e AI Act, costo reale di una Genesi, limite OAuth di OpenRouter, alcune fonti del § 4 bis.
+
+- **D66 (chiusa, autore 19/11 → T454, T455):** 1) A1, tolti i luoghi/individui `?offline` e gli ambienti medievali del seme e ripianificati i 25 luoghi col Cartografo vero (T454); 2) B1, rigenerate senza merli né feritoie le strutture non fortificate e le 6 fallite in T411 (T455); 3) C1, convertiti `orichalcum`, `neapolis` e `sidera` in multigiocatore (`universe.json → game.mode`, in T454).
 
 - **D65 (chiusa, autore 19/11 → T185):** Far West `mesa` (sul generatore), Pirati `thalassa`, Spazio `astra`.
 - **D64 (chiusa, autore 19/11 → T437-T451):** si nuota ovunque; la regola 10 cambia, isole a nuoto anche oltre 4 luoghi; pianeti a definizione variabile con la distanza (precalcolati, meno voxel da lontano); prima Pirati e veicolo; 15 task approvati. Direzione: primitive della fisica che il Concilio rimodella a runtime, predisposizione più che implementazione.
