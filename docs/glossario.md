@@ -422,6 +422,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `modello` (per Gemini: vedi «Modello di IA»)
 - **Fermo**: `appearance.model`, `models/index.json`.
 
+### Stella
+- **Inglese**: `STAR`, `isStar`, `starPulse`
+- **Definizione**: l'aspetto di ciò che non ha un modello suo: il modello generico della classe `object` (`models/object.xml`), una stella a quattro punte nel colore della cosa, che il renderer fa girare e stirare in altezza e larghezza; nell'inventario la sua icona fa lo stesso (ADR-0220).
+- **Dove vive**: `universe/models/object.xml`, `src/render/star.ts`, `src/render/entities.ts`, `src/ui/hud.ts`
+- **Da non usare**: `pozione`, `sacco` (era l'aspetto di prima)
+- **Fermo**: l'id `object` del modello generico.
+
 ### Programma
 - **Inglese**: `program`, `checkProgram`, `repairProgram`
 - **Definizione**: il testo MarkovJunior (XML) di un modello o di un ambiente.

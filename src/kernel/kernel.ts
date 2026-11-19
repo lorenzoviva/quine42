@@ -1616,7 +1616,9 @@ export class Kernel {
     }
     const d = this.content.get(item);
     const model = this.forms.resolve(d?.model, 'object');
-    return { model, seed: 1, yaw: 0, tint: d?.color, ...(d?.model && d.model !== model ? { wanted: d.model, classe: 'object' } : {}) };
+    // An item that says no colour has one of its own all the same (T430): the star of what has no model is in it.
+    const tint = d?.color || (d ? `hsl(${hashStr(item) % 360}, 55%, 58%)` : undefined);
+    return { model, seed: 1, yaw: 0, tint,...(d?.model && d.model !== model ? { wanted: d.model, classe: 'object' } : {}) };
   }
 
   /** The actions of an entity's model that would change it now (open when closed, close when open). */

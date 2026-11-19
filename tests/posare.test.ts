@@ -21,8 +21,11 @@ import { closeWorld, newLasting, open, pause } from './espressivita/banco';
 
 // --- The shapes, on the seed's own models ------------------------------------------------------
 
+// A pot of 10 voxels, round, tied at the top: the seed's generic thing until T430, now only here, where a round shape tries the shelves.
+const POT = '<sequence values="BCN" size="12 12 12" symmetry="(xy)"><color symbol="C" value="b08a5a"/><color symbol="N" value="5a4028"/><ellipsoid at="6 6 0" size="10 10 8" color="C"/><cylinder at="6 6 7" size="4 4 3" color="C"/><cylinder at="6 6 8" size="5 5 1" color="N"/></sequence>';
+const index = { ...JSON.parse(bundledFiles['models/index.json']), pot: { class: 'object', name: 'Vaso (prova)' } };
 const forms = new Forms(new InlineRunner());
-forms.load(bundledFiles);
+forms.load({ ...bundledFiles, 'models/pot.xml': POT, 'models/index.json': JSON.stringify(index) });
 
 async function formOf(model: string, seed = 1): Promise<Form> {
   const f = await forms.wait(model, seed);
@@ -98,7 +101,7 @@ const FURNITURE: Array<[string, number]> = [
 
 describe('the spot, on the true shapes of the seed', () => {
   it('on every piece of furniture of the seed a thing lies on its top, every column of it on wood with room above', async () => {
-    const pot = await formOf('object');
+    const pot = await formOf('pot');
     for (const [model, seed] of FURNITURE) {
       const f = await formOf(model, seed);
       const r = findSpot(supportOf(f), shapeOf(pot), OPEN);
@@ -111,15 +114,25 @@ describe('the spot, on the true shapes of the seed', () => {
     }
   });
 
+  it('what has no model of its own, the star (T430), lies on every piece of furniture of the seed, flat', async () => {
+    const star = await formOf('object');
+    for (const [model, seed] of FURNITURE) {
+      const f = await formOf(model, seed);
+      const { spots } = fill(f, star);
+      expect(spots.length, `stella su ${model} ${seed}`).toBeGreaterThanOrEqual(1);
+      for (const s of spots) expect(liesFlat(f, star, s), `stella su ${model} ${seed}`).toBe(true);
+    }
+  });
+
   it('a sign, a fire, a barrel with a bump on its lid: no shelf holds the thing', async () => {
-    const pot = await formOf('object');
+    const pot = await formOf('pot');
     for (const [model, seed] of [['cartello', 1], ['falo', 1], ['barile', 2]] as Array<[string, number]>) {
       expect(findSpot(supportOf(await formOf(model, seed)), shapeOf(pot), OPEN), `${model} ${seed}`).toEqual({ fail: 'no-shelf' });
     }
   });
 
   it('how many fit is how many footprints fit: they never overlap, each lies flat, then the furniture is full', async () => {
-    const pot = await formOf('object');
+    const pot = await formOf('pot');
     const scissors = await formOf('forbici');
     for (const item of [pot, scissors])
       for (const [model, seed] of FURNITURE) {
@@ -143,7 +156,7 @@ describe('the spot, on the true shapes of the seed', () => {
 
   it('the first goes in the corner nearest to who puts it down, the next beside it', async () => {
     const f = await formOf('furniture', 1);
-    const pot = await formOf('object');
+    const pot = await formOf('pot');
     const near = fill(f, pot, { x: 0, y: 2 }).spots;
     const far = fill(f, pot, { x: 0, y: -2 }).spots;
     // From the front (+y) the first lies further forward than from behind.

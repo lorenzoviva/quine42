@@ -15,6 +15,7 @@ import type { Form, FormComp } from '../kernel/forms';
 import { overheadTurn, type Hand } from '../mj/hold';
 import { heldBy, heldSeedOf, hold, type Holding } from './held';
 import { dressedFor, wornBy } from './dressed';
+import { isStar, starPulse } from './star';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -43,6 +44,8 @@ export interface EntityView {
   sig: string;
   /** What it holds in hand (T288). */
   holding?: Holding;
+  /** The star of what has no model of its own (T430): the height of its middle, around which it stretches. */
+  star?: { middle: number };
 }
 
 /** Bodies go up and down the steps of the relief (and of a house) in a moment, not at once; far jumps are at once. */
@@ -182,7 +185,19 @@ export class Entities {
     this.world.add(root);
     const yaw = figure ? hash32(id) % 6 : (fc?.yaw ?? 0);
     root.rotation.y = yaw;
-    return { root, body, limbs, frames, kind: figure ? 'figure' : item ? 'item' : 'thing', last: { x: p.x, y: p.y }, yaw, phase: 0, sig, owned: !model };
+    // An item without a model of its own is the star (T430): it stretches around its middle.
+    let star: EntityView['star'];
+    if (model && item && isStar(fc?.model)) {
+      let lo = Infinity, hi = -Infinity;
+      body.traverse((o) => {
+        if (!(o instanceof THREE.Mesh)) return;
+        if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+        lo = Math.min(lo, o.geometry.boundingBox!.min.y);
+        hi = Math.max(hi, o.geometry.boundingBox!.max.y);
+      });
+      star = { middle: Number.isFinite(lo) && Number.isFinite(hi) ? (lo + hi) / 2 : 0 };
+    }
+    return { root, body, limbs, frames, kind: figure ? 'figure' : item ? 'item' : 'thing', last: { x: p.x, y: p.y }, yaw, phase: 0, sig, owned: !model, ...(star ? { star } : {}) };
   }
 
   /** `inside`: the structure the wanderer is in (cut above the head). */
@@ -208,6 +223,15 @@ export class Entities {
         // Put down on furniture (T291): still on its shelf, as high as the kernel rests it, turned as it was laid.
         v.root.position.set(p.x, (Number.isFinite(p.z) ? p.z : k.groundAt(p.x, p.y)) + (v.owned ? 0.16 : 0), p.y);
         v.root.rotation.y = k.ecs.get(id, 'form')?.yaw ?? 0;
+        continue;
+      }
+      if (v.kind === 'item' && v.star) {
+        // The star (T430): it hovers higher, turns and stretches in height and width around its middle.
+        const s = starPulse(t, id * 0.61);
+        v.root.position.set(p.x, k.restsAt(id) + 0.12 + Math.sin(t * 1.8 + id) * 0.04, p.y);
+        v.root.rotation.y = s.spin;
+        v.body.scale.set(s.width, s.height, s.width);
+        v.body.position.y = v.star.middle * (1 - s.height);
         continue;
       }
       if (v.kind === 'item') {

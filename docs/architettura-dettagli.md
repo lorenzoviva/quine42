@@ -1118,6 +1118,15 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   base, `<animation>` e `<action>` (regole sul modello finito: la porta si apre); il front-end ripara le forme
   sbagliate dagli agenti. Il codice è in `src/mj/`; il laboratorio (`lab/`, `lab/README.md`) serve ad analizzare e
   correggere i programmi che il Concilio non riesce a scrivere (sandbox 3D `/lab/3d/`, sezioni, foto, prove con Gemini).
+- **La stella** (ADR-0220, T430, kernel 0.9.16): ciò che non ha un modello suo veste il generico della classe `object` (`Forms.resolve`),
+  che dal 19/11 è una stella a quattro punte (`universe/models/object.xml`, 17 voxel a 32 per casella, 0,53 caselle, perché entri
+  anche sul coperchio di un barile; la lettera `C` prende il colore della cosa, `tint`, o uno dal suo id se la cosa non lo dice, `itemLook`), al posto del sacco legato che sembrava una pozione. Il giro e la deformazione
+  sono del renderer, al suo fotogramma (`starPulse` in `src/render/star.ts`, `EntityView.star` in `entities.ts`: un oggetto a terra senza
+  modello suo gira, si stira in altezza e larghezza attorno al suo mezzo e ogni tanto si stringe come il lampo di uno schermo a tubo); posato su un
+  mobile resta fermo. L'icona è la foto della stella (`thumbs.ts`) e nell'inventario si muove con un'animazione CSS (`.icon.star`,
+  `itemIcon`, ferma con `prefers-reduced-motion`). Gli universi la prendono dal seme se non hanno riscritto `models/object.xml`
+  (`upgradeFromSeed`), e la voce di un programma preso dal seme ora segue quella del seme (`mergeEntries` con `taken`: `vpt`, `tint`, il nome;
+  i campi che ha solo l'universo restano).
 - **I simboli** (ADR-0175, T342, contratto 0.6): un simbolo è una lettera o `#` e un numero (`#0`…`#2047`), letto avidamente
   (`#12A` sono `#12` e `A`, `#1#2` due), senza zeri davanti; una cifra da sola e un `#` senza numero sono errori del compilatore
   col motivo, anche nel modo che ripara. Valgono ovunque si legge un simbolo: `values`, pattern (attributi, figli, file),

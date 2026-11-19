@@ -1,8 +1,23 @@
-<!-- Thing (the generic object): written by hand by Claude Code (step 9). A bundle tied at the top; the letter C takes the colour of the thing (index.json: "tinta"), so a single program serves all the objects that have no model of their own. -->
-<sequence values="BCN" size="12 12 12" symmetry="(xy)" name="Cosa">
+<!-- Thing (the generic object): written by hand by Claude Code (T430). What has no model of its own looks like nothing that exists: a star of four points, standing, its sides curving in by steps (each box is a step of the curve |x|^0.65 + |z|^0.65 = 1), thicker towards its middle like a lens, a light spark at its heart. The letter C takes the colour of the thing (index.json: "tint"), so a single program serves all the objects that have no model of their own; the renderer turns it and stretches it in height and width (src/render/star.ts). -->
+<sequence values="BCW" size="17 17 17" name="Stella">
   <color symbol="C" value="b08a5a" name="colore della cosa"/>
-  <color symbol="N" value="5a4028" name="laccio"/>
-  <ellipsoid at="6 6 0" size="10 10 8" color="C"/>
-  <cylinder at="6 6 7" size="4 4 3" color="C"/>
-  <cylinder at="6 6 8" size="5 5 1" color="N"/>
+  <color symbol="W" value="fff4d6" name="scintilla"/>
+  <!-- The outer star, one voxel thick: from the long thin points to the widest step. -->
+  <box at="8 8 0" size="1 1 17" color="C"/>
+  <box at="8 8 3" size="3 1 11" color="C"/>
+  <box at="8 8 5" size="5 1 7" color="C"/>
+  <box at="8 8 6" size="7 1 5" color="C"/>
+  <box at="8 8 7" size="11 1 3" color="C"/>
+  <box at="8 8 8" size="17 1 1" color="C"/>
+  <!-- The inner star, three voxels thick. -->
+  <box at="8 8 3" size="1 3 11" color="C"/>
+  <box at="8 8 6" size="3 3 5" color="C"/>
+  <box at="8 8 7" size="5 3 3" color="C"/>
+  <box at="8 8 8" size="11 3 1" color="C"/>
+  <!-- The middle, five voxels thick, and the spark that stands out of both faces. -->
+  <box at="8 8 6" size="1 5 5" color="C"/>
+  <box at="8 8 7" size="3 5 3" color="C"/>
+  <box at="8 8 8" size="5 5 1" color="C"/>
+  <box at="8 8 7" size="1 7 3" color="W"/>
+  <box at="8 8 8" size="3 7 1" color="W"/>
 </sequence>
