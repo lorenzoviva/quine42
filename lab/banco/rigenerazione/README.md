@@ -50,3 +50,35 @@ casella; la partenza ha due lotti 7 × 7, (1, 1)-(7, 7) e (1, 9)-(7, 15), il bar
 Validatore degli ambienti e `recutFaults` verdi. Commit nel repository di sidera sopra il tag `prima-di-t435`; i programmi e le bozze dei due luoghi
 in `sidera-piazza.json` (lo prova `tests/rigenera-sidera.test.ts`); le foto nel browser, offline su una copia: `sidera-piazza-dei-viadotti.jpg`
 (il bar con le luci ciano in alto a sinistra, il santuario con i merli a sinistra) e `sidera-piazza-santuario.jpg` (la porta del santuario).
+
+## neapolis, le quattro strutture a 16 e la figura dei cittadini (T436, ADR-0223)
+
+Il 19/11, sull'universo vero (`universes/neapolis` della cartella del generatore), dopo il tag `prima-di-t436`, in un giro a parte (il progresso in
+`universes/.generation/neapolis.rigenera-modelli-t436.json`, quello del generatore non si tocca):
+
+```bash
+npx vite-node --script tools/abbonamenti/servi.ts -- --coda <universi>/.queue
+npm run genera -- neapolis --rigenera modelli --giro t436 --tetto 10 --universi <universi> \
+  --tipi casa-comune-structure-f2e1f8de,struttura-bistrot,struttura-mercato-coperto-rionale,struttura-torre-panoramica,neapolis-cittadino
+```
+
+- **La figura**: un commit a mano nell'universo (autore Kernel) aggiunge `neapolis-cittadino` (classe `person`, `tint: C`, per ora il programma
+  del Fabbro) e la fa indossare agli 11 mestieri `npc.*` al posto di `person`, il generico del kernel che la rigenerazione non tocca; poi lo
+  Scultore la riscolpisce («Cittadino di Neapolis (anni Novanta)», giacca, pantaloni, scarpe; il colore principale è quello di ogni mestiere).
+- **`porto`** (i magazzini di 7 × 5 del Porto commerciale e del Molo Vecchio): il Cartografo ha fallito sette volte (gli edifici 7 × 7 trovavano
+  posto per uno solo: la riva di (1, 2) ha nove righe di terra e il bordo del luogo resta sabbia anche sotto una regola) e ha riuscito
+  all'ottavo, il secondo col prompt che dice il bordo (ADR-0223): i magazzini 7 × 7 con l'anello anche sulla banchina e sulla strada del bordo,
+  due per luogo. Il programma: `neapolis-porto.json`. Prima di riprovarlo, un programma scritto a mano provato con
+  `piano-rigenerazione.ts --prova porto <file>` aveva mostrato che due 7 × 7 ci stanno.
+- **`uffici`** (chiesto con `--ambienti uffici` per il bistrot Enorme): tre tentativi, e non si può: alla Torre C due strutture e un 10 × 10
+  non entrano con un 7 × 7 in 18 caselle col bordo fermo. Ma il bistrot su una casa di 7 × 8 era già Grande a 20 (vuole 8): ora resta a 20 solo
+  una struttura che il 16 mostrerebbe più piccola (`shownRank`), e il bistrot va a 16, Grande come si vedeva.
+- `village` e `inn` (ambienti del seme medievale con case di 6 × 5) presi dal seme di oggi, come il generatore avrebbe fatto.
+- Le strutture riscolpite a 16 e arredate dallo Scenografo, senza merli né feritoie (solo `part-door`, `part-stair` e, con la cantina,
+  `part-cellar`): la palazzina delle case comuni 6/10 (al secondo giro: il primo un piano solo), il bistrot 5/10, il mercato coperto rionale
+  4/10, la torre panoramica 4/10; il cittadino 6/10.
+- **Il costo**: 46 chiamate, almeno 5,1 $ al listino di Opus 5.5 (11 del Cartografo, 0,63 $; 31 dello Scultore e dell'Artista, 4,40 $; 4 dello
+  Scenografo, 0,07 $), più al più una chiamata interrotta quando ho fermato il primo giro prima che riscolpisse a 20; la settimana 96 → 97 %.
+- **Dopo**: `piano-rigenerazione.ts` non trova strutture a 20; `controlla-universo.ts` legge i 107 piani, 0 guasti. Nel browser (copia offline):
+  il Porto commerciale coi due magazzini, il mercato a sinistra e la torre a destra (`neapolis-porto-commerciale.jpg`), e i cittadini col corpo
+  nuovo (`neapolis-cittadino.jpg`, `neapolis-cittadino-vicino.png`).
