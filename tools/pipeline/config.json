@@ -21,6 +21,12 @@
       "universo": "neapolis",
       "rigenera": "modelli",
       "tettoSettimana": 25
+    },
+    {
+      "universo": "mesa",
+      "ambientazione": "western",
+      "partita": "multigiocatore",
+      "tettoSettimana": 25
     }
   ],
   "generatore": {

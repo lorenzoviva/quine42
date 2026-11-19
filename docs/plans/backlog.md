@@ -3354,6 +3354,7 @@ la vista d'insieme e la conformità dei modelli; l'editor MJ è un ambiente dedi
 
 ### T185 · Generare gli universi spazio, pirati, cowboy — `in attesa` (dipende da T184, T153)
 - Orchestratore (19/11): il cowboy lo genera il generatore appena T184 è integrato: voce `{ universo: "mesa", ambientazione: "western", partita: "multigiocatore", tettoSettimana: 25 }` in `config.json → generazione` (nome scelto dall'orchestratore in autonomia; alternative per l'autore: `polvere`, `frontiera`, `sierra`, `canyon`). Proposte in latino e greco (stile di T153, epoca 547), da scegliere dall'autore prima della Genesi: cowboy `aridus`, `deserta`, `pulvis`, `occidens`; pirati `thalassa`, `pelagos`, `naufragium`, `aequor`; spazio `aether`, `kosmos`, `astra`, `vacuum`. I piani dei luoghi portano il nome dell'universo (ADR-0217): non si rinomina dopo, quindi il western parte sul generatore solo col nome scelto dall'autore. Pirati e spazio dopo i cambi del kernel che T432 propone.
+- Autore (19/11, D65): Far West `mesa` (sul generatore, `config.json → generazione`, multigiocatore, tetto 25 %); Pirati `thalassa` dopo T444; Spazio `astra` dopo T450.
 - Pipeline: claude · stima 2% · priorità 91
 - Step: 37
 - Contesto: in attesa come T184, per scelta dell'autore (03/11); servono anche le risposte di T153 (`docs/pipeline/domande/T153.md`): costo, abbonamenti, nomi.
@@ -5984,3 +5985,117 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — col turno `browser`, su una copia di `universes/neapolis` con `?skip&offline&universo=neapolis`: un luogo con una delle 4 strutture portate a 16 (senza merli) e un individuo col corpo nuovo; nessun errore del gioco in console; screenshot.
 - Quando è fatto: commit su `task/T436` (e i commit nel repository di `universes/neapolis`); nell'esito chiamate, costo a listino e voti dell'Artista. Sicurezza: nessuna superficie nuova.
 - Esito: neapolis: `porto` riscritto dal Cartografo (8° tentativo; i primi 7 falliti finché il prompt non ha detto che il bordo del luogo resta quello della bozza), `uffici` impossibile per il bistrot (10×10 + 7×7 non entrano in 18 caselle), ma il bistrot va a 16 perché ora una struttura resta a 20 solo se a 16 si vedrebbe più piccola (`shownRank`); palazzina delle case comuni, bistrot, mercato coperto rionale e torre panoramica riscolpiti a 16 e arredati, senza merli né feritoie (Artista 6/5/4/4); `neapolis-cittadino` scolpito (6/10) e indossato dagli 11 mestieri; tag `prima-di-t436`, commit nel repository dell'universo; 46 chiamate, almeno 5,1 $ a listino, settimana 96→97 %; `--ambienti` e `--giro` in `npm run genera`, prompt di `environment.recut` con due lati, il bordo e la pianta nel ritorno, `piano-rigenerazione.ts --prova/--bozze`; ADR-0223, kernel 0.9.21; `piano-rigenerazione.ts` 0 strutture a 20, `controlla-universo.ts` 107 piani 0 guasti; suite (3590) e typecheck verdi; non provato: gli interni nel browser, un'Enorme in un luogo che ha già altre strutture (resta difficile). Sicurezza: nessuna superficie nuova.
+
+## L'acqua dei Pirati e lo spazio (D64 chiusa dall'autore il 19/11; studio `docs/design/acqua-spazio.md`, nasce da T432: `dossier T432`)
+
+> **La direzione dell'autore (19/11, vale per tutti i task qui sotto):** il kernel deve accogliere il maggior numero possibile di modifiche fatte in gioco. Il lavoro è soprattutto di **predisposizione**: primitive del kernel che permettano al Fisico e al resto del Concilio di rimodellare la fisica (di poco, entro i limiti del kernel) per accomodare qualunque effetto fisico a runtime, non comportamenti cablati per tema. Pirati e spazio sono la prova che il motore regge questi due modelli; non ci si ferma a loro. Risposte: 1) **si nuota ovunque** (non solo nei mondi la cui natura lo dice: il nuoto deve poter emergere anche in `aurora`); 2) **la regola 10 cambia**: isole raggiungibili a nuoto, anche più lontane fra loro dei 4 luoghi proposti; 3) **i pianeti a definizione variabile** secondo quanto si è vicini, precalcolati, con meno voxel da lontano; 4) prima i Pirati e il veicolo, poi lo spazio (D1); 5) i 15 task approvati. Nomi (D65): Far West `mesa` (sul generatore dal 19/11), Pirati `thalassa`, Spazio `astra`.
+
+### T437 · N0 · La natura del mondo e le primitive della fisica che il Concilio rimodella — `da fare` (dipende da T184)
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 5
+- Step: 37
+- Contesto: § 4, § 1.1, § 1.2 e § 3 di `docs/design/acqua-spazio.md`; la direzione dell'autore qui sopra. Lo studio proponeva il nuoto acceso solo da `universe.json → nature` per non toccare il contratto; l'autore vuole il nuoto ovunque e primitive della fisica rimodellabili dal Concilio.
+- Cosa fare: (1) l'ADR della fisica rimodellabile: quali grandezze del corpo e del terreno diventano dati con limiti del kernel (modo di attraversare una casella: camminare, nuotare, non attraversabile; passo, fatica, galleggiamento/pescaggio, gravità, aria), dove stanno (terreni, `nature`, regole), chi le scrive (il Fisico, entro tetti del kernel; mai Lua fuori da `Host`), e come restano vere la regola 7 e la regola 10; (2) `universe.json → nature` portata dall'ambientazione, fissata alla Genesi e riparata come `game`, `world.nature()` per Lua (API: `Host`, `prelude.lua`, `LUA_API`, prompt dell'Ingegnere, `AGENTS.md`); (3) il nuoto come senso dei codici d'acqua in **ogni** universo: se questo cambia il contratto, `0.10` con la migrazione in `migrations.ts` e `AGENTS.md`; altrimenti dire perché no; (4) la regola 10 riscritta in `AGENTS.md` («connesso a piedi o a nuoto», le isole oltre i 4 luoghi con la garanzia che il kernel dà, che T441 misura); (5) il test che fissa bozza e layout di tre luoghi campione; voci nuove nel glossario.
+- Quando è fatto: commit su `task/T437`; ADR, `AGENTS.md`, glossario; nell'esito l'elenco delle primitive e dei tetti, se il contratto è cambiato, cosa resta ai task dopo. Suite e typecheck verdi. Sicurezza: dire le superfici (Lua, multigiocatore).
+
+### T438 · P1 · Il mare che si nuota, ovunque — `da fare` (dipende da T437)
+- Pipeline: claude · sforzo high · stima 6% · approvato · browser · priorità 5
+- Step: 37
+- Contesto: § 1.1 dello studio, con le primitive di T437 (`dossier T437`): il nuoto è un modo di attraversare che il Fisico può rimodellare, non un caso dei Pirati.
+- Cosa fare: il corpo che nuota (passo, fatica nel kernel, annegare come causa di `player.death` col livello della morte, salto dentro e fuori, carico che ferma alla riva, posa a schermo), il layout che non scava più l'acqua, gli NPC che non nuotano (per ora), il server che ferma chi cammina sull'acqua; in ogni universo, anche quelli di oggi (fiumi e fossati si nuotano).
+- Browser: sì — dalla riva nell'acqua in `aurora` (o una sua copia) e in un mondo `pirates` offline: affonda al petto, rallenta, energia giù; un fiume a nuoto; salto in acqua; risalita; portata piena ferma alla riva; screenshot.
+- Quando è fatto: commit su `task/T438`; test del layout (0 caselle d'acqua scavate) e del corpo; suite e typecheck verdi. Sicurezza: multigiocatore.
+
+### T439 · P3 · Il veicolo, da soli — `da fare` (dipende da T438)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · browser · priorità 5
+- Step: 37
+- Contesto: § 1.3 dello studio; la Q di T183. Il veicolo è una primitiva generica (acqua, terra, vuoto), da cui il Concilio fa barche, carri, capsule: non una barca cablata.
+- Cosa fare: `vehicle`, chi è a bordo, il timone, l'ancora, le collisioni con la costa, `state.json → vehicles`, il verso a ogni fotogramma, lo zoom al timone, `world.vehicle*` (API Lua nuova con tutti i suoi posti), `mech.barca` senza il sedile a mano.
+- Browser: sì — salire, governare, ancorare, urtare la costa, scendere; screenshot.
+- Quando è fatto: commit su `task/T439`; suite e typecheck verdi. Sicurezza: Lua.
+
+### T440 · P5 · Lo Scultore delle navi — `da fare` (dipende da T439)
+- Pipeline: claude · sforzo high · stima 5% · approvato · browser · priorità 5
+- Step: 37
+- Contesto: § 1.6 dello studio.
+- Cosa fare: la classe `vessel`, `waterline`, le aree (ponte, timone), i controlli, il prompt, la risposta offline, le taglie sul banco.
+- Browser: sì — nel laboratorio, una nave alle taglie del banco; screenshot.
+- Quando è fatto: commit su `task/T440`; suite e typecheck verdi.
+
+### T441 · P2 · L'arcipelago dall'atlante, isole lontane a nuoto — `da fare` (dipende da T438)
+- Pipeline: claude · sforzo high · stima 6% · approvato · browser · priorità 5
+- Step: 37
+- Contesto: § 1.2 e § 1.5 dello studio; l'autore vuole isole raggiungibili a nuoto **più lontane** dei 4 luoghi proposti (`MAX_STRAIT`).
+- Cosa fare: le isole del kernel, lo stretto massimo misurato sulla fatica a nuoto (proporre un valore oltre 4 col margine che resta, ed eventuali scogli o isolotti di riposo che il kernel garantisce sulla rotta), le isole ferme, il mare aperto senza chiamate, il Cartografo che battezza, `world.region_at`/`islands`; la garanzia della regola 10 come la scrive T437.
+- Browser: sì — una traversata dalla partenza all'isola più lontana della catena; screenshot.
+- Quando è fatto: commit su `task/T441`; nell'esito lo stretto scelto e la misura; suite e typecheck verdi.
+
+### T442 · P4 · Il veicolo in molti — `da fare` (dipende da T439)
+- Pipeline: claude · sforzo extra · stima 6% · approvato · browser · priorità 5
+- Step: 37
+- Contesto: § 1.3 dello studio.
+- Cosa fare: la parte `vehicle` estrapolata, il passo relativo, gli altri a bordo, il timone in molti, le voci di sicurezza (registro, `tests/sicurezza/`).
+- Browser: sì — due schede, due viandanti sulla stessa nave; screenshot.
+- Quando è fatto: commit su `task/T442`; suite e typecheck verdi. Sicurezza: voci nuove se servono.
+
+### T443 · P6 · Porti, moli, secche — `da fare` (dipende da T440, T441)
+- Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
+- Step: 37
+- Contesto e cosa fare: § 1.5-1.6 e tabella § 6 dello studio.
+- Browser: sì — un porto con molo e secca; screenshot.
+- Quando è fatto: commit su `task/T443`; suite e typecheck verdi.
+
+### T444 · P7 · Affondare e relitti — `da fare` (dipende da T442)
+- Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
+- Step: 37
+- Contesto e cosa fare: § 1.4 dello studio; galleggiamento e affondamento come grandezze che il Fisico rimodella (T437).
+- Browser: sì — una nave che affonda e il relitto; screenshot.
+- Quando è fatto: commit su `task/T444`; suite e typecheck verdi. Dopo questo si genera `thalassa` (T185).
+
+### T445 · S1 · Il vuoto, il cielo, il giorno — `da fare` (dipende da T437, T441)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
+- Step: 37
+- Contesto e cosa fare: § 2.1-2.3 dello studio: stazioni e asteroidi col meccanismo di T441, il vuoto come modo di attraversare di T437, le stelle.
+- Browser: sì; screenshot.
+- Quando è fatto: commit su `task/T445`; suite e typecheck verdi.
+
+### T446 · S2 · L'aria e l'ossigeno — `da fare` (dipende da T445)
+- Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
+- Step: 37
+- Contesto e cosa fare: § 2.4 dello studio; l'aria come grandezza generica che il Concilio usa anche altrove (sott'acqua, miniere).
+- Browser: sì; screenshot.
+- Quando è fatto: commit su `task/T446`; suite e typecheck verdi.
+
+### T447 · S3 · La gravità — `da fare` (dipende da T437)
+- Pipeline: claude · sforzo high · stima 1.5% · approvato · browser · priorità 6
+- Step: 37
+- Contesto e cosa fare: § 2.5 dello studio; la gravità fra le primitive rimodellabili di T437.
+- Browser: sì; screenshot.
+- Quando è fatto: commit su `task/T447`; suite e typecheck verdi.
+
+### T448 · S4 · Le astronavi e le capsule — `da fare` (dipende da T442, T445)
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6
+- Step: 37
+- Contesto e cosa fare: § 2.2 e § 2.6 dello studio, sul veicolo di T439/T442.
+- Browser: sì; screenshot.
+- Quando è fatto: commit su `task/T448`; suite e typecheck verdi.
+
+### T449 · S5 · I pianeti a definizione variabile e il viaggio — `da fare` (dipende da T448)
+- Pipeline: claude · sforzo extra · stima 9% · approvato · browser · priorità 6
+- Step: 37
+- Contesto: § 2.7-2.8 dello studio (C1: fasce lontane dello stesso piano, origine mobile del renderer, senza contratto nuovo). L'autore vuole i pianeti **a definizione variabile secondo la distanza**: precalcolati, con meno voxel da lontano e sempre più dettaglio avvicinandosi, fino ai luoghi veri all'atterraggio.
+- Cosa fare: i livelli di dettaglio di un pianeta (precalcolo, cache, voxel ridotti per livello), il passaggio fra un livello e l'altro senza scatti, il viaggio che sposta lo scorrimento del tappeto e mai la posizione nel cerchio, l'origine mobile; misurare memoria e frame (`lab/scripts/misura-frame.mjs`).
+- Browser: sì — avvicinarsi a un pianeta dallo spazio fino all'atterraggio; screenshot a tre distanze.
+- Quando è fatto: commit su `task/T449`; nell'esito le misure; suite e typecheck verdi.
+
+### T450 · S6 · Lo spazio nel Concilio — `da fare` (dipende da T445, T446, T447)
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 6
+- Step: 37
+- Contesto e cosa fare: § 2.9 dello studio; prompt e schemi perché il Concilio (il Fisico per primo) usi le primitive di T437 anche fuori dai temi. Dopo questo si genera `astra` (T185).
+- Quando è fatto: commit su `task/T450`; suite e typecheck verdi.
+
+### T451 · P8 · Il mare a schermo — `da fare` (dipende da T439)
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 9
+- Step: 37
+- Contesto e cosa fare: § 1.7 dello studio (facoltativo).
+- Browser: sì; screenshot.
+- Quando è fatto: commit su `task/T451`; suite e typecheck verdi.

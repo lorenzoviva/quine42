@@ -7,18 +7,6 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
   2. **Strutture rigenerate con merli e feritoie** (cattedrale degli ingranaggi di `orichalcum`; bistrot, laboratorio, palazzina, chiesa moderna, torre panoramica di `neapolis`; laboratori, fari, santuari, stazione di transito di `sidera`, più le 6 strutture fallite in T411): **B1** *(raccomandata)* dopo T434, rilanciare `--rigenera modelli --tipi …` solo su quelle strutture e sulle 6 rimaste al vecchio programma; oppure **B2** tenerle così per ora e rifarle solo in Fase III.
   3. **Modalità di gioco dei tre universi di T273:** oggi `universe.json → game.mode` dice `single` (il 03/11 li volevi multigiocatore, e la scelta è fissa alla Genesi): **C1** *(raccomandata)* convertirli in multigiocatore prima di portarli sul server della beta (T45f) così i tester ci giocano insieme; oppure **C2** lasciarli `single` e tenere il multigiocatore per i nuovi universi (`aridus`, ecc.).
 
-- **D65 (T185 — I nomi dei tre nuovi universi: Far West, Pirati, Spazio):** né T184 né T432 hanno proposto nomi nuovi. Proposte in latino e greco antico (stile di T153, cartelle in `universes/`):
-  1. **Far West (`western`, pronto a partire sul generatore appena scelto il nome — ADR-0217: il nome entra nei piani e non si cambia dopo):** `aridus` *(raccomandata: l'arido, la terra secca)*, `deserta`, `pulvis`, `occidens` (alternative: `mesa`, `polvere`, `frontiera`, `sierra`, `canyon`).
-  2. **Pirati (`pirates`, dopo i task del kernel di T432/D64):** `thalassa` *(raccomandata: il mare)*, `pelagos`, `naufragium`, `aequor`.
-  3. **Spazio (`space`, dopo i task del kernel di T432/D64):** `aether` *(raccomandata: il cielo più alto)*, `kosmos`, `astra`, `vacuum`.
-
-- **D64 (T432 — L'acqua dei Pirati e lo spazio: nuoto, isole, pianeti, ordine, `docs/design/acqua-spazio.md` e `docs/pipeline/domande/T432.md`):**
-  1. **Dove si nuota:** A1 **solo nei mondi la cui natura lo dice (`universe.json → nature`)** *(raccomandata: Pirati e pianeti con il mare; Valmora resta coi ponti e i fossati che fermano)*; oppure A2 in ogni universo nuovo dalla Genesi.
-  2. **La regola 10 con le isole:** B1 **le isole sono connesse a nuoto entro 4 luoghi dall'atlante** *(raccomandata: ogni riva camminabile è un approdo, niente strade scavate sull'acqua)*; oppure B2 il mare resta un muro con una barca su ogni approdo.
-  3. **I pianeti:** C1 **fasce lontane dello stesso piano ogni `2^20` caselle con origine mobile del renderer** *(raccomandata: aggiuntiva, 6 %, sposta solo lo scorrimento del tappeto)*; C2 coordinata `plane` nuova (contratto nuovo, 15-20 %); oppure C3 niente pianeti nel primo universo dello spazio (14,5 %, C1 possibile dopo).
-  4. **L'ordine:** D1 **prima i Pirati e il veicolo, poi lo spazio** *(raccomandata)*, decidendo se generare l'universo dei Pirati (T185) dopo il task 6 (veicolo in molti, 29 %) o dopo l'8 (porti e relitti); D2 prima lo spazio; oppure D3 i due in parallelo dopo N0 e il veicolo da soli (task 3).
-  5. **I 15 task proposti** in `docs/design/acqua-spazio.md` § 6 (57,5 % totale con P8, nessun contratto nuovo): approvati così da pianificare nel backlog?
-
 - **D35 (T240 → T378 il 14/11 — Il piano di lancio, `docs/lancio/piano.md`, § «Le decisioni (D35)»; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, a nome tuo (consiglio: sì, la voce più importante); D4.6 il volto del lancio sei tu, nome e cognome, Boa Lodger mai portavoce (consiglio: sì).
   - **Senza consiglio, tue:** D5.1 10 ore a settimana di promozione?; D6.2 chiave del server in open beta: nessuna oppure una tua con tetto piccolo per un universo vetrina (proposta 10-20 $/giorno); D6.4 quanti mondi accesi sul server ufficiale (proposta 4-8, chi trova pieno va alla demo offline e alla guida d'installazione); D7.3 codice o pacchetto pubblico con licenza, ora requisito della Fase IV (da decidere prima che T367 pubblichi l'immagine).
@@ -27,6 +15,8 @@ L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiorna
   - **Facoltativa:** D4.3 Boa Lodger easter egg. **Tolte:** D4.5 (bot Discord), D3.5 (rimandata con D3.4).
   - **Non verificato (V1-V12):** regole di HN/Reddit/itch.io, GDPR e AI Act, costo reale di una Genesi, limite OAuth di OpenRouter, alcune fonti del § 4 bis.
 
+- **D65 (chiusa, autore 19/11 → T185):** Far West `mesa` (sul generatore), Pirati `thalassa`, Spazio `astra`.
+- **D64 (chiusa, autore 19/11 → T437-T451):** si nuota ovunque; la regola 10 cambia, isole a nuoto anche oltre 4 luoghi; pianeti a definizione variabile con la distanza (precalcolati, meno voxel da lontano); prima Pirati e veicolo; 15 task approvati. Direzione: primitive della fisica che il Concilio rimodella a runtime, predisposizione più che implementazione.
 - **D58 (chiusa, autore 14/11 → T395):** lo Scultore usa Argon per le strutture di ogni taglia fino a T392; riparazione del prompt dopo T392.
 - **D55 (chiusa, autore 14/11 → T395, T396):** la chiave OpenRouter la mette l’autore; 2) sì, il testo del viandante a Jev solo via OpenRouter con la ritenzione zero (T396); 3) sì, 3.5 Flash a 1,50/9,00 (T395).
 - **D52 (chiusa, autore 13/11 → T361-T369, T45f su VM):** confermate tutte tranne la 5: Jev resta acceso in open beta, perché OpenRouter fornisce anche i modelli di TypeSafe (passa da T362).
