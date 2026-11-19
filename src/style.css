@@ -233,6 +233,10 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--neon-pink); }
 #hotbar .count, #inventory .count { position: absolute; bottom: 0; right: var(--space-2); font: var(--text-18)/1 var(--font-pixel); color: #fff; text-shadow: 1px 1px 0 var(--comic-ink), -1px -1px 0 var(--comic-ink), 1px -1px 0 var(--comic-ink), -1px 1px 0 var(--comic-ink); }
 .icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
 .icon img { image-rendering: auto; display: block; }
+/* The star of what has no model of its own (T430): it turns and stretches as in the world (src/render/star.ts), each a little out of step. */
+.icon.star img { animation: star-pulse 3.4s ease-in-out infinite; animation-delay: var(--star-delay, 0s); }
+@keyframes star-pulse { 0%, 100% { transform: scale(1, 1); } 22% { transform: scale(0.22, 1.12); } 44% { transform: scale(1.12, 0.88); } 70% { transform: scale(0.9, 1.06); } 84% { transform: scale(0.55, 1.2); } }
+@media (prefers-reduced-motion: reduce) { .icon.star img { animation: none; } }
 
 #inventory { position: fixed; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; background: rgba(7, 4, 13, 0.45); }
 #inventory .window { width: min(calc(var(--measure-843) + var(--measure-47)), calc(100vw - var(--space-21))); max-height: calc(100vh - var(--space-21)); overflow: auto; }

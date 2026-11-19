@@ -104,10 +104,12 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
       if (!updated.includes(p)) updated.push(p);
     }
   }
-  // The library's index the Sculptor rewrote still receives the kernel's new models (the corona's buildings).
+  // The library's index the Sculptor rewrote still receives the kernel's new models (the corona's buildings), and the entry of a program
+  // just taken from the seed follows the seed's (T430: the generic thing's density came with its new program).
   const index = 'models/index.json';
   if (out[index] && seed[index] && out[index] !== seed[index]) {
-    const merged = mergeEntries(out[index], seed[index]);
+    const taken = updated.map((p) => /^models\/([^/]+)\.xml$/.exec(p)?.[1]).filter((id): id is string => !!id);
+    const merged = mergeEntries(out[index], seed[index], taken);
     if (merged && merged !== out[index]) {
       out[index] = changes[index] = merged;
       if (!updated.includes(index)) updated.push(index);
@@ -162,14 +164,29 @@ export function keepEnvironments(mine: string, seed: string): string {
   }
 }
 
-/** The seed's top-level entries the universe lacks, added; the universe's own never replaced. */
-function mergeEntries(mine: string, seed: string): string | undefined {
+/**
+ * The seed's top-level entries the universe lacks, added; the universe's own never replaced, but for the programs it just took from the seed
+ * (`taken`, T430): their entry says what the seed's says (density, tint), and keeps the fields only the universe's has.
+ */
+function mergeEntries(mine: string, seed: string, taken: readonly string[] = []): string | undefined {
+  const isEntry = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
   try {
     const m = JSON.parse(mine);
     const s = JSON.parse(seed);
-    const add = Object.keys(s).filter((id) => !(id in m));
-    if (!add.length) return mine;
-    for (const id of add) m[id] = s[id];
+    if (!isEntry(m) || !isEntry(s)) return undefined;
+    let changed = false;
+    for (const [id, entry] of Object.entries(s)) {
+      if (!(id in m)) {
+        m[id] = entry;
+        changed = true;
+      } else if (taken.includes(id) && isEntry(m[id]) && isEntry(entry)) {
+        const next = { ...m[id], ...entry };
+        if (JSON.stringify(next) === JSON.stringify(m[id])) continue;
+        m[id] = next;
+        changed = true;
+      }
+    }
+    if (!changed) return mine;
     return JSON.stringify(m, null, 1) + '\n';
   } catch {
     return undefined;

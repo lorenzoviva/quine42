@@ -10,6 +10,8 @@ import { runeGlyph } from '../kernel/runes';
 import { HELD_NOTICE, HELD_NOTICE_MASTER } from '../kernel/worldPace';
 import { pressKey } from './touch';
 import { closeButton } from './panels';
+import { isStar } from '../render/star';
+import { hashStr } from '../kernel/rng';
 
 /** A phone held upright (T388): the short side under this, with fingers, and the game asks to be turned. */
 export const UPRIGHT_SMALL = '(orientation: portrait) and (max-width: 600px)';
@@ -22,7 +24,10 @@ export const icons: { get?: (item: string) => Promise<string | undefined>; model
 /** An item's icon: the photograph of its model, its sign in its colour until the photograph is there. */
 export function itemIcon(k: Kernel, item: string, size = 32): HTMLElement {
   const info = k.itemInfo(item);
-  const box = el('span', { class: 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px` }, info.glyph);
+  // An item without a model of its own is the star (T430), and here too it turns and stretches, each out of step.
+  const star = isStar(k.itemLook(item).model);
+  const delay = star ? `;--star-delay:-${(hashStr(item) % 34) / 10}s` : '';
+  const box = el('span', { class: star ? 'icon star' : 'icon', style: `width:${size}px;height:${size}px;color:${info.color};font-size:${Math.round(size * 0.7)}px${delay}` }, info.glyph);
   void icons.get?.(item).then((src) => {
     if (src) box.replaceChildren(el('img', { src, alt: info.name, width: String(size), height: String(size) }));
   });
