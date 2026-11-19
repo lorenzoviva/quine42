@@ -6074,6 +6074,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T447`; suite e typecheck verdi.
 
+### T453 · Integrare T447 nel base (conflitto con T438: AGENTS.md, kernel.ts, kernel 0.10.1) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 1
+- Step: 37
+- Contesto: `integra T447` (la gravità, `nature.gravity` 0,2-2, salto che scala con 1/g, `Region.gravity` del master, ADR-0225 rinumerato in ADR-0226 sul ramo) ha trovato conflitti in `AGENTS.md` e `src/kernel/kernel.ts`: nel frattempo è entrato T438 (il nuoto, `swim.ts`, `swimmingTick`, `bodyFree`, ADR-0225, kernel 0.10.1). Nasce da T447: `dossier T447`, `traccia T447`, `dossier T438`.
+- Cosa fare: nel worktree `git merge task/T447`; tenere entrambe le aggiunte: nel kernel il nuoto e la fatica di T438 e il salto con la gravità di T447 (il salto dentro e fuori dall'acqua di T438 con la gravità della regione; la verifica di ciò che si raggiunge resta con la gravità della terra); ADR della gravità come ADR-0226 (riferimenti aggiornati); kernel 0.10.2 in `version.ts`, `package.json` e nel seme; in `AGENTS.md` e nei dettagli le righe di entrambi; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/gravity.test.ts` e `tests/nuoto.test.ts` verdi insieme.
+- Browser: sì, breve — `?skip&offline`: un salto in una regione del master a gravità 0,25 e una nuotata nell'acqua; screenshot.
+- Quando è fatto: commit su `task/T453`; poi l'orchestratore integra T453 e `integra T447` toglie worktree e branch di T447. Sicurezza: nessuna superficie nuova oltre a quella di T447.
+
 ### T448 · S4 · Le astronavi e le capsule — `da fare` (dipende da T442, T445)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6
 - Step: 37
