@@ -103,7 +103,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T311 T316 T315 T400 T401 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
-| 37 | Altri universi: spazio, pirati, cowboy | III | in attesa | T184 T185 T278 |
+| 37 | Altri universi: spazio, pirati, cowboy | III | in corso | T184 T185 T278 T432 |
 | 38 | Il lancio | IV | in attesa | T240 T378 T287 |
 | 39 | Gli NPC decidono e invecchiano | III | in attesa | T326 T327 T245g T245h T245i |
 | 40 | Gli oggetti si vedono: in mano, addosso, sui mobili; i mobili si spostano | I | raggiunto | T288 T289 T290 T291 T292 T301 T353 |

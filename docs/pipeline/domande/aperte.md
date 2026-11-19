@@ -2,6 +2,13 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
+- **D64 (T432 — L'acqua dei Pirati e lo spazio: nuoto, isole, pianeti, ordine, `docs/design/acqua-spazio.md` e `docs/pipeline/domande/T432.md`):**
+  1. **Dove si nuota:** A1 **solo nei mondi la cui natura lo dice (`universe.json → nature`)** *(raccomandata: Pirati e pianeti con il mare; Valmora resta coi ponti e i fossati che fermano)*; oppure A2 in ogni universo nuovo dalla Genesi.
+  2. **La regola 10 con le isole:** B1 **le isole sono connesse a nuoto entro 4 luoghi dall'atlante** *(raccomandata: ogni riva camminabile è un approdo, niente strade scavate sull'acqua)*; oppure B2 il mare resta un muro con una barca su ogni approdo.
+  3. **I pianeti:** C1 **fasce lontane dello stesso piano ogni `2^20` caselle con origine mobile del renderer** *(raccomandata: aggiuntiva, 6 %, sposta solo lo scorrimento del tappeto)*; C2 coordinata `plane` nuova (contratto nuovo, 15-20 %); oppure C3 niente pianeti nel primo universo dello spazio (14,5 %, C1 possibile dopo).
+  4. **L'ordine:** D1 **prima i Pirati e il veicolo, poi lo spazio** *(raccomandata)*, decidendo se generare l'universo dei Pirati (T185) dopo il task 6 (veicolo in molti, 29 %) o dopo l'8 (porti e relitti); D2 prima lo spazio; oppure D3 i due in parallelo dopo N0 e il veicolo da soli (task 3).
+  5. **I 15 task proposti** in `docs/design/acqua-spazio.md` § 6 (57,5 % totale con P8, nessun contratto nuovo): approvati così da pianificare nel backlog?
+
 - **D35 (T240 → T378 il 14/11 — Il piano di lancio, `docs/lancio/piano.md`, § «Le decisioni (D35)»; il testo di ogni voce è lì, col consiglio):**
   - **Da decidere ora:** D3.1 account personali su Hacker News e Reddit da subito, a nome tuo (consiglio: sì, la voce più importante); D4.6 il volto del lancio sei tu, nome e cognome, Boa Lodger mai portavoce (consiglio: sì).
   - **Senza consiglio, tue:** D5.1 10 ore a settimana di promozione?; D6.2 chiave del server in open beta: nessuna oppure una tua con tetto piccolo per un universo vetrina (proposta 10-20 $/giorno); D6.4 quanti mondi accesi sul server ufficiale (proposta 4-8, chi trova pieno va alla demo offline e alla guida d'installazione); D7.3 codice o pacchetto pubblico con licenza, ora requisito della Fase IV (da decidere prima che T367 pubblichi l'immagine).
