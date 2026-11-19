@@ -59,7 +59,11 @@ export class People {
     const people = readPeople(this.host.files());
     const known = origin ? people.people.find((p) => p.origin === origin && p.kind === modId) : undefined;
     let identity: Identity;
-    if (known) {
+    if (!known && this.host.localModelsAbroad) {
+      // The local models over a world that is not theirs (T433): a newcomer would be one of Valmora's trades, saved as the Narrator's. The
+      // character stays its archetype (the name of its module, no call), and nothing is written: the Narrator of the world makes them later.
+      identity = { name: m.name, persona: m.persona, look: '', carrying: [], wearing: [], routine: defaultRoutine('') };
+    } else if (known) {
       identity = { name: known.name, persona: known.persona ?? m.persona, look: known.look ?? '', carrying: known.carries ?? [], wearing: known.wears ?? [], job: known.job, gender: known.gender, age: known.age, family: known.family, routine: known.routine, story: known.story };
     } else {
       const specie = this.speciesOf(modId!) ?? 'person';
@@ -147,10 +151,11 @@ export class People {
   /**
    * The sheet of an individual for the Actor (T157): the Narrator writes it once, at their first line, and again only when what
    * it was written from changed (their bonds, their story: `sheetFingerprint`), never at every line. Saved with the individual in
-   * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off.
+   * world/people.json. Paid by whoever pays the line (`chi`). Nothing is written when the Actor is off, nor by the local models over a world
+   * that is not theirs (T433): the Actor plays from the persona.
    */
   async ensureSheet(name: string, chi?: string): Promise<string | undefined> {
-    if (!this.host.actorOn()) return undefined;
+    if (!this.host.actorOn() || this.host.localModelsAbroad) return undefined;
     const p = this.individualOf(name);
     if (!p) return undefined;
     const stamp = sheetFingerprint(p);

@@ -97,8 +97,13 @@ export const CELLAR_THING = 'obj.chest';
 /** What the local models put in a cellar (T419): the seed's shelf and rack, and a barrel. */
 export const CELLAR_FURNITURE = ['cellar-shelf', 'cellar-rack', 'barile'];
 
+/** The world the local models write (T433): the seed's, Valmora; the title of the bible of their Genesis. */
+export const LOCAL_WORLD = 'Il Regno di Valmora';
+
 export class MockAiModels implements AiModels, DecisionModels {
   readonly name = 'offline';
+  /** Only Valmora (T433): over a universe of another world the kernel asks them no new place nor individual. A test may set it to undefined. */
+  world: string | undefined = LOCAL_WORLD;
   readonly usage = emptyUsage();
   /** Closed decisions answered (ADR-0157): always with today's rule. */
   decided = 0;
@@ -146,7 +151,7 @@ export class MockAiModels implements AiModels, DecisionModels {
       case 'text.read':
         return { text: this.sign(d.facts ?? {}, d.what?.name ?? '') };
       case 'genesis.bible':
-        return { mysteries: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], title: 'Il Regno di Valmora', tone: 'concreto e caldo', summary: 'Un regno quieto di prati, boschi e borghi.', history: '', places: ['Piazza di Valmora'], characters: ['Abitanti di Valmora'], facts: ['Il pane del forno di piazza è famoso in tutto il regno.'], customs: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
+        return { mysteries: ['i vecchi non calpestano le rune: dicono che porti sfortuna'], title: LOCAL_WORLD, tone: 'concreto e caldo', summary: 'Un regno quieto di prati, boschi e borghi.', history: '', places: ['Piazza di Valmora'], characters: ['Abitanti di Valmora'], facts: ['Il pane del forno di piazza è famoso in tutto il regno.'], customs: ['Chi sforna il primo pane del giorno lo lascia sulla soglia per il primo che passa.'] };
       case 'genesis.style':
         return { style: 'voxel medievale, semplice e caldo', shapes: 'persone tozze dalla testa grande, case basse', palette: ['verde', 'ocra', 'blu'], light: 'diurna morbida', rules: ['niente testo'], protagonist: 'un viandante incappucciato' };
       case 'model.sculpt': {

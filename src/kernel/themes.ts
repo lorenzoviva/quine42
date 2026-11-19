@@ -126,6 +126,20 @@ them in the greenhouse, the children collect them. What they really do is writte
   },
 ];
 
+/**
+ * The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon; and a
+ * universe of another theme receives from the seed only these (T433, `upgradeFromSeed`), never the castles and the dragons of Valmora.
+ */
+export const TIMELESS_LAYOUTS: ReadonlySet<string> = new Set(['woods', 'fields', 'ruins', 'dungeon', 'desert', 'jungle', 'mountains', 'lake']);
+
+/**
+ * Whether a universe is of the seed's age (T433): its `prompts/theme.md` is the medieval theme as the seed has it, or it has none of its own.
+ * A theme written by hand, even a medieval one, is a world of its own.
+ */
+export function seedAged(theme: string | undefined): boolean {
+  return theme === undefined || themeOfText(theme)?.id === 'medievale';
+}
+
 /** The theme a text is, as it is or with only its blank ends and line endings changed; a text rewritten is no theme of the list. */
 export function themeOfText(text: string): WorldTheme | undefined {
   const plain = (s: string) => s.replace(/\r\n/g, '\n').trim();

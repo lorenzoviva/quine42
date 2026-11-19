@@ -67,6 +67,11 @@ export interface AiModels {
   limits: Limits;
   /** The configured text model, where there is one (T45b: chosen at the Genesis, it changes without a reload). */
   textModel?: string;
+  /**
+   * The one world these models write, by the title of its bible, if they write only one (T433): the local models write Valmora's. Over a
+   * universe with another bible they plan no new place and make no new individual (`Kernel.localModelsAbroad`); undefined, any world.
+   */
+  world?: string;
   /** Every call, with its tokens (the kernel's usage ledger listens). */
   onCall?: (r: CallRecord) => void;
   text(call: TextCall): Promise<string>;

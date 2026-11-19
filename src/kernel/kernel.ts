@@ -1894,7 +1894,8 @@ export class Kernel {
         at.push({ x: pc.x / S - 0.5, y: pc.y / S - 0.5 });
       });
     if (!at.length) return;
-    const quota = this.chunkQuota();
+    // A place the local models left a draft (T433) is not asked again in this session: they would not plan it now either.
+    const quota = this.chunkQuota() && !this.localModelsAbroad();
     // A region of the master (T375): what it holds is not asked again until it is let go; a filler place costs nothing, so neither the quota nor
     // the pace keeps it a draft.
     const drafts = [...this.chunks.values()].filter((c) => {
@@ -2073,6 +2074,13 @@ export class Kernel {
       await this.chunkStore.save(this.recordKey(ch), { plan });
       this.council.say('kernel', 'info', `luogo ${ch.key}: riempitivo «${region!.name}» (${this.content.layouts[plan.layout]?.name ?? plan.layout}), senza chiamate`, 'cartographer', 'chunk.plan');
       if (this.alive(ch)) this.applyPlan(ch, plan);
+      return;
+    }
+    // The local models over a world that is not theirs (T433): they would plan a place of Valmora and the kernel would save it as the
+    // Council's. The place stays a draft until the models of the world come back.
+    if (this.localModelsAbroad()) {
+      if (!ch.held) this.council.say('kernel', 'info', `luogo ${ch.key}: i modelli locali non pianificano questo mondo, resta abbozzato`, 'cartographer', 'chunk.plan');
+      ch.held = true;
       return;
     }
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
@@ -8586,6 +8594,9 @@ export class Kernel {
       get offline() {
         return k.ai.name === 'offline';
       },
+      get localModelsAbroad() {
+        return k.localModelsAbroad();
+      },
       day: () => k.day(),
       phase: () => dayPhase(k.time, Kernel.DAY_SECONDS),
       get modules() {
@@ -9364,6 +9375,19 @@ export class Kernel {
   readOnly(): string | undefined {
     if (this.mirror) return undefined;
     return this.faults.get('universe:kernel')?.message;
+  }
+
+  /**
+   * The models are the local ones over a world that is not theirs (T433): `?offline` (or no key) on a universe the Council made, whose bible
+   * is not the one the local models write (`AiModels.world`, Valmora's). Then a place without a plan stays a draft and a character without an
+   * individual stays its archetype: nothing of Valmora is planned, shown or saved in that world. A mirror decides nothing.
+   */
+  localModelsAbroad(): boolean {
+    if (this.mirror) return false;
+    const world = this.ai.world;
+    if (world === undefined) return false;
+    const title = readBible(this.files)?.title;
+    return typeof title === 'string' && title.trim() !== '' && title.trim() !== world;
   }
 
   /** universe.json unreadable or of another kernel (T260): the world running is not the universe's, nothing of it is saved. */

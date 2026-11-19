@@ -72,6 +72,8 @@ export interface NpcHost {
   readonly paused: boolean;
   /** The models are the local ones (`offline`). */
   readonly offline: boolean;
+  /** The local models over a world that is not theirs (T433, `Kernel.localModelsAbroad`): no new individual is made, none is saved. */
+  readonly localModelsAbroad: boolean;
   /** The day of the world (0 = the first) and its phase now. */
   day(): number;
   phase(): DayPhase;
