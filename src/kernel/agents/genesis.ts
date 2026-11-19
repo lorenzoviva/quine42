@@ -11,6 +11,7 @@ import { repairProgram } from '../mj';
 import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
 import { internalFields, internalName } from '../internalNames';
 import { FORGE_KINDS, type ForgeKind } from './forge';
+import { TIMELESS_LAYOUTS } from '../themes';
 
 /** Codes the procedural draft and the kernel rely on: every palette must define them. */
 export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
@@ -29,9 +30,6 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
   k: { meaning: 'mountain, uncrossable walls', layer: 'rock', solid: true },
   n: { meaning: 'cold walkable, slow ground (snow, frost)', layer: 'ground', solid: false },
 };
-
-/** The seed's environments that belong to no age (ADR-0134): a Genesis that wrote too few keeps these, not a castle in a city of neon. */
-const TIMELESS_LAYOUTS = new Set(['woods', 'fields', 'ruins', 'dungeon', 'desert', 'jungle', 'mountains', 'lake']);
 
 /** What the Narrator asks the Forge for at the Genesis: a kind of what it creates (T310b, `tipi-fucina`) and the request. */
 export interface CastEntry {

@@ -12,6 +12,7 @@ import { hashStr, hex } from './rng';
 import { runsOnThisKernel } from './version';
 import { migrateUniverse, MIGRATIONS } from './migrations';
 import { internalPath } from './internalNames';
+import { seedAged, TIMELESS_LAYOUTS } from './themes';
 import type { ChunkRecord, ChunkStore } from './chunks';
 import type { BringAnswer, BringRef, KinView } from './bring';
 
@@ -66,6 +67,8 @@ export function seedHashes(seed: FileMap): Record<string, string> {
  * A universe out of the range of the kernels it runs on (T302, ADR-0152) takes nothing: the seed is of another contract.
  * The environments a universe has keep their programs (T407, ADR-0211): its places were laid out with them and its plans keep their edits per
  * tile; it takes only the seed's new environments, as from a manifest it rewrote (`keepEnvironments`).
+ * A universe of another age (T433, `seedAged`) takes from the seed only the environments of no age (`TIMELESS_LAYOUTS`): its Genesis left out
+ * Valmora's castles and dragons, and no load brings them back.
  */
 export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap; changes: Record<string, string | null>; updated: string[] } {
   if (!runsOnThisKernel(files['universe.json'])) return { files, changes: {}, updated: [] };
@@ -94,11 +97,15 @@ export function upgradeFromSeed(files: FileMap, seed: FileMap): { files: FileMap
     }
   }
   // Manifests the universe rewrote still receive what the kernel added to them: new terrains, new
-  // environments, new runes and incantations — never replacing what the universe has.
+  // environments, new runes and incantations — never replacing what the universe has; of the environments, in a world of another age,
+  // only those of no age (T433).
+  // The seed's theme as the universe was made from it is the seed's age too (a universe of before T310, whose theme was Italian).
+  const theme = out['prompts/theme.md'];
+  const aged = seedAged(theme) || (theme !== undefined && base['prompts/theme.md'] === h(theme));
   for (const [p, content] of Object.entries(seed)) {
     const mine = out[p];
     if (!mine || mine === content || !p.endsWith('manifest.json')) continue;
-    const merged = mergeKeyed(mine, content);
+    const merged = mergeKeyed(mine, content, aged);
     if (merged && merged !== mine) {
       out[p] = changes[p] = merged;
       if (!updated.includes(p)) updated.push(p);
@@ -193,7 +200,7 @@ function mergeEntries(mine: string, seed: string, taken: readonly string[] = [])
   }
 }
 
-function mergeKeyed(mine: string, seed: string): string | undefined {
+function mergeKeyed(mine: string, seed: string, aged = true): string | undefined {
   try {
     const m = JSON.parse(mine);
     const s = JSON.parse(seed);
@@ -202,7 +209,7 @@ function mergeKeyed(mine: string, seed: string): string | undefined {
       if (!s[k] || typeof s[k] !== 'object') continue;
       m[k] ??= {};
       for (const [id, v] of Object.entries(s[k])) {
-        if (id in m[k]) continue;
+        if (id in m[k] || (k === 'layouts' && !aged && !TIMELESS_LAYOUTS.has(id))) continue;
         m[k][id] = v;
         changed = true;
       }

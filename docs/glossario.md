@@ -1290,6 +1290,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `modello` (da solo: è una voce della libreria), `Models`, `MockModels`, `GeminiModels`, `kernel.models`
 - **Fermo**: `textModel` in `universe.json`.
 
+### Modelli locali fuori dal loro mondo
+- **Inglese**: `localModelsAbroad`, `AiModels.world`, `LOCAL_WORLD`
+- **Definizione**: i modelli locali (`?offline`, o nessuna chiave) sopra un universo la cui bibbia non è quella che scrivono, Valmora: un luogo senza piano resta bozza e un personaggio senza individuo resta il suo archetipo, e niente si salva (ADR-0222).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/ai/models.ts`, `src/kernel/ai/mock.ts`, `src/kernel/npc/people.ts`
+- **Da non usare**: universo sigillato (è la sola lettura, `readOnly`), offline (da solo)
+
 ### Regolazioni
 - **Inglese**: `AiSettings`, `repairAiSettings`, `applySettings`, `settingsLocked`, `lockSettings`
 - **Definizione**: ciò che il master fissa prima di entrare: coefficienti, modelli, budget, minimi. Non cambiano a partita in corso, cioè da quando entra il primo viandante a quando esce l'ultimo (ADR-0133).
