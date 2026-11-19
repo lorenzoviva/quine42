@@ -156,14 +156,15 @@ Where the concept leaves a ratio free, lean on the golden one (about 8 to 5): th
 the walls against the roof; a winding stair or the rings of a dome may step as 1, 2, 3, 5, 8; never shrink a door, a storey or a room for a ratio.
 
 ## The measure of «done well»: the reference fort
-Every structure is held against a fort drawn by hand (500 × 500 voxels, as your Gargantuan): a courtyard that is a **union of rectangles**, not one box, grown
+Every structure is held against a fort drawn by hand (500 × 500 voxels, as your Gargantuan), for its **richness, never its form**: a courtyard that is a **union of rectangles**, not one box, grown
 from the centre with arms that stop at random; a curtain wall that follows it, thick, with a **corridor inside** and a **walk on top** reached
-by stairs from the courtyard, merlons and arrow slits on the outer faces; **hollow towers on every convex corner** and along the long sides,
+by stairs from the courtyard; **hollow towers on every convex corner** and along the long sides,
 two storeys each with a door onto the walk; a **gatehouse** taller than the wall, a tower at each side; the **keep as far from the gate as
 the courtyard allows**, a hall and two or three storeys joined by stairs, a terrace on top; barracks against the inside of
 the wall; a paved road from the gate to the keep; every seed another fort. Aim at the same: several storeys and ways in
-height reached on foot, outlines that bend, nothing that is only a box. A farm, a temple, a house have
-other parts: take the standard, not the fort.
+height reached on foot, outlines that bend, nothing that is only a box. A farm, a temple, a station have
+other parts: take the standard, not the fort. **Merlons and arrow slits only on a fortification**; elsewhere a flat top
+ends in a cornice, a parapet, a railing, a dome.
 
 ## The method: three levels, one program
 ```xml
@@ -270,7 +271,7 @@ heights are numbers of steps**: a storey is 32 (a floor, 31 of air, the slab); a
 <all steps="31"><rule in="B h" out="h B"/><rule in="B s" out="s B"/></all>
 <prl><rule in="h" out="R"/><rule in="s" out="R"/></prl>                       <!-- z=64: the ceiling is the roof -->
 ```
-A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more than its platform, so the parapet gets merlons.
+A wall with a walk on top: 24 (`steps="23"`); a tower 40; a parapet one more than its platform.
 
 ## C. The full scale: the doors, the parts, the facades
 - **The doors** come from the plan: where the road (or the paving) meets the foot of a wall, the seed `O` through the whole thickness of the
@@ -282,14 +283,13 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a keep's wall one more
   `close` back, with hidden letters.
 - **The parts of the seed** the request lists are the parts one lives in, already right: include each with `<import file="…"/>` at the point
   where it goes (after the columns have risen), instead of writing it, and give its letters your colours (`<color>`). Each reads a union you
-  redefine with your letters (`<union symbol="+" values="…"/>` in your program wins): `+` your walls, `=` your floors and slabs, `%` the
-  walls that get slits. The request says what each part reads and writes.
+  redefine with your letters (`<union symbol="+" values="…"/>` in your program wins): `+` your walls, `=` your floors and slabs, `%` a fort's
+  walls with slits. The request says what each part reads and writes.
 - **Windows** in the band: `<one steps="14"><rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU …8 layers…" out="*L/*L/*L/*L/*L/*L …"/></one>`
-  then through the wall `<all in="LUUUUB" out="*LLLL*"/>` and the rest of the band back to the wall `<prl in="U" out="W"/>`; the slits come
-  from `part-slits` (their colour `name="feritoia…"`).
+  then through the wall `<all in="LUUUUB" out="*LLLL*"/>` and the rest of the band back to the wall `<prl in="U" out="W"/>`.
 - **Roofs**: the eaves `<all in="RB" out="*R" steps="1"/>`, then a hip roof with a slope of one in two: `<all in="*****/*****/**B**/*****/*****
   **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>`; a flat top
-  with a parapet is a wall one higher than the platform, crowned by `part-battlements`; cones on round towers, pitches on halls, a chimney
+  ends in a parapet, a fort's in `part-battlements` and `part-slits`; cones on round towers, pitches on halls, a chimney
   `<one in="B B R" out="* K *" steps="1" symmetry="()"/><all in="B K" out="K *" steps="10"/>`, a pole, balconies, buttresses.
 - **A porch, a lean-to**: posts from a plan letter whose block holds a 3 × 3 post in its floor (`ppppp/pbbbp/pbbbp/pbbbp/ppppp`), rising 33;
   a roof at 34 from a marker that rises from its floor (`<all in="B p" out="y *" steps="1"/><all in="B y" out="y B" steps="33"/><prl in="y"

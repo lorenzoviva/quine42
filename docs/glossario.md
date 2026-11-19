@@ -306,6 +306,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «casa» per il concetto del controllo (una casa è una delle abitazioni), «residenza»
 - **Fermo**: nessuno (nulla su disco: la misura e la soglia stanno nel codice).
 
+### Fortificazione
+- **Inglese**: `fortified`, `isFortified`, `fortifiedOf`, `FORT_PARTS`
+- **Definizione**: una struttura il cui concetto è una fortificazione militare (forte, castello, rocca, mastio, bastione, cittadella, mura, torre di guardia), detta dalla richiesta o dalle parole del suo nome; solo lei ha merli e feritoie (`part-battlements`, `part-slits`), che la richiesta le elenca; ogni altra struttura finisce le cime piatte in cornicioni, parapetti pieni, ringhiere, lucernari o cupole. Il forte dell'autore è il metro della ricchezza, non della forma (T434).
+- **Dove vive**: `src/mj/classes.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/regenerate.ts`, `universe/prompts/agents/sculptor.md`
+- **Da non usare**: «struttura militare», «edificio difensivo»
+- **Fermo**: nessuno (nulla su disco: le parole stanno nel codice).
+
 ### Guardia degli interni
 - **Inglese**: `InteriorGuard`, `interiorPlan`, `stageGrid`, `STAGE`, `furnishFromStage`, `interiorKey`, `Refusal`
 - **Definizione**: ciò che il kernel fa di un interno scritto a parte dall'edificio (lo Scenografo): il palco, le classi dello strato dei piedi (`W` l'edificio, `F` il pavimento libero coperto, `C` la cantina, `P` il protetto, `A` il posto degli animali), e la guardia che tiene un mobile solo se non tocca l'edificio né gli animali, lascia la cantina che regge (T419, ADR-0215), lascia la stanza dello Scultore e non chiude il cammino dalla porta (ADR-0212).

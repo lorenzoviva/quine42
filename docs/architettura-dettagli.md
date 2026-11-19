@@ -1423,7 +1423,13 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   delle strutture** il forte è un metro, non un esempio (ADR-0183: un programma nel prompt si copia): la sezione «The measure of done well»
   lo descrive in dieci righe, in voxel (500 × 500, la scatola della gargantuesca, non le sue 50 caselle a 10), entro la misura che il prompt aveva prima (16 023 caratteri dopo il
   T405, `tests/sculptor-structures.test.ts`), coi doppioni
-  di ciò che la richiesta già dice tolti.
+  di ciò che la richiesta già dice tolti. Il forte misura la **ricchezza** (più volumi, piani, vie dentro), **mai la forma** (T434): merli e
+  feritoie solo su una fortificazione. Chi lo è lo dice la richiesta (`SculptRequest.fortified`; la rigenerazione la mette quando il concetto
+  che il mondo indossa lo dice) o il nome (`isFortified` in `src/mj/classes.ts`: forte, castello, rocca, mastio, bastione, cittadella, mura,
+  torre di guardia, `fortificat…`, in italiano e in inglese; una torre da sola no, né una caserma che non si dice fortificata); solo a lei la
+  richiesta elenca `part-battlements` e `part-slits` (`FORT_PARTS`, `partResources(files, fortified)`) e dice che le appartengono, a ogni altra
+  dice che non ne ha e che le sue cime piatte finiscono in un cornicione, un parapetto pieno, una ringhiera, un lucernario o una cupola
+  (`UNFORTIFIED_LINE`). Trovato da T153: con l'elenco intero e il forte come forma, cattedrali, bistrot, laboratori e stazioni avevano i merli.
 - **Gli interni, la parte del kernel** (ADR-0212, T409; il progetto in `docs/design/scenografo.md`): un edificio che cresce a regole cambia
   a ogni seme, e il suo interno lo scrive lo Scenografo sull'edificio fatto (i suoi task sono il § 10.2-10.3). Il kernel dà il pavimento,
   in `src/kernel/interior.ts`: il piano (`interiorPlan`) sullo strato dei piedi di ogni piano raggiunto (`walkIn`, `storeysOf`), il
