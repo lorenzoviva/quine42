@@ -368,7 +368,7 @@ describe('V-031 l’archivio delle carte', () => {
     const dir = universes();
     mkdirSync(path.join(dir, HANDMADE_DIR), { recursive: true });
     const file = path.join(dir, HANDMADE_DIR, `${ALICE}.json`);
-    const tomorrow = { id: 'handmade-domani0001', kind: 'model', name: 'Nave', class: 'vehicle', xml: SMALL, kernel: '0.9', author: ALICE, made: '2027-01-01T00:00:00.000Z', changed: '2027-01-01T00:00:00.000Z' };
+    const tomorrow = { id: 'handmade-domani0001', kind: 'model', name: 'Nave', class: 'vehicle', xml: SMALL, kernel: '0.11', author: ALICE, made: '2027-01-01T00:00:00.000Z', changed: '2027-01-01T00:00:00.000Z' };
     const forged = { ...tomorrow, id: 'handmade-altrui0001', class: 'object', kernel: HANDMADE_CONTRACT, author: BRUNO };
     writeFileSync(file, JSON.stringify({ cards: [tomorrow, forged] }));
     const s = await serve({ universesDir: dir, accounts, caps: { cards: 3, bytes: 1024 * 1024 } });

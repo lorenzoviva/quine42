@@ -4,6 +4,7 @@
 import type { AiConfig, AiMinimums, AiSettings, FileMap, ModuleEntry, UniverseConfig } from './types';
 import { repairActor, repairCoefficients, repairGameSetup, type Validator } from './validator';
 import { DEFAULT_GAME_SETUP } from './gameSetup';
+import { DEFAULT_NATURE, repairNature } from './nature';
 import { COEFFICIENT_KEYS, pricedAiModels, type Coefficients } from './coefficients';
 import { DEFAULT_SCULPTORS, repairSculptorTier, SCULPTOR_TIERS, type SculptorAiModels } from './agents/sculptor';
 import { priceOf } from './ai/prices';
@@ -17,6 +18,7 @@ export const DEFAULT_CONFIG: UniverseConfig = {
   chunkSize: 18,
   ai: { textModel: 'gemini-3.1-flash-lite', maxText: 800, maxForges: 3, maxPacks: 4, maxCast: 3, thinking: 'low', timeout: 120 },
   game: DEFAULT_GAME_SETUP,
+  nature: { ...DEFAULT_NATURE },
 };
 
 /** Repairs quality and spending minimums of an universe (T45d). */
@@ -167,6 +169,8 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
           ...(parsed.ai?.sculptorTier !== undefined ? { sculptorTier: repairSculptorTier(parsed.ai.sculptorTier) } : {}),
         }),
         game: repairGameSetup(parsed.game),
+        // The nature of the world (T437, ADR-0224): what this kernel can make true, the rest the world of today.
+        nature: repairNature(parsed.nature),
         // Only what the store writes opens the choice of the cards (T295): anything else is closed.
         cardChoice: parsed.cardChoice === 'seed' || parsed.cardChoice === 'clone' ? parsed.cardChoice : undefined,
       },

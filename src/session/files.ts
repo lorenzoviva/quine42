@@ -11,7 +11,8 @@ import { internalEffect, internalFields } from '../kernel/internalNames';
 import type { FileChanges } from './protocol';
 
 /** What a client reads of `universe.json`. Not `ai` (budgets, models, providers), not the theme's path, not the heritage. */
-const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'relief'];
+// `nature` (T437, ADR-0224): the client walks, swims and draws the sky with it, and its Lua reads it (`world.nature()`).
+const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'chunkSize', 'relief', 'nature'];
 // `expenses` (T372, ADR-0188): whoever enters reads who pays for the match before entering.
 const GAME_FIELDS = ['mode', 'death', 'pvp', 'freeActionsBetweenPlayers', 'master', 'expenses'];
 /** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agents`, `thinking`, `timeout`. */
@@ -29,7 +30,8 @@ const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order'
 const OWN_FIELDS = ['components', 'singleton', 'persist'];
 const APPEARANCE_FIELDS = ['glyph', 'color', 'model', 'class', 'size'];
 const ITEM_FIELDS = ['id', 'name', 'description', 'category', 'weight', 'stack', 'tags', 'glyph', 'color', 'model', 'equippable', 'effects', 'container', 'module', 'bonus', 'slot', 'card'];
-const TILE_FIELDS = ['name', 'color', 'solid', 'speed', 'description', 'layer', 'indoor', 'model'];
+// How a body crosses a tile (T437, ADR-0224): the client predicts its own wanderer's steps, and draws who swims.
+const TILE_FIELDS = ['name', 'color', 'solid', 'speed', 'description', 'layer', 'indoor', 'model', 'cross', 'depth', 'fatigue', 'air'];
 const RECIPE_FIELDS = ['id', 'name', 'inputs', 'tools', 'output', 'card'];
 const RUNE_FIELDS = ['name', 'glyph', 'color', 'element', 'description', 'card'];
 const SPELL_FIELDS = ['name', 'description', 'cost', 'card'];

@@ -8,6 +8,8 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
+import { repairNature, sameNature, type WorldNature } from './nature';
+import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
 import { Corona, campusModel, coronaNearby, coronaShown, tileNear, FOCUSED_RULES, folderOf, TABLETS_MAX, type CoronaTile, type Exhibit, type ShowcaseSource, type StudioItem } from './corona';
@@ -738,6 +740,8 @@ export class Kernel {
   private dying = new Map<string, Promise<void>>();
   /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
   private game?: GameSetup;
+  /** The nature of the world chosen at the Genesis (T437, ADR-0224): universe.json follows it, as the game. */
+  private worldNature?: WorldNature;
   /** Files the kernel or the master wrote and no commit has brought yet: `fenceCouncil` leaves them be. */
   private commanded = new Map<string, string>();
   /** Size of the visible area in cells, set by the renderer. */
@@ -933,6 +937,8 @@ export class Kernel {
         return undefined;
       },
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
+      // A copy each time (T437, ADR-0224): what Lua changes of it is its own, the world's nature stays (rule 1, rule 7).
+      nature: () => this.nature(),
       time: () => this.time,
       log: (msg) => this.log('lua', msg),
       emit: (name, data) => this.bus.emit(`lua:${internalEvent(name)}`, data),
@@ -7490,6 +7496,7 @@ export class Kernel {
    * fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one.
    */
   private keepGame(config: UniverseConfig, files: FileMap): void {
+    this.keepNature(config, files);
     if (!this.game) {
       this.game = config.game;
       return;
@@ -7504,6 +7511,47 @@ export class Kernel {
     }
     if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, game: this.game }, null, 2) + '\n');
     this.council?.say('kernel', 'scarta', "la partita (morte, modalità, PvP, «Altro…» tra giocatori) si sceglie solo alla Genesi, chi paga le sue spese solo nella lobby: universe.json la tiene com'era");
+  }
+
+  /**
+   * The nature of the world is chosen at the Genesis with its theme and never changes after (T437, ADR-0224), as the game: the first
+   * universe.json fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one. A universe without it is
+   * the world of today, and nothing is written for it.
+   */
+  private keepNature(config: UniverseConfig, files: FileMap): void {
+    if (!this.worldNature) {
+      this.worldNature = config.nature;
+      return;
+    }
+    if (sameNature(config.nature, this.worldNature)) return;
+    config.nature = this.worldNature;
+    let raw: Record<string, unknown>;
+    try {
+      raw = internalFields('config', JSON.parse(files['universe.json'] ?? '{}'));
+    } catch {
+      return;
+    }
+    if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, nature: this.worldNature }, null, 2) + '\n');
+    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, gravità, respiro) si sceglie solo alla Genesi: universe.json la tiene com'era");
+  }
+
+  /** The nature of this world (T437, ADR-0224): what `world.nature()` gives Lua, a copy. */
+  nature(): WorldNature {
+    return { ...this.config.nature };
+  }
+
+  /** The Genesis writes the nature its theme brings (a theme written by hand brings the world of today): the world is born again with it. */
+  private chooseNature(theme: string): void {
+    const nature = repairNature(themeOfText(theme)?.nature);
+    let raw: Record<string, unknown>;
+    try {
+      raw = internalFields('config', JSON.parse(this.repo.working['universe.json'] ?? '{}'));
+    } catch {
+      raw = {};
+    }
+    this.worldNature = nature;
+    this.config = { ...this.config, nature };
+    this.writeCommanded('universe.json', JSON.stringify({ ...raw, nature }, null, 2) + '\n');
   }
 
   /** `universe.json → ai` as it was when the match started (T247, ADR-0133); undefined when no match is under way. */
@@ -9246,11 +9294,14 @@ export class Kernel {
     this.generationHeld = true;
     const backup = { ...this.repo.working };
     const keptGame = this.game;
+    const keptNature = this.worldNature;
     try {
       // The game is chosen once, for a universe that was never generated (ADR-0053).
       // The cards came before (T295): the Genesis closes the choice (a commit of its own, before the game is chosen), and its agents know what came.
       this.closeCardChoice('comincia la Genesi');
       if (game && this.needsGenesis()) this.chooseGame(game);
+      // The world is born again with the nature of its theme (T437, ADR-0224): fixed from here.
+      this.chooseNature(theme);
       onProgress?.('Il Concilio si riunisce');
       const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis());
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
@@ -9307,6 +9358,7 @@ export class Kernel {
       this.council.say('kernel', 'errore', `Genesi fallita: ${(e as Error).message}`);
       this.noteShortfall({ request: 'la Genesi', agent: (e as { agent?: string }).agent ?? 'kernel', task: 'genesis', outcome: 'error', reason: (e as Error).message });
       this.game = keptGame;
+      this.worldNature = keptNature;
       this.repo.restore();
       this.applyFiles({ ...this.repo.working });
       return false;

@@ -23,6 +23,7 @@ import { relationKind } from './npc/model';
 import { hashDigits } from '../mj/symbols';
 import { hashStr, hex } from './rng';
 import type { FileMap } from './types';
+import { SWIM_PACE, TERRAIN_LIMITS, WATER_CODES } from './nature';
 import { checkKernelVersion, compareContracts, contractOf, KERNEL_VERSION, parseContract, parseVersion, runsOnThisKernel, showContract, universeKernels, type Contract } from './version';
 
 export interface Migration {
@@ -102,6 +103,13 @@ export const MIGRATIONS: readonly Migration[] = [
     descrizione:
       'le strutture che crescono a regole a 16 voxel per casella (T405): una voce nuova è più grande di un quarto in caselle con gli stessi voxel (porte e piani di 1,25 viandanti); una voce di prima dice in models/index.json la densità a cui è stata scolpita (vpt 20) e resta com’era, una gargantuesca di prima anche la sua scatola nel programma (size), sul lotto che ha',
     migrate: (files) => migrate0_9(files),
+  },
+  {
+    from: '0.9',
+    to: '0.10',
+    descrizione:
+      'l’acqua si nuota (T437): i codici dell’acqua di ogni universo, w (fiumi, laghi, stagni, fossati) e o (il mare), dicono come li attraversa un corpo (cross: swim), quanto è profonda la loro acqua (depth: shallow, deep) e il passo a nuoto (speed 0.4, se non era già un passo da nuoto); restano solidi per chi cammina, e i luoghi pianificati restano come sono',
+    migrate: (files) => migrate0_10(files),
   },
 ];
 
@@ -1234,7 +1242,8 @@ export const patternFileFor0_6 = (text: string): string => patternLines0_6(text)
  * not here does not: a card of before it stays of its contract, kept and not offered (ADR-0161), as the cards of 0.4 stayed in 0.5.
  */
 // 0.8 → 0.9 (T405) changes the density of the entries, not the programs: a handmade card keeps its own (ADR-0161).
-const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml, '0.7': (xml) => xml, '0.8': (xml) => xml };
+// 0.9 → 0.10 (T437) changes the terrains, not the programs.
+const PROGRAM_STEPS: Readonly<Record<string, (xml: string) => string>> = { '0.5': programFor0_6, '0.6': (xml) => xml, '0.7': (xml) => xml, '0.8': (xml) => xml, '0.9': (xml) => xml };
 
 /**
  * A program alone, of the contract `contract` (`X.Y`), as this kernel reads it (a handmade card's, T342): ported by every step from there
@@ -1495,4 +1504,39 @@ function plan0_7(plan: ChunkPlan): ChunkPlan {
   const where = (o: unknown): unknown => (isRecord(o) && typeof o.where === 'string' ? { ...o, where: internalName('dove-piano', o.where) } : o);
   const next = { ...p, ...(Array.isArray(p.objects) ? { objects: p.objects.map(where) } : {}), ...(Array.isArray(p.fresh) ? { fresh: p.fresh.map(where) } : {}) } as ChunkPlan;
   return JSON.stringify(next) === JSON.stringify(plan) ? plan : next;
+}
+
+// --- 0.9 → 0.10 (T437, ADR-0224): the water is swum ---------------------------------------------------------------------------------
+// Up to 0.9 the water codes of every palette (`w` rivers, lakes, ponds, moats; `o` the sea) were solid liquids, uncrossable, and the layout
+// dug paths across them. From 0.10 a body swims them, in every universe (the author, D64): their terrains say it (`cross: swim`, the
+// primitive of nature.ts), with the depth of their water and a pace of swimming (the 1 the Cartographer gave the water it drew was never
+// one). They stay `solid`: `solid` is what is not walked. Nothing else changes: the other liquids (lava) are not crossed, as before; the
+// plans of the places stay as they are (the layout that stops digging the water, T438, marks the plans it makes, as ADR-0211 did with
+// `vpt`); a universe.json without `nature` is the world of today. The seed's terrains say it themselves, so a manifest that followed the
+// seed keeps following it.
+
+/** A palette's water of 0.9 in 0.10: `w` and `o`, liquids that are not walked, are swum. */
+function tiles0_10(raw: unknown): unknown {
+  if (!isRecord(raw) || !isRecord(raw.tiles)) return raw;
+  const tiles: Record<string, unknown> = {};
+  const [lo, hi] = TERRAIN_LIMITS.swimPace;
+  for (const [code, t] of Object.entries(raw.tiles)) {
+    const depth = WATER_CODES[code];
+    if (!depth || !isRecord(t) || t.solid === false || (t.layer !== undefined && t.layer !== 'liquid') || t.cross !== undefined) {
+      tiles[code] = t;
+      continue;
+    }
+    const pace = typeof t.speed === 'number' && t.speed >= lo && t.speed <= hi ? t.speed : SWIM_PACE;
+    tiles[code] = { ...t, layer: 'liquid', cross: 'swim', depth, speed: pace };
+  }
+  return { ...raw, tiles };
+}
+
+function migrate0_10(files: FileMap): FileMap {
+  const out: FileMap = {};
+  for (const [p, text] of Object.entries(files)) {
+    if (p === SEED) continue;
+    out[p] = /^modules\/[^/]+\/manifest\.json$/.test(p) ? rewriteJson(text, tiles0_10) : text;
+  }
+  return withSeedFollowing(files, out);
 }

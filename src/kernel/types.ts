@@ -91,6 +91,17 @@ export interface TerrainDef {
   actions?: ActionDef[];
   /** What it becomes by itself (T245b, ADR-0140): after `dopo` days of the world from when the tile was written, the tile `in`. */
   ripens?: { after: number; in: string };
+  /**
+   * How a body crosses it (T437, ADR-0224; `crossingOf`, `src/kernel/nature.ts`): `walk`, `swim` (a liquid: the water codes `w` and `o` of
+   * every universe from the contract 0.10), `none`. `solid` stays what is not walked; a terrain without `cross` is of before (solid: none).
+   */
+  cross?: import('./nature').Crossing;
+  /** Only where one swims: how deep the water is, `shallow` or `deep` (deep if not said). */
+  depth?: import('./nature').WaterDepth;
+  /** Only where one swims: how many times the energy a second costs against walking, 1-6 (3 if not said; the kernel spends it from T438). */
+  fatigue?: number;
+  /** Whether a body breathes on it (true if not said; read from T446). */
+  air?: boolean;
 }
 
 export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;
@@ -420,6 +431,8 @@ export interface UniverseConfig {
   ai: AiConfig;
   /** Chosen before the Genesis, never changed after (ADR-0053). */
   game: GameSetup;
+  /** The nature of the world (T437, ADR-0224): from the theme at the Genesis, never changed after; absent, the world of today (`DEFAULT_NATURE`). */
+  nature: import('./nature').WorldNature;
   /** The relief (ADR-0048): `mare` is the sea's level (T51a); without it, the one the relief gives. */
   relief?: { sea?: number };
   /** The heritage of clones (T45c, ADR-0084): what of every use of a cloned card goes back to who held it before. */

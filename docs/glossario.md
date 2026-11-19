@@ -144,6 +144,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `tile` (per il tipo), `TileDef`, `TileLayer`
 - **Fermo**: `tiles` nei manifest, `TerrainDef.layer`.
 
+### Modo di attraversare
+- **Inglese**: `cross`, `Crossing`, `CROSSINGS`, `crossingOf`; i suoi valori `walk` (camminare), `swim` (nuotare), `none` (non attraversabile)
+- **Definizione**: come un corpo passa una casella di un terreno: a piedi, a nuoto (solo un liquido: l'acqua `w` e `o` di ogni universo dal contratto 0.10), per niente. `solid` resta ciò che non si cammina; il modo di attraversare dice come si passa ciò che non si cammina (ADR-0224).
+- **Dove vive**: `src/kernel/nature.ts`, `TerrainDef.cross`, i moduli `generator` dell'universo
+- **Da non usare**: `passabile` (per l'acqua: si nuota, non si cammina), `invalicabile` (per l'acqua), `walkable` (per ciò che si nuota)
+- **Fermo**: `cross`, `walk`, `swim`, `none` nei manifest (contratto 0.10).
+
+### Fisica del terreno
+- **Inglese**: `TerrainPhysics`, `terrainPhysics`, `terrainPhysicsErrors`, `physicsOf`, `TERRAIN_LIMITS`; i campi `speed` (il passo), `fatigue` (la fatica), `depth` (la profondità, `shallow` o `deep`, `WaterDepth`), `air` (l'aria)
+- **Definizione**: le primitive della fisica di un terreno, dati che il Fisico scrive entro i tetti del kernel: il modo di attraversare, il passo (a piedi 0,3-1,5, a nuoto 0,2-0,6), la fatica a nuoto (1-6), la profondità dell'acqua, l'aria (ADR-0224).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/agents/genesis.ts` (`genesis.physics`)
+- **Da non usare**: `velocità` (per il passo di un terreno), `pescaggio` (per l'acqua: è dello scafo; l'acqua ha la profondità), `stamina`
+- **Fermo**: `speed`, `fatigue`, `depth`, `air` nei manifest.
+
 ### Ambiente
 - **Inglese**: `environment`, `EnvironmentDraft`, `EnvironmentDef`, `environmentsFor`
 - **Definizione**: un programma di riscrittura che dà forma a un luogo (bosco, villaggio…), scritto dal Cartografo.
@@ -1268,9 +1282,16 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Ambientazione
 - **Inglese**: `WorldTheme`, `WORLD_THEMES`, `themeOfText`
-- **Definizione**: uno dei testi di tema tra cui si sceglie alla Genesi; il kernel non la conosce, di una Genesi resta il tema.
+- **Definizione**: uno dei testi di tema tra cui si sceglie alla Genesi, con la natura del mondo che porta; di una Genesi restano il tema e la natura.
 - **Dove vive**: `src/kernel/themes.ts`, `src/ui/genesis.ts`
 - **Da non usare**: nessuno
+
+### Natura del mondo
+- **Inglese**: `nature`, `WorldNature`, `DEFAULT_NATURE`, `NATURE_ACCEPTS`, `repairNature`, `keepNature`, `chooseNature`, `world.nature`; i campi `geography` (`Geography`), `sky` (`Sky`), `day`, `gravity`, `oxygen`
+- **Definizione**: ciò di cui un mondo è fatto: la geografia della bozza, il cielo, la durata del giorno, la gravità, se i corpi contano il respiro. La porta l'ambientazione, si fissa alla Genesi come la partita e il kernel accetta solo ciò che sa rendere vero (ADR-0224). Non è un «reame» (le zone di 4 × 4) né l'«ambientazione» (il testo).
+- **Dove vive**: `src/kernel/nature.ts`, `universe.json → nature`, `src/kernel/kernel.ts`
+- **Da non usare**: `fisica del mondo` (per la natura), `reame`, `bioma` (sono le lettere del generatore), `clima`
+- **Fermo**: `nature` in universe.json, `world.nature()`.
 
 ### Bibbia
 - **Inglese**: `bible`, `readBible`, `biblePages`

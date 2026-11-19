@@ -1,0 +1,260 @@
+[
+ {
+  "name": "la partenza, con uno stagno nell’angolo",
+  "cx": 0,
+  "cy": 0,
+  "draft": [
+   "ggggggppppgggwwwww",
+   "ggggggppppgggwwwww",
+   "ggggggppppggggwwww",
+   "ggggggppppgggggwww",
+   "gggggggppppggggggg",
+   "gggggggppppggggggg",
+   "ggggggggppppgggggg",
+   "ggggggggppppgggggg",
+   "gggggggggppppggggg",
+   "ggggggggggppppgggg",
+   "gggggggggggpppppgg",
+   "ggggggggggggpppppp",
+   "ggggggggggggggpppp",
+   "gggggggggggggggggp",
+   "gggggggggggggggggw",
+   "ggggggggggggggggww",
+   "ggggggggggggggggww",
+   "gggggggggggggggnww"
+  ],
+  "bare": {
+   "grid": [
+    "ggggggppppgggwwwww",
+    "ggggggppppgggwwwww",
+    "ggggggppppggggwwww",
+    "ggggggppppgggggwww",
+    "gggggggppppggggggg",
+    "gggggggppppggggggg",
+    "ggggggggppppgggggg",
+    "ggggggggppppgggggg",
+    "gggggggggppppggggg",
+    "ggggggggggppppgggg",
+    "gggggggggggpppppgg",
+    "ggggggggggggpppppp",
+    "ggggggggggggggpppp",
+    "gggggggggggggggggp",
+    "gggggggggggggggggw",
+    "ggggggggggggggggww",
+    "ggggggggggggggggww",
+    "gggggggggggggggnww"
+   ],
+   "gates": [
+    72,
+    215,
+    5,
+    308
+   ],
+   "carved": 0,
+   "reachable": 300
+  },
+  "house": {
+   "grid": [
+    "ggggggppppgggwwwww",
+    "ggggggppppgggwwwww",
+    "ggggggppppggggwwww",
+    "ggggggppppgggggwww",
+    "gggggggppppggggggg",
+    "gggggggppppggggggg",
+    "ggggggggppppgggggg",
+    "ggggggggppppgggggg",
+    "gggggggggppppggggg",
+    "gggggpppppppppgggg",
+    "gggggphhhhhpppppgg",
+    "gggggphfffhgpppppp",
+    "gggggpdfffhgggpppp",
+    "gggggghfffhggggggp",
+    "gggggghhhhhggggggw",
+    "ggggggggggggggggww",
+    "ggggggggggggggggww",
+    "gggggggggggggggnww"
+   ],
+   "gates": [
+    72,
+    215,
+    5,
+    308
+   ],
+   "carved": 0,
+   "reachable": 285,
+   "lots": 1
+  }
+ },
+ {
+  "name": "la costa: mare, riva, sabbia, neve",
+  "cx": 5,
+  "cy": -5,
+  "draft": [
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "sssswwwooooooooooo",
+   "sssswwwwwwwwwwwwww",
+   "sssswwwwwwwwwwwwww",
+   "sssssswwwwswwwwwww",
+   "sssssssssssswwwwww",
+   "sssssssssssswwwwww",
+   "ssssssssssssswwwww",
+   "sssssssssssssswwww",
+   "ppppppwwwwwwwpnnnn",
+   "ppppppppwwwwwwwwww",
+   "nnnnnnnnnppwwwwwww",
+   "nnntnttnnnnpppwwww",
+   "nttntntntnnnnpppnn",
+   "tnnntnnntnntnppppn",
+   "ttnnttntnnntnnpppn"
+  ],
+  "bare": {
+   "grid": [
+    "oooooopooooooooooo",
+    "oooppppooooooooooo",
+    "poopoooooooooooooo",
+    "sssswwwooooooooopp",
+    "sssswwwwwwwwwwwwpw",
+    "sssswwwwwwwwwwwwpw",
+    "sssssswwwwswwwwwpw",
+    "sssssssssssswwwwpw",
+    "sssssssssssswwwwpw",
+    "ssssssssssssswwwpw",
+    "sssssssssssssswwpw",
+    "ppppppwwwwwwwpnnnn",
+    "ppppppppwwwwwwwwww",
+    "nnnnnnnnnppwwwwwww",
+    "nnntnttnnnnpppwwww",
+    "nttnpntntnnnnpppnn",
+    "tnnntnnntnntnppppn",
+    "ttnnttntnnntnnpppn"
+   ],
+   "gates": [
+    36,
+    71,
+    6,
+    321
+   ],
+   "carved": 14,
+   "reachable": 167
+  },
+  "house": {
+   "grid": [
+    "oooooopooooooooooo",
+    "oooppppooooooooooo",
+    "poopoooooooooooooo",
+    "sssswwwooooooooopp",
+    "sssswwwwwwwwwwwwpw",
+    "sssswwwwwwwwwwwwpw",
+    "sssssswwwwswwwwwpw",
+    "sssssssssssswwwwpw",
+    "sssssssssssswwwwpw",
+    "ssssssssssssswwwpw",
+    "sssssssssssssswwpw",
+    "ppppppwwwwwwwpnnnn",
+    "ppppppppwwwwwwwwww",
+    "nnnnnnnnnppwwwwwww",
+    "nnntnttnnnnpppwwww",
+    "nttnpntntnnnnpppnn",
+    "tnnntnnntnntnppppn",
+    "ttnnttntnnntnnpppn"
+   ],
+   "gates": [
+    36,
+    71,
+    6,
+    321
+   ],
+   "carved": 14,
+   "reachable": 167,
+   "lots": 0
+  }
+ },
+ {
+  "name": "il mare aperto",
+  "cx": -7,
+  "cy": 6,
+  "draft": [
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo",
+   "oooooooooooooooooo"
+  ],
+  "bare": {
+   "grid": [
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "oppppppppppppppppp",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "ppoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opppoooooooooooooo",
+    "ooopoooooooooooooo"
+   ],
+   "gates": [
+    252,
+    125,
+    15,
+    309
+   ],
+   "carved": 33,
+   "reachable": 37
+  },
+  "house": {
+   "grid": [
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "ooooooooooooooopoo",
+    "oppppppppppppppppp",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opoooooooooooooooo",
+    "ppoooooooooooooooo",
+    "opoooooooooooooooo",
+    "opppoooooooooooooo",
+    "ooopoooooooooooooo"
+   ],
+   "gates": [
+    252,
+    125,
+    15,
+    309
+   ],
+   "carved": 33,
+   "reachable": 37,
+   "lots": 0
+  }
+ }
+]

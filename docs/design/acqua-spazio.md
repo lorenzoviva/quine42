@@ -9,6 +9,10 @@ Niente codice del gioco: questo documento dice che cosa cambierebbe nel kernel, 
 di oggi (0.9.17) è letto nel codice, con il file. L'unica prova è offline, in `lab/scripts/mare-scavato.ts` (§ 1.2); niente è provato nel
 browser e nessun modello è stato chiamato.
 
+> **Dopo le risposte dell'autore (D64, 19/11)**: si nuota **ovunque**, anche negli universi di oggi, e le primitive della fisica sono dati che il
+> Concilio rimodella. N0 (T437) l'ha fatto con un contratto nuovo, 0.10, e la migrazione: [ADR-0224](../adr/0224-la-fisica-rimodellabile-e-il-nuoto-ovunque.md).
+> Il § 4 qui sotto (il nuoto acceso dalla natura, nessun contratto) è la proposta di prima; `nature` non ha più `water`.
+
 ## In breve
 
 1. **Oggi l'acqua è un muro e il kernel ci scava le strade.** `w` e `o` sono `liquid` e solidi per costruzione, qualunque cosa dica il

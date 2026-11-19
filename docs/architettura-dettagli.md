@@ -35,6 +35,7 @@
 | [Il mondo in 3D, bozze di prova, mappa, voxel luminosi](#mondo3d) | `src/render/`, `src/kernel/layout.ts` |
 | [MarkovJunior, i modelli, la cache delle forme](#markovjunior-modelli) | `src/mj/`, `src/kernel/forms.ts`, `src/kernel/modeldirector.ts`, `src/render/worker.ts`, `lab/` |
 | [Il suono](#suono) | `src/mj/sound.ts`, `src/mj/synth.ts`, `src/audio/`, `universe/models/suono-*.xml` |
+| [La fisica rimodellabile e la natura del mondo](#fisica) | `src/kernel/nature.ts`, `src/kernel/agents/genesis.ts`, `src/kernel/migrations.ts` |
 | [Il rilievo](#rilievo) | `src/kernel/relief.ts` |
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
 | [Lotti e strutture, scale e piani](#lotti) | `src/kernel/layout.ts`, `src/kernel/forms.ts` |
@@ -1217,6 +1218,36 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **Le misure** (T224): Chrome headless, RTX 2070, ?skip&offline, turni da 15 s: 59,2 e 60,0 fps senza suono; 60,0 durante il primo rendering e 60,0 e 60,0 con la musica; p99 16,9 ms, il frame peggiore 17 ms contro i 183,6 di un caricamento senza suono. Un brano si calcola in 0,6-1,1 s nel worker (in Node 0,8-1,7 s), un effetto in 3-48 ms, tutti e 22 in circa 0,3 s; dal disco i 22 effetti in 80 ms in tutto. Un brano pesa 3,1-6,0 MB, gli effetti insieme 5,8 MB; dopo aver sentito sette brani la memoria della pagina tiene 36 MB (tetto 64), e ciò che suona ne ha una copia in più nell'AudioBuffer. Livelli all'uscita, volume 70 %, RMS massimo su 46 ms: musica 0,02-0,11; effetti 0,03-0,14; muto 0.
 - **Il Musicista** (T225, ADR-0127): `sound.compose` (`src/kernel/agents/composer.ts`), prompt `prompts/agents/musician.md`, modello `ai.sculptors.musician`. Risponde con nome, programma e scopo; il kernel prende ciò che il mondo sa nominare, e un programma che non passa il validatore, i nomi del mondo (regola 0) o i 32 passi di un brano torna indietro col motivo, due volte al più. `ScoreDirector` (`src/kernel/scoredirector.ts`, `kernel.composing`): un ambiente di un luogo caricato che nessun programma nomina riceve il suo brano di giorno, entro `ai.maxPieces` (8) e il coefficiente `brani`, spese comuni; con il seme non chiede nulla, perché il seme li nomina tutti. Il viandante chiede al Referente (incarico `musica`) o al Musicista con `E`, e paga: senza un ambiente nominato il brano è di dove sta; un effetto prende l'id del programma di quell'effetto e lo sostituisce. In `chooseMusic` chi nomina l'ambiente per intero batte chi ne nomina una parte, e tra pari suona l'ultimo dell'indice. Provare il prompt: `npx vite-node lab/scripts/musicista-prova.ts -- <cartella con il .env> --max 10`.
 - **In multigiocatore** suona ciò che il client sa: musica e raccolte, iscrizioni, incantesimi, ritorni, morte. Il client non riceve `item:crafted` né `forge:done` e non salta da sé, quindi quei suoni restano del gioco in singola.
+
+<a id="fisica"></a>
+## La fisica rimodellabile e la natura del mondo
+
+- **Le primitive della fisica sono dati** (ADR-0224, T437, kernel 0.10.0, contratto 0.10): ciò che un corpo fa su una casella e ciò di cui il
+  mondo è fatto si leggono da `src/kernel/nature.ts`, sempre entro i tetti del kernel (regola 7). **Il modo di attraversare** (`TerrainDef.cross`,
+  `crossingOf`): `walk` a piedi, `swim` a nuoto (solo un liquido), `none` per niente; `solid` resta ciò che non si cammina e tutto il codice
+  che lo legge (layout di oggi, cose posate, NPC, vie, `world.free`) resta com'è, `cross` dice come si attraversa ciò che non si cammina. **Il
+  passo** (`speed`) a piedi 0,3-1,5, a nuoto 0,2-0,6 (0,4 se non detto, `SWIM_PACE`); **la fatica** a nuoto (`fatigue`, 1-6, 3 se non detta);
+  **la profondità** (`depth`, `shallow` o `deep`, solo dove si nuota); **l'aria** (`air`, vero se non detto). `terrainPhysics` le legge
+  riparate, `terrainPhysicsErrors` è ciò che il validatore rifiuta di un manifest (un `cross` che contraddice `solid`, il nuoto fuori da un
+  liquido, profondità e fatica dove non si nuota, il passo dell'acqua fuori dal suo intervallo).
+- **L'acqua si nuota in ogni universo**: `w` (fiumi, laghi, stagni, fossati, `shallow`) e `o` (il mare, `deep`) sono `cross: swim` nei
+  codici di base (`BASE_CODES`, `WATER_CODES`), nel seme e, con la migrazione `0.9 → 0.10` (`migrate0_10`), nei manifest di ogni universo; la
+  lava del seme e ogni liquido che nessuno dice resta `none`. **Il kernel 0.10.0 scava ancora l'acqua e il corpo non nuota**: lo fanno da T438,
+  il layout solo per i piani col suo segno (come `vpt`, ADR-0211), così i luoghi pianificati restano come sono. `tests/luoghi-campione.test.ts`
+  fissa la bozza e il layout di tre luoghi del seme (la partenza con lo stagno, la costa a (5, -5), il mare aperto a (-7, 6): 0, 16 e 37
+  caselle d'acqua scavate) e dice che cosa fare se cambiano.
+- **Il Fisico alla Genesi** (`genesis.physics`): lo schema dice `cross`, `speed`, `fatigue`, `depth`; `toPalette` scrive ogni terreno con
+  `physicsOf` dentro lo strato (muri, vegetazione e roccia mai, pavimenti e porte sempre, la terra a piedi o no, un altro liquido a nuoto o no) e i
+  limiti; dei codici di base il Fisico dice solo il passo e la fatica dell'acqua; un passo fuori dall'intervallo del nuoto (l'1 del Cartografo) è
+  quello dell'acqua. Ogni terreno di una tavolozza nuova dice `cross`. Dopo la Genesi un terreno cambia solo per mano del kernel, e il modo di
+  attraversare di un codice che un luogo pianificato usa mai.
+- **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
+  (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
+  com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`, oggi solo il mondo
+  di oggi: `continent`, `earth`, 600 secondi, gravità 1, niente respiro), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+  degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
+  T446, la gravità T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
+  (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
 
 <a id="rilievo"></a>
 ## Il rilievo

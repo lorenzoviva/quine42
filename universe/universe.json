@@ -1,8 +1,8 @@
 {
   "name": "aurora",
-  "kernel": "0.9.21",
+  "kernel": "0.10.0",
   "kernels": {
-    "from": "0.9"
+    "from": "0.10"
   },
   "seed": 1337,
   "theme": "prompts/theme.md",

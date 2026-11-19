@@ -812,6 +812,8 @@ local function make_api()
     venture_bring = function(id, item) return host.venture_bring(id, item ~= nil and tostring(item) or nil) end,
     store_get = function(key) return host.store_get(tostring(key)) end,
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
+    -- The nature of the world (T437, ADR-0224): a copy each call, read only.
+    nature = function() return host.nature() end,
   }
   local inventory = {
     add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,

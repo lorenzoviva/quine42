@@ -51,15 +51,15 @@ function universe0_8(): FileMap {
 }
 
 describe('the migration 0.8 → 0.9 (T405)', () => {
-  it('is the last step of the chain, and this kernel is of 0.9', () => {
-    expect(KERNEL_CONTRACT).toBe('0.9');
-    expect(MIGRATIONS.at(-1)).toMatchObject({ from: '0.8', to: '0.9' });
+  it('is a step of the chain, the one after 0.8 (the next, 0.9 → 0.10, of T437, tests/migration-0.9.test.ts)', () => {
+    expect(KERNEL_CONTRACT).toBe('0.10');
+    expect(MIGRATIONS.find((m) => m.from === '0.8')).toMatchObject({ from: '0.8', to: '0.9' });
   });
 
   it('keeps every structure of before at the 20 it was sculpted at: its box, its tiles', () => {
     const files = universe0_8();
     const { files: out, applied } = migrateUniverse(files);
-    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.8→0.9:']);
+    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.8→0.9:', '0.9→0.10']);
     const after = json(out['models/index.json']);
     // The seed's structures and the Sculptor's say their 20; the ones that said a density, the other sizes and classes stay.
     expect(after['struttura-il-mulino']).toEqual({ class: 'structure', name: 'Il mulino', vpt: 20 });
