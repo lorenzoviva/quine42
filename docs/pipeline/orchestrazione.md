@@ -2181,3 +2181,6 @@
 - [2026-11-19T01:10:13.364Z] generatore: fermo orichalcum (un task pronto vuole lo slot), il lavoro fatto resta e riprende da lì
 - [2026-11-19T01:10:18.156Z] lancio T431 su claude (Opus 5.5, sforzo high) in H:\projects\rune\.claude\worktrees\t431
 - [2026-11-19T01:10:25.763Z] integra T430: non riuscito (error: Your local changes to the following files would be overwritten by merge:); il base è com'era
+- [2026-11-19T01:10:32.438Z] integra T430: conflitti in docs/pipeline/PIANO.md; il base è com'era
+- [2026-11-19T01:11:23.345Z] generatore: rigenera i modelli di orichalcum su claude, tetto 14 % della settimana (speso finora 2 %, al reset avanzerebbe il 12 %)
+- [2026-11-19T01:30:22.431Z] task/T430 integrato in 3d; worktree e branch tolti.

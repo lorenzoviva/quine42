@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 19/11/2026, epoca 541 (claude). Crediti: vedi `stato`.
+Aggiornato il 19/11/2026, epoca 542 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,6 +34,7 @@ Aggiornato il 19/11/2026, epoca 541 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- **19/11 01:30 (epoca 542):** T430 integrato (ADR-0220, kernel 0.9.16 alzato dall'orchestratore: la stella che pulsa al posto della pozione; visto nel browser; non su un universo vero). Disco C: al 99 % (3,9 GB liberi): causa dei rossi ENOSPC di `site-video`. In corso T431; pronti T184, T432; generatore su orichalcum.
 - **19/11 00:4x (epoca 541):** T429 integrato (`95917407`, kernel 0.9.15 dopo la correzione `e1396784`: il letto, coperta col telaio; cantina e vano scala più sicuri; visto nel browser offline). T430 in corso; pronti T431, T184, T432.
 - **19/11 00:3x (epoca 540):** autore assente fino al 19/11 18:00 locale (17:00Z): autonomia, non sprecare i crediti (reset settimana 16:00Z). Sbloccati T184 (temi western, pirati, spazio) e T432 (specifica acqua dei Pirati e spazio, `docs/design/acqua-spazio.md`); dopo T184 aggiungere `mesa` (western, multigiocatore) a `generazione` (T185).
 - **19/11 00:xx (epoca 537):** T428 integrato (`9b20fa6b`, ADR-0219, kernel 0.9.14: `classFit`, `building` nella rigenerazione, `lab/scripts/edifici-piccoli.ts`); neapolis riparato gratis (`--ripara`, casa comune piccola ed edicola a vpt 8, commit universo `e154402`); la rigenerazione vera delle due voci dalla coda resta da proporre. T429 in corso, T430 e T431 pronti. Cartella `worktrees/t428` rimasta bloccata (permesso negato), il ramo è cancellato.
