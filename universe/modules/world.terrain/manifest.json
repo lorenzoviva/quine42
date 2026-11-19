@@ -12,6 +12,7 @@
       "description": "erba bassa con trifoglio e piccoli fiori",
       "color": "#5a9e48",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 1
     },
@@ -21,6 +22,7 @@
       "description": "terra battuta con sassolini",
       "color": "#c7a76a",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 1.15
     },
@@ -31,6 +33,7 @@
       "description": "alberi fitti dalle chiome tonde",
       "color": "#2c6a34",
       "solid": true,
+      "cross": "none",
       "layer": "vegetation"
     },
     "w": {
@@ -39,7 +42,10 @@
       "description": "acqua di stagno, increspata",
       "color": "#3c7cc8",
       "solid": true,
-      "layer": "liquid"
+      "cross": "swim",
+      "depth": "shallow",
+      "layer": "liquid",
+      "speed": 0.4
     },
     "r": {
       "id": "rock",
@@ -48,6 +54,7 @@
       "description": "massi grigi e lastre di pietra",
       "color": "#8c8d95",
       "solid": true,
+      "cross": "none",
       "layer": "rock"
     },
     "h": {
@@ -56,6 +63,7 @@
       "description": "muri di pietra squadrata",
       "color": "#8a6a52",
       "solid": true,
+      "cross": "none",
       "layer": "wall"
     },
     "f": {
@@ -64,6 +72,7 @@
       "description": "assi di legno chiaro",
       "color": "#b48a5a",
       "solid": false,
+      "cross": "walk",
       "layer": "floor",
       "indoor": true
     },
@@ -73,6 +82,7 @@
       "description": "soglia e porta di legno",
       "color": "#d8b048",
       "solid": false,
+      "cross": "walk",
       "layer": "door"
     },
     "m": {
@@ -81,6 +91,7 @@
       "description": "solchi di terra scura coltivata",
       "color": "#6e5434",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 0.8
     },
@@ -89,6 +100,7 @@
       "name": "sabbia",
       "color": "#d8c27a",
       "solid": false,
+      "cross": "walk",
       "speed": 0.85,
       "layer": "ground",
       "description": "sabbia fine e calda, di deserto o di spiaggia"
@@ -99,6 +111,7 @@
       "name": "giungla",
       "color": "#1f6b34",
       "solid": true,
+      "cross": "none",
       "layer": "vegetation",
       "description": "vegetazione tropicale fittissima, liane e foglie enormi"
     },
@@ -107,8 +120,11 @@
       "name": "mare",
       "color": "#1d4f8a",
       "solid": true,
+      "cross": "swim",
+      "depth": "deep",
       "layer": "liquid",
-      "description": "acqua profonda del mare aperto"
+      "description": "acqua profonda del mare aperto",
+      "speed": 0.4
     },
     "k": {
       "id": "mountain",
@@ -116,6 +132,7 @@
       "name": "montagna",
       "color": "#6e6a66",
       "solid": true,
+      "cross": "none",
       "layer": "rock",
       "description": "pareti di montagna, invalicabili"
     },
@@ -124,6 +141,7 @@
       "name": "neve",
       "color": "#e8eef2",
       "solid": false,
+      "cross": "walk",
       "speed": 0.7,
       "layer": "ground",
       "description": "neve alta che rallenta il passo"
@@ -133,6 +151,7 @@
       "name": "muro di pietra",
       "color": "#8a8580",
       "solid": true,
+      "cross": "none",
       "layer": "wall",
       "description": "muri di grosse pietre squadrate: castelli, torri, templi"
     },
@@ -141,6 +160,7 @@
       "name": "muro di mattoni",
       "color": "#9a4a32",
       "solid": true,
+      "cross": "none",
       "layer": "wall",
       "description": "mattoni rossi cotti al forno"
     },
@@ -149,6 +169,7 @@
       "name": "parete di paglia",
       "color": "#c9a85a",
       "solid": true,
+      "cross": "none",
       "layer": "wall",
       "description": "pareti di canne e paglia delle capanne"
     },
@@ -157,6 +178,7 @@
       "name": "staccionata",
       "color": "#7a5a34",
       "solid": true,
+      "cross": "none",
       "layer": "wall",
       "description": "recinto di pali di legno per cavalli e pecore"
     },
@@ -165,6 +187,7 @@
       "name": "ponte levatoio",
       "color": "#8b6a42",
       "solid": false,
+      "cross": "walk",
       "layer": "floor",
       "description": "assi di legno robuste sopra il fossato"
     },
@@ -173,6 +196,7 @@
       "name": "pavimento di pietra",
       "color": "#9c958c",
       "solid": false,
+      "cross": "walk",
       "layer": "floor",
       "indoor": true,
       "description": "lastre di pietra consumate dai passi"
@@ -182,6 +206,7 @@
       "name": "lava",
       "color": "#e2581e",
       "solid": true,
+      "cross": "none",
       "layer": "liquid",
       "description": "roccia fusa che ribolle: nessuno la attraversa"
     },
@@ -190,6 +215,7 @@
       "name": "campo seminato",
       "color": "#6e5232",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 0.8,
       "description": "Solchi appena chiusi sul seme: tra un giorno spunta il grano.",
@@ -203,6 +229,7 @@
       "name": "grano maturo",
       "color": "#d6b445",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 0.7,
       "description": "Spighe alte e gialle, pronte per la falce."
@@ -212,6 +239,7 @@
       "name": "ceppaia",
       "color": "#6f8a3c",
       "solid": false,
+      "cross": "walk",
       "layer": "ground",
       "speed": 0.9,
       "description": "Il ceppo di un albero tagliato: in qualche giorno il bosco si richiude.",

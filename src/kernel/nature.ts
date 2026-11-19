@@ -1,0 +1,202 @@
+// The nature of a world and the primitives of its physics (T437, ADR-0224). How a body crosses a tile, at what pace, how much it tires,
+// how deep the water is, whether there is air; what the world is made of (its geography, its sky, its day, its gravity, whether one
+// breathes): data, never constants of the kernel, read through these functions and always within the kernel's limits (rule 7).
+// Who writes them: the Physicist, for the terrains (at the Genesis, `genesis.physics`; after it only by the kernel's hand); the kernel, for
+// the nature, from the theme chosen at the Genesis, fixed after it as the game is (ADR-0053). Lua reads them (`world.nature()`), never
+// writes them. A value this kernel cannot make true is not accepted: it is the world of today (ADR-0221, «what the kernel cannot do is
+// not asked»); each task that makes one true opens it here.
+
+import type { TerrainDef } from './types';
+
+// --- The terrain: how a body crosses a tile ------------------------------------------------------------------------------------------
+
+/** How a body crosses a tile: on foot, swimming, or not at all. `solid` is what is not walked (`cross` is not `walk`). */
+export const CROSSINGS = ['walk', 'swim', 'none'] as const;
+export type Crossing = (typeof CROSSINGS)[number];
+
+/** How deep the water of a tile one swims is: what a hull floats on (T439), whether one too loaded may enter it (T438). */
+export const DEPTHS = ['shallow', 'deep'] as const;
+export type WaterDepth = (typeof DEPTHS)[number];
+
+/**
+ * The kernel's limits of a terrain's physics: whatever the Physicist says, the terrain stays inside them. The pace is a multiplier of the
+ * body's (6 tiles a second): on foot the range of the Genesis since ADR-0011, swimming never faster than a slow walk. The fatigue is how
+ * many times the energy a second in the water costs, against walking (only a tile one swims has it, in the contract 0.10).
+ */
+export const TERRAIN_LIMITS = {
+  walkPace: [0.3, 1.5],
+  swimPace: [0.2, 0.6],
+  fatigue: [1, 6],
+} as const;
+
+/** The pace and the fatigue of the water nobody has said them of (T432, `docs/design/acqua-spazio.md` § 1.1). */
+export const SWIM_PACE = 0.4;
+export const SWIM_FATIGUE = 3;
+
+/**
+ * The water codes of every palette (`BASE_CODES` w and o) and their depth: swum in every universe from the contract 0.10 (ADR-0224), the
+ * meaning of a base code the Cartographer and the Physicist do not change, as `solid` was before.
+ */
+export const WATER_CODES: Readonly<Record<string, WaterDepth>> = { w: 'shallow', o: 'deep' };
+
+/** A terrain's physics as the kernel reads it. */
+export interface TerrainPhysics {
+  cross: Crossing;
+  /** The pace on the tile, within the range of its crossing (1 where nothing is crossed). */
+  pace: number;
+  /** The fatigue swimming (1 where one does not swim). */
+  fatigue: number;
+  /** Only where one swims: how deep the water is (deep if not said). */
+  depth?: WaterDepth;
+  /** Whether a body breathes on the tile (true if not said; nothing reads it before T446). */
+  air: boolean;
+}
+
+const isCrossing = (v: unknown): v is Crossing => typeof v === 'string' && (CROSSINGS as readonly string[]).includes(v);
+const isDepth = (v: unknown): v is WaterDepth => typeof v === 'string' && (DEPTHS as readonly string[]).includes(v);
+const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+const within = (v: number, [lo, hi]: readonly [number, number]) => Math.min(hi, Math.max(lo, v));
+
+/**
+ * How a body crosses a tile of this terrain. `solid` says, as it always has, whether it is walked; `cross` says how a tile not walked is
+ * crossed: swum, if it is a liquid that says so, and otherwise not at all. Whatever else a terrain says, it is one of the three.
+ */
+export function crossingOf(t: Pick<TerrainDef, 'solid' | 'cross' | 'layer'> | undefined): Crossing {
+  if (!t) return 'none';
+  if (t.solid === false) return 'walk';
+  return t.cross === 'swim' && t.layer === 'liquid' ? 'swim' : 'none';
+}
+
+/** The physics of a terrain, within the kernel's limits: a number that is not one, or out of range, is the nearest it may be (rule 7). */
+export function terrainPhysics(t: TerrainDef | undefined): TerrainPhysics {
+  const cross = crossingOf(t);
+  const air = t?.air !== false;
+  if (cross === 'none') return { cross, pace: 1, fatigue: 1, air };
+  if (cross === 'walk') return { cross, pace: within(finite(t?.speed) ? t!.speed! : 1, TERRAIN_LIMITS.walkPace), fatigue: 1, air };
+  return {
+    cross,
+    pace: within(finite(t?.speed) ? t!.speed! : SWIM_PACE, TERRAIN_LIMITS.swimPace),
+    fatigue: within(finite(t?.fatigue) ? t!.fatigue! : SWIM_FATIGUE, TERRAIN_LIMITS.fatigue),
+    depth: isDepth(t?.depth) ? t!.depth : 'deep',
+    air,
+  };
+}
+
+/**
+ * What the validator refuses of a terrain's physics as a manifest writes it (the Council's, or a universe's by hand): a crossing that is not
+ * one of the three or that says the opposite of `solid`, swimming in what is not a liquid, a depth or a fatigue where one does not swim or
+ * outside the limits, the pace of the water outside its range, an `air` that is not true or false. A terrain without `cross` is of before.
+ */
+export function terrainPhysicsErrors(code: string, t: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  const err = (s: string) => out.push(`tile "${code}": ${s}`);
+  if (t.cross !== undefined) {
+    if (!isCrossing(t.cross)) err(`cross deve essere uno tra ${CROSSINGS.join(', ')}`);
+    else if ((t.cross === 'walk') !== (t.solid === false)) err(`cross "${t.cross}" e solid ${String(t.solid)} si contraddicono (solid è ciò che non si cammina)`);
+    else if (t.cross === 'swim' && t.layer !== 'liquid') err('si nuota solo un liquido (layer liquid)');
+  }
+  const swum = t.cross === 'swim';
+  if (t.depth !== undefined && (!swum || !isDepth(t.depth))) err(`depth (${DEPTHS.join(', ')}) solo dove si nuota`);
+  if (t.fatigue !== undefined && (!swum || !finite(t.fatigue) || t.fatigue < TERRAIN_LIMITS.fatigue[0] || t.fatigue > TERRAIN_LIMITS.fatigue[1])) err(`fatigue (${TERRAIN_LIMITS.fatigue.join('-')}) solo dove si nuota`);
+  if (swum && t.speed !== undefined && (!finite(t.speed) || t.speed < TERRAIN_LIMITS.swimPace[0] || t.speed > TERRAIN_LIMITS.swimPace[1])) err(`a nuoto speed sta tra ${TERRAIN_LIMITS.swimPace.join(' e ')}`);
+  if (t.air !== undefined && typeof t.air !== 'boolean') err('air deve essere true o false');
+  return out;
+}
+
+/** What the Physicist may say of a terrain (`genesis.physics`), as read: nothing of it is trusted. */
+export interface PhysicsSaid {
+  cross?: unknown;
+  speed?: unknown;
+  fatigue?: unknown;
+  depth?: unknown;
+}
+
+/**
+ * The physics of a terrain of a new palette, as the kernel writes it (`toPalette`): what the layer fixes (walls, trees and rocks are not
+ * crossed; floors and doors are walked), the meaning of a base code (`fixed`: the water codes are swum), and otherwise what the Physicist
+ * said within the layer (ground walked or not, a liquid swum or not; a liquid nobody said of is not crossed, as before 0.10, so lava
+ * stays lava); the pace, the fatigue and the depth within the limits of the crossing. `cross` is written on every terrain: a palette of
+ * the contract 0.10 says it all.
+ */
+export function physicsOf(layer: TerrainDef['layer'], said: PhysicsSaid & { solid?: unknown }, fixed?: Crossing, fixedDepth?: WaterDepth): Pick<TerrainDef, 'solid' | 'cross' | 'speed' | 'fatigue' | 'depth'> {
+  const cross: Crossing =
+    fixed ??
+    (layer === 'wall' || layer === 'vegetation' || layer === 'rock'
+      ? 'none'
+      : layer === 'floor' || layer === 'door'
+        ? 'walk'
+        : layer === 'liquid'
+          ? said.cross === 'swim'
+            ? 'swim'
+            : 'none'
+          : said.cross === 'none' || (said.cross === undefined && said.solid === true)
+            ? 'none'
+            : 'walk');
+  const speed = finite(said.speed) ? said.speed : undefined;
+  if (cross === 'none') return { solid: true, cross, speed: within(speed ?? 1, TERRAIN_LIMITS.walkPace) };
+  if (cross === 'walk') return { solid: false, cross, speed: within(speed ?? 1, TERRAIN_LIMITS.walkPace) };
+  // A pace outside the swimming range was said of walking (the Cartographer's 1 for the water it drew): the water's own, then.
+  const [lo, hi] = TERRAIN_LIMITS.swimPace;
+  return {
+    solid: true,
+    cross,
+    speed: speed !== undefined && speed >= lo && speed <= hi ? speed : SWIM_PACE,
+    ...(finite(said.fatigue) ? { fatigue: within(said.fatigue, TERRAIN_LIMITS.fatigue) } : {}),
+    depth: fixedDepth ?? (isDepth(said.depth) ? said.depth : 'deep'),
+  };
+}
+
+// --- The nature of the world ---------------------------------------------------------------------------------------------------------
+
+/** What the draft makes of the world: land with its seas today; an archipelago (T441), the void with its stations (T445). */
+export type Geography = 'continent' | 'archipelago' | 'void';
+/** The sky over it: the earth's, with its day and its night; the stars (T445). */
+export type Sky = 'earth' | 'stars';
+
+/**
+ * The nature of a world (`universe.json → nature`): chosen at the Genesis with its theme and never changed after, written by the kernel,
+ * repaired by `repairNature`; the Council does not write it (universe.json is not among what it may write, ADR-0109). A universe without
+ * it is the world of today, so the defaults never change. It is public, as the rest of universe.json but `ai` (`playerFiles`).
+ */
+export interface WorldNature {
+  geography: Geography;
+  sky: Sky;
+  /** Seconds of a day of the world (600, `Kernel.DAY_SECONDS`); 0 a light that never changes (T445). It enters the routines and the days of the world. */
+  day: number;
+  /** The weight of a body against the earth's (1): the jump scales with it (T447). */
+  gravity: number;
+  /** Whether a body counts its breath (the need `oxygen`, T446): false, the air is everywhere. */
+  oxygen: boolean;
+}
+
+export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false });
+
+/**
+ * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
+ * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` T441, `void` and `stars` and the day T445,
+ * the oxygen T446, the gravity 0.2-2 T447).
+ */
+export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
+  geography: ['continent'],
+  sky: ['earth'],
+  day: [600, 600],
+  gravity: [1, 1],
+  oxygen: [false],
+};
+
+/** The nature of universe.json (or of a theme), whatever it says: each field within what this kernel accepts, the rest the world of today. */
+export function repairNature(raw: unknown): WorldNature {
+  const r = (raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const one = <T>(v: unknown, list: readonly T[], d: T): T => (list.includes(v as T) ? (v as T) : d);
+  const num = (v: unknown, range: readonly [number, number], d: number): number => (finite(v) && v >= range[0] && v <= range[1] ? v : d);
+  return {
+    geography: one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography),
+    sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
+    day: num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
+    gravity: num(r.gravity, NATURE_ACCEPTS.gravity, DEFAULT_NATURE.gravity),
+    oxygen: one(r.oxygen, NATURE_ACCEPTS.oxygen, DEFAULT_NATURE.oxygen),
+  };
+}
+
+/** Whether two natures are the same world. */
+export const sameNature = (a: WorldNature, b: WorldNature): boolean => (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]);

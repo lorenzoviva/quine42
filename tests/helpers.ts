@@ -33,6 +33,7 @@ export function fakeHost() {
       return undefined;
     },
     carpet: () => carpet,
+    nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
     time: () => 1.5,
     log: (m) => logs.push(m),
     emit: () => {},

@@ -12,23 +12,27 @@ import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
 import { internalFields, internalName } from '../internalNames';
 import { FORGE_KINDS, type ForgeKind } from './forge';
 import { TIMELESS_LAYOUTS } from '../themes';
+import { physicsOf, TERRAIN_LIMITS, WATER_CODES, type Crossing } from '../nature';
 
-/** Codes the procedural draft and the kernel rely on: every palette must define them. */
-export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; indoor?: boolean }> = {
-  g: { meaning: 'walkable base ground (grass, sand, earth…)', layer: 'ground', solid: false },
-  p: { meaning: 'path or road (also the paths the kernel digs)', layer: 'ground', solid: false },
-  t: { meaning: 'vegetation that blocks the way (trees, brambles…)', layer: 'vegetation', solid: true },
-  w: { meaning: 'water or uncrossable liquid', layer: 'liquid', solid: true },
-  r: { meaning: 'uncrossable rock, relief or rubble', layer: 'rock', solid: true },
-  h: { meaning: 'wall of the buildings', layer: 'wall', solid: true },
-  f: { meaning: 'inner floor of the buildings', layer: 'floor', solid: false, indoor: true },
-  d: { meaning: 'door or threshold', layer: 'door', solid: false },
+/**
+ * Codes the procedural draft and the kernel rely on: every palette must define them. Their layer and how a body crosses them (T437,
+ * ADR-0224: the water codes are swum in every universe) are the kernel's, whatever the Cartographer and the Physicist say.
+ */
+export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; solid: boolean; cross: Crossing; indoor?: boolean }> = {
+  g: { meaning: 'walkable base ground (grass, sand, earth…)', layer: 'ground', solid: false, cross: 'walk' },
+  p: { meaning: 'path or road (also the paths the kernel digs)', layer: 'ground', solid: false, cross: 'walk' },
+  t: { meaning: 'vegetation that blocks the way (trees, brambles…)', layer: 'vegetation', solid: true, cross: 'none' },
+  w: { meaning: 'water one swims across: river, lake, pond, moat', layer: 'liquid', solid: true, cross: 'swim' },
+  r: { meaning: 'uncrossable rock, relief or rubble', layer: 'rock', solid: true, cross: 'none' },
+  h: { meaning: 'wall of the buildings', layer: 'wall', solid: true, cross: 'none' },
+  f: { meaning: 'inner floor of the buildings', layer: 'floor', solid: false, cross: 'walk', indoor: true },
+  d: { meaning: 'door or threshold', layer: 'door', solid: false, cross: 'walk' },
   // Biomes of the procedural draft (world.terrain): they must exist in every world.
-  s: { meaning: 'dry walkable ground (sand, desert, beach)', layer: 'ground', solid: false },
-  j: { meaning: 'very thick, uncrossable vegetation of hot climates (jungle)', layer: 'vegetation', solid: true },
-  o: { meaning: 'deep water of the sea or the ocean', layer: 'liquid', solid: true },
-  k: { meaning: 'mountain, uncrossable walls', layer: 'rock', solid: true },
-  n: { meaning: 'cold walkable, slow ground (snow, frost)', layer: 'ground', solid: false },
+  s: { meaning: 'dry walkable ground (sand, desert, beach)', layer: 'ground', solid: false, cross: 'walk' },
+  j: { meaning: 'very thick, uncrossable vegetation of hot climates (jungle)', layer: 'vegetation', solid: true, cross: 'none' },
+  o: { meaning: 'deep water of the sea or the ocean, swum', layer: 'liquid', solid: true, cross: 'swim' },
+  k: { meaning: 'mountain, uncrossable walls', layer: 'rock', solid: true, cross: 'none' },
+  n: { meaning: 'cold walkable, slow ground (snow, frost)', layer: 'ground', solid: false, cross: 'walk' },
 };
 
 /** What the Narrator asks the Forge for at the Genesis: a kind of what it creates (T310b, `tipi-fucina`) and the request. */
@@ -103,7 +107,18 @@ const PHYS_SCHEMA: Schema = {
   properties: {
     terrains: {
       type: 'ARRAY',
-      items: { type: 'OBJECT', properties: { code: { type: 'STRING' }, solid: { type: 'BOOLEAN' }, speed: { type: 'NUMBER' }, note: { type: 'STRING' } }, required: ['code', 'solid', 'speed'] },
+      items: {
+        type: 'OBJECT',
+        properties: {
+          code: { type: 'STRING' },
+          cross: { type: 'STRING', enum: ['walk', 'swim', 'none'], description: 'how a body crosses it: on foot, swimming (only a liquid), not at all' },
+          speed: { type: 'NUMBER', description: `the pace, a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}` },
+          fatigue: { type: 'NUMBER', description: `only where one swims: how many times the energy against walking, ${TERRAIN_LIMITS.fatigue.join('-')}` },
+          depth: { type: 'STRING', enum: ['shallow', 'deep'], description: 'only where one swims: how deep the water is' },
+          note: { type: 'STRING' },
+        },
+        required: ['code', 'cross', 'speed'],
+      },
     },
   },
   required: ['terrains'],
@@ -150,6 +165,10 @@ interface RawTerrain {
   layer: TerrainLayer;
   solid: boolean;
   speed: number;
+  /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep. */
+  cross?: Crossing;
+  fatigue?: number;
+  depth?: string;
 }
 
 export function styleMarkdown(s: RawStyle): string {
@@ -177,16 +196,19 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
   return errors;
 }
 
-/** The base codes keep their meaning whatever the models say: the engine depends on them. */
+/**
+ * The base codes keep their meaning whatever the models say: the engine depends on them. How a body crosses every terrain, its pace, the
+ * fatigue and the depth of its water are written by `physicsOf` (T437, ADR-0224), within the kernel's limits: the water codes are swum.
+ */
 export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
   return Object.fromEntries(
     terrains.map((t) => {
       const base = BASE_CODES[t.code];
       const layer = base?.layer ?? t.layer ?? (t.solid ? 'rock' : 'ground');
-      const solid = base ? base.solid : layer === 'wall' || layer === 'liquid' || layer === 'vegetation' || layer === 'rock' ? true : layer === 'floor' || layer === 'door' ? false : !!t.solid;
+      const physics = physicsOf(layer, t, base?.cross, WATER_CODES[t.code]);
       // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
       const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.code.charCodeAt(0)}` } : {};
-      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), solid, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), speed: Math.min(1.5, Math.max(0.3, Number(t.speed) || 1)) }];
+      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}) }];
     }),
   );
 }
@@ -259,21 +281,29 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   }
   if (!errs.length) c.say('cartographer', 'propone', terrain.terrains.map((t) => `${t.code}=${t.name}`).join(', '));
 
-  // The Physicist decides what can be walked on, and how fast.
+  // The Physicist decides how a body crosses each terrain, and how fast (T437, ADR-0224): within the kernel's limits, which `toPalette` keeps.
   if (!errs.length) {
-    const phys = await c.ask<{ terrains: Array<{ code: string; solid: boolean; speed: number; note?: string }> }>(
+    const phys = await c.ask<{ terrains: Array<{ code: string; cross?: Crossing; solid?: boolean; speed?: number; fatigue?: number; depth?: string; note?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Review the physics of these terrains: what can be crossed and at what speed (a multiplier of 0.3-1.5).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, f, d walkable; w, t, r, h uncrossable.`,
+      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow or deep.\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).`,
       PHYS_SCHEMA,
       { data: { terrains: terrain.terrains } },
     );
     for (const p of phys.terrains ?? []) {
       const t = terrain.terrains.find((x) => x.code === p.code);
-      if (!t || BASE_CODES[t.code]) continue;
-      if (t.solid !== p.solid || t.speed !== p.speed) c.say('physicist', 'corregge', `${t.name}: ${p.solid ? 'invalicabile' : 'calpestabile'}, velocità ×${p.speed}${p.note ? ` — ${p.note}` : ''}`, 'cartographer');
-      t.solid = p.solid;
-      t.speed = p.speed;
+      const base = t && BASE_CODES[t.code];
+      // Of a base code only the water's pace and fatigue are the Physicist's; the rest is the kernel's.
+      if (!t || (base && base.cross !== 'swim')) continue;
+      const was = physicsOf(base ? base.layer : t.layer, t, base ? base.cross : undefined, WATER_CODES[t.code]);
+      // An answer of before (`solid`, no `cross`) still says whether it is walked.
+      const cross = p.cross ?? (p.solid === true ? 'none' : p.solid === false ? 'walk' : undefined);
+      if (!base && cross) t.cross = cross;
+      if (typeof p.speed === 'number') t.speed = p.speed;
+      if (typeof p.fatigue === 'number') t.fatigue = p.fatigue;
+      if (!base && typeof p.depth === 'string') t.depth = p.depth;
+      const now = physicsOf(base ? base.layer : t.layer, t, base ? base.cross : undefined, WATER_CODES[t.code]);
+      if (now.cross !== was.cross || now.speed !== was.speed || now.fatigue !== was.fatigue) c.say('physicist', 'corregge', `${t.name}: ${now.cross === 'walk' ? 'calpestabile' : now.cross === 'swim' ? 'si nuota' : 'invalicabile'}, velocità ×${now.speed}${p.note ? ` — ${p.note}` : ''}`, 'cartographer');
     }
   }
   const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terrains);

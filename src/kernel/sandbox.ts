@@ -42,6 +42,8 @@ export interface Host {
   /** Returns an error message to raise in Lua, or undefined. */
   player_set(key: string, value: unknown): string | undefined;
   carpet(): unknown;
+  /** The nature of the world (T437, ADR-0224): `{geography, sky, day, gravity, oxygen}`, a copy; Lua reads it, never writes it. */
+  nature(): unknown;
   time(): number;
   log(msg: string): void;
   emit(name: string, data: unknown): void;
@@ -379,6 +381,7 @@ function emptyHost(): Host {
     player_get: () => 0,
     player_set: () => undefined,
     carpet: () => ({ strength: 1, rate: 6, active: true, ox: 0, oy: 0 }),
+    nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
     time: () => 0,
     log: () => {},
     emit: () => {},

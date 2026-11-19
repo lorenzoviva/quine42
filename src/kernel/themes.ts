@@ -7,6 +7,12 @@ export interface WorldTheme {
   /** The name the Genesis screen shows (the interface, Italian until T239). */
   name: string;
   text: string;
+  /**
+   * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. None
+   * says one yet: the archipelago of the pirates comes with T441, the void and the stars of space with T445-T450; until then every theme
+   * is a world of today's nature, and a theme written by hand always is.
+   */
+  nature?: Partial<import('./nature').WorldNature>;
 }
 
 /** The first is the seed's own `prompts/theme.md`: a test keeps them equal. */

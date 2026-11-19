@@ -354,7 +354,7 @@ describe('the migration 0.7 → 0.8', () => {
       [`models/${id}.xml`]: '<sequence values="BW" origin="bottom"><box at="0 0 0" size="20 20 60" color="W"/></sequence>',
     };
     const { files: out, applied } = migrateUniverse(files);
-    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.7→0.8:', '0.8→0.9:']);
+    expect(applied.map((a) => a.slice(0, 8))).toEqual(['0.7→0.8:', '0.8→0.9:', '0.9→0.10']);
     const after = JSON.parse(out['models/index.json']);
     expect(after[id]).toEqual({ class: 'structure', size: 'gargantuan', vpt: 20 });
     // Then 0.8 → 0.9 (T405): the Huge one of then says its 20 too.
