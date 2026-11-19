@@ -97,7 +97,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 28 | Si parla del lavoro per fasi, step e titoli dei task | I | raggiunto | T230 T231 T246 |
 | 29 | La grafica a cartone | I | raggiunto | T89 T89a T89b T89c T89d T89e T98 |
 | 30 | Lo Scultore scolpisce strutture con un metodo misurato sul banco | I | raggiunto | T154 T155 T173 T180 T181 T182 T258 T259 T156 T303 T313 T333 T334 T335 T336 T337 T338 T339 T340 T341 T342 T343 T344 T346 T354 T355 T356 T359 T370 T371 T391 T408 T397 T398 T407 T409 T410 T413 T414 T420 T434 |
-| 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | raggiunto | T152 T153 T207 T88 T411 T433 T435 T436 |
+| 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | in corso | T152 T153 T207 T88 T411 T433 T435 T436 T454 T455 |
 | 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | raggiunto | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 T302 T312 T317 T319 T320 T321 |
 | 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | raggiunto | T241 T242 |
 | 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T311 T316 T315 T400 T401 |

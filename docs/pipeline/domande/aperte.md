@@ -3,8 +3,8 @@
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
 - **D66 (T153 — Pulizia dei luoghi finti, rigenerazione strutture coi merli e modalità multigiocatore di `orichalcum`, `neapolis` e `sidera`, `lab/banco/universi-t153/README.md`):**
-  1. **Luoghi e individui salvati da `?offline` + ambienti medievali del seme** (`orichalcum` 98/114 luoghi e 11/36 individui, `neapolis` 88/107 e 1, `sidera` 37/56 e 3): **A1** *(raccomandata)* toglierli con un commit nel repository (dopo tag e dopo T433) e ripianificarli col Cartografo vero (`npm run genera`), togliendo anche gli ambienti medievali del seme da `orichalcum` e `neapolis`; oppure **A2** lasciare i luoghi già visitati e togliere solo quelli medievali/offline più evidenti.
-  2. **Strutture rigenerate con merli e feritoie** (cattedrale degli ingranaggi di `orichalcum`; bistrot, laboratorio, palazzina, chiesa moderna, torre panoramica di `neapolis`; laboratori, fari, santuari, stazione di transito di `sidera`, più le 6 strutture fallite in T411): **B1** *(raccomandata)* dopo T434, rilanciare `--rigenera modelli --tipi …` solo su quelle strutture e sulle 6 rimaste al vecchio programma; oppure **B2** tenerle così per ora e rifarle solo in Fase III.
+  1. **Chiusa (autore 19/11 → A1, T454):** tolti i luoghi/individui `?offline` e gli ambienti medievali del seme e ripianificati i luoghi mancanti col Cartografo vero.
+  2. **Chiusa (autore 19/11 → B1, T455):** rigenerate senza merli né feritoie le strutture non fortificate e le 6 fallite in T411.
   3. **Modalità di gioco dei tre universi di T273:** oggi `universe.json → game.mode` dice `single` (il 03/11 li volevi multigiocatore, e la scelta è fissa alla Genesi): **C1** *(raccomandata)* convertirli in multigiocatore prima di portarli sul server della beta (T45f) così i tester ci giocano insieme; oppure **C2** lasciarli `single` e tenere il multigiocatore per i nuovi universi (`aridus`, ecc.).
 
 - **D35 (T240 → T378 il 14/11 — Il piano di lancio, `docs/lancio/piano.md`, § «Le decisioni (D35)»; il testo di ogni voce è lì, col consiglio):**
