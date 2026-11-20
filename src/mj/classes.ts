@@ -37,7 +37,26 @@ export const CLASSES: AssetClass[] = [
   { id: 'monument', taglia: 'medium', name: 'colonna, statua, portale', tiles: [1, 1, 3], minHeight: 0.6, hint: 'one tile at the base, tall' },
   { id: 'building', taglia: 'medium', name: 'edificio piccolo', tiles: [2.5, 2.5, 2.5], minHeight: 0.6, hint: 'well, fountain, hut' },
   { id: 'structure', taglia: 'large', name: 'struttura grande', tiles: [5, 5, 4], minHeight: 0.5, hint: 'house with a courtyard, mill, tower, temple: a single model over several tiles, that one enters' },
+  { id: 'vessel', taglia: 'large', name: 'nave o barca', tiles: [2.5, 6, 4], minHeight: 0.3, hint: 'boat, ship, raft: the bow toward the front (large y), a hull under its waterline and a deck one walks on (see «Vessels»)' },
 ];
+
+/**
+ * The boxes of the vessels in tiles (T440, `docs/design/acqua-spazio.md` § 1.6), size by size: long boxes, not the squares of D&D (a ship
+ * is long and narrow): Medium the dinghy, Large the sailing boat, Huge the brig, Gargantuan the galleon. At `VESSEL_VPT` at every size,
+ * as the structures (the galleon 96 × 256 × 144 voxels, inside `STRUCTURE_SIDE`). Measured on the bench with the wanderer beside
+ * (`lab/scripts/banco-navi.ts`, `lab/banco/navi/`).
+ */
+export const VESSEL_TILES: Readonly<Record<SizeTier, [number, number, number]>> = {
+  tiny: [0.5, 1.25, 0.5],
+  small: [0.75, 1.75, 0.75],
+  medium: [1, 2.5, 1],
+  large: [2.5, 6, 4],
+  huge: [4, 10, 6],
+  gargantuan: [6, 16, 9],
+};
+
+/** Whether a class is the vessels' (T440): its box is `VESSEL_TILES` at `VESSEL_VPT`, its program has a waterline and the areas of a ship. */
+export const isVessel = (c: Pick<AssetClass, 'id'> | undefined): boolean => c?.id === 'vessel';
 
 // The sizes of D&D (ADR-0092), one scale for creatures and structures: the class gives the shape and the box
 // of its usual size, the size scales it. A Medium creature takes one tile, a Large one 2 × 2, a Huge one 3 × 3, a
@@ -87,11 +106,16 @@ export const GARGANTUAN_LOT = 25;
  */
 export const STRUCTURE_VPT = 16;
 
+/** The voxels per tile of a vessel (T440): the structures' at every size, so a deck, a rail and a helm are the same voxels on a dinghy and on a galleon. */
+export const VESSEL_VPT = STRUCTURE_VPT;
+
 /**
  * The box in tiles of a class at a size by the scale of D&D alone (its own if none): the class's box scaled by the ratio of the spaces.
  * What was sculpted before the lot of more places (T370) was sculpted in it: an entry that says its density (`entryBox`), a handmade card.
  */
 export function scaledTiles(c: AssetClass, taglia?: string): [number, number, number] {
+  // A vessel's boxes are a table of their own (T440): long, not squares.
+  if (isVessel(c)) return [...VESSEL_TILES[sizeOf(taglia)?.id ?? c.taglia]];
   const to = sizeOf(taglia), from = sizeOf(c.taglia)!;
   if (!to || to.id === from.id) return c.tiles;
   const k = to.scala / from.scala;
@@ -138,6 +162,7 @@ export const growsByRules = (c: AssetClass, taglia?: string): boolean => c.id ==
  * STRUCTURE_SIDE (ADR-0179; 20 before T405).
  */
 export function densityFor(c: AssetClass, taglia?: string): number {
+  if (isVessel(c)) return VESSEL_VPT;
   const tiles = tilesOf(c, taglia);
   if (growsByRules(c, taglia)) return Math.min(STRUCTURE_VPT, Math.floor(STRUCTURE_SIDE / Math.max(...tiles)));
   return taglia ? densityOf(tiles) : TILE;
@@ -247,6 +272,7 @@ const CLASS_WORDS: Record<'it' | 'en', Array<[string, RegExp]>> = {
   it: [
     ['animal', /\b(gatto|cane|volpe|gallina|coniglio|topo|corvo|gufo|anatra|slime)\b/],
     ['beast', /\b(lupo|cavallo|orso|cervo|troll|drago|bue|mucca|cinghiale|mostro)\b/],
+    ['vessel', /\b(barca|barche|barchetta|nave|navi|scialuppa|scialuppe|veliero|velieri|galeone|galeoni|brigantino|brigantini|caravella|caravelle|vascello|vascelli|zattera|zattere|canoa|canoe|battello|battelli|gondola|gondole|peschereccio|goletta|feluca|chiatta)\b/],
     ['person', /^$/],
     ['pebble', /\b(sasso|ciottolo)\b/],
     ['rock', /(roccia|masso|pietr|rocce|macigno|sperone|scoglio)/],
@@ -259,6 +285,7 @@ const CLASS_WORDS: Record<'it' | 'en', Array<[string, RegExp]>> = {
   en: [
     ['animal', /\b(cat|dog|fox|hen|chicken|rabbit|mouse|rat|crow|owl|duck|slime)\b/],
     ['beast', /\b(wolf|horse|bear|deer|stag|troll|dragon|ox|cow|boar|monster)\b/],
+    ['vessel', /\b(boats?|ships?|dinghy|dinghies|rowboats?|sailboats?|galleons?|brigs?|brigantines?|caravels?|sloops?|schooners?|rafts?|canoes?|barges?|gondolas?|longships?)\b/],
     ['person', /^$/],
     ['pebble', /\b(pebble|stone)\b/],
     ['rock', /\b(rocks?|boulders?|crag|outcrop|reef)\b/],

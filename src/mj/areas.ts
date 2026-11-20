@@ -39,3 +39,32 @@ export function areasOf(g: Pick<Grid3, 'X' | 'Y' | 'Z' | 'cells' | 'alphabet'>, 
     }
   return Object.fromEntries(Object.keys(out).sort().map((k) => [k, out[k]]));
 }
+
+/**
+ * The areas of a vessel (T440): its helm, where one boards it, its hold stand on its deck and under it, not on a ground, so every layer
+ * counts, and a tile is of every area that has a cell in its column of `vpt` × `vpt` (a helm of a few voxels over a hold is both): the
+ * tiles of each area in reading order, as `areasOf` gives them.
+ */
+export function columnAreasOf(g: Pick<Grid3, 'X' | 'Y' | 'Z' | 'cells' | 'alphabet'>, palette: Record<string, PaletteEntry>, vpt: number): AreaMap {
+  const out: AreaMap = {};
+  if (!(vpt >= 1)) return out;
+  const areaOf = g.alphabet.map((ch) => palette[ch]?.area);
+  if (!areaOf.some(Boolean)) return out;
+  const tx = Math.ceil(g.X / vpt), ty = Math.ceil(g.Y / vpt), XY = g.X * g.Y;
+  const seen = new Map<string, Uint8Array>();
+  for (let z = 0; z < g.Z; z++)
+    for (let y = 0; y < g.Y; y++)
+      for (let x = 0; x < g.X; x++) {
+        const a = areaOf[g.cells[z * XY + x + y * g.X]];
+        if (!a) continue;
+        let m = seen.get(a);
+        if (!m) seen.set(a, (m = new Uint8Array(tx * ty)));
+        m[Math.floor(x / vpt) + Math.floor(y / vpt) * tx] = 1;
+      }
+  for (const a of [...seen.keys()].sort()) {
+    const m = seen.get(a)!;
+    out[a] = [];
+    for (let j = 0; j < ty; j++) for (let i = 0; i < tx; i++) if (m[i + j * tx]) out[a].push([i, j]);
+  }
+  return out;
+}

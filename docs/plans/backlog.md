@@ -6016,13 +6016,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T439`; suite e typecheck verdi. Sicurezza: Lua.
 - Esito: veicolo come primitiva del kernel (ADR-0227, kernel 0.10.3): `vehicle` nel manifest (water/land entro `VEHICLE_LIMITS`), componente scritto solo dal kernel, a bordo = sul ponte (`deckAt`, `waterline` sulla radice dei programmi, disco senza forma) senza nuotare, `vehicleTick` prima dei solidi con chi è sul ponte portato e girato, la costa ferma senza rompere, timone dal menu (chi governa non cammina), ancora (da sé senza nessuno a bordo), `state.json → vehicles`, i veicoli fuori dal catalogo del Cartografo, `world.vehicle/vehicle_set/vehicle_of` (V-045), verso a ogni fotogramma, zoom 30 al timone, `mech.barca` senza sedile; in più il tetto `MAX_NESTING` al rientro kernel↔Lua in `Sandbox.enter` (un trabocco di pila nel codice C della VM la rompeva, V-019); manca: multigiocatore (T442), classe `vessel` (T440), stiva salvata (T444), spinta di chi nuota davanti allo scafo, NPC a bordo; non provato: due schede, Gemini vero; sicurezza: V-045 nuova (Lua), V-019 rafforzata.
 
-### T440 · P5 · Lo Scultore delle navi — `da fare` (dipende da T439)
+### T440 · P5 · Lo Scultore delle navi — `fatto` (`3c8ee7f3`) (dipende da T439)
 - Pipeline: claude · sforzo high · stima 5% · approvato · browser · priorità 5
 - Step: 37
 - Contesto: § 1.6 dello studio.
 - Cosa fare: la classe `vessel`, `waterline`, le aree (ponte, timone), i controlli, il prompt, la risposta offline, le taglie sul banco.
 - Browser: sì — nel laboratorio, una nave alle taglie del banco; screenshot.
 - Quando è fatto: commit su `task/T440`; suite e typecheck verdi.
+- Esito: classe `vessel` (scatole lunghe a 16 voxel per casella: scialuppa, barca a vela, brigantino, galeone; generico del seme `vessel.xml`), controlli dello Scultore (`src/mj/vessel.ts`: `waterline`, scafo chiuso alla linea, lungo il doppio, prua che si stringe al 75 %, ponte dall'imbarco per metà sopra lo scafo, timone sul ponte; aree `helm`/`boarding`/`hold` su ogni strato), sezione «Vessels» del prompt e richiesta coi numeri, barca offline per ogni scatola con le vele come azioni `furl`/`hoist`, timone solo entro `HELM_REACH` dalla sua area (kernel 0.10.4, ADR-0228), banco `lab/scripts/banco-navi.ts` e navi nel laboratorio 3D; manca: navi dello Scultore vero (prove a pagamento non fatte), cabine come piani, riuso per i veicoli, uso di `boarding`/`hold` nel kernel (T443, T444); non provato: Gemini/OpenRouter veri, salire a bordo dall'acqua (il ponte del generico è 9 voxel sopra l'acqua); sicurezza: nessuna superficie nuova.
 
 ### T441 · P2 · L'arcipelago dall'atlante, isole lontane a nuoto — `da fare` (dipende da T438)
 - Pipeline: claude · sforzo high · stima 6% · approvato · browser · priorità 5

@@ -1318,6 +1318,22 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   −1…1 solo senza timoniere; `anchored`; `helm` a un viandante sul ponte, in silenzio se non può, o `false`), `world.vehicle_of(id)`. La `pos` e
   il `vehicle` di un veicolo arrivano a Lua come copie, `vehicle` non si scrive né nasce da `ecs.spawn`. `mech.barca` di T183 è il vento sulla
   vela, senza sedile a mano.
+- **Lo Scultore delle navi** (ADR-0228, T440, kernel 0.10.4): la classe `vessel` ha scatole lunghe sue (`VESSEL_TILES` in
+  `src/mj/classes.ts`: Media la scialuppa 1 × 2,5 × 1, Grande la barca a vela 2,5 × 6 × 4, sua taglia, Enorme il brigantino 4 × 10 × 6,
+  Gargantuesca il galeone 6 × 16 × 9; Minuscola e Piccola il modellino e la canoa) a `VESSEL_VPT` (16) a ogni taglia; una voce non scrive la
+  densità (`modelSize`), `vptOf` la legge. Il generico del seme è `universe/models/vessel.xml`. Ciò che il kernel legge di una nave sta in
+  `src/mj/vessel.ts`: le aree su ogni strato (`columnAreasOf`, una casella di ogni area che vi ha una cella: `helm`, `boarding`, `hold`;
+  per una forma `formDeckAreas`), lo scafo alla linea (lo strato `waterline - 1`, il mare allagato dal bordo: ciò che non raggiunge è scafo),
+  lungo, largo, la prua (l'ottavo davanti), il ponte dall'imbarco (`surfaces`: asciutto, un gradino alla volta, la testa libera), quanto ne sta
+  sopra lo scafo, il timone accanto (`measureVessel`). I controlli (`vesselErrors`, `VESSEL_LEAST`) sono nei controlli dello Scultore
+  (`checkProgram` → `vesselNotes`): la linea sulla radice, lo scafo chiuso lungo il doppio con la prua che si stringe; dalla Media in su
+  (`carriesPeople`) l'imbarco, mezza casella² di ponte, metà sopra lo scafo, il timone sul ponte. Una nave è della categoria delle strutture
+  (lo Scultore più forte, una revisione) ma non cresce a regole: un programma per taglia. La sezione «Vessels» del prompt dice come, la richiesta
+  i numeri (`vesselLine`). Offline `mockVesselProgram` (`src/kernel/ai/mockVessel.ts`) scrive una barca per la scatola chiesta (aperta fino
+  alla Media; dalla Grande ponte, parapetto, varco dell'imbarco, timone a poppa, stiva, uno-tre alberi con le vele come azioni `furl`/`hoist`).
+  **Il timone dov'è**: con l'area `helm` nella forma si prende solo entro `HELM_REACH` (1,5 caselle) da una sua casella (`nearHelm`, anche da
+  Lua); il menu lo mostra spento con «Il timone è più in là.» Senza l'area, da ovunque sul ponte. Il banco: `lab/scripts/banco-navi.ts`,
+  `lab/banco/navi/`; nel laboratorio 3D il gruppo «Navi alle taglie». I test: `tests/navi.test.ts`.
 - **A schermo**: il verso di ogni cosa a ogni fotogramma (`Entities.update`); chi è a bordo muove le gambe solo se cammina sul ponte; al
   timone la camera arretra una volta a `HELM_VIEW` (22) e la rotella e il pizzico arrivano a `ZOOM.helm` (30, `zoomMax` in
   `src/render/camera.ts`); lasciato il timone torna entro 15.

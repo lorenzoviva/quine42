@@ -259,6 +259,11 @@ cartografo di T278 indicano un'isola vera.
 
 ### 1.6 Lo Scultore: scafi, alberi, vele (P5)
 
+> **Fatto (T440, ADR-0228)**: come qui sotto, con queste differenze: la prua si stringe al 75 % nell'ottavo davanti e il ponte sta per
+> metà sopra lo scafo alla linea (le misure del banco, `lab/banco/navi/`); una nave non cresce a regole (un programma per taglia); le aree
+> si leggono su ogni strato (`columnAreasOf`); `boarding` e `hold` si misurano ma il kernel non le usa ancora (T443, T444); il riuso e le
+> cabine come piani restano.
+
 - **La classe `vessel`** (nave), con la prua verso +y (il davanti delle forme, `FormComp.yaw`), scatole lunghe: Media la scialuppa
   (circa 1 × 2,5 × 1 caselle), Grande la barca a vela (2,5 × 6 × 4), Enorme il brigantino (4 × 10 × 6), Gargantuesca il galeone
   (6 × 16 × 9) a `STRUCTURE_VPT` 16 come le strutture, dentro `STRUCTURE_SIDE` e `FORM_LIMITS`. I numeri sono un punto di partenza: li

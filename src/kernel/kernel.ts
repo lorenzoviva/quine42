@@ -44,7 +44,7 @@ import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
-import { anyVisible, BODY_R, bodyFoot, bodyGround, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
+import { anyVisible, BODY_R, bodyFoot, bodyGround, formDeckAreas, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
 import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { footprint, stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
@@ -88,7 +88,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
-import { carried, carries, discPoints, facingOf, helmOrders, hullPoints, MAX_VEHICLES, newVehicle, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleRecord, type VehicleSpec, type VehicleState } from './vehicle';
+import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, MAX_VEHICLES, newVehicle, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleRecord, type VehicleSpec, type VehicleState } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -5604,6 +5604,7 @@ export class Kernel {
     return this.as(who, () => {
       if (this.aboard() !== id) return void (quiet || this.message(words.aboard, 'warn')), false;
       if (v.helm !== undefined && v.helm !== who) return void (quiet || this.message(words.taken, 'warn')), false;
+      if (!this.nearHelm(id)) return void (quiet || this.message(words.far, 'warn')), false;
       const other = this.atHelm();
       if (other !== undefined && other !== id) this.leaveHelm(other);
       v.helm = who;
@@ -5613,6 +5614,22 @@ export class Kernel {
       this.bus.emit('vehicle:helm', { id, wanderer: who, held: true });
       return true;
     });
+  }
+
+  /**
+   * Whether the wanderer acting stands at the helm of a vehicle (T440): within `HELM_REACH` tiles of a tile of the `helm` area its form marks
+   * (`formDeckAreas`), in the form's own frame; a vehicle whose form marks none, or is not ready, is steered from anywhere on its deck (T439).
+   */
+  private nearHelm(id: Id): boolean {
+    const s = this.decks.find((d) => d.id === id)?.s;
+    const g = s?.form.result?.grid;
+    if (!s || !g) return true;
+    const helm = formDeckAreas(s.form).helm;
+    if (!helm?.length) return true;
+    const c = this.wandererCarpet();
+    const [lx, ly] = toLocal(c.x - s.x, c.y - s.y, s.yaw);
+    const tx = lx + g.X / 2 / s.form.vpt, ty = ly + g.Y / 2 / s.form.vpt;
+    return helm.some(([i, j]) => Math.hypot(i + 0.5 - tx, j + 0.5 - ty) <= HELM_REACH);
   }
 
   /** «Lascia il timone» (T439): the wanderer acting lets go the helm they hold. */
@@ -5643,7 +5660,11 @@ export class Kernel {
     const w = VEHICLE_WORDS[spec.medium];
     const out: ActionOption[] = [];
     if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
-    else out.push({ id: 'helm', label: w.take, enabled: v.helm === undefined, ...(v.helm !== undefined ? { reason: w.taken } : {}) });
+    else {
+      // Its helm where its form marks one (T440): from elsewhere on the deck the menu says where it is.
+      const reason = v.helm !== undefined ? w.taken : !this.nearHelm(id) ? w.far : undefined;
+      out.push({ id: 'helm', label: w.take, enabled: reason === undefined, ...(reason ? { reason } : {}) });
+    }
     out.push(v.anchored ? { id: 'weigh', label: w.weigh, enabled: true } : { id: 'anchor', label: w.anchor, enabled: true });
     return out;
   }

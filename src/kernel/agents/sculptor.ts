@@ -10,7 +10,7 @@
 import type { Schema } from '../ai/models';
 import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
 import { analyse, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, isFortified, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, isFortified, isVessel, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -20,7 +20,8 @@ import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
-import { cellarVoxels, groundOfForm, habitablePartsOf, holesOf, walkIn } from '../forms';
+import { cellarVoxels, groundOfForm, habitablePartsOf, holesOf, walkIn, waterlineOf } from '../forms';
+import { measureVessel, vesselErrors, VESSEL_LEAST } from '../../mj/vessel';
 import { storeyFloors } from '../interior';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
@@ -31,7 +32,7 @@ import type { Council } from './council';
 export type ModelCategory = 'simple' | 'figure' | 'structure';
 
 export const categoryOf = (cls: AssetClass): ModelCategory =>
-  ['person', 'animal', 'beast'].includes(cls.id) ? 'figure' : ['building', 'monument', 'structure'].includes(cls.id) ? 'structure' : 'simple';
+  ['person', 'animal', 'beast'].includes(cls.id) ? 'figure' : ['building', 'monument', 'structure', 'vessel'].includes(cls.id) ? 'structure' : 'simple';
 
 export interface SculptorAiModels {
   simple: string;
@@ -232,7 +233,7 @@ export function examplesFor(files: FileMap, classe: string): string[] {
   } catch {
     index = {};
   }
-  const family: Record<string, string[]> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'] };
+  const family: Record<string, string[]> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'], vessel: ['vessel'] };
   const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
   const picked: string[] = [];
   for (const cls of family[classe] ?? [classe, 'furniture']) {
@@ -424,6 +425,8 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     if (wornSections(xml).length) notes.push(...wornErrors(xml, { background: symbolName(model.background), palette: model.program.palette }));
     const cells = result.grid.X * result.grid.Y * result.grid.Z;
     if (a.voxels > cells * 0.85) notes.push(`riempie il ${Math.round((a.voxels / cells) * 100)}% della scatola: qualcosa cresce senza limite (manca steps?) o la prima lettera di values non è la cella vuota`);
+    // A vessel (T440): the hull at its waterline, long and with the bow toward large y; from Medium up a deck reached from where one boards, the helm on it.
+    if (isVessel(cls) && !notes.length) notes.push(...vesselNotes(xml, result, model.program.palette, cls, taglia));
     let composition: Composition | undefined;
     let cellarOnly = false;
     if (procedural(cls, taglia) && !notes.length) {
@@ -473,6 +476,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     procedural(cls, req.taglia) && dwellingOf(req) && DWELLING_LINE,
     procedural(cls, req.taglia) && (fortifiedOf(req) ? FORTIFIED_LINE : UNFORTIFIED_LINE),
     cellarLine(req, cls),
+    isVessel(cls) && vesselLine(cls, req.taglia),
   ]
     .filter(Boolean)
     .join('\n');
@@ -487,6 +491,37 @@ function cellarLine(req: SculptRequest, cls: AssetClass): string | undefined {
   if (!base) return undefined;
   const vpt = densityFor(cls, req.taglia);
   return `It has a cellar under it: the box goes ${base} voxels (${(base / vpt).toFixed(2)} tiles) under the soil, which the kernel writes at z=${base}; z=0 to ${base - 1} are under the ground. Dig it with part-cellar: mark D under the floor of a room on the soil, away from the door and from the foot of the stair, then include part-cellar after the floors rise and before part-stair, and give D, V and k your colours. The cellar must hold: a body goes down to it on foot from the door, and every floor down there is reached; if it does not, the building comes in without it.`;
+}
+
+/** Whether a vessel at a size carries people (T440): from Medium up it has a deck reached from where one boards, and the helm on it. */
+export const carriesPeople = (cls: AssetClass, taglia?: string): boolean => sizeRank(sizeOf(taglia)?.id ?? cls.taglia) >= sizeRank('medium');
+
+/**
+ * What a vessel's request says (T440): the body at its density, the waterline, what the kernel reads of the form (the areas) and what it
+ * checks, with the numbers of its box. The prompt's «Vessels» says how; this says how much.
+ */
+function vesselLine(cls: AssetClass, taglia?: string): string {
+  const vpt = densityFor(cls, taglia);
+  const [, , Z] = boxOf(cls, taglia);
+  const step = Math.round(0.2 * vpt);
+  const head = Math.ceil(0.7 * vpt);
+  const lines = [
+    `A vessel: a tile is ${vpt} voxels, a person ${Math.ceil(1.5 * vpt)} tall, a step ${step}. The bow toward large y, the stern toward small y.`,
+    `Write waterline="N" on the root: the N lowest layers (z=0 to N-1) are under the water, the kernel lays the hull that deep (1 to 40, less than ${Z}). The hull at z=N-1 must be closed (the sea does not get in) and at least ${VESSEL_LEAST.ratio} times as long (along y) as wide, its foremost eighth at most ${Math.round(VESSEL_LEAST.bow * 100)}% of its width (the bow narrows).`,
+  ];
+  if (carriesPeople(cls, taglia))
+    lines.push(
+      `Mark with area="boarding" the letter where one comes aboard (a gangway, a ladder, a step in the gap of the rail) and with area="helm" the helm (a wheel, a tiller), aft on the deck; area="hold" the floor of the hold, if it has one. The deck is dry (its floor at z=N or above), a step up or down at a time from the boarding (at most ${step} voxels), with ${head} voxels free over it; at least ${Math.round(VESSEL_LEAST.deckOverHull * 100)}% of it over the hull at the waterline; the helm within ${VESSEL_LEAST.helmReach} tiles of it. Sails and rigging above the head of whoever walks the deck.`,
+    );
+  return lines.join('\n');
+}
+
+/** Why a vessel's run is not one (T440): its waterline against the box, then the measures of `src/mj/vessel.ts`. */
+function vesselNotes(xml: string, result: RunResult, palette: Record<string, PaletteEntry>, cls: AssetClass, taglia?: string): string[] {
+  const waterline = waterlineOf(xml);
+  if (waterline >= result.grid.Z) return [`nave: waterline="${waterline}" non lascia niente sopra l'acqua (la scatola è alta ${result.grid.Z})`];
+  const vpt = densityFor(cls, taglia);
+  return vesselErrors(measureVessel(result.grid, palette, vpt, waterline), vpt, carriesPeople(cls, taglia));
 }
 
 /**

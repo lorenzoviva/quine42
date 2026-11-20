@@ -247,8 +247,14 @@ export function readVehicles(list: unknown): VehicleRecord[] {
 
 // --- Words of the world ------------------------------------------------------------------------------------------------------------
 
+/**
+ * How near the helm of a vessel one takes it (T440), tiles from the middle of a tile of its `helm` area (`columnAreasOf`) to the body: a step
+ * or two. A form without a helm area is steered from anywhere on its deck, as before (T439).
+ */
+export const HELM_REACH = 1.5;
+
 /** What the menu and the world say of a vehicle, by what it moves on: a helm and an anchor on the water, the reins and a brake on land. */
-export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; took: string; left: string; anchored: string; weighed: string; bumped: string; taken: string; aboard: string }> = {
+export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; took: string; left: string; anchored: string; weighed: string; bumped: string; taken: string; aboard: string; far: string }> = {
   water: {
     take: 'Prendi il timone',
     leave: 'Lascia il timone',
@@ -261,6 +267,7 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     bumped: 'Lo scafo urta e si ferma.',
     taken: 'Al timone c’è già qualcuno.',
     aboard: 'Devi essere a bordo.',
+    far: 'Il timone è più in là.',
   },
   land: {
     take: 'Mettiti alla guida',
@@ -274,5 +281,6 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     bumped: 'Le ruote urtano e si fermano.',
     taken: 'Alla guida c’è già qualcuno.',
     aboard: 'Devi esserci sopra.',
+    far: 'Il posto di guida è più in là.',
   },
 };

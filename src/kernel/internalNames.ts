@@ -47,6 +47,8 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     names: {
       sasso: 'pebble', roccia: 'rock', cespuglio: 'bush', albero: 'tree', oggetto: 'object', mobile: 'furniture', persona: 'person',
       animale: 'animal', bestia: 'beast', monumento: 'monument', edificio: 'building', grande: 'structure',
+      // Born English with T440 (ADR-0228): the Italian word only says what it is.
+      nave: 'vessel',
     },
     note: 'il modello generico di una classe ha il suo id (`models/persona.xml`): si rinomina con la classe',
   }),
@@ -181,7 +183,8 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     reach: ['disco', 'lua'],
     lang: 'en',
     step: 'T307a',
-    names: { ascolta: 'listen', attingi: 'draw', dormi: 'sleep', fruga: 'search', moneta: 'coin', raccogli: 'gather', apri: 'open', chiudi: 'close' },
+    // The sails of the seed's vessel (T440) were born English: the Italian words only say what they are.
+    names: { ascolta: 'listen', attingi: 'draw', dormi: 'sleep', fruga: 'search', moneta: 'coin', raccogli: 'gather', apri: 'open', chiudi: 'close', ammaina: 'furl', issa: 'hoist' },
     note: 'le azioni che il Concilio ha scritto negli universi salvati restano: le legge solo il loro modulo',
   }),
   d({

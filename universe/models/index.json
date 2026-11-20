@@ -137,6 +137,11 @@
   "name": "Casa a graticcio",
   "author": "procedurale, a mano (Claude Cloud, T270)"
  },
+ "vessel": {
+  "class": "vessel",
+  "name": "Barca a vela",
+  "author": "a mano (Claude Code, T440)"
+ },
  "fattoria": {
   "class": "structure",
   "name": "Fattoria",

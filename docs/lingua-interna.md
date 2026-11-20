@@ -289,6 +289,7 @@ posto di un pannello sul filo).
 | `monumento` | `monument` |
 | `edificio` | `building` |
 | `grande` | `structure` |
+| `nave` | `vessel` |
 
 <a id="animazioni"></a>
 ### Animazioni delle classi (`animazioni`)
@@ -538,6 +539,8 @@ posto di un pannello sul filo).
 | `raccogli` | `gather` |
 | `apri` | `open` |
 | `chiudi` | `close` |
+| `ammaina` | `furl` |
+| `issa` | `hoist` |
 
 <a id="rune"></a>
 ### Token delle rune magiche (in latino) (`rune`)
