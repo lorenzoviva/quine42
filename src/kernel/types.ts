@@ -66,8 +66,11 @@ export interface ItemSpec {
   controls?: Record<string, string>;
 }
 
-/** How a terrain is drawn; `stratum` (T418) only for the strata under the ground, a generator's `strata`, never a tile of a map. */
-export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock' | 'stratum';
+/**
+ * How a terrain is drawn; `stratum` (T418) only for the strata under the ground, a generator's `strata`, never a tile of a map; `void` (T445,
+ * ADR-0233) only the kernel's void (`voidTerrain`), never a manifest's.
+ */
+export type TerrainLayer = 'ground' | 'floor' | 'wall' | 'door' | 'liquid' | 'vegetation' | 'rock' | 'stratum' | 'void';
 
 export interface TerrainDef {
   /**

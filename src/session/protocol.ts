@@ -12,6 +12,7 @@ import type { BrokenCard } from '../kernel/brokencards';
 import type { WornZone } from '../kernel/wearing';
 import type { WorldPace } from '../kernel/worldPace';
 import type { RegionRequest } from '../kernel/atlas';
+import type { VehicleView } from '../kernel/vehicle';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -71,11 +72,26 @@ export interface FormView {
   done?: string[];
 }
 
-/** An entity of the world near the wanderer; after the first time only what moved (`x`, `y`) or changed. */
-export interface EntityView {
+/**
+ * Where something stands on a vehicle's deck (T442, ADR-0232): the vehicle (its id on the server) and the point of its deck, in its own frame
+ * (tiles from its middle, its bow toward +y). A client draws it there on the vehicle its mirror carries on, so that it does not tremble.
+ */
+export interface OnDeck {
+  on?: number;
+  lx?: number;
+  ly?: number;
+}
+
+/**
+ * An entity of the world near the wanderer; after the first time only where it is (`x`, `y`, and `on` on a deck, `vehicle` for a vehicle:
+ * a move, `isMove`) or, when it changed, what it is.
+ */
+export interface EntityView extends OnDeck {
   id: number;
   x: number;
   y: number;
+  /** A vehicle (T442): its heading, way and turn, the anchor, who holds the helm; its form comes without `yaw`, which is its heading. */
+  vehicle?: VehicleView;
   /** Its module, or the item it is on the ground. */
   m?: string;
   form?: FormView;
@@ -96,8 +112,14 @@ export interface EntityView {
  */
 export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'light', 'fire', 'activity', 'wander', 'container', 'identity', 'mind', 'placed', 'below'] as const;
 
-/** Another wanderer in sight. */
-export interface OtherView {
+/** The fields of an `EntityView` that only say where it is (T442): a view with no other is a move, the look stays as it was. */
+export const MOVE_FIELDS: ReadonlySet<string> = new Set(['id', 'x', 'y', 'on', 'lx', 'ly', 'vehicle']);
+
+/** Whether a view of an entity only says where it is (a move), not what it is. */
+export const isMove = (t: object): boolean => Object.keys(t).every((k) => MOVE_FIELDS.has(k));
+
+/** Another wanderer in sight; on a vehicle's deck (T442) where on it too (`on`, `lx`, `ly`). */
+export interface OtherView extends OnDeck {
   id: string;
   name: string;
   x: number;
@@ -126,8 +148,12 @@ export type ClientMsg =
   | { t: 'join'; id: string; name?: string; profile?: Partial<Profile>; token?: string; cap?: number; settings?: LobbySettings }
   /** The wanderer chooses again who they are (T44a): the answer says the profile as the server repaired it. */
   | { t: 'profile'; seq: number; profile: Partial<Profile> }
-  /** Where the client's wanderer is now, in the world: the server checks the step and may correct it. */
-  | { t: 'step'; seq: number; x: number; y: number }
+  /**
+   * Where the client's wanderer is now, in the world: the server checks the step and may correct it. With `on` (T442) they stand on that
+   * vehicle's deck and `x`, `y` are in its frame: the server puts them at that point of its deck, where it has it, and the step is what they
+   * walked on it, not the voyage.
+   */
+  | { t: 'step'; seq: number; x: number; y: number; on?: number }
   /** The directions the wanderer holds, in the world's terms (T263): what `input.held(action, id)` reads on the server. No answer. */
   | { t: 'keys'; held: string[] }
   | { t: 'phrase'; seq: number; tokens: string[] }
@@ -208,8 +234,8 @@ export type ServerMsg =
    * class in their place, as the world does, and the master's console shows why.
    */
   | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[]; pace?: WorldPace } & Clock)
-  /** The step was not possible (too fast, through a wall): the wanderer is here. */
-  | { t: 'correction'; seq: number; x: number; y: number }
+  /** The step was not possible (too fast, through a wall), or the world moved them (T442: a hull's push, over the side): the wanderer is here; on a deck, there on it too. */
+  | ({ t: 'correction'; seq: number; x: number; y: number } & OnDeck)
   /**
    * What came of a message: what the world said back meanwhile, and the answer if there is one; the container it
    * opened or changed, with what is in it, and the slot of a bag it opened.
@@ -227,7 +253,8 @@ export type ServerMsg =
 
 /** What another wanderer did to this one (T43a, T43b), what death cost them (T43c), or credits notice (T45d). */
 export interface Notice {
-  type: 'say' | 'give' | 'other' | 'death' | 'credits';
+  /** `world` (T442): words of the world to this wanderer outside what they do (a hull that bumps, a helm let go). */
+  type: 'say' | 'give' | 'other' | 'death' | 'credits' | 'world';
   from: string;
   name: string;
   text: string;
@@ -236,6 +263,8 @@ export interface Notice {
   where?: 'here' | 'square';
   /** Why, when the credits or the cap are exhausted (T45d). */
   reason?: 'exhausted' | 'cap';
+  /** How words of the world are said (T442). */
+  tone?: 'info' | 'warn' | 'good';
 }
 
 /** A line someone (or something) said back, as the game shows it in its dialog box. */

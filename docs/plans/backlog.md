@@ -6185,7 +6185,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (le misure del frame con lo script headless).
 - Quando è fatto: lo studio con le misure e i task proposti (da approvare); commit su `task/T459`.
 
-### T460 · Integrare T442 e T445 nel base (conflitto di versione e di ADR con T457 e fra loro) — `da fare`
+### T460 · Integrare T442 e T445 nel base (conflitto di versione e di ADR con T457 e fra loro) — `fatto` (`bee69b7d`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 37
 - Contesto: `integra T442` (il veicolo in molti, ADR-0232, kernel 0.10.8) ha trovato conflitti in `package.json`, `src/kernel/version.ts` e `universe/universe.json`: nel frattempo è entrato T457 (il luogo che il budget ferma resta bozza, ADR-0231, kernel 0.10.7). T445 (il vuoto, il cielo, il giorno) è finito anche lui con kernel 0.10.8 e ADR-0232: si scontra con T442 sugli stessi file, sull'ADR e probabilmente su AGENTS.md (regola 10), architettura, glossario e `nature.ts`. Nasce da T442 e T445: `dossier T442`, `dossier T445`, `dossier T457`. (Le dipendenze sono i rami `task/T442` e `task/T445`, finiti e non integrati.)
@@ -6193,3 +6193,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/vuoto.test.ts` e i test del veicolo in molti verdi.
 - Browser: no (il veicolo in molti l'ha visto T442, il vuoto T445; il merge non cambia UI).
 - Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460, e `integra T442` e `integra T445` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: T442 (ADR-0232, kernel 0.10.8) e T445 (rinumerato ad ADR-0233) fusi in `task/T460`, kernel finale 0.10.9 in version.ts, package.json e universe.json; rimandi di T445 portati a ADR-0233 in AGENTS.md, dettagli, glossario, indice degli ADR, codice e test; censimento del glossario rigenerato; suite intera (3714 test passati, 1 saltato) e typecheck verdi coi turni; browser non richiesto; sicurezza: nessuna superficie nuova.

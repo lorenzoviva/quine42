@@ -7,6 +7,8 @@
 //      by carving the cheapest path (vegetation before rock, never through lots); a plan with the mark of T438
 //      (`swim`, ADR-0224) is joined on foot or swimming: the water one swims is a way and is never carved;
 //   5. lots (indoor floor enclosed by walls) are recognised for roofs and interiors.
+// The void (T445, ADR-0233) is the absence of a floor: never carved, never a gate (a gate on it stays void), never written nor taken away
+// by a program; a place whose gates are all on the void is joined from its land nearest the middle.
 // A place of a block (T370, ADR-0206) has cells reserved for the lot of more places: the program does not write them, no path goes
 // through them, they are never reachable; its gates are the kernel's (those inside the block moved into the ring).
 
@@ -14,7 +16,7 @@ import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
 import { defaultCodes, stampGround } from './stamps';
 import { STRUCTURE_VPT } from '../mj/classes';
-import { crossingOf } from './nature';
+import { crossingOf, isVoid } from './nature';
 import type { TerrainDef } from './types';
 
 export interface Lot {
@@ -149,6 +151,8 @@ function carvePath(cells: string[][], size: number, palette: Record<string, Terr
       const n = ny * size + nx;
       if (frozen.has(n) && !targets.has(n)) continue;
       const t = palette[cells[ny][nx]];
+      // Nothing is carved through the void (T445): no way goes over it.
+      if (isVoid(t)) continue;
       const nd = d + (swim && crossingOf(t) === 'swim' ? 1 : solidCost(t));
       if (nd < (dist.get(n) ?? Infinity)) {
         dist.set(n, nd);
@@ -216,7 +220,9 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const walkable = (i: number) => palette[cells[Math.floor(i / size)][i % size]]?.solid === false && !reserved.has(i);
   // A gate on the water one swims stays water (T438): the place beyond is reached swimming.
   const swum = (i: number) => swim && crossingOf(palette[cells[Math.floor(i / size)][i % size]]) === 'swim';
-  for (const g of gateTiles) if (!walkable(g) && !reserved.has(g) && !swum(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
+  // A gate on the void is no gate (T445): the land does not go on there.
+  const voided = (i: number) => isVoid(palette[draft[Math.floor(i / size)][i % size]]);
+  for (const g of gateTiles) if (!walkable(g) && !reserved.has(g) && !swum(g) && !voided(g)) cells[Math.floor(g / size)][g % size] = opts.pathCode;
   const apron = [...(opts.apron ?? [])].filter((i) => i >= 0 && i < size * size && !reserved.has(i));
   for (const a of apron) if (!walkable(a)) cells[Math.floor(a / size)][a % size] = opts.pathCode;
   const gated = opts.stages ? cells.map((r) => r.join('')) : undefined;
@@ -230,6 +236,8 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
     const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border, cut };
     steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];
+    // The void is the kernel's (T445): a program neither builds on it nor opens it in the land.
+    for (let i = 0; i < size * size; i++) if (voided(i) !== isVoid(palette[cells[Math.floor(i / size)][i % size]])) cells[Math.floor(i / size)][i % size] = draft[Math.floor(i / size)][i % size];
   }
 
   // Connectivity: everything that matters must be reachable from the first gate.
@@ -239,9 +247,12 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const doorTiles: number[] = [];
   for (let i = 0; i < size * size; i++) if (palette[cells[Math.floor(i / size)][i % size]]?.layer === 'door' && !reserved.has(i)) doorTiles.push(i);
   // From the first gate the lot of a block does not cover (T404: in a block of 3 × 3 an edge may lie under it whole); the first gate elsewhere.
-  const first = Math.max(0, gateTiles.findIndex((g) => !reserved.has(g)));
-  const mustReach = [...gateTiles.filter((_, i) => i !== first), ...doorTiles, ...apron].filter((i) => !reserved.has(i));
-  let reach = flood(rows(), size, palette, [gateTiles[first]], reserved, swim);
+  // A gate on the void is none (T445); a place whose gates are all on it starts from its land nearest the middle.
+  const live = gateTiles.filter((g) => !voided(g));
+  const first = live.length ? Math.max(0, live.findIndex((g) => !reserved.has(g))) : -1;
+  const start = first >= 0 ? live[first] : landNearMiddle(cells, size, palette, reserved);
+  const mustReach = [...live.filter((_, i) => i !== first), ...doorTiles, ...apron].filter((i) => !reserved.has(i) && !voided(i));
+  let reach = flood(rows(), size, palette, [start], reserved, swim);
   const frozen = new Set([...border].filter((b) => !gateTiles.includes(b)));
   for (const r of reserved) frozen.add(r);
   const join = (from: number) => {
@@ -256,7 +267,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
         carved++;
       }
     }
-    reach = flood(rows(), size, palette, [gateTiles[first]], reserved, swim);
+    reach = flood(rows(), size, palette, [start], reserved, swim);
   };
   for (const target of mustReach) if (!reach.has(target)) join(target);
   // Sizeable walkable pockets are joined too; tiny ones are left as scenery.
@@ -267,13 +278,25 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
     for (const p of pocket) visited.add(p);
     // Sizeable by what is walked in it (T438): a tile of shore by a pond is not a pocket of five.
     const walked = swim ? [...pocket].filter(walkable).length : pocket.size;
-    if (walked >= 4 && !pocket.has(gateTiles[first])) join(i);
+    if (walked >= 4 && !pocket.has(start)) join(i);
   }
 
   const grid = rows();
   // Where entities may be placed is what is walked (T438): nothing is set on the water, even where it joins the place.
   const reachable = swim ? new Set([...reach].filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false)) : reach;
   return { grid, lots: findLots(grid, size, palette), gates: gateTiles, reachable, carved, steps, ...(stages ? { stages } : {}) };
+}
+
+/** The walked cell nearest the middle of a place (T445: where a place of the void with no gate is joined from); 0 if none. */
+function landNearMiddle(cells: string[][], size: number, palette: Record<string, TerrainDef>, reserved: ReadonlySet<number>): number {
+  let best = 0, far = Infinity;
+  const m = (size - 1) / 2;
+  for (let i = 0; i < size * size; i++) {
+    if (reserved.has(i) || palette[cells[Math.floor(i / size)][i % size]]?.solid !== false) continue;
+    const d = Math.hypot((i % size) - m, Math.floor(i / size) - m);
+    if (d < far) [best, far] = [i, d];
+  }
+  return best;
 }
 
 /**

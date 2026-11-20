@@ -50,8 +50,8 @@ export interface Host {
    */
   region_at(x: number, y: number): unknown;
   /**
-   * The islands of an archipelago within r tiles of (x, y) (T441): `{id, name, x, y, radius, islet}` each, the nearest first, at most
-   * `MAX_ISLANDS_SEEN`; empty in a world that is not an archipelago. Read only: the islands are the kernel's.
+   * The islands of an archipelago within r tiles of (x, y) (T441), or the stations and asteroids of the void (T445, `body`): `{id, name, x, y,
+   * radius, islet, body}` each, the nearest first, at most `MAX_ISLANDS_SEEN`; empty in a world that is neither. Read only: they are the kernel's.
    */
   islands(x: number, y: number, r: number): unknown;
   /**

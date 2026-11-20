@@ -21,7 +21,8 @@ import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
 import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
-import { ENTITY_PARTS } from './protocol';
+import { ENTITY_PARTS, isMove, type OnDeck } from './protocol';
+import { coast, offDeck, onDeck, readVehicleView, turnBetween, type VehiclePose, type VehicleView } from '../kernel/vehicle';
 import { SEA_DRAFT } from '../kernel/relief';
 import { readStrata } from '../kernel/strata';
 import { readPace } from '../kernel/worldPace';
@@ -41,6 +42,20 @@ const CARRIED = 8;
 // `structure` arrives only as the stage of a building under way (T245e), and goes when it is finished.
 const MIRRORED = ['module', 'form', 'glyph', 'structure', ...ENTITY_PARTS];
 
+/**
+ * How fast the mirror's vehicle closes on where the server's is, carried on (T442, per second): the gap a word of the server shows goes in a few
+ * tenths of a second, while the vehicle keeps its way; nothing jerks.
+ */
+const SETTLE = 4;
+/** The longest the mirror carries a vehicle on past the server's last word (T442, seconds): a server that is late does not send it far. */
+const COAST = 0.5;
+/** Turned more than this (radians) from where the server has it, the mirror's vehicle goes there at once (T442), as one farther than `JUMP`. */
+const JUMP_TURN = 0.6;
+/** The farthest point of a deck a client takes from the wire (T442, tiles from its middle): a galleon is 16 long. */
+const DECK_REACH = 64;
+/** The mark of a helm another wanderer holds, in a mirror (T442): no wanderer's id has it, so it is never this mirror's own. */
+const OTHERS_HELM = 'other:';
+
 /** What the kernel does that a multiplayer game does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
 
@@ -53,6 +68,10 @@ export class ThinClient {
   private others = new Map<string, Id>();
   /** Where each mirrored entity is going (the server's last word). */
   private targets = new Map<Id, { x: number; y: number }>();
+  /** The vehicles (T442), by their entity here: the server's last word of each (where, heading, way, turn) and when it came. */
+  private ships = new Map<Id, { pose: VehiclePose; speed: number; turn: number; at: number }>();
+  /** What stands on a vehicle's deck (T442), by its entity here: the vehicle here and the point of its deck the server last had it at. */
+  private onDecks = new Map<Id, { ship: Id; lx: number; ly: number }>();
   /** Entities picked up here and not yet confirmed: the server's updates do not bring them back meanwhile. */
   private hidden = new Set<number>();
   /** Entities to set again as the server has them, once its next update has come (an optimistic change that may not hold). */
@@ -68,7 +87,8 @@ export class ThinClient {
   private adopt = false;
   /** What is carried as last set here from the server (to tell the inventory window when it changes). */
   private carriedKey = '';
-  private lastStep = { x: NaN, y: NaN, t: 0 };
+  /** The last step sent: in the world, or in the frame of a vehicle's deck (`on`, its id on the server: T442). */
+  private lastStep: { x: number; y: number; t: number; on?: number } = { x: NaN, y: NaN, t: 0 };
   private clock = 0;
   private lastCorrection = 0;
   /** The world's files as the server last told them: the master's branch is what their mirror has that these do not. */
@@ -119,10 +139,14 @@ export class ThinClient {
     return o;
   }
 
-  /** Every frame, after the kernel's ticks: what moves on the server glides, the wanderer's step and phrase go. */
+  /**
+   * Every frame, after the kernel's ticks: the vehicles go on their way (T442) and carry who stands on them, what moves on the server glides,
+   * the wanderer's step and phrase go.
+   */
   frame(dt: number): void {
     const k = this.k;
     this.clock += dt;
+    this.sail(dt);
     const f = Math.min(1, dt * FOLLOW);
     for (const [id, to] of this.targets) {
       const p = k.ecs.get(id, 'pos');
@@ -140,16 +164,78 @@ export class ThinClient {
         p.y += (to.y - p.y) * f;
       }
     }
-    // The keys held, for the systems that run on the server (T263).
+    // The keys held, for the systems that run on the server (T263); at the helm they steer (T442).
     this.session.keys(HELD.filter((a) => k.input.isHeld(a)));
     const at = k.wandererCarpet();
-    if (this.clock - this.lastStep.t >= STEP_EVERY && !(Math.hypot(at.x - this.lastStep.x, at.y - this.lastStep.y) <= 0.005)) {
-      this.lastStep = { ...at, t: this.clock };
-      this.session.move(at.x, at.y);
+    // On a vehicle's deck (T442) the step is in its frame: what was walked on it, not where the deck went meanwhile.
+    const deck = k.zone === 'sim' ? k.aboard() : undefined;
+    const on = deck !== undefined ? this.server.get(deck) : undefined;
+    const pose = deck !== undefined ? k.vehiclePose(deck) : undefined;
+    const [sx, sy] = on !== undefined && pose ? onDeck(pose, at.x, at.y) : [at.x, at.y];
+    const still = this.lastStep.on === (pose ? on : undefined) && Math.hypot(sx - this.lastStep.x, sy - this.lastStep.y) <= 0.005;
+    if (this.clock - this.lastStep.t >= STEP_EVERY && !still) {
+      if (on !== undefined && pose) {
+        this.lastStep = { x: sx, y: sy, t: this.clock, on };
+        this.session.move(at.x, at.y, { on, lx: sx, ly: sy });
+      } else {
+        this.lastStep = { ...at, t: this.clock };
+        this.session.move(at.x, at.y);
+      }
     }
     // The phrase is the wanderer's own: what they compose here goes to the server when nothing else is under way.
     const hand = k.phrase();
     if (hand && !this.pending && hand.tokens.join(' ') !== this.told.join(' ')) this.phrase(hand.tokens);
+  }
+
+  /**
+   * The vehicles go on (T442): each carried on from the server's last word by its way and its turn (`coast`), the gap to where the server has
+   * it now closed a little at every frame (`SETTLE`), all of it beyond `JUMP` or `JUMP_TURN`; the kernel carries the wanderer of this
+   * client who stands on its deck (`carryMirrored`). Then what stands on a deck goes to its point of it, where the deck is here.
+   */
+  private sail(dt: number): void {
+    const k = this.k;
+    // Where what stands on a deck is on it, before the decks go on: they carry it.
+    const was = new Map<Id, [number, number]>();
+    for (const [id, d] of this.onDecks) {
+      const p = k.ecs.get(id, 'pos'), pose = k.vehiclePose(d.ship);
+      if (p && pose) was.set(id, onDeck(pose, p.x, p.y));
+    }
+    for (const [id, s] of this.ships) {
+      if (!k.ecs.alive.has(id)) {
+        this.ships.delete(id);
+        continue;
+      }
+      const age = this.clock - s.at;
+      const there = coast(s.pose, s.speed, s.turn, Math.min(age, COAST));
+      const now = k.vehiclePose(id);
+      // A vehicle whose module this client does not know (yet) is no deck here: it is drawn where the server has it, carried on.
+      if (!now) {
+        const p = k.ecs.get(id, 'pos'), form = k.ecs.get(id, 'form');
+        if (p) Object.assign(p, { x: there.x, y: there.y });
+        if (form) form.yaw = there.heading;
+        continue;
+      }
+      let next = age < COAST ? coast(now, s.speed, s.turn, dt) : now;
+      const ex = there.x - next.x, ey = there.y - next.y, eh = turnBetween(next.heading, there.heading);
+      if (Math.hypot(ex, ey) > JUMP || Math.abs(eh) > JUMP_TURN) next = there;
+      else {
+        const g = Math.min(1, dt * SETTLE);
+        next = { x: next.x + ex * g, y: next.y + ey * g, heading: next.heading + eh * g };
+      }
+      if (next.x !== now.x || next.y !== now.y || next.heading !== now.heading) k.carryMirrored(id, next);
+    }
+    const f = Math.min(1, dt * FOLLOW);
+    for (const [id, d] of this.onDecks) {
+      const p = k.ecs.get(id, 'pos');
+      const pose = k.vehiclePose(d.ship);
+      if (!p || !k.ecs.alive.has(id) || !pose) {
+        this.onDecks.delete(id);
+        continue;
+      }
+      const [lx, ly] = was.get(id) ?? onDeck(pose, p.x, p.y);
+      const far = Math.hypot(d.lx - lx, d.ly - ly) > JUMP;
+      [p.x, p.y] = offDeck(pose, far ? d.lx : lx + (d.lx - lx) * f, far ? d.ly : ly + (d.ly - ly) * f);
+    }
   }
 
   // --- What the server says ----------------------------------------------------------------------
@@ -176,7 +262,10 @@ export class ThinClient {
         for (const o of m.wanderers ?? []) this.other(o);
         for (const id of m.departed ?? []) {
           const e = this.others.get(id);
-          if (e !== undefined) this.k.ecs.destroy(e);
+          if (e !== undefined) {
+            this.k.ecs.destroy(e);
+            this.onDecks.delete(e);
+          }
           this.others.delete(id);
         }
         if (m.players && this.session.master) this.players();
@@ -202,8 +291,7 @@ export class ThinClient {
         // The latest word wins: an older correction, overtaken by steps already corrected, is not applied again.
         if (m.seq < this.lastCorrection) break;
         this.lastCorrection = m.seq;
-        this.putMe(m.x, m.y);
-        this.lastStep = { x: m.x, y: m.y, t: this.clock };
+        this.correction(m);
         break;
     }
   }
@@ -220,6 +308,8 @@ export class ThinClient {
     this.server.clear();
     this.others.clear();
     this.targets.clear();
+    this.ships.clear();
+    this.onDecks.clear();
     this.hidden.clear();
     this.recheck.clear();
     this.pending = 0;
@@ -290,6 +380,24 @@ export class ThinClient {
     if (c && p) Object.assign(c, { ox: x - p.x, oy: y - p.y });
   }
 
+  /**
+   * The server put the wanderer here: in the world, or (T442) at a point of a vehicle's deck, which goes where this client has the deck: the
+   * deck here and the server's are a moment apart, the point of it is the same.
+   */
+  private correction(m: { x: number; y: number } & OnDeck): void {
+    const ship = typeof m.on === 'number' ? this.local.get(m.on) : undefined;
+    const pose = ship !== undefined ? this.k.vehiclePose(ship) : undefined;
+    const lx = Number(m.lx), ly = Number(m.ly);
+    if (pose && Number.isFinite(lx) && Number.isFinite(ly) && Math.abs(lx) <= DECK_REACH && Math.abs(ly) <= DECK_REACH) {
+      const [x, y] = offDeck(pose, lx, ly);
+      this.putMe(x, y);
+      this.lastStep = { x: lx, y: ly, t: this.clock, on: m.on };
+      return;
+    }
+    this.putMe(m.x, m.y);
+    this.lastStep = { x: m.x, y: m.y, t: this.clock };
+  }
+
   /** Where the server has the wanderer: lag is a step or two behind, farther means they were carried. */
   private carried(x: number, y: number): void {
     const at = this.k.wandererCarpet();
@@ -329,12 +437,57 @@ export class ThinClient {
     for (const t of list) {
       if (this.hidden.has(t.id)) continue;
       const known = this.local.get(t.id);
-      // Only where it is now: it glides there.
-      if (known !== undefined && Object.keys(t).length <= 3) {
-        this.targets.set(known, { x: t.x, y: t.y });
+      // Only where it is now: it glides there (on a deck, to its point of it; a vehicle carries on: T442).
+      if (known !== undefined && this.k.ecs.alive.has(known) && isMove(t)) {
+        this.place(known, t, false);
         continue;
       }
       this.look(t);
+    }
+  }
+
+  /**
+   * Where the server has an entity: a vehicle (T442) carries on from its word; what stands on a deck goes to its point of it, where the deck
+   * is here; anything else glides to where it is. `fresh`: it was just made here, where the server has it.
+   */
+  private place(id: Id, t: { x: number; y: number; vehicle?: unknown } & OnDeck, fresh: boolean): void {
+    const v = readVehicleView(t.vehicle);
+    if (v) return this.ship(id, t, v, fresh);
+    this.ships.delete(id);
+    const ship = typeof t.on === 'number' ? this.local.get(t.on) : undefined;
+    const lx = Number(t.lx), ly = Number(t.ly);
+    if (ship !== undefined && this.ships.has(ship) && Number.isFinite(lx) && Number.isFinite(ly) && Math.abs(lx) <= DECK_REACH && Math.abs(ly) <= DECK_REACH) {
+      this.targets.delete(id);
+      this.onDecks.set(id, { ship, lx, ly });
+      const pose = fresh ? this.k.vehiclePose(ship) : undefined;
+      const p = this.k.ecs.get(id, 'pos');
+      if (pose && p) [p.x, p.y] = offDeck(pose, lx, ly);
+      return;
+    }
+    this.onDecks.delete(id);
+    if (!fresh) this.targets.set(id, { x: t.x, y: t.y });
+  }
+
+  /**
+   * A vehicle as the server says it (T442): its way and turn, the anchor, its helm (this client's wanderer, when the server says so, is this
+   * mirror's), which make its menu here; where it is and its heading are carried on from here (`sail`), from the start when it is new.
+   */
+  private ship(id: Id, t: { x: number; y: number }, v: VehicleView, fresh: boolean): void {
+    const k = this.k;
+    this.targets.delete(id);
+    this.onDecks.delete(id);
+    const known = this.ships.has(id) && !fresh;
+    const was = k.ecs.get(id, 'vehicle');
+    const heading = known && Number.isFinite(was?.heading) ? was.heading : v.heading;
+    // Another's helm is never this mirror's wanderer, whose id (`me`) may be the server's id of the master: it is marked as another's.
+    const helm = v.helm === undefined ? undefined : v.helm === this.session.id ? k.wanderer().id : `${OTHERS_HELM}${v.helm}`;
+    k.ecs.set(id, 'vehicle', { heading, speed: v.speed, turn: v.turn, thrust: 0, steer: 0, power: 1, anchored: v.anchored, ...(helm !== undefined ? { helm } : {}) });
+    const form = k.ecs.get(id, 'form');
+    if (form) form.yaw = heading;
+    this.ships.set(id, { pose: { x: t.x, y: t.y, heading: v.heading }, speed: v.speed, turn: v.turn, at: this.clock });
+    if (!known) {
+      const p = k.ecs.get(id, 'pos');
+      if (p) Object.assign(p, { x: t.x, y: t.y });
     }
   }
 
@@ -342,11 +495,13 @@ export class ThinClient {
   private look(t: EntityView): Id {
     const k = this.k;
     let id = this.local.get(t.id);
+    let fresh = false;
     if (id === undefined || !k.ecs.alive.has(id)) {
+      fresh = true;
       id = k.ecs.spawn({ pos: { x: t.x, y: t.y } });
       this.local.set(t.id, id);
       this.server.set(id, t.id);
-    } else this.targets.set(id, { x: t.x, y: t.y });
+    }
     const parts: Record<string, unknown> = { ...(t.c ?? {}) };
     // An item on the ground has no module: what it is, is what it would be in the hand.
     if (t.m && (t.c?.pickup as { item?: string } | undefined)?.item !== t.m) parts.module = { id: t.m };
@@ -365,12 +520,18 @@ export class ThinClient {
     else k.ecs.remove(id, 'worn');
     if (t.text) this.say(id, t.text);
     else k.bubbles.delete(id);
+    // Where it is, after what it is (T442: a vehicle's form takes its heading here).
+    this.place(id, t, fresh);
     return id;
   }
 
   private drop(sid: number): void {
     const id = this.local.get(sid);
-    if (id !== undefined) this.k.ecs.destroy(id);
+    if (id !== undefined) {
+      this.k.ecs.destroy(id);
+      this.ships.delete(id);
+      this.onDecks.delete(id);
+    }
     this.local.delete(sid);
     if (id !== undefined) this.server.delete(id);
     this.hidden.delete(sid);
@@ -380,11 +541,15 @@ export class ThinClient {
   private other(o: OtherView): void {
     const k = this.k;
     let id = this.others.get(o.id);
+    let fresh = false;
     if (id === undefined || !k.ecs.alive.has(id)) {
+      fresh = true;
       const me = k.ecs.get(k.wandererEntity, 'glyph');
       id = k.ecs.spawn({ pos: { x: o.x, y: o.y }, glyph: { ...(me ?? { glyph: '@', color: '#ffffff' }) }, body: { r: 0.3, solid: false }, wander: {} });
       this.others.set(o.id, id);
-    } else this.targets.set(id, { x: o.x, y: o.y });
+    }
+    // On a vehicle's deck (T442) at their point of it, where the deck is here: they do not tremble on it.
+    this.place(id, o, fresh);
     // What they wield (T288): the renderer puts it in their hand; a string or nothing, whatever came.
     // What they hold (T288), and the seed of its look when it is a thing of the world they carry (T292): numbers and a text only.
     const held = typeof o.held === 'string' && o.held ? o.held.slice(0, 120) : undefined;
@@ -417,6 +582,8 @@ export class ThinClient {
       k.bus.emit('ui:credits:exhausted', { reason: n.reason ?? 'exhausted', text: n.text });
       return k.message(n.text, 'warn');
     }
+    // Words of the world to this wanderer outside what they do (T442: a hull that bumps, a helm let go).
+    if (n.type === 'world') return k.message(n.text, n.tone === 'warn' || n.tone === 'good' ? n.tone : 'info');
     if (n.type === 'give') return k.message(`${n.name} ti dà ${n.text}.`, 'good');
     if (n.type === 'other') return k.message(`${n.name}: ${n.text}`);
     const id = this.others.get(n.from);
@@ -814,6 +981,9 @@ export class ThinClient {
     });
     if (rune !== undefined) return this.perform(rune, 'raccogli');
     const target = k.targetInFront();
+    // At the helm, or on a deck with nothing else in front (T442, as alone): the vehicle's menu; what is chosen the server does.
+    const deck = k.aboard();
+    if (deck !== undefined && (target === undefined || target === deck || k.atHelm() === deck)) return k.openTileMenu(col + dx, row + dy, deck);
     if (target !== undefined && k.ecs.has(target, 'pickup')) return this.perform(target, 'raccogli');
     const at = target !== undefined ? k.ecs.get(target, 'pos') : { x: pc.x + dx, y: pc.y + dy };
     k.openTileMenu(Math.floor(at.x), Math.floor(at.y), target);

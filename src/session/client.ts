@@ -9,7 +9,7 @@ import type { PlayerSpot } from '../kernel/situation';
 import type { Profile } from '../kernel/wanderers';
 import { readBrokenCards, type BrokenCard } from '../kernel/brokencards';
 import { NORMAL_PACE, readPace, type WorldPace } from '../kernel/worldPace';
-import type { ClientLink, ClientMsg, ContainerView, Dialog, FileChanges, FormView, Me, MyState, Notice, OtherView, ChunkView, ServerMsg, EntityView } from './protocol';
+import { isMove, type ClientLink, type ClientMsg, type ContainerView, type Dialog, type FileChanges, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerMsg, type EntityView } from './protocol';
 
 export interface Outcome {
   ok: boolean;
@@ -113,11 +113,14 @@ export class SessionClient {
     void (this.who.freshToken?.() ?? Promise.resolve(this.who.token)).catch(() => this.who.token).then((token) => this.enter(token));
   }
 
-  /** The wanderer walked here (world space): it is so here at once, the server may correct it. */
-  move(x: number, y: number): number {
+  /**
+   * The wanderer walked here (world space): it is so here at once, the server may correct it. On a vehicle's deck (T442) the step goes in its
+   * frame (`deck`: the vehicle's id on the server and the point of its deck), which the server reads where it has the vehicle.
+   */
+  move(x: number, y: number, deck?: { on: number; lx: number; ly: number }): number {
     const seq = ++this.seq;
     if (this.me) this.me = { ...this.me, x, y };
-    this.link.send({ t: 'step', seq, x, y });
+    this.link.send(deck ? { t: 'step', seq, x: deck.lx, y: deck.ly, on: deck.on } : { t: 'step', seq, x, y });
     return seq;
   }
 
@@ -209,8 +212,15 @@ export class SessionClient {
     if (m.broken !== undefined) this.broken = readBrokenCards(m.broken);
     if (m.pace !== undefined) this.pace = readPace(m.pace);
     for (const p of m.chunks ?? []) this.places.set(p.key, p);
-    // An entity that only moved keeps what it is.
-    for (const t of m.entities ?? []) this.entities.set(t.id, Object.keys(t).length > 3 ? t : { ...(this.entities.get(t.id) ?? t), x: t.x, y: t.y });
+    // An entity that only moved keeps what it is; where it is (on a deck, a vehicle's way: T442) is the move's.
+    for (const t of m.entities ?? []) {
+      if (!isMove(t)) {
+        this.entities.set(t.id, t);
+        continue;
+      }
+      const { on: _on, lx: _lx, ly: _ly, vehicle: _vehicle, ...look } = this.entities.get(t.id) ?? t;
+      this.entities.set(t.id, { ...look, ...t });
+    }
     for (const id of m.gone ?? []) this.entities.delete(id);
     for (const o of m.wanderers ?? []) this.others.set(o.id, o);
     for (const id of m.departed ?? []) this.others.delete(id);

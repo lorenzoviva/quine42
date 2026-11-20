@@ -8,8 +8,8 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
-import { crossingOf, gaitOf, gravityOf, leapOf, repairNature, sameNature, terrainPhysics, type WorldNature } from './nature';
-import { islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, type Island } from './islands';
+import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
+import { islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
@@ -89,7 +89,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
-import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, MAX_VEHICLES, newVehicle, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleRecord, type VehicleSpec, type VehicleState } from './vehicle';
+import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -623,7 +623,7 @@ export class Kernel {
   private groundVersion = 0;
   /** The water that flows (T51b, ADR-0094): the kernel's cellular automaton on the loaded places. */
   readonly water = new WaterFlow({
-    loaded: (c, r) => this.chunkAt(c, r)?.stage === 'planned',
+    loaded: (c, r) => this.chunkAt(c, r)?.stage === 'planned' && !isVoid(this.palette[this.tileAt(c, r) ?? '']),
     wet: (c, r) => this.palette[this.tileAt(c, r) ?? '']?.layer === 'liquid',
     surface: (c, r) => this.fieldAt(c, r),
     ground: (c, r) => Math.max(this.seaLevel, this.relief.level(c, r) + this.digAt(c, r)),
@@ -976,8 +976,9 @@ export class Kernel {
       speed_at: (x, y) => {
         const t = this.tileAt(Math.floor(x), Math.floor(y));
         const def = t ? this.palette[t] : undefined;
-        // In the water one swims, the swimming pace within the kernel's limits (T438); elsewhere the tile's, as always.
-        if (crossingOf(def) === 'swim') return terrainPhysics(def).pace;
+        // In the water one swims, the swimming pace within the kernel's limits (T438), but on a vehicle's deck over it one walks (T442);
+        // elsewhere the tile's, as always.
+        if (crossingOf(def) === 'swim') return this.onAnyDeck(x, y) ? 1 : terrainPhysics(def).pace;
         return (t && def?.speed) || 1;
       },
       player_get: (key) => (key === 'x' || key === 'y' ? this.wandererPos()[key] : (this.wandererComp() as any)[key]),
@@ -1427,7 +1428,8 @@ export class Kernel {
           else if (cross === 'walk') walked = true;
           terrain = Math.max(terrain, (cross !== 'swim' && t && Number(def?.speed)) || 1);
         }
-      if (swum && !walked) terrain = swum;
+      // On a vehicle's deck (T442) one walks, whatever water is under it.
+      if (swum && !walked && this.aboard() === undefined) terrain = swum;
       const speed = Math.max(0, Math.min(60, Number(pl?.speed) || 0));
       const passo = Math.max(0.2, Math.min(4, Number(pl?.step) || 1));
       return speed * passo * Math.min(4, terrain);
@@ -1648,7 +1650,7 @@ export class Kernel {
     this.modules = new Map(modules.map((m) => [m.manifest.id, m]));
     this.systems = modules.filter((m) => m.manifest.kind === 'system').sort((a, b) => (a.manifest.order ?? 50) - (b.manifest.order ?? 50));
     this.terrain = modules.find((m) => m.manifest.kind === 'generator');
-    this.palette = { '?': VOID_TILE, ...(this.terrain?.manifest.tiles ?? {}) };
+    this.palette = this.paletteOf(this.terrain?.manifest.tiles);
     this.strata = strataPalette(this.terrain?.manifest.strata);
     this.fragments = modules.flatMap((m) => m.manifest.fragments ?? []);
     this.content.rebuild(modules);
@@ -1898,6 +1900,20 @@ export class Kernel {
     return `${this.config.name}:${this.config.seed}:${this.worldSignature()}:${ch.key}`;
   }
 
+/**
+   * The palette of the world: the generator's terrains, the missing tile, and in a world of the void (T445, ADR-0233) the void, the kernel's
+   * (`VOID_CODE`), whatever a terrain of the generator says of that code.
+   */
+  private paletteOf(tiles: Record<string, TerrainDef> | undefined): Record<string, TerrainDef> {
+    return { '?': VOID_TILE, ...(tiles ?? {}), ...(this.config.nature.geography === 'void' ? { [VOID_CODE]: voidTerrain(languageOf(this.files)) } : {}) };
+  }
+
+  /** What the kernel's lattice makes of this world (T441, T445): the islands of an archipelago, the lands of the void; none on a continent. */
+  private lattice(): Lattice | undefined {
+    const g = this.config.nature.geography;
+    return g === 'archipelago' || g === 'void' ? g : undefined;
+  }
+
   private genDraft(cx: number, cy: number): string {
     const S = this.config.chunkSize;
     const n = S * S;
@@ -1906,8 +1922,10 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
       if (!failed) {
-        // In an archipelago (T441, ADR-0229) the kernel's islands decide where the land is: the sea, the shallows and the beach around them.
-        const drawn = typeof value === 'string' && value.length === n && this.config.nature.geography === 'archipelago' ? islandDraft(value, this.config.seed, cx, cy, S) : value;
+        // In an archipelago (T441, ADR-0229) the kernel's islands decide where the land is: the sea, the shallows and the beach around them;
+        // in the void (T445, ADR-0233) its stations and asteroids, and the void around them.
+        const lattice = this.lattice();
+        const drawn = typeof value === 'string' && value.length === n && lattice ? (lattice === 'void' ? voidDraft : islandDraft)(value, this.config.seed, cx, cy, S) : value;
         // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
         if (typeof drawn === 'string' && drawn.length === n) return [...drawn].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
         this.faults.raise(`module:${id}:generate_chunk`, `generate_chunk deve restituire una stringa di ${n} caratteri`);
@@ -2178,9 +2196,10 @@ export class Kernel {
     // The open sea (T441, ADR-0229): a place whose draft is all deep water one swims has nothing the Council would put there (nothing stands
     // on the water) and costs nothing: the kernel plans it, without a call, outside the quota and the pace, as a filler (not by the local models over
     // a world that is not theirs, above: nothing of theirs is saved, T433).
-    if (this.openSea(ch.draft)) {
+    // The void (T445, ADR-0233) the same: a place all void has nothing on it and costs nothing.
+    if (this.openSea(ch.draft) || this.allVoid(ch.draft)) {
       ch.held = false;
-      const plan = { ...this.seaPlan(), strata: this.strataOf(ch) };
+      const plan = { ...this.seaPlan(this.allVoid(ch.draft)), strata: this.strataOf(ch) };
       await this.chunkStore.save(this.recordKey(ch), { plan });
       if (this.alive(ch)) this.applyPlan(ch, plan);
       return;
@@ -2286,6 +2305,8 @@ export class Kernel {
       for (const i of reservedCells(b, S, cx, cy)) {
         cells++;
         if (this.palette[draft[i]]?.layer === 'liquid') wet++;
+        // No lot over the void (T445): nothing stands on it.
+        if (isVoid(this.palette[draft[i]])) return false;
       }
     }
     return cells > 0 && wet * 4 <= cells;
@@ -2389,15 +2410,21 @@ export class Kernel {
     return true;
   }
 
-  /** The plan of a place of open sea (T441): the sea's name in the language of the world, no environment, nothing in it; the kernel's. */
-  private seaPlan(): ChunkPlan {
-    return { place: { ...OPEN_SEA[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
+  /** Whether a draft is all the void (T445): nothing but stars. */
+  private allVoid(draft: string): boolean {
+    return draft.length > 0 && [...new Set(draft)].every((c) => isVoid(this.palette[c]));
   }
 
-  /** The island a place stands on in an archipelago (T441), with its region of the atlas if the Cartographer has named it. */
+  /** The plan of a place of open sea (T441), or of the void (T445): its name in the language of the world, no environment, nothing in it; the kernel's. */
+  private seaPlan(empty = false): ChunkPlan {
+    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
+  }
+
+  /** The island a place stands on in an archipelago (T441), or its station or asteroid in the void (T445), with its region of the atlas if the Cartographer has named it. */
   private islandUnder(ch: Pick<Chunk, 'cx' | 'cy'>): { island: Island; region?: Region } | undefined {
-    if (this.config.nature.geography !== 'archipelago') return undefined;
-    const island = islandOfPlace(this.config.seed, ch.cx, ch.cy, this.config.chunkSize);
+    const lattice = this.lattice();
+    if (!lattice) return undefined;
+    const island = islandOfPlace(this.config.seed, ch.cx, ch.cy, this.config.chunkSize, lattice);
     return island && { island, region: islandRegion(this.atlasNow(), island.id) };
   }
 
@@ -2454,7 +2481,8 @@ export class Kernel {
     const placeable = new Set(this.catalog().map((c) => c.id));
     // On an island of an archipelago (T441): its name, or the Cartographer names it with the first place on it.
     const under = this.islandUnder(ch);
-    const island = under && (under.region ? { name: under.region.name, description: under.region.description } : { islet: !!under.island.islet, across: Math.max(1, Math.round((2 * under.island.radius) / this.config.chunkSize)) });
+    const body = under?.island.body ? { body: under.island.body } : {};
+    const island = under && (under.region ? { name: under.region.name, description: under.region.description, ...body } : { islet: !!under.island.islet, across: Math.max(1, Math.round((2 * under.island.radius) / this.config.chunkSize)), ...body });
     let feedback = '';
     for (let attempt = 0; attempt < 3 && layouts.length; attempt++) {
       try {
@@ -2551,7 +2579,7 @@ export class Kernel {
       const free = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].filter((c) => !palette[c]);
       for (const t of d.tiles) {
         if (!['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'].includes(t.tile.layer ?? '')) continue;
-        const code = t.code && !palette[t.code] && t.code !== '?' && /\S/.test(t.code) ? t.code : free.shift();
+        const code = t.code && !palette[t.code] && t.code !== '?' && t.code !== VOID_CODE && /\S/.test(t.code) ? t.code : free.shift();
         if (!code) break;
         palette[code] = added[code] = t.tile;
         // A model's own code for the terrain may appear in its program: map it to the one assigned.
@@ -2659,7 +2687,9 @@ export class Kernel {
     const block = this.blockFor(ch, plan);
     // Quiet is the model of places: it shows the phases too.
     // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...(block ? this.blockLayout(block, ch) : {}) };
+    // In the void the gates stand where the land goes on (T445, `voidGates`).
+    const voidAt = this.config.nature.geography === 'void' ? { gates: voidGates(this.config.seed, ch.cx, ch.cy, S) } : {};
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(block ? this.blockLayout(block, ch) : {}) };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
@@ -2669,7 +2699,8 @@ export class Kernel {
     let tiles = result.grid.join('');
     for (const [tile, code] of Object.entries(plan.edits ?? {})) {
       const i = Number(tile);
-      if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code]) tiles = tiles.slice(0, i) + code + tiles.slice(i + 1);
+      // Never on the void nor the void (T445): it is the kernel's.
+      if (Number.isInteger(i) && i >= 0 && i < S * S && this.palette[code] && !isVoid(this.palette[code]) && !isVoid(this.palette[tiles[i]])) tiles = tiles.slice(0, i) + code + tiles.slice(i + 1);
     }
     // The lot of the block is ground, as every lot (ADR-0043): its structure is the wall.
     if (block) {
@@ -4093,6 +4124,9 @@ export class Kernel {
     const ch = this.chunkAt(col, row);
     const def = this.palette[code];
     if (!ch || ch.stage !== 'planned' || !ch.plan || !def || code === '?') return false;
+    // The void is the kernel's (T445): no effect, spell or Lua builds on it or opens it.
+    const S0 = (row - ch.cy * S) * S + (col - ch.cx * S);
+    if (isVoid(def) || isVoid(this.palette[ch.tiles[S0]])) return false;
     if (def.solid) {
       const pc = this.wandererCarpet();
       if (Math.abs(pc.x - (col + 0.5)) < 1 && Math.abs(pc.y - (row + 0.5)) < 1) return false;
@@ -5016,6 +5050,8 @@ export class Kernel {
   private waitingVehicles: VehicleRecord[] = [];
   /** The points of each hull (T439), by form. */
   private hulls = new WeakMap<Form, Float64Array>();
+  /** When each wanderer was last pushed aside by a hull (T442): said again only after a while. */
+  private pushSaid = new Map<string, number>();
   /** When each vehicle last pressed against what stops it (T439): the bump is said again only after a while. */
   private bumpSaid = new Map<Id, number>();
 
@@ -5453,6 +5489,11 @@ export class Kernel {
     return undefined;
   }
 
+  /** Whether a point (carpet space) is on a vehicle's deck (T442): whoever stands there walks on it, the water under it does not count. */
+  private onAnyDeck(x: number, y: number): boolean {
+    return this.decks.length > 0 && this.deckAt(x, y, this.floorAt(x, y)) !== undefined;
+  }
+
   /** The vehicle under the feet of the wanderer acting (T439), in the simulation. */
   aboard(): Id | undefined {
     const p = this.wandererPos();
@@ -5478,11 +5519,14 @@ export class Kernel {
     return out;
   }
 
-  /** The wanderers of this kernel who stand on a vehicle's deck (T439), in the simulation; who plays from a client of their own, with T442. */
+  /**
+   * The wanderers who stand on a vehicle's deck (T439), in the simulation: those this kernel walks and, in a game of many (T442), those who
+   * play from a client of their own, whose steps come in the deck's frame (the session's `step.on`).
+   */
   private wanderersAboard(id: Id): string[] {
     const out: string[] = [];
     for (const w of this.wanderersById.keys()) {
-      if (this.remote.has(w) || !this.inWorld(w)) continue;
+      if (!this.inWorld(w)) continue;
       if (this.as(w, () => this.aboard()) === id) out.push(w);
     }
     return out;
@@ -5571,6 +5615,8 @@ export class Kernel {
     // The decks where they are now: who is carried is put on them, and checked against them.
     this.reindexVehicles(new Set(moves.map((m) => m.id)));
     for (const m of moves) this.carryAboard(m);
+    // Who swims (or stands) where the hull came is pushed aside, never crushed (T442).
+    for (const m of moves) this.pushAside(m);
   }
 
   /** The solids and the decks of the vehicles that moved, where they are now (T439): the rest stays as the last `rebuildSolids` made it. */
@@ -5634,7 +5680,7 @@ export class Kernel {
       if (last === undefined || this.time - last > BUMP_EVERY) {
         // On a reef (T443) the hull runs aground: the water goes on, the rock under it does not let it.
         const aground = this.onReef(id, tries[0]);
-        if (v.helm !== undefined) this.as(v.helm, () => this.message(VEHICLE_WORDS[spec.medium][aground ? 'aground' : 'bumped'], 'warn'));
+        if (v.helm !== undefined) this.tell(v.helm, VEHICLE_WORDS[spec.medium][aground ? 'aground' : 'bumped'], 'warn');
         this.bus.emit('vehicle:bumped', aground ? { id, reef: true } : { id });
       }
       this.bumpSaid.set(id, this.time);
@@ -5661,8 +5707,7 @@ export class Kernel {
         const [x, y] = carried(c.x, c.y, m.from, m.to);
         const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
         if (!this.bodyFree(x, y, r, p.z)) return;
-        p.x += x - c.x;
-        p.y += y - c.y;
+        this.shiftWanderer(x - c.x, y - c.y);
         // A jump on the deck goes with it too.
         const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
         if (j?.from && j.to) {
@@ -5683,30 +5728,150 @@ export class Kernel {
     }
   }
 
+  /**
+   * The wanderer acting moves by (dx, dy) in the world without walking (T442): carried by a deck, pushed by a hull, over the side. Who plays
+   * from a client of their own on their carpet (as `stepWanderer`: nobody brings them back to the middle of their circle here); who this kernel
+   * walks on their circle, which their carpet brings back (T439).
+   */
+  private shiftWanderer(dx: number, dy: number): void {
+    if (!Number.isFinite(dx) || !Number.isFinite(dy)) return;
+    const c = this.carpet();
+    if (this.remote.has(this.wanderer().id) && c) Object.assign(c, { ox: c.ox + dx, oy: c.oy + dy });
+    else {
+      const p = this.wandererPos();
+      p.x += dx;
+      p.y += dy;
+    }
+  }
+
+  /**
+   * Who is where a hull came is pushed aside (T442, rule 7: never crushed): a wanderer not on its deck whose body is now over it (`overHull`),
+   * in the water or on the ground, goes the way that point of the hull went (or away from its middle, if it only turned) as far as the body is free, at most
+   * `PUSH_REACH` tiles; with no room it stays (whoever the world grew around may always move out). Who is pushed hears it now and then, and a
+   * client's steps start again from there (`wanderer:pushed`).
+   */
+  private pushAside(m: VehicleMove): void {
+    const s = this.decks.find((d) => d.id === m.id)?.s;
+    if (!s) return;
+    const reach = s.form.reach + 1;
+    for (const w of this.wanderersById.keys()) {
+      if (m.aboard.includes(w) || this.dying.has(w) || !this.inWorld(w)) continue;
+      this.as(w, () => {
+        const c = this.wandererCarpet(), p = this.wandererPos();
+        if (Math.abs(c.x - m.to.x) > reach || Math.abs(c.y - m.to.y) > reach) return;
+        const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+        if (!this.overHull(m.id, c.x, c.y, r)) return;
+        const [hx, hy] = carried(c.x, c.y, m.from, m.to);
+        let dx = hx - c.x, dy = hy - c.y;
+        if (Math.hypot(dx, dy) < 1e-6) [dx, dy] = [c.x - m.to.x, c.y - m.to.y];
+        const n = Math.hypot(dx, dy);
+        if (n < 1e-6) return;
+        for (let d = PUSH_STEP; d <= PUSH_REACH + 1e-9; d += PUSH_STEP) {
+          const x = c.x + (dx / n) * d, y = c.y + (dy / n) * d;
+          if (this.overHull(m.id, x, y, r) || !this.bodyFree(x, y, r, p.z)) continue;
+          this.shiftWanderer(x - c.x, y - c.y);
+          const last = this.pushSaid.get(w);
+          if (last === undefined || this.time - last > BUMP_EVERY) this.tell(w, VEHICLE_WORDS[this.vehicleOf(m.id)?.spec.medium ?? 'water'].pushed, 'warn');
+          this.pushSaid.set(w, this.time);
+          this.bus.emit('wanderer:pushed', { id: w });
+          return;
+        }
+      });
+    }
+  }
+
+  /**
+   * Whether a body (carpet space, half-size r) is over a vehicle's hull (T442): a column of its form with something over its waterline under
+   * the body's middle or a corner of it; the disc of its body while it has no form. Not the collision of a body (`formBlocks`): from the water a
+   * low deck is a step, and who is where a hull came, or goes over its side, must be off it.
+   */
+  private overHull(id: Id, x: number, y: number, r: number): boolean {
+    const d = this.decks.find((e) => e.id === id);
+    if (!d) return false;
+    const s = d.s;
+    if (!s?.form.result) return Math.hypot(x - d.x, y - d.y) < d.r + r;
+    const g = s.form.result.grid, cols = this.builtColumns(s.form);
+    for (const [ox, oy] of [[0, 0], [-r, -r], [r, -r], [-r, r], [r, r]]) {
+      const [lx, lz] = toLocal(x + ox - s.x, y + oy - s.y, s.yaw);
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && cols[vx + vy * g.X]) return true;
+    }
+    return false;
+  }
+
+  /**
+   * «Tuffati», «Scendi» (T442): the wanderer acting goes over the side of the vehicle they stand on, to the nearest place off its deck where
+   * the body is free, within `LEAVE_REACH` tiles: the water beside the hull, the ground beside the cart. Always, whoever steers it (in a game
+   * of many nobody is carried where they do not want to go: a client does not jump); the helm, if theirs, let go. False, said, with no room.
+   */
+  leaveDeck(id: Id): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror) return false;
+    const words = VEHICLE_WORDS[got.spec.medium];
+    if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
+    const c = this.wandererCarpet(), p = this.wandererPos();
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+    let spot: { x: number; y: number; z: number } | undefined;
+    for (let d = 0.5; d <= LEAVE_REACH + 1e-9 && !spot; d += 0.25)
+      for (let i = 0; i < 16 && !spot; i++) {
+        const x = c.x + Math.cos((i * Math.PI) / 8) * d, y = c.y + Math.sin((i * Math.PI) / 8) * d;
+        const z = this.groundAt(x, y);
+        if (this.deckAt(x, y, z) === undefined && !this.overHull(id, x, y, r) && this.bodyFree(x, y, r, z)) spot = { x, y, z };
+      }
+    if (!spot) return void this.message(words.noRoom, 'warn'), false;
+    if (got.v.helm === this.wanderer().id) this.letGoHelm(id, got.v, got.spec);
+    this.ecs.remove(this.wandererEntity, 'jump');
+    this.shiftWanderer(spot.x - c.x, spot.y - c.y);
+    p.z = spot.z;
+    this.message(words.went);
+    this.bus.emit('wanderer:pushed', { id: this.wanderer().id });
+    return true;
+  }
+
   /** The helm let go (T439): whoever held it is told, the vehicle keeps its anchor as it was, its course is nobody's. */
-  private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec): void {
+  private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec, said: 'left' | 'seized' = 'left'): void {
     const who = v.helm;
     delete v.helm;
     v.thrust = 0;
     v.steer = 0;
-    if (who !== undefined && this.wanderersById.has(who)) this.as(who, () => this.message(VEHICLE_WORDS[spec.medium].left));
+    if (who !== undefined && this.wanderersById.has(who)) this.tell(who, VEHICLE_WORDS[spec.medium][said], said === 'seized' ? 'warn' : 'info');
     this.bus.emit('vehicle:helm', { id, wanderer: who, held: false });
   }
 
   /**
+   * Words of the world to a wanderer, whoever is acting (T442): this kernel shows them as it shows every message; a session takes them to that
+   * wanderer's own client (`wanderer:told`), when they come outside what the wanderer is doing (the tick: a hull that bumps, a helm let go).
+   */
+  private tell(who: string, text: string, tone: 'info' | 'warn' | 'good' = 'info'): void {
+    this.as(who, () => this.message(text, tone));
+    this.bus.emit('wanderer:told', { id: who, text, tone });
+  }
+
+  /**
+   * Whether `who` may take a helm another holds (T442): in a game of many the master (who frees it, as they free everything), and anyone when
+   * the game says that wanderers may harm one another (`pvp`: a mutiny); else nobody. A mirror knows it is the master's by its branch.
+   */
+  private seizesHelm(who: string): boolean {
+    if (this.gameSetup()?.pvp === true) return true;
+    if (!this.manyPlayers()) return false;
+    return this.mirror ? !!this.publisher : this.isMaster(who);
+  }
+
+  /**
    * «Prendi il timone» (T439): `who` (the wanderer acting), on the deck, takes the helm if it is free (theirs of another vehicle is let go) and
-   * the anchor comes up. False, said in the world's words when `quiet` is not (Lua asks it at every tick), when not. Who plays from a client
-   * of their own steers with T442.
+   * the anchor comes up. False, said in the world's words when `quiet` is not (Lua asks it at every tick), when not. In a game of many (T442)
+   * anyone with a body takes it, whoever moves them; one held by another only who `seizesHelm`, from the menu (never Lua).
    */
   takeHelm(id: Id, who = this.wanderer().id, quiet = false): boolean {
     const got = this.vehicleOf(id);
-    if (!got || this.mirror || this.remote.has(who) || !this.wanderersById.has(who)) return false;
+    if (!got || this.mirror || !this.wanderersById.has(who)) return false;
     const { v, spec } = got;
     const words = VEHICLE_WORDS[spec.medium];
     return this.as(who, () => {
       if (this.aboard() !== id) return void (quiet || this.message(words.aboard, 'warn')), false;
-      if (v.helm !== undefined && v.helm !== who) return void (quiet || this.message(words.taken, 'warn')), false;
+      if (v.helm !== undefined && v.helm !== who && (quiet || !this.seizesHelm(who))) return void (quiet || this.message(words.taken, 'warn')), false;
       if (!this.nearHelm(id)) return void (quiet || this.message(words.far, 'warn')), false;
+      if (v.helm !== undefined && v.helm !== who) this.letGoHelm(id, v, spec, 'seized');
       const other = this.atHelm();
       if (other !== undefined && other !== id) this.leaveHelm(other);
       v.helm = who;
@@ -5745,7 +5910,7 @@ export class Kernel {
   /** «Getta l'ancora», «Leva l'ancora» (T439): who stands on the deck holds it or lets it go (the brake, on land). */
   setAnchor(id: Id, anchored: boolean): boolean {
     const got = this.vehicleOf(id);
-    if (!got || this.mirror || this.remote.has(this.wanderer().id)) return false;
+    if (!got || this.mirror) return false;
     const words = VEHICLE_WORDS[got.spec.medium];
     if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
     got.v.anchored = anchored;
@@ -5753,21 +5918,25 @@ export class Kernel {
     return true;
   }
 
-  /** What a vehicle's menu offers the wanderer acting on its deck (T439): the helm, taken or let go, and the anchor. */
+  /**
+   * What a vehicle's menu offers the wanderer acting on its deck (T439): the helm, taken or let go, the anchor, and going over the side (T442).
+   * The same in a mirror (T442), from the vehicle the server sends (`EntityView.vehicle`): the server does what is chosen, and checks it.
+   */
   private vehicleActions(id: Id): ActionOption[] {
-    const got = this.mirror ? undefined : this.vehicleOf(id);
+    const got = this.vehicleOf(id);
     const me = this.wanderer().id;
-    if (!got || this.remote.has(me) || this.aboard() !== id) return [];
+    if (!got || this.aboard() !== id) return [];
     const { v, spec } = got;
     const w = VEHICLE_WORDS[spec.medium];
     const out: ActionOption[] = [];
     if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
     else {
       // Its helm where its form marks one (T440): from elsewhere on the deck the menu says where it is.
-      const reason = v.helm !== undefined ? w.taken : !this.nearHelm(id) ? w.far : undefined;
+      const reason = v.helm !== undefined && !this.seizesHelm(me) ? w.taken : !this.nearHelm(id) ? w.far : undefined;
       out.push({ id: 'helm', label: w.take, enabled: reason === undefined, ...(reason ? { reason } : {}) });
     }
     out.push(v.anchored ? { id: 'weigh', label: w.weigh, enabled: true } : { id: 'anchor', label: w.anchor, enabled: true });
+    out.push({ id: 'over', label: w.over, enabled: true });
     return out;
   }
 
@@ -5819,6 +5988,81 @@ export class Kernel {
       if (v.helm !== who && !this.takeHelm(id, who, true)) return false;
     }
     return true;
+  }
+
+  // --- Vehicles in a game of many (T442) ---------------------------------------------------------------------------------------
+
+  /** Where a vehicle is (T442): its middle (carpet space) and its heading; undefined if `id` is not one. A client's steps on a deck are in its frame. */
+  vehiclePose(id: Id): VehiclePose | undefined {
+    const got = this.vehicleOf(id);
+    const p = got ? this.ecs.get(id, 'pos') : undefined;
+    return got && Number.isFinite(p?.x) && Number.isFinite(p?.y) ? { x: p.x, y: p.y, heading: got.v.heading } : undefined;
+  }
+
+  /**
+   * A vehicle as the clients see it (T442, `EntityView.vehicle`, a list as rule 8f wants): its heading, its way and its turn, which their mirror
+   * carries it on with between two updates, the anchor and who holds the helm, which make its menu there. Undefined if `id` is not one.
+   */
+  vehicleSeen(id: Id): VehicleView | undefined {
+    const got = this.vehicleOf(id);
+    if (!got) return undefined;
+    const r = (n: number, d: number) => Math.round(n * d) / d;
+    const { v } = got;
+    return { heading: r(v.heading, 1e5), speed: r(v.speed, 1e3), turn: r(v.turn, 1e4), anchored: v.anchored, ...(v.helm !== undefined ? { helm: v.helm } : {}) };
+  }
+
+  /**
+   * The deck an entity is carried on (T442), and where on it (its frame): a wanderer's body where its wanderer stands, a thing where it lies,
+   * as `vehicleTick` carries them (never someone of the world, a building, a vehicle). What a client draws relative to the vehicle its mirror
+   * carries on itself, so that what stands on a deck does not tremble on it.
+   */
+  carriedOn(entity: Id): { vehicle: Id; lx: number; ly: number } | undefined {
+    if (!this.decks.length || !this.ecs.alive.has(entity) || this.ecs.has(entity, 'vehicle')) return undefined;
+    const who = this.wandererOf(entity);
+    let vehicle: Id | undefined;
+    let at: { x: number; y: number } | undefined;
+    if (who !== undefined) {
+      if (!this.inWorld(who)) return undefined;
+      vehicle = this.as(who, () => this.aboard());
+      at = this.wandererAt(who);
+    } else {
+      if (NOT_CARGO.some((c) => this.ecs.has(entity, c))) return undefined;
+      const p = this.ecs.get(entity, 'pos');
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return undefined;
+      vehicle = this.deckAt(p.x, p.y, p.z);
+      at = p;
+    }
+    const pose = vehicle !== undefined ? this.vehiclePose(vehicle) : undefined;
+    if (!pose || !at) return undefined;
+    const [lx, ly] = onDeck(pose, at.x, at.y);
+    return { vehicle: vehicle!, lx, ly };
+  }
+
+  /**
+   * A mirror's vehicle goes where its client carries it (T442: the thin client carries on what the server said, `coast`): its middle and its
+   * heading; the wanderer of this mirror who stands on its deck goes and turns with it, as the server carries them, and at its helm looks where
+   * its bow points. Only in a mirror: in the world the kernel moves its vehicles (`vehicleTick`).
+   */
+  carryMirrored(id: Id, to: VehiclePose): void {
+    if (!this.mirror || ![to.x, to.y, to.heading].every(Number.isFinite)) return;
+    const got = this.vehicleOf(id);
+    const p = got ? this.ecs.get(id, 'pos') : undefined;
+    if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return;
+    const heading = ((to.heading % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const from: Pose = { x: p.x, y: p.y, heading: got.v.heading };
+    const aboard = this.wanderersAboard(id);
+    p.x = to.x;
+    p.y = to.y;
+    got.v.heading = heading;
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) fc.yaw = heading;
+    if (!this.decks.some((d) => d.id === id)) return;
+    this.reindexVehicles(new Set([id]));
+    this.carryAboard({ id, from, to: { x: to.x, y: to.y, heading }, aboard, things: [] });
+    if (got.v.helm === this.wanderer().id) {
+      const pl = this.wandererComp();
+      if (pl) pl.facing = facingOf(heading);
+    }
   }
 
   /** The vehicle an entity stands on (T439, `world.vehicle_of`): a wanderer's body where its wanderer is, a thing where it lies. */
@@ -6346,6 +6590,10 @@ export class Kernel {
       case 'anchor':
       case 'weigh':
         this.setAnchor(id, action === 'anchor');
+        return;
+      // Over the side (T442).
+      case 'over':
+        this.leaveDeck(id);
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
@@ -8343,7 +8591,8 @@ export class Kernel {
     const cx = Math.floor(x / S), cy = Math.floor(y / S);
     const r = cx === 0 && cy === 0 ? undefined : regionAt(this.atlasNow(), cx, cy);
     const region = r && !(r.master && r.kind === 'held') ? r : undefined;
-    const island = this.config.nature.geography === 'archipelago' ? islandAtTile(this.config.seed, x, y) : undefined;
+    const lattice = this.lattice();
+    const island = lattice ? islandAtTile(this.config.seed, x, y, lattice) : undefined;
     if (!region && !island) return undefined;
     return { ...(region ? { name: region.name, description: region.description } : {}), ...(island ? { island: island.id } : {}) };
   }
@@ -8352,17 +8601,18 @@ export class Kernel {
    * What `world.islands(x, y, r)` gives Lua (T441): the islands and islets within r tiles of (x, y) (at most `ISLANDS_REACH`), the nearest first,
    * at most `MAX_ISLANDS_SEEN`, each with the name the Cartographer gave it (none yet: no name). Empty in a world that is not an archipelago.
    */
-  islandsSeen(x: unknown, y: unknown, r: unknown): Array<{ id: string; name?: string; x: number; y: number; radius: number; islet: boolean }> {
-    if (this.config.nature.geography !== 'archipelago' || typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return [];
+  islandsSeen(x: unknown, y: unknown, r: unknown): Array<{ id: string; name?: string; x: number; y: number; radius: number; islet: boolean; body?: string }> {
+    const lattice = this.lattice();
+    if (!lattice || typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return [];
     const reach = typeof r === 'number' && Number.isFinite(r) ? Math.max(0, Math.min(ISLANDS_REACH, r)) : 200;
     const atlas = this.atlasNow();
     const round = (v: number) => Math.round(v * 100) / 100;
-    return islandsNear(this.config.seed, x, y, reach)
+    return islandsNear(this.config.seed, x, y, reach, lattice)
       .filter((f) => Math.hypot(f.x - x, f.y - y) <= reach)
       .slice(0, MAX_ISLANDS_SEEN)
       .map((f) => {
         const name = islandRegion(atlas, f.id)?.name;
-        return { id: f.id, ...(name ? { name } : {}), x: round(f.x), y: round(f.y), radius: f.radius, islet: !!f.islet };
+        return { id: f.id, ...(name ? { name } : {}), x: round(f.x), y: round(f.y), radius: f.radius, islet: !!f.islet, ...(f.body ? { body: f.body } : {}) };
       });
   }
 
@@ -8377,6 +8627,8 @@ export class Kernel {
     }
     this.worldNature = nature;
     this.config = { ...this.config, nature };
+    // The void is in the palette of a world of the void only (T445).
+    this.palette = this.paletteOf(this.terrain?.manifest.tiles);
     this.writeCommanded('universe.json', JSON.stringify({ ...raw, nature }, null, 2) + '\n');
   }
 
@@ -9287,14 +9539,26 @@ export class Kernel {
     }
   }
 
-  /** Day and night: 0 = deep night, 1 = full day. A day lasts DAY_SECONDS; the world is born in the morning. */
+  /**
+   * Day and night: 0 = deep night, 1 = full day. A day lasts the nature's seconds (`daySeconds`, T445); the world is born in the morning.
+   * Under a still light (`nature.day` 0) it is always full day.
+   */
   daylight(): number {
-    const phase = (this.time / Kernel.DAY_SECONDS + 0.12) % 1;
+    // Read through the nature alone: the light is a function of the time and the nature (a test calls it on a bare object).
+    const nature = this.config?.nature;
+    if (stillLight(nature)) return 1;
+    const phase = (this.time / clockDay(nature) + 0.12) % 1;
     const sun = Math.sin(phase * Math.PI * 2);
     return Math.max(0, Math.min(1, 0.5 + sun * 1.4));
   }
 
+  /** The day of the earth, the one of every world of today (`DEFAULT_NATURE.day`). */
   static DAY_SECONDS = 600;
+
+  /** The seconds of a day of this world for its clock (T445, `clockDay`): the nature's, the earth's under a still light. */
+  daySeconds(): number {
+    return clockDay(this.config.nature);
+  }
 
   /** Applies validated effects through core.effects (Lua): the world's own code decides how they happen. */
   applyEffects(effects: Effect[], target?: Id, at?: { x: number; y: number }): string[] {
@@ -9427,7 +9691,7 @@ export class Kernel {
 
   /** The day of the world (0 = the first). */
   day(): number {
-    return Math.floor((this.time / Kernel.DAY_SECONDS) + 0.12);
+    return Math.floor((this.time / this.daySeconds()) + 0.12);
   }
 
   // --- The people of the world (T327, ADR-0166) ----------------------------------------------------------------
@@ -9481,7 +9745,7 @@ export class Kernel {
         return k.localModelsAbroad();
       },
       day: () => k.day(),
-      phase: () => dayPhase(k.time, Kernel.DAY_SECONDS),
+      phase: () => dayPhase(k.time, k.daySeconds()),
       get modules() {
         return k.modules;
       },
@@ -10851,8 +11115,10 @@ export class Kernel {
     this.paceTick();
     if (this.campusVersion !== this.forms.version) this.placeCampus();
     this.rebuildSolids();
+    // At the helm (T442) the wanderer of this client does not walk: their keys go to the server, which steers.
+    const steering = this.atHelm() !== undefined;
     for (const s of this.systems) {
-      if (!PER_WANDERER.has(s.manifest.id)) continue;
+      if (!PER_WANDERER.has(s.manifest.id) || (steering && s.manifest.id === HELM_STILLS)) continue;
       this.runningSystem = s.manifest.id;
       this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;

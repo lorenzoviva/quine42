@@ -909,6 +909,10 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   zone, testi tagliati) e ne fa il corpo con i suoi file. Gli individui (ADR-0181, T353): `EntityView.worn` porta zona → id dei capi di
   un'entità con segni nell'inventario (`wornItems`; dell'inventario nient'altro), il client sottile lo mette nel componente `worn` dello
   specchio (`readWorn`), che `wornBy` legge dopo `remote.worn` e prima dei segni; se ne va con il prossimo `update` senza segni.
+- **Il veicolo tra molti** (ADR-0232, T442): il server porta sul ponte anche chi gioca da un suo client; ai client la posa del veicolo a elenco
+  (`EntityView.vehicle`), che lo specchio porta avanti invece di inseguirla; il passo sul ponte nel riferimento del veicolo (`step.on`); gli altri
+  a bordo dove stanno sul ponte (`OtherView.on`, `lx`, `ly`); timone, ancora e «Tuffati» dal menu dello specchio; le parole del mondo a un viandante
+  fuori dai suoi messaggi con l'avviso `world`, il posto che il mondo gli dà con una correzione subito (`wanderer:pushed`). Il resto → `#veicoli`.
 - **L'universo privato** (ADR-0194, T366; ADR-0188 punto 2): gli ospiti e gli inviti di un universo di molti stanno fuori dall'universo,
   `universes/.campaign/<nome>.json` (`CampaignArchive` in `server/campaign.ts`: `private`, `guests` per id, `invites` per impronta SHA-256 del
   token), scritto intero sotto un lucchetto fra processi (`server/lockedFile.ts`); un file illeggibile vale privato e senza ospiti; un universo
@@ -1265,7 +1269,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
   (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
   com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
-  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2 e l'arcipelago), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle e il giorno di 120-3600 secondi o 0), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
@@ -1320,6 +1324,29 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   regione dell'atlante. **Il Cartografo**: alla Genesi di un arcipelago gli ambienti delle rive (`ARCHIPELAGO_ENVIRONMENTS`), nel prompt delle
   terre le tavole dei moli e una secca, nel piano di un luogo d'isola che un porto va solo dove c'è il mare (`SHORE_LINE`); i modelli locali
   scelgono il porto solo sulla riva di un'isola, a parte (`HARBOUR` in `mock.ts`). `tests/porti.test.ts`.
+- **Il vuoto, il cielo, il giorno** (ADR-0233, T445, kernel 0.10.9). **Il vuoto** è un terreno del kernel: il codice `~` (`VOID_CODE`), lo
+  strato `void` (`voidTerrain` nella lingua del mondo, `isVoid`), che il kernel aggiunge alla palette solo in un mondo con
+  `nature.geography: 'void'` (`paletteOf`, anche in `chooseNature`), sopra un terreno del generatore con lo stesso codice; la Genesi rifiuta `~`
+  (`terrainErrors`), un manifest non può dire lo strato. `crossingOf` lo dà `none` qualunque cosa dica, `terrainPhysics` senz'aria; è solido e
+  non è un liquido, quindi il corpo si ferma al bordo e il salto non lo passa (`airFree`); non è tra le caselle raggiungibili, quindi niente vi
+  si posa; `setTile` non vi scrive e non lo scrive (effetti, incantesimi, `world.set_tile`); l'automa dell'acqua non lo carica
+  (`WaterWorld.loaded`); un lotto di un blocco non lo copre (`blockFree`). **Le terre** sono il reticolo delle isole (`islandOf(…, 'void')`, gli
+  stessi centri): la partenza una stazione grande quanto l'isola della partenza, una terra su tre un asteroide (`ASTEROID_ONE_IN`, raggio
+  10-24), le altre stazioni (bordo a superellisse, `shoreAt`); niente isolotti. **La bozza** (`voidDraft`): fuori il vuoto (anche l'acqua bassa
+  di un'isola), nella stazione il sentiero `p`, nell'asteroide ciò che il generatore ha disegnato senza prato, alberi né acqua (`s`, `r`, `n`).
+  **Il layout** (`layout.ts`): `carvePath` salta il vuoto, un varco sul vuoto resta vuoto e non è da raggiungere, dopo il programma ogni
+  casella torna alla bozza se il programma ha scritto sul vuoto o l'ha scritto; senza varchi sulla terra si parte dalla terra più vicina al
+  mezzo (`landNearMiddle`); i varchi del kernel per un mondo del vuoto sono `voidGates` (dal varco dell'hash la prima casella lungo il lato
+  che è terra dalle due parti, uguale per i due luoghi), passati come `opts.gates` da `layoutOf`, che salta anche i ritocchi (`edits`) sul
+  vuoto. **Il vuoto costa zero**: un luogo tutto vuoto (`allVoid`) lo pianifica il kernel come il mare aperto (`seaPlan(true)`, `OPEN_VOID`).
+  Il Cartografo battezza la stazione o l'asteroide (`islandUnder` con `body`, `VOID_LINE` al posto di `SHORE_LINE`, i nomi offline in
+  `mock.ts`); `world.region_at` e `world.islands` (con `body`) leggono le terre del vuoto. **Il cielo di stelle** (`nature.sky: 'stars'`,
+  `src/render/stars.ts`, `Stars`): sfondo e nebbia `STAR_SKY`, una sfera di 1800 stelle alla camera e un campo periodico sotto il piano
+  (120 caselle, 4 × 4) che scorre con il tappeto e la camera al 40 % (`FIELD_PARALLAX`), `fog: false`, mai con la corona; `terrain.ts` non
+  disegna le caselle del vuoto e dà alla terra accanto un fianco di `VOID_SLAB` (0,9) più scuro. **Il giorno** (`nature.day`, 120-3600 o 0):
+  `Kernel.daySeconds()` (`clockDay`) per `day()`, la fase delle routine (`dayPhase`) e il suono; `daylight()` con la luce ferma (`STILL_DAY`,
+  `stillLight`) è 1 e l'orologio tiene i 600 secondi della terra. **Nessuna ambientazione porta il vuoto** finché T448 non mette la capsula a
+  ogni approdo (regola 10); lo Spazio della Genesi resta la colonia con il cielo della terra. `tests/vuoto.test.ts`.
 
 <a id="veicoli"></a>
 ## Il veicolo
@@ -1344,10 +1371,10 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   posa nuova, poi solo il giro, poi solo l'andare (`hullFits`: ogni punto dello scafo, `hullPoints` sulle colonne della forma ogni quarto di
   casella e i bordi o `discPoints`, su ciò che lo porta e fuori dal piede dei solidi e dallo scafo intero degli altri veicoli). Fermato perde
   l'abbrivio e dice `bumped`; chi tiene il timone sente «Lo scafo urta e si ferma.» una volta finché preme lì (`BUMP_EVERY`), e il bus dice
-  `vehicle:bumped`. Poi i solidi si rifanno e **chi era sul ponte va con lui** (`carryAboard`): i viandanti di questo kernel (`wanderersAboard`)
-  con la stessa rototraslazione (`carried`) se il corpo può stare lì, il salto in corso con loro; le cose che vi giacciono (`thingsAboard`: non
+  `vehicle:bumped`. Poi i solidi si rifanno e **chi era sul ponte va con lui** (`carryAboard`): i viandanti (`wanderersAboard`; da T442 anche chi gioca da
+  un suo client, spostato sul suo tappeto, `shiftWanderer`) con la stessa rototraslazione (`carried`) se il corpo può stare lì, il salto in corso con loro; le cose che vi giacciono (`thingsAboard`: non
   persone, animali, edifici, altri veicoli) col loro verso, e il loro luogo diventa quello sotto di loro. Nessuno a bordo: l'ancora si getta da sé.
-- **Il timone e l'ancora**: dal menu del veicolo (`vehicleActions`, solo sul ponte e mai in uno specchio: «Prendi il timone», «Lascia il
+- **Il timone e l'ancora**: dal menu del veicolo (`vehicleActions`, solo sul ponte; da T442 anche in uno specchio, che manda la scelta al server: «Prendi il timone», «Lascia il
   timone», «Getta l'ancora», «Leva l'ancora»; su un carro la guida e il freno, `VEHICLE_WORDS`). E apre il menu del veicolo a chi è sul ponte
   senza altro davanti e sempre al timone; Spazio al timone fa lo stesso (`jump` rifiuta). Prendere il timone leva l'ancora; chi lo tiene non
   cammina (`HELM_STILLS`, `core.movement` saltato) e guarda dove guarda la prua (`facingOf`); lo lascia dal menu, o scendendo, saltando,
@@ -1379,9 +1406,27 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **A schermo**: il verso di ogni cosa a ogni fotogramma (`Entities.update`); chi è a bordo muove le gambe solo se cammina sul ponte; al
   timone la camera arretra una volta a `HELM_VIEW` (22) e la rotella e il pizzico arrivano a `ZOOM.helm` (30, `zoomMax` in
   `src/render/camera.ts`); lasciato il timone torna entro 15.
-- **In molti** (T442): oggi il veicolo porta e fa governare solo i viandanti del kernel che lo muove; chi gioca da un suo client non è portato
-  né prende il timone, e lo specchio riceve il verso solo con la prima vista. `tests/veicolo.test.ts`, `tests/sicurezza/veicolo.test.ts`,
-  `tests/espressivita/scenari.test.ts` (la barca).
+- **In molti** (ADR-0232, T442, kernel 0.10.8). Il server muove il veicolo e **porta anche chi gioca da un suo client**. **Ai client la posa a
+  elenco**: `EntityView.vehicle` (`heading`, `speed`, `turn`, `anchored`, `helm`; `vehicleSeen`) a ogni spostamento, la forma senza `yaw`, il
+  manifest con `vehicle` (`VEHICLE_FIELDS` in `src/session/files.ts`); una vista con soli `id x y on lx ly vehicle` è uno spostamento (`isMove`).
+  **Lo specchio porta avanti il veicolo** (`sail` in `src/session/thin.ts`): dall'ultima parola del server col suo abbrivio e il suo giro
+  (`coast`, al più `COAST` oltre), lo scarto chiuso a poco a poco (`SETTLE`), tutto oltre `JUMP`/`JUMP_TURN`; il kernel specchio lo sposta e porta
+  il suo viandante (`carryMirrored`); il timoniere non predice. **Il passo sul ponte**: `step { x, y, on }` col punto del ponte nel riferimento
+  del veicolo (`onDeck`), che il server mette dove ha il veicolo (`offDeck`, `deckNear`: un veicolo entro `near`) e controlla come ogni passo
+  (credito, `FAR`, collisione): il ponte porta, il credito conta solo il cammino; la correzione dice anche il punto del ponte (`correction.on/lx/ly`).
+  **Gli altri a bordo** e ciò che giace sul ponte arrivano dove stanno su di lui (`OtherView.on/lx/ly`, `EntityView.on/lx/ly`, `carriedOn`) e lo
+  specchio li tiene lì sul ponte che porta avanti (`onDecks`); il renderer muove le gambe di chi cammina sul ponte, non di chi vi è portato.
+  **Il timone**: il menu dello specchio (dal `vehicle` mandato; il timone del suo client è il suo viandante, quello di un altro `other:<id>`,
+  mai l'id `me` che ogni specchio dà al suo), le scelte al server (`action`), il
+  veicolo su cui si sta a portata da tutto il ponte (`outOfReach`); i tasti col messaggio `keys`; al timone lo specchio non cammina. Uno tenuto
+  da un altro solo al master o con `pvp`, dal menu (`seizesHelm`; chi lo perde: «Qualcuno ti prende il timone.»). **Tuffarsi** («Tuffati», sui
+  carri «Scendi», `over` → `leaveDeck`): sempre, chiunque governi, il posto più vicino fuori dallo scafo entro `LEAVE_REACH`; in molti un client
+  non salta. **La spinta dello scafo** (`pushAside`): chi non sta sul ponte ed è sopra lo scafo dove è arrivato (`overHull`: le colonne sopra la
+  linea) va da parte per dove è andato quel punto dello scafo, al più `PUSH_REACH`; mai schiacciato. **Ciò che il mondo fa a un viandante fuori da
+  ciò che fa lui** arriva al suo client: le parole (`tell` → `wanderer:told` → l'avviso `world`) e il posto (`wanderer:pushed` → una correzione
+  subito). **Sul ponte si cammina**: `world.speed_at` e il credito del server sopra l'acqua coperta da un ponte (`onAnyDeck`, `aboard`) danno il
+  passo di chi cammina. V-046. `tests/veicolo.test.ts`, `tests/veicolo-molti.test.ts` (con `tests/fleet.ts`), `tests/sicurezza/veicolo.test.ts`,
+  `tests/sicurezza/veicolo-molti.test.ts`, `tests/espressivita/scenari.test.ts` (la barca).
 
 <a id="rilievo"></a>
 ## Il rilievo

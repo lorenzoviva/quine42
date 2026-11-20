@@ -608,7 +608,7 @@ async function main() {
         sound.setPrograms(readPrograms(kernel.files));
       }
       const here = kernel.wandererCarpet();
-      sound.update({ beyond: kernel.coronaRevealed(), environment: kernel.chunkAt(here.x, here.y)?.plan?.layout, phase: dayPhase(kernel.time, Kernel.DAY_SECONDS), seed: kernel.config.seed });
+      sound.update({ beyond: kernel.coronaRevealed(), environment: kernel.chunkAt(here.x, here.y)?.plan?.layout, phase: dayPhase(kernel.time, kernel.daySeconds()), seed: kernel.config.seed });
     } catch {
       /* silence, and the game goes on */
     }

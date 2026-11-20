@@ -65,7 +65,7 @@ const within = (v: number, [lo, hi]: readonly [number, number]) => Math.min(hi, 
  * crossed: swum, if it is a liquid that says so, and otherwise not at all. Whatever else a terrain says, it is one of the three.
  */
 export function crossingOf(t: Pick<TerrainDef, 'solid' | 'cross' | 'layer'> | undefined): Crossing {
-  if (!t) return 'none';
+  if (!t || t.layer === 'void') return 'none';
   if (t.solid === false) return 'walk';
   return t.cross === 'swim' && t.layer === 'liquid' ? 'swim' : 'none';
 }
@@ -73,7 +73,7 @@ export function crossingOf(t: Pick<TerrainDef, 'solid' | 'cross' | 'layer'> | un
 /** The physics of a terrain, within the kernel's limits: a number that is not one, or out of range, is the nearest it may be (rule 7). */
 export function terrainPhysics(t: TerrainDef | undefined): TerrainPhysics {
   const cross = crossingOf(t);
-  const air = t?.air !== false;
+  const air = t?.air !== false && t?.layer !== 'void';
   if (cross === 'none') return { cross, pace: 1, fatigue: 1, air };
   if (cross === 'walk') return { cross, pace: within(finite(t?.speed) ? t!.speed! : 1, TERRAIN_LIMITS.walkPace), fatigue: 1, air };
   return {
@@ -149,6 +149,35 @@ export function physicsOf(layer: TerrainDef['layer'], said: PhysicsSaid & { soli
   };
 }
 
+// --- The void (T445, ADR-0233) -------------------------------------------------------------------------------------------------------
+
+/**
+ * The code of the void in a palette: the kernel's, never the Cartographer's (the Genesis refuses it, a manifest cannot say the layer
+ * `void`). Only a world whose nature is the void has it (`voidTerrain`, added by the kernel to its palette); a world of today never does.
+ */
+export const VOID_CODE = '~';
+
+/** The words of the void in the language of the world: no ground, the stars above and below. */
+const VOID_WORDS: Readonly<Record<string, { name: string; description: string }>> = {
+  it: { name: 'vuoto', description: 'nessun suolo: le stelle sopra e sotto' },
+  en: { name: 'void', description: 'no ground: the stars above and below' },
+  fr: { name: 'vide', description: 'aucun sol : les étoiles dessus et dessous' },
+  es: { name: 'vacío', description: 'ningún suelo: las estrellas arriba y abajo' },
+};
+
+/**
+ * The void as a terrain (T445, `docs/design/acqua-spazio.md` § 2.2): the absence of a floor. Not walked, not swum, not crossed by a jump,
+ * never carved by the layout nor a gate, nothing set on it, no air; the renderer draws no ground there (the stars show through) and the
+ * edge of the land beside it is a slab with its thickness. Its physics is fixed: no Physicist and no Lua write it.
+ */
+export function voidTerrain(language = 'it'): TerrainDef {
+  const w = VOID_WORDS[language] ?? VOID_WORDS.it;
+  return { id: 'void', name: w.name, description: w.description, color: '#05060c', solid: true, cross: 'none', layer: 'void', air: false };
+}
+
+/** Whether a terrain is the void (the kernel's, `layer: 'void'`). */
+export const isVoid = (t: Pick<TerrainDef, 'layer'> | undefined): boolean => t?.layer === 'void';
+
 // --- The nature of the world ---------------------------------------------------------------------------------------------------------
 
 /** What the draft makes of the world: land with its seas today; an archipelago (T441), the void with its stations (T445). */
@@ -164,7 +193,11 @@ export type Sky = 'earth' | 'stars';
 export interface WorldNature {
   geography: Geography;
   sky: Sky;
-  /** Seconds of a day of the world (600, `Kernel.DAY_SECONDS`); 0 a light that never changes (T445). It enters the routines and the days of the world. */
+  /**
+   * Seconds of a day of the world (600, `Kernel.DAY_SECONDS`), within `NATURE_ACCEPTS.day`; 0 a light that never changes (T445: the lamps
+   * of a station, a sun standing still over an asteroid). It enters the routines and the days of the world (`clockDay`): under a still
+   * light the clock keeps the earth's day, and the shifts go on.
+   */
   day: number;
   /** The weight of a body against the earth's (1): the jump scales with it (T447). */
   gravity: number;
@@ -176,16 +209,19 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
- * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229, `void` and `stars` and the day T445,
- * the oxygen T446; the gravity 0.2-2 is open since T447).
+ * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229; `void`, `stars` and
+ * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen T446; the gravity 0.2-2 since T447).
  */
 export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
-  geography: ['continent', 'archipelago'],
-  sky: ['earth'],
-  day: [600, 600],
+  geography: ['continent', 'archipelago', 'void'],
+  sky: ['earth', 'stars'],
+  day: [120, 3600],
   gravity: [0.2, 2],
   oxygen: [false],
 };
+
+/** The day of a still light (`nature.day` 0, T445): accepted besides the range of `NATURE_ACCEPTS.day`. */
+export const STILL_DAY = 0;
 
 /** The nature of universe.json (or of a theme), whatever it says: each field within what this kernel accepts, the rest the world of today. */
 export function repairNature(raw: unknown): WorldNature {
@@ -195,11 +231,24 @@ export function repairNature(raw: unknown): WorldNature {
   return {
     geography: one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography),
     sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
-    day: num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
+    day: r.day === STILL_DAY ? STILL_DAY : num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
     gravity: num(r.gravity, NATURE_ACCEPTS.gravity, DEFAULT_NATURE.gravity),
     oxygen: one(r.oxygen, NATURE_ACCEPTS.oxygen, DEFAULT_NATURE.oxygen),
   };
 }
+
+/**
+ * The seconds of a day of the world for its clock (T445): the routines, the shifts, what ripens, the days of a plan (`Kernel.day`). The
+ * nature's day; under a still light (0) the earth's (600), so that the people of a station still sleep and work.
+ */
+export function clockDay(nature: Pick<WorldNature, 'day'> | undefined): number {
+  const d = nature?.day;
+  const [lo, hi] = NATURE_ACCEPTS.day;
+  return finite(d) && d >= lo && d <= hi ? d : DEFAULT_NATURE.day;
+}
+
+/** Whether the light of a world never changes (`nature.day` 0, T445): the light of full day, always. */
+export const stillLight = (nature: Pick<WorldNature, 'day'> | undefined): boolean => nature?.day === STILL_DAY;
 
 /** Whether two natures are the same world. */
 export const sameNature = (a: WorldNature, b: WorldNature): boolean => (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]);

@@ -115,16 +115,18 @@ describe('the palette of a Genesis (T437)', () => {
 describe('the nature of the world (T437)', () => {
   it('is repaired to what this kernel can make true: anything else is the world of today', () => {
     expect(repairNature(undefined)).toEqual(DEFAULT_NATURE);
-    expect(repairNature({ geography: 'void', sky: 'stars', day: 0, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
-    // The archipelago is open since T441.
-    expect(repairNature({ geography: 'archipelago', sky: 'stars' })).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
+    expect(repairNature({ geography: 'moon', sky: 'rainbow', day: 50, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
+    // The archipelago is open since T441; the void, the stars and the day since T445 (the day 0 is a still light).
+    expect(repairNature({ geography: 'archipelago', sky: 'stars' })).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', sky: 'stars' });
+    expect(repairNature({ geography: 'void', sky: 'stars', day: 0 })).toEqual({ ...DEFAULT_NATURE, geography: 'void', sky: 'stars', day: 0 });
+    expect(repairNature({ day: 5000 }).day).toBe(600);
     // The gravity is open since T447: 0.2-2, anything else the earth's.
-    expect(repairNature({ geography: 'void', gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
+    expect(repairNature({ gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
     expect(repairNature({ gravity: 0.1 }).gravity).toBe(1);
     expect(repairNature({ geography: 'continent', day: NaN, gravity: '1' })).toEqual(DEFAULT_NATURE);
     expect(repairNature([1, 2])).toEqual(DEFAULT_NATURE);
-    // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441.
-    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago'], sky: ['earth'], day: [600, 600], gravity: [0.2, 2], oxygen: [false] });
+    // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441, the void, the stars and the day of T445.
+    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
     for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(t.id === 'pirates' ? { ...DEFAULT_NATURE, geography: 'archipelago' } : DEFAULT_NATURE);
   });
