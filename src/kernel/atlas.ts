@@ -37,6 +37,12 @@ export interface Region {
    * the world's. An asteroid, a moon. It changes how a body jumps and walks there, never what is reachable (`leapOf`).
    */
   gravity?: number;
+  /**
+   * The island of an archipelago this region names (T441, ADR-0229): the Cartographer's, written when the first place on it is planned. Its
+   * centre and radius say where the island is on the atlas; its shape is the kernel's (`islands.ts`) and never changes. Not a region of
+   * the places (`regionAt` passes over it): its environment was the first place's, and the island's places choose their own.
+   */
+  island?: string;
 }
 
 export interface Atlas {
@@ -67,13 +73,18 @@ export function regionAt(atlas: Atlas, cx: number, cy: number): Region | undefin
   let best: Region | undefined;
   let bd = Infinity;
   for (const r of atlas.regions) {
-    if (!r || !Array.isArray(r.center)) continue;
+    if (!r || !Array.isArray(r.center) || r.island !== undefined) continue;
     const d = Math.max(Math.abs(cx - r.center[0]), Math.abs(cy - r.center[1]));
     if (d > r.radius) continue;
     const rank = r.master ? d - 1e6 : d;
     if (rank < bd) [best, bd] = [r, rank];
   }
   return best;
+}
+
+/** The region of the atlas that names an island (T441), if the Cartographer has named it. */
+export function islandRegion(atlas: Atlas, island: string): Region | undefined {
+  return atlas.regions.find((r) => r && r.island === island);
 }
 
 /** What a region does to the new places inside it (T375): only a region of the master has a kind, and only a known one. */

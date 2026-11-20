@@ -9,6 +9,7 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { crossingOf, gaitOf, gravityOf, leapOf, repairNature, sameNature, terrainPhysics, type WorldNature } from './nature';
+import { islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, type Island } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
@@ -22,7 +23,7 @@ import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
@@ -985,6 +986,9 @@ export class Kernel {
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
       // A copy each time (T437, ADR-0224): what Lua changes of it is its own, the world's nature stays (rule 1, rule 7).
       nature: () => this.nature(),
+      // The atlas and the islands (T441, ADR-0229): copies, read only.
+      region_at: (x, y) => this.regionInfoAt(x, y),
+      islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
       vehicle: (id) => this.vehicleView(id),
       vehicle_set: (id, thrust, steer, power, anchored, helm) => this.askVehicle(id, { thrust, steer, power, anchored, helm }),
@@ -1898,8 +1902,10 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
       if (!failed) {
+        // In an archipelago (T441, ADR-0229) the kernel's islands decide where the land is: the sea, the shallows and the beach around them.
+        const drawn = typeof value === 'string' && value.length === n && this.config.nature.geography === 'archipelago' ? islandDraft(value, this.config.seed, cx, cy, S) : value;
         // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
-        if (typeof value === 'string' && value.length === n) return [...value].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
+        if (typeof drawn === 'string' && drawn.length === n) return [...drawn].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
         this.faults.raise(`module:${id}:generate_chunk`, `generate_chunk deve restituire una stringa di ${n} caratteri`);
       }
     }
@@ -2164,6 +2170,16 @@ export class Kernel {
       ch.held = true;
       return;
     }
+    // The open sea (T441, ADR-0229): a place whose draft is all deep water one swims has nothing the Council would put there (nothing stands
+    // on the water) and costs nothing: the kernel plans it, without a call, outside the quota and the pace, as a filler (not by the local models over
+    // a world that is not theirs, above: nothing of theirs is saved, T433).
+    if (this.openSea(ch.draft)) {
+      ch.held = false;
+      const plan = { ...this.seaPlan(), strata: this.strataOf(ch) };
+      await this.chunkStore.save(this.recordKey(ch), { plan });
+      if (this.alive(ch)) this.applyPlan(ch, plan);
+      return;
+    }
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!noQuota && !this.chunkQuota()) {
       if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
@@ -2348,14 +2364,62 @@ export class Kernel {
     return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
   }
 
+  /** Whether a draft is all open sea (T441): every tile deep water one swims. */
+  private openSea(draft: string): boolean {
+    if (!draft.length) return false;
+    for (const c of new Set(draft)) {
+      const p = terrainPhysics(this.palette[c]);
+      if (p.cross !== 'swim' || p.depth !== 'deep') return false;
+    }
+    return true;
+  }
+
+  /** The plan of a place of open sea (T441): the sea's name in the language of the world, no environment, nothing in it; the kernel's. */
+  private seaPlan(): ChunkPlan {
+    return { place: { ...OPEN_SEA[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
+  }
+
+  /** The island a place stands on in an archipelago (T441), with its region of the atlas if the Cartographer has named it. */
+  private islandUnder(ch: Pick<Chunk, 'cx' | 'cy'>): { island: Island; region?: Region } | undefined {
+    if (this.config.nature.geography !== 'archipelago') return undefined;
+    const island = islandOfPlace(this.config.seed, ch.cx, ch.cy, this.config.chunkSize);
+    return island && { island, region: islandRegion(this.atlasNow(), island.id) };
+  }
+
+  /**
+   * The Cartographer names an island (T441, ADR-0229) when it plans the first place on it: a region of the atlas that says the island (`island`),
+   * its centre and its reach in places, the environment of that first place; never its shape, which is the kernel's. A name out of the world
+   * (`metaBreak`) or not a line of text is left, and the next place on the island asks again. Once named, an island is never named again.
+   */
+  private nameIsland(island: Island, said: unknown, environment: string): void {
+    const atlas = readAtlas(this.repo.working);
+    if (islandRegion(atlas, island.id) || !said || typeof said !== 'object') return;
+    const s = said as { name?: unknown; description?: unknown };
+    const name = cleanText(s.name, MASTER_REGION_LIMITS.name, 'il nome');
+    const description = s.description === undefined || s.description === '' ? { text: '' } : cleanText(s.description, MASTER_REGION_LIMITS.description, 'la descrizione');
+    const words = wordsOf(this.files);
+    const lang = languageOf(this.files);
+    const out = 'error' in name ? name.error : 'error' in description ? description.error : metaBreak(name.text, words, lang) ?? (description.text ? metaBreak(description.text, words, lang) : undefined);
+    if (out || 'error' in name || 'error' in description) {
+      this.council.say('kernel', 'scarta', `isola ${island.id}: ${out ?? 'nome non valido'}`, 'cartographer', 'chunk.plan');
+      return;
+    }
+    const { center, radius } = islandPlaces(island, this.config.chunkSize);
+    atlas.regions.push({ id: `island-${island.id}`, name: name.text, description: description.text, environment, center, radius, island: island.id });
+    this.repo.write(ATLAS_FILE, writeAtlas(atlas));
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`cartografo: ${island.islet ? 'isolotto' : 'isola'} «${name.text}»`, 'agent');
+    this.council.say('cartographer', 'propone', `${island.islet ? 'isolotto' : 'isola'} «${name.text}» (${center.join(',')})`, undefined, 'chunk.plan');
+  }
+
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
   private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
     const atlas = this.atlasNow();
     const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
     if (region && this.content.layouts[region.environment]) return { layouts: all.filter((l) => l.id === region.environment), region };
-    // The master's regions do not take their environment away from the rest of the world (T375): only the Cartographer's are regional.
-    const regional = new Set(atlas.regions.filter((r) => !r.master).map((r) => r.environment));
+    // The master's regions do not take their environment away from the rest of the world (T375): nor the islands' (T441): only the Cartographer's regions are regional.
+    const regional = new Set(atlas.regions.filter((r) => !r.master && r.island === undefined).map((r) => r.environment));
     const free = all.filter((l) => !regional.has(l.id));
     return { layouts: free.length ? free : all };
   }
@@ -2368,6 +2432,9 @@ export class Kernel {
       .filter((n): n is Chunk => !!n?.place)
       .map((n) => ({ place: n.place!.name, layout: n.plan?.layout ?? '' }));
     const placeable = new Set(this.catalog().map((c) => c.id));
+    // On an island of an archipelago (T441): its name, or the Cartographer names it with the first place on it.
+    const under = this.islandUnder(ch);
+    const island = under && (under.region ? { name: under.region.name, description: under.region.description } : { islet: !!under.island.islet, across: Math.max(1, Math.round((2 * under.island.radius) / this.config.chunkSize)) });
     let feedback = '';
     for (let attempt = 0; attempt < 3 && layouts.length; attempt++) {
       try {
@@ -2375,6 +2442,7 @@ export class Kernel {
           cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { name: region.name, description: region.description } : undefined,
+          ...(island ? { island } : {}),
           rari: this.rareAllowed(ch),
           ...(this.broughtStructures().length ? { brought: this.broughtStructures() } : {}),
           chi: ch.chi,
@@ -2387,6 +2455,7 @@ export class Kernel {
         }
         if (verdict.dropped.length) this.council.say('kernel', 'scarta', `(${ch.key}) ${verdict.dropped[0]}${verdict.dropped.length > 1 ? ` (+${verdict.dropped.length - 1})` : ''}`, 'cartographer', 'chunk.plan');
         const plan = verdict.plan;
+        if (under && !under.region) this.nameIsland(under.island, (raw as { island?: unknown }).island, plan.layout);
         this.council.say('cartographer', 'propone', `(${ch.key}) «${plan.place.name}» — ${this.content.layouts[plan.layout]?.name}: ${plan.objects.length} cose, ${plan.ground.length} a terra, ${plan.runes.length} rune${plan.fresh.length ? `, chiede «${plan.fresh[0].concept}»` : ''}`, undefined, 'chunk.plan');
         return plan;
       } catch (e) {
@@ -8224,6 +8293,39 @@ export class Kernel {
   /** The nature of this world (T437, ADR-0224): what `world.nature()` gives Lua, a copy. */
   nature(): WorldNature {
     return { ...this.config.nature };
+  }
+
+  /**
+   * What `world.region_at(x, y)` gives Lua (T441, ADR-0229): the region of the place of the tile (the Cartographer's or the master's; the first
+   * place is nobody's, a region held is the master's plan and not the world's) and the island under the tile in an archipelago. A copy.
+   */
+  regionInfoAt(x: unknown, y: unknown): { name?: string; description?: string; island?: string } | undefined {
+    if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+    const S = this.config.chunkSize;
+    const cx = Math.floor(x / S), cy = Math.floor(y / S);
+    const r = cx === 0 && cy === 0 ? undefined : regionAt(this.atlasNow(), cx, cy);
+    const region = r && !(r.master && r.kind === 'held') ? r : undefined;
+    const island = this.config.nature.geography === 'archipelago' ? islandAtTile(this.config.seed, x, y) : undefined;
+    if (!region && !island) return undefined;
+    return { ...(region ? { name: region.name, description: region.description } : {}), ...(island ? { island: island.id } : {}) };
+  }
+
+  /**
+   * What `world.islands(x, y, r)` gives Lua (T441): the islands and islets within r tiles of (x, y) (at most `ISLANDS_REACH`), the nearest first,
+   * at most `MAX_ISLANDS_SEEN`, each with the name the Cartographer gave it (none yet: no name). Empty in a world that is not an archipelago.
+   */
+  islandsSeen(x: unknown, y: unknown, r: unknown): Array<{ id: string; name?: string; x: number; y: number; radius: number; islet: boolean }> {
+    if (this.config.nature.geography !== 'archipelago' || typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return [];
+    const reach = typeof r === 'number' && Number.isFinite(r) ? Math.max(0, Math.min(ISLANDS_REACH, r)) : 200;
+    const atlas = this.atlasNow();
+    const round = (v: number) => Math.round(v * 100) / 100;
+    return islandsNear(this.config.seed, x, y, reach)
+      .filter((f) => Math.hypot(f.x - x, f.y - y) <= reach)
+      .slice(0, MAX_ISLANDS_SEEN)
+      .map((f) => {
+        const name = islandRegion(atlas, f.id)?.name;
+        return { id: f.id, ...(name ? { name } : {}), x: round(f.x), y: round(f.y), radius: f.radius, islet: !!f.islet };
+      });
   }
 
   /** The Genesis writes the nature its theme brings (a theme written by hand brings the world of today): the world is born again with it. */

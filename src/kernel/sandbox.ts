@@ -45,6 +45,16 @@ export interface Host {
   /** The nature of the world (T437, ADR-0224): `{geography, sky, day, gravity, oxygen}`, a copy; Lua reads it, never writes it. */
   nature(): unknown;
   /**
+   * The atlas at a tile (T441, ADR-0229): `{name, description, island}`, the region of the place (the Cartographer's or the master's, never one
+   * held) and the id of the island whose land, beach or shallows the tile is, a copy; undefined where there is neither.
+   */
+  region_at(x: number, y: number): unknown;
+  /**
+   * The islands of an archipelago within r tiles of (x, y) (T441): `{id, name, x, y, radius, islet}` each, the nearest first, at most
+   * `MAX_ISLANDS_SEEN`; empty in a world that is not an archipelago. Read only: the islands are the kernel's.
+   */
+  islands(x: number, y: number, r: number): unknown;
+  /**
    * A vehicle now (T439, ADR-0227): `{heading, speed, turn, thrust, steer, power, anchored, helm, bumped, medium, max, aboard}`, a copy, or
    * undefined if `id` is not one. `helm` and `aboard` are the bodies of wanderers.
    */
@@ -401,6 +411,8 @@ function emptyHost(): Host {
     player_set: () => undefined,
     carpet: () => ({ strength: 1, rate: 6, active: true, ox: 0, oy: 0 }),
     nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
+    region_at: () => undefined,
+    islands: () => [],
     vehicle: () => undefined,
     vehicle_set: () => false,
     vehicle_of: () => undefined,

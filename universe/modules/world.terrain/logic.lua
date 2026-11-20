@@ -40,7 +40,7 @@ local function bioma(C, wx, wy, seed)
   return temp, umid, cont
 end
 
-local function tile_at(C, wx, wy, seed)
+local function tile_at(C, wx, wy, seed, islands)
   -- The starting square is always clear.
   if wx > -3 and wx < 3 and wy > -3 and wy < 3 then return "g" end
   local h = fbm(C, wx, wy, seed)
@@ -49,9 +49,11 @@ local function tile_at(C, wx, wy, seed)
   local fiume = math.abs(vnoise(C, wx / 55, wy / 55, seed + 17) - 0.5) < 0.014
   local r = hash(wx, wy, seed + 3)
   local temp, umid, cont = bioma(C, wx, wy, seed)
-  -- Open sea, then the sandy shore.
-  if cont < 0.24 then return "o" end
-  if cont < 0.28 then return h < 0.45 and "w" or "s" end
+  -- Open sea, then the sandy shore. In an archipelago the kernel draws the sea around its islands: inside them, land.
+  if not islands then
+    if cont < 0.24 then return "o" end
+    if cont < 0.28 then return h < 0.45 and "w" or "s" end
+  end
   if h > 0.8 then return "k" end
   if h > 0.73 then return "r" end
   if fiume then return "w" end
@@ -84,9 +86,11 @@ end
 
 function M.generate_chunk(cx, cy, seed, size)
   local out, C = {}, {}
+  local nature = world.nature()
+  local islands = type(nature) == "table" and nature.geography == "archipelago"
   for row = 0, size - 1 do
     for col = 0, size - 1 do
-      out[#out + 1] = tile_at(C, cx * size + col, cy * size + row, seed)
+      out[#out + 1] = tile_at(C, cx * size + col, cy * size + row, seed, islands)
     end
   end
   return table.concat(out)

@@ -125,6 +125,11 @@ export interface PlanContext {
   /** The region of the atlas this place belongs to, if any. */
   region?: { name: string; description: string };
   /**
+   * The island of an archipelago this place stands on (T441, ADR-0229): its name if the Cartographer gave it one, otherwise how large it is,
+   * and the Cartographer names it in `island` with this first place on it.
+   */
+  island?: { name?: string; description?: string; islet?: boolean; across?: number };
+  /**
    * The rare sizes a structure here may still have (ADR-0092): Huge one per zone of the world (about a
    * million tiles), Gargantuan one per realm (4 × 4 zones); the kernel enforces it anyway.
    */
@@ -185,11 +190,17 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
     ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
+    islandLine(ctx.island),
   ]
     .filter(Boolean)
     .join('\n\n');
-  // The environment can only be one of the existing ids: the schema says so.
-  const schema: Schema = { ...PLAN_SCHEMA, properties: { ...PLAN_SCHEMA.properties!, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) } } };
+  // The environment can only be one of the existing ids: the schema says so. An island nobody has named yet is named with it (T441).
+  const unnamed = !!ctx.island && !ctx.island.name;
+  const schema: Schema = {
+    ...PLAN_SCHEMA,
+    properties: { ...PLAN_SCHEMA.properties!, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
+    ...(unnamed ? { required: [...PLAN_SCHEMA.required!, 'island'] } : {}),
+  };
   const raw = await c.ask<any>('cartographer', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
   // `oggetti` of a plan of before T310b are its objects (`internalAnswer` does not port the word: a pack's are items).
   const objects = Array.isArray(raw?.objects) ? raw.objects : Array.isArray(raw?.oggetti) ? raw.oggetti : [];
@@ -201,7 +212,20 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     fresh: (raw?.fresh ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concept ?? ''), where: whereOf(o?.where), ...(typeof o?.takeable === 'boolean' ? { takeable: o.takeable } : {}) })),
     runes: (raw?.runes ?? []).slice(0, 3).map(String),
     structures: (raw?.structures ?? []).slice(0, 3).map(readStructure),
-  };
+    // The island's name as said (T441): the kernel checks it and writes it on the atlas, never in the plan.
+    ...(unnamed && raw?.island ? { island: raw.island } : {}),
+  } as ChunkPlan;
+}
+
+/** The island's name and a line about it, as the Cartographer gives them with the first place on it (T441). */
+const ISLAND_SCHEMA: Schema = { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] };
+
+/** What the Cartographer is told of the island a place stands on (T441): its name, or that it is to be named. */
+function islandLine(island: PlanContext['island']): string {
+  if (!island) return '';
+  if (island.name) return `This place is on the island «${island.name}» (${island.description ?? ''}): its name and what is in it belong to the island; the sea around it is open water.`;
+  const what = island.islet ? 'a cay, a few tiles of sand in the open sea between two far islands' : `an island about ${island.across ?? 1} places across, in the open sea`;
+  return `This place is the first one explored on ${what}, which has no name yet: name it in "island" ("name", short, as the people of the world call it, and "description", one line), in the language of the world.`;
 }
 
 /** The types of an environment (T310b, `tipi-ambiente`), as the Cartographer's schemas list them. */

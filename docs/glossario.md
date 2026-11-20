@@ -179,6 +179,41 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `nuoto` (per il segno), `water` (per il campo)
 - **Fermo**: `swim` nei piani dei luoghi.
 
+### Arcipelago
+- **Inglese**: `archipelago` (`nature.geography`), `islandDraft`
+- **Definizione**: un mondo di isole nel mare aperto, che la natura dice alla Genesi (i Pirati): la terra sta solo dentro le isole del kernel, attorno il mare (T441, ADR-0229).
+- **Dove vive**: `src/kernel/islands.ts`, `src/kernel/nature.ts`, `universe.json → nature`
+- **Da non usare**: `reame` (è delle 4 × 4 zone), `oceano` (per la geografia)
+- **Fermo**: `archipelago` in `nature.geography`.
+
+### Isola
+- **Inglese**: `Island`, `islandOf`, `islandsNear`, `islandOfPlace`, `shoreAt`, `Region.island`, `islandRegion`
+- **Definizione**: una terra di un arcipelago, una per cella di 10 luoghi, decisa dal solo seme e ferma; la sua riva è una spiaggia che si cammina, un approdo. Il Cartografo le dà il nome col primo luogo che vi pianifica (una regione dell'atlante con `island`, che non è una regione dei luoghi) (T441, ADR-0229).
+- **Dove vive**: `src/kernel/islands.ts`, `src/kernel/atlas.ts`, `world/atlas.json`
+- **Da non usare**: `continente` (per un'isola), `regione` (per l'isola: la regione la nomina soltanto)
+- **Fermo**: `island` nelle regioni dell'atlante; l'id `i,j` della cella.
+
+### Isolotto
+- **Inglese**: `islet`, `isletBetween`, `ISLET_RADIUS`
+- **Definizione**: la lingua di sabbia che il kernel mette a metà dell'acqua fra due isole vicine quando sarebbe più lunga dello stretto più lungo: un riposo dall'acqua, non dalla fatica (T441, ADR-0229).
+- **Dove vive**: `src/kernel/islands.ts`
+- **Da non usare**: `scoglio` (è roccia, non si cammina), `secca` (è sotto il pelo dell'acqua, P6)
+- **Fermo**: l'id `i,j~k,l` delle due isole.
+
+### Stretto
+- **Inglese**: `MAX_STRAIT`, `routeGap`, `straitCost`
+- **Definizione**: l'acqua fra due rive di un arcipelago; il più lungo che un viandante deve nuotare è di 144 caselle, 8 luoghi, misurato sul corpo che nuota (T441, ADR-0229).
+- **Dove vive**: `src/kernel/islands.ts`
+- **Da non usare**: `canale` (è un'opera), `distanza` (per lo stretto: è l'acqua fra le rive, non fra i centri)
+- **Fermo**: —
+
+### Mare aperto
+- **Inglese**: `openSea`, `seaPlan`, `OPEN_SEA`
+- **Definizione**: un luogo la cui bozza è tutta acqua profonda che si nuota: lo pianifica il kernel, senza chiamate, in ogni mondo (T441, ADR-0229).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/islands.ts`
+- **Da non usare**: `oceano`, `acqua aperta`
+- **Fermo**: —
+
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
 - **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina (le capsule col vuoto, T445). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
