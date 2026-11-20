@@ -168,3 +168,19 @@ capannone dei telai a vapore (un errore della CLI durante la notte, il direttore
 torre della Banca del Golfo; i luoghi oltre la spirale 5 × 5 che erano dei modelli locali sono tolti e non ripianificati
 (il Cartografo li pianifica quando qualcuno ci arriva). neapolis è ora del kernel 0.10.2 (lo ha aperto un kernel di `3d`
 durante il lavoro), orichalcum e sidera del 0.10.1: lo stesso contratto.
+
+## Senza merli né feritoie (T455)
+
+Fatte le proposte C (con T434, il prompt) e G (D66.2 B1), il 20/11/2026: su ciascun repository un tag `prima-di-t455`, poi
+`npm run genera -- <nome> --rigenera modelli --giro t455 --tetto 15 --tipi …` sulla coda degli abbonamenti (Opus 5.5 a sforzo `low`).
+Riscolpite e arredate a 16 voxel per casella le strutture civili che portavano `part-battlements` o `part-slits` (orichalcum 6, neapolis 4,
+sidera 7; l'elenco lo dà `lab/scripts/merli-civili.ts`) e cinque delle sei che non erano passate in T411 (l'osservatorio a vapore, la
+taverna delle caldaie, l'osservatorio civico, il bar orbitale, la lounge criogenica); la taverna della Caldaia di orichalcum non passa
+neanche ora (cantina, poi 9,5 caselle² di pavimento coperto) e resta col programma di prima, senza merli. Fatte anche le due strutture
+che T454 aveva lasciato (il capannone dei telai a vapore di orichalcum, la torre della Banca del Golfo di neapolis). Voti dell'Artista
+3-6 (mediana 5); 173 chiamate, almeno 27,35 $ al listino. Nessuna struttura civile coi merli nei tre universi, 25 piani e 0 guasti in
+ognuno, nessuna struttura a 20. I dettagli, il costo per universo e le foto nel browser: `lab/banco/rigenerazione/README.md`, «Senza
+merli né feritoie».
+
+Resta, per una proposta come F: in orichalcum la Piazza della Pesa (0,0) e il Quartiere dei Mattoni (2,1) nominano due strutture e
+hanno un lotto solo (la taverna della Caldaia e la cattedrale degli Ingranaggi non compaiono).
