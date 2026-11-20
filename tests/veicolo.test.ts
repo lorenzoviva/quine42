@@ -22,11 +22,11 @@ describe('the vehicle, as data (T439)', () => {
   it('reads a manifest within the kernel limits, and the validator says what is wrong', () => {
     expect(vehicleSpecOf({ medium: 'water' })).toEqual({ medium: 'water', speed: 3, accel: 1.5, turn: 0.8, draught: 'shallow' });
     expect(vehicleSpecOf({ medium: 'land', speed: 99, accel: -1, turn: Number.NaN })).toEqual({ medium: 'land', speed: VEHICLE_LIMITS.speed[1], accel: VEHICLE_LIMITS.accel[0], turn: 0.8, draught: 'shallow' });
-    // What the kernel cannot do is not said: the void is not a terrain yet (T445).
-    expect(vehicleSpecOf({ medium: 'void' })).toBeUndefined();
+    // What the kernel cannot do is not said: a medium it does not know (the void is one since T448, `tests/capsula.test.ts`).
+    expect(vehicleSpecOf({ medium: 'air' })).toBeUndefined();
     expect(vehicleSpecOf('water')).toBeUndefined();
     expect(vehicleSpecErrors({ medium: 'water', speed: 3, draught: 'deep' })).toEqual([]);
-    expect(vehicleSpecErrors({ medium: 'void' })).toHaveLength(1);
+    expect(vehicleSpecErrors({ medium: 'air' })).toHaveLength(1);
     expect(vehicleSpecErrors({ medium: 'water', speed: 20 })).toHaveLength(1);
     expect(vehicleSpecErrors({ medium: 'land', draught: 'deep' })).toHaveLength(1);
     expect(vehicleSpecErrors([])).toHaveLength(1);
@@ -307,5 +307,32 @@ describe('the vehicle in the kernel (T439)', () => {
     expect(without.ecs.query('vehicle')).toHaveLength(0);
     without.saveState();
     expect(JSON.parse(without.repo.working['world/state.json']).vehicles).toHaveLength(1);
+  }, 60_000);
+
+  it('climbs aboard from the water beside it (T448): «Sali a bordo» in its menu, to its deck; nothing from too far', async () => {
+    const { k, boat, x0, y0, said } = await harbour();
+    const put = (x: number, y: number) => {
+      const { ox, oy } = k.offset();
+      const p = k.wandererPos();
+      delete p.z;
+      Object.assign(p, { x: x - ox, y: y - oy });
+      k.tick(1 / 60);
+    };
+    // Swimming beside the hull, a tile and a half from its middle line.
+    put(x0 + 6.5, y0 + 2.5);
+    expect(k.aboard()).toBeUndefined();
+    expect(k.swimming()).toBe(true);
+    expect(k.actionsFor(boat).find((o) => o.id === 'board')?.label).toBe('Sali a bordo');
+    await k.perform(boat, 'board');
+    expect(k.aboard()).toBe(boat);
+    expect(k.swimming()).toBe(false);
+    expect(said).toContain('Sali a bordo.');
+    // Aboard, the menu does not offer it again.
+    expect(k.actionsFor(boat).map((o) => o.id)).not.toContain('board');
+    // From the far end of the pool: too far.
+    put(x0 + 11.5, y0 + 7.5);
+    expect(k.aboard()).toBeUndefined();
+    expect(k.actionsFor(boat).map((o) => o.id)).not.toContain('board');
+    expect(k.boardDeck(boat)).toBe(false);
   }, 60_000);
 });

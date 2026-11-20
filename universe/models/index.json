@@ -142,6 +142,11 @@
   "name": "Barca a vela",
   "author": "a mano (Claude Code, T440)"
  },
+ "capsule": {
+  "class": "vessel",
+  "name": "Capsula",
+  "author": "a mano (Claude Code, T448)"
+ },
  "fattoria": {
   "class": "structure",
   "name": "Fattoria",

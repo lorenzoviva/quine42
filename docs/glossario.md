@@ -195,7 +195,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Vuoto
 - **Inglese**: `void` (`nature.geography`, lo strato del terreno), `VOID_CODE` (`~`), `voidTerrain`, `isVoid`, `voidDraft`, `voidGates`, `OPEN_VOID`
-- **Definizione**: l'assenza del pavimento, in un mondo che la natura dice del vuoto: una casella che non si cammina, non si nuota e non si salta, senz'aria, dove niente si posa e che il layout non scava; a schermo non ha suolo e ci si vedono le stelle. È un terreno del kernel, non di un manifest; fra due terre del vuoto si va solo con la capsula (T448) (T445, ADR-0233).
+- **Definizione**: l'assenza del pavimento, in un mondo che la natura dice del vuoto: una casella che non si cammina, non si nuota e non si salta, senz'aria, dove niente si posa e che il layout non scava; a schermo non ha suolo e ci si vedono le stelle. È un terreno del kernel, non di un manifest; fra due terre del vuoto si va solo con la capsula (T445, ADR-0233; T448, ADR-0234).
 - **Dove vive**: `src/kernel/nature.ts`, `src/kernel/islands.ts`, `src/kernel/layout.ts`, `src/render/terrain.ts`
 - **Da non usare**: `spazio` (per la casella: lo spazio è l'ambientazione), `abisso`, `baratro` (si cade: nel vuoto non si cade, ci si ferma al bordo); il «vuoto» del codice `?` è la casella che manca, un'altra cosa
 - **Fermo**: `void` in `nature.geography`, il codice `~` e lo strato `void`.
@@ -272,10 +272,24 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
-- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina (le capsule col vuoto, T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
+- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina, una capsula sul vuoto (T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
 - **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`, `world/state.json → vehicles`
 - **Da non usare**: `mezzo`, `nave` e `barca` (per la primitiva: sono ciò che il Concilio ne fa), `cavalcatura`
-- **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`.
+- **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`/`void`, l'azione `board` («Sali a bordo», T448).
+
+### Capsula
+- **Inglese**: `CAPSULE` (`vehicle.capsule`), `CAPSULE_TILES`, `dockCapsules`, `idleCapsule`
+- **Definizione**: il veicolo del vuoto del seme: uno scafo senza tetto di 2,5 × 4 caselle, il portello a poppa e i comandi a prua, che il kernel mette all'approdo di ogni terra del vuoto quando il suo luogo entra nel mondo; lasciata ferma e vuota torna al suo approdo. Fra due terre del vuoto si va solo con lei (regola 10) (T448, ADR-0234).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/islands.ts`, `universe/modules/vehicle.capsule`, `universe/models/capsule.xml`
+- **Da non usare**: `astronave` (per la capsula del seme: un'astronave è ciò che il Concilio farà di un veicolo del vuoto), `navetta`, `shuttle`, `modulo` (è un'altra cosa)
+- **Fermo**: l'id del modulo `vehicle.capsule`, il modello `capsule`, le origini `dock:<terra>`.
+
+### Approdo
+- **Inglese**: `Dock`, `dockOf`, `DOCK_OVERLAP`, `DOCK_NEAR`, `docksOf`, `dockApron`
+- **Definizione**: dove una terra si lascia. Nell'arcipelago ogni riva che si cammina (T441); nel vuoto il punto del bordo di ogni stazione o asteroide, deciso dal seme, dove la capsula aspetta con la poppa contro il bordo, e la terra al portello, che il layout tiene raggiunta dai varchi (T448, ADR-0234).
+- **Dove vive**: `src/kernel/islands.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `hangar` (per l'approdo: l'hangar della stazione è un ambiente, T450), `molo` (nel vuoto), `porto` (nel vuoto), `attracco`
+- **Fermo**: `land` dell'approdo, l'origine `dock:<terra>` delle capsule.
 
 ### Nave
 - **Inglese**: `vessel`, `VESSEL_TILES`, `VESSEL_VPT`, `isVessel`, `measureVessel`, `vesselErrors`, `VESSEL_LEAST`, `mockVesselProgram`

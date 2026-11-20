@@ -71,7 +71,7 @@ describe('the sky and the day of the nature (T445)', () => {
     expect(stillLight(DEFAULT_NATURE)).toBe(false);
   });
 
-  it('no theme brings the void yet (T448 brings the capsule that joins its lands, rule 10), nor the stars to a world with air', () => {
+  it('no theme brings the void yet (T448 brought the capsule that joins its lands, rule 10; the space of the Council, its terrains and its places, is T450), nor the stars to a world with air', () => {
     for (const t of WORLD_THEMES) {
       const n = repairNature(t.nature);
       expect(n.geography, t.id).not.toBe('void');

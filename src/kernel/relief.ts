@@ -11,6 +11,9 @@
 // (AGENTS.md rule 10: what looks impassable is; a hill does not look it).
 //
 // Deterministic from the universe's seed and the coordinates; the same in Node and in the browser.
+//
+// A world of the void is flat (T448, ADR-0234: `flatRelief`): its stations are built, its asteroids lie in the void at the height of the
+// stations, and a capsule docked at the edge of any land has its deck a step over it.
 
 import { compileMjx } from '../mj/model';
 import { runMjx } from '../mj/run';
@@ -28,6 +31,11 @@ export const HILLS = `<sequence values="BA">
     <rule in="A" out="B" sum="10..18" values="B"/>
   </convolution>
 </sequence>`;
+
+/** The relief of a world with none (T448): every tile at the level 0, the sea too. */
+export function flatRelief(): Relief {
+  return new Relief(0, null);
+}
 
 /** Height of a level, in tiles. */
 export const LEVEL = 0.25;
@@ -87,8 +95,14 @@ export class Relief {
   /** Levels above the lowest point of the world (0 = the lowest). */
   readonly max: number;
 
-  constructor(seed: number, xml = HILLS) {
-    this.tiles = SIDES.map((n, i) => runTile(xml, n, hash32(seed, 4242, i)));
+  /** `xml` null: no hills, the flat relief (`flatRelief`). */
+  constructor(seed: number, xml: string | null = HILLS) {
+    this.tiles = xml === null ? [] : SIDES.map((n, i) => runTile(xml, n, hash32(seed, 4242, i)));
+    if (!this.tiles.length) {
+      this.max = 0;
+      this.seaLevel = 0;
+      return;
+    }
     const lo = this.tiles.map((t) => Math.min(...t.h));
     const hi = this.tiles.map((t) => Math.max(...t.h));
     this.base = lo[0] + lo[1];

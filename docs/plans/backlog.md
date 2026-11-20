@@ -6091,12 +6091,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T453`; poi l'orchestratore integra T453 e `integra T447` toglie worktree e branch di T447. Sicurezza: nessuna superficie nuova oltre a quella di T447.
 - Esito: T447 fuso con T438: nel kernel il nuoto e la fatica di T438 con il salto alla gravità della regione di T447 (dentro e fuori dall'acqua con `leapOf`, il passo a nuoto con `gaitOf`, ciò che si raggiunge verificato con la terra); ADR-0226 con la riga sul nuoto; kernel 0.10.2 in version.ts, package.json e seme; AGENTS.md e i dettagli con le righe di entrambi; `tests/gravity.test.ts` adeguato al salto nel fiume con gravità 1 e 2, più il caso dall'acqua oltre la riva con gravità 0,4; suite (3625) e typecheck verdi; non provato in multigiocatore; sicurezza: nessuna superficie nuova oltre a quella di T447.
 
-### T448 · S4 · Le astronavi e le capsule — `da fare` (dipende da T442, T445)
+### T448 · S4 · Le astronavi e le capsule — `fatto` (`19bd6ad9`) (dipende da T442, T445)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 6
 - Step: 37
 - Contesto e cosa fare: § 2.2 e § 2.6 dello studio, sul veicolo di T439/T442.
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T448`; suite e typecheck verdi.
+- Esito: le astronavi e le capsule (ADR-0234, kernel 0.10.10): `medium: void` (lo scafo solo sul vuoto); l'approdo di ogni terra del vuoto dal seme (`dockOf`, la poppa sul bordo, la terra al portello camminata e raggiunta dai varchi); la capsula del seme (`vehicle.capsule`, `models/capsule.xml`) messa dal kernel quando il luogo dell'approdo entra nel mondo (`dockCapsules`), quella lasciata ferma e vuota non salvata e rimessa all'approdo; il mondo del vuoto piano (`flatRelief`); il piede sul ponte entro un gradino (`DECK_STEP`); «Sali a bordo», «Sali», «Entra» dal menu di ogni veicolo (`boardDeck`, anche da un client: `canBoard` nella portata del server, V-046 aggiornata con la prova); i moduli `vehicle.` nel Laboratorio delle Cose della corona; test `tests/capsula.test.ts` più veicolo, veicolo-molti, sicurezza; fixture del motore con le due voci della capsula; non provato: Gemini, capsule in molti, rete vera; resta: nessuna ambientazione porta il vuoto (T450), l'aria del ponte (T446), l'hangar e i pianeti (T449), un'astronave dello Scultore; gli asteroidi ora sono piatti.
 
 ### T449 · S5 · I pianeti a definizione variabile e il viaggio — `da fare` (dipende da T448)
 - Pipeline: claude · sforzo extra · stima 9% · approvato · browser · priorità 6

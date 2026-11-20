@@ -238,4 +238,19 @@ describe('the vehicle in a game of many (T442)', () => {
     bruno.k.input.setHeld('left', false);
     expect(mine(bruno)[1]).toBeLessThan(from[1] - 0.1);
   }, 90_000);
+
+  it('aboard from a client (T448): «Sali a bordo» in the mirror beside the hull, done by the server, the client told at once', async () => {
+    const { k, server, carla, all, x0, y0, put, deckOf } = await fleet();
+    put('carla', x0 + 6.5, y0 + 2.5);
+    run(server, all, 8);
+    expect(deckOf('carla')).toBeUndefined();
+    expect(carla.k.actionsFor(boatIn(carla)).map((o) => o.id)).toContain('board');
+    await ask(server, all, carla.k.perform(boatIn(carla), 'board') as Promise<void>);
+    run(server, all, 6);
+    expect(deckOf('carla')).toBeDefined();
+    expect(carla.k.aboard()).toBe(boatIn(carla));
+    const there = k.wandererAt('carla')!;
+    const mirror = carla.k.wandererCarpet();
+    expect(Math.hypot(mirror.x - there.x, mirror.y - there.y)).toBeLessThan(0.3);
+  }, 90_000);
 });

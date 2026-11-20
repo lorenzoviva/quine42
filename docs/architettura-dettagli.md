@@ -1345,18 +1345,20 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (120 caselle, 4 × 4) che scorre con il tappeto e la camera al 40 % (`FIELD_PARALLAX`), `fog: false`, mai con la corona; `terrain.ts` non
   disegna le caselle del vuoto e dà alla terra accanto un fianco di `VOID_SLAB` (0,9) più scuro. **Il giorno** (`nature.day`, 120-3600 o 0):
   `Kernel.daySeconds()` (`clockDay`) per `day()`, la fase delle routine (`dayPhase`) e il suono; `daylight()` con la luce ferma (`STILL_DAY`,
-  `stillLight`) è 1 e l'orologio tiene i 600 secondi della terra. **Nessuna ambientazione porta il vuoto** finché T448 non mette la capsula a
-  ogni approdo (regola 10); lo Spazio della Genesi resta la colonia con il cielo della terra. `tests/vuoto.test.ts`.
+  `stillLight`) è 1 e l'orologio tiene i 600 secondi della terra. **Nessuna ambientazione porta il vuoto** ancora: la capsula a ogni approdo
+  c'è (T448, `#veicoli`), i terreni e gli ambienti dello spazio sono di T450; lo Spazio della Genesi resta la colonia con il cielo della terra.
+  **Il mondo del vuoto è piano** (T448, ADR-0234: `flatRelief`, il rilievo dove ogni casella è al livello 0): una capsula agganciata a ogni bordo
+  ha il ponte un gradino sopra la terra. `tests/vuoto.test.ts`.
 
 <a id="veicoli"></a>
 ## Il veicolo
 
-- **Una primitiva, non una barca** (ADR-0227, T439, kernel 0.10.3): un'entità il cui manifest dice `vehicle` (`medium` `water` o `land`,
-  `speed`, `accel`, `turn`, `draught`) porta chi sta sul suo ponte; il Concilio ne fa barche e carri (le capsule col vuoto, T445). Le funzioni
+- **Una primitiva, non una barca** (ADR-0227, T439, kernel 0.10.3): un'entità il cui manifest dice `vehicle` (`medium` `water`, `land` o `void`,
+  `speed`, `accel`, `turn`, `draught`) porta chi sta sul suo ponte; il Concilio ne fa barche e carri, il kernel le capsule del vuoto (T448). Le funzioni
   pure in `src/kernel/vehicle.ts`: `vehicleSpecOf` legge il manifest entro `VEHICLE_LIMITS` (velocità 0,5-8 caselle al secondo,
-  accelerazione 0,2-4, giro 0,2-2 rad/s; `void` non si accetta finché non c'è il vuoto), `vehicleSpecErrors` è ciò che il validatore rifiuta
+  accelerazione 0,2-4, giro 0,2-2 rad/s; `void` da T448), `vehicleSpecErrors` è ciò che il validatore rifiuta
   (anche un veicolo che è qualcuno o si prende), `carries` dice se una casella regge lo scafo (l'acqua che si nuota, solo quella profonda per un
-  `draught: deep`; ciò che si cammina per un carro). Lo stato è il componente `vehicle` (`heading` = lo `yaw` della forma, `speed`, `turn`,
+  `draught: deep`; ciò che si cammina per un carro; il vuoto solo, per una capsula). Lo stato è il componente `vehicle` (`heading` = lo `yaw` della forma, `speed`, `turn`,
   `thrust`, `steer`, `power`, `anchored`, `helm`, `bumped`), scritto solo dal kernel e riparato a ogni lettura (`saneVehicle`).
 - **Il ponte** (`Kernel.deckAt`): i pavimenti della forma del veicolo (le `decks`, rifatte con i solidi in `rebuildSolids`) alla quota dei piedi,
   o, finché la forma non c'è o se il veicolo non è solido, il disco del suo corpo. **La linea di galleggiamento** è `waterline="N"` sulla radice
@@ -1427,6 +1429,25 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   subito). **Sul ponte si cammina**: `world.speed_at` e il credito del server sopra l'acqua coperta da un ponte (`onAnyDeck`, `aboard`) danno il
   passo di chi cammina. V-046. `tests/veicolo.test.ts`, `tests/veicolo-molti.test.ts` (con `tests/fleet.ts`), `tests/sicurezza/veicolo.test.ts`,
   `tests/sicurezza/veicolo-molti.test.ts`, `tests/espressivita/scenari.test.ts` (la barca).
+- **Salire a bordo dal menu** (ADR-0234, T448, kernel 0.10.10): accanto a un veicolo e su nessun ponte, il suo menu offre `board` («Sali a
+  bordo», «Sali» su un carro, «Entra» in una capsula; `vehicleActions`, anche nello specchio, che manda la scelta al server): `boardDeck` mette il
+  corpo sul posto libero del ponte più vicino, prima l'area `boarding` (`boardingSpot`), entro `BOARD_REACH` (2,5 caselle), e lo dice al client
+  come una spinta (`wanderer:pushed`); dall'acqua accanto allo scafo, dalla testa del molo; il server lo prende anche quando il mezzo del veicolo
+  è oltre la sua portata (`outOfReach` con `canBoard`). **Il piede sul ponte**: dove la casella sotto un piede
+  non porta il corpo, il ponte lo porta se sta entro un gradino dai piedi (`DECK_STEP` in `bodyFree` e `freeReal`; `deckAt` con la sua tolleranza).
+- **Le capsule del vuoto** (ADR-0234, T448). Uno scafo `medium: void` sta solo sul vuoto (`carries`: `isVoid`), il bordo di una terra lo
+  ferma («La capsula urta e si ferma.»); le parole sono quelle dei comandi e dei motori (`VEHICLE_WORDS.void`: «Prendi i comandi», «Spegni i
+  motori», «Esci», «Entra»); «Esci» nel vuoto solo verso una terra entro `LEAVE_REACH`. **L'approdo** di ogni terra (`dockOf` in
+  `src/kernel/islands.ts`, una funzione del seme e della terra, in cache per terra nel kernel): sull'asse verso la più vicina delle quattro
+  vicine del reticolo, dove la terra finisce sulla riga (o la colonna) del centro, la capsula (`CAPSULE_TILES` 2,5 × 4) oltre il bordo con la
+  prua lontano dalla terra e la poppa sopra il bordo di `DOCK_OVERLAP` (1/64), spostata fuori di una casella finché una casella sotto di lei è
+  terra; `Dock.land`, la terra al portello, nell'`apron` del layout del suo luogo (`dockApron`, con quello del blocco: camminata e raggiunta
+  dai varchi). **La capsula del seme**: `vehicle.capsule` (`CAPSULE`), `universe/models/capsule.xml` (classe `vessel`, la scatola nel
+  programma 40 × 64 × 32 a 16; il ponte di un voxel, le pareti, senza tetto, l'arco sopra la testa, i comandi `helm` a prua, il portello
+  `boarding` a poppa, i motori `glow`). **Il kernel la mette** in `applyPlan` (`dockCapsules`, mai in uno specchio) per ogni approdo il cui
+  mezzo sta nel luogo, se nessun veicolo è entro `DOCK_NEAR` (2,5); origine `dock:<terra>` (o `dock:<terra>/<n>`), il verso dell'approdo,
+  `vehicle:docked` sul bus; oltre `MAX_VEHICLES` il guasto `kernel:capsule`. **La capsula lasciata** (`idleCapsule`: motori spenti, nessuno ai
+  comandi né a bordo) non si salva e lascia il mondo con il luogo in cui sta (`unloadChunk`): il luogo dell'approdo ne rimette una. `tests/capsula.test.ts`.
 
 <a id="rilievo"></a>
 ## Il rilievo

@@ -964,6 +964,8 @@ export class SessionServer {
     const at = k.wandererAt(c.id)!;
     // The vehicle one stands on (T442) is at hand from all its deck: its middle may be farther than a step (a galleon).
     if (k.ecs.has(id, 'vehicle') && k.carriedOn(at.entity)?.vehicle === id) return undefined;
+    // Beside its deck (T448), whose place one climbs to is within `BOARD_REACH`: its middle may be farther (the stern of a galleon).
+    if (k.ecs.has(id, 'vehicle') && k.as(c.id, () => k.canBoard(id))) return undefined;
     return Math.hypot(p.x - at.x, p.y - at.y) > this.reach ? 'è troppo lontano' : undefined;
   }
 

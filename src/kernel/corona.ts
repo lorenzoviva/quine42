@@ -386,7 +386,8 @@ export function folderOf(path: string): string {
     if (p === 'sys' || p === 'mech') return 'sistemi';
     if (p === 'world') return 'luoghi';
     if (p === 'items' || p === 'item') return 'oggetti';
-    if (p === 'obj' || p === 'object') return 'cose';
+    // The vehicles (T448: the capsule of the seed) are things of the world too.
+    if (p === 'obj' || p === 'object' || p === 'vehicle') return 'cose';
     // The programs of the trades (T245b) are of the people: the Narrator writes them.
     if (p === 'npc' || p === 'job' || p === 'lavoro') return 'persone';
     if (p === 'runes' || p === 'magic') return 'magia';

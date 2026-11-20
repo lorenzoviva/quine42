@@ -1,0 +1,30 @@
+{
+  "id": "vehicle.capsule",
+  "name": "Capsula",
+  "kind": "entity",
+  "version": "0.1.0",
+  "origin": "esempio",
+  "description": "Una capsula a due posti, ferma all'approdo con il portello contro il bordo.",
+  "tags": [
+    "capsula",
+    "veicolo"
+  ],
+  "context": "gli approdi delle stazioni e degli asteroidi",
+  "appearance": {
+    "model": "capsule",
+    "class": "vessel",
+    "glyph": "◘",
+    "color": "#d8dde4",
+    "look": "uno scafo bianco senza tetto, un oblò azzurro a prua, due motori arancioni a poppa"
+  },
+  "physics": {
+    "solid": true,
+    "radius": 0.5
+  },
+  "vehicle": {
+    "medium": "void",
+    "speed": 6,
+    "accel": 2,
+    "turn": 1.2
+  }
+}

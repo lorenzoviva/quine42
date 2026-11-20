@@ -122,6 +122,28 @@ describe('V-046 · the vehicle in a game of many', () => {
     expect(far(k, 'carla', at.x, at.y)).toBeLessThan(0.01);
   }, 90_000);
 
+  it('V-046 aboard from a client (T448): only beside the deck, onto it where a body stands, never from afar nor from another deck', async () => {
+    const { k, server, anna, carla, all, boat, x0, y0, put } = await fleet();
+    // From the shore, farther than `BOARD_REACH` from its deck: refused, nobody moves.
+    const at = { ...k.wandererAt('carla')! };
+    const far1 = await ask(server, all, carla.session.act({ t: 'action', entity: boat, action: 'board' }));
+    expect(far1.ok).toBe(false);
+    expect(far(k, 'carla', at.x, at.y)).toBeLessThan(0.01);
+    expect(k.as('carla', () => k.boardDeck(boat))).toBe(false);
+    // Anna, already on its deck, does not climb aboard again: she stays where she is.
+    const on = { ...k.wandererAt('anna')! };
+    await ask(server, all, anna.session.act({ t: 'action', entity: boat, action: 'board' }));
+    expect(far(k, 'anna', on.x, on.y)).toBeLessThan(0.01);
+    // Beside the hull, in the water: onto its deck, at most `BOARD_REACH` and a body away.
+    put('carla', x0 + 6.5, y0 + 2.5);
+    run(server, all, 4);
+    const from = { ...k.wandererAt('carla')! };
+    const ok = await ask(server, all, carla.session.act({ t: 'action', entity: boat, action: 'board' }));
+    expect(ok.ok).toBe(true);
+    expect(k.carriedOn(k.wandererAt('carla')!.entity)?.vehicle).toBe(boat);
+    expect(far(k, 'carla', from.x, from.y)).toBeLessThan(2.5 + 0.3);
+  }, 90_000);
+
   it('V-046 what leaves of a vehicle is a list: its way and its helm, the manifest of what it moves on; never what is asked of it', async () => {
     const { k, server, anna, bruno, all, boat } = await fleet();
     await ask(server, all, anna.k.perform(boatIn(anna), 'helm') as Promise<void>);

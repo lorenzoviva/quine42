@@ -1,0 +1,36 @@
+<!-- Capsule, the vehicle of the void of the seed (T448, ADR-0234): what the kernel puts at the landing of every land of the void, docked
+     with its stern against the edge. 2.5 × 4 tiles, two high, at 16 voxels a tile; the stern (low y) has the hatch, the bow (high y) the
+     controls and the window. No roof: from above one sees who is aboard; a hoop over the middle, above the head of whoever walks the deck.
+     A box of an even side has its middle on a half voxel. -->
+<sequence values="BDWGTKELH" size="40 64 32">
+  <!-- The deck, one voxel: the floor one walks on, a step over the land it docks at. -->
+  <box at="19.5 31.5 0" size="40 64 1" color="D"/>
+  <!-- The hull: walls two voxels thick, under the shoulder of a body; the bow cut at its corners. -->
+  <box at="19.5 31.5 1" size="40 64 13" color="W"/>
+  <box at="19.5 31.5 1" size="36 60 13" color="B"/>
+  <box at="0.5 62.5 0" size="2 2 14" color="B"/>
+  <box at="38.5 62.5 0" size="2 2 14" color="B"/>
+  <!-- A band of colour along the top of the walls. -->
+  <box at="19.5 31.5 13" size="40 64 1" color="L" on="W"/>
+  <!-- The window at the bow, the controls before it. -->
+  <box at="19.5 62 6" size="28 3 6" color="K" on="W"/>
+  <box at="19.5 56 1" size="14 3 9" color="T"/>
+  <!-- The hatch at the stern: the wall open a tile wide, its threshold where one boards. -->
+  <box at="19.5 0.5 1" size="16 2 13" color="B"/>
+  <box at="19.5 3 0" size="16 7 1" color="G"/>
+  <!-- The engines at the stern corners, glowing. -->
+  <box at="4 0.5 3" size="5 2 7" color="E"/>
+  <box at="35 0.5 3" size="5 2 7" color="E"/>
+  <!-- The hoop over the middle, above the head. -->
+  <box at="0.5 31.5 14" size="2 2 13" color="H"/>
+  <box at="38.5 31.5 14" size="2 2 13" color="H"/>
+  <box at="19.5 31.5 27" size="40 2 2" color="H"/>
+  <color symbol="D" value="6e7681" name="pavimento"/>
+  <color symbol="W" value="d8dde4" name="scafo"/>
+  <color symbol="L" value="3d7bd9" name="fascia"/>
+  <color symbol="G" value="f2b134" name="portello" area="boarding"/>
+  <color symbol="T" value="39424e" name="comandi" area="helm"/>
+  <color symbol="K" value="8fd3ff" glow="True" name="oblò"/>
+  <color symbol="E" value="ff7a3d" glow="True" name="motore"/>
+  <color symbol="H" value="9aa3ad" name="arco"/>
+</sequence>

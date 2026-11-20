@@ -2,18 +2,18 @@
 // medium floats or rolls on (`water`: the water one swims, `land`: the ground one walks), within the kernel's limits: who stands on its
 // deck (a floor of its form, or the disc of its body while it has none) goes and turns with it; who holds its helm steers it with the keys
 // that walk (up and down push, left and right turn the bow), and does not walk; the anchor (the brake, on land) holds it; the shore and
-// what is solid stop it, never break it. The Council makes boats, carts and, one day, capsules of it (the void opens with T445):
-// Lua reads it (`world.vehicle`), gives it power and a course (`world.vehicle_set`), never a place.
+// what is solid stop it, never break it. The Council makes boats, carts and capsules of it (the void, T448, ADR-0234: a capsule at the
+// landing of every land of the void, which the kernel puts there, `islands.ts → dockOf`): Lua reads it (`world.vehicle`), gives it power and a course (`world.vehicle_set`), never a place.
 // Pure functions here: the limits, the manifest read without trusting it, the state kept sane, the step, the hull's points, the save.
 
 import { toLocal } from './forms';
-import { crossingOf, terrainPhysics } from './nature';
+import { crossingOf, isVoid, terrainPhysics } from './nature';
 import type { TerrainDef } from './types';
 
 // --- What a manifest says ----------------------------------------------------------------------------------------------------------
 
-/** What a hull moves on: the water one swims, the ground one walks. The void is not yet a terrain (T445): what the kernel cannot do is not said. */
-export const VEHICLE_MEDIA = ['water', 'land'] as const;
+/** What a hull moves on: the water one swims, the ground one walks, the void between the lands of a world of the void (T448). */
+export const VEHICLE_MEDIA = ['water', 'land', 'void'] as const;
 export type VehicleMedium = (typeof VEHICLE_MEDIA)[number];
 
 /** How deep a hull goes: a shallow one floats on every water, a deep one only on the deep water (the sea). */
@@ -90,10 +90,11 @@ export function vehicleSpecErrors(said: unknown): string[] {
 
 /**
  * Whether a tile carries a hull: on the water what one swims (the deep only, for a deep hull; never a reef, where a hull runs aground,
- * T443), on land what one walks.
+ * T443), on land what one walks, in the void the void alone (T448: a capsule never flies over a land, it docks at its edge).
  */
 export function carries(spec: Pick<VehicleSpec, 'medium' | 'draught'>, t: TerrainDef | undefined): boolean {
   if (!t) return false;
+  if (spec.medium === 'void') return isVoid(t);
   const cross = crossingOf(t);
   if (spec.medium === 'land') return cross === 'walk';
   if (cross !== 'swim') return false;
@@ -329,9 +330,11 @@ export const PUSH_REACH = 2;
 export const PUSH_STEP = 0.05;
 /** How far from where one stands on a deck one goes over the side (T442), at most, in tiles. */
 export const LEAVE_REACH = 3;
+/** How far from a deck one climbs aboard from the menu (T448, «Sali a bordo»), at most, in tiles: from the head of a pier, the edge of a land. */
+export const BOARD_REACH = 2.5;
 
 /** What the menu and the world say of a vehicle, by what it moves on: a helm and an anchor on the water, the reins and a brake on land. */
-export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; over: string; took: string; left: string; seized: string; anchored: string; weighed: string; bumped: string; aground: string; taken: string; aboard: string; far: string; went: string; noRoom: string; pushed: string }> = {
+export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; over: string; board: string; took: string; left: string; seized: string; anchored: string; weighed: string; bumped: string; aground: string; taken: string; aboard: string; far: string; went: string; noRoom: string; pushed: string; boarded: string; noDeck: string }> = {
   water: {
     take: 'Prendi il timone',
     leave: 'Lascia il timone',
@@ -351,6 +354,9 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     went: 'Ti tuffi in acqua.',
     noRoom: 'Non c’è spazio per tuffarsi qui.',
     pushed: 'Lo scafo ti spinge da parte.',
+    board: 'Sali a bordo',
+    boarded: 'Sali a bordo.',
+    noDeck: 'Non c’è posto sul ponte.',
   },
   land: {
     take: 'Mettiti alla guida',
@@ -371,5 +377,32 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     went: 'Scendi.',
     noRoom: 'Non c’è spazio per scendere qui.',
     pushed: 'Il carro ti spinge da parte.',
+    board: 'Sali',
+    boarded: 'Sali.',
+    noDeck: 'Non c’è posto per salire.',
+  },
+  // The void (T448): a capsule's controls, its engines for an anchor; out of the hatch only onto a land.
+  void: {
+    take: 'Prendi i comandi',
+    leave: 'Lascia i comandi',
+    anchor: 'Spegni i motori',
+    weigh: 'Accendi i motori',
+    over: 'Esci',
+    took: 'Prendi i comandi.',
+    left: 'Lasci i comandi.',
+    seized: 'Qualcuno prende i comandi al posto tuo.',
+    anchored: 'Spegni i motori.',
+    weighed: 'Accendi i motori.',
+    bumped: 'La capsula urta e si ferma.',
+    aground: 'La capsula urta e si ferma.',
+    taken: 'Ai comandi c’è già qualcuno.',
+    aboard: 'Devi essere a bordo.',
+    far: 'I comandi sono più in là.',
+    went: 'Esci dalla capsula.',
+    noRoom: 'Fuori c’è solo il vuoto: niente su cui posare i piedi.',
+    pushed: 'La capsula ti spinge da parte.',
+    board: 'Entra',
+    boarded: 'Entri nella capsula.',
+    noDeck: 'Non c’è posto nella capsula.',
   },
 };

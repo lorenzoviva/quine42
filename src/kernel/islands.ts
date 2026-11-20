@@ -284,6 +284,85 @@ export function voidGates(seed: number, cx: number, cy: number, S: number): numb
   });
 }
 
+// --- The landing of a land of the void and its capsule (T448, ADR-0234) ------------------------------------------------------------
+
+/** The box of the seed's capsule (`models/capsule.xml`), tiles: across, and along from the stern to the bow. */
+export const CAPSULE_TILES: readonly [number, number] = [2.5, 4];
+/**
+ * How far a docked capsule's stern goes over the edge of its land, in tiles: a sixty-fourth, so that between the land and its deck there is
+ * no gap to stop a foot, while every point of its hull (`hullPoints`: the middles of its columns, a thirty-second in) stays over the void.
+ */
+export const DOCK_OVERLAP = 1 / 64;
+/** How near its landing (tiles, its middle from the landing's) a vehicle is at it: there the kernel puts no other capsule. */
+export const DOCK_NEAR = 2.5;
+
+/**
+ * The landing of a land of the void (T448): where its capsule waits, docked. Its middle (carpet space) in the void beyond the edge, its bow
+ * away from the land (`heading`, as a vehicle's: the bow toward (sin, cos)), its stern, with the hatch, against the edge; `land` the tile of
+ * the land at the hatch, which the layout keeps walked and reached from the gates (rule 10).
+ */
+export interface Dock {
+  island: string;
+  x: number;
+  y: number;
+  heading: number;
+  land: [number, number];
+}
+
+const AXES: ReadonlyArray<readonly [number, number, number]> = [
+  [1, 0, Math.PI / 2],
+  [-1, 0, (3 * Math.PI) / 2],
+  [0, 1, 0],
+  [0, -1, Math.PI],
+];
+
+/**
+ * The landing of a land of the void (T448, `docs/design/acqua-spazio.md` § 2.2): on the axis (east, west, south, north) toward the nearest
+ * of its four neighbours of the lattice, where the land ends along the row (or the column) through its middle; the capsule (`CAPSULE_TILES`)
+ * beyond, its stern over the edge by `DOCK_OVERLAP`, moved out a tile at a time while a tile under it is land. A function of the seed and the
+ * land: the same in every kernel, never a file. Undefined in the archipelago (an island is reached swimming) and if no room is found.
+ */
+export function dockOf(seed: number, land: Island): Dock | undefined {
+  if (!land.body || land.islet) return undefined;
+  const [i, j] = land.id.split(',').map(Number);
+  if (!Number.isInteger(i) || !Number.isInteger(j)) return undefined;
+  let best = AXES[0], far = Infinity;
+  for (const a of AXES) {
+    const n = islandOf(seed, i + a[0], j + a[1], 'void');
+    const d = Math.hypot(n.x - land.x, n.y - land.y);
+    if (d < far) [best, far] = [a, d];
+  }
+  const [dx, dy, heading] = best;
+  const own = [land];
+  const cx = Math.floor(land.x), cy = Math.floor(land.y);
+  // Along the axis, the first tile that is not land.
+  let k = 1;
+  while (k < 200 && landOfVoid(groundAt(own, cx + k * dx + 0.5, cy + k * dy + 0.5).ground)) k++;
+  const features = islandsNear(seed, land.x, land.y, land.radius * 2 + 16, 'void');
+  const [W, L] = CAPSULE_TILES;
+  // The edge: the coordinate along the axis where the first void tile begins; across, the middle of the row (or the column).
+  const across = (dx !== 0 ? cy : cx) + 0.5;
+  for (let out = 0; out < 4; out++) {
+    const step = k + out;
+    const edge = dx > 0 ? cx + step : dx < 0 ? cx - step + 1 : dy > 0 ? cy + step : cy - step + 1;
+    const sign = dx + dy;
+    const mid = edge + sign * (L / 2 - DOCK_OVERLAP);
+    // The tiles under the hull's points: from the edge to the bow, the width across, a thirty-second in.
+    const a0 = Math.min(edge - sign * DOCK_OVERLAP, mid + sign * L / 2) + 1 / 32, a1 = Math.max(edge - sign * DOCK_OVERLAP, mid + sign * L / 2) - 1 / 32;
+    const b0 = across - W / 2 + 1 / 32, b1 = across + W / 2 - 1 / 32;
+    let clear = true;
+    for (let a = Math.floor(a0); a <= Math.floor(a1) && clear; a++)
+      for (let b = Math.floor(b0); b <= Math.floor(b1) && clear; b++) {
+        const [tx, ty] = dx !== 0 ? [a, b] : [b, a];
+        if (landOfVoid(groundAt(features, tx + 0.5, ty + 0.5).ground)) clear = false;
+      }
+    if (!clear) continue;
+    const back = k - 1;
+    return { island: land.id, x: dx !== 0 ? mid : across, y: dx !== 0 ? across : mid, heading, land: [cx + back * dx, cy + back * dy] };
+  }
+  return undefined;
+}
+
 /** The name of a place of the void, which the kernel plans without a call (T445), in the language of the world. */
 export const OPEN_VOID: Readonly<Record<WorldLanguage, { name: string; description: string }>> = {
   it: { name: 'Vuoto', description: 'Nient’altro che stelle, sopra e sotto.' },
