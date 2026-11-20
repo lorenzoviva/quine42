@@ -714,7 +714,7 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
 <a id="geografia"></a>
 ## Geografia
 
-- **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 20 ambienti nel seme, nodo `stamp` di
+- **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 21 ambienti nel seme (il porto da T443), nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
 - **I timbri e gli ambienti per le strutture a 16** (ADR-0211, T407, kernel 0.9.1): ogni edificio che un timbro o un ambiente del seme
   disegna tiene la struttura per cui è tagliato, nei due versi, senza scendere né sporgere (`STAMP_SIZES` in `stamps.ts`: il tempio
@@ -1298,7 +1298,27 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   ambiente al resto del mondo; `island` esce ai client nell'atlante (`REGION_FIELDS`). **Lua**: `world.region_at(x, y)` (la regione del luogo,
   mai una trattenuta, e l'id dell'isola sotto la casella; `Kernel.regionInfoAt`) e `world.islands(x, y, r)` (entro r ≤ 720 caselle, al più 32,
   i più vicini prima, col nome; `Kernel.islandsSeen`), copie. `tests/arcipelago.test.ts` (la misura, le coppie di 60 semi, la traversata
-  sulle caselle di 5 × 5 celle, il kernel, Lua). Gli NPC restano sulla loro isola; porti, moli e secche sono un task a parte (P6 dello studio).
+  sulle caselle di 5 × 5 celle, il kernel, Lua). Gli NPC restano sulla loro isola.
+- **Porti, moli e secche** (ADR-0230, T443, kernel 0.10.6). **La secca** è una profondità dell'acqua (`depth: 'reef'`, `DEPTHS`): si nuota come
+  ogni acqua (anche troppo carichi: non è profonda), **nessuno scafo vi galleggia** (`carries`): la nave che la tocca si ferma, il timoniere
+  legge «Lo scafo tocca la secca e si ferma.» (`onReef`, `VEHICLE_WORDS.aground`, `vehicle:bumped` con `reef: true`). Il Fisico la dice di un
+  liquido alla Genesi (`genesis.physics`); il seme ha il terreno `y` «secca» (id `reef`) e il molo `i` (id `pier`, un `floor` senza tetto).
+  **Il timbro `harbour`** (`stamps.ts`) non è un disegno: da una riva che si cammina per due caselle (`StampCut.ground`, `stampGround`: come
+  si attraversa ogni codice, dal layout) un molo dritto di caselle `pier` sopra l'acqua che si nuota, finché `PIER_INTO_DEEP` (2) sue caselle
+  stanno nell'acqua profonda, al più `MAX_PIER` (8); dove l'acqua è bassa fino in fondo, un molo corto di `SHALLOW_PIER` (3) che non la
+  attraversa; prima le rive da cui l'acqua profonda si raggiunge, il molo più corto, poi il seme. **La garanzia** (`pierTouches`): la testa
+  tocca l'acqua profonda dove l'ha raggiunta, l'acqua comunque; se no il kernel allunga il molo di una casella, e una riva dove nemmeno così
+  la tocca non si prende. Mai sul bordo né su ciò che un altro timbro ha preso (molo, radice e la casella dietro restano presi); al largo della
+  testa, a tre o più caselle dalla sua linea e mai accanto al molo, due o tre secche dove il mondo ha un terreno di secca (ruolo `reef`; `pier`:
+  un terreno che si cammina chiamato molo, altrimenti il ponte). Senza riva non disegna niente. Il rilievo mette il molo due livelli sopra il
+  mare (la terra scende verso l'acqua di due livelli a casella): nel browser 0,75 contro 1,06 del ponte della barca a vela del seme, più di un
+  gradino, e dalla testa del molo si sale a bordo con un salto. **Il ponte di una nave si raggiunge dall'imbarco** (`cellarGround`): i piani
+  delle colonne dell'area `boarding` sono raggiunti come quelli a gradini dall'acqua (prima il ponte del generico, 9 voxel sopra la linea, era
+  tutto «dove non si sta»).
+  **L'ambiente «Porto»** del seme (`harbour`: il molo, due case, le strade dalle porte al molo) è senza epoca (`TIMELESS_LAYOUTS`), mai una
+  regione dell'atlante. **Il Cartografo**: alla Genesi di un arcipelago gli ambienti delle rive (`ARCHIPELAGO_ENVIRONMENTS`), nel prompt delle
+  terre le tavole dei moli e una secca, nel piano di un luogo d'isola che un porto va solo dove c'è il mare (`SHORE_LINE`); i modelli locali
+  scelgono il porto solo sulla riva di un'isola, a parte (`HARBOUR` in `mock.ts`). `tests/porti.test.ts`.
 
 <a id="veicoli"></a>
 ## Il veicolo

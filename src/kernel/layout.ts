@@ -12,7 +12,7 @@
 
 import { hash32 } from './rng';
 import { resolveStamps, run, type MjNode } from './mj';
-import { defaultCodes } from './stamps';
+import { defaultCodes, stampGround } from './stamps';
 import { STRUCTURE_VPT } from '../mj/classes';
 import { crossingOf } from './nature';
 import type { TerrainDef } from './types';
@@ -226,7 +226,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   if (opts.program) {
     // The stamps keep off each other and off the buildings the rules drew (T407): one lot, one structure.
     const built = Object.entries(palette).filter(([, t]) => t.layer === 'wall' || t.layer === 'door' || t.indoor).map(([c]) => c).join('');
-    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>() };
+    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>(), ground: stampGround(palette) };
     const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border, cut };
     steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];

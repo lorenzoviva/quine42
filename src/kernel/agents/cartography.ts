@@ -10,6 +10,18 @@ import type { MjNode } from '../mj';
 import { sizeOf, type SizeTier } from '../../mj/classes';
 import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
+import type { Geography } from '../nature';
+
+/**
+ * What the Cartographer is told at the Genesis of an archipelago (T443, ADR-0230): the shores are most of its places, so among its environments
+ * those of the coast, with the stamp of the harbour where a ship moors.
+ */
+export const ARCHIPELAGO_ENVIRONMENTS =
+  'This world is an archipelago in the open sea: most places stand on a shore. Among the environments, those of its coasts: a harbour (the stamp "harbour": a pier from the shore out to where the water is deep, where a ship moors, with reefs off it; houses and stores around it), a lighthouse on a cape (a "tower"), a shipyard, a beach with wrecks, a coast of reefs (a terrain of reef: rock just under the water, swum over, where a ship runs aground).';
+
+/** What the Cartographer is told of a place on a shore (T443): the harbour only where the place has the sea. */
+export const SHORE_LINE =
+  'On a shore: a harbour (an environment with the stamp "harbour") puts a pier where the water is deep enough for a ship; choose it only where this place has the sea and few places around have a harbour; lighthouses, shipyards, wrecks and reefs belong to the shores too.';
 
 /**
  * Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere; `under` (T417, ADR-0091 point 4) in the cellar
@@ -191,6 +203,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
     ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
     islandLine(ctx.island),
+    ctx.island ? SHORE_LINE : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -259,7 +272,7 @@ const LAYOUTS_SCHEMA: Schema = {
 };
 
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
-export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = []): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
+export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = [], geography?: Geography): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
   const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string }> }>(
     'cartographer',
     'genesis.layouts',
@@ -267,6 +280,8 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
       'Write 10-14 environments for the places of this world, each as a MarkovJunior rewrite program (see your role for the syntax) that transforms the procedural draft.',
       'Variety, in the age of the bible! Needed: where people live (more than one kind: from the stone village to the quarter of blocks of flats, as the world has it), where they work and farm, the nature that remains in this world (woods, jungles, deserts, mountains, lakes and coasts, or what they made of them), and special places with the kernel\'s stamps. Plus one big interior with several rooms. The draft is nature: a densely built environment clears it first.',
       `Available stamps: {"type":"stamp","shape":…} with shape among ${internalValues('timbri').join(', ')} (see the role). A stamp is a shape, not an age: its id stays in the program, the name and description of the environment are yours to decide and "codes" gives it the materials of this world.`,
+      // An archipelago (T443, ADR-0230): its shores are most of its places, and what is made on them.
+      geography === 'archipelago' && ARCHIPELAGO_ENVIRONMENTS,
       `Usable terrain codes:\n${paletteSummary(palette)}`,
       // The music that came with the cards (T295) plays where an environment's id contains one of its words.
       music.length && `Music is already written for the environments whose id contains: ${music.slice(0, 20).map((m) => `${m.environments.map((e) => `"${e}"`).join(' or ')} (${m.name})`).join('; ')}. When one of yours is that kind of place, put that word in its id.`,

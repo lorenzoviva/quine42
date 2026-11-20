@@ -12,7 +12,7 @@ import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
 import { internalFields, internalName } from '../internalNames';
 import { FORGE_KINDS, type ForgeKind } from './forge';
 import { TIMELESS_LAYOUTS } from '../themes';
-import { physicsOf, TERRAIN_LIMITS, WATER_CODES, type Crossing } from '../nature';
+import { DEPTHS, physicsOf, TERRAIN_LIMITS, WATER_CODES, type Crossing, type Geography } from '../nature';
 
 /**
  * Codes the procedural draft and the kernel rely on: every palette must define them. Their layer and how a body crosses them (T437,
@@ -114,7 +114,7 @@ const PHYS_SCHEMA: Schema = {
           cross: { type: 'STRING', enum: ['walk', 'swim', 'none'], description: 'how a body crosses it: on foot, swimming (only a liquid), not at all' },
           speed: { type: 'NUMBER', description: `the pace, a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}` },
           fatigue: { type: 'NUMBER', description: `only where one swims: how many times the energy against walking, ${TERRAIN_LIMITS.fatigue.join('-')}` },
-          depth: { type: 'STRING', enum: ['shallow', 'deep'], description: 'only where one swims: how deep the water is' },
+          depth: { type: 'STRING', enum: [...DEPTHS], description: 'only where one swims: how deep the water is; reef: rock just under the surface, swum over, no hull floats on it' },
           note: { type: 'STRING' },
         },
         required: ['code', 'cross', 'speed'],
@@ -228,7 +228,7 @@ export interface GenesisBrought {
 
 const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(0, n).map((x) => `«${x.name}» (${x.class})`).join(', ');
 
-export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought): Promise<GenesisPlan> {
+export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography): Promise<GenesisPlan> {
   const data = { theme };
   // The fields of the bible are those of the file (English since T310b); `storia` of an answer of before is `history` here, not in internalAnswer.
   const askBible = async (feedback = ''): Promise<Bible> =>
@@ -251,7 +251,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terrains: RawTerrain[]; roof: string }>(
       'cartographer',
       'genesis.terrain',
-      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; on the frontier planks, packed dirt, corral; on islands planks, coral, rigging; on a far world regolith, ice, glass of the greenhouses; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
+      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; on the frontier planks, packed dirt, corral; on islands planks (for the piers), a reef (rock just under the water), coral, rigging; on a far world regolith, ice, glass of the greenhouses; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -286,7 +286,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     const phys = await c.ask<{ terrains: Array<{ code: string; cross?: Crossing; solid?: boolean; speed?: number; fatigue?: number; depth?: string; note?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow or deep.\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).`,
+      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow, deep or a reef (rock just under the surface: one swims over it, no hull floats on it).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).`,
       PHYS_SCHEMA,
       { data: { terrains: terrain.terrains } },
     );
@@ -334,7 +334,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const layouts: Record<string, EnvironmentDef> = {};
   let feedback = '';
   for (let round = 0; round < 2 && Object.keys(layouts).length < 4; round++) {
-    const designed = await designLayouts(c, palette, feedback, brought?.music);
+    const designed = await designLayouts(c, palette, feedback, brought?.music, geography);
     const problems: string[] = [];
     for (const d of designed) {
       if ('error' in d) {

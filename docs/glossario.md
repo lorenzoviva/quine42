@@ -197,7 +197,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Inglese**: `islet`, `isletBetween`, `ISLET_RADIUS`
 - **Definizione**: la lingua di sabbia che il kernel mette a metà dell'acqua fra due isole vicine quando sarebbe più lunga dello stretto più lungo: un riposo dall'acqua, non dalla fatica (T441, ADR-0229).
 - **Dove vive**: `src/kernel/islands.ts`
-- **Da non usare**: `scoglio` (è roccia, non si cammina), `secca` (è sotto il pelo dell'acqua, P6)
+- **Da non usare**: `scoglio` (è roccia, non si cammina), `secca` (è sotto il pelo dell'acqua, T443)
 - **Fermo**: l'id `i,j~k,l` delle due isole.
 
 ### Stretto
@@ -213,6 +213,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/islands.ts`
 - **Da non usare**: `oceano`, `acqua aperta`
 - **Fermo**: —
+
+### Porto
+- **Inglese**: `harbour` (il timbro e l'ambiente del seme), `ARCHIPELAGO_ENVIRONMENTS`, `SHORE_LINE`
+- **Definizione**: il luogo su una riva dove una nave si affianca: il timbro `harbour` vi posa un molo e qualche secca al largo; l'ambiente «Porto» del seme, senza epoca, gli mette attorno le case. In un luogo senza riva il timbro non disegna niente (T443, ADR-0230).
+- **Dove vive**: `src/kernel/stamps.ts`, `universe/modules/world.layouts` (`harbour`), `src/kernel/agents/cartography.ts`
+- **Da non usare**: `darsena`, `approdo` (per il porto: l'approdo è ogni riva che si cammina), `scalo`
+- **Fermo**: `harbour` come forma di timbro e come id dell'ambiente.
+
+### Molo
+- **Inglese**: `pier`, `Pier`, `harbour`, `pierTouches`, `PIER_INTO_DEEP`, `MAX_PIER`, `SHALLOW_PIER`
+- **Definizione**: una fila di caselle che si camminano sopra l'acqua, dritta da una riva fino a dove l'acqua è profonda (due caselle dentro), o corto dove l'acqua è bassa fino in fondo; la sua testa tocca sempre l'acqua (il kernel la allunga di una casella, se no la riva non si prende). Il seme ha il terreno `i` «molo» (T443, ADR-0230).
+- **Dove vive**: `src/kernel/stamps.ts`, `universe/modules/world.terrain` (`i`, id `pier`)
+- **Da non usare**: `pontile` (anche quello corto di un lago è un molo), `banchina`, `ponte` (per il molo: il ponte attraversa)
+- **Fermo**: `pier` come ruolo di un timbro e come id del terreno del seme.
+
+### Secca
+- **Inglese**: `reef` (un valore di `depth`), `onReef`, `aground`
+- **Definizione**: roccia appena sotto il pelo dell'acqua: si nuota come ogni acqua, nessuno scafo vi galleggia (la nave si ferma, «tocca la secca»). È una profondità dell'acqua, accanto a bassa e profonda; il seme ha il terreno `y` «secca», il porto ne mette al largo del molo (T443, ADR-0230).
+- **Dove vive**: `src/kernel/nature.ts` (`DEPTHS`), `src/kernel/vehicle.ts` (`carries`), `src/kernel/stamps.ts`, `universe/modules/world.terrain` (`y`, id `reef`)
+- **Da non usare**: `scoglio` (è roccia, non si nuota), `bassofondo` (è l'acqua bassa, `shallow`), `scogliera`
+- **Fermo**: `reef` come valore di `depth`, come ruolo di un timbro e come id del terreno del seme.
 
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
@@ -246,7 +267,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Inglese**: `anchored`, `setAnchor`, `ANCHOR_BRAKE`
 - **Definizione**: ciò che tiene fermo un veicolo: gettata, l'abbrivio si perde e niente lo spinge né lo gira; un veicolo senza nessuno a bordo la getta da sé. Sui carri «il freno» (T439, ADR-0227).
 - **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`
-- **Da non usare**: `ormeggio` (è del porto, T443), `parcheggio`
+- **Da non usare**: `ormeggio` (è del porto: il molo, T443), `parcheggio`
 - **Fermo**: `anchored` nel componente `vehicle` e in `world/state.json → vehicles`.
 
 ### Onda lunga

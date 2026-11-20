@@ -6042,12 +6042,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — due schede, due viandanti sulla stessa nave; screenshot.
 - Quando è fatto: commit su `task/T442`; suite e typecheck verdi. Sicurezza: voci nuove se servono.
 
-### T443 · P6 · Porti, moli, secche — `da fare` (dipende da T440, T441)
+### T443 · P6 · Porti, moli, secche — `fatto` (`b17b15d5`) (dipende da T440, T441)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5
 - Step: 37
 - Contesto e cosa fare: § 1.5-1.6 e tabella § 6 dello studio.
 - Browser: sì — un porto con molo e secca; screenshot.
 - Quando è fatto: commit su `task/T443`; suite e typecheck verdi.
+- Esito: la secca come profondità dell'acqua (`depth: reef`: si nuota, nessuna nave vi galleggia, «tocca la secca»); molo `i` e secca `y` nel seme; timbro `harbour` (molo dritto da una riva fin dentro l'acqua profonda, `PIER_INTO_DEEP` 2, `MAX_PIER` 8, `SHALLOW_PIER` 3; la testa tocca l'acqua o il kernel la allunga di una casella o la riva non si prende, `pierTouches`; secche al largo dal lato del mare), ruoli `pier`/`reef`, ambiente «Porto» senza epoca con le case sulla terra; prompt del Cartografo per gli arcipelaghi e per i luoghi d'isola, del Fisico e delle terre; modelli locali che scelgono il porto solo sulle rive delle isole; correzione: il ponte di una nave raggiungibile dall'imbarco (`cellarGround`), prima sul `vessel` generico non ci si poteva stare; ADR-0230, kernel 0.10.6, AGENTS.md, architettura, glossario, lingua interna, `tests/porti.test.ts`; manca: salire a bordo camminando dal molo (la differenza 0,75 → 1,06 si fa col salto) e dall'acqua, stiva (T444), traghetto di NPC, faro come luce; non provato con Gemini vero né in multigiocatore; sicurezza: nessuna superficie nuova.
 
 ### T444 · P7 · Affondare e relitti — `da fare` (dipende da T442)
 - Pipeline: claude · sforzo high · stima 3% · approvato · browser · priorità 5

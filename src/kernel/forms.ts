@@ -376,6 +376,16 @@ function cellarGround(g: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: 
   const queue: number[] = [];
   for (let i = 0; i < XY; i++)
     for (let l = start[i]; l < start[i + 1]; l++) if (Math.abs(z[l] - base) <= step && !block[l]) (reached[l] = 1), queue.push(l, i);
+  // A hull (T443, ADR-0230): its deck is reached from where one boards (the area `boarding`, from a pier or a jump), as the Sculptor's
+  // checks measure it (`measureVessel`), not a step at a time from the water.
+  const boards = new Set(g.alphabet.map((ch, k) => (palette[ch]?.area === 'boarding' ? k : -1)).filter((k) => k >= 0));
+  if (boards.size)
+    for (let i = 0; i < XY; i++) {
+      let here = false;
+      for (let k = base; k < g.Z && !here; k++) here = boards.has(g.cells[i + k * XY]);
+      if (!here) continue;
+      for (let l = start[i]; l < start[i + 1]; l++) if (z[l] >= base && !block[l] && !reached[l]) (reached[l] = 1), queue.push(l, i);
+    }
   reach(g, levels, reached, queue, step);
   for (let l = 0; l < block.length; l++) if (!reached[l]) block[l] = 1;
   // The cellar: somewhere under the ground a body stands, and every floor there where it could stand is reached.

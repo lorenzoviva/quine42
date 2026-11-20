@@ -244,6 +244,10 @@ più** (né centro né raggio né forma, nemmeno dal master); altrimenti le case
 «mare» di T347 fatta bene: la dice la bozza, non una regione. In un mondo di pirati la gran parte dei luoghi è mare, e costa niente;
 si pagano coste e isole, entro `placesPerMinute` e il ritmo del mondo come oggi.
 
+> **Fatto (T443, ADR-0230)**: come qui sotto, con queste differenze: la secca è una profondità dell'acqua (`depth: reef`), non un terreno a
+> sé; il timbro `harbour` è una regola che trova la riva e porta il molo due caselle dentro l'acqua profonda; le secche le mette il porto al
+> largo del molo (non la bozza delle isole); il faro, il cantiere e i relitti sono parole del prompt, non timbri; l'imbarco dall'acqua resta.
+
 **Porti e approdi (P6).** Il porto come ambiente e timbro, con il **molo**: una casella che si cammina sopra l'acqua (`floor`, tavole
 sull'acqua) fino all'acqua profonda, dove una nave si affianca e si sale dalla passerella. Il kernel controlla che il molo di un porto
 tocchi `swim` (se no lo allunga di una casella), come oggi controlla che gli ingressi dei timbri diano su caselle raggiungibili

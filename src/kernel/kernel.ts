@@ -5500,6 +5500,17 @@ export class Kernel {
    * Whether a vehicle's hull stands at a pose (T439): every point of it on what carries it (the water it floats on, the ground it rolls on),
    * none in what is solid (another hull with all of itself, anything else with what stops a body); `ignore` what goes with it.
    */
+  /** Whether a point of a vehicle's hull at a pose is over a reef (T443, ADR-0230): rock just under the water, where a hull runs aground. */
+  private onReef(id: Id, pose: Pose): boolean {
+    const pts = this.hullOf(id);
+    for (let i = 0; i < pts.length; i += 2) {
+      const [wx, wy] = toWorld(pts[i], pts[i + 1], pose.heading);
+      const t = this.tileAt(Math.floor(pose.x + wx), Math.floor(pose.y + wy));
+      if (t && terrainPhysics(this.palette[t]).depth === 'reef') return true;
+    }
+    return false;
+  }
+
   private hullFits(id: Id, spec: VehicleSpec, pose: Pose, ignore: ReadonlySet<Id>): boolean {
     const pts = this.hullOf(id);
     const own = this.ecs.get(id, 'pos');
@@ -5601,8 +5612,10 @@ export class Kernel {
       v.bumped = true;
       const last = this.bumpSaid.get(id);
       if (last === undefined || this.time - last > BUMP_EVERY) {
-        if (v.helm !== undefined) this.as(v.helm, () => this.message(VEHICLE_WORDS[spec.medium].bumped, 'warn'));
-        this.bus.emit('vehicle:bumped', { id });
+        // On a reef (T443) the hull runs aground: the water goes on, the rock under it does not let it.
+        const aground = this.onReef(id, tries[0]);
+        if (v.helm !== undefined) this.as(v.helm, () => this.message(VEHICLE_WORDS[spec.medium][aground ? 'aground' : 'bumped'], 'warn'));
+        this.bus.emit('vehicle:bumped', aground ? { id, reef: true } : { id });
       }
       this.bumpSaid.set(id, this.time);
     } else if (moving) delete v.bumped;
@@ -10091,7 +10104,7 @@ export class Kernel {
       // The world is born again with the nature of its theme (T437, ADR-0224): fixed from here.
       this.chooseNature(theme);
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis());
+      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis(), this.config.nature.geography);
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);
       // Example content shipped on disk makes room for the generated world.

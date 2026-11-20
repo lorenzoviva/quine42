@@ -196,17 +196,17 @@ posto di un pannello sul filo).
 
 | dominio | genere | voci | tocca | task (contratto) |
 |---|---|---:|---|---|
-| [Classi dei modelli](#classi) | valori | 12 | disco, prompt | T307a (0.2) |
+| [Classi dei modelli](#classi) | valori | 13 | disco, prompt | T307a (0.2) |
 | [Animazioni delle classi](#animazioni) | valori | 2 | solo codice | T307a (0.2) |
 | [Taglie (D&D)](#taglie) | valori | 6 | disco, prompt | T307a (0.2) |
 | [Effetti (`tipo`)](#effetti) | valori | 19 | disco, Lua, prompt | T307a (0.2) |
 | [Campi degli effetti](#campi-effetti) | campi | 21 | disco, Lua, prompt | T307a (0.2) |
 | [Categorie degli oggetti](#categorie) | valori | 11 | disco, prompt | T307a (0.2) |
 | [Forme degli oggetti (gli id `forma-…` dei modelli)](#impronte) | valori | 31 | disco, prompt | T307a (0.2) |
-| [Nomi dei terreni del seme (diventano id con l’etichetta italiana)](#terreni) | valori | 24 | disco, Lua, prompt | T307a (0.2) |
-| [Ambienti del seme (layout)](#ambienti) | valori | 20 | disco, prompt | T307a (0.2) |
-| [Timbri delle strutture](#timbri) | valori | 12 | prompt, solo codice | T307a (0.2) |
-| [Azioni del seme (`actions[].id`) e dei programmi (`<action name>`)](#azioni-seme) | valori | 8 | disco, Lua | T307a (0.2) |
+| [Nomi dei terreni del seme (diventano id con l’etichetta italiana)](#terreni) | valori | 26 | disco, Lua, prompt | T307a (0.2) |
+| [Ambienti del seme (layout)](#ambienti) | valori | 21 | disco, prompt | T307a (0.2) |
+| [Timbri delle strutture](#timbri) | valori | 13 | prompt, solo codice | T307a (0.2) |
+| [Azioni del seme (`actions[].id`) e dei programmi (`<action name>`)](#azioni-seme) | valori | 10 | disco, Lua | T307a (0.2) |
 | [Token delle rune magiche (in latino)](#rune) | valori | 7 | disco, Lua, prompt | T307a (0.2) |
 | [Elementi delle rune (`element`)](#elementi) | valori | 7 | disco, prompt | T307a (0.2) |
 | [Elementi dei pannelli (`ui.elementi[].tipo`)](#pannelli) | valori | 4 | disco, prompt | T307a (0.2) |
@@ -223,9 +223,9 @@ posto di un pannello sul filo).
 | [Stati delle trame e delle missioni, tipi di obiettivo](#trame) | valori | 8 | disco, prompt | T307b (0.3) |
 | [Usi dei suoni e nomi degli effetti sonori](#suoni) | valori | 12 | disco, prompt | T307b (0.3) |
 | [Parti dei modelli (`part`) e viste delle foto](#parti) | valori | 8 | disco, prompt | T307b (0.3) |
-| [Agenti del Concilio (`AgentId`)](#agenti) | valori | 10 | disco, filo, prompt | T307b (0.3) |
+| [Agenti del Concilio (`AgentId`)](#agenti) | valori | 11 | disco, filo, prompt | T307b (0.3) |
 | [Classi dello Scultore (`ai.scultori`)](#classi-scultore) | valori | 6 | disco, filo | T307b (0.3) |
-| [Coefficienti di generazione](#coefficienti) | valori | 19 | disco, filo | T307b (0.3) |
+| [Coefficienti di generazione](#coefficienti) | valori | 20 | disco, filo | T307b (0.3) |
 | [Tipi delle carte e dei nodi del grafo](#carte) | valori | 15 | disco, filo | T307b (0.3) |
 | [Modalità della partita, esiti delle mancanze](#partita) | valori | 6 | disco, filo | T307b (0.3) |
 | [Valori che solo il TypeScript confronta](#solo-codice) | valori | 53 | solo codice | T307b (0.3) |
@@ -260,13 +260,13 @@ posto di un pannello sul filo).
 | [Azioni di un individuo in un dialogo e modi della sua mente (`mind.mode`)](#azioni-npc) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
 | [Incarichi del Referente e interventi della sessione del Concilio](#incarichi) | valori | 14 | prompt, solo codice | T310b (0.7) |
 | [Posti degli oggetti (dove si indossano o si impugnano)](#posti) | valori | 10 | disco, Lua, filo, prompt | T310b (0.7) |
-| [Ruoli dei codici di un timbro (`codes`)](#ruoli-timbri) | valori | 9 | disco, prompt | T310b (0.7) |
+| [Ruoli dei codici di un timbro (`codes`)](#ruoli-timbri) | valori | 11 | disco, prompt | T310b (0.7) |
 | [Interazioni di un concetto della Fucina](#interazioni) | valori | 4 | prompt, solo codice | T310b (0.7) |
 | [Comandi di uno strumento (`item.controls`)](#comandi) | valori | 2 | disco, prompt | T310b (0.7) |
 | [Dove si riapre gli occhi dopo la morte](#ripartenza) | valori | 2 | prompt, solo codice | T310b (0.7) |
 | [Bonus di una cosa indossata o impugnata](#bonus) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
 | [Campi delle risposte del Concilio (gli schemi delle richieste)](#campi-risposte) | campi | 164 | prompt | T310b (0.7) |
-| **totale** | | **1170** | | T307a: 192 · T307b: 301 · T308a: 275 · T308b: 166 · T310b: 236 |
+| **totale** | | **1181** | | T307a: 199 · T307b: 303 · T308a: 275 · T308b: 166 · T310b: 238 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -470,6 +470,8 @@ posto di un pannello sul filo).
 | `campo seminato` | `sown_field` |
 | `grano maturo` | `ripe_wheat` |
 | `ceppaia` | `stump` |
+| `molo` | `pier` |
+| `secca` | `reef` |
 
 <a id="ambienti"></a>
 ### Ambienti del seme (layout) (`ambienti`)
@@ -500,6 +502,7 @@ posto di un pannello sul filo).
 | `tana_drago` | `dragon_lair` |
 | `tempio` | `temple` |
 | `torre_mago` | `wizard_tower` |
+| `harbour` | `harbour` |
 
 <a id="timbri"></a>
 ### Timbri delle strutture (`timbri`)
@@ -521,6 +524,7 @@ posto di un pannello sul filo).
 | `dungeon` | `dungeon` |
 | `tana` | `lair` |
 | `pozzo` | `well` |
+| `porto` | `harbour` |
 
 <a id="azioni-seme"></a>
 ### Azioni del seme (`actions[].id`) e dei programmi (`<action name>`) (`azioni-seme`)
@@ -1889,6 +1893,8 @@ posto di un pannello sul filo).
 | `strada` | `road` |
 | `roccia` | `rock` |
 | `recinto` | `fence` |
+| `molo` | `pier` |
+| `secca` | `reef` |
 
 <a id="interazioni"></a>
 ### Interazioni di un concetto della Fucina (`interazioni`)

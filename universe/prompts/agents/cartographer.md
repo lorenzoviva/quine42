@@ -71,12 +71,14 @@ what it is is told by the name of the environment and by the materials of `codes
 
 - `{"type":"stamp","shape":"castle"}` — moat, walls with towers at the corners, a bridge, a keep.
 - Shapes: `house`, `castle`, `fortress`, `tower`, `temple`, `pyramid`, `huts`, `pen`
-  (riding ground with a stable), `barracks`, `dungeon` (rooms and tunnels in the rock), `lair` (cave), `well`.
+  (riding ground with a stable), `barracks`, `dungeon` (rooms and tunnels in the rock), `lair` (cave), `well`, `harbour`
+  (a pier from a shore straight out over the water to where it is deep enough for a ship to moor alongside, a few reefs off it:
+  only where the place has a shore; elsewhere it draws nothing).
   The building of a `temple` holds a huge structure; those of a `house`, `tower`, `pyramid`, `dungeon`, the keep of a `castle`,
   the barracks of a `fortress` and the two halls of the `barracks` a large one; `huts` and the stable of a `pen` small houses.
   Stamps never cover each other nor the buildings your rules drew: ask only for as many as the place holds.
 - `"count": N` puts N of them (e.g. 5 huts); `"codes"` chooses the terrains for each role: `wall`,
-  `floor`, `door`, `water`, `bridge`, `ground`, `road`, `rock`, `fence`
+  `floor`, `door`, `water`, `bridge`, `ground`, `road`, `rock`, `fence`, `pier`, `reef`
   (e.g. huts with `{"wall":"a"}` = straw, a castle with `{"wall":"b","bridge":"z"}`). Without `codes` the kernel chooses.
 - They combine with the rules: first clear (`prl` trees → meadow), then the stamps, then the details.
 
