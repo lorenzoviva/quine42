@@ -677,6 +677,10 @@ export class Kernel {
   static PLACES_PER_MINUTE = 20;
   /** When (world time) the last new places were planned: the quota of a universe of many. */
   private chunksMade: number[] = [];
+  /** Seconds of the world the new places wait after the budget stopped the Cartographer (T457, ADR-0231): then one asks again. */
+  static BUDGET_RETRY = 60;
+  /** Until when (world time) the new places stay drafts because the budget stopped the Cartographer (T457). */
+  private budgetHeldUntil = -Infinity;
   private genBudget = 64;
   private tickCount = 0;
   /** Ticks since this kernel started (the clock of a session, T38). */
@@ -1973,7 +1977,8 @@ export class Kernel {
       });
     if (!at.length) return;
     // A place the local models left a draft (T433) is not asked again in this session: they would not plan it now either.
-    const quota = this.chunkQuota() && !this.localModelsAbroad();
+    // Nor one the budget stopped a moment ago (T457): asked again when `BUDGET_RETRY` has passed.
+    const quota = this.chunkQuota() && !this.localModelsAbroad() && !this.budgetHeld();
     // A region of the master (T375): what it holds is not asked again until it is let go; a filler place costs nothing, so neither the quota nor
     // the pace keeps it a draft.
     const drafts = [...this.chunks.values()].filter((c) => {
@@ -2181,18 +2186,28 @@ export class Kernel {
       return;
     }
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
-    if (!noQuota && !this.chunkQuota()) {
-      if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
+    if (!noQuota && (!this.chunkQuota() || this.budgetHeld())) {
+      if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : this.budgetHeld() ? `luogo ${ch.key}: il Concilio non ha budget, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
       ch.held = true;
       return;
     }
     ch.held = false;
-    this.chunksMade.push(this.time);
+    const made = this.time;
+    this.chunksMade.push(made);
     // Places are planned several at once: the card of each takes its part of what planning them cost (T365).
     const end = this.cardCosts.begin('chunk.plan');
-    let plan: ChunkPlan;
+    let plan: ChunkPlan | undefined;
     try {
       plan = await this.makePlan(ch);
+      // Stopped by the budget (T457, ADR-0231): a draft, held, nothing saved and no place of the quota spent; the new places wait a while
+      // before asking again.
+      if (!plan) {
+        const i = this.chunksMade.indexOf(made);
+        if (i >= 0) this.chunksMade.splice(i, 1);
+        this.budgetHeldUntil = this.time + Kernel.BUDGET_RETRY;
+        ch.held = true;
+        return;
+      }
       // A new plan's stamps cut their buildings for the structures at 16 (T407); a plan of before does not say it, and keeps its stamps.
       plan.vpt = STRUCTURE_VPT;
       // And it swims (T438, ADR-0224): its layout joins it through the water one swims and never digs it; a plan of before does not say it.
@@ -2424,7 +2439,12 @@ export class Kernel {
     return { layouts: free.length ? free : all };
   }
 
-  private async makePlan(ch: Chunk): Promise<ChunkPlan> {
+  /**
+   * The Cartographer's plan of a new place, or the kernel's fallback when it fails (three invalid answers, an error). Undefined when the
+   * budget stopped it (T457, ADR-0231: the session's text, the day's cap of the gate, a key without credit): the place stays a draft and is
+   * asked again when there is budget, never saved as a «Terra senza nome» of a random environment.
+   */
+  private async makePlan(ch: Chunk): Promise<ChunkPlan | undefined> {
     const start = ch.cx === 0 && ch.cy === 0;
     const { layouts, region } = this.environmentsFor(ch);
     const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]]
@@ -2460,7 +2480,7 @@ export class Kernel {
         return plan;
       } catch (e) {
         this.council.say('cartographer', 'errore', `(${ch.key}) ${(e as Error).message}`, undefined, 'chunk.plan');
-        if (e instanceof BudgetError) break;
+        if (e instanceof BudgetError) return undefined;
       }
     }
     if (feedback) this.noteShortfall({ request: 'il piano di un luogo', who: ch.chi, agent: 'cartographer', task: 'chunk.plan', outcome: 'invalid', reason: feedback });
@@ -7784,6 +7804,11 @@ export class Kernel {
   /** Whether the master holds the world (`hold`): new places stay drafts and nothing the world does by itself calls the models. */
   paceHeld(): boolean {
     return this.pace.mode === 'hold';
+  }
+
+  /** Whether the budget stopped the Cartographer a moment ago (T457, ADR-0231): the new places stay drafts until `BUDGET_RETRY` has passed. */
+  budgetHeld(): boolean {
+    return this.time < this.budgetHeldUntil;
   }
 
   /** A pause of the Sculptor or of the Musician as the pace makes it: longer in a slow world, never shorter. */
