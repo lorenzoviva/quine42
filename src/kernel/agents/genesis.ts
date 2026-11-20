@@ -188,7 +188,7 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
   const codes = terrains.map((t) => t.code);
   for (const [code, b] of Object.entries(BASE_CODES)) if (!codes.includes(code)) errors.push(`manca il codice "${code}" (${b.meaning})`);
   for (const t of terrains) {
-    if (typeof t.code !== 'string' || t.code.length !== 1 || '?*/[]'.includes(t.code)) errors.push(`codice non valido "${t.code}"`);
+    if (typeof t.code !== 'string' || t.code.length !== 1 || '?*/[]~'.includes(t.code)) errors.push(`codice non valido "${t.code}"`);
     if (!/^#[0-9a-f]{6}$/i.test(t.color)) errors.push(`colore non valido per ${t.code}: ${t.color}`);
   }
   if (new Set(codes).size !== codes.length) errors.push('codici duplicati');

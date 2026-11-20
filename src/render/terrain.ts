@@ -136,6 +136,9 @@ export class Builder {
   }
 }
 
+/** How thick the edge of a land over the void is drawn (tiles, T445): a slab, not a cliff down to nothing. */
+export const VOID_SLAB = 0.9;
+
 const groundY = (t: TerrainDef | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
 
 /**
@@ -325,6 +328,8 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
     for (let c = 0; c < S; c++) {
       const code = ch.tiles[r * S + c];
       const t = pal[code] ?? pal['?'];
+      // The void (T445): no ground at all; the stars show through, and the land beside it has its edge.
+      if (t?.layer === 'void') continue;
       const x = X0 + c, z = Z0 + r;
       const h = hash32(x, z, 77);
       const g0 = ground0(x, z);
@@ -348,12 +353,14 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
       // banks of earth down to the water.
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const n = tile(x + dx, z + dz);
-        const earth = n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
-        if (holed?.cover || holeAt(x + dx, z + dz)?.cover) {
+        // Over the void the edge of the land is a slab with its thickness (T445), darker underneath than a bank.
+        const edge = n?.layer === 'void';
+        const earth = edge ? base.map((v) => v * 0.5) : n?.layer === 'liquid' && t?.layer !== 'liquid' ? rgbOf('#735638') : base.map((v) => v * 0.72);
+        if (!edge && (holed?.cover || holeAt(x + dx, z + dz)?.cover)) {
           subSides(x, z, dx, dz, earth);
           continue;
         }
-        const ny = top(x + dx, z + dz);
+        const ny = edge ? y - VOID_SLAB : top(x + dx, z + dz);
         if (ny >= y) continue;
         side(dx, dz, dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z, dx ? z : x, dx ? z + 1 : x + 1, y, ny, earth);
       }

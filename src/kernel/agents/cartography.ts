@@ -140,7 +140,7 @@ export interface PlanContext {
    * The island of an archipelago this place stands on (T441, ADR-0229): its name if the Cartographer gave it one, otherwise how large it is,
    * and the Cartographer names it in `island` with this first place on it.
    */
-  island?: { name?: string; description?: string; islet?: boolean; across?: number };
+  island?: { name?: string; description?: string; islet?: boolean; across?: number; body?: 'station' | 'asteroid' };
   /**
    * The rare sizes a structure here may still have (ADR-0092): Huge one per zone of the world (about a
    * million tiles), Gargantuan one per realm (4 × 4 zones); the kernel enforces it anyway.
@@ -203,7 +203,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
     ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
     islandLine(ctx.island),
-    ctx.island ? SHORE_LINE : '',
+    ctx.island ? (ctx.island.body ? VOID_LINE : SHORE_LINE) : '',
   ]
     .filter(Boolean)
     .join('\n\n');
@@ -233,11 +233,20 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
 /** The island's name and a line about it, as the Cartographer gives them with the first place on it (T441). */
 const ISLAND_SCHEMA: Schema = { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] };
 
-/** What the Cartographer is told of the island a place stands on (T441): its name, or that it is to be named. */
+/** The edge of a station or an asteroid (T445, ADR-0232), as the Cartographer is told: the void around, where nothing stands. */
+export const VOID_LINE =
+  'Around this land is the void, with the stars above and below: nothing stands on it and nobody walks or swims it; what the place has is on its land, and its edge looks out on the stars.';
+
+/** What the Cartographer is told of the island a place stands on (T441), or of the station or the asteroid in the void (T445): its name, or that it is to be named. */
 function islandLine(island: PlanContext['island']): string {
   if (!island) return '';
-  if (island.name) return `This place is on the island «${island.name}» (${island.description ?? ''}): its name and what is in it belong to the island; the sea around it is open water.`;
-  const what = island.islet ? 'a cay, a few tiles of sand in the open sea between two far islands' : `an island about ${island.across ?? 1} places across, in the open sea`;
+  const land = island.body === 'station' ? 'station' : island.body === 'asteroid' ? 'asteroid' : 'island';
+  if (island.name) return `This place is on the ${land} «${island.name}» (${island.description ?? ''}): its name and what is in it belong to the ${land}; ${island.body ? 'the void around it is empty' : 'the sea around it is open water'}.`;
+  const what = island.body
+    ? `a ${land} about ${island.across ?? 1} places across, in the void among the stars${island.body === 'station' ? ' (built: decks, corridors, modules)' : ' (rock, dust and ice)'}`
+    : island.islet
+      ? 'a cay, a few tiles of sand in the open sea between two far islands'
+      : `an island about ${island.across ?? 1} places across, in the open sea`;
   return `This place is the first one explored on ${what}, which has no name yet: name it in "island" ("name", short, as the people of the world call it, and "description", one line), in the language of the world.`;
 }
 

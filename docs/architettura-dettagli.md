@@ -1265,7 +1265,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
   (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
   com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
-  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2 e l'arcipelago), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle e il giorno di 120-3600 secondi o 0), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
@@ -1320,6 +1320,29 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   regione dell'atlante. **Il Cartografo**: alla Genesi di un arcipelago gli ambienti delle rive (`ARCHIPELAGO_ENVIRONMENTS`), nel prompt delle
   terre le tavole dei moli e una secca, nel piano di un luogo d'isola che un porto va solo dove c'è il mare (`SHORE_LINE`); i modelli locali
   scelgono il porto solo sulla riva di un'isola, a parte (`HARBOUR` in `mock.ts`). `tests/porti.test.ts`.
+- **Il vuoto, il cielo, il giorno** (ADR-0232, T445, kernel 0.10.8). **Il vuoto** è un terreno del kernel: il codice `~` (`VOID_CODE`), lo
+  strato `void` (`voidTerrain` nella lingua del mondo, `isVoid`), che il kernel aggiunge alla palette solo in un mondo con
+  `nature.geography: 'void'` (`paletteOf`, anche in `chooseNature`), sopra un terreno del generatore con lo stesso codice; la Genesi rifiuta `~`
+  (`terrainErrors`), un manifest non può dire lo strato. `crossingOf` lo dà `none` qualunque cosa dica, `terrainPhysics` senz'aria; è solido e
+  non è un liquido, quindi il corpo si ferma al bordo e il salto non lo passa (`airFree`); non è tra le caselle raggiungibili, quindi niente vi
+  si posa; `setTile` non vi scrive e non lo scrive (effetti, incantesimi, `world.set_tile`); l'automa dell'acqua non lo carica
+  (`WaterWorld.loaded`); un lotto di un blocco non lo copre (`blockFree`). **Le terre** sono il reticolo delle isole (`islandOf(…, 'void')`, gli
+  stessi centri): la partenza una stazione grande quanto l'isola della partenza, una terra su tre un asteroide (`ASTEROID_ONE_IN`, raggio
+  10-24), le altre stazioni (bordo a superellisse, `shoreAt`); niente isolotti. **La bozza** (`voidDraft`): fuori il vuoto (anche l'acqua bassa
+  di un'isola), nella stazione il sentiero `p`, nell'asteroide ciò che il generatore ha disegnato senza prato, alberi né acqua (`s`, `r`, `n`).
+  **Il layout** (`layout.ts`): `carvePath` salta il vuoto, un varco sul vuoto resta vuoto e non è da raggiungere, dopo il programma ogni
+  casella torna alla bozza se il programma ha scritto sul vuoto o l'ha scritto; senza varchi sulla terra si parte dalla terra più vicina al
+  mezzo (`landNearMiddle`); i varchi del kernel per un mondo del vuoto sono `voidGates` (dal varco dell'hash la prima casella lungo il lato
+  che è terra dalle due parti, uguale per i due luoghi), passati come `opts.gates` da `layoutOf`, che salta anche i ritocchi (`edits`) sul
+  vuoto. **Il vuoto costa zero**: un luogo tutto vuoto (`allVoid`) lo pianifica il kernel come il mare aperto (`seaPlan(true)`, `OPEN_VOID`).
+  Il Cartografo battezza la stazione o l'asteroide (`islandUnder` con `body`, `VOID_LINE` al posto di `SHORE_LINE`, i nomi offline in
+  `mock.ts`); `world.region_at` e `world.islands` (con `body`) leggono le terre del vuoto. **Il cielo di stelle** (`nature.sky: 'stars'`,
+  `src/render/stars.ts`, `Stars`): sfondo e nebbia `STAR_SKY`, una sfera di 1800 stelle alla camera e un campo periodico sotto il piano
+  (120 caselle, 4 × 4) che scorre con il tappeto e la camera al 40 % (`FIELD_PARALLAX`), `fog: false`, mai con la corona; `terrain.ts` non
+  disegna le caselle del vuoto e dà alla terra accanto un fianco di `VOID_SLAB` (0,9) più scuro. **Il giorno** (`nature.day`, 120-3600 o 0):
+  `Kernel.daySeconds()` (`clockDay`) per `day()`, la fase delle routine (`dayPhase`) e il suono; `daylight()` con la luce ferma (`STILL_DAY`,
+  `stillLight`) è 1 e l'orologio tiene i 600 secondi della terra. **Nessuna ambientazione porta il vuoto** finché T448 non mette la capsula a
+  ogni approdo (regola 10); lo Spazio della Genesi resta la colonia con il cielo della terra. `tests/vuoto.test.ts`.
 
 <a id="veicoli"></a>
 ## Il veicolo

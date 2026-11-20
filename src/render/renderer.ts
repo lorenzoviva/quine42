@@ -20,6 +20,7 @@ import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
 import { HELM_VIEW, wheelFactor, zoomDistance, zoomMax } from './camera';
+import { Stars, STAR_SKY } from './stars';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
@@ -75,6 +76,8 @@ export class Renderer {
    * change the program of every material, and the frame the edge is crossed would wait for them (5-7 programs, 170-290 ms).
    */
   private fog = new THREE.Fog(0, 1, 2);
+  /** The sky of stars of a world whose nature says it (T445), behind and under everything; hidden otherwise. */
+  private stars = new Stars();
   /** Where the ring's meshes are drawn once before they are seen, so that they are on the GPU when the edge is crossed (T226). */
   private loader = { target: new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }), group: new THREE.Group() };
   private overlay: Overlay;
@@ -113,7 +116,7 @@ export class Renderer {
       this.bloom.radius = CARTOON_BLOOM_RADIUS;
     }
     this.scene.fog = this.fog;
-    this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash, this.loader.group);
+    this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash, this.loader.group, this.stars.root);
     this.entities = new Entities(kernel, this.world);
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
@@ -328,6 +331,7 @@ export class Renderer {
 
     // Light: the day outside, a dim neon light in the studio.
     const day = k.daylight();
+    const starry = k.config.nature.sky === 'stars';
     const night = 1 - day;
     if (revealed) {
       // The studio and its campus have their own light, day and night: neon and screens.
@@ -361,7 +365,8 @@ export class Renderer {
       this.dim += (dimAt(under?.depth ?? 0) - this.dim) * Math.min(1, dt * 3);
       this.sun.intensity *= this.dim;
       this.hemi.intensity *= this.dim;
-      const bg = day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
+      // Under the stars (T445) the sky is black, by day too: the light is the sun's, the sky has no air to colour.
+      const bg = starry ? STAR_SKY.clone() : day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3);
       this.scene.background = bg;
       this.fog.color.copy(bg);
       const air = CARTOON ? aerial(this.distance, day) : { near: this.distance * 2.2, far: this.distance * 4.5 };
@@ -413,6 +418,8 @@ export class Renderer {
     this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(this.pitch) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
     if (g > 0.2) this.camera.position.x += (Math.random() - 0.5) * 0.15 * g;
     this.camera.lookAt(this.target);
+    // The stars only where the world shows, never with the corona (ADR-0124: it has its own dark).
+    this.stars.update(starry && !revealed, this.camera, ox, oy);
     this.sun.position.copy(this.target).add(new THREE.Vector3(...SUN_FROM));
     this.sun.target.position.copy(this.target);
     this.bloom.render(dt);
