@@ -11,7 +11,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { readPeople } from '../src/kernel/npc/model';
 import { memoryStore } from '../src/kernel/repo';
 import { TIMELESS_LAYOUTS } from '../src/kernel/themes';
-import { agedSeedLayouts, cleanGraph, cleanPeople, isLocalPerson, isLocalPlan, planGoes } from '../lab/scripts/pulisci-offline';
+import { agedSeedLayouts, cleanGraph, cleanPeople, isLocalPerson, isLocalPlan, planGoes, type PersonLike } from '../lab/scripts/pulisci-offline';
 import { develop } from './world';
 
 class Kept extends MemoryChunks {
@@ -70,7 +70,7 @@ describe('la pulizia dei modelli locali (T454)', () => {
   it('toglie i legami con chi se ne va, i suoi nodi e quelli dei luoghi', () => {
     const local = { name: 'Gemma', story: 'È nata qui e da qui non è mai riuscita ad andarsene, anche se ci ha provato.', routine: [] };
     const kept = { name: 'Mora', story: 'Una gatta del porto.', family: [{ name: 'Gemma' }, { name: 'Lucia' }] };
-    const out = cleanPeople([kept, local, { name: 'Lucia', story: 'Vende il pesce.' }]);
+    const out = cleanPeople<PersonLike>([kept, local, { name: 'Lucia', story: 'Vende il pesce.' }]);
     expect(out.gone.map((p) => p.name)).toEqual(['Gemma']);
     expect(out.kept[0].family).toEqual([{ name: 'Lucia' }]);
     expect(out.bonds).toBe(1);
