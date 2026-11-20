@@ -1278,7 +1278,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (nella corona e nello studio la terra). In multigiocatore il salto è solo da soli; il client prevede il passo con la gravità del mondo, non
   con quella delle regioni del master che non vede, uno scarto entro la tolleranza del server. Nessuna ambientazione porta oggi una gravità
   diversa (l'asteroide e i pianeti: T445, T449); la pagina della campagna nel sito non ha ancora la riga (la rotta la accetta).
-- **L'arcipelago** (ADR-0228, T441, kernel 0.10.4): `nature.geography: 'archipelago'`, portato dai Pirati. **Le isole sono del kernel**, dal solo
+- **L'arcipelago** (ADR-0229, T441, kernel 0.10.4): `nature.geography: 'archipelago'`, portato dai Pirati. **Le isole sono del kernel**, dal solo
   seme (`src/kernel/islands.ts`): una per cella di `ISLAND_PITCH` (180 caselle, 10 luoghi), il centro scosso di al più 18 caselle, la riva una
   curva chiusa attorno al centro (`shoreAt`: raggio 16-40, mosso di al più un quinto; la partenza la più grande, centrata sulla prima casella).
   **Lo stretto più lungo** è `MAX_STRAIT` = 144 caselle (8 luoghi) d'acqua fra due rive, misurato sul corpo che nuota (`straitCost`): nel mare

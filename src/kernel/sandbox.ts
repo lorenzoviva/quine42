@@ -45,7 +45,7 @@ export interface Host {
   /** The nature of the world (T437, ADR-0224): `{geography, sky, day, gravity, oxygen}`, a copy; Lua reads it, never writes it. */
   nature(): unknown;
   /**
-   * The atlas at a tile (T441, ADR-0228): `{name, description, island}`, the region of the place (the Cartographer's or the master's, never one
+   * The atlas at a tile (T441, ADR-0229): `{name, description, island}`, the region of the place (the Cartographer's or the master's, never one
    * held) and the id of the island whose land, beach or shallows the tile is, a copy; undefined where there is neither.
    */
   region_at(x: number, y: number): unknown;

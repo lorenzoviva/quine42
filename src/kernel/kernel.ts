@@ -986,7 +986,7 @@ export class Kernel {
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
       // A copy each time (T437, ADR-0224): what Lua changes of it is its own, the world's nature stays (rule 1, rule 7).
       nature: () => this.nature(),
-      // The atlas and the islands (T441, ADR-0228): copies, read only.
+      // The atlas and the islands (T441, ADR-0229): copies, read only.
       region_at: (x, y) => this.regionInfoAt(x, y),
       islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
@@ -1902,7 +1902,7 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
       if (!failed) {
-        // In an archipelago (T441, ADR-0228) the kernel's islands decide where the land is: the sea, the shallows and the beach around them.
+        // In an archipelago (T441, ADR-0229) the kernel's islands decide where the land is: the sea, the shallows and the beach around them.
         const drawn = typeof value === 'string' && value.length === n && this.config.nature.geography === 'archipelago' ? islandDraft(value, this.config.seed, cx, cy, S) : value;
         // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
         if (typeof drawn === 'string' && drawn.length === n) return [...drawn].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
@@ -2170,7 +2170,7 @@ export class Kernel {
       ch.held = true;
       return;
     }
-    // The open sea (T441, ADR-0228): a place whose draft is all deep water one swims has nothing the Council would put there (nothing stands
+    // The open sea (T441, ADR-0229): a place whose draft is all deep water one swims has nothing the Council would put there (nothing stands
     // on the water) and costs nothing: the kernel plans it, without a call, outside the quota and the pace, as a filler (not by the local models over
     // a world that is not theirs, above: nothing of theirs is saved, T433).
     if (this.openSea(ch.draft)) {
@@ -2387,7 +2387,7 @@ export class Kernel {
   }
 
   /**
-   * The Cartographer names an island (T441, ADR-0228) when it plans the first place on it: a region of the atlas that says the island (`island`),
+   * The Cartographer names an island (T441, ADR-0229) when it plans the first place on it: a region of the atlas that says the island (`island`),
    * its centre and its reach in places, the environment of that first place; never its shape, which is the kernel's. A name out of the world
    * (`metaBreak`) or not a line of text is left, and the next place on the island asks again. Once named, an island is never named again.
    */
@@ -8275,7 +8275,7 @@ export class Kernel {
   }
 
   /**
-   * What `world.region_at(x, y)` gives Lua (T441, ADR-0228): the region of the place of the tile (the Cartographer's or the master's; the first
+   * What `world.region_at(x, y)` gives Lua (T441, ADR-0229): the region of the place of the tile (the Cartographer's or the master's; the first
    * place is nobody's, a region held is the master's plan and not the world's) and the island under the tile in an archipelago. A copy.
    */
   regionInfoAt(x: unknown, y: unknown): { name?: string; description?: string; island?: string } | undefined {

@@ -38,7 +38,7 @@ export interface Region {
    */
   gravity?: number;
   /**
-   * The island of an archipelago this region names (T441, ADR-0228): the Cartographer's, written when the first place on it is planned. Its
+   * The island of an archipelago this region names (T441, ADR-0229): the Cartographer's, written when the first place on it is planned. Its
    * centre and radius say where the island is on the atlas; its shape is the kernel's (`islands.ts`) and never changes. Not a region of
    * the places (`regionAt` passes over it): its environment was the first place's, and the island's places choose their own.
    */

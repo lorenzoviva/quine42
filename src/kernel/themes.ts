@@ -9,7 +9,7 @@ export interface WorldTheme {
   text: string;
   /**
    * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. The
-   * pirates bring the archipelago (T441, ADR-0228); the void and the stars of space come with T445-T450; every other theme is a world of
+   * pirates bring the archipelago (T441, ADR-0229); the void and the stars of space come with T445-T450; every other theme is a world of
    * today's nature, and a theme written by hand always is.
    */
   nature?: Partial<import('./nature').WorldNature>;

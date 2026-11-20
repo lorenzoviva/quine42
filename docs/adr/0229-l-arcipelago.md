@@ -1,4 +1,4 @@
-# ADR-0228 — L'arcipelago: le isole del kernel e lo stretto più lungo
+# ADR-0229 — L'arcipelago: le isole del kernel e lo stretto più lungo
 
 Data: 2026-11-20 · Stato: accettato (task T441 del backlog, P2 di [`docs/design/acqua-spazio.md`](../design/acqua-spazio.md) § 1.2 e § 1.5)
 · Riferimenti: ADR-0224 (la natura del mondo, la regola 10 «a piedi o a nuoto»), ADR-0225 (il corpo che nuota, la fatica, l'annegare, il

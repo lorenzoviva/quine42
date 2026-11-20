@@ -173,7 +173,7 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
- * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0228, `void` and `stars` and the day T445,
+ * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229, `void` and `stars` and the day T445,
  * the oxygen T446; the gravity 0.2-2 is open since T447).
  */
 export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {

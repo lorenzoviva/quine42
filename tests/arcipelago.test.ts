@@ -1,4 +1,4 @@
-// The archipelago (T441, ADR-0228): the islands of the kernel, from the seed alone; the longest strait measured on the swimming body and the
+// The archipelago (T441, ADR-0229): the islands of the kernel, from the seed alone; the longest strait measured on the swimming body and the
 // islets the kernel puts where a strait would be longer (rule 10); the islands that never move; the open sea planned without a call; the
 // Cartographer who names an island with the first place on it; `world.region_at` and `world.islands` for Lua, read only.
 

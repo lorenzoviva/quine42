@@ -1,4 +1,4 @@
-// The archipelago (T441, ADR-0228, `docs/design/acqua-spazio.md` § 1.2 and § 1.5): where a world of islands has land, decided by the kernel
+// The archipelago (T441, ADR-0229, `docs/design/acqua-spazio.md` § 1.2 and § 1.5): where a world of islands has land, decided by the kernel
 // from the universe's seed alone, without a call and without a file. A lattice of islands, one in each cell of `ISLAND_PITCH` tiles, its
 // centre shaken within the cell, its shore a closed curve around it; between two islands of neighbouring cells whose shores are farther
 // than the longest strait (`MAX_STRAIT`) an islet on the line between them, so that no swim between two shores is longer. The islands never

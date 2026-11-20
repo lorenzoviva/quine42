@@ -814,7 +814,7 @@ local function make_api()
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
     -- The nature of the world (T437, ADR-0224): a copy each call, read only.
     nature = function() return host.nature() end,
-    -- The atlas and the islands (T441, ADR-0228): read only, copies.
+    -- The atlas and the islands (T441, ADR-0229): read only, copies.
     region_at = function(x, y)
       if type(x) ~= "number" or type(y) ~= "number" then return nil end
       return host.region_at(x, y)

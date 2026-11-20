@@ -125,7 +125,7 @@ export interface PlanContext {
   /** The region of the atlas this place belongs to, if any. */
   region?: { name: string; description: string };
   /**
-   * The island of an archipelago this place stands on (T441, ADR-0228): its name if the Cartographer gave it one, otherwise how large it is,
+   * The island of an archipelago this place stands on (T441, ADR-0229): its name if the Cartographer gave it one, otherwise how large it is,
    * and the Cartographer names it in `island` with this first place on it.
    */
   island?: { name?: string; description?: string; islet?: boolean; across?: number };
