@@ -4,9 +4,12 @@
 // than the longest strait (`MAX_STRAIT`) an islet on the line between them, so that no swim between two shores is longer. The islands never
 // move: they are a function of the seed, the nature is fixed at the Genesis (ADR-0224), and nothing else enters them, not the atlas, not the
 // master, not the Cartographer, who only names them (`Region.island`). Pure and deterministic: the same in Node, in the browser, on the server.
+// The void (T445, ADR-0233) has its lands on the same lattice: stations (squared, built) and asteroids (smaller, of rock) in the void,
+// without islets (nobody swims the void) and with the gates of the places moved onto the land (`voidGates`).
 
 import { hash32 } from './rng';
-import { gaitOf } from './nature';
+import { gaitOf, VOID_CODE } from './nature';
+import { gates } from './layout';
 import { WALK_ENERGY, DROWN_HEALTH } from './swim';
 import type { WorldLanguage } from './language';
 
@@ -40,7 +43,20 @@ export const BODY_SPEED = 6;
 /** The energy a wanderer is born with (`core.player`): a strait must be crossed with it, in any sea. */
 export const BORN_ENERGY = 90;
 
-/** An island (or an islet) of the archipelago: its centre and its shore. */
+/** What the lattice makes of the world: the islands of an archipelago, or the stations and asteroids of the void (T445). */
+export type Lattice = 'archipelago' | 'void';
+
+/** A land of the void (T445): a station, squared and built, or an asteroid, smaller and of rock. */
+export type Body = 'station' | 'asteroid';
+
+/** The radius of an asteroid before its wobble, in tiles: from a boulder one crosses in a few steps to one of three places. */
+export const ASTEROID_RADIUS: readonly [number, number] = [10, 24];
+/** How many lands of the void are asteroids, one in so many (the rest are stations; the start's is always a station). */
+export const ASTEROID_ONE_IN = 3;
+/** How square a station's edge is (the exponent of its superellipse: 2 a circle, larger a square with rounded corners). */
+const STATION_SQUARE = 4;
+
+/** An island (or an islet) of the archipelago, or a land of the void: its centre and its shore. */
 export interface Island {
   /** `i,j` the cell of the lattice; an islet `i,j~k,l`, the two islands it joins. */
   id: string;
@@ -52,6 +68,8 @@ export interface Island {
   /** The wobble of the shore: amplitude and phase of the harmonics 2, 3 and 4. */
   wave: ReadonlyArray<readonly [number, number]>;
   islet?: true;
+  /** In the void (T445): a station or an asteroid. */
+  body?: Body;
 }
 
 const AMPLITUDES = [0.5, 0.3, 0.2] as const;
@@ -62,22 +80,29 @@ function waveOf(seed: number, a: number, b: number, c: number): Array<[number, n
 
 /** Where the shore of an island is, in the direction `theta` from its centre (tiles): every ray from the centre crosses it once. */
 export function shoreAt(island: Island, theta: number): number {
+  // A station's edge is a superellipse (T445): squared, with rounded corners, and every ray still crosses it once.
+  if (island.body === 'station') return island.radius / (Math.abs(Math.cos(theta)) ** STATION_SQUARE + Math.abs(Math.sin(theta)) ** STATION_SQUARE) ** (1 / STATION_SQUARE);
   let w = 0;
   island.wave.forEach(([amp, phase], n) => (w += amp * Math.sin((n + 2) * theta + phase)));
   return island.radius * (1 + ISLAND_WOBBLE * w);
 }
 
-/** The island of a cell of the lattice: the seed's, always the same. */
-export function islandOf(seed: number, i: number, j: number): Island {
+/**
+ * The island of a cell of the lattice: the seed's, always the same. In the void (T445) a station or an asteroid: the start's a station as
+ * large as the start's island, the others an asteroid one in `ASTEROID_ONE_IN`, smaller; centres and shapes from the same hashes.
+ */
+export function islandOf(seed: number, i: number, j: number, lattice: Lattice = 'archipelago'): Island {
   const start = i === 0 && j === 0;
   const shake = (k: number) => (start ? 0 : (hash32(seed, i, j, k) % (2 * ISLAND_JITTER + 1)) - ISLAND_JITTER);
-  const [lo, hi] = ISLAND_RADIUS;
+  const body: Body | undefined = lattice !== 'void' ? undefined : !start && hash32(seed, i, j, 6) % ASTEROID_ONE_IN === 0 ? 'asteroid' : 'station';
+  const [lo, hi] = body === 'asteroid' ? ASTEROID_RADIUS : ISLAND_RADIUS;
   return {
     id: `${i},${j}`,
     x: i * ISLAND_PITCH + shake(1),
     y: j * ISLAND_PITCH + shake(2),
     radius: start ? START_ISLAND_RADIUS : lo + (hash32(seed, i, j, 3) % (hi - lo + 1)),
     wave: waveOf(seed, i, j, 4),
+    ...(body ? { body } : {}),
   };
 }
 
@@ -105,9 +130,10 @@ const reachOf = (f: Island) => f.radius * (1 + ISLAND_WOBBLE) + SHALLOWS;
 
 /**
  * The islands and the islets within `reach` tiles of (x, y), the nearest first: of the lattice's cells around, and of the pairs of
- * neighbouring cells (the islets). Each is a function of the seed and its cells only.
+ * neighbouring cells (the islets). Each is a function of the seed and its cells only. In the void (T445) the stations and the asteroids,
+ * without islets: nobody swims the void.
  */
-export function islandsNear(seed: number, x: number, y: number, reach: number): Island[] {
+export function islandsNear(seed: number, x: number, y: number, reach: number, lattice: Lattice = 'archipelago'): Island[] {
   const r = Math.max(0, Number.isFinite(reach) ? reach : 0);
   const i0 = Math.floor((x - r) / ISLAND_PITCH) - 1;
   const i1 = Math.ceil((x + r) / ISLAND_PITCH) + 1;
@@ -117,7 +143,7 @@ export function islandsNear(seed: number, x: number, y: number, reach: number): 
   const cell = (i: number, j: number) => {
     const k = `${i},${j}`;
     let c = cells.get(k);
-    if (!c) cells.set(k, (c = islandOf(seed, i, j)));
+    if (!c) cells.set(k, (c = islandOf(seed, i, j, lattice)));
     return c;
   };
   const out: Island[] = [];
@@ -126,6 +152,7 @@ export function islandsNear(seed: number, x: number, y: number, reach: number): 
     for (let j = j0; j <= j1; j++) {
       const a = cell(i, j);
       if (near(a)) out.push(a);
+      if (lattice === 'void') continue;
       for (const b of [cell(i + 1, j), cell(i, j + 1)]) {
         const islet = isletBetween(seed, a, b);
         if (islet && near(islet)) out.push(islet);
@@ -154,8 +181,8 @@ export function groundAt(features: readonly Island[], px: number, py: number): {
 }
 
 /** The features that may touch a place (cx, cy) of side S. */
-export function islandsOfPlace(seed: number, cx: number, cy: number, S: number): Island[] {
-  return islandsNear(seed, cx * S + S / 2, cy * S + S / 2, S * Math.SQRT1_2 + 1);
+export function islandsOfPlace(seed: number, cx: number, cy: number, S: number, lattice: Lattice = 'archipelago'): Island[] {
+  return islandsNear(seed, cx * S + S / 2, cy * S + S / 2, S * Math.SQRT1_2 + 1, lattice);
 }
 
 /**
@@ -179,8 +206,8 @@ export function islandDraft(draft: string, seed: number, cx: number, cy: number,
  * The island a place stands on (T441): the one with the most of its land and beach in the place, or undefined if the place is all water.
  * The Cartographer names it when the first place on it is planned.
  */
-export function islandOfPlace(seed: number, cx: number, cy: number, S: number): Island | undefined {
-  const features = islandsOfPlace(seed, cx, cy, S);
+export function islandOfPlace(seed: number, cx: number, cy: number, S: number, lattice: Lattice = 'archipelago'): Island | undefined {
+  const features = islandsOfPlace(seed, cx, cy, S, lattice);
   const count = new Map<Island, number>();
   for (let r = 0; r < S; r++)
     for (let c = 0; c < S; c++) {
@@ -193,11 +220,77 @@ export function islandOfPlace(seed: number, cx: number, cy: number, S: number): 
 }
 
 /** The island whose shallows, beach or land the tile (x, y) is on, if any. */
-export function islandAtTile(seed: number, x: number, y: number): Island | undefined {
+export function islandAtTile(seed: number, x: number, y: number, lattice: Lattice = 'archipelago'): Island | undefined {
   const tx = Math.floor(x) + 0.5, ty = Math.floor(y) + 0.5;
-  const g = groundAt(islandsNear(seed, tx, ty, 1), tx, ty);
-  return g.ground === 'sea' ? undefined : g.island;
+  const g = groundAt(islandsNear(seed, tx, ty, 1, lattice), tx, ty);
+  // In the void the shallows are the void too (T445): only the land is a station's or an asteroid's.
+  return g.ground === 'sea' || (lattice === 'void' && g.ground === 'shallows') ? undefined : g.island;
 }
+
+// --- The void (T445, ADR-0233) -------------------------------------------------------------------------------------------------------
+
+/** Whether a ground of the lattice is land in the void: the beach and the land inside a shore; the rest is the void. */
+const landOfVoid = (g: Ground) => g === 'land' || g === 'beach';
+
+/** What a tile of the generator becomes on an asteroid: no trees, no water but ice, dust for the meadow; what else it drew stays. */
+const ASTEROID_GROUND: Readonly<Record<string, string>> = { g: 's', t: 'r', j: 'r', w: 'n', o: 'n' };
+
+/**
+ * The draft of a place of the void (T445): outside the edges of the stations and the asteroids the void (`VOID_CODE`); a station's
+ * floor is the plating of the world (`p`, the path of every palette: the corridors, the decks, what the environments build on); an
+ * asteroid keeps what the generator drew of rock, dust and ice (`ASTEROID_GROUND`), its rim dust. The lands are the kernel's: a generator
+ * a universe rewrote still has them.
+ */
+export function voidDraft(draft: string, seed: number, cx: number, cy: number, S: number): string {
+  const features = islandsOfPlace(seed, cx, cy, S, 'void');
+  const out: string[] = [];
+  for (let r = 0; r < S; r++)
+    for (let c = 0; c < S; c++) {
+      const { ground, island } = groundAt(features, cx * S + c + 0.5, cy * S + r + 0.5);
+      const code = draft[r * S + c];
+      out.push(!landOfVoid(ground) ? VOID_CODE : island?.body === 'station' ? 'p' : ground === 'beach' ? 's' : (ASTEROID_GROUND[code] ?? code));
+    }
+  return out.join('');
+}
+
+/** Whether the tile (x, y) of the carpet is land in the void, among these features. */
+const voidLand = (features: readonly Island[], x: number, y: number) => landOfVoid(groundAt(features, x + 0.5, y + 0.5).ground);
+
+/**
+ * The gates of a place of the void (T445, `docs/design/acqua-spazio.md` § 2.2), as `gates` gives them ([west, east, north, south]):
+ * a gate stands where the land goes on into the next place, on both sides of the edge; from the gate of the hash, the nearest such tile
+ * along the edge. An edge that is the void on one side wherever one looks keeps the gate of the hash, which the layout leaves as void (no
+ * gate, nothing carved). The two places of an edge look at the same two rows of tiles, so they agree.
+ */
+export function voidGates(seed: number, cx: number, cy: number, S: number): number[] {
+  const base = gates(cx, cy, S, seed);
+  const features = islandsNear(seed, cx * S + S / 2, cy * S + S / 2, S * 1.5 + 2, 'void');
+  const X0 = cx * S, Y0 = cy * S;
+  // For each edge: the gate's position along it, its tile in the place, and the two tiles (here, beyond) at a position along it.
+  const edges: Array<{ along: number; tile: (a: number) => number; pair: (a: number) => [number, number, number, number] }> = [
+    { along: Math.floor(base[0] / S), tile: (a) => a * S, pair: (a) => [X0, Y0 + a, X0 - 1, Y0 + a] },
+    { along: Math.floor(base[1] / S), tile: (a) => a * S + S - 1, pair: (a) => [X0 + S - 1, Y0 + a, X0 + S, Y0 + a] },
+    { along: base[2] % S, tile: (a) => a, pair: (a) => [X0 + a, Y0, X0 + a, Y0 - 1] },
+    { along: base[3] % S, tile: (a) => (S - 1) * S + a, pair: (a) => [X0 + a, Y0 + S - 1, X0 + a, Y0 + S] },
+  ];
+  return edges.map(({ along, tile, pair }, k) => {
+    for (let d = 0; d < S; d++)
+      for (const a of d === 0 ? [along] : [along + d, along - d]) {
+        if (a < 2 || a > S - 3) continue;
+        const [x1, y1, x2, y2] = pair(a);
+        if (voidLand(features, x1, y1) && voidLand(features, x2, y2)) return tile(a);
+      }
+    return base[k];
+  });
+}
+
+/** The name of a place of the void, which the kernel plans without a call (T445), in the language of the world. */
+export const OPEN_VOID: Readonly<Record<WorldLanguage, { name: string; description: string }>> = {
+  it: { name: 'Vuoto', description: 'Nient’altro che stelle, sopra e sotto.' },
+  en: { name: 'The void', description: 'Nothing but stars, above and below.' },
+  fr: { name: 'Le vide', description: 'Rien que des étoiles, dessus et dessous.' },
+  es: { name: 'El vacío', description: 'Nada más que estrellas, arriba y abajo.' },
+};
 
 /** The place a feature's centre is in and how many places around it its shore reaches (Chebyshev, as the atlas measures a region). */
 export function islandPlaces(f: Island, S: number): { center: [number, number]; radius: number } {

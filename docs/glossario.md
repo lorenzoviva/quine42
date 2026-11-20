@@ -193,6 +193,41 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `continente` (per un'isola), `regione` (per l'isola: la regione la nomina soltanto)
 - **Fermo**: `island` nelle regioni dell'atlante; l'id `i,j` della cella.
 
+### Vuoto
+- **Inglese**: `void` (`nature.geography`, lo strato del terreno), `VOID_CODE` (`~`), `voidTerrain`, `isVoid`, `voidDraft`, `voidGates`, `OPEN_VOID`
+- **Definizione**: l'assenza del pavimento, in un mondo che la natura dice del vuoto: una casella che non si cammina, non si nuota e non si salta, senz'aria, dove niente si posa e che il layout non scava; a schermo non ha suolo e ci si vedono le stelle. È un terreno del kernel, non di un manifest; fra due terre del vuoto si va solo con la capsula (T448) (T445, ADR-0233).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/islands.ts`, `src/kernel/layout.ts`, `src/render/terrain.ts`
+- **Da non usare**: `spazio` (per la casella: lo spazio è l'ambientazione), `abisso`, `baratro` (si cade: nel vuoto non si cade, ci si ferma al bordo); il «vuoto» del codice `?` è la casella che manca, un'altra cosa
+- **Fermo**: `void` in `nature.geography`, il codice `~` e lo strato `void`.
+
+### Stazione
+- **Inglese**: `station`, `body` di `Island`, `Body`
+- **Definizione**: una terra costruita del vuoto, squadrata, sul reticolo delle isole; il suo pavimento è il sentiero della palette (la lamiera, i ponti), su cui gli ambienti costruiscono. La partenza è una stazione (T445, ADR-0233).
+- **Dove vive**: `src/kernel/islands.ts`
+- **Da non usare**: `base`, `astronave` (è un veicolo, T448)
+- **Fermo**: `body: station` di `world.islands`.
+
+### Asteroide
+- **Inglese**: `asteroid`, `body` di `Island`, `ASTEROID_ONE_IN`, `ASTEROID_RADIUS`
+- **Definizione**: una terra di roccia, polvere e ghiaccio del vuoto, più piccola di una stazione, una su tre sul reticolo delle isole (T445, ADR-0233).
+- **Dove vive**: `src/kernel/islands.ts`
+- **Da non usare**: `pianeta` (è T449), `meteora`
+- **Fermo**: `body: asteroid` di `world.islands`.
+
+### Cielo di stelle
+- **Inglese**: `stars` (`nature.sky`), `Stars`, `STAR_SKY`
+- **Definizione**: il cielo di un mondo che la natura dice di stelle: nero anche di giorno, con le stelle sopra e sotto il pavimento (dove c'è il vuoto) e un campo lento sotto che dà la profondità. Solo disegno (T445, ADR-0233).
+- **Dove vive**: `src/render/stars.ts`, `src/render/renderer.ts`
+- **Da non usare**: `spazio` (per il cielo), `notte` (il cielo di stelle c'è anche di giorno)
+- **Fermo**: `stars` in `nature.sky`.
+
+### Luce ferma
+- **Inglese**: `STILL_DAY`, `stillLight`, `clockDay`, `daySeconds` (`nature.day` 0)
+- **Definizione**: la luce di un mondo il cui giorno è 0: sempre pieno giorno (le lampade di una stazione, il sole fermo su un asteroide); l'orologio del mondo, per le routine e ciò che matura, tiene allora il giorno della terra, 600 secondi (T445, ADR-0233).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `giorno eterno`, `tempo fermo` (il tempo va avanti)
+- **Fermo**: `day: 0` in `nature`.
+
 ### Isolotto
 - **Inglese**: `islet`, `isletBetween`, `ISLET_RADIUS`
 - **Definizione**: la lingua di sabbia che il kernel mette a metà dell'acqua fra due isole vicine quando sarebbe più lunga dello stretto più lungo: un riposo dall'acqua, non dalla fatica (T441, ADR-0229).
@@ -237,7 +272,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
-- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina (le capsule col vuoto, T445). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
+- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina (le capsule col vuoto, T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
 - **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`, `world/state.json → vehicles`
 - **Da non usare**: `mezzo`, `nave` e `barca` (per la primitiva: sono ciò che il Concilio ne fa), `cavalcatura`
 - **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`.
