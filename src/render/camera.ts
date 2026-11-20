@@ -3,9 +3,18 @@
 
 /**
  * The camera's distance from the wanderer, in tiles: never nearer than `min`; in the simulation never further than the
- * default view (`max`), with the free orbit (god mode, the corona, the studio, following a player) up to `freeMax`.
+ * default view (`max`), at a vehicle's helm (T439) up to `helm`, to see the hull and the shore; with the free orbit (god mode,
+ * the corona, the studio, following a player) up to `freeMax`.
  */
-export const ZOOM = { min: 2.5, max: 15, freeMax: 45 } as const;
+export const ZOOM = { min: 2.5, max: 15, helm: 30, freeMax: 45 } as const;
+
+/** Where the camera draws back to when the helm is taken (T439), if it is nearer: the wheel goes on from there. */
+export const HELM_VIEW = 22;
+
+/** How far the camera may go now: the free orbit's, the helm's, or the simulation's. */
+export function zoomMax(free: boolean, helm = false): number {
+  return free ? ZOOM.freeMax : helm ? ZOOM.helm : ZOOM.max;
+}
 
 /** One notch of the wheel: further (down) or nearer (up). */
 export const WHEEL = { out: 1.12, in: 0.89 } as const;
@@ -16,8 +25,8 @@ export function wheelFactor(deltaY: number): number {
 }
 
 /** The distance scaled by `factor`, within the limits; what is not a number leaves it where it was (within them). */
-export function zoomDistance(distance: number, factor: number, free: boolean): number {
-  const max = free ? ZOOM.freeMax : ZOOM.max;
+export function zoomDistance(distance: number, factor: number, free: boolean, helm = false): number {
+  const max = zoomMax(free, helm);
   const from = Number.isFinite(distance) ? distance : ZOOM.max;
   const to = Number.isFinite(factor) && factor > 0 ? from * factor : from;
   return Math.min(max, Math.max(ZOOM.min, to));
@@ -27,7 +36,7 @@ export function zoomDistance(distance: number, factor: number, free: boolean): n
  * A pinch: the distance the camera had when the two fingers touched, scaled by how their span changed. Fingers that
  * part bring the camera nearer (as the wheel up), fingers that close take it further; a span of nothing changes nothing.
  */
-export function pinchDistance(startDistance: number, startSpan: number, span: number, free: boolean): number {
+export function pinchDistance(startDistance: number, startSpan: number, span: number, free: boolean, helm = false): number {
   const factor = startSpan > 0 && span > 0 ? startSpan / span : 1;
-  return zoomDistance(startDistance, factor, free);
+  return zoomDistance(startDistance, factor, free, helm);
 }

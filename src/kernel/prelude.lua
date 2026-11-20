@@ -814,6 +814,13 @@ local function make_api()
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
     -- The nature of the world (T437, ADR-0224): a copy each call, read only.
     nature = function() return host.nature() end,
+    -- The vehicle (T439, ADR-0227): read, asked for power, course, anchor and helm; never moved by Lua (the kernel moves it).
+    vehicle = function(id) return host.vehicle(id) end,
+    vehicle_set = function(id, t)
+      if type(t) ~= "table" then return false end
+      return host.vehicle_set(id, t.thrust, t.steer, t.power, t.anchored, t.helm)
+    end,
+    vehicle_of = function(id) return host.vehicle_of(id) end,
   }
   local inventory = {
     add = function(id, item, n) return host.inv_add(id, tostring(item), n or 1) end,

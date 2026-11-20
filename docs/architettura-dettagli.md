@@ -153,6 +153,10 @@
 ## Lua: confine e limiti
 
 - **Lua 5.4 via wasmoon** (WebAssembly), sandbox gestita dal kernel. Il confine (ADR-0101, T122): il proxy di wasmoon è spento e tutto passa da `Crossing` (`sandbox.ts`): a Lua arriva una vista dei soli campi di dati propri di un oggetto (niente prototipi, metodi, chiamate), a JS solo dati (niente funzioni Lua, cicli, nomi di `Object.prototype`; al più 64 livelli). La prova di caricamento (`Sandbox.probe`) gira in una VM a parte con un `Host` vuoto. I limiti (ADR-0105, T126): 2 milioni di istruzioni per chiamata e 12 per tick (`tickBegin`, `tickEnd`: chi viene dopo salta il tick, il guasto è `tick:budget`, `core.*` gira comunque), il lavoro delle funzioni C addebitato, i pattern costosi nel matcher scritto in Lua del prelude, memoria (64 MB), stringhe (1 MiB) e byte allocati nell'allocatore (`Meter`), 2 s di rete per chiamata; i modelli del gioco con `FORM_LIMITS`, `MAX_FORM_TIME`, `MAX_FORM_XML` (`src/mj/run.ts`).
+- **Le chiamate annidate** (T439, ADR-0227): il kernel che chiama Lua, che chiama l'Host, che chiama di nuovo Lua, al più `MAX_NESTING` (32) aperte
+  insieme (`Sandbox.enter`); oltre, la chiamata è un guasto e non entra. Prima un rientro senza fine finiva solo quando una pila traboccava, e un
+  trabocco nel mezzo del codice C della VM (l'interning delle stringhe) la lasciava rotta: la chiamata dopo non tornava più. Dipendeva dalla
+  disposizione della memoria (tre funzioni in più nell'Host dei test bastavano). `tests/sicurezza/uscita.test.ts`.
 
 <a id="gemini"></a>
 ## Gemini, l'Attore, i coefficienti di generazione
@@ -1274,6 +1278,52 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (nella corona e nello studio la terra). In multigiocatore il salto è solo da soli; il client prevede il passo con la gravità del mondo, non
   con quella delle regioni del master che non vede, uno scarto entro la tolleranza del server. Nessuna ambientazione porta oggi una gravità
   diversa (l'asteroide e i pianeti: T445, T449); la pagina della campagna nel sito non ha ancora la riga (la rotta la accetta).
+
+<a id="veicoli"></a>
+## Il veicolo
+
+- **Una primitiva, non una barca** (ADR-0227, T439, kernel 0.10.3): un'entità il cui manifest dice `vehicle` (`medium` `water` o `land`,
+  `speed`, `accel`, `turn`, `draught`) porta chi sta sul suo ponte; il Concilio ne fa barche e carri (le capsule col vuoto, T445). Le funzioni
+  pure in `src/kernel/vehicle.ts`: `vehicleSpecOf` legge il manifest entro `VEHICLE_LIMITS` (velocità 0,5-8 caselle al secondo,
+  accelerazione 0,2-4, giro 0,2-2 rad/s; `void` non si accetta finché non c'è il vuoto), `vehicleSpecErrors` è ciò che il validatore rifiuta
+  (anche un veicolo che è qualcuno o si prende), `carries` dice se una casella regge lo scafo (l'acqua che si nuota, solo quella profonda per un
+  `draught: deep`; ciò che si cammina per un carro). Lo stato è il componente `vehicle` (`heading` = lo `yaw` della forma, `speed`, `turn`,
+  `thrust`, `steer`, `power`, `anchored`, `helm`, `bumped`), scritto solo dal kernel e riparato a ogni lettura (`saneVehicle`).
+- **Il ponte** (`Kernel.deckAt`): i pavimenti della forma del veicolo (le `decks`, rifatte con i solidi in `rebuildSolids`) alla quota dei piedi,
+  o, finché la forma non c'è o se il veicolo non è solido, il disco del suo corpo. **La linea di galleggiamento** è `waterline="N"` sulla radice
+  del programma (`waterlineOf`, 1-40 voxel): la forma si posa N voxel sotto la superficie come una cantina (`Form.base`, ADR-0091) ma senza
+  suolo, e il suo pavimento entro un gradino sopra la base si raggiunge dall'acqua e dalla riva. Sul ponte non si nuota (`swimsAt`), l'acqua
+  sotto non conta per il corpo (`bodyFree`, `freeReal`: anche chi è troppo carico ci cammina sopra l'acqua profonda), il salto ci atterra come
+  sulla terra, e ciò che vi giace si disegna sul ponte (`restsAt`). La barca dei test è `tests/fixtures/barca-prova.xml` (scafo sotto 6 voxel,
+  ponte 3 sopra l'acqua, parapetto basso, albero).
+- **Il moto** (`vehicleTick`, nel tick prima di `rebuildSolids`, mai in uno specchio): per ogni veicolo il timone dà `thrust` e `steer`
+  (`helmOrders`: su e giù spingono, sinistra gira la prua alla sua sinistra) o li ha dati Lua; `vehicleStep` integra l'abbrivio entro
+  l'accelerazione (indietro a metà, l'ancora frena tre volte più in fretta) e il giro (a riposo un terzo, `TURN_AT_REST`); lo scafo prova la
+  posa nuova, poi solo il giro, poi solo l'andare (`hullFits`: ogni punto dello scafo, `hullPoints` sulle colonne della forma ogni quarto di
+  casella e i bordi o `discPoints`, su ciò che lo porta e fuori dal piede dei solidi e dallo scafo intero degli altri veicoli). Fermato perde
+  l'abbrivio e dice `bumped`; chi tiene il timone sente «Lo scafo urta e si ferma.» una volta finché preme lì (`BUMP_EVERY`), e il bus dice
+  `vehicle:bumped`. Poi i solidi si rifanno e **chi era sul ponte va con lui** (`carryAboard`): i viandanti di questo kernel (`wanderersAboard`)
+  con la stessa rototraslazione (`carried`) se il corpo può stare lì, il salto in corso con loro; le cose che vi giacciono (`thingsAboard`: non
+  persone, animali, edifici, altri veicoli) col loro verso, e il loro luogo diventa quello sotto di loro. Nessuno a bordo: l'ancora si getta da sé.
+- **Il timone e l'ancora**: dal menu del veicolo (`vehicleActions`, solo sul ponte e mai in uno specchio: «Prendi il timone», «Lascia il
+  timone», «Getta l'ancora», «Leva l'ancora»; su un carro la guida e il freno, `VEHICLE_WORDS`). E apre il menu del veicolo a chi è sul ponte
+  senza altro davanti e sempre al timone; Spazio al timone fa lo stesso (`jump` rifiuta). Prendere il timone leva l'ancora; chi lo tiene non
+  cammina (`HELM_STILLS`, `core.movement` saltato) e guarda dove guarda la prua (`facingOf`); lo lascia dal menu, o scendendo, saltando,
+  morendo, uscendo (`letGoHelm`).
+- **Non è di un luogo** (come `moved`, ADR-0168): `spawnModuleEntity` gli dà un'origine (`freshOrigin` se non ne ha), lo toglie al suo luogo
+  (niente `chunk`) e mette l'origine in `consumed`; al più `MAX_VEHICLES` (32), oltre un veicolo di un luogo è una cosa del luogo e Lua non ne fa.
+  Il salvataggio: `world/state.json → vehicles` (`vehiclesToSave`: modulo, origine, x, y, verso, ancora; `restoreVehicles` al caricamento, letto con
+  `readVehicles`; un modulo che non c'è aspetta nel salvataggio). La Genesi li toglie. Il carico non si salva ancora (la stiva, T444). Il catalogo del Cartografo non offre i veicoli (`catalog`): li fanno Lua e i porti (T443).
+- **Lua** (V-045): `world.vehicle(id)` (una copia, con `aboard` e `helm` come corpi), `world.vehicle_set(id, t)` (`power` 0…1; `thrust` e `steer`
+  −1…1 solo senza timoniere; `anchored`; `helm` a un viandante sul ponte, in silenzio se non può, o `false`), `world.vehicle_of(id)`. La `pos` e
+  il `vehicle` di un veicolo arrivano a Lua come copie, `vehicle` non si scrive né nasce da `ecs.spawn`. `mech.barca` di T183 è il vento sulla
+  vela, senza sedile a mano.
+- **A schermo**: il verso di ogni cosa a ogni fotogramma (`Entities.update`); chi è a bordo muove le gambe solo se cammina sul ponte; al
+  timone la camera arretra una volta a `HELM_VIEW` (22) e la rotella e il pizzico arrivano a `ZOOM.helm` (30, `zoomMax` in
+  `src/render/camera.ts`); lasciato il timone torna entro 15.
+- **In molti** (T442): oggi il veicolo porta e fa governare solo i viandanti del kernel che lo muove; chi gioca da un suo client non è portato
+  né prende il timone, e lo specchio riceve il verso solo con la prima vista. `tests/veicolo.test.ts`, `tests/sicurezza/veicolo.test.ts`,
+  `tests/espressivita/scenari.test.ts` (la barca).
 
 <a id="rilievo"></a>
 ## Il rilievo

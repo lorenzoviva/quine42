@@ -27,7 +27,7 @@ Gli scenari provati in codice. Le colonne dicono se lo scenario regge lì, per i
 
 | Scenario | Modulo | Da solo, in una sessione | Dopo una riapertura | In multigiocatore | Dove si ferma, genere | L'Ingegnere |
 |---|---|---|---|---|---|---|
-| Barca | `mech.barca` | ● | ○ | ○ | Il sedile è a mano: si riscrive `pos` a ogni tick, perché il passo non scende sotto 0,2. Sul server nessun tasto. **Movimento, multigiocatore** | con due righe: il prompt non spiega `pos` contro `world.player_pos()` |
+| Barca | `mech.barca` | ● | ◐ | ○ | Da T439 (ADR-0227) la barca è il veicolo del kernel: chi è sul ponte va con lo scafo, il timone coi tasti, la riva la ferma; il modulo è il vento sulla vela (`world.vehicle_set` → `power`), senza sedile a mano. Riaperto il mondo la barca torna dov'era (`state.json → vehicles`), il timone e il componente del modulo no. In molti chi gioca da un suo client non è portato (T442). Prima: il sedile a mano, `pos` riscritta a ogni tick. **Movimento, multigiocatore** | sì: il prompt dice `world.vehicle*` (T439) |
 | Mongolfiera | `mech.mongolfiera` | ◐ | ○ | ○ | La logica c'è, la quota no: `settleHeights` cancella `pos.z` a ogni tick. **Movimento, camera** | la logica sì, la quota nessuno |
 | Fucile | `mech.fucile` | ● | ◐ | ◐ | Proiettile vero, si ferma ai muri. I colpi nel caricatore non durano. Mira solo nelle 4 direzioni di `facing`, F non si legge (`input.held` vede solo WASD), niente suono. **Proiettili, input** | sì; `free_real` e `facing` mancano nel prompt |
 | Computer anni 90 | `mech.computer` | ◐ | ○ | ○ | Un menu su 4 righe e 4 tasti funziona; non si scrive, e un'entità non apre un pannello. **Pannelli** | sì, come menu |
@@ -66,7 +66,7 @@ Un trucco che non è una primitiva: con un edificio funzione pura del tempo (la 
 
 | # | Scenario | Genere | Oggi | Primitive |
 |---|---|---|---|---|
-| 1 | Barca a vela col vento | movimento | ● provato | Q K X |
+| 1 | Barca a vela col vento | movimento | ● provato (il veicolo del kernel, T439) | Q K X |
 | 2 | Mongolfiera | movimento, camera | ◐ provato | Q C |
 | 3 | Fucile | proiettili | ● provato | I X W |
 | 4 | Computer anni 90 | pannelli | ◐ provato | U W D |
@@ -106,7 +106,7 @@ Un trucco che non è una primitiva: con un edificio funzione pura del tempo (la 
 | 38 | Fornaio: forno, ricette, clienti, tutto il giorno | NPC | ◐ | N E Y |
 | 39 | Regata con traguardi e classifica | multigiocatore | ◐ | K W D |
 
-Gli scenari 35 e 36 non hanno un modulo di prova: li coprono gli effetti `terreno` e `rilievo` già nel gioco e il fatto, provato sulla barca, che `pos` si riscrive.
+Gli scenari 35 e 36 non hanno un modulo di prova: li coprono gli effetti `terreno` e `rilievo` già nel gioco e il fatto, provato sulla barca prima del veicolo del kernel (T439), che `pos` si riscrive.
 
 ## Le primitive proposte, per quanti scenari sbloccano
 
@@ -115,7 +115,7 @@ Gli scenari 35 e 36 non hanno un modulo di prova: li coprono gli effetti `terren
 | D | **Magazzino durevole** | 20 | stato durevole | `world.store_get/set`: dati per modulo in un file del mondo, salvati con la partita; una versione per viandante |
 | W | **Campi dei pannelli al client** | 15 | multigiocatore | I `campo` nominati dai `manifest.ui` viaggiano in `MyState`: un elenco, come vuole la regola 8f |
 | E | **Eventi** | 9 | eventi | `M.on_event(nome, dati)`: morte, rottura, azione, con chi è stato. Oggi `bus.emit` non ha ascoltatori in Lua |
-| Q | **Corpi: quota, sedile, stazza** | 8 | movimento | Quota libera non cancellata da `settleHeights`; `body.portato_da`, valido anche sul client; corpi più larghi |
+| Q | **Corpi: quota, sedile, stazza** | 8 | movimento | Quota libera non cancellata da `settleHeights`; `body.portato_da`, valido anche sul client; corpi più larghi. Il sedile è il ponte del veicolo da T439 (ADR-0227: chi sta sul ponte è portato), sul client con T442; quota e stazza restano |
 | O | **Fuori vista** | 6 | fuori vista | `M.on_return(luogo, trascorso)` per recuperare al ritorno; caselle di un luogo non caricato |
 | X | **Effetti e suono da Lua** | 6 | aspetto | `fx.play(id)`, `sound.play(id)`, un evento al client (ADR-0126: il suono resta del client) |
 | L | **Cose posate che durano** | 5 | stato durevole | `world.place(modulo, x, y)` scrive in `plan.objects`, con i componenti che dichiara `persist` |

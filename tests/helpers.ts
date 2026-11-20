@@ -61,6 +61,9 @@ export function fakeHost() {
     fault: (k, m) => {
       faults[k] = m;
     },
+    vehicle: () => undefined,
+    vehicle_set: () => false,
+    vehicle_of: () => undefined,
   };
   return { host, player, carpet, faults, logs };
 }

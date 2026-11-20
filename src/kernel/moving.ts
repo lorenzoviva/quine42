@@ -49,7 +49,7 @@ export interface MovedRecord {
  * The components the kernel makes again whenever an entity of a module comes into the world (where it is, its body, its look, its
  * menu, its container, which is kept by its origin) or that say someone rather than something: never part of a thing's state.
  */
-export const KERNEL_PARTS: ReadonlySet<string> = new Set(['pos', 'module', 'body', 'glyph', 'form', 'interact', 'mind', 'container', 'inventory', 'vel', 'chunk', 'origin', 'placed', 'pickup', 'rune', 'remote', 'player', 'structure', 'identity', 'carpet', 'hand', 'needs', 'states', 'slots', 'jump']);
+export const KERNEL_PARTS: ReadonlySet<string> = new Set(['pos', 'module', 'body', 'glyph', 'form', 'interact', 'mind', 'container', 'inventory', 'vel', 'chunk', 'origin', 'placed', 'pickup', 'rune', 'remote', 'player', 'structure', 'identity', 'carpet', 'hand', 'needs', 'states', 'slots', 'jump', 'vehicle']);
 
 /** How much state a thing takes with it (characters of JSON): beyond, it comes back as its manifest makes it. */
 export const MAX_THING_PARTS = 4096;

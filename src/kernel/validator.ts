@@ -28,6 +28,7 @@ import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 import { strataErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
+import { vehicleSpecErrors } from './vehicle';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -280,7 +281,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature', 'vehicle', 'vehicle_set', 'vehicle_of'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
@@ -364,6 +365,11 @@ export class Validator {
     if (m.takeable !== undefined && typeof m.takeable !== 'boolean') err('takeable deve essere true o false');
     // Only a thing of the world is taken (T292): not someone, not an item (it is one already), not what the world is made of.
     if (m.takeable === true && (m.kind !== 'entity' || m.persona !== undefined)) err('takeable vale solo per le cose del mondo (kind entity, senza persona)');
+    // A vehicle (T439, ADR-0227): a thing of the world that carries, within the kernel's limits; not someone, not a thing one takes.
+    if (m.vehicle !== undefined) {
+      for (const e of vehicleSpecErrors(m.vehicle)) err(e);
+      if (m.kind !== 'entity' || m.persona !== undefined || m.takeable === true) err('vehicle vale solo per le cose del mondo che non si prendono (kind entity, senza persona né takeable)');
+    }
     if (m.interaction && !['talk', 'read', 'lua'].includes(m.interaction.type)) err('interaction.type deve essere talk, read o lua');
     if (m.interaction?.type === 'talk' && typeof m.persona !== 'string') err('un personaggio (talk) richiede "persona"');
     if (m.kind === 'item') {

@@ -179,6 +179,41 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `nuoto` (per il segno), `water` (per il campo)
 - **Fermo**: `swim` nei piani dei luoghi.
 
+### Veicolo
+- **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
+- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina (le capsule col vuoto, T445). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
+- **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`, `world/state.json → vehicles`
+- **Da non usare**: `mezzo`, `nave` e `barca` (per la primitiva: sono ciò che il Concilio ne fa), `cavalcatura`
+- **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`.
+
+### A bordo
+- **Inglese**: `aboard`, `deckAt`, `Deck`, `wanderersAboard`, `thingsAboard`, `carried`, `carryAboard`
+- **Definizione**: stare sul ponte di un veicolo: i piedi su un pavimento della sua forma, alla loro altezza (il disco del suo corpo finché la forma non c'è). Chi è a bordo non nuota, va e gira con il veicolo dove un corpo può stare, e ciò che giace sul ponte con lui (T439, ADR-0227).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts`
+- **Da non usare**: `sedile` (il sedile a mano di T183 non c'è più), `seduto`, `imbarcato`
+- **Fermo**: —
+
+### Timone
+- **Inglese**: `helm`, `takeHelm`, `leaveHelm`, `atHelm`, `helmOrders`, `HELM_STILLS`, `HELM_VIEW`, `ZOOM.helm`
+- **Definizione**: chi governa un veicolo: lo prende dal menu chi è sul ponte, se è libero; non cammina, i suoi tasti spingono (su, giù) e girano la prua (sinistra, destra); lo lascia dal menu o scendendo. Sui carri «la guida» (T439, ADR-0227).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts` (`VEHICLE_WORDS`), `src/render/camera.ts`
+- **Da non usare**: `pilota`, `guidatore` (per chi lo tiene: è il timoniere), `volante`
+- **Fermo**: `helm` nel componente `vehicle`.
+
+### Ancora
+- **Inglese**: `anchored`, `setAnchor`, `ANCHOR_BRAKE`
+- **Definizione**: ciò che tiene fermo un veicolo: gettata, l'abbrivio si perde e niente lo spinge né lo gira; un veicolo senza nessuno a bordo la getta da sé. Sui carri «il freno» (T439, ADR-0227).
+- **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `ormeggio` (è del porto, T443), `parcheggio`
+- **Fermo**: `anchored` nel componente `vehicle` e in `world/state.json → vehicles`.
+
+### Linea di galleggiamento
+- **Inglese**: `waterline`, `waterlineOf`, `Form.base`
+- **Definizione**: quanti voxel di uno scafo stanno sotto l'acqua, detto sulla radice del suo programma (`waterline="6"`): la forma si posa tanto più in basso, come una cantina ma senza suolo (T439, ADR-0227; lo Scultore delle navi lo scrive con T440).
+- **Dove vive**: `src/kernel/forms.ts`
+- **Da non usare**: `pescaggio` (per i voxel: il pescaggio, `draught`, è quale acqua regge lo scafo), `chiglia`
+- **Fermo**: l'attributo `waterline` dei programmi.
+
 ### Ambiente
 - **Inglese**: `environment`, `EnvironmentDraft`, `EnvironmentDef`, `environmentsFor`
 - **Definizione**: un programma di riscrittura che dà forma a un luogo (bosco, villaggio…), scritto dal Cartografo.

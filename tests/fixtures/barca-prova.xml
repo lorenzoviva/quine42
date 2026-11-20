@@ -1,0 +1,14 @@
+<!-- A boat for the tests of the vehicle (T439): a hull six voxels under the water, a deck three over it, a low rail on the sides, a mast; the bow toward +y. -->
+<sequence values="BHDRM" size="36 72 36" waterline="6" name="Barca di prova">
+  <color symbol="H" value="6b4423" name="scafo"/>
+  <color symbol="D" value="b08850" name="ponte"/>
+  <color symbol="R" value="4a2e17" name="parapetto"/>
+  <color symbol="M" value="d8d0c0" name="albero"/>
+  <box at="18 34 0" size="32 56 9" color="H"/>
+  <box at="18 66 0" size="22 8 9" color="H"/>
+  <box at="18 71 0" size="10 2 9" color="H"/>
+  <box at="18 36 8" size="28 60 1" color="D" on="H"/>
+  <box at="3 34 9" size="2 52 2" color="R"/>
+  <box at="33 34 9" size="2 52 2" color="R"/>
+  <box at="18 40 9" size="2 2 26" color="M"/>
+</sequence>

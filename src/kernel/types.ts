@@ -1,4 +1,5 @@
 import type { CardStamp } from './cards';
+import type { VehicleSaid } from './vehicle';
 
 export type FileMap = Record<string, string>;
 
@@ -288,6 +289,11 @@ export interface Manifest {
    * entity that is not someone: taken, it is the item `thing:<id>` with who it is and its state.
    */
   takeable?: boolean;
+  /**
+   * A vehicle (T439, ADR-0227): what it moves on (`water`, `land`), its top speed, its way, its turn, its draught, within `VEHICLE_LIMITS`.
+   * Who stands on its deck goes with it, who holds its helm steers it; only an entity that is not someone nor a thing one takes.
+   */
+  vehicle?: VehicleSaid;
   /** Character sheet for NPCs: the LLM plays this individual. */
   persona?: string;
   /** Module ids an NPC carries (can give them away). */
