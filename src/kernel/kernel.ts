@@ -9,7 +9,7 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
-import { islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Island, type Lattice } from './islands';
+import { DOCK_NEAR, dockOf, islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
@@ -77,7 +77,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWo
 import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
 import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
-import { chunkLevels, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels, type LotBox } from './relief';
+import { chunkLevels, flatRelief, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels, type LotBox } from './relief';
 import { CardCosts, CardUses, CARDS_FILE, readServer, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
@@ -89,7 +89,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
-import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
+import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -135,10 +135,18 @@ interface VehicleMove {
 
 /** How near the feet must be to a deck's floor to stand on it (tiles, T439): the kernel puts them on it, so a little. */
 const DECK_SLACK = 0.05;
+/**
+ * How far over or under the feet a deck a foot goes onto is (T448): a step. Where the tile under a foot does not carry a body (the void
+ * beside a land, the deep water for who carries too much) the deck there does, if it is within a step: from the edge into a capsule.
+ */
+const DECK_STEP = UNDER_STEP;
 /** The system that walks a wanderer (T439): it does not run for who holds a helm. */
 const HELM_STILLS = 'core.movement';
 /** The bump of a hull pressing against the shore is said again only after this many seconds without one (T439). */
 const BUMP_EVERY = 2;
+/** The capsule of the seed (T448, ADR-0234): the kernel puts one at the landing of every land of the void (`dockOf`). */
+export const CAPSULE = 'vehicle.capsule';
+
 /** What is never cargo of a vehicle (T439): someone (people, animals, wanderers), a building, another vehicle, a rune. */
 const NOT_CARGO = ['vehicle', 'mind', 'identity', 'wander', 'structure', 'remote', 'player', 'rune'];
 
@@ -2689,7 +2697,11 @@ export class Kernel {
     // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
     // In the void the gates stand where the land goes on (T445, `voidGates`).
     const voidAt = this.config.nature.geography === 'void' ? { gates: voidGates(this.config.seed, ch.cx, ch.cy, S) } : {};
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(block ? this.blockLayout(block, ch) : {}) };
+    const blockAt = block ? this.blockLayout(block, ch) : undefined;
+    // The land at the hatch of a landing (T448) is walked and reached from the gates, with the edge of a block's lot if there is one.
+    const docked = this.dockApron(ch);
+    const apron = docked.length ? { apron: new Set([...(blockAt?.apron ?? []), ...docked]) } : {};
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(blockAt ?? {}), ...apron };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
@@ -2906,6 +2918,8 @@ export class Kernel {
     for (const f of asks ? (plan.fresh ?? []) : []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     if (away !== undefined) this.npc.onReturn(ch.key, away);
+    // The capsules of its landings (T448).
+    this.dockCapsules(ch);
     this.bus.emit('chunk:planned', { key: ch.key });
     // The rhythms of the world (T45b): stretched by the coefficients of generation; none while the world is held (T373).
     if (!asks) return;
@@ -3424,13 +3438,18 @@ export class Kernel {
     fc.yaw = Math.round(fc.yaw / q) * q;
   }
 
-  /** The relief of the simulation (ADR-0048), made the first time it is asked for, again if the seed or the program change. */
+  /**
+   * The relief of the simulation (ADR-0048), made the first time it is asked for, again if the seed or the program change. A world of the
+   * void is flat (T448, ADR-0234): a capsule docked at any edge has its deck a step over the land.
+   */
   get relief(): Relief {
     const xml = this.files[RELIEF_PATH] ?? HILLS;
-    const key = `${this.config.seed}|${xml}`;
+    const flat = this.config.nature.geography === 'void';
+    const key = `${this.config.seed}|${flat ? 'flat' : xml}`;
     if (this.reliefCache?.key !== key) {
       let relief: Relief;
-      try {
+      if (flat) relief = flatRelief();
+      else try {
         relief = new Relief(this.config.seed, xml);
         this.faults.clear('universe:relief');
       } catch (e) {
@@ -3820,6 +3839,14 @@ export class Kernel {
       if (this.ecs.get(id, 'chunk').key !== ch.key) continue;
       if (this.ecs.has(id, 'rune')) this.runesDirty = true;
       this.ecs.destroy(id);
+    }
+    // A capsule left idle in it (T448) goes back to its landing: the place of the landing makes it again when it comes.
+    if (!this.mirror && this.config.nature.geography === 'void') {
+      const S = this.config.chunkSize;
+      for (const id of this.ecs.query('vehicle', 'pos')) {
+        const p = this.ecs.get(id, 'pos');
+        if (Math.floor(p.x / S) === ch.cx && Math.floor(p.y / S) === ch.cy && this.idleCapsule(id)) this.ecs.destroy(id);
+      }
     }
     this.chunks.delete(ch.key);
     this.npc.forgetWays();
@@ -4211,7 +4238,7 @@ export class Kernel {
     if (![x, y, r].every(Number.isFinite)) return false;
     const heavy = this.tooLoaded();
     // On a vehicle's deck (T439) the water under it does not count: the hull carries the body.
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (this.deckAt(x + dx, y + dy, z) === undefined && !this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (this.deckAt(x + dx, y + dy, z, DECK_STEP) === undefined && !this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
     return !this.formBlocks(x, y, r, z);
   }
 
@@ -4234,7 +4261,7 @@ export class Kernel {
         continue;
       }
       sim = true;
-      if (this.deckAt(px + ox, py + oy, z) === undefined && !this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
+      if (this.deckAt(px + ox, py + oy, z, DECK_STEP) === undefined && !this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
     }
     return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
@@ -5468,7 +5495,7 @@ export class Kernel {
    * The vehicle whose deck the feet at (x, y) carpet space, `z` high, stand on (T439): a floor of its form there, at their height (the kernel
    * puts the feet on it, `settleHeights`); a vehicle whose form is not ready, or that is not solid, its disc, at any height.
    */
-  deckAt(x: number, y: number, z?: number): Id | undefined {
+  deckAt(x: number, y: number, z?: number, slack = DECK_SLACK): Id | undefined {
     if (!this.decks.length || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
     for (const d of this.decks) {
       const s = d.s;
@@ -5484,7 +5511,7 @@ export class Kernel {
       const f = s.levels.z[levelAt(s.levels, vx + vy * g.X, this.levelIn(s, z))];
       // Nothing of the hull over its waterline here: the water, not the deck.
       if (f <= s.form.base) continue;
-      if (Math.abs(this.standOf(s) + (f - s.form.base) / s.form.vpt - z) <= DECK_SLACK) return d.id;
+      if (Math.abs(this.standOf(s) + (f - s.form.base) / s.form.vpt - z) <= slack) return d.id;
     }
     return undefined;
   }
@@ -5828,6 +5855,148 @@ export class Kernel {
     return true;
   }
 
+  /**
+   * Where on a vehicle's deck the wanderer acting climbs aboard (T448): its boarding area (`area="boarding"`, the hatch of a capsule) if a
+   * place of it is within `BOARD_REACH` tiles, else the place of the deck nearest them; a place of this deck where the body is free. The
+   * disc of a vehicle with no form yet is its middle.
+   */
+  private boardingSpot(id: Id): { x: number; y: number; z: number } | undefined {
+    const d = this.decks.find((e) => e.id === id);
+    const at = this.wandererPos();
+    if (!d || !at || this.corona.isInterior(at.x)) return undefined;
+    const c = this.wandererCarpet();
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+    const s = d.s;
+    const ranks: Array<Array<[number, number]>> = [[], []];
+    const g = s?.form.result?.grid;
+    if (!s || !g) ranks[1].push([d.x, d.y]);
+    else {
+      const vpt = s.form.vpt, W = g.X / vpt, L = g.Y / vpt;
+      const put = (rank: number, lx: number, ly: number) => {
+        const [wx, wy] = toWorld(lx, ly, s.yaw);
+        ranks[rank].push([s.x + wx, s.y + wy]);
+      };
+      for (const [i, j] of formDeckAreas(s.form).boarding ?? []) put(0, i + 0.5 - W / 2, j + 0.5 - L / 2);
+      for (let a = 0.25; a < W; a += 0.5) for (let b = 0.25; b < L; b += 0.5) put(1, a - W / 2, b - L / 2);
+    }
+    for (const list of ranks) {
+      let best: { x: number; y: number; z: number } | undefined, far = Infinity;
+      for (const [x, y] of list) {
+        const dist = Math.hypot(x - c.x, y - c.y);
+        if (dist > BOARD_REACH + 1e-9 || dist >= far) continue;
+        const z = this.floorAt(x, y);
+        if (this.deckAt(x, y, z) !== id || !this.bodyFree(x, y, r, z)) continue;
+        [best, far] = [{ x, y, z }, dist];
+      }
+      if (best) return best;
+    }
+    return undefined;
+  }
+
+  /** Whether the wanderer acting, on no deck, climbs aboard a vehicle from where they are (T448): a place of its deck within `BOARD_REACH`. */
+  canBoard(id: Id): boolean {
+    return !!this.vehicleOf(id) && this.aboard() === undefined && this.boardingSpot(id) !== undefined;
+  }
+
+  /**
+   * «Sali a bordo», «Entra» (T448): the wanderer acting, beside a vehicle and on no deck, climbs aboard at its `boardingSpot`: from the head of a
+   * pier onto a boat whose deck is a jump over it, from the edge of a land into a capsule. False, said, with no room.
+   */
+  boardDeck(id: Id): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror || this.aboard() !== undefined) return false;
+    const words = VEHICLE_WORDS[got.spec.medium];
+    const spot = this.boardingSpot(id);
+    if (!spot) return void this.message(words.noDeck, 'warn'), false;
+    const c = this.wandererCarpet(), p = this.wandererPos();
+    this.ecs.remove(this.wandererEntity, 'jump');
+    this.shiftWanderer(spot.x - c.x, spot.y - c.y);
+    p.z = spot.z;
+    this.message(words.boarded);
+    this.bus.emit('wanderer:pushed', { id: this.wanderer().id });
+    return true;
+  }
+
+  // --- The capsules of the void (T448, ADR-0234) ---------------------------------------------------------------------------------
+
+  /** The landings of the lands of the void (T448), a function of the seed: made once each. */
+  private dockCache = new Map<string, Dock | null>();
+
+  private dockOfLand(f: Island): Dock | undefined {
+    const key = `${this.config.seed}|${f.id}`;
+    let d = this.dockCache.get(key);
+    if (d === undefined) this.dockCache.set(key, (d = dockOf(this.config.seed, f) ?? null));
+    return d ?? undefined;
+  }
+
+  /** The landings of a place of a world of the void (T448): those whose capsule's middle, or whose land at the hatch, is in it. */
+  docksOf(cx: number, cy: number): Dock[] {
+    if (this.config.nature.geography !== 'void') return [];
+    const S = this.config.chunkSize;
+    const inside = (x: number, y: number) => Math.floor(x / S) === cx && Math.floor(y / S) === cy;
+    const out: Dock[] = [];
+    for (const f of islandsNear(this.config.seed, cx * S + S / 2, cy * S + S / 2, S + 8, 'void')) {
+      const d = this.dockOfLand(f);
+      if (d && (inside(d.x, d.y) || inside(d.land[0] + 0.5, d.land[1] + 0.5))) out.push(d);
+    }
+    return out;
+  }
+
+  /** The tiles of a place the landings of its lands keep walked and reached from its gates (T448, rule 10): the land at each hatch. */
+  private dockApron(ch: Pick<Chunk, 'cx' | 'cy'>): number[] {
+    const S = this.config.chunkSize;
+    const out: number[] = [];
+    for (const d of this.docksOf(ch.cx, ch.cy)) {
+      const c = d.land[0] - ch.cx * S, r = d.land[1] - ch.cy * S;
+      if (c >= 0 && r >= 0 && c < S && r < S) out.push(r * S + c);
+    }
+    return out;
+  }
+
+  /** Whether a vehicle is a capsule of a landing left idle (T448): at anchor, nobody at its controls nor aboard. It goes back to its landing. */
+  private idleCapsule(id: Id): boolean {
+    const o = this.ecs.get(id, 'origin')?.key;
+    if (typeof o !== 'string' || !o.startsWith('dock:')) return false;
+    const got = this.vehicleOf(id);
+    return !!got && got.v.anchored && got.v.helm === undefined && !this.wanderersAboard(id).length;
+  }
+
+  /**
+   * The capsule at every landing of a place that has just come into the world (T448, rule 10: between two lands of the void one goes only by
+   * capsule): the seed's (`CAPSULE`), docked, where no vehicle is near the landing. The same guarantee as the gates: the kernel writes it,
+   * nobody asks for it, no call. Not in a mirror: the world makes it, the clients see it.
+   */
+  private dockCapsules(ch: Chunk): void {
+    if (this.mirror || this.config.nature.geography !== 'void') return;
+    const m = this.modules.get(CAPSULE);
+    if (!m || !this.vehicleSpecFor(m.manifest)) return;
+    const S = this.config.chunkSize;
+    for (const d of this.docksOf(ch.cx, ch.cy)) {
+      if (Math.floor(d.x / S) !== ch.cx || Math.floor(d.y / S) !== ch.cy) continue;
+      const near = this.ecs.query('vehicle', 'pos').some((e) => {
+        const p = this.ecs.get(e, 'pos');
+        return Math.hypot(p.x - d.x, p.y - d.y) < DOCK_NEAR;
+      });
+      if (near) continue;
+      const taken = (o: string) => this.waitingVehicles.some((r) => r.origin === o) || this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === o);
+      let origin = `dock:${d.island}`;
+      for (let n = 2; taken(origin); n++) origin = `dock:${d.island}/${n}`;
+      const id = this.spawnModuleEntity(m, d.x, d.y, undefined, origin);
+      this.consumed.delete(origin);
+      const v: VehicleState | undefined = this.ecs.get(id, 'vehicle');
+      // Beyond the vehicles a world keeps (`MAX_VEHICLES`) it would be a thing of no place that never goes: none.
+      if (!v) {
+        this.ecs.destroy(id);
+        this.faults.raise('kernel:capsule', `l'approdo di ${d.island} non ha la sua capsula: il mondo ha già ${MAX_VEHICLES} veicoli`);
+        continue;
+      }
+      v.heading = d.heading;
+      const fc: FormComp | undefined = this.ecs.get(id, 'form');
+      if (fc) fc.yaw = d.heading;
+      this.bus.emit('vehicle:docked', { id, island: d.island });
+    }
+  }
+
   /** The helm let go (T439): whoever held it is told, the vehicle keeps its anchor as it was, its course is nobody's. */
   private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec, said: 'left' | 'seized' = 'left'): void {
     const who = v.helm;
@@ -5925,9 +6094,11 @@ export class Kernel {
   private vehicleActions(id: Id): ActionOption[] {
     const got = this.vehicleOf(id);
     const me = this.wanderer().id;
-    if (!got || this.aboard() !== id) return [];
+    if (!got) return [];
     const { v, spec } = got;
     const w = VEHICLE_WORDS[spec.medium];
+    // Beside it (T448): climbing aboard, from the head of a pier, the edge of a land, the ground beside a cart.
+    if (this.aboard() !== id) return this.aboard() === undefined && this.boardingSpot(id) ? [{ id: 'board', label: w.board, enabled: true }] : [];
     const out: ActionOption[] = [];
     if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
     else {
@@ -6082,6 +6253,8 @@ export class Kernel {
       const got = this.vehicleOf(id);
       const p = this.ecs.get(id, 'pos');
       if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) continue;
+      // A capsule left idle (T448) is not kept: its landing makes it again when its place comes back.
+      if (this.idleCapsule(id)) continue;
       out.push({ module: this.ecs.get(id, 'module').id, origin: this.ecs.get(id, 'origin').key, x: r4(p.x), y: r4(p.y), heading: r4(got.v.heading), anchored: got.v.anchored });
     }
     return [...out, ...this.waitingVehicles].slice(0, MAX_VEHICLES);
@@ -6591,9 +6764,12 @@ export class Kernel {
       case 'weigh':
         this.setAnchor(id, action === 'anchor');
         return;
-      // Over the side (T442).
+      // Over the side (T442), and aboard (T448).
       case 'over':
         this.leaveDeck(id);
+        return;
+      case 'board':
+        this.boardDeck(id);
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
