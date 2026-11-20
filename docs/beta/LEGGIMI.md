@@ -15,6 +15,11 @@ Guida per l'autore (ADR-0131). Nessuno dei due passi tocca il codice.
 Come si prepara e si conduce una campagna (ospiti e inviti, ritmo, regioni, direttive), dal gioco e dal sito, e come si ospita una beta senza
 Firebase: [`campagna.md`](campagna.md). Non è una parte della pagina delle istruzioni: resta fuori dalla build.
 
+## La prima run della closed beta
+
+Come si lancia la prima run registrata con Gemini vero (il branch `beta/run-1`, l'universo, il tetto, le regolazioni, che cosa fare se
+qualcosa va storto): [`run-1.md`](run-1.md). Come `campagna.md`, resta fuori dalla build.
+
 ## I laboratori per i giocatori
 
 - `site/beta.json` ha un secondo interruttore, `laboratori`, separato da `laCorona` (ADR-0161). Spento: le carte fatte a mano non si leggono né si salvano, `/lab` non si serve.
