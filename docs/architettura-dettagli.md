@@ -1264,11 +1264,27 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **Il Fisico alla Genesi** (`genesis.physics`): lo schema dice `cross`, `speed`, `fatigue`, `depth`; `toPalette` scrive ogni terreno con
   `physicsOf` dentro lo strato (muri, vegetazione e roccia mai, pavimenti e porte sempre, la terra a piedi o no, un altro liquido a nuoto o no) e i
   limiti; dei codici di base il Fisico dice solo il passo e la fatica dell'acqua; un passo fuori dall'intervallo del nuoto (l'1 del Cartografo) è
-  quello dell'acqua. Ogni terreno di una tavolozza nuova dice `cross`. Dopo la Genesi un terreno cambia solo per mano del kernel, e il modo di
-  attraversare di un codice che un luogo pianificato usa mai.
+  quello dell'acqua. Ogni terreno di una tavolozza nuova dice `cross`. Dopo la Genesi un terreno cambia solo per mano del kernel: con le
+  azioni imparate, e col Fisico a mondo acceso (sotto).
+- **Il Fisico a mondo acceso** (T452, ADR-0235, kernel 0.10.11): il Referente porta al Fisico (l'incarico `physics`) una richiesta che cambia
+  come i corpi vanno sul mondo, anche una regola che lo dice (una regola che cambia la fisica diventa un dato, ADR-0224); il Fisico risponde
+  (`physics.reshape`, `src/kernel/agents/physicist.ts`, la manopola `studio`) coi terreni che cambiano e i soli campi che cambiano (`cross`,
+  `speed`, `fatigue`, `depth`, `air`) e, se la richiesta lo dice, la gravità del mondo. Il kernel legge la risposta senza fidarsi e senza
+  tagliarla (`src/kernel/reshape.ts`: `reshapedTerrain`, `reshapedGravity`): un valore fuori dai tetti o ciò che è fermo (lo strato di un
+  terreno, come si attraversa e la profondità di un codice di base, il vuoto, l'aria dei codici di base, e della natura tutto tranne la
+  gravità) si rifiuta col motivo. **La regola 10**: se un codice cambia come si attraversa (`crossingChanged`), `Kernel.crossingBreaks`
+  guarda ogni luogo del mondo: un luogo caricato le cui caselle di adesso si dividerebbero (`walkGroups`, `splitBetween`) e un luogo
+  pianificato, caricato o sul disco (`plannedPlaces`), che il layout disporrebbe altrimenti (scaverebbe un sentiero dove il luogo era intero,
+  o non ne scaverebbe uno che c'è: `laidWith`, la tavolozza di prova solo per quella chiamata); in un kernel del ramo del master lo chiede al
+  mondo che rappresenta (`branchOf`). Ciò che il kernel rifiuta torna al Fisico una volta coi motivi; ciò che resta rifiutato non entra, i
+  motivi vanno nella risposta del Referente e nelle mancanze. Accettato, un commit del Concilio: il manifest dei terreni (`councilMayWrite`) e
+  la gravità in `universe.json` per mano del kernel (`writeCommanded`), che `keepNature` ora lascia passare (`keptNature`: la gravità da
+  ciò che universe.json dice, il resto della natura dalla Genesi). In una partita di molti il master lo chiede sul suo ramo (il suo specchio
+  prende i file del ramo come il server li ha scritti, `writeCommanded`), e pubblicato lo hanno il mondo e ogni client (`TILE_FIELDS`,
+  `UNIVERSE_FIELDS`). Mai da Lua. `tests/fisico-acceso.test.ts`.
 - **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
   (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
-  com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
+  com'era (`keepNature`, accanto a `keepGame`; la gravità no: la rimodella il Fisico, T452); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
   di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle e il giorno di 120-3600 secondi o 0), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`

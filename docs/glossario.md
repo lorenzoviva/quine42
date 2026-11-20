@@ -158,6 +158,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `velocità` (per il passo di un terreno), `pescaggio` (per l'acqua: è dello scafo; l'acqua ha la profondità), `stamina`
 - **Fermo**: `speed`, `fatigue`, `depth`, `air` nei manifest.
 
+### Rimodellare la fisica
+- **Inglese**: `reshape`, `reshapePhysics`, `reshapedTerrain`, `reshapedGravity`, `keptNature`, `crossingBreaks`, `RESHAPE_TASK` (`physics.reshape`), l'incarico del Referente `physics`
+- **Definizione**: il Fisico che cambia a mondo acceso la fisica di un terreno (modo di attraversare, passo, fatica, profondità, aria) o la gravità del mondo, entro i tetti del kernel, con un commit del Concilio; ciò che sconnetterebbe un luogo o ne cambierebbe le caselle si rifiuta col motivo (T452, ADR-0235).
+- **Dove vive**: `src/kernel/reshape.ts`, `src/kernel/agents/physicist.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: «ricalibrare», «aggiornare la fisica» (è il Fisico che rimodella), «patch»
+- **Fermo**: il compito `physics.reshape` e l'incarico `physics` del Referente.
+
 ### Nuotare
 - **Inglese**: `swim`, `swimming`, `swimsAt`, `bodyFree`, `swimmingTick`, `swimTick`, `tooLoadedToSwim`, `SWIM_LOAD`, `SWIM_SINK`, `WALK_ENERGY`, `DROWN_HEALTH`
 - **Definizione**: ciò che fa il corpo di un viandante su una casella che si nuota: il passo del terreno, la fatica che il kernel aggiunge, immerso fino al petto; nell'acqua profonda non entra chi porta più di metà della portata o una cosa sopra la testa. Gli NPC e le cose non nuotano (`free`); il viandante sì (`bodyFree`, anche nel passo del server) (T438, ADR-0225).
@@ -1374,7 +1381,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Fisico
 - **Inglese**: `Physicist`, `fisico`
-- **Definizione**: l'agente della fisica di moduli, terreni e oggetti.
+- **Definizione**: l'agente della fisica di moduli, terreni e oggetti; alla Genesi la fisica dei terreni, a mondo acceso la rimodella (T452).
 - **Dove vive**: `src/kernel/agents/content.ts`, `src/kernel/agents/council.ts`
 - **Da non usare**: nessuno
 

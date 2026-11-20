@@ -8,6 +8,8 @@ import { Faults } from './faults';
 import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
+import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshapedWords, MAX_RESHAPED } from './reshape';
+import { askReshape, RESHAPE_TASK } from './agents/physicist';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
 import { DOCK_NEAR, dockOf, islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
@@ -794,8 +796,10 @@ export class Kernel {
   private dying = new Map<string, Promise<void>>();
   /** The game chosen at the Genesis (ADR-0053): universe.json follows it, nothing else changes it. */
   private game?: GameSetup;
-  /** The nature of the world chosen at the Genesis (T437, ADR-0224): universe.json follows it, as the game. */
+  /** The nature of the world chosen at the Genesis (T437, ADR-0224): universe.json follows it, as the game, but the gravity (T452, `keptNature`). */
   private worldNature?: WorldNature;
+  /** The world a kernel of the master's branch stands for (T452): its places are those the Physicist must not cut (`crossingBreaks`). */
+  private branchOf?: Kernel;
   /** Files the kernel or the master wrote and no commit has brought yet: `fenceCouncil` leaves them be. */
   private commanded = new Map<string, string>();
   /** Size of the visible area in cells, set by the renderer. */
@@ -8125,7 +8129,7 @@ export class Kernel {
       return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     }
     const req = r.request ?? text;
-    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
+    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
     switch (r.task) {
       case 'item':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'item', true)).summary };
@@ -8157,6 +8161,12 @@ export class Kernel {
       }
       case 'music':
         return { say: r.say, forged: (await this.composing.make({ richiesta: req }, chi, here)).summary };
+      case 'physics': {
+        // The Physicist reshapes the physics with the world on (T452, ADR-0235): a terrain, or the gravity of the world.
+        const made = await this.reshapePhysics(req, chi);
+        if (!made.ok) return { say: r.say, forged: `Il Fisico non lo fa: ${made.reason}` };
+        return { say: r.say, forged: made.text };
+      }
       case 'individual': {
         // An individual the master declares (T376, ADR-0188 §5.2): the Narrator writes them with the facts given, where the master said.
         const made = await this.declareIndividual({ facts: req, name: r.name, where: r.target }, chi);
@@ -8733,13 +8743,17 @@ export class Kernel {
   /**
    * The nature of the world is chosen at the Genesis with its theme and never changes after (T437, ADR-0224), as the game: the first
    * universe.json fixes it, a later one that says otherwise is written back; only `runGenesis` chooses a new one. A universe without it is
-   * the world of today, and nothing is written for it.
+   * the world of today, and nothing is written for it. The gravity is the exception (T452, ADR-0235): the Physicist reshapes it with the
+   * world on, and a universe.json that says another one (the kernel's commit, the master's branch published, the server's file on a
+   * client) brings it; the rest stays the Genesis's (`keptNature`).
    */
   private keepNature(config: UniverseConfig, files: FileMap): void {
     if (!this.worldNature) {
       this.worldNature = config.nature;
       return;
     }
+    if (sameNature(config.nature, this.worldNature)) return;
+    this.worldNature = keptNature(this.worldNature, config.nature);
     if (sameNature(config.nature, this.worldNature)) return;
     config.nature = this.worldNature;
     let raw: Record<string, unknown>;
@@ -8749,7 +8763,7 @@ export class Kernel {
       return;
     }
     if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, nature: this.worldNature }, null, 2) + '\n');
-    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, gravità, respiro) si sceglie solo alla Genesi: universe.json la tiene com'era");
+    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità la rimodella il Fisico: universe.json la tiene com'era");
   }
 
   /** The nature of this world (T437, ADR-0224): what `world.nature()` gives Lua, a copy. */
@@ -9848,6 +9862,173 @@ export class Kernel {
     this.council.say('kernel', 'approva', `${owner} impara «${def.label}» (commit ${c.id})`);
   }
 
+  // --- The Physicist with the world on (T452, ADR-0235) ----------------------------------------------------------------------------
+
+  /**
+   * The Physicist reshapes the physics with the world on: the terrains (crossing, pace, fatigue, depth, air) and the gravity of the world,
+   * on the Referente's request (a rule of the world that changes the physics goes there too: ADR-0224 § 1, a judgement that changes the
+   * physics becomes data). Within the kernel's limits (`reshapedTerrain`, `reshapedGravity`), and a crossing that would cut a place or change
+   * its tiles refused (rule 10, `crossingBreaks`); what the kernel refuses goes back to the Physicist once, with the reasons, and what is
+   * still refused does not go in. One commit of the Council: the terrains' manifest (`councilMayWrite`) and the gravity in universe.json by
+   * the kernel's hand (`writeCommanded`). Never from Lua. The answer: the line of what changed, or why nothing did.
+   */
+  async reshapePhysics(request: string, chi: string = this.payerNow()): Promise<{ ok: true; text: string } | { ok: false; reason: string }> {
+    const lacking = (outcome: 'refusal' | 'invalid' | 'error', reason: string) => {
+      this.noteShortfall({ request, who: chi, agent: 'physicist', task: RESHAPE_TASK, outcome, reason });
+      return { ok: false as const, reason };
+    };
+    if (this.readOnly() !== undefined) return { ok: false, reason: 'questo universo si legge soltanto' };
+    if (this.manyPlayers() && !this.isMaster()) return { ok: false, reason: 'solo il master rimodella la fisica del mondo' };
+    const path = this.terrain?.manifestPath;
+    if (!path || !this.repo.working[path]) return lacking('invalid', 'il mondo non ha i suoi terreni');
+    let sentBack: string | undefined;
+    const refused: string[] = [];
+    for (let round = 0; round < 2; round++) {
+      let a;
+      try {
+        a = await askReshape(this.council, request, this.palette, this.config.nature.gravity, { chi, sentBack });
+      } catch (e) {
+        return lacking('error', `il Fisico non risponde: ${(e as Error).message}`);
+      }
+      // A refusal after the kernel's: the kernel's reasons first, they say why.
+      if (a.refusal && !a.terrains.length && a.gravity === undefined) return lacking('refusal', [...refused, a.refusal].join('; '));
+      const checked = await this.checkReshape(path, a.terrains, a.gravity);
+      if (checked.ok) return this.applyReshape(path, checked, a.note);
+      sentBack = checked.reasons.join('; ');
+      for (const why of checked.reasons) if (!refused.includes(why)) refused.push(why);
+      this.council.say('kernel', 'scarta', sentBack, 'physicist', RESHAPE_TASK);
+    }
+    return lacking('invalid', refused.join('; ') || 'niente cambia');
+  }
+
+  /** What the Physicist said, read against the kernel's limits and rule 10: the terrains and the gravity as they would be, or the reasons. */
+  private async checkReshape(path: string, said: readonly unknown[], gravity: unknown): Promise<{ ok: true; tiles: Record<string, TerrainDef>; changed: Record<string, string[]>; gravity?: number } | { ok: false; reasons: string[] }> {
+    let tiles: Record<string, TerrainDef>;
+    try {
+      tiles = (JSON.parse(this.repo.working[path] ?? '').tiles ?? {}) as Record<string, TerrainDef>;
+    } catch {
+      return { ok: false, reasons: ['i terreni del mondo non si leggono'] };
+    }
+    const reasons: string[] = [];
+    if (said.length > MAX_RESHAPED) reasons.push(`al più ${MAX_RESHAPED} terreni per volta`);
+    const out: Record<string, TerrainDef> = {};
+    const changed: Record<string, string[]> = {};
+    for (const raw of said.slice(0, MAX_RESHAPED)) {
+      const change = raw as Record<string, unknown>;
+      const code = typeof change.code === 'string' ? change.code : '';
+      if (code in out) {
+        reasons.push(`«${code}» detto due volte`);
+        continue;
+      }
+      const r = reshapedTerrain(code, Object.hasOwn(tiles, code) ? tiles[code] : undefined, change);
+      if (!r.ok) reasons.push(r.reason);
+      else {
+        out[code] = r.tile;
+        changed[code] = r.changed;
+      }
+    }
+    let g: number | undefined;
+    if (gravity !== undefined) {
+      const r = reshapedGravity(gravity);
+      if (!r.ok) reasons.push(r.reason);
+      else if (r.gravity !== this.config.nature.gravity) g = r.gravity;
+    }
+    if (!reasons.length && !Object.keys(out).length && g === undefined) reasons.push('niente cambia');
+    if (!reasons.length && Object.keys(out).length) {
+      // Rule 10 on the world's places: a kernel of the master's branch asks the world it stands for.
+      const broken = await (this.branchOf ?? this).crossingBreaks(out);
+      if (broken) reasons.push(broken);
+    }
+    return reasons.length ? { ok: false, reasons } : { ok: true, tiles: out, changed, ...(g !== undefined ? { gravity: g } : {}) };
+  }
+
+  /** The reshape the kernel accepted, written and committed: the terrains' manifest, and the gravity in universe.json. */
+  private applyReshape(path: string, r: { tiles: Record<string, TerrainDef>; changed: Record<string, string[]>; gravity?: number }, note?: string): { ok: true; text: string } | { ok: false; reason: string } {
+    const before = { [path]: this.repo.working[path] ?? null, 'universe.json': this.repo.working['universe.json'] ?? null };
+    const man = JSON.parse(this.repo.working[path]!);
+    for (const [code, t] of Object.entries(r.tiles)) man.tiles[code] = t;
+    const text = JSON.stringify(man, null, 2) + '\n';
+    const errors = this.validator.validateFile(path, text);
+    if (errors.length) return { ok: false, reason: errors.join(' · ') };
+    const nature = this.worldNature;
+    this.repo.write(path, text);
+    if (r.gravity !== undefined) {
+      let raw: Record<string, unknown>;
+      try {
+        raw = internalFields('config', JSON.parse(this.repo.working['universe.json'] ?? '{}'));
+      } catch {
+        raw = {};
+      }
+      const next = { ...this.config.nature, gravity: r.gravity };
+      this.worldNature = next;
+      this.writeCommanded('universe.json', JSON.stringify({ ...raw, nature: next }, null, 2) + '\n');
+    }
+    this.applyFiles({ ...this.repo.working });
+    if (this.faults.list().some((f) => f.key === `manifest:${path}` || f.key === 'universe:config')) {
+      for (const [p, v] of Object.entries(before)) this.repo.write(p, v);
+      this.commanded.delete('universe.json');
+      this.worldNature = nature;
+      this.applyFiles({ ...this.repo.working });
+      return { ok: false, reason: 'il mondo si romperebbe' };
+    }
+    const lines = Object.entries(r.tiles).map(([code, t]) => reshapedWords(t, r.changed[code]));
+    if (r.gravity !== undefined) lines.push(`gravità ×${String(r.gravity).replace('.', ',')}`);
+    const said = lines.join('; ');
+    const c = this.repo.commit(`il Fisico rimodella: ${said}`, 'agent');
+    this.council.say('physicist', 'propone', `${said}${note ? ` — ${note}` : ''} (commit ${c.id})`, undefined, RESHAPE_TASK);
+    return { ok: true, text: `Il Fisico rimodella il mondo: ${said}.` };
+  }
+
+  /**
+   * Whether terrains with another crossing would cut a place of this world (T452, rule 10): a place loaded whose tiles, as they are now, would
+   * fall apart, or a place planned (loaded or on the disk) that the layout would lay out otherwise (it would dig a path where the place was
+   * whole, or leave one it dug). Why not, naming the places; undefined if none.
+   */
+  async crossingBreaks(changes: Record<string, TerrainDef>): Promise<string | undefined> {
+    const before = this.palette;
+    const after = this.paletteOf({ ...(this.terrain?.manifest.tiles ?? {}), ...changes });
+    const codes = new Set(crossingChanged(before, after));
+    if (!codes.size) return undefined;
+    const S = this.config.chunkSize;
+    const area: TileArea = { col: 0, row: 0, cols: S, rows: S };
+    const walkOn = (tiles: string, palette: Record<string, TerrainDef>): Walk => ({ passable: (c, r) => crossingOf(palette[tiles[r * S + c]]) !== 'none', step: () => true });
+    const split: string[] = [];
+    const moved: string[] = [];
+    const seen = new Set<string>();
+    for (const ch of this.chunks.values()) {
+      if (ch.stage !== 'planned' || !ch.plan) continue;
+      seen.add(ch.key);
+      const name = `«${ch.place?.name ?? ch.key}»`;
+      if ([...ch.tiles].some((c) => codes.has(c)) && splitBetween(walkGroups(area, walkOn(ch.tiles, before)), walkGroups(area, walkOn(ch.tiles, after)))) split.push(name);
+      else if (this.laidWith(before, ch, ch.plan) !== this.laidWith(after, ch, ch.plan)) moved.push(name);
+    }
+    for (const p of await this.plannedPlaces()) {
+      if (seen.has(this.chunkKey(p.cx, p.cy))) continue;
+      const ch = { cx: p.cx, cy: p.cy, draft: this.genDraft(p.cx, p.cy) };
+      if (this.laidWith(before, ch, p.plan) !== this.laidWith(after, ch, p.plan)) moved.push(`«${p.plan.place?.name ?? `${p.cx},${p.cy}`}»`);
+    }
+    if (!split.length && !moved.length) return undefined;
+    const names = [...codes].map((c) => `«${before[c]?.name ?? c}»`).join(', ');
+    const list = (xs: string[]) => `${xs.slice(0, 4).join(', ')}${xs.length > 4 ? ` e altri ${xs.length - 4}` : ''}`;
+    return [
+      split.length ? `cambiare come si attraversa ${names} dividerebbe ${list(split)}` : '',
+      moved.length ? `cambiare come si attraversa ${names} cambierebbe le caselle di ${list(moved)} (i sentieri che il kernel vi scava)` : '',
+    ]
+      .filter(Boolean)
+      .join('; ');
+  }
+
+  /** A place as the layout lays it out on another palette (T452): its tiles. The palette is this kernel's again before it returns. */
+  private laidWith(palette: Record<string, TerrainDef>, ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan): string {
+    const was = this.palette;
+    this.palette = palette;
+    try {
+      return this.layoutOf(ch, plan, this.pathCode(), true).tiles;
+    } finally {
+      this.palette = was;
+    }
+  }
+
   private worldFacts(): Record<string, unknown> {
     const held = equippedItem(this.inventory());
     const n = this.needs();
@@ -10870,8 +11051,11 @@ export class Kernel {
     this.files = { ...this.files, ...changed };
   }
 
-  /** A write the kernel or the master commands, which may wait for its commit: the next commit of the Council is not what brought it. */
-  private writeCommanded(path: string, content: string): void {
+  /**
+   * A write the kernel or the master commands, which may wait for its commit: the next commit of the Council is not what brought it. Public
+   * for the master's mirror (T452): what the server's Council committed on their branch was fenced there, and comes in as it is.
+   */
+  writeCommanded(path: string, content: string): void {
     this.commanded.set(path, content);
     this.repo.write(path, content);
   }
@@ -11170,6 +11354,7 @@ export class Kernel {
   async branchKernel(files: FileMap, wanderer: string): Promise<Kernel> {
     const decisions = this.council.decisions === this.council.localAiModels ? undefined : this.council.decisions;
     const k = await Kernel.boot({ files, store: memoryStore(), ai: this.ai, decisions, wasmUri: this.wasmUri, mirror: true, server: this.server });
+    k.branchOf = this;
     this.ai.onCall = (r) => this.called(r);
     if (decisions) decisions.onCall = (r) => this.called(r);
     // What the branch commits is made by calls counted here: its cards take their dollars from this world's (T365).

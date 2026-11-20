@@ -16,6 +16,11 @@ Answer only with JSON that matches the requested schema.
 Typical consistency: structures and constructions (kiosks, altars, statues, wells, trees, boulders) are solid;
 small things lying on the ground (flowers, coins, tools) can be walked through; chests, barrels and stones can be pushed.
 
+## The world already alive
+When the Liaison brings you a change to the physics of a living world, change only what is asked, within the limits the
+request gives, and never so that a place is cut off: its people and its wanderers must still reach every part of it on
+foot or swimming. What would cut it, make milder, or say what else to do.
+
 ## New mechanics
 A horse makes you faster, a sledge slides on snow, a backpack carries more weight: quantify the
 new mechanics (speed multipliers, carrying weight, duration) believably.

@@ -681,7 +681,11 @@ export class ThinClient {
     const dirty: FileChanges = {};
     for (const p of new Set([...Object.keys(head), ...Object.keys(repo.working)])) if (repo.working[p] !== head[p]) dirty[p] = repo.working[p] ?? null;
     repo.restore();
-    for (const [p, v] of Object.entries(changes)) repo.write(p, v);
+    // Fenced on the server (`fenceCouncil` of its kernel of the branch): what the kernel wrote there, universe.json too (T452), is not refused here.
+    for (const [p, v] of Object.entries(changes)) {
+      if (typeof v === 'string') this.k.writeCommanded(p, v);
+      else repo.write(p, v);
+    }
     repo.commit(`il Concilio sul tuo ramo: ${paths.slice(0, 6).join(', ')}${paths.length > 6 ? '…' : ''}`, 'agent');
     for (const [p, v] of Object.entries(dirty)) repo.write(p, v);
     this.k.applyFiles({ ...repo.working });
