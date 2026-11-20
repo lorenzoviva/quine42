@@ -154,6 +154,9 @@ describe('the pier of a harbour (T443)', () => {
           expect(Math.max(Math.abs(cx - x), Math.abs(cy - y))).toBeGreaterThanOrEqual(2);
         }
         expect(Math.abs(p.dx ? y - hy : x - hx)).toBeGreaterThanOrEqual(3);
+        // On the sea's side of the shore.
+        const [rx, ry] = xy(p.cells[0]);
+        expect((x - rx) * p.dx + (y - ry) * p.dy).toBeGreaterThanOrEqual(0);
       }
     }
     expect(seen).toBeGreaterThan(30);
@@ -168,6 +171,8 @@ describe('the pier of a harbour (T443)', () => {
       const piers = [...r.grid.join('')].map((c, i) => (c === 'i' ? i : -1)).filter((i) => i >= 0);
       expect(piers.length, `seme ${seed}`).toBeGreaterThanOrEqual(2 + PIER_INTO_DEEP);
       for (const i of piers) expect(r.reachable.has(i), `seme ${seed}`).toBe(true);
+      // Its houses stand on the land, never on the water.
+      for (const b of r.lots) for (let y = b.y0; y <= b.y1; y++) for (let x = b.x0; x <= b.x1; x++) expect('wo', `seme ${seed}`).not.toContain(draft[y][x]);
       // The sea is not dug: no path on it.
       expect(r.carved).toBe(0);
       // Doors and gates are reached (rule 10).
@@ -309,5 +314,55 @@ describe('a ship on a reef (T443)', () => {
     expect(bumps).toContainEqual({ id: boat, reef: true });
     // A body swims over it: the reef is water one swims.
     expect(k.bodyFree(x0 + 10.5, y0 + 4.5, 0.22)).toBe(true);
+  }, 60_000);
+});
+
+describe('from the pier aboard (T443)', () => {
+  it('the deck of the seed’s vessel is walked from where one boards, and a jump from the head of a pier lands on it', async () => {
+    const id = 'veicolo.vela';
+    const manifest = { id, name: 'Barca a vela', kind: 'entity', appearance: { glyph: 'B', color: '#8a5a2b', model: 'vessel', class: 'vessel', size: 'large' }, physics: { solid: true, radius: 0.5 }, vehicle: { medium: 'water', speed: 3, draught: 'deep' } };
+    const k = await Kernel.boot({ files: { ...bundledFiles, [`modules/${id}/manifest.json`]: JSON.stringify(manifest, null, 1) }, store: memoryStore(), ai: new MockAiModels() });
+    for (let i = 0; i < 120 && k.chunks.get('0,0')?.stage !== 'planned'; i++) {
+      k.tick(1 / 60);
+      await new Promise((r) => setTimeout(r, 25));
+    }
+    k.tick(1 / 60);
+    k.carpet()!.active = false;
+    const c = k.wandererCarpet();
+    const x0 = Math.floor(c.x) + 2, y0 = Math.floor(c.y) + 2;
+    // A sea 9 × 11 with a pier of four tiles from the shore (x0) out to x0 + 4, on the row y0 + 5.
+    for (let r = 0; r <= 10; r++) for (let col = 0; col <= 10; col++) expect(k.setTile(x0 + col, y0 + r, col === 0 ? 'g' : r === 5 && col <= 4 ? 'i' : 'o')).toBe(true);
+    for (const e of k.ecs.query('pos')) {
+      const p = k.ecs.get(e, 'pos');
+      if (e !== k.wandererEntity && Math.abs(p.x - (x0 + 5)) < 14 && Math.abs(p.y - (y0 + 5)) < 14) k.ecs.destroy(e);
+    }
+    // The boat with its side against the head of the pier, the bow to the south: its boarding (amidships) by the pier.
+    const boat = k.spawnModuleEntity(k.modules.get(id)!, x0 + 5 + 1.35, y0 + 5.5);
+    k.ecs.get(boat, 'vehicle').heading = 0;
+    const fc = k.ecs.get(boat, 'form');
+    fc.yaw = 0;
+    await k.forms.wait(fc.model, fc.seed, fc.tint);
+    k.tick(1 / 60);
+    const f = k.forms.ready(fc.model, fc.seed)!;
+    expect(f.base).toBeGreaterThan(0);
+    // Its deck: a body stands on it (before T443 every floor of it was out of reach from the water).
+    const b = k.ecs.get(boat, 'pos');
+    const deck = k.floorAt(b.x, b.y - 0.5, 9);
+    expect(k.deckAt(b.x, b.y - 0.5, deck)).toBe(boat);
+    expect((k as any).formBlocks(b.x - 0.4, b.y - 0.5, 0.22, deck)).toBe(false);
+    // On the head of the pier, a little under the deck: a jump towards the boat lands aboard.
+    const { ox, oy } = k.offset();
+    const p = k.wandererPos();
+    delete p.z;
+    Object.assign(p, { x: x0 + 4.75 - ox, y: y0 + 5.5 - oy });
+    k.tick(1 / 60);
+    const pier = k.wandererPos().z!;
+    expect(deck - pier).toBeGreaterThan(0.1);
+    expect(deck - pier).toBeLessThan(0.5);
+    k.wandererComp().facing = 'right';
+    expect(k.jump()).toBe(true);
+    for (let i = 0; i < 60; i++) k.tick(1 / 60);
+    expect(k.aboard()).toBe(boat);
+    expect(k.swimming()).toBe(false);
   }, 60_000);
 });

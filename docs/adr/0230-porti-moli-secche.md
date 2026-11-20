@@ -39,6 +39,10 @@ arcipelaghi (porto, faro, cantiere, relitti, secche).
    cantiere, la spiaggia dei relitti, la costa di secche: `ARCHIPELAGO_ENVIRONMENTS`); in ogni mondo il prompt delle terre chiede, per le isole,
    le tavole dei moli e una secca; nel piano di un luogo su un'isola, che un porto va solo dove il luogo ha il mare (`SHORE_LINE`). I modelli
    locali scelgono il porto solo sulla riva di un'isola, a parte: i mondi offline di prima restano quelli che erano.
+6. **Il ponte di una nave si raggiunge dall'imbarco** (`cellarGround` in `src/kernel/forms.ts`): i piani di una forma sotto la sua linea di
+   galleggiamento erano raggiunti solo a gradini dall'acqua, e il ponte del generico `vessel`, 9 voxel sopra, era tutto «dove non si sta»
+   (nessuno ci camminava, nemmeno saltandoci); ora sono raggiunti anche dai piani delle colonne dell'area `boarding`, come li misura
+   `measureVessel` per i controlli dello Scultore. Una forma senza quell'area non cambia.
 
 ## Alternative scartate
 
@@ -55,9 +59,10 @@ arcipelaghi (porto, faro, cantiere, relitti, secche).
 
 - Kernel **0.10.6**: aggiuntivo (una profondità, due terreni e un ambiente del seme, un timbro, due ruoli, un parametro della Genesi); un
   universo di oggi non se ne accorge: i suoi piani non cambiano, i suoi ambienti non usano il timbro.
-- Il molo del seme sta, per il rilievo, due livelli sopra l'acqua (mezza casella: la terra scende verso l'acqua al più di due livelli a
-  casella, ADR-0048), all'altezza del ponte di una barca a vela: dal molo si sale a bordo della nave affiancata.
-- Restano: l'imbarco dall'acqua (salire sul ponte nuotando) e l'area `boarding` usata dal kernel; la stiva salvata (T444); un traghetto di NPC;
-  il faro come luce del mondo.
+- Il molo sta, per il rilievo, sopra l'acqua di uno o due livelli (la terra scende verso l'acqua al più di due livelli a casella, ADR-0048):
+  misurato nel browser, il molo a 0,75 e il ponte della barca a vela del seme a 1,06 (l'acqua a 0,5). Più di un gradino (0,2): dalla testa
+  del molo si sale a bordo **con un salto**, non camminando (fuori dalla forma il kernel conta l'altezza della linea di galleggiamento).
+- Restano: salire a bordo camminando dal molo (l'altezza fuori dalla forma di un veicolo) e dall'acqua nuotando; la stiva salvata (T444); un
+  traghetto di NPC; il faro come luce del mondo.
 - Sicurezza: nessuna superficie nuova (un timbro e un terreno passano dal layout e dal validatore come gli altri; la secca restringe ciò che
   galleggia).

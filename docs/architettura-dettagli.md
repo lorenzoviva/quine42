@@ -1311,7 +1311,10 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   la tocca non si prende. Mai sul bordo né su ciò che un altro timbro ha preso (molo, radice e la casella dietro restano presi); al largo della
   testa, a tre o più caselle dalla sua linea e mai accanto al molo, due o tre secche dove il mondo ha un terreno di secca (ruolo `reef`; `pier`:
   un terreno che si cammina chiamato molo, altrimenti il ponte). Senza riva non disegna niente. Il rilievo mette il molo due livelli sopra il
-  mare (la terra scende verso l'acqua di due livelli a casella), all'incirca all'altezza del ponte di una barca a vela: dal molo si sale a bordo.
+  mare (la terra scende verso l'acqua di due livelli a casella): nel browser 0,75 contro 1,06 del ponte della barca a vela del seme, più di un
+  gradino, e dalla testa del molo si sale a bordo con un salto. **Il ponte di una nave si raggiunge dall'imbarco** (`cellarGround`): i piani
+  delle colonne dell'area `boarding` sono raggiunti come quelli a gradini dall'acqua (prima il ponte del generico, 9 voxel sopra la linea, era
+  tutto «dove non si sta»).
   **L'ambiente «Porto»** del seme (`harbour`: il molo, due case, le strade dalle porte al molo) è senza epoca (`TIMELESS_LAYOUTS`), mai una
   regione dell'atlante. **Il Cartografo**: alla Genesi di un arcipelago gli ambienti delle rive (`ARCHIPELAGO_ENVIRONMENTS`), nel prompt delle
   terre le tavole dei moli e una secca, nel piano di un luogo d'isola che un porto va solo dove c'è il mare (`SHORE_LINE`); i modelli locali

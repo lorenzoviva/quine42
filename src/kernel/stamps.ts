@@ -520,12 +520,14 @@ export function harbour(cells: string[], w: number, h: number, fixed: Set<number
     const head = pier[pier.length - 1];
     const hx = head % w, hy = (head - hx) / w;
     const nearPier = (x: number, y: number) => pier.some((p) => Math.max(Math.abs((p % w) - x), Math.abs(Math.floor(p / w) - y)) < 2);
-    // Beside the way in: across the pier's line, never on it nor ahead of its head.
+    // Beside the way in: across the pier's line, never on it, on the sea's side of the shore.
     const spots: number[] = [];
     for (let y = hy - REEF_TO; y <= hy + REEF_TO; y++)
       for (let x = hx - REEF_TO; x <= hx + REEF_TO; x++) {
         const across = Math.abs(r.dx ? y - hy : x - hx);
-        if (across < REEF_FROM || !free(x, y) || !swum(y * w + x) || nearPier(x, y)) continue;
+        // On the sea's side: past the pier's root, the way it goes out (never in a lagoon behind the shore).
+        const out = (x - r.x) * r.dx + (y - r.y) * r.dy;
+        if (across < REEF_FROM || out < 1 || !free(x, y) || !swum(y * w + x) || nearPier(x, y)) continue;
         spots.push(y * w + x);
       }
     if (spots.length) {

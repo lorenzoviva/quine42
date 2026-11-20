@@ -589,7 +589,7 @@ export class MockAiModels implements AiModels, DecisionModels {
     const ids = ctx.layouts.map((l) => l.id).filter((id) => id !== HARBOUR);
     const neighbour = ctx.neighbors.find((n) => ids.includes(n.layout))?.layout;
     const sea = [...ctx.terrain.matchAll(/(?:mare|acqua) (\d+)%/g)].reduce((a, m) => a + Number(m[1]), 0);
-    const shore = !ctx.start && !!ctx.island && sea >= 20 && sea <= 80 && ctx.layouts.some((l) => l.id === HARBOUR) && new Rng(hashStr(`harbour|${ctx.cx}|${ctx.cy}`)).chance(0.6);
+    const shore = !ctx.start && !!ctx.island && sea >= 15 && sea <= 95 && ctx.layouts.some((l) => l.id === HARBOUR) && new Rng(hashStr(`harbour|${ctx.cx}|${ctx.cy}`)).chance(0.6);
     const picked = ctx.start
       ? (ids.find((i) => i === 'village') ?? ids[0])
       : neighbour && rng.chance(0.4)

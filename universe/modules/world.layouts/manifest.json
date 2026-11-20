@@ -691,7 +691,8 @@
           {
             "type": "stamp",
             "shape": "house",
-            "count": 2
+            "count": 2,
+            "on": "gspmn"
           },
           {
             "type": "path",
