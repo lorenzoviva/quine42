@@ -131,16 +131,17 @@ describe('the nature of the world (T437)', () => {
     for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(t.id === 'pirates' ? { ...DEFAULT_NATURE, geography: 'archipelago' } : DEFAULT_NATURE);
   });
 
-  it('is fixed like the game: a universe.json that says otherwise later is written back', async () => {
+  it('is fixed like the game but the gravity (T452): a universe.json that says otherwise later is written back', async () => {
     {
       const cfg = JSON.parse(bundledFiles['universe.json']);
       const light = { ...DEFAULT_NATURE, gravity: 0.4 };
       const k = await Kernel.boot({ files: { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, nature: light }, null, 2) + '\n' }, store: memoryStore(), ai: new MockAiModels() });
       expect(k.nature()).toEqual(light);
-      const heavy = { ...k.files, 'universe.json': JSON.stringify({ ...JSON.parse(k.files['universe.json']), nature: { ...light, gravity: 2 } }, null, 2) + '\n' };
+      // Another geography is written back; another gravity comes in: the Physicist reshapes it (T452, ADR-0235, `keptNature`).
+      const heavy = { ...k.files, 'universe.json': JSON.stringify({ ...JSON.parse(k.files['universe.json']), nature: { ...light, geography: 'archipelago', gravity: 2 } }, null, 2) + '\n' };
       k.applyFiles(heavy);
-      expect(k.nature()).toEqual(light);
-      expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual(light);
+      expect(k.nature()).toEqual({ ...light, gravity: 2 });
+      expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...light, gravity: 2 });
       expect(k.feed().some((e) => /natura del mondo/.test(e.text))).toBe(true);
     }
   });

@@ -137,6 +137,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'model.sculpt', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'e revisioni' },
   { compito: 'model.judge', agente: 'artist', modo: 'diretta', coefficiente: 'reviews' },
   { compito: 'model.action', agente: 'sculptor', modo: 'diretta', coefficiente: 'actions', nota: '«Altro…» che cambia la forma' },
+  { compito: 'physics.reshape', agente: 'physicist', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona (il Referente): la fisica di un terreno o la gravità del mondo, a mondo acceso (T452)' },
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
   { compito: 'review.fourthwall', agente: 'narrator', modo: 'indiretta', coefficiente: 'sessions', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
   { compito: 'sound.compose', agente: 'musician', modo: 'diretta', coefficiente: 'pieces', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },

@@ -226,6 +226,28 @@ export class MockAiModels implements AiModels, DecisionModels {
         };
       case 'genesis.physics':
         return { terrains: [] };
+      case 'physics.reshape': {
+        // The Physicist with the world on (T452): the terrain the request names, by its name, and what the words say of it.
+        const t = String(d.request ?? '');
+        const n = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const terrains: Array<{ code: string; name: string }> = Array.isArray(d.terrains) ? d.terrains : [];
+        const hit = terrains.filter((x) => x.name && n(t).includes(n(x.name))).sort((a, b) => b.name.length - a.name.length)[0];
+        const num = /(\d+(?:[.,]\d+)?)/.exec(t)?.[1];
+        const value = num ? Number(num.replace(',', '.')) : undefined;
+        const gravity = /gravit/i.test(t) ? (value ?? (/leggera|bassa|meno/i.test(t) ? 0.5 : 1.5)) : undefined;
+        if (!hit) return gravity !== undefined ? { terrains: [], gravity, note: 'I corpi pesano diversamente.' } : { terrains: [], refusal: 'non so di quale terreno si parla' };
+        const change: Record<string, unknown> = { code: hit.code };
+        if (/non si attravers|invalicabil|non si nuota più|non si cammina più/i.test(t)) change.cross = 'none';
+        else if (/si nuot|nuotar/i.test(t)) change.cross = 'swim';
+        else if (/calpestabil|si cammina/i.test(t)) change.cross = 'walk';
+        if (/lent|passo/i.test(t) && value !== undefined) change.speed = value;
+        if (/fatic/i.test(t) && value !== undefined) change.fatigue = value;
+        if (/profond/i.test(t)) change.depth = 'deep';
+        if (/bass/i.test(t) && !/gravit/i.test(t)) change.depth = 'shallow';
+        // Sent back: the Physicist makes it milder, the crossing as it was.
+        if (d.sentBack && change.cross !== undefined) delete change.cross;
+        return { terrains: Object.keys(change).length > 1 ? [change] : [], ...(gravity !== undefined ? { gravity } : {}), note: 'Chi passa di lì se ne accorgerà.' };
+      }
       case 'genesis.layouts':
         return {
           environments: [
@@ -388,6 +410,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (/\brun[ae]\b/i.test(t)) return { reply: 'Eccole.', task: 'rune', runes: [t.replace(/.*\brun[ae]\s+/i, '')] };
         if (/musica|brano|canzone|melodia/i.test(t)) return { reply: 'Lo porto al Musicista.', task: 'music', request: t };
         if (/\bcredit[io]\b/i.test(t)) return { reply: 'I crediti non passano dal Concilio.', task: 'none' };
+        // The physics with the world on (T452): how bodies go over a terrain, or the weight of every body.
+        if (/gravit|si nuot|nuotar|non si attravers|invalicabil|calpestabil|più lent|più fatic|più profond/i.test(t)) return { reply: 'Lo porto al Fisico.', task: 'physics', request: t };
         if (/regola/i.test(t)) return { reply: 'Sarà una regola del mondo.', task: 'rule', request: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { reply: 'Il Cartografo ci pensa.', task: 'environment', request: t };
         if (/personaggio|abitante|persona/i.test(t)) return { reply: 'La Fucina lo farà nascere.', task: 'character', request: t };
