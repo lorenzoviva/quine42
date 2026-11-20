@@ -118,3 +118,53 @@ pianificato dal Cartografo vero.
 - **G. Le sei strutture non rigenerate** (cantina non raggiungibile, un piano solo): un secondo giro della rigenerazione
   coi tipi elencati, `--tipi`.
 - **H. La partita in multigiocatore** per i tre universi, se l'autore la vuole ancora: oggi si sceglie solo alla Genesi.
+
+## La pulizia e i 25 luoghi del Concilio (T454)
+
+Fatte le proposte B, E e H (D66.1 A1, D66.3 C1), il 19-20/11/2026, dopo T433. Su ciascun repository un tag
+`prima-di-t454` sulla testa di prima, poi `lab/scripts/pulisci-offline.ts -- universes/<nome> --multigiocatore --scrivi`
+(un commit dell'autore, la storia non si riscrive), poi `npm run genera -- <nome> --partita multigiocatore --luoghi 25`
+sulla coda degli abbonamenti (Opus 5.5).
+
+La pulizia riconosce ciò che i modelli locali scrivono dalla loro firma (i nomi «Prato di Valmora», «Borgo del Re Muto»…,
+le descrizioni dei loro biomi; degli individui la storia e la giornata), firma che `tests/pulizia-offline.test.ts` rifà
+con `MockAiModels` e prova sui luoghi di Claude Cloud, che non tocca.
+
+| Universo | Ambienti medievali tolti | Piani tolti | Piani tornati veri | Individui tolti | Luoghi ripianificati | Individui ora | Chiamate | ≥ $ al listino |
+|---|---|---|---|---|---|---|---|---|
+| orichalcum | 12 | 95 | 3 | 12 (11 di T153 e la gatta Berta) | 6 | 27 | 213 | 17,67 |
+| neapolis | 12 | 88 | 0 | 1 | 6 | 28 | 196 | 15,51 |
+| sidera | 0 | 37 | 0 | 3 | 6 | 28 | 182 | 18,36 |
+| **totale** | | **220** | **3** | **16** | **18** | | **591** | **≈ 51,5** |
+
+La settimana dell'abbonamento è passata dal 9 al 18 % (le tre generazioni insieme; il listino è un minimo: senza le
+scritture in cache). Quasi tutto è lo Scultore (202 chiamate, 36 $): i modelli dei nuovi abitanti, delle cose, delle forme
+comuni degli oggetti che mancavano a orichalcum e delle strutture dei luoghi nuovi; i sei piani del Cartografo costano 0,8 $.
+
+- **I tre piani tornati veri.** In orichalcum una sessione offline del 18/11 (il commit «salvataggio della partita»
+  delle 19:40) aveva sovrascritto tre luoghi di T273 già pianificati: le Fonderie Ramelli (0,-1), i Magazzini Ramelli
+  (-1,-1) e il Giardino della Fuliggine (1,-1). La pulizia li rimette dalla storia (la loro ultima versione vera, del
+  commit `78a8beb`), con le carte, così Nives Caldera, Raniero Ramelli e la gatta Ruggine, della trama «Le dieci ore»,
+  abitano di nuovo il loro luogo.
+- **Gli ambienti tolti**: `barracks brick_village castle dragon_lair fortress huts inn pyramid stables temple village
+  wizard_tower` dal modulo `world.layouts` di orichalcum e neapolis; restano i senza tempo (`woods fields ruins dungeon
+  desert jungle mountains lake`) e quelli scritti dal Cartografo. Un caricamento non li riporta (T433: il manifest è
+  riscritto, `mergeKeyed` non dà gli ambienti di un'età a un mondo di un'altra).
+- **I luoghi nuovi**, tutti dell'ambientazione: orichalcum la Diga Foranea di Tramontana, il Molo del Faro di Tramontana,
+  la Darsena delle Chiatte, la Terrazza sul Mare, il piazzale di ponente della Torre d'Ormeggio, il Cortile delle Matasse;
+  neapolis il Largo dei Pellegrini (il pronto soccorso), i Vicoli del Pendino (la trattoria Da Nannina), lo Scalo dei
+  Pescatori, la Porta del Parco e il Piazzale delle Banche al Centro Direzionale, la Darsena dei Granili; sidera la Darsena
+  dei Rifornimenti e il Molo delle Navette allo spazioporto, l'Imbocco dei Turni nella Gola dei Cristalli, i Basamenti sul
+  Canale di Levante, la Soglia dei Piloni e il margine dei viadotti alle Cupole di Serralta.
+- **La partita**: `universe.json → game` dice `mode: multiplayer`, `master: me` (il master di prima degli account, che il
+  server lega a `QUINE_MASTER`); anche i tre `universe.json` di `lab/banco/universi-cloud/` (contratto 0.1:
+  `partita.modalita: multigiocatore`, `master: io`), così una nuova installazione nasce in multigiocatore.
+- **Le verifiche**: `controlla-universo.ts` legge 25 piani su 25 in ognuno, 0 guasti; `piano-rigenerazione.ts` non trova
+  ambienti da ritagliare né strutture che resterebbero a 20; 0 luoghi e 0 individui dei modelli locali, 0 ambienti
+  medievali del seme.
+
+Restano, per T455: due strutture nuove che lo Scultore non ha fatto (in `world/shortfalls.json`): a orichalcum il
+capannone dei telai a vapore (un errore della CLI durante la notte, il direttore non lo riprova da solo), a neapolis la
+torre della Banca del Golfo; i luoghi oltre la spirale 5 × 5 che erano dei modelli locali sono tolti e non ripianificati
+(il Cartografo li pianifica quando qualcuno ci arriva). neapolis è ora del kernel 0.10.2 (lo ha aperto un kernel di `3d`
+durante il lavoro), orichalcum e sidera del 0.10.1: lo stesso contratto.
