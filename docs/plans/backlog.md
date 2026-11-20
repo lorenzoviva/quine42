@@ -6058,12 +6058,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — una nave che affonda e il relitto; screenshot.
 - Quando è fatto: commit su `task/T444`; suite e typecheck verdi. Dopo questo si genera `thalassa` (T185).
 
-### T445 · S1 · Il vuoto, il cielo, il giorno — `da fare` (dipende da T437, T441)
+### T445 · S1 · Il vuoto, il cielo, il giorno — `fatto` (`1f189a2c`) (dipende da T437, T441)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
 - Step: 37
 - Contesto e cosa fare: § 2.1-2.3 dello studio: stazioni e asteroidi col meccanismo di T441, il vuoto come modo di attraversare di T437, le stelle.
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T445`; suite e typecheck verdi.
+- Esito: il vuoto è un terreno del kernel (`~`, strato `void`) solo nei mondi del vuoto: non si cammina, nuota né salta, senz'aria, mai scavato né varco, nessun programma, effetto o Lua lo tocca, l'acqua non vi scorre, nessun lotto lo copre; stazioni (superellisse, pavimento `p`) e asteroidi (una terra su tre, polvere, roccia e ghiaccio) sul reticolo delle isole di T441 senza isolotti; i varchi dove la terra continua dalle due parti (`voidGates`); il luogo tutto vuoto pianificato dal kernel senza chiamate; il Cartografo battezza stazioni e asteroidi (`body`); `world.islands` e `world.region_at` li leggono; cielo di stelle (`nature.sky: stars`, `src/render/stars.ts`) e lastra sul bordo; `nature.day` 120-3600 o 0 (luce ferma, orologio della terra per le routine); ADR-0232, kernel 0.10.8, AGENTS.md (regola 10), architettura, glossario, prompt dell'Ingegnere, `tests/vuoto.test.ts`; nessuna ambientazione porta il vuoto finché T448 non mette la capsula a ogni approdo (regola 10); offline il Cartografo dà nomi da Valmora ai luoghi sopra stazioni e asteroidi (terreni e ambienti dello spazio: T450); non provato con Gemini vero né in multigiocatore; sicurezza: nessuna superficie nuova (il campo `body` di `world.islands` è una copia in sola lettura, `world.set_tile` rifiuta il vuoto, il filo non cambia).
 
 ### T446 · S2 · L'aria e l'ossigeno — `da fare` (dipende da T445)
 - Pipeline: claude · sforzo high · stima 4% · approvato · browser · priorità 6
