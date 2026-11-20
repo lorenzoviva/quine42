@@ -6185,11 +6185,11 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (le misure del frame con lo script headless).
 - Quando è fatto: lo studio con le misure e i task proposti (da approvare); commit su `task/T459`.
 
-### T460 · Integrare T442 nel base (conflitto con T457: package.json, version.ts, universe.json) — `da fare` (dipende da T442)
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+### T460 · Integrare T442 e T445 nel base (conflitto di versione e di ADR con T457 e fra loro) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 37
-- Contesto: `integra T442` (il veicolo in molti, ADR-0232, kernel 0.10.8) ha trovato conflitti in `package.json`, `src/kernel/version.ts` e `universe/universe.json`: nel frattempo è entrato T457 (il luogo che il budget ferma resta bozza, ADR-0231, kernel 0.10.7). Gli ADR non si scontrano. Nasce da T442: `dossier T442`, `dossier T457`.
-- Cosa fare: nel worktree `git merge task/T442`; tenere tutte le aggiunte; kernel 0.10.8 in `version.ts`, `package.json` e `universe/universe.json` (e dove T442 lo cita: dettagli, ADR-0232, indice degli ADR); se il glossario è cambiato, il censimento rigenerato con `node tools/glossario/glossario.mjs`; typecheck e suite intera coi turni.
-- Test: suite intera e typecheck coi turni.
-- Browser: no (il veicolo in molti l'ha visto T442; il merge non cambia UI).
-- Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460 e `integra T442` toglie worktree e branch di T442. Sicurezza: nessuna superficie nuova.
+- Contesto: `integra T442` (il veicolo in molti, ADR-0232, kernel 0.10.8) ha trovato conflitti in `package.json`, `src/kernel/version.ts` e `universe/universe.json`: nel frattempo è entrato T457 (il luogo che il budget ferma resta bozza, ADR-0231, kernel 0.10.7). T445 (il vuoto, il cielo, il giorno) è finito anche lui con kernel 0.10.8 e ADR-0232: si scontra con T442 sugli stessi file, sull'ADR e probabilmente su AGENTS.md (regola 10), architettura, glossario e `nature.ts`. Nasce da T442 e T445: `dossier T442`, `dossier T445`, `dossier T457`. (Le dipendenze sono i rami `task/T442` e `task/T445`, finiti e non integrati.)
+- Cosa fare: nel worktree `git merge task/T442`, poi `git merge task/T445`; tenere tutte le aggiunte di entrambi; T442 resta kernel 0.10.8 e ADR-0232; T445 diventa ADR-0233 (file rinominato, indice degli ADR, ogni rimando in AGENTS.md, dettagli, glossario, codice, test) e il kernel finale è 0.10.9 in `version.ts`, `package.json` e `universe/universe.json` (e dove i due task lo citano); se il glossario è cambiato, il censimento rigenerato con `node tools/glossario/glossario.mjs`; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/vuoto.test.ts` e i test del veicolo in molti verdi.
+- Browser: no (il veicolo in molti l'ha visto T442, il vuoto T445; il merge non cambia UI).
+- Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460, e `integra T442` e `integra T445` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
