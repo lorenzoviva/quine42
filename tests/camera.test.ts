@@ -103,9 +103,10 @@ describe('camera turns', () => {
     const view: any = {
       distance: 15,
       godMode: false,
-      kernel: { zone: 'sim', coronaRevealed: () => false, wandererPos: () => ({ x: 0, y: 0 }), config: { circleRadius: 42 } },
+      kernel: { zone: 'sim', coronaRevealed: () => false, wandererPos: () => ({ x: 0, y: 0 }), config: { circleRadius: 42 }, atHelm: (): number | undefined => undefined },
       fitView: () => {},
       canFreeOrbit: Renderer.prototype.canFreeOrbit,
+      atHelm: Renderer.prototype.atHelm,
       zoom: Renderer.prototype.zoom,
     };
 
@@ -122,6 +123,13 @@ describe('camera turns', () => {
     view.zoom(100);
     view.zoom(100);
     expect(view.distance).toBe(15);
+
+    // At a vehicle's helm (T439): further, up to 30, not beyond
+    view.kernel.atHelm = () => 7;
+    for (let i = 0; i < 20; i++) view.zoom(100);
+    expect(view.distance).toBe(30);
+    view.kernel.atHelm = () => undefined;
+    view.distance = 15;
 
     // In god mode: can zoom out far up to 45
     view.godMode = true;

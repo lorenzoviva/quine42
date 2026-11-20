@@ -56,6 +56,17 @@ export function cellarVoxels(info: Pick<ModelInfo, 'class' | 'size' | 'vpt' | 'c
   return cellarOf(info as ModelInfo) * (typeof info?.vpt === 'number' ? vptOf(info) : VPT);
 }
 
+/**
+ * The voxels of a hull under the water (T439, ADR-0227): `waterline="N"` on the root of its program. Laid that much under the ground of
+ * its middle (the water's surface), as a cellar is (`base`), without a soil: the program writes the hull, the kernel only lowers it. 0 if
+ * the program says none, or not a whole number from 1 to 40.
+ */
+export function waterlineOf(xml: string): number {
+  const m = /\swaterline="(\d+)"/.exec(rootTag(xml));
+  const n = m ? Number(m[1]) : 0;
+  return Number.isInteger(n) && n >= 1 && n <= 40 ? n : 0;
+}
+
 export function cellarOf(info: ModelInfo | undefined): number {
   const n = info?.cellar;
   return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
@@ -1179,7 +1190,9 @@ export class Forms {
       .then((result) => {
         form.result = result;
         // Under the ground (T52b): its lowest voxels, if the grid has room for them and for something above.
-        const base = under < result.grid.Z ? under : 0;
+        // A hull (T439): its waterline, if it has no cellar.
+        const sunk = under || waterlineOf(req.xml);
+        const base = sunk < result.grid.Z ? sunk : 0;
         form.base = base;
         form.foot = bodyFoot(result.grid, result.palette, vpt, base);
         form.footless = !form.foot.includes(1);

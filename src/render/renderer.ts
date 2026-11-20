@@ -19,7 +19,7 @@ import { buildChunk, buildCut, chunkSig, cutSig, disposeChunk, tileForms, type T
 import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
-import { ZOOM, wheelFactor, zoomDistance } from './camera';
+import { HELM_VIEW, wheelFactor, zoomDistance, zoomMax } from './camera';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
@@ -31,6 +31,9 @@ export class Renderer {
   mouse: { x: number; y: number } | null = null;
   /** Distance of the camera from the wanderer, in tiles. */
   distance = 15;
+  /** Where the camera draws back to, the helm just taken (T439); the wheel or a pinch stops it. */
+  private helmEase: number | undefined;
+  private wasAtHelm = false;
   /** The camera's angle around the wanderer (0 = from the south; follows input or middle-click drag). */
   yaw = 0;
   yawGoal = 0;
@@ -215,15 +218,22 @@ export class Renderer {
     }
   }
 
-  /** Zoom with the mouse wheel: within [2.5, 15] in simulation; up to 45 in god mode / corona (`ZOOM`, src/render/camera.ts). */
+  /** Whether the wanderer holds a vehicle's helm (T439): the camera may go further, up to `ZOOM.helm`. */
+  atHelm(): boolean {
+    return this.kernel.zone === 'sim' && this.kernel.atHelm() !== undefined;
+  }
+
+  /** Zoom with the mouse wheel: within [2.5, 15] in simulation, 30 at a helm; up to 45 in god mode / corona (`ZOOM`, src/render/camera.ts). */
   zoom(deltaY: number): void {
-    this.distance = zoomDistance(this.distance, wheelFactor(deltaY), this.canFreeOrbit());
+    this.helmEase = undefined;
+    this.distance = zoomDistance(this.distance, wheelFactor(deltaY), this.canFreeOrbit(), this.atHelm());
     this.fitView();
   }
 
   /** The camera at a distance, within the wheel's limits: a pinch of two fingers (T387). */
   zoomTo(distance: number): void {
-    this.distance = zoomDistance(distance, 1, this.canFreeOrbit());
+    this.helmEase = undefined;
+    this.distance = zoomDistance(distance, 1, this.canFreeOrbit(), this.atHelm());
     this.fitView();
   }
 
@@ -368,9 +378,20 @@ export class Renderer {
     if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
 
     // In simulation without god mode: restore pitch to 3/4 (PITCH) and clamp distance to 15
+    // At the helm (T439) the camera draws back once, to see the hull and the shore; let go, it comes back within the simulation's.
+    const helm = this.atHelm();
+    if (helm && !this.wasAtHelm && this.distance < HELM_VIEW) this.helmEase = HELM_VIEW;
+    if (!helm) this.helmEase = undefined;
+    this.wasAtHelm = helm;
+    if (this.helmEase !== undefined) {
+      this.distance += (this.helmEase - this.distance) * Math.min(1, dt * 3);
+      if (Math.abs(this.helmEase - this.distance) < 0.05) this.helmEase = undefined;
+      this.fitView();
+    }
     if (!this.canFreeOrbit()) {
-      if (this.distance > ZOOM.max) {
-        this.distance = Math.max(ZOOM.max, this.distance - dt * 20);
+      const max = zoomMax(false, helm);
+      if (this.distance > max) {
+        this.distance = Math.max(max, this.distance - dt * 20);
         this.fitView();
       }
       if (Math.abs(this.pitch - PITCH) > 0.001) {

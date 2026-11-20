@@ -152,6 +152,10 @@ dice, a nuoto; nel vuoto ogni terra è connessa al suo interno e ha un approdo c
 
 ### 1.3 Il veicolo: navigare (P3, P4)
 
+> **Fatto da soli (T439, ADR-0227)**: come qui sotto, con queste differenze: il timone si prende dal menu da ovunque sul ponte (l'area
+> `helm` è di T440), il vento e la vela danno `power` (0…1) e il timone `thrust` e `steer`; un veicolo senza forma ha per ponte il disco del suo
+> corpo; `void` aspetta il vuoto (T445). In molti è T442.
+
 **Che cos'è.** Un'entità con una forma (il programma dello Scultore, classe `vessel`, § 1.6) e il componente `vehicle` (`heading`,
 `speed`, `turn`, `anchored`, `helm`, `hull`); il manifest dice `vehicle: { medium: 'water' | 'void', speed, accel, turn, draught:
 'shallow' | 'deep', aboard }`. È solida per chi le sta attorno (l'indice dei solidi la prende già a ogni tick, girata) e il suo ponte è un

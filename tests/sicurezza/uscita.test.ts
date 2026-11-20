@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Sandbox, type Host } from '../../src/kernel/sandbox';
+import { MAX_NESTING, Sandbox, type Host } from '../../src/kernel/sandbox';
 import { Validator } from '../../src/kernel/validator';
 import { fakeHost } from '../helpers';
 
@@ -242,6 +242,29 @@ describe('il budget di istruzioni', () => {
     expect(depth).toBeGreaterThan(0);
     expect(sb.loadModule('dopo', 'local M = {} function M.update() return 1 + 1 end return M')).toBeNull();
     expect(sb.run('dopo', 'update', 0)).toBe(2);
+  });
+
+  it('V-019 il rientro senza fine si ferma al tetto delle chiamate annidate, con un guasto, mai a una pila che trabocca dentro la VM', async () => {
+    // T439: un trabocco dentro il codice C della VM (le stringhe che interna) la lasciava rotta, e la chiamata dopo non tornava più.
+    for (let round = 0; round < 3; round++) {
+      let sb!: Sandbox;
+      let depth = 0;
+      const { host, faults } = fakeHost();
+      host.first = () => {
+        depth++;
+        sb.run(`giro${round}`, 'update', 0);
+        return undefined;
+      };
+      sb = await Sandbox.create(host);
+      expect(sb.loadModule(`giro${round}`, `local M = {} function M.update() ecs.first('x') end return M`)).toBeNull();
+      sb.run(`giro${round}`, 'update', 0);
+      expect(depth).toBe(MAX_NESTING);
+      expect(faults[`module:giro${round}:update`]).toMatch(/annidate/);
+      // The VM is sound: a module with a name it never saw loads and runs.
+      const after = `dopo${Math.random()}`;
+      expect(sb.loadModule(after, 'local M = {} function M.update() return 1 + 1 end return M')).toBeNull();
+      expect(sb.run(after, 'update', 0)).toBe(2);
+    }
   });
 
   it('V-019 dopo un guasto del budget la sandbox continua a lavorare', async () => {

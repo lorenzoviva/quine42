@@ -264,6 +264,9 @@ export class Entities {
       if (v.kind !== 'figure') {
         // An entity (a structure too) stands on the ground under its middle; its cellar under it (T52b); a thing in a cellar on its floor (T417).
         v.root.position.set(p.x, k.restsAt(id), p.y);
+        // Where it faces, at every frame (T439): a vehicle turns, and what lies on its deck with it.
+        const yaw = k.ecs.get(id, 'form')?.yaw;
+        if (Number.isFinite(yaw)) v.root.rotation.y = yaw;
         const cut = id === inside;
         if (v.cut !== cut) {
           v.cut = cut;
@@ -378,9 +381,17 @@ export class Wanderer {
     const goal = facing === 'left' ? -Math.PI / 2 : facing === 'right' ? Math.PI / 2 : facing === 'up' ? Math.PI : 0;
     // The carpet pulls the wanderer back: what counts for the legs is the walking, not the real motion.
     const pc = k.wandererCarpet();
-    const walking = moved > 0.0005 || Math.hypot(pc.x - (this.view.root.userData.cx ?? pc.x), pc.y - (this.view.root.userData.cy ?? pc.y)) > 0.0005;
-    this.view.root.userData.cx = pc.x;
-    this.view.root.userData.cy = pc.y;
+    // On a vehicle's deck (T439) what counts is the walking on it, not the deck's motion; at the helm one does not walk.
+    const deck = k.zone === 'sim' ? k.aboard() : undefined;
+    const dp = deck !== undefined ? k.ecs.get(deck, 'pos') : undefined;
+    const yaw = deck !== undefined ? Number(k.ecs.get(deck, 'form')?.yaw) || 0 : 0;
+    const on = dp ? { x: (pc.x - dp.x) * Math.cos(yaw) - (pc.y - dp.y) * Math.sin(yaw), y: (pc.x - dp.x) * Math.sin(yaw) + (pc.y - dp.y) * Math.cos(yaw) } : pc;
+    const ud = this.view.root.userData;
+    const was = ud.deck === deck ? { x: ud.cx ?? on.x, y: ud.cy ?? on.y } : on;
+    const walking = deck !== undefined ? k.atHelm() === undefined && Math.hypot(on.x - was.x, on.y - was.y) > 0.0005 : moved > 0.0005 || Math.hypot(on.x - was.x, on.y - was.y) > 0.0005;
+    ud.deck = deck;
+    ud.cx = on.x;
+    ud.cy = on.y;
     turnTowards(this.view, goal, dt);
     if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * (swims ? 4 : 7);
     else if (swims) this.view.phase += dt * 1.5;

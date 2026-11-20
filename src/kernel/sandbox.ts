@@ -44,6 +44,18 @@ export interface Host {
   carpet(): unknown;
   /** The nature of the world (T437, ADR-0224): `{geography, sky, day, gravity, oxygen}`, a copy; Lua reads it, never writes it. */
   nature(): unknown;
+  /**
+   * A vehicle now (T439, ADR-0227): `{heading, speed, turn, thrust, steer, power, anchored, helm, bumped, medium, max, aboard}`, a copy, or
+   * undefined if `id` is not one. `helm` and `aboard` are the bodies of wanderers.
+   */
+  vehicle(id: number): unknown;
+  /**
+   * Asks a vehicle (T439): thrust and steer −1…1 (the helmsman's keys win), power 0…1, the anchor, the helm for a wanderer aboard (`false`
+   * lets it go). Never where it is: the kernel moves it. Each value checked, what is not one ignored; false if `id` is not a vehicle.
+   */
+  vehicle_set(id: number, thrust?: unknown, steer?: unknown, power?: unknown, anchored?: unknown, helm?: unknown): boolean;
+  /** The vehicle whose deck an entity (a wanderer's body, a thing) stands on (T439), or undefined. */
+  vehicle_of(id: number): number | undefined;
   time(): number;
   log(msg: string): void;
   emit(name: string, data: unknown): void;
@@ -158,6 +170,13 @@ class Meter {
     if (this.pointer) module.removeFunction(this.pointer);
   }
 }
+
+/**
+ * How many calls from the kernel into Lua may be open at once, re-entering through the Host (T439): beyond, the call is a fault and does not
+ * go in. Without it a re-entry with no end stopped only when a stack overflowed, and an overflow in the middle of the VM's own C code (the
+ * strings it interns) left it broken: the next call never came back (rule 7). Far over what a module does (an action that acts on another).
+ */
+export const MAX_NESTING = 32;
 
 /** How deep a Lua table given to the kernel is read: what is deeper does not arrive. */
 const MAX_TABLE_DEPTH = 64;
@@ -382,6 +401,9 @@ function emptyHost(): Host {
     player_set: () => undefined,
     carpet: () => ({ strength: 1, rate: 6, active: true, ox: 0, oy: 0 }),
     nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
+    vehicle: () => undefined,
+    vehicle_set: () => false,
+    vehicle_of: () => undefined,
     time: () => 0,
     log: () => {},
     emit: () => {},
@@ -411,6 +433,9 @@ function emptyHost(): Host {
 }
 
 export class Sandbox {
+  /** The calls into Lua open now (`MAX_NESTING`). */
+  private nesting = 0;
+
   private constructor(
     private engine: LuaEngine,
     private K: KernelLua,
@@ -429,6 +454,11 @@ export class Sandbox {
    * out of it as an exception is a fault, never an exception in the tick.
    */
   private enter<T>(key: string, fallback: T, call: () => T): T {
+    if (this.nesting >= MAX_NESTING) {
+      this.host.fault(key, `troppe chiamate annidate fra il kernel e Lua (al più ${MAX_NESTING})`);
+      return fallback;
+    }
+    this.nesting++;
     const { on, depth } = this.meter;
     this.meter.on = false;
     try {
@@ -444,6 +474,7 @@ export class Sandbox {
       return fallback;
     } finally {
       this.meter.on = on;
+      this.nesting--;
     }
   }
 

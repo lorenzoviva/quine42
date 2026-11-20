@@ -107,7 +107,7 @@ Modello di una voce:
 - Contromisura: `Crossing` (ADR-0101): da Lua a JS soli dati. `Sandbox.probe`: una VM a parte con un `Host` vuoto, azzerata prima di ogni prova (non buttata: la prova è sincrona, aprire una VM no).
 - Task: T122
 - Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
-- Esito: `task/T122`, 01/11. R8 ridotta come ha deciso l'autore: qui resta solo ciò che tocca la sandbox; il resto di R8 è V-018.
+- Esito: `task/T122`, 01/11. Il tetto del rientro: `task/T439`, 20/11. R8 ridotta come ha deciso l'autore: qui resta solo ciò che tocca la sandbox; il resto di R8 è V-018.
 
 ### V-009 · La coda delle CLI
 - Gravità: alta (oggi: alta se si usano gli abbonamenti)
@@ -225,7 +225,7 @@ Modello di una voce:
 - Superficie: `src/kernel/sandbox.ts`, `src/kernel/prelude.lua`, wasmoon nel processo che tiene i segreti
 - Proprietà violata: non si esce dalla sandbox: da Lua nessun accesso a `process`, `require`, costruttori o prototipi JS, e un valore finto nell'ambiente non arriva a Lua. È la proprietà che conta di più
 - Prova: misurata prima della correzione dal kit e nella suite (`esiti/2026-11-01.json`): **da Lua si raggiungevano `constructor`, `__proto__` e altri campi di JS sui valori che l'Host dà** (V-019.a), guardati per tipo e mai chiamati: la proprietà non reggeva. La lettura di wasmoon aggiunge che anche l'errore di un indice sbagliato arrivava a `pcall` come oggetto JS. Dopo, test su ogni via (`uscita.test.ts`): oggetti, annidati, liste, istanze di classi, argomenti dei moduli, errori, stringhe, funzioni dell'API; scritture del prototipo; budget contro `pcall`, callback e rientri nel kernel. V-019.b del primo kit era vuota (l'ambiente di un modulo è vuoto, `pairs` non scorre nulla): la prova ora va per nomi. Il kit dopo la correzione: 6 ok su 6 per V-008, V-017, V-019 (`esiti/2026-11-01-t122.json`). Ciò che queste prove non coprono è in `audit-2026-11.md`, domanda 1. Le coroutine non si provano: non sono raggiungibili
-- Contromisura: `Crossing` (ADR-0101): il proxy di wasmoon è spento, a Lua arrivano viste dei soli campi di dati propri. Un difetto di wasm o di Lua stesso non è coperto da qui: T127, il mondo in un worker senza segreti.
+- Contromisura: `Crossing` (ADR-0101): il proxy di wasmoon è spento, a Lua arrivano viste dei soli campi di dati propri. Un difetto di wasm o di Lua stesso non è coperto da qui: T127, il mondo in un worker senza segreti. Da T439 (ADR-0227) il rientro fra kernel e Lua ha un tetto (`MAX_NESTING`, 32 chiamate aperte in `Sandbox.enter`): un rientro senza fine finisce con un guasto prima che una pila trabocchi dentro il codice C della VM, che prima ne restava rotta (la chiamata dopo non tornava).
 - Task: T122
 - Test: `tests/sicurezza/uscita.test.ts`, `tests/sicurezza/sandbox.test.ts`
 - Esito: `task/T122`, 01/11.
@@ -507,6 +507,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/testo-viandante.test.ts`, `tests/text-guards.test.ts`, `tests/openrouter.test.ts`
 - Esito: chiusa da T396 (ADR-0204), 15/11/2026, branch `task/T396`: la voce nasce con la via. Non provato contro OpenRouter né TypeSafe veri.
 
+### V-045 · Il veicolo per Lua: ciò che il codice del mondo chiede a ciò che porta i corpi
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: l'API Lua del veicolo (`world.vehicle`, `world.vehicle_set`, `world.vehicle_of`: `Host`, `prelude.lua`, `LUA_API`), `Kernel.askVehicle`, `vehicleView`, `vehicleUnder`, l'`Host` che dà i componenti (`get`, `set`, `spawnFromLua` in `src/kernel/kernel.ts`), `saneVehicle` e `vehicleSpecOf` (`src/kernel/vehicle.ts`), `state.json → vehicles` (`readVehicles`)
+- Proprietà violata: il codice del mondo non sposta un veicolo né chi vi sta sopra (regola 1): un veicolo porta i corpi, e un modulo che lo spostasse a piacere porterebbe un viandante dove vuole, oltre un muro o fuori dal mondo; non lo rende più veloce dei tetti del kernel, non lo fa nascere da ciò che non è un veicolo, non dà il timone a chi non è sul ponte; ciò che arriva da Lua o da un salvataggio non porta il kernel in uno stato senza senso (regola 7)
+- Prova: test (T439)
+- Contromisura: Lua legge il veicolo e la sua posizione come copie (`get` clona `vehicle` e la `pos` di un veicolo), non scrive il componente (`vehicle` fra i nomi protetti di `set`) né lo crea (`spawnFromLua` lo toglie; lo crea solo un modulo che lo dice nel manifest, `spawnModuleEntity`); `world.vehicle_set` chiede soltanto spinta e rotta (−1…1, e solo se nessuno tiene il timone), forza (0…1), ancora e timone, ognuno controllato e ciò che non è un valore ignorato; il timone solo a un viandante di questo kernel sul ponte (`takeHelm`), mai a chi gioca da un suo client (T442); il veicolo lo muove solo il kernel entro `VEHICLE_LIMITS`, e chi è a bordo va solo dove un corpo può stare (`bodyFree`). Il salvataggio letto voce per voce (`readVehicles`, al più `MAX_VEHICLES`); uno specchio non chiede niente
+- Task: T439
+- Test: `tests/sicurezza/veicolo.test.ts`, `tests/veicolo.test.ts`
+- Esito: chiusa da T439 (ADR-0227), 20/11/2026, branch `task/T439`: le contromisure nascono col veicolo. In multigiocatore il veicolo non porta ancora chi gioca da un suo client (T442), che aggiungerà le voci del passo relativo e del timone.
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -557,6 +568,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-042 | — | — | `campagna-sito.test.ts` | la campagna dal sito si prova sullo store senza Firebase, coi collegamenti finti per il mondo acceso: tests/sicurezza/campagna-sito.test.ts |
 | V-043 | — | — | `pacchetto.test.ts`, `produzione.test.ts` | il pacchetto sono file e un’immagine, non un server da provare: il kit non costruisce immagini; le proprietà le leggono tests/sicurezza/pacchetto.test.ts e produzione.test.ts |
 | V-044 | — | — | `testo-viandante.test.ts` | il kit non ha chiavi di TypeSafe né di OpenRouter e non esce sulla rete: i due varchi e il kernel si provano coi fornitori finti, tests/sicurezza/testo-viandante.test.ts |
+| V-045 | — | — | `veicolo.test.ts` | ciò che Lua chiede a un veicolo si vede solo dentro il kernel e la sandbox: lo prova tests/sicurezza/veicolo.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

@@ -6007,13 +6007,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T438`; test del layout (0 caselle d'acqua scavate) e del corpo; suite e typecheck verdi. Sicurezza: multigiocatore.
 - Esito: layout col segno `swim` sui piani nuovi (0 caselle d'acqua scavate; i piani di prima restano scavati); il corpo del viandante nuota (`bodyFree` nel cammino, nel salto e in `stepWanderer`), NPC e cose no; passo della casella, fatica e annegamento nel kernel (`src/kernel/swim.ts`, causa «annegato» col livello della morte, testo nuovo nello schermo della morte); l'acqua profonda no a chi è troppo carico o porta una cosa sopra la testa, con l'avviso; il server dà il passo del nuoto in mare aperto; salto dentro e fuori; immerso fino al petto a schermo, senza campi sul filo; ADR-0225, kernel 0.10.1, AGENTS.md, architettura, glossario; tests/nuoto.test.ts, adeguati jump/places/dislivello/campagna-individui; non provato in multigiocatore con due schede né su aurora o pirates (natura uguale a oggi); sicurezza: nessuna superficie nuova (il filo non cambia, il passo del server usa la collisione del corpo con carico e passo del nuoto).
 
-### T439 · P3 · Il veicolo, da soli — `da fare` (dipende da T438)
+### T439 · P3 · Il veicolo, da soli — `fatto` (`297be479`) (dipende da T438)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · browser · priorità 5
 - Step: 37
 - Contesto: § 1.3 dello studio; la Q di T183. Il veicolo è una primitiva generica (acqua, terra, vuoto), da cui il Concilio fa barche, carri, capsule: non una barca cablata.
 - Cosa fare: `vehicle`, chi è a bordo, il timone, l'ancora, le collisioni con la costa, `state.json → vehicles`, il verso a ogni fotogramma, lo zoom al timone, `world.vehicle*` (API Lua nuova con tutti i suoi posti), `mech.barca` senza il sedile a mano.
 - Browser: sì — salire, governare, ancorare, urtare la costa, scendere; screenshot.
 - Quando è fatto: commit su `task/T439`; suite e typecheck verdi. Sicurezza: Lua.
+- Esito: veicolo come primitiva del kernel (ADR-0227, kernel 0.10.3): `vehicle` nel manifest (water/land entro `VEHICLE_LIMITS`), componente scritto solo dal kernel, a bordo = sul ponte (`deckAt`, `waterline` sulla radice dei programmi, disco senza forma) senza nuotare, `vehicleTick` prima dei solidi con chi è sul ponte portato e girato, la costa ferma senza rompere, timone dal menu (chi governa non cammina), ancora (da sé senza nessuno a bordo), `state.json → vehicles`, i veicoli fuori dal catalogo del Cartografo, `world.vehicle/vehicle_set/vehicle_of` (V-045), verso a ogni fotogramma, zoom 30 al timone, `mech.barca` senza sedile; in più il tetto `MAX_NESTING` al rientro kernel↔Lua in `Sandbox.enter` (un trabocco di pila nel codice C della VM la rompeva, V-019); manca: multigiocatore (T442), classe `vessel` (T440), stiva salvata (T444), spinta di chi nuota davanti allo scafo, NPC a bordo; non provato: due schede, Gemini vero; sicurezza: V-045 nuova (Lua), V-019 rafforzata.
 
 ### T440 · P5 · Lo Scultore delle navi — `da fare` (dipende da T439)
 - Pipeline: claude · sforzo high · stima 5% · approvato · browser · priorità 5

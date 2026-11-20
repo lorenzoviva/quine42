@@ -6,16 +6,16 @@ import { runScenario, series } from './banco';
 const WATER = ['wwwww', 'wwwww', 'wwwww', 'wwwww', 'wwwww'];
 
 describe('the boat', () => {
-  it('sails on water with the helm, the wanderer and the hull together, and runs aground at the shore', async () => {
+  it('sails on water with the helm, the wanderer carried by the kernel, and runs aground at the shore (T439: no seat by hand)', async () => {
     const run = await runScenario(
       'mech.barca',
       {
         titolo: 'A vela',
-        racconto: 'Il viandante sale e va verso riva.',
+        racconto: 'Il viandante prende il timone e va verso riva, la prua a est.',
         terreno: WATER,
-        cose: [{ modulo: 'veicolo.barca', x: 0, y: 0 }],
+        cose: [{ modulo: 'veicolo.barca', x: 0, y: 0, componenti: { vehicle: { heading: Math.PI / 2 } } }],
         viandante: { componenti: { barca: { stato: 'a terra' } } },
-        passi: [{ tipo: 'pulsante', azione: 'sali' }, { tipo: 'cammina', verso: 'destra', secondi: 3 }],
+        passi: [{ tipo: 'pulsante', azione: 'sali' }, { tipo: 'cammina', verso: 'su', secondi: 3 }],
         durata: 0,
         guarda: ['barca.stato', '0:pos.x'],
       },

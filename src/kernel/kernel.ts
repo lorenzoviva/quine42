@@ -88,6 +88,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
+import { carried, carries, discPoints, facingOf, helmOrders, hullPoints, MAX_VEHICLES, newVehicle, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleRecord, type VehicleSpec, type VehicleState } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -102,7 +103,43 @@ interface SolidForm extends Ground {
    * Every other model stands on the ground under its middle (`standOf`).
    */
   stand?: number;
+  /** A vehicle's (T439): its hull meets another's with all of itself, not only with what stops a body. */
+  vehicle?: true;
 }
+
+/** A vehicle's deck (T439), as the solids are made: its form's floors, or the disc of its body while its form is not ready (or it is not solid). */
+interface Deck {
+  id: Id;
+  x: number;
+  y: number;
+  r: number;
+  s?: SolidForm;
+}
+
+/** Where a vehicle is (T439): its middle (carpet space) and where its bow points. */
+interface Pose {
+  x: number;
+  y: number;
+  heading: number;
+}
+
+/** A vehicle that moved this tick (T439): from where to where, the wanderers on its deck and the things lying on it. */
+interface VehicleMove {
+  id: Id;
+  from: Pose;
+  to: Pose;
+  aboard: string[];
+  things: Id[];
+}
+
+/** How near the feet must be to a deck's floor to stand on it (tiles, T439): the kernel puts them on it, so a little. */
+const DECK_SLACK = 0.05;
+/** The system that walks a wanderer (T439): it does not run for who holds a helm. */
+const HELM_STILLS = 'core.movement';
+/** The bump of a hull pressing against the shore is said again only after this many seconds without one (T439). */
+const BUMP_EVERY = 2;
+/** What is never cargo of a vehicle (T439): someone (people, animals, wanderers), a building, another vehicle, a rune. */
+const NOT_CARGO = ['vehicle', 'mind', 'identity', 'wander', 'structure', 'remote', 'player', 'rune'];
 
 /** A jump under way (T56b), on the wanderer: from and to in carpet space, the floors there, how high it goes, its clock. */
 export interface JumpComp {
@@ -477,7 +514,7 @@ export function placeRefusal(why: SpotFailure, name: string, what: string): stri
  */
 // Also known, so never kept as a field of tomorrow: the names they had until the contract 0.3 (T308a), and the balance of before the
 // ledger (`crediti`, ADR-0104).
-const STATE_FIELDS: ReadonlySet<string> = new Set(['consumed', 'containers', 'forms', 'rares', 'blocks', 'time', 'important', 'wanderer', 'placed', 'moved', ...italianFieldsOf('campi-stato')]);
+const STATE_FIELDS: ReadonlySet<string> = new Set(['consumed', 'containers', 'forms', 'rares', 'blocks', 'time', 'important', 'wanderer', 'placed', 'moved', 'vehicles', ...italianFieldsOf('campi-stato')]);
 const WANDERER_FIELDS: ReadonlySet<string> = new Set(['name', 'profile', 'pos', 'inventory', 'needs', 'hand', 'states', 'slots', 'transcended', 'anonymous', 'credits', ...italianFieldsOf('campi-viandante')]);
 
 /** The fields of a saved JSON object that are not in `known`. */
@@ -893,13 +930,15 @@ export class Kernel {
       get: (id, name) => {
         this.touching?.add(id);
         const c = this.ecs.get(id, name) ?? undefined;
-        // A line that may not move anyone reads the carpet and the positions, it does not hold them (T37).
+        // A line that may not move anyone reads the carpet and the positions, it does not hold them (T37). A vehicle (T439) is read,
+        // never held: where it is and what it is now only the kernel writes (`world.vehicle_set` asks).
+        if (c && (name === 'vehicle' || (name === 'pos' && this.ecs.has(id, 'vehicle')))) return clone(c);
         return this.lockedLine && c && (name === 'carpet' || name === 'pos') ? clone(c) : c;
       },
       set: (id, name, data) => {
         this.touching?.add(id);
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
-        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container'].includes(name) || (id === this.wandererEntity && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container', 'vehicle'].includes(name) || (id === this.wandererEntity && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
@@ -946,6 +985,10 @@ export class Kernel {
       carpet: () => (this.lockedLine && this.carpet() ? clone(this.carpet()) : this.carpet()),
       // A copy each time (T437, ADR-0224): what Lua changes of it is its own, the world's nature stays (rule 1, rule 7).
       nature: () => this.nature(),
+      // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
+      vehicle: (id) => this.vehicleView(id),
+      vehicle_set: (id, thrust, steer, power, anchored, helm) => this.askVehicle(id, { thrust, steer, power, anchored, helm }),
+      vehicle_of: (id) => this.vehicleUnder(id),
       time: () => this.time,
       log: (msg) => this.log('lua', msg),
       emit: (name, data) => this.bus.emit(`lua:${internalEvent(name)}`, data),
@@ -1023,6 +1066,11 @@ export class Kernel {
     const comps = c as Record<string, any>;
     if (comps.pos && !(Number.isFinite(comps.pos.x) && Number.isFinite(comps.pos.y))) return undefined;
     if (comps.rune) this.runesDirty = true;
+    // A vehicle comes only from a module that says one (T439): what Lua makes is not one.
+    if ('vehicle' in comps) {
+      const { vehicle: _, ...rest } = comps;
+      return this.ecs.spawn(rest);
+    }
     return this.ecs.spawn(comps);
   }
 
@@ -1474,10 +1522,13 @@ export class Kernel {
     this.bubbles.set(id, { text: text.slice(0, 140), until: this.time + 4 + text.length / 25 });
   }
 
-  /** Placeable world modules (people, animals, furniture, things), for the Cartographer. */
+  /**
+   * Placeable world modules (people, animals, furniture, things), for the Cartographer. Not a vehicle (T439): a place would put a boat on its
+   * ground; who makes them is Lua, and the ports (T443).
+   */
   catalog(): CatalogEntry[] {
     return [...this.modules.values()]
-      .filter((m) => m.manifest.kind === 'entity')
+      .filter((m) => m.manifest.kind === 'entity' && !this.vehicleSpecFor(m.manifest))
       .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.persona ? 'npc' : m.manifest.container ? 'furniture' : 'object', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
   }
 
@@ -3494,6 +3545,8 @@ export class Kernel {
   restsAt(id: Id): number {
     const p = this.ecs.get(id, 'pos');
     if (!p) return 0;
+    // A thing on a vehicle's deck (T439) stands on it.
+    if (this.decks.length && Number.isFinite(p.z) && !this.ecs.has(id, 'vehicle') && this.deckAt(p.x, p.y, p.z) !== undefined) return p.z - this.sunk(id);
     return this.cellarHeight(id, p) ?? this.groundAt(p.x, p.y) - this.sunk(id);
   }
 
@@ -3718,6 +3771,14 @@ export class Kernel {
   spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string, parts?: ThingParts): Id {
     const man = m.manifest;
     if (man.kind === 'item') return this.spawnItem(man.id, x, y, 1, chunkKey, origin);
+    // A vehicle (T439): of no place (its place does not make it again, nor takes it away), with an origin that says who it is; at most
+    // `MAX_VEHICLES`, beyond which a place's is a thing of its place.
+    const vehicle = !!this.vehicleSpecFor(man) && this.ecs.query('vehicle').length < MAX_VEHICLES;
+    if (vehicle) {
+      origin ??= this.freshOrigin(man.id, { x, y });
+      chunkKey = undefined;
+      this.consumed.add(origin);
+    }
     const comps: Record<string, any> = {
       ...clone(man.components ?? {}),
       ...clone(readParts(parts) ?? {}),
@@ -3744,7 +3805,12 @@ export class Kernel {
     if (man.physics?.speed && comps.wander) comps.wander.speed = man.physics.speed;
     if (chunkKey) comps.chunk = { key: chunkKey };
     if (origin) comps.origin = { key: origin };
+    // Still and at anchor, heading where its form faces; only the kernel makes and writes it (a manifest's components do not).
+    delete comps.vehicle;
+    if (vehicle) comps.vehicle = newVehicle(comps.form.yaw);
     const id = this.ecs.spawn(comps);
+    // Its deck from now, the disc of its body until the solids are made again.
+    if (vehicle) this.decks.push({ id, x, y, r: comps.body.r });
     if (this.sandbox.has(man.id, 'on_spawn')) this.runModule(man.id, 'on_spawn', id);
     return id;
   }
@@ -4021,7 +4087,8 @@ export class Kernel {
   bodyFree(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     const heavy = this.tooLoaded();
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
+    // On a vehicle's deck (T439) the water under it does not count: the hull carries the body.
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (this.deckAt(x + dx, y + dy, z) === undefined && !this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
     return !this.formBlocks(x, y, r, z);
   }
 
@@ -4044,7 +4111,7 @@ export class Kernel {
         continue;
       }
       sim = true;
-      if (!this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
+      if (this.deckAt(px + ox, py + oy, z) === undefined && !this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
     }
     return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
@@ -4134,7 +4201,8 @@ export class Kernel {
    * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
    */
   jump(): boolean {
-    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'jump')) return false;
+    // At the helm (T439) Space is the vehicle's menu, as E: who steers does not jump.
+    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'jump') || this.atHelm() !== undefined) return false;
     const pl = this.wandererComp();
     const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
     let dx = 0, dy = 0;
@@ -4165,7 +4233,8 @@ export class Kernel {
       if (i < 10) continue;
       // It lands on the highest floor it clears, if the body stands there.
       const h = this.floorBelow(x, y, h0 + up);
-      if (this.free(x, y, r, h)) land = { d, h };
+      // A vehicle's deck is somewhere to land (T439), over the water too.
+      if (this.free(x, y, r, h) || (this.deckAt(x, y, h) !== undefined && this.bodyFree(x, y, r, h))) land = { d, h };
       else if (!wet && this.swimsAt(x, y) && this.bodyFree(x, y, r, h)) wet = { d, h, clear };
     }
     if (!land && wet) {
@@ -4190,6 +4259,8 @@ export class Kernel {
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
     const t = this.tileAt(Math.floor(x), Math.floor(y));
     if (!t || crossingOf(this.palette[t]) !== 'swim') return false;
+    // On a vehicle's deck one does not swim (T439).
+    if (this.deckAt(x, y, z) !== undefined) return false;
     return !(typeof z === 'number' && Number.isFinite(z) && z > this.groundAt(x, y) + 0.3);
   }
 
@@ -4850,6 +4921,14 @@ export class Kernel {
 
   /** The things moved from where their place made them (T292), by origin: where they stand; the save keeps them (`moved`). */
   private moved = new Map<string, MovedRecord>();
+  /** The decks of the vehicles (T439), made with the solids: who stands on one goes with it. */
+  private decks: Deck[] = [];
+  /** The vehicles of a save whose module is not here, or not a vehicle any more (T439): they wait in it, nothing comes into the world. */
+  private waitingVehicles: VehicleRecord[] = [];
+  /** The points of each hull (T439), by form. */
+  private hulls = new WeakMap<Form, Float64Array>();
+  /** When each vehicle last pressed against what stops it (T439): the bump is said again only after a while. */
+  private bumpSaid = new Map<Id, number>();
 
   /** The manifest of a thing one can take (T292): an entity of a module that says `takeable`, not someone, not a building, not an item. */
   private takeableOf(id: Id): Manifest | undefined {
@@ -5241,6 +5320,429 @@ export class Kernel {
     }
   }
 
+  // --- Vehicles (T439, ADR-0227) -------------------------------------------------------------------------------------------------
+
+  /** The vehicle an entity's module makes (T439): a thing of the world, not someone nor a thing one takes, whose `vehicle` the kernel knows. */
+  private vehicleSpec(id: Id): VehicleSpec | undefined {
+    return this.vehicleSpecFor(this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest);
+  }
+
+  private vehicleSpecFor(m: Manifest | undefined): VehicleSpec | undefined {
+    return m && m.kind === 'entity' && m.persona === undefined && m.takeable !== true ? vehicleSpecOf(m.vehicle) : undefined;
+  }
+
+  /** A vehicle's state made sane (rule 7) and what its module says of it; undefined if `id` is not a vehicle. */
+  private vehicleOf(id: Id): { v: VehicleState; spec: VehicleSpec } | undefined {
+    if (!this.ecs.alive.has(id)) return undefined;
+    const raw = this.ecs.get(id, 'vehicle');
+    const spec = raw && typeof raw === 'object' ? this.vehicleSpec(id) : undefined;
+    return spec ? { v: saneVehicle(raw, spec), spec } : undefined;
+  }
+
+  /**
+   * The vehicle whose deck the feet at (x, y) carpet space, `z` high, stand on (T439): a floor of its form there, at their height (the kernel
+   * puts the feet on it, `settleHeights`); a vehicle whose form is not ready, or that is not solid, its disc, at any height.
+   */
+  deckAt(x: number, y: number, z?: number): Id | undefined {
+    if (!this.decks.length || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+    for (const d of this.decks) {
+      const s = d.s;
+      if (!s) {
+        if (Math.hypot(x - d.x, y - d.y) <= d.r) return d.id;
+        continue;
+      }
+      if (typeof z !== 'number' || !Number.isFinite(z) || Math.abs(x - s.x) > s.form.reach || Math.abs(y - s.y) > s.form.reach) continue;
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
+      const f = s.levels.z[levelAt(s.levels, vx + vy * g.X, this.levelIn(s, z))];
+      // Nothing of the hull over its waterline here: the water, not the deck.
+      if (f <= s.form.base) continue;
+      if (Math.abs(this.standOf(s) + (f - s.form.base) / s.form.vpt - z) <= DECK_SLACK) return d.id;
+    }
+    return undefined;
+  }
+
+  /** The vehicle under the feet of the wanderer acting (T439), in the simulation. */
+  aboard(): Id | undefined {
+    const p = this.wandererPos();
+    if (!p || this.corona.isInterior(p.x) || !(Math.hypot(p.x, p.y) < this.config.circleRadius)) return undefined;
+    const c = this.wandererCarpet();
+    return this.deckAt(c.x, c.y, p.z);
+  }
+
+  /** The vehicle whose helm the wanderer acting holds (T439): their keys steer it, the camera goes further. */
+  atHelm(): Id | undefined {
+    const me = this.wanderer().id;
+    for (const d of this.decks) if (this.ecs.get(d.id, 'vehicle')?.helm === me) return d.id;
+    return undefined;
+  }
+
+  /** Who holds a helm now (T439): they do not walk. */
+  private helmsmen(): Set<string> {
+    const out = new Set<string>();
+    for (const d of this.decks) {
+      const h = this.ecs.get(d.id, 'vehicle')?.helm;
+      if (typeof h === 'string') out.add(h);
+    }
+    return out;
+  }
+
+  /** The wanderers of this kernel who stand on a vehicle's deck (T439), in the simulation; who plays from a client of their own, with T442. */
+  private wanderersAboard(id: Id): string[] {
+    const out: string[] = [];
+    for (const w of this.wanderersById.keys()) {
+      if (this.remote.has(w) || !this.inWorld(w)) continue;
+      if (this.as(w, () => this.aboard()) === id) out.push(w);
+    }
+    return out;
+  }
+
+  /** What lies or stands on a vehicle's deck (T439): things, not someone (people, animals, wanderers), not a building, not another vehicle. */
+  private thingsAboard(id: Id, at: Pose): Id[] {
+    const d = this.decks.find((x) => x.id === id);
+    const reach = (d?.s ? d.s.form.reach : (d?.r ?? 0.5)) + 0.5;
+    const bodies = new Set([...this.wanderersById.values()].map((w) => w.entity));
+    const out: Id[] = [];
+    for (const e of this.ecs.query('pos')) {
+      if (e === id || bodies.has(e) || NOT_CARGO.some((c) => this.ecs.has(e, c))) continue;
+      const p = this.ecs.get(e, 'pos');
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y) || Math.abs(p.x - at.x) > reach || Math.abs(p.y - at.y) > reach) continue;
+      if (this.deckAt(p.x, p.y, p.z) === id) out.push(e);
+    }
+    return out;
+  }
+
+  /** The points of a vehicle's hull, in its own frame (T439): its form's columns, or the disc of its body. */
+  private hullOf(id: Id): Float64Array {
+    const d = this.decks.find((x) => x.id === id);
+    const f = d?.s?.form;
+    if (!f?.result) return discPoints(d?.r ?? (Number(this.ecs.get(id, 'body')?.r) || 0.35));
+    let h = this.hulls.get(f);
+    if (!h) {
+      const g = f.result.grid;
+      this.hulls.set(f, (h = hullPoints(footprint(g, f.result.palette, 0, g.Z), g.X, g.Y, f.vpt)));
+    }
+    return h;
+  }
+
+  /**
+   * Whether a vehicle's hull stands at a pose (T439): every point of it on what carries it (the water it floats on, the ground it rolls on),
+   * none in what is solid (another hull with all of itself, anything else with what stops a body); `ignore` what goes with it.
+   */
+  private hullFits(id: Id, spec: VehicleSpec, pose: Pose, ignore: ReadonlySet<Id>): boolean {
+    const pts = this.hullOf(id);
+    const own = this.ecs.get(id, 'pos');
+    const ownTile = `${Math.floor(own.x)},${Math.floor(own.y)}`;
+    for (let i = 0; i < pts.length; i += 2) {
+      const [wx, wy] = toWorld(pts[i], pts[i + 1], pose.heading);
+      const x = pose.x + wx, y = pose.y + wy;
+      const col = Math.floor(x), row = Math.floor(y);
+      const t = this.tileAt(col, row);
+      if (!carries(spec, t ? this.palette[t] : undefined)) return false;
+      const key = `${col},${row}`;
+      if (key !== ownTile && this.solidTiles.has(key)) return false;
+      for (const s of this.solidForms.get(key) ?? []) {
+        if (ignore.has(s.id)) continue;
+        const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+        const g = s.form.result!.grid;
+        const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+        if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
+        if ((s.vehicle ? this.builtColumns(s.form) : s.foot)[vx + vy * g.X]) return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * The vehicles move (T439, ADR-0227), before the solids are made again: what the helm or Lua asks, the way gathered within the limits, the
+   * hull where what carries it lets it (the shore and what is solid stop it: turning, if it can, or nothing); then who stands on the deck and
+   * what lies on it go and turn with it, where a body may stand. A vehicle nobody is aboard of drops anchor: it never drifts unseen.
+   */
+  private vehicleTick(dt: number): void {
+    if (!(dt > 0) || !Number.isFinite(dt) || !this.decks.length) return;
+    const moves: VehicleMove[] = [];
+    for (const d of this.decks) {
+      const m = this.driveVehicle(d.id, dt);
+      if (m) moves.push(m);
+    }
+    if (!moves.length) return;
+    // The decks where they are now: who is carried is put on them, and checked against them.
+    this.reindexVehicles(new Set(moves.map((m) => m.id)));
+    for (const m of moves) this.carryAboard(m);
+  }
+
+  /** The solids and the decks of the vehicles that moved, where they are now (T439): the rest stays as the last `rebuildSolids` made it. */
+  private reindexVehicles(moved: ReadonlySet<Id>): void {
+    const cells = (s: SolidForm, fn: (key: string) => void) => {
+      for (let cy = Math.floor(s.y - s.form.reach); cy <= Math.floor(s.y + s.form.reach); cy++)
+        for (let cx = Math.floor(s.x - s.form.reach); cx <= Math.floor(s.x + s.form.reach); cx++) fn(`${cx},${cy}`);
+    };
+    for (const d of this.decks) {
+      if (!moved.has(d.id)) continue;
+      const old = d.s;
+      if (old)
+        cells(old, (key) => {
+          const list = this.solidForms.get(key);
+          const i = list ? list.indexOf(old) : -1;
+          if (i >= 0) list!.splice(i, 1);
+        });
+      const p = this.ecs.get(d.id, 'pos');
+      d.x = p.x;
+      d.y = p.y;
+      if (!old) continue;
+      const s: SolidForm = { ...old, x: p.x, y: p.y, yaw: Number(this.ecs.get(d.id, 'form')?.yaw) || 0 };
+      d.s = s;
+      cells(s, (key) => (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s));
+    }
+  }
+
+  private driveVehicle(id: Id, dt: number): VehicleMove | undefined {
+    const got = this.vehicleOf(id);
+    const p = this.ecs.get(id, 'pos');
+    if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return undefined;
+    const { v, spec } = got;
+    const aboard = this.wanderersAboard(id);
+    // The helm, held by a wanderer on the deck, alive, not in the air: else it is let go.
+    const h = v.helm;
+    if (h !== undefined && (!aboard.includes(h) || this.dying.has(h) || this.ecs.has(this.wanderersById.get(h)!.entity, 'jump'))) this.letGoHelm(id, v, spec);
+    if (v.helm !== undefined) {
+      const who = v.helm;
+      Object.assign(v, helmOrders((a) => this.heldBy(who, a)));
+      const pl = this.as(who, () => this.wandererComp());
+      if (pl) pl.facing = facingOf(v.heading);
+    }
+    // Nobody aboard: it drops anchor, nothing pushes it.
+    if (v.helm === undefined && !aboard.length) Object.assign(v, { anchored: true, thrust: 0, steer: 0 });
+    const step = vehicleStep(v, spec, dt);
+    v.speed = step.speed;
+    v.turn = step.turn;
+    const moving = Math.abs(step.dx) + Math.abs(step.dy) > 1e-9;
+    if (!moving && Math.abs(step.dyaw) < 1e-9) return undefined;
+    const from: Pose = { x: p.x, y: p.y, heading: v.heading };
+    const things = this.thingsAboard(id, from);
+    const ignore = new Set<Id>([id, ...things]);
+    const tries: Pose[] = [{ x: p.x + step.dx, y: p.y + step.dy, heading: v.heading + step.dyaw }];
+    if (step.dyaw && moving) tries.push({ x: p.x, y: p.y, heading: v.heading + step.dyaw }, { x: p.x + step.dx, y: p.y + step.dy, heading: v.heading });
+    const to = tries.find((t) => this.hullFits(id, spec, t, ignore));
+    // The way stopped: the hull stays (it may still turn), its way is lost; the helmsman feels it, once while it presses there.
+    if (moving && (!to || (to.x === p.x && to.y === p.y))) {
+      v.speed = 0;
+      v.bumped = true;
+      const last = this.bumpSaid.get(id);
+      if (last === undefined || this.time - last > BUMP_EVERY) {
+        if (v.helm !== undefined) this.as(v.helm, () => this.message(VEHICLE_WORDS[spec.medium].bumped, 'warn'));
+        this.bus.emit('vehicle:bumped', { id });
+      }
+      this.bumpSaid.set(id, this.time);
+    } else if (moving) delete v.bumped;
+    if (!to) {
+      v.turn = 0;
+      return undefined;
+    }
+    if (to.heading === v.heading) v.turn = 0;
+    const turned = ((to.heading % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    p.x = to.x;
+    p.y = to.y;
+    v.heading = turned;
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) fc.yaw = turned;
+    return { id, from, to, aboard, things };
+  }
+
+  /** Who is on a vehicle that moved goes with it (T439): to the same place of its deck, if a body may stand there; else it stays (and falls in). */
+  private carryAboard(m: VehicleMove): void {
+    for (const w of m.aboard)
+      this.as(w, () => {
+        const c = this.wandererCarpet(), p = this.wandererPos();
+        const [x, y] = carried(c.x, c.y, m.from, m.to);
+        const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+        if (!this.bodyFree(x, y, r, p.z)) return;
+        p.x += x - c.x;
+        p.y += y - c.y;
+        // A jump on the deck goes with it too.
+        const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
+        if (j?.from && j.to) {
+          j.from = { x: j.from.x + x - c.x, y: j.from.y + y - c.y };
+          j.to = { x: j.to.x + x - c.x, y: j.to.y + y - c.y };
+        }
+      });
+    const S = this.config.chunkSize;
+    for (const e of m.things) {
+      const p = this.ecs.get(e, 'pos');
+      if (!p) continue;
+      [p.x, p.y] = carried(p.x, p.y, m.from, m.to);
+      const fc: FormComp | undefined = this.ecs.get(e, 'form');
+      if (fc && Number.isFinite(fc.yaw)) fc.yaw = (fc.yaw + m.to.heading - m.from.heading) % (2 * Math.PI);
+      // It belongs to where it is now, as what lies there: it goes when that place goes.
+      const ch = this.ecs.get(e, 'chunk');
+      if (ch) ch.key = this.chunkKey(Math.floor(p.x / S), Math.floor(p.y / S));
+    }
+  }
+
+  /** The helm let go (T439): whoever held it is told, the vehicle keeps its anchor as it was, its course is nobody's. */
+  private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec): void {
+    const who = v.helm;
+    delete v.helm;
+    v.thrust = 0;
+    v.steer = 0;
+    if (who !== undefined && this.wanderersById.has(who)) this.as(who, () => this.message(VEHICLE_WORDS[spec.medium].left));
+    this.bus.emit('vehicle:helm', { id, wanderer: who, held: false });
+  }
+
+  /**
+   * «Prendi il timone» (T439): `who` (the wanderer acting), on the deck, takes the helm if it is free (theirs of another vehicle is let go) and
+   * the anchor comes up. False, said in the world's words when `quiet` is not (Lua asks it at every tick), when not. Who plays from a client
+   * of their own steers with T442.
+   */
+  takeHelm(id: Id, who = this.wanderer().id, quiet = false): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror || this.remote.has(who) || !this.wanderersById.has(who)) return false;
+    const { v, spec } = got;
+    const words = VEHICLE_WORDS[spec.medium];
+    return this.as(who, () => {
+      if (this.aboard() !== id) return void (quiet || this.message(words.aboard, 'warn')), false;
+      if (v.helm !== undefined && v.helm !== who) return void (quiet || this.message(words.taken, 'warn')), false;
+      const other = this.atHelm();
+      if (other !== undefined && other !== id) this.leaveHelm(other);
+      v.helm = who;
+      v.anchored = false;
+      delete v.bumped;
+      this.message(words.took);
+      this.bus.emit('vehicle:helm', { id, wanderer: who, held: true });
+      return true;
+    });
+  }
+
+  /** «Lascia il timone» (T439): the wanderer acting lets go the helm they hold. */
+  leaveHelm(id: Id): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || got.v.helm !== this.wanderer().id) return false;
+    this.letGoHelm(id, got.v, got.spec);
+    return true;
+  }
+
+  /** «Getta l'ancora», «Leva l'ancora» (T439): who stands on the deck holds it or lets it go (the brake, on land). */
+  setAnchor(id: Id, anchored: boolean): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror || this.remote.has(this.wanderer().id)) return false;
+    const words = VEHICLE_WORDS[got.spec.medium];
+    if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
+    got.v.anchored = anchored;
+    this.message(anchored ? words.anchored : words.weighed);
+    return true;
+  }
+
+  /** What a vehicle's menu offers the wanderer acting on its deck (T439): the helm, taken or let go, and the anchor. */
+  private vehicleActions(id: Id): ActionOption[] {
+    const got = this.mirror ? undefined : this.vehicleOf(id);
+    const me = this.wanderer().id;
+    if (!got || this.remote.has(me) || this.aboard() !== id) return [];
+    const { v, spec } = got;
+    const w = VEHICLE_WORDS[spec.medium];
+    const out: ActionOption[] = [];
+    if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
+    else out.push({ id: 'helm', label: w.take, enabled: v.helm === undefined, ...(v.helm !== undefined ? { reason: w.taken } : {}) });
+    out.push(v.anchored ? { id: 'weigh', label: w.weigh, enabled: true } : { id: 'anchor', label: w.anchor, enabled: true });
+    return out;
+  }
+
+  /** A vehicle for Lua (T439, `world.vehicle`): a copy of what it is now; the helmsman and who is aboard as their bodies. */
+  private vehicleView(id: number): unknown {
+    const got = this.vehicleOf(id);
+    if (!got) return undefined;
+    const { v, spec } = got;
+    const body = (w: string) => this.wanderersById.get(w)?.entity;
+    const helm = v.helm !== undefined ? body(v.helm) : undefined;
+    return {
+      heading: v.heading,
+      speed: v.speed,
+      turn: v.turn,
+      thrust: v.thrust,
+      steer: v.steer,
+      power: v.power,
+      anchored: v.anchored,
+      bumped: !!v.bumped,
+      medium: spec.medium,
+      max: spec.speed,
+      aboard: this.wanderersAboard(id).map(body).filter((e): e is Id => e !== undefined),
+      ...(helm !== undefined ? { helm } : {}),
+    };
+  }
+
+  /**
+   * What Lua asks of a vehicle (T439, `world.vehicle_set`): thrust and steer −1…1 while nobody holds the helm (the helmsman's keys win), the
+   * power 0…1 (the wind in the sail, the oars), the anchor, the helm for a wanderer of this kernel on its deck or `false` to let it go. Never
+   * where it is (rule 1): the kernel moves it. What is not a value is ignored; false if `id` is not a vehicle, or in a mirror.
+   */
+  private askVehicle(id: number, ask: { thrust?: unknown; steer?: unknown; power?: unknown; anchored?: unknown; helm?: unknown }): boolean {
+    if (this.mirror) return false;
+    const got = this.vehicleOf(id);
+    if (!got) return false;
+    const { v, spec } = got;
+    const num = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
+    const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
+    if (v.helm === undefined) {
+      if (num(ask.thrust)) v.thrust = clamp(ask.thrust, -1, 1);
+      if (num(ask.steer)) v.steer = clamp(ask.steer, -1, 1);
+    }
+    if (num(ask.power)) v.power = clamp(ask.power, 0, 1);
+    if (typeof ask.anchored === 'boolean') v.anchored = ask.anchored;
+    if (ask.helm === false && v.helm !== undefined) this.letGoHelm(id, v, spec);
+    else if (num(ask.helm)) {
+      const who = this.wandererOf(ask.helm);
+      if (who === undefined) return false;
+      if (v.helm !== who && !this.takeHelm(id, who, true)) return false;
+    }
+    return true;
+  }
+
+  /** The vehicle an entity stands on (T439, `world.vehicle_of`): a wanderer's body where its wanderer is, a thing where it lies. */
+  private vehicleUnder(id: number): Id | undefined {
+    if (!this.ecs.alive.has(id) || this.ecs.has(id, 'vehicle')) return undefined;
+    const who = this.wandererOf(id);
+    if (who !== undefined) return this.inWorld(who) ? this.as(who, () => this.aboard()) : undefined;
+    const p = this.ecs.get(id, 'pos');
+    return p ? this.deckAt(p.x, p.y, p.z) : undefined;
+  }
+
+  /** The vehicles as the save keeps them (T439): those in the world where they are, then those whose module is not here. */
+  private vehiclesToSave(): VehicleRecord[] {
+    const r4 = (v: number) => Math.round(v * 10000) / 10000;
+    const out: VehicleRecord[] = [];
+    for (const id of this.ecs.query('vehicle', 'origin', 'module')) {
+      const got = this.vehicleOf(id);
+      const p = this.ecs.get(id, 'pos');
+      if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) continue;
+      out.push({ module: this.ecs.get(id, 'module').id, origin: this.ecs.get(id, 'origin').key, x: r4(p.x), y: r4(p.y), heading: r4(got.v.heading), anchored: got.v.anchored });
+    }
+    return [...out, ...this.waitingVehicles].slice(0, MAX_VEHICLES);
+  }
+
+  /**
+   * The vehicles of the save (T439) come back where they were, heading as they did, at anchor or not; their places do not make them again.
+   * A module gone, or not a vehicle any more: the record waits in the save.
+   */
+  private restoreVehicles(list: unknown): void {
+    this.waitingVehicles = [];
+    for (const r of readVehicles(list)) {
+      this.consumed.add(r.origin);
+      const entry = this.modules.get(r.module);
+      if (!entry || !this.vehicleSpecFor(entry.manifest)) {
+        this.waitingVehicles.push(r);
+        continue;
+      }
+      if (this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === r.origin)) continue;
+      const id = this.spawnModuleEntity(entry, r.x, r.y, undefined, r.origin);
+      const v = this.ecs.get(id, 'vehicle');
+      if (!v) continue;
+      Object.assign(v, { heading: r.heading, anchored: r.anchored });
+      const fc: FormComp | undefined = this.ecs.get(id, 'form');
+      if (fc) fc.yaw = r.heading;
+    }
+  }
+
   moveSlot(from: number, to: number): void {
     moveSlot(this.inventory(), from, to, this.itemSpec);
   }
@@ -5474,6 +5976,8 @@ export class Kernel {
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     const inv = this.inventory();
     const has = (req: string) => countItem(inv, req) > 0 || inv.slots.some((s) => s && this.itemInfo(s.item).tags.includes(req));
+    // A vehicle one stands on (T439): its helm and its anchor first.
+    out.push(...this.vehicleActions(id));
     if (this.ecs.has(id, 'pickup')) out.push({ id: 'raccogli', label: 'Raccogli', enabled: true });
     // A thing of the world one can carry elsewhere (T292); the kernel says why when it does not go.
     if (this.takeableOf(id)) out.push({ id: 'prendi', label: 'Prendi', enabled: true });
@@ -5565,6 +6069,9 @@ export class Kernel {
     if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
     if (this.pickUpRune()) return;
     const { id: target, col, row } = this.inFront();
+    // At the helm, or on a deck with nothing else in front (T439): the vehicle's menu.
+    const deck = this.aboard();
+    if (deck !== undefined && (target === undefined || target === deck || this.atHelm() === deck)) return this.openTileMenu(col, row, deck);
     if (target !== undefined && this.ecs.has(target, 'pickup')) {
       this.pickUpEntity(target);
       return;
@@ -5705,6 +6212,17 @@ export class Kernel {
         return;
       case 'prendi':
         this.takeThing(id);
+        return;
+      // The vehicle (T439).
+      case 'helm':
+        this.takeHelm(id);
+        return;
+      case 'unhelm':
+        this.leaveHelm(id);
+        return;
+      case 'anchor':
+      case 'weigh':
+        this.setAnchor(id, action === 'anchor');
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
@@ -9468,6 +9986,9 @@ export class Kernel {
       for (const id of this.ecs.query('placed')) this.ecs.destroy(id);
       for (const id of this.ecs.query('origin')) if (this.moved.has(this.ecs.get(id, 'origin').key)) this.ecs.destroy(id);
       this.moved.clear();
+      // And its vehicles (T439).
+      for (const id of this.ecs.query('vehicle')) this.ecs.destroy(id);
+      this.waitingVehicles = [];
       this.repo.write('world/state.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();
@@ -9542,6 +10063,7 @@ export class Kernel {
     }
     const placed = this.placedToSave();
     const moved = this.movedToSave();
+    const vehicles = this.vehiclesToSave();
     const state = {
       consumed: [...this.consumed].slice(-5000),
       containers,
@@ -9551,6 +10073,7 @@ export class Kernel {
       time: Math.round(this.time),
       ...(placed.length ? { placed } : {}),
       ...(moved.length ? { moved } : {}),
+      ...(vehicles.length ? { vehicles } : {}),
     };
     // Each wanderer in their own file (T34); the world's state no longer carries one.
     const players = Object.fromEntries([...this.wanderersById.values()].map((w) => [playerFile(w.id), this.as(w.id, () => this.wandererState(w))]));
@@ -9915,6 +10438,8 @@ export class Kernel {
     this.restorePlaced(st.placed);
     // After the containers and the forms: a thing moved comes back with what its origin keeps (T292).
     this.restoreMoved(st.moved);
+    // The vehicles (T439): where they were, of no place.
+    this.restoreVehicles(st.vehicles);
     // The important structures of before ADR-0092 are the Huge ones.
     for (const [z, c] of Object.entries(st.important ?? {})) if (typeof c === 'string') this.rari.get('huge')!.set(z, c);
     for (const t of RARE_SIZES) for (const [z, c] of Object.entries(st.rares?.[t] ?? {})) if (typeof c === 'string') this.rari.get(t)!.set(z, c);
@@ -10118,6 +10643,9 @@ export class Kernel {
       this.composing.pump();
       this.furnishing.pump();
     }
+    // The vehicles (T439) before the solids: they move, and who stands on them with them.
+    this.vehicleTick(dt);
+    const helmsmen = this.helmsmen();
     this.rebuildSolids();
     for (const w of this.wanderersById.keys()) this.as(w, () => (this.wandererComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
     this.syncRunes();
@@ -10129,7 +10657,8 @@ export class Kernel {
       this.touching.clear();
       const t0 = performance.now();
       this.runningSystem = s.manifest.id;
-      if (PER_WANDERER.has(s.manifest.id)) for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.runModule(s.manifest.id, 'update', dt));
+      // Who holds a helm does not walk (T439): their keys steer the vehicle.
+      if (PER_WANDERER.has(s.manifest.id)) for (const w of this.wanderersById.keys()) !this.remote.has(w) && !(s.manifest.id === HELM_STILLS && helmsmen.has(w)) && this.as(w, () => this.runModule(s.manifest.id, 'update', dt));
       else this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;
       this.meter.record(s.manifest.id, performance.now() - t0, this.touching.size);
@@ -10197,6 +10726,7 @@ export class Kernel {
     this.solidTiles.clear();
     this.solidForms.clear();
     this.cellars = [];
+    const decks = new Map<Id, SolidForm>();
     for (const id of this.ecs.query('body', 'pos')) {
       if (id === this.wandererEntity) continue;
       const b = this.ecs.get(id, 'body');
@@ -10212,13 +10742,22 @@ export class Kernel {
       // An entity with a model blocks with its voxels: it is listed in every cell its footprint may reach.
       // A thing that stands in a cellar (T417) stands at its height, not on the ground over it.
       const stand = this.cellarHeight(id, p);
-      const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f), ...(stand !== undefined ? { stand } : {}) };
+      const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f), ...(stand !== undefined ? { stand } : {}), ...(this.ecs.has(id, 'vehicle') ? { vehicle: true as const } : {}) };
+      if (s.vehicle) decks.set(id, s);
       if (s.hole) this.cellars.push(s);
       for (let cy = Math.floor(p.y - f.reach); cy <= Math.floor(p.y + f.reach); cy++)
         for (let cx = Math.floor(p.x - f.reach); cx <= Math.floor(p.x + f.reach); cx++) {
           const key = `${cx},${cy}`;
           (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s);
         }
+    }
+    // The decks (T439): of every vehicle a module still makes one, its form's floors if it is a solid with a form, else its disc.
+    this.decks = [];
+    for (const id of this.ecs.query('vehicle', 'pos')) {
+      const p = this.ecs.get(id, 'pos');
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y) || !this.vehicleSpec(id)) continue;
+      const s = decks.get(id);
+      this.decks.push({ id, x: p.x, y: p.y, r: Number(this.ecs.get(id, 'body')?.r) || 0.35, ...(s ? { s } : {}) });
     }
   }
 

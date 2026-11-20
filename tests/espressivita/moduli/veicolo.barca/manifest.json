@@ -1,3 +1,4 @@
 { "id": "veicolo.barca", "name": "Barca", "kind": "entity", "tags": ["barca"],
   "appearance": { "glyph": "B", "color": "#8a5a2b", "aspetto": "una barca a vela" },
-  "physics": { "solid": false, "radius": 0.4 } }
+  "physics": { "solid": false, "radius": 0.4 },
+  "vehicle": { "medium": "water", "speed": 3, "accel": 2, "turn": 1 } }

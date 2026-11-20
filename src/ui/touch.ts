@@ -321,7 +321,7 @@ export class TouchControls {
           break;
         case 'pinch':
           // As the wheel: not while a window has the keys.
-          if (this.pinch && kernel.input.enabled) renderer.zoomTo(pinchDistance(this.pinch.distance, this.pinch.span, g.span, renderer.canFreeOrbit()));
+          if (this.pinch && kernel.input.enabled) renderer.zoomTo(pinchDistance(this.pinch.distance, this.pinch.span, g.span, renderer.canFreeOrbit(), renderer.atHelm()));
           break;
         case 'pinchEnd':
           this.pinch = undefined;
