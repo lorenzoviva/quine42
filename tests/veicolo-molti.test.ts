@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { coast, onDeck, readVehicleView, turnBetween } from '../src/kernel/vehicle';
 import { isMove } from '../src/session/protocol';
-import { ask, avatarOf, boatIn, DT, fleet, run } from './fleet';
+import { ask, avatarOf, boatIn, DT, fleet, run, thin } from './fleet';
 
 describe('the vehicle on the wire (T442)', () => {
   it('reads a vehicle from the wire without trusting it, carries it on along the arc of its bow, tells a move from a look', () => {
@@ -213,4 +213,29 @@ describe('the vehicle in a game of many (T442)', () => {
     await ask(mutiny.server, mutiny.all, mutiny.bruno.k.perform(boatIn(mutiny.bruno), 'helm') as Promise<void>);
     expect(mutiny.k.ecs.get(mutiny.boat, 'vehicle').helm).toBe('bruno');
   }, 180_000);
+
+  it('the helm of the master, whose id is the one every mirror gives its own wanderer (`me`), is another’s in the other mirrors', async () => {
+    const { k, server, anna, bruno, all, boat, board, mine } = await fleet();
+    const io = await thin(server, 'me', 'Io');
+    const every = [...all, io];
+    run(server, every, 12);
+    const f = io.k.ecs.get(boatIn(io), 'form');
+    await io.k.forms.wait(f.model, f.seed, f.tint);
+    board('me', -0.3, 0.9);
+    run(server, every, 12);
+    await ask(server, every, io.k.perform(boatIn(io), 'helm') as Promise<void>);
+    run(server, every, 8);
+    expect(k.ecs.get(boat, 'vehicle').helm).toBe('me');
+    expect(io.k.atHelm()).toBe(boatIn(io));
+    for (const t of [anna, bruno]) {
+      expect(t.k.atHelm()).toBeUndefined();
+      expect(t.k.actionsFor(boatIn(t)).find((o) => o.id === 'helm')).toMatchObject({ enabled: false });
+    }
+    // Bruno is not at the helm in his mirror: he walks on the deck.
+    const from = mine(bruno);
+    bruno.k.input.setHeld('left', true);
+    run(server, every, 6);
+    bruno.k.input.setHeld('left', false);
+    expect(mine(bruno)[1]).toBeLessThan(from[1] - 0.1);
+  }, 90_000);
 });

@@ -37,8 +37,9 @@ del rapimento e di ciò che esce (§ 5).
 5. **Gli altri a bordo arrivano dove stanno sul ponte** (`OtherView.on`, `lx`, `ly`; e così le cose che vi giacciono, `EntityView.on`): lo
    specchio li mette in quel punto del ponte che porta avanti lui, scivolando nel riferimento del ponte (`onDecks`), così non tremano; il
    renderer muove le loro gambe solo se camminano sul ponte.
-6. **Il timone in molti**: il menu del veicolo è lo stesso nello specchio (dal veicolo che il server manda) e la scelta va al server come ogni
-   azione (`helm`, `unhelm`, `anchor`, `weigh`); il veicolo su cui si sta è a portata da tutto il suo ponte (un galeone è lungo 16). I tasti
+6. **Il timone in molti**: il menu del veicolo è lo stesso nello specchio (dal veicolo che il server manda: il timone del suo client è il suo
+   viandante, quello di un altro è segnato come di un altro, `other:<id>`, perché l'id del master, `me`, è anche quello che ogni specchio dà al
+   suo viandante: trovato nella prova con due schede) e la scelta va al server come ogni azione (`helm`, `unhelm`, `anchor`, `weigh`); il veicolo su cui si sta è a portata da tutto il suo ponte (un galeone è lungo 16). I tasti
    viaggiano già (`keys`, ADR-0139); al timone lo specchio non cammina (`HELM_STILLS` saltato) e la camera arretra come da soli. **Un timone
    tenuto da un altro** lo prende solo il master (che libera ogni cosa) o chiunque se la partita dice `pvp` (un ammutinamento), dal menu e mai da
    Lua (`seizesHelm`); chi lo perde lo sente («Qualcuno ti prende il timone.»). Si libera all'uscita, alla morte, scendendo: come da soli.

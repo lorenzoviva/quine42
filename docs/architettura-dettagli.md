@@ -1392,7 +1392,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (credito, `FAR`, collisione): il ponte porta, il credito conta solo il cammino; la correzione dice anche il punto del ponte (`correction.on/lx/ly`).
   **Gli altri a bordo** e ciò che giace sul ponte arrivano dove stanno su di lui (`OtherView.on/lx/ly`, `EntityView.on/lx/ly`, `carriedOn`) e lo
   specchio li tiene lì sul ponte che porta avanti (`onDecks`); il renderer muove le gambe di chi cammina sul ponte, non di chi vi è portato.
-  **Il timone**: il menu dello specchio (dal `vehicle` mandato; il timone del suo client è il suo viandante), le scelte al server (`action`), il
+  **Il timone**: il menu dello specchio (dal `vehicle` mandato; il timone del suo client è il suo viandante, quello di un altro `other:<id>`,
+  mai l'id `me` che ogni specchio dà al suo), le scelte al server (`action`), il
   veicolo su cui si sta a portata da tutto il ponte (`outOfReach`); i tasti col messaggio `keys`; al timone lo specchio non cammina. Uno tenuto
   da un altro solo al master o con `pvp`, dal menu (`seizesHelm`; chi lo perde: «Qualcuno ti prende il timone.»). **Tuffarsi** («Tuffati», sui
   carri «Scendi», `over` → `leaveDeck`): sempre, chiunque governi, il posto più vicino fuori dallo scafo entro `LEAVE_REACH`; in molti un client

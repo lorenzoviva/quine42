@@ -53,6 +53,8 @@ const COAST = 0.5;
 const JUMP_TURN = 0.6;
 /** The farthest point of a deck a client takes from the wire (T442, tiles from its middle): a galleon is 16 long. */
 const DECK_REACH = 64;
+/** The mark of a helm another wanderer holds, in a mirror (T442): no wanderer's id has it, so it is never this mirror's own. */
+const OTHERS_HELM = 'other:';
 
 /** What the kernel does that a multiplayer game does not do from a player's client yet (the master's R is their branch's). */
 const LATER = ['rollback'] as const;
@@ -477,7 +479,8 @@ export class ThinClient {
     const known = this.ships.has(id) && !fresh;
     const was = k.ecs.get(id, 'vehicle');
     const heading = known && Number.isFinite(was?.heading) ? was.heading : v.heading;
-    const helm = v.helm === this.session.id ? k.wanderer().id : v.helm;
+    // Another's helm is never this mirror's wanderer, whose id (`me`) may be the server's id of the master: it is marked as another's.
+    const helm = v.helm === undefined ? undefined : v.helm === this.session.id ? k.wanderer().id : `${OTHERS_HELM}${v.helm}`;
     k.ecs.set(id, 'vehicle', { heading, speed: v.speed, turn: v.turn, thrust: 0, steer: 0, power: 1, anchored: v.anchored, ...(helm !== undefined ? { helm } : {}) });
     const form = k.ecs.get(id, 'form');
     if (form) form.yaw = heading;
