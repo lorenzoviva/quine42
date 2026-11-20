@@ -31,6 +31,16 @@ const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
     descr: ["L'erba si piega al vento.", 'Un sentiero di pecore attraversa il prato.', 'In lontananza suona una campana.', 'Qualcuno ha lasciato un cesto vuoto sul sasso.'],
   },
 };
+/** The names the offline Cartographer gives the islands of an archipelago (T441). */
+const ISLANDS = ['Isola del Granchio', 'Isola delle Palme', 'Isola della Tartaruga', 'Isola dei Pellicani', 'Isola del Corallo', 'Isola della Conchiglia', 'Isola Ventosa', 'Isola del Faro Spento'];
+const ISLETS = ['Secca del Gabbiano', 'Banco delle Sterne', 'Scoglio Bianco', 'Secca della Murena'];
+function islandName(cx: number, cy: number, islet: boolean): { name: string; description: string } {
+  const rng = new Rng(hashStr(`island|${cx}|${cy}`));
+  return islet
+    ? { name: rng.pick(ISLETS), description: 'Una lingua di sabbia in mezzo al mare, dove ci si ferma a riprendere fiato.' }
+    : { name: rng.pick(ISLANDS), description: rng.pick(['Spiagge chiare e una macchia fitta nel mezzo.', 'Scogli a nord, una baia tranquilla a sud.', 'Palme, sabbia e un sentiero che sale.']) };
+}
+
 const SUFFIX = ['di Valmora', 'dei Sussurri', 'del Re Muto', 'delle Lanterne', 'Senza Ritorno', "dell'Eco", 'del Primo Passo', 'delle Rune', 'del Nastro', 'Immobile'];
 
 const VILLAGER = [
@@ -605,6 +615,8 @@ export class MockAiModels implements AiModels, DecisionModels {
       runes,
       // The start has its bakery: a structure of its own, which the Sculptor writes.
       structures: ctx.start ? [{ concept: 'il forno del borgo' }] : cellar ? [{ concept: CELLAR_HOUSE, cellar: true }] : [],
+      // The island it stands on, if nobody has named it (T441): drawn apart, the rest of the plan stays the one it was.
+      ...(ctx.island && !ctx.island.name ? { island: islandName(ctx.cx, ctx.cy, !!ctx.island.islet) } : {}),
     };
   }
 

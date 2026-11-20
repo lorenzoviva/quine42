@@ -8,9 +8,9 @@ export interface WorldTheme {
   name: string;
   text: string;
   /**
-   * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. None
-   * says one yet: the archipelago of the pirates comes with T441, the void and the stars of space with T445-T450; until then every theme
-   * is a world of today's nature, and a theme written by hand always is.
+   * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. The
+   * pirates bring the archipelago (T441, ADR-0228); the void and the stars of space come with T445-T450; every other theme is a world of
+   * today's nature, and a theme written by hand always is.
    */
   nature?: Partial<import('./nature').WorldNature>;
 }
@@ -100,8 +100,8 @@ whoever has spoken one does not boast of it at the bar. What they really do is w
     name: 'Pirati',
     text: `# Theme: The Islands of the Brethren
 
-An archipelago of warm seas in the age of sail: islands close to one another, joined by sandbanks, reefs and rope
-bridges, walked from cove to cove; harbour towns of timber and coral stone, quays with ships at anchor in the bay,
+An archipelago of warm seas in the age of sail: islands scattered over open water, a long swim from one another,
+with cays and sandbanks between the farthest; harbour towns of timber and coral stone, quays with ships at anchor in the bay,
 shipyards, taverns of the port, a fort on the headland, plantations, palm beaches, jungle in the heart of the islands,
 wrecks on the shoals. Sailors, boatswains, ship's cooks, carpenters, fishermen, smugglers, harbour masters, tavern
 keepers, governors' soldiers, freebooters, parrots, goats, crabs and ship's cats. Pistols and cutlasses are tools of the world, with their weight.
@@ -111,6 +111,7 @@ Stories are born from the people: work, crews, families, loves, debts, shares of
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the sand as
 in the jungle. Sailors keep them for luck, smugglers trade them, harbour masters tax them; whoever has spoken
 one tells it only to their own crew. What they really do is written in the canon of the runes.`,
+    nature: { geography: 'archipelago' },
   },
   {
     id: 'space',

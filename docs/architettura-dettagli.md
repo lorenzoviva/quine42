@@ -1263,8 +1263,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   attraversare di un codice che un luogo pianificato usa mai.
 - **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
   (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
-  com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`, oggi solo il mondo
-  di oggi: `continent`, `earth`, 600 secondi, gravità 1, niente respiro), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+  com'era (`keepNature`, accanto a `keepGame`); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
+  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2 e l'arcipelago), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
@@ -1278,6 +1278,27 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (nella corona e nello studio la terra). In multigiocatore il salto è solo da soli; il client prevede il passo con la gravità del mondo, non
   con quella delle regioni del master che non vede, uno scarto entro la tolleranza del server. Nessuna ambientazione porta oggi una gravità
   diversa (l'asteroide e i pianeti: T445, T449); la pagina della campagna nel sito non ha ancora la riga (la rotta la accetta).
+- **L'arcipelago** (ADR-0228, T441, kernel 0.10.4): `nature.geography: 'archipelago'`, portato dai Pirati. **Le isole sono del kernel**, dal solo
+  seme (`src/kernel/islands.ts`): una per cella di `ISLAND_PITCH` (180 caselle, 10 luoghi), il centro scosso di al più 18 caselle, la riva una
+  curva chiusa attorno al centro (`shoreAt`: raggio 16-40, mosso di al più un quinto; la partenza la più grande, centrata sulla prima casella).
+  **Lo stretto più lungo** è `MAX_STRAIT` = 144 caselle (8 luoghi) d'acqua fra due rive, misurato sul corpo che nuota (`straitCost`): nel mare
+  del seme 60 secondi e 17 di energia, nel più faticoso che il Fisico può scrivere con il passo più pesante di una gravità 77, sotto i 90 con cui
+  si nasce. Fra due isole di celle vicine sugli assi, se l'acqua fra le rive lungo la retta dei centri è più lunga, **un isolotto** (raggio 5)
+  a metà (`isletBetween`): così ogni isola è unita alle quattro vicine e dalla partenza si arriva a ogni isola (regola 10). Un isolotto non
+  ridà energia (la ridanno cibo e letto), è un riposo dall'acqua. **La bozza**: il generatore del seme in un arcipelago non fa il suo mare
+  (`world.nature()`), il kernel ci disegna sopra le isole (`islandDraft`, in `genDraft`): mare aperto `o`, due caselle d'acqua bassa `w`, due
+  di spiaggia `s` (ogni riva un approdo), dentro la terra del generatore (il suo mare una laguna `w`); un generatore riscritto ha le isole lo
+  stesso. **Le isole sono ferme**: solo il seme e la natura le decidono, mai l'atlante, il master o il Cartografo. **Il mare aperto senza
+  chiamate**, in ogni mondo: un luogo la cui bozza è tutta acqua profonda che si nuota lo pianifica il kernel (`openSea`, `seaPlan`: «Mare
+  aperto» nella lingua del mondo, `OPEN_SEA`; nessun ambiente, cosa, runa o carta), fuori dalla quota e dalla pausa come il riempitivo (non i modelli locali sopra un mondo che non è il loro, T433).
+  **Il battesimo**: il primo luogo pianificato su un'isola (`islandOfPlace`, l'isola con più terra e spiaggia nel luogo) porta nella richiesta
+  del Cartografo `island` e lo schema chiede nome e riga; il kernel li controlla (`cleanText`, `metaBreak`) e scrive nell'atlante una regione
+  con `island` (l'id), il centro e la portata in luoghi (`islandPlaces`), l'ambiente del primo luogo, in un commit (`nameIsland`); i luoghi
+  dopo ricevono il nome. Una regione d'isola non è una regione dei luoghi (`regionAt` la salta, `islandRegion` la trova) né toglie il suo
+  ambiente al resto del mondo; `island` esce ai client nell'atlante (`REGION_FIELDS`). **Lua**: `world.region_at(x, y)` (la regione del luogo,
+  mai una trattenuta, e l'id dell'isola sotto la casella; `Kernel.regionInfoAt`) e `world.islands(x, y, r)` (entro r ≤ 720 caselle, al più 32,
+  i più vicini prima, col nome; `Kernel.islandsSeen`), copie. `tests/arcipelago.test.ts` (la misura, le coppie di 60 semi, la traversata
+  sulle caselle di 5 × 5 celle, il kernel, Lua). Gli NPC restano sulla loro isola; porti, moli e secche sono un task a parte (P6 dello studio).
 
 <a id="veicoli"></a>
 ## Il veicolo

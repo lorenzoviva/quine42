@@ -814,6 +814,15 @@ local function make_api()
     store_set = function(key, value) return host.store_set(tostring(key), value) end,
     -- The nature of the world (T437, ADR-0224): a copy each call, read only.
     nature = function() return host.nature() end,
+    -- The atlas and the islands (T441, ADR-0228): read only, copies.
+    region_at = function(x, y)
+      if type(x) ~= "number" or type(y) ~= "number" then return nil end
+      return host.region_at(x, y)
+    end,
+    islands = function(x, y, r)
+      if type(x) ~= "number" or type(y) ~= "number" then return {} end
+      return host.islands(x, y, type(r) == "number" and r or 200)
+    end,
     -- The vehicle (T439, ADR-0227): read, asked for power, course, anchor and helm; never moved by Lua (the kernel moves it).
     vehicle = function(id) return host.vehicle(id) end,
     vehicle_set = function(id, t)
