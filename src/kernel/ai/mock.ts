@@ -106,6 +106,8 @@ export const CELLAR_CHANCE = 0.2;
 export const CELLAR_FROM = 2;
 export const CELLAR_HOUSE = 'la casa con la cantina';
 export const CELLAR_THING = 'obj.chest';
+/** The seed's harbour (T443): the offline plans choose it on the shore of an island, never elsewhere. */
+export const HARBOUR = 'harbour';
 /** What the local models put in a cellar (T419): the seed's shelf and rack, and a barrel. */
 export const CELLAR_FURNITURE = ['cellar-shelf', 'cellar-rack', 'barile'];
 
@@ -426,7 +428,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         };
       }
       case 'genesis.atlas': {
-        const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(village|woods|fields|ruins|inn)$/.test(l.id));
+        // The harbour (T443) has no region: it is a shore's, where the sea is.
+        const special = (d.layouts ?? []).filter((l: { id: string }) => !/^(village|woods|fields|ruins|inn|harbour)$/.test(l.id));
         const dirs = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
         return { regions: special.map((l: { id: string; name: string; description: string }, i: number) => ({ name: `${l.name} ${SUFFIX[i % SUFFIX.length]}`, description: l.description, environment: l.id, direction: dirs[(i * 3) % 8], distance: 3 + (i % 5), radius: 1 })) };
       }
@@ -582,15 +585,19 @@ export class MockAiModels implements AiModels, DecisionModels {
     const water = /acqua (\d+)%/.exec(ctx.terrain);
     const biome = forest && +forest[1] > 30 ? 'forest' : water && +water[1] > 20 ? 'water' : 'plain';
     const lex = PLACES[biome];
-    const ids = ctx.layouts.map((l) => l.id);
+    // The harbour (T443) only on the shore of an island, drawn apart: the offline worlds of before stay the ones they were.
+    const ids = ctx.layouts.map((l) => l.id).filter((id) => id !== HARBOUR);
     const neighbour = ctx.neighbors.find((n) => ids.includes(n.layout))?.layout;
-    const ambiente = ctx.start
+    const sea = [...ctx.terrain.matchAll(/(?:mare|acqua) (\d+)%/g)].reduce((a, m) => a + Number(m[1]), 0);
+    const shore = !ctx.start && !!ctx.island && sea >= 20 && sea <= 80 && ctx.layouts.some((l) => l.id === HARBOUR) && new Rng(hashStr(`harbour|${ctx.cx}|${ctx.cy}`)).chance(0.6);
+    const picked = ctx.start
       ? (ids.find((i) => i === 'village') ?? ids[0])
       : neighbour && rng.chance(0.4)
         ? neighbour
         : biome === 'forest' && ids.includes('woods')
           ? 'woods'
           : rng.pick(ids);
+    const ambiente = shore ? HARBOUR : picked;
     const objects: Array<{ module: string; where: string }> = [];
     // In the order of the ids of before T307b (`obj.letto`, not `obj.bed`): the offline worlds of the seed stay the ones they were.
     const legacy = (id: string) => italianName('moduli-seme', id);

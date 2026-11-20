@@ -11,7 +11,7 @@
 //   sequence — run children in order, each until it can do nothing more
 //   markov   — every step, run the first child that can do something
 //   path     — draw a shortest path of `color` from a `from` cell to the nearest `to` cell over `on` cells
-//   stamp    — a whole structure drawn by the kernel (castello, torre, tempio…, see stamps.ts), with the
+//   stamp    — a whole structure drawn by the kernel (castle, tower, temple, harbour…, see stamps.ts), with the
 //              world's codes for each role (wall, floor, door, water, bridge…); `count` copies
 // `steps` limits how many times a node may apply; `symmetry` ("all" by default) also tries rotations
 // and mirrors of each rule.
@@ -310,7 +310,7 @@ class StampRunner extends Runner {
     if (this.count >= (this.limit ?? 1)) return false;
     this.count++;
     // Codes are resolved by the layout from the palette; a lone stamp falls back to the base codes.
-    const codes = { wall: 'h', floor: 'f', door: 'd', water: 'w', bridge: 'p', ground: 'g', road: 'p', rock: 'r', fence: 'h', ...(this.node.codes ?? {}) } as StampCodes;
+    const codes = { wall: 'h', floor: 'f', door: 'd', water: 'w', bridge: 'p', ground: 'g', road: 'p', rock: 'r', fence: 'h', pier: 'p', reef: '', ...(this.node.codes ?? {}) } as StampCodes;
     return stamp(g.cells, g.w, g.h, g.fixed, this.node.shape, codes, rng, this.node.on, g.cut);
   }
 }

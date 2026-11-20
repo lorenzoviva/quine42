@@ -666,6 +666,43 @@
           }
         ]
       }
+    },
+    "harbour": {
+      "name": "Porto",
+      "description": "un molo di tavole che entra nell'acqua fino al fondo dove le navi si affiancano, case sulla riva, secche al largo",
+      "environment": "mixed",
+      "program": {
+        "type": "sequence",
+        "children": [
+          {
+            "type": "prl",
+            "rules": [
+              {
+                "in": "t",
+                "out": "g",
+                "p": 0.8
+              }
+            ]
+          },
+          {
+            "type": "stamp",
+            "shape": "harbour"
+          },
+          {
+            "type": "stamp",
+            "shape": "house",
+            "count": 2
+          },
+          {
+            "type": "path",
+            "from": "d",
+            "to": "i",
+            "on": "gs",
+            "color": "p",
+            "steps": 2
+          }
+        ]
+      }
     }
   }
 }

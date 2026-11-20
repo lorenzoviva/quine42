@@ -247,6 +247,26 @@
         "after": 3,
         "in": "t"
       }
+    },
+    "i": {
+      "id": "pier",
+      "name": "molo",
+      "description": "tavole di legno su pali, sopra l'acqua",
+      "color": "#9c7a4e",
+      "solid": false,
+      "cross": "walk",
+      "layer": "floor"
+    },
+    "y": {
+      "id": "reef",
+      "name": "secca",
+      "description": "scogli appena sotto il pelo dell'acqua, dove le chiglie si incagliano",
+      "color": "#3f8f8c",
+      "solid": true,
+      "cross": "swim",
+      "depth": "reef",
+      "layer": "liquid",
+      "speed": 0.4
     }
   },
   "strata": {

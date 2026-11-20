@@ -88,13 +88,17 @@ export function vehicleSpecErrors(said: unknown): string[] {
   return out;
 }
 
-/** Whether a tile carries a hull: on the water what one swims (the deep only, for a deep hull), on land what one walks. */
+/**
+ * Whether a tile carries a hull: on the water what one swims (the deep only, for a deep hull; never a reef, where a hull runs aground,
+ * T443), on land what one walks.
+ */
 export function carries(spec: Pick<VehicleSpec, 'medium' | 'draught'>, t: TerrainDef | undefined): boolean {
   if (!t) return false;
   const cross = crossingOf(t);
   if (spec.medium === 'land') return cross === 'walk';
   if (cross !== 'swim') return false;
-  return spec.draught === 'shallow' || terrainPhysics(t).depth === 'deep';
+  const depth = terrainPhysics(t).depth;
+  return depth === 'deep' || (spec.draught === 'shallow' && depth !== 'reef');
 }
 
 // --- Its state: the component `vehicle` --------------------------------------------------------------------------------------------
@@ -254,7 +258,7 @@ export function readVehicles(list: unknown): VehicleRecord[] {
 export const HELM_REACH = 1.5;
 
 /** What the menu and the world say of a vehicle, by what it moves on: a helm and an anchor on the water, the reins and a brake on land. */
-export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; took: string; left: string; anchored: string; weighed: string; bumped: string; taken: string; aboard: string; far: string }> = {
+export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; took: string; left: string; anchored: string; weighed: string; bumped: string; aground: string; taken: string; aboard: string; far: string }> = {
   water: {
     take: 'Prendi il timone',
     leave: 'Lascia il timone',
@@ -265,6 +269,7 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     anchored: "Getti l'ancora.",
     weighed: "Levi l'ancora.",
     bumped: 'Lo scafo urta e si ferma.',
+    aground: 'Lo scafo tocca la secca e si ferma.',
     taken: 'Al timone c’è già qualcuno.',
     aboard: 'Devi essere a bordo.',
     far: 'Il timone è più in là.',
@@ -279,6 +284,7 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     anchored: 'Tiri il freno.',
     weighed: 'Togli il freno.',
     bumped: 'Le ruote urtano e si fermano.',
+    aground: 'Le ruote urtano e si fermano.',
     taken: 'Alla guida c’è già qualcuno.',
     aboard: 'Devi esserci sopra.',
     far: 'Il posto di guida è più in là.',

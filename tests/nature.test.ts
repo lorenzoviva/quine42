@@ -61,10 +61,12 @@ describe('how a body crosses a tile (T437)', () => {
       expect(terrainPhysicsErrors(code, t as never), code).toEqual([]);
       expect(t.cross, code).toBe(crossingOf(t));
     }
-    expect(Object.entries(tiles).filter(([, t]) => t.cross === 'swim').map(([c]) => c).sort()).toEqual(['o', 'w']);
+    expect(Object.entries(tiles).filter(([, t]) => t.cross === 'swim').map(([c]) => c).sort()).toEqual(['o', 'w', 'y']);
     expect(tiles.w).toMatchObject({ solid: true, cross: 'swim', depth: 'shallow', speed: 0.4 });
     expect(tiles.o).toMatchObject({ solid: true, cross: 'swim', depth: 'deep', speed: 0.4 });
     expect(tiles.v).toMatchObject({ layer: 'liquid', solid: true, cross: 'none' });
+    // The reef (T443): swum over, no hull floats on it.
+    expect(tiles.y).toMatchObject({ solid: true, cross: 'swim', depth: 'reef', speed: 0.4 });
   });
 });
 

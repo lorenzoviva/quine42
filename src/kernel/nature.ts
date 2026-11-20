@@ -14,8 +14,11 @@ import type { TerrainDef } from './types';
 export const CROSSINGS = ['walk', 'swim', 'none'] as const;
 export type Crossing = (typeof CROSSINGS)[number];
 
-/** How deep the water of a tile one swims is: what a hull floats on (T439), whether one too loaded may enter it (T438). */
-export const DEPTHS = ['shallow', 'deep'] as const;
+/**
+ * How deep the water of a tile one swims is: what a hull floats on (T439), whether one too loaded may enter it (T438). A reef (T443,
+ * ADR-0230) is rock just under the surface: a body swims over it, no hull floats on it (a vessel stops there, whatever its draught).
+ */
+export const DEPTHS = ['shallow', 'deep', 'reef'] as const;
 export type WaterDepth = (typeof DEPTHS)[number];
 
 /**

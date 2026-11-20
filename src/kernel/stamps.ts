@@ -2,12 +2,14 @@
 // hut villages, stables, barracks, dungeons, dragon lairs. Models cannot draw a castle cell by cell
 // (they cannot count); the Cartographer only says "a castle here" in its layout program
 // ({type: "stamp", shape: "castle"}) and the kernel draws it with the world's own tile codes.
+// The harbour (T443, ADR-0230) is not a pattern: it finds a shore, lays a pier from it out to where the water is deep and sets reefs off it.
 
 import { STRUCTURE_VPT, TILE, type SizeTier } from '../mj/classes';
+import { crossingOf, terrainPhysics } from './nature';
 import type { Rng } from './rng';
 import type { TerrainDef } from './types';
 
-export const STAMP_SHAPES = ['house', 'castle', 'fortress', 'tower', 'temple', 'pyramid', 'huts', 'pen', 'barracks', 'dungeon', 'lair', 'well'] as const;
+export const STAMP_SHAPES = ['house', 'castle', 'fortress', 'tower', 'temple', 'pyramid', 'huts', 'pen', 'barracks', 'dungeon', 'lair', 'well', 'harbour'] as const;
 export type StampShape = (typeof STAMP_SHAPES)[number];
 
 /** Roles a stamp draws with (ids since T310b, `ruoli-timbri`); resolved from the palette when the program does not say. */
@@ -21,9 +23,13 @@ export interface StampCodes {
   road: string;
   rock: string;
   fence: string;
+  /** The pier of a harbour (T443): a tile walked over the water, planks, a jetty. */
+  pier: string;
+  /** The reefs off a harbour (T443): rock just under the water, swum over, where a hull runs aground; '' if the world has none. */
+  reef: string;
 }
 
-export const STAMP_ROLES: Array<keyof StampCodes> = ['wall', 'floor', 'door', 'water', 'bridge', 'ground', 'road', 'rock', 'fence'];
+export const STAMP_ROLES: Array<keyof StampCodes> = ['wall', 'floor', 'door', 'water', 'bridge', 'ground', 'road', 'rock', 'fence', 'pier', 'reef'];
 
 /**
  * The codes of this world that play each role: by layer, by the terrain's id (the seed's, English since the contract 0.2) and by its
@@ -35,16 +41,20 @@ export function defaultCodes(palette: Record<string, TerrainDef>, pathCode = 'p'
   const by = (pred: (t: TerrainDef) => boolean, fallback: string) => codes.find(([, t]) => pred(t))?.[0] ?? fallback;
   const named = (ids: string[], re: RegExp, fallback: string) => codes.find(([, t]) => (t.id !== undefined && ids.includes(t.id)) || re.test(t.name))?.[0] ?? fallback;
   const wall = by((t) => t.layer === 'wall', 'h');
+  const bridge = named(['drawbridge', 'bridge'], /ponte|levatoi|bridge/i, pathCode);
   return {
     wall,
     floor: by((t) => t.layer === 'floor' && !!t.indoor, 'f'),
     door: by((t) => t.layer === 'door', 'd'),
     water: named(['moat'], /fossat|acqua(?! profonda)|moat|water(?! deep)/i, by((t) => t.layer === 'liquid', 'w')),
-    bridge: named(['drawbridge', 'bridge'], /ponte|levatoi|bridge/i, pathCode),
+    bridge,
     ground: by((t) => t.layer === 'ground' && !t.solid && !/sentier|strada|campo|path|road|field/i.test(t.name), 'g'),
     road: pathCode,
     rock: by((t) => t.layer === 'rock', wall),
     fence: named(['fence', 'palisade'], /recint|staccionat|palizzat|steccat|fence|palisade|paddock/i, wall),
+    // A pier is walked: a terrain the world calls so, if it is walked, otherwise the bridge's (T443).
+    pier: codes.find(([, t]) => crossingOf(t) === 'walk' && ((t.id !== undefined && ['pier', 'jetty', 'dock', 'boardwalk'].includes(t.id)) || /molo|pontil|banchin|tavolat|pier|jetty|dock|boardwalk/i.test(t.name)))?.[0] ?? bridge,
+    reef: by((t) => crossingOf(t) === 'swim' && terrainPhysics(t).depth === 'reef', ''),
   };
 }
 
@@ -79,7 +89,33 @@ export interface StampCut {
   built?: string;
   /** Cells the stamps of this place took, their whole box: written by each stamp, read by the next. */
   claimed?: Set<number>;
+  /** How a body crosses the codes of this world, for the harbour (T443): the layout says it from the palette. */
+  ground?: StampGround;
 }
+
+/** The codes of a world by how a body crosses them (T443): the harbour lays its pier from what is walked over what is swum. */
+export interface StampGround {
+  /** Codes walked. */
+  walked: string;
+  /** Codes swum. */
+  swum: string;
+  /** Codes of deep water, where a ship of any draught floats. */
+  deep: string;
+}
+
+/** The ground of a palette as the harbour reads it (T443). */
+export function stampGround(palette: Record<string, TerrainDef>): StampGround {
+  const codes = Object.entries(palette).filter(([c]) => c.length === 1 && c !== '?');
+  const of = (pred: (t: TerrainDef) => boolean) => codes.filter(([, t]) => pred(t)).map(([c]) => c).join('');
+  return {
+    walked: of((t) => crossingOf(t) === 'walk'),
+    swum: of((t) => crossingOf(t) === 'swim'),
+    deep: of((t) => crossingOf(t) === 'swim' && terrainPhysics(t).depth === 'deep'),
+  };
+}
+
+/** The ground of the seed's base codes, for a stamp run without a layout. */
+const BASE_GROUND: StampGround = { walked: 'gpsnfdmz', swum: 'wo', deep: 'o' };
 
 /**
  * The size of the structure the lot of each shape holds at `STRUCTURE_VPT` (T407): the tiles of that size (`tilesOf`) fit in the lot,
@@ -99,6 +135,7 @@ export const STAMP_SIZES: Readonly<Record<StampShape, SizeTier | 'building' | un
   dungeon: 'large',
   lair: undefined,
   well: undefined,
+  harbour: undefined,
 };
 
 /**
@@ -106,6 +143,8 @@ export const STAMP_SIZES: Readonly<Record<StampShape, SizeTier | 'building' | un
  * `STAMP_SIZES` (T407), at TILE the patterns of before (`patternAt20`).
  */
 export function shapePattern(shape: StampShape, rng: Rng, vpt: number = STRUCTURE_VPT): Pat {
+  // The harbour has no pattern: it is laid on the shore it finds (`harbour`).
+  if (shape === 'harbour') return grid(1, 1);
   if (vpt === TILE) return patternAt20(shape, rng);
   switch (shape) {
     case 'house': {
@@ -311,6 +350,8 @@ function patternAt20(shape: StampShape, rng: Rng): Pat {
       p[1][1] = 'water';
       return p;
     }
+    case 'harbour':
+      return grid(1, 1);
   }
 }
 
@@ -322,6 +363,7 @@ function patternAt20(shape: StampShape, rng: Rng): Pat {
  * one can reach.
  */
 export function stamp(cells: string[], w: number, h: number, fixed: Set<number> | undefined, shape: StampShape, codes: StampCodes, rng: Rng, on?: string, cut?: StampCut): boolean {
+  if (shape === 'harbour') return !!harbour(cells, w, h, fixed, codes, rng, cut);
   const vpt = cut?.vpt ?? STRUCTURE_VPT;
   const pat = shapePattern(shape, rng, vpt);
   const apart = vpt !== TILE;
@@ -373,4 +415,132 @@ export function stamp(cells: string[], w: number, h: number, fixed: Set<number> 
     return true;
   }
   return false;
+}
+
+// --- The harbour (T443, ADR-0230) ----------------------------------------------------------------------------------------------------
+
+/** How far a pier goes into the deep water: its last tiles stand in it, and a ship of any draught moors alongside its head. */
+export const PIER_INTO_DEEP = 2;
+/** The longest pier the kernel lays, in tiles of water: a shore whose deep water is further has a pier over the shallows only. */
+export const MAX_PIER = 8;
+/** Where the water is shallow all the way (a lake, a lagoon), a short pier of at most this many tiles: it never crosses the water. */
+export const SHALLOW_PIER = 3;
+/** How far from a pier's line the reefs lie, in tiles across it, and from its head: off the harbour, beside its way in. */
+const REEF_FROM = 3;
+const REEF_TO = 5;
+
+/** A pier laid by the kernel: its tiles from the shore out (the first is the first tile of water), the way it goes, the reefs off it. */
+export interface Pier {
+  cells: number[];
+  dx: number;
+  dy: number;
+  reefs: number[];
+}
+
+/**
+ * Whether a pier's head touches the water (T443): a tile of `water` beside it or beyond it that is not the pier (the deep codes: where a
+ * ship of any draught moors alongside). The guarantee of a harbour: a pier that does not reach the water is no pier.
+ */
+export function pierTouches(cells: readonly string[], w: number, h: number, pier: readonly number[], water: string): boolean {
+  const head = pier[pier.length - 1];
+  if (head === undefined) return false;
+  const x = head % w, y = (head - x) / w;
+  const own = new Set(pier);
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const nx = x + dx, ny = y + dy;
+    if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+    const n = ny * w + nx;
+    if (!own.has(n) && water.includes(cells[n])) return true;
+  }
+  return false;
+}
+
+/**
+ * The harbour (T443, ADR-0230): from a shore walked two tiles deep, a pier of `pier` tiles straight out over the water one swims, until
+ * `PIER_INTO_DEEP` of its tiles stand in the deep water (at most `MAX_PIER`; where the water is shallow all the way, a short one of `SHALLOW_PIER`). The shores that reach the deep
+ * water come first, the shortest pier among them. Its head touches the deep water where it reached it, the water anyway: if not, the kernel
+ * lengthens it by one tile, and a shore where even so it does not is not taken. Off its head, beside its way in, where the world has a reef
+ * terrain, two or three tiles of reef. Never on the border of the place, nor on what another stamp took; its tiles, its root and the tile
+ * behind are taken. Returns the pier laid, or undefined where the place has no shore for it (inland: the stamp draws nothing).
+ */
+export function harbour(cells: string[], w: number, h: number, fixed: Set<number> | undefined, codes: StampCodes, rng: Rng, cut?: StampCut): Pier | undefined {
+  const ground = cut?.ground ?? BASE_GROUND;
+  const swum = (i: number) => ground.swum.includes(cells[i]);
+  const deep = (i: number) => ground.deep.includes(cells[i]);
+  const walked = (i: number) => ground.walked.includes(cells[i]) && !cut?.built?.includes(cells[i]);
+  const free = (x: number, y: number) => x >= 1 && y >= 1 && x < w - 1 && y < h - 1 && !fixed?.has(y * w + x) && !cut?.claimed?.has(y * w + x);
+  const DIRS: Array<[number, number]> = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+  type Root = { x: number; y: number; dx: number; dy: number };
+  // Every root: a tile walked with another walked behind it, the water ahead.
+  const roots: Root[] = [];
+  for (let y = 1; y < h - 1; y++)
+    for (let x = 1; x < w - 1; x++) {
+      if (!free(x, y) || !walked(y * w + x)) continue;
+      for (const [dx, dy] of DIRS) if (free(x + dx, y + dy) && swum((y + dy) * w + x + dx) && free(x - dx, y - dy) && walked((y - dy) * w + x - dx)) roots.push({ x, y, dx, dy });
+    }
+  const lay = (r: Root): number[] | undefined => {
+    const out: number[] = [];
+    let into = 0;
+    for (let k = 1; k <= MAX_PIER && into < PIER_INTO_DEEP; k++) {
+      const x = r.x + r.dx * k, y = r.y + r.dy * k;
+      if (!free(x, y) || !swum(y * w + x)) break;
+      out.push(y * w + x);
+      if (into || deep(y * w + x)) into++;
+    }
+    if (!into && out.length > SHALLOW_PIER) out.length = SHALLOW_PIER;
+    const water = into ? ground.deep : ground.swum;
+    if (out.length && !pierTouches(cells, w, h, out, water)) {
+      // The kernel's check: lengthened by one tile; a shore where it still does not touch the water is not taken.
+      const head = out[out.length - 1];
+      const nx = (head % w) + r.dx, ny = Math.floor(head / w) + r.dy;
+      if (!free(nx, ny) || !swum(ny * w + nx)) return undefined;
+      out.push(ny * w + nx);
+      if (!pierTouches(cells, w, h, out, water)) return undefined;
+    }
+    // A pier of one tile is a step into the water, not a pier.
+    return out.length >= 2 ? out : undefined;
+  };
+  const laid = roots
+    .map((r) => ({ r, k: rng.next(), cells: lay(r) }))
+    .filter((t): t is { r: Root; k: number; cells: number[] } => !!t.cells)
+    .map((t) => ({ ...t, reaches: t.cells.some(deep) ? 0 : 1 }))
+    .sort((a, b) => a.reaches - b.reaches || a.cells.length - b.cells.length || a.k - b.k);
+  const best = laid[0];
+  if (!best) return undefined;
+  const { r, cells: pier } = best;
+  for (const i of pier) {
+    cells[i] = codes.pier;
+    cut?.claimed?.add(i);
+  }
+  // The root and the tile behind it stay to walk to the pier: no other stamp covers them.
+  cut?.claimed?.add(r.y * w + r.x);
+  cut?.claimed?.add((r.y - r.dy) * w + r.x - r.dx);
+  const reefs: number[] = [];
+  if (codes.reef) {
+    const head = pier[pier.length - 1];
+    const hx = head % w, hy = (head - hx) / w;
+    const nearPier = (x: number, y: number) => pier.some((p) => Math.max(Math.abs((p % w) - x), Math.abs(Math.floor(p / w) - y)) < 2);
+    // Beside the way in: across the pier's line, never on it nor ahead of its head.
+    const spots: number[] = [];
+    for (let y = hy - REEF_TO; y <= hy + REEF_TO; y++)
+      for (let x = hx - REEF_TO; x <= hx + REEF_TO; x++) {
+        const across = Math.abs(r.dx ? y - hy : x - hx);
+        if (across < REEF_FROM || !free(x, y) || !swum(y * w + x) || nearPier(x, y)) continue;
+        spots.push(y * w + x);
+      }
+    if (spots.length) {
+      const first = spots[rng.int(spots.length)];
+      reefs.push(first);
+      const fx = first % w, fy = (first - fx) / w;
+      for (const [dx, dy] of DIRS) {
+        const n = (fy + dy) * w + fx + dx;
+        if (reefs.length < 3 && spots.includes(n) && rng.next() < 0.7) reefs.push(n);
+      }
+      for (const i of reefs) {
+        cells[i] = codes.reef;
+        cut?.claimed?.add(i);
+      }
+    }
+  }
+  return { cells: pier, dx: r.dx, dy: r.dy, reefs };
 }

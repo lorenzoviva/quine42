@@ -143,7 +143,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       porta: 'door', 'campo arato': 'plowed_field', sabbia: 'sand', giungla: 'jungle', mare: 'sea', montagna: 'mountain', neve: 'snow',
       'muro di pietra': 'stone_wall', 'muro di mattoni': 'brick_wall', 'parete di paglia': 'straw_wall', staccionata: 'fence',
       'ponte levatoio': 'drawbridge', 'pavimento di pietra': 'stone_floor', lava: 'lava', 'campo seminato': 'sown_field',
-      'grano maturo': 'ripe_wheat', ceppaia: 'stump',
+      'grano maturo': 'ripe_wheat', ceppaia: 'stump', molo: 'pier', secca: 'reef',
     },
     note: 'oggi il nome è insieme id e testo; il terreno prende un `id` e il `name` resta il testo del mondo (`world.find_tile` e `matura.in` cercano l’id, poi il nome)',
   }),
@@ -159,6 +159,8 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       borgo: 'village', borgo_mattoni: 'brick_village', bosco: 'woods', campi: 'fields', capanne: 'huts', caserma: 'barracks', castello: 'castle',
       deserto: 'desert', dungeon: 'dungeon', fortezza: 'fortress', giungla: 'jungle', lago: 'lake', locanda: 'inn', maneggio: 'stables',
       montagne: 'mountains', piramide: 'pyramid', rovine: 'ruins', tana_drago: 'dragon_lair', tempio: 'temple', torre_mago: 'wizard_tower',
+      // The harbour (T443) was born English: never `porto`, which a universe may have as an environment of its own Cartographer.
+      harbour: 'harbour',
     },
     note: 'gli ambienti scritti dal Cartografo negli universi salvati sono contenuto: restano come sono',
   }),
@@ -172,7 +174,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     step: 'T307a',
     names: {
       casa: 'house', castello: 'castle', fortezza: 'fortress', torre: 'tower', tempio: 'temple', piramide: 'pyramid', capanne: 'huts',
-      recinto: 'pen', caserma: 'barracks', dungeon: 'dungeon', tana: 'lair', pozzo: 'well',
+      recinto: 'pen', caserma: 'barracks', dungeon: 'dungeon', tana: 'lair', pozzo: 'well', porto: 'harbour',
     },
   }),
   d({
@@ -919,7 +921,7 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
     reach: ['disco', 'prompt'],
     lang: 'en',
     step: 'T310b',
-    names: { muro: 'wall', pavimento: 'floor', porta: 'door', acqua: 'water', ponte: 'bridge', terreno: 'ground', strada: 'road', roccia: 'rock', recinto: 'fence' },
+    names: { muro: 'wall', pavimento: 'floor', porta: 'door', acqua: 'water', ponte: 'bridge', terreno: 'ground', strada: 'road', roccia: 'rock', recinto: 'fence', molo: 'pier', secca: 'reef' },
   }),
   d({
     id: 'interazioni',
