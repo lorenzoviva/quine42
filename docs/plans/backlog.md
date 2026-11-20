@@ -6184,3 +6184,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: uno studio in `docs/design/terreno-3d.md`: (a) la regola 10 rivista: aree raggiungibili, meno percorribili e da superare con mezzi (arrampicare, ponte, leva, veicoli) provati con «Altro…», tenendo il path-finding comodo dove si cammina; cosa garantisce il kernel e cosa no; (b) il rilievo con picchi e avvallamenti veri, il fondale e il sottosuolo con dettagli (nuoto subacqueo); (c) gli strati come concetto trasversale (Cartografo, Scultore Architetto, Scenografo, Narratore) con le adiacenze fra strati in MJ, e l'alternativa del terreno tutto in MJ 3D, con la divisione Lua/MJ; (d) un'acqua più realistica e il vento come automi cellulari, e una primitiva del kernel per automi parametrici o programmatici (esposta a chi, con quali tetti); (e) le prestazioni misurate, non stimate: un prototipo nel `lab/` per ogni via (tempo per luogo, memoria, frame con `misura-frame.mjs`) contro il budget del frame di oggi; (f) i contratti e le migrazioni che servirebbero, i task con stime e l'ADR proposto.
 - Browser: no (le misure del frame con lo script headless).
 - Quando è fatto: lo studio con le misure e i task proposti (da approvare); commit su `task/T459`.
+
+### T460 · Integrare T442 nel base (conflitto con T457: package.json, version.ts, universe.json) — `da fare` (dipende da T442)
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Step: 37
+- Contesto: `integra T442` (il veicolo in molti, ADR-0232, kernel 0.10.8) ha trovato conflitti in `package.json`, `src/kernel/version.ts` e `universe/universe.json`: nel frattempo è entrato T457 (il luogo che il budget ferma resta bozza, ADR-0231, kernel 0.10.7). Gli ADR non si scontrano. Nasce da T442: `dossier T442`, `dossier T457`.
+- Cosa fare: nel worktree `git merge task/T442`; tenere tutte le aggiunte; kernel 0.10.8 in `version.ts`, `package.json` e `universe/universe.json` (e dove T442 lo cita: dettagli, ADR-0232, indice degli ADR); se il glossario è cambiato, il censimento rigenerato con `node tools/glossario/glossario.mjs`; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni.
+- Browser: no (il veicolo in molti l'ha visto T442; il merge non cambia UI).
+- Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460 e `integra T442` toglie worktree e branch di T442. Sicurezza: nessuna superficie nuova.
