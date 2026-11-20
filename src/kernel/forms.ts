@@ -8,8 +8,8 @@
 // and for actions. A form that is not ready yet is simply not there: the entity blocks by its radius.
 
 import type { SoundPurpose } from '../mj/sound';
-import { areasOf, type AreaMap } from '../mj/areas';
-import { boxOf, classOf, CLASSES, growsByRules, scaledTiles, STRUCTURE_VPT, tilesOf, voxelsOf, type AssetClass } from '../mj/classes';
+import { areasOf, columnAreasOf, type AreaMap } from '../mj/areas';
+import { boxOf, classOf, CLASSES, growsByRules, isVessel, scaledTiles, STRUCTURE_VPT, tilesOf, VESSEL_VPT, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
 import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
@@ -35,12 +35,13 @@ export const JUMP_FAR = 2.6;
 
 /**
  * The density a model's index entry asks for, if it is a sane one (the corona's buildings: 8); else 20, but a structure that grows by
- * rules is at `STRUCTURE_VPT` (T405, ADR-0209: the same voxels, shown a quarter larger).
+ * rules is at `STRUCTURE_VPT` (T405, ADR-0209: the same voxels, shown a quarter larger), a vessel at `VESSEL_VPT` (T440).
  */
 export function vptOf(info: Pick<ModelInfo, 'class' | 'size' | 'vpt'> | undefined): number {
   const v = info?.vpt;
   if (typeof v === 'number' && Number.isInteger(v) && v >= 4 && v <= 40) return v;
   const cls = info && classOf(info.class);
+  if (isVessel(cls)) return VESSEL_VPT;
   return cls && growsByRules(cls, info.size) ? STRUCTURE_VPT : VPT;
 }
 
@@ -207,6 +208,8 @@ export interface Form {
   footless?: boolean;
   /** The areas its program marks on its ground, in its own tiles (T346, ADR-0182), read once by `formAreas`. */
   areas?: AreaMap;
+  /** The areas its program marks on every layer (T440: a vessel's helm, boarding, hold), read once by `formDeckAreas`. */
+  deckAreas?: AreaMap;
   /** A building with its interior (T410, ADR-0214): the furniture its entry's rules place is in its grid. */
   furnished?: boolean;
   /**
@@ -225,6 +228,16 @@ export function formAreas(f: Form): AreaMap {
   if (f.areas) return f.areas;
   if (!f.result) return {};
   return (f.areas = areasOf(f.result.grid, f.result.palette, f.vpt, f.base));
+}
+
+/**
+ * The areas a vessel's program marks on its deck and under it (T440): `helm`, `boarding`, `hold`, each with every tile of the model's own frame
+ * where it has a cell, every layer counted (`columnAreasOf`). Empty until the form is ready; read once per form.
+ */
+export function formDeckAreas(f: Form): AreaMap {
+  if (f.deckAreas) return f.deckAreas;
+  if (!f.result) return {};
+  return (f.deckAreas = columnAreasOf(f.result.grid, f.result.palette, f.vpt));
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */

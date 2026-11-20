@@ -1,0 +1,40 @@
+<!-- Sailing boat, the generic vessel of the seed (T440): what a vessel wears until the Sculptor gives it its own. The local models
+     answer with the same boat written for every box (src/kernel/ai/mockVessel.ts); this is it at the class's own size, Large. -->
+<sequence values="BHIDFRGTOMNSs" size="40 96 64" waterline="10">
+  <!-- The hull: the lower half of an egg as long and as wide as the box, hollow, the stern cut flat and closed by a transom. -->
+  <ellipsoid at="19.5 47.5 0" size="40 96 38" color="H"/>
+  <ellipsoid at="19.5 47.5 2" size="36 92 34" color="I" on="H"/>
+  <box at="19.5 47.5 19" size="40 96 45" color="B"/>
+  <box at="19.5 2.5 0" size="40 6 64" color="B"/>
+  <box at="19.5 6 0" size="40 1 19" color="H" on="I"/>
+  <!-- The deck over the hold, the planks at the bottom of the hold, a low rail round the deck. -->
+  <box at="19.5 47.5 18" size="40 96 1" color="D" on="I"/>
+  <all in="I H" out="O *" steps="1"/>
+  <prl in="I" out="B"/>
+  <all in="B H" out="R *" steps="1"/>
+  <all in="B R" out="R *" steps="1"/>
+  <!-- Where one boards: the rail opens amidships on both sides, a step of planks in the gap. -->
+  <box at="19.5 47.5 20" size="40 16 1" color="B" on="R"/>
+  <box at="19.5 47.5 19" size="40 16 1" color="G" on="R"/>
+  <!-- The helm aft, on the middle line: a post and its wheel. -->
+  <box at="19.5 16 19" size="2 2 12" color="T"/>
+  <box at="19.5 17.5 26" size="7 1 7" color="T"/>
+  <!-- The masts, a sail on each above the head of whoever walks the deck, its yard on top. -->
+  <box at="19.5 53 19" size="2 2 42" color="M"/>
+  <box at="19.5 54 45" size="31 1 14" color="S"/>
+  <box at="19.5 54 59" size="34 1 2" color="N"/>
+  <color symbol="H" value="6b4423" name="scafo"/>
+  <color symbol="D" value="b08850" name="ponte"/>
+  <color symbol="F" value="a07a48" name="pagliolo"/>
+  <color symbol="R" value="4a2e17" name="parapetto"/>
+  <color symbol="G" value="8a6a3a" name="imbarco" area="boarding"/>
+  <color symbol="T" value="5a3a1e" name="timone" area="helm"/>
+  <color symbol="O" value="7a5634" name="fondo della stiva" area="hold"/>
+  <color symbol="M" value="5e3f22" name="albero"/>
+  <color symbol="N" value="4a3020" name="pennone"/>
+  <color symbol="S" value="ece4d0" name="vela"/>
+  <color symbol="I" hidden="True" name="dentro lo scafo"/>
+  <color symbol="s" hidden="True" name="vela ammainata"/>
+  <action name="furl" label="Ammaina le vele"><all in="S" out="s"/></action>
+  <action name="hoist" label="Issa le vele"><all in="s" out="S"/></action>
+</sequence>

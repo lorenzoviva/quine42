@@ -186,6 +186,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `mezzo`, `nave` e `barca` (per la primitiva: sono ciò che il Concilio ne fa), `cavalcatura`
 - **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`.
 
+### Nave
+- **Inglese**: `vessel`, `VESSEL_TILES`, `VESSEL_VPT`, `isVessel`, `measureVessel`, `vesselErrors`, `VESSEL_LEAST`, `mockVesselProgram`
+- **Definizione**: la classe dei modelli che galleggiano e portano chi sta sul ponte (scialuppa, barca a vela, brigantino, galeone): scatole lunghe a 16 voxel per casella, la prua verso y grande, la linea di galleggiamento sulla radice, le aree del timone, dell'imbarco e della stiva; lo scafo alla linea chiuso e lungo il doppio, il ponte raggiunto dall'imbarco. È l'aspetto: il veicolo è la primitiva che la muove (T440, ADR-0228).
+- **Dove vive**: `src/mj/classes.ts`, `src/mj/vessel.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/ai/mockVessel.ts`, `universe/models/vessel.xml`
+- **Da non usare**: `ship` come classe, `imbarcazione`, `natante`
+- **Fermo**: `vessel` come classe nelle voci di `models/index.json`, `area="helm"`, `area="boarding"`, `area="hold"`.
+
 ### A bordo
 - **Inglese**: `aboard`, `deckAt`, `Deck`, `wanderersAboard`, `thingsAboard`, `carried`, `carryAboard`
 - **Definizione**: stare sul ponte di un veicolo: i piedi su un pavimento della sua forma, alla loro altezza (il disco del suo corpo finché la forma non c'è). Chi è a bordo non nuota, va e gira con il veicolo dove un corpo può stare, e ciò che giace sul ponte con lui (T439, ADR-0227).
@@ -194,8 +201,8 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: —
 
 ### Timone
-- **Inglese**: `helm`, `takeHelm`, `leaveHelm`, `atHelm`, `helmOrders`, `HELM_STILLS`, `HELM_VIEW`, `ZOOM.helm`
-- **Definizione**: chi governa un veicolo: lo prende dal menu chi è sul ponte, se è libero; non cammina, i suoi tasti spingono (su, giù) e girano la prua (sinistra, destra); lo lascia dal menu o scendendo. Sui carri «la guida» (T439, ADR-0227).
+- **Inglese**: `helm`, `takeHelm`, `leaveHelm`, `atHelm`, `nearHelm`, `HELM_REACH`, `helmOrders`, `HELM_STILLS`, `HELM_VIEW`, `ZOOM.helm`
+- **Definizione**: chi governa un veicolo: lo prende dal menu chi è sul ponte, se è libero (vicino alla sua area `helm`, se la forma ne ha una, T440); non cammina, i suoi tasti spingono (su, giù) e girano la prua (sinistra, destra); lo lascia dal menu o scendendo. Sui carri «la guida» (T439, ADR-0227).
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts` (`VEHICLE_WORDS`), `src/render/camera.ts`
 - **Da non usare**: `pilota`, `guidatore` (per chi lo tiene: è il timoniere), `volante`
 - **Fermo**: `helm` nel componente `vehicle`.

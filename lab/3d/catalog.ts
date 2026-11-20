@@ -3,8 +3,9 @@
 
 import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
-import { STRUCTURE_VPT } from '../../src/mj/classes';
+import { boxOf, classOf, sizeOf, STRUCTURE_VPT, VESSEL_TILES, VESSEL_VPT, type SizeTier } from '../../src/mj/classes';
 import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
+import { mockVesselProgram } from '../../src/kernel/ai/mockVessel';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade' | 'bench';
@@ -38,6 +39,8 @@ export interface Entry {
   sizes?: boolean;
   /** A program a Sculptor wrote on the bench of the sizes (T391, T402, lab/banco/taglie/modelli/): only for the developers. */
   sculpted?: boolean;
+  /** A vessel of the bench of the vessels (T440, lab/banco/navi/) at one of its sizes. */
+  vessels?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -196,6 +199,16 @@ for (const [file, xml] of Object.entries(sculpted)) {
   CATALOG.push({ id: `scultori:${run}/${concept}-${size}`, name: `${concept} ${size} · ${who}`, role: 'structure', xml, vpt: STRUCTURE_VPT, size: box, source: sourceOf(xml), sculpted: true, ...withIncludes(xml) });
 }
 
+// The bench of the vessels (T440, lab/banco/navi/): the boat the local models write for the box of every size of the class `vessel` (the
+// dinghy, the sailing boat, the brig, the galleon), at its density in the game (`VESSEL_VPT`), to see it beside the wanderer. In the players'
+// labs too: they are the seed's boat (`universe/models/vessel.xml`) at every size, nothing of the developers.
+const VESSEL_NAMES: Partial<Record<SizeTier, string>> = { medium: 'scialuppa', large: 'barca a vela', huge: 'brigantino', gargantuan: 'galeone' };
+for (const [t, name] of Object.entries(VESSEL_NAMES) as Array<[SizeTier, string]>) {
+  const box = boxOf(classOf('vessel')!, t);
+  const xml = mockVesselProgram(box, name);
+  CATALOG.push({ id: `navi:offline-${t}`, name: `Nave dei modelli locali, ${sizeOf(t)!.name}: ${name} (${VESSEL_TILES[t].join(' × ')} caselle)`, role: 'structure', xml, vpt: VESSEL_VPT, size: box, source: sourceOf(xml), vessels: true });
+}
+
 /**
  * The density a hand drawn model is drawn for, if not the lab's 20 (T404, D61): the author's fort, 500 × 500 voxels, is 50 × 50 tiles at
  * 10 voxels a tile, as its entry says in a world (`vpt: 10`, ADR-0208); the «voxel per casella» of the inspector starts from it.
@@ -236,7 +249,8 @@ export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && ['prop', 'structure'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && !e.vessels && ['prop', 'structure'].includes(e.role)],
+  ['Navi alle taglie (T440)', (e) => !!e.vessels],
   ...(DEV_TOOLS
     ? ([
       ['MarkovJunior (originali)', (e) => e.role === 'official'],

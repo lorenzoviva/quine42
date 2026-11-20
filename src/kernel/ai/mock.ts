@@ -12,6 +12,8 @@ import type { NpcContext } from '../agents/minds';
 import { fallbackDeath } from '../gameSetup';
 import { italianName } from '../internalNames';
 import { symbolTokens } from '../../mj/symbols';
+import { boxOf, classOf } from '../../mj/classes';
+import { mockVesselProgram } from './mockVessel';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -157,6 +159,8 @@ export class MockAiModels implements AiModels, DecisionModels {
       case 'model.sculpt': {
         // Offline the Sculptor answers with the library's hand-written program of the class; without one, a program of the nodes of
         // T333-T336 (a field leads a walker to its goal, the rule written in <in>/<out> children), which holds in every box but a procedural one.
+        // A vessel (T440): a simple boat written for the box of its size (a vessel is not one program for every size).
+        if (d.classe === 'vessel') return mockVesselProgram(boxOf(classOf('vessel')!, d.request?.taglia), String(d.request?.nome ?? 'Barca'));
         const program = String(d.example ?? MOCK_FIELD_PROGRAM);
         // A thing worn (T290): a section for its zone, a layer of its main letter over the zone, as the prompt asks.
         return d.worn ? `${program.trimEnd()}\n${mockWorn(program, String(d.worn))}\n` : program;

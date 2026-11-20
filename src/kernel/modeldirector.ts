@@ -5,7 +5,7 @@
 
 import type { Kernel } from './kernel';
 import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
-import { classOf, densityFor, growsByRules, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
+import { classOf, densityFor, growsByRules, guessClass, isVessel, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
 import { cellarOf, type ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -51,7 +51,8 @@ export function reuseQuestions(library: Array<{ id: string; name: string }>, cls
 export function modelSize(req: Pick<SculptRequest, 'classe' | 'taglia'>): Pick<ModelInfo, 'size' | 'vpt'> {
   const cls = classOf(req.classe), t = sizeOf(req.taglia);
   if (!cls || !t || t.id === cls.taglia) return {};
-  if (growsByRules(cls, t.id)) return { size: t.id };
+  // A vessel too (T440): without a density it is at `VESSEL_VPT` (`vptOf`) at every size.
+  if (growsByRules(cls, t.id) || isVessel(cls)) return { size: t.id };
   const vpt = densityFor(cls, t.id);
   return { size: t.id, ...(vpt !== TILE ? { vpt } : {}) };
 }
@@ -64,7 +65,7 @@ export const SHAPE_PREFIX = 'shape-';
 export const itemShapeModel = (f: string) => `${SHAPE_PREFIX}${f}`;
 
 /** The generic programs of the classes: shared by every kind of entity without a model of its own. */
-export const GENERIC = new Set(['person', 'animal', 'beast', 'tree', 'bush', 'rock', 'pebble', 'object', 'furniture', 'building', 'monument', 'structure']);
+export const GENERIC = new Set(['person', 'animal', 'beast', 'tree', 'bush', 'rock', 'pebble', 'object', 'furniture', 'building', 'monument', 'structure', 'vessel']);
 
 /** A model id for a module or an item of its own ("npc.mugnaio" → "npc-mugnaio"). */
 const COMMON_HOUSE = 'casa-comune-';
