@@ -36,8 +36,8 @@ const RECIPE_FIELDS = ['id', 'name', 'inputs', 'tools', 'output', 'card'];
 const RUNE_FIELDS = ['name', 'glyph', 'color', 'element', 'description', 'card'];
 const SPELL_FIELDS = ['name', 'description', 'cost', 'card'];
 const LAYOUT_FIELDS = ['name', 'description', 'card'];
-/** What a client reads of a region of the atlas (T375): not whether the master declared it nor what it does to the places inside it. */
-const REGION_FIELDS = ['id', 'name', 'description', 'environment', 'center', 'radius'];
+/** What a client reads of a region of the atlas (T375): not whether the master declared it nor what it does to the places inside it; the island it names (T441). */
+const REGION_FIELDS = ['id', 'name', 'description', 'environment', 'center', 'radius', 'island'];
 
 /** The fields of an object that are named here. */
 function only(o: unknown, keys: string[]): Record<string, unknown> {

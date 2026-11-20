@@ -104,25 +104,27 @@ describe('the palette of a Genesis (T437)', () => {
     expect(crossingOf(tiles.o)).toBe('swim');
     expect(crossingOf(k.palette.o)).toBe('swim');
     for (const t of Object.values(tiles)) expect(t.cross).toBe(crossingOf(t));
-    // No theme brings a nature the kernel cannot make true yet: the archipelago is T441's.
-    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual(DEFAULT_NATURE);
-    expect(k.nature()).toEqual(DEFAULT_NATURE);
+    // The pirates bring the archipelago (T441), the only nature a theme brings yet.
+    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
+    expect(k.nature()).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
   }, 60_000);
 });
 
 describe('the nature of the world (T437)', () => {
   it('is repaired to what this kernel can make true: anything else is the world of today', () => {
     expect(repairNature(undefined)).toEqual(DEFAULT_NATURE);
-    expect(repairNature({ geography: 'archipelago', sky: 'stars', day: 0, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
+    expect(repairNature({ geography: 'void', sky: 'stars', day: 0, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
+    // The archipelago is open since T441.
+    expect(repairNature({ geography: 'archipelago', sky: 'stars' })).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
     // The gravity is open since T447: 0.2-2, anything else the earth's.
-    expect(repairNature({ geography: 'archipelago', gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
+    expect(repairNature({ geography: 'void', gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
     expect(repairNature({ gravity: 0.1 }).gravity).toBe(1);
     expect(repairNature({ geography: 'continent', day: NaN, gravity: '1' })).toEqual(DEFAULT_NATURE);
     expect(repairNature([1, 2])).toEqual(DEFAULT_NATURE);
-    // What it accepts is a list a task widens: the world of today, and the gravity of T447.
-    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent'], sky: ['earth'], day: [600, 600], gravity: [0.2, 2], oxygen: [false] });
+    // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441.
+    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago'], sky: ['earth'], day: [600, 600], gravity: [0.2, 2], oxygen: [false] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
-    for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(DEFAULT_NATURE);
+    for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(t.id === 'pirates' ? { ...DEFAULT_NATURE, geography: 'archipelago' } : DEFAULT_NATURE);
   });
 
   it('is fixed like the game: a universe.json that says otherwise later is written back', async () => {

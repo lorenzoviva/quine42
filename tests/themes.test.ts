@@ -98,7 +98,7 @@ describe('the frontier, the islands and the far world (T184)', () => {
     for (const t of WORLD_THEMES.filter((x) => ['western', 'pirates', 'space'].includes(x.id))) {
       expect(t.text, t.id).not.toMatch(/\b(?:sail(?:s|ing)? (?:to|across|between)|zero gravity|weightless|vacuum|airless|spacewalk)/i);
     }
-    expect(WORLD_THEMES.find((x) => x.id === 'pirates')!.text).toMatch(/walked from cove to cove/);
+    expect(WORLD_THEMES.find((x) => x.id === 'pirates')!.text).toMatch(/a long swim from one another/);
     expect(WORLD_THEMES.find((x) => x.id === 'space')!.text).toMatch(/The air can be breathed/);
   });
 });
