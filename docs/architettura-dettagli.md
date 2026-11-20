@@ -1348,6 +1348,18 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   di «Altro…» che scava); il piano tiene `scavi` e `acqua` (il campo di `worldLevels` li prende: la superficie dell'acqua che ha scorso
   è fissata), le caselle che si riempiono o si asciugano cambiano tipo con `setTile`; il client sottile li riceve nel `ChunkView`.
   MarkovJunior resta per generare.
+- **Il mare a schermo** (T451, § 1.7 di `docs/design/acqua-spazio.md`): solo disegno, niente sul filo né nei dati, `src/render/sea.ts`.
+  Le cime delle caselle d'acqua stanno in una mesh loro per luogo (`SEA_MAT.water`), che l'**onda lunga** muove nel vertex shader: tre
+  sinusoidi delle coordinate del tappeto (così le onde restano sul mare quando il tappeto scorre) e del tempo (`SWELL`, `SEA_GLSL`, la stessa
+  somma in `swellAt`), la pendenza come normale e le creste più chiare (le bande del cartone non mostrerebbero una pendenza così lieve). Il
+  peso di ogni vertice (`wave`, `seaWeight`) è 1 dove le quattro caselle attorno all'angolo sono acqua dello stesso livello e 0 dove tocca
+  altro: lì l'acqua resta al suo livello, così l'argine scende fino a lei e un'onda non apre mai una fessura; gli ids dell'inchiostro
+  muovono i vertici allo stesso modo (`userData.pars`, `userData.begin` letti da `idsOf`). La **schiuma** è una striscia sull'acqua lungo
+  ciò che la ferma alla sua altezza, che va e viene (`FoamBuilder`, `SEA_MAT.foam`, senza inchiostro). Un veicolo su una casella d'acqua
+  **rolla** e beccheggia sul suo corpo (non sulla radice: il verso resta quello del kernel) con l'onda e si inclina in fuori in virata
+  (`rollOf`), e lascia la **scia** (`Sea`, in `Entities`): un punto ogni `WAKE.every` caselle oltre `WAKE.slow`, dal moto che si vede
+  fotogramma per fotogramma (vale anche nello specchio), con due bracci che si allargano e il ribollire nel mezzo, in una mesh con i buffer
+  fatti una volta. Chi nuota galleggia sull'onda; la camera no (`Wanderer.sunk` la toglie). Nessun numero è del kernel: non sale `Z`.
 
 <a id="lotti"></a>
 ## Lotti e strutture, scale e piani

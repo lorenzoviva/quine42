@@ -232,12 +232,16 @@ export function idsOf(m: THREE.Material): THREE.Material | undefined {
     const clip = !!m.userData?.clipped;
     const cut = clip && !!m.userData?.cut;
     const sway = !!m.userData?.sway;
+    // What a material adds to its vertices before three's (the swell of the sea, T451): the ids move the same, or the ink would not follow.
+    const pars: string = m.userData?.pars ?? '';
+    const begin: string = m.userData?.begin ?? (sway ? WIND_VERTEX : '#include <begin_vertex>');
     const material = new THREE.ShaderMaterial({
       uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR, ...(cut ? cutUniforms() : {}) },
       side: m.side,
       clipping: true,
       clippingPlanes: m.clippingPlanes ?? null,
       vertexShader: `attribute float part;
+${pars}
 ${sway ? 'attribute float sway;' : ''}
 uniform float uTime;
 uniform float uWind;
@@ -251,7 +255,7 @@ void main() {
   #else
   vIds = vec2(0.0, part / 255.0);
   #endif
-  ${sway ? WIND_VERTEX : '#include <begin_vertex>'}
+  ${begin}
   #include <project_vertex>
   ${clip ? CLIP_VERTEX : ''}
   ${cut ? CUT_VERTEX : ''}

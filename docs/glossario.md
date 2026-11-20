@@ -207,6 +207,34 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `ormeggio` (è del porto, T443), `parcheggio`
 - **Fermo**: `anchored` nel componente `vehicle` e in `world/state.json → vehicles`.
 
+### Onda lunga
+- **Inglese**: `swell`, `SWELL`, `swellAt`, `seaSwell`, `seaWeight`, `seaLift`
+- **Definizione**: il moto dell'acqua a schermo: tre onde sinusoidali di dove sta un punto del tappeto e del tempo, le creste più chiare; ferma dove l'acqua tocca altro (la riva, l'acqua di un altro livello), piena in mare aperto; chi nuota ci galleggia sopra. Solo disegno, nessun dato (T451).
+- **Dove vive**: `src/render/sea.ts`, `src/render/terrain.ts`
+- **Da non usare**: `marea` (l'acqua non sale né scende nei dati), `moto ondoso`
+- **Fermo**: —
+
+### Schiuma
+- **Inglese**: `foam`, `FoamBuilder`, `FOAM_WIDTH`
+- **Definizione**: la striscia bianca sull'acqua lungo ciò che la ferma alla sua altezza (una riva, un molo, una roccia), che va e viene; la stessa tinta fa la scia. Solo disegno (T451).
+- **Dove vive**: `src/render/sea.ts`
+- **Da non usare**: `spuma`, `risacca`
+- **Fermo**: —
+
+### Scia
+- **Inglese**: `wake`, `WakePoint`, `wakePuffs`, `dropsWake`, `Sea`
+- **Definizione**: la schiuma che un veicolo lascia sull'acqua dietro la poppa quando va: due bracci che si allargano e il ribollire nel mezzo, che svaniscono in pochi secondi. Solo disegno, dal moto che si vede (T451).
+- **Dove vive**: `src/render/sea.ts`, `src/render/entities.ts`
+- **Da non usare**: `traccia` (è del programma MarkovJunior, ADR-0118), `solco`
+- **Fermo**: —
+
+### Rollio
+- **Inglese**: `roll`, `rollOf`, `ROLL`
+- **Definizione**: come uno scafo sull'acqua dondola sui suoi due assi con l'onda lunga (di più in mare aperto) e si inclina in fuori in una virata. Solo disegno: il ponte dei dati resta piano (T451).
+- **Dove vive**: `src/render/sea.ts`, `src/render/entities.ts`
+- **Da non usare**: `beccheggio` per il moto intero (è solo l'asse di prua, `pitch`), `oscillazione`
+- **Fermo**: —
+
 ### Linea di galleggiamento
 - **Inglese**: `waterline`, `waterlineOf`, `Form.base`
 - **Definizione**: quanti voxel di uno scafo stanno sotto l'acqua, detto sulla radice del suo programma (`waterline="6"`): la forma si posa tanto più in basso, come una cantina ma senza suolo (T439, ADR-0227; lo Scultore delle navi lo scrive con T440).
