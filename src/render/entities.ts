@@ -17,6 +17,7 @@ import { overheadTurn, type Hand } from '../mj/hold';
 import { heldBy, heldSeedOf, hold, type Holding } from './held';
 import { dressedFor, wornBy } from './dressed';
 import { isStar, starPulse } from './star';
+import { Sea, seaLift, waterTopOf } from './sea';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -150,10 +151,14 @@ export function turnTowards(v: { yaw: number; root: THREE.Object3D }, goal: numb
 
 export class Entities {
   readonly views = new Map<Id, EntityView>();
+  /** The wakes and the roll of what floats (T451). */
+  readonly sea: Sea;
   constructor(
     private k: Kernel,
     private world: THREE.Group,
-  ) {}
+  ) {
+    this.sea = new Sea(world);
+  }
 
   /** Individuals differ a little: size, and (while they have no model) the colour of what they wear. */
   private variant(id: Id): { scale: number; color?: string } {
@@ -225,6 +230,8 @@ export class Entities {
   update(dt: number, t: number, inside?: Id): void {
     const k = this.k;
     const seen = new Set<Id>();
+    const hulls = new Set<Id>();
+    const waterTop = waterTopOf(k, WATER_Y);
     for (const id of k.ecs.query('glyph', 'pos')) {
       if (id === k.wandererEntity) continue;
       seen.add(id);
@@ -267,6 +274,11 @@ export class Entities {
         // Where it faces, at every frame (T439): a vehicle turns, and what lies on its deck with it.
         const yaw = k.ecs.get(id, 'form')?.yaw;
         if (Number.isFinite(yaw)) v.root.rotation.y = yaw;
+        // A vehicle on the water rolls with the swell and leaves its wake (T451): rendering only.
+        if (k.ecs.has(id, 'vehicle')) {
+          hulls.add(id);
+          this.sea.hull(id, p.x, p.y, Number.isFinite(yaw) ? yaw : 0, v.root, v.body, dt, t, waterTop);
+        }
         const cut = id === inside;
         if (v.cut !== cut) {
           v.cut = cut;
@@ -280,7 +292,7 @@ export class Entities {
       }
       // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b); another wanderer in the water swims (T438).
       const swims = k.swimsAt(p.x, p.y, p.z);
-      v.root.position.set(p.x, climb(v.root, swims ? swimFloor(k, p.x, p.y) : k.floorAt(p.x, p.y, p.z), dt), p.y);
+      v.root.position.set(p.x, climb(v.root, swims ? swimFloor(k, p.x, p.y) + seaLift(waterTop, p.x, p.y, t) : k.floorAt(p.x, p.y, p.z), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'activity');
       v.root.rotation.z = att?.kind === 'sleep' && att.still ? Math.PI / 2.2 : 0;
@@ -294,6 +306,7 @@ export class Entities {
       hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id), heldSeedOf(k, id));
     }
     for (const id of [...this.views.keys()]) if (!seen.has(id)) this.remove(id);
+    this.sea.update(t, hulls, waterTop);
   }
 
   private remove(id: Id): void {
@@ -364,12 +377,14 @@ export class Wanderer {
     const pcf = k.wandererCarpet();
     // In the water (T438) the body sinks to the chest; the camera does not follow it down (`lift`).
     const swims = k.zone === 'sim' && k.swimming();
-    const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) : k.floorAt(pcf.x, pcf.y, p.z)) : 0, dt);
+    // A swimmer rides the swell (T451); the camera does not (`sunk` takes it back).
+    const ride = swims ? seaLift(waterTopOf(k, WATER_Y), pcf.x, pcf.y, t) : 0;
+    const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) + ride : k.floorAt(pcf.x, pcf.y, p.z)) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
     const y = jump ? Math.max(floor, jump.y) : floor;
     this.lift = y - floor;
-    const sink = swims ? Math.max(0, k.floorAt(pcf.x, pcf.y, p.z) - swimFloor(k, pcf.x, pcf.y)) : 0;
+    const sink = swims ? Math.max(0, k.floorAt(pcf.x, pcf.y, p.z) - swimFloor(k, pcf.x, pcf.y) - ride) : 0;
     this.sunk += (sink - this.sunk) * Math.min(1, dt * 14);
     this.view.root.position.set(p.x, y, p.y);
     this.shadow.visible = !!jump;

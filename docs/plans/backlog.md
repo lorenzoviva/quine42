@@ -6107,12 +6107,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto e cosa fare: § 2.9 dello studio; prompt e schemi perché il Concilio (il Fisico per primo) usi le primitive di T437 anche fuori dai temi. Dopo questo si genera `astra` (T185).
 - Quando è fatto: commit su `task/T450`; suite e typecheck verdi.
 
-### T451 · P8 · Il mare a schermo — `da fare` (dipende da T439)
+### T451 · P8 · Il mare a schermo — `fatto` (`09f8f5f2`) (dipende da T439)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 9
 - Step: 37
 - Contesto e cosa fare: § 1.7 dello studio (facoltativo).
 - Browser: sì; screenshot.
 - Quando è fatto: commit su `task/T451`; suite e typecheck verdi.
+- Esito: il mare a schermo, solo disegno (`src/render/sea.ts`): onde lunghe nel vertex shader con creste più chiare, ferme dove l'acqua tocca altro (`seaWeight`) e con gli ids dell'inchiostro che si muovono uguali; schiuma sulle rive (`FoamBuilder`); scia (`Sea`) e rollio (`rollOf`) dei veicoli sull'acqua dal moto che si vede; chi nuota galleggia sull'onda, la camera no; kernel invariato; test `tests/mare-schermo.test.ts`, compreso uno che compone gli shader e coglie l'identificatore non dichiarato trovato nel browser; doc, AGENTS e glossario aggiornati; non provato: la scia col timone vero (la barca di prova è stata mossa dalla console) e in multigiocatore (T442).
 
 ### T452 · N0b · Il Fisico a mondo acceso — `da fare` (dipende da T438)
 - Pipeline: claude · sforzo high · stima 3% · priorità 5

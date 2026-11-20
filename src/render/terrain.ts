@@ -16,6 +16,7 @@ import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
 import { STRATA_DEPTH, stratumRow } from '../kernel/strata';
+import { FoamBuilder, SEA_MAT, waterTopOf, waveAttribute } from './sea';
 
 export const WALL_H = 1.6;
 /** The water drawn under the level of its tiles (the swimmer sinks under it, T438). */
@@ -237,6 +238,10 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
   const pal = k.palette;
   const ground = new Builder();
   const solid = new Builder();
+  // The water's tops in a mesh of their own, which the swell moves (T451), and the foam along its shores.
+  const water = new Builder();
+  const waterTop = waterTopOf(k, WATER_Y);
+  const foam = new FoamBuilder(waterTop);
   const X0 = ch.cx * S, Z0 = ch.cy * S;
   // Instances of the terrains' models, by form: where, how turned, how big.
   const instances = new Map<string, { geo: ModelGeo; mats: THREE.Matrix4[] }>();
@@ -330,7 +335,15 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
       solid.fixedPart = undefined;
       const holed = holeAt(x, z);
       if (holed?.cover) partTile(x, z, base);
-      else ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
+      else if (t?.layer === 'liquid') {
+        water.fixedPart = ground.fixedPart;
+        water.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
+        // Foam where the water meets what stands at its level or higher and is not water: a shore, a quay, a rock.
+        for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+          const n = tile(x + dx, z + dz);
+          if (n && n.layer !== 'liquid' && top(x + dx, z + dz) >= y - 1e-6) foam.edge(x, z, dx, dz, y);
+        }
+      } else ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
       // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
       // banks of earth down to the water.
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -373,6 +386,19 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
     const s = casts(new THREE.Mesh(solid.geometry(), MAT.world), true);
     s.userData.inkThing = TERRAIN_THING;
     group.add(s);
+  }
+  if (!water.empty) {
+    const geo = water.geometry();
+    geo.setAttribute('wave', new THREE.Float32BufferAttribute(waveAttribute(geo.getAttribute('position').array, waterTop), 1));
+    const w = new THREE.Mesh(geo, SEA_MAT.water);
+    w.receiveShadow = true;
+    w.userData.inkThing = TERRAIN_THING;
+    group.add(w);
+  }
+  if (!foam.empty) {
+    const fm = new THREE.Mesh(foam.geometry(), SEA_MAT.foam);
+    fm.renderOrder = 1;
+    group.add(fm);
   }
   for (const { geo, mats } of instances.values()) {
     const im = new THREE.InstancedMesh(geo.body, modelMaterials(geo.body, geo.sway ? MAT.sway : MAT.world), mats.length);

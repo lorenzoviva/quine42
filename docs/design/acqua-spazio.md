@@ -283,6 +283,9 @@ cartografo di T278 indicano un'isola vera.
 
 Onde, schiuma sulle rive, scia e rollio: solo rendering, nessun dato. **Costo**: 2 %.
 
+> **Fatto (T451)**: `src/render/sea.ts`; l'onda lunga ferma dove l'acqua tocca altro, la schiuma lungo ciò che la ferma alla sua
+> altezza, la scia e il rollio dal moto che si vede (anche nello specchio). Vedi `docs/architettura-dettagli.md#acqua`.
+
 ---
 
 ## 2. Lo spazio
