@@ -89,7 +89,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
-import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, MAX_VEHICLES, newVehicle, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleRecord, type VehicleSpec, type VehicleState } from './vehicle';
+import { carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -976,8 +976,9 @@ export class Kernel {
       speed_at: (x, y) => {
         const t = this.tileAt(Math.floor(x), Math.floor(y));
         const def = t ? this.palette[t] : undefined;
-        // In the water one swims, the swimming pace within the kernel's limits (T438); elsewhere the tile's, as always.
-        if (crossingOf(def) === 'swim') return terrainPhysics(def).pace;
+        // In the water one swims, the swimming pace within the kernel's limits (T438), but on a vehicle's deck over it one walks (T442);
+        // elsewhere the tile's, as always.
+        if (crossingOf(def) === 'swim') return this.onAnyDeck(x, y) ? 1 : terrainPhysics(def).pace;
         return (t && def?.speed) || 1;
       },
       player_get: (key) => (key === 'x' || key === 'y' ? this.wandererPos()[key] : (this.wandererComp() as any)[key]),
@@ -1427,7 +1428,8 @@ export class Kernel {
           else if (cross === 'walk') walked = true;
           terrain = Math.max(terrain, (cross !== 'swim' && t && Number(def?.speed)) || 1);
         }
-      if (swum && !walked) terrain = swum;
+      // On a vehicle's deck (T442) one walks, whatever water is under it.
+      if (swum && !walked && this.aboard() === undefined) terrain = swum;
       const speed = Math.max(0, Math.min(60, Number(pl?.speed) || 0));
       const passo = Math.max(0.2, Math.min(4, Number(pl?.step) || 1));
       return speed * passo * Math.min(4, terrain);
@@ -5016,6 +5018,8 @@ export class Kernel {
   private waitingVehicles: VehicleRecord[] = [];
   /** The points of each hull (T439), by form. */
   private hulls = new WeakMap<Form, Float64Array>();
+  /** When each wanderer was last pushed aside by a hull (T442): said again only after a while. */
+  private pushSaid = new Map<string, number>();
   /** When each vehicle last pressed against what stops it (T439): the bump is said again only after a while. */
   private bumpSaid = new Map<Id, number>();
 
@@ -5453,6 +5457,11 @@ export class Kernel {
     return undefined;
   }
 
+  /** Whether a point (carpet space) is on a vehicle's deck (T442): whoever stands there walks on it, the water under it does not count. */
+  private onAnyDeck(x: number, y: number): boolean {
+    return this.decks.length > 0 && this.deckAt(x, y, this.floorAt(x, y)) !== undefined;
+  }
+
   /** The vehicle under the feet of the wanderer acting (T439), in the simulation. */
   aboard(): Id | undefined {
     const p = this.wandererPos();
@@ -5478,11 +5487,14 @@ export class Kernel {
     return out;
   }
 
-  /** The wanderers of this kernel who stand on a vehicle's deck (T439), in the simulation; who plays from a client of their own, with T442. */
+  /**
+   * The wanderers who stand on a vehicle's deck (T439), in the simulation: those this kernel walks and, in a game of many (T442), those who
+   * play from a client of their own, whose steps come in the deck's frame (the session's `step.on`).
+   */
   private wanderersAboard(id: Id): string[] {
     const out: string[] = [];
     for (const w of this.wanderersById.keys()) {
-      if (this.remote.has(w) || !this.inWorld(w)) continue;
+      if (!this.inWorld(w)) continue;
       if (this.as(w, () => this.aboard()) === id) out.push(w);
     }
     return out;
@@ -5571,6 +5583,8 @@ export class Kernel {
     // The decks where they are now: who is carried is put on them, and checked against them.
     this.reindexVehicles(new Set(moves.map((m) => m.id)));
     for (const m of moves) this.carryAboard(m);
+    // Who swims (or stands) where the hull came is pushed aside, never crushed (T442).
+    for (const m of moves) this.pushAside(m);
   }
 
   /** The solids and the decks of the vehicles that moved, where they are now (T439): the rest stays as the last `rebuildSolids` made it. */
@@ -5634,7 +5648,7 @@ export class Kernel {
       if (last === undefined || this.time - last > BUMP_EVERY) {
         // On a reef (T443) the hull runs aground: the water goes on, the rock under it does not let it.
         const aground = this.onReef(id, tries[0]);
-        if (v.helm !== undefined) this.as(v.helm, () => this.message(VEHICLE_WORDS[spec.medium][aground ? 'aground' : 'bumped'], 'warn'));
+        if (v.helm !== undefined) this.tell(v.helm, VEHICLE_WORDS[spec.medium][aground ? 'aground' : 'bumped'], 'warn');
         this.bus.emit('vehicle:bumped', aground ? { id, reef: true } : { id });
       }
       this.bumpSaid.set(id, this.time);
@@ -5661,8 +5675,7 @@ export class Kernel {
         const [x, y] = carried(c.x, c.y, m.from, m.to);
         const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
         if (!this.bodyFree(x, y, r, p.z)) return;
-        p.x += x - c.x;
-        p.y += y - c.y;
+        this.shiftWanderer(x - c.x, y - c.y);
         // A jump on the deck goes with it too.
         const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
         if (j?.from && j.to) {
@@ -5683,30 +5696,150 @@ export class Kernel {
     }
   }
 
+  /**
+   * The wanderer acting moves by (dx, dy) in the world without walking (T442): carried by a deck, pushed by a hull, over the side. Who plays
+   * from a client of their own on their carpet (as `stepWanderer`: nobody brings them back to the middle of their circle here); who this kernel
+   * walks on their circle, which their carpet brings back (T439).
+   */
+  private shiftWanderer(dx: number, dy: number): void {
+    if (!Number.isFinite(dx) || !Number.isFinite(dy)) return;
+    const c = this.carpet();
+    if (this.remote.has(this.wanderer().id) && c) Object.assign(c, { ox: c.ox + dx, oy: c.oy + dy });
+    else {
+      const p = this.wandererPos();
+      p.x += dx;
+      p.y += dy;
+    }
+  }
+
+  /**
+   * Who is where a hull came is pushed aside (T442, rule 7: never crushed): a wanderer not on its deck whose body is now over it (`overHull`),
+   * in the water or on the ground, goes the way that point of the hull went (or away from its middle, if it only turned) as far as the body is free, at most
+   * `PUSH_REACH` tiles; with no room it stays (whoever the world grew around may always move out). Who is pushed hears it now and then, and a
+   * client's steps start again from there (`wanderer:pushed`).
+   */
+  private pushAside(m: VehicleMove): void {
+    const s = this.decks.find((d) => d.id === m.id)?.s;
+    if (!s) return;
+    const reach = s.form.reach + 1;
+    for (const w of this.wanderersById.keys()) {
+      if (m.aboard.includes(w) || this.dying.has(w) || !this.inWorld(w)) continue;
+      this.as(w, () => {
+        const c = this.wandererCarpet(), p = this.wandererPos();
+        if (Math.abs(c.x - m.to.x) > reach || Math.abs(c.y - m.to.y) > reach) return;
+        const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+        if (!this.overHull(m.id, c.x, c.y, r)) return;
+        const [hx, hy] = carried(c.x, c.y, m.from, m.to);
+        let dx = hx - c.x, dy = hy - c.y;
+        if (Math.hypot(dx, dy) < 1e-6) [dx, dy] = [c.x - m.to.x, c.y - m.to.y];
+        const n = Math.hypot(dx, dy);
+        if (n < 1e-6) return;
+        for (let d = PUSH_STEP; d <= PUSH_REACH + 1e-9; d += PUSH_STEP) {
+          const x = c.x + (dx / n) * d, y = c.y + (dy / n) * d;
+          if (this.overHull(m.id, x, y, r) || !this.bodyFree(x, y, r, p.z)) continue;
+          this.shiftWanderer(x - c.x, y - c.y);
+          const last = this.pushSaid.get(w);
+          if (last === undefined || this.time - last > BUMP_EVERY) this.tell(w, VEHICLE_WORDS[this.vehicleOf(m.id)?.spec.medium ?? 'water'].pushed, 'warn');
+          this.pushSaid.set(w, this.time);
+          this.bus.emit('wanderer:pushed', { id: w });
+          return;
+        }
+      });
+    }
+  }
+
+  /**
+   * Whether a body (carpet space, half-size r) is over a vehicle's hull (T442): a column of its form with something over its waterline under
+   * the body's middle or a corner of it; the disc of its body while it has no form. Not the collision of a body (`formBlocks`): from the water a
+   * low deck is a step, and who is where a hull came, or goes over its side, must be off it.
+   */
+  private overHull(id: Id, x: number, y: number, r: number): boolean {
+    const d = this.decks.find((e) => e.id === id);
+    if (!d) return false;
+    const s = d.s;
+    if (!s?.form.result) return Math.hypot(x - d.x, y - d.y) < d.r + r;
+    const g = s.form.result.grid, cols = this.builtColumns(s.form);
+    for (const [ox, oy] of [[0, 0], [-r, -r], [r, -r], [-r, r], [r, r]]) {
+      const [lx, lz] = toLocal(x + ox - s.x, y + oy - s.y, s.yaw);
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && cols[vx + vy * g.X]) return true;
+    }
+    return false;
+  }
+
+  /**
+   * «Tuffati», «Scendi» (T442): the wanderer acting goes over the side of the vehicle they stand on, to the nearest place off its deck where
+   * the body is free, within `LEAVE_REACH` tiles: the water beside the hull, the ground beside the cart. Always, whoever steers it (in a game
+   * of many nobody is carried where they do not want to go: a client does not jump); the helm, if theirs, let go. False, said, with no room.
+   */
+  leaveDeck(id: Id): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror) return false;
+    const words = VEHICLE_WORDS[got.spec.medium];
+    if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
+    const c = this.wandererCarpet(), p = this.wandererPos();
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
+    let spot: { x: number; y: number; z: number } | undefined;
+    for (let d = 0.5; d <= LEAVE_REACH + 1e-9 && !spot; d += 0.25)
+      for (let i = 0; i < 16 && !spot; i++) {
+        const x = c.x + Math.cos((i * Math.PI) / 8) * d, y = c.y + Math.sin((i * Math.PI) / 8) * d;
+        const z = this.groundAt(x, y);
+        if (this.deckAt(x, y, z) === undefined && !this.overHull(id, x, y, r) && this.bodyFree(x, y, r, z)) spot = { x, y, z };
+      }
+    if (!spot) return void this.message(words.noRoom, 'warn'), false;
+    if (got.v.helm === this.wanderer().id) this.letGoHelm(id, got.v, got.spec);
+    this.ecs.remove(this.wandererEntity, 'jump');
+    this.shiftWanderer(spot.x - c.x, spot.y - c.y);
+    p.z = spot.z;
+    this.message(words.went);
+    this.bus.emit('wanderer:pushed', { id: this.wanderer().id });
+    return true;
+  }
+
   /** The helm let go (T439): whoever held it is told, the vehicle keeps its anchor as it was, its course is nobody's. */
-  private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec): void {
+  private letGoHelm(id: Id, v: VehicleState, spec: VehicleSpec, said: 'left' | 'seized' = 'left'): void {
     const who = v.helm;
     delete v.helm;
     v.thrust = 0;
     v.steer = 0;
-    if (who !== undefined && this.wanderersById.has(who)) this.as(who, () => this.message(VEHICLE_WORDS[spec.medium].left));
+    if (who !== undefined && this.wanderersById.has(who)) this.tell(who, VEHICLE_WORDS[spec.medium][said], said === 'seized' ? 'warn' : 'info');
     this.bus.emit('vehicle:helm', { id, wanderer: who, held: false });
   }
 
   /**
+   * Words of the world to a wanderer, whoever is acting (T442): this kernel shows them as it shows every message; a session takes them to that
+   * wanderer's own client (`wanderer:told`), when they come outside what the wanderer is doing (the tick: a hull that bumps, a helm let go).
+   */
+  private tell(who: string, text: string, tone: 'info' | 'warn' | 'good' = 'info'): void {
+    this.as(who, () => this.message(text, tone));
+    this.bus.emit('wanderer:told', { id: who, text, tone });
+  }
+
+  /**
+   * Whether `who` may take a helm another holds (T442): in a game of many the master (who frees it, as they free everything), and anyone when
+   * the game says that wanderers may harm one another (`pvp`: a mutiny); else nobody. A mirror knows it is the master's by its branch.
+   */
+  private seizesHelm(who: string): boolean {
+    if (this.gameSetup()?.pvp === true) return true;
+    if (!this.manyPlayers()) return false;
+    return this.mirror ? !!this.publisher : this.isMaster(who);
+  }
+
+  /**
    * «Prendi il timone» (T439): `who` (the wanderer acting), on the deck, takes the helm if it is free (theirs of another vehicle is let go) and
-   * the anchor comes up. False, said in the world's words when `quiet` is not (Lua asks it at every tick), when not. Who plays from a client
-   * of their own steers with T442.
+   * the anchor comes up. False, said in the world's words when `quiet` is not (Lua asks it at every tick), when not. In a game of many (T442)
+   * anyone with a body takes it, whoever moves them; one held by another only who `seizesHelm`, from the menu (never Lua).
    */
   takeHelm(id: Id, who = this.wanderer().id, quiet = false): boolean {
     const got = this.vehicleOf(id);
-    if (!got || this.mirror || this.remote.has(who) || !this.wanderersById.has(who)) return false;
+    if (!got || this.mirror || !this.wanderersById.has(who)) return false;
     const { v, spec } = got;
     const words = VEHICLE_WORDS[spec.medium];
     return this.as(who, () => {
       if (this.aboard() !== id) return void (quiet || this.message(words.aboard, 'warn')), false;
-      if (v.helm !== undefined && v.helm !== who) return void (quiet || this.message(words.taken, 'warn')), false;
+      if (v.helm !== undefined && v.helm !== who && (quiet || !this.seizesHelm(who))) return void (quiet || this.message(words.taken, 'warn')), false;
       if (!this.nearHelm(id)) return void (quiet || this.message(words.far, 'warn')), false;
+      if (v.helm !== undefined && v.helm !== who) this.letGoHelm(id, v, spec, 'seized');
       const other = this.atHelm();
       if (other !== undefined && other !== id) this.leaveHelm(other);
       v.helm = who;
@@ -5745,7 +5878,7 @@ export class Kernel {
   /** «Getta l'ancora», «Leva l'ancora» (T439): who stands on the deck holds it or lets it go (the brake, on land). */
   setAnchor(id: Id, anchored: boolean): boolean {
     const got = this.vehicleOf(id);
-    if (!got || this.mirror || this.remote.has(this.wanderer().id)) return false;
+    if (!got || this.mirror) return false;
     const words = VEHICLE_WORDS[got.spec.medium];
     if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
     got.v.anchored = anchored;
@@ -5753,21 +5886,25 @@ export class Kernel {
     return true;
   }
 
-  /** What a vehicle's menu offers the wanderer acting on its deck (T439): the helm, taken or let go, and the anchor. */
+  /**
+   * What a vehicle's menu offers the wanderer acting on its deck (T439): the helm, taken or let go, the anchor, and going over the side (T442).
+   * The same in a mirror (T442), from the vehicle the server sends (`EntityView.vehicle`): the server does what is chosen, and checks it.
+   */
   private vehicleActions(id: Id): ActionOption[] {
-    const got = this.mirror ? undefined : this.vehicleOf(id);
+    const got = this.vehicleOf(id);
     const me = this.wanderer().id;
-    if (!got || this.remote.has(me) || this.aboard() !== id) return [];
+    if (!got || this.aboard() !== id) return [];
     const { v, spec } = got;
     const w = VEHICLE_WORDS[spec.medium];
     const out: ActionOption[] = [];
     if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
     else {
       // Its helm where its form marks one (T440): from elsewhere on the deck the menu says where it is.
-      const reason = v.helm !== undefined ? w.taken : !this.nearHelm(id) ? w.far : undefined;
+      const reason = v.helm !== undefined && !this.seizesHelm(me) ? w.taken : !this.nearHelm(id) ? w.far : undefined;
       out.push({ id: 'helm', label: w.take, enabled: reason === undefined, ...(reason ? { reason } : {}) });
     }
     out.push(v.anchored ? { id: 'weigh', label: w.weigh, enabled: true } : { id: 'anchor', label: w.anchor, enabled: true });
+    out.push({ id: 'over', label: w.over, enabled: true });
     return out;
   }
 
@@ -5819,6 +5956,81 @@ export class Kernel {
       if (v.helm !== who && !this.takeHelm(id, who, true)) return false;
     }
     return true;
+  }
+
+  // --- Vehicles in a game of many (T442) ---------------------------------------------------------------------------------------
+
+  /** Where a vehicle is (T442): its middle (carpet space) and its heading; undefined if `id` is not one. A client's steps on a deck are in its frame. */
+  vehiclePose(id: Id): VehiclePose | undefined {
+    const got = this.vehicleOf(id);
+    const p = got ? this.ecs.get(id, 'pos') : undefined;
+    return got && Number.isFinite(p?.x) && Number.isFinite(p?.y) ? { x: p.x, y: p.y, heading: got.v.heading } : undefined;
+  }
+
+  /**
+   * A vehicle as the clients see it (T442, `EntityView.vehicle`, a list as rule 8f wants): its heading, its way and its turn, which their mirror
+   * carries it on with between two updates, the anchor and who holds the helm, which make its menu there. Undefined if `id` is not one.
+   */
+  vehicleSeen(id: Id): VehicleView | undefined {
+    const got = this.vehicleOf(id);
+    if (!got) return undefined;
+    const r = (n: number, d: number) => Math.round(n * d) / d;
+    const { v } = got;
+    return { heading: r(v.heading, 1e5), speed: r(v.speed, 1e3), turn: r(v.turn, 1e4), anchored: v.anchored, ...(v.helm !== undefined ? { helm: v.helm } : {}) };
+  }
+
+  /**
+   * The deck an entity is carried on (T442), and where on it (its frame): a wanderer's body where its wanderer stands, a thing where it lies,
+   * as `vehicleTick` carries them (never someone of the world, a building, a vehicle). What a client draws relative to the vehicle its mirror
+   * carries on itself, so that what stands on a deck does not tremble on it.
+   */
+  carriedOn(entity: Id): { vehicle: Id; lx: number; ly: number } | undefined {
+    if (!this.decks.length || !this.ecs.alive.has(entity) || this.ecs.has(entity, 'vehicle')) return undefined;
+    const who = this.wandererOf(entity);
+    let vehicle: Id | undefined;
+    let at: { x: number; y: number } | undefined;
+    if (who !== undefined) {
+      if (!this.inWorld(who)) return undefined;
+      vehicle = this.as(who, () => this.aboard());
+      at = this.wandererAt(who);
+    } else {
+      if (NOT_CARGO.some((c) => this.ecs.has(entity, c))) return undefined;
+      const p = this.ecs.get(entity, 'pos');
+      if (!Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return undefined;
+      vehicle = this.deckAt(p.x, p.y, p.z);
+      at = p;
+    }
+    const pose = vehicle !== undefined ? this.vehiclePose(vehicle) : undefined;
+    if (!pose || !at) return undefined;
+    const [lx, ly] = onDeck(pose, at.x, at.y);
+    return { vehicle: vehicle!, lx, ly };
+  }
+
+  /**
+   * A mirror's vehicle goes where its client carries it (T442: the thin client carries on what the server said, `coast`): its middle and its
+   * heading; the wanderer of this mirror who stands on its deck goes and turns with it, as the server carries them, and at its helm looks where
+   * its bow points. Only in a mirror: in the world the kernel moves its vehicles (`vehicleTick`).
+   */
+  carryMirrored(id: Id, to: VehiclePose): void {
+    if (!this.mirror || ![to.x, to.y, to.heading].every(Number.isFinite)) return;
+    const got = this.vehicleOf(id);
+    const p = got ? this.ecs.get(id, 'pos') : undefined;
+    if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return;
+    const heading = ((to.heading % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const from: Pose = { x: p.x, y: p.y, heading: got.v.heading };
+    const aboard = this.wanderersAboard(id);
+    p.x = to.x;
+    p.y = to.y;
+    got.v.heading = heading;
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) fc.yaw = heading;
+    if (!this.decks.some((d) => d.id === id)) return;
+    this.reindexVehicles(new Set([id]));
+    this.carryAboard({ id, from, to: { x: to.x, y: to.y, heading }, aboard, things: [] });
+    if (got.v.helm === this.wanderer().id) {
+      const pl = this.wandererComp();
+      if (pl) pl.facing = facingOf(heading);
+    }
   }
 
   /** The vehicle an entity stands on (T439, `world.vehicle_of`): a wanderer's body where its wanderer is, a thing where it lies. */
@@ -6346,6 +6558,10 @@ export class Kernel {
       case 'anchor':
       case 'weigh':
         this.setAnchor(id, action === 'anchor');
+        return;
+      // Over the side (T442).
+      case 'over':
+        this.leaveDeck(id);
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
@@ -10851,8 +11067,10 @@ export class Kernel {
     this.paceTick();
     if (this.campusVersion !== this.forms.version) this.placeCampus();
     this.rebuildSolids();
+    // At the helm (T442) the wanderer of this client does not walk: their keys go to the server, which steers.
+    const steering = this.atHelm() !== undefined;
     for (const s of this.systems) {
-      if (!PER_WANDERER.has(s.manifest.id)) continue;
+      if (!PER_WANDERER.has(s.manifest.id) || (steering && s.manifest.id === HELM_STILLS)) continue;
       this.runningSystem = s.manifest.id;
       this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;

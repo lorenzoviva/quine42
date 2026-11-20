@@ -177,11 +177,78 @@ export function toWorld(lx: number, lz: number, yaw: number): [number, number] {
   return [lx * c + lz * s, -lx * s + lz * c];
 }
 
+/** Where a vehicle is: its middle (carpet space) and where its bow points. */
+export interface VehiclePose {
+  x: number;
+  y: number;
+  heading: number;
+}
+
 /** Where a point carried by a vehicle goes: the same place on its deck, the deck moved from `from` to `to` (middle and heading). */
-export function carried(x: number, y: number, from: { x: number; y: number; heading: number }, to: { x: number; y: number; heading: number }): [number, number] {
+export function carried(x: number, y: number, from: VehiclePose, to: VehiclePose): [number, number] {
   const [lx, lz] = toLocal(x - from.x, y - from.y, from.heading);
   const [wx, wy] = toWorld(lx, lz, to.heading);
   return [to.x + wx, to.y + wy];
+}
+
+/** A point of the world in the frame of a vehicle's deck (T442): tiles from its middle, its bow toward +y. */
+export function onDeck(pose: VehiclePose, x: number, y: number): [number, number] {
+  return toLocal(x - pose.x, y - pose.y, pose.heading);
+}
+
+/** A point of a vehicle's deck (its frame) in the world (T442): the inverse of `onDeck`. */
+export function offDeck(pose: VehiclePose, lx: number, ly: number): [number, number] {
+  const [wx, wy] = toWorld(lx, ly, pose.heading);
+  return [pose.x + wx, pose.y + wy];
+}
+
+// --- In a game of many (T442): what a client sees of a vehicle, and how its mirror carries it on between two words of the server -------
+
+/**
+ * A vehicle as a client sees it (T442, `EntityView.vehicle`): where its bow points, its way and its turn, the anchor, who holds the helm (a
+ * wanderer's id, as `OtherView.id`). Nothing else of its state leaves the server: what is asked of it (`thrust`, `steer`, `power`) is the
+ * helmsman's keys and Lua's.
+ */
+export interface VehicleView {
+  heading: number;
+  speed: number;
+  turn: number;
+  anchored: boolean;
+  helm?: string;
+}
+
+/** The longest helm a client takes from the wire: a wanderer's id is shorter. */
+const MAX_HELM = 64;
+
+/** What the wire says of a vehicle, read without trusting it (rule 7): numbers within the kernel's widest limits, a helm that is a short text. */
+export function readVehicleView(raw: unknown): VehicleView | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const r = raw as Record<string, unknown>;
+  if (!finite(r.heading)) return undefined;
+  const top = VEHICLE_LIMITS.speed[1], turn = VEHICLE_LIMITS.turn[1];
+  return {
+    heading: r.heading % (2 * Math.PI),
+    speed: finite(r.speed) ? within(r.speed, [-top, top]) : 0,
+    turn: finite(r.turn) ? within(r.turn, [-turn, turn]) : 0,
+    anchored: r.anchored !== false,
+    ...(typeof r.helm === 'string' && r.helm && r.helm.length <= MAX_HELM ? { helm: r.helm } : {}),
+  };
+}
+
+/**
+ * Where a vehicle seen at `pose`, with its way and its turn, is `t` seconds later if nothing changes (T442): on the arc its bow draws. The
+ * mirror carries a vehicle on with it between two updates, instead of chasing the last one: its deck does not tremble.
+ */
+export function coast(pose: VehiclePose, speed: number, turn: number, t: number): VehiclePose {
+  const h = pose.heading + turn * t;
+  if (Math.abs(turn) < 1e-6) return { x: pose.x + Math.sin(pose.heading) * speed * t, y: pose.y + Math.cos(pose.heading) * speed * t, heading: h };
+  return { x: pose.x + (speed * (Math.cos(pose.heading) - Math.cos(h))) / turn, y: pose.y + (speed * (Math.sin(h) - Math.sin(pose.heading))) / turn, heading: h };
+}
+
+/** The smallest turn from one heading to another (radians, −π…π). */
+export function turnBetween(from: number, to: number): number {
+  const d = (((to - from) % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI);
+  return d - Math.PI;
 }
 
 /**
@@ -257,15 +324,23 @@ export function readVehicles(list: unknown): VehicleRecord[] {
  */
 export const HELM_REACH = 1.5;
 
+/** How far a hull pushes who is where it came (T442), at most, in tiles; and how finely the room is looked for. */
+export const PUSH_REACH = 2;
+export const PUSH_STEP = 0.05;
+/** How far from where one stands on a deck one goes over the side (T442), at most, in tiles. */
+export const LEAVE_REACH = 3;
+
 /** What the menu and the world say of a vehicle, by what it moves on: a helm and an anchor on the water, the reins and a brake on land. */
-export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; took: string; left: string; anchored: string; weighed: string; bumped: string; aground: string; taken: string; aboard: string; far: string }> = {
+export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string; anchor: string; weigh: string; over: string; took: string; left: string; seized: string; anchored: string; weighed: string; bumped: string; aground: string; taken: string; aboard: string; far: string; went: string; noRoom: string; pushed: string }> = {
   water: {
     take: 'Prendi il timone',
     leave: 'Lascia il timone',
     anchor: "Getta l'ancora",
     weigh: "Leva l'ancora",
+    over: 'Tuffati',
     took: 'Prendi il timone.',
     left: 'Lasci il timone.',
+    seized: 'Qualcuno ti prende il timone.',
     anchored: "Getti l'ancora.",
     weighed: "Levi l'ancora.",
     bumped: 'Lo scafo urta e si ferma.',
@@ -273,14 +348,19 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     taken: 'Al timone c’è già qualcuno.',
     aboard: 'Devi essere a bordo.',
     far: 'Il timone è più in là.',
+    went: 'Ti tuffi in acqua.',
+    noRoom: 'Non c’è spazio per tuffarsi qui.',
+    pushed: 'Lo scafo ti spinge da parte.',
   },
   land: {
     take: 'Mettiti alla guida',
     leave: 'Lascia la guida',
     anchor: 'Tira il freno',
     weigh: 'Togli il freno',
+    over: 'Scendi',
     took: 'Ti metti alla guida.',
     left: 'Lasci la guida.',
+    seized: 'Qualcuno prende la guida al posto tuo.',
     anchored: 'Tiri il freno.',
     weighed: 'Togli il freno.',
     bumped: 'Le ruote urtano e si fermano.',
@@ -288,5 +368,8 @@ export const VEHICLE_WORDS: Record<VehicleMedium, { take: string; leave: string;
     taken: 'Alla guida c’è già qualcuno.',
     aboard: 'Devi esserci sopra.',
     far: 'Il posto di guida è più in là.',
+    went: 'Scendi.',
+    noRoom: 'Non c’è spazio per scendere qui.',
+    pushed: 'Il carro ti spinge da parte.',
   },
 };

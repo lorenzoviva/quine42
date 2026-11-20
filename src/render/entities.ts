@@ -18,6 +18,7 @@ import { heldBy, heldSeedOf, hold, type Holding } from './held';
 import { dressedFor, wornBy } from './dressed';
 import { isStar, starPulse } from './star';
 import { Sea, seaLift, waterTopOf } from './sea';
+import { onDeck, toWorld } from '../kernel/vehicle';
 
 export interface Limb {
   pivot: THREE.Object3D;
@@ -48,6 +49,8 @@ export interface EntityView {
   holding?: Holding;
   /** The star of what has no model of its own (T430): the height of its middle, around which it stretches. */
   star?: { middle: number };
+  /** The vehicle's deck it stood on last frame, and where on it (T442): what counts for its legs is the walking on it. */
+  deck?: { id: Id; lx: number; ly: number };
 }
 
 /** Bodies go up and down the steps of the relief (and of a house) in a moment, not at once; far jumps are at once. */
@@ -296,12 +299,23 @@ export class Entities {
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'activity');
       v.root.rotation.z = att?.kind === 'sleep' && att.still ? Math.PI / 2.2 : 0;
-      if (moved > 0.0005 && moved < 2) {
-        turnTowards(v, Math.atan2(dx, dy), dt);
-        v.phase += moved * 7;
+      // Another wanderer on a vehicle's deck (T442): the legs walk with what they walk on it, not with where the deck takes them.
+      const deck = k.deckAt(p.x, p.y, p.z);
+      const pose = deck !== undefined ? k.vehiclePose(deck) : undefined;
+      let wx = dx, wy = dy, step = moved;
+      if (pose) {
+        const [lx, ly] = onDeck(pose, p.x, p.y);
+        const was = v.deck?.id === deck ? v.deck : undefined;
+        [wx, wy] = was ? toWorld(lx - was.lx, ly - was.ly, pose.heading) : [0, 0];
+        step = Math.hypot(wx, wy);
+        v.deck = { id: deck!, lx, ly };
+      } else v.deck = undefined;
+      if (step > 0.0005 && step < 2) {
+        turnTowards(v, Math.atan2(wx, wy), dt);
+        v.phase += step * 7;
       }
-      if (swims) swimLimbs(v, moved > 0.0005 && moved < 2, dt, t);
-      else animateLimbs(v, moved > 0.0005 && moved < 2, dt, t);
+      if (swims) swimLimbs(v, step > 0.0005 && step < 2, dt, t);
+      else animateLimbs(v, step > 0.0005 && step < 2, dt, t);
       // What they hold, in hand (T288): another wanderer's as the server says, an individual's if it has one.
       hold(k, v, heldBy(k, id), MAT.world, t, (o) => (o.userData.entity = id), heldSeedOf(k, id));
     }

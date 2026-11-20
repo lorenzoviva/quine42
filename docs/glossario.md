@@ -250,18 +250,46 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `vessel` come classe nelle voci di `models/index.json`, `area="helm"`, `area="boarding"`, `area="hold"`.
 
 ### A bordo
-- **Inglese**: `aboard`, `deckAt`, `Deck`, `wanderersAboard`, `thingsAboard`, `carried`, `carryAboard`
-- **Definizione**: stare sul ponte di un veicolo: i piedi su un pavimento della sua forma, alla loro altezza (il disco del suo corpo finché la forma non c'è). Chi è a bordo non nuota, va e gira con il veicolo dove un corpo può stare, e ciò che giace sul ponte con lui (T439, ADR-0227).
+- **Inglese**: `aboard`, `deckAt`, `Deck`, `wanderersAboard`, `thingsAboard`, `carried`, `carryAboard`, `carriedOn`, `onAnyDeck`, `OnDeck`
+- **Definizione**: stare sul ponte di un veicolo: i piedi su un pavimento della sua forma, alla loro altezza (il disco del suo corpo finché la forma non c'è). Chi è a bordo non nuota e vi cammina al passo di chi cammina, va e gira con il veicolo dove un corpo può stare, e ciò che giace sul ponte con lui; in molti anche chi gioca da un suo client, e ai client va dove sta sul ponte (`on`, `lx`, `ly`; T439, ADR-0227; T442, ADR-0232).
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts`
 - **Da non usare**: `sedile` (il sedile a mano di T183 non c'è più), `seduto`, `imbarcato`
 - **Fermo**: —
 
 ### Timone
-- **Inglese**: `helm`, `takeHelm`, `leaveHelm`, `atHelm`, `nearHelm`, `HELM_REACH`, `helmOrders`, `HELM_STILLS`, `HELM_VIEW`, `ZOOM.helm`
-- **Definizione**: chi governa un veicolo: lo prende dal menu chi è sul ponte, se è libero (vicino alla sua area `helm`, se la forma ne ha una, T440); non cammina, i suoi tasti spingono (su, giù) e girano la prua (sinistra, destra); lo lascia dal menu o scendendo. Sui carri «la guida» (T439, ADR-0227).
+- **Inglese**: `helm`, `takeHelm`, `leaveHelm`, `atHelm`, `nearHelm`, `HELM_REACH`, `helmOrders`, `HELM_STILLS`, `HELM_VIEW`, `ZOOM.helm`, `seizesHelm`
+- **Definizione**: chi governa un veicolo: lo prende dal menu chi è sul ponte, se è libero (vicino alla sua area `helm`, se la forma ne ha una, T440); non cammina, i suoi tasti spingono (su, giù) e girano la prua (sinistra, destra); lo lascia dal menu o scendendo. In molti anche da un client (i tasti col messaggio `keys`); uno tenuto da un altro lo prende solo il master, o chiunque se la partita dice `pvp` (T442, ADR-0232). Sui carri «la guida» (T439, ADR-0227).
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts` (`VEHICLE_WORDS`), `src/render/camera.ts`
 - **Da non usare**: `pilota`, `guidatore` (per chi lo tiene: è il timoniere), `volante`
 - **Fermo**: `helm` nel componente `vehicle`.
+
+### Passo sul ponte
+- **Inglese**: `step.on`, `onDeck`, `offDeck`, `deckNear`, `DECK_REACH`
+- **Definizione**: il passo di chi gioca da un suo client e sta sul ponte di un veicolo: il punto del ponte dove è, nel riferimento del veicolo (caselle dal suo mezzo, la prua verso y grande), che il server mette dove ha il veicolo; così il ponte lo porta e il passo è solo ciò che ha camminato sul ponte, e il credito del passo non conta il viaggio. Come ogni passo, al più quanto il ritmo concede e mai oltre `FAR` (T442, ADR-0232, V-046).
+- **Dove vive**: `src/session/thin.ts`, `src/session/server.ts`, `src/session/client.ts`, `src/kernel/vehicle.ts`
+- **Da non usare**: `passo relativo` (nei nomi del codice: è `step.on`), `coordinate locali`
+- **Fermo**: `on`, `lx`, `ly` sul filo (`step`, `correction`, `EntityView`, `OtherView`).
+
+### Andare avanti nello specchio
+- **Inglese**: `coast`, `sail`, `carryMirrored`, `VehicleView`, `readVehicleView`, `vehicleSeen`, `SETTLE`, `COAST`, `JUMP_TURN`
+- **Definizione**: come lo specchio di un client muove un veicolo fra due aggiornamenti del server: lo porta avanti col suo abbrivio e il suo giro dall'ultima parola del server (sull'arco della prua), e chiude a poco a poco lo scarto da dove il server lo ha; non lo insegue, così il ponte non trema. Il client non predice il timone: il veicolo lo muove il server (T442, ADR-0232).
+- **Dove vive**: `src/session/thin.ts`, `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `predire` (il veicolo non si predice), `interpolare` (si interpola chi cammina, `FOLLOW`)
+- **Fermo**: `vehicle` in `EntityView` (`heading`, `speed`, `turn`, `anchored`, `helm`).
+
+### Tuffarsi
+- **Inglese**: `leaveDeck`, `over`, `LEAVE_REACH`
+- **Definizione**: scendere dal ponte di un veicolo dal suo menu: il posto più vicino fuori dallo scafo dove il corpo sta, l'acqua accanto o la terra accanto al carro (`Scendi`), entro `LEAVE_REACH` caselle; sempre, chiunque governi (in molti un client non salta: nessuno è portato dove non vuole), e il timone, se lo teneva, si lascia (T442, ADR-0232).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/vehicle.ts` (`VEHICLE_WORDS`)
+- **Da non usare**: `sbarcare` (è dal molo, a piedi), `abbandonare la nave`
+- **Fermo**: l'azione `over` del menu di un veicolo.
+
+### Spinta dello scafo
+- **Inglese**: `pushAside`, `overHull`, `PUSH_REACH`, `PUSH_STEP`
+- **Definizione**: ciò che uno scafo che va fa a chi è dove arriva e non sta sul suo ponte: lo sposta da parte, per dove va quel punto dello scafo, quanto basta perché il corpo stia, al più `PUSH_REACH` caselle; mai schiacciato, mai sotto lo scafo; chi è spinto lo sente (T442, ADR-0232).
+- **Dove vive**: `src/kernel/kernel.ts`
+- **Da non usare**: `urto` (è dello scafo contro la costa: lo ferma), `speronare` (danneggia: T444)
+- **Fermo**: —
 
 ### Ancora
 - **Inglese**: `anchored`, `setAnchor`, `ANCHOR_BRAKE`

@@ -795,4 +795,5 @@ export const UNCOVERED = {
   'V-043': 'il pacchetto sono file e un’immagine, non un server da provare: il kit non costruisce immagini; le proprietà le leggono tests/sicurezza/pacchetto.test.ts e produzione.test.ts',
   'V-044': 'il kit non ha chiavi di TypeSafe né di OpenRouter e non esce sulla rete: i due varchi e il kernel si provano coi fornitori finti, tests/sicurezza/testo-viandante.test.ts',
   'V-045': 'ciò che Lua chiede a un veicolo si vede solo dentro il kernel e la sandbox: lo prova tests/sicurezza/veicolo.test.ts',
+  'V-046': 'il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts',
 };

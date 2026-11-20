@@ -26,6 +26,8 @@ const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', '
  * `takeable` (T292): the client's menu offers «Prendi», and makes the item of a thing carried, with its name and look.
  */
 const MANIFEST_FIELDS = ['id', 'name', 'kind', 'version', 'description', 'order', 'physics', 'tags', 'item', 'roof', 'ui', 'card', 'takeable'];
+/** What a client reads of a vehicle (T442): what it moves on and how fast; the client stands on its deck, carries it on and makes its menu with it. */
+const VEHICLE_FIELDS = ['medium', 'speed', 'accel', 'turn', 'draught'];
 /** Only for the modules that make up the client's own wanderer and carpet: the others' entities come from the server. */
 const OWN_FIELDS = ['components', 'singleton', 'persist'];
 const APPEARANCE_FIELDS = ['glyph', 'color', 'model', 'class', 'size'];
@@ -81,6 +83,7 @@ function manifestShown(m: Fields, logic: boolean): Fields {
     ['recipes', eachOf(m.recipes, (r) => only(r, RECIPE_FIELDS))],
     ['runes', eachValue(m.runes, (r) => only(r, RUNE_FIELDS))],
     ['spells', eachValue(m.spells, (s) => only(s, SPELL_FIELDS))],
+    ['vehicle', m.vehicle === undefined ? undefined : only(m.vehicle, VEHICLE_FIELDS)],
   ];
   return { ...only(m, MANIFEST_FIELDS), ...(own ? only(m, OWN_FIELDS) : {}), ...Object.fromEntries(parts.filter(([, v]) => v !== undefined)) };
 }

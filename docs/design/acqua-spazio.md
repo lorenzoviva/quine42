@@ -154,7 +154,8 @@ dice, a nuoto; nel vuoto ogni terra è connessa al suo interno e ha un approdo c
 
 > **Fatto da soli (T439, ADR-0227)**: come qui sotto, con queste differenze: il timone si prende dal menu da ovunque sul ponte (l'area
 > `helm` è di T440), il vento e la vela danno `power` (0…1) e il timone `thrust` e `steer`; un veicolo senza forma ha per ponte il disco del suo
-> corpo; `void` aspetta il vuoto (T445). In molti è T442.
+> corpo; `void` aspetta il vuoto (T445). **In molti (T442, ADR-0232)**: come qui sotto; in più «Tuffati» dal menu (un client non salta), la spinta
+> dello scafo, il timone tenuto preso solo dal master o con `pvp`, le cose che giacciono sul ponte relative anche loro (`EntityView.on`).
 
 **Che cos'è.** Un'entità con una forma (il programma dello Scultore, classe `vessel`, § 1.6) e il componente `vehicle` (`heading`,
 `speed`, `turn`, `anchored`, `helm`, `hull`); il manifest dice `vehicle: { medium: 'water' | 'void', speed, accel, turn, draught:

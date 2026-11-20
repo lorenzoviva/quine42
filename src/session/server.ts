@@ -16,7 +16,8 @@ import { hashStr, hex } from '../kernel/rng';
 import { equippedItem, shownInventory } from '../kernel/inventory';
 import { wornItems } from '../kernel/wearing';
 import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
-import { ENTITY_PARTS, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
+import { offDeck } from '../kernel/vehicle';
+import { ENTITY_PARTS, type OnDeck, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -234,13 +235,15 @@ interface Client {
   link: ServerLink;
   /** Tiles the wanderer may still walk now. */
   budget: number;
+  /** The last step heard (T442): a correction the world makes (a hull's push, over the side) answers it, so that the client takes it. */
+  stepSeq: number;
   me?: string;
   state?: string;
   places: Map<string, number>;
   /** The strata of each place as last sent (T418): sent again only when the place has others (its plan's in place of its draft's). */
   strata?: Map<string, string[]>;
-  /** What the client knows of each entity in sight: what it is, and where it last was. */
-  things: Map<number, { look: string; x: number; y: number }>;
+  /** What the client knows of each entity in sight: what it is, and where it last was (on a deck, a vehicle's way: T442). */
+  things: Map<number, { look: string; at: string }>;
   others: Map<string, string>;
   /** The master follows this player (T42c): what they get is what is around them. */
   watch?: string;
@@ -282,6 +285,8 @@ export class SessionServer {
   private masterUid?: string;
   /** The wanderers whose account is anonymous (T44b), as they last came in: they play with the local models only. */
   private anonymous = new Set<string>();
+  /** Who the world is acting as now, while a message of theirs runs (`act`): what it says them goes in the answer. */
+  private acting?: string;
 
   constructor(
     readonly kernel: Kernel,
@@ -312,7 +317,17 @@ export class SessionServer {
     // A wanderer pushed by another (T43b) walks back only with the credit of their steps from now on.
     kernel.bus.on('wanderer:pushed', (e: { id?: unknown }) => {
       const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
-      if (c) c.budget = 0;
+      if (!c) return;
+      c.budget = 0;
+      // Where the world put them (T442: a hull's push, over the side), said now: a client standing still sends no step to correct.
+      this.correct(c, c.stepSeq);
+    });
+    // Words of the world to a wanderer outside what they do (T442: a hull that bumps, a helm let go): what they do brings its own in the answer.
+    kernel.bus.on('wanderer:told', (e: { id?: unknown; text?: unknown; tone?: unknown }) => {
+      const c = typeof e?.id === 'string' ? this.clients.get(e.id) : undefined;
+      if (!c || this.acting === c.id || typeof e.text !== 'string' || c.notices.length >= 50) return;
+      const tone = e.tone === 'warn' || e.tone === 'good' ? e.tone : 'info';
+      c.notices.push({ type: 'world', from: '', name: '', text: e.text.slice(0, 300), tone });
     });
     // A wanderer who died in the world (T43c) wakes up where the verdict says, with the words of their new life.
     kernel.bus.on('wanderer:died', (e: { id?: unknown; causa?: unknown; testo?: unknown; perso?: unknown; dove?: unknown }) => {
@@ -474,7 +489,7 @@ export class SessionServer {
     // Who they say they are (T44a): repaired against everyone else in the world. A profile already saved stays (T44c): only
     // `profile` changes it, what a browser brings on entering may be another wanderer's.
     const fixed = profile && typeof profile === 'object' && !this.kernel.profileOf(id) ? this.kernel.setProfile(id, profile) : undefined;
-    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, places: new Map(), things: new Map(), others: new Map(), notices: [], cap, pace: this.paceOf(id) };
+    const c: Client = { id, link, budget: this.kernel.paceOf(id) * BURST, stepSeq: 0, places: new Map(), things: new Map(), others: new Map(), notices: [], cap, pace: this.paceOf(id) };
     this.clients.set(id, c);
     this.kernel.lockSettings();
     const u = this.view(c);
@@ -838,23 +853,55 @@ export class SessionServer {
     return { ok: true };
   }
 
-  /** A step claimed by the client: as far as the pace allows and the world lets them, corrected if it differs. */
-  private step(c: Client, msg: { seq?: unknown; x?: unknown; y?: unknown }): void {
+  /**
+   * A step claimed by the client: as far as the pace allows and the world lets them, corrected if it differs. On a vehicle's deck (T442,
+   * `on`) the point is in its frame, and goes where the server has the vehicle now: the same check as any step (the pace, `FAR`, the
+   * collision), so that `on` moves nobody anywhere they could not walk to; what the deck carried them is not walked (V-046).
+   */
+  private step(c: Client, msg: { seq?: unknown; x?: unknown; y?: unknown; on?: unknown }): void {
     const seq = seqOf(msg);
+    c.stepSeq = Math.max(c.stepSeq, seq);
     const { x, y } = msg;
     const k = this.kernel;
     const at = k.wandererAt(c.id);
     if (!at) return;
     if (k.isDying(c.id) || c.notices.some((n) => n.type === 'death')) {
       c.budget = 0;
-      return c.link.send({ t: 'correction', seq, x: round(at.x), y: round(at.y) });
+      return this.correct(c, seq);
     }
     // Only numbers: on the wire what is not a number becomes null, and null is not 0.
-    const to = { x: typeof x === 'number' ? x : NaN, y: typeof y === 'number' ? y : NaN };
-    if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return c.link.send({ t: 'correction', seq, x: round(at.x), y: round(at.y) });
+    let to = { x: typeof x === 'number' ? x : NaN, y: typeof y === 'number' ? y : NaN };
+    if (msg.on !== undefined) {
+      // A vehicle in sight, as the server has it now; anything else is not a deck, and the step is not taken.
+      const deck = this.deckNear(at, msg.on);
+      if (!deck || !(Math.abs(to.x) <= this.near) || !(Math.abs(to.y) <= this.near)) return this.correct(c, seq);
+      const [wx, wy] = offDeck(deck, to.x, to.y);
+      to = { x: wx, y: wy };
+    }
+    if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return this.correct(c, seq);
     const got = k.stepWanderer(c.id, to, Math.max(0, c.budget)) ?? at;
     c.budget -= Math.hypot(got.x - at.x, got.y - at.y);
-    if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) c.link.send({ t: 'correction', seq, x: round(got.x), y: round(got.y) });
+    if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) this.correct(c, seq);
+  }
+
+  /** A vehicle of the world near a wanderer, by the id a client says (T442): where it is now; undefined if that id is no vehicle in sight. */
+  private deckNear(at: { x: number; y: number }, on: unknown) {
+    const id = typeof on === 'number' && Number.isInteger(on) ? on : -1;
+    const pose = id >= 0 && this.kernel.ecs.alive.has(id) ? this.kernel.vehiclePose(id) : undefined;
+    return pose && Math.hypot(pose.x - at.x, pose.y - at.y) <= this.near ? pose : undefined;
+  }
+
+  /** The client's wanderer is where the server has them (T442: on a deck, there on it too). */
+  private correct(c: Client, seq: number): void {
+    const at = this.kernel.wandererAt(c.id);
+    if (!at) return;
+    c.link.send({ t: 'correction', seq, x: round(at.x), y: round(at.y), ...this.deckOf(at.entity) });
+  }
+
+  /** Where an entity stands on a vehicle's deck (T442), as the wire says it; nothing when it stands on none. */
+  private deckOf(entity: number): OnDeck {
+    const d = this.kernel.carriedOn(entity);
+    return d ? { on: d.vehicle, lx: round(d.lx), ly: round(d.ly) } : {};
   }
 
   /** Something carried (T39b): what the kernel does with a slot of the inventory, as the wanderer. */
@@ -915,6 +962,8 @@ export class SessionServer {
     const p = Number.isInteger(id) && k.ecs.alive.has(id) ? k.ecs.get(id, 'pos') : undefined;
     if (!p || k.ecs.has(id, 'player')) return 'non c’è niente lì';
     const at = k.wandererAt(c.id)!;
+    // The vehicle one stands on (T442) is at hand from all its deck: its middle may be farther than a step (a galleon).
+    if (k.ecs.has(id, 'vehicle') && k.carriedOn(at.entity)?.vehicle === id) return undefined;
     return Math.hypot(p.x - at.x, p.y - at.y) > this.reach ? 'è troppo lontano' : undefined;
   }
 
@@ -931,12 +980,15 @@ export class SessionServer {
       k.bus.on('ui:container', (b) => Number.isInteger(b?.id) && (seen.opened = b.id)),
       k.bus.on('ui:bag', (b) => Number.isInteger(b?.slot) && (seen.bag = b.slot)),
     ];
+    const before = this.acting;
+    this.acting = c.id;
     try {
       const value = k.as(c.id, fn);
       return { ok: value !== false, value, messages: said.filter(Boolean), dialogues: dialogs, ...seen };
     } catch (e) {
       return { ok: false, messages: [...said, (e as Error).message], dialogues: dialogs, ...seen };
     } finally {
+      this.acting = before;
       off.forEach((f) => f());
     }
   }
@@ -1061,12 +1113,14 @@ export class SessionServer {
       inSight.add(id);
       const look = this.lookOf(id);
       const key = JSON.stringify(look);
-      const x = round(p.x);
-      const y = round(p.y);
+      // Where it is: the place, and on a deck where on it (T442); a vehicle's way and its helm with every move of it.
+      const vehicle = k.vehicleSeen(id);
+      const where: EntityView = { id, x: round(p.x), y: round(p.y), ...this.deckOf(id), ...(vehicle ? { vehicle } : {}) };
+      const at = JSON.stringify(where);
       const seen = c.things.get(id);
-      if (!seen || seen.look !== key) things.push({ id, x, y, ...look });
-      else if (seen.x !== x || seen.y !== y) things.push({ id, x, y });
-      c.things.set(id, { look: key, x, y });
+      if (!seen || seen.look !== key) things.push({ ...where, ...look });
+      else if (seen.at !== at) things.push(where);
+      c.things.set(id, { look: key, at });
     }
     if (things.length) out.entities = things;
     const gone = [...c.things.keys()].filter((id) => !inSight.has(id));
@@ -1090,7 +1144,7 @@ export class SessionServer {
       // What they wear (T290): the ids by zone, read as the kernel reads them; of the inventory nothing else.
       const worn = wornItems(inv, (item) => k.wornZone(item));
       const dressed = Object.keys(worn).length > 0;
-      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}), ...(heldSeed !== undefined ? { heldSeed } : {}), ...(dressed ? { worn } : {}) };
+      const v: OtherView = { id: w.id, name: w.name, x: round(o.x), y: round(o.y), ...this.deckOf(o.entity), facing: o.facing, ...(form ? { form } : {}), ...(b ? { text: b.text } : {}), ...(intro ? { introduction: intro } : {}), ...(held ? { held } : {}), ...(heldSeed !== undefined ? { heldSeed } : {}), ...(dressed ? { worn } : {}) };
       const key = JSON.stringify(v);
       if (c.others.get(w.id) !== key) others.push(v);
       c.others.set(w.id, key);
@@ -1120,6 +1174,8 @@ export class SessionServer {
     // What an individual wears (T353): the ids by zone, read as the kernel reads them; of its inventory nothing else.
     const inv = k.ecs.get(id, 'inventory');
     const worn = inv?.worn ? wornItems(inv, (item) => k.wornZone(item)) : {};
+    // A vehicle's form turns with every move (T442): its heading goes in `vehicle`, not in what it is.
+    if (form && k.ecs.has(id, 'vehicle')) delete form.yaw;
     return {
       ...(m ? { m: String(m) } : {}),
       ...(form ? { form } : {}),
