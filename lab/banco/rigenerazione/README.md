@@ -82,3 +82,52 @@ npm run genera -- neapolis --rigenera modelli --giro t436 --tetto 10 --universi 
 - **Dopo**: `piano-rigenerazione.ts` non trova strutture a 20; `controlla-universo.ts` legge i 107 piani, 0 guasti. Nel browser (copia offline):
   il Porto commerciale coi due magazzini, il mercato a sinistra e la torre a destra (`neapolis-porto-commerciale.jpg`), e i cittadini col corpo
   nuovo (`neapolis-cittadino.jpg`, `neapolis-cittadino-vicino.png`).
+
+## Senza merli né feritoie: le strutture civili dei tre universi e le sei che non erano passate (T455)
+
+Il 20/11, sugli universi veri (`universes/` della cartella del generatore), dopo il tag `prima-di-t455` su ognuno e col prompt di T434
+(merli e feritoie solo a una fortificazione), in un giro a parte (`--giro t455`, il progresso in
+`universes/.generation/<nome>.rigenera-modelli-t455.json`). L'elenco dei tipi lo dà `lab/scripts/merli-civili.ts`: le strutture e gli
+edifici che il mondo indossa, non fortificati (`fortifiedOf`), il cui programma include ancora `part-battlements` o `part-slits`, più quelle
+rimaste in `world/shortfalls.json` (una mancanza superata da un commit dello Scultore o della rigenerazione dopo di lei non conta più).
+
+```bash
+npx vite-node lab/scripts/merli-civili.ts -- <universi>/orichalcum <universi>/neapolis <universi>/sidera
+npx vite-node --script tools/abbonamenti/servi.ts -- --coda <universi>/.queue      # tre servitori sulla stessa coda
+npm run genera -- <nome> --rigenera modelli --giro t455 --tetto 15 --universi <universi> --tipi <elenco>
+```
+
+Nessun universo aveva una struttura fortificata: tutte le 20 + 21 + 19 strutture ed edifici indossati sono civili.
+
+| Universo | Riscolpite (voto dell'Artista) | Non passate |
+|---|---|---|
+| orichalcum | Cattedrale degli Ingranaggi 4, Cattedrale degli ingranaggi (a gradoni) 4, Faro a vapore 3, Officina delle presse 5, Palazzo dei meccanici 5, Stazione dei dirigibili 4, Osservatorio a vapore 3, Taverna delle caldaie 5 (al secondo giro) | Taverna della Caldaia: due giri, cantina non raggiungibile dalla porta, poi pavimento coperto 9,5 caselle² al piano terra (un'abitazione ne vuole 10); resta col programma di prima, che non ha merli |
+| neapolis | Cappella del silenzio 6, Chiesa moderna 4, Laboratorio di ricerca 5, Palazzina di quattro alloggi 5, Osservatorio civico 4 (al secondo giro) | — |
+| sidera | Bar orbitale 5, Faro di segnalazione 3, Faro al plasma 3, Laboratorio del plasma 5, Laboratorio di fusione 3, Lounge orbitale 5, Santuario della luce 5, Santuario quantico 5, Stazione di transito 5 | — |
+
+Tutte arredate dallo Scenografo (2-6 regole), a 16 voxel per casella, con le sole parti `part-door`, `part-stair` e, con la cantina,
+`part-cellar`. Le due strutture nuove che T454 aveva lasciato senza modello, con la generazione differita (`npm run genera -- <nome>
+--partita multigiocatore --luoghi 25 --modelli 3 --brani 0`, togliendo dal progresso del generatore il passo del loro luogo, così il luogo
+si ricarica e la struttura risulta mancante): il capannone dei telai a vapore di orichalcum (2,2), scolpito e poi arredato in un secondo
+giro (lo Scenografo era stato chiamato mentre la finestra delle 5 ore si chiudeva), e la torre della Banca del Golfo di neapolis (2,-1),
+riuscita al terzo tentativo (un errore della CLI, poi un tentativo durante il limite).
+
+- **Il costo**: dai registri degli universi (`world/usage.json`, la differenza dal tag `prima-di-t455`) 173 chiamate, almeno 27,35 $ al
+  listino di Opus 5.5 senza le scritture in cache: orichalcum 68 (12,87 $), neapolis 41 (6,46 $), sidera 64 (8,03 $); quasi tutto lo
+  Scultore (106 chiamate, 25,82 $), l'Artista 42 (1,01 $), lo Scenografo 23 (0,42 $), due revisioni della quarta parete (0,12 $). I tentativi della torre che non hanno fatto un
+  commit non sono nel registro (al più una decina di chiamate). La finestra delle 5 ore si è esaurita una volta, verso le 8:15 ora locale (i
+  servitori della coda si sono fermati fino al reset delle 9:30 e poi hanno ripreso da soli).
+- **Tre servitori sulla stessa coda** vanno, la presa di una richiesta è un rename atomico; ma su Windows due battiti che rinominano
+  `servitore-claude.json` nello stesso istante danno `EPERM` e uno dei servitori muore (`writeAtomic` in `server/subscriptionQueue.ts`).
+  Non è stato toccato: un servitore solo, quello della pipeline, non lo incontra.
+- **Dopo**: `merli-civili.ts` non trova strutture civili coi merli in nessuno dei tre; `controlla-universo.ts` legge 25 piani su 25 in
+  ognuno, 0 guasti; `piano-rigenerazione.ts` non trova strutture a 20. Restano, già prima di T455, due ambienti che il kernel non sa
+  allargare: in orichalcum `piazza_pesa` (0,0) e `quartiere_mattoni` (2,1) hanno due strutture e un lotto solo (la taverna e la cattedrale
+  a gradoni non hanno dove stare), in neapolis `uffici` (T436).
+- **Nel browser** (server di sviluppo nel turno `browser`: i tre universi sono in multigiocatore da T454 e `vite preview` non aggancia il
+  WebSocket; su una copia, col viandante portato sulla piazza nel `world/players/me.json` della copia): la cattedrale degli ingranaggi
+  della Piazza della Pesa con il tetto a gradoni, le due ciminiere e le finestre accese (`t455-orichalcum-cattedrale.jpg`), la cappella
+  della Piazza delle Erbe di neapolis col tetto di coppi, di notte (`t455-neapolis-cappella.jpg`, `t455-neapolis-cappella-tetto.jpg`), la
+  Piazza dei Viadotti di sidera col bar orbitale (tetto piano con parapetto pieno, fasce di vetro) e il santuario della luce (tetto a
+  gradoni) (`t455-sidera-piazza-dei-viadotti.jpg`, `t455-sidera-santuario-e-bar.jpg`); nessun merlo, nessuna feritoia; la console senza
+  errori del gioco (solo «message channel closed» dell'estensione di Chrome). Non visti: gli interni.
