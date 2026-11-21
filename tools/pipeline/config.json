@@ -111,6 +111,7 @@
           "argon",
           "agy-opus",
           "agy-sonnet",
+          "neon",
           "hydrogen",
           "orchestrator"
         ]
@@ -122,6 +123,7 @@
           "argon",
           "agy-opus",
           "agy-sonnet",
+          "neon",
           "hydrogen",
           "orchestrator"
         ]
@@ -147,6 +149,7 @@
       "argon": 1,
       "agy-opus": 1,
       "agy-sonnet": 1,
+      "neon": 1,
       "hydrogen": 1,
       "orchestrator": 1
     }
@@ -389,6 +392,34 @@
       "abbonamento": "google",
       "ratioSessioneSettimana": 2
     },
+    "neon": {
+      "modello": "Gemini 4 Neon",
+      "cmd": "agy",
+      "args": [
+        "--output-format",
+        "json",
+        "--dangerously-skip-permissions",
+        "--model",
+        "gemini-4-neon-high"
+      ],
+      "livelli": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ],
+      "resume": [
+        "--conversation",
+        "{sessione}"
+      ],
+      "resetSettimanale": "",
+      "contatori": "^Gemini Models$",
+      "browser": false,
+      "orchestrabile": false,
+      "stessoContoDi": "gemini",
+      "abbonamento": "google",
+      "ratioSessioneSettimana": 3.3
+    },
     "hydrogen": {
       "modello": "Gemini 4 Hydrogen",
       "cmd": "agy",
@@ -446,6 +477,7 @@
     "ordine": [
       "claude",
       "orchestrator",
+      "neon",
       "argon",
       "hydrogen",
       "gemini"
@@ -456,6 +488,7 @@
       "argon": 1000000,
       "gemini": 1000000,
       "orchestrator": 200000,
+      "neon": 1000000,
       "hydrogen": 200000
     },
     "rotazione": 0.35,
