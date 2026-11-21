@@ -6300,7 +6300,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T473 · La prova pagata delle specialità (S7 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo max · stima 3% · priorità 2
+- Pipeline: claude · sforzo max · stima 3% · approvato · priorità 2
 - Dipende da: T468, T469, T470
-- Contesto: studio T458, riga S7. Dipende da T468, T469, T470. **Spesa 3-5 $ da approvare dall'autore** prima del lancio (il task non è approvato finché lui non dice sì alla spesa).
+- Contesto: studio T458, riga S7. Dipende da T468, T469, T470. Spesa approvata dall'autore il 21/11: lo sforzo max vale per le sessioni in abbonamento; la prova pagata resta quella dello studio (3-5 $) con **tetto 6 $ sul registro**; se servisse di più, fermarsi e chiedere.
 - Cosa fare: la riga S7, col tetto sul registro. Browser: sì, le foto dei modelli.
