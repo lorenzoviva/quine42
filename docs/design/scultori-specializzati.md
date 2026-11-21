@@ -202,6 +202,25 @@ consumi (`world/usage.json → specialties`); il ripiego del prompt intero per g
 che non cresce a regole perde 1 705-2 179 token, 1 755 in media, 0,035 $ l'ora oggi e 0,052 $ dall'1/12, come il § 1.4 prevedeva; ciò che non
 serve ancora è 0-173 token a richiesta. Richiesta per richiesta, prima e dopo: [`misure-s2.md`](scultori-specializzati/misure-s2.md).
 
+**Fatto in T470 (S4, solo i prompt del seme)**: ogni sezione ha un titolo suo con ciò che il kernel fa delle cose del mestiere, letto nel
+codice e provato da `tests/sculptor-trades.test.ts`. Il Paesaggista «Growing like nature»: il seme che sceglie le misure, le famiglie di forma
+(tronco, chioma, cespuglio, masso), il vento che piega per altezza col quarto più basso fermo e senza `<animation>`, il piede. Il Mobiliere «What
+the world does with them»: `open` e `close` col segno nascosto del coperchio aperto, che si alternano da sé nel menu; le facce dove si posa;
+ciò che si porta sopra la testa; la presa dalla forma. Il Sarto «Every body»: l'aria di ogni zona (3 voxel attorno alla testa, 2 al busto, 3
+dietro la schiena), gli stessi capi sugli individui, l'ordine dal fuori al dentro, i due colori dove la sezione non va, il programma come la cosa
+posata. Il Figurinista «How the kernel moves a figure»: gli arti come pezzi di una parte, i perni, il passo, le quattro zampe, la testa, le mani.
+Il Capomastro «Building in one box»: in grande e poi in piccolo, la scatola della classe, la porta alla misura del corpo che si apre, il
+basamento, le finestre, i tetti, i materiali, i monumenti. Il Carrozziere «Building a hull»: lo scafo, i buchi sopra la linea di
+galleggiamento, l'orlo, alberi e vele, il ponte. **Che cosa è cambiato dal previsto**: al Carrozziere niente ruote né capsule, che oggi nessuna
+richiesta porta (la classe `vessel` è dell'acqua e i suoi controlli vogliono la linea di galleggiamento): mandarle a ogni barca costerebbe
+istruzioni che nessuno usa, e le scriverà chi darà a quei veicoli una classe e i controlli («un'astronave dello Scultore», ADR-0234); al
+loro posto il metodo dello scafo. Al Paesaggista niente radici verso l'acqua: nella scatola di un modello l'acqua non c'è. Ogni sezione è
+intera per il suo mestiere (la cache, § 2.3): le righe di una classe sola (il vento, la presa, le quattro zampe, porte e tetti) non servono
+alle altre, 190 token a chiamata in media pesata, 0,0035 $ l'ora oggi. **La misura** ([`misure-s4.md`](scultori-specializzati/misure-s4.md)):
+le istruzioni nuove 219-419 token (il § 2.1 ne stimava 300-600), nucleo e sezione 3 596-3 890 (il § 2.2: 3 650-4 000), +308 token a
+chiamata in media pesata, +0,006 $ l'ora oggi e +0,010 $ dall'1/12. Con S2 e S3 l'ora dello Scultore costa 0,016 $ meno di prima di T468 oggi
+e 0,018 $ dall'1/12, come il § 2.2 prevedeva (0,016 e 0,021).
+
 ## 3. Il few-shot: quali esempi e quanto costano (c)
 
 ### 3.1 Che cosa c'è oggi
@@ -470,7 +489,7 @@ chiama i modelli. S7 sì, e va approvata dall'autore per la spesa.
 ## 7. Che cosa non è provato
 
 - **Nessuna qualità è misurata**: che le specialità facciano programmi migliori, che gli esempi scelti per voto aiutino, che la guida dei
-  cicli venga usata. Offline si misurano i token, non i programmi. È S7.
+  cicli venga usata, che le istruzioni dei mestieri di S4 vengano seguite. Offline si misurano i token, non i programmi. È S7.
 - La Genesi è quella offline: 11 modelli. Una con Gemini ne chiede circa 20, e il risparmio per Genesi raddoppia (resta sotto i due
   centesimi).
 - I pesi delle classi vengono da cinque universi generati in buona parte dalla coda degli abbonamenti (la rigenerazione dei modelli,
