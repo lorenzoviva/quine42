@@ -6336,7 +6336,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 2. Browser: sì, un mondo col rilievo vero.
 
 ### T476 · R2 · Il taglio verso la camera (riga 3 di T459) — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
 - Step: 45
 - Dipende da: T475
 - Contesto: § 3.2, il disco di T416.
@@ -6357,14 +6357,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 5. Browser: sì, i tagli.
 
 ### T479 · S2 · Gli strati nel Concilio (riga 6 di T459) — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 4
 - Step: 45
 - Dipende da: T478
 - Contesto: § 4.2; lo Scultore Architetto di T468.
 - Cosa fare: la riga 6; nuova API Lua `world.stratum_at` coi passi della convenzione. Browser: no.
 
 ### T480 · R4 · Il fondale (riga 7 di T459) — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 4
 - Step: 45
 - Dipende da: T475
 - Contesto: § 3.3.
@@ -6399,14 +6399,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 11; il vento grossolano ai client a elenco (regola 8f). Browser: sì.
 
 ### T485 · A3 · L'acqua a schermo sulla GPU (riga 12 di T459) — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4
 - Step: 45
 - Dipende da: T483
 - Contesto: § 5.4; il campo d'onde a quattro celle per lato o più, mosso dalle correnti dell'automa a due.
 - Cosa fare: la riga 12. Browser: sì.
 
 ### T486 · M0 · La mesh dei luoghi in un worker (riga 13 di T459) — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
 - Step: 45
 - Dipende da: T459
 - Contesto: § 1.6 punto 2, il punto 3 di T331.
