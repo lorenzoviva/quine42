@@ -2662,3 +2662,89 @@ describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrat
     expect(html).toContain('<option value="orchestrator">orchestrator (Orchestrator (Argon))</option>');
   });
 });
+
+describe('Gemini 4 Neon nella pipeline (T465)', () => {
+  type Agy = Pipeline & {
+    launchArgs(t: unknown, run?: unknown, o?: { resume?: boolean; config?: unknown }): string[];
+    modelOf(provider: string, config?: unknown): string;
+    accountOf(provider: string, config?: unknown): string;
+  };
+  const A = () => P as unknown as Agy;
+  const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/pipeline-config.json'), 'utf8'));
+  const realConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+  const model = (sforzo?: string, run: Record<string, unknown> = {}, cfg = config) => {
+    const a = A().launchArgs({ id: 'T1', provider: 'neon', sforzo }, run, { resume: Boolean(run.sessione), config: cfg });
+    expect(a).not.toContain('--effort');
+    return a[a.indexOf('--model') + 1];
+  };
+  // `agy -p /usage` del 21/11/2026, dopo le tre micro-prove di T465 (Neon high, Neon xhigh, Orchestrator (Neon)).
+  const USAGE = [
+    'Gemini Models\tWeekly Limit Remaining\t100%\t2026-11-28T16:26:27Z',
+    'Gemini Models\tFive Hour Limit Remaining\t98%\t2026-11-21T21:26:27Z',
+    'Claude and GPT models\tWeekly Limit Remaining\t100%\t2026-11-28T16:31:10Z',
+    'Claude and GPT models\tFive Hour Limit Remaining\t100%\t2026-11-21T21:31:10Z',
+    'Gemini 4 Argon\tGemini 4 Argon Weekly Limit\t100%\t2026-11-28T16:31:10Z',
+  ].join('\n');
+  const counters = () => (P.parseUsage('gemini', USAGE) ?? []).filter((c) => new RegExp(config.providers.neon.contatori).test(c.nome));
+
+  it('il provider su agy: modello, piani Pro e Ultra, tetto 1, nessun tetto della CLI sale, non orchestra da solo', () => {
+    for (const cfg of [config, realConfig]) {
+      expect(cfg.providers.neon).toMatchObject({ cmd: 'agy', modello: 'Gemini 4 Neon', browser: false, abbonamento: 'google', stessoContoDi: 'gemini' });
+      expect(cfg.providers.neon.args).toContain('gemini-4-neon-high');
+      expect(cfg.providers.neon.livelli).toEqual(['low', 'medium', 'high', 'xhigh']);
+      for (const piano of ['pro', 'ultra']) expect(cfg.piani.google[piano].disponibili).toContain('neon');
+      expect(cfg.limiti.modello.neon).toBe(1);
+      expect(cfg.limiti.provider).toEqual({ claude: 3, agy: 1 });
+    }
+    expect(config.providers.neon.orchestrabile).toBe(false);
+    expect(P.ceilingOf('neon', config)).toBe(1);
+    expect(P.providerEnabled('neon', config)).toBe(true);
+    expect(P.canOrchestrate('neon', config)).toBe(false);
+    expect(P.providerHasBrowser('neon', config)).toBe(false);
+    expect(A().modelOf('neon', config)).toBe('Gemini 4 Neon');
+    const senza = { ...structuredClone(config), abbonamenti: { ...config.abbonamenti, google: 'nessuno' } };
+    expect(P.ceilingOf('neon', senza)).toBe(0);
+  });
+
+  it('il contatore è Gemini Models, il conto quello di Gemini e di Hydrogen, mai quello di Argon', () => {
+    expect(counters().map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h']);
+    expect(P.computeBudget('neon', config.providers.neon, counters())).toEqual({ residuo: 100, sessione: 98 });
+    expect(A().accountOf('neon', config)).toBe(A().accountOf('gemini', config));
+    expect(A().accountOf('neon', config)).toBe(A().accountOf('hydrogen', config));
+    expect(A().accountOf('neon', config)).not.toBe(A().accountOf('argon', config));
+    for (const nome of ['Claude and GPT models', 'Gemini 4 Argon']) expect(new RegExp(config.providers.neon.contatori).test(nome)).toBe(false);
+    // Su agy un task alla volta, di qualunque modello.
+    const small = { estimate: 1, priority: 10 };
+    const budget = { neon: { residuo: 90, sessione: 100, slot: 1, tetto: 1 } };
+    expect(P.fitsOn('neon', small, { budget, live: [], config })).toBe(true);
+    expect(P.fitsOn('neon', small, { budget, live: [{ provider: 'hydrogen', stima: 1 }], config })).toBe(false);
+  });
+
+  it('lo sforzo è il suffisso: extra, xhigh e max diventano -xhigh, anche riprendendo', () => {
+    expect(model()).toBe('gemini-4-neon-high');
+    expect(model('low')).toBe('gemini-4-neon-low');
+    expect(model('medium')).toBe('gemini-4-neon-medium');
+    expect(model('high')).toBe('gemini-4-neon-high');
+    for (const s of ['extra', 'xhigh', 'max']) expect(model(s)).toBe('gemini-4-neon-xhigh');
+    const ripresa = A().launchArgs({ id: 'T1', provider: 'neon' }, { sessione: 'sid', sforzo: 'max' }, { resume: true, config });
+    expect(ripresa[ripresa.indexOf('--model') + 1]).toBe('gemini-4-neon-xhigh');
+    expect(ripresa).toEqual(expect.arrayContaining(['--conversation', 'sid']));
+    expect(ripresa).not.toContain('--effort');
+  });
+
+  it("nell'ordine dell'orchestratore dopo Claude e prima di Argon, con la finestra di 1M", () => {
+    const ordine: string[] = config.orchestra.ordine;
+    expect(ordine.indexOf('neon')).toBeGreaterThan(ordine.indexOf('claude'));
+    expect(ordine.indexOf('neon')).toBeLessThan(ordine.indexOf('argon'));
+    expect(config.orchestra.finestra.neon).toBe(1_000_000);
+    const spuntato = structuredClone(config);
+    spuntato.providers.neon.orchestrabile = true;
+    expect(P.canOrchestrate('neon', spuntato)).toBe(true);
+  });
+
+  it('la pagina web lo offre col suo nome', async () => {
+    const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href;
+    const W = (await import(/* @vite-ignore */ url)) as { renderHtml(): string };
+    expect(W.renderHtml()).toContain('<option value="neon">neon (Gemini 4 Neon)</option>');
+  });
+});

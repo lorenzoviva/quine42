@@ -1,6 +1,6 @@
 # Scheda dei modelli della pipeline: benchmark, prezzi, contatori e misure nostre
 
-> Riferimento unico per la scelta dei modelli nella pipeline agentica di QUINE42 (task **T254**, rivisto e corretto in **T257**, integrato con le prove e misure sul campo dei modelli esterni di `agy` in **T268**, preparatorio a **T255**; Gemini 4 Hydrogen e Orchestrator (Argon) in **T360**).
+> Riferimento unico per la scelta dei modelli nella pipeline agentica di QUINE42 (task **T254**, rivisto e corretto in **T257**, integrato con le prove e misure sul campo dei modelli esterni di `agy` in **T268**, preparatorio a **T255**; Gemini 4 Hydrogen e Orchestrator (Argon) in **T360**; Gemini 4 Neon in **T465**).
 > Regola di redazione: **nessun numero senza fonte**; ciò che non è pubblicato o non è stato ancora provato nella nostra pipeline è indicato in chiaro come `non misurato` / `mai provato da noi`. Quando due benchmark pubbliche (o due tabelle ufficiali) si contraddicono, sono riportate entrambe.
 
 ---
@@ -34,6 +34,10 @@
   - **I livelli di sforzo li dice la CLI**, senza spendere quota: `agy --model <base> --effort max -p /model` risponde con i livelli del modello. `gemini-4-hydrogen`: `low, medium, high, xhigh`; `gemini-4-argon`, `gemini-3.8-flash`, `claude-opus-5-5`, `claude-sonnet-5-5`: `low, medium, high`. `agy --model gemini-pro-orchestrator-g1-pro -p /effort` risponde `not adjustable`. Il nome base senza sforzo (`--model gemini-4-hydrogen`) dà `gemini-4-hydrogen-medium`, non il `high` che l'annuncio chiama predefinito.
   - **`agy` ha ora anche `--effort low|medium|high|xhigh|max`** (`agy --help`), ma la pipeline non lo usa: accanto a un modello col suffisso è un errore (`--model gemini-4-hydrogen-high conflicts with --effort=xhigh`), sull'Orchestrator pure (`--effort is not supported for model "gemini-pro-orchestrator-g1-pro"`), e un livello che il modello non ha si rifiuta (`gemini-4-argon has no "xhigh" effort`). Lo sforzo resta il suffisso dell'id, scelto tra i `livelli` del provider in `config.json` (sezione 4.4).
   - `agy -p /usage` (con `MSYS_NO_PATHCONV=1` in Git Bash, che altrimenti converte `/usage` in un percorso di Windows) mostra **gli stessi tre gruppi**: `Gemini Models`, `Claude and GPT models`, `Gemini 4 Argon`. Hydrogen e l'Orchestrator **non hanno un contatore loro**. Su quale pesino: sezione 1.3.
+- **Antigravity CLI (`agy` v1.5.14), verifica del 21/11/2026 (T465)**:
+  - `agy models` elenca **23 voci su 9 modelli base**: alle 18 di T360 si aggiungono `gemini-4-neon-low`, `-medium`, `-high`, `-xhigh` (`Gemini 4 Neon (Low/Medium/High/XHigh)`, il provider `neon` della pipeline usa `gemini-4-neon-high`) e `gemini-pro-orchestrator-neon` (`Orchestrator (Neon)`, **non** nella pipeline: sezione 1.4). Carbon e Orchestrator (Carbon) mancano ancora (Ultra).
+  - I livelli (`agy --model gemini-4-neon --effort max -p /model`): `gemini-4-neon has no "max" effort (available: low, medium, high, xhigh)`. Il nome base (`--model gemini-4-neon -p /model`) dà `gemini-4-neon-high`, il predefinito dell'annuncio (per Hydrogen dava `-medium`). `agy --model gemini-pro-orchestrator-neon -p /effort`: `not adjustable`.
+  - `agy -p /usage`: **gli stessi tre gruppi**, nessun contatore di Neon. Neon pesa su `Gemini Models` (misurato: sezione 1.4).
 
 ### 1.2 Tabella prezzi di listino e contatori
 
@@ -50,6 +54,7 @@
 | **Claude Opus 5.5** (via `agy`) | `agy`: `claude-opus-5-5-high` (anche `-medium`, `-low`) | 22/09/2026 | 1M / 128k | Listino Anthropic: Input **$4,00** · Output **$20,00** · Cache read **$0,20** (incluso nella quota `agy`) | `agy /usage`: `Claude and GPT models` (`Weekly Limit` + `Five Hour Limit`) | **`2,00`** (`8 pt` 5h / `4 pt` settimana in **T268**) | No | **Provato in T268 (1 run di misura, 04/11/2026)**: `SUCCESS` in `23,61 s` (CLI `26,51 s`), `Weekly` `97 % → 93 %` (**`-4 pt`**), `Five Hour` `100 % → 92 %` (**`-8 pt`**); `agy models` e `agy -p /usage`; [Anthropic Claude Opus 5.5](https://www.anthropic.com/claude-opus-5-5) |
 | **Claude Sonnet 5.5** (via `agy`) | `agy`: `claude-sonnet-5-5-high` (anche `-medium`, `-low`) | 28/09/2026 | 1M / 128k | Listino Anthropic: Input **$2,00** · Output **$10,00** · Cache read **$0,10** (incluso nella quota `agy`) | `agy /usage`: `Claude and GPT models` (`Weekly Limit` + `Five Hour Limit`) | **`2,00`** (`4 pt` 5h / `2 pt` settimana in **T268**) | No | **Provato in T268 (1 run di misura, 04/11/2026)**: `SUCCESS` in `17,01 s` (CLI `19,33 s`), `Weekly` `93 % → 91 %` (**`-2 pt`**), `Five Hour` `92 % → 88 %` (**`-4 pt`**); `agy models` e `agy -p /usage`; [Anthropic Claude Sonnet 5.5](https://www.anthropic.com/claude-sonnet-5-5) |
 | **Gemini 4 Hydrogen** (via `agy`) | `agy`: `gemini-4-hydrogen-high` (anche `-low`, `-medium`, `-xhigh`) | 12/11/2026 | `non pubblicato` nell'annuncio | `non pubblicato` nell'annuncio | `agy /usage`: nessun contatore suo; in `config.json` `^Gemini Models$` (**dedotto, non misurato**: sezione 1.3) | `3,3` in `config.json`, **provvisorio**: è il rapporto misurato del contatore `Gemini Models` | No | **Micro-prove in T360 (2 run, 13/11/2026)**: `SUCCESS` su `-high` e `-xhigh`, 0 punti su ogni contatore; [Gemini 4 Hydrogen and Orchestrator](https://antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity/) (12/11/2026); `agy models` |
+| **Gemini 4 Neon** (via `agy`) | `agy`: `gemini-4-neon-high` (anche `-low`, `-medium`, `-xhigh`) | 18/11/2026 | **1M** / `non pubblicato` | API a pagamento: Input **$3,00** · Output **$15,00** · Cache read **$0,15** (annuncio) | `agy /usage`: nessun contatore suo; pesa su `Gemini Models` (**misurato in T465**: 5 ore -1 pt a corsa breve, settimana 0) | `3,3` in `config.json`, **provvisorio**: quello del contatore | No | **Micro-prove e una prova di qualità in T465 (21/11/2026)**, sezione 1.4; [Introducing Gemini 4 Neon](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/) (18/11/2026) |
 | **Orchestrator (Argon)** (via `agy`) | `agy`: `gemini-pro-orchestrator-g1-pro` (nessun livello: «not adjustable») | 12/11/2026 | `non pubblicato` (commuta tra Argon, 1M, e Hydrogen) | `non pubblicato` nell'annuncio | `agy /usage`: nessun contatore suo; in `config.json` `^(Gemini Models\|Gemini 4 Argon)$`, i due (**prudente, non misurato**: sezione 1.3) | `1` in `config.json`, **provvisorio** (la settimana che decide è quella di Argon, le 5 ore quelle di `Gemini Models`) | No | **Micro-prove in T360 (2 run, 13/11/2026)**: `SUCCESS`, 0 punti su ogni contatore, contro **-1** di Argon da solo sullo stesso compito; [Gemini 4 Hydrogen and Orchestrator](https://antigravity.google/blog/gemini-4-hydrogen-in-google-antigravity/) (12/11/2026) |
 | **GPT-OSS 120B** (via `agy`) | `agy`: `gpt-oss-120b-medium` | 05/08/2025 | 128k / 128k | Pesi aperti Apache 2.0 (117B MoE, 5,1B attivi); API MaaS / OpenRouter: Input **$0,03–$0,15** · Output **$0,15–$0,60** | `agy /usage`: `Claude and GPT models` (`Weekly Limit` + `Five Hour Limit`) | **`0 / 0`** (`< 1 pt` su entrambi i contatori in **T268**: `0 pt` 5h / `0 pt` settimana) | No | **Provato in T268 (1 run di misura, 04/11/2026)**: `SUCCESS` in `25,47 s` (CLI `27,94 s`, con imprecisione sul punto 5), `Weekly` `91 % → 91 %` (**`0 pt`**), `Five Hour` `88 % → 88 %` (**`0 pt`**); [OpenAI GPT-OSS 120B](https://openai.com/index/gpt-oss-120b/) (05/08/2025); `agy models` |
 
@@ -77,6 +82,51 @@
 - **Su quale contatore pesano: non misurato.** I contatori hanno la risoluzione di un punto e una corsa di ~30k token non muove `Gemini Models`, né la settimana né le 5 ore. La corsa 4 dice che una sola corsa di Argon puro ne muove uno sul suo contatore; le due dell'Orchestrator, con gli stessi token, nessuno. È coerente con un Orchestrator che spende **meno** quota di Argon di quanto spende Argon (e con il «24% less quota» dell'annuncio), non lo misura: l'arrotondamento può nascondere fino a un punto.
 - **La scelta in `config.json`, finché i primi task veri non misurano**: `hydrogen` su `^Gemini Models$` (l'unico gruppo di Antigravity per i modelli Gemini che non sono Argon, e le corse 1 e 2 non hanno toccato Argon), `ratioSessioneSettimana` 3,3, quello misurato di quel contatore; `orchestrator` su `Gemini Models` **e** `Gemini 4 Argon` insieme, la scelta prudente: la settimana che decide è la più bassa (oggi Argon), le 5 ore quelle di `Gemini Models`, e un contatore vuoto ferma il provider. Il campo `sforzo` e le colonne `prima`/`dopo` di `consumi.jsonl` daranno i numeri veri.
 - **Il tempo**: Hydrogen ha fatto il compito più in fretta di Argon (26-30 s contro 37 s); l'Orchestrator una volta in 58 s, una in 31 s.
+
+### 1.4 Gemini 4 Neon: l'annuncio e le micro-prove di T465 (21/11/2026)
+
+**L'annuncio** ([«Introducing Gemini 4 Neon»](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/), 18/11/2026), riassunto dall'autore nel task:
+
+- id `gemini-4-neon`, quattro livelli di ragionamento (`high` predefinito, `xhigh` il massimo), contesto **1M**;
+- API a pagamento **3 $/M** in ingresso, **0,15 $/M** in cache, **15 $/M** in uscita; in Antigravity per Google AI Pro e Ultra;
+- **58,6** (1°) sul *Coding Agent Index* di Artificial Analysis, **65,2 %** su *Terminal-Bench 4.1* (Hydrogen 57 %, sezione 1.3), **-32 %** di costo a task rispetto a Gemini 4 Carbon;
+- **non dice**: quote per piano né contatori di Antigravity, latenza, uscita massima, schema JSON, immagini via API, un confronto con Opus 5.5. «Meglio di Opus 5.5» non è nell'annuncio: la prova di qualità sotto è la sola misura nostra.
+
+**Le micro-prove** (come T268 e T360): lo stesso compito in sola lettura (leggere `src/kernel/paths.ts` e `tests/sicurezza/percorsi.test.ts`, lanciare `npx vitest run tests/sicurezza/percorsi.test.ts`, riassumere in 5 righe), `agy --output-format json --dangerously-skip-permissions --model <modello> -p "<compito>"`, `agy -p /usage` prima e 20 s dopo, nessun altro task `agy` in corso, ogni contatore appena rinnovato (100 %). Ogni corsa ha passato i 184 test e chiuso con `ESITO: fatto`, nessun file toccato.
+
+| # | Modello | Durata (interna / CLI) | Token (in / out / ragionamento / cache letta) | `Gemini Models` sett. · 5h | `Claude and GPT models` | `Gemini 4 Argon` sett. |
+|---|---|---|---|---|---|---|
+| 1 | `gemini-4-neon-high` | 36,08 s / 39,10 s | 29.766 / 1.689 / 1.118 / 45.294 | 100 → 100 · **100 → 99** | 100 → 100 | 100 → 100 |
+| 2 | `gemini-4-neon-xhigh` | 52,01 s / 55,01 s | 30.177 / 3.000 / 2.367 / 45.429 | 100 → 100 · 99 → 99 | 100 → 100 | 100 → 100 |
+| 3 | `gemini-pro-orchestrator-neon` | 47,87 s / 50,50 s | 28.446 / 3.344 / 2.683 / 21.176 | 100 → 100 · **99 → 98** | 100 → 100 | 100 → 100 |
+
+- **Neon pesa su `Gemini Models`**, non su `Gemini 4 Argon`: la prima corsa ha tolto un punto alle 5 ore, dove le corse di Hydrogen con gli stessi token (T360) non ne toglievano nessuno. Con la risoluzione di un punto è un ordine di grandezza, non un rapporto: Neon costa a token **più** di Hydrogen sullo stesso contatore, coerente col listino (3/15 $ contro 1,5/7,5 $). La settimana non si è mossa.
+- **L'Orchestrator (Neon)** pesa anch'esso su `Gemini Models` (e non su Argon); con 3.344 token in uscita ha tolto un punto. Non entra nella pipeline con questo task: non era chiesto, e senza un contatore di Argon in gioco è un candidato per risparmiare la settimana di Argon (un task a parte, come T360 per l'Orchestrator (Argon)).
+- `-xhigh` ha ragionato il doppio di `-high` (2.367 token contro 1.118) e impiegato 16 s in più sullo stesso compito.
+
+### 1.5 La prova di qualità di Neon contro Opus 5.5 (T465, 21/11/2026)
+
+**Il compito**: **T423** («la coda degli abbonamenti scambia per un limite la risposta del modello»), chiuso da Opus 5.5 il 18/11 (`3a8ac065`, sforzo `medium`): un task vero di programmazione su più file (`pipeline.mjs`, `servi.ts`, `orchestra.mjs`, i banchi di `lab/`) con test offline. Neon (`gemini-4-neon-high`) l'ha rifatto dallo stesso commit di partenza (`e33443e8`), con lo stesso blocco del backlog e il prompt della pipeline, in un worktree usa e getta fuori dal repository, senza integrare; l'unica differenza: niente suite intera, solo `tests/pipeline.test.ts` e `tests/abbonamenti.test.ts`. La patch di Neon è in [`prove/T465-neon-T423.patch`](prove/T465-neon-T423.patch).
+
+| | Opus 5.5 (`claude`, `medium`) | Neon (`agy`, `-high`) |
+|---|---|---|
+| Esito | `fatto`, typecheck verde; 3 fallimenti già presenti nel base segnalati come tali | `fatto`, typecheck e build verdi nei turni; **gli stessi 3** fallimenti, segnalati come tali con la stessa causa (`orchestrator.orchestrabile` in `config.json`) |
+| Tempo | 13 min | **10 min** (609 s) |
+| Contatori | `Current week` 23 → 22 (**-1**), `Current session` 93 → 90 (**-3**) | `Gemini Models` settimana 100 → 98 (**-2**), 5 ore 98 → 93 (**-5**) |
+| Costo | **1,60 $** (detto dalla CLI) | **1,57 $** a listino API (176 k in, 50 k out di cui 39 k di ragionamento, 1,95 M in cache; dentro l'abbonamento Pro) |
+| Diff | 7 file, +116 −10; `pipeline.mjs` +41 (`cliSaid`, una funzione) | 7 file, +359 −17; `pipeline.mjs` +172 (`cliLimitText` e cinque funzioni d'appoggio) |
+| I test dell'altro | — | i test di Opus (`cliSaid` rinominato) passano sul codice di Neon: 181 su 184, i 3 del base; i test di Neon su `servi` passano sul codice di Opus (18 su 18) |
+
+- **La sostanza è la stessa**: lo stesso punto (`usageLimit` legge ciò che la CLI dice, mai la risposta), gli stessi chiamanti (coda, `finish`, orchestratore, banchi), gli stessi casi (`result` di errore, errore di agy, `rate_limit_event` che rifiuta, eventi di sistema dopo `init`). I due insiemi di test si passano a vicenda.
+- **La forma no**: Neon ha scritto quattro volte il codice, più difensivo (JSON a più righe ricomposto a mano, chiavi cercate in cinque nomi), e ha allargato il compito senza che fosse chiesto: `readOutput` legge anche `status: 'ERROR'`, `finish` tratta da riuscito un processo chiuso senza codice ma con un `ESITO`, l'orchestratore tiene separati stdout e stderr. Sono cambi ragionevoli, ma sono comportamento nuovo nella pipeline che il task non diceva: da guardare in revisione, come un collega bravo che non sa fermarsi.
+- **Il prezzo in quota**: un task così toglie a Neon 5 punti delle 5 ore e 2 della settimana di `Gemini Models`, contro 3 e 1 a Opus sui contatori di Claude. Con `ratioSessioneSettimana` 3,3 il conto torna (5/2 = 2,5, con la risoluzione di un punto).
+- **Il verdetto, su una prova sola**: per un task chiuso di programmazione Neon arriva dove arriva Opus, un po' più in fretta, allo stesso costo a listino e **fuori dall'abbonamento di Claude**. «Meglio di Opus 5.5» non è misurato: è pari sul risultato e peggiore sulla misura del diff. Basta per metterlo in prova (ADR-0237), non per spostarvi il kernel o la sicurezza.
+
+**Il gioco: se e dove servirebbe al Concilio (solo analisi, nessun codice)**
+
+- **Il prezzo**: Neon costa a token 3/15 $ (cache 0,15), Argon 2/10 $ fino al 30/11 e **4/20 $ dall'1/12** (`src/kernel/ai/prices.ts`), 3.8 Flash 0,75/3,75 $ fino al 31/12. Dall'1/12 Neon costa **un quarto meno di Argon** a token; resta **quattro volte** 3.8 Flash.
+- **Dove sì, da provare**: lo **Scultore delle strutture sulla via di Google** (`DEFAULT_SCULPTORS.structure`, oggi Argon, che dall'1/12 raddoppia; su OpenRouter le strutture vanno già a Opus 5.5). Il banco c'è (`lab/scripts/scultore-gemini.ts --modelli gemini-4-neon`, T391): Argon riusciva 6 su 8 a 0,37 $ per riuscita (0,74 $ dall'1/12), Carbon 4 su 12, Hydrogen 4 su 12. Se Neon riuscisse almeno come Argon, a parità di token costerebbe circa **0,55 $** per riuscita dall'1/12. Stima del giro (12 strutture, Grande ed Enorme, come T391): **3-5 $** sulla chiave di Google, un task `claude` da ~3 %. Da sapere prima: se la Gemini API dà `gemini-4-neon` con lo schema JSON (l'annuncio non lo dice; lo Scultore delle strutture scrive XML e non ne ha bisogno, il resto del Concilio sì) e la latenza contro i 120 s di `ai.timeout` (Carbon li passava una chiamata su nove).
+- **Dove no**: Narratore, Cartografo, Attore e le cose semplici restano su 3.8 Flash e 3.1 Flash-Lite (quattro volte meno, e lì non serve un modello da agente di programmazione); l'Artista resta su 3.5 Flash finché non si sa se Neon prende immagini via API (l'annuncio non lo dice); le figure restano su 3.8 Flash. Neon non è nell'elenco di OpenRouter (`src/kernel/ai/openrouter.ts`): sulla via di OpenRouter non cambierebbe niente finché non c'è il suo id.
 
 ---
 
@@ -206,6 +256,23 @@ Entrambi **in prova**, come i provider di T255: tetto 1, mai provati su un task 
 - **La quota.** `hydrogen` spende `Gemini Models`, come `gemini` (dedotto, 1.3): con Hydrogen la stessa quota fa lavoro di un modello più forte di Flash, ma quanto di più costa per task non è misurato. `orchestrator` sta sotto le due (la settimana di Argon e le 5 ore di `Gemini Models`): per i task piccoli che oggi vanno su `argon` (D31) è il candidato per **risparmiare la settimana di Argon**, che è il contatore più stretto.
 - **La stima** si scrive come per `gemini` (`hydrogen`) e come per `argon` (`orchestrator`), finché `consumi.jsonl` non dice di più: le prime due o tre righe di ognuno si leggono prima di dargli task più grandi.
 
+#### Gemini 4 Neon (T465): dove provarlo
+
+**In prova** come Hydrogen: tetto 1, senza browser, non orchestra se l'autore non lo spunta. Opus resta il predefinito. Le benchmark sono quelle dell'annuncio (sezione 1.4); la misura nostra è una prova sola (sezione 1.5).
+
+| Tipo di task | `neon` (Gemini 4 Neon) | Al posto di | Motivo |
+|---|---|---|---|
+| **1. Pianificazione e orchestrazione** | merge, integrazioni e script di più passi senza browser | `argon` (task piccoli) | pesa su `Gemini Models`, non sulla settimana di Argon, il contatore più stretto; contesto 1M come Argon |
+| **2. Architettura e kernel** | no | — | una prova sola; il kernel è il pavimento: resta Opus |
+| **3. Programmazione** | sforzo `high` o `extra` (`-xhigh`): la programmazione di più file senza browser, quando la finestra delle 5 ore di `claude` è carica | `claude` (solo in quel caso), `argon`, `hydrogen` per i task più impegnativi | 1° sul *Coding Agent Index* (58,6) e **65,2 %** su *Terminal-Bench 4.1* contro 57 % di Hydrogen; la prova di 1.5 |
+| **4. Sicurezza** | no | — | nessuna benchmark e nessuna misura |
+| **5. Programmi MarkovJunior** | no nella pipeline | — | nessuna misura; per lo Scultore del gioco vedi 1.5, la proposta |
+| **6. Documenti** | no: `hydrogen` o `gemini` bastano | — | costa di più sullo stesso contatore |
+| **7. UI** | solo senza verifica nel browser | — | `agy` non ha `--chrome` (T87) |
+| **8. Test semplici** | no: `hydrogen` basta | — | stesso contatore, Hydrogen costa la metà a token |
+
+- **La quota.** Neon spende `Gemini Models` come `gemini` e `hydrogen` (misurato, 1.4), più di Hydrogen a parità di token: tra i tre provider di quel contatore è quello per i task più difficili, non il predefinito. Contro `argon` vince sulla quota (non tocca la sua settimana); contro Opus non costa niente dell'abbonamento di Claude.
+- **La stima** come per `gemini`, alzata a giudizio (più ragionamento a token): le prime righe di `consumi.jsonl` si leggono prima di dargli task più grandi.
 ### 4.3 Correzioni ai parametri di stima e alle regole per T255
 
 - **`argon` (`gemini-4-argon-high`) — da «8×» a ~3,9× medio (1,1× negli ultimi task), con incertezza dichiarata**:
@@ -220,7 +287,7 @@ Entrambi **in prova**, come i provider di T255: tetto 1, mai provati su un task 
 
 Decisione dell'autore del 05/11: **la qualità conta più del tempo: tanti task `high`, una parte `extra`, `max` qua e là**; `medium` e `low` non sono il predefinito. La sua impressione è che con `max` i risultati siano eccezionali: è un'osservazione sul campo, non ancora una misura nostra.
 
-| Sforzo | Per cosa | Alla CLI `claude` | Su `agy`: Hydrogen | Su `agy`: Flash, Argon, Opus e Sonnet | Su `agy`: Orchestrator |
+| Sforzo | Per cosa | Alla CLI `claude` | Su `agy`: Hydrogen e Neon | Su `agy`: Flash, Argon, Opus e Sonnet | Su `agy`: Orchestrator |
 |---|---|---|---|---|---|
 | `max` | architettura, kernel, creazione di programmi MarkovJunior, universi, task complessi | `--effort max` | `-xhigh` | `-high` | nessun suffisso |
 | `extra` (o `xhigh`) | task impegnativi | `--effort xhigh` | `-xhigh` | `-high` | nessun suffisso |
@@ -238,6 +305,7 @@ Decisione dell'autore del 05/11: **la qualità conta più del tempo: tanti task 
 - `agy-opus`, `agy-sonnet` su `agy`, contatore `Claude and GPT models`: `ratioSessioneSettimana` **2, misurato in T268** su una prova breve per modello.
 - Tutti a tetto 1, nessuno orchestrabile, in prova; Opus resta il predefinito. `gpt-oss-120b-medium` non entra.
 - **Con T360** (ADR-0187): `hydrogen` (`gemini-4-hydrogen-high`, `livelli` `low, medium, high, xhigh`) su `^Gemini Models$`, con il conto di `gemini` (`stessoContoDi`), `ratioSessioneSettimana` **3,3, provvisorio**: è quello del contatore; `orchestrator` (`gemini-pro-orchestrator-g1-pro`, senza `livelli`) su `^(Gemini Models|Gemini 4 Argon)$`, con il conto di `argon`, `ratioSessioneSettimana` **1, provvisorio**. Entrambi nei `disponibili` di Pro e Ultra, `limiti.modello` 1 (`limiti.provider.agy` resta 1), `browser: false`, `orchestrabile: false`; in `orchestra.ordine` l'Orchestrator prima di Argon e Hydrogen prima di Gemini, così contano solo se l'autore li spunta nella pagina web; `orchestra.finestra` 200 000 per entrambi, prudente: la finestra di contesto di Hydrogen non è pubblicata. Ogni provider `agy` dice i suoi `livelli`.
+- **Con T465** (ADR-0237): `neon` (`gemini-4-neon-high`, `livelli` `low, medium, high, xhigh`) su `^Gemini Models$` (misurato, 1.4), con il conto di `gemini` (e quindi di `hydrogen`), `ratioSessioneSettimana` **3,3, provvisorio**: quello del contatore. Nei `disponibili` di Pro e Ultra, `limiti.modello` 1 (`limiti.provider.agy` resta 1), `browser: false`, `orchestrabile: false`; in `orchestra.ordine` dopo l'Orchestrator (Argon) e prima di Argon, `orchestra.finestra` 1 000 000 (l'annuncio dice 1M). L'Orchestrator (Neon) non entra.
 
 ### 4.6 Argon sul piano Pro (T305)
 
