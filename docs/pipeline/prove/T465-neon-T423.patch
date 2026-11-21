@@ -1,0 +1,530 @@
+From 1b09b21289570c37389abcded6603e062e84256a Mon Sep 17 00:00:00 2001
+From: lorenzoviva <lorenzo.vaccaro@hotmail.com>
+Date: Sat, 21 Nov 2026 17:42:13 +0100
+Subject: [PATCH] T423: cerca i limiti abbonamento solo nei messaggi della CLI,
+ mai nella risposta del modello
+
+---
+ lab/banco/agy.ts             |   4 +-
+ lab/banco/claude.ts          |   4 +-
+ tests/abbonamenti.test.ts    | 121 ++++++++++++++++++++++++
+ tests/pipeline.test.ts       |  45 +++++++++
+ tools/abbonamenti/servi.ts   |   6 +-
+ tools/pipeline/orchestra.mjs |  20 ++--
+ tools/pipeline/pipeline.mjs  | 176 ++++++++++++++++++++++++++++++++++-
+ 7 files changed, 359 insertions(+), 17 deletions(-)
+
+diff --git a/lab/banco/agy.ts b/lab/banco/agy.ts
+index 2f07f473..9c76a107 100644
+--- a/lab/banco/agy.ts
++++ b/lab/banco/agy.ts
+@@ -9,7 +9,7 @@ import path from 'node:path';
+ import { costOf } from '../../src/kernel/ai/prices';
+ import { cliEnv, runCli } from '../../tools/abbonamenti/servi';
+ // @ts-expect-error pipeline.mjs is untyped plain JS
+-import { usageLimit } from '../../tools/pipeline/pipeline.mjs';
++import { cliLimitText, usageLimit } from '../../tools/pipeline/pipeline.mjs';
+ import { LimiteAbbonamento, type Risposta, type Token } from './claude';
+ 
+ /** Characters of a command line on Windows, with room for the rest of the arguments. */
+@@ -59,7 +59,7 @@ export async function chiediAgy(system: string, bersaglio: string, opts: { model
+   await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+   const letto = leggiAgy(run.stdout);
+   if (!letto.testo) {
+-    const reset = usageLimit(run.combined);
++    const reset = usageLimit(cliLimitText(run));
+     if (reset) throw new LimiteAbbonamento(reset);
+   }
+   if (run.code !== 0 || letto.errore || letto.testo === undefined) throw new Error(`errore di agy: ${letto.errore ?? (run.stderr.trim().slice(0, 400) || `codice ${run.code}`)}`);
+diff --git a/lab/banco/claude.ts b/lab/banco/claude.ts
+index 32744365..600dcd41 100644
+--- a/lab/banco/claude.ts
++++ b/lab/banco/claude.ts
+@@ -6,7 +6,7 @@ import os from 'node:os';
+ import path from 'node:path';
+ import { cliEnv, IsolationCheck, ISOLATION_ARGS, runCli } from '../../tools/abbonamenti/servi';
+ // @ts-expect-error pipeline.mjs is untyped plain JS
+-import { usageLimit } from '../../tools/pipeline/pipeline.mjs';
++import { cliLimitText, usageLimit } from '../../tools/pipeline/pipeline.mjs';
+ 
+ export interface Token {
+   /** Input not read from the cache. */
+@@ -68,7 +68,7 @@ export async function chiedi(system: string, bersaglio: string, opts: { modello?
+   const run = await runCli({ cmd: 'claude', args, stdin: bersaglio, cwd: vuota, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 25 * 60_000, onLine: (l) => check.see(l) });
+   await fs.rm(vuota, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
+   if (check.breach) throw new Error(`isolamento della CLI non confermato: ${check.breach}`);
+-  const reset = usageLimit(run.combined);
++  const reset = usageLimit(cliLimitText(run));
+   if (reset) throw new LimiteAbbonamento(reset);
+   const letto = leggiEventi(run.stdout);
+   if (run.code === 0 && !check.confirmed) throw new Error('isolamento della CLI non confermato: nessun evento di avvio');
+diff --git a/tests/abbonamenti.test.ts b/tests/abbonamenti.test.ts
+index 30e16336..d6c17fe5 100644
+--- a/tests/abbonamenti.test.ts
++++ b/tests/abbonamenti.test.ts
+@@ -256,6 +256,127 @@ describe('servi (T68b) — esecuzione con una CLI finta', () => {
+     expect(looked.errore).toMatch(/limite abbonamento claude raggiunto/);
+   });
+ 
++  it('una risposta che contiene «quota», «rate limit» e «429» (e 429 nei metadati JSON) non viene scambiata per un limite (T423)', async () => {
++    const d = dir();
++    const scriptPath = path.join(d, 'mock-quota-answer.mjs');
++    const xml = '<model><!-- mensola a quota 429, rate limit e usage limit nel commento --></model>';
++    await fs.writeFile(
++      scriptPath,
++      `
++      console.log(JSON.stringify({ type: 'system', subtype: 'init', cwd: '/tmp/quota-429', session_id: 's-429-a', tools: [], mcp_servers: [], skills: [], slash_commands: [], plugins: [{ path: 'builtin' }] }));
++      console.log(JSON.stringify({ type: 'rate_limit_event', rate_limit_info: { status: 'allowed', resetsAt: 1761735600 } }));
++      console.log(JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: ${JSON.stringify(xml)} }] } }));
++      console.log(JSON.stringify({
++        type: 'result',
++        subtype: 'success',
++        is_error: false,
++        duration_ms: 429,
++        total_cost_usd: 0.429,
++        result: ${JSON.stringify(xml)},
++        usage: { input_tokens: 429, output_tokens: 429 },
++      }));
++      `,
++      'utf8',
++    );
++
++    const id = await enqueue(d, {
++      provider: 'claude',
++      agent: 'sculptor',
++      task: 'model.sculpt',
++      system: 'sys',
++      prompt: 'Scolpisci una credenza',
++    });
++
++    const res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
++    expect(res.served).toBe(true);
++    expect(res.status).toBe('ok');
++    expect(res.text).toBe(xml);
++    expect((await look(d, id)).stato).toBe('fatta');
++  });
++
++  it('rileva un limite vero detto dalla CLI in un evento result con errore, in un messaggio di sistema o in rate_limit_event respinto (T423)', async () => {
++    const cases: Array<{ name: string; body: string; expectedEpoch?: number }> = [
++      {
++        name: 'result con is_error: true (anche con codice 0)',
++        body: `
++          ${INIT}
++          console.log(JSON.stringify({ type: 'result', subtype: 'error', is_error: true, result: "You've hit your 5-hour limit · resets 8am (Europe/Rome)" }));
++        `,
++      },
++      {
++        name: 'messaggio di sistema della CLI senza risposta',
++        body: `
++          ${INIT}
++          console.log(JSON.stringify({ type: 'system', subtype: 'error', message: 'Claude AI usage limit reached|1761735600' }));
++          process.exit(1);
++        `,
++        expectedEpoch: 1761735600,
++      },
++      {
++        name: 'rate_limit_event con status rejected',
++        body: `
++          ${INIT}
++          console.log(JSON.stringify({ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: 1761735600 } }));
++          process.exit(1);
++        `,
++        expectedEpoch: 1761735600,
++      },
++    ];
++
++    for (const c of cases) {
++      const d = dir();
++      const scriptPath = path.join(d, 'mock-cli-limit.mjs');
++      await fs.writeFile(scriptPath, c.body, 'utf8');
++      await enqueue(d, {
++        provider: 'claude',
++        agent: 'sculptor',
++        task: 'model.sculpt',
++        system: '',
++        prompt: 'Credenza',
++      });
++      const res = await serveOne(d, 'claude', { cmd: `node ${scriptPath}` });
++      expect(res.status, c.name).toBe('limit');
++      expect(res.reset, c.name).toBeInstanceOf(Date);
++      if (c.expectedEpoch) expect(res.reset!.getTime(), c.name).toBe(c.expectedEpoch * 1000);
++      expect(res.errore, c.name).toMatch(/limite abbonamento claude raggiunto/);
++    }
++  });
++
++  it('un errore non di limite con 429 nei metadati resta un errore normale, non un limite; un retry transitorio prima di un ok resta ok (T423)', async () => {
++    const d1 = dir();
++    const errScript = path.join(d1, 'mock-nonlimit-error.mjs');
++    await fs.writeFile(
++      errScript,
++      `
++      ${INIT}
++      console.log(JSON.stringify({ type: 'result', subtype: 'error', is_error: true, duration_ms: 429, usage: { input_tokens: 429 }, result: 'Modello non disponibile' }));
++      process.exit(1);
++      `,
++      'utf8',
++    );
++    await enqueue(d1, { provider: 'claude', agent: 'sculptor', task: 'model.sculpt', system: '', prompt: 'Credenza' });
++    const errRes = await serveOne(d1, 'claude', { cmd: `node ${errScript}` });
++    expect(errRes.status).toBe('error');
++    expect(errRes.errore).toContain('Modello non disponibile');
++
++    const d2 = dir();
++    const retryScript = path.join(d2, 'mock-transient-retry.mjs');
++    await fs.writeFile(
++      retryScript,
++      `
++      ${INIT}
++      console.error('HTTP 429 rate limit, retrying...');
++      console.log(JSON.stringify({ type: 'system', subtype: 'api_retry', message: 'rate limit, retry 1' }));
++      console.log(JSON.stringify({ type: 'result', subtype: 'success', is_error: false, result: '<model/>', usage: { input_tokens: 10, output_tokens: 5 } }));
++      `,
++      'utf8',
++    );
++    await enqueue(d2, { provider: 'claude', agent: 'sculptor', task: 'model.sculpt', system: '', prompt: 'Credenza' });
++    const okRes = await serveOne(d2, 'claude', { cmd: `node ${retryScript}` });
++    expect(okRes.status).toBe('ok');
++    expect(okRes.text).toBe('<model/>');
++  });
++
+   it('funziona end-to-end con QueueAiModels', async () => {
+     const d = dir();
+     const scriptPath = path.join(d, 'mock-server.mjs');
+diff --git a/tests/pipeline.test.ts b/tests/pipeline.test.ts
+index f1957849..cfc73441 100644
+--- a/tests/pipeline.test.ts
++++ b/tests/pipeline.test.ts
+@@ -15,6 +15,7 @@ type Pipeline = {
+   parseUsage(provider: string, text: string): Counter[] | undefined;
+   canOrchestrate(provider: string, config?: unknown): boolean;
+   usageLimit(output: string, from?: Date): Date | undefined;
++  cliLimitText(input: string | { stdout?: string; stderr?: string; code?: number | null }): string;
+   readOutput(text: string): { session?: string; cost?: number; error: boolean; result: string; outcome?: string; browser?: string };
+   capOf(o: { left: number; session?: number; provider: string; orchestrator?: string; slot?: number; tetto?: number; threshold: number; urgent?: boolean; resuming?: boolean }): number;
+   ceilingOf(provider: string, config: unknown): number;
+@@ -318,6 +319,50 @@ describe('usageLimit', () => {
+   });
+ });
+ 
++describe('cliLimitText (T423)', () => {
++  it('ignora il testo della risposta e i metadati JSON anche se contengono «quota», «rate limit» o «429»', () => {
++    const log = [
++      JSON.stringify({ type: 'system', subtype: 'init', cwd: '/tmp/quota-429', session_id: 's-429' }),
++      JSON.stringify({ type: 'rate_limit_event', rate_limit_info: { status: 'allowed', resetsAt: 1761735600 } }),
++      JSON.stringify({ type: 'assistant', message: { content: [{ type: 'text', text: 'La quota è 429, rate limit nel testo.' }] } }),
++      JSON.stringify({ type: 'result', subtype: 'success', is_error: false, duration_ms: 429, total_cost_usd: 0.429, result: 'quota 429 rate limit usage limit', usage: { output_tokens: 429 } }),
++    ].join('\n');
++    expect(P.cliLimitText(log)).toBe('');
++    expect(P.usageLimit(P.cliLimitText({ stdout: log, stderr: '', code: 0 }))).toBeUndefined();
++    // Anche con codice non zero o null (processo seguito dopo riavvio), la risposta non è mai un limite.
++    expect(P.usageLimit(P.cliLimitText({ stdout: log, stderr: '', code: 1 }))).toBeUndefined();
++    expect(P.usageLimit(P.cliLimitText({ stdout: log, stderr: '', code: null }))).toBeUndefined();
++    // Stesso comportamento per il formato JSON di agy e per JSON indentato su più righe.
++    const agyOk = JSON.stringify({ status: 'SUCCESS', response: 'quota 429 rate limit', usage: { output_tokens: 429 } }, null, 2);
++    expect(P.usageLimit(P.cliLimitText(agyOk))).toBeUndefined();
++  });
++
++  it('legge il limite solo da stderr, eventi result/status di errore, messaggi di sistema e rate_limit_event respinti', () => {
++    const from = new Date(2026, 9, 29, 20, 15);
++    const errResult = JSON.stringify({ type: 'result', is_error: true, duration_ms: 429, result: "You've hit your 5-hour limit · resets 10pm (Europe/Rome)" });
++    expect(P.usageLimit(P.cliLimitText({ stdout: errResult, stderr: '', code: 0 }), from)).toEqual(new Date(2026, 9, 29, 22, 1));
++
++    const agyErr = JSON.stringify({ status: 'ERROR', error: 'Error 429: RESOURCE_EXHAUSTED' });
++    expect(P.usageLimit(P.cliLimitText(agyErr), from)).toBeDefined();
++    expect(P.readOutput(agyErr).error).toBe(true);
++
++    const sysErr = JSON.stringify({ type: 'system', subtype: 'error', message: 'Claude AI usage limit reached|1761735600' });
++    expect(P.usageLimit(P.cliLimitText({ stdout: sysErr, stderr: '', code: 1 }))).toEqual(new Date(1761735600 * 1000));
++
++    const rejected = JSON.stringify({ type: 'rate_limit_event', rate_limit_info: { status: 'rejected', resetsAt: 1761735600 } });
++    expect(P.usageLimit(P.cliLimitText({ stdout: rejected, stderr: '', code: 1 }))).toEqual(new Date(1761735600 * 1000));
++
++    // Un errore di altro tipo con 429 nei campi numerici non è un limite.
++    const otherErr = JSON.stringify({ type: 'result', is_error: true, duration_ms: 429, usage: { input_tokens: 429 }, result: 'Reached max turns' });
++    expect(P.usageLimit(P.cliLimitText(otherErr))).toBeUndefined();
++
++    // Un avviso su stderr prima di un risultato riuscito (codice 0) non ferma la chiamata.
++    const okResult = JSON.stringify({ type: 'result', is_error: false, result: 'tutto ok' });
++    expect(P.usageLimit(P.cliLimitText({ stdout: okResult, stderr: 'HTTP 429 rate limit, retrying...', code: 0 }))).toBeUndefined();
++    expect(P.usageLimit(P.cliLimitText({ stdout: '', stderr: 'HTTP 429 Too Many Requests', code: 1 }))).toBeDefined();
++  });
++});
++
+ describe('Fable (ADR-0115)', () => {
+   const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+   const reads = (p: string, name: string) => new RegExp(config.providers[p].contatori).test(name);
+diff --git a/tools/abbonamenti/servi.ts b/tools/abbonamenti/servi.ts
+index 9c3876fd..a5115f7e 100644
+--- a/tools/abbonamenti/servi.ts
++++ b/tools/abbonamenti/servi.ts
+@@ -14,7 +14,7 @@ import { answer, beat, type QueuedRequest } from '../../server/subscriptionQueue
+ import { parseJson } from '../../src/kernel/ai/models';
+ import type { Provider, QueuedAnswer } from '../../src/kernel/ai/subscription';
+ // @ts-expect-error pipeline.mjs is untyped plain JS
+-import { usageLimit } from '../pipeline/pipeline.mjs';
++import { cliLimitText, usageLimit } from '../pipeline/pipeline.mjs';
+ import { serverPath } from '../../server/folders';
+ 
+ export type SubscriptionProvider = Exclude<Provider, 'api'>;
+@@ -353,8 +353,8 @@ export async function runIsolated(
+   // 0. It had something to act with: no answer from that run, and no more runs.
+   if (check.breach) return { status: 'isolation', errore: `isolamento della CLI non confermato: ${check.breach}` };
+ 
+-  // 1. Subscription usage limit check
+-  const reset = usageLimit(run.combined);
++  // 1. Subscription usage limit check: only in what the CLI itself reports (stderr, error result, system messages), never the model's answer (T423).
++  const reset = usageLimit(cliLimitText(run));
+   if (reset) return { status: 'limit', errore: `limite abbonamento ${provider} raggiunto, reset alle ${reset.toISOString()}`, reset };
+ 
+   // 2. Process failure, or a run that never said what it had
+diff --git a/tools/pipeline/orchestra.mjs b/tools/pipeline/orchestra.mjs
+index d98bb6f8..2a863505 100644
+--- a/tools/pipeline/orchestra.mjs
++++ b/tools/pipeline/orchestra.mjs
+@@ -11,7 +11,7 @@ import { randomUUID } from 'node:crypto';
+ import fs from 'node:fs';
+ import path from 'node:path';
+ import readline from 'node:readline';
+-import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
++import { bus, BUDGET, canOrchestrate, cliLimitText, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, writeJson } from './pipeline.mjs';
+ 
+ const DIR = path.join(STATE_DIR, 'orchestra');
+ const STATE = path.join(DIR, 'stato.json');
+@@ -219,13 +219,17 @@ function runTurn(provider, sessione, prompt) {
+   const conf = CONFIG.providers[provider];
+   const args = [...conf.args.filter((a) => a !== '--chrome'), ...(sessione ? conf.resume.map((a) => a.replace('{sessione}', sessione)) : []), '-p', prompt];
+   return new Promise((resolve) => {
+-    let text = '';
++    let stdout = '';
++    let stderr = '';
+     const child = spawn(conf.cmd, args, { cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+     turn = child;
+-    child.stdout.on('data', (d) => { text += d; });
+-    child.stderr.on('data', (d) => { text += d; });
+-    child.on('error', (e) => resolve({ code: -1, text: `${text}\n${e.message}` }));
+-    child.on('close', (code) => resolve({ code, text }));
++    child.stdout.on('data', (d) => { stdout += d; });
++    child.stderr.on('data', (d) => { stderr += d; });
++    child.on('error', (e) => {
++      const err = `${stderr}\n${e.message}`.trim();
++      resolve({ code: -1, stdout, stderr: err, text: `${stdout}\n${err}`.trim() });
++    });
++    child.on('close', (code) => resolve({ code, stdout, stderr, text: `${stdout}\n${stderr}`.trim() }));
+   });
+ }
+ 
+@@ -335,8 +339,8 @@ export async function orchestra({ agente, porta } = {}) {
+ 
+         process.stdout.write(`\n· orchestratore (${st.provider}, epoca ${st.epoca}) al lavoro…\n`);
+         const r = await runTurn(st.provider, st.sessione, prompt);
+-        const out = readOutput(r.text);
+-        const limit = usageLimit(out.error || r.code !== 0 ? r.text : '');
++        const out = readOutput(r.stdout || r.text);
++        const limit = usageLimit(out.error || r.code !== 0 ? cliLimitText(r) : '');
+         if (limit) {
+           // Its credits are over: the provider is stopped until it resets, the turn goes to the next one, whole.
+           const b = readJson(BUDGET, {});
+diff --git a/tools/pipeline/pipeline.mjs b/tools/pipeline/pipeline.mjs
+index 5c5a9c4c..06c8f923 100644
+--- a/tools/pipeline/pipeline.mjs
++++ b/tools/pipeline/pipeline.mjs
+@@ -588,6 +588,178 @@ function lastReset(spec, from = new Date()) {
+   return d;
+ }
+ 
++/** Extracts plain diagnostic strings from a CLI error/system field, ignoring numbers and metadata. */
++function diagnosticStrings(value, out) {
++  if (typeof value === 'string') {
++    if (value.trim()) out.push(value);
++  } else if (Array.isArray(value)) {
++    for (const item of value) diagnosticStrings(item, out);
++  } else if (value && typeof value === 'object') {
++    for (const k of ['message', 'error', 'text', 'detail', 'reason']) {
++      if (k in value) diagnosticStrings(value[k], out);
++    }
++  }
++}
++
++/** Whether a parsed CLI JSON object represents an error (not a successful model answer). */
++function isCliErrorObject(obj) {
++  return Boolean(
++    obj.is_error === true ||
++    obj.status === 'ERROR' ||
++    obj.error ||
++    (Array.isArray(obj.errors) && obj.errors.length > 0) ||
++    (typeof obj.subtype === 'string' && obj.subtype.startsWith('error')),
++  );
++}
++
++/** Whether a parsed CLI JSON object represents a non-empty successful answer. */
++function isCliSuccessResult(obj) {
++  if (!obj || typeof obj !== 'object' || isCliErrorObject(obj)) return false;
++  if (obj.type === 'system' || obj.type === 'assistant' || obj.type === 'user' || obj.type === 'stream_event' || obj.type === 'rate_limit_event' || obj.type === 'error') {
++    return false;
++  }
++  const hasAnswer = obj.type === 'result' || 'result' in obj || 'response' in obj || (obj.type === undefined && 'text' in obj);
++  if (!hasAnswer) return false;
++  const text = obj.result ?? obj.response ?? obj.text;
++  return typeof text === 'string' && text.trim().length > 0;
++}
++
++/** Splits CLI output into JSON objects (single JSON, JSON array, NDJSON, or pretty-printed JSON mixed with lines) and non-JSON lines. */
++function parseCliStream(text) {
++  const events = [];
++  const plain = [];
++  const trimmed = String(text ?? '').trim();
++  if (!trimmed) return { events, plain };
++  try {
++    const whole = JSON.parse(trimmed);
++    if (Array.isArray(whole)) {
++      for (const item of whole) {
++        if (item && typeof item === 'object' && !Array.isArray(item)) events.push(item);
++      }
++      return { events, plain };
++    }
++    if (whole && typeof whole === 'object') return { events: [whole], plain };
++  } catch { /* line-by-line */ }
++
++  const lines = trimmed.split('\n');
++  for (let i = 0; i < lines.length; i++) {
++    const line = lines[i].trim();
++    if (!line) continue;
++    try {
++      const v = JSON.parse(line);
++      if (v && typeof v === 'object' && !Array.isArray(v)) {
++        events.push(v);
++        continue;
++      }
++      if (typeof v === 'string') plain.push(v);
++      continue;
++    } catch { /* maybe multi-line pretty-printed JSON, or plain CLI output */ }
++
++    if (line.startsWith('{')) {
++      let acc = line;
++      let parsed;
++      let end = i;
++      for (let j = i + 1; j < lines.length; j++) {
++        acc += `\n${lines[j]}`;
++        if (lines[j].trim().endsWith('}')) {
++          try {
++            const v = JSON.parse(acc);
++            if (v && typeof v === 'object' && !Array.isArray(v)) {
++              parsed = v;
++              end = j;
++              break;
++            }
++          } catch { /* keep reading */ }
++        }
++      }
++      if (parsed) {
++        events.push(parsed);
++        i = end;
++        continue;
++      }
++    }
++    plain.push(line);
++  }
++  return { events, plain };
++}
++
++/** Extracts only CLI-originated diagnostic/error text from one JSON event, never model response content or metadata (T423). */
++function extractEventDiagnostics(obj, out) {
++  if (!obj || typeof obj !== 'object') return;
++  if (obj.type === 'user' || obj.type === 'stream_event') return;
++  if (obj.type === 'assistant') {
++    if (typeof obj.error === 'string' && obj.error.trim()) {
++      out.push(obj.error === 'rate_limit' ? 'rate limit' : obj.error);
++    } else if (obj.error && typeof obj.error === 'object') {
++      diagnosticStrings(obj.error, out);
++    }
++    return;
++  }
++  if (obj.type === 'rate_limit_event') {
++    const info = obj.rate_limit_info;
++    if (info && typeof info === 'object' && info.status === 'rejected') {
++      const reset = Number(info.resetsAt);
++      if (Number.isFinite(reset) && reset > 0) {
++        const epochSec = reset > 1e12 ? Math.round(reset / 1000) : Math.round(reset);
++        out.push(`Claude AI usage limit reached|${epochSec}`);
++      } else {
++        out.push('rate limit');
++      }
++      diagnosticStrings(info.message ?? info.reason, out);
++    }
++    return;
++  }
++  if (obj.type === 'system') {
++    if (obj.subtype === 'init') return;
++    for (const k of ['message', 'error', 'errors', 'text', 'detail', 'reason']) {
++      if (k in obj) diagnosticStrings(obj[k], out);
++    }
++    return;
++  }
++  if (obj.type === 'error') {
++    for (const k of ['error', 'errors', 'message', 'text', 'detail', 'reason']) {
++      if (k in obj) diagnosticStrings(obj[k], out);
++    }
++    return;
++  }
++  if (isCliErrorObject(obj)) {
++    for (const k of ['error', 'errors', 'message', 'detail', 'reason']) {
++      if (k in obj) diagnosticStrings(obj[k], out);
++    }
++    if (obj.is_error === true || obj.status === 'ERROR' || (typeof obj.subtype === 'string' && obj.subtype.startsWith('error'))) {
++      for (const k of ['result', 'response', 'text']) {
++        if (typeof obj[k] === 'string' && obj[k].trim()) out.push(obj[k]);
++      }
++    }
++  }
++}
++
++/**
++ * Collects only the CLI's own diagnostic/error messages (stderr, non-JSON CLI lines, system/error events,
++ * rejected rate-limit events, and `result` events with an error) — never the model's answer nor JSON metadata
++ * such as `duration_ms` or token counts (T423).
++ * Accepts `{ stdout, stderr, code }` or a combined log string. When `code === 0` and the last result is a
++ * non-empty, non-error answer, returns `''` so transient retry notices do not abort a completed run.
++ */
++export function cliLimitText(input) {
++  const isObj = Boolean(input && typeof input === 'object');
++  const stdout = isObj ? String(input.stdout ?? '') : String(input ?? '');
++  const stderr = isObj ? String(input.stderr ?? '') : '';
++  const code = isObj ? input.code : undefined;
++
++  const { events, plain } = parseCliStream(stdout);
++  const lastResult = [...events].reverse().find(
++    (ev) => ev.type === 'result' || ('result' in ev) || ('response' in ev) || (ev.type === undefined && 'text' in ev),
++  );
++  if (code === 0 && isCliSuccessResult(lastResult)) return '';
++
++  const out = [];
++  if (stderr.trim()) out.push(stderr.trim());
++  for (const line of plain) out.push(line);
++  for (const ev of events) extractEventDiagnostics(ev, out);
++  return out.join('\n');
++}
++
+ /** Recognises the message of a usage limit in a CLI's output; gives when it resets, if it says so. */
+ export function usageLimit(output, from = new Date()) {
+   if (!/usage limit|limit reached|hit your (?:[\w-]+ )?limit|rate limit|quota|resource_exhausted|\b429\b/i.test(output)) return undefined;
+@@ -880,7 +1052,7 @@ export function readOutput(text) {
+   return {
+     session: json.session_id ?? json.sessionId ?? json.conversation_id ?? json.conversationId,
+     cost: json.total_cost_usd,
+-    error: Boolean(json.is_error),
++    error: Boolean(json.is_error || json.status === 'ERROR'),
+     result,
+     outcome: /ESITO:\s*(fatto|in attesa|fallito)[^\n]*/i.exec(result)?.[0],
+     browser: /BROWSER:\s*(verificato|da verificare)[^\n]*/i.exec(result)?.[0],
+@@ -1112,7 +1284,7 @@ function finish(run, { code, text, log }, runs, saveRuns) {
+     saveRuns(run.id);
+     return;
+   }
+-  const limit = usageLimit(out.error || code !== 0 ? text : '');
++  const limit = usageLimit(out.error || (code !== 0 && !(code === null && out.outcome)) ? cliLimitText(text) : '');
+   const stale = readJson(BUDGET, {});
+   if (stale[run.provider]) { delete stale[run.provider].letto; writeJson(BUDGET, stale); }
+   const budget = loadBudget();
+-- 
+2.46.2.windows.1
+
