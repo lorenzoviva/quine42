@@ -1478,7 +1478,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `MAX_PLANETS` (8); `name` (una riga), `seed` (`planetSeed`: del mondo e della fascia se manca), `geography` (`continent`), `sky`, `day`, `gravity`,
   `sea` (0-24 livelli); fissati alla Genesi con la natura. `natureOfBand` e `Kernel.natureAt`: il cielo, il giorno e la gravità del pianeta; la
   gravità di un punto (`gravityAt`), la luce (`daylight(x)`), `world.nature()` (la fascia del luogo che il generatore disegna, `draftBand`, o del
-  viandante che agisce; mai l'elenco). Le destinazioni con i nomi (`destinations`; senza nome `planetName` dal seme; l'orbita «l'orbita»).
+  viandante che agisce; mai l'elenco). Le destinazioni con i nomi (`destinations`; senza nome `planetName` dal seme; l'orbita «l'orbita»). Ogni nome che il kernel conia a sillabe (un pianeta, una persona quando i nomi del mondo sono finiti, `freshName`) passa dal filtro dei nomi coniati (`src/kernel/coined.ts`, T462): `foldName` lo sente senza accenti né doppie, con `k`/`c`, `th`/`t` e simili uguali, e `badRootOf` lo confronta con le radici offensive, volgari o ridicole in italiano, inglese, francese e spagnolo; un nome che ci cade si ricompone col seme successivo.
 - **La terra, il rilievo, il mare**: `genDraft` chiama `generate_chunk` con il luogo nelle coordinate del pianeta (`planetLocal`) e il suo seme;
   niente reticolo del kernel su un pianeta (`lattice(cx)`), i varchi del vuoto solo nell'orbita. `BandedRelief` (`relief.ts`): l'orbita col suo
   rilievo (piatto nel vuoto), ogni pianeta le sue colline dal suo seme lette nelle sue coordinate e alzate perché il suo mare (`sea` o quello del suo
