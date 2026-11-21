@@ -132,18 +132,52 @@ export function imagePart(dataUrl: string): { type: 'image_url'; image_url: { ur
   return { type: 'image_url', image_url: { url: dataUrl } };
 }
 
+/** The most marks of the cache a request may carry: Anthropic takes four. */
+export const MAX_CACHE_MARKS = 4;
+
+export interface SystemPart {
+  type: 'text';
+  text: string;
+  cache_control?: { type: 'ephemeral' };
+}
+
 /**
- * The body of a call, as it goes to `/v1/chat/completions`: the system instructions first (a stable prefix, as for Gemini), the prompt with the
- * photos after it, the schema as a JSON Schema (`strict: false`: the validator is the safety net, rule 2, and the strict modes narrow the schema), the
- * reasoning when it is asked (never sent back), and the routing: every parameter taken (`require_parameters`), no provider that keeps the words
- * to train on them (`data_collection: deny`).
+ * The system as a model that caches only what is marked reads it (T468, ADR-0239): one text part for each stable part the call says
+ * (`TextCall.cacheBreaks`), with the mark at its end, so that a call of another specialty still reads the common part from the cache and one of
+ * the same specialty its section too; what follows the last stable part (a focus) goes unmarked. At most `MAX_CACHE_MARKS`: the first ones and
+ * the last. Without breaks, one part with the mark, as before. The same text: the parts put together are `system`.
+ */
+export function systemParts(system: string, breaks?: readonly number[]): SystemPart[] {
+  const mark = { type: 'ephemeral' } as const;
+  const ends = breaks === undefined ? [system.length] : [...new Set(breaks.filter((b) => Number.isInteger(b) && b > 0 && b <= system.length))].sort((a, b) => a - b);
+  // A part of blanks only is no part (a provider refuses an empty text): it goes with the next one.
+  const kept: number[] = [];
+  for (const end of ends) if (system.slice(kept.length ? kept[kept.length - 1] : 0, end).trim()) kept.push(end);
+  const marked = kept.length > MAX_CACHE_MARKS ? [...kept.slice(0, MAX_CACHE_MARKS - 1), kept[kept.length - 1]] : kept;
+  if (!marked.length) return [{ type: 'text', text: system, cache_control: mark }];
+  const out: SystemPart[] = [];
+  let from = 0;
+  for (const end of marked) {
+    out.push({ type: 'text', text: system.slice(from, end), cache_control: mark });
+    from = end;
+  }
+  if (system.slice(from).trim()) out.push({ type: 'text', text: system.slice(from) });
+  else if (from < system.length) out[out.length - 1].text += system.slice(from);
+  return out;
+}
+
+/**
+ * The body of a call, as it goes to `/v1/chat/completions`: the system instructions first (a stable prefix, as for Gemini; where the model
+ * caches only what is marked, in parts with their marks, `systemParts`), the prompt with the photos after it, the schema as a JSON Schema
+ * (`strict: false`: the validator is the safety net, rule 2, and the strict modes narrow the schema), the reasoning when it is asked (never sent
+ * back), and the routing: every parameter taken (`require_parameters`), no provider that keeps the words to train on them (`data_collection: deny`).
  */
 export function openRouterBody(call: TextCall, model: OpenRouterModel, thinking: Thinking): Record<string, unknown> {
   const images = (call.images ?? []).map(imagePart);
   return {
     model: model.id,
     messages: [
-      ...(call.system ? [{ role: 'system', content: model.cacheSystem ? [{ type: 'text', text: call.system, cache_control: { type: 'ephemeral' } }] : call.system }] : []),
+      ...(call.system ? [{ role: 'system', content: model.cacheSystem ? systemParts(call.system, call.cacheBreaks) : call.system }] : []),
       { role: 'user', content: images.length ? [{ type: 'text', text: call.prompt }, ...images] : call.prompt },
     ],
     ...(model.temperature ? { temperature: call.temperature ?? 0.8 } : {}),
@@ -298,10 +332,10 @@ export class OpenRouterAiModels implements AiModels {
     });
   }
 
-  private async post(model: string, body: string, call: { agent: string; task: string; chi?: string }): Promise<any> {
+  private async post(model: string, body: string, call: { agent: string; task: string; chi?: string; specialty?: string }): Promise<any> {
     const report = (j: any, extra: Partial<CallRecord> = {}) => {
       const usd = reportedCost(j?.usage);
-      const r: CallRecord = { model, agent: call.agent, task: call.task, ...chatTokens(j?.usage), ...(usd !== undefined ? { usd } : {}), ...(call.chi ? { who: call.chi } : {}), ...extra };
+      const r: CallRecord = { model, agent: call.agent, task: call.task, ...chatTokens(j?.usage), ...(usd !== undefined ? { usd } : {}), ...(call.chi ? { who: call.chi } : {}), ...(call.specialty ? { specialty: call.specialty } : {}), ...extra };
       this.usage.inputTokens += r.prompt;
       this.usage.cachedTokens += r.cached;
       this.usage.outputTokens += r.output;

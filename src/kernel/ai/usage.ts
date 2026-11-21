@@ -41,6 +41,8 @@ export interface CallRecord {
    * on the local models. Not in the file: the charge reads it, the tallies keep who asked (`who`).
    */
   paidBy?: string;
+  /** The Sculptor's specialty the call was for (T468, ADR-0239): the ledger counts each specialty apart (`UsageFile.specialties`). */
+  specialty?: string;
 }
 
 export interface Tally {
@@ -74,6 +76,11 @@ export interface UsageFile {
    * pays (T372, ADR-0188): the master's wallet says it, and a player's own spending is what is left of theirs. Absent where nobody paid for another.
    */
   masterPaid?: Record<string, Record<string, Tally>>;
+  /**
+   * day → the Sculptor's specialty (`landscaper`, `joiner`…, T468, ADR-0239) → tally: the calls of `model.sculpt` and `model.action` the
+   * calls themselves said they were for, so that the trades are measured apart. Absent where no call said one.
+   */
+  specialties?: Record<string, Record<string, Tally>>;
 }
 
 export const USAGE_FILE = 'world/usage.json';
@@ -110,7 +117,7 @@ function sum(into: Tally, t: Tally): Tally {
 }
 
 export class UsageLog {
-  private file: UsageFile & { payers: Record<string, Record<string, Tally>>; masterPaid: Record<string, Record<string, Tally>> } = { prices: PRICES_READ_ON, days: {}, payers: {}, masterPaid: {} };
+  private file: UsageFile & { payers: Record<string, Record<string, Tally>>; masterPaid: Record<string, Record<string, Tally>>; specialties: Record<string, Record<string, Tally>> } = { prices: PRICES_READ_ON, days: {}, payers: {}, masterPaid: {}, specialties: {} };
   /** This session only (since the page opened). */
   readonly session = emptyTally();
   readonly sessionByModel: Record<string, Tally> = {};
@@ -119,6 +126,8 @@ export class UsageLog {
   readonly lastCall: Record<string, { model: string; task: string; time: number }> = {};
   /** This session by payer (T36). */
   readonly sessionByPayer: Record<string, Tally> = {};
+  /** This session by the Sculptor's specialty (T468). */
+  readonly sessionBySpecialty: Record<string, Tally> = {};
   /** Bumped at every call: the kernel writes the file when it changed. */
   version = 0;
   onChange?: () => void;
@@ -139,6 +148,8 @@ export class UsageLog {
         for (const [chi, t] of Object.entries(payers ?? {})) sum(((this.file.payers[day] ??= {})[chi] ??= emptyTally()), { ...emptyTally(), ...t });
       for (const [day, askers] of Object.entries(f.masterPaid ?? {}))
         for (const [chi, t] of Object.entries(askers ?? {})) sum(((this.file.masterPaid[day] ??= {})[chi] ??= emptyTally()), { ...emptyTally(), ...t });
+      for (const [day, trades] of Object.entries(f.specialties ?? {}))
+        for (const [s, t] of Object.entries(trades ?? {})) sum(((this.file.specialties[day] ??= {})[s] ??= emptyTally()), { ...emptyTally(), ...t });
     } catch {
       /* a broken file is replaced by this session's */
     }
@@ -154,6 +165,10 @@ export class UsageLog {
     const chi = r.who || COMMON;
     add(((this.file.payers[day] ??= {})[chi] ??= emptyTally()), r, usd);
     add((this.sessionByPayer[chi] ??= emptyTally()), r, usd);
+    if (r.specialty) {
+      add(((this.file.specialties[day] ??= {})[r.specialty] ??= emptyTally()), r, usd);
+      add((this.sessionBySpecialty[r.specialty] ??= emptyTally()), r, usd);
+    }
     this.lastCall[r.agent] = { model: r.model, task: r.task, time: Date.now() };
     this.version++;
     this.onChange?.();
@@ -203,6 +218,13 @@ export class UsageLog {
     return out;
   }
 
+  /** What each of the Sculptor's specialties cost: on a day, or (without one) on every day (T468). */
+  specialties(day?: string): Record<string, Tally> {
+    const out: Record<string, Tally> = {};
+    for (const d of day ? [day] : Object.keys(this.file.specialties)) for (const [s, t] of Object.entries(this.file.specialties[d] ?? {})) sum((out[s] ??= emptyTally()), t);
+    return out;
+  }
+
   /** The most expensive tasks of a day. */
   tasks(day = today()): Array<{ model: string; task: string; tally: Tally }> {
     const out: Array<{ model: string; task: string; tally: Tally }> = [];
@@ -222,8 +244,11 @@ export class UsageLog {
     const masterPaid: NonNullable<UsageFile['masterPaid']> = {};
     for (const day of Object.keys(this.file.masterPaid).sort())
       for (const chi of Object.keys(this.file.masterPaid[day]).sort()) (masterPaid[day] ??= {})[chi] = round(this.file.masterPaid[day][chi]);
-    // Only where the master paid for someone (T372): every other universe's file stays as it was.
-    return JSON.stringify({ prices: PRICES_READ_ON, days: giorni, payers: paganti, ...(Object.keys(masterPaid).length ? { masterPaid } : {}) } satisfies UsageFile, null, 1) + '\n';
+    const specialties: NonNullable<UsageFile['specialties']> = {};
+    for (const day of Object.keys(this.file.specialties).sort())
+      for (const s of Object.keys(this.file.specialties[day]).sort()) (specialties[day] ??= {})[s] = round(this.file.specialties[day][s]);
+    // Only where the master paid for someone (T372), only where a call said its specialty (T468): every other universe's file stays as it was.
+    return JSON.stringify({ prices: PRICES_READ_ON, days: giorni, payers: paganti, ...(Object.keys(masterPaid).length ? { masterPaid } : {}), ...(Object.keys(specialties).length ? { specialties } : {}) } satisfies UsageFile, null, 1) + '\n';
   }
 }
 

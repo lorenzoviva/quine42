@@ -254,7 +254,8 @@
 - **Opus 5.5, Scultore delle strutture su OpenRouter** (ADR-0205, T397, kernel 0.7.14; D57): `OPENROUTER_MODELS['claude-opus-5-5']` è
   `anthropic/claude-opus-5.5` (versione `-20260921`, letta il 16/11, `OPUS_READ_ON`), senza temperatura (nessun endpoint la prende), con le istruzioni di
   sistema in una parte di testo con `cache_control: { type: 'ephemeral' }` (`cacheSystem`: nessun endpoint di Anthropic ha la cache implicita; i blocchi e
-  le correzioni di una struttura la leggono entro cinque minuti) e `max_tokens` 32 000 (`maxTokens`); i modelli di Google come prima. Prezzo in
+  le correzioni di una struttura la leggono entro cinque minuti; dal T468 una parte con il suo segno per ogni parte stabile che la chiamata dice,
+  `TextCall.cacheBreaks`, `systemParts`, al più quattro, ADR-0239) e `max_tokens` 32 000 (`maxTokens`); i modelli di Google come prima. Prezzo in
   `PRICES['claude-opus-5-5']` (4 / 20 / 0,20, `OPUS_PRICES_READ_ON`), `priceOf` legge anche l'id di OpenRouter col punto. **La via del mondo**:
   `Kernel.aiRoute()` (`openrouter` se il Concilio scrive con `OpenRouterAiModels`, anche dietro il router degli abbonamenti; `google` altrimenti) e
   `Kernel.sculptors()` = `sculptorsOn(ai.sculptors, via)` (`src/kernel/agents/sculptor.ts`): su OpenRouter da `openRouterFrom` (2026-12-01)
@@ -1188,8 +1189,38 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   `{model, seed, yaw, tint, done, wanted}` (`wanted`: il modello suo, indossato appena lo Scultore lo scrive). Le cose solide bloccano con l'impronta dei loro voxel; le `<action>` del modello
   sono nel menu dell'entità e restano fatte (`stato.json → forme`). Persone e animali camminano con gli arti, la
   vegetazione al vento, le `<animation>` girano; le icone sono foto dei modelli.
+- **Lo Scultore a specialità** (ADR-0239, T468, S2 dello studio T458, kernel 0.10.16): un agente solo (`sculptor`, `model.sculpt` e
+  `model.action`, la manopola `models`) con otto specialità che il kernel decide dalla classe, dalla taglia e dalla richiesta
+  (`specialtyOf`, `src/kernel/agents/sculptor.ts`): Paesaggista (`landscaper`: alberi, cespugli, rocce, sassi), Mobiliere (`joiner`: mobili e
+  oggetti), Sarto (`tailor`: ciò che si indossa, `worn`), Figurinista (`figurist`: persone, animali, bestie), Capomastro (`mason`: edifici,
+  monumenti, strutture sotto la Grande), Architetto (`architect`: le strutture che crescono a regole, `procedural`), Carrozziere
+  (`coachbuilder`: le navi) e le azioni (`actions`); i nomi italiani in `SPECIALTY_NAMES`, che il registro del Concilio dice accanto alla
+  classe. **Il prompt**: il nucleo `prompts/agents/sculptor.md` (la nota `<!-- core: … -->`, `CORE_MARK`, `hasCore`: chi sei, coordinate, il
+  programma, la palette e i colori, i pattern, i nodi, `field` e `observe`, come scolpire bene, le trappole), uguale per ogni mestiere
+  (`sculptorRole(files, specialità)`); la sezione `prompts/agents/sculptor/<specialità>.md` (`sculptorSection`, `sectionPath`: le righe delle
+  sue classi `@@CLASSES@@`, le taglie per il Capomastro `@@SIZES@@`, «Worn things» e la tinta per il Sarto, la tinta per il Mobiliere, gli arti
+  e le persone per il Figurinista, «Vessels» per il Carrozziere); l'Architetto legge solo `architect.md`, il prompt delle strutture di prima
+  carattere per carattere. Una riga che è solo un commento HTML fuori da un blocco di codice è una nota per chi modifica il prompt
+  (`withoutNotes`, `promptSections`); sotto un titolo del nucleo la nota `<!-- sculpting: … -->` lo toglie alle azioni e `<!-- files: … -->` lo
+  dà solo dove `models/` ha tileset, campioni o regole (`libraryResources`: `wfc`, `convchain`, `<import>`). La vetrina (`schermo-…`,
+  `circuito-3D`) non c'è più. **L'ordine del sistema**: nucleo (o il prompt dell'Architetto), principi, «Lingua», guida di stile, sezione,
+  esempi (`systemOf` in `council.ts`, lo stesso testo di prima, le parti unite da una riga vuota); la chiamata dice dove finisce ogni parte
+  stabile (`TextCall.cacheBreaks`) e su OpenRouter i modelli di Anthropic ricevono il sistema in parti con `cache_control` alla fine di ognuna
+  (`systemParts`, al più `MAX_CACHE_MARKS` quattro; un focus dopo l'ultima senza segno); Gemini le ignora. **Un'azione** legge il nucleo senza
+  le sezioni `sculpting` e la sezione del mestiere del suo modello (classe e taglia della voce, `ActionRequest.taglia`; il Capomastro per
+  una struttura che cresce a regole). **Un universo di prima** (senza il segno del nucleo) riceve il prompt intero come prima, la parte dopo
+  `<!-- strutture -->` all'Architetto, nessuna sezione; uno che non l'ha toccato prende nucleo e sezioni dal seme (`upgradeFromSeed`). **Il
+  direttore** mette in fila per specialità ciò che manca (`missing()`, `bySpecialty`: dopo le case comuni il mestiere scolpito per ultimo, poi
+  gli altri a gruppi dove compare la loro prima richiesta). **Il registro dei consumi**: `CallRecord.specialty` e `world/usage.json →
+  specialties` (giorno → specialità → conteggio, `UsageLog.specialties`, solo dove una chiamata l'ha detta). La misura con
+  `prompt-tokens.ts -- --scultore --conta --universi <cartella> --prima misure-s1.json` (`docs/design/scultori-specializzati/misure-s2.md`): il
+  nucleo 2 856 token, il nucleo delle azioni 1 473, le sezioni 172-646; il sistema di una richiesta che non cresce a regole scende di 1 705-2 179
+  token (1 755 in media pesata), quello di un'azione di 3 563, quello dell'Architetto resta 5 603; 0,035 $ in meno per ora di gioco oggi,
+  0,052 $ dall'1/12. Le istruzioni nuove dei mestieri sono di T470 (S4), i cicli e i nodi dell'Architetto di T469 (S3), le parti del mondo di
+  T471 e T472, la prova pagata di T473.
 - **Gli esempi dello Scultore** (T467, S1 dello studio T458 § 3.2, kernel 0.10.15): in fondo al sistema di ogni richiesta che non cresce a
-  regole («## Examples (programs of the library)», dopo ruolo, principi, «Lingua» e guida di stile) al più due programmi della libreria,
+  regole («## Examples (programs of the library)», dopo il nucleo, i principi, la «Lingua», la guida di stile e, dal T468, la sezione del
+  mestiere) al più due programmi della libreria,
   scelti da `examplesFor` senza chiamate e sempre gli stessi per la stessa libreria, così la cache li tiene finché non arriva un modello
   migliore. **Un modello scritto a mano** della classe della richiesta (l'autore lo dice e non è portato: del seme, o scritto a mano per
   l'universo, come i cantieri di Claude Code; se la classe non ne ha uno che insegni, della classe accanto, `EXAMPLE_FAMILY`: una struttura
@@ -1609,7 +1640,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   `pos.z`, che il kernel tiene dopo ogni tick (`settleHeights`) e che `free`/`free_real`/`floorAt` prendono (senza: il piano terra);
   il renderer taglia sopra il piano in cui si è.
 - **Le strutture che crescono** (ADR-0160, T156): la classe `structure` da Grande in su ha il prompt procedurale del banco (T182),
-  la parte di `prompts/agents/sculptor.md` dopo `<!-- strutture -->` (`sculptorRole(files, true)`, `procedural`), senza esempi della libreria
+  dal T468 il prompt dell'Architetto, `prompts/agents/sculptor/architect.md` (prima la parte di `prompts/agents/sculptor.md` dopo
+  `<!-- strutture -->`, che un universo di prima tiene; `sculptorRole(files, 'architect')`, `procedural`, ADR-0239), senza esempi della libreria
   e, dal T354, senza scheletro (ADR-0183: il metodo e gli attrezzi, non un edificio da ricopiare); offline la risposta dei modelli locali è
   `MOCK_STRUCTURE_PROGRAM` (`src/kernel/ai/mockStructure.ts`), la villetta scritta a mano come il prompt chiede. Il programma non ha una `size` sua (`withoutSize`):
   gira nella scatola della taglia di ogni voce. `checkProgram` lo prova a `STRUCTURE_SEEDS` semi alla sua taglia e al primo seme della
@@ -1659,7 +1691,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   tracciati, appezzamenti a incastro, pascoli recintati con i cancelli a sbarre, il fienile a lato) e la casa di T338 (due piani, tettoia,
   fieno); il forte con la cinta di 12 e il camminamento, le torri cave con la porta dal camminamento, merli e feritoie dalle parti; i
   controlli `merlonRuns` e `animalLetters`, le aree per taglia, `--parti` per le parti da sole.
-- **Lo Scultore delle strutture senza scheletro, a blocchi** (ADR-0183, T354, kernel 0.6.10, passo 2 di D48): il prompt dopo `<!-- strutture -->` non ha più
+- **Lo Scultore delle strutture senza scheletro, a blocchi** (ADR-0183, T354, kernel 0.6.10, passo 2 di D48): il prompt dopo `<!-- strutture -->` (dal T468 il prompt dell'Architetto, `architect.md`, ADR-0239) non ha più
   un programma da ricopiare (T337: lo scheletro era il 78-92 % di ogni programma, e ogni concetto dava lo stesso edificio) ma un metodo in tre
   livelli dentro un programma solo: la composizione del concetto sul piano a un quinto (`map scale="1/5 1/5 1"`, una cella un quarto di
   casella: 20, 30 e 40 celle di lato alle tre taglie; `soil` e `origin` portati giù dalla prima `map`), le altezze come colonne a passi dopo la

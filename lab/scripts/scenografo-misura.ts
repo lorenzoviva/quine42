@@ -50,10 +50,10 @@ const edificioXml = (nome: string) => path.join(OUT, 'vuoto', MODELLO, 'giro1', 
 
 // ---------------------------------------------------------------- the prompts
 
-/** The Sculptor's own sections on the language of MarkovJunior (the program, patterns, nodes, traps), as the game gives them. */
+/** The Sculptor's own sections on the language of MarkovJunior (the program, the palette, patterns, nodes, traps), as the game gives them (since T468 the core). */
 function linguaggio(): string {
   const role = sculptorRole({ 'prompts/agents/sculptor.md': fs.readFileSync('universe/prompts/agents/sculptor.md', 'utf8') });
-  const keep = ['## The program', '## Patterns', '## Nodes (the same', '## Nodes that look ahead', '## Traps'];
+  const keep = ['## The program', '## The palette and the colours', '## Patterns', '## Nodes (the same', '## Nodes that look ahead', '## Traps'];
   return role
     .split(/\n(?=## )/)
     .filter((s) => keep.some((k) => s.startsWith(k)))

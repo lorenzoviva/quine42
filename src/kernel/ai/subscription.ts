@@ -255,6 +255,7 @@ export class QueueAiModels implements AiModels {
           output: u?.output ?? 0,
           thoughts: u?.thoughts ?? 0,
           ...(call.chi ? { who: call.chi } : {}),
+          ...(call.specialty ? { specialty: call.specialty } : {}),
           ...extra,
         };
         this.usage.inputTokens += r.prompt;

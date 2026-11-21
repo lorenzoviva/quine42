@@ -203,25 +203,182 @@ export function triedSizes(cls: AssetClass, taglia?: string): SizeTier[] {
 export const STRUCTURE_SEEDS = 4;
 
 /**
- * Where the structures' prompt begins in `prompts/agents/sculptor.md`: what comes before is for every other class. The part after it has
- * no skeleton (T354, ADR-0183: a program in the prompt is copied, and every concept came out the same building, T337): the method of the
- * composition on a coarse plan, the parts of the seed, the blocks. Offline the Sculptor answers with `MOCK_STRUCTURE_PROGRAM`.
+ * The Sculptor's specialties (T468, ADR-0239, S2 of T458): one agent (`sculptor`, `model.sculpt`, the knob `models`) with eight roles, which
+ * the kernel decides from the class, the size and the request (`specialtyOf`). Each reads the core of the prompt and its own section; the
+ * architect (the structures that grow by rules) its whole prompt; `actions` writes the `<action>`s of «Altro…», for a model of any trade.
+ */
+export type SculptorSpecialty = 'landscaper' | 'joiner' | 'tailor' | 'figurist' | 'mason' | 'architect' | 'coachbuilder' | 'actions';
+export const SPECIALTIES: readonly SculptorSpecialty[] = ['landscaper', 'joiner', 'tailor', 'figurist', 'mason', 'architect', 'coachbuilder', 'actions'];
+
+/** The names of the specialties, as the studio and the Council's feed say them (the author's words of 21/11). */
+export const SPECIALTY_NAMES: Readonly<Record<SculptorSpecialty, string>> = {
+  landscaper: 'Paesaggista',
+  joiner: 'Mobiliere',
+  tailor: 'Sarto',
+  figurist: 'Figurinista',
+  mason: 'Capomastro',
+  architect: 'Architetto',
+  coachbuilder: 'Carrozziere',
+  actions: 'le azioni',
+};
+
+/** The classes each trade sculpts, whose lines its section shows (`@@CLASSES@@`): what is worn is an object; actions show none of their own. */
+export const SPECIALTY_CLASSES: Readonly<Record<SculptorSpecialty, readonly string[]>> = {
+  landscaper: ['tree', 'bush', 'rock', 'pebble'],
+  joiner: ['furniture', 'object'],
+  tailor: ['object'],
+  figurist: ['person', 'animal', 'beast'],
+  mason: ['building', 'monument', 'structure'],
+  architect: ['structure'],
+  coachbuilder: ['vessel'],
+  actions: [],
+};
+
+/** The trade of each class, for what is sculpted in one box (the worn things and the structures that grow by rules are decided apart). */
+const CLASS_SPECIALTY: Readonly<Record<string, SculptorSpecialty>> = {
+  tree: 'landscaper',
+  bush: 'landscaper',
+  rock: 'landscaper',
+  pebble: 'landscaper',
+  furniture: 'joiner',
+  object: 'joiner',
+  person: 'figurist',
+  animal: 'figurist',
+  beast: 'figurist',
+  building: 'mason',
+  monument: 'mason',
+  structure: 'mason',
+  vessel: 'coachbuilder',
+};
+
+/**
+ * The specialty that sculpts a request (T468): the architect for a structure that grows by rules (from Large up, `procedural`), the tailor for
+ * a thing that is worn, else the trade of its class (a class the kernel does not know is an object's, as `sculpt` takes it).
+ */
+export function specialtyOf(cls: AssetClass, req: Partial<Pick<SculptRequest, 'taglia' | 'worn'>> = {}): SculptorSpecialty {
+  if (procedural(cls, req.taglia)) return 'architect';
+  if (req.worn) return 'tailor';
+  return CLASS_SPECIALTY[cls.id] ?? 'joiner';
+}
+
+/** The specialty of a request as `sculpt` reads it: its class, or the object's if the kernel does not know it. */
+export const requestSpecialty = (req: Pick<SculptRequest, 'classe'> & Partial<Pick<SculptRequest, 'taglia' | 'worn'>>): SculptorSpecialty => specialtyOf(classOf(req.classe) ?? classOf('object')!, req);
+
+/**
+ * Where the structures' prompt begins in a `prompts/agents/sculptor.md` of before T468: what comes before is for every other class. Since
+ * T468 the structures' prompt is the architect's section (`prompts/agents/sculptor/architect.md`), the same text; a universe whose prompt is
+ * the one of before (without `CORE_MARK`) keeps it, the whole of it. The part after it has no skeleton (T354, ADR-0183: a program in the
+ * prompt is copied, and every concept came out the same building, T337): the method of the composition on a coarse plan, the parts of the
+ * seed, the blocks. Offline the Sculptor answers with `MOCK_STRUCTURE_PROGRAM`.
  */
 export const STRUCTURES_MARK = '<!-- strutture -->';
 
+/** The file of the Sculptor's prompt: since T468 its core, what every specialty reads. */
+export const SCULPTOR_PROMPT = 'prompts/agents/sculptor.md';
+/** The section of a specialty, beside the core (T468): `prompts/agents/sculptor/<specialty>.md`. */
+export const sectionPath = (s: SculptorSpecialty): string => `prompts/agents/sculptor/${s}.md`;
+
 /**
- * The Sculptor's instructions (prompts/agents/sculptor.md) with the scale, the classes, the sizes and the palette; for the
- * procedural structures the part after `STRUCTURES_MARK`, which says its own numbers.
+ * The mark of the core (T468), a note at the top of `SCULPTOR_PROMPT`: a prompt with it is the core of the specialties, each with its section;
+ * a prompt without it is the one of before (a universe that rewrote it, or one the seed has not reached), and goes whole, as before.
  */
-export function sculptorRole(files: FileMap, structures = false): string {
-  const palette = Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
-  const text = files['prompts/agents/sculptor.md'] ?? 'You are the Sculptor: you write MarkovJunior programs in XML.';
-  const at = text.indexOf(STRUCTURES_MARK);
-  if (structures && at >= 0) return text.slice(at + STRUCTURES_MARK.length).trim();
-  return (at >= 0 ? text.slice(0, at).trimEnd() : text)
+export const CORE_MARK = '<!-- core';
+/** A note under a title of the core (T468): that section is for sculpting, not sent with an action (the palette, `field`, how to sculpt well). */
+export const SCULPTING_MARK = '<!-- sculpting';
+/** A note under a title of the core (T468): that section is sent only where models/ has files to read (`libraryResources`: tilesets, samples, rules). */
+export const FILES_MARK = '<!-- files';
+
+/** A line that is only an HTML comment: a note for whoever edits a prompt, outside a code fence. */
+const isNote = (line: string): boolean => /^\s*<!--.*-->\s*$/.test(line);
+const isFence = (line: string): boolean => /^\s*```/.test(line);
+
+/**
+ * A prompt cut at its titles of the second level (`## `), outside the code fences: the first piece is what comes before the first title. Each
+ * piece with its notes, the lines that are only an HTML comment outside a fence (the marks among them).
+ */
+export function promptSections(text: string): Array<{ text: string; notes: string[] }> {
+  const out: Array<{ lines: string[]; notes: string[] }> = [{ lines: [], notes: [] }];
+  let fenced = false;
+  for (const line of text.split('\n')) {
+    if (!fenced && line.startsWith('## ')) out.push({ lines: [], notes: [] });
+    const here = out[out.length - 1];
+    if (isFence(line)) fenced = !fenced;
+    else if (!fenced && isNote(line)) here.notes.push(line.trim());
+    here.lines.push(line);
+  }
+  return out.filter((s, i) => i > 0 || s.lines.some((l) => l.trim())).map((s) => ({ text: s.lines.join('\n'), notes: s.notes }));
+}
+
+/**
+ * What of a prompt reaches the model (T468): without the notes for whoever edits it, a line that is only an HTML comment outside a code fence
+ * (the marks are notes too). A comment inside a fence is part of a piece of program, and stays.
+ */
+export function withoutNotes(text: string): string {
+  let fenced = false;
+  const out: string[] = [];
+  for (const line of text.split('\n')) {
+    if (isFence(line)) fenced = !fenced;
+    else if (!fenced && isNote(line)) continue;
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
+/** The palette of MarkovJunior, as the prompt lists it (`@@PALETTE@@`). */
+const paletteLine = () => Object.entries(MJ_PALETTE).map(([k, v]) => `${k} ${v.color.slice(1)}`).join(' · ');
+
+/** The placeholders of the core and of a section (T468): the tile, the palette, a section's classes (`@@CLASSES@@`), the sizes of D&D (`@@SIZES@@`). */
+const filled = (text: string, classes: readonly string[] = []) =>
+  text
     .replaceAll('@@TILE@@', String(TILE))
-    .replace('@@CLASSES@@', [...CLASSES.map(classLine), sizesLine()].join('\n'))
-    .replace('@@PALETTE@@', palette);
+    .replace('@@CLASSES@@', CLASSES.filter((c) => classes.includes(c.id)).map(classLine).join('\n'))
+    .replace('@@SIZES@@', sizesLine())
+    .replace('@@PALETTE@@', paletteLine());
+
+/** Whether a universe's prompt is the core of the specialties (T468), or the one of before: its notes say so (`CORE_MARK`). */
+export const hasCore = (files: FileMap): boolean => promptSections(files[SCULPTOR_PROMPT] ?? '').some((s) => s.notes.some((n) => n.startsWith(CORE_MARK)));
+
+/**
+ * What a specialty reads first in its system (T468, ADR-0239), the stable part that the cache serves: the core (`prompts/agents/sculptor.md`,
+ * the same for every trade, so that the calls of one model share its prefix); for `actions` the core without its sections for sculpting; for the
+ * architect its whole prompt, the structures' of before (`prompts/agents/sculptor/architect.md`; without that file, the core). A section of the
+ * core marked for the files goes only where the universe has files of models/ to read. A universe whose prompt is the one of before (no
+ * `CORE_MARK`) gets it as before, the same text: the part after `STRUCTURES_MARK` for the architect, the rest, whole, with every class, for
+ * every other. `true` is the architect, as the callers of before said it; without a specialty, the core (or the whole prompt of before).
+ */
+export function sculptorRole(files: FileMap, specialty?: SculptorSpecialty | boolean): string {
+  const spec = specialty === true ? 'architect' : specialty === false ? undefined : specialty;
+  const text = files[SCULPTOR_PROMPT] ?? 'You are the Sculptor: you write MarkovJunior programs in XML.';
+  if (!hasCore(files)) {
+    const at = text.indexOf(STRUCTURES_MARK);
+    if (spec === 'architect' && at >= 0) return text.slice(at + STRUCTURES_MARK.length).trim();
+    return (at >= 0 ? text.slice(0, at).trimEnd() : text)
+      .replaceAll('@@TILE@@', String(TILE))
+      .replace('@@CLASSES@@', [...CLASSES.map(classLine), sizesLine()].join('\n'))
+      .replace('@@PALETTE@@', paletteLine());
+  }
+  const own = files[sectionPath('architect')];
+  if (spec === 'architect' && own?.trim()) return withoutNotes(own).trim();
+  const withFiles = libraryResources(files).length > 0;
+  const kept = promptSections(text).filter((s) => {
+    if (spec === 'actions' && s.notes.some((n) => n.startsWith(SCULPTING_MARK))) return false;
+    return withFiles || !s.notes.some((n) => n.startsWith(FILES_MARK));
+  });
+  return filled(withoutNotes(kept.map((s) => s.text).join('\n'))).trim();
+}
+
+/**
+ * The section of a specialty (T468, ADR-0239): what is its own (its classes and their boxes, the sizes for the mason, the worn things, the
+ * vessels…), after the core, the principles, the «Lingua» and the style guide, before the examples. For an action, `of` is the specialty of
+ * the model the action is for: its section, the mason's for a structure that grows by rules (the architect's is the method of a whole
+ * composition). Empty for the architect (its prompt is its role), for a section the universe does not have, and where the prompt is the one of
+ * before (it already says everything).
+ */
+export function sculptorSection(files: FileMap, specialty: SculptorSpecialty, of?: SculptorSpecialty): string {
+  const spec = specialty === 'actions' ? (of === 'architect' ? 'mason' : of) : specialty;
+  if (!spec || spec === 'architect' || spec === 'actions' || !hasCore(files)) return '';
+  const text = files[sectionPath(spec)];
+  return text ? filled(withoutNotes(text), SPECIALTY_CLASSES[spec]).trim() : '';
 }
 
 /**
@@ -759,7 +916,11 @@ export async function judge(c: Council, req: SculptRequest, cls: AssetClass, che
  */
 async function write(c: Council, req: SculptRequest, cls: AssetClass, model: string, previous?: { checked: Checked; critique: Critique }, retries = 2): Promise<{ checked?: Checked; calls: number; error?: string }> {
   const proc = procedural(cls, req.taglia);
-  const role = sculptorRole(c.files, proc);
+  // The trade's prompt (T468, ADR-0239): the core first (the architect its own), then, after the principles, the «Lingua» and the style guide,
+  // its section and the examples, each a stable part of its own that the cache serves.
+  const specialty = specialtyOf(cls, req);
+  const role = sculptorRole(c.files, specialty);
+  const section = sculptorSection(c.files, specialty);
   // The procedural prompt composes from the concept: the library's programs of sole boxes would teach the opposite (T156).
   const examples = proc ? [] : examplesFor(c.files, { ...req, classe: cls.id });
   // What a procedural program did (the trace), and what the Sculptor «sees» of it (the views in text, T354): in every request that sends one back.
@@ -769,7 +930,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     const t = traceOf(k, cls, req.taglia, filesOf(k.xml, c.files));
     return `${v ? `\nWhat the game made of it, in text:\n${v}` : ''}${t ? `\nHere is what the program did when the game ran it, node by node:\n${t}` : ''}`;
   };
-  const system = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : undefined;
+  const system = [section, examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : ''];
   let prompt = describe(req, cls);
   const resources = libraryResources(c.files);
   if (resources.length) prompt += `\n\nFiles of models/ the program may read (wfc tileset or sample, convchain sample, rules with file/fin/fout):\n${resources.join('\n')}`;
@@ -783,7 +944,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     images.push(views(previous.checked));
   }
   const call = async (p: string) => {
-    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, data: { request: req, classe: cls.id, example: proc ? MOCK_STRUCTURE_PROGRAM : examples[0], ...(req.worn ? { worn: req.worn } : {}) } });
+    const raw = await c.write('sculptor', 'model.sculpt', p, { role, system, images, model, temperature: 0.7, specialty, data: { request: req, classe: cls.id, example: proc ? MOCK_STRUCTURE_PROGRAM : examples[0], ...(req.worn ? { worn: req.worn } : {}) } });
     return extractXml(raw);
   };
   let calls = 0;
@@ -834,7 +995,7 @@ export async function sculpt(c: Council, req: SculptRequest, m: SculptorAiModels
   const cls = classOf(req.classe) ?? classOf('object')!;
   const model = modelFor(req, cls, m);
   const cat = categoryOf(cls);
-  c.say('sculptor', 'propone', `«${req.nome}» (${cls.name}, ${model})`, undefined, 'model.sculpt');
+  c.say('sculptor', 'propone', `«${req.nome}» (${cls.name}, ${SPECIALTY_NAMES[specialtyOf(cls, req)]}, ${model})`, undefined, 'model.sculpt');
   let calls = 0;
   const candidates: Array<{ checked: Checked; critique?: Critique }> = [];
   // Simple things: two independent programs. Figures and structures: one, and a revision if needed.
@@ -878,6 +1039,8 @@ export interface ActionRequest {
   /** What the wanderer wrote, and how the Narrator says the look changes. */
   testo: string;
   cambia: string;
+  /** The size of the model, if not its class's own (its entry in the library): with the class it says whose trade the model is (T468). */
+  taglia?: SizeTier;
 }
 
 export interface ActionLetter {
@@ -967,10 +1130,13 @@ export async function sculptAction(c: Council, req: ActionRequest, model: string
   ].join('\n\n');
   let last: { clip?: string; error?: string } = {};
   let calls = 0;
+  // The core of the actions and the section of the model's trade (T468): its letters and its conventions, not its whole craft.
+  const role = sculptorRole(c.files, 'actions');
+  const section = sculptorSection(c.files, 'actions', specialtyOf(cls, { ...(req.taglia ? { taglia: req.taglia } : {}) }));
   for (let i = 0; i <= retries; i++) {
     const p = i === 0 ? prompt : `${prompt}\n\nYou wrote:\n${last.clip ?? '(nothing)'}\nIt does not pass: ${last.error}\nFix it and answer with the <action> only.`;
     calls++;
-    const raw = await c.write('sculptor', 'model.action', p, { role: sculptorRole(c.files), model, temperature: 0.4, data: { request: req, background: info.background, letters: info.letters } });
+    const raw = await c.write('sculptor', 'model.action', p, { role, system: [section], model, temperature: 0.4, specialty: 'actions', data: { request: req, background: info.background, letters: info.letters } });
     const clip = extractAction(raw, req.azione, req.etichetta);
     const checked = clip ? checkAction(req.xml, clip, req.azione, cls) : { error: 'manca <action>…</action>' };
     if (checked.xml) return { xml: checked.xml, calls };

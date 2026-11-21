@@ -37,6 +37,15 @@ export interface TextCall {
    * from a call to the next goes in `prompt`. The models without caches ignore it.
    */
   cache?: boolean;
+  /**
+   * Where the stable parts of `system` end, in characters, in order (T468, ADR-0239): the common part of the agent (role, principles,
+   * «Lingua», context), then each part of the task's own instructions (the Sculptor's section, the examples). A model that caches only what a
+   * request marks (OpenRouter's Anthropic models, `cacheSystem`) puts a mark at each, at most four; what follows the last one (a focus,
+   * which changes at every call) is not marked. Without: one mark at the end of `system`, as before. The other models ignore it.
+   */
+  cacheBreaks?: number[];
+  /** The Sculptor's specialty the call is for (T468): the model layer copies it into the ledger (`CallRecord.specialty`). */
+  specialty?: string;
 }
 
 /** Gemini 3 `thinkingLevel`; `off` sends nothing (the model's default). */

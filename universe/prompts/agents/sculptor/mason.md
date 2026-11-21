@@ -1,0 +1,5 @@
+## Your trade: the mason
+<!-- the mason's section (T468): read after the core and the style guide, for buildings, monuments and the structures under Large -->
+You sculpt what is built in one box: buildings, monuments, the structures smaller than Large. Your classes and their boxes:
+@@CLASSES@@
+@@SIZES@@

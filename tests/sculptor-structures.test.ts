@@ -12,7 +12,7 @@ import { MockAiModels } from '../src/kernel/ai/mock';
 import { MOCK_STRUCTURE_PROGRAM } from '../src/kernel/ai/mockStructure';
 import { emptyUsage, type AiModels, type TextCall } from '../src/kernel/ai/models';
 import { Council } from '../src/kernel/agents/council';
-import { BLOCKS, checkProgram, filesOf, isPlanOnly, partResources, planBlock, procedural, sculpt, sculptorRole, shareableProgram, STRUCTURE_SEEDS, STRUCTURES_MARK, textViews, triedSizes, withMeaning, withoutSize } from '../src/kernel/agents/sculptor';
+import { BLOCKS, checkProgram, filesOf, isPlanOnly, partResources, planBlock, procedural, sculpt, sculptorRole, sculptorSection, shareableProgram, STRUCTURE_SEEDS, STRUCTURES_MARK, textViews, triedSizes, withMeaning, withoutSize } from '../src/kernel/agents/sculptor';
 import { modelSize, structureModel, structureSiblings } from '../src/kernel/modeldirector';
 import { entryBox } from '../src/kernel/forms';
 import { MODEL_RE } from '../src/kernel/validator';
@@ -43,12 +43,14 @@ const planOf = (xml: string) => {
 };
 
 describe('the prompt of the structures without a skeleton (T354)', () => {
-  it('is the part of the prompt after the mark: the method, no stock building; the other classes keep theirs', () => {
+  it('is the architect’s prompt (the part after the mark before T468): the method, no stock building; the other classes keep theirs', () => {
     const general = sculptorRole(bundledFiles);
     const structures = sculptorRole(bundledFiles, true);
-    expect(bundledFiles['prompts/agents/sculptor.md']).toContain(STRUCTURES_MARK);
+    // Since T468 the structures' prompt is the architect's section, the same text; the core and the sections are the others'.
+    expect(bundledFiles['prompts/agents/sculptor.md']).not.toContain(STRUCTURES_MARK);
+    expect(structures).toBe(bundledFiles['prompts/agents/sculptor/architect.md']!.trim());
     expect(general).toContain('## Traps');
-    expect(general).toContain('rock: 20×20×16');
+    expect(sculptorSection(bundledFiles, 'landscaper')).toContain('rock: 20×20×16');
     expect(structures).not.toContain('## Traps');
     expect(structures).not.toContain('@@');
     expect(structures).toContain('## The method: three levels, one program');

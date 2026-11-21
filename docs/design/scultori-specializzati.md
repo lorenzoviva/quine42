@@ -191,6 +191,17 @@ specialità sparirebbe. Perciò:
 - **l'ordine del direttore**: `ModelDirector.missing()` in fila per specialità, così le chiamate che si seguono entro i cinque minuti della
   cache leggono lo stesso prefisso. La pausa fra due modelli (`modelGap`, 0 a manopola 1) non cambia.
 
+**Fatto in T468 (S2, ADR-0239, kernel 0.10.16)**: le specialità (`specialtyOf`), il nucleo in `prompts/agents/sculptor.md` e le sezioni in
+`prompts/agents/sculptor/<specialità>.md`, con ciò che c'era e nient'altro (le istruzioni nuove sono S4); l'Architetto col prompt delle
+strutture di prima, carattere per carattere; la vetrina fuori; i nodi che leggono file solo dove `models/` ne ha (la nota `files`); l'azione
+col nucleo senza le sezioni per scolpire (la nota `sculpting`) e la sezione del mestiere del suo modello; l'ordine qui sopra, con un segno
+`cache_control` alla fine di ogni parte stabile su OpenRouter (il comune, la sezione, gli esempi: tre, non due, perché gli esempi cambiano con
+la classe dentro un mestiere); `missing()` in fila per specialità, il mestiere scolpito per ultimo davanti; la specialità nel registro dei
+consumi (`world/usage.json → specialties`); il ripiego del prompt intero per gli universi di prima. Il nucleo è venuto più corto del previsto,
+2 856 token e non 3 068 (senza la vetrina, i nodi dei file, gli arti e le persone), il nucleo delle azioni 1 473; il sistema di ogni richiesta
+che non cresce a regole perde 1 705-2 179 token, 1 755 in media, 0,035 $ l'ora oggi e 0,052 $ dall'1/12, come il § 1.4 prevedeva; ciò che non
+serve ancora è 0-173 token a richiesta. Richiesta per richiesta, prima e dopo: [`misure-s2.md`](scultori-specializzati/misure-s2.md).
+
 ## 3. Il few-shot: quali esempi e quanto costano (c)
 
 ### 3.1 Che cosa c'è oggi
