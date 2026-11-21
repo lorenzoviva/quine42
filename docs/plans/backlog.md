@@ -6198,3 +6198,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (il veicolo in molti l'ha visto T442, il vuoto T445; il merge non cambia UI).
 - Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460, e `integra T442` e `integra T445` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T442 (ADR-0232, kernel 0.10.8) e T445 (rinumerato ad ADR-0233) fusi in `task/T460`, kernel finale 0.10.9 in version.ts, package.json e universe.json; rimandi di T445 portati a ADR-0233 in AGENTS.md, dettagli, glossario, indice degli ADR, codice e test; censimento del glossario rigenerato; suite intera (3714 test passati, 1 saltato) e typecheck verdi coi turni; browser non richiesto; sicurezza: nessuna superficie nuova.
+
+### T461 · Integrare T446 nel base (conflitto di versione e di ADR con T452) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 37
+- Contesto: `integra T446` (l'aria e l'ossigeno, ADR-0235, kernel 0.10.11) ha trovato conflitti in `AGENTS.md` e `docs/architettura-dettagli.md`: nel frattempo è entrato T452 (il Fisico a mondo acceso), anche lui ADR-0235 e kernel 0.10.11. Nasce da T446 e T452: `dossier T446`, `dossier T452`. (La dipendenza è il ramo `task/T446`, finito e non integrato.)
+- Cosa fare: nel worktree `git merge task/T446`; tenere tutte le aggiunte di entrambi; T452 resta ADR-0235 e kernel 0.10.11; T446 diventa ADR-0236 (file rinominato, indice degli ADR, ogni rimando in AGENTS.md, dettagli, glossario, codice, test) e il kernel finale è 0.10.12 in `version.ts`, `package.json` e `universe/universe.json` (e dove T446 lo cita); se il glossario è cambiato, il censimento rigenerato con `node tools/glossario/glossario.mjs`; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/aria.test.ts` e `tests/fisico-acceso.test.ts` verdi.
+- Browser: no (l'aria l'ha vista T446; il merge non cambia UI).
+- Quando è fatto: commit su `task/T461`; poi l'orchestratore integra T461, e `integra T446` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
