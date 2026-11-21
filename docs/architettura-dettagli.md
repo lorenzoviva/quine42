@@ -1366,7 +1366,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   c'è (T448, `#veicoli`), i terreni e gli ambienti dello spazio sono di T450; lo Spazio della Genesi resta la colonia con il cielo della terra.
   **Il mondo del vuoto è piano** (T448, ADR-0234: `flatRelief`, il rilievo dove ogni casella è al livello 0): una capsula agganciata a ogni bordo
   ha il ponte un gradino sopra la terra. `tests/vuoto.test.ts`.
-- **L'aria e l'ossigeno** (ADR-0237, T446, kernel 0.10.13). **L'aria** è una proprietà di caselle, luoghi e veicoli, mai un gas
+- **L'aria e l'ossigeno** (ADR-0238, T446, kernel 0.10.14). **L'aria** è una proprietà di caselle, luoghi e veicoli, mai un gas
   (`src/kernel/air.ts`): `Kernel.airAt(x, y, z)` la dice in un punto del tappeto, dalla prima fonte che parla (`airOf`): il ponte di un
   veicolo che la tiene (`vehicle.air`, vero se non detto per `medium: void`: la capsula; un ponte aperto ha l'aria della casella sotto), poi il
   terreno senz'aria (`air: false`, il vuoto sempre), una regione del master che la dice (`Region.air`, vero o falso, mai una trattenuta,

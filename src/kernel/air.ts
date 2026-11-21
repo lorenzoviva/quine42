@@ -1,4 +1,4 @@
-// The air and the breath (T446, ADR-0237, `docs/design/acqua-spazio.md` § 2.4): where a body breathes, and what the kernel does of a
+// The air and the breath (T446, ADR-0238, `docs/design/acqua-spazio.md` § 2.4): where a body breathes, and what the kernel does of a
 // wanderer's breath where the world counts it (`nature.oxygen`). The air is a property of tiles, places and vehicles, never a gas: what
 // says it is the terrain (`air`, true if not said; the void never), the vehicle whose deck one stands on (`vehicle.air`), the master's
 // region, the environment of the place, the body of the void (an asteroid has none); the first that says wins, in that order, the terrain's

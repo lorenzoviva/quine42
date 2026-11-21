@@ -38,7 +38,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Vuoto | `spazio` | 25 (18) | 0 (0) | 109 (43) | 1 (1) |
 | Vuoto | `abisso` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
 | Vuoto | `baratro` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
-| Stazione | `base` | 656 (62) | 2 (1) | 149 (44) | 18 (5) |
+| Stazione | `base` | 656 (62) | 2 (1) | 150 (45) | 18 (5) |
 | Stazione | `astronave` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Asteroide | `pianeta` | 1 (1) | 0 (0) | 42 (4) | 0 (0) |
 | Asteroide | `meteora` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -75,7 +75,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Capsula | `shuttle` | 3 (1) | 0 (0) | 0 (0) | 0 (0) |
 | Capsula | `modulo` | 22 (10) | 0 (0) | 141 (52) | 0 (0) |
 | Pianeta | `piano` | 33 (12) | 0 (0) | 505 (94) | 4 (4) |
-| Pianeta | `livello` | 5 (4) | 0 (0) | 98 (31) | 1 (1) |
+| Pianeta | `livello` | 5 (4) | 0 (0) | 99 (32) | 1 (1) |
 | Pianeta | `mondo` | 231 (58) | 0 (0) | 1202 (177) | 103 (17) |
 | Pianeta | `dimensione` | 0 (0) | 0 (0) | 2 (2) | 0 (0) |
 | Nome coniato | `censura` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
@@ -144,14 +144,14 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Magazzino | `deposito` | 12 (3) | 0 (0) | 37 (7) | 0 (0) |
 | Struttura | `edificio` | 13 (8) | 0 (0) | 150 (39) | 0 (0) |
 | Struttura | `building` | 572 (47) | 24 (5) | 31 (15) | 0 (0) |
-| Modello | `modello` | 106 (38) | 0 (0) | 486 (107) | 20 (8) |
+| Modello | `modello` | 106 (38) | 0 (0) | 487 (108) | 20 (8) |
 | Stella | `pozione` | 2 (1) | 0 (0) | 3 (3) | 0 (0) |
 | Stella | `sacco` | 5 (3) | 0 (0) | 8 (5) | 0 (0) |
-| Programma | `codice` | 47 (19) | 0 (0) | 227 (89) | 10 (3) |
+| Programma | `codice` | 47 (19) | 0 (0) | 228 (90) | 10 (3) |
 | Programma | `xml` | 641 (44) | 13 (2) | 123 (37) | 6 (2) |
 | Simbolo | `lettera` | 21 (11) | 0 (0) | 103 (42) | 0 (0) |
 | Simbolo | `#12` | 246 (73) | 6 (2) | 121 (51) | 34 (14) |
-| Simbolo | `codice` | 47 (19) | 0 (0) | 227 (89) | 10 (3) |
+| Simbolo | `codice` | 47 (19) | 0 (0) | 228 (90) | 10 (3) |
 | Simbolo | `colore` | 21 (9) | 0 (0) | 71 (28) | 6 (3) |
 | Programma incluso | `include` | 373 (96) | 1 (1) | 48 (12) | 10 (7) |
 | Programma incluso | `sottoprogramma` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -180,7 +180,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Ritocco | `correzione` | 1 (1) | 0 (0) | 26 (13) | 0 (0) |
 | Inchiostro | `outline` | 27 (8) | 6 (2) | 0 (0) | 21 (4) |
 | Inchiostro | `bordo` | 16 (8) | 0 (0) | 172 (36) | 2 (2) |
-| Fondo di una mesh | `base` | 656 (62) | 2 (1) | 149 (44) | 18 (5) |
+| Fondo di una mesh | `base` | 656 (62) | 2 (1) | 150 (45) | 18 (5) |
 | Fondo di una mesh | `bottom` | 132 (30) | 13 (2) | 6 (5) | 91 (12) |
 | Fondo di una mesh | `sotto` | 28 (16) | 0 (0) | 472 (108) | 21 (14) |
 | Taglia | `size` | 1508 (126) | 28 (5) | 102 (28) | 177 (21) |
@@ -203,7 +203,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Programma di mestiere | `script` | 31 (12) | 0 (0) | 151 (56) | 85 (12) |
 | Programma di mestiere | `job` | 293 (26) | 2 (2) | 44 (10) | 7 (2) |
 | Comportamento | `azione` | 47 (14) | 0 (0) | 77 (36) | 1 (1) |
-| Comportamento | `task` | 489 (40) | 0 (0) | 446 (172) | 0 (0) |
+| Comportamento | `task` | 489 (40) | 0 (0) | 453 (173) | 0 (0) |
 | Deposito del luogo | `magazzino` | 6 (3) | 0 (0) | 42 (12) | 0 (0) |
 | Deposito del luogo | `granaio` | 0 (0) | 0 (0) | 3 (1) | 0 (0) |
 | Deposito del luogo | `scorta` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
@@ -217,7 +217,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Squadra di un'impresa | `gruppo` | 0 (0) | 0 (0) | 22 (9) | 0 (0) |
 | Squadra di un'impresa | `ciurma` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Stadio di un edificio | `fase` | 39 (10) | 0 (0) | 90 (49) | 0 (0) |
-| Stadio di un edificio | `livello` | 5 (4) | 0 (0) | 98 (31) | 1 (1) |
+| Stadio di un edificio | `livello` | 5 (4) | 0 (0) | 99 (32) | 1 (1) |
 | Stadio di un edificio | `step` | 1225 (96) | 99 (6) | 237 (86) | 84 (14) |
 | Stadio di un edificio | `stage` | 213 (22) | 1 (1) | 22 (6) | 54 (11) |
 | Impalcatura | `ponteggio` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -256,7 +256,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Capo indossato | `abito` | 1 (1) | 0 (0) | 2 (1) | 0 (0) |
 | Capo indossato | `vestito` | 0 (0) | 0 (0) | 14 (5) | 0 (0) |
 | Zona del corpo | `slot` | 740 (39) | 10 (1) | 111 (23) | 5 (2) |
-| Zona del corpo | `parte` | 22 (11) | 0 (0) | 275 (113) | 9 (5) |
+| Zona del corpo | `parte` | 22 (11) | 0 (0) | 276 (114) | 9 (5) |
 | Corpo vestito | `skin` | 86 (4) | 0 (0) | 61 (6) | 892 (34) |
 | Ricetta | `crafting` | 5 (4) | 0 (0) | 3 (2) | 0 (0) |
 | Stato | `status` | 441 (41) | 0 (0) | 13 (8) | 78 (12) |
@@ -274,15 +274,15 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Musicista | `Compositore` | 0 (0) | 0 (0) | 2 (1) | 0 (0) |
 | Registro del Concilio | `registro` | 11 (9) | 0 (0) | 212 (78) | 1 (1) |
 | Registro del Concilio | `log` | 234 (53) | 1 (1) | 32 (22) | 6 (5) |
-| Sessione del Concilio | `sessione` | 38 (16) | 0 (0) | 136 (55) | 12 (1) |
+| Sessione del Concilio | `sessione` | 38 (16) | 0 (0) | 138 (56) | 12 (1) |
 | Generazione differita | `pregenerazione` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Rigenerazione dei modelli | `riscolpitura` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Natura del mondo | `reame` | 0 (0) | 0 (0) | 22 (10) | 1 (1) |
 | Natura del mondo | `bioma` | 0 (0) | 0 (0) | 4 (3) | 0 (0) |
 | Natura del mondo | `clima` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gravità | `peso` | 21 (8) | 0 (0) | 33 (21) | 0 (0) |
-| Modello di IA | `modello` | 106 (38) | 0 (0) | 486 (107) | 20 (8) |
-| Modello di IA | `Models` | 864 (111) | 8 (3) | 299 (74) | 6 (4) |
+| Modello di IA | `modello` | 106 (38) | 0 (0) | 487 (108) | 20 (8) |
+| Modello di IA | `Models` | 864 (111) | 8 (3) | 307 (75) | 6 (4) |
 | Vite degli individui | `realismo` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gioco al tocco | `joystick` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gioco al tocco | `mobile` | 7 (5) | 0 (0) | 64 (17) | 2 (2) |

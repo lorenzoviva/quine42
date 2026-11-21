@@ -208,7 +208,7 @@ export interface WorldNature {
   /** The weight of a body against the earth's (1): the jump scales with it (T447). */
   gravity: number;
   /**
-   * Whether a body counts its breath (T446, ADR-0237): the need `oxygen`, drained where there is no air (`air.ts`); false, the air is
+   * Whether a body counts its breath (T446, ADR-0238): the need `oxygen`, drained where there is no air (`air.ts`); false, the air is
    * everywhere and no body has the need.
    */
   oxygen: boolean;
@@ -219,7 +219,7 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
  * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229; `void`, `stars` and
- * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen since T446, ADR-0237; the gravity 0.2-2 since T447).
+ * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen since T446, ADR-0238; the gravity 0.2-2 since T447).
  */
 export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
   geography: ['continent', 'archipelago', 'void'],

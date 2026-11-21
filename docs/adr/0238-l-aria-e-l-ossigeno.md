@@ -1,4 +1,4 @@
-# ADR-0237 — L'aria e l'ossigeno
+# ADR-0238 — L'aria e l'ossigeno
 
 Data: 2026-11-21 · Stato: accettato (task T446 del backlog, S2 di [`docs/design/acqua-spazio.md`](../design/acqua-spazio.md) § 2.4)
 · Riferimenti: ADR-0224 (la fisica rimodellabile: `air` dei terreni e `oxygen` della natura, previsti per T446), ADR-0225 (il corpo che
@@ -47,7 +47,7 @@ rallenta, l'asfissia come morte, la bombola che lo ricarica, e tutto fatto dal k
 
 ## Conseguenze
 
-- Kernel **0.10.13**: il contratto non cambia (ciò che c'era resta com'era; la natura di prima non ha il respiro). Cose nuove: `src/kernel/air.ts`
+- Kernel **0.10.14**: il contratto non cambia (ciò che c'era resta com'era; la natura di prima non ha il respiro). Cose nuove: `src/kernel/air.ts`
   (`airOf`, `breathOf`, `breathTick`, `OXYGEN_DRAIN`, `OXYGEN_REFILL`, `ASPHYXIA_HEALTH`, `ASPHYXIATED`), `Kernel.airAt`, `Kernel.breathing`,
   `Needs.oxygen`, `VehicleSpec.air`, `Region.air` e `regionAir`, `EnvironmentDef.air`, `world.air_at`; `tests/aria.test.ts`.
 - Restano: l'ambientazione dello spazio che porta il respiro e le sue bombole e tute (T450); il fiato sott'acqua dei Pirati (il giorno che
