@@ -84,6 +84,18 @@ export class Stars {
    * Shown or not. The sphere stays at the camera; the field stays under it but slides back by a share of where the camera is on the carpet
    * (`ox`, `oy` the carpet's scroll: the ground moves by all of it), wrapped by its period.
    */
+  /**
+   * The sphere alone around a camera whose planes are far apart (T449, a planet's pass): `distance` from the eye, between them; the field,
+   * which belongs under a floor, hidden.
+   */
+  around(camera: THREE.Camera, distance: number): void {
+    this.root.visible = true;
+    this.root.position.copy(camera.position);
+    this.root.scale.setScalar(distance / SPHERE.radius);
+    this.sphere.position.set(0, 0, 0);
+    this.field.visible = false;
+  }
+
   update(visible: boolean, camera: THREE.Camera, ox: number, oy: number): void {
     this.root.visible = visible;
     if (!visible) return;

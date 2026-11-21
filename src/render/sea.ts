@@ -28,12 +28,38 @@ export function swellAt(x: number, z: number, t: number): number {
 
 const f = (v: number) => v.toFixed(4);
 
-/** The same swell for the shaders, and its slope (for the normal): `seaSwell(p, t)`, `seaSlope(p, t)`. */
-export const SEA_GLSL = `float seaSwell(vec2 p, float t) {
-  return ${SWELL.map(({ dir, k, w, a }) => `${f(a)} * sin(dot(p, vec2(${f(dir[0])}, ${f(dir[1])})) * ${f(k)} + t * ${f(w)})`).join('\n    + ')};
+/**
+ * Where a point of the carpet is in each wave of the swell (radians, within a turn): computed here in double precision, so that a vertex
+ * a million tiles from the origin (a planet, T449) is as still as one at it; the shaders only add the time.
+ */
+export function swellPhases(x: number, z: number): [number, number, number] {
+  const out = SWELL.map(({ dir, k }) => {
+    const p = (x * dir[0] + z * dir[1]) * k;
+    return p - 2 * Math.PI * Math.floor(p / (2 * Math.PI));
+  });
+  return [out[0]!, out[1]!, out[2]!];
 }
-vec2 seaSlope(vec2 p, float t) {
-  return ${SWELL.map(({ dir, k, w, a }) => `${f(a * k)} * vec2(${f(dir[0])}, ${f(dir[1])}) * cos(dot(p, vec2(${f(dir[0])}, ${f(dir[1])})) * ${f(k)} + t * ${f(w)})`).join('\n    + ')};
+
+/** The phase of the foam's breath along a shore (radians, within a turn), in double precision as the swell's. */
+export function foamPhase(x: number, z: number): number {
+  const p = x * 0.71 + z * 1.37;
+  return p - 2 * Math.PI * Math.floor(p / (2 * Math.PI));
+}
+
+/** The swell's phases of every vertex of a geometry (local to `origin`, carpet x and z): the `seaPhase` attribute. */
+export function phaseAttribute(positions: ArrayLike<number>, origin: readonly [number, number] = [0, 0]): Float32Array {
+  const n = Math.floor(positions.length / 3);
+  const out = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) out.set(swellPhases(positions[i * 3]! + origin[0], positions[i * 3 + 2]! + origin[1]), i * 3);
+  return out;
+}
+
+/** The same swell for the shaders, and its slope (for the normal): `seaSwell(ph, t)`, `seaSlope(ph, t)`, from the phases of the vertex. */
+export const SEA_GLSL = `float seaSwell(vec3 ph, float t) {
+  return ${SWELL.map(({ w, a }, i) => `${f(a)} * sin(ph[${i}] + t * ${f(w)})`).join('\n    + ')};
+}
+vec2 seaSlope(vec3 ph, float t) {
+  return ${SWELL.map(({ dir, k, w, a }, i) => `${f(a)} * ${f(k)} * vec2(${f(dir[0])}, ${f(dir[1])}) * cos(ph[${i}] + t * ${f(w)})`).join('\n    + ')};
 }`;
 
 /**
@@ -72,11 +98,11 @@ export function seaLift(waterTop: (x: number, z: number) => number | undefined, 
   return w > 0 ? w * swellAt(x, z, t) : 0;
 }
 
-/** The weight of every vertex of a geometry made of the water's tops (corners on whole tiles), as its `wave` attribute. */
-export function waveAttribute(positions: ArrayLike<number>, waterTop: (x: number, z: number) => number | undefined): Float32Array {
+/** The weight of every vertex of a geometry made of the water's tops (corners on whole tiles; local to `origin`), as its `wave` attribute. */
+export function waveAttribute(positions: ArrayLike<number>, waterTop: (x: number, z: number) => number | undefined, origin: readonly [number, number] = [0, 0]): Float32Array {
   const n = Math.floor(positions.length / 3);
   const out = new Float32Array(n);
-  for (let i = 0; i < n; i++) out[i] = seaWeight(waterTop, positions[i * 3]!, positions[i * 3 + 2]!);
+  for (let i = 0; i < n; i++) out[i] = seaWeight(waterTop, positions[i * 3]! + origin[0], positions[i * 3 + 2]! + origin[1]);
   // A vertex on the far edge of its tile reads the next tile there (u or v 0): the same corner, so the same weight.
   return out;
 }
@@ -84,12 +110,12 @@ export function waveAttribute(positions: ArrayLike<number>, waterTop: (x: number
 // --- The materials -------------------------------------------------------------------------------------------------------------------
 
 /** What the water's vertices add, before three's: the swell's height and its slope as the normal, weighted by `wave`. */
-const WAVE_PARS = `attribute float wave;\n${SEA_GLSL}\n`;
+const WAVE_PARS = `attribute float wave;\nattribute vec3 seaPhase;\n${SEA_GLSL}\n`;
 const WAVE_NORMAL = `#include <beginnormal_vertex>
-  vec2 seaS = wave * seaSlope(position.xz, uTime);
+  vec2 seaS = wave * seaSlope(seaPhase, uTime);
   objectNormal = normalize(vec3(-seaS.x, 1.0, -seaS.y));`;
 const WAVE_BEGIN = `#include <begin_vertex>
-  transformed.y += wave * seaSwell(position.xz, uTime);`;
+  transformed.y += wave * seaSwell(seaPhase, uTime);`;
 
 /** Adds to a clipped material (materials.ts) what moves its vertices with the swell; the ink's ids move the same (`userData.pars`, `userData.begin`). */
 function waving<M extends THREE.Material>(m: M, extra?: (sh: THREE.WebGLProgramParametersWithUniforms) => void): M {
@@ -130,16 +156,16 @@ export const SEA_MAT = {
   water: waving(clipped(lit({ vertexColors: true }), 'water'), (sh) => {
     sh.vertexShader = `varying float vSeaH;\n${sh.vertexShader}`.replace(
       '#include <begin_vertex>',
-      `#include <begin_vertex>\n  vSeaH = wave * seaSwell(position.xz, uTime) / ${SWELL_MAX.toFixed(4)};`,
+      `#include <begin_vertex>\n  vSeaH = wave * seaSwell(seaPhase, uTime) / ${SWELL_MAX.toFixed(4)};`,
     );
     sh.fragmentShader = `varying float vSeaH;\n${sh.fragmentShader}`.replace('#include <color_fragment>', CREST_FRAGMENT);
   }),
   /** The foam on the shores, riding the swell as the water does. */
   foam: noInk(
     waving(clipped(lit({ color: FOAM, transparent: true, depthWrite: false }), 'foam'), (sh) => {
-      sh.vertexShader = `attribute float foam;\nvarying float vFoam;\nvarying float vFoamPhase;\n${sh.vertexShader}`.replace(
+      sh.vertexShader = `attribute float foam;\nattribute float foamPhase;\nvarying float vFoam;\nvarying float vFoamPhase;\n${sh.vertexShader}`.replace(
         '#include <begin_vertex>',
-        '#include <begin_vertex>\n  vFoam = foam;\n  vFoamPhase = position.x * 0.71 + position.z * 1.37;',
+        '#include <begin_vertex>\n  vFoam = foam;\n  vFoamPhase = foamPhase;',
       );
       sh.fragmentShader = `uniform float uTime;\nvarying float vFoam;\nvarying float vFoamPhase;\n${sh.fragmentShader}`.replace('#include <dithering_fragment>', FOAM_FRAGMENT);
     }),
@@ -160,6 +186,8 @@ export class FoamBuilder {
   pos: number[] = [];
   foam: number[] = [];
   wave: number[] = [];
+  phase: number[] = [];
+  breath: number[] = [];
 
   constructor(private waterTop: (x: number, z: number) => number | undefined) {}
 
@@ -175,6 +203,8 @@ export class FoamBuilder {
     for (const i of [0, 1, 2, 0, 2, 3]) {
       const [px, pz, fo] = quad[i]!;
       this.pos.push(px!, y + FOAM_LIFT, pz!);
+      this.phase.push(...swellPhases(px!, pz!));
+      this.breath.push(foamPhase(px!, pz!));
       this.foam.push(fo!);
       this.wave.push(seaWeight(this.waterTop, Math.min(px!, x + 1 - 1e-6), Math.min(pz!, z + 1 - 1e-6)));
     }
@@ -184,11 +214,14 @@ export class FoamBuilder {
     return this.pos.length === 0;
   }
 
-  geometry(): THREE.BufferGeometry {
+  /** The strips' mesh, its vertices relative to `origin` (carpet x and z: the place's, T449), its phases from where they really are. */
+  geometry(origin: readonly [number, number] = [0, 0]): THREE.BufferGeometry {
     const n = this.pos.length / 3;
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
+    g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos.map((v, i) => (i % 3 === 0 ? v - origin[0] : i % 3 === 2 ? v - origin[1] : v)), 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(new Float32Array(n * 3).map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
+    g.setAttribute('seaPhase', new THREE.Float32BufferAttribute(this.phase, 3));
+    g.setAttribute('foamPhase', new THREE.Float32BufferAttribute(this.breath, 1));
     g.setAttribute('foam', new THREE.Float32BufferAttribute(this.foam, 1));
     g.setAttribute('wave', new THREE.Float32BufferAttribute(this.wave, 1));
     // Its own glow and alpha (materials.ts would add them after the first frame).
@@ -341,6 +374,9 @@ export class Sea {
     this.points = this.points.filter((p) => t - p.born < WAKE.life);
     let v = 0;
     const cap = this.alpha.length;
+    // The puffs relative to the first one's tile (T449): a wake a million tiles from the origin is as still as one at it.
+    const ax = this.points.length ? Math.floor(this.points[0]!.x) : 0, az = this.points.length ? Math.floor(this.points[0]!.z) : 0;
+    this.mesh.position.set(ax, 0, az);
     for (const p of this.points)
       for (const puff of wakePuffs(p, t)) {
         const top = waterTop(Math.floor(puff.x), Math.floor(puff.z));
@@ -350,9 +386,9 @@ export class Sea {
           const a0 = (i * 2 * Math.PI) / SIDES, a1 = ((i + 1) * 2 * Math.PI) / SIDES;
           // Wound to face up: the middle, then the rim clockwise seen from above (x right, z down).
           for (const [px, pz] of [[puff.x, puff.z], [puff.x + Math.cos(a1) * puff.r, puff.z + Math.sin(a1) * puff.r], [puff.x + Math.cos(a0) * puff.r, puff.z + Math.sin(a0) * puff.r]]) {
-            this.pos[v * 3] = px!;
+            this.pos[v * 3] = px! - ax;
             this.pos[v * 3 + 1] = y;
-            this.pos[v * 3 + 2] = pz!;
+            this.pos[v * 3 + 2] = pz! - az;
             this.alpha[v] = puff.alpha;
             v++;
           }

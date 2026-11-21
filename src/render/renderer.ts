@@ -21,6 +21,8 @@ import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
 import { HELM_VIEW, wheelFactor, zoomDistance, zoomMax } from './camera';
 import { Stars, STAR_SKY } from './stars';
+import { Planets, PLACES_BELOW } from './planet';
+import { GLOBE_RADIUS, GLOBE_TOP, natureOfBand, ORBIT_TOP, planetPlace, transitView } from '../kernel/planets';
 
 const SKY = { day: new THREE.Color('#9cc8e8'), dusk: new THREE.Color('#e8a070'), night: new THREE.Color('#0e1424'), studio: new THREE.Color('#07070f'), corona: new THREE.Color('#05060a') };
 const PITCH = 0.95;
@@ -78,6 +80,10 @@ export class Renderer {
   private fog = new THREE.Fog(0, 1, 2);
   /** The sky of stars of a world whose nature says it (T445), behind and under everything; hidden otherwise. */
   private stars = new Stars();
+  /** The planets of a world that has them (T449): their globes at the levels of detail a voyage wants, in a pass of their own. */
+  private planets?: Planets;
+  /** The voyage shown (T449): its clock, which goes on by itself between two updates, and what flies with the vehicle. */
+  private voyage?: { id: number; t: number; ids: Set<number>; at: number };
   /** Where the ring's meshes are drawn once before they are seen, so that they are on the GPU when the edge is crossed (T226). */
   private loader = { target: new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }), group: new THREE.Group() };
   private overlay: Overlay;
@@ -150,6 +156,61 @@ export class Renderer {
     this.syncCut(undefined);
     this.corona?.reset();
     this.entities.clear();
+    this.planets?.dispose();
+    this.planets = undefined;
+  }
+
+  /**
+   * The voyage the wanderer is on (T449), as it is shown: the vehicle and what is aboard, the body under it (the one left until the kernel moves
+   * the vehicle, the one reached after) and how high over its landing (`transitView`).
+   */
+  private voyageNow(dt: number): { id: number; band: number; altitude: number; ids: Set<number> } | undefined {
+    const k = this.kernel;
+    const id = k.planets().length && !k.watched() && k.zone === 'sim' ? k.aboard() : undefined;
+    const tr = id !== undefined ? k.transitOf(id) : undefined;
+    if (id === undefined || !tr) return (this.voyage = undefined);
+    let v = this.voyage;
+    if (!v || v.id !== id) v = this.voyage = { id, t: tr.t, ids: new Set([id]), at: -1 };
+    v.t = Math.abs(v.t + dt - tr.t) > 0.5 ? tr.t : Math.min(tr.total, v.t + dt);
+    if (this.t - v.at > 0.5) {
+      v.at = this.t;
+      v.ids = new Set([id, ...k.ecs.query('pos').filter((e) => e !== id && k.carriedOn(e)?.vehicle === id)]);
+    }
+    const top = (b: number) => (b > 0 ? GLOBE_TOP * GLOBE_RADIUS : ORBIT_TOP);
+    const s = transitView({ ...tr, t: v.t }, top);
+    const band = tr.jumped ? tr.to : tr.from;
+    return { id, band, altitude: band === s.band ? s.altitude : top(band), ids: v.ids };
+  }
+
+  /** What the planets are asked this frame (T449): the body under the voyage, its altitude, its sky if it has air (by its own day). */
+  private planetSight(v: { band: number; altitude: number }): { band: number; altitude: number; sky?: THREE.Color } {
+    const k = this.kernel;
+    if (v.band < 1) return v;
+    const S = k.config.chunkSize;
+    const n = natureOfBand(k.config.nature, v.band);
+    if (n.sky !== 'earth') return v;
+    const day = k.daylight(planetPlace(v.band, S) * S);
+    return { ...v, sky: day > 0.6 ? SKY.day.clone() : day > 0.3 ? SKY.dusk.clone().lerp(SKY.day, (day - 0.3) / 0.3) : SKY.night.clone().lerp(SKY.dusk, day / 0.3) };
+  }
+
+  /** The tiles of the places loaded on a band (T449): the levels leave them to the true places. */
+  private placesOf(band: number): { x0: number; y0: number; x1: number; y1: number } | undefined {
+    const k = this.kernel;
+    const S = k.config.chunkSize;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const ch of k.chunks.values()) {
+      if (k.bandOf(ch.cx) !== band) continue;
+      x0 = Math.min(x0, ch.cx * S);
+      y0 = Math.min(y0, ch.cy * S);
+      x1 = Math.max(x1, (ch.cx + 1) * S);
+      y1 = Math.max(y1, (ch.cy + 1) * S);
+    }
+    return Number.isFinite(x0) ? { x0, y0, x1, y1 } : undefined;
+  }
+
+  /** What the planets' levels cost now (T449: `misura-frame`, the console), or nothing in a world without planets. */
+  planetStats(): ReturnType<Planets['stats']> | undefined {
+    return this.planets?.stats();
   }
 
   /** The master's client draws the corona too. */
@@ -301,6 +362,14 @@ export class Renderer {
     this.crack = Math.max(0, this.crack - dt);
     const g = Math.max(this.glitchLevel, crackLevel(this.crack));
 
+    // A voyage (T449): the vehicle and who is aboard over the ground, the rest of the world hidden over a planet's levels.
+    if (k.planets().length) this.planets ??= new Planets(k);
+    const voyage = this.voyageNow(dt);
+    const alone = !!voyage && voyage.band > 0 && voyage.altitude > PLACES_BELOW;
+    this.wanderer.aloft = voyage?.altitude ?? 0;
+    this.entities.aloft = voyage ? { ids: voyage.ids, dy: voyage.altitude, alone } : undefined;
+    for (const v of this.chunks.values()) v.group.visible = !alone;
+
     // The simulation.
     this.world.visible = !interior;
     this.world.position.set(-ox, 0, -oy);
@@ -315,7 +384,11 @@ export class Renderer {
       // Under the ground (T416): what stands over the head in a disc around is cut, terrain too; the corona has nothing of it.
       under = watch ? k.underground(watch) : k.underground();
       this.syncCut(under);
-      U.cutOff.value.set(ox, oy);
+      // The cut in whole tiles of the carpet (T449): the shader gets the scroll's fraction and the tile relative to its whole part, small numbers
+      // a million tiles from the origin too.
+      const ix = Math.floor(ox), iy = Math.floor(oy);
+      U.cutOff.value.set(ox - ix, oy - iy);
+      if (under) U.cutTile.value.set(under.tile.x - ix, under.tile.y - iy);
       this.entities.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
@@ -330,8 +403,10 @@ export class Renderer {
     if (!watch) this.corona?.update(this.t, studio, revealed, k.coronaNear(), interior);
 
     // Light: the day outside, a dim neon light in the studio.
-    const day = k.daylight();
-    const starry = k.config.nature.sky === 'stars';
+    // The light and the sky of where one is (T449: a planet's own `nature.sky` and day), and the stars on a voyage.
+    const here = watch ? watch.x : k.wandererCarpet().x;
+    const day = k.daylight(here);
+    const starry = !!voyage || k.natureAt(here).sky === 'stars';
     const night = 1 - day;
     if (revealed) {
       // The studio and its campus have their own light, day and night: neon and screens.
@@ -370,8 +445,10 @@ export class Renderer {
       this.scene.background = bg;
       this.fog.color.copy(bg);
       const air = CARTOON ? aerial(this.distance, day) : { near: this.distance * 2.2, far: this.distance * 4.5 };
-      this.fog.near = air.near;
-      this.fog.far = air.far;
+      // On a voyage the ground is as far again as the altitude (T449): it goes away into the dark, and comes back from it.
+      const up = voyage?.altitude ?? 0;
+      this.fog.near = air.near + up;
+      this.fog.far = air.far + up * 1.25;
     }
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t, watch ? { x: 0, y: 0 } : p);
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
@@ -380,7 +457,8 @@ export class Renderer {
     // It looks at the wanderer's middle, up and down the hills with it.
     const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y, watch.z) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + this.wanderer.sunk + 0.6, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
-    if (this.target.distanceTo(aim) > 30) this.target.copy(aim);
+    // On a voyage (T449) the altitude changes by a share of itself each second: the camera keeps the vehicle where it is, without easing.
+    if (voyage || this.target.distanceTo(aim) > 30) this.target.copy(aim);
 
     // In simulation without god mode: restore pitch to 3/4 (PITCH) and clamp distance to 15
     // At the helm (T439) the camera draws back once, to see the hull and the shore; let go, it comes back within the simulation's.
@@ -418,8 +496,25 @@ export class Renderer {
     this.camera.position.set(this.target.x + Math.sin(this.yaw) * flat, this.target.y + Math.sin(this.pitch) * this.distance, this.target.z + Math.cos(this.yaw) * flat);
     if (g > 0.2) this.camera.position.x += (Math.random() - 0.5) * 0.15 * g;
     this.camera.lookAt(this.target);
+    // On a voyage the far plane follows the altitude (T449), the near one a little further from the eye: the depth keeps its precision.
+    const far = voyage ? Math.min(3e4, Math.max(400, voyage.altitude * 1.5 + 400)) : 400;
+    const near = voyage ? 1 : 0.1;
+    if (this.camera.far !== far || this.camera.near !== near) {
+      this.camera.far = far;
+      this.camera.near = near;
+      this.camera.updateProjectionMatrix();
+    }
     // The stars only where the world shows, never with the corona (ADR-0124: it has its own dark).
     this.stars.update(starry && !revealed, this.camera, ox, oy);
+    // A planet seen on a voyage (T449): its globe in the pass before the world's, the world over it without its background.
+    const drawn = !revealed && !!voyage && !!this.planets?.show(this.planetSight(voyage), this.camera, this.h, ox, oy, this.placesOf(voyage.band), this.wanderer.view.root.position);
+    this.bloom.background(drawn ? this.planets!.scene : null, this.planets?.camera);
+    if (!drawn) this.planets?.warm(this.gl, this.loader.target);
+    if (drawn) {
+      this.fog.color.copy(this.planets!.scene.background as THREE.Color);
+      this.scene.background = null;
+      this.stars.root.visible = false;
+    } else this.planets?.show(undefined, this.camera, this.h, ox, oy);
     this.sun.position.copy(this.target).add(new THREE.Vector3(...SUN_FROM));
     this.sun.target.position.copy(this.target);
     this.bloom.render(dt);

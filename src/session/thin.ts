@@ -481,7 +481,7 @@ export class ThinClient {
     const heading = known && Number.isFinite(was?.heading) ? was.heading : v.heading;
     // Another's helm is never this mirror's wanderer, whose id (`me`) may be the server's id of the master: it is marked as another's.
     const helm = v.helm === undefined ? undefined : v.helm === this.session.id ? k.wanderer().id : `${OTHERS_HELM}${v.helm}`;
-    k.ecs.set(id, 'vehicle', { heading, speed: v.speed, turn: v.turn, thrust: 0, steer: 0, power: 1, anchored: v.anchored, ...(helm !== undefined ? { helm } : {}) });
+    k.ecs.set(id, 'vehicle', { heading, speed: v.speed, turn: v.turn, thrust: 0, steer: 0, power: 1, anchored: v.anchored, ...(helm !== undefined ? { helm } : {}), ...(v.transit ? { transit: { ...v.transit } } : {}) });
     const form = k.ecs.get(id, 'form');
     if (form) form.yaw = heading;
     this.ships.set(id, { pose: { x: t.x, y: t.y, heading: v.heading }, speed: v.speed, turn: v.turn, at: this.clock });

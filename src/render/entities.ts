@@ -156,11 +156,31 @@ export class Entities {
   readonly views = new Map<Id, EntityView>();
   /** The wakes and the roll of what floats (T451). */
   readonly sea: Sea;
+  /** What flies on a voyage (T449): the vehicle and what is aboard it, in a group lifted over the ground. */
+  private up = new THREE.Group();
+  /**
+   * A voyage under way (T449): the vehicle and what is aboard (`ids`) `dy` tiles over where the kernel has them, the rest hidden when
+   * `alone` (the vehicle alone among the stars, over the levels of a planet). Undefined: everything where it is.
+   */
+  aloft?: { ids: ReadonlySet<Id>; dy: number; alone: boolean };
   constructor(
     private k: Kernel,
     private world: THREE.Group,
   ) {
     this.sea = new Sea(world);
+    world.add(this.up);
+  }
+
+  /** Every view in the world's group or in the lifted one, shown or hidden, as `aloft` says. */
+  private fly(): void {
+    const a = this.aloft;
+    this.up.position.y = a?.dy ?? 0;
+    for (const [id, v] of this.views) {
+      const lifted = !!a && a.ids.has(id);
+      const parent = lifted ? this.up : this.world;
+      if (v.root.parent !== parent) parent.add(v.root);
+      v.root.visible = !a?.alone || lifted;
+    }
   }
 
   /** Individuals differ a little: size, and (while they have no model) the colour of what they wear. */
@@ -231,6 +251,11 @@ export class Entities {
 
   /** `inside`: the structure the wanderer is in (cut above the head). */
   update(dt: number, t: number, inside?: Id): void {
+    this.updateViews(dt, t, inside);
+    this.fly();
+  }
+
+  private updateViews(dt: number, t: number, inside?: Id): void {
     const k = this.k;
     const seen = new Set<Id>();
     const hulls = new Set<Id>();
@@ -326,7 +351,7 @@ export class Entities {
   private remove(id: Id): void {
     const v = this.views.get(id);
     if (!v) return;
-    this.world.remove(v.root);
+    v.root.removeFromParent();
     // Models share their geometry among instances (models.ts keeps it); stand-ins own theirs, but not what they hold (T288).
     if (v.owned)
       v.root.traverse((o) => {
@@ -349,6 +374,8 @@ export class Wanderer {
   lift = 0;
   /** How far under its floor the body has sunk swimming (T438): the camera does not follow it down either. */
   sunk = 0;
+  /** How high over the ground a voyage carries it (T449): the camera follows it up. */
+  aloft = 0;
   /** The shadow on the floor under a jump. */
   private shadow: THREE.Mesh;
   constructor(private scene: THREE.Object3D) {
@@ -400,7 +427,7 @@ export class Wanderer {
     this.lift = y - floor;
     const sink = swims ? Math.max(0, k.floorAt(pcf.x, pcf.y, p.z) - swimFloor(k, pcf.x, pcf.y) - ride) : 0;
     this.sunk += (sink - this.sunk) * Math.min(1, dt * 14);
-    this.view.root.position.set(p.x, y, p.y);
+    this.view.root.position.set(p.x, y + this.aloft, p.y);
     this.shadow.visible = !!jump;
     if (jump) {
       this.shadow.position.set(p.x, floor + 0.03, p.y);

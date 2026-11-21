@@ -18,6 +18,11 @@
 // loaded, the frames there.
 // Only that: the other phases are not run.
 //
+// `--viaggio <universo>` (T449, ADR-0236): a universe of the void with planets (`nature.planets`); after the cold load the levels of detail
+// of the planet 1 are precomputed with no cache (how long, how many cells), the wanderer takes the controls of the capsule at the start's
+// landing and travels to the planet: the frames of the whole voyage, the JS heap and the buffers, what the levels hold on the GPU, then the
+// frames on the planet's ground. Only that, as `--blocco`.
+//
 // Nothing of the game changes: the probe wraps requestAnimationFrame, WebGL and Worker before the page, and the kernel's and the
 // renderer's methods from the console (`window.quine`, `window.view`), as an instance property over the prototype's. The wanderer's
 // saved position is removed from `universes/` before the load (T214): run it against a preview of a throwaway checkout.
@@ -325,7 +330,7 @@ try {
   await page.send('Runtime.enable');
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: PROBE });
   const t0 = Date.now();
-  await page.send('Page.navigate', { url: `http://localhost:${port}/?skip&offline` });
+  await page.send('Page.navigate', { url: `http://localhost:${port}/?skip&offline${opt('viaggio') ? `&universo=${opt('viaggio')}` : ''}` });
   await page.eval(`(async () => { for (let i = 0; i < 240 && !(window.quine?.corona && window.view); i++) await new Promise((r) => setTimeout(r, 250)); if (!window.quine?.corona) throw new Error('niente kernel'); })()`);
   const kernelAt = (Date.now() - t0) / 1000;
   const env = await page.eval(`(() => { const m = window.__misura, g = m.gl; const e = g.getExtension('WEBGL_debug_renderer_info'); return { gpu: e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : '?', size: [g.drawingBufferWidth, g.drawingBufferHeight], timer: !!m.timer, cores: navigator.hardwareConcurrency, ua: navigator.userAgent, webgpu: !!navigator.gpu }; })()`);
@@ -339,7 +344,7 @@ try {
   await page.eval(RESET);
   const settled = await settle(page);
   rows.push({ ...summary(`caricamento a freddo (fino a ${settled} s dopo il kernel)`, await page.eval(TAKE)), settled, kernelAt });
-  for (const [scene, go] of Object.entries(opt('blocco') ? {} : SCENES)) {
+  for (const [scene, go] of Object.entries(opt('blocco') || opt('viaggio') ? {} : SCENES)) {
     await page.eval(go);
     await settle(page, 60);
     await page.eval(RESET);
@@ -376,8 +381,52 @@ try {
     rows.push(summary(`dentro il modello di ${box.join('×')}, disegnato`, await page.eval(TAKE)));
   }
   // A block of places (T404): the program at a density, the block it asks for, its places loaded together.
+  const heapNow = async () => {
+    await page.send('HeapProfiler.collectGarbage').catch(() => {});
+    const m = await page.send('Performance.getMetrics');
+    const get = (n) => m.metrics.find((x) => x.name === n)?.value ?? 0;
+    const u = await page.send('Runtime.getHeapUsage').catch(() => ({}));
+    return { heapMB: get('JSHeapUsedSize') / 2 ** 20, buffersMB: (u.backingStorageSize ?? NaN) / 2 ** 20 };
+  };
+  // A voyage to a planet (T449).
+  if (opt('viaggio')) {
+    await page.send('Performance.enable');
+    const before = await heapNow();
+    // The levels of the planet 1, with no cache (a profile of its own): in the pauses between frames, as in the game.
+    const t1 = Date.now();
+    const lod = await page.eval(`(async () => { for (let i = 0; i < 600; i++) { const s = window.view.planetStats(); if (s?.ready?.[1] === 16) return s; await new Promise((r) => setTimeout(r, 250)); } return window.view.planetStats(); })()`);
+    console.log(`\nlivelli del pianeta 1: ${lod?.ready?.[1]} su 16 in ${((Date.now() - t1) / 1000).toFixed(1)} s (${lod?.sampled} celle campionate, ${lod?.ms} ms di lavoro nelle pause)`);
+    const aboard = await page.eval(`(async () => {
+      const k = window.quine; k.carpet().active = false;
+      const d = k.landingOf(0); const cp = k.carpet(); Object.assign(cp, { ox: Math.round(d.x), oy: Math.round(d.y) });
+      let c; for (let i = 0; i < 120 && c === undefined; i++) { await new Promise((r) => setTimeout(r, 250)); c = k.ecs.query('vehicle').find((e) => { const p = k.ecs.get(e, 'pos'); return Math.hypot(p.x - d.x, p.y - d.y) < 1; }); }
+      const p = k.wandererPos(); delete p.z; Object.assign(p, { x: d.x + Math.sin(d.heading) * 0.8 - cp.ox, y: d.y + Math.cos(d.heading) * 0.8 - cp.oy });
+      await new Promise((r) => setTimeout(r, 1000));
+      await k.perform(c, 'board'); await k.perform(c, 'helm');
+      window.__c = c; return { c, aboard: k.aboard(), courses: k.actionsFor(c).filter((o) => o.id.startsWith('travel:')).length };
+    })()`);
+    if (aboard.aboard !== aboard.c || !aboard.courses) throw new Error(`niente capsula ai comandi: ${JSON.stringify(aboard)}`);
+    await settle(page, 30);
+    await page.eval(RESET);
+    const went = await page.eval(`(async () => { const k = window.quine, c = window.__c; const t0 = performance.now(); await k.perform(c, 'travel:1'); let most = 0;
+      for (let i = 0; i < 600 && k.transitOf(c); i++) { most = Math.max(most, window.view.planetStats()?.bytes ?? 0); await new Promise((r) => setTimeout(r, 100)); }
+      return { ms: Math.round(performance.now() - t0), band: k.bandAt(k.wandererCarpet().x), levelsMB: most / 2 ** 20 }; })()`);
+    rows.push({ ...summary(`il viaggio verso il pianeta 1 (${(went.ms / 1000).toFixed(1)} s, i livelli fino a ${went.levelsMB.toFixed(1)} MB)`, await page.eval(TAKE)), went, lod });
+    const after = { ...(await heapNow()), levels: await page.eval('window.view.planetStats()') };
+    console.log(`memoria JS: prima ${before.heapMB.toFixed(0)} MB, buffer ${before.buffersMB.toFixed(0)} MB; dopo l'atterraggio ${after.heapMB.toFixed(0)} MB, buffer ${after.buffersMB.toFixed(0)} MB; livelli sulla GPU: ${after.levels?.meshes} mesh, ${Math.round((after.levels?.triangles ?? 0) / 1000)}k triangoli, ${((after.levels?.bytes ?? 0) / 2 ** 20).toFixed(1)} MB`);
+    await settle(page, 60);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`sul pianeta, atterrati`, await page.eval(TAKE)), before, after });
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+    process.exitCode = went.band === 1 ? 0 : 1;
+  }
   const blockFile = opt('blocco');
-  if (blockFile) {
+  if (opt('viaggio')) {
+    // Done above.
+  } else if (blockFile) {
     const vpt = Number(opt('vpt', '10'));
     const [bx, by] = (opt('luogo') ?? '20,24').split(',').map(Number);
     const xml = fs.readFileSync(blockFile, 'utf8');

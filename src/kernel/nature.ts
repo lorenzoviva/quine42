@@ -6,6 +6,7 @@
 // writes them. A value this kernel cannot make true is not accepted: it is the world of today (ADR-0221, «what the kernel cannot do is
 // not asked»); each task that makes one true opens it here.
 
+import { cleanText } from './cleantext';
 import type { TerrainDef } from './types';
 
 // --- The terrain: how a body crosses a tile ------------------------------------------------------------------------------------------
@@ -191,6 +192,11 @@ export type Sky = 'earth' | 'stars';
  * it is the world of today, so the defaults never change. It is public, as the rest of universe.json but `ai` (`playerFiles`).
  */
 export interface WorldNature {
+  /**
+   * The planets of a world of the void (T449, ADR-0236): each one a far band of the same plane (`src/kernel/planets.ts`), the void with its
+   * stations and asteroids the band 0, the orbit. Only a world of the void has them; none, the world of today.
+   */
+  planets?: Planet[];
   geography: Geography;
   sky: Sky;
   /**
@@ -228,13 +234,58 @@ export function repairNature(raw: unknown): WorldNature {
   const r = (raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
   const one = <T>(v: unknown, list: readonly T[], d: T): T => (list.includes(v as T) ? (v as T) : d);
   const num = (v: unknown, range: readonly [number, number], d: number): number => (finite(v) && v >= range[0] && v <= range[1] ? v : d);
+  const geography = one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography);
+  // The planets only around the void (T449): the orbit is the band 0, and a world of today has no far bands.
+  const planets = geography === 'void' ? repairPlanets(r.planets) : [];
   return {
-    geography: one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography),
+    ...(planets.length ? { planets } : {}),
+    geography,
     sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
     day: r.day === STILL_DAY ? STILL_DAY : num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
     gravity: num(r.gravity, NATURE_ACCEPTS.gravity, DEFAULT_NATURE.gravity),
     oxygen: one(r.oxygen, NATURE_ACCEPTS.oxygen, DEFAULT_NATURE.oxygen),
   };
+}
+
+// --- The planets (T449, ADR-0236) ----------------------------------------------------------------------------------------------------
+
+/**
+ * A planet of a world of the void (`nature.planets[k - 1]` is the band k, `src/kernel/planets.ts`): its name in the world, the seed of its
+ * ground and of its relief (the world's and its band's if not said), what its draft is made of (the generator's land with its seas: the
+ * archipelago and the void are not open on a planet yet), its sky, its day, its gravity, and where its sea lies (levels of its relief over its
+ * lowest, as `universe.json → relief.sea`; the one its relief gives if not said). Fixed at the Genesis as the rest of the nature.
+ */
+export interface Planet {
+  name?: string;
+  seed?: number;
+  geography: 'continent';
+  sky: Sky;
+  day: number;
+  gravity: number;
+  sea?: number;
+}
+
+/** How many planets a world has at most (T449): eight far bands, 2^23 tiles, well within what `hash32` takes. */
+export const MAX_PLANETS = 8;
+/** What this kernel accepts of a planet: its land and seas (the generator's), a sea within the relief's levels, a name of a line. */
+export const PLANET_ACCEPTS = { geography: ['continent'] as const, sea: [0, 24] as const, name: 40 };
+
+/** The planets of a nature, whatever it says: at most `MAX_PLANETS`, each within what the kernel accepts; what is not an object is no planet. */
+export function repairPlanets(raw: unknown): Planet[] {
+  if (!Array.isArray(raw)) return [];
+  const out: Planet[] = [];
+  for (const p of raw.slice(0, MAX_PLANETS)) {
+    if (!p || typeof p !== 'object' || Array.isArray(p)) continue;
+    const r = p as Record<string, unknown>;
+    // A planet is a world with air under its own sky: its own nature within the same limits as the world's.
+    const n = repairNature({ geography: 'continent', sky: r.sky ?? 'earth', day: r.day, gravity: r.gravity });
+    const said = typeof r.name === 'string' ? cleanText(r.name, PLANET_ACCEPTS.name, 'il nome') : undefined;
+    const name = said && 'text' in said ? said.text : '';
+    const seed = typeof r.seed === 'number' && Number.isSafeInteger(r.seed) ? r.seed : undefined;
+    const sea = finite(r.sea) && r.sea >= PLANET_ACCEPTS.sea[0] && r.sea <= PLANET_ACCEPTS.sea[1] ? Math.round(r.sea) : undefined;
+    out.push({ ...(name ? { name } : {}), ...(seed !== undefined ? { seed } : {}), geography: 'continent', sky: n.sky, day: n.day, gravity: n.gravity, ...(sea !== undefined ? { sea } : {}) });
+  }
+  return out;
 }
 
 /**
@@ -251,7 +302,8 @@ export function clockDay(nature: Pick<WorldNature, 'day'> | undefined): number {
 export const stillLight = (nature: Pick<WorldNature, 'day'> | undefined): boolean => nature?.day === STILL_DAY;
 
 /** Whether two natures are the same world. */
-export const sameNature = (a: WorldNature, b: WorldNature): boolean => (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]);
+export const sameNature = (a: WorldNature, b: WorldNature): boolean =>
+  (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]) && JSON.stringify(a.planets ?? []) === JSON.stringify(b.planets ?? []);
 
 // --- The gravity: how a body leaps and walks (T447, ADR-0226) ------------------------------------------------------------------------
 

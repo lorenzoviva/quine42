@@ -9,6 +9,8 @@
 import { toLocal } from './forms';
 import { crossingOf, isVoid, terrainPhysics } from './nature';
 import type { TerrainDef } from './types';
+import { saneTransit, type Transit } from './planets';
+import { MAX_PLANETS } from './nature';
 
 // --- What a manifest says ----------------------------------------------------------------------------------------------------------
 
@@ -119,6 +121,8 @@ export interface VehicleState {
   anchored: boolean;
   helm?: string;
   bumped?: boolean;
+  /** A voyage under way (T449, ADR-0236): only a vehicle of the void, only the kernel writes it (`travelTo`). */
+  transit?: Transit;
 }
 
 /** A vehicle that comes into the world: still, at anchor, heading as its form faces. */
@@ -127,7 +131,7 @@ export function newVehicle(heading: number): VehicleState {
 }
 
 /** The state made sane in place (rule 7): what is not a number is nothing, what is out of range the nearest it may be. */
-export function saneVehicle(v: Partial<VehicleState> & Record<string, unknown>, spec: VehicleSpec): VehicleState {
+export function saneVehicle(v: Partial<VehicleState> & Record<string, unknown>, spec: VehicleSpec, bands = 0): VehicleState {
   v.heading = finite(v.heading) ? v.heading % (2 * Math.PI) : 0;
   v.speed = finite(v.speed) ? within(v.speed, [-spec.speed * REVERSE, spec.speed]) : 0;
   v.turn = finite(v.turn) ? within(v.turn, [-spec.turn, spec.turn]) : 0;
@@ -137,6 +141,9 @@ export function saneVehicle(v: Partial<VehicleState> & Record<string, unknown>, 
   v.anchored = v.anchored !== false;
   if (typeof v.helm !== 'string' || !v.helm) delete v.helm;
   if (v.bumped !== true) delete v.bumped;
+  const tr = spec.medium === 'void' ? saneTransit(v.transit, bands) : undefined;
+  if (tr) v.transit = Object.assign(v.transit as Transit, tr);
+  else delete v.transit;
   return v as VehicleState;
 }
 
@@ -216,6 +223,8 @@ export interface VehicleView {
   turn: number;
   anchored: boolean;
   helm?: string;
+  /** A voyage under way (T449): the client shows it, never moves it. */
+  transit?: Transit;
 }
 
 /** The longest helm a client takes from the wire: a wanderer's id is shorter. */
@@ -233,6 +242,8 @@ export function readVehicleView(raw: unknown): VehicleView | undefined {
     turn: finite(r.turn) ? within(r.turn, [-turn, turn]) : 0,
     anchored: r.anchored !== false,
     ...(typeof r.helm === 'string' && r.helm && r.helm.length <= MAX_HELM ? { helm: r.helm } : {}),
+    // A voyage (T449): bands within the most a world has, a time within its length.
+    ...((t) => (t ? { transit: t } : {}))(saneTransit(r.transit, MAX_PLANETS)),
   };
 }
 

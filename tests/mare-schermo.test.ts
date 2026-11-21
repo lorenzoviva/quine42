@@ -156,7 +156,7 @@ describe('the shaders of the sea (T451)', () => {
       expect(sh.uniforms.uTime, name).toBeDefined();
     }
     const water = compiled(SEA_MAT.water), foam = compiled(SEA_MAT.foam);
-    expect(water.vertexShader).toContain('transformed.y += wave * seaSwell(position.xz, uTime);');
+    expect(water.vertexShader).toContain('transformed.y += wave * seaSwell(seaPhase, uTime);');
     expect(water.vertexShader).toContain('objectNormal = normalize(vec3(-seaS.x, 1.0, -seaS.y));');
     expect(water.fragmentShader).toContain('smoothstep(0.3, 0.85, vSeaH)');
     expect(foam.vertexShader).toContain('vFoam = foam;');
@@ -183,10 +183,12 @@ describe('the water and the foam of a place (T451)', () => {
     expect(foam).toBeDefined();
     const pos = water.geometry.getAttribute('position'), wave = water.geometry.getAttribute('wave');
     expect(pos.count).toBe((S * S - 16) * 6);
+    // The place's vertices are relative to its corner, where its group stands (T449).
     const X0 = ch.cx * S, Z0 = ch.cy * S;
+    expect([view.group.position.x, view.group.position.z]).toEqual([X0, Z0]);
     let moving = 0;
     for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i) - X0, z = pos.getZ(i) - Z0;
+      const x = pos.getX(i), z = pos.getZ(i);
       expect([0, 1]).toContain(wave.getX(i));
       // The corners of the islet are still.
       if (x >= 7 && x <= 11 && z >= 7 && z <= 11) expect(wave.getX(i)).toBe(0);
@@ -198,7 +200,7 @@ describe('the water and the foam of a place (T451)', () => {
     const near = (v: number, a: number, b: number) => v >= a - FOAM_WIDTH - 1e-5 && v <= b + FOAM_WIDTH + 1e-5;
     let around = 0;
     for (let i = 0; i < fp.count; i++) {
-      const x = fp.getX(i) - X0, z = fp.getZ(i) - Z0;
+      const x = fp.getX(i), z = fp.getZ(i);
       expect(islet(Math.floor(x), Math.floor(z)) && x > 7 && x < 11 && z > 7 && z < 11).toBe(false);
       if (near(x, 7, 11) && near(z, 7, 11)) around++;
       else expect(Math.min(x, z, S - x, S - z), `${x},${z}`).toBeLessThanOrEqual(FOAM_WIDTH + 1e-5);
@@ -206,7 +208,7 @@ describe('the water and the foam of a place (T451)', () => {
     expect(around).toBe(16 * 6);
     // The ink's ids move the water's vertices as the water does; the foam has no ink.
     const ids = idsOf(SEA_MAT.water) as THREE.ShaderMaterial;
-    expect(ids.vertexShader).toContain('seaSwell(position.xz, uTime)');
+    expect(ids.vertexShader).toContain('seaSwell(seaPhase, uTime)');
     expect(ids.vertexShader).toContain('attribute float wave;');
     expect(idsOf(SEA_MAT.foam)).toBeUndefined();
     expect(idsOf(SEA_MAT.wake)).toBeUndefined();
