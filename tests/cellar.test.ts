@@ -278,10 +278,13 @@ describe('the model that goes down (T52b)', () => {
       let low = 0;
       for (const c of k.chunks.values()) {
         if (!k.holesIn(c).size) continue;
-        const mesh = buildChunk(k, c).group.children[0] as THREE.Mesh;
+        const group = buildChunk(k, c).group;
+        const mesh = group.children[0] as THREE.Mesh;
+        // The place's vertices are relative to its corner, where its group stands (T449).
+        const [gx, gz] = [group.position.x, group.position.z];
         const pos = mesh.geometry.getAttribute('position'), nor = mesh.geometry.getAttribute('normal');
         for (let i = 0; i < pos.count; i += 3) {
-          if (nor.getY(i) !== 1 || pos.getY(i) > k.groundAt(cx, cy) - 10 / vpt || Math.abs(pos.getX(i) - cx) > 4 || Math.abs(pos.getZ(i) - cy) > 4) continue;
+          if (nor.getY(i) !== 1 || pos.getY(i) > k.groundAt(cx, cy) - 10 / vpt || Math.abs(pos.getX(i) + gx - cx) > 4 || Math.abs(pos.getZ(i) + gz - cy) > 4) continue;
           const a = new THREE.Vector3().fromBufferAttribute(pos, i), b = new THREE.Vector3().fromBufferAttribute(pos, i + 1), d = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
           low += b.sub(a).cross(d.sub(a)).length() / 2;
         }

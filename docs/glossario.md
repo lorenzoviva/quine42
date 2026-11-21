@@ -218,7 +218,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Inglese**: `asteroid`, `body` di `Island`, `ASTEROID_ONE_IN`, `ASTEROID_RADIUS`
 - **Definizione**: una terra di roccia, polvere e ghiaccio del vuoto, più piccola di una stazione, una su tre sul reticolo delle isole (T445, ADR-0233).
 - **Dove vive**: `src/kernel/islands.ts`
-- **Da non usare**: `pianeta` (è T449), `meteora`
+- **Da non usare**: `pianeta` (è un'altra cosa: una fascia lontana dello stesso piano, T449), `meteora`
 - **Fermo**: `body: asteroid` di `world.islands`.
 
 ### Cielo di stelle
@@ -290,6 +290,48 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/islands.ts`, `universe/modules/vehicle.capsule`, `universe/models/capsule.xml`
 - **Da non usare**: `astronave` (per la capsula del seme: un'astronave è ciò che il Concilio farà di un veicolo del vuoto), `navetta`, `shuttle`, `modulo` (è un'altra cosa)
 - **Fermo**: l'id del modulo `vehicle.capsule`, il modello `capsule`, le origini `dock:<terra>`.
+
+### Pianeta
+- **Inglese**: `Planet`, `nature.planets`, `repairPlanets`, `MAX_PLANETS`, `planetSeed`, `planetName`, `natureOfBand`
+- **Definizione**: in un mondo del vuoto, un mondo con l'aria sotto il suo cielo, lontano un giorno e una notte di cammino dall'orbita: una **fascia** lontana dello stesso piano, con il suo seme, il suo rilievo, il suo mare, la sua gravità, il suo cielo e il suo giorno; la sua terra è quella del generatore attorno al suo centro (T449, ADR-0236).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/planets.ts`, `src/kernel/kernel.ts`, `universe.json → nature.planets`
+- **Da non usare**: `piano` e `livello` (per il pianeta: il piano è uno solo, il livello è del dettaglio o del rilievo), `mondo` (il mondo è l'universo intero), `dimensione`
+- **Fermo**: `planets` in `universe.json → nature` e i suoi campi (`name`, `seed`, `geography`, `sky`, `day`, `gravity`, `sea`).
+
+### Fascia
+- **Inglese**: `band`, `bandOf`, `bandAt`, `bandOfPlace`, `bandOfTile`, `PLANET_SPAN`, `planetPitch`, `planetPlace`, `planetLocal`
+- **Definizione**: la striscia di luoghi attorno a (k · 2^20, 0) caselle che è il pianeta k; la fascia 0 è l'orbita, il vuoto con le stazioni e gli asteroidi, e ogni mondo senza pianeti (T449, ADR-0236).
+- **Dove vive**: `src/kernel/planets.ts`
+- **Da non usare**: `zona` (è dello studio), `regione` (è dell'atlante), `piano` (`plane`, la coordinata nuova scartata, via B)
+- **Fermo**: niente su disco: la fascia si ricava dalla coordinata.
+
+### Viaggio
+- **Inglese**: `travelTo`, `Transit` (`transit` del veicolo), `transitTick`, `jumpVehicle`, `TRAVEL_SECONDS`, `TRAVEL_JUMP`, `transitView`, `Destination`, `destinations`, `TRAVEL_WORDS`
+- **Definizione**: la rotta di un veicolo del vuoto verso un altro corpo del mondo (un pianeta, l'orbita), scelta ai comandi («Rotta per …»); dura 16 secondi, a metà il kernel porta il veicolo e chi è a bordo all'approdo della destinazione spostando lo scorrimento del tappeto di ognuno, mai la sua posizione nel cerchio (T449, ADR-0236).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/planets.ts`, `src/render/renderer.ts`
+- **Da non usare**: `salto` (è del corpo), `teletrasporto`, `warp`, `iperspazio`
+- **Fermo**: `transit` (`from`, `to`, `t`, `total`, `jumped`) nel componente `vehicle` e in `EntityView.vehicle`, l'azione `travel:<fascia>`.
+
+### Spazioporto
+- **Inglese**: `PAD`, `planetDock`, `padTiles`, `landingOf`
+- **Definizione**: l'approdo di un pianeta: la piazzola nel suo primo luogo dove arriva un viaggio e dove il kernel mette la sua capsula, con le caselle sotto lo scafo e al portello che il layout tiene camminate e libere (T449, ADR-0236).
+- **Dove vive**: `src/kernel/planets.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `hangar` (è un ambiente della stazione, T450), `aeroporto`, `pista`
+- **Fermo**: l'isola `planet:<k>` del suo `Dock`.
+
+### Livelli di dettaglio
+- **Inglese**: `PlanetLod`, `LOD_CELLS`, `LOD_LEVELS`, `lodCell`, `lodPoint`, `lodWanted`, `GLOBE_RADIUS`, `globePoint`, `planetTile`, `Planets`, `levelGeometry`
+- **Definizione**: come si vede un pianeta dallo spazio: sedici livelli, dal pianeta intero in celle di 32 768 caselle alla casella, ognuno 32 × 32 celle campionate dal generatore e precalcolate nelle pause fra un frame e l'altro (tenute nel browser); più vicino, un livello più fine entra a retino sopra quello più grosso, fino ai luoghi veri all'atterraggio. Solo disegno (T449, ADR-0236).
+- **Dove vive**: `src/kernel/planets.ts`, `src/render/planet.ts`
+- **Da non usare**: `LOD` da solo nei testi italiani, `mipmap`, `risoluzione` (per il livello)
+- **Fermo**: la chiave della cache `quine:pianeta:v<LOD_VERSION>:…` nel `localStorage`.
+
+### Origine mobile
+- **Inglese**: `geometry(origin)`, `swellPhases`, `phaseAttribute`, `foamPhase`
+- **Definizione**: i vertici di un luogo relativi al suo angolo e il gruppo posto lì in doppia precisione, le fasi delle onde calcolate in doppia precisione, il taglio sotto terra in caselle intere relative: a un milione di caselle dall'origine un sessantaquattresimo di casella resta tale (T449, ADR-0236).
+- **Dove vive**: `src/render/terrain.ts`, `src/render/sea.ts`, `src/render/renderer.ts`
+- **Da non usare**: `floating origin` nei testi italiani, `origine fluttuante`
+- **Fermo**: niente su disco né sul filo.
 
 ### Approdo
 - **Inglese**: `Dock`, `dockOf`, `DOCK_OVERLAP`, `DOCK_NEAR`, `docksOf`, `dockApron`

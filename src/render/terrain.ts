@@ -16,7 +16,7 @@ import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
 import { STRATA_DEPTH, stratumRow } from '../kernel/strata';
-import { FoamBuilder, SEA_MAT, waterTopOf, waveAttribute } from './sea';
+import { FoamBuilder, phaseAttribute, SEA_MAT, waterTopOf, waveAttribute } from './sea';
 
 export const WALL_H = 1.6;
 /** The water drawn under the level of its tiles (the swimmer sinks under it, T438). */
@@ -121,9 +121,14 @@ export class Builder {
       }
   }
 
-  geometry(): THREE.BufferGeometry {
+  /**
+   * The mesh, its vertices relative to `origin` (carpet x and z): a place's own corner (T449, the origin that moves), so that a place a million
+   * tiles from the origin keeps its sixty-fourths of a tile in a float; the mesh is put there in double precision.
+   */
+  geometry(origin: readonly [number, number] = [0, 0]): THREE.BufferGeometry {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(this.pos, 3));
+    const [ox, oz] = origin;
+    g.setAttribute('position', new THREE.Float32BufferAttribute(ox || oz ? this.pos.map((v, i) => (i % 3 === 0 ? v - ox : i % 3 === 2 ? v - oz : v)) : this.pos, 3));
     g.setAttribute('normal', new THREE.Float32BufferAttribute(this.nor, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.col, 3));
     g.setAttribute('part', new THREE.Uint8BufferAttribute(this.prt, 1));
@@ -384,37 +389,41 @@ export function buildChunk(k: Kernel, ch: Chunk, models = ''): TerrainView {
       }
     }
   const group = new THREE.Group();
-  const g = new THREE.Mesh(ground.geometry(), MAT.world);
+  // Everything of the place relative to its corner (T449): the group stands there, in double precision.
+  const origin = [X0, Z0] as const;
+  const g = new THREE.Mesh(ground.geometry(origin), MAT.world);
   g.receiveShadow = true;
   // One thing across the chunks, or the ink would draw their edges.
   g.userData.inkThing = TERRAIN_THING;
   group.add(g);
   if (!solid.empty) {
-    const s = casts(new THREE.Mesh(solid.geometry(), MAT.world), true);
+    const s = casts(new THREE.Mesh(solid.geometry(origin), MAT.world), true);
     s.userData.inkThing = TERRAIN_THING;
     group.add(s);
   }
   if (!water.empty) {
-    const geo = water.geometry();
-    geo.setAttribute('wave', new THREE.Float32BufferAttribute(waveAttribute(geo.getAttribute('position').array, waterTop), 1));
+    const geo = water.geometry(origin);
+    geo.setAttribute('wave', new THREE.Float32BufferAttribute(waveAttribute(geo.getAttribute('position').array, waterTop, origin), 1));
+    geo.setAttribute('seaPhase', new THREE.Float32BufferAttribute(phaseAttribute(geo.getAttribute('position').array, origin), 3));
     const w = new THREE.Mesh(geo, SEA_MAT.water);
     w.receiveShadow = true;
     w.userData.inkThing = TERRAIN_THING;
     group.add(w);
   }
   if (!foam.empty) {
-    const fm = new THREE.Mesh(foam.geometry(), SEA_MAT.foam);
+    const fm = new THREE.Mesh(foam.geometry(origin), SEA_MAT.foam);
     fm.renderOrder = 1;
     group.add(fm);
   }
   for (const { geo, mats } of instances.values()) {
     const im = new THREE.InstancedMesh(geo.body, modelMaterials(geo.body, geo.sway ? MAT.sway : MAT.world), mats.length);
-    mats.forEach((m, i) => im.setMatrixAt(i, m));
+    mats.forEach((m, i) => im.setMatrixAt(i, m.setPosition(m.elements[12]! - X0, m.elements[13]!, m.elements[14]! - Z0)));
     casts(im, true);
     im.computeBoundingSphere();
     im.userData.shared = true;
     group.add(im);
   }
+  group.position.set(X0, 0, Z0);
   return { key: ch.key, sig: chunkSig(k, ch, models), group };
 }
 
@@ -524,7 +533,9 @@ export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mes
     }
   }
   if (b.empty) return undefined;
-  const mesh = new THREE.Mesh(b.geometry(), MAT.world);
+  // Relative to the tile it is cut around (T449), put there in double precision.
+  const mesh = new THREE.Mesh(b.geometry([u.tile.x, u.tile.y]), MAT.world);
+  mesh.position.set(u.tile.x, 0, u.tile.y);
   mesh.receiveShadow = true;
   mesh.userData.inkThing = TERRAIN_THING;
   return mesh;

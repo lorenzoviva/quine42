@@ -22,6 +22,9 @@ void main() {
 export class Bloom {
   private composer: EffectComposer;
   private pass: UnrealBloomPass;
+  /** The world's pass, and the one before it (T449: a planet's globe and its stars, `background`). */
+  private main: RenderPass;
+  private behind?: RenderPass;
   /** The ink outlines of the cartoon (ADR-0093). */
   private ink: Ink | null = null;
 
@@ -34,7 +37,8 @@ export class Bloom {
   ) {
     // The canvas' antialias is lost in a target: the target has its own samples.
     this.composer = new EffectComposer(gl, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
-    this.composer.addPass(new RenderPass(scene, camera));
+    this.main = new RenderPass(scene, camera);
+    this.composer.addPass(this.main);
     if (camera instanceof THREE.PerspectiveCamera) {
       this.ink = new Ink(scene, camera, idsOf);
       this.ink.pass.enabled = CARTOON;
@@ -69,6 +73,28 @@ export class Bloom {
   /** How far the halo spreads. */
   set radius(v: number) {
     this.pass.radius = v;
+  }
+
+  /**
+   * A pass before the world's (T449): a scene of its own drawn first, then the world over it with its depth cleared and no background (the
+   * caller takes the scene's off). Null: the world's pass alone, as always.
+   */
+  background(scene: THREE.Scene | null, camera?: THREE.Camera): void {
+    if (scene && camera) {
+      if (!this.behind) {
+        this.behind = new RenderPass(scene, camera);
+        this.composer.insertPass(this.behind, 0);
+      }
+      this.behind.scene = scene;
+      this.behind.camera = camera;
+      this.behind.enabled = true;
+      this.main.clear = false;
+      this.main.clearDepth = true;
+    } else if (this.behind?.enabled) {
+      this.behind.enabled = false;
+      this.main.clear = true;
+      this.main.clearDepth = false;
+    }
   }
 
   render(dt: number): void {

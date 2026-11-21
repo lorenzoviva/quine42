@@ -35,6 +35,7 @@
 | [Il mondo in 3D, bozze di prova, mappa, voxel luminosi](#mondo3d) | `src/render/`, `src/kernel/layout.ts` |
 | [MarkovJunior, i modelli, la cache delle forme](#markovjunior-modelli) | `src/mj/`, `src/kernel/forms.ts`, `src/kernel/modeldirector.ts`, `src/render/worker.ts`, `lab/` |
 | [Il suono](#suono) | `src/mj/sound.ts`, `src/mj/synth.ts`, `src/audio/`, `universe/models/suono-*.xml` |
+| [I pianeti e il viaggio](#pianeti) | `src/kernel/planets.ts`, `src/render/planet.ts`, `src/kernel/relief.ts` |
 | [La fisica rimodellabile e la natura del mondo](#fisica) | `src/kernel/nature.ts`, `src/kernel/agents/genesis.ts`, `src/kernel/migrations.ts` |
 | [Il rilievo](#rilievo) | `src/kernel/relief.ts` |
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
@@ -1464,6 +1465,57 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   mezzo sta nel luogo, se nessun veicolo è entro `DOCK_NEAR` (2,5); origine `dock:<terra>` (o `dock:<terra>/<n>`), il verso dell'approdo,
   `vehicle:docked` sul bus; oltre `MAX_VEHICLES` il guasto `kernel:capsule`. **La capsula lasciata** (`idleCapsule`: motori spenti, nessuno ai
   comandi né a bordo) non si salva e lascia il mondo con il luogo in cui sta (`unloadChunk`): il luogo dell'approdo ne rimette una. `tests/capsula.test.ts`.
+
+
+<a id="pianeti"></a>
+## I pianeti e il viaggio
+
+- **Fasce lontane dello stesso piano** (ADR-0236, T449, la via C1 di D64; `src/kernel/planets.ts`): il pianeta k è la striscia di luoghi attorno a
+  (k · `planetPitch`, 0), 2^20 caselle in luoghi interi (`PLANET_SPAN`, 58 254 luoghi a 18 caselle); la fascia 0 è l'orbita (il vuoto, le stazioni,
+  gli asteroidi) e ogni mondo senza pianeti (`bandOfPlace`, `bandOfTile`, `Kernel.bandOf`, `bandAt`). Nessun campo nuovo su disco né sul filo per
+  la fascia: si ricava dalla coordinata; un universo di oggi non ha pianeti.
+- **I pianeti della natura** (`universe.json → nature.planets`, `Planet`, `repairPlanets` in `nature.ts`): solo con `geography: void`, al più
+  `MAX_PLANETS` (8); `name` (una riga), `seed` (`planetSeed`: del mondo e della fascia se manca), `geography` (`continent`), `sky`, `day`, `gravity`,
+  `sea` (0-24 livelli); fissati alla Genesi con la natura. `natureOfBand` e `Kernel.natureAt`: il cielo, il giorno e la gravità del pianeta; la
+  gravità di un punto (`gravityAt`), la luce (`daylight(x)`), `world.nature()` (la fascia del luogo che il generatore disegna, `draftBand`, o del
+  viandante che agisce; mai l'elenco). Le destinazioni con i nomi (`destinations`; senza nome `planetName` dal seme; l'orbita «l'orbita»).
+- **La terra, il rilievo, il mare**: `genDraft` chiama `generate_chunk` con il luogo nelle coordinate del pianeta (`planetLocal`) e il suo seme;
+  niente reticolo del kernel su un pianeta (`lattice(cx)`), i varchi del vuoto solo nell'orbita. `BandedRelief` (`relief.ts`): l'orbita col suo
+  rilievo (piatto nel vuoto), ogni pianeta le sue colline dal suo seme lette nelle sue coordinate e alzate perché il suo mare (`sea` o quello del suo
+  rilievo) stia al livello del mare del mondo; fatto la prima volta che serve (~350 ms), il renderer lo fa nelle pause.
+- **Lo spazioporto** (`PAD`, `planetDock`, `padTiles`): la piazzola nel primo luogo del pianeta (la capsula di 2,5 × 4, la prua a nord, il portello
+  sulla casella (1, 4)); `docksOf` la dà come un approdo del vuoto, `dockApron` tiene camminate le sue caselle, `placementsOf` non vi posa niente,
+  `dockCapsules` vi mette la capsula (regola 10).
+- **Il viaggio** (`travelTo`, `transitTick`, `jumpVehicle`, `landingOf`): «Rotta per …» (`travel:<fascia>`) nel menu di chi tiene i comandi di un
+  veicolo del vuoto, per ogni corpo che non è quello dov'è; rifiutata se l'approdo ha un altro veicolo che non è una capsula ferma e vuota. Lo stato
+  `transit` del componente `vehicle` (`from`, `to`, `t`, `total`, `jumped`; `saneTransit`, anche sul filo in `vehicleSeen` e `readVehicleView`,
+  copiato dallo specchio). 16 s (`TRAVEL_SECONDS`): il veicolo non guida, «Esci» risponde «Siete in viaggio», nessuno sale. A metà (`TRAVEL_JUMP`) il
+  veicolo va all'approdo della destinazione col suo verso, chi è a bordo allo stesso posto del ponte spostando lo scorrimento del tappeto (mai la
+  posizione nel cerchio: la corona non se ne accorge), i piedi alzati quanto il suolo, ciò che vi giace con lui; la capsula ferma all'approdo gli
+  lascia il posto; `wanderer:pushed` ai client. Alla fine l'ancora e «Siete arrivati: …». Il bus dice `vehicle:travel`, `vehicle:jumped`,
+  `vehicle:arrived`. Lua non ha un'API del viaggio.
+- **A schermo** (`Renderer.voyageNow`, `transitView`): fino al salto il corpo lasciato, dopo quello raggiunto; il veicolo e chi è a bordo
+  (`carriedOn`) in un gruppo alzato della quota (`Entities.aloft`, `Wanderer.aloft`), da 0 a `GLOBE_TOP` raggi del globo (360 caselle,
+  `ORBIT_TOP`, per l'orbita) e giù, esponenziale (`altitudeAt`); la camera li tiene senza inseguirli, il piano lontano e la nebbia seguono la quota;
+  sopra un pianeta oltre `PLACES_BELOW` (160) il resto del mondo si nasconde.
+- **I livelli di dettaglio** (`PlanetLod` in `planets.ts`, `Planets` in `src/render/planet.ts`): sedici livelli di 32 × 32 celle centrate sul
+  centro del pianeta, da 32 768 caselle alla casella (`lodCell`, `lodPoint`); il codice di ogni cella dal generatore (`Kernel.planetTile`: una casella
+  col seme del pianeta, senza toccare `seedLua` né i guasti; ~0,18 ms nel browser). Si riempiono dal più grosso nelle pause (5 ms ogni 40, 14 in
+  viaggio, il pianeta del viaggio per primo) e si tengono nel `localStorage` (`quine:pianeta:v<LOD_VERSION>:<planetSignature>`). Ogni livello è una
+  mesh di voxel sul globo (`levelGeometry`, `globePoint`: mappa azimutale equidistante, raggio `GLOBE_RADIUS`, l'equatore lungo la fascia; le
+  altezze da `cellHeight` e dal rilievo dove la cella è di poche caselle), al più `KEPT` (10) mesh sulla GPU.
+- **Il passaggio fra i livelli**: il voluto ha celle di circa nove pixel (`lodWanted`); il più fine entra a retino complementare (`ditherAt` dello
+  schermo: `uShow`, il quadrato `uInner` che il più grosso gli lascia con `uInnerShow`), i più grossi fino a cinque sotto; sotto `PLACES_BELOW` il
+  rettangolo dei luoghi caricati della fascia è un buco dei livelli (`uHole`). Da lontano il globo gira attorno al veicolo verso dove guarda la
+  camera e torna sotto di lui da R/30 in giù. Il globo e le sue stelle (`Stars.around`) nel passaggio prima del mondo (`Bloom.background`), la
+  camera del mondo coi piani dalla quota; il mondo sopra senza sfondo, con la profondità pulita; i programmi fatti prima del viaggio
+  (`Planets.warm`). `window.view.planetStats()`: livelli pronti, mesh, triangoli, byte, celle campionate.
+- **L'origine mobile**: `Builder.geometry(origin)` e `FoamBuilder.geometry(origin)` (i vertici relativi all'angolo del luogo, il gruppo lì), le
+  istanze relative; `buildCut` relativo alla sua casella; `U.cutOff` la frazione dello scorrimento e `U.cutTile` relativa alla parte intera; le
+  onde dall'attributo `seaPhase` (`swellPhases`, in doppia precisione) e la schiuma da `foamPhase`; la scia relativa al primo sbuffo.
+- **Le misure** (`lab/scripts/misura-frame.mjs --viaggio <universo>`): sono nell'ADR-0236; i long task del viaggio cadono dopo il salto, quando
+  arrivano i luoghi nuovi del pianeta, come in un caricamento a freddo.
+- **Test**: `tests/pianeti.test.ts` (la natura, le fasce, la terra e il rilievo, lo spazioporto, il viaggio, il filo, i livelli, l'origine mobile).
 
 <a id="rilievo"></a>
 ## Il rilievo

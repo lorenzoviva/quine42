@@ -371,3 +371,44 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
   }
   return out;
 }
+
+/** A planet's relief in a world with planets (T449): made the first time a tile of its band is asked for. */
+export interface BandRelief {
+  /** The first tile of the planet's own coordinates (its centre), carpet space. */
+  x0: number;
+  /** The planet's relief and how much it is lifted so that its sea lies at the world's level. */
+  make: () => { relief: Relief; shift: number };
+}
+
+/**
+ * The relief of a world with planets (T449, ADR-0236): the orbit's (flat: the void) and, on each planet's band, the planet's own (its seed,
+ * read in its own coordinates), lifted so that its sea lies at the world's: one sea level for every band, and each planet its hills and its sea.
+ */
+export class BandedRelief extends Relief {
+  private made: Array<{ relief: Relief; shift: number } | undefined>;
+
+  constructor(
+    private home: Relief,
+    private bandOf: (col: number) => number,
+    private planets: readonly BandRelief[],
+  ) {
+    super(0, null);
+    this.made = planets.map(() => undefined);
+    (this as { max: number }).max = home.max;
+  }
+
+  private planet(k: number): { relief: Relief; shift: number } | undefined {
+    if (k < 1 || k > this.planets.length) return undefined;
+    return (this.made[k - 1] ??= this.planets[k - 1].make());
+  }
+
+  override get sea(): number {
+    return this.home.sea;
+  }
+
+  override level(col: number, row: number): number {
+    const k = this.bandOf(col);
+    const p = k ? this.planet(k) : undefined;
+    return p ? p.relief.level(col - this.planets[k - 1].x0, row) + p.shift : this.home.level(col, row);
+  }
+}

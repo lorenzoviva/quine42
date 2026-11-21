@@ -11,7 +11,7 @@ import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameS
 import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshapedWords, MAX_RESHAPED } from './reshape';
 import { askReshape, RESHAPE_TASK } from './agents/physicist';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
-import { DOCK_NEAR, dockOf, islandAtTile, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
+import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
@@ -79,7 +79,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWo
 import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
 import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
-import { chunkLevels, flatRelief, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels, type LotBox } from './relief';
+import { BandedRelief, chunkLevels, flatRelief, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels, type LotBox } from './relief';
 import { CardCosts, CardUses, CARDS_FILE, readServer, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
@@ -91,6 +91,7 @@ import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
+import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
 import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -1920,10 +1921,77 @@ export class Kernel {
     return { '?': VOID_TILE, ...(tiles ?? {}), ...(this.config.nature.geography === 'void' ? { [VOID_CODE]: voidTerrain(languageOf(this.files)) } : {}) };
   }
 
-  /** What the kernel's lattice makes of this world (T441, T445): the islands of an archipelago, the lands of the void; none on a continent. */
-  private lattice(): Lattice | undefined {
+  /**
+   * What the kernel's lattice makes of this world (T441, T445): the islands of an archipelago, the lands of the void; none on a continent.
+   * A place of a planet (T449) has none: its land and its seas are its generator's. `cx` the place's column, or the band 0's if not said.
+   */
+  private lattice(cx?: number): Lattice | undefined {
+    if (cx !== undefined && this.bandOf(cx) > 0) return undefined;
     const g = this.config.nature.geography;
     return g === 'archipelago' || g === 'void' ? g : undefined;
+  }
+
+  // --- The planets (T449, ADR-0236): far bands of the same plane ------------------------------------------------------------------
+
+  /** The planets of this world (the nature's, only around the void). */
+  planets(): NonNullable<WorldNature['planets']> {
+    return this.config.nature.planets ?? [];
+  }
+
+  /** The band of a place's column: a planet's (1…), or 0, the orbit and every world without planets. */
+  bandOf(cx: number): number {
+    return bandOfPlace(cx, this.config.chunkSize, this.config.nature.planets?.length ?? 0);
+  }
+
+  /** The band of a point of the carpet. */
+  bandAt(x: number): number {
+    return bandOfTile(x, this.config.chunkSize, this.config.nature.planets?.length ?? 0);
+  }
+
+  /** The nature where a point of the carpet is: its planet's sky, day and gravity, or the world's (never with the planets). */
+  natureAt(x: number): WorldNature {
+    return natureOfBand(this.config.nature, this.bandAt(x));
+  }
+
+  /** The seed of a band's ground: the world's for the orbit, the planet's own. */
+  private bandSeed(k: number): number {
+    return k > 0 ? planetSeed(this.config.seed, k, this.planets()[k - 1]) : this.config.seed;
+  }
+
+  /** The band whose draft the generator is making now (T449): what `world.nature()` says during `generate_chunk`. */
+  private draftBand?: number;
+
+  /**
+   * The generator at a tile of a planet (T449: the levels of detail its globe is drawn with), in the planet's own coordinates: what its draft
+   * has there, as `generate_chunk` of one tile, with the planet's seed; `?` where it fails. It neither counts nor raises anything (the draws
+   * of the world stay the same, `seedLua` untouched) and is never a place: nothing is kept.
+   */
+  planetTile(k: number, x: number, y: number): string {
+    if (!this.terrain || k < 1 || k > this.planets().length || !Number.isFinite(x) || !Number.isFinite(y)) return '?';
+    const id = this.terrain.manifest.id;
+    const was = this.draftBand;
+    this.draftBand = k;
+    this.sandbox.seed(hash32(this.bandSeed(k), Math.floor(x), Math.floor(y), 4049));
+    const outer = this.luaModule;
+    this.luaModule = id;
+    let value: unknown;
+    try {
+      value = this.sandbox.run(id, 'generate_chunk', Math.floor(x), Math.floor(y), this.bandSeed(k), 1);
+    } catch {
+      value = undefined;
+    } finally {
+      this.luaModule = outer;
+      this.draftBand = was;
+    }
+    const c = typeof value === 'string' && value.length === 1 ? value : '?';
+    return this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?';
+  }
+
+  /** What identifies a planet's levels of detail (T449): the generator, the planet's seed, the palette's colours; another is computed again. */
+  planetSignature(k: number): string {
+    const src = this.terrain ? (this.files[`modules/${this.terrain.manifest.id}/logic.lua`] ?? '') : '';
+    const colours = Object.entries(this.palette).map(([c, t]) => `${c}${t.color}${t.layer ?? ''}`).join('');
+    return `${this.config.name}|${k}|${this.bandSeed(k)}|${hashStr(src)}|${hashStr(colours)}`;
   }
 
   private genDraft(cx: number, cy: number): string {
@@ -1932,11 +2000,20 @@ export class Kernel {
     if (this.bench) return this.benchDraft(cx, cy);
     if (this.terrain) {
       const id = this.terrain.manifest.id;
-      const { value, failed } = this.runModule(id, 'generate_chunk', cx, cy, this.config.seed, S);
+      // A planet's place (T449): its generator around its own centre, with its own seed, under its own nature.
+      const band = this.bandOf(cx);
+      this.draftBand = band;
+      let got: { value: unknown; failed: boolean };
+      try {
+        got = this.runModule(id, 'generate_chunk', band ? planetLocal(cx, band, S) : cx, cy, this.bandSeed(band), S);
+      } finally {
+        this.draftBand = undefined;
+      }
+      const { value, failed } = got;
       if (!failed) {
         // In an archipelago (T441, ADR-0229) the kernel's islands decide where the land is: the sea, the shallows and the beach around them;
         // in the void (T445, ADR-0233) its stations and asteroids, and the void around them.
-        const lattice = this.lattice();
+        const lattice = this.lattice(cx);
         const drawn = typeof value === 'string' && value.length === n && lattice ? (lattice === 'void' ? voidDraft : islandDraft)(value, this.config.seed, cx, cy, S) : value;
         // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
         if (typeof drawn === 'string' && drawn.length === n) return [...drawn].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
@@ -2434,7 +2511,7 @@ export class Kernel {
 
   /** The island a place stands on in an archipelago (T441), or its station or asteroid in the void (T445), with its region of the atlas if the Cartographer has named it. */
   private islandUnder(ch: Pick<Chunk, 'cx' | 'cy'>): { island: Island; region?: Region } | undefined {
-    const lattice = this.lattice();
+    const lattice = this.lattice(ch.cx);
     if (!lattice) return undefined;
     const island = islandOfPlace(this.config.seed, ch.cx, ch.cy, this.config.chunkSize, lattice);
     return island && { island, region: islandRegion(this.atlasNow(), island.id) };
@@ -2700,7 +2777,7 @@ export class Kernel {
     // Quiet is the model of places: it shows the phases too.
     // The stamps of a plan of before (no `vpt`) are the ones it was drawn with (T407): its edits are per tile.
     // In the void the gates stand where the land goes on (T445, `voidGates`).
-    const voidAt = this.config.nature.geography === 'void' ? { gates: voidGates(this.config.seed, ch.cx, ch.cy, S) } : {};
+    const voidAt = this.config.nature.geography === 'void' && !this.bandOf(ch.cx) ? { gates: voidGates(this.config.seed, ch.cx, ch.cy, S) } : {};
     const blockAt = block ? this.blockLayout(block, ch) : undefined;
     // The land at the hatch of a landing (T448) is walked and reached from the gates, with the edge of a block's lot if there is one.
     const docked = this.dockApron(ch);
@@ -2780,6 +2857,8 @@ export class Kernel {
     // The edge of the lot of a block stays clear (T370): the structure's doors open on it, whatever side they are on, and the ring goes round.
     const block = this.blockFor(ch, plan);
     if (block) for (const a of this.blockLayout(block, ch).apron) occupied.add(a);
+    // A planet's pad (T449) stays clear: its capsule stands there.
+    if (this.bandOf(ch.cx)) for (const a of this.dockApron(ch)) occupied.add(a);
     const indoorSet = new Set(result.lots.flatMap((b) => b.floor));
     const reach = [...result.reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
@@ -3449,7 +3528,8 @@ export class Kernel {
   get relief(): Relief {
     const xml = this.files[RELIEF_PATH] ?? HILLS;
     const flat = this.config.nature.geography === 'void';
-    const key = `${this.config.seed}|${flat ? 'flat' : xml}`;
+    const planets = this.planets();
+    const key = `${this.config.seed}|${flat ? 'flat' : xml}|${this.config.chunkSize}|${JSON.stringify(planets)}`;
     if (this.reliefCache?.key !== key) {
       let relief: Relief;
       if (flat) relief = flatRelief();
@@ -3459,6 +3539,28 @@ export class Kernel {
       } catch (e) {
         this.faults.raise('universe:relief', `${RELIEF_PATH}: ${(e as Error).message}`);
         relief = new Relief(this.config.seed);
+      }
+      // The planets (T449): each band its own hills and its sea, at the world's sea level.
+      if (planets.length) {
+        const S = this.config.chunkSize;
+        const home = relief;
+        const homeSea = this.config.relief?.sea ?? home.sea;
+        relief = new BandedRelief(
+          home,
+          (col) => this.bandAt(col),
+          planets.map((p, i) => ({
+            x0: planetPlace(i + 1, S) * S,
+            make: () => {
+              let r: Relief;
+              try {
+                r = new Relief(this.bandSeed(i + 1), this.files[RELIEF_PATH] ?? HILLS);
+              } catch {
+                r = new Relief(this.bandSeed(i + 1));
+              }
+              return { relief: r, shift: homeSea - (p.sea ?? r.sea) };
+            },
+          })),
+        );
       }
       this.reliefCache = { key, relief };
     }
@@ -4335,7 +4437,7 @@ export class Kernel {
     const S = this.config.chunkSize;
     const cx = Math.floor(x / S), cy = Math.floor(y / S);
     const region = cx === 0 && cy === 0 ? undefined : regionAt(this.atlasNow(), cx, cy);
-    return regionGravity(region) ?? gravityOf(this.config.nature);
+    return regionGravity(region) ?? gravityOf(this.natureAt(x));
   }
 
   /** How high a jump clears and lands in this world (tiles): JUMP_UP under the earth's gravity, more under a lighter one (T447). */
@@ -5492,7 +5594,7 @@ export class Kernel {
     if (!this.ecs.alive.has(id)) return undefined;
     const raw = this.ecs.get(id, 'vehicle');
     const spec = raw && typeof raw === 'object' ? this.vehicleSpec(id) : undefined;
-    return spec ? { v: saneVehicle(raw, spec), spec } : undefined;
+    return spec ? { v: saneVehicle(raw, spec, this.planets().length), spec } : undefined;
   }
 
   /**
@@ -5636,7 +5738,9 @@ export class Kernel {
    * what lies on it go and turn with it, where a body may stand. A vehicle nobody is aboard of drops anchor: it never drifts unseen.
    */
   private vehicleTick(dt: number): void {
-    if (!(dt > 0) || !Number.isFinite(dt) || !this.decks.length) return;
+    if (!(dt > 0) || !Number.isFinite(dt)) return;
+    if (this.planets().length) this.transitTick(dt);
+    if (!this.decks.length) return;
     const moves: VehicleMove[] = [];
     for (const d of this.decks) {
       const m = this.driveVehicle(d.id, dt);
@@ -5680,6 +5784,8 @@ export class Kernel {
     const p = this.ecs.get(id, 'pos');
     if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) return undefined;
     const { v, spec } = got;
+    // Under way (T449) it does not drive: the voyage moves it, once.
+    if (v.transit) return undefined;
     const aboard = this.wanderersAboard(id);
     // The helm, held by a wanderer on the deck, alive, not in the air: else it is let go.
     const h = v.helm;
@@ -5840,6 +5946,8 @@ export class Kernel {
     if (!got || this.mirror) return false;
     const words = VEHICLE_WORDS[got.spec.medium];
     if (this.aboard() !== id) return void this.message(words.aboard, 'warn'), false;
+    // Under way (T449) there is nothing outside: the void between two bodies.
+    if (got.v.transit) return void this.message(TRAVEL_WORDS.still, 'warn'), false;
     const c = this.wandererCarpet(), p = this.wandererPos();
     const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || BODY_R;
     let spot: { x: number; y: number; z: number } | undefined;
@@ -5908,7 +6016,7 @@ export class Kernel {
    */
   boardDeck(id: Id): boolean {
     const got = this.vehicleOf(id);
-    if (!got || this.mirror || this.aboard() !== undefined) return false;
+    if (!got || this.mirror || this.aboard() !== undefined || got.v.transit) return false;
     const words = VEHICLE_WORDS[got.spec.medium];
     const spot = this.boardingSpot(id);
     if (!spot) return void this.message(words.noDeck, 'warn'), false;
@@ -5919,6 +6027,127 @@ export class Kernel {
     this.message(words.boarded);
     this.bus.emit('wanderer:pushed', { id: this.wanderer().id });
     return true;
+  }
+
+  // --- The voyage between the bodies of the world (T449, ADR-0236) --------------------------------------------------------------
+
+  /** The name of a band as a destination: the planet's, or the orbit's. */
+  private destinationName(band: number): string {
+    return destinations(this.config.nature, this.config.seed, languageOf(this.files))[band]?.name ?? '';
+  }
+
+  /** Where a voyage to a band lands: a planet's pad, or the landing of the start's station in the orbit. */
+  landingOf(band: number): Dock | undefined {
+    if (band > 0) return band <= this.planets().length ? planetDock(band, this.config.chunkSize) : undefined;
+    return this.config.nature.geography === 'void' ? this.dockOfLand(islandOf(this.config.seed, 0, 0, 'void')) : undefined;
+  }
+
+  /** Whether a landing has another vehicle at it that is not an idle capsule (which gives its berth). */
+  private berthTaken(dock: Dock, id: Id): boolean {
+    return this.ecs.query('vehicle', 'pos').some((e) => {
+      if (e === id) return false;
+      const q = this.ecs.get(e, 'pos');
+      return Math.hypot(q.x - dock.x, q.y - dock.y) < DOCK_NEAR && !this.idleCapsule(e);
+    });
+  }
+
+  /** A voyage under way of a vehicle (T449), a copy: for the renderer and the tests. */
+  transitOf(id: Id): Transit | undefined {
+    const tr = this.vehicleOf(id)?.v.transit;
+    return tr && { ...tr };
+  }
+
+  /**
+   * «Rotta per …» (T449, ADR-0236): the wanderer acting, at the controls of a vehicle of the void in a world with planets, sets its course for
+   * another body (a planet, or the orbit). The voyage lasts `TRAVEL_SECONDS`; halfway the kernel moves the vehicle to the landing of the
+   * destination, and whoever is aboard with it (`jumpVehicle`). False, said, if the landing is taken by a vehicle that is not an idle capsule.
+   */
+  travelTo(id: Id, band: number): boolean {
+    const got = this.vehicleOf(id);
+    if (!got || this.mirror) return false;
+    const { v, spec } = got;
+    const n = this.planets().length;
+    if (spec.medium !== 'void' || !n || !Number.isInteger(band) || band < 0 || band > n || v.transit) return false;
+    if (v.helm !== this.wanderer().id) return void this.message(TRAVEL_WORDS.helm, 'warn'), false;
+    const from = this.bandAt(this.ecs.get(id, 'pos').x);
+    const dock = this.landingOf(band);
+    if (from === band || !dock) return false;
+    if (this.berthTaken(dock, id)) return void this.message(TRAVEL_WORDS.busy, 'warn'), false;
+    v.transit = { from, to: band, t: 0, total: TRAVEL_SECONDS };
+    Object.assign(v, { anchored: false, thrust: 0, steer: 0, speed: 0, turn: 0 });
+    delete v.bumped;
+    for (const w of this.wanderersAboard(id)) this.tell(w, TRAVEL_WORDS.left(this.destinationName(band)), 'info');
+    this.bus.emit('vehicle:travel', { id, from, to: band });
+    return true;
+  }
+
+  /** The voyages go on (T449): halfway the jump, at the end the landing, at anchor. Not in a mirror: the world moves its vehicles. */
+  private transitTick(dt: number): void {
+    if (this.mirror) return;
+    for (const id of this.ecs.query('vehicle', 'pos')) {
+      const got = this.vehicleOf(id);
+      const tr = got?.v.transit;
+      if (!got || !tr) continue;
+      tr.t = Math.min(tr.total, tr.t + dt);
+      if (!tr.jumped && tr.t >= tr.total * TRAVEL_JUMP) this.jumpVehicle(id, got.v, tr);
+      if (tr.t < tr.total) continue;
+      delete got.v.transit;
+      Object.assign(got.v, { anchored: true, speed: 0, turn: 0, thrust: 0, steer: 0 });
+      for (const w of this.wanderersAboard(id)) this.tell(w, TRAVEL_WORDS.arrived(this.destinationName(tr.to)), 'good');
+      this.bus.emit('vehicle:arrived', { id, band: tr.to });
+    }
+  }
+
+  /**
+   * The jump of a voyage (T449, `docs/design/acqua-spazio.md` § 2.7): the vehicle to the landing of the destination, its bow as the landing's;
+   * whoever is aboard to the same place of its deck, by the scroll of their carpet and never where they stand in their circle (rule 8: the
+   * corona does not notice; ADR-0004), their feet as high over the ground as they were; what lies on the deck with it. Unconditional: the
+   * places there come around them as they come around anyone. An idle capsule at the landing gives its berth.
+   */
+  private jumpVehicle(id: Id, v: VehicleState, tr: Transit): void {
+    tr.jumped = true;
+    const dock = this.landingOf(tr.to);
+    const p = this.ecs.get(id, 'pos');
+    if (!dock || !p) return;
+    for (const e of this.ecs.query('vehicle', 'pos')) {
+      if (e === id) continue;
+      const q = this.ecs.get(e, 'pos');
+      if (Math.hypot(q.x - dock.x, q.y - dock.y) < DOCK_NEAR && this.idleCapsule(e)) this.ecs.destroy(e);
+    }
+    const from: Pose = { x: p.x, y: p.y, heading: v.heading };
+    const to: Pose = { x: dock.x, y: dock.y, heading: dock.heading };
+    const aboard = this.wanderersAboard(id);
+    const things = this.thingsAboard(id, from);
+    const lift = this.groundAt(to.x, to.y) - this.groundAt(from.x, from.y);
+    p.x = to.x;
+    p.y = to.y;
+    v.heading = to.heading;
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) fc.yaw = to.heading;
+    if (this.decks.some((d) => d.id === id)) this.reindexVehicles(new Set([id]));
+    for (const w of aboard)
+      this.as(w, () => {
+        const c = this.wandererCarpet();
+        const [x, y] = carried(c.x, c.y, from, to);
+        const carpet = this.carpet();
+        if (carpet) Object.assign(carpet, { ox: carpet.ox + x - c.x, oy: carpet.oy + y - c.y });
+        const wp = this.wandererPos();
+        if (Number.isFinite(wp.z)) wp.z = wp.z! + lift;
+        this.ecs.remove(this.wandererEntity, 'jump');
+        this.bus.emit('wanderer:pushed', { id: w });
+      });
+    const S = this.config.chunkSize;
+    for (const e of things) {
+      const q = this.ecs.get(e, 'pos');
+      if (!q) continue;
+      [q.x, q.y] = carried(q.x, q.y, from, to);
+      if (Number.isFinite(q.z)) q.z += lift;
+      const tf: FormComp | undefined = this.ecs.get(e, 'form');
+      if (tf && Number.isFinite(tf.yaw)) tf.yaw = (tf.yaw + to.heading - from.heading) % (2 * Math.PI);
+      const ch = this.ecs.get(e, 'chunk');
+      if (ch) ch.key = this.chunkKey(Math.floor(q.x / S), Math.floor(q.y / S));
+    }
+    this.bus.emit('vehicle:jumped', { id, from: tr.from, to: tr.to });
   }
 
   // --- The capsules of the void (T448, ADR-0234) ---------------------------------------------------------------------------------
@@ -5938,6 +6167,12 @@ export class Kernel {
     if (this.config.nature.geography !== 'void') return [];
     const S = this.config.chunkSize;
     const inside = (x: number, y: number) => Math.floor(x / S) === cx && Math.floor(y / S) === cy;
+    // A planet (T449, ADR-0236): its spaceport's pad, in its first place.
+    const band = this.bandOf(cx);
+    if (band) {
+      const d = planetDock(band, S);
+      return inside(d.x, d.y) || inside(d.land[0] + 0.5, d.land[1] + 0.5) ? [d] : [];
+    }
     const out: Dock[] = [];
     for (const f of islandsNear(this.config.seed, cx * S + S / 2, cy * S + S / 2, S + 8, 'void')) {
       const d = this.dockOfLand(f);
@@ -5954,6 +6189,13 @@ export class Kernel {
       const c = d.land[0] - ch.cx * S, r = d.land[1] - ch.cy * S;
       if (c >= 0 && r >= 0 && c < S && r < S) out.push(r * S + c);
     }
+    // A planet's pad (T449): every tile under its capsule too, walked and kept clear.
+    const band = this.bandOf(ch.cx);
+    if (band)
+      for (const [x, y] of padTiles(band, S)) {
+        const c = x - ch.cx * S, r = y - ch.cy * S;
+        if (c >= 0 && r >= 0 && c < S && r < S && !out.includes(r * S + c)) out.push(r * S + c);
+      }
     return out;
   }
 
@@ -6104,6 +6346,18 @@ export class Kernel {
     // Beside it (T448): climbing aboard, from the head of a pier, the edge of a land, the ground beside a cart.
     if (this.aboard() !== id) return this.aboard() === undefined && this.boardingSpot(id) ? [{ id: 'board', label: w.board, enabled: true }] : [];
     const out: ActionOption[] = [];
+    // Under way (T449): where it goes, and nothing else but the controls let go.
+    if (v.transit) {
+      const to = this.destinationName(v.transit.to);
+      out.push({ id: 'transit', label: TRAVEL_WORDS.under(to), enabled: false, reason: TRAVEL_WORDS.under(to) });
+      if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
+      return out;
+    }
+    // The courses of the voyage (T449): at the controls of a vehicle of the void, every body but the one it is at.
+    if (v.helm === me && spec.medium === 'void' && this.planets().length) {
+      const here = this.bandAt(this.ecs.get(id, 'pos').x);
+      for (const d of destinations(this.config.nature, this.config.seed, languageOf(this.files))) if (d.band !== here) out.push({ id: `travel:${d.band}`, label: TRAVEL_WORDS.course(d.name), enabled: true });
+    }
     if (v.helm === me) out.push({ id: 'unhelm', label: w.leave, enabled: true });
     else {
       // Its helm where its form marks one (T440): from elsewhere on the deck the menu says where it is.
@@ -6183,7 +6437,16 @@ export class Kernel {
     if (!got) return undefined;
     const r = (n: number, d: number) => Math.round(n * d) / d;
     const { v } = got;
-    return { heading: r(v.heading, 1e5), speed: r(v.speed, 1e3), turn: r(v.turn, 1e4), anchored: v.anchored, ...(v.helm !== undefined ? { helm: v.helm } : {}) };
+    const tr = v.transit;
+    return {
+      heading: r(v.heading, 1e5),
+      speed: r(v.speed, 1e3),
+      turn: r(v.turn, 1e4),
+      anchored: v.anchored,
+      ...(v.helm !== undefined ? { helm: v.helm } : {}),
+      // A voyage (T449): where from and to, how far it has gone; the client shows it, the server moves it.
+      ...(tr ? { transit: { from: tr.from, to: tr.to, t: r(tr.t, 1e2), total: tr.total, ...(tr.jumped ? { jumped: true } : {}) } } : {}),
+    };
   }
 
   /**
@@ -6737,6 +7000,10 @@ export class Kernel {
     const m = modId ? this.modules.get(modId)?.manifest : undefined;
     const speaker = this.nameOf(id);
     const say = (text: string) => this.bus.emit('ui:dialog', { speaker, text });
+    if (action.startsWith('travel:')) {
+      this.travelTo(id, Number(action.slice(7)));
+      return;
+    }
     switch (action) {
       case 'raccogli':
         this.pickUpEntity(id);
@@ -6774,6 +7041,9 @@ export class Kernel {
         return;
       case 'board':
         this.boardDeck(id);
+        return;
+      // The voyage (T449).
+      case 'transit':
         return;
       case 'altro':
         this.bus.emit('ui:freeaction', { id, name: speaker });
@@ -8766,9 +9036,14 @@ export class Kernel {
     this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità la rimodella il Fisico: universe.json la tiene com'era");
   }
 
-  /** The nature of this world (T437, ADR-0224): what `world.nature()` gives Lua, a copy. */
+  /**
+   * The nature of this world (T437, ADR-0224): what `world.nature()` gives Lua, a copy. Where there are planets (T449), the nature where the
+   * code is: the planet's whose draft the generator makes, else the one of the band of the wanderer acting; never the list of the planets.
+   */
   nature(): WorldNature {
-    return { ...this.config.nature };
+    if (!this.config.nature.planets) return { ...this.config.nature };
+    const k = this.draftBand ?? (this.ecs.alive.has(this.wandererEntity) ? this.bandAt(this.wandererCarpet().x) : 0);
+    return natureOfBand(this.config.nature, k);
   }
 
   /**
@@ -8781,7 +9056,7 @@ export class Kernel {
     const cx = Math.floor(x / S), cy = Math.floor(y / S);
     const r = cx === 0 && cy === 0 ? undefined : regionAt(this.atlasNow(), cx, cy);
     const region = r && !(r.master && r.kind === 'held') ? r : undefined;
-    const lattice = this.lattice();
+    const lattice = this.lattice(cx);
     const island = lattice ? islandAtTile(this.config.seed, x, y, lattice) : undefined;
     if (!region && !island) return undefined;
     return { ...(region ? { name: region.name, description: region.description } : {}), ...(island ? { island: island.id } : {}) };
@@ -8792,7 +9067,7 @@ export class Kernel {
    * at most `MAX_ISLANDS_SEEN`, each with the name the Cartographer gave it (none yet: no name). Empty in a world that is not an archipelago.
    */
   islandsSeen(x: unknown, y: unknown, r: unknown): Array<{ id: string; name?: string; x: number; y: number; radius: number; islet: boolean; body?: string }> {
-    const lattice = this.lattice();
+    const lattice = typeof x === 'number' && Number.isFinite(x) ? this.lattice(Math.floor(x / this.config.chunkSize)) : undefined;
     if (!lattice || typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return [];
     const reach = typeof r === 'number' && Number.isFinite(r) ? Math.max(0, Math.min(ISLANDS_REACH, r)) : 200;
     const atlas = this.atlasNow();
@@ -9733,9 +10008,10 @@ export class Kernel {
    * Day and night: 0 = deep night, 1 = full day. A day lasts the nature's seconds (`daySeconds`, T445); the world is born in the morning.
    * Under a still light (`nature.day` 0) it is always full day.
    */
-  daylight(): number {
+  daylight(at?: number): number {
     // Read through the nature alone: the light is a function of the time and the nature (a test calls it on a bare object).
-    const nature = this.config?.nature;
+    // On a planet (T449) its own day: `at` a column of the carpet.
+    const nature = at !== undefined && this.config?.nature?.planets ? this.natureAt(at) : this.config?.nature;
     if (stillLight(nature)) return 1;
     const phase = (this.time / clockDay(nature) + 0.12) % 1;
     const sun = Math.sin(phase * Math.PI * 2);
