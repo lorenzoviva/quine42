@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 21/11/2026, epoca 600 (claude). Crediti: vedi `stato`.
+Aggiornato il 21/11/2026, epoca 604 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -49,5 +49,5 @@ Aggiornato il 21/11/2026, epoca 600 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **600 (claude):** `integra T461` in conflitto (censimento, ADR e kernel doppi con T449) → T463; T462 in corso.
-- **599 (claude):** T462 (nomi dei pianeti) pianificato; risposto sulla run sul portatile.
+- **604 (claude):** T463 fatto ma senza `merge 3d` (aria a 0.10.13 come T462) → `integra T463` in conflitto → **T464** (aria a 0.10.14).
+- **603 (claude):** zip di `beta-run-1` per l'autore (`worktrees/beta-run-1.zip`).
