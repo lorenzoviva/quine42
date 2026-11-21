@@ -6208,3 +6208,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/aria.test.ts` e `tests/fisico-acceso.test.ts` verdi.
 - Browser: no (l'aria l'ha vista T446; il merge non cambia UI).
 - Quando è fatto: commit su `task/T461`; poi l'orchestratore integra T461, e `integra T446` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+
+### T462 · I nomi dei pianeti senza parole offensive o ridicole — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 37
+- Contesto: richiesta dell'autore del 21/11: il pianeta di prova di T449 si chiamava «Teruna», che in italiano richiama «terrone». `planetName` (`src/kernel/planets.ts`) compone due o tre sillabe dal seme (`SYLLABLES`) senza nessun controllo: può dare anche «Pene» (`pe`+`ne`), «Kaka», «Ruto» e simili. Nasce da T449: `dossier T449`.
+- Cosa fare: un filtro dei nomi generati dal kernel (pianeti, e ogni altro nome composto a sillabe se ce ne sono: cercarli) contro un elenco di radici offensive, volgari o ridicole in italiano e in inglese (e nelle lingue di `ORBIT_NAME`), confrontate senza accenti, doppie e con `k`/`c`, `th`/`t` equivalenti; un nome che ci cade si ricompone col seme successivo, deterministico; togliere le sillabe che da sole portano a guai; rinominare «Teruna» nell'ADR-0236, nei test e nelle catture dove compare; un test che genera i nomi di molti semi e nessuno contiene una radice dell'elenco. Se cambia il nome di pianeti già nati in un universo, dirlo nell'esito (oggi nessuna ambientazione porta i pianeti, T450).
+- Test: suite intera e typecheck coi turni; `tests/pianeti.test.ts` verde col test nuovo.
+- Browser: no (solo nomi; il viaggio l'ha visto T449).
+- Quando è fatto: commit su `task/T462`, kernel sale di `Z`. Sicurezza: nessuna superficie nuova.
