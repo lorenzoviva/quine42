@@ -182,7 +182,8 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxUnderMaxSide(cls, q.size);
     const m = compileMjx(q.xml, box ? { size: box } : {});
     if (m.sound) return ['questo programma è un suono (<sound>): salvalo come suono'];
-    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a card reads no files, so no wfc, convchain or import.
+    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a card reads no files, so no wfc nor import, and a convchain only
+    // with its sample written in the node (T469, ADR-0240).
     const nodes = worldNodeErrors(m, q.xml);
     if (nodes.length) return nodes;
     if (m.actions.length > limits.actions) return [`troppe azioni: ${m.actions.length}, al più ${limits.actions}`];

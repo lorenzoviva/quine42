@@ -32,8 +32,11 @@ class Scripted implements AiModels {
 }
 
 const structure = classOf('structure')!;
-/** The characters of the structures' prompt after T405, before T371 came in (17/11): the measure it must stay under. */
-const STRUCTURES_PROMPT_CHARS = 16_023;
+/**
+ * The characters of the structures' prompt after T405, before T371 came in (17/11): the measure it must stay under; and what T469 (S3 of T458)
+ * added on purpose, the loops, the textures, the cellar and the pieces (4 045 characters, `docs/design/scultori-specializzati/misure-s3.md`).
+ */
+const STRUCTURES_PROMPT_CHARS = 16_023 + 4_045;
 const house = MOCK_STRUCTURE_PROGRAM;
 const seedFiles = (xml: string) => filesOf(xml, bundledFiles);
 /** The first block of the house: the program without its second map (the plan on the coarse grid). */
@@ -66,8 +69,10 @@ describe('the prompt of the structures without a skeleton (T354)', () => {
     expect(structures).toContain('## The measure of «done well»: the reference fort');
     expect(structures).toContain('union of rectangles');
     expect(structures).toContain('take the standard, not the fort');
-    // A description, not a program to copy (ADR-0183): nothing of the fort's XML is in the prompt.
-    expect(structures).not.toContain('<pieces');
+    // A description, not a program to copy (ADR-0183): nothing of the fort's XML is in the prompt (T469 teaches `<pieces>` and the loop of its
+    // keep as tools, with letters and numbers of their own, never the fort's).
+    expect(structures).not.toContain('<pieces piece="128" margin="40">');
+    expect(structures).not.toContain('<prl p="0.00005" in="k" out="z"/>');
     expect(structures).not.toContain('forte-handmade');
     // The structures' prompt stays under the size it had before the measure came in: 16 023 characters after T405 on 17/11 (about 4 900 tokens at
     // 3.26 characters a token, as T325 counted them); what the measure adds, the duplicates of the request's own words gave back.

@@ -2,9 +2,10 @@
 // known, a contradiction and a new try, determinism, the ceilings, the folders of rule files, unions that belong to their grid, and what
 // the original (MarkovJunior's C#, run with lab/banco/wfc/originale) gives on its own tilesets: the same patterns and the same neighbours.
 
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/kernel/rng';
-import { modelErrors } from '../src/kernel/validator';
+import { modelErrors, WORLD_NODE_LIMITS } from '../src/kernel/validator';
 import { run, type Grid3, type Node3 } from '../src/mj/engine';
 import { compileMjx, mjxIncludes, newNodesIn } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
@@ -167,15 +168,76 @@ describe('convchain', () => {
     expect(n.D).toBeGreaterThanOrEqual(20);
   });
 
-  it('è piana, il campione è di black e white, n ha un tetto', () => {
+  it('il campione è di black e white, n ha un tetto', () => {
     const files = { 'c.txt': 'AD/DA' };
     const ok = '<sequence values="BAD"><convchain sample="c" on="B" black="D" white="A"/></sequence>';
-    expect(() => run(compileMjx(ok, { size: [4, 4, 2], files }).program, 1, 3)).toThrow(/piana/);
     expect(() => compileMjx(ok, { size: [4, 4, 1], files: { 'c.txt': 'AQ/DA' } })).toThrow(/"Q" non è né black/);
     expect(() => compileMjx(ok.replace('white', 'n="5" white'), { size: [4, 4, 1], files })).toThrow(/da 1 a 4/);
     // Without steps it goes on until the run's budget: the steps are its sweeps.
     expect(run(compileMjx(ok, { size: [4, 4, 1], files }).program, 1, 30).steps).toBe(30);
     expect(run(compileMjx(ok.replace('white="A"', 'white="A" steps="3"'), { size: [4, 4, 1], files }).program, 1, 30).steps).toBe(3);
+  });
+
+  // T469, ADR-0240: the sample written in the node, and a grid of more layers, where every layer that holds `on` cells is a flat grid of its own.
+  const room = () => OFFICIAL.find((m) => m.name === 'ChainDungeon')!.files!['Room.txt'];
+  const print = (g: Grid3) => createHash('sha1').update(g.alphabet.join('')).update(g.cells).digest('hex').slice(0, 12);
+
+  it('su una griglia piana come prima, voxel per voxel (le impronte del motore di prima di T469)', () => {
+    const cc = OFFICIAL.find((m) => m.name === 'ChainDungeon')!;
+    const d = compileMjx(cc.xml, { size: [30, 30, 1], files: cc.files });
+    expect([1, 2].map((seed) => print(run(d.program, seed, 5_000_000).grid))).toEqual(['87cb8b3c32ad', '7c24b116e274']);
+    const m = OFFICIAL.find((m) => m.name === 'ChainDungeonMaze')!;
+    const e = compileMjx(m.xml, { size: [48, 40, 1], files: m.files });
+    expect(print(run(e.program, 1, 5_000_000).grid)).toBe('5957175fb3c1');
+  });
+
+  it('il campione scritto nel nodo dà ciò che dà il file', () => {
+    const fromFile = '<sequence values="BAD"><convchain sample="Room" on="B" black="D" white="A" n="3" steps="10"/></sequence>';
+    const text = room().split('\n').filter((l) => !l.startsWith('#')).join('\n').trim();
+    // In one line, and on more lines (a "/" ends a row, as in a rule's <in>).
+    const inline = `<sequence values="BAD"><convchain on="B" black="D" white="A" n="3" steps="10"><sample>${text}</sample></convchain></sequence>`;
+    const lines = `<sequence values="BAD"><convchain on="B" black="D" white="A" n="3" steps="10"><sample>\n  ${text.split('/').join('/\n  ')}\n</sample></convchain></sequence>`;
+    const a = run(compileMjx(fromFile, { size: [24, 24, 1], files: { 'Room.txt': room() } }).program, 4);
+    for (const xml of [inline, lines]) {
+      expect(mjxIncludes(xml, () => undefined)).toEqual({});
+      expect(Buffer.compare(run(compileMjx(xml, { size: [24, 24, 1] }).program, 4).grid.cells, a.grid.cells)).toBe(0);
+    }
+    const one = (body: string) => `<sequence values="BAD"><convchain on="B" black="D" white="A" steps="2"${body}</convchain></sequence>`;
+    expect(() => compileMjx(one('>'), { size: [4, 4, 1] })).toThrow(/manca il campione/);
+    expect(() => compileMjx(one(' sample="c"><sample>AD/DA</sample>'), { size: [4, 4, 1], files: { 'c.txt': 'AD/DA' } })).toThrow(/due modi/);
+    expect(() => compileMjx(one('><sample>AD/DA</sample><sample>AD/DA</sample>'), { size: [4, 4, 1] })).toThrow(/un solo <sample>/);
+    expect(() => compileMjx(one('><sample n="2">AD/DA</sample>'), { size: [4, 4, 1] })).toThrow(/solo il campione/);
+    expect(() => compileMjx(one('><sample>AD DA</sample>'), { size: [4, 4, 1] })).toThrow(/<sample>: il campione è piano/);
+    expect(() => compileMjx(one('><sample>AQ/DA</sample>'), { size: [4, 4, 1] })).toThrow(/<sample>: il simbolo "Q" non è né black/);
+  });
+
+  it('su una griglia di più strati ogni strato con celle on è una griglia piana a sé, e il resto non cambia', () => {
+    const chain = (pre: string) => `<sequence values="BODAW" ground="O">${pre}<convchain on="O" black="D" white="A" n="3" steps="8"><sample>${room().split('\n').filter((l) => !l.startsWith('#')).join('').trim()}</sample></convchain></sequence>`;
+    // One layer of `on` cells (the ground) in a grid of four: the flat grid's own run, cell by cell, and nothing above it.
+    const flat = run(compileMjx(chain(''), { size: [20, 16, 1] }).program, 3).grid;
+    const tall = run(compileMjx(chain(''), { size: [20, 16, 4] }).program, 3).grid;
+    expect(letters(tall).slice(0, 320)).toBe(letters(flat));
+    expect(letters(tall).slice(320)).toBe('B'.repeat(320 * 3));
+    // Two layers: each is textured on its own (the second from where the first left the generator), the layers between stay.
+    const two = run(compileMjx(chain('<all in="B O" out="O *" steps="1"/><all in="B O" out="W *"/>'), { size: [20, 16, 3] }).program, 3).grid;
+    const layer = (z: number) => letters(two).slice(z * 320, (z + 1) * 320);
+    expect(layer(0)).toMatch(/^[DA]+$/);
+    expect(layer(1)).toMatch(/^[DA]+$/);
+    expect(layer(0)).not.toBe(layer(1));
+    expect(layer(2)).toBe('W'.repeat(320));
+  });
+
+  it('i tetti: nel mondo al più 65 536 celle degli strati che lavora, nel motore 2^20 su più strati', () => {
+    const xml = (size: string, up = '') => `<sequence values="BODA" ground="O" size="${size}">${up}<convchain on="O" black="D" white="A" n="2" steps="2"><sample>AD/DA</sample></convchain></sequence>`;
+    // A plan of 256 × 256 passes in the world; one of 260 × 260, or two layers of 200 × 200, is past the world's ceiling.
+    expect(modelErrors('models/x.xml', xml('256 256 2'), 8_000).join()).not.toMatch(/convchain/);
+    expect(modelErrors('models/x.xml', xml('260 260 2'), 8_000).join()).toMatch(/convchain: nel mondo lavora su al più 65536 celle/);
+    expect(() => runMjx(compileMjx(xml('260 260 2')), 1, { ceilings: WORLD_NODE_LIMITS })).toThrow(/al più 65536 celle/);
+    // Without ceilings (the world's own run) the same program runs: the ceiling is the validator's, as for the waves.
+    expect(runMjx(compileMjx(xml('260 260 2')), 1).finished).toBe(true);
+    // The engine's own, only on a grid of more layers (a flat grid is the original's): two layers of 1024 × 513 are past it.
+    expect(() => runMjx(compileMjx(xml('1024 513 2', '<all in="B O" out="O *" steps="1"/>')), 1)).toThrow(/su una griglia di più strati lavora su al più 1048576 celle/);
+    expect(WFC_LIMITS.convchainCells).toBe(1 << 20);
   });
 });
 

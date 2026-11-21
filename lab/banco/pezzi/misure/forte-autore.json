@@ -1,0 +1,1125 @@
+{
+ "file": "lab/mjx/models/handmade/forte-handmade.xml",
+ "impronta": "5a06372c97c1",
+ "griglia": "500×500×148",
+ "nodi": [
+  {
+   "nodo": 1,
+   "tag": "<pieces piece=\"128\" margin=\"40\">",
+   "righe": [
+    {
+     "seme": 1,
+     "margine": 0,
+     "interaMs": 2298,
+     "pezziMs": 2222,
+     "pezzi": 16,
+     "pezzoLento": 39,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 4,
+     "interaMs": 2298,
+     "pezziMs": 2059,
+     "pezzi": 16,
+     "pezzoLento": 29,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 8,
+     "interaMs": 2298,
+     "pezziMs": 2049,
+     "pezzi": 16,
+     "pezzoLento": 25,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 16,
+     "interaMs": 2298,
+     "pezziMs": 2087,
+     "pezzi": 16,
+     "pezzoLento": 29,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 24,
+     "interaMs": 2298,
+     "pezziMs": 2172,
+     "pezzi": 16,
+     "pezzoLento": 39,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 40,
+     "interaMs": 2298,
+     "pezziMs": 2335,
+     "pezzi": 16,
+     "pezzoLento": 74,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 0,
+     "interaMs": 1879,
+     "pezziMs": 1930,
+     "pezzi": 16,
+     "pezzoLento": 23,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 4,
+     "interaMs": 1879,
+     "pezziMs": 1939,
+     "pezzi": 16,
+     "pezzoLento": 25,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 8,
+     "interaMs": 1879,
+     "pezziMs": 1955,
+     "pezzi": 16,
+     "pezzoLento": 28,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 16,
+     "interaMs": 1879,
+     "pezziMs": 2033,
+     "pezzi": 16,
+     "pezzoLento": 32,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 24,
+     "interaMs": 1879,
+     "pezziMs": 2122,
+     "pezzi": 16,
+     "pezzoLento": 48,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 40,
+     "interaMs": 1879,
+     "pezziMs": 2264,
+     "pezzi": 16,
+     "pezzoLento": 64,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 0,
+     "interaMs": 1892,
+     "pezziMs": 1927,
+     "pezzi": 16,
+     "pezzoLento": 21,
+     "finito": true,
+     "diversi": 3168,
+     "coppie": {
+      "Q>B": 3168
+     },
+     "aiBordi": 3168
+    },
+    {
+     "seme": 3,
+     "margine": 4,
+     "interaMs": 1892,
+     "pezziMs": 1965,
+     "pezzi": 16,
+     "pezzoLento": 27,
+     "finito": true,
+     "diversi": 3048,
+     "coppie": {
+      "Q>B": 3048
+     },
+     "aiBordi": 3048
+    },
+    {
+     "seme": 3,
+     "margine": 8,
+     "interaMs": 1892,
+     "pezziMs": 2014,
+     "pezzi": 16,
+     "pezzoLento": 30,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 16,
+     "interaMs": 1892,
+     "pezziMs": 2078,
+     "pezzi": 16,
+     "pezzoLento": 45,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 24,
+     "interaMs": 1892,
+     "pezziMs": 2158,
+     "pezzi": 16,
+     "pezzoLento": 48,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 40,
+     "interaMs": 1892,
+     "pezziMs": 2292,
+     "pezzi": 16,
+     "pezzoLento": 61,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 0,
+     "interaMs": 1923,
+     "pezziMs": 1983,
+     "pezzi": 16,
+     "pezzoLento": 22,
+     "finito": true,
+     "diversi": 3168,
+     "coppie": {
+      "Q>B": 3168
+     },
+     "aiBordi": 3168
+    },
+    {
+     "seme": 14,
+     "margine": 4,
+     "interaMs": 1923,
+     "pezziMs": 1999,
+     "pezzi": 16,
+     "pezzoLento": 31,
+     "finito": true,
+     "diversi": 3048,
+     "coppie": {
+      "Q>B": 3048
+     },
+     "aiBordi": 3048
+    },
+    {
+     "seme": 14,
+     "margine": 8,
+     "interaMs": 1923,
+     "pezziMs": 2058,
+     "pezzi": 16,
+     "pezzoLento": 37,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 16,
+     "interaMs": 1923,
+     "pezziMs": 2136,
+     "pezzi": 16,
+     "pezzoLento": 43,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 24,
+     "interaMs": 1923,
+     "pezziMs": 2189,
+     "pezzi": 16,
+     "pezzoLento": 51,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 40,
+     "interaMs": 1923,
+     "pezziMs": 2326,
+     "pezzi": 16,
+     "pezzoLento": 61,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    }
+   ]
+  },
+  {
+   "nodo": 2,
+   "tag": "<pieces piece=\"128\" margin=\"40\">",
+   "righe": [
+    {
+     "seme": 1,
+     "margine": 0,
+     "interaMs": 3132,
+     "pezziMs": 3387,
+     "pezzi": 16,
+     "pezzoLento": 50,
+     "finito": true,
+     "diversi": 4340,
+     "coppie": {
+      "M>B": 2318,
+      "B>M": 2022
+     },
+     "aiBordi": 3348
+    },
+    {
+     "seme": 1,
+     "margine": 4,
+     "interaMs": 3132,
+     "pezziMs": 3479,
+     "pezzi": 16,
+     "pezzoLento": 52,
+     "finito": true,
+     "diversi": 4142,
+     "coppie": {
+      "M>B": 2074,
+      "B>M": 2068
+     },
+     "aiBordi": 3080
+    },
+    {
+     "seme": 1,
+     "margine": 8,
+     "interaMs": 3132,
+     "pezziMs": 3493,
+     "pezzi": 16,
+     "pezzoLento": 57,
+     "finito": true,
+     "diversi": 4144,
+     "coppie": {
+      "M>B": 2074,
+      "B>M": 2070
+     },
+     "aiBordi": 3098
+    },
+    {
+     "seme": 1,
+     "margine": 16,
+     "interaMs": 3132,
+     "pezziMs": 3613,
+     "pezzi": 16,
+     "pezzoLento": 67,
+     "finito": true,
+     "diversi": 4092,
+     "coppie": {
+      "M>B": 2078,
+      "B>M": 2014
+     },
+     "aiBordi": 3120
+    },
+    {
+     "seme": 1,
+     "margine": 24,
+     "interaMs": 3132,
+     "pezziMs": 3730,
+     "pezzi": 16,
+     "pezzoLento": 72,
+     "finito": true,
+     "diversi": 4064,
+     "coppie": {
+      "M>B": 2054,
+      "B>M": 2010
+     },
+     "aiBordi": 3070
+    },
+    {
+     "seme": 1,
+     "margine": 40,
+     "interaMs": 3132,
+     "pezziMs": 4003,
+     "pezzi": 16,
+     "pezzoLento": 94,
+     "finito": true,
+     "diversi": 4044,
+     "coppie": {
+      "B>M": 2016,
+      "M>B": 2028
+     },
+     "aiBordi": 3054
+    },
+    {
+     "seme": 2,
+     "margine": 0,
+     "interaMs": 3171,
+     "pezziMs": 3312,
+     "pezzi": 16,
+     "pezzoLento": 51,
+     "finito": true,
+     "diversi": 3580,
+     "coppie": {
+      "M>B": 1852,
+      "B>M": 1728
+     },
+     "aiBordi": 3134
+    },
+    {
+     "seme": 2,
+     "margine": 4,
+     "interaMs": 3171,
+     "pezziMs": 3429,
+     "pezzi": 16,
+     "pezzoLento": 57,
+     "finito": true,
+     "diversi": 3594,
+     "coppie": {
+      "B>M": 1752,
+      "M>B": 1842
+     },
+     "aiBordi": 3070
+    },
+    {
+     "seme": 2,
+     "margine": 8,
+     "interaMs": 3171,
+     "pezziMs": 3596,
+     "pezzi": 16,
+     "pezzoLento": 50,
+     "finito": true,
+     "diversi": 3398,
+     "coppie": {
+      "B>M": 1692,
+      "M>B": 1706
+     },
+     "aiBordi": 2936
+    },
+    {
+     "seme": 2,
+     "margine": 16,
+     "interaMs": 3171,
+     "pezziMs": 3654,
+     "pezzi": 16,
+     "pezzoLento": 66,
+     "finito": true,
+     "diversi": 3550,
+     "coppie": {
+      "B>M": 1748,
+      "M>B": 1802
+     },
+     "aiBordi": 3016
+    },
+    {
+     "seme": 2,
+     "margine": 24,
+     "interaMs": 3171,
+     "pezziMs": 3882,
+     "pezzi": 16,
+     "pezzoLento": 85,
+     "finito": true,
+     "diversi": 3436,
+     "coppie": {
+      "B>M": 1694,
+      "M>B": 1742
+     },
+     "aiBordi": 2972
+    },
+    {
+     "seme": 2,
+     "margine": 40,
+     "interaMs": 3171,
+     "pezziMs": 4208,
+     "pezzi": 16,
+     "pezzoLento": 120,
+     "finito": true,
+     "diversi": 3714,
+     "coppie": {
+      "B>M": 1844,
+      "M>B": 1870
+     },
+     "aiBordi": 3226
+    },
+    {
+     "seme": 3,
+     "margine": 0,
+     "interaMs": 3309,
+     "pezziMs": 3411,
+     "pezzi": 16,
+     "pezzoLento": 42,
+     "finito": true,
+     "diversi": 4360,
+     "coppie": {
+      "M>B": 2508,
+      "B>M": 1852
+     },
+     "aiBordi": 3824
+    },
+    {
+     "seme": 3,
+     "margine": 4,
+     "interaMs": 3309,
+     "pezziMs": 3374,
+     "pezzi": 16,
+     "pezzoLento": 51,
+     "finito": true,
+     "diversi": 3826,
+     "coppie": {
+      "B>M": 1858,
+      "M>B": 1968
+     },
+     "aiBordi": 3348
+    },
+    {
+     "seme": 3,
+     "margine": 8,
+     "interaMs": 3309,
+     "pezziMs": 3412,
+     "pezzi": 16,
+     "pezzoLento": 54,
+     "finito": true,
+     "diversi": 3890,
+     "coppie": {
+      "B>M": 1928,
+      "M>B": 1962
+     },
+     "aiBordi": 3346
+    },
+    {
+     "seme": 3,
+     "margine": 16,
+     "interaMs": 3309,
+     "pezziMs": 3544,
+     "pezzi": 16,
+     "pezzoLento": 60,
+     "finito": true,
+     "diversi": 3852,
+     "coppie": {
+      "B>M": 1850,
+      "M>B": 2002
+     },
+     "aiBordi": 3312
+    },
+    {
+     "seme": 3,
+     "margine": 24,
+     "interaMs": 3309,
+     "pezziMs": 3701,
+     "pezzi": 16,
+     "pezzoLento": 72,
+     "finito": true,
+     "diversi": 3988,
+     "coppie": {
+      "B>M": 1968,
+      "M>B": 2020
+     },
+     "aiBordi": 3462
+    },
+    {
+     "seme": 3,
+     "margine": 40,
+     "interaMs": 3309,
+     "pezziMs": 3912,
+     "pezzi": 16,
+     "pezzoLento": 103,
+     "finito": true,
+     "diversi": 3938,
+     "coppie": {
+      "B>M": 1956,
+      "M>B": 1982
+     },
+     "aiBordi": 3402
+    },
+    {
+     "seme": 14,
+     "margine": 0,
+     "interaMs": 3223,
+     "pezziMs": 3441,
+     "pezzi": 16,
+     "pezzoLento": 43,
+     "finito": true,
+     "diversi": 5008,
+     "coppie": {
+      "M>B": 2678,
+      "B>M": 2330
+     },
+     "aiBordi": 4208
+    },
+    {
+     "seme": 14,
+     "margine": 4,
+     "interaMs": 3223,
+     "pezziMs": 3519,
+     "pezzi": 16,
+     "pezzoLento": 57,
+     "finito": true,
+     "diversi": 4604,
+     "coppie": {
+      "B>M": 2296,
+      "M>B": 2308
+     },
+     "aiBordi": 3876
+    },
+    {
+     "seme": 14,
+     "margine": 8,
+     "interaMs": 3223,
+     "pezziMs": 3585,
+     "pezzi": 16,
+     "pezzoLento": 56,
+     "finito": true,
+     "diversi": 4544,
+     "coppie": {
+      "B>M": 2258,
+      "M>B": 2286
+     },
+     "aiBordi": 3750
+    },
+    {
+     "seme": 14,
+     "margine": 16,
+     "interaMs": 3223,
+     "pezziMs": 3688,
+     "pezzi": 16,
+     "pezzoLento": 71,
+     "finito": true,
+     "diversi": 4672,
+     "coppie": {
+      "B>M": 2366,
+      "M>B": 2306
+     },
+     "aiBordi": 3860
+    },
+    {
+     "seme": 14,
+     "margine": 24,
+     "interaMs": 3223,
+     "pezziMs": 3834,
+     "pezzi": 16,
+     "pezzoLento": 73,
+     "finito": true,
+     "diversi": 4664,
+     "coppie": {
+      "B>M": 2328,
+      "M>B": 2336
+     },
+     "aiBordi": 3826
+    },
+    {
+     "seme": 14,
+     "margine": 40,
+     "interaMs": 3223,
+     "pezziMs": 4127,
+     "pezzi": 16,
+     "pezzoLento": 100,
+     "finito": true,
+     "diversi": 4648,
+     "coppie": {
+      "B>M": 2324,
+      "M>B": 2324
+     },
+     "aiBordi": 3808
+    }
+   ]
+  },
+  {
+   "nodo": 3,
+   "tag": "<pieces piece=\"128\" margin=\"40\">",
+   "righe": [
+    {
+     "seme": 1,
+     "margine": 0,
+     "interaMs": 3209,
+     "pezziMs": 3477,
+     "pezzi": 16,
+     "pezzoLento": 38,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 4,
+     "interaMs": 3209,
+     "pezziMs": 3596,
+     "pezzi": 16,
+     "pezzoLento": 34,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 8,
+     "interaMs": 3209,
+     "pezziMs": 3685,
+     "pezzi": 16,
+     "pezzoLento": 45,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 16,
+     "interaMs": 3209,
+     "pezziMs": 3669,
+     "pezzi": 16,
+     "pezzoLento": 41,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 24,
+     "interaMs": 3209,
+     "pezziMs": 3697,
+     "pezzi": 16,
+     "pezzoLento": 56,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 1,
+     "margine": 40,
+     "interaMs": 3209,
+     "pezziMs": 3939,
+     "pezzi": 16,
+     "pezzoLento": 75,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 0,
+     "interaMs": 3223,
+     "pezziMs": 3484,
+     "pezzi": 16,
+     "pezzoLento": 29,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 4,
+     "interaMs": 3223,
+     "pezziMs": 3548,
+     "pezzi": 16,
+     "pezzoLento": 33,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 8,
+     "interaMs": 3223,
+     "pezziMs": 3520,
+     "pezzi": 16,
+     "pezzoLento": 33,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 16,
+     "interaMs": 3223,
+     "pezziMs": 3583,
+     "pezzi": 16,
+     "pezzoLento": 38,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 24,
+     "interaMs": 3223,
+     "pezziMs": 3680,
+     "pezzi": 16,
+     "pezzoLento": 52,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 2,
+     "margine": 40,
+     "interaMs": 3223,
+     "pezziMs": 3855,
+     "pezzi": 16,
+     "pezzoLento": 63,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 0,
+     "interaMs": 3135,
+     "pezziMs": 3403,
+     "pezzi": 16,
+     "pezzoLento": 21,
+     "finito": true,
+     "diversi": 3108,
+     "coppie": {
+      "f>B": 3108
+     },
+     "aiBordi": 3108
+    },
+    {
+     "seme": 3,
+     "margine": 4,
+     "interaMs": 3135,
+     "pezziMs": 3449,
+     "pezzi": 16,
+     "pezzoLento": 30,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 8,
+     "interaMs": 3135,
+     "pezziMs": 3509,
+     "pezzi": 16,
+     "pezzoLento": 34,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 16,
+     "interaMs": 3135,
+     "pezziMs": 3531,
+     "pezzi": 16,
+     "pezzoLento": 50,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 24,
+     "interaMs": 3135,
+     "pezziMs": 3614,
+     "pezzi": 16,
+     "pezzoLento": 56,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 3,
+     "margine": 40,
+     "interaMs": 3135,
+     "pezziMs": 3807,
+     "pezzi": 16,
+     "pezzoLento": 70,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 0,
+     "interaMs": 3310,
+     "pezziMs": 3549,
+     "pezzi": 16,
+     "pezzoLento": 30,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 4,
+     "interaMs": 3310,
+     "pezziMs": 3589,
+     "pezzi": 16,
+     "pezzoLento": 32,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 8,
+     "interaMs": 3310,
+     "pezziMs": 3648,
+     "pezzi": 16,
+     "pezzoLento": 44,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 16,
+     "interaMs": 3310,
+     "pezziMs": 3745,
+     "pezzi": 16,
+     "pezzoLento": 38,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 24,
+     "interaMs": 3310,
+     "pezziMs": 3790,
+     "pezzi": 16,
+     "pezzoLento": 56,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    },
+    {
+     "seme": 14,
+     "margine": 40,
+     "interaMs": 3310,
+     "pezziMs": 3953,
+     "pezzi": 16,
+     "pezzoLento": 71,
+     "finito": true,
+     "diversi": 0,
+     "coppie": {},
+     "aiBordi": 0
+    }
+   ]
+  }
+ ],
+ "forte": [
+  {
+   "seme": 1,
+   "pezzi": {
+    "ms": 6340,
+    "passi": 1162,
+    "finito": true,
+    "pezzi": 48,
+    "pezzoLento": 95,
+    "pezziMs": 2353
+   },
+   "intera": {
+    "ms": 3800,
+    "passi": 807,
+    "finito": true
+   },
+   "diversi": 10535,
+   "coppie": {
+    "T>B": 1593,
+    "B>T": 2364,
+    "M>B": 2016,
+    "B>M": 1898,
+    "B>K": 2592,
+    "K>B": 72
+   },
+   "aiBordi": 8001
+  },
+  {
+   "seme": 2,
+   "pezzi": {
+    "ms": 6525,
+    "passi": 1178,
+    "finito": true,
+    "pezzi": 48,
+    "pezzoLento": 108,
+    "pezziMs": 2472
+   },
+   "intera": {
+    "ms": 4716,
+    "passi": 719,
+    "finito": true
+   },
+   "diversi": 7106,
+   "coppie": {
+    "B>T": 975,
+    "T>B": 723,
+    "K>B": 1056,
+    "B>K": 744,
+    "B>M": 1796,
+    "M>B": 1812
+   },
+   "aiBordi": 6390
+  },
+  {
+   "seme": 3,
+   "pezzi": {
+    "ms": 7124,
+    "passi": 1241,
+    "finito": true,
+    "pezzi": 48,
+    "pezzoLento": 109,
+    "pezziMs": 2548
+   },
+   "intera": {
+    "ms": 3675,
+    "passi": 712,
+    "finito": true
+   },
+   "diversi": 8405,
+   "coppie": {
+    "T>B": 677,
+    "B>T": 358,
+    "B>K": 2640,
+    "K>B": 696,
+    "B>M": 1980,
+    "M>B": 2054
+   },
+   "aiBordi": 7465
+  },
+  {
+   "seme": 14,
+   "pezzi": {
+    "ms": 6689,
+    "passi": 1233,
+    "finito": true,
+    "pezzi": 48,
+    "pezzoLento": 108,
+    "pezziMs": 2421
+   },
+   "intera": {
+    "ms": 3982,
+    "passi": 802,
+    "finito": true
+   },
+   "diversi": 14382,
+   "coppie": {
+    "B>T": 2717,
+    "T>B": 2465,
+    "B>K": 2016,
+    "K>B": 2448,
+    "B>M": 2364,
+    "M>B": 2372
+   },
+   "aiBordi": 11941
+  }
+ ],
+ "tempi": [
+  {
+   "fin": "il piano (A e B, a un quarto)",
+   "ms": 1365
+  },
+  {
+   "fin": "la map ai voxel, senza i nodi a piena scala",
+   "ms": 1646
+  },
+  {
+   "fin": "fino al nodo 1 compreso",
+   "ms": 1893
+  },
+  {
+   "fin": "fino al nodo 2 compreso",
+   "ms": 3112
+  },
+  {
+   "fin": "fino al nodo 3 compreso",
+   "ms": 3243
+  },
+  {
+   "fin": "il forte intero",
+   "ms": 3557
+  }
+ ],
+ "avvisi": [
+  "riga 23: out: il simbolo \"A\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 129: out: il simbolo \"Y\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 129: out: il simbolo \"y\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 194: out: il simbolo \"#6\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 198: out: il simbolo \"#7\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 201: out: il simbolo \"#4\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 204: out: il simbolo \"#1\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 209: in: il simbolo \"#2\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 215: out: il simbolo \"#3\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 226: out: il simbolo \"#5\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 232: out: il simbolo \"#8\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 232: out: il simbolo \"#9\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 246: out: il simbolo \"D\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 249: pattern irregolari completati con \"*\": in \"BBBBBB/BBBBBB/BBBBBB/BBBBBB FFFFFFF/FBBBBBF/FBBBBBF/FBBBBBF\", out \"BrrrrrB/BrrrrrB/BrrrrrB/BrrrrrB FFFFFFF/FRRRRRF/FRRRRRF/FRRRRRF\" (riparato)",
+  "riga 281: out: il simbolo \"#8\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 282: out: il simbolo \"#9\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 283: out: il simbolo \"i\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 284: out: il simbolo \"j\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 288: out: il simbolo \"g\" non era tra i values della griglia, aggiunto (riparato)",
+  "riga 325: out: il simbolo \"#10\" non era tra i values della griglia, aggiunto (riparato)"
+ ]
+}

@@ -92,6 +92,8 @@ export const MJ_NODES = new Set([
   'neighbors',
   'neighbor',
   'convchain',
+  // ConvChain's sample written in the node (T469).
+  'sample',
   // The grid in pieces (T339).
   'pieces',
 ]);

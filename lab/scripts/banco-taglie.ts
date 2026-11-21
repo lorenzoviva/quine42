@@ -3,16 +3,18 @@
 // sizes, with the checks of the kernel (`partErrors`, `varietyError`, `checkProgram` with the seed's parts included), the regularity
 // of the battlements, that no animal is drawn, the time and the photos from four sides; the seed's parts alone (`--parti`); and the
 // programs written by hand as the Sculptor writes them from the prompt without a skeleton (T354: the country house the local models answer
-// with, `MOCK_STRUCTURE_PROGRAM`, and the fort `scultore-rocca.xml`), with the views in text the Sculptor gets back (`--viste`).
+// with, `MOCK_STRUCTURE_PROGRAM`, and the fort `scultore-rocca.xml`; T469: the fort whose keep grows in a loop until a mark stops it and
+// whose yard is paved by a convchain, `scultore-rocca-ciclo.xml`), with the views in text the Sculptor gets back (`--viste`). Since T469
+// at the game's boxes and densities (`boxOf`, `densityFor`: 16 voxels a tile since T405), as `checkProgram` runs them.
 //
 //   npx vite-node lab/scripts/banco-taglie.ts -- --misura [--semi 2]                 # the seed's structures and the offline answer, at their boxes
 //   npx vite-node lab/scripts/banco-taglie.ts -- --parti [--foto]                     # part-stair, part-door, part-battlements, part-slits alone
-//   npx vite-node lab/scripts/banco-taglie.ts -- [--semi 2] [--solo fattoria,forte,scultore-villetta,scultore-rocca] [--foto] [--viste] [--json lab/banco/taglie/misure.json]
+//   npx vite-node lab/scripts/banco-taglie.ts -- [--semi 2] [--solo fattoria,forte,scultore-villetta,scultore-rocca,scultore-rocca-ciclo] [--foto] [--viste] [--json lab/banco/taglie/misure.json]
 //   npx vite-node lab/scripts/banco-taglie.ts -- --venti [--solo fattoria] [--foto]   # the same programs at 20 × 20 tiles (400 × 400 × 160), past the Gargantuan box of today (T356)
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { classOf, SIZE_TIERS, tilesOf, voxelsOf, type SizeTier } from '../../src/mj/classes';
+import { boxOf, classOf, densityFor, SIZE_TIERS, tilesOf, type SizeTier } from '../../src/mj/classes';
 import { analyse, varietyError, type Composition } from '../../src/mj/check';
 import { animalLetters, giro, merlonRuns, riga, type Giro } from '../banco/taglie/misure';
 import { compileMjx, mjxIncludes, type MjxFiles, type MjxModel } from '../../src/mj/model';
@@ -94,6 +96,8 @@ const BANCHI: Array<{ id: string; file?: string; xml?: string; merli?: string }>
   // As the Sculptor writes them from the prompt without a skeleton (T354): the plan at a fifth, the parts included.
   { id: 'scultore-villetta', xml: MOCK_STRUCTURE_PROGRAM },
   { id: 'scultore-rocca', file: 'lab/banco/taglie/scultore-rocca.xml', merli: 'M' },
+  // The same fort with the loops of T469: the keep grows a ring a turn until a mark stops it, the yard paved by a convchain on the plan.
+  { id: 'scultore-rocca-ciclo', file: 'lab/banco/taglie/scultore-rocca-ciclo.xml', merli: 'M' },
 ];
 const TAGLIE: SizeTier[] = ['large', 'huge', 'gargantuan'];
 
@@ -108,12 +112,14 @@ function banco(): void {
     const prima: Record<string, Composition> = {};
     const foto = [];
     for (const t of TAGLIE) {
-      const box = voxelsOf(tilesOf(STRUCTURE, t), 20);
+      // The game's box and density at the size (T405: 16 voxels a tile), as `checkProgram` and the world run the program.
+      const box = boxOf(STRUCTURE, t);
+      const vpt = densityFor(STRUCTURE, t);
       const model = compileMjx(xml, { size: box, files });
       if (model.warnings.length) console.log(`   avvisi: ${model.warnings.join('; ')}`);
-      const giri = Array.from({ length: SEMI }, (_, i) => giro(model, 20, i + 1));
-      console.log(`${b.id} · ${t} (${tilesOf(STRUCTURE, t).slice(0, 2).join(' × ')} caselle, ${box.join('×')}; include ${Object.keys(files).join(', ') || 'niente'})`);
-      for (const g of giri) console.log(`   ${riga(g, 20)}`);
+      const giri = Array.from({ length: SEMI }, (_, i) => giro(model, vpt, i + 1));
+      console.log(`${b.id} · ${t} (${tilesOf(STRUCTURE, t).slice(0, 2).join(' × ')} caselle, ${box.join('×')} a ${vpt} voxel per casella; include ${Object.keys(files).join(', ') || 'niente'})`);
+      for (const g of giri) console.log(`   ${riga(g, vpt)}`);
       const animali = animalLetters(model.program.palette);
       console.log(`   animali: ${animali.length ? `✗ ${animali.join(' ')}` : 'nessuno'}`);
       if (b.merli) console.log(`   merli per lunghezza: ${JSON.stringify(merlonRuns(giri[0].grid, b.merli))}`);
@@ -126,9 +132,9 @@ function banco(): void {
         fs.writeFileSync(path.join(DIR, `${b.id}-${t}.png`), png(sheet(lati, 1, 8, [112, 150, 84])));
         foto.push(`${b.id}-${t}.png`);
         // The areas of the first seed, as a map of tiles (a letter an area).
-        const aree = areasOf(g, model.program.palette, 20);
+        const aree = areasOf(g, model.program.palette, vpt);
         const names = Object.keys(aree);
-        const tx = Math.ceil(g.X / 20), ty = Math.ceil(g.Y / 20);
+        const tx = Math.ceil(g.X / vpt), ty = Math.ceil(g.Y / vpt);
         const mappa = Array.from({ length: ty }, () => Array(tx).fill('.'));
         for (const [i, name] of names.entries()) for (const [x, y] of aree[name]) mappa[y][x] = name[0].toUpperCase() === name[0] ? name[0] : String.fromCharCode(97 + i);
         console.log(`   aree (${names.map((n, i) => `${String.fromCharCode(97 + i)} ${n}`).join(', ')}):\n      ${mappa.map((r) => r.join('')).join('\n      ')}`);

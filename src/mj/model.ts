@@ -39,6 +39,8 @@
 //                                           is the text of its <tile>, or models/<file>.txt, or models/<tiles>-<name>.txt
 //   <wfc sample="x" values=".." n symmetry periodicInput shannon tries><rule in="W" out="A|B"/>…</wfc>  a flat sample, models/x.txt
 //   <convchain sample="x" n temperature on black white steps/>  a flat sample of the black and white letters, models/x.txt
+//   <convchain n temperature on black white steps><sample>AB/BA</sample></convchain>  the sample written in the node (T469,
+//                                           ADR-0240); on a grid of more layers every layer with `on` cells is a flat grid of its own
 //   <map scale="5/3 5/3 6/3">               a fraction: the new grid is M·N/D cells, the rules write at x·N/D
 //   folder="F" on the root, a map or a wfc  the rule files of that grid are models/F-<name>.txt (MarkovJunior's folders)
 // A union belongs to its grid (the root, a map, a wfc), as in MarkovJunior: the same symbol may mean other letters in another grid.
@@ -975,21 +977,27 @@ class Compiler {
   }
 
   /**
-   * MarkovJunior's <convchain> (T335): a flat sample of models/ in the node's two letters, `black` and `white`; the `on` cells of the
-   * grid become one or the other and then change as the sample's windows say.
+   * MarkovJunior's <convchain> (T335): a flat sample in the node's two letters, `black` and `white`, from models/ (`sample="x"`) or written
+   * in the node as the text of a child `<sample>` (T469, ADR-0240: a program that reads no file, as the Sculptor writes them); the `on`
+   * cells of the grid become one or the other and then change as the sample's windows say (on a grid of more layers, layer by layer).
    */
   convchain(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
     const name = el.attrs.sample;
-    if (name === undefined) this.fail(el, 'manca "sample" (un campione piano di models/, nei simboli black e white)');
+    const own = el.children.filter((c) => c.name === 'sample');
+    if (name === undefined && !own.length) this.fail(el, 'manca il campione: sample="…" (un file piano di models/) o il figlio <sample> col campione scritto nel nodo, nei simboli black e white');
+    if (name !== undefined && own.length) this.fail(el, 'il campione è scritto in due modi (sample="…" e il figlio <sample>): se ne usa uno solo');
+    if (own.length > 1) this.fail(own[1], 'un solo <sample> per convchain');
+    if (own.length && (own[0].children.length || Object.keys(own[0].attrs).length)) this.fail(own[0], '<sample> contiene solo il campione, come testo: righe separate da "/"');
     const black = this.one(el, el.attrs.black, ctx, 'black');
     const white = this.one(el, el.attrs.white, ctx, 'white');
     if (black === white) this.fail(el, 'black e white sono due simboli diversi');
     // The sample is written in the symbols themselves, not in the grid's '.' for the empty one.
     const [b, w] = [this.sign(el, el.attrs.black, 'black'), this.sign(el, el.attrs.white, 'white')];
-    const layers = this.block(el, this.fileText(el, name, 'txt', 'sample'), `models/${name}.txt`);
-    if (layers.length !== 1) this.fail(el, `models/${name}.txt: il campione è piano, uno strato solo (come nell'originale)`);
+    const where = name !== undefined ? `models/${name}.txt` : '<sample>';
+    const layers = this.block(el, name !== undefined ? this.fileText(el, name, 'txt', 'sample') : (own[0].text ?? ''), where);
+    if (layers.length !== 1) this.fail(el, `${where}: il campione è piano, uno strato solo (come nell'originale)${name === undefined ? ': righe separate da "/", anche andando a capo' : ''}`);
     const rows = layers[0];
-    const sample = rows.flat().map((ch) => (ch === w ? '1' : ch === b ? '0' : this.fail(el, `models/${name}.txt: il simbolo "${symbolName(ch)}" non è né black ("${el.attrs.black}") né white ("${el.attrs.white}")`))).join('');
+    const sample = rows.flat().map((ch) => (ch === w ? '1' : ch === b ? '0' : this.fail(el, `${where}: il simbolo "${symbolName(ch)}" non è né black ("${el.attrs.black}") né white ("${el.attrs.white}")`))).join('');
     if (sample.length > WFC_LIMITS.sampleCells) this.fail(el, `il campione è troppo grande (al più ${WFC_LIMITS.sampleCells} celle)`);
     const temperature = this.num(el, el.attrs.temperature, 'temperature');
     if (temperature !== undefined && !(temperature > 0)) this.fail(el, 'temperature è un numero positivo');

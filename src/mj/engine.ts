@@ -23,7 +23,8 @@
 //                      own cells from the windows of a flat sample (`overlap`); the new grid is what the tiles or
 //                      windows write, and what comes after works on it
 //   convchain        — MarkovJunior's ConvChain on a flat grid: `on` cells become black or white, then sweeps of
-//                      Metropolis steps make every N×N window as likely as in the sample
+//                      Metropolis steps make every N×N window as likely as in the sample; on a grid of more layers
+//                      every layer that holds `on` cells is a flat grid of its own (T469, ADR-0240, not in MarkovJunior)
 //   shape            — box, ellipsoid, cylinder, cone resting on `at` (centre of the base), or a line
 //                      from `at` to `to` with radius `r`; `on` limits which codes it may overwrite
 //   pieces           — the nodes inside run on one piece of the grid at a time, each on a window with a margin around it
@@ -132,7 +133,10 @@ export interface WfcNode {
   tries?: number;
 }
 
-/** MarkovJunior's <convchain> (T335): `on` cells become `black` or `white` like the sample, `1` white and `0` black, rows of `sampleSize[0]`. */
+/**
+ * MarkovJunior's <convchain> (T335): `on` cells become `black` or `white` like the sample, `1` white and `0` black, rows of `sampleSize[0]`.
+ * On a grid of more layers (T469, ADR-0240) every layer that holds `on` cells is a flat grid of its own, swept in turn from the bottom.
+ */
 export interface ConvChainNode {
   type: 'convchain';
   sample: string;
@@ -333,6 +337,11 @@ export interface NodeCeilings {
   waveBytes: number;
   /** Bytes of the potentials and of the propagation of a node that infers (`INFERENCE_LIMITS.potentialBytes` the engine's). */
   potentialBytes: number;
+  /**
+   * Cells a sweep of a `convchain` visits, those of the layers that hold its `on` cells (T469, ADR-0240): the engine's own,
+   * `WFC_LIMITS.convchainCells`, holds only on a grid of more layers.
+   */
+  convchainCells: number;
 }
 
 /** The bytes of potentials a node may take in this run: the engine's, or the run's ceiling if lower. */
@@ -1758,7 +1767,11 @@ class WfcRunner extends Runner {
   }
 }
 
-/** MarkovJunior's <convchain> (T335): see `ConvChainNode`. Only on a flat grid, as the original. */
+/**
+ * MarkovJunior's <convchain> (T335): see `ConvChainNode`. On a flat grid as the original (ConvChain.cs); on a grid of more layers (T469,
+ * ADR-0240) every layer that holds `on` cells is a flat grid of its own: the same windows, wrapping round its edges, swept in turn from the
+ * bottom. A flat grid draws and writes what it always did: one layer, its cells.
+ */
 class ConvChainRunner extends Runner {
   private weights: Float64Array;
   private N: number;
@@ -1767,6 +1780,8 @@ class ConvChainRunner extends Runner {
   private c1: number;
   private on: number;
   private substrate?: Uint8Array;
+  /** The layers that hold `on` cells, from the bottom: a flat grid has its one. */
+  private layers: number[] = [];
   private counter = 0;
   constructor(node: ConvChainNode, alpha: Alphabet) {
     super(node.steps);
@@ -1796,37 +1811,53 @@ class ConvChainRunner extends Runner {
     super.reset();
     this.counter = 0;
     this.substrate = undefined;
+    this.layers = [];
   }
   rewind(): void {
     this.reset();
   }
   go(g: Grid3, rng: Rng): boolean {
     if (this.limit !== undefined && this.counter >= this.limit) return false;
-    if (g.Z !== 1) throw new Mj3Error('convchain: solo su una griglia piana, alta un voxel, come nell\'originale');
-    const MX = g.X, MY = g.Y, N = this.N;
-    const total = MX * MY;
+    const total = g.X * g.Y;
     if (this.counter === 0) {
-      const substrate = new Uint8Array(total);
-      let any = false;
-      for (let i = 0; i < total; i++)
+      // The cells a sweep visits are those of the layers that hold `on` cells: counted before anything is drawn.
+      const layers: number[] = [];
+      for (let z = 0; z < g.Z; z++) if (g.cells.subarray(z * total, (z + 1) * total).includes(this.on)) layers.push(z);
+      // Without `on` cells it does nothing, now or later (the original would count empty sweeps).
+      if (!layers.length) return false;
+      const visits = layers.length * total;
+      if (g.Z > 1 && visits > WFC_LIMITS.convchainCells)
+        throw new Mj3Error(`convchain: su una griglia di più strati lavora su al più ${WFC_LIMITS.convchainCells} celle, quelle degli strati che hanno le sue celle "on" (qui ${visits})`);
+      const cap = current?.ceilings?.convchainCells;
+      if (cap !== undefined && visits > cap)
+        throw new Mj3Error(`convchain: nel mondo lavora su al più ${cap} celle, quelle degli strati che hanno le sue celle "on" (qui ${visits}: ${layers.length} strat${layers.length === 1 ? 'o' : 'i'} di ${g.X}×${g.Y}): meno strati o una griglia più piccola, il piano prima della map`);
+      const substrate = new Uint8Array(g.cells.length);
+      for (let i = 0; i < g.cells.length; i++)
         if (g.cells[i] === this.on) {
           write(g, i, rng.int(2) === 0 ? this.c0 : this.c1);
           substrate[i] = 1;
-          any = true;
         }
-      // Without `on` cells it does nothing, now or later (the original would count empty sweeps).
-      if (!any) return false;
       this.substrate = substrate;
+      this.layers = layers;
       this.counter++;
       this.count++;
       this.total++;
       return true;
     }
-    const substrate = this.substrate!;
-    const cells = g.cells;
+    for (const z of this.layers) this.sweep(g, rng, this.substrate!, z * total);
+    this.counter++;
+    this.count++;
+    this.total++;
+    return true;
+  }
+  /** A sweep of the layer that starts at cell `off` (ConvChain.cs): as many draws as its cells, each change kept as the sample's windows say. */
+  private sweep(g: Grid3, rng: Rng, substrate: Uint8Array, off: number): void {
+    const MX = g.X, MY = g.Y, N = this.N;
+    const total = MX * MY;
+    const cells = g.cells.subarray(off, off + total);
     for (let k = 0; k < total; k++) {
       const r = rng.int(total);
-      if (!substrate[r]) continue;
+      if (!substrate[off + r]) continue;
       const x = r % MX, y = Math.floor(r / MX);
       let q = 1;
       for (let sy = y - N + 1; sy <= y + N - 1; sy++)
@@ -1851,12 +1882,8 @@ class ConvChainRunner extends Runner {
         if (this.temperature !== 1) q = Math.pow(q, 1 / this.temperature);
         if (!(q > rng.next())) continue;
       }
-      write(g, r, cells[r] === this.c0 ? this.c1 : this.c0);
+      write(g, off + r, cells[r] === this.c0 ? this.c1 : this.c0);
     }
-    this.counter++;
-    this.count++;
-    this.total++;
-    return true;
   }
 }
 

@@ -849,17 +849,24 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Campione
 - **Inglese**: `sample`, `overlapModel`, `convchainWeights`
-- **Definizione**: un pattern piano di `models/<nome>.txt` da cui la `wfc` a sovrapposizione (nelle lettere del nodo) e `convchain` (nelle sue due lettere, black e white) imparano quali finestre N×N possono stare insieme e quanto spesso (ADR-0174). Al posto dell'immagine PNG dell'originale.
+- **Definizione**: un pattern piano di `models/<nome>.txt` da cui la `wfc` a sovrapposizione (nelle lettere del nodo) e `convchain` (nelle sue due lettere, black e white) imparano quali finestre N×N possono stare insieme e quanto spesso (ADR-0174). Al posto dell'immagine PNG dell'originale. Quello di `convchain` si può scrivere anche nel nodo, come testo del figlio `<sample>` (righe separate da `/`): un programma che non legge file, come quelli dello Scultore (T469, ADR-0240).
 - **Dove vive**: `src/mj/wfc.ts`, `src/mj/model.ts`
 - **Da non usare**: `esempio`, `immagine` (per il campione)
-- **Fermo**: l'attributo `sample` dell'XML di MarkovJunior.
+- **Fermo**: l'attributo `sample` dell'XML di MarkovJunior; il figlio `<sample>` di `<convchain>`.
 
 ### ConvChain
 - **Inglese**: `convchain`, `ConvChainNode`
-- **Definizione**: il nodo `<convchain>` di MarkovJunior: le celle `on` di una griglia piana diventano black o white, poi a ogni passo una passata di Metropolis le fa somigliare alle finestre N×N del campione (`temperature` le ammorbidisce), per `steps` passi (ADR-0174).
+- **Definizione**: il nodo `<convchain>` di MarkovJunior: le celle `on` di una griglia piana diventano black o white, poi a ogni passo una passata di Metropolis le fa somigliare alle finestre N×N del campione (`temperature` le ammorbidisce), per `steps` passi (ADR-0174). Su una griglia di più strati (non nell'originale) ogni strato che ha celle `on` è una griglia piana a sé, passato a ogni passo dal basso: la trama di un piano o di un pavimento in una struttura; nel mondo al più 65 536 celle degli strati che lavora (`convchainCells` dei tetti del mondo), nel motore 2^20 (T469, ADR-0240).
 - **Dove vive**: `src/mj/engine.ts`, `src/mj/wfc.ts`
 - **Da non usare**: nessuno
-- **Fermo**: `<convchain sample n temperature on black white steps>`, come nell'XML di MarkovJunior.
+- **Fermo**: `<convchain sample n temperature on black white steps>`, come nell'XML di MarkovJunior, e il figlio `<sample>`.
+
+### Ciclo
+- **Inglese**: `MarkovRunner`, `SequenceRunner`
+- **Definizione**: un `<markov>` che ripete: a ogni passo il primo figlio che trova qualcosa fa un passo, e quando lavora l'**ultimo** ripartono tutti (i loro passi contati di nuovo, una sequenza dal suo primo figlio); finisce quando nessun figlio trova niente. `<markov><sequence>…</sequence></markov>` è un ciclo il cui corpo riparte dal primo figlio a ogni passo, un passo a giro: prima l'**uscita** (un segno raro), poi ciò che lo propaga, ultima la crescita; una sequenza che non è l'ultimo figlio tiene il suo posto da un passo all'altro (i piani a moneta del forte dell'autore). Nell'originale di mxgmn una sequenza dentro un `markov` corre fino in fondo: il nostro motore no, e `tests/mj-markov.test.ts` lo fissa voxel per voxel (T469).
+- **Dove vive**: `src/mj/engine.ts`, `universe/prompts/agents/sculptor.md`, `universe/prompts/agents/sculptor/architect.md`
+- **Da non usare**: `iterazione` (per il ciclo di un programma; «anello» è la crescita di un giro)
+- **Fermo**: `<markov>`, `<sequence>`, come nell'XML di MarkovJunior.
 
 ### Scala frazionaria
 - **Inglese**: `divide`
