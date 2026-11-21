@@ -23,6 +23,12 @@
 // landing and travels to the planet: the frames of the whole voyage, the JS heap and the buffers, what the levels hold on the GPU, then the
 // frames on the planet's ground. Only that, as `--blocco`.
 //
+// `--terreno` (T459, docs/design/terreno-3d.md): the ways of the ground of lab/terreno-3d/ (bundled from `pagina.ts` with esbuild and
+// evaluated in the page). After the cold load the wanderer goes to the place with the most relief near the start; the frames there with
+// the ground of today, then with the loaded places in each way (columns with the true relief and the strata, voxels at 2 and at 4 a tile:
+// how long each place took to make, the triangles, the buffers, the JS heap before and after), then today's ground with the automata
+// on (the water as virtual pipes every tick, the wind at 10 Hz, the water's surface following them). Only that, as `--blocco`.
+//
 // Nothing of the game changes: the probe wraps requestAnimationFrame, WebGL and Worker before the page, and the kernel's and the
 // renderer's methods from the console (`window.quine`, `window.view`), as an instance property over the prototype's. The wanderer's
 // saved position is removed from `universes/` before the load (T214): run it against a preview of a throwaway checkout.
@@ -344,7 +350,7 @@ try {
   await page.eval(RESET);
   const settled = await settle(page);
   rows.push({ ...summary(`caricamento a freddo (fino a ${settled} s dopo il kernel)`, await page.eval(TAKE)), settled, kernelAt });
-  for (const [scene, go] of Object.entries(opt('blocco') || opt('viaggio') ? {} : SCENES)) {
+  for (const [scene, go] of Object.entries(opt('blocco') || opt('viaggio') || argv.includes('--terreno') ? {} : SCENES)) {
     await page.eval(go);
     await settle(page, 60);
     await page.eval(RESET);
@@ -426,6 +432,54 @@ try {
   const blockFile = opt('blocco');
   if (opt('viaggio')) {
     // Done above.
+  } else if (argv.includes('--terreno')) {
+    // The ways of the ground (T459): the prototype of lab/terreno-3d/ bundled for the page.
+    const { build } = await import('esbuild');
+    const bundle = await build({ entryPoints: ['lab/terreno-3d/pagina.ts'], bundle: true, format: 'iife', platform: 'browser', target: 'es2022', write: false, logLevel: 'error' });
+    await page.eval(bundle.outputFiles[0].text + ';true');
+    await page.send('Performance.enable');
+    const heap = async () => {
+      await page.send('HeapProfiler.collectGarbage').catch(() => {});
+      const m = await page.send('Performance.getMetrics');
+      const get = (n) => m.metrics.find((x) => x.name === n)?.value ?? 0;
+      const u = await page.send('Runtime.getHeapUsage').catch(() => ({}));
+      return { heapMB: get('JSHeapUsedSize') / 2 ** 20, buffersMB: (u.backingStorageSize ?? NaN) / 2 ** 20 };
+    };
+    // Where the relief is: the place with the most of it near the start; the wanderer there, the carpet still.
+    const place = await page.eval('window.__t459.where(12)');
+    await page.eval(`(() => { const k = window.quine, S = k.config.chunkSize, c = k.carpet(); c.active = false; Object.assign(k.wandererPos(), { x: 0, y: 0 }); c.ox = ${place.cx} * S + S / 2; c.oy = ${place.cy} * S + S / 2; })()`);
+    const settled = await settle(page, 90);
+    console.log(`
+il luogo con più rilievo vicino alla partenza: (${place.cx}, ${place.cy}), ${place.span} livelli di dislivello; assestato in ${settled} s`);
+    const before = await heap();
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`oggi, dove c'è più rilievo (${place.cx}, ${place.cy})`, await page.eval(TAKE)), place, heap: before });
+    for (const mode of ['columns', 'voxels2', 'voxels4']) {
+      const h0 = await heap();
+      const t0 = Date.now();
+      const made = await page.eval(`window.__t459.ground('${mode}')`);
+      const ms = Date.now() - t0;
+      await sleep(2000);
+      const h1 = await heap();
+      console.log(`
+${mode}: ${made.places} luoghi in ${ms} ms (a luogo: fare ${made.makeMs.median.toFixed(1)} ms, max ${made.makeMs.max.toFixed(1)}; la mesh ${made.meshMs.median.toFixed(1)} ms, max ${made.meshMs.max.toFixed(1)}); ${Math.round(made.triangles / 1000)}k triangoli, ${(made.bytes / 2 ** 20).toFixed(1)} MB di buffer; heap JS ${h0.heapMB.toFixed(0)} → ${h1.heapMB.toFixed(0)} MB, buffer ${h0.buffersMB.toFixed(0)} → ${h1.buffersMB.toFixed(0)} MB`);
+      await page.eval(RESET);
+      await sleep(seconds * 1000);
+      rows.push({ ...summary(`${mode} (${made.places} luoghi, ${Math.round(made.triangles / 1000)}k triangoli del terreno)`, await page.eval(TAKE)), made, installMs: ms, heap: { before: h0, after: h1 } });
+    }
+    await page.eval('window.__t459.restore()');
+    await sleep(1000);
+    const auto = await page.eval('window.__t459.automata(true)');
+    console.log(`
+automi: ${JSON.stringify(auto)}`);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`oggi con gli automi (acqua a tubi ${auto.cells} celle ogni tick, vento ${auto.windCells} celle a 10 Hz, la superficie)`, await page.eval(TAKE)), auto });
+    await page.eval('window.__t459.restore()');
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
   } else if (blockFile) {
     const vpt = Number(opt('vpt', '10'));
     const [bx, by] = (opt('luogo') ?? '20,24').split(',').map(Number);
