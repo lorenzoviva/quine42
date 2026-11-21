@@ -36,10 +36,12 @@ import {
   transitView,
 } from '../src/kernel/planets';
 import { readVehicleView } from '../src/kernel/vehicle';
+import { badRootOf, cleanCoined, COINED_ROOTS, foldName } from '../src/kernel/coined';
+import { freshName } from '../src/kernel/npc/model';
 
 const S = 18;
 const PLANETS = [
-  { name: 'Teruna', gravity: 0.5, day: 300 },
+  { name: 'Aldora', gravity: 0.5, day: 300 },
   { name: 'Velmar', gravity: 1.5, sky: 'earth', seed: 777, sea: 6 },
 ];
 
@@ -50,8 +52,8 @@ function planetFiles(planets: unknown = PLANETS, seed = 11) {
 
 describe('the planets of the nature (T449)', () => {
   it('only around the void, at most eight, each within what the kernel accepts', () => {
-    const n = repairNature({ geography: 'void', sky: 'stars', planets: [{ name: ' Teruna ', gravity: 9, day: 5, sky: 'mars', sea: 99, seed: 1.5, extra: 1 }, 'x', null, { name: '<b>' }] });
-    expect(n.planets).toEqual([{ name: 'Teruna', geography: 'continent', sky: 'earth', day: 600, gravity: 1 }, { geography: 'continent', sky: 'earth', day: 600, gravity: 1 }]);
+    const n = repairNature({ geography: 'void', sky: 'stars', planets: [{ name: ' Aldora ', gravity: 9, day: 5, sky: 'mars', sea: 99, seed: 1.5, extra: 1 }, 'x', null, { name: '<b>' }] });
+    expect(n.planets).toEqual([{ name: 'Aldora', geography: 'continent', sky: 'earth', day: 600, gravity: 1 }, { geography: 'continent', sky: 'earth', day: 600, gravity: 1 }]);
     expect(repairNature({ geography: 'continent', planets: [{}] }).planets).toBeUndefined();
     expect(repairNature({ geography: 'void', planets: Array.from({ length: 20 }, () => ({})) }).planets).toHaveLength(MAX_PLANETS);
     // A world of today: no planets, the same nature as before.
@@ -73,7 +75,7 @@ describe('the planets of the nature (T449)', () => {
     expect(natureOfBand(n, 1)).toMatchObject({ geography: 'continent', sky: 'earth', day: 300, gravity: 0.5 });
     expect(natureOfBand(n, 0)).toMatchObject({ geography: 'void', sky: 'stars' });
     expect(natureOfBand(n, 0).planets).toBeUndefined();
-    expect(destinations(n, 11).map((d) => d.name)).toEqual(['l’orbita', 'Teruna', 'Velmar']);
+    expect(destinations(n, 11).map((d) => d.name)).toEqual(['l’orbita', 'Aldora', 'Velmar']);
     expect(planetName(5)).toMatch(/^[A-Z][a-z]+$/);
   });
 });
@@ -160,7 +162,7 @@ describe('the voyage (T449)', () => {
     const { k, c, said } = await atTheControls();
     expect(k.aboard()).toBe(c);
     const courses = k.actionsFor(c).filter((o) => o.id.startsWith('travel:'));
-    expect(courses.map((o) => o.label)).toEqual(['Rotta per Teruna', 'Rotta per Velmar']);
+    expect(courses.map((o) => o.label)).toEqual(['Rotta per Aldora', 'Rotta per Velmar']);
     const circle = { ...k.wandererPos() };
     const onDeck = () => {
       const b = k.ecs.get(c, 'pos'), w = k.wandererCarpet();
@@ -169,9 +171,9 @@ describe('the voyage (T449)', () => {
     const before = onDeck();
     await k.perform(c, 'travel:1');
     expect(k.transitOf(c)).toMatchObject({ from: 0, to: 1, t: 0, total: TRAVEL_SECONDS });
-    expect(said.some((s) => s.includes('rotta per Teruna'))).toBe(true);
+    expect(said.some((s) => s.includes('rotta per Aldora'))).toBe(true);
     // Under way: no way out, no other course, the vehicle does not drive.
-    expect(k.actionsFor(c).find((o) => o.id === 'transit')?.label).toBe('In viaggio verso Teruna');
+    expect(k.actionsFor(c).find((o) => o.id === 'transit')?.label).toBe('In viaggio verso Aldora');
     await k.perform(c, 'over');
     expect(k.aboard()).toBe(c);
     for (let i = 0; i < 60 * TRAVEL_SECONDS * 0.5 + 2; i++) k.tick(1 / 60);
@@ -190,7 +192,7 @@ describe('the voyage (T449)', () => {
     for (let i = 0; i < 60 * TRAVEL_SECONDS; i++) k.tick(1 / 60);
     expect(k.transitOf(c)).toBeUndefined();
     expect(k.ecs.get(c, 'vehicle').anchored).toBe(true);
-    expect(said).toContain('Siete arrivati: Teruna.');
+    expect(said).toContain('Siete arrivati: Aldora.');
     expect(k.aboard()).toBe(c);
     await k.planAhead(planetPlace(1, S), 0);
     const near = k.ecs.query('vehicle', 'pos').filter((e) => Math.hypot(k.ecs.get(e, 'pos').x - d.x, k.ecs.get(e, 'pos').y - d.y) < 2.5);
@@ -315,4 +317,45 @@ describe('the origin that moves (T449)', () => {
     whole.computeBoundingSphere();
     expect(whole.boundingSphere!.radius).toBeGreaterThan(GLOBE_RADIUS * 0.9);
   }, 120_000);
+});
+
+describe('i nomi coniati dal kernel senza parole offensive o ridicole (T462)', () => {
+  it('il filtro sente le radici senza accenti, doppie, k/c e th/t', () => {
+    expect(foldName('Thétta')).toBe('teta');
+    expect(foldName('Kakka')).toBe(foldName('cacca'));
+    for (const bad of ['Teruna', 'Terrone', 'Pene', 'Kaka', 'Cacca', 'Ruto', 'Kazzo', 'Thetta', 'Culoo', 'Nigero', 'Merde', 'Fuck', 'Puttana', 'Mierda', 'Salope', 'Ano'])
+      expect(badRootOf(bad), bad).toBeDefined();
+    for (const good of ['Velmar', 'Aldora', 'Doveldo', 'Ornali', 'Marisol', 'Adelina', 'Teodora']) expect(cleanCoined(good), good).toBe(true);
+    // A root is written as the filter hears it.
+    for (const r of COINED_ROOTS) expect(foldName(r)).toBe(r);
+  });
+
+  it("nessun pianeta senza nome ha una radice dell'elenco né una sillaba ripetuta, e i nomi restano tanti e fermi", () => {
+    const names = new Set<string>();
+    for (let seed = -5000; seed < 20000; seed++) {
+      const name = planetName(seed);
+      expect(badRootOf(name), name).toBeUndefined();
+      expect(name).toMatch(/^[A-Z][a-z]+$/);
+      expect(/^(?:(..)\1|(...)\2)/i.test(name), name).toBe(false);
+      names.add(name);
+    }
+    expect(names.size).toBeGreaterThan(4000);
+    expect(planetName(123456)).toBe(planetName(123456));
+    // The planets of a nature without names, in many worlds.
+    const n = repairNature({ geography: 'void', sky: 'stars', planets: Array.from({ length: MAX_PLANETS }, () => ({})) });
+    for (let world = 0; world < 500; world++) for (const d of destinations(n, world).slice(1)) expect(cleanCoined(d.name), d.name).toBe(true);
+  });
+
+  it('neppure le persone coniate a sillabe quando i nomi del mondo sono finiti', () => {
+    const taken: string[] = [];
+    for (let i = 0; i < 30; i++) taken.push(freshName('person', 'female', taken, 'f'), freshName('person', 'male', taken, 'm'));
+    const coined = new Set<string>();
+    for (let i = 0; i < 3000; i++) {
+      const name = freshName('person', i % 2 ? 'female' : 'male', taken, `seme${i}`);
+      expect(cleanCoined(name), name).toBe(true);
+      expect(name).toMatch(/^[A-Z][a-z]+$/);
+      coined.add(name);
+    }
+    expect(coined.size).toBeGreaterThan(1000);
+  });
 });

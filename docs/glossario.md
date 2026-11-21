@@ -298,6 +298,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `piano` e `livello` (per il pianeta: il piano è uno solo, il livello è del dettaglio o del rilievo), `mondo` (il mondo è l'universo intero), `dimensione`
 - **Fermo**: `planets` in `universe.json → nature` e i suoi campi (`name`, `seed`, `geography`, `sky`, `day`, `gravity`, `sea`).
 
+### Nome coniato
+- **Inglese**: `foldName`, `badRootOf`, `cleanCoined`, `COINED_ROOTS`, `planetName`, `freshName`
+- **Definizione**: un nome che il kernel compone da sé a sillabe dal seme (un pianeta senza nome, una persona quando i nomi del mondo sono finiti); mai una parola offensiva, volgare o ridicola in una delle lingue del mondo: un nome che cade nel filtro si ricompone col seme successivo (T462).
+- **Dove vive**: `src/kernel/coined.ts`, `src/kernel/planets.ts`, `src/kernel/npc/society.ts`
+- **Da non usare**: `nome casuale` (è una funzione del seme), `censura` (il filtro non tocca i nomi che il Concilio o il master scrivono)
+- **Fermo**: niente su disco: un nome coniato si ricava dal seme ogni volta (i pianeti) o si scrive una volta (le persone).
+
 ### Fascia
 - **Inglese**: `band`, `bandOf`, `bandAt`, `bandOfPlace`, `bandOfTile`, `PLANET_SPAN`, `planetPitch`, `planetPlace`, `planetLocal`
 - **Definizione**: la striscia di luoghi attorno a (k · 2^20, 0) caselle che è il pianeta k; la fascia 0 è l'orbita, il vuoto con le stazioni e gli asteroidi, e ogni mondo senza pianeti (T449, ADR-0236).

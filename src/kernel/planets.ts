@@ -10,6 +10,7 @@
 // the same in every kernel, never a file.
 
 import { hash32 } from './rng';
+import { cleanCoined } from './coined';
 import { DEFAULT_NATURE, type Planet, type WorldNature } from './nature';
 import type { Dock } from './islands';
 import type { TerrainDef } from './types';
@@ -52,14 +53,36 @@ export function natureOfBand(n: WorldNature, k: number): WorldNature {
 /** What the orbit is called, in the language of the world: the destination of the voyage back to the stations. */
 export const ORBIT_NAME: Readonly<Record<string, string>> = { it: 'l’orbita', en: 'the orbit', fr: 'l’orbite', es: 'la órbita' };
 
-const SYLLABLES = ['ka', 'ri', 'to', 'ne', 'su', 'mar', 'vel', 'do', 'li', 'an', 'or', 'te', 'zan', 'pe', 'ru', 'is', 'lo', 'ga', 'mi', 'th'];
+// No `th` («Thth», «Anth»: no word of the world) nor `ka` («Kaka», and with `zan` a «kaz…»): what is left is filtered (T462).
+const SYLLABLES = ['sol', 'ri', 'to', 'ne', 'su', 'mar', 'vel', 'do', 'li', 'an', 'or', 'te', 'zan', 'pe', 'ru', 'is', 'lo', 'ga', 'mi', 'na'];
 
-/** The name of a planet nobody named (a function of its seed): two or three syllables, as a word of the world and never a number. */
-export function planetName(seed: number): string {
+/** How many seeds a name is coined from before the fallback: the filter and the repeats turn down fewer than one in ten. */
+const NAME_TRIES = 64;
+
+/** Two or three syllables from a seed, as they come; `undefined` when one comes twice in a row («Gaga», «Velvel»: a child's word). */
+function syllables(seed: number): string | undefined {
   const n = 2 + (hash32(seed, 17) % 2);
   let s = '';
-  for (let i = 0; i < n; i++) s += SYLLABLES[hash32(seed, 31, i) % SYLLABLES.length];
+  let last = -1;
+  for (let i = 0; i < n; i++) {
+    const at = hash32(seed, 31, i) % SYLLABLES.length;
+    if (at === last) return undefined;
+    s += SYLLABLES[(last = at)];
+  }
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * The name of a planet nobody named (a function of its seed): two or three syllables, as a word of the world and never a number. A name that
+ * says or sounds like a word that offends (`cleanCoined`, T462), or says a syllable twice in a row, is coined again from the next seed;
+ * after `NAME_TRIES` seeds, Velmar.
+ */
+export function planetName(seed: number): string {
+  for (let a = 0; a < NAME_TRIES; a++) {
+    const name = syllables((seed + a) | 0);
+    if (name && cleanCoined(name)) return name;
+  }
+  return 'Velmar';
 }
 
 /** Where a voyage can go: the orbit (band 0) and every planet, with its name. */

@@ -6218,7 +6218,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit su `task/T463`; poi l'orchestratore integra T463, e `integra T461`/`integra T446` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
 
-### T462 · I nomi dei pianeti senza parole offensive o ridicole — `da fare`
+### T462 · I nomi dei pianeti senza parole offensive o ridicole — `fatto` (`7a0a0065`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 37
 - Contesto: richiesta dell'autore del 21/11: il pianeta di prova di T449 si chiamava «Teruna», che in italiano richiama «terrone». `planetName` (`src/kernel/planets.ts`) compone due o tre sillabe dal seme (`SYLLABLES`) senza nessun controllo: può dare anche «Pene» (`pe`+`ne`), «Kaka», «Ruto» e simili. Nasce da T449: `dossier T449`.
@@ -6226,3 +6226,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/pianeti.test.ts` verde col test nuovo.
 - Browser: no (solo nomi; il viaggio l'ha visto T449).
 - Quando è fatto: commit su `task/T462`, kernel sale di `Z`. Sicurezza: nessuna superficie nuova.
+- Esito: filtro dei nomi coniati (`src/kernel/coined.ts`: `foldName`, `badRootOf`, `cleanCoined`; radici in it/en/fr/es, senza accenti né doppie, k/c, th/t, ph/f, y/j/i, w/v uguali) usato da `planetName` (ricompone col seme successivo, scarta le sillabe ripetute di fila, tolte `th` e `ka`, aggiunte `sol` e `na`) e da `freshName` (persone a nomi finiti; corretto anche lo shift con segno che coniava «Zundefined…»); «Teruna» → «Aldora» in test, ADR-0236 e nomi dei file delle catture di T449 (il testo dentro le immagini resta, non rifatte); test nuovo in `tests/pianeti.test.ts` (25 000 pianeti, 3000 persone); kernel 0.10.13; i pianeti senza nome di un universo cambiano nome (oggi nessuna ambientazione li porta, T450), le persone già nate tengono il loro; suite intera e typecheck verdi; sicurezza: nessuna superficie nuova.

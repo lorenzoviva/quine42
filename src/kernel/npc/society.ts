@@ -5,6 +5,7 @@
 // there) and lets related people greet each other when they meet. No model calls here.
 
 import { internalFields, internalIndividual, italianName } from '../internalNames';
+import { cleanCoined } from '../coined';
 import { hashStr } from '../rng';
 import type { FileMap } from '../types';
 import { SOLO, WANDERER_NAME, wandererOf } from '../wandererIds';
@@ -353,7 +354,7 @@ const NAME_POOL: Record<Species, Record<Gender, string[]>> = {
   },
 };
 
-/** A name unlike every name taken: from the pool first, then made of syllables (deterministic for a seed). */
+/** A name unlike every name taken: from the pool first, then made of syllables (deterministic for a seed), never one that offends (T462). */
 export function freshName(specie: Species, genere: Gender, taken: string[], seed: string): string {
   const free = (n: string) => !taken.some((t) => similarNames(t, n));
   const pool = NAME_POOL[specie][genere];
@@ -363,8 +364,8 @@ export function freshName(specie: Species, genere: Gender, taken: string[], seed
   const V = ['a', 'e', 'i', 'o', 'u'];
   for (let i = 0; i < 2000; i++) {
     const x = hashStr(`${seed}#${i}`);
-    const n = `${C[x % 14].toUpperCase()}${V[(x >> 4) % 5]}${C[(x >> 7) % 14]}${V[(x >> 11) % 5]}${['', 'l', 'n', 'r'][(x >> 14) % 4]}${genere === 'female' ? 'a' : 'o'}`;
-    if (free(n)) return n;
+    const n = `${C[x % 14].toUpperCase()}${V[(x >>> 4) % 5]}${C[(x >>> 7) % 14]}${V[(x >>> 11) % 5]}${['', 'l', 'n', 'r'][(x >>> 14) % 4]}${genere === 'female' ? 'a' : 'o'}`;
+    if (free(n) && cleanCoined(n)) return n;
   }
   return `${pool[h % pool.length]} ${taken.length}`;
 }

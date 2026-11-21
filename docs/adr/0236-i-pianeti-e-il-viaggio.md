@@ -21,7 +21,7 @@ distanza**: precalcolati, con meno voxel da lontano e sempre più dettaglio avvi
    vuoto, al più `MAX_PLANETS` (8), ognuno con il nome (una riga, `cleanText`), il seme (del mondo e della fascia se non lo dice, `planetSeed`), la
    geografia (`continent`: la terra e i mari del generatore; l'arcipelago e il vuoto su un pianeta non sono aperti), il cielo, il giorno, la
    gravità e il mare (i livelli del suo rilievo, 0-24), riparati entro ciò che il kernel accetta come la natura del mondo; fissati alla Genesi con
-   lei (`sameNature` li confronta). Un pianeta senza nome ha un nome di sillabe dal suo seme (`planetName`), mai un numero.
+   lei (`sameNature` li confronta). Un pianeta senza nome ha un nome di sillabe dal suo seme (`planetName`), mai un numero, e mai una parola offensiva, volgare o ridicola né una sillaba ripetuta di fila: un nome che cade nel filtro dei nomi coniati (`src/kernel/coined.ts`, T462) si ricompone col seme successivo.
 3. **La natura di una fascia** (`natureOfBand`, `Kernel.natureAt`, `bandAt`, `bandOf`): il cielo, il giorno e la gravità del pianeta, il respiro del
    mondo; la gravità di un punto la prende (`gravityAt`), la luce anche (`daylight(x)`), `world.nature()` dice a Lua la natura di dove gira il codice
    (la fascia del luogo che il generatore disegna, `draftBand`, o quella del viandante che agisce), mai l'elenco dei pianeti.
@@ -35,7 +35,7 @@ distanza**: precalcolati, con meno voxel da lontano e sempre più dettaglio avvi
    portello di ADR-0234) e il piano non vi posa niente; il kernel vi mette la capsula quando il luogo entra nel mondo (`docksOf`, `dockCapsules`):
    la regola 10 dei pianeti, da un pianeta si torna solo con la capsula.
 6. **Il viaggio** (`travelTo`, `transitTick`, `jumpVehicle`): ai comandi di un veicolo del vuoto, in un mondo con pianeti, il menu offre una rotta
-   per ogni corpo che non è quello dov'è («Rotta per Teruna», «Rotta per l'orbita»: `destinations`, l'azione `travel:<fascia>`). Il viaggio è lo
+   per ogni corpo che non è quello dov'è («Rotta per Aldora», «Rotta per l'orbita»: `destinations`, l'azione `travel:<fascia>`). Il viaggio è lo
    stato `transit` del componente `vehicle` (`from`, `to`, `t`, `total`, `jumped`; `saneTransit`), scritto solo dal kernel; dura `TRAVEL_SECONDS`
    (16 s); intanto il veicolo non guida, non si esce né si sale. **A metà** il kernel porta il veicolo all'approdo della destinazione (lo
    spazioporto di un pianeta, l'approdo della stazione della partenza per l'orbita) con il verso dell'approdo, e chi è a bordo allo stesso posto del
