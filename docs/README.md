@@ -80,6 +80,9 @@ docs/
 │   ├── consumi.jsonl              # Storico dei consumi per calibrare le stime
 │   └── domande/                   # Scambio domande aperte tra agente e autore
 │
+├── guide/                         # Guide operative
+│   └── nuovo-modello.md           # Come si integra un modello nuovo, nel gioco e nella pipeline (T466)
+│
 ├── plans/                         # Pianificazione attiva
 │   └── backlog.md                 # UNICA FONTE DI VERITÀ per tutti i task (T01 - T68+)
 │

@@ -69,6 +69,8 @@ La **priorità 0** è riservata alle richieste urgenti dell'autore e alle correz
 
 **Neon** (ADR-0237): `neon` (Gemini 4 Neon) è su `agy`, in prova a tetto 1, senza browser, sul contatore `Gemini Models` (misurato) col conto di `gemini` e `hydrogen`. È il Gemini per la programmazione più impegnativa senza browser: provalo quando un task da `claude` aspetterebbe la finestra delle 5 ore, o al posto di `argon` per non spendere la sua settimana; sforzo `high` o `extra`. Non per ciò che Hydrogen fa già (documenti, test, merge): costa di più sullo stesso contatore. Mai architettura, kernel, sicurezza o MarkovJunior. In `orchestra.ordine` viene dopo l'Orchestrator e prima di Argon, e orchestra solo se l'autore spunta la sua casella (`/agente neon`).
 
+**Un modello nuovo** (T466): quando l'autore ne chiede uno, il task si scrive e si controlla con [`docs/guide/nuovo-modello.md`](../guide/nuovo-modello.md): contatore misurato e non dedotto, la voce anche nella copia dei test, tetto 1 e non orchestrabile finché è in prova, la prova di qualità su un task già fatto da Opus.
+
 **Le domande per l'autore**: **ogni domanda si scrive per intero in chat, numerata, con la raccomandazione; i file di `domande/` non bastano**, perché l'autore legge la chat. L'elenco vivo è `docs/pipeline/domande/aperte.md`.
 
 ## Come lavori
