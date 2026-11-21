@@ -50,7 +50,7 @@ export interface Host {
    */
   region_at(x: number, y: number): unknown;
   /**
-   * Whether a body breathes at a tile (T446, ADR-0236): the terrain, a vehicle's deck, the master's region, the environment, the body of the
+   * Whether a body breathes at a tile (T446, ADR-0237): the terrain, a vehicle's deck, the master's region, the environment, the body of the
    * void. True or false, also where the world does not count the breath; read only.
    */
   air_at(x: number, y: number): boolean;

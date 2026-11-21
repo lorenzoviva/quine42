@@ -819,7 +819,7 @@ local function make_api()
       if type(x) ~= "number" or type(y) ~= "number" then return nil end
       return host.region_at(x, y)
     end,
-    -- The air (T446, ADR-0236): whether a body breathes at the tile, read only.
+    -- The air (T446, ADR-0237): whether a body breathes at the tile, read only.
     air_at = function(x, y)
       if type(x) ~= "number" or type(y) ~= "number" then return true end
       return host.air_at(x, y)

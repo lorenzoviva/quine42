@@ -198,7 +198,7 @@ export interface EnvironmentDef {
   environment: 'outdoor' | 'indoor' | 'mixed';
   program: import('./mj').MjNode;
   /**
-   * Only false says (T446, ADR-0236): its places have no air to breathe (a flooded shaft, the bare rock of an airless moon). Read only where
+   * Only false says (T446, ADR-0237): its places have no air to breathe (a flooded shaft, the bare rock of an airless moon). Read only where
    * the world counts the breath (`nature.oxygen`); a terrain without air, a vehicle's deck and the master's region say before it.
    */
   air?: false;

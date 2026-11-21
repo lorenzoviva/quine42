@@ -1,4 +1,4 @@
-# ADR-0236 — L'aria e l'ossigeno
+# ADR-0237 — L'aria e l'ossigeno
 
 Data: 2026-11-21 · Stato: accettato (task T446 del backlog, S2 di [`docs/design/acqua-spazio.md`](../design/acqua-spazio.md) § 2.4)
 · Riferimenti: ADR-0224 (la fisica rimodellabile: `air` dei terreni e `oxygen` della natura, previsti per T446), ADR-0225 (il corpo che

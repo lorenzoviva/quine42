@@ -103,7 +103,7 @@ const TERRAIN_SCHEMA: Schema = {
 };
 
 /**
- * The physics' schema in a world that counts the breath (T446, ADR-0236): `air` false for a terrain one does not breathe on. Built from
+ * The physics' schema in a world that counts the breath (T446, ADR-0237): `air` false for a terrain one does not breathe on. Built from
  * PHYS_SCHEMA after it; only there, so a world of today is asked as before.
  */
 const PHYS_BREATH = '\nIn this world bodies count their breath: say air false of a terrain where nobody breathes (a grating open to the void, the floor of a flooded shaft); of the base codes say nothing, they have air.';
