@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 21/11/2026, epoca 613 (claude). Crediti: vedi `stato`.
+Aggiornato il 21/11/2026, epoca 614 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -49,5 +49,5 @@ Aggiornato il 21/11/2026, epoca 613 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **613 (claude):** **T467** integrato (`b00b0568`, kernel 0.10.15: esempi dello Scultore scelti per classe/taglia/voto, 2 528 → 936 token a chiamata; qualità coi modelli veri non provata, S7); T468 pronto (max).
-- **612 (claude):** **T466** integrato (guida `docs/guide/nuovo-modello.md`, solo documenti).
+- **614 (claude):** **T468** integrato (`48d19ce5`, ADR-0239, kernel 0.10.16: Scultore a otto specialità, nucleo 2 856 token, −1 755 token a richiesta; qualità coi modelli veri e segni di cache non provati, T473); pronti T469 T470 T471; T459 in corso.
+- **613 (claude):** **T467** integrato (`b00b0568`, kernel 0.10.15: esempi dello Scultore scelti per classe/taglia/voto, 2 528 → 936 token a chiamata).
