@@ -6209,6 +6209,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (l'aria l'ha vista T446; il merge non cambia UI).
 - Quando è fatto: commit su `task/T461`; poi l'orchestratore integra T461, e `integra T446` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 
+### T463 · Integrare T461 nel base (conflitto nel censimento del glossario) — `da fare`
+- Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
+- Step: 37
+- Contesto: `integra T461` (il merge di T446, l'aria, ADR-0236 e kernel 0.10.12) si è fermato su un solo conflitto, in `docs/glossario-censimento.md`, il file generato: nel frattempo T449 (i pianeti) è entrato nel base con lo stesso ADR-0236 e lo stesso kernel 0.10.12. Nasce da T461, T446 e T449: `dossier T461`, `dossier T449`.
+- Cosa fare: nel worktree `git merge task/T461`; controllare che non restino due ADR-0236 né due kernel 0.10.12: T449 tiene ADR-0236 e 0.10.12, l'aria di T446 diventa il primo ADR libero e il kernel 0.10.13 (file dell'ADR rinominato, indice, ogni rimando in AGENTS.md, dettagli, glossario, codice, test, `version.ts`, `package.json`, `universe/universe.json`); il censimento rigenerato con `node tools/glossario/glossario.mjs`, mai risolto a mano; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/aria.test.ts`, `tests/fisico-acceso.test.ts`, `tests/pianeti.test.ts` verdi.
+- Browser: no.
+- Quando è fatto: commit su `task/T463`; poi l'orchestratore integra T463, e `integra T461`/`integra T446` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
+
 ### T462 · I nomi dei pianeti senza parole offensive o ridicole — `da fare`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 37
