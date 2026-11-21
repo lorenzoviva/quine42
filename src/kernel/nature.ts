@@ -52,7 +52,7 @@ export interface TerrainPhysics {
   fatigue: number;
   /** Only where one swims: how deep the water is (deep if not said). */
   depth?: WaterDepth;
-  /** Whether a body breathes on the tile (true if not said; nothing reads it before T446). */
+  /** Whether a body breathes on the tile (true if not said; the void never): read where the world counts the breath (T446, `air.ts`). */
   air: boolean;
 }
 
@@ -207,7 +207,10 @@ export interface WorldNature {
   day: number;
   /** The weight of a body against the earth's (1): the jump scales with it (T447). */
   gravity: number;
-  /** Whether a body counts its breath (the need `oxygen`, T446): false, the air is everywhere. */
+  /**
+   * Whether a body counts its breath (T446, ADR-0237): the need `oxygen`, drained where there is no air (`air.ts`); false, the air is
+   * everywhere and no body has the need.
+   */
   oxygen: boolean;
 }
 
@@ -216,14 +219,14 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
  * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229; `void`, `stars` and
- * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen T446; the gravity 0.2-2 since T447).
+ * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen since T446, ADR-0237; the gravity 0.2-2 since T447).
  */
 export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
   geography: ['continent', 'archipelago', 'void'],
   sky: ['earth', 'stars'],
   day: [120, 3600],
   gravity: [0.2, 2],
-  oxygen: [false],
+  oxygen: [false, true],
 };
 
 /** The day of a still light (`nature.day` 0, T445): accepted besides the range of `NATURE_ACCEPTS.day`. */

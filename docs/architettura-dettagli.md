@@ -1286,7 +1286,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
   (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
   com'era (`keepNature`, accanto a `keepGame`; la gravità no: la rimodella il Fisico, T452); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
-  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle e il giorno di 120-3600 secondi o 0), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle, il giorno di 120-3600 secondi o 0 e il respiro), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
   T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
@@ -1366,6 +1366,25 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   c'è (T448, `#veicoli`), i terreni e gli ambienti dello spazio sono di T450; lo Spazio della Genesi resta la colonia con il cielo della terra.
   **Il mondo del vuoto è piano** (T448, ADR-0234: `flatRelief`, il rilievo dove ogni casella è al livello 0): una capsula agganciata a ogni bordo
   ha il ponte un gradino sopra la terra. `tests/vuoto.test.ts`.
+- **L'aria e l'ossigeno** (ADR-0237, T446, kernel 0.10.13). **L'aria** è una proprietà di caselle, luoghi e veicoli, mai un gas
+  (`src/kernel/air.ts`): `Kernel.airAt(x, y, z)` la dice in un punto del tappeto, dalla prima fonte che parla (`airOf`): il ponte di un
+  veicolo che la tiene (`vehicle.air`, vero se non detto per `medium: void`: la capsula; un ponte aperto ha l'aria della casella sotto), poi il
+  terreno senz'aria (`air: false`, il vuoto sempre), una regione del master che la dice (`Region.air`, vero o falso, mai una trattenuta,
+  `regionAir`; la riga «aria» del modulo «Dichiara regione», solo dove il mondo conta il respiro), l'ambiente del luogo che dice
+  `air: false` (il validatore rifiuta altro), il corpo del vuoto (un asteroide no, una stazione sì); altrove c'è. Lua la legge con
+  `world.air_at(x, y)` (vero o falso, anche dove il respiro non conta: una fiamma che non si accende). **Il respiro** (`nature.oxygen`, aperto
+  in `NATURE_ACCEPTS`; nessuna ambientazione lo porta ancora, T450): solo allora il kernel dà ai bisogni `oxygen` (0-100, pieno se manca) e
+  lo fa lui, non `sys.needs` (`breathingTick` dopo il nuoto, ogni viandante, anche dei client): fuori dall'aria cala di `OXYGEN_DRAIN`
+  (100 in due minuti), dieci volte più piano con una tuta indossata (`bonus.breath`, il più grande di ciò che si indossa, 1-10,
+  `breathOf`), nell'aria risale di `OXYGEN_REFILL` (in cinque secondi); a zero la salute (`ASPHYXIA_HEALTH`) e `die('asfissia')` col
+  livello della morte; non gli dei, non chi è trasceso, non chi sta già morendo; nella corona e nello studio si respira. Il mondo lo dice
+  una volta a ogni cambio (`NO_AIR`, `AIR_AGAIN`). La rinascita, gli dei e chi è trasceso hanno l'ossigeno pieno. **La bombola** è un
+  oggetto con `effects.oxygen` (il Narratore fino a 100, `toItemDef`; la bombola dei reami di T278): `core.items` lo fa respirare qualunque
+  sia la categoria («Respiri: …»); l'effetto `needs` accetta `oxygen` (±40, «ossigeno +N»), che `core.effects` cambia solo dove c'è.
+  **Il Concilio**: in un mondo che conta il respiro il Fisico può dire `air: false` di un terreno che non è dei codici di base e il
+  Cartografo di un ambiente della Genesi (`PHYS_SCHEMA_BREATH`, `LAYOUTS_SCHEMA_BREATH`, `BREATH_ENVIRONMENTS`); in un mondo di oggi le
+  richieste non cambiano. L'HUD mostra la barra «ossigeno» solo se i bisogni la hanno; i bisogni vanno al client come prima. Niente
+  sott'acqua né falle: il fiato del nuoto sotto la superficie e l'aria che si svuota da una stanza sono dopo. `tests/aria.test.ts`.
 
 <a id="veicoli"></a>
 ## Il veicolo
