@@ -115,7 +115,7 @@ describe('the palette of a Genesis (T437)', () => {
 describe('the nature of the world (T437)', () => {
   it('is repaired to what this kernel can make true: anything else is the world of today', () => {
     expect(repairNature(undefined)).toEqual(DEFAULT_NATURE);
-    expect(repairNature({ geography: 'moon', sky: 'rainbow', day: 50, gravity: 9, oxygen: true })).toEqual(DEFAULT_NATURE);
+    expect(repairNature({ geography: 'moon', sky: 'rainbow', day: 50, gravity: 9, oxygen: 'yes' })).toEqual(DEFAULT_NATURE);
     // The archipelago is open since T441; the void, the stars and the day since T445 (the day 0 is a still light).
     expect(repairNature({ geography: 'archipelago', sky: 'stars' })).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', sky: 'stars' });
     expect(repairNature({ geography: 'void', sky: 'stars', day: 0 })).toEqual({ ...DEFAULT_NATURE, geography: 'void', sky: 'stars', day: 0 });
@@ -126,7 +126,7 @@ describe('the nature of the world (T437)', () => {
     expect(repairNature({ geography: 'continent', day: NaN, gravity: '1' })).toEqual(DEFAULT_NATURE);
     expect(repairNature([1, 2])).toEqual(DEFAULT_NATURE);
     // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441, the void, the stars and the day of T445.
-    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false] });
+    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false, true] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
     for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(t.id === 'pirates' ? { ...DEFAULT_NATURE, geography: 'archipelago' } : DEFAULT_NATURE);
   });

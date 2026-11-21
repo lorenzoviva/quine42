@@ -280,9 +280,22 @@ const LAYOUTS_SCHEMA: Schema = {
   required: ['environments'],
 };
 
+/**
+ * The environments' schema in a world that counts the breath (T446, ADR-0235): `air` false for one whose places have no air. Only there: in a
+ * world of today the air is everywhere and the Cartographer is not asked.
+ */
+const LAYOUTS_SCHEMA_BREATH: Schema = (() => {
+  const s = JSON.parse(JSON.stringify(LAYOUTS_SCHEMA)) as { properties: { environments: { items: { properties: Record<string, unknown> } } } };
+  s.properties.environments.items.properties.air = { type: 'BOOLEAN', description: 'false only for a place with no air to breathe (a flooded shaft, the bare rock of an airless moon); leave it out otherwise' };
+  return s as unknown as Schema;
+})();
+
+/** What the Cartographer is told of the air in a world that counts the breath (T446). */
+const BREATH_ENVIRONMENTS = 'In this world bodies count their breath: where there is no air it runs out. Say "air": false of an environment whose places have none (the open rock of an airless body, a flooded shaft); a station, a dome, a ship hold the air. Most places have air.';
+
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
-export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = [], geography?: Geography): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
-  const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string }> }>(
+export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = [], geography?: Geography, breath = false): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
+  const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string; air?: unknown }> }>(
     'cartographer',
     'genesis.layouts',
     [
@@ -291,6 +304,7 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
       `Available stamps: {"type":"stamp","shape":…} with shape among ${internalValues('timbri').join(', ')} (see the role). A stamp is a shape, not an age: its id stays in the program, the name and description of the environment are yours to decide and "codes" gives it the materials of this world.`,
       // An archipelago (T443, ADR-0230): its shores are most of its places, and what is made on them.
       geography === 'archipelago' && ARCHIPELAGO_ENVIRONMENTS,
+      breath && BREATH_ENVIRONMENTS,
       `Usable terrain codes:\n${paletteSummary(palette)}`,
       // The music that came with the cards (T295) plays where an environment's id contains one of its words.
       music.length && `Music is already written for the environments whose id contains: ${music.slice(0, 20).map((m) => `${m.environments.map((e) => `"${e}"`).join(' or ')} (${m.name})`).join('; ')}. When one of yours is that kind of place, put that word in its id.`,
@@ -298,14 +312,14 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     ]
       .filter(Boolean)
       .join('\n\n'),
-    LAYOUTS_SCHEMA,
+    breath ? LAYOUTS_SCHEMA_BREATH : LAYOUTS_SCHEMA,
     { data: { palette }, temperature: 0.7 },
   );
   return (raw.environments ?? []).map((a) => {
     const id = String(a.id ?? '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 24) || 'ambiente';
     try {
       const program = JSON.parse(a.program_json) as MjNode;
-      return { id, def: { name: String(a.name), description: String(a.description), environment: environmentTypeOf(a.type), program } };
+      return { id, def: { name: String(a.name), description: String(a.description), environment: environmentTypeOf(a.type), program, ...(breath && a.air === false ? { air: false as const } : {}) } };
     } catch (e) {
       return { id, error: `${id}: program_json non è JSON valido (${(e as Error).message})` };
     }

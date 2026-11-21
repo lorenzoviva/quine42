@@ -43,6 +43,11 @@ export interface VehicleSpec {
   turn: number;
   /** On the water: whether it floats on the shallow water too. */
   draught: Draught;
+  /**
+   * Whether its deck holds air (T446, ADR-0235): who stands on it breathes, whatever is under it. A vehicle of the void holds it if it says
+   * nothing (a capsule is closed); another only if it says so (an open deck has the air of the tile under it).
+   */
+  air: boolean;
 }
 
 /** What a manifest writes of a vehicle (`vehicle`), as read: nothing of it is trusted. */
@@ -52,6 +57,7 @@ export interface VehicleSaid {
   accel?: unknown;
   turn?: unknown;
   draught?: unknown;
+  air?: unknown;
 }
 
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -70,6 +76,7 @@ export function vehicleSpecOf(said: unknown): VehicleSpec | undefined {
     accel: within(finite(v.accel) ? v.accel : 1.5, VEHICLE_LIMITS.accel),
     turn: within(finite(v.turn) ? v.turn : 0.8, VEHICLE_LIMITS.turn),
     draught: isDraught(v.draught) ? v.draught : 'shallow',
+    air: v.air === true || (v.air !== false && v.medium === 'void'),
   };
 }
 
@@ -84,6 +91,7 @@ export function vehicleSpecErrors(said: unknown): string[] {
     const [lo, hi] = VEHICLE_LIMITS[k];
     if (n !== undefined && (!finite(n) || n < lo || n > hi)) out.push(`vehicle.${k} sta tra ${lo} e ${hi}`);
   }
+  if (v.air !== undefined && typeof v.air !== 'boolean') out.push('vehicle.air deve essere true o false');
   if (v.draught !== undefined && (!isDraught(v.draught) || v.medium !== 'water')) out.push(`vehicle.draught (${DRAUGHTS.join(', ')}) solo sull'acqua`);
   return out;
 }

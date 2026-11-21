@@ -65,6 +65,7 @@ const EFFECT_SCHEMA: Schema = {
     thirst: { type: 'NUMBER' },
     energy: { type: 'NUMBER' },
     health: { type: 'NUMBER' },
+    oxygen: { type: 'NUMBER', description: 'needs: the breath, only where the world counts it (world.nature().oxygen)' },
     capacity: { type: 'INTEGER' },
     loot: { type: 'STRING' },
   },

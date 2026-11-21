@@ -3,7 +3,8 @@
 -- Effects have English names and fields (contract 0.2): { type = "light", radius = 4, duration = 60 }.
 local M = {}
 
-local NEEDS = { "hunger", "thirst", "energy", "health" }
+-- oxygen (T446) only where the world counts the breath: a needs without it is left so.
+local NEEDS = { "hunger", "thirst", "energy", "health", "oxygen" }
 
 local function clamp(v) return math.max(0, math.min(100, v)) end
 
@@ -23,7 +24,7 @@ function F.needs(_, user, e)
   local n = ecs.get(user, "needs")
   if not n then return nil end
   for _, k in ipairs(NEEDS) do
-    if e[k] then n[k] = clamp(n[k] + e[k]) end
+    if e[k] and n[k] then n[k] = clamp(n[k] + e[k]) end
   end
   return nil
 end

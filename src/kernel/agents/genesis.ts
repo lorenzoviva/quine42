@@ -102,6 +102,12 @@ const TERRAIN_SCHEMA: Schema = {
   required: ['terrains', 'roof'],
 };
 
+/**
+ * The physics' schema in a world that counts the breath (T446, ADR-0235): `air` false for a terrain one does not breathe on. Built from
+ * PHYS_SCHEMA after it; only there, so a world of today is asked as before.
+ */
+const PHYS_BREATH = '\nIn this world bodies count their breath: say air false of a terrain where nobody breathes (a grating open to the void, the floor of a flooded shaft); of the base codes say nothing, they have air.';
+
 const PHYS_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
@@ -123,6 +129,12 @@ const PHYS_SCHEMA: Schema = {
   },
   required: ['terrains'],
 };
+
+const PHYS_SCHEMA_BREATH: Schema = (() => {
+  const s = JSON.parse(JSON.stringify(PHYS_SCHEMA)) as { properties: { terrains: { items: { properties: Record<string, unknown> } } } };
+  s.properties.terrains.items.properties.air = { type: 'BOOLEAN', description: 'false only for a terrain nobody breathes on; leave it out otherwise' };
+  return s as unknown as Schema;
+})();
 
 const REVIEW_SCHEMA: Schema = {
   type: 'OBJECT',
@@ -165,10 +177,11 @@ interface RawTerrain {
   layer: TerrainLayer;
   solid: boolean;
   speed: number;
-  /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep. */
+  /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep; whether one breathes on it (T446). */
   cross?: Crossing;
   fatigue?: number;
   depth?: string;
+  air?: boolean;
 }
 
 export function styleMarkdown(s: RawStyle): string {
@@ -208,7 +221,8 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
       const physics = physicsOf(layer, t, base?.cross, WATER_CODES[t.code]);
       // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
       const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.code.charCodeAt(0)}` } : {};
-      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}) }];
+      // The air (T446): only the Physicist's false, never of a base code (one breathes over the water and on the ground of every world).
+      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), ...(!base && t.air === false ? { air: false } : {}) }];
     }),
   );
 }
@@ -228,7 +242,7 @@ export interface GenesisBrought {
 
 const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(0, n).map((x) => `«${x.name}» (${x.class})`).join(', ');
 
-export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography): Promise<GenesisPlan> {
+export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography, breath = false): Promise<GenesisPlan> {
   const data = { theme };
   // The fields of the bible are those of the file (English since T310b); `storia` of an answer of before is `history` here, not in internalAnswer.
   const askBible = async (feedback = ''): Promise<Bible> =>
@@ -283,11 +297,11 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
 
   // The Physicist decides how a body crosses each terrain, and how fast (T437, ADR-0224): within the kernel's limits, which `toPalette` keeps.
   if (!errs.length) {
-    const phys = await c.ask<{ terrains: Array<{ code: string; cross?: Crossing; solid?: boolean; speed?: number; fatigue?: number; depth?: string; note?: string }> }>(
+    const phys = await c.ask<{ terrains: Array<{ code: string; cross?: Crossing; solid?: boolean; speed?: number; fatigue?: number; depth?: string; air?: unknown; note?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow, deep or a reef (rock just under the surface: one swims over it, no hull floats on it).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).`,
-      PHYS_SCHEMA,
+      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow, deep or a reef (rock just under the surface: one swims over it, no hull floats on it).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).${breath ? PHYS_BREATH : ''}`,
+      breath ? PHYS_SCHEMA_BREATH : PHYS_SCHEMA,
       { data: { terrains: terrain.terrains } },
     );
     for (const p of phys.terrains ?? []) {
@@ -302,6 +316,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
       if (typeof p.speed === 'number') t.speed = p.speed;
       if (typeof p.fatigue === 'number') t.fatigue = p.fatigue;
       if (!base && typeof p.depth === 'string') t.depth = p.depth;
+      if (breath && !base && p.air === false) t.air = false;
       const now = physicsOf(base ? base.layer : t.layer, t, base ? base.cross : undefined, WATER_CODES[t.code]);
       if (now.cross !== was.cross || now.speed !== was.speed || now.fatigue !== was.fatigue) c.say('physicist', 'corregge', `${t.name}: ${now.cross === 'walk' ? 'calpestabile' : now.cross === 'swim' ? 'si nuota' : 'invalicabile'}, velocità ×${now.speed}${p.note ? ` — ${p.note}` : ''}`, 'cartographer');
     }
@@ -334,7 +349,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const layouts: Record<string, EnvironmentDef> = {};
   let feedback = '';
   for (let round = 0; round < 2 && Object.keys(layouts).length < 4; round++) {
-    const designed = await designLayouts(c, palette, feedback, brought?.music, geography);
+    const designed = await designLayouts(c, palette, feedback, brought?.music, geography, breath);
     const problems: string[] = [];
     for (const d of designed) {
       if ('error' in d) {

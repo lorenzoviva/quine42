@@ -281,7 +281,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature', 'vehicle', 'vehicle_set', 'vehicle_of', 'region_at', 'islands'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature', 'vehicle', 'vehicle_set', 'vehicle_of', 'region_at', 'air_at', 'islands'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
@@ -496,6 +496,8 @@ export class Validator {
   validateLayout(id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>, drafts: string[][]): string[] {
     const errors: string[] = [];
     if (!def || typeof def.name !== 'string' || typeof def.description !== 'string') return [`${id}: name e description obbligatori`];
+    // The air of its places (T446): only false says.
+    if ((def as { air?: unknown }).air !== undefined && (def as { air?: unknown }).air !== false) return [`${id}: air è false (i suoi luoghi non hanno aria) o non c'è`];
     try {
       compile(def.program);
     } catch (e) {
@@ -627,7 +629,8 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
         break;
       case 'needs': {
         const b: Effect & { type: 'needs' } = { type };
-        for (const k of ['hunger', 'thirst', 'energy', 'health'] as const) if (e[k] !== undefined && e[k] !== null) b[k] = Math.round(num(e[k], -40, 40, 0));
+        // The breath (T446) as the others: core.effects changes it only where the world counts it.
+        for (const k of ['hunger', 'thirst', 'energy', 'health', 'oxygen'] as const) if (e[k] !== undefined && e[k] !== null) b[k] = Math.round(num(e[k], -40, 40, 0));
         if (Object.keys(b).length > 1) out.effects.push(b);
         else out.dropped.push('bisogni senza variazioni');
         break;
@@ -736,7 +739,7 @@ export function describeEffect(e: Effect, names: EffectNames): string {
     case 'message':
       return `un messaggio: «${e.text}»`;
     case 'needs':
-      return ([['health', 'salute'], ['energy', 'energia'], ['hunger', 'fame'], ['thirst', 'sete']] as const).filter(([k]) => e[k]).map(([k, word]) => `${word} ${signed(e[k]!)}`).join(', ');
+      return ([['health', 'salute'], ['energy', 'energia'], ['hunger', 'fame'], ['thirst', 'sete'], ['oxygen', 'ossigeno']] as const).filter(([k]) => e[k]).map(([k, word]) => `${word} ${signed(e[k]!)}`).join(', ');
     case 'create_item':
       return `crea ${e.quantity ?? 1} × ${names.item(e.item) ?? e.item}`;
     case 'consume':
