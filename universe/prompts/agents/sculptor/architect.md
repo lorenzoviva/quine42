@@ -91,6 +91,31 @@ of a line, the centre), never a `prl` with `p` on every cell of an edge (that fr
 - **A room** is at least 28 voxels clear from wall to wall at every size, counting where a body stands.
 - **An inner wall**: a row of its letter from wall to wall (`<all in="[Hj]h" out="*j" symmetry="(x)"/>`, then `[hj]E`), a storey high.
 
+## Loops: grow until a mark stops it
+`<markov>` repeats: at each step the first child that finds something does one step, and when the LAST one works they all start again
+(their steps counted anew); it ends when no child finds anything. So `<markov><sequence>…</sequence></markov>` is a loop whose body starts
+from its first child at every step: the exit first, the mark spreading next, the growth last. A keep that grows a ring a turn until a rare
+mark stops it, its size the seed's and the room's, never a number of steps (`p` is per cell: the larger the keep, the sooner it stops):
+```xml
+<markov><sequence>
+  <prl p="0.0015" in="i" out="z"/>      <!-- the exit: now and then a cell of the keep becomes the mark z -->
+  <prl in="iz" out="zz"/>               <!-- the mark covers the keep; meanwhile nothing grows -->
+  <all steps="1"><rule in="[Hi]u" out="*i"/><rule in="[Hi]*/*u" out="**/*i"/><rule in="Ei" out="Ez"/></all>   <!-- else a ring in its room u; at its edge, the mark -->
+</sequence></markov>
+<prl in="z" out="i"/><prl in="u" out="E"/>
+```
+The room first: `<prl in="***/*E*/***" out="***/*u*/***"/><prl in="Eu" out="*E" steps="6"/>` (the lot less what the yard and the walls
+need). A `<sequence>` that is not the last child runs through across the steps: storeys at a coin are `<markov><sequence>…a storey, its
+mark M turned into N…</sequence><prl p="0.5" in="N" out="M"/><all in="N" out="M" steps="1"/></markov>`; heads, N goes back and nothing
+else works, the loop ends; tails, the last child does it and all start again, one storey more. The storeys the checks want go before it.
+
+## Textures: `<convchain>` on the plan
+`<convchain on="c" black="c" white="l" n="3" steps="8"><sample>cccllll/cccllll/ccclllc/llccccc/llcccll/lllccll/cllllcc</sample></convchain>`:
+the `on` cells become `black` and `white` with the texture of the sample, written in the node in those letters (rows apart by "/", its
+patches as large as yours): flagstones in the grass of a yard, furrows in a field, a rough edge. A layer at a time; in the world on at most
+65 536 cells of the layers it works (the plan, a floor at Large and Huge, Gargantuan's full scale only in pieces), `steps` written (at most
+50), `n` 2 or 3. A `<wfc>` makes a grid of its own tiles from a tileset of models/ and decides its box: not for a structure.
+
 ## What fits: the size decides what is built, not how big
 A tile is always 16 voxels: a larger size is a larger area at the same scale, and holds **more**, never the same building bigger. Decide first what fits at each size: a fort is a keep inside a thin ring at Large, a yard with
 a well at Huge, the full fort with a moat at Gargantuan; a country house is the house and its porch at Large, then the hedge and the trees, then an
@@ -153,6 +178,23 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a parapet one more tha
   out="J"/>`): a body must pass under it (30 clear).
 - **Cleaning**: every marker of yours becomes what it must be or air; the parts clean their own. A colour per material, 6 or more, the most
   used under half; `name` in the language of the world.
+
+## Under the ground: a cellar
+Only when the request asks for one (it says how deep the box goes under the soil). Before a room on the soil rises (one the door reaches,
+away from the door and from the stair's foot), mark D on the layer under its floor, `<all in="h B" out="* D"/>`; include
+`<import file="part-cellar"/>` after the floors have risen and before part-stair; give D, V and k your colours. It must hold: something
+under the ground, every floor there reached, a body walking down from the door; else the building comes in without it.
+
+## A Gargantuan's full scale in pieces
+At Gargantuan (500 × 500) level C may run in pieces, in the world each in its own time (in the checks within the 8 seconds, like the rest):
+`<pieces piece="125" margin="24">…nodes…</pieces>` in the second map, around level C. A piece is a column of 125 × 125 voxels; its nodes run
+on it and on `margin` voxels around it, as the grid was when the node began, and only its own cells stay. So a rule that gives the same in
+any order and reaches no farther than the margin gives the whole grid, voxel by voxel: part-stair reaches some 16 (with 24 the doors and the
+stairs come out as on the whole grid, with 12 a stair breaks at a border); a larger margin is only more work. `piece` a multiple of 5, the
+plan's cell, so that what is stamped in a cell is never cut. A `one` picks in each piece, so what is one for the whole building (a pole, a
+chimney, the stair of part-cellar) goes outside, as does what looks along a whole wall (part-battlements counts from the corners). Inside:
+rule nodes, `path`, `convolution`, `convchain`, `sequence`, `markov`, part-door, part-stair; never `map`, `wfc`, shapes, `observe`,
+`search`, another `pieces`.
 
 ## What the game checks on every seed, at both sizes
 The door the action `open` takes away and the parts at the request's measures; **at least 2 covered storeys one reaches on foot** from the

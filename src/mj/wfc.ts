@@ -25,6 +25,11 @@ export const WFC_LIMITS = {
   ms: 10_000,
   /** ConvChain's N: its weights are 2^(N·N). */
   convchainN: 4,
+  /**
+   * Cells a sweep of ConvChain visits on a grid of more layers (T469, ADR-0240): those of the layers that hold its `on` cells. A flat
+   * grid is the original's and has none but the grid's.
+   */
+  convchainCells: 1 << 20,
   /** A sample (overlap model, ConvChain): cells. */
   sampleCells: 128 * 128,
 };

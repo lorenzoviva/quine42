@@ -28,6 +28,9 @@ npx vite-node lab/scripts/banco-pezzi.ts -- --semi 4 --foto --json lab/banco/pez
 - I pezzi non vanno più veloci (16 pezzi: 1,7 s contro 1,3) e a queste misure non risparmiano memoria: tengono ogni pezzo in un tempo
   e in una memoria che non crescono col modello e danno a ognuno il suo tempo (4 s), il che permette di alzare il tetto solo per loro
   (`FORM_PIECES`: 32 milioni di celle).
+- **Come si usa `<pieces>`** (T469, § 5): la regola del margine e i tre `<pieces>` del forte dell'autore. Le scale (nodi 1 e 3) danno la
+  griglia intera da un margine di 8 in su anche dove passano un bordo, 24 basta a ogni seme; la merlatura (nodo 2) cambia a ogni margine,
+  perché dipende dall'ordine; il forte a pezzi gira più piano che intero e sta in `FORM_LIMITS` anche intero: oggi i pezzi non servono.
 
 ## 1. Il tetto di oggi
 
@@ -142,6 +145,104 @@ La fattoria e il forte non hanno di queste crescite che passano un bordo, per qu
 - **La mesh**: il grano a file larghe un voxel faceva il doppio delle facce (quattro lati per stelo); a file di due la fattoria è passata
   da 2,3 a 1,8 milioni di vertici. Il prato non si disegna (nel mondo sotto c'è il prato).
 
+## 5. Come si usa `<pieces>`: i tre `<pieces>` del forte dell'autore (T469)
+
+L'autore (21/11) ha lasciato nel suo forte (`lab/mjx/models/handmade/forte-handmade.xml`, 500 × 500 × 150 a 10 voxel per casella, il
+riferimento dell'ottima di ADR-0210) i tre `<pieces piece="128" margin="40">` del forte di partenza, fatto con Claude, «senza capire bene
+come si usa il tag». Qui come funziona il nodo, quando serve, e i tre `<pieces>` del forte esaminati uno per uno: che cosa fanno, se il
+margine è giusto, se servono (il forte a pezzi contro il forte sulla griglia intera, voxel per voxel), che cosa cambierei. Il file
+dell'autore non è toccato: lo script lo legge e basta.
+
+```bash
+npx vite-node lab/scripts/pezzi-forte-autore.ts -- --semi 1,2,3,14 --margini 0,4,8,16,24,40 --tempi --json lab/banco/pezzi/misure/forte-autore.json
+```
+
+### Che cosa fa il nodo
+
+1. `<pieces piece="128" margin="40">…nodi…</pieces>` taglia la griglia del momento in colonne di 128 × 128 voxel, a tutta altezza, in righe
+   dal fondo. Nel forte la griglia è quella dopo `map scale="4 4 4"`, 500 × 500 × 148: 4 × 4 = 16 pezzi (gli ultimi larghi 116).
+2. Per ogni pezzo i nodi dentro ripartono da capo, con i loro passi, il loro generatore (la corsa estrae un numero solo, poi un seme per
+   pezzo) e il loro tempo, su una **finestra**: il pezzo più `margin` voxel tutt'attorno, letti com'era la griglia quando il nodo è
+   cominciato (i pezzi non si vedono fra loro: si potrebbero fare in parallelo). Le regole scrivono anche nel margine, ma della finestra
+   torna nella griglia solo il pezzo.
+3. Ne viene **la regola del margine**: una regola che dà lo stesso risultato in qualunque ordine e non arriva più lontano del margine da
+   dove comincia dà nei pezzi la griglia intera, voxel per voxel. Una scala che nasce nel pezzo A e sale nel pezzo B: B vede il piede della
+   scala nel suo margine, la rifà come l'ha fatta A e tiene la parte sua.
+4. Ciò che cambia: (a) una crescita più lunga del margine che passa un bordo: il pezzo dopo non ne vede il piede, e la scala si ferma al
+   bordo; (b) ciò che è a caso e dipende dall'ordine (`one`, `prl` con `p`, un `all` le cui corrispondenze si sovrappongono): ogni pezzo
+   estrae i suoi numeri, quindi un'altra disposizione, ai bordi e dentro; (c) `one` sceglie in ogni pezzo: `steps="40"` sono 40 per pezzo;
+   (d) dopo il nodo il generatore della corsa va da un'altra parte (i pezzi estraggono un numero, la griglia intera uno per scelta): ciò che
+   è a caso dopo `<pieces>` è un'altra estrazione, come con un altro seme.
+5. Dentro non vanno `map`, `wfc`, le forme (`box`, `cylinder`…), `observe`, `search` né un altro `pieces`: il compilatore lo dice.
+
+**Quando serve**: (a) quando la griglia intera supera `FORM_LIMITS` (40 milioni di celle da T370): coi pezzi il gioco ne regge 64; (b) per il
+tempo nel mondo: una forma ha 8 secondi (`MODEL_TIME`), i pezzi un tempo loro (4 s ognuno, 45 in tutto, `FORM_PIECES`), quindi su una
+macchina lenta il dettaglio in pezzi finisce dove sulla griglia intera non finirebbe; (c) la memoria di un pezzo non cresce col modello.
+**Quando no**: non va più veloce (ogni pezzo copia la sua finestra e la rilegge col margine), e nel validatore e nei controlli dello
+Scultore i pezzi contano negli 8 secondi come il resto.
+
+### I tre `<pieces>` del forte
+
+| nodo | righe | che cosa fa | fin dove arriva | contro la griglia intera, a ogni margine (0, 4, 8, 16, 24, 40) |
+|---|---|---|---|---|
+| 1 | 293-300 | la scala lunga del mastio: dal secondo voxel della striscia `i` (`BBB iij`), 17 gradini di 2 su e 1 avanti, pieno sotto, la pulizia di `i j Y U` | il piede e 17 passi verso le x grandi: circa 20 voxel | semi 1 e 2: uguale a ogni margine, anche 0 (la scala non passa un bordo); semi 3 e 14 la scala passa un bordo vicino al piede: 3 168 voxel di scala mancano col margine 0, 3 048 col 4, nessuno dall'8 in su |
+| 2 | 332-343 | le scale dei camminatoi (11 gradini, `BBB sse`), il parapetto di un voxel sul bordo esterno di mura, torri, corpo di guardia e mastio, la merlatura (`MMMMMM` su quattro strati diventa `BBMMBB` nei due in alto), la pulizia | le scale circa 14; la merlatura dipende dall'ordine | semi 1, 2, 3 e 14: da 3 398 a 5 008 voxel di merli diversi a ogni margine, 40 compreso (`M` al posto del vuoto e viceversa, mezzo e mezzo); le scale uguali |
+| 3 | 355-368 | le scale di legno del mastio (11 gradini da `#8#8#9`) e il raccordo col piano di sopra (22 strati in altezza), la pulizia | circa 14 in x | semi 1, 2 e 14: uguale a ogni margine; seme 3, la scala passa un bordo: 3 108 voxel col margine 0, nessuno dal 4 |
+
+**La merlatura del nodo 2** cambia a ogni margine, anche 40, ed è il caso (b) del punto 4, non un margine corto: `<all in="MMMMMM MMMMMM
+MMMMMM MMMMMM" out="BBMMBB BBMMBB MMMMMM MMMMMM"/>` prende ogni finestra di sei celle del parapetto, a ogni scostamento, e le finestre si
+sovrappongono; `all` le prende in un ordine a caso e salta quella che scriverebbe dove un'altra ha già scritto, quindi è l'ordine a
+decidere dove stanno i merli. Sulla griglia intera l'ordine è quello della corsa, in ogni pezzo un altro: i merli si spostano dappertutto,
+non solo dove i pezzi si incontrano (un quarto dei voxel diversi sta a più di 40 voxel da ogni bordo). Le scale dei camminatoi, nello
+stesso nodo, sono uguali. Nel seme del gioco i merli li fa `part-battlements`, che conta i merli dagli angoli (5 e
+3, regolari): anche quella in pezzi cambia, perché un lato è più lungo di qualunque margine (provato sulla rocca col ciclo del banco delle
+taglie a Gargantuesca: cambia anche col margine 64, il più grande).
+
+**Il forte intero contro il forte a pezzi**, com'è e coi tre `<pieces>` fatti `<sequence>`: a pezzi 6,3-7,1 s (2,4-2,5 s nei 48 pezzi, il più
+lento 0,1 s; 4,0-4,6 s fuori dai pezzi), senza 3,7-4,7 s. Fra i due da 7 106 a 14 382 voxel diversi secondo il seme (1, 2, 3, 14), e sono
+tutti merli (`M`, circa 4 000) e feritoie e finestre (`B` al posto di `K` o `T` e viceversa: le `L` di `prl p="0.0002"` e `p="0.012"` nelle
+torri e nel mastio, dopo i pezzi, quindi un'altra estrazione, punto 4d). Mai una scala, un muro, un pavimento.
+
+**Dove va il tempo** (il forte senza pezzi tagliato a ogni tappa, il più breve dei quattro semi; 3,56 s in tutto):
+
+| fino a | ms | la tappa |
+|---|---:|---:|
+| il piano a un quarto (A e B: la composizione, il mastio, i piani a moneta) | 1 365 | 1 365 |
+| la `map` ai voxel (500 × 500 × 148), senza i nodi a piena scala | 1 646 | 281 |
+| il nodo 1 compreso | 1 893 | 247 |
+| il nodo 2 compreso (con i corridoi nelle mura e nelle torri, le aperture, gli archi prima di lui) | 3 112 | 1 219 |
+| il nodo 3 compreso | 3 243 | 131 |
+| il forte intero (i pavimenti sulle mura e sulle torri, le feritoie) | 3 557 | 314 |
+
+Sulla griglia intera i nodi 1 e 3 costano 247 e 131 ms, il nodo 2 una parte dei 1 219 ms della sua tappa; a pezzi i tre insieme 2,4 s:
+ogni pezzo copia la sua finestra di 208 × 208 × 148 voxel e la rilegge, dove sulla griglia intera il censimento trova subito le poche
+celle delle scale.
+
+### Il margine è giusto? Servono?
+
+- **Il margine**: 40 basta a ogni seme (la scala lunga arriva a circa 20 voxel dal piede: 17 passi e la larghezza della regola), ed è il
+  doppio. Il caso peggiore è il bordo che passa in cima alla scala: il pezzo dopo deve vedere il piede, a 20 voxel. Con **24** le scale
+  restano intere a ogni seme (nella rocca del banco a Gargantuesca regge il 16, si spezza il 12; nel forte, coi bordi vicini al piede, regge
+  già l'8) e ogni pezzo legge una finestra di 176 × 176 invece di 208 × 208: 1,9 volte la sua area invece di 2,6.
+- **Servono?** Oggi no. Non per la misura: la griglia intera (500 × 500 × 148, 37 milioni di celle) sta in `FORM_LIMITS` (40 milioni) da
+  T370. Non per la velocità: a pezzi il forte gira in più tempo che senza. Non per il tempo nel mondo: i nodi dentro i pezzi sulla griglia
+  intera costano poco (il censimento di ADR-0142 trova subito le poche celle delle scale), e ciò che pesa, il piano a un quarto e le
+  regole fra un nodo e l'altro, sta fuori dai pezzi e conta negli 8 secondi della forma comunque.
+
+### Che cosa cambierei
+
+1. **Togliere i tre `<pieces>`** (diventano `<sequence>`): le stesse scale, i merli e le feritoie a caso come oggi (un'altra estrazione), e
+   il forte più veloce (vedi «Dove va il tempo»). È la scelta che consiglio finché il forte sta in `FORM_LIMITS`.
+2. **Se servissero** (un forte oltre i 40 milioni di celle, o un dettaglio a piena scala che pesa davvero): un `<pieces piece="128"
+   margin="24">` solo, attorno al dettaglio che guarda vicino (le tre scale insieme, e le regole fra un nodo e l'altro che guardano entro 24
+   voxel, come gli allargamenti dei corridoi di 12 × 12, provandole con lo script), lasciando fuori la merlatura e le feritoie, che sono a
+   caso; 128 è un multiplo della cella del piano (4 voxel, 32 celle), così ciò che si timbra in una cella non si taglia mai.
+3. **Il commento della riga 387** viene dal forte pilota, dove le feritoie erano un `one` nei pezzi («5 in each of nine pieces»): nel forte
+   sono un `prl` con `p` fuori dai pezzi.
+4. **Ciò che il compilatore ripara** (in silenzio, nel modo non rigoroso): alla riga 249 lo strato in alto ha 6 colonne e quello sotto 7, e
+   le colonne mancanti diventano `*`; le lettere `A D Y y i j g #1`-`#10` non sono nei `values` della loro griglia e vengono aggiunte. Alla
+   riga 141 `simmetry` non è un attributo: non fa niente, e la simmetria ereditata, `(xy)`, comprende già `(x)`.
+
 ## File
 
 - `fattoria.xml`: la fattoria di 50 × 50 caselle (la scatola la decide chi la fa girare: a 10 voxel per casella, 500 × 500 × 50); il
@@ -151,4 +252,6 @@ La fattoria e il forte non hanno di queste crescite che passano un bordo, per qu
   mura, le caserme, e il dettaglio a piena scala in `<pieces piece="128" margin="40">`.
 - `bordi.ts`: i controlli sui bordi; `fattoria.png`, `forte.png` (da quattro lati, via a, seme 1); `fattoria-bordo.png`,
   `forte-bordo.png` (il riquadro di un bordo: intera, a, a col margine fermo, b); `misure/` (i JSON delle tabelle).
+- `misure/forte-autore.json`: i tre `<pieces>` del forte dell'autore (§ 5), nodo per nodo a sei margini, il forte intero contro quello a
+  pezzi e dove va il tempo, ai semi 1, 2, 3 e 14; lo scrive `lab/scripts/pezzi-forte-autore.ts`, che legge il forte e non lo scrive.
 - `browser/fattoria-nel-gioco.jpg`: la fattoria nel gioco (`?skip&offline`, caricata nella libreria dalla console e indossata da un'entità accanto al viandante): forma pronta in 2,3 s dal worker, 500 × 500 × 50 a 10 voxel per casella; blocca i corpi con la sua impronta (23 caselle in più in un riquadro di 19 × 11, che si liberano togliendola). Nella sandbox 3D del laboratorio i due programmi stanno nel gruppo «Banco: modelli grandi a pezzi (T339)».

@@ -366,7 +366,7 @@ due, tre… con metà delle probabilità ogni volta.
 **Una differenza dall'originale da fissare con un test.** In MarkovJunior di mxgmn una `<sequence>` dentro un `<markov>` diventa il ramo
 corrente e corre fino in fondo prima di tornare al `<markov>`. Nel nostro motore riparte dopo ogni passo, se è l'ultimo figlio. Il ciclo
 del mastio fa lo stesso nei due (un anello a giro, l'uscita provata a ogni giro, il segno che si allarga prima di un altro anello), ma la guida deve descrivere il nostro, e un test (`tests/mj-*.test.ts`, S3) deve tenerlo fermo:
-un programma che lo usa non deve cambiare sotto i piedi (ADR-0142).
+un programma che lo usa non deve cambiare sotto i piedi (ADR-0142). Fatto in T469: `tests/mj-markov.test.ts`.
 
 ### 5.2 La guida proposta (in inglese, come i prompt)
 
@@ -399,6 +399,22 @@ moneta, le torri lungo le mura finché c'è posto. Circa 400 token.
 | `<color>` con `alpha`, `opacity`, `glass`, `translucent` | sì | solo nella vetrina | no | — | Mobiliere e Capomastro: vetri, acqua in un vaso, schermi |
 | `<color area>` | sì | navi | sì | — | Carrozziere e Architetto (come oggi) |
 | simmetria `(xyz+)` (rotazioni) | sì | no | no | — | Paesaggista (rocce) |
+
+### 5.4 Che cosa ha fatto S3 (T469)
+
+- **Il test**: `tests/mj-markov.test.ts` fissa la nostra semantica (il corpo di un ciclo riparte dal primo figlio a ogni passo: in una gara fra
+  due crescite vince la prima, che nell'originale di mxgmn si fermerebbe a metà; una sequenza che non è l'ultimo figlio tiene il suo posto) e
+  i due idiomi del forte, voxel per voxel: il mastio che cresce finché la strada o il segno non lo ferma (com'è scritto, e col segno più
+  frequente, che dà un mastio diverso a ogni seme), i piani a moneta (su 400 semi uno, due, tre piani circa 200, 100, 50 volte).
+- **La guida**: nel nucleo le righe del § 5.2 e la `map` frazionaria con `clear`; nell'Architetto il ciclo del mastio e i piani a moneta,
+  le trame, la cantina, la Gargantuesca a pezzi con la regola del margine; al Paesaggista `path longest` e `(xyz+)`, al Mobiliere e al
+  Capomastro le lettere traslucide. La misura prima e dopo: [`scultori-specializzati/misure-s3.md`](scultori-specializzati/misure-s3.md).
+- **`wfc` e `convchain`**, che l'autore vuole all'Architetto (21/11): così com'erano non potevano stare in una struttura (leggevano file che lo
+  Scultore non scrive, e `convchain` girava solo su una griglia piana). ADR-0240: il campione di `convchain` scritto nel nodo e, su più strati,
+  strato per strato; la `wfc` resta com'è e il prompt dice perché non è per una struttura.
+- **Il banco**: `lab/banco/taglie/scultore-rocca-ciclo.xml`, la rocca col ciclo del mastio e il cortile lastricato; `banco-taglie.ts` alle
+  scatole del gioco (16 voxel per casella).
+- **Per l'autore**: «Come si usa `<pieces>`» in `lab/banco/pezzi/README.md`, coi tre `<pieces>` del suo forte.
 
 ## 6. I task e l'ADR proposto (f)
 
@@ -462,4 +478,5 @@ chiama i modelli. S7 sì, e va approvata dall'autore per la spesa.
 - I token sono di Gemini (`countTokens` di Flash-Lite); su Opus il tokenizzatore è un altro.
 - Il controllo «la stessa griglia» della via B non è provato: che una parte inclusa consumi lo stesso caso del testo che sostituisce si
   legge nel motore (`importNode` compila il programma incluso al suo posto), va provato in S6.
-- La semantica di `<markov>` è letta nel codice, non provata con un test (S3).
+- La semantica di `<markov>` era letta nel codice: T469 l'ha provata (`tests/mj-markov.test.ts`). Che lo Scultore usi la guida dei cicli resta da
+  vedere coi modelli veri (S7).

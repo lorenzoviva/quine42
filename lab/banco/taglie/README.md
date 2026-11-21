@@ -117,6 +117,36 @@ altezze, fronte, lato, tre tagli, le piante di altri due semi, ≈ 8 000 token; 
 ![la rocca Enorme](scultore-rocca-huge.png)
 ![la rocca Gargantuesca](scultore-rocca-gargantuan.png)
 
+## La rocca col ciclo del mastio (T469, S3 di T458)
+
+`scultore-rocca-ciclo.xml` è la rocca scritta come la scriverebbe lo Scultore con la guida di T469 (`prompts/agents/sculptor/architect.md`,
+«Loops» e «Textures»). Cambiano due cose. **Il mastio**: lo stesso nucleo di 9 × 9, poi un ciclo lo allarga di un anello a giro dentro la sua
+stanza (il lotto meno sette celle dal bordo, quelle del cortile, della cinta e delle torri) finché nasce il segno raro (`p="0.0015"` a
+cella) o tocca il bordo della stanza: la grandezza è del seme e dell'area, non di un numero di passi. **Il cortile**: il terreno è
+lastricato a macchie da una `convchain` sul piano, col campione scritto nel nodo (ADR-0240), lastre `l` ed erba `c`. Passa `checkProgram`
+a Grande, Enorme e Gargantuesca (4 semi e la taglia dopo). Dal T469 il banco gira alle scatole e alla densità del gioco (`boxOf`,
+`densityFor`: 16 voxel per casella da T405; prima a 20, con la Gargantuesca oltre il tetto delle celle).
+
+| taglia | la rocca di T354, semi 1-3 | la rocca col ciclo, semi 1-3 |
+|---|---|---|
+| Grande | tre volte la stessa: stanza di 34, mastio 9 caselle | il mastio di prima (la stanza non lo lascia crescere), il lastricato diverso a ogni seme |
+| Enorme | tre volte la stessa: mastio 10 caselle, cortile 54 | mastio 16, 26, 10 caselle; stanze di 44, 69, 34 voxel |
+| Gargantuesca | tre volte la stessa: mastio 10, cortile 71 | mastio 25, 10, 35; cortile 96, 71, 109 |
+
+La rocca di prima, a ogni taglia, dà la stessa griglia a ogni seme (lo stesso numero di voxel: 208 632, 266 926, 303 567): il seme non
+cambia niente. Quella col ciclo cambia col seme dove l'area lo permette, e a ogni taglia più grande contiene di più (`varietyError`:
+cresce). Con le porte e le scale (`part-door`, `part-stair`) in `<pieces piece="125" margin="24">` la Gargantuesca è voxel per voxel quella
+della griglia intera (tre semi); col margine 12 la scala si spezza dove passa un bordo (840 voxel in due semi su tre), col 8 anche più,
+col 0 anche le assi della porta (`tests/sculptor-architect-guide.test.ts` lo tiene fermo).
+
+```bash
+npx vite-node lab/scripts/banco-taglie.ts -- --solo scultore-rocca,scultore-rocca-ciclo --semi 3 --foto
+```
+
+![la rocca col ciclo, Grande](scultore-rocca-ciclo-large.png)
+![la rocca col ciclo, Enorme](scultore-rocca-ciclo-huge.png)
+![la rocca col ciclo, Gargantuesca](scultore-rocca-ciclo-gargantuan.png)
+
 ## Il tetto delle gargantuesche (T356, ADR-0185)
 
 L'autore (10/11): a 20 voxel per casella le gargantuesche a 200 voxel sono solo 10 caselle, piccole rispetto alla mappa; va alzato il

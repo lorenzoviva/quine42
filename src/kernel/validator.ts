@@ -157,6 +157,11 @@ export const WORLD_NODE_LIMITS = {
   /** `steps` of a convchain, written, and its `n`. */
   convchainSteps: 50,
   convchainN: 3,
+  /**
+   * Cells a sweep of a convchain visits, those of the layers that hold its `on` cells (T469, ADR-0240): a plan of 256 × 256, or a floor
+   * of a Huge structure. A sweep costs some 225 operations a cell of the texture at `n` 3: 50 sweeps stay within a couple of seconds.
+   */
+  convchainCells: 65_536,
   /** Files of models/ a program reads (imports, rule files, tilesets, tiles, samples), their characters, imports one inside the other. */
   files: 64,
   fileChars: 200_000,

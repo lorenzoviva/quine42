@@ -51,8 +51,11 @@ by a space — as in MarkovJunior, THE FIRST LAYER IS THE TOP ONE.
 - More rules in a node: children `<rule in=".." out=".." p="weight"/>`.
 - A long pattern can be written as children instead of attributes, on more lines: `<rule><in>RB</in><out>WR</out></rule>`
   (also `<one>…<in>…</in><out>…</out></one>`); the attribute or the child, never both.
-- `<sequence>` runs the children in order, each as long as it has work to do; `<markov>` at each step the first
-  child that can do something (loops: "grow until you touch, then...").
+- `<sequence>` runs the children in order, each as long as it has work to do.
+- Loops: `<markov>` repeats; at each step the first child that finds something does one step, and when the LAST one works they all
+  start again (their steps counted anew); it ends when no child finds anything. So `<markov><sequence>…</sequence></markov>` is a loop
+  whose body starts from its first child at every step: put the exit first (a rare mark, `<prl p="0.01" in="R" out="X"/>`), what spreads
+  the mark next, the growth last (a branch until the crown touches the edge). A growth in a loop needs an exit or a letter it uses up.
 - `symmetry`: "(xy)" — put it on the root — rotates and mirrors the rules horizontally and never upside down
   (gravity stays); "()" the rule holds only as it is written (to orient doors, faces); "(x)" also
   mirrored left-right; "(xyz)" in all directions (roundish growths: rocks, crowns).
@@ -62,7 +65,8 @@ by a space — as in MarkovJunior, THE FIRST LAYER IS THE TOP ONE.
 - `<path from="S" to="T" on="B" color="T" inertia="True"/>`: the shortest path (branches, roots).
 - `<map scale="3 3 3" values="BWN..."> <rule in="W" out="WWW/WWW/WWW WWW/WWW/WWW WWW/WWW/WWW"/> …
   nodes … </map>`: decide at large and refine at small (houses, towers): the new grid starts
-  empty, the rules enlarge every letter, the nodes inside work at the new resolution.
+  empty, the rules enlarge every letter, the nodes inside work at the new resolution. A fraction shrinks (`scale="1/3 1/3 1"`: a plan a
+  third as large, then a map back up); `clear="False"` (whole scales) keeps the grid, every cell a block of itself, under the rules.
 - Ready shapes, only for the main masses (then the rules do the rest):
   `<box at="x y z" size="w d h" color="A"/>`, `<ellipsoid …/>`, `<cylinder …/>`, `<cone …/>` (at is the
   centre of the base, z from the bottom), `<line at="x y z" to="x y z" r="1" color="A"/>`; `on="B"` limits the
