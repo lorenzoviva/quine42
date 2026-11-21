@@ -6,7 +6,7 @@
   "origin": "a mano (Claude Code)",
   "description": "Ciò che si compra, si vende e si recupera tra le stazioni: bombole, celle d'energia, minerale, gettoni, razioni.",
   "items": [
-    { "id": "item.bombola-ossigeno", "name": "Bombola d'ossigeno", "description": "Una bombola d'acciaio piena d'aria buona, con il manometro sul collo.", "category": "attrezzo", "weight": 3, "stack": 3, "tags": ["attrezzo", "aria"], "glyph": "▯", "color": "#d8e8f0" },
+    { "id": "item.bombola-ossigeno", "name": "Bombola d'ossigeno", "description": "Una bombola d'acciaio piena d'aria buona, con il manometro sul collo.", "category": "attrezzo", "weight": 3, "stack": 3, "tags": ["attrezzo", "aria"], "glyph": "▯", "color": "#d8e8f0", "effects": { "oxygen": 100 } },
     { "id": "item.bombola-vuota", "name": "Bombola vuota", "description": "Una bombola d'acciaio che suona vuota quando la batti.", "category": "materiale", "weight": 2.5, "stack": 3, "tags": ["materiale", "aria"], "glyph": "▯", "color": "#8a98a0" },
     { "id": "item.cella-energia", "name": "Cella d'energia", "description": "Un cilindro tiepido che ronza piano: accende scudi, trivelle e boe.", "category": "materiale", "weight": 1, "stack": 6, "tags": ["materiale", "energia"], "glyph": "⌁", "color": "#5ad8ff" },
     { "id": "item.gettone", "name": "Gettone di stazione", "description": "Un gettone d'ottone con il buco al centro: la moneta delle rotte.", "category": "varie", "weight": 0.02, "stack": 50, "tags": ["moneta"], "glyph": "¤", "color": "#d8b04a" },

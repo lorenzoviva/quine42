@@ -249,6 +249,8 @@ export class Hud {
     const n = k.needs();
     if (n) {
       const bars: Array<[string, number, string]> = [['fame', n.hunger, 'var(--neon-orange)'], ['sete', n.thirst, 'var(--neon-cyan)'], ['energia', n.energy, 'var(--neon-green)'], ['salute', n.health, 'var(--neon-pink)'], ['mana', n.mana ?? 0, 'var(--neon-purple)']];
+      // The breath (T446): only in a world that counts it, where the kernel gave the needs their oxygen.
+      if (typeof n.oxygen === 'number') bars.push(['ossigeno', n.oxygen, 'var(--neon-yellow)']);
       const key = bars.map((b) => Math.round(b[1])).join(',') + Object.keys(k.states()).join('|');
       if (key !== this.lastNeeds) {
         this.lastNeeds = key;

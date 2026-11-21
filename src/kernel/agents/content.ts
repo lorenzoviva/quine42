@@ -25,11 +25,11 @@ const ITEM_SCHEMA: Schema = {
     weight: { type: 'NUMBER' },
     stack: { type: 'INTEGER' },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
-    effects: { type: 'OBJECT', properties: { hunger: { type: 'NUMBER' }, thirst: { type: 'NUMBER' }, energy: { type: 'NUMBER' }, health: { type: 'NUMBER' }, mana: { type: 'NUMBER' } } },
+    effects: { type: 'OBJECT', properties: { hunger: { type: 'NUMBER' }, thirst: { type: 'NUMBER' }, energy: { type: 'NUMBER' }, health: { type: 'NUMBER' }, mana: { type: 'NUMBER' }, oxygen: { type: 'NUMBER', description: 'only an air tank, where the world counts the breath: the breath it gives (up to 100)' } } },
     equippable: { type: 'BOOLEAN' },
     container: { type: 'INTEGER', description: 'only for bags, sacks, baskets, saddlebags carried on oneself: how many things fit inside (2-12)' },
     slot: { type: 'STRING', enum: SLOTS, description: 'only for what is worn or held: where' },
-    bonus: { type: 'OBJECT', description: 'only for what is worn or held: what it gives', properties: { defense: { type: 'NUMBER' }, attack: { type: 'NUMBER' }, speed: { type: 'NUMBER', description: 'a multiplier, e.g. 0.95 for a heavy armour, 1.1 for light boots' }, weight: { type: 'NUMBER', description: 'extra carrying weight (backpacks)' }, light: { type: 'NUMBER' }, warmth: { type: 'NUMBER' } } },
+    bonus: { type: 'OBJECT', description: 'only for what is worn or held: what it gives', properties: { defense: { type: 'NUMBER' }, attack: { type: 'NUMBER' }, speed: { type: 'NUMBER', description: 'a multiplier, e.g. 0.95 for a heavy armour, 1.1 for light boots' }, weight: { type: 'NUMBER', description: 'extra carrying weight (backpacks)' }, light: { type: 'NUMBER' }, warmth: { type: 'NUMBER' }, breath: { type: 'NUMBER', description: 'only a suit or a mask that holds air: how many times slower the breath runs out without air (2-10)' } } },
     look: { type: 'STRING' },
     shape: { type: 'STRING', enum: internalValues('impronte').filter((f) => f !== 'shape'), description: 'the common shape it looks like (one model per shape, coloured like the thing)' },
   },
@@ -45,7 +45,7 @@ interface RawItem {
   tags: string[];
   /** The list of before T310b (`tag`): `internalAnswer` leaves it, it is also a loot entry's tag. */
   tag?: string[];
-  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number };
+  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number; oxygen?: number };
   equippable?: boolean;
   container?: number;
   look: string;
@@ -73,7 +73,7 @@ export function toItemDef(r: RawItem, taken: Set<string>): ItemDef | null {
   const named = internalName('categorie', String(r.category ?? ''));
   const category = (ITEM_CATEGORIES as readonly string[]).includes(named) ? (named as ItemDef['category']) : 'misc';
   const e = r.effects ?? {};
-  const effects = { hunger: clamp(e.hunger, -50, 60, 0), thirst: clamp(e.thirst, -50, 60, 0), energy: clamp(e.energy, -50, 60, 0), health: clamp(e.health, -50, 60, 0), mana: clamp(e.mana, -50, 60, 0) };
+  const effects = { hunger: clamp(e.hunger, -50, 60, 0), thirst: clamp(e.thirst, -50, 60, 0), energy: clamp(e.energy, -50, 60, 0), health: clamp(e.health, -50, 60, 0), mana: clamp(e.mana, -50, 60, 0), ...(typeof e.oxygen === 'number' && e.oxygen > 0 ? { oxygen: clamp(e.oxygen, 0, 100, 0) } : {}) };
   const bag = category === 'container' && Number(r.container) >= 2 ? { size: Math.round(clamp(r.container, 2, 12, 4)) } : undefined;
   const hasEffects = Object.values(effects).some((v) => v !== 0);
   // A place or a bonus in the Italian of the contract 0.6 (`testa`, `difesa`) is still the one it means (T310b).
