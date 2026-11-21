@@ -44,7 +44,7 @@ export interface VehicleSpec {
   /** On the water: whether it floats on the shallow water too. */
   draught: Draught;
   /**
-   * Whether its deck holds air (T446, ADR-0235): who stands on it breathes, whatever is under it. A vehicle of the void holds it if it says
+   * Whether its deck holds air (T446, ADR-0236): who stands on it breathes, whatever is under it. A vehicle of the void holds it if it says
    * nothing (a capsule is closed); another only if it says so (an open deck has the air of the tile under it).
    */
   air: boolean;

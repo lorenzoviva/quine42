@@ -1,4 +1,4 @@
-// The air and the breath (T446, ADR-0235, `docs/design/acqua-spazio.md` § 2.4): where a body breathes (the terrain, a closed vehicle's
+// The air and the breath (T446, ADR-0236, `docs/design/acqua-spazio.md` § 2.4): where a body breathes (the terrain, a closed vehicle's
 // deck, the master's region, the environment, the body of the void), the need `oxygen` only in a world that counts the breath, drained out
 // of the air by the kernel (not by `sys.needs`), slower with a suit, given back in the air and by a tank, and asphyxia as a death of the
 // game. A world of today does not notice: no oxygen in its needs, the air everywhere.

@@ -375,7 +375,7 @@ export interface Needs {
   health: number;
   /** Magic strength: spells cost it, it slowly comes back, magic crystals restore it. */
   mana: number;
-  /** The breath (T446, ADR-0235): 0-100, only in a world that counts it (`nature.oxygen`); the kernel drains it out of the air (`air.ts`). */
+  /** The breath (T446, ADR-0236): 0-100, only in a world that counts it (`nature.oxygen`); the kernel drains it out of the air (`air.ts`). */
   oxygen?: number;
 }
 
@@ -4461,7 +4461,7 @@ export class Kernel {
   }
 
   /**
-   * Whether a body breathes at a point of the world (carpet space, T446, ADR-0235; `air.ts` for the order): on the deck of a vehicle that
+   * Whether a body breathes at a point of the world (carpet space, T446, ADR-0236; `air.ts` for the order): on the deck of a vehicle that
    * holds air, yes; else the terrain of the tile (the void never), the master's region, the environment of the place, the body of the void
    * (an asteroid has none). It says the air whether or not the world counts the breath: `world.air_at` reads it.
    */
@@ -4499,7 +4499,7 @@ export class Kernel {
   }
 
   /**
-   * The breath of the wanderer acting (T446, ADR-0235), in a world that counts it: the need `oxygen` is the kernel's (a needs without it gets
+   * The breath of the wanderer acting (T446, ADR-0236), in a world that counts it: the need `oxygen` is the kernel's (a needs without it gets
    * it full), it comes back in the air and goes out of it, slower with a suit; out of it the health, and they die of it (`player.death`,
    * with the level of death of the game). Gods, who reached the corona alone and who is already dying do not choke. The world says once
    * when the air runs out and when it comes back.

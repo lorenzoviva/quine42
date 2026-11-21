@@ -38,7 +38,7 @@ export interface Region {
    */
   gravity?: number;
   /**
-   * Only on a region of the master (T446, ADR-0235): whether its places have air to breathe (false: a moon of bare rock; true: a dome of air
+   * Only on a region of the master (T446, ADR-0236): whether its places have air to breathe (false: a moon of bare rock; true: a dome of air
    * over an asteroid). Absent, what the terrain, the environment and the body of the void say. Read only where the world counts the breath.
    */
   air?: boolean;

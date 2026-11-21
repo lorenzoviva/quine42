@@ -281,7 +281,7 @@ const LAYOUTS_SCHEMA: Schema = {
 };
 
 /**
- * The environments' schema in a world that counts the breath (T446, ADR-0235): `air` false for one whose places have no air. Only there: in a
+ * The environments' schema in a world that counts the breath (T446, ADR-0236): `air` false for one whose places have no air. Only there: in a
  * world of today the air is everywhere and the Cartographer is not asked.
  */
 const LAYOUTS_SCHEMA_BREATH: Schema = (() => {
