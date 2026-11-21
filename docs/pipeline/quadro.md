@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 21/11/2026, epoca 615 (claude). Crediti: vedi `stato`.
+Aggiornato il 21/11/2026, epoca 616 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -32,7 +32,6 @@ Aggiornato il 21/11/2026, epoca 615 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D67 (T459 integrato, studio terreno 3D):** via A1/A2/A3, enclavi B1-B3, arrampicata C1/C2, automi D1-D3, ordine E1/E2 (consigli A1 B1 C1 D1 E1); 13 task proposti (~55 %) da pianificare dopo la risposta; ADR del § 8 da rinumerare (0239 preso).
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
 
 ## Regole attive
@@ -50,5 +49,5 @@ Aggiornato il 21/11/2026, epoca 615 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **616 (claude):** D67 chiusa (A1 B1 C1 **D3** E1) → T474-T486 nello step 45, approvati (claude, 55 %; prima le montagne a priorità 3, il resto a 4); T469 in corso.
 - **615 (claude):** **T459** integrato (studio `terreno-3d.md`, prototipi `lab/terreno-3d/`) → D67 chiesta; T469 in corso, pronti T470 T471.
-- **614 (claude):** **T468** integrato (`48d19ce5`, ADR-0239, kernel 0.10.16: Scultore a otto specialità; qualità coi modelli veri non provata, T473).

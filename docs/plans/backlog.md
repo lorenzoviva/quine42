@@ -6312,3 +6312,102 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Dipende da: T468, T469, T470
 - Contesto: studio T458, riga S7. Dipende da T468, T469, T470. Spesa approvata dall'autore il 21/11: lo sforzo max vale per le sessioni in abbonamento; la prova pagata resta quella dello studio (3-5 $) con **tetto 6 $ sul registro**; se servisse di più, fermarsi e chiedere.
 - Cosa fare: la riga S7, col tetto sul registro. Browser: sì, le foto dei modelli.
+
+## Step 45 — il terreno in tre dimensioni (D67, autore 21/11: A1, B1, C1, D3, E1)
+
+> Nascono da T459 (`dossier T459`, `docs/design/terreno-3d.md` § 7, il numero della riga). Scelte dell'autore: colonne col rilievo vero (A1),
+> enclavi dove l'asprezza della regione le concede (B1), arrampicata come movimento del kernel con l'attrezzo fino a 3 caselle (C1),
+> **automi fisici nel kernel a due celle per lato di casella (D3: 38 880 celle sulla finestra, 1,21 ms a tick misurati), non una**,
+> prima le montagne (E1). V0 (sottosuolo in voxel) resta rinviato. L'ADR del § 8 prende il primo numero libero (0239 è preso), con le
+> risposte dell'autore al posto delle raccomandazioni e D3 nel punto 5. Ogni task che tocca `src/kernel/` sale di una `Z`; nessuno cambia il contratto.
+
+### T474 · R0 · La regola 10 della rete e delle enclavi (riga 1 di T459) — `da fare`
+- Pipeline: claude · sforzo max · stima 5% · approvato · priorità 3
+- Step: 45
+- Dipende da: T459
+- Contesto: `terreno-3d.md` § 2 e § 8; B1 (enclavi dove l'asprezza le concede), C1 (`CLIMB` fino a 3 caselle). Scrive l'ADR (primo numero libero) e la regola 10 in `AGENTS.md` (§ 2.6).
+- Cosa fare: la riga 1; inerte col rilievo di oggi (`tests/luoghi-campione.test.ts` verde), provato con un rilievo sintetico; voci del glossario; «sicurezza:» nell'esito (il passo del server). Browser: sì, un dirupo sintetico dalla console.
+
+### T475 · R1 · Il rilievo vero (riga 2 di T459) — `da fare`
+- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 3
+- Step: 45
+- Dipende da: T474
+- Contesto: § 3.1 e § 6; A1. Le ambientazioni che lo portano: frontiera, Pirati, spazio; il medioevo resta collinare finché l'autore non dice altro.
+- Cosa fare: la riga 2. Browser: sì, un mondo col rilievo vero.
+
+### T476 · R2 · Il taglio verso la camera (riga 3 di T459) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Step: 45
+- Dipende da: T475
+- Contesto: § 3.2, il disco di T416.
+- Cosa fare: la riga 3. Browser: sì.
+
+### T477 · R3 · Arrampicarsi (riga 4 di T459) — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
+- Step: 45
+- Dipende da: T474
+- Contesto: § 3.5; C1: movimento del kernel con l'attrezzo, fino a 3 caselle.
+- Cosa fare: la riga 4; il salto e l'arrampicata controllati nel passo del server; «sicurezza:» nell'esito. Browser: sì.
+
+### T478 · S1 · Gli strati come regole (riga 5 di T459) — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4
+- Step: 45
+- Dipende da: T459
+- Contesto: § 4.1-4.2, il seguito di T418.
+- Cosa fare: la riga 5. Browser: sì, i tagli.
+
+### T479 · S2 · Gli strati nel Concilio (riga 6 di T459) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Step: 45
+- Dipende da: T478
+- Contesto: § 4.2; lo Scultore Architetto di T468.
+- Cosa fare: la riga 6; nuova API Lua `world.stratum_at` coi passi della convenzione. Browser: no.
+
+### T480 · R4 · Il fondale (riga 7 di T459) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 4
+- Step: 45
+- Dipende da: T475
+- Contesto: § 3.3.
+- Cosa fare: la riga 7. Browser: sì.
+
+### T481 · R5 · Immergersi (riga 8 di T459) — `da fare`
+- Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 4
+- Step: 45
+- Dipende da: T480
+- Contesto: § 3.3; l'ossigeno di T446.
+- Cosa fare: la riga 8; il passo del server; «sicurezza:» nell'esito. Browser: sì.
+
+### T482 · A0 · La primitiva degli automi (riga 9 di T459) — `da fare`
+- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 4
+- Step: 45
+- Dipende da: T459
+- Contesto: § 5.5-5.6; **D3**: le famiglie fisiche (`flow`) a due celle per lato di casella, il tetto di celle per automa e il carico fisso rifatti su questa risoluzione (1,21 ms a tick per l'acqua, il bilancio di 1,5 ms va rimisurato e detto nell'ADR); il resto come lo studio.
+- Cosa fare: la riga 9; test di determinismo; voce nel registro per `world.field_add`; «sicurezza:» nell'esito. Browser: no.
+
+### T483 · A1 · L'acqua che scorre (riga 10 di T459) — `da fare`
+- Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 4
+- Step: 45
+- Dipende da: T475, T482
+- Contesto: § 5.2; D3: `flow` a due celle per lato di casella, il passo stabile a quella risoluzione (§ 1.5), il frame misurato nel browser.
+- Cosa fare: la riga 10. Browser: sì.
+
+### T484 · A2 · Il vento (riga 11 di T459) — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4
+- Step: 45
+- Dipende da: T482
+- Contesto: § 5.3; D3 chiede la massima definizione: la risoluzione del vento la più fine che il carico fisso regge accanto all'acqua a due celle (lo studio proponeva una cella ogni tre caselle), misurata e scritta.
+- Cosa fare: la riga 11; il vento grossolano ai client a elenco (regola 8f). Browser: sì.
+
+### T485 · A3 · L'acqua a schermo sulla GPU (riga 12 di T459) — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 4
+- Step: 45
+- Dipende da: T483
+- Contesto: § 5.4; il campo d'onde a quattro celle per lato o più, mosso dalle correnti dell'automa a due.
+- Cosa fare: la riga 12. Browser: sì.
+
+### T486 · M0 · La mesh dei luoghi in un worker (riga 13 di T459) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
+- Step: 45
+- Dipende da: T459
+- Contesto: § 1.6 punto 2, il punto 3 di T331.
+- Cosa fare: la riga 13; la stessa mesh byte per byte; `misura-frame.mjs` prima e dopo. Browser: sì.
