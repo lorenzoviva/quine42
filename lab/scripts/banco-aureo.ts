@@ -39,9 +39,9 @@ const RICHIESTE: Array<SculptRequest & { chiave: string }> = [
 /** The line this task adds to the part of the prompt for every class but the procedural structures: the variant `base` goes without. */
 const RIGA = /^- Proportions: where nothing else fixes a measure, lean on the golden ratio[\s\S]*?come first\.\n/m;
 
-function sistema(files: Record<string, string>, classe: string): string {
+function sistema(files: Record<string, string>, req: SculptRequest): string {
   const role = sculptorRole(files);
-  const examples = examplesFor(files, classe);
+  const examples = examplesFor(files, req);
   return examples.length ? `${role}\n\n## Examples (programs of the library)\n${examples.join('\n\n')}` : role;
 }
 
@@ -122,7 +122,7 @@ for (const req of RICHIESTE.filter((r) => !solo || solo.includes(r.chiave))) {
       if (senza === files['prompts/agents/sculptor.md']) throw new Error('la riga delle proporzioni non è nel prompt del seme');
       files['prompts/agents/sculptor.md'] = senza;
     }
-    const system = sistema(files, cls.id);
+    const system = sistema(files, { ...req, classe: cls.id });
     const msg = messaggio(req);
     for (let n = 1; n <= tentativi; n++) {
       const dir = path.join(out, req.chiave, variante, String(n));

@@ -18,7 +18,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Piano del luogo | `piano` | 33 (12) | 0 (0) | 505 (94) | 4 (4) |
 | Casella | `cell` | 1382 (73) | 38 (3) | 18 (10) | 98 (9) |
 | Casella | `cella` | 12 (4) | 0 (0) | 65 (22) | 0 (0) |
-| Terreno | `tile` | 1827 (92) | 34 (6) | 144 (39) | 34 (4) |
+| Terreno | `tile` | 1829 (92) | 34 (6) | 144 (39) | 34 (4) |
 | Modo di attraversare | `passabile` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Modo di attraversare | `invalicabile` | 2 (2) | 0 (0) | 11 (9) | 0 (0) |
 | Modo di attraversare | `walkable` | 23 (8) | 1 (1) | 1 (1) | 0 (0) |
@@ -30,7 +30,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Annegare | `affogare` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Annegare | `affondare` | 0 (0) | 0 (0) | 2 (2) | 0 (0) |
 | Segno del nuoto | `nuoto` | 3 (2) | 0 (0) | 52 (10) | 0 (0) |
-| Segno del nuoto | `water` | 454 (40) | 10 (5) | 29 (10) | 0 (0) |
+| Segno del nuoto | `water` | 455 (40) | 10 (5) | 29 (10) | 0 (0) |
 | Arcipelago | `reame` | 0 (0) | 0 (0) | 22 (10) | 1 (1) |
 | Arcipelago | `oceano` | 1 (1) | 0 (0) | 0 (0) | 0 (0) |
 | Isola | `continente` | 0 (0) | 0 (0) | 2 (2) | 0 (0) |
@@ -67,8 +67,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Secca | `bassofondo` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Secca | `scogliera` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Veicolo | `mezzo` | 7 (5) | 0 (0) | 72 (33) | 0 (0) |
-| Veicolo | `nave` | 14 (4) | 0 (0) | 19 (7) | 0 (0) |
-| Veicolo | `barca` | 4 (3) | 0 (0) | 32 (10) | 0 (0) |
+| Veicolo | `nave` | 14 (4) | 0 (0) | 20 (7) | 0 (0) |
+| Veicolo | `barca` | 4 (3) | 0 (0) | 33 (10) | 0 (0) |
 | Veicolo | `cavalcatura` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Capsula | `astronave` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Capsula | `navetta` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
@@ -123,9 +123,9 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Linea di galleggiamento | `chiglia` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Ambiente | `layout` | 390 (44) | 1 (1) | 112 (32) | 7 (3) |
 | Ambiente | `bioma` | 0 (0) | 0 (0) | 4 (3) | 0 (0) |
-| Lotto | `building` | 572 (47) | 24 (5) | 31 (15) | 0 (0) |
-| Lotto | `Building` | 572 (47) | 24 (5) | 31 (15) | 0 (0) |
-| Lotto | `buildings` | 98 (24) | 6 (3) | 1 (1) | 0 (0) |
+| Lotto | `building` | 573 (47) | 24 (5) | 31 (15) | 0 (0) |
+| Lotto | `Building` | 573 (47) | 24 (5) | 31 (15) | 0 (0) |
+| Lotto | `buildings` | 99 (25) | 6 (3) | 1 (1) | 0 (0) |
 | Blocco | `megachunk` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Blocco | `quadrante` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Corona | `crown` | 5 (5) | 5 (2) | 0 (0) | 0 (0) |
@@ -136,21 +136,21 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Sotto (dove di una cosa) | `sotto` | 28 (16) | 0 (0) | 472 (108) | 21 (14) |
 | Strato | `sottosuolo` | 0 (0) | 0 (0) | 5 (3) | 0 (0) |
 | Strato | `layer` | 311 (53) | 14 (3) | 6 (4) | 0 (0) |
-| Entità | `thing` | 786 (86) | 43 (9) | 31 (10) | 0 (0) |
+| Entità | `thing` | 788 (86) | 43 (9) | 31 (10) | 0 (0) |
 | Entità | `Things` | 235 (55) | 21 (9) | 6 (4) | 0 (0) |
 | Entità | `cosa` | 50 (19) | 0 (0) | 330 (118) | 13 (4) |
 | Modulo | `mod` | 52 (7) | 0 (0) | 0 (0) | 0 (0) |
 | Magazzino | `store` | 371 (56) | 5 (1) | 86 (23) | 22 (9) |
 | Magazzino | `deposito` | 12 (3) | 0 (0) | 37 (7) | 0 (0) |
 | Struttura | `edificio` | 13 (8) | 0 (0) | 150 (39) | 0 (0) |
-| Struttura | `building` | 572 (47) | 24 (5) | 31 (15) | 0 (0) |
-| Modello | `modello` | 106 (38) | 0 (0) | 487 (108) | 20 (8) |
+| Struttura | `building` | 573 (47) | 24 (5) | 31 (15) | 0 (0) |
+| Modello | `modello` | 106 (38) | 0 (0) | 492 (108) | 20 (8) |
 | Stella | `pozione` | 2 (1) | 0 (0) | 3 (3) | 0 (0) |
 | Stella | `sacco` | 5 (3) | 0 (0) | 8 (5) | 0 (0) |
 | Programma | `codice` | 47 (19) | 0 (0) | 228 (90) | 10 (3) |
-| Programma | `xml` | 641 (44) | 13 (2) | 123 (37) | 6 (2) |
+| Programma | `xml` | 650 (44) | 13 (2) | 123 (37) | 6 (2) |
 | Simbolo | `lettera` | 21 (11) | 0 (0) | 103 (42) | 0 (0) |
-| Simbolo | `#12` | 246 (73) | 6 (2) | 121 (51) | 34 (14) |
+| Simbolo | `#12` | 248 (73) | 6 (2) | 124 (51) | 34 (14) |
 | Simbolo | `codice` | 47 (19) | 0 (0) | 228 (90) | 10 (3) |
 | Simbolo | `colore` | 21 (9) | 0 (0) | 71 (28) | 6 (3) |
 | Programma incluso | `include` | 373 (96) | 1 (1) | 48 (12) | 10 (7) |
@@ -166,7 +166,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Osservazione | `obiettivo` | 17 (6) | 0 (0) | 6 (3) | 0 (0) |
 | Onda | `collasso` | 0 (0) | 0 (0) | 2 (1) | 0 (0) |
 | Tileset | `tilemap` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
-| Campione | `esempio` | 8 (4) | 0 (0) | 30 (21) | 1 (1) |
+| Campione | `esempio` | 8 (4) | 0 (0) | 33 (21) | 1 (1) |
 | Campione | `immagine` | 2 (2) | 0 (0) | 59 (19) | 2 (2) |
 | Griglia a pezzi | `chunk` | 1005 (68) | 0 (0) | 157 (42) | 5 (1) |
 | Griglia a pezzi | `blocchi` | 0 (0) | 0 (0) | 116 (27) | 0 (0) |
@@ -183,8 +183,8 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Fondo di una mesh | `base` | 656 (62) | 2 (1) | 150 (45) | 18 (5) |
 | Fondo di una mesh | `bottom` | 132 (30) | 13 (2) | 6 (5) | 91 (12) |
 | Fondo di una mesh | `sotto` | 28 (16) | 0 (0) | 472 (108) | 21 (14) |
-| Taglia | `size` | 1508 (126) | 28 (5) | 102 (28) | 177 (21) |
-| Taglia | `Taglia` | 188 (16) | 0 (0) | 205 (43) | 0 (0) |
+| Taglia | `size` | 1520 (126) | 28 (5) | 102 (28) | 177 (21) |
+| Taglia | `Taglia` | 192 (16) | 0 (0) | 207 (43) | 0 (0) |
 | Taglia | `TAGLIE` | 14 (6) | 0 (0) | 129 (30) | 0 (0) |
 | Viandante | `player` | 549 (92) | 8 (5) | 74 (31) | 8 (5) |
 | Viandante | `giocatore` | 11 (8) | 0 (0) | 198 (69) | 3 (2) |
@@ -223,7 +223,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Impalcatura | `ponteggio` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Impalcatura | `scaffold` | 3 (1) | 0 (0) | 1 (1) | 0 (0) |
 | Contabilità fuori vista | `simulazione` | 6 (5) | 0 (0) | 56 (25) | 1 (1) |
-| Contabilità fuori vista | `offline` | 118 (27) | 0 (0) | 150 (55) | 1 (1) |
+| Contabilità fuori vista | `offline` | 118 (27) | 0 (0) | 151 (55) | 1 (1) |
 | Contabilità fuori vista | `background` | 160 (17) | 0 (0) | 4 (4) | 148 (10) |
 | Ritorno | `reload` | 22 (13) | 0 (0) | 5 (4) | 2 (2) |
 | Ritorno | `ricarica` | 25 (8) | 0 (0) | 60 (22) | 20 (6) |
@@ -241,7 +241,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Oggetto | `cosa` | 50 (19) | 0 (0) | 330 (118) | 13 (4) |
 | Tasca | `pocket` | 9 (3) | 0 (0) | 0 (0) | 0 (0) |
 | Mobile | `arredo` | 2 (1) | 0 (0) | 9 (4) | 0 (0) |
-| Mobile | `furniture` | 207 (31) | 5 (2) | 25 (11) | 0 (0) |
+| Mobile | `furniture` | 206 (31) | 5 (2) | 25 (11) | 0 (0) |
 | Ripiano | `piano` | 33 (12) | 0 (0) | 505 (94) | 4 (4) |
 | Ripiano | `superficie` | 0 (0) | 0 (0) | 70 (58) | 0 (0) |
 | Impronta di un oggetto | `footprint` | 18 (4) | 0 (0) | 0 (0) | 0 (0) |
@@ -256,21 +256,22 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Capo indossato | `abito` | 1 (1) | 0 (0) | 2 (1) | 0 (0) |
 | Capo indossato | `vestito` | 0 (0) | 0 (0) | 14 (5) | 0 (0) |
 | Zona del corpo | `slot` | 740 (39) | 10 (1) | 111 (23) | 5 (2) |
-| Zona del corpo | `parte` | 22 (11) | 0 (0) | 276 (114) | 9 (5) |
+| Zona del corpo | `parte` | 22 (11) | 0 (0) | 277 (114) | 9 (5) |
 | Corpo vestito | `skin` | 86 (4) | 0 (0) | 61 (6) | 892 (34) |
 | Ricetta | `crafting` | 5 (4) | 0 (0) | 3 (2) | 0 (0) |
 | Stato | `status` | 441 (41) | 0 (0) | 13 (8) | 78 (12) |
 | Stato | `buff` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Runa | `simbolo` | 18 (3) | 0 (0) | 29 (9) | 0 (0) |
 | Runa | `glifo` | 1 (1) | 0 (0) | 14 (11) | 0 (0) |
-| Frase | `hand` | 357 (54) | 3 (3) | 14 (8) | 3 (3) |
+| Frase | `hand` | 361 (54) | 3 (3) | 14 (8) | 3 (3) |
 | Frase | `sentence` | 23 (9) | 3 (3) | 0 (0) | 1 (1) |
-| Frase | `mano` | 31 (12) | 0 (0) | 257 (81) | 12 (8) |
+| Frase | `mano` | 31 (12) | 0 (0) | 261 (81) | 12 (8) |
 | Incidere | `engrave` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Incidere | `scrivere` | 10 (4) | 0 (0) | 59 (43) | 1 (1) |
 | Pronunciare | `lanciare` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Incantesimo | `magia` | 19 (7) | 0 (0) | 39 (16) | 6 (1) |
 | Lessico | `glossario` | 1 (1) | 0 (0) | 42 (16) | 0 (0) |
+| Esempio dello Scultore | `campione` | 13 (5) | 0 (0) | 20 (10) | 0 (0) |
 | Musicista | `Compositore` | 0 (0) | 0 (0) | 2 (1) | 0 (0) |
 | Registro del Concilio | `registro` | 11 (9) | 0 (0) | 212 (78) | 1 (1) |
 | Registro del Concilio | `log` | 234 (53) | 1 (1) | 32 (22) | 6 (5) |
@@ -281,16 +282,16 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Natura del mondo | `bioma` | 0 (0) | 0 (0) | 4 (3) | 0 (0) |
 | Natura del mondo | `clima` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gravità | `peso` | 21 (8) | 0 (0) | 33 (21) | 0 (0) |
-| Modello di IA | `modello` | 106 (38) | 0 (0) | 487 (108) | 20 (8) |
-| Modello di IA | `Models` | 864 (111) | 8 (3) | 307 (75) | 6 (4) |
+| Modello di IA | `modello` | 106 (38) | 0 (0) | 492 (108) | 20 (8) |
+| Modello di IA | `Models` | 867 (111) | 8 (3) | 308 (75) | 6 (4) |
 | Vite degli individui | `realismo` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gioco al tocco | `joystick` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Gioco al tocco | `mobile` | 7 (5) | 0 (0) | 64 (17) | 2 (2) |
-| Croce di una finestra | `X` | 4940 (146) | 56 (3) | 212 (64) | 212 (16) |
+| Croce di una finestra | `X` | 4944 (146) | 56 (3) | 212 (64) | 212 (16) |
 | Eredità | `Eredita` | 6 (2) | 0 (0) | 11 (6) | 5 (1) |
 | Eredità | `EREDITA` | 6 (2) | 0 (0) | 11 (6) | 5 (1) |
 | Eredità | `Origine` | 11 (4) | 0 (0) | 96 (34) | 2 (1) |
-| Carta | `Carta` | 70 (16) | 0 (0) | 219 (36) | 17 (8) |
+| Carta | `Carta` | 70 (16) | 0 (0) | 220 (36) | 17 (8) |
 | Titolare | `owner` | 55 (13) | 0 (0) | 4 (3) | 2 (2) |
 | Regione del master | `mare` | 14 (8) | 0 (0) | 98 (19) | 0 (0) |
 | Commissione | `fee` | 96 (16) | 0 (0) | 23 (5) | 10 (2) |
@@ -304,7 +305,7 @@ gli ADR restano come sono (sono storia). Per ciò che una rinomina tocca davvero
 | Migrazione | `conversione` | 0 (0) | 0 (0) | 3 (3) | 0 (0) |
 | Migrazione | `upgrade` | 12 (6) | 0 (0) | 21 (16) | 0 (0) |
 | Riparazione dei valori italiani | `traduzione` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
-| Lingua del mondo | `locale` | 27 (15) | 0 (0) | 51 (25) | 12 (8) |
+| Lingua del mondo | `locale` | 28 (16) | 0 (0) | 51 (25) | 12 (8) |
 | Blocco «Lingua» | `traduzione` | 0 (0) | 0 (0) | 1 (1) | 0 (0) |
 | Lingua interna | `i18n` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
 | Fase | `milestone` | 0 (0) | 0 (0) | 0 (0) | 0 (0) |

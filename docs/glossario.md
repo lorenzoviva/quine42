@@ -1435,6 +1435,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/agents/sculptor.ts`
 - **Da non usare**: `SculptorModels`
 
+### Esempio dello Scultore
+- **Inglese**: `examplesFor`, `ExampleRequest`, `EXAMPLE_SCORE`, `EXAMPLE_CHARS`
+- **Definizione**: un programma della libreria che lo Scultore riceve nel suo sistema per vedere come si scrive una cosa della sua classe (il few-shot, T467): al più due, scelti senza chiamate e sempre gli stessi per la stessa libreria; un modello scritto a mano della classe (il generico per primo) e, se c'è, il migliore dell'universo della stessa classe, taglia e densità con un voto dell'Artista di almeno `EXAMPLE_SCORE`, 6. Mai dello studio, della vetrina, una parte del seme, la richiesta stessa né una struttura che cresce a regole, che non ne riceve. Non è il riferimento dell'ottima, il forte dell'autore, che il prompt delle strutture descrive come metro e non mostra (ADR-0210).
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `lab/scripts/prompt-tokens.ts`
+- **Da non usare**: `campione` (è il testo di `wfc` e `convchain`), `modello di riferimento`
+- **Fermo**: nessuno.
+
 ### Viste in testo
 - **Inglese**: `viewsText`, `planView`, `elevationView`, `sectionView`, `legend`, `planDistance`, `textViews`
 - **Definizione**: ciò che lo Scultore «vede» di una griglia senza fotografie (ADR-0183): la pianta e le altezze dall'alto, il fronte e il lato destro, i tagli a ogni piano, la legenda delle lettere, quanto differiscono le piante di due semi; tornano dopo ogni blocco e con ogni difetto.
