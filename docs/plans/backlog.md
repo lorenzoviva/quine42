@@ -6256,14 +6256,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T467 · Gli esempi dello Scultore scelti bene (S1 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo high · stima 1% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 2% · approvato · priorità 2
 - Contesto: studio T458 (`docs/design/scultori-specializzati.md` § 3, § 6, riga S1; `dossier T458`), approvato dall'autore il 21/11 con le quattro domande del § 6.2: nomi delle specialità sì, «parte del mondo» sì, **soglia del voto 6** (l'Artista è severo e i modelli generativi di oggi limitano la qualità: voti bassi sono normali ora), S7 dopo S2-S4.
 - Cosa fare: `examplesFor` come dice la riga S1, con il migliore dell'universo **a voto ≥ 6** (la soglia una costante con nome, scritta nell'ADR di T468); scelta deterministica; un test; `prompt-tokens.ts -- --scultore --conta` prima e dopo; kernel Z.
 - Browser: no. Quando è fatto: commit su `task/T467`, la misura nell'esito.
 
 ### T468 · Lo Scultore a specialità (S2 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 5% · approvato · priorità 2
 - Dipende da: T467
 - Contesto: studio T458, riga S2 e ADR proposto § 6.1 (approvato il 21/11: nomi Paesaggista, Mobiliere, Sarto, Figurinista, Capomastro, Architetto, Carrozziere e le azioni; «parte del mondo»; soglia 6). Dipende da T467 (stessi file: `examplesFor`).
 - Cosa fare: la riga S2 per intero; l'ADR «Lo Scultore a specialità e le parti del mondo» con la soglia 6; glossario (specialità, parte del mondo), AGENTS.md; kernel Z.
@@ -6271,7 +6271,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T469 · I cicli e i nodi che il prompt non insegna, WFC e cantine per l'Architetto (S3 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 5% · approvato · priorità 2
 - Dipende da: T468
 - Contesto: studio T458 § 5 e riga S3. L'autore (21/11): nel suo forte (`lab/mjx/models/handmade/forte-handmade.xml`) ha lasciato i `<pieces>` del forte di partenza fatto con Claude senza capire bene come si usa il tag; vuole che l'Architetto sappia anche **WFC** e **come scavare i sotterranei**. Leggi ADR-0174 (wfc), ADR-0176 (tetti del mondo), ADR-0178 (`<pieces>`, `lab/banco/pezzi/README.md`), T417 e ADR-0091 (`part-cellar`, cantine che reggono). Dipende da T468.
 - Cosa fare: la riga S3; in più nella sezione dell'Architetto (i) `<wfc>`/`<convchain>` quando servono (selciati, mura irregolari, campi) entro `WORLD_NODE_LIMITS`, con un idioma breve; (ii) lo scavo della cantina con `part-cellar` e la regola che la cantina regga e si raggiunga dalla porta; (iii) `<pieces>` con la regola del margine. **Per l'autore**: una sezione in italiano in `lab/banco/pezzi/README.md` (o nello studio) «Come si usa `<pieces>`», con l'esame dei tre `<pieces>` del suo forte: cosa fanno, se il margine è giusto, se servono (forte intero contro forte a pezzi voxel per voxel su un seme), e cosa cambierebbe; senza toccare il file dell'autore.
@@ -6279,28 +6279,28 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T470 · Le sezioni dei mestieri (S4 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 5% · approvato · priorità 2
 - Dipende da: T468
 - Contesto: studio T458, riga S4 e § 2. Dipende da T468.
 - Cosa fare: la riga S4. Browser: no.
 
 ### T471 · Le parti del mondo, A: a mano nel seme (S5 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 3% · approvato · priorità 2
 - Dipende da: T468
 - Contesto: studio T458, riga S5 e § 4. Dipende da T468.
 - Cosa fare: la riga S5. Browser: sì, le parti da sole e in un modello nel laboratorio 3D.
 
 ### T472 · Le parti del mondo, B: estratte da un modello buono (S6 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 2
 - Dipende da: T471
 - Contesto: studio T458, riga S6 e § 4.3-4.4; soglia del voto 6 (come T467). Dipende da T471.
 - Cosa fare: la riga S6; ADR; «sicurezza:» nell'esito. Browser: no.
 
 ### T473 · La prova pagata delle specialità (S7 di T458) — `da fare`
 - Step: 44
-- Pipeline: claude · sforzo high · stima 2% · priorità 2
+- Pipeline: claude · sforzo max · stima 3% · priorità 2
 - Dipende da: T468, T469, T470
 - Contesto: studio T458, riga S7. Dipende da T468, T469, T470. **Spesa 3-5 $ da approvare dall'autore** prima del lancio (il task non è approvato finché lui non dice sì alla spesa).
 - Cosa fare: la riga S7, col tetto sul registro. Browser: sì, le foto dei modelli.
