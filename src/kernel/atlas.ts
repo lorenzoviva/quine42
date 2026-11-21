@@ -38,6 +38,11 @@ export interface Region {
    */
   gravity?: number;
   /**
+   * Only on a region of the master (T446, ADR-0236): whether its places have air to breathe (false: a moon of bare rock; true: a dome of air
+   * over an asteroid). Absent, what the terrain, the environment and the body of the void say. Read only where the world counts the breath.
+   */
+  air?: boolean;
+  /**
    * The island of an archipelago this region names (T441, ADR-0229): the Cartographer's, written when the first place on it is planned. Its
    * centre and radius say where the island is on the atlas; its shape is the kernel's (`islands.ts`) and never changes. Not a region of
    * the places (`regionAt` passes over it): its environment was the first place's, and the island's places choose their own.
@@ -103,6 +108,15 @@ export function regionGravity(r: Region | undefined): number | undefined {
   return typeof g === 'number' && Number.isFinite(g) && g >= lo && g <= hi ? g : undefined;
 }
 
+/**
+ * Whether a region gives its places air (T446): only a region of the master that is the world's (not held), and only true or false. Undefined:
+ * the region does not say, the terrain, the environment and the body do.
+ */
+export function regionAir(r: Region | undefined): boolean | undefined {
+  if (!r?.master || r.kind === 'held') return undefined;
+  return typeof r.air === 'boolean' ? r.air : undefined;
+}
+
 /** The kinds in the words of the master's tools. */
 export const REGION_KIND_NAME: Record<RegionKind | 'plan', string> = { plan: 'ambiente', filler: 'riempitivo', held: 'trattenuta' };
 /** What each kind means, for the master. */
@@ -128,6 +142,8 @@ export interface RegionRequest {
   environment?: string;
   /** The gravity of its places (T447): a number within the kernel's range; absent, none of its own. */
   gravity?: number;
+  /** Whether its places have air (T446): true or false; absent, none of its own. */
+  air?: boolean;
 }
 
 const has = (o: Record<string, unknown>, k: string) => Object.prototype.hasOwnProperty.call(o, k);
@@ -165,6 +181,9 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
   const gravity = r.gravity === undefined || r.gravity === null || r.gravity === '' ? undefined : typeof r.gravity === 'number' && Number.isFinite(r.gravity) && r.gravity >= glo && r.gravity <= ghi ? Math.round(r.gravity * 100) / 100 : null;
   if (gravity === null) errors.push(`la gravità: un numero da ${glo} a ${ghi} (1 è quella della terra), o nessuna`);
   else if (gravity !== undefined && kind === 'held') errors.push('la gravità: una regione trattenuta non è ancora del mondo, non ne ha una');
+  const air = r.air === undefined || r.air === null || r.air === '' ? undefined : typeof r.air === 'boolean' ? r.air : null;
+  if (air === null) errors.push('l’aria: c’è o non c’è (vero o falso), o quella dei suoi luoghi');
+  else if (air !== undefined && kind === 'held') errors.push('l’aria: una regione trattenuta non è ancora del mondo, non ne ha una');
   const regions = atlas.regions.slice();
   const id = r.id === undefined ? undefined : typeof r.id === 'string' ? r.id : null;
   const at = id ? regions.findIndex((x) => x.id === id) : -1;
@@ -183,6 +202,7 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
     master: true,
     ...(kind ? { kind } : {}),
     ...(gravity !== undefined && gravity !== null ? { gravity } : {}),
+    ...(typeof air === 'boolean' ? { air } : {}),
   };
   if (at >= 0) regions[at] = region;
   else regions.push(region);

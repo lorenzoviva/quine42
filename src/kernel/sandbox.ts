@@ -50,6 +50,11 @@ export interface Host {
    */
   region_at(x: number, y: number): unknown;
   /**
+   * Whether a body breathes at a tile (T446, ADR-0236): the terrain, a vehicle's deck, the master's region, the environment, the body of the
+   * void. True or false, also where the world does not count the breath; read only.
+   */
+  air_at(x: number, y: number): boolean;
+  /**
    * The islands of an archipelago within r tiles of (x, y) (T441), or the stations and asteroids of the void (T445, `body`): `{id, name, x, y,
    * radius, islet, body}` each, the nearest first, at most `MAX_ISLANDS_SEEN`; empty in a world that is neither. Read only: they are the kernel's.
    */
@@ -412,6 +417,7 @@ function emptyHost(): Host {
     carpet: () => ({ strength: 1, rate: 6, active: true, ox: 0, oy: 0 }),
     nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
     region_at: () => undefined,
+    air_at: () => true,
     islands: () => [],
     vehicle: () => undefined,
     vehicle_set: () => false,

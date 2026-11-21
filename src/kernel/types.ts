@@ -129,7 +129,7 @@ export interface ItemDef {
   model?: string;
   equippable?: boolean;
   /** Applied by core.items when the item is used (eaten, drunk, applied, absorbed). */
-  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number };
+  effects?: { hunger?: number; thirst?: number; energy?: number; health?: number; mana?: number; oxygen?: number };
   /** Bags, pouches, baskets: an inventory inside the item (only things with tag `accepts`, if set). */
   container?: { size: number; accepts?: string };
   /** Learned uses ("Altro…" in the inventory): effects applied without asking the Council again. */
@@ -197,6 +197,11 @@ export interface EnvironmentDef {
   /** Outdoor, indoor or mixed (ids since T310b, `tipi-ambiente`). */
   environment: 'outdoor' | 'indoor' | 'mixed';
   program: import('./mj').MjNode;
+  /**
+   * Only false says (T446, ADR-0236): its places have no air to breathe (a flooded shaft, the bare rock of an airless moon). Read only where
+   * the world counts the breath (`nature.oxygen`); a terrain without air, a vehicle's deck and the master's region say before it.
+   */
+  air?: false;
 }
 
 /**
@@ -205,7 +210,7 @@ export interface EnvironmentDef {
  */
 export type Effect =
   | { type: 'message'; text: string }
-  | { type: 'needs'; hunger?: number; thirst?: number; energy?: number; health?: number }
+  | { type: 'needs'; hunger?: number; thirst?: number; energy?: number; health?: number; oxygen?: number }
   | { type: 'create_item'; item: string; quantity?: number }
   | { type: 'consume'; item: string; quantity?: number }
   | { type: 'destroy' }
