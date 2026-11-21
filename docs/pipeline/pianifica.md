@@ -28,6 +28,7 @@ Sei l'agente che pianifica, nel worktree del branch base (`3d`). Non esegui task
      - `neon` (Gemini 4 Neon, ADR-0237, `modelli.md` 1.4, 1.5 e 4.2): il più forte dei Gemini di `agy`, per la programmazione di più file senza browser che daresti a `claude` quando la sua finestra delle 5 ore è carica, o ad `argon` per non toccare la sua settimana. Sforzo `high`, `extra` se il task è impegnativo (`-xhigh`). Pesa su `Gemini Models` come `gemini` e `hydrogen`, più di Hydrogen a parità di token: non per documenti, test semplici o merge, dove Hydrogen basta. Stima come per `gemini`, alzata a giudizio, e solo task piccoli finché `consumi.jsonl` non dice di più.
      - Mai su architettura, kernel, sicurezza o programmi MarkovJunior: restano su `claude`.
    - `fable` (Claude Fable 5.1, ADR-0115, ADR-0146) solo per i task più difficili, che chiedono molto ragionamento: consuma in fretta, ha un contatore suo e pesa anche sul settimanale di Claude.
+   - **Un task che aggiunge un modello** (alla pipeline o al Concilio) si scrive col modello di blocco di [`docs/guide/nuovo-modello.md`](../guide/nuovo-modello.md) (T466), che dice i passi, i test e i tetti di spesa.
    - Provider: quello scritto dall'autore («> Provider proposto: …», Antigravity = `gemini`) e allora `approvato`;
      altrimenti `claude` per ciò che è delicato (architettura, kernel, multigiocatore, sicurezza, ciò che tocca
      molti file), `gemini` per ciò che è semplice o meccanico (modelli MarkovJunior, documenti, test, UI isolata),

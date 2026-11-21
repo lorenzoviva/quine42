@@ -162,6 +162,7 @@
 <a id="gemini"></a>
 ## Gemini, l'Attore, i coefficienti di generazione
 
+- **Un modello nuovo nel Concilio** (T466): il prezzo con la data, gli elenchi a id fissi dei varchi, dove il gioco lo sceglie, la stima, il banco pagato col tetto e la sicurezza, passo per passo, in [`docs/guide/nuovo-modello.md`](guide/nuovo-modello.md) (parte A).
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
   `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
