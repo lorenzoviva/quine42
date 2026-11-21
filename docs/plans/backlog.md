@@ -6259,12 +6259,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T466` con la guida e i rimandi. Sicurezza: nessuna superficie nuova.
 - Esito: nuova `docs/guide/nuovo-modello.md` (prima di cominciare; A nel gioco: prezzo, varchi a elenco, scelta, CENSUS, stima e cache, banco col tetto, sicurezza, regole; B nella pipeline: CLI e micro-prove, config e copia per i test, test, schede, prova di qualità, periodo in prova; C blocco del backlog), esempio svolto T465 con T360; rimandi in README della pipeline, pianifica.md, orchestra.md, architettura-dettagli.md#gemini, docs/README.md e convenzioni di AGENTS.md; link controllati con uno script al volo (4 rotti già prima in architettura-dettagli.md, non toccati), tests/pipeline.test.ts verde; suite intera e typecheck non lanciati (solo documenti). Sicurezza: nessuna superficie nuova.
 
-### T467 · Gli esempi dello Scultore scelti bene (S1 di T458) — `da fare`
+### T467 · Gli esempi dello Scultore scelti bene (S1 di T458) — `fatto` (`196ff5e7`)
 - Step: 44
 - Pipeline: claude · sforzo max · stima 2% · approvato · priorità 2
 - Contesto: studio T458 (`docs/design/scultori-specializzati.md` § 3, § 6, riga S1; `dossier T458`), approvato dall'autore il 21/11 con le quattro domande del § 6.2: nomi delle specialità sì, «parte del mondo» sì, **soglia del voto 6** (l'Artista è severo e i modelli generativi di oggi limitano la qualità: voti bassi sono normali ora), S7 dopo S2-S4.
 - Cosa fare: `examplesFor` come dice la riga S1, con il migliore dell'universo **a voto ≥ 6** (la soglia una costante con nome, scritta nell'ADR di T468); scelta deterministica; un test; `prompt-tokens.ts -- --scultore --conta` prima e dopo; kernel Z.
 - Browser: no. Quando è fatto: commit su `task/T467`, la misura nell'esito.
+- Esito: `examplesFor` sceglie un modello a mano della classe (nella scatola della richiesta, il generico prima) e il migliore dell'universo della stessa classe, taglia e densità con voto ≥ `EXAMPLE_SCORE` = 6 (voto, poi id), senza corona/vetrina/parti, programmi a regole, navi che non galleggiano, capi indossati, la richiesta stessa, programmi oltre `EXAMPLE_CHARS` = 12 000; i portati valgono per il voto (cambia ADR-0170 § 7: da scrivere nell'ADR di T468 con la soglia); misura `prompt-tokens.ts --scultore --conta` prima/dopo: seme 2 528 → 936 token a chiamata, 0,075 → 0,025 $/h (dall'1/12 0,116 → 0,041), universi veri 2 084-7 161 → 1 491-1 972 token (`misure-s1.md`); test nuovo, glossario, architettura, AGENTS.md, kernel 0.10.15; non provata la qualità coi modelli veri (S7); sicurezza: nessuna superficie nuova.
 
 ### T468 · Lo Scultore a specialità (S2 di T458) — `da fare`
 - Step: 44

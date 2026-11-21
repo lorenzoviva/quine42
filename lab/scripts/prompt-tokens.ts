@@ -10,7 +10,8 @@
 // npx vite-node lab/scripts/prompt-tokens.ts -- --campaign [--file f.md] [--json f]  # the master's directives (T374), offline: whether every
 //   request of an offline Genesis carries its sections and no other, what they add agent by agent and in an hour of HOUR
 // npx vite-node lab/scripts/prompt-tokens.ts -- --scultore [--conta] [--universi <dir>] [--md f] [--json f]  # the Sculptor's prompt request by
-//   request (T458): what each kind of model needs of it and what not, the dollars a cut saves, today's examples, the few-shot candidates
+//   request (T458): what each kind of model needs of it and what not, the dollars a cut saves, today's examples, the few-shot candidates;
+//   with --universi the examples each library gives every request, with the rule of before and with T467's, and what they cost an hour
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -396,6 +397,33 @@ async function campaignCost(): Promise<void> {
 const SCULPTED_SHARE: Record<string, number> = { pebble: 0, rock: 2, bush: 0, tree: 7, object: 3, 'object-tinted': 84, 'object-worn': 4, furniture: 100, person: 75, animal: 1, beast: 0, monument: 27, building: 71, 'structure-medium': 5, 'structure-large': 49, 'structure-fort': 0, vessel: 0 };
 
 /**
+ * The Sculptor's examples as the kernel chose them before T467 (kernel 0.10.14), only to measure the rule of today against them: the first
+ * two programs of the library of the class's family, the hand-written first, then those that came with the cards, then the rest, in the
+ * order of the index.
+ */
+function examplesBeforeT467(files: Record<string, string>, req: { classe: string } | string): string[] {
+  const classe = typeof req === 'string' ? req : req.classe;
+  let index: Record<string, { class?: string; author?: string; brought?: string; classe?: string; autore?: string }> = {};
+  try {
+    index = JSON.parse(files['models/index.json'] ?? '{}');
+  } catch {
+    index = {};
+  }
+  const family: Record<string, string[]> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'], vessel: ['vessel'] };
+  // The fields of 0.3 (`classe`, `autore`) as `internalFields` read them.
+  const classOfEntry = (id: string) => index[id].class ?? index[id].classe;
+  const authorOf = (id: string) => index[id].author ?? index[id].autore ?? '';
+  const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
+  const picked: string[] = [];
+  for (const cls of family[classe] ?? [classe, 'furniture']) {
+    const rank = (id: string) => (/mano/.test(authorOf(id)) ? 2 : typeof index[id].brought === 'string' ? 1 : 0);
+    const of = ids.filter((id) => classOfEntry(id) === cls).sort((a, b) => rank(b) - rank(a));
+    for (const id of of) if (picked.length < 2 && !picked.includes(id)) picked.push(id);
+  }
+  return picked.map((id) => files[`models/${id}.xml`].trim());
+}
+
+/**
  * The Sculptor's prompt class by class (T458, `docs/design/scultori-specializzati.md`), offline: an offline Genesis for a real style guide,
  * then one request of every kind of model (the classes, a thing tinted, a thing worn, a structure that grows by rules, a vessel, an action)
  * sculpted with the local models, every request recorded as it goes to the models; each system cut into its parts (the sections of
@@ -600,7 +628,7 @@ async function sculptorSpecialties(): Promise<void> {
     if (!rec) continue;
     const cls = classOf(c.req.classe)!;
     const proc = c.spec !== 'actions' && S.procedural(cls, c.req.taglia);
-    const examples = proc || c.spec === 'actions' ? [] : S.examplesFor(files, cls.id);
+    const examples = proc || c.spec === 'actions' ? [] : S.examplesFor(files, { ...c.req, classe: cls.id });
     const exampleText = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : '';
     const role = proc ? structures : general;
     const sameSystem = rec.system === [role, COUNCIL_PRINCIPLES, language, context, exampleText].filter(Boolean).join('\n\n');
@@ -626,6 +654,8 @@ async function sculptorSpecialties(): Promise<void> {
   let share = { ...SCULPTED_SHARE };
   const read: string[] = [];
   const best: Array<{ universe: string; id: string; cls: string; score: number; author: string; xml: string }> = [];
+  // The library of each universe (T467): its models/ as the kernel reads them, for the examples each request would get there.
+  const libraries = new Map<string, Record<string, string>>();
   if (opt('universi')) {
     share = Object.fromEntries(Object.keys(SCULPTED_SHARE).map((k2) => [k2, 0]));
     const root = path.resolve(opt('universi')!);
@@ -633,6 +663,9 @@ async function sculptorSpecialties(): Promise<void> {
       const idxFile = path.join(root, u, 'models', 'index.json');
       if (!fs.existsSync(idxFile)) continue;
       read.push(u);
+      const library: Record<string, string> = { 'models/index.json': fs.readFileSync(idxFile, 'utf8') };
+      for (const f of fs.readdirSync(path.join(root, u, 'models'))) if (f.endsWith('.xml')) library[`models/${f}`] = fs.readFileSync(path.join(root, u, 'models', f), 'utf8');
+      libraries.set(u, library);
       const idx = JSON.parse(fs.readFileSync(idxFile, 'utf8')) as Record<string, { class?: string; author?: string; size?: string; tint?: string; sound?: unknown; name?: string }>;
       const programs = new Set<string>();
       for (const [id, info] of Object.entries(idx)) {
@@ -747,6 +780,62 @@ async function sculptorSpecialties(): Promise<void> {
     routes[route.name] = { perCall, tokensCut, genesis, hour, share: perCall / hourSpend, examplesHour: examplesPerCall * hourCalls, callSpend: hourSpend, lobby };
   }
   json.routes = routes;
+
+  // The examples in the seed and in the real universes (T467): what each request gets from each library, with the rule of before
+  // (`examplesBeforeT467`) and with today's (`examplesFor`), and what they cost in an hour of the lobby on each route.
+  {
+    const libs: Array<[string, Record<string, string>]> = [['seme', files], ...libraries];
+    const ruleOf = { prima: examplesBeforeT467, dopo: S.examplesFor } as const;
+    const seen = new Map<string, number>();
+    const chosen: Record<string, Record<string, Record<string, { ids: string[]; tokens: number }>>> = { prima: {}, dopo: {} };
+    for (const [rule, pick] of Object.entries(ruleOf) as Array<[keyof typeof ruleOf, typeof S.examplesFor]>) {
+      for (const [u, lib] of libs) {
+        const idx = JSON.parse(lib['models/index.json'] ?? '{}') as Record<string, { score?: unknown }>;
+        const idOf = new Map<string, string>();
+        for (const p of Object.keys(lib).sort()) if (/^models\/[^/]+\.xml$/.test(p) && !idOf.has(lib[p].trim())) idOf.set(lib[p].trim(), p.slice(7, -4));
+        chosen[rule][u] = {};
+        for (const x of sculpts) {
+          const cls = classOf(x.c.req.classe)!;
+          const ex = S.procedural(cls, x.c.req.taglia) ? [] : pick(lib, { ...x.c.req, classe: cls.id });
+          const text = ex.length ? `## Examples (programs of the library)\n${ex.join('\n\n')}` : '';
+          const t = seen.get(text) ?? (await tokens(text));
+          seen.set(text, t);
+          const ids = ex.map((e) => {
+            const id = idOf.get(e) ?? '?';
+            const v = idx[id]?.score;
+            return typeof v === 'number' ? `${id} (${v})` : id;
+          });
+          chosen[rule][u][x.c.key] = { ids, tokens: t };
+        }
+      }
+    }
+    out.push('', '### Gli esempi di ogni richiesta, nel seme e negli universi veri (T467)', '', `Prima: i primi due programmi della famiglia, quelli a mano davanti. Dopo (\`examplesFor\`): un modello a mano del seme della classe (il generico per primo, nella scatola della richiesta) e, se c’è, il migliore dell’universo della stessa classe, taglia e densità con voto ≥ ${S.EXAMPLE_SCORE} (il voto fra parentesi). Ogni cella: gli esempi, poi i token della loro sezione.`, '', `| tipo | ${libs.map(([u]) => `${u}, prima | ${u}, dopo`).join(' | ')} |`, `|---|${libs.map(() => '---|---').join('|')}|`);
+    const cell = (c?: { ids: string[]; tokens: number }) => (c && c.ids.length ? `${c.ids.join(' + ')}: ${fmt(c.tokens)}` : '—');
+    for (const x of sculpts) out.push(`| ${x.c.key} | ${libs.map(([u]) => `${cell(chosen.prima[u][x.c.key])} | ${cell(chosen.dopo[u][x.c.key])}`).join(' | ')} |`);
+    out.push('', '| via | ' + libs.map(([u]) => `${u}, prima | ${u}, dopo`).join(' | ') + ' |', `|---|${libs.map(() => '---:|---:').join('|')}|`);
+    const hours: Record<string, Record<string, Record<string, number>>> = {};
+    for (const route of ROUTES) {
+      const cells: string[] = [];
+      for (const [u] of libs) {
+        for (const rule of ['prima', 'dopo'] as const) {
+          let perCall = 0;
+          let tokensPerCall = 0;
+          for (const x of sculpts) {
+            const w = (((share[x.c.key] ?? 0) / total) * callsOf(x.c)) / callsPerModel;
+            const t = chosen[rule][u][x.c.key]?.tokens ?? 0;
+            perCall += w * t * perToken(modelOf(x.c, route.route, route.day), route.day);
+            tokensPerCall += w * t;
+          }
+          ((hours[route.name] ??= {})[u] ??= {})[rule] = perCall * hourCalls;
+          ((hours.tokens ??= {})[u] ??= {})[rule] = tokensPerCall;
+          cells.push(usd(perCall * hourCalls));
+        }
+      }
+      out.push(`| ${route.name}, gli esempi in $ l’ora | ${cells.join(' | ')} |`);
+    }
+    out.push(`| token di esempi a chiamata (media pesata) | ${libs.map(([u]) => `${fmt(hours.tokens[u].prima)} | ${fmt(hours.tokens[u].dopo)}`).join(' | ')} |`);
+    json.examples = { chosen, hours };
+  }
 
   // The trades: what each keeps of today's role (the parts its requests need) and what it leaves.
   out.push('', '### Le specialità: ciò che tengono del prompt di oggi', '', '| specialità | richieste | ruolo di oggi | ne tiene | ne lascia |', '|---|---|---:|---:|---:|');

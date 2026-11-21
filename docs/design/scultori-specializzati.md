@@ -253,6 +253,14 @@ gli esempi mostrano lo stile. La proposta per ogni specialità che non sia l'Arc
 3. scelti in modo deterministico (voto, poi id) e cambiati solo quando arriva un modello migliore: gli esempi stanno in fondo al sistema e
    la cache li tiene finché non cambiano.
 
+**Fatto in T467 (S1, kernel 0.10.15)**, con la soglia a 6 (l'autore, 21/11): `examplesFor` dà un modello scritto a mano della classe (nella
+scatola della richiesta, il generico per primo) e, se c'è, il migliore dell'universo della stessa classe, taglia e densità con voto ≥
+`EXAMPLE_SCORE` (il voto, poi l'id); mai lo studio, la vetrina, le parti, ciò che cresce a regole, una nave che non galleggia, un capo
+indossato a chi non si indossa, un programma oltre i 12 000 caratteri (`EXAMPLE_CHARS`). Nel seme gli esempi scendono da 2 528 a 936 token a
+chiamata (media pesata), da 0,075 $ a 0,025 $ l'ora di gioco (dall'1/12 da 0,116 a 0,041); nei cinque universi veri, dove entra il migliore
+dell'universo, da 2 084-7 161 a 1 491-1 972 token, da 0,060-0,100 $ a 0,035-0,049 $ l'ora (dall'1/12 da 0,095-0,133 a 0,052-0,074). Richiesta
+per richiesta e universo per universo, prima e dopo: [`misure-s1.md`](scultori-specializzati/misure-s1.md).
+
 ## 4. Le parti condivise per specialità e universo (d)
 
 ### 4.1 Che cosa c'è già

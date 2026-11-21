@@ -20,7 +20,7 @@ import { act, runMjx } from '../../mj/run';
 import { isNoteLine, symbolName } from '../../mj/symbols';
 import { traceText } from '../../mj/trace';
 import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
-import { cellarVoxels, groundOfForm, habitablePartsOf, holesOf, walkIn, waterlineOf } from '../forms';
+import { cellarVoxels, groundOfForm, habitablePartsOf, holesOf, vptOf, walkIn, waterlineOf, type ModelInfo } from '../forms';
 import { measureVessel, vesselErrors, VESSEL_LEAST } from '../../mj/vessel';
 import { storeyFloors } from '../interior';
 import type { FileMap } from '../types';
@@ -224,25 +224,100 @@ export function sculptorRole(files: FileMap, structures = false): string {
     .replace('@@PALETTE@@', palette);
 }
 
-/** Up to two programs of the library of the same class (or family) to learn from: the hand-written first, then those that came with the cards (T295). */
-export function examplesFor(files: FileMap, classe: string): string[] {
-  let index: Record<string, { class?: string; author?: string; brought?: string }> = {};
+/**
+ * The Artist's vote from which a model of the universe is an example for the Sculptor (T467, S1 of T458 § 3.2): 6, the author's word of
+ * 21/11. The Artist is severe and today's generative models limit the quality, so low votes are normal now: of the 211 models with a vote
+ * in the real universes of that day the mean was 5.1, and only 12 had 7 or more.
+ */
+export const EXAMPLE_SCORE = 6;
+
+/**
+ * The longest program that is an example, in characters (T467): an example goes into every request of its class until a better one comes,
+ * and past this it would cost more than it teaches (some 5 000 tokens). The longest of the seed that teaches is 6 778, the best of the real
+ * universes stay under 10 000.
+ */
+export const EXAMPLE_CHARS = 12_000;
+
+/**
+ * What is never an example (T467, as `reuseOptions` of the `ModelDirector`): the studio's models (of the corona, not of the world, at 8 voxels
+ * a tile), the showcase of the editor (`schermo-`, `circuito-`) and the parts of the seed, which a structure includes and are no thing.
+ */
+const NOT_EXAMPLES = /^(corona-|schermo-|circuito-|part-)/;
+
+/**
+ * The classes a class learns from when none of its own models written by hand teaches: a medium structure, whose class grows by rules from
+ * Large up, from the buildings.
+ */
+const EXAMPLE_FAMILY: Readonly<Record<string, readonly string[]>> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'], vessel: ['vessel'] };
+
+/** What of a request chooses its examples (T467): its id (it is never its own example), its class, its size, whether it is worn. */
+export type ExampleRequest = Pick<SculptRequest, 'classe'> & Partial<Pick<SculptRequest, 'id' | 'taglia' | 'worn'>>;
+
+/** Ids in a fixed order, the same on every machine (not the locale's). */
+const byId = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * The library's programs the Sculptor learns from, in its system (T467, S1 of T458 § 3.2): at most two, chosen without calls and always the
+ * same for the same library, so that the cache keeps them until a better model comes.
+ * 1. A model written by hand (its author says so, and it was not brought: the seed's, or one written by hand for the universe) of the
+ *    request's class, or of the class beside it if none of its own teaches (`EXAMPLE_FAMILY`): worn first if the request is worn, then one
+ *    in the request's box (its size and density: the star of the objects, at 32 voxels a tile, is not), then the generic of the class, then
+ *    by id.
+ * 2. If there is one, the best of the universe of the request's class, size and density, worn if and only if the request is, with a vote of
+ *    the Artist of at least `EXAMPLE_SCORE`: the higher vote, then by id; never the same program as the first. A model brought with the
+ *    cards (ADR-0170) is one of these by the vote it brought from where it was born, no longer second by being brought.
+ * A program teaches if it is of the world (`NOT_EXAMPLES`), of an asset class (not a sound), not the request itself, does not grow by rules
+ * (a box alone would learn the opposite, T156), floats if it is a vessel (the Sculptor's vessels are on water, the request asks for the
+ * waterline: the capsule of the void is not theirs), is worn only if the request is (a thing of its own would learn a `<worn>` section) and
+ * is not longer than `EXAMPLE_CHARS`. The structures that grow by rules get none (`write`): their prompt composes from the concept.
+ */
+export function examplesFor(files: FileMap, request: ExampleRequest | string): string[] {
+  const req: ExampleRequest = typeof request === 'string' ? { classe: request } : request;
+  let index: Record<string, Partial<ModelInfo> | undefined> = {};
   try {
-    // The fields of 0.3 (`classe`, `autore`) read internal (T308a).
+    // The fields of 0.3 (`classe`, `autore`, `voto`) read internal (T308a).
     index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
   } catch {
     index = {};
   }
-  const family: Record<string, string[]> = { person: ['person', 'animal'], animal: ['animal', 'person'], beast: ['beast', 'animal'], tree: ['tree', 'bush'], bush: ['bush', 'tree'], rock: ['rock', 'pebble'], pebble: ['pebble', 'rock'], object: ['object', 'furniture'], furniture: ['furniture', 'object'], building: ['building', 'structure'], structure: ['structure', 'building'], monument: ['monument', 'building'], vessel: ['vessel'] };
-  const ids = Object.keys(index).filter((id) => files[`models/${id}.xml`]);
-  const picked: string[] = [];
-  for (const cls of family[classe] ?? [classe, 'furniture']) {
-    // The hand-written first, then what the master brought from other worlds (the world's look grows from them), then the rest.
-    const rank = (id: string) => (/mano/.test(index[id].author ?? '') ? 2 : typeof index[id].brought === 'string' ? 1 : 0);
-    const of = ids.filter((id) => index[id].class === cls).sort((a, b) => rank(b) - rank(a));
-    for (const id of of) if (picked.length < 2 && !picked.includes(id)) picked.push(id);
+  if (!index || typeof index !== 'object' || Array.isArray(index)) index = {};
+  const worn = !!req.worn;
+  const own = classOf(req.classe);
+  const size = (t: unknown) => (own ? (sizeOf(typeof t === 'string' ? t : undefined)?.id ?? own.taglia) : undefined);
+  interface Example {
+    id: string;
+    info: Partial<ModelInfo>;
+    xml: string;
+    worn: boolean;
+    /** In the request's box: its class, its size, its density. */
+    boxed: boolean;
   }
-  return picked.map((id) => files[`models/${id}.xml`].trim());
+  const all: Example[] = [];
+  for (const [id, info] of Object.entries(index)) {
+    const xml = files[`models/${id}.xml`]?.trim();
+    const cls = info && typeof info === 'object' ? classOf(info.class) : undefined;
+    if (!cls || !xml || id === req.id || NOT_EXAMPLES.test(id) || growsByRules(cls, info!.size) || xml.length > EXAMPLE_CHARS) continue;
+    if (isVessel(cls) && !waterlineOf(xml)) continue;
+    const isWorn = wornSections(xml).length > 0;
+    if (isWorn && !worn) continue;
+    const boxed = !!own && cls.id === own.id && size(info!.size) === size(req.taglia) && vptOf({ class: cls.id, size: info!.size, vpt: info!.vpt }) === densityFor(own, req.taglia);
+    all.push({ id, info: info!, xml, worn: isWorn, boxed });
+  }
+  // 1. Written by hand: of the request's class, or of the first class of its family that has one.
+  const byHand = (e: Example) => /mano/.test(typeof e.info.author === 'string' ? e.info.author : '') && typeof e.info.brought !== 'string';
+  let first: Example | undefined;
+  for (const cls of EXAMPLE_FAMILY[req.classe] ?? [req.classe]) {
+    const rank = (e: Example) => [Number(e.worn === worn), Number(e.boxed), Number(e.id === cls)];
+    const of = all.filter((e) => e.info.class === cls && byHand(e)).sort((a, b) => {
+      const [x, y] = [rank(a), rank(b)];
+      return y[0] - x[0] || y[1] - x[1] || y[2] - x[2] || byId(a.id, b.id);
+    });
+    if ((first = of[0])) break;
+  }
+  // 2. The best of the universe by the Artist's vote, of the same class, box and kind.
+  const vote = (e: Example) => (typeof e.info.score === 'number' && Number.isFinite(e.info.score) ? e.info.score : -1);
+  const best = all.filter((e) => e.boxed && e.worn === worn && vote(e) >= EXAMPLE_SCORE && e.xml !== first?.xml).sort((a, b) => vote(b) - vote(a) || byId(a.id, b.id))[0];
+  return [first, best].filter((e): e is Example => !!e).map((e) => e.xml);
 }
 
 /** The XML in an answer: inside a code fence if there is one, from the first "<" to the last ">". */
@@ -686,7 +761,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   const proc = procedural(cls, req.taglia);
   const role = sculptorRole(c.files, proc);
   // The procedural prompt composes from the concept: the library's programs of sole boxes would teach the opposite (T156).
-  const examples = proc ? [] : examplesFor(c.files, cls.id);
+  const examples = proc ? [] : examplesFor(c.files, { ...req, classe: cls.id });
   // What a procedural program did (the trace), and what the Sculptor «sees» of it (the views in text, T354): in every request that sends one back.
   const seen = (k: Checked) => {
     if (!proc) return '';
