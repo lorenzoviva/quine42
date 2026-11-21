@@ -58,6 +58,26 @@ export interface CallOptions {
   focus?: string[];
   /** Who pays (T36); default the Council's `payer` for the task. */
   chi?: string;
+  /** The Sculptor's specialty the call is for (T468, ADR-0239): it goes with the call into the ledger. */
+  specialty?: string;
+}
+
+/**
+ * The system of a call and where its stable parts end (T468, ADR-0239): the common part (role, principles, «Lingua», the agent's context),
+ * then each part of the task's own instructions (the Sculptor's section, the examples), then what changes at every call (a focus). The same
+ * text as ever, the parts joined by a blank line, the empty ones left out; `breaks` are the ends of the stable parts, in characters, where a
+ * model that caches only what is marked puts its marks.
+ */
+export function systemOf(common: ReadonlyArray<string | undefined>, parts: ReadonlyArray<string | undefined>, tail?: string): { system: string; breaks: number[] } {
+  let system = common.filter(Boolean).join('\n\n');
+  const breaks = system ? [system.length] : [];
+  for (const p of parts) {
+    if (!p) continue;
+    system = system ? `${system}\n\n${p}` : p;
+    breaks.push(system.length);
+  }
+  if (tail) system = system ? `${system}\n\n${tail}` : tail;
+  return { system, breaks };
 }
 
 export interface FeedEntry {
@@ -441,7 +461,7 @@ export class Council {
     return broken.length ? broken.map((k) => FOURTH_WALL_REASONS[k]).join(', ') : undefined;
   }
 
-  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string; role?: string } = {}): Promise<T> {
+  async ask<T>(agent: AgentId, task: string, prompt: string, schema: Schema, opts: CallOptions & { system?: string | ReadonlyArray<string | undefined>; role?: string } = {}): Promise<T> {
     try {
       // The fields of the schemas are English (T310b): an answer with the Italian ones of before (a local model, a recorded answer) reads the same.
       return internalAnswer(parseJson<T>(await this.write(agent, task, prompt, { ...opts, schema })));
@@ -453,9 +473,10 @@ export class Council {
 
   /**
    * A call whose answer is not JSON (the Sculptor's programs). The stable part first — role, principles,
-   * the agent's context, then `system` (instructions that change rarely) — so the cache serves it.
+   * the agent's context, then `system` (instructions that change rarely; in parts, each a stable part of its own, T468) — so the cache
+   * serves it, and the call says where each stable part ends (`cacheBreaks`).
    */
-  async write(agent: AgentId, task: string, prompt: string, opts: CallOptions & { schema?: Schema; system?: string; role?: string } = {}): Promise<string> {
+  async write(agent: AgentId, task: string, prompt: string, opts: CallOptions & { schema?: Schema; system?: string | ReadonlyArray<string | undefined>; role?: string } = {}): Promise<string> {
     const role = opts.role ?? this.files[`prompts/agents/${agent}.md`] ?? `You are the ${agent} of the Council.`;
     // The focus goes last: what comes before it is the same for every focused task of the agent (the cache).
     const focus = this.focusContext(opts.focus);
@@ -472,11 +493,14 @@ export class Council {
     // An agent with an explicit cache (T351, ADR-0186): its system instructions are the stable prefix the cache keeps, the focus
     // changes at every call and opens the prompt instead.
     const cache = CACHED_AGENTS.has(agent);
-    const stable = [role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus), opts.system];
+    const parts = typeof opts.system === 'string' || opts.system === undefined ? [opts.system] : opts.system;
+    const { system, breaks } = systemOf([role, COUNCIL_PRINCIPLES, languageBlock(languageOf(this.files)), this.context(agent, !!focus)], parts, cache ? '' : focus);
     return models.text({
       agent,
       task,
-      system: [...stable, cache ? '' : focus].filter(Boolean).join('\n\n'),
+      system,
+      ...(breaks.length ? { cacheBreaks: breaks } : {}),
+      ...(opts.specialty ? { specialty: opts.specialty } : {}),
       prompt: cache && focus ? `${focus}\n\n${prompt}` : prompt,
       ...(cache ? { cache } : {}),
       schema: opts.schema,

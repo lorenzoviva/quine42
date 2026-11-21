@@ -1431,7 +1431,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Scultore
 - **Inglese**: `Sculptor`, `scultore`, `SculptorAiModels`
-- **Definizione**: l'agente che scrive i programmi dei modelli e le loro azioni; le strutture grandi le scrive a blocchi, dal concetto, con le parti del seme (ADR-0183).
+- **Definizione**: l'agente che scrive i programmi dei modelli e le loro azioni, con otto specialità e un prompt in nucleo e sezioni (ADR-0239); le strutture grandi le scrive a blocchi, dal concetto, con le parti del seme (ADR-0183).
 - **Dove vive**: `src/kernel/agents/sculptor.ts`
 - **Da non usare**: `SculptorModels`
 
@@ -1441,6 +1441,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `src/kernel/agents/sculptor.ts`, `lab/scripts/prompt-tokens.ts`
 - **Da non usare**: `campione` (è il testo di `wfc` e `convchain`), `modello di riferimento`
 - **Fermo**: nessuno.
+
+### Specialità dello Scultore
+- **Inglese**: `SculptorSpecialty`, `SPECIALTIES`, `SPECIALTY_NAMES`, `SPECIALTY_CLASSES`, `specialtyOf`, `requestSpecialty`, `bySpecialty`
+- **Definizione**: uno degli otto ruoli dello Scultore, che resta un agente solo (ADR-0239): il Paesaggista (`landscaper`: alberi, cespugli, rocce, sassi), il Mobiliere (`joiner`: mobili e oggetti), il Sarto (`tailor`: ciò che si indossa), il Figurinista (`figurist`: persone, animali, bestie), il Capomastro (`mason`: edifici, monumenti, strutture sotto la Grande), l'Architetto (`architect`: le strutture che crescono a regole), il Carrozziere (`coachbuilder`: le navi) e le azioni (`actions`, le `<action>` di «Altro…»). La decide il kernel dalla classe, dalla taglia e dalla richiesta; dice quale sezione del prompt legge, va con la chiamata nel registro dei consumi (`specialties`) e mette in fila ciò che manca. Nei documenti anche «il mestiere dello Scultore»; non è il mestiere di un individuo (`job`), e il Capomastro dello Scultore non è il capomastro della squadra di un'impresa (ADR-0147).
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `src/kernel/modeldirector.ts`, `src/kernel/ai/usage.ts`
+- **Da non usare**: «Scultori specializzati» per gli agenti (lo Scultore è uno), `role` per la specialità (è il prompt dell'agente), `classe` (un mestiere ha più classi, e una classe cambia mestiere con la taglia o se si indossa)
+- **Fermo**: le parole `landscaper`, `joiner`, `tailor`, `figurist`, `mason`, `architect`, `coachbuilder`, `actions` in `world/usage.json` e nei nomi dei file delle sezioni.
+
+### Nucleo e sezione dello Scultore
+- **Inglese**: `sculptorRole`, `sculptorSection`, `sectionPath`, `hasCore`, `CORE_MARK`, `SCULPTING_MARK`, `FILES_MARK`, `withoutNotes`, `promptSections`
+- **Definizione**: le due parti del prompt dello Scultore (ADR-0239): il **nucleo** (`prompts/agents/sculptor.md`, con la nota `<!-- core: … -->`) è ciò che ogni specialità legge per primo, uguale per tutte, così la cache ne serve il prefisso; la **sezione** (`prompts/agents/sculptor/<specialità>.md`) è ciò che è di una sola, letta dopo i principi, la «Lingua» e la guida di stile, prima degli esempi. L'Architetto ha il suo prompt intero e nessun nucleo. Sotto un titolo del nucleo, la nota `sculpting` lo toglie alle azioni e la nota `files` lo dà solo dove `models/` ha file da leggere; le note non arrivano al modello. Un universo senza il segno del nucleo riceve il prompt di prima, intero.
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `universe/prompts/agents/sculptor.md`, `universe/prompts/agents/sculptor/`
+- **Da non usare**: «prompt generale» (era il prompt intero di prima), «prompt base», `core prompt` nei testi italiani
+- **Fermo**: i segni `<!-- core`, `<!-- sculpting`, `<!-- files` e i nomi dei file delle sezioni.
+
+### Parte del mondo
+- **Inglese**: `partResources`
+- **Definizione**: una parte che lo Scultore di un universo usa per la sua specialità accanto alle parti del seme (ADR-0239, § 9): un programma `models/part-<nome>.xml` col suo contratto nel primo commento (le lettere che legge e scrive, le unioni che chi include ridefinisce), che i modelli della stessa specialità includono con `<import>` invece di riscriverlo; prima scritta a mano nel seme (T471), poi estratta da un modello buono, voto ≥ 6, e presa solo se il modello riscritto dà la stessa griglia su tre semi (T472). Non include niente, non cambia né si cancella finché qualcuno la include, viaggia con le carte che la includono. `partResources` le offre alla richiesta (oggi solo quelle del seme, alle strutture).
+- **Dove vive**: `src/kernel/agents/sculptor.ts`, `universe/models/`
+- **Da non usare**: `pezzo` (è della griglia a pezzi, `<pieces>`, ADR-0178), `modulo` (è un modulo dell'universo), `sottoprogramma`
+- **Fermo**: i nomi `part-<nome>` dei file, l'attributo `file` di `<import>`.
 
 ### Viste in testo
 - **Inglese**: `viewsText`, `planView`, `elevationView`, `sectionView`, `legend`, `planDistance`, `textViews`

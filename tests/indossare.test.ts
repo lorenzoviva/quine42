@@ -9,7 +9,7 @@ import * as THREE from 'three';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { Council } from '../src/kernel/agents/council';
-import { checkProgram, describe as describeRequest, sculpt, sculptorRole } from '../src/kernel/agents/sculptor';
+import { checkProgram, describe as describeRequest, sculpt, sculptorRole, sculptorSection } from '../src/kernel/agents/sculptor';
 import { bundledFiles } from '../src/kernel/bundle';
 import { Forms, InlineRunner, runForm, type Form, type FormRequest, type FormResult, type FormRunner } from '../src/kernel/forms';
 import { moveSlot, removeItem, takeFromSlot, type Inventory } from '../src/kernel/inventory';
@@ -623,9 +623,12 @@ describe('the validator and the Sculptor', () => {
   });
 
   it('the Sculptor knows what is worn: the role says how, the request says where, its checks try the section', () => {
-    const role = sculptorRole(bundledFiles);
-    expect(role).toContain('## Worn things');
-    expect(role).toContain('<worn zone="head|torso|back">');
+    // Since T468 it is the tailor's section: the core and the other trades do not carry it.
+    const tailor = sculptorSection(bundledFiles, 'tailor');
+    expect(tailor).toContain('## Worn things');
+    expect(tailor).toContain('<worn zone="head|torso|back">');
+    expect(sculptorRole(bundledFiles, 'tailor')).not.toContain('Worn things');
+    expect(sculptorSection(bundledFiles, 'joiner')).not.toContain('Worn things');
     expect(sculptorRole(bundledFiles, true)).not.toContain('Worn things');
     const cls = classOf('object')!;
     expect(describeRequest({ id: 'elmo', nome: 'Elmo', aspetto: 'un elmo', classe: 'object', worn: 'head' }, cls)).toContain('<worn zone="head">');

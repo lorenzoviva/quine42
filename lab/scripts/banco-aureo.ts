@@ -12,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { bundledFiles } from '../../src/kernel/bundle';
-import { checkProgram, describe, examplesFor, extractXml, filesOf, libraryResources, sculptorRole, views, type Checked, type SculptRequest } from '../../src/kernel/agents/sculptor';
+import { checkProgram, describe, examplesFor, extractXml, filesOf, libraryResources, sculptorRole, sculptorSection, specialtyOf, views, type Checked, type SculptRequest } from '../../src/kernel/agents/sculptor';
 import { analyse } from '../../src/mj/check';
 import { boxOf, classOf } from '../../src/mj/classes';
 import { compileMjx } from '../../src/mj/model';
@@ -39,10 +39,11 @@ const RICHIESTE: Array<SculptRequest & { chiave: string }> = [
 /** The line this task adds to the part of the prompt for every class but the procedural structures: the variant `base` goes without. */
 const RIGA = /^- Proportions: where nothing else fixes a measure, lean on the golden ratio[\s\S]*?come first\.\n/m;
 
+/** The Sculptor's system without the principles of the Council: the role of the trade, its section (T468), the examples. */
 function sistema(files: Record<string, string>, req: SculptRequest): string {
-  const role = sculptorRole(files);
+  const trade = specialtyOf(classOf(req.classe)!, req);
   const examples = examplesFor(files, req);
-  return examples.length ? `${role}\n\n## Examples (programs of the library)\n${examples.join('\n\n')}` : role;
+  return [sculptorRole(files, trade), sculptorSection(files, trade), examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : ''].filter(Boolean).join('\n\n');
 }
 
 function messaggio(req: SculptRequest): string {

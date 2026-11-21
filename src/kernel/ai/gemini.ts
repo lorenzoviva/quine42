@@ -116,7 +116,7 @@ export class GeminiAiModels implements AiModels {
     });
   }
 
-  private async post(model: string, body: unknown, call: { agent: string; task: string; chi?: string }): Promise<any> {
+  private async post(model: string, body: unknown, call: { agent: string; task: string; chi?: string; specialty?: string }): Promise<any> {
     const report = (u: any, extra: Partial<CallRecord> = {}) => {
       const r: CallRecord = {
         model,
@@ -127,6 +127,7 @@ export class GeminiAiModels implements AiModels {
         output: u?.candidatesTokenCount ?? 0,
         thoughts: u?.thoughtsTokenCount ?? 0,
         ...(call.chi ? { who: call.chi } : {}),
+        ...(call.specialty ? { specialty: call.specialty } : {}),
         ...extra,
       };
       this.usage.inputTokens += r.prompt;

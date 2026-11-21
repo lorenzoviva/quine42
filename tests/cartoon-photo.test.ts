@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { bundledFiles } from '../src/kernel/bundle';
-import { checkProgram, STRUCTURES_MARK, views } from '../src/kernel/agents/sculptor';
+import { checkProgram, sculptorRole, STRUCTURES_MARK, views } from '../src/kernel/agents/sculptor';
 import { classOf } from '../src/mj/classes';
 import type { Grid3, PaletteEntry } from '../src/mj/engine';
 import { cartoonRender, DEFAULT_RENDER, inkRaster, paint, render, type Raster } from '../src/mj/photo';
@@ -141,9 +141,10 @@ describe('the prompts', () => {
   });
 
   // T242: the golden ratio as a principle for what is sculpted from now on, in both parts of the Sculptor (the structures too) and in the
-  // Artist's guide; the models already sculpted are not touched.
+  // Artist's guide; the models already sculpted are not touched. Since T468 the core and the architect's section (the structures' prompt).
   it('carry the golden ratio as a hint, not a rule', () => {
-    const [simple, structures] = bundledFiles['prompts/agents/sculptor.md']!.split(STRUCTURES_MARK);
+    const [simple, structures] = [sculptorRole(bundledFiles, 'joiner'), sculptorRole(bundledFiles, 'architect')];
+    expect(bundledFiles['prompts/agents/sculptor.md']).not.toContain(STRUCTURES_MARK);
     for (const part of [simple, structures]) expect(part).toMatch(/golden (ratio|one) \(about 8 to 5\)/);
     expect(simple).toMatch(/Fibonacci/);
     expect(structures).toMatch(/never shrink a door/);

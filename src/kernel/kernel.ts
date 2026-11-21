@@ -1788,9 +1788,11 @@ export class Kernel {
     for (let i = 2; taken.has(name); i++) name = `${slug(label)}-${i}`;
     const nome = this.forms.info(model)?.name ?? this.nameOf(id);
     this.council.say('narrator', 'propone', `«${text}» cambia ${nome}: ${change}`, 'sculptor', 'model.action');
+    // Its size says whose trade the model is (T468): the action reads that trade's section.
+    const taglia = sizeOf(this.forms.info(model)?.size)?.id;
     let r;
     try {
-      r = await sculptAction(this.council, { nome, xml, classe: cls.id, azione: name, etichetta: label, testo: text, cambia: change }, this.sculptors()[categoryOf(cls)]);
+      r = await sculptAction(this.council, { nome, xml, classe: cls.id, azione: name, etichetta: label, testo: text, cambia: change, ...(taglia ? { taglia } : {}) }, this.sculptors()[categoryOf(cls)]);
     } catch (e) {
       this.council.say('sculptor', 'errore', `azione «${label}»: ${(e as Error).message}`, undefined, 'model.action');
       return undefined;

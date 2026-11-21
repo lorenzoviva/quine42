@@ -6267,13 +6267,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no. Quando è fatto: commit su `task/T467`, la misura nell'esito.
 - Esito: `examplesFor` sceglie un modello a mano della classe (nella scatola della richiesta, il generico prima) e il migliore dell'universo della stessa classe, taglia e densità con voto ≥ `EXAMPLE_SCORE` = 6 (voto, poi id), senza corona/vetrina/parti, programmi a regole, navi che non galleggiano, capi indossati, la richiesta stessa, programmi oltre `EXAMPLE_CHARS` = 12 000; i portati valgono per il voto (cambia ADR-0170 § 7: da scrivere nell'ADR di T468 con la soglia); misura `prompt-tokens.ts --scultore --conta` prima/dopo: seme 2 528 → 936 token a chiamata, 0,075 → 0,025 $/h (dall'1/12 0,116 → 0,041), universi veri 2 084-7 161 → 1 491-1 972 token (`misure-s1.md`); test nuovo, glossario, architettura, AGENTS.md, kernel 0.10.15; non provata la qualità coi modelli veri (S7); sicurezza: nessuna superficie nuova.
 
-### T468 · Lo Scultore a specialità (S2 di T458) — `da fare`
+### T468 · Lo Scultore a specialità (S2 di T458) — `fatto` (`4116e7df`)
 - Step: 44
 - Pipeline: claude · sforzo max · stima 5% · approvato · priorità 2
 - Dipende da: T467
 - Contesto: studio T458, riga S2 e ADR proposto § 6.1 (approvato il 21/11: nomi Paesaggista, Mobiliere, Sarto, Figurinista, Capomastro, Architetto, Carrozziere e le azioni; «parte del mondo»; soglia 6). Dipende da T467 (stessi file: `examplesFor`).
 - Cosa fare: la riga S2 per intero; l'ADR «Lo Scultore a specialità e le parti del mondo» con la soglia 6; glossario (specialità, parte del mondo), AGENTS.md; kernel Z.
 - Browser: no. Dipende da T467.
+- Esito: Scultore a otto specialità (`specialtyOf`), prompt in nucleo e sezioni (l'Architetto col prompt delle strutture identico, 5 603 token prima e dopo; vetrina fuori; nodi dei file solo dove ce ne sono); azione col nucleo delle azioni e la sezione del suo modello (il Capomastro per le strutture a regole); ordine del sistema per la cache e tre segni `cache_control` su OpenRouter invece di due; prompt intero per gli universi di prima (aurora lo tiene, mesa/neapolis/orichalcum/sidera ricevono il nucleo); `missing()` in fila per specialità; specialità nel registro dei consumi; misura: nucleo 2 856 token, −1 705/−2 179 token a richiesta (−1 755 in media), −0,035 $/h oggi e −0,052 $/h dall'1/12; ADR-0239 (soglia 6, ADR-0170 punto 7, parti del mondo), glossario, AGENTS.md, kernel 0.10.16, test nuovo; mancano le istruzioni nuove dei mestieri (T470), i cicli (T469), il codice delle parti del mondo (T471, T472); non provati la qualità con i modelli veri (T473) e i segni di cache con una chiamata vera; sicurezza: nessuna superficie nuova.
 
 ### T469 · I cicli e i nodi che il prompt non insegna, WFC e cantine per l'Architetto (S3 di T458) — `da fare`
 - Step: 44

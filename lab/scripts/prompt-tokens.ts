@@ -9,9 +9,10 @@
 //   recorded after an offline Genesis, the cache's policy (ExplicitCaches) at the pace of an hour of HOUR, the tokens and dollars it saves
 // npx vite-node lab/scripts/prompt-tokens.ts -- --campaign [--file f.md] [--json f]  # the master's directives (T374), offline: whether every
 //   request of an offline Genesis carries its sections and no other, what they add agent by agent and in an hour of HOUR
-// npx vite-node lab/scripts/prompt-tokens.ts -- --scultore [--conta] [--universi <dir>] [--md f] [--json f]  # the Sculptor's prompt request by
+// npx vite-node lab/scripts/prompt-tokens.ts -- --scultore [--conta] [--universi <dir>] [--prima f.json] [--md f] [--json f]  # the Sculptor's prompt request by
 //   request (T458): what each kind of model needs of it and what not, the dollars a cut saves, today's examples, the few-shot candidates;
-//   with --universi the examples each library gives every request, with the rule of before and with T467's, and what they cost an hour
+//   with --universi the examples each library gives every request, with the rule of before and with T467's, and what they cost an hour;
+//   since T468 the role and the section of each trade, and with --prima (a --json of this mode from before) what each request lost
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -115,17 +116,25 @@ async function roles(ref: string): Promise<void> {
     if (!res.ok || typeof j.totalTokens !== 'number') throw new Error(`countTokens ${res.status}`);
     return j.totalTokens;
   };
-  const at = (p: string) => execSync(`git show ${ref}:${p}`, { encoding: 'utf8' });
+  // A file that was not there at the ref (the sections of the Sculptor's trades, T468) counts as empty before.
+  const at = (p: string) => {
+    try {
+      return execSync(`git show ${ref}:${p}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    } catch {
+      return '';
+    }
+  };
   const before = /export const COUNCIL_PRINCIPLES = `([\s\S]*?)`;/.exec(at('src/kernel/fourthwall.ts'))![1];
-  const files = [...fs.readdirSync('universe/prompts/agents').map((f) => `universe/prompts/agents/${f}`), 'universe/prompts/theme.md'];
+  const prompts = (dir: string): string[] => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? prompts(`${dir}/${e.name}`) : e.name.endsWith('.md') ? [`${dir}/${e.name}`] : []));
+  const files = [...prompts('universe/prompts/agents'), 'universe/prompts/theme.md'];
   const rows: string[] = ['| testo | prima (token) | dopo (token) | differenza |', '|---|---:|---:|---:|'];
   let sa = 0;
   let sb = 0;
   for (const [name, a, b] of [['COUNCIL_PRINCIPLES', before, COUNCIL_PRINCIPLES], ...files.map((f) => [f.replace('universe/', ''), at(f), fs.readFileSync(f, 'utf8')])]) {
-    const [ta, tb] = [await tokens(a), await tokens(b)];
+    const [ta, tb] = [a.trim() ? await tokens(a) : 0, b.trim() ? await tokens(b) : 0];
     sa += ta;
     sb += tb;
-    rows.push(`| ${name} | ${ta} | ${tb} | ${(((tb - ta) / ta) * 100).toFixed(1)} % |`);
+    rows.push(`| ${name} | ${ta || '—'} | ${tb} | ${ta ? `${(((tb - ta) / ta) * 100).toFixed(1)} %` : 'nuovo'} |`);
   }
   rows.push(`| **testi fissi** | ${sa} | ${sb} | ${(((sb - sa) / sa) * 100).toFixed(1)} % |`);
   rows.push(`| blocco «Lingua» (nuovo, con ogni richiesta) | — | ${await tokens(languageBlock('it'))} | |`);
@@ -516,7 +525,7 @@ async function sculptorSpecialties(): Promise<void> {
     const first = recorded.slice(before).find((x) => x.task === 'model.sculpt');
     if (first) sent.set(c.key, first);
   }
-  // An action («Altro…» on a chest): the whole general prompt for one <action>.
+  // An action («Altro…» on a chest): since T468 the core of the actions and the section of the chest's trade.
   {
     const xml = files['models/credenza.xml'] ?? files['models/barile.xml'];
     const before = recorded.length;
@@ -526,17 +535,20 @@ async function sculptorSpecialties(): Promise<void> {
   }
   CASES.push({ key: 'action', spec: 'actions', req: r('t458-credenza', 'furniture', 'Credenza', 'una credenza a due ante') });
 
-  // The parts of the system, as `Council.write` puts it together: role, principles, Language, the agent's context, the examples.
-  const general = S.sculptorRole(files);
-  const structures = S.sculptorRole(files, true);
+  // The parts of the system, as `Council.write` puts it together (T468): the role (the core, the architect's prompt, the core of the
+  // actions), the principles, the Language block, the agent's context, the section of the trade, the examples.
   const language = languageBlock(languageOf(files));
   const context = k.council.context('sculptor');
   const resources = S.libraryResources(files);
+  const { systemOf } = await import('../../src/kernel/agents/council');
+  /** What a request reads as its role and its section, as `write` and `sculptAction` give them. */
+  const roleOf = (c: Case): string => S.sculptorRole(files, c.spec);
+  const sectionOf = (c: Case): string => (c.spec === 'actions' ? S.sculptorSection(files, 'actions', S.specialtyOf(classOf(c.req.classe)!, c.req)) : S.sculptorSection(files, c.spec));
   interface Part {
     id: string;
     text: string;
   }
-  /** The general role cut at its sections, and inside some of them the lines that serve one kind of request only. */
+  /** A role or a section cut at its titles, and inside some of them the lines that serve one kind of request only. */
   const cut = (role: string): Part[] => {
     const out: Part[] = [];
     const take = (id: string, whole: string, pieces: Array<[string, RegExp]>) => {
@@ -552,11 +564,19 @@ async function sculptorSpecialties(): Promise<void> {
     const sections = role.split(/\n(?=## )/);
     for (const s of sections) {
       const title = /^## (.*)/.exec(s)?.[1] ?? '';
+      const files_ = [['look.wfc', /^- `<wfc[\s\S]*?(?=\n- |$)/m], ['look.convchain', /^- `<convchain[\s\S]*?(?=\n- |$)/m], ['look.import', /^- `<import[\s\S]*?(?=\n- |$)/m]] as Array<[string, RegExp]>;
+      const palette: [string, RegExp] = ['palette', /^[A-Za-z#0-9]+ [0-9a-f]{6}( · [A-Za-z#0-9]+ [0-9a-f]{6})+$/m];
+      const lines: Array<[string, RegExp]> = [['class:$1', /^ {2}- ([a-z]+): .*$/m], ['sizes', /^ {2}Sizes \(D&D\).*$/m]];
+      const limbs: [string, RegExp] = ['program.limbs', /(- )?For people and animals,\s+`part`[\s\S]*?for the limbs\./];
       if (!title) take('intro', s, []);
-      else if (title.startsWith('Coordinates')) take('coordinates', s, [['class:$1', /^ {2}- ([a-z]+): .*$/m], ['sizes', /^ {2}Sizes \(D&D\).*$/m]]);
-      else if (title.startsWith('The program')) take('program', s, [['program.limbs', /For people and animals,\s+`part`[\s\S]*?for the limbs\./], ['palette', /^[A-Za-z#0-9]+ [0-9a-f]{6}( · [A-Za-z#0-9]+ [0-9a-f]{6})+$/m]]);
+      else if (title.startsWith('Coordinates')) take('coordinates', s, lines);
+      else if (title.startsWith('The program')) take('program', s, [limbs, palette]);
+      // The core of T468: the palette in its own section, the files in theirs, the trades in their sections.
+      else if (title.startsWith('The palette')) take('palette.colours', s, [palette]);
+      else if (title.startsWith('Tiles and files')) take('look.files', s, files_);
+      else if (title.startsWith('Your trade')) take(`trade:${/the ([a-z]+)/.exec(title)?.[1] ?? '?'}`, s, [...lines, limbs, ['sculpt.people', /^- People:.*$/m]]);
       else if (title.startsWith('Patterns')) take('patterns', s, []);
-      else if (title.startsWith('Nodes that look ahead')) take('look.children', s, [['look.field', /^- `<field[\s\S]*?(?=\n- |$)/m], ['look.observe', /^- `<observe[\s\S]*?(?=\n- |$)/m], ['look.wfc', /^- `<wfc[\s\S]*?(?=\n- |$)/m], ['look.convchain', /^- `<convchain[\s\S]*?(?=\n- |$)/m], ['look.import', /^- `<import[\s\S]*?(?=\n- |$)/m]]);
+      else if (title.startsWith('Nodes that look ahead')) take('look.children', s, [['look.field', /^- `<field[\s\S]*?(?=\n- |$)/m], ['look.observe', /^- `<observe[\s\S]*?(?=\n- |$)/m], ...files_]);
       else if (title.startsWith('Nodes')) take('nodes', s, []);
       else if (title.startsWith('The colour')) take('colour', s, []);
       else if (title.startsWith('How to sculpt')) take('sculpt', s, [['sculpt.people', /^- People:.*$/m]]);
@@ -568,15 +588,24 @@ async function sculptorSpecialties(): Promise<void> {
     }
     return out;
   };
-  const generalParts = cut(general);
-  const structureParts: Part[] = structures.split(/\n(?=## )/).map((s, i) => ({ id: `structures:${/^## (.*)/.exec(s)?.[1] ?? (i ? '?' : 'intro')}`, text: s }));
+  /** The architect's prompt cut at its titles: it serves the structures that grow by rules whole. */
+  const structureCut = (text: string): Part[] => text.split(/\n(?=## )/).map((s, i) => ({ id: `structures:${/^## (.*)/.exec(s)?.[1] ?? (i ? '?' : 'intro')}`, text: s }));
+  /** The parts a request reads, each with where it comes from: its role (the core, the core of the actions, the architect's prompt) and its section. */
+  const partsOf = (c: Case): Array<Part & { where: string }> => {
+    if (c.spec === 'architect') return structureCut(roleOf(c)).map((p) => ({ ...p, where: 'architect' }));
+    const trade = c.spec === 'actions' ? S.specialtyOf(classOf(c.req.classe)!, c.req) : c.spec;
+    return [...cut(roleOf(c)).map((p) => ({ ...p, where: c.spec === 'actions' ? 'nucleo delle azioni' : 'nucleo' })), ...cut(sectionOf(c)).map((p) => ({ ...p, where: `sezione ${trade}` }))];
+  };
 
-  /** Whether a request needs a part of the general role: in doubt it does. */
+  /** Whether a request needs a part of what it reads: in doubt it does. */
   const SHOWCASE = ['schermo-scritte', 'schermo-struttura', 'circuito-3D'];
   const needs = (c: Case, part: string, examples: string[]): boolean => {
     const cls = classOf(c.req.classe)!;
     const figure = ['person', 'animal', 'beast'].includes(cls.id);
+    if (c.spec === 'architect') return true;
     if (c.spec === 'actions') return ['intro', 'coordinates', 'program', 'patterns', 'nodes', 'traps', 'look.children'].includes(part);
+    if (part === 'palette.colours' || part.startsWith('trade:') || part === 'trade') return true;
+    if (part === 'look.files') return resources.length > 0;
     if (part.startsWith('class:')) return part === `class:${cls.id}`;
     if (part === 'sizes') return !!c.req.taglia && sizeOf(c.req.taglia)?.id !== cls.taglia;
     if (part === 'program.limbs' || part === 'sculpt.people') return figure;
@@ -611,17 +640,21 @@ async function sculptorSpecialties(): Promise<void> {
     c: Case;
     system: number;
     role: number;
+    section: number;
     examples: number;
     rest: number;
     prompt: number;
     waste: number;
     wasted: string[];
+    /** The parts it reads and those it does not use, as `where|id`. */
+    reads: Set<string>;
+    unused: Set<string>;
     sameSystem: boolean;
     exampleIds: string[];
   }
   const rows: Row[] = [];
+  // The tokens of every part the requests read, by where it comes from (the core, a section, the architect's prompt): `where|id`.
   const partTokens = new Map<string, number>();
-  for (const p of [...generalParts, ...structureParts]) partTokens.set(p.id, (partTokens.get(p.id) ?? 0) + (await tokens(p.text)));
   const fixed = { principles: await tokens(COUNCIL_PRINCIPLES), language: await tokens(language), context: await tokens(context) };
   for (const c of CASES) {
     const rec = sent.get(c.key);
@@ -630,24 +663,38 @@ async function sculptorSpecialties(): Promise<void> {
     const proc = c.spec !== 'actions' && S.procedural(cls, c.req.taglia);
     const examples = proc || c.spec === 'actions' ? [] : S.examplesFor(files, { ...c.req, classe: cls.id });
     const exampleText = examples.length ? `## Examples (programs of the library)\n${examples.join('\n\n')}` : '';
-    const role = proc ? structures : general;
-    const sameSystem = rec.system === [role, COUNCIL_PRINCIPLES, language, context, exampleText].filter(Boolean).join('\n\n');
-    const parts = proc ? structureParts : generalParts;
-    const wasted = proc ? [] : parts.filter((p) => !needs(c, p.id, examples)).map((p) => p.id);
-    const waste = wasted.reduce((n, id) => n + (partTokens.get(id) ?? 0), 0);
+    const role = roleOf(c);
+    const section = sectionOf(c);
+    const sameSystem = rec.system === systemOf([role, COUNCIL_PRINCIPLES, language, context], [section, exampleText]).system;
+    const tokensOf = new Map<string, number>();
+    for (const p of partsOf(c)) {
+      const key = `${p.where}|${p.id}`;
+      tokensOf.set(key, (tokensOf.get(key) ?? 0) + (await tokens(p.text)));
+    }
+    for (const [key, t] of tokensOf) if (!partTokens.has(key)) partTokens.set(key, t);
+    const idOf = (key: string) => key.slice(key.indexOf('|') + 1);
+    const unused = new Set([...tokensOf.keys()].filter((key) => !needs(c, idOf(key), examples)));
+    const wasted = [...unused].map(idOf);
+    const waste = [...unused].reduce((n, key) => n + (tokensOf.get(key) ?? 0), 0);
     rows.push({
       c,
       system: await tokens(rec.system),
       role: await tokens(role),
+      section: await tokens(section),
       examples: await tokens(exampleText),
       rest: fixed.principles + fixed.language + fixed.context,
       prompt: await tokens(rec.prompt),
       waste,
       wasted,
+      reads: new Set(tokensOf.keys()),
+      unused,
       sameSystem,
       exampleIds: examples.map((x) => Object.keys(files).find((p) => /^models\/[^/]+\.xml$/.test(p) && files[p].trim() === x)?.slice(7, -4) ?? '?'),
     });
   }
+  // The measure of before (`--prima`, a --json of this mode before T468): the system each request had then.
+  const prima = opt('prima') ? (JSON.parse(fs.readFileSync(path.resolve(opt('prima')!), 'utf8')) as { rows: Array<{ key: string; system: number; role: number }> }) : undefined;
+  const before = new Map((prima?.rows ?? []).map((x) => [x.key, x]));
 
   // The share of the Sculptor's work: the real universes (or `--universi`), each kind by its calls (two programs for a simple thing,
   // one and half a revision for a figure or a built thing, three for a structure that grows by rules).
@@ -729,40 +776,50 @@ async function sculptorSpecialties(): Promise<void> {
   const usd = (v: number) => (v < 0.01 ? v.toFixed(4) : v.toFixed(3));
   const out: string[] = [];
   out.push(`Token: ${counting ? 'countTokens di Gemini (gemini-3.1-flash-lite)' : 'stima a 3,5 caratteri per token'}. Risorse di models/ nella richiesta (tileset, campioni, regole da file): ${resources.length}.`);
-  out.push('', '### Le richieste, una per tipo', '', '| tipo | specialità | modello (Google, oggi) | sistema | di cui ruolo | di cui esempi | principi, lingua, stile | richiesta | non serve | quota del totale | esempi della libreria |', '|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|');
+  out.push('', '### Le richieste, una per tipo', '', `| tipo | specialità | modello (Google, oggi) | sistema | di cui ruolo | di cui sezione | di cui esempi | principi, lingua, stile | richiesta | non serve | quota del totale |${prima ? ' sistema prima | differenza |' : ''} esempi della libreria |`, `|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|${prima ? '---:|---:|' : ''}---|`);
   for (const x of rows) {
     const all = x.system + x.prompt;
-    out.push(`| ${x.c.key} | ${x.c.spec} | ${modelOf(x.c, 'google', '2026-11-21')} | ${fmt(x.system)} | ${fmt(x.role)} | ${fmt(x.examples)} | ${fmt(x.rest)} | ${fmt(x.prompt)} | ${fmt(x.waste)} | ${Math.round((x.waste / all) * 100)} % | ${x.exampleIds.join(', ') || '—'} |`);
+    const then = before.get(x.c.key);
+    const diff = then ? `${x.system - then.system > 0 ? '+' : ''}${fmt(x.system - then.system)}` : '—';
+    out.push(`| ${x.c.key} | ${x.c.spec} | ${modelOf(x.c, 'google', '2026-11-21')} | ${fmt(x.system)} | ${fmt(x.role)} | ${fmt(x.section)} | ${fmt(x.examples)} | ${fmt(x.rest)} | ${fmt(x.prompt)} | ${fmt(x.waste)} | ${Math.round((x.waste / all) * 100)} % |${prima ? ` ${then ? fmt(then.system) : '—'} | ${diff} |` : ''} ${x.exampleIds.join(', ') || '—'} |`);
   }
-  out.push('', '### Le parti del prompt generale (prima di `<!-- strutture -->`)', '', '| parte | token | chi la usa |', '|---|---:|---|');
-  const merged = new Map<string, number>();
-  for (const p of generalParts) merged.set(p.id, (merged.get(p.id) ?? 0) + 0);
-  for (const id of merged.keys()) {
-    const users = rows.filter((x) => x.c.spec === 'actions' || !S.procedural(classOf(x.c.req.classe)!, x.c.req.taglia)).filter((x) => !x.wasted.includes(id)).map((x) => x.c.key);
-    const of = rows.filter((x) => x.c.spec === 'actions' || !S.procedural(classOf(x.c.req.classe)!, x.c.req.taglia)).length;
-    out.push(`| ${id} | ${fmt(partTokens.get(id) ?? 0)} | ${users.length === of ? 'tutti' : users.join(', ') || 'nessuno'} |`);
+  // The parts of the core, of each section and of the architect's prompt (T468): their tokens, and who of the requests that read them needs them.
+  out.push('', '### Le parti del nucleo, delle sezioni e del prompt dell’Architetto', '', '| dove | parte | token | chi la legge e la usa |', '|---|---|---:|---|');
+  for (const [key, t] of partTokens) {
+    const [where, id] = [key.slice(0, key.indexOf('|')), key.slice(key.indexOf('|') + 1)];
+    const readers = rows.filter((x) => x.reads.has(key));
+    const users = readers.filter((x) => !x.unused.has(key)).map((x) => x.c.key);
+    out.push(`| ${where} | ${id.replace('structures:', '')} | ${fmt(t)} | ${users.length === readers.length ? `tutti quelli che la leggono (${readers.length})` : `${users.join(', ') || 'nessuno'} (su ${readers.length}: ${readers.map((x) => x.c.key).join(', ')})`} |`);
   }
-  out.push(`| **prompt generale** | **${fmt(await tokens(general))}** | |`);
-  out.push('', '### Il prompt delle strutture che crescono a regole (dopo `<!-- strutture -->`)', '', '| sezione | token |', '|---|---:|');
-  for (const p of structureParts) out.push(`| ${p.id.replace('structures:', '')} | ${fmt(partTokens.get(p.id) ?? 0)} |`);
-  out.push(`| **prompt delle strutture** | **${fmt(await tokens(structures))}** |`);
+  const coreTokens = await tokens(S.sculptorRole(files, 'joiner'));
+  out.push(`| **nucleo** | | **${fmt(coreTokens)}** | ogni mestiere tranne l’Architetto |`);
+  out.push(`| **nucleo delle azioni** | | **${fmt(await tokens(S.sculptorRole(files, 'actions')))}** | le azioni |`);
+  for (const s of S.SPECIALTIES.filter((x) => x !== 'architect' && x !== 'actions')) out.push(`| **sezione ${s}** (${S.SPECIALTY_NAMES[s]}) | | **${fmt(await tokens(S.sculptorSection(files, s)))}** | |`);
+  out.push(`| **prompt dell’Architetto** | | **${fmt(await tokens(S.sculptorRole(files, 'architect')))}** | le strutture che crescono a regole |`);
   out.push('', `Principi del Concilio ${fmt(fixed.principles)}, blocco «Lingua» ${fmt(fixed.language)}, contesto dello Scultore (guida di stile della Genesi offline) ${fmt(fixed.context)} token.`);
 
-  // The dollars: per call, per Genesis, per hour, on each route.
-  out.push('', '### Il risparmio togliendo ciò che non serve', '', `Ripartizione del lavoro dello Scultore (modelli scolpiti negli universi veri${read.length ? `, ${read.join(', ')}` : ', 21/11/2026'}): ${sculpts.map((x) => `${x.c.key} ${share[x.c.key] ?? 0}`).join(', ')}; ${callsPerModel.toFixed(2)} chiamate a modello. Un'ora della lobby (HOUR, manopole a 1): ${fmt(hourCalls)} chiamate di «${COEFFICIENT_INFO.models.nome}», ${modelsPerHour.toFixed(1)} modelli. La Genesi offline chiede ${atGenesis.length} modelli (${[...genesisKinds.entries()].map(([k2, n]) => `${k2} ${n}`).join(', ')}).`, '', '| via | $ a chiamata (media pesata) | token tolti a chiamata (media) | $ per Genesi | $ per ora di gioco | quota della spesa dello Scultore l’ora | gli esempi di oggi, $ l’ora | lo Scultore l’ora nella stima della lobby, $ |', '|---|---:|---:|---:|---:|---:|---:|---:|');
-  const json: Record<string, unknown> = { rows: rows.map((x) => ({ key: x.c.key, spec: x.c.spec, system: x.system, role: x.role, examples: x.examples, prompt: x.prompt, waste: x.waste, wasted: x.wasted })), share, callsPerModel, hourCalls, modelsPerHour, genesis: Object.fromEntries(genesisKinds), parts: Object.fromEntries(partTokens), fixed };
+  // The dollars: per call, per Genesis, per hour, on each route; against the measure of before, what the trades took away.
+  out.push('', '### Il risparmio', '', `Ripartizione del lavoro dello Scultore (modelli scolpiti negli universi veri${read.length ? `, ${read.join(', ')}` : ', 21/11/2026'}): ${sculpts.map((x) => `${x.c.key} ${share[x.c.key] ?? 0}`).join(', ')}; ${callsPerModel.toFixed(2)} chiamate a modello. Un'ora della lobby (HOUR, manopole a 1): ${fmt(hourCalls)} chiamate di «${COEFFICIENT_INFO.models.nome}», ${modelsPerHour.toFixed(1)} modelli. La Genesi offline chiede ${atGenesis.length} modelli (${[...genesisKinds.entries()].map(([k2, n]) => `${k2} ${n}`).join(', ')}).${prima ? ` «Tolti rispetto a prima»: il sistema di ogni richiesta contro quello di \`${opt('prima')}\`.` : ''}`, '', `| via | ciò che non serve ancora, $ a chiamata (media pesata) | token che non servono ancora, a chiamata | ${prima ? 'token tolti rispetto a prima, a chiamata | $ tolti a chiamata | $ tolti per Genesi | $ tolti per ora di gioco | ' : ''}$ per ora di gioco di ciò che non serve | quota della spesa dello Scultore l’ora | gli esempi, $ l’ora | lo Scultore l’ora nella stima della lobby, $ |`, `|---|---:|---:|${prima ? '---:|---:|---:|---:|' : ''}---:|---:|---:|---:|`);
+  const json: Record<string, unknown> = { rows: rows.map((x) => ({ key: x.c.key, spec: x.c.spec, system: x.system, role: x.role, section: x.section, examples: x.examples, prompt: x.prompt, waste: x.waste, wasted: x.wasted, ...(before.get(x.c.key) ? { before: before.get(x.c.key)!.system } : {}) })), share, callsPerModel, hourCalls, modelsPerHour, genesis: Object.fromEntries(genesisKinds), parts: Object.fromEntries(partTokens), fixed, core: coreTokens };
   const routes: Record<string, unknown> = {};
   for (const route of ROUTES) {
     let perCall = 0;
     let tokensCut = 0;
     let hourSpend = 0;
     let examplesPerCall = 0;
+    let savedTokens = 0;
+    let savedPerCall = 0;
     for (const x of sculpts) {
       const w = ((share[x.c.key] ?? 0) / total) * callsOf(x.c) / callsPerModel;
       const model = modelOf(x.c, route.route, route.day);
       perCall += w * x.waste * perToken(model, route.day);
       examplesPerCall += w * x.examples * perToken(model, route.day);
       tokensCut += w * x.waste;
+      const then = before.get(x.c.key);
+      if (then) {
+        savedTokens += w * (then.system - x.system);
+        savedPerCall += w * (then.system - x.system) * perToken(model, route.day);
+      }
       // What a call of that kind costs whole (its system and request at the cache share, the output of T352, a structure's of T397).
       const proc = S.procedural(classOf(x.c.req.classe)!, x.c.req.taglia);
       const outTok = proc ? STRUCTURE_SCULPT.output : 3000;
@@ -770,14 +827,19 @@ async function sculptorSpecialties(): Promise<void> {
       hourSpend += w * ((x.system * perToken(model, route.day) * 1e6 + (promptTok - x.system) * (priceOf(model, route.day)?.input ?? 0)) / 1e6 + (costOf(model, { prompt: 0, output: outTok }, route.day) ?? 0));
     }
     let genesis = 0;
+    let genesisSaved = 0;
     for (const [kind, n] of genesisKinds) {
       const x = sculpts.find((y) => y.c.key === kind);
-      if (x) genesis += n * callsOf(x.c) * x.waste * perToken(modelOf(x.c, route.route, route.day), route.day);
+      if (!x) continue;
+      const per = perToken(modelOf(x.c, route.route, route.day), route.day);
+      genesis += n * callsOf(x.c) * x.waste * per;
+      const then = before.get(x.c.key);
+      if (then) genesisSaved += n * callsOf(x.c) * (then.system - x.system) * per;
     }
     const hour = perCall * hourCalls;
     const lobby = hourlyEstimate(k.config.ai, route.day, { route: route.route }).righe.find((x) => x.voce === COEFFICIENT_INFO.models.nome)?.dollari ?? 0;
-    out.push(`| ${route.name} | ${usd(perCall)} | ${fmt(tokensCut)} | ${usd(genesis)} | ${usd(hour)} | ${Math.round((perCall / hourSpend) * 100)} % | ${usd(examplesPerCall * hourCalls)} | ${usd(lobby)} |`);
-    routes[route.name] = { perCall, tokensCut, genesis, hour, share: perCall / hourSpend, examplesHour: examplesPerCall * hourCalls, callSpend: hourSpend, lobby };
+    out.push(`| ${route.name} | ${usd(perCall)} | ${fmt(tokensCut)} | ${prima ? `${fmt(savedTokens)} | ${usd(savedPerCall)} | ${usd(genesisSaved)} | ${usd(savedPerCall * hourCalls)} | ` : ''}${usd(hour)} | ${Math.round((perCall / hourSpend) * 100)} % | ${usd(examplesPerCall * hourCalls)} | ${usd(lobby)} |`);
+    routes[route.name] = { perCall, tokensCut, genesis, hour, share: perCall / hourSpend, examplesHour: examplesPerCall * hourCalls, callSpend: hourSpend, lobby, ...(prima ? { savedTokens, savedPerCall, genesisSaved, savedHour: savedPerCall * hourCalls } : {}) };
   }
   json.routes = routes;
 
@@ -837,15 +899,14 @@ async function sculptorSpecialties(): Promise<void> {
     json.examples = { chosen, hours };
   }
 
-  // The trades: what each keeps of today's role (the parts its requests need) and what it leaves.
-  out.push('', '### Le specialità: ciò che tengono del prompt di oggi', '', '| specialità | richieste | ruolo di oggi | ne tiene | ne lascia |', '|---|---|---:|---:|---:|');
+  // The trades (T468): what each reads now (its role and its section) against the role of before, and what of it its requests do not use.
+  out.push('', '### Le specialità: ciò che leggono', '', `| specialità | richieste | ruolo e sezione | di cui non serve (la richiesta che ne usa meno) |${prima ? ' ruolo di prima | differenza |' : ''}`, `|---|---|---:|---:|${prima ? '---:|---:|' : ''}`);
   for (const spec of [...new Set(rows.map((x) => x.c.spec))]) {
     const of = rows.filter((x) => x.c.spec === spec);
-    const proc = of.every((x) => x.c.spec !== 'actions' && S.procedural(classOf(x.c.req.classe)!, x.c.req.taglia));
-    const parts = proc ? structureParts : generalParts;
-    const kept = parts.filter((p) => of.some((x) => !x.wasted.includes(p.id))).reduce((n, p) => n + (partTokens.get(p.id) ?? 0), 0);
-    const role = proc ? await tokens(structures) : await tokens(general);
-    out.push(`| ${spec} | ${of.map((x) => x.c.key).join(', ')} | ${fmt(role)} | ${fmt(Math.min(role, kept))} | ${fmt(Math.max(0, role - kept))} |`);
+    const reads = Math.max(...of.map((x) => x.role + x.section));
+    const unused = Math.max(...of.map((x) => x.waste));
+    const then = Math.max(0, ...of.map((x) => before.get(x.c.key)?.role ?? 0));
+    out.push(`| ${spec} (${S.SPECIALTY_NAMES[spec as keyof typeof S.SPECIALTY_NAMES]}) | ${of.map((x) => x.c.key).join(', ')} | ${fmt(reads)} | ${fmt(unused)} |${prima ? ` ${then ? fmt(then) : '—'} | ${then ? `${reads - then > 0 ? '+' : ''}${fmt(reads - then)}` : '—'} |` : ''}`);
   }
 
   // Few-shot (T458 § c): what the candidate examples cost, against the instructions they would stand beside or replace.
@@ -883,7 +944,7 @@ async function sculptorSpecialties(): Promise<void> {
   console.log(out.join('\n'));
   if (opt('json')) fs.writeFileSync(path.resolve(opt('json')!), JSON.stringify(json, null, 1) + '\n');
   const head = [
-    '# Il prompt dello Scultore, richiesta per richiesta (T458)',
+    '# Il prompt dello Scultore, richiesta per richiesta (T458, T468)',
     '',
     `Scritto da \`npx vite-node lab/scripts/prompt-tokens.ts -- ${argv.join(' ')}\` il ${new Date().toISOString().slice(0, 10)}, kernel ${(await import('../../src/kernel/version')).KERNEL_VERSION}: nessuna chiamata ai modelli (\`countTokens\` è gratis). Lo studio è [\`../scultori-specializzati.md\`](../scultori-specializzati.md).`,
     '',

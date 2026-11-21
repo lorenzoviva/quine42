@@ -4,7 +4,7 @@
 // Sculptor writes it, the entity shows the generic model of its class. Within a budget per session.
 
 import type { Kernel } from './kernel';
-import { procedural, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptRequest } from './agents/sculptor';
+import { procedural, requestSpecialty, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptorSpecialty, type SculptRequest } from './agents/sculptor';
 import { classOf, densityFor, growsByRules, guessClass, isVessel, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
 import { cellarOf, type ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
@@ -106,6 +106,22 @@ const SCULPTED = { task: 'model.sculpt', author: 'sculptor' };
 /** A model of the library worn by another request (T349): a card of the world as well, which the decision brought. */
 const REUSED = { task: 'model.reuse', author: 'sculptor' };
 
+/**
+ * Requests in a queue by specialty (T468, ADR-0239): those of `last` (the trade sculpted last) first, then the others in groups, each group
+ * where its first request was; inside a group the order of before. The calls that follow one another read the same prefix (the core, the
+ * section), which the cache keeps for minutes.
+ */
+export function bySpecialty<T>(reqs: readonly T[], trade: (r: T) => string, last?: string): T[] {
+  const groups = new Map<string, T[]>();
+  if (last !== undefined) groups.set(last, []);
+  for (const r of reqs) {
+    const s = trade(r);
+    if (!groups.has(s)) groups.set(s, []);
+    groups.get(s)!.push(r);
+  }
+  return [...groups.values()].flat();
+}
+
 export class ModelDirector {
   private busy = false;
   private used = 0;
@@ -115,6 +131,8 @@ export class ModelDirector {
   reusedCount = 0;
   /** World time before which no model starts (T45b: the pause of the coefficient of models). */
   private nextAt = 0;
+  /** The trade the Sculptor was last asked for (T468): its requests come first, while the cache keeps its prefix. */
+  private lastSpecialty?: SculptorSpecialty;
 
   constructor(private k: Kernel) {}
 
@@ -140,7 +158,10 @@ export class ModelDirector {
     return undefined;
   }
 
-  /** What is missing, in the order it matters: people and things first, then items' shapes, then terrains. */
+  /**
+   * What is missing, in the order it matters: the common houses first, then in a queue by specialty (T468, `bySpecialty`): the trade
+   * sculpted last, then the others where their first request is (people and things first, then items' shapes, then terrains).
+   */
   missing(): SculptRequest[] {
     const k = this.k;
     const out: SculptRequest[] = [];
@@ -177,7 +198,7 @@ export class ModelDirector {
       out.push({ id: t.model!, nome: t.name, aspetto: t.description ?? t.name, classe: t.layer === 'vegetation' ? 'tree' : t.layer === 'rock' ? 'rock' : 'bush', contesto: `on the tiles of ${t.name}` });
     }
     // Every common lot shows them: before anything else, or the budget may end on the seed's cottages.
-    return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...out.filter((r) => !r.id.startsWith(COMMON_HOUSE))];
+    return [...out.filter((r) => r.id.startsWith(COMMON_HOUSE)), ...bySpecialty(out.filter((r) => !r.id.startsWith(COMMON_HOUSE)), requestSpecialty, this.lastSpecialty)];
   }
 
   /**
@@ -301,6 +322,7 @@ export class ModelDirector {
     try {
       if (await this.reuse(req)) return true;
       this.used++;
+      this.lastSpecialty = requestSpecialty(req);
       const coef = this.k.coefficients();
       const r = await sculpt(this.k.council, req, this.k.sculptors(), sculptPlan(coef.reviews));
       this.nextAt = this.k.time + this.k.pacedGap(modelGap(coef.models));
