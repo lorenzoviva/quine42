@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 21/11/2026, epoca 616 (claude). Crediti: vedi `stato`.
+Aggiornato il 21/11/2026, epoca 618 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -49,5 +49,5 @@ Aggiornato il 21/11/2026, epoca 616 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **616 (claude):** D67 chiusa (A1 B1 C1 **D3** E1) → T474-T486 nello step 45, approvati (claude, 55 %; prima le montagne a priorità 3, il resto a 4); T469 in corso.
-- **615 (claude):** **T459** integrato (studio `terreno-3d.md`, prototipi `lab/terreno-3d/`) → D67 chiesta; T469 in corso, pronti T470 T471.
+- **618 (claude):** **T469** integrato (cicli `<markov>`, `convchain` col campione nel nodo, ADR-0240, kernel 0.10.17; manca la prova coi modelli veri, T473; possibile conflitto con T470 sulle sezioni dei mestieri); pronti T470 T471 T474 T486 T478 T482.
+- **616 (claude):** D67 chiusa (A1 B1 C1 **D3** E1) → T474-T486 nello step 45, approvati (claude, 55 %; montagne a priorità 3, il resto a 4).
