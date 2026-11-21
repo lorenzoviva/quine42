@@ -6202,7 +6202,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T460`; poi l'orchestratore integra T460, e `integra T442` e `integra T445` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T442 (ADR-0232, kernel 0.10.8) e T445 (rinumerato ad ADR-0233) fusi in `task/T460`, kernel finale 0.10.9 in version.ts, package.json e universe.json; rimandi di T445 portati a ADR-0233 in AGENTS.md, dettagli, glossario, indice degli ADR, codice e test; censimento del glossario rigenerato; suite intera (3714 test passati, 1 saltato) e typecheck verdi coi turni; browser non richiesto; sicurezza: nessuna superficie nuova.
 
-### T461 · Integrare T446 nel base (conflitto di versione e di ADR con T452) — `da fare`
+### T461 · Integrare T446 nel base (conflitto di versione e di ADR con T452) — `fatto` (`c89f6285`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 37
 - Contesto: `integra T446` (l'aria e l'ossigeno, ADR-0235, kernel 0.10.11) ha trovato conflitti in `AGENTS.md` e `docs/architettura-dettagli.md`: nel frattempo è entrato T452 (il Fisico a mondo acceso), anche lui ADR-0235 e kernel 0.10.11. Nasce da T446 e T452: `dossier T446`, `dossier T452`. (La dipendenza è il ramo `task/T446`, finito e non integrato.)
@@ -6210,6 +6210,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/aria.test.ts` e `tests/fisico-acceso.test.ts` verdi.
 - Browser: no (l'aria l'ha vista T446; il merge non cambia UI).
 - Quando è fatto: commit su `task/T461`; poi l'orchestratore integra T461, e `integra T446` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: merge di T446 su T461 coi conflitti risolti tenendo le aggiunte di entrambi; T452 resta ADR-0235 e kernel 0.10.11, T446 è ADR-0236 e il kernel sale a 0.10.12 (version.ts, package.json, universe/universe.json, ADR-0236, dettagli); censimento del glossario rigenerato; suite intera (3745 passati, 1 saltato) e typecheck verdi coi turni; sicurezza: nessuna superficie nuova.
 
 ### T463 · Integrare T461 nel base (conflitto nel censimento del glossario) — `da fare`
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
