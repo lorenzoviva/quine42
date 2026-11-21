@@ -6412,3 +6412,40 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Dipende da: T459
 - Contesto: § 1.6 punto 2, il punto 3 di T331.
 - Cosa fare: la riga 13; la stessa mesh byte per byte; `misura-frame.mjs` prima e dopo. Browser: sì.
+
+### T487 · Veicoli dal Concilio: la barca generata si guida — `da fare`
+- Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 2
+- Step: 34
+- Contesto: richiesta dell'autore del 21/11 dopo la prima run (T457, `dossier T457`, chat delle 23:08): in `orichalcum` le chiatte non si guidavano. `obj.chiatta-a-vapore-della-d` l'ha creata la Fucina come entità qualunque (`kind: entity`, classe `object`) senza `vehicle` nel manifest: per il kernel è un soprammobile. Il veicolo di T439/T442/T448 (ADR-0227, ADR-0232, ADR-0234) funziona, ma nessun agente sa scriverlo e il Cartografo non mette veicoli nei luoghi (`catalog`). L'universo della run è in `H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum` (non toccarlo: leggilo o clonalo).
+- Cosa fare:
+  1. La Fucina (e il Narratore dove definisce entità) riconosce un concetto di veicolo (barca, chiatta, zattera, carro, capsula…: dal concetto e dai tag, nella lingua del mondo) e scrive `vehicle` (`medium`, `speed`, `accel`, `turn`, `draught`) entro `VEHICLE_LIMITS`, con classe `vessel` per l'acqua e la richiesta allo Scultore delle navi (ADR-0228); schema Gemini, `MockAiModels`, registro.
+  2. Il validatore rifiuta, col motivo all'agente, un'entità che si presenta come veicolo senza `vehicle` (regola «ciò che sembra si comporta»: un mezzo che non si guida è un inganno come un muro che si attraversa, regola 10).
+  3. Dove il mondo ha acqua navigabile un veicolo nasce dove può muoversi (non in un luogo senz'acqua, non su una casella che lo blocca), anche se lo mette il Cartografo; decidi se il Cartografo può chiederne uno nel piano (`catalog`) e scrivilo nell'ADR.
+  4. Una migrazione o una riparazione per gli universi esistenti: le entità generate che sono veicoli finti (come la chiatta di `orichalcum`) prendono `vehicle` dal kernel o restano decorazione dichiarata; prova su un clone di `orichalcum`.
+- Browser: sì — su un clone di `orichalcum` (offline va bene, e una chiamata vera alla Fucina se il tetto lo regge, ≤ 0,20 $): sali sulla chiatta, timone, muoviti.
+- Quando è fatto: una barca chiesta alla Fucina si guida; la chiatta di `orichalcum` si guida o non promette di farlo; test offline del riconoscimento, del validatore e della riparazione; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+
+### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `da fare`
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
+- Step: 34
+- Contesto: richiesta dell'autore del 21/11 dopo la prima run (`dossier T457`): in 18 minuti da soli in `orichalcum` 2,93 $ (Scultore Argon 16 chiamate 1,04 $; `chunk.plan` 238 chiamate 0,62 $; `content.define` 162 chiamate 0,45 $; Artista 24 0,20 $; Scultore Flash-Lite 40 0,15 $; individui 25 0,11 $). Il mondo ha pianificato 238 luoghi e definito 162 oggetti, molti più di quanti il giocatore potesse vedere: la stima della lobby (~1,4 $/h, T352) non tiene. Registro della run: `H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum\world\usage.json` (e il registro del varco); non toccare quell'universo.
+- Cosa fare:
+  1. Misura prima: dal registro della run, quanti luoghi pianificati, oggetti definiti e modelli scolpiti sono stati davvero visti o raggiunti dal viandante; scrivilo in `lab/banco/run-1/consumi.md`.
+  2. Pianificare in anticipo solo i luoghi entro un raggio dal viandante (e lungo la sua direzione), non a ondate; un oggetto si definisce quando entra in un luogo caricato vicino a chi gioca, non quando un piano lo cita; lo Scultore delle strutture solo per ciò che sta in un luogo che il viandante può raggiungere presto. Con più viandanti, attorno a ognuno. Le manopole della lobby e il ritmo del mondo (ADR-0196) restano e si rispettano.
+  3. Rifai la stima oraria della lobby da ciò che il nuovo ritmo chiama, e confrontala con la run.
+  4. Prova: una sessione offline scriptata di 18 minuti di cammino con le chiamate contate (mock), prima e dopo; obiettivo < 1 $/ora a pieno dettaglio da soli al listino; poi una prova breve con Gemini vero ≤ 0,50 $ su un clone.
+- Browser: sì — la prova con Gemini vero su un clone di `orichalcum` o `sidera`: i luoghi vicini si pianificano in tempo, niente bozze davanti ai piedi.
+- Quando è fatto: il costo misurato prima e dopo, la stima della lobby aggiornata, i test del raggio e dell'ordine; ADR se cambia quando il Concilio lavora, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+
+### T489 · Oggetti che si capiscono: ogni oggetto generato ha un uso — `da fare`
+- Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 3
+- Step: 34
+- Dipende da: T488
+- Contesto: richiesta dell'autore del 21/11 dopo la prima run (`dossier T457`): «il mondo è pieno di oggetti che non è affatto chiaro come usare/combinare». Gli oggetti nascono in serie da `content.define` senza un uso chiaro né combinazioni pensate. Universo della run: `H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum` (non toccarlo).
+- Cosa fare:
+  1. Rapporto della run (`lab/banco/run-1/oggetti.md`): per ogni oggetto generato di `orichalcum`, se ha un'azione, un effetto, una ricetta in cui entra o esce, un mestiere che lo usa, un ruolo (cibo, attrezzo, capo, contenitore, chiave, materia), o niente.
+  2. Il Narratore, quando definisce un oggetto, gli dà un uso del mondo tra quelli che il kernel sa fare (azione, effetto, ricetta, mestiere, posto addosso) o lo dichiara decorazione; il validatore rifiuta col motivo un oggetto prendibile senza uso; «Esamina» e il menu dicono cosa ci si fa, nel mondo (regola 0: niente meta-gioco).
+  3. Le combinazioni si leggono: una ricetta che un oggetto apre si vede dove lo si tiene (un suggerimento nel mondo, non un elenco di meta-gioco); decidi con un ADR come.
+  4. Gli universi esistenti: gli oggetti senza uso restano, marcati decorazione dal kernel, senza chiamate.
+- Browser: sì — su un clone di `orichalcum`: un oggetto preso dice cosa farne, una ricetta si scopre.
+- Quando è fatto: il rapporto, la regola nel Narratore e nel validatore coi test offline, la marcatura degli esistenti; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
