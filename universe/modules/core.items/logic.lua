@@ -9,15 +9,18 @@ function M.use(user, item)
   local d = items.def(item)
   if not d then return "Non sai cosa farne." end
   local verbo = VERBI[d.category]
+  local e = d.effects or {}
+  local n = ecs.get(user, "needs")
+  -- An air tank (T446): whatever its category, what gives oxygen is breathed, where the world counts the breath (needs.oxygen).
+  if not verbo and e.oxygen and n and n.oxygen then verbo = "Respiri" end
   if verbo then
-    local e = d.effects or {}
-    local n = ecs.get(user, "needs")
     if n then
       n.hunger = clamp(n.hunger + (e.hunger or 0))
       n.thirst = clamp(n.thirst + (e.thirst or 0))
       n.energy = clamp(n.energy + (e.energy or 0))
       n.health = clamp(n.health + (e.health or 0))
       n.mana = clamp((n.mana or 0) + (e.mana or 0))
+      if n.oxygen then n.oxygen = clamp(n.oxygen + (e.oxygen or 0)) end
     end
     inventory.remove(user, item, 1)
     return verbo .. ": " .. d.name .. "."

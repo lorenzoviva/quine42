@@ -6228,7 +6228,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (solo nomi; il viaggio l'ha visto T449).
 - Quando è fatto: commit su `task/T462`, kernel sale di `Z`. Sicurezza: nessuna superficie nuova.
 - Esito: filtro dei nomi coniati (`src/kernel/coined.ts`: `foldName`, `badRootOf`, `cleanCoined`; radici in it/en/fr/es, senza accenti né doppie, k/c, th/t, ph/f, y/j/i, w/v uguali) usato da `planetName` (ricompone col seme successivo, scarta le sillabe ripetute di fila, tolte `th` e `ka`, aggiunte `sol` e `na`) e da `freshName` (persone a nomi finiti; corretto anche lo shift con segno che coniava «Zundefined…»); «Teruna» → «Aldora» in test, ADR-0236 e nomi dei file delle catture di T449 (il testo dentro le immagini resta, non rifatte); test nuovo in `tests/pianeti.test.ts` (25 000 pianeti, 3000 persone); kernel 0.10.13; i pianeti senza nome di un universo cambiano nome (oggi nessuna ambientazione li porta, T450), le persone già nate tengono il loro; suite intera e typecheck verdi; sicurezza: nessuna superficie nuova.
-### T464 · Integrare T463 nel base (l'aria a 0.10.14 dopo T462) — `da fare`
+### T464 · Integrare T463 nel base (l'aria a 0.10.14 dopo T462) — `fatto` (`a07d6f68`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
 - Step: 37
 - Contesto: T463 ha fatto il merge di T461 (l'aria, ADR-0237) ma senza prima `git merge 3d`: ha messo l'aria al kernel 0.10.13, che nel base è già di T462 (i nomi coniati, `coined.ts`, ha toccato ADR-0236 e `tests/pianeti.test.ts`). `integra T463` si ferma sul censimento del glossario. Nasce da T463, T462, T461: `dossier T463`.
@@ -6236,6 +6236,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/aria.test.ts`, `tests/fisico-acceso.test.ts`, `tests/pianeti.test.ts`, `tests/coefficients.test.ts` verdi (quest'ultimo era rosso nella suite intera di T463 e verde da solo).
 - Browser: no.
 - Quando è fatto: commit su `task/T464`; poi l'orchestratore integra T464, e `integra T463`/`T461`/`T446` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: merge di task/T463 e di 3d; il base aveva già ADR-0237 (Gemini 4 Neon, T465), quindi l'aria è ADR-0238 (file rinominato, indice riordinato, rimandi in AGENTS.md, dettagli, glossario, codice e test) e kernel 0.10.14 (version.ts, package.json, universe/universe.json, ADR, indice, dettagli), T462 resta 0.10.13; censimento rigenerato con glossario.mjs; typecheck e suite intera verdi (3763 passati, 1 saltato, `coefficients` compreso); package-lock.json era già a 0.7.7 e non è stato toccato; sicurezza: nessuna superficie nuova.
 
 ### T465 · Gemini 4 Neon nella pipeline (agy): verifica, contatori, provider in prova — `fatto` (`e325af46`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 0

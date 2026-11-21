@@ -20,8 +20,8 @@ const BOAT = 'veicolo.prova';
 
 describe('the vehicle, as data (T439)', () => {
   it('reads a manifest within the kernel limits, and the validator says what is wrong', () => {
-    expect(vehicleSpecOf({ medium: 'water' })).toEqual({ medium: 'water', speed: 3, accel: 1.5, turn: 0.8, draught: 'shallow' });
-    expect(vehicleSpecOf({ medium: 'land', speed: 99, accel: -1, turn: Number.NaN })).toEqual({ medium: 'land', speed: VEHICLE_LIMITS.speed[1], accel: VEHICLE_LIMITS.accel[0], turn: 0.8, draught: 'shallow' });
+    expect(vehicleSpecOf({ medium: 'water' })).toEqual({ medium: 'water', speed: 3, accel: 1.5, turn: 0.8, draught: 'shallow', air: false });
+    expect(vehicleSpecOf({ medium: 'land', speed: 99, accel: -1, turn: Number.NaN })).toEqual({ medium: 'land', speed: VEHICLE_LIMITS.speed[1], accel: VEHICLE_LIMITS.accel[0], turn: 0.8, draught: 'shallow', air: false });
     // What the kernel cannot do is not said: a medium it does not know (the void is one since T448, `tests/capsula.test.ts`).
     expect(vehicleSpecOf({ medium: 'air' })).toBeUndefined();
     expect(vehicleSpecOf('water')).toBeUndefined();

@@ -221,6 +221,27 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `pianeta` (è un'altra cosa: una fascia lontana dello stesso piano, T449), `meteora`
 - **Fermo**: `body: asteroid` di `world.islands`.
 
+### Aria
+- **Inglese**: `air` (dei terreni, degli ambienti, delle regioni del master e dei veicoli), `EnvironmentDef.air`, `airAt`, `airOf`, `regionAir`, `world.air_at`
+- **Definizione**: se un corpo respira in un punto del mondo: una proprietà di caselle, luoghi e veicoli, mai un gas. La dice la prima fonte che parla: il ponte di un veicolo che la tiene, il terreno senz'aria (il vuoto), la regione del master, l'ambiente, l'asteroide; altrove c'è (T446, ADR-0238).
+- **Dove vive**: `src/kernel/air.ts`, `Kernel.airAt`
+- **Da non usare**: `atmosfera` (per la casella), `gas`, `pressione` (non c'è un fluido)
+- **Fermo**: `air` nei terreni, negli ambienti, nelle regioni e nei veicoli; `world.air_at`.
+
+### Ossigeno
+- **Inglese**: `oxygen` (il bisogno, `nature.oxygen`), `breathingTick`, `breathTick`, `bonus.breath`
+- **Definizione**: il fiato del viandante, un bisogno da 0 a 100 che esiste solo dove la natura del mondo conta il respiro: il kernel lo fa calare fuori dall'aria (una tuta lo rallenta) e risalire dentro; una bombola lo ricarica; a zero l'asfissia (T446, ADR-0238).
+- **Dove vive**: `src/kernel/air.ts`, `Kernel.breathingTick`, `universe.json → nature`, l'HUD
+- **Da non usare**: `respiro` (per il bisogno: il respiro è il campo della natura che lo accende), `aria` (per il bisogno), `fiato` (nei campi)
+- **Fermo**: `oxygen` nei bisogni e nella natura; la causa `asfissia` di `player.death`.
+
+### Asfissia
+- **Inglese**: `ASPHYXIATED`, `ASPHYXIA_HEALTH`
+- **Definizione**: morire senz'aria: a ossigeno finito la salute scende in fretta, e a zero è una morte della partita, con il suo livello (`player.death`, causa «asfissia») (T446, ADR-0238).
+- **Dove vive**: `src/kernel/air.ts`, `Kernel.breathingTick`
+- **Da non usare**: `soffocare` (nei testi del codice), `annegare` (è nell'acqua)
+- **Fermo**: la causa `asfissia`.
+
 ### Cielo di stelle
 - **Inglese**: `stars` (`nature.sky`), `Stars`, `STAR_SKY`
 - **Definizione**: il cielo di un mondo che la natura dice di stelle: nero anche di giorno, con le stelle sopra e sotto il pavimento (dove c'è il vuoto) e un campo lento sotto che dà la profondità. Solo disegno (T445, ADR-0233).

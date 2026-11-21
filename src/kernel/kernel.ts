@@ -13,6 +13,7 @@ import { askReshape, RESHAPE_TASK } from './agents/physicist';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
 import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
+import { AIR_AGAIN, airOf, ASPHYXIATED, breathOf, breathTick, FULL_OXYGEN, NO_AIR } from './air';
 import { themeOfText } from './themes';
 import { Repo, memoryStore, type Commit, type KeyValueStore } from './repo';
 import { councilMayWrite } from './paths';
@@ -25,7 +26,7 @@ import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAir, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
@@ -377,6 +378,8 @@ export interface Needs {
   health: number;
   /** Magic strength: spells cost it, it slowly comes back, magic crystals restore it. */
   mana: number;
+  /** The breath (T446, ADR-0238): 0-100, only in a world that counts it (`nature.oxygen`); the kernel drains it out of the air (`air.ts`). */
+  oxygen?: number;
 }
 
 export interface KernelOptions {
@@ -1006,6 +1009,8 @@ export class Kernel {
       nature: () => this.nature(),
       // The atlas and the islands (T441, ADR-0229): copies, read only.
       region_at: (x, y) => this.regionInfoAt(x, y),
+      // The air (T446): whether a body breathes there, a boolean.
+      air_at: (x, y) => (typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y) ? this.airAt(x, y) : true),
       islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
       vehicle: (id) => this.vehicleView(id),
@@ -4560,6 +4565,66 @@ export class Kernel {
     this.loadSaid.set(id, this.time);
     this.message(TOO_LOADED, 'warn');
   }
+
+  /**
+   * Whether a body breathes at a point of the world (carpet space, T446, ADR-0238; `air.ts` for the order): on the deck of a vehicle that
+   * holds air, yes; else the terrain of the tile (the void never), the master's region, the environment of the place, the body of the void
+   * (an asteroid has none). It says the air whether or not the world counts the breath: `world.air_at` reads it.
+   */
+  airAt(x: number, y: number, z?: number): boolean {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return true;
+    const deck = this.deckAt(x, y, z);
+    const t = this.tileAt(Math.floor(x), Math.floor(y));
+    const S = this.config.chunkSize;
+    const cx = Math.floor(x / S), cy = Math.floor(y / S);
+    const lattice = this.lattice();
+    const layout = this.chunkAt(x, y)?.plan?.layout;
+    return airOf({
+      deck: deck !== undefined && this.vehicleSpec(deck)?.air === true,
+      terrain: terrainPhysics(t ? this.palette[t] : undefined).air,
+      region: cx === 0 && cy === 0 ? undefined : regionAir(regionAt(this.atlasNow(), cx, cy)),
+      environment: layout ? this.content.layouts[layout]?.air : undefined,
+      body: lattice === 'void' ? islandAtTile(this.config.seed, x, y, lattice)?.body : undefined,
+    });
+  }
+
+  /**
+   * Whether the wanderer acting breathes now (T446): in the corona and in the studio always (they are of the studio, not of the world), and
+   * in the air of a jump the air of the tile under them.
+   */
+  breathing(): boolean {
+    const p = this.wandererPos();
+    if (!p || this.corona.isInterior(p.x) || !(Math.hypot(p.x, p.y) < this.config.circleRadius)) return true;
+    const c = this.wandererCarpet();
+    return this.airAt(c.x, c.y, p.z);
+  }
+
+  /** How many times slower the breath of the wanderer acting runs out, by what they wear (`bonus.breath`: a suit 10). */
+  private breathWorn(): number {
+    return breathOf(Object.values(this.outfit()).map((item) => (item ? this.content.get(item)?.bonus : undefined)));
+  }
+
+  /**
+   * The breath of the wanderer acting (T446, ADR-0238), in a world that counts it: the need `oxygen` is the kernel's (a needs without it gets
+   * it full), it comes back in the air and goes out of it, slower with a suit; out of it the health, and they die of it (`player.death`,
+   * with the level of death of the game). Gods, who reached the corona alone and who is already dying do not choke. The world says once
+   * when the air runs out and when it comes back.
+   */
+  private breathingTick(dt: number): void {
+    const id = this.wanderer().id;
+    const n = this.needs() as (Needs & { dead?: boolean }) | undefined;
+    if (!n) return;
+    const air = this.breathing();
+    const spared = this.dying.has(id) || this.deathVerdicts.has(id) || (this.manyPlayers() && this.godMode(id)) || (id === SOLO && this.exitedOnce);
+    if (breathTick(n, air || spared, this.breathWorn(), dt)) this.die(ASPHYXIATED);
+    const was = this.breathSaid.get(id);
+    if (was === undefined ? !air : was !== air) {
+      this.breathSaid.set(id, air);
+      this.message(air ? AIR_AGAIN : NO_AIR, air ? 'good' : 'warn');
+    }
+  }
+  /** Whether the air was there the last time the world said it, by wanderer (said once at each change). */
+  private breathSaid = new Map<string, boolean>();
 
   /** The jump under way, if any: how far along it is (0-1) and the height of the feet (tiles), for the renderer. */
   jumping(): { s: number; y: number } | undefined {
@@ -8955,7 +9020,7 @@ export class Kernel {
     for (const w of this.wanderersById.values()) {
       if (!this.godMode(w.id)) continue;
       const n: any = this.ecs.get(w.entity, 'needs');
-      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, dead: false });
+      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, dead: false, ...(typeof n.oxygen === 'number' ? { oxygen: FULL_OXYGEN } : {}) });
     }
   }
 
@@ -9298,7 +9363,7 @@ export class Kernel {
     this.as(id, () => {
       const wandererModule = [...this.modules.values()].find((m) => m.manifest.kind === 'player');
       const defaults: Record<string, any> = clone(wandererModule?.manifest.components ?? FALLBACK_PLAYER);
-      Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), dead: false });
+      Object.assign(this.needs() ?? {}, { ...FALLBACK_PLAYER.needs, ...(defaults.needs ?? {}), dead: false, ...(this.config.nature.oxygen ? { oxygen: FULL_OXYGEN } : {}) });
       if (v.loseAll) {
         this.ecs.set(this.wandererEntity, 'inventory', newInventory());
         this.ecs.set(this.wandererEntity, 'states', {});
@@ -11026,7 +11091,7 @@ export class Kernel {
       // The world is born again with the nature of its theme (T437, ADR-0224): fixed from here.
       this.chooseNature(theme);
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis(), this.config.nature.geography);
+      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis(), this.config.nature.geography, this.config.nature.oxygen);
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);
       // Example content shipped on disk makes room for the generated world.
@@ -11684,7 +11749,7 @@ export class Kernel {
     // Transcended: nothing is lost any more (needs stay full, no death).
     if (this.exitedOnce) {
       const n = this.needs();
-      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100 });
+      if (n) Object.assign(n, { hunger: 100, thirst: 100, energy: 100, health: 100, ...(typeof n.oxygen === 'number' ? { oxygen: FULL_OXYGEN } : {}) });
     }
     if (this.tickCount % 10 === 0) {
       this.councilStock();
@@ -11732,6 +11797,8 @@ export class Kernel {
     else this.faults.clear('tick:budget');
     // The water (T438): who swims tires and drowns, whoever moves them (this kernel or their client); then the jumps.
     for (const w of this.wanderersById.keys()) this.as(w, () => this.swimmingTick(dt));
+    // The breath (T446): only where the world counts it, whoever moves the wanderer.
+    if (this.config.nature.oxygen) for (const w of this.wanderersById.keys()) this.as(w, () => this.breathingTick(dt));
     for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.jumpTick(dt));
     this.keepGods();
     this.syncRunes();
@@ -11932,7 +11999,7 @@ function individualFacts(p: Individual, type: string): Array<[string, string]> {
 export function unharmed(e: Effect): Effect | undefined {
   switch (e.type) {
     case 'needs': {
-      const kept = Object.fromEntries((['hunger', 'thirst', 'energy', 'health'] as const).filter((k) => Number(e[k]) > 0).map((k) => [k, e[k]]));
+      const kept = Object.fromEntries((['hunger', 'thirst', 'energy', 'health', 'oxygen'] as const).filter((k) => Number(e[k]) > 0).map((k) => [k, e[k]]));
       return Object.keys(kept).length ? { type: 'needs', ...kept } : undefined;
     }
     case 'push':
