@@ -6212,7 +6212,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T461`; poi l'orchestratore integra T461, e `integra T446` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: merge di T446 su T461 coi conflitti risolti tenendo le aggiunte di entrambi; T452 resta ADR-0235 e kernel 0.10.11, T446 è ADR-0236 e il kernel sale a 0.10.12 (version.ts, package.json, universe/universe.json, ADR-0236, dettagli); censimento del glossario rigenerato; suite intera (3745 passati, 1 saltato) e typecheck verdi coi turni; sicurezza: nessuna superficie nuova.
 
-### T463 · Integrare T461 nel base (conflitto nel censimento del glossario) — `da fare`
+### T463 · Integrare T461 nel base (conflitto nel censimento del glossario) — `fatto` (`f57f6e5c`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
 - Step: 37
 - Contesto: prima di tutto `git merge 3d` nel worktree (il base ha ora T462). `integra T461` (il merge di T446, l'aria, ADR-0236 e kernel 0.10.12) si è fermato su un solo conflitto, in `docs/glossario-censimento.md`, il file generato: nel frattempo T449 (i pianeti) è entrato nel base con lo stesso ADR-0236 e lo stesso kernel 0.10.12. Nasce da T461, T446 e T449: `dossier T461`, `dossier T449`.
@@ -6220,6 +6220,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/aria.test.ts`, `tests/fisico-acceso.test.ts`, `tests/pianeti.test.ts` verdi.
 - Browser: no.
 - Quando è fatto: commit su `task/T463`; poi l'orchestratore integra T463, e `integra T461`/`integra T446` tolgono worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: merge di T461 con il conflitto del censimento rigenerato da `tools/glossario/glossario.mjs`; T449 resta ADR-0236 e kernel 0.10.12, l'aria è ADR-0237 e il kernel 0.10.13 (version.ts, package.json, universe/universe.json, ADR-0237, indice, dettagli); typecheck verde; suite intera 3754 passati, 1 saltato, 1 fallito (`tests/coefficients.test.ts`, 59 invece di 60, verde da solo: pare instabile sotto carico, suite intera non rilanciata); aria, fisico-acceso e pianeti verdi; sicurezza: nessuna superficie nuova.
 
 ### T462 · I nomi dei pianeti senza parole offensive o ridicole — `fatto` (`7a0a0065`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
