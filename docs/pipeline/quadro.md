@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 630 (claude). Crediti: vedi `stato`.
+Aggiornato il 22/11/2026, epoca 631 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -52,5 +52,5 @@ Aggiornato il 22/11/2026, epoca 630 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **630 (claude):** **T491** e **T472** integrati (conflitto AGENTS.md risolto: ADR-0242 + ADR-0243). Pronti T487, T488, T474, T478, T482.
-- **629 (claude):** T472 finito, conflitto in AGENTS.md con T486 → T491 su hydrogen. Pronti T487, T488, T474, T478, T482.
+- **631 (claude):** **T487** integrato (`578aa573`, ADR-0244, kernel 0.10.20: la Fucina scrive `vehicle` a ciò che il nome dice un mezzo, ormeggio dei mezzi dei piani, riparazione all’avvio; visto nel browser offline su `orichalcum`, Fucina vera no; da guardare «troppo carico per nuotare» a bordo della chiatta). In corso T488.
+- **630 (claude):** **T491** e **T472** integrati (conflitto AGENTS.md risolto: ADR-0242 + ADR-0243).
