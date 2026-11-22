@@ -38,7 +38,7 @@ MarkovJunior prova una regola in ogni verso del cubo: «sotto l'erba la terra» 
    (senza segno) tiene le sue 4 di T418 o le rifà dalla bozza (`STRATA_DEPTH_BEFORE`, `strataDepthOf`); un piano col segno che le ha perse le
    rifà uguali (il programma è deterministico dal seme del mondo e dal luogo). `readStrata` legge le due profondità; sul filo `ChunkView.strata`
    porta le righe che ha il luogo; il taglio sotto terra fa l'ultima banda della profondità del luogo (`strataRowsAt`). Un luogo ancora bozza
-   ha la bozza a 6 righe. Il contratto non cambia: tutto è aggiuntivo col segno, come `vpt` e `swim` (kernel 0.10.24).
+   ha la bozza a 6 righe. Il contratto non cambia: tutto è aggiuntivo col segno, come `vpt` e `swim` (kernel 0.10.25).
 5. **Il Cartografo alla Genesi** (`genesis.strata`, `designStrata`, un compito della Genesi senza manopola): dopo gli ambienti scrive i terreni
    degli strati del mondo (4-8, una lettera maiuscola ciascuno, non `E` né il codice di un terreno, un ruolo della bozza al più una volta:
    `topsoil clay sandbed mud bedrock`, così la bozza li prende, `ownStrata`) e, per ogni ambiente, il suo programma; i programmi invalidi
