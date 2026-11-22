@@ -79,11 +79,11 @@ export interface MjxModel {
   /** What `<sound>` says: the program is a score. */
   sound?: SoundSettings;
   /**
-   * `under="N"` on the root (T494, ADR-0245): the voxels the program digs under the soil, the cellar it was drawn with. The soil is at that
+   * `under="N"` on the root (T494, ADR-0246): the voxels the program digs under the soil, the cellar it was drawn with. The soil is at that
    * layer where whoever runs it does not say another (`base`); an index entry that says no `cellar` takes its tiles from it.
    */
   under?: number;
-  /** `vpt="N"` on the root (T494, ADR-0245): the density a hand drawn program is drawn for, a default an entry that says its own `vpt` overrides. */
+  /** `vpt="N"` on the root (T494, ADR-0246): the density a hand drawn program is drawn for, a default an entry that says its own `vpt` overrides. */
   vpt?: number;
   warnings: string[];
 }
@@ -96,14 +96,14 @@ export const ROOT_VPT_RANGE: readonly [number, number] = [4, 40];
 /** The opening tag of a program's root, comments left out. */
 const rootOpening = (xml: string): string => /<[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '';
 
-/** `under="N"` on the root of a program (T494, ADR-0245): the voxels it digs under the soil; 0 if it says none or not a whole number in range. */
+/** `under="N"` on the root of a program (T494, ADR-0246): the voxels it digs under the soil; 0 if it says none or not a whole number in range. */
 export function underOf(xml: string | undefined): number {
   const m = xml ? /\sunder="(\d+)"/.exec(rootOpening(xml)) : null;
   const n = m ? Number(m[1]) : 0;
   return Number.isInteger(n) && n >= 1 && n <= ROOT_UNDER_MAX ? n : 0;
 }
 
-/** `vpt="N"` on the root of a program (T494, ADR-0245): the density a hand drawn program is drawn for, if it says a sane one. */
+/** `vpt="N"` on the root of a program (T494, ADR-0246): the density a hand drawn program is drawn for, if it says a sane one. */
 export function rootVptOf(xml: string | undefined): number | undefined {
   const m = xml ? /\svpt="(\d+)"/.exec(rootOpening(xml)) : null;
   const n = m ? Number(m[1]) : NaN;
@@ -1242,7 +1242,7 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   // `base` counts voxels of the finished model: on the coarse grid of a `map` it would be another height. A program whose maps come
   // back to the box (a plan at 1/10, then ×10: T346, ADR-0182) keeps the scale of its root: its first map carries the soil down.
   if (soil && hasMap(root) && !mapsBackToBox(root)) c.fail(root, 'suolo non vale con map: il suolo si conta in voxel del modello finito (salvo che le map tornino alla scatola)');
-  // The cellar and the density on the root (T494, ADR-0245): whole numbers in their ranges, or the program does not compile.
+  // The cellar and the density on the root (T494, ADR-0246): whole numbers in their ranges, or the program does not compile.
   const under = root.attrs.under === undefined ? undefined : Number(root.attrs.under);
   if (under !== undefined && !(Number.isInteger(under) && under >= 1 && under <= ROOT_UNDER_MAX)) c.fail(root, `under vuole i voxel sotto il suolo, un intero da 1 a ${ROOT_UNDER_MAX}`);
   if (under !== undefined && !soil) c.warnings.push(`${c.where(root)}: under senza soil: il programma non sa dov'è il suolo`);

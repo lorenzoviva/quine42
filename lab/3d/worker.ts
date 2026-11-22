@@ -37,7 +37,7 @@ export interface Built {
   ok: true;
   grid: { X: number; Y: number; Z: number; cells: Uint8Array; alphabet: string[] };
   palette: Record<string, PaletteEntry>;
-  /** The voxels under the soil (T494, ADR-0245): the root's `under`, where the program has a soil; 0 otherwise. */
+  /** The voxels under the soil (T494, ADR-0246): the root's `under`, where the program has a soil; 0 otherwise. */
   base: number;
   body: MeshData;
   limbs: LimbMesh[];

@@ -1,4 +1,4 @@
-// The cellar and the density on the root of a program (T494, ADR-0245): `under="N"` says how many voxels the program digs under the
+// The cellar and the density on the root of a program (T494, ADR-0246): `under="N"` says how many voxels the program digs under the
 // soil, `vpt="N"` the density a hand drawn program is drawn for. The compiler reads them (the soil at `under` where whoever runs it does
 // not say another `base`); an index entry that says no `cellar` takes its tiles from `under / vpt`, one that says `cellar` or `vpt` wins;
 // the Sculptor's programs never carry them.

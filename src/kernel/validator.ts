@@ -86,7 +86,7 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
-    // Without a cellar said by whoever asks, the program's own `under` (T494, ADR-0245), as the world will run it.
+    // Without a cellar said by whoever asks, the program's own `under` (T494, ADR-0246), as the world will run it.
     const base = typeof opts.base === 'number' ? (opts.base > 0 ? opts.base : 0) : underOf(xml);
     const own = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml);
     const [X, Y, Z] = box ?? boxOf(classOf('object')!);

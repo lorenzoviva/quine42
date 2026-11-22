@@ -1,4 +1,4 @@
-# ADR-0245 — La cantina e la densità sulla radice del programma (`under`, `vpt` predefinito)
+# ADR-0246 — La cantina e la densità sulla radice del programma (`under`, `vpt` predefinito)
 
 Data: 2026-11-22 · Stato: accettato (task T494 del backlog, step 13) · Riferimenti: ADR-0091 (i sotterranei), ADR-0135 (la lettera del suolo),
 ADR-0049 (la densità di un modello), ADR-0208 (il forte dell'autore a 10), ADR-0209 (le strutture a 16), ADR-0227 (`waterline`), ADR-0161

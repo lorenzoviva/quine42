@@ -217,7 +217,7 @@ const buckets = new Map<number, Entity[]>();
 function place(a: Asset, x: number, z: number, yaw: number, vpt = a.entry.vpt): Entity {
   const e = vpt === a.entry.vpt ? a.entry : { ...a.entry, vpt };
   const root = new THREE.Group();
-  // A program with a cellar (T494, ADR-0245: `under` on its root) goes that much under the meadow: its soil on the ground, as in the world.
+  // A program with a cellar (T494, ADR-0246: `under` on its root) goes that much under the meadow: its soil on the ground, as in the world.
   root.position.set(x, -a.built.base / vpt, z);
   root.rotation.y = yaw;
   root.scale.setScalar(a.entry.vpt / vpt);

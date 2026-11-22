@@ -3,7 +3,7 @@
      number of cells), barracks stand against the walls, and the detail at full scale runs a piece at a time: stairs, battlements,
      arrow slits look at most as far as a stair is long. -->
 <!-- SEGRETE (copy with a dungeon): under="20" on the root says the program digs 20 voxels under the soil, vpt="10" that it is drawn at
-     10 voxels a tile (T494, ADR-0245): the soil is the layer 20, the dungeon under it; an entry that says no cellar has 2 tiles of it. An
+     10 voxels a tile (T494, ADR-0246): the soil is the layer 20, the dungeon under it; an entry that says no cellar has 2 tiles of it. An
      entry with cellar: 0 lays it on the ground, the soil on the layer 0: no dungeon is found and the fort is the same. -->
 <sequence values="BNE" size="500 500 170" symmetry="(xy)" soil="E" under="20" vpt="10" origin="bottom">
   <!-- the earth under the soil: a hidden letter (#20) down to the bottom, so the rules that fill downwards (the stairs, "f B") stop at the ground as before -->

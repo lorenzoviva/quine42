@@ -46,7 +46,7 @@ Il motore, il front-end XML, la palette, le mesh, lo scheletro, le classi e le f
   L'indirizzo tiene la scelta (`?vpt=5`) e apre un modello (`?modello=<id>`). In console `sandbox.showModel(id, vpt)`,
   `toWorld`, `putPlayer`, `frame`, `follow`, `cut` (le foto di `lab/scripts/foto-scala.mjs`, `lab/banco/riferimento/forte-scala.md`).
   «Del modello» è la densità della sua voce: 20 per i modelli disegnati a mano, **10 per il forte dell'autore** (`HANDMADE_VPT` in
-  `lab/3d/catalog.ts`, D61, T404: 50 × 50 caselle come nel gioco, ADR-0208). Un programma fatto a mano dice la sua con `vpt="N"` sulla radice, e la cantina con `under="N"` (i voxel sotto il suolo): il modello si posa tanto sotto il prato e, con `sandbox.cut(y)` sotto 0, il prato sparisce e la cantina si vede dall'alto (T494, ADR-0245; `forte-handmade-segrete`).
+  `lab/3d/catalog.ts`, D61, T404: 50 × 50 caselle come nel gioco, ADR-0208). Un programma fatto a mano dice la sua con `vpt="N"` sulla radice, e la cantina con `under="N"` (i voxel sotto il suolo): il modello si posa tanto sotto il prato e, con `sandbox.cut(y)` sotto 0, il prato sparisce e la cantina si vede dall'alto (T494, ADR-0246; `forte-handmade-segrete`).
   Solo con `npm run dev`: gli XML di `lab/mjx/models/` entrano nella pagina quando si costruisce, quindi
   `vite preview` mostra quelli dell'ultima `npm run build` (anche il seme `universe/` del gioco), e un file
   cambiato si vede solo dopo una nuova build. Con `npm run dev` la pagina si ricarica appena il file cambia.

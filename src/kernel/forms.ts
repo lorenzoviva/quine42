@@ -48,7 +48,7 @@ export function vptOf(info: Pick<ModelInfo, 'class' | 'size' | 'vpt'> | undefine
 }
 
 /**
- * An index entry as the kernel reads it with its program (T494, ADR-0245): the root's `vpt` is its density where it says none (an entry
+ * An index entry as the kernel reads it with its program (T494, ADR-0246): the root's `vpt` is its density where it says none (an entry
  * that says one wins); the same object if the program says nothing, so an entry of today is read as ever. Never written back.
  */
 export function withRoot<T extends Pick<ModelInfo, 'class' | 'vpt'>>(info: T, xml: string | undefined): T;
@@ -62,7 +62,7 @@ export function withRoot<T extends Pick<ModelInfo, 'class' | 'vpt'>>(info: T | u
 /**
  * The voxels of a model under the ground (T52b): its cellar's tiles at the density its entry says, at 20 if it says none (T405, ADR-0209:
  * a structure at 16 keeps the cellar of 20 voxels a tile its program writes, 1.25 tiles deep). An entry that says no `cellar` takes the
- * program's `under` (T494, ADR-0245), in voxels as it was drawn; one that says `cellar` (0 too: none) wins.
+ * program's `under` (T494, ADR-0246), in voxels as it was drawn; one that says `cellar` (0 too: none) wins.
  */
 export function cellarVoxels(info: Pick<ModelInfo, 'class' | 'size' | 'vpt' | 'cellar'> | undefined, xml?: string): number {
   if (info?.cellar === undefined && xml) return underOf(xml);
@@ -83,7 +83,7 @@ export function waterlineOf(xml: string): number {
 
 /**
  * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `cellar`, from 1 to 3 (a cellar, a crypt); 0 for
- * anything else. Without one, the program's `under` at the entry's density, whole tiles up (T494, ADR-0245: 20 voxels at 10 are 2).
+ * anything else. Without one, the program's `under` at the entry's density, whole tiles up (T494, ADR-0246: 20 voxels at 10 are 2).
  */
 export function cellarOf(info: ModelInfo | undefined, xml?: string): number {
   if (info?.cellar === undefined && xml) {
@@ -1044,7 +1044,7 @@ export class Forms {
   }
 
   /**
-   * An entry as the forms read it (T494, ADR-0245): with its program's root `vpt` where it says none (`withRoot`); `info` stays the entry as
+   * An entry as the forms read it (T494, ADR-0246): with its program's root `vpt` where it says none (`withRoot`); `info` stays the entry as
    * it is written. Its cellar from the program's `under` is `cellarVoxels(entry, xml)`.
    */
   entry(id: string): ModelInfo | undefined {
