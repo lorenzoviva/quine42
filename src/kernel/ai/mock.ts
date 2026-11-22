@@ -653,6 +653,8 @@ export class MockAiModels implements AiModels, DecisionModels {
     if (has('innalz', 'sollev')) return { possible: true, story: 'La terra si solleva.', effects: [{ type: 'relief', delta: 2, radius: 1 }], repeatable: true, label };
     if (has('abbass', 'spian')) return { possible: true, story: 'La terra si abbassa.', effects: [{ type: 'relief', delta: -2, radius: 1 }], repeatable: true, label };
     if (has('spin', 'calc')) return { possible: true, story: `Dai una spinta a ${name}.`, effects: [{ type: 'push', force: 2 }], repeatable: true, label };
+    // A cliff (T477): roped up, the wanderer climbs it for a while.
+    if (has('arrampic', 'scalo', 'scalar', 'aggrapp')) return { possible: true, story: 'Ti leghi la corda alla vita e cerchi gli appigli nella roccia.', effects: [{ type: 'state', name: 'in arrampicata', climb: 12, duration: 30 }], repeatable: true, label: 'Arrampicati' };
     if (has('mont', 'cavalc', 'sell')) return { possible: true, story: `Sali in sella: ${name} sbuffa e parte al trotto.`, effects: [{ type: 'state', name: 'a cavallo', speed: 1.8, weight: 30, duration: 0 }], repeatable: true, label: 'Monta in sella' };
     if (has('smont', 'scend')) return { possible: true, story: 'Scendi di sella.', effects: [{ type: 'remove_state', name: 'a cavallo' }], repeatable: true, label: 'Scendi di sella' };
     if (has('riemp')) return { possible: true, story: `Riempi ${name} e bevi; poi è di nuovo vuoto.`, effects: [{ type: 'consume', item: name }, { type: 'needs', thirst: 10 }], repeatable: true, label };

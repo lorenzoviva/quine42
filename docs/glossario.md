@@ -180,9 +180,16 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Gradino
 - **Inglese**: `STEP`, `JUMP`, `CLIMB`, `acrossRise`, `riseBetween`, `riseOnStep`, `steepOf`
-- **Definizione**: il dislivello fra due caselle vicine che un corpo cammina sempre, in salita e in discesa: mezza casella (2 livelli, `STEP`). Oltre è un **dirupo**, che non si cammina: fino a una casella si salta (`JUMP`), fino a tre si arrampicherà con un mezzo (`CLIMB`, R3), oltre si costruisce. Due caselle nuotate si uniscono qualunque sia il loro livello. La collisione lo controlla sui lati fra le caselle sotto un corpo, non sulle diagonali (T474, ADR-0250). Il gradino di un modello è un'altra misura (`stepOf`, un quinto di casella).
+- **Definizione**: il dislivello fra due caselle vicine che un corpo cammina sempre, in salita e in discesa: mezza casella (2 livelli, `STEP`). Oltre è un **dirupo**, che non si cammina: fino a una casella si salta (`JUMP`), fino a tre si arrampica con un mezzo (`CLIMB`, ADR-0251), oltre si costruisce. Due caselle nuotate si uniscono qualunque sia il loro livello. La collisione lo controlla sui lati fra le caselle sotto un corpo, non sulle diagonali (T474, ADR-0250). Il gradino di un modello è un'altra misura (`stepOf`, un quinto di casella).
 - **Dove vive**: `src/kernel/network.ts`, `src/kernel/kernel.ts` (`free`, `bodyFree`, `freeReal`), `src/kernel/npc/places.ts`
 - **Da non usare**: «scalino», «pendenza» (un pendio di gradini si cammina; il salto è il movimento che supera un dirupo basso)
+
+### Arrampicarsi
+- **Inglese**: `climb`, `climbTo`, `climbOffer`, `climbReach`, `climbOf`, `climbLine`, `ClimbComp`, `ClimbRefusal`, `CLIMB_ACTION`, `CLIMB_WORDS`, `fallFromClimb`, `carriedBody`, `bonus.climb`
+- **Definizione**: il movimento del kernel che porta un corpo su o giù per un dirupo accanto, più alto di un gradino e al più di tre caselle, con un mezzo la cui portata basta: ciò che si indossa o si impugna (`bonus.climb`, la corda) o uno stato (`climb`, che «Altro…» dà); lento e faticoso, interrotto da un colpo, una spinta o l'energia a zero, e il corpo torna al piede della parete. «Arrampicati» e «Calati giù» nel menu della casella. In molti lo fa il server, che porta il corpo (T477, ADR-0251). Le persone non si arrampicano.
+- **Dove vive**: `src/kernel/climb.ts`, `src/kernel/kernel.ts` (`climbTick`), `src/session/server.ts` (`leap`, `landed`), `src/session/thin.ts`, `src/render/entities.ts`
+- **Da non usare**: «scalare» (in un identificatore: `climb`), «salire» (è anche il gradino e la scala), «issarsi»
+- **Fermo**: `climb` di un bonus e di uno stato, l'azione `_climb` del menu, il messaggio `jump`.
 
 ### Rete
 - **Inglese**: `network`, `Network`, `placeNetwork`, `networkOf`, `PlaceGround`, `NetworkRules`, `apart`, `stranded`
@@ -212,7 +219,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Asprezza
 - **Inglese**: `roughness`, `Roughness`, `ROUGHNESS`, `ROUGHNESS_NAME`, `ROUGHNESS_QUOTA`, `ROUGH_EDGES`, `FLAT_SPAN`, `roughnessOf`, `keptPass`, `readRoughness`, `regionRoughness`
-- **Definizione**: quanto è aspro un luogo per la regola 10 dei gradini: piana o collinare (ogni parte unita alla rete), montuosa (enclavi fino al 15 % delle sue caselle camminate, col valico entro un salto), impervia (fino al 35 %, ogni valico). Il kernel la misura dal rilievo senza chiamate (la quota dei lati oltre un gradino); il master la può dire per una regione sua, e vale per i luoghi nuovi, scritta nel piano (T474, ADR-0250).
+- **Definizione**: quanto è aspro un luogo per la regola 10 dei gradini: piana o collinare (ogni parte unita alla rete), montuosa (enclavi fino al 15 % delle sue caselle camminate, col valico entro un salto e, da T477, entro un'arrampicata), impervia (fino al 35 %, ogni valico). Il kernel la misura dal rilievo senza chiamate (la quota dei lati oltre un gradino); il master la può dire per una regione sua, e vale per i luoghi nuovi, scritta nel piano (T474, ADR-0250).
 - **Dove vive**: `src/kernel/network.ts`, `src/kernel/atlas.ts` (`Region.roughness`), `src/kernel/agents/cartography.ts` (`ChunkPlan.roughness`), `src/ui/regions.ts`
 - **Da non usare**: «difficoltà», «pendenza», «zona» (lo studio di T459 diceva «le zone»)
 - **Fermo**: `roughness` e i valori `flat`, `hilly`, `mountainous`, `rugged` nell'atlante e nei piani.

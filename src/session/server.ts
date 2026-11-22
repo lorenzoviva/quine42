@@ -16,6 +16,7 @@ import { hashStr, hex } from '../kernel/rng';
 import { equippedItem, shownInventory } from '../kernel/inventory';
 import { wornItems } from '../kernel/wearing';
 import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
+import { CLIMB_ACTION } from '../kernel/climb';
 import { offDeck } from '../kernel/vehicle';
 import { shownSpend } from '../kernel/ai/usage';
 import { ENTITY_PARTS, type OnDeck, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
@@ -238,6 +239,10 @@ interface Client {
   budget: number;
   /** The last step heard (T442): a correction the world makes (a hull's push, over the side) answers it, so that the client takes it. */
   stepSeq: number;
+  /** The last step claimed while the server carried the body (T477: a jump, a climb), looked at once it has landed. */
+  claim?: { seq: number; x: number; y: number };
+  /** The server carried the body at the last tick (T477): when it stops, the client hears where it landed. */
+  carried?: boolean;
   me?: string;
   state?: string;
   places: Map<string, number>;
@@ -542,6 +547,7 @@ export class SessionServer {
       }
     }
     this.kernel.tick(dt);
+    this.landed();
     this.since += dt;
     if (this.since + 1e-9 < 1 / this.hz) return;
     this.since = 0;
@@ -578,8 +584,8 @@ export class SessionServer {
         c.link.send({ t: 'refusal', reason: 'troppi messaggi: collegamento chiuso' });
         return c.link.close();
       }
-      // A step lost is made good by the next one.
-      if (msg && typeof msg === 'object' && msg.t !== 'step' && msg.t !== 'keys') this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
+      // A step lost is made good by the next one; a jump lost is not made (T477), and the next step puts the client back.
+      if (msg && typeof msg === 'object' && msg.t !== 'step' && msg.t !== 'keys' && msg.t !== 'jump') this.answer(c, seqOf(msg), { ok: false, reason: SLOW_DOWN });
       return;
     }
     p.msgs--;
@@ -638,6 +644,7 @@ export class SessionServer {
     if (msg.t === 'step') return this.step(c, msg);
     // The keys a client holds (T263): only the four directions pass, `setHeldOf` reads them as a list of names.
     if (msg.t === 'keys') return this.kernel.setHeldOf(c.id, Array.isArray(msg.held) ? msg.held.slice(0, 8) : []);
+    if (msg.t === 'jump') return this.leap(c, msg);
     const seq = seqOf(msg);
     const k = this.kernel;
     if (msg.t === 'other' && typeof msg.wanderer === 'string') return this.later(c, seq, () => k.freeOnWanderer(String(msg.wanderer), words(msg.text)));
@@ -737,6 +744,8 @@ export class SessionServer {
       case 'tile': {
         const why = this.tileOutOfReach(c, msg.col, msg.row) ?? (typeof msg.action === 'string' && msg.action && msg.action !== 'altro' ? undefined : 'azione sconosciuta');
         if (why) return this.answer(c, seq, { ok: false, reason: why });
+        // A climb (T477): made on the server's world as the wanderer, the answer whether it was (the client made it at once, and ends it if not).
+        if (msg.action === CLIMB_ACTION) return this.answer(c, seq, this.act(c, () => k.climbTo(msg.col, msg.row)));
         return this.later(c, seq, () => k.performMenu(`t:${msg.action}`, -1, msg.col, msg.row));
       }
       case 'action':
@@ -880,9 +889,49 @@ export class SessionServer {
       to = { x: wx, y: wy };
     }
     if (!Number.isFinite(to.x) || !Number.isFinite(to.y) || Math.hypot(to.x - at.x, to.y - at.y) > FAR) return this.correct(c, seq);
+    // In a jump or on a climb (T477) the server carries the body: no step counts, the last one is looked at once it has landed (`landed`).
+    if (k.carriedBody(c.id)) {
+      c.claim = { seq, x: to.x, y: to.y };
+      return;
+    }
     const got = k.stepWanderer(c.id, to, Math.max(0, c.budget)) ?? at;
     c.budget -= Math.hypot(got.x - at.x, got.y - at.y);
     if (Math.hypot(got.x - to.x, got.y - to.y) > CORRECT) this.correct(c, seq);
+  }
+
+  /**
+   * A jump a client asks for (T477): toward the direction it says (only numbers, made a unit; none: where the wanderer faces), on the server's
+   * world, which carries the body as it carries a climb. Refused (in the air, climbing, at a helm, out of the simulation, dying), the client is
+   * put back where the server has them.
+   */
+  private leap(c: Client, msg: { dx?: unknown; dy?: unknown }): void {
+    const k = this.kernel;
+    const dx = typeof msg.dx === 'number' && Number.isFinite(msg.dx) ? msg.dx : 0;
+    const dy = typeof msg.dy === 'number' && Number.isFinite(msg.dy) ? msg.dy : 0;
+    const n = Math.hypot(dx, dy);
+    const dir = n > 1e-6 ? { x: dx / n, y: dy / n } : undefined;
+    if (!k.wandererAt(c.id)) return;
+    if (k.isDying(c.id) || !k.as(c.id, () => k.jump(dir))) this.correct(c, c.stepSeq);
+  }
+
+  /**
+   * Once the server has landed a wanderer it carried (T477): the last step their client claimed meanwhile, if any, against where the server has
+   * them, and the client put there if the two differ; if it claimed none (it stood still, or did not make the move itself), put there anyway: a
+   * client standing still sends no other step to correct.
+   */
+  private landed(): void {
+    for (const c of this.clients.values()) {
+      if (this.kernel.carriedBody(c.id)) {
+        c.carried = true;
+        continue;
+      }
+      if (!c.carried) continue;
+      c.carried = false;
+      const claim = c.claim;
+      c.claim = undefined;
+      const at = this.kernel.wandererAt(c.id);
+      if (at && (!claim || Math.hypot(at.x - claim.x, at.y - claim.y) > CORRECT)) this.correct(c, Math.max(claim?.seq ?? 0, c.stepSeq));
+    }
   }
 
   /** A vehicle of the world near a wanderer, by the id a client says (T442): where it is now; undefined if that id is no vehicle in sight. */

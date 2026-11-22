@@ -85,7 +85,7 @@ of the inventory, your `logic.lua` reacts. Elements of the panel (the labels in 
   of the wanderer;
 - `{"type":"button","id":"rest","label":"Riposa"}` — calls `M.on_ui(user, "rest")`.
 API: `ui.slot(panel, slot)` → the item in that slot (or nil); `items.bonus(id, "defense")` → a number
-of the item's bonus (defense, attack, speed, weight, light, warmth). The consequences go through the
+of the item's bonus (defense, attack, speed, weight, light, warmth; `climb` is the kernel's: the levels of a cliff a rope or a pick lets one climb, never climb in Lua). The consequences go through the
 **states** of the wanderer, the component `states`: `local st = ecs.get(user, "states") or {}; st["armour"] = { speed = 0.9, weight = 0, light = 0, expires = 0 }; ecs.set(user, "states", st)`
 (the kernel applies speed and carrying weight). Never walk with `pairs` the tables that come
 from `ecs.get`: use lists of names you know (e.g. `for _, p in ipairs({"head","torso"}) do … end`).

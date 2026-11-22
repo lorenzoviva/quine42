@@ -94,6 +94,7 @@ import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, programStrata, readStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow } from './strata';
 import { addMoved, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
+import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, climbDuration, climbLine, climbOf, climbPoint, fallPoint, onFace, saneClimb, startClimb, type ClimbComp, type ClimbRefusal } from './climb';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
@@ -2750,8 +2751,8 @@ export class Kernel {
     const tiles = bare.grid.join('');
     const ground = this.groundOfPlace(tiles, levels, [], true);
     const roughness = regionRoughness(this.masterRegionOf(ch)) ?? roughnessOf(ground);
-    if (keptPass(roughness) < 0) return undefined;
-    const kept = placeNetwork(ground, bare.start, bare.mustReach, { roughness }).enclaves.filter((e) => e.kept);
+    if (keptPass(roughness, true) < 0) return undefined;
+    const kept = placeNetwork(ground, bare.start, bare.mustReach, { roughness, climb: true }).enclaves.filter((e) => e.kept);
     if (!kept.length) return undefined;
     let walked = 0;
     for (let i = 0; i < S * S; i++) if (ground.walked(i)) walked++;
@@ -4132,7 +4133,8 @@ export class Kernel {
     const corner = ch.cx === 0 && ch.cy === 0 ? 0 : ch.cx === -1 && ch.cy === 0 ? S - 1 : ch.cx === 0 && ch.cy === -1 ? (S - 1) * S : ch.cx === -1 && ch.cy === -1 ? S * S - 1 : -1;
     const targets = [...result.mustReach, ...ways, ...(corner >= 0 ? [corner] : [])];
     const roughness = readRoughness(plan.roughness) ?? roughnessOf(ground);
-    return placeNetwork(ground, result.start, targets, { roughness });
+    // Every world climbs (T477, R3): a mountainous place keeps the enclaves a climb reaches.
+    return placeNetwork(ground, result.start, targets, { roughness, climb: true });
   }
 
   /** A place's tiles as the network reads them (T474): walked, swum where the plan swims (T438), fixed on the border, the lots and the water. */
@@ -4996,26 +4998,40 @@ export class Kernel {
     return JUMP_FAR * leapOf(this.gravity()).reach;
   }
 
-  /**
-   * A jump (T56b, Space): towards where the wanderer walks (or faces), over what is no higher than JUMP_UP, to the
-   * nearest place a tile or more away and within JUMP_FAR where the feet can rest or the body swims (T438: into the water and out of it; not a floor out of
-   * reach); with none, a jump on the spot. Under a lighter gravity higher, farther and slower (T447, `leapOf`). Only in the simulation: false in the corona and the studio (nothing
-   * changes there), in a thin client (the server would put the wanderer back) or while already in the air.
-   */
-  jump(): boolean {
-    // At the helm (T439) Space is the vehicle's menu, as E: who steers does not jump.
-    if (this.mirror || this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'jump') || this.atHelm() !== undefined) return false;
-    const pl = this.wandererComp();
-    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
+  /** Whether the wanderer acting stands in the simulation (T477): inside the circle, not in the studio; their own, whoever the kernel's zone is of. */
+  private inSim(): boolean {
+    const p = this.wandererPos();
+    return !!p && Number.isFinite(p.x) && Number.isFinite(p.y) && !this.corona.isInterior(p.x) && Math.hypot(p.x, p.y) < this.config.circleRadius;
+  }
+
+  /** Where a jump of the wanderer acting goes (T477): where the keys of this kernel walk them, else where they face; a unit vector. */
+  jumpDirection(): { x: number; y: number } {
     let dx = 0, dy = 0;
     if (this.wanderer().id === this.inputFor) {
       dx = (this.input.isHeld('right') ? 1 : 0) - (this.input.isHeld('left') ? 1 : 0);
       dy = (this.input.isHeld('down') ? 1 : 0) - (this.input.isHeld('up') ? 1 : 0);
     }
-    if (!dx && !dy) [dx, dy] = ({ left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] } as Record<string, number[]>)[pl?.facing] ?? [0, 1];
+    if (!dx && !dy) [dx, dy] = ({ left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] } as Record<string, number[]>)[this.wandererComp()?.facing] ?? [0, 1];
     const n = Math.hypot(dx, dy);
-    dx /= n;
-    dy /= n;
+    return { x: dx / n, y: dy / n };
+  }
+
+  /**
+   * A jump (T56b, Space): towards where the wanderer walks (or faces; `dir`, a direction a client said, T477), over what is no higher than JUMP_UP, to the
+   * nearest place a tile or more away and within JUMP_FAR where the feet can rest or the body swims (T438: into the water and out of it; not a floor out of
+   * reach); with none, a jump on the spot. Under a lighter gravity higher, farther and slower (T447, `leapOf`). Only in the simulation: false in the corona and the studio (nothing
+   * changes there), while already in the air or climbing. A thin client jumps as alone and tells the server, which jumps the same on its world (T477):
+   * the server's jump is the one that counts.
+   */
+  jump(dir?: { x: number; y: number }): boolean {
+    // At the helm (T439) Space is the vehicle's menu, as E: who steers does not jump.
+    if (!this.inSim() || this.ecs.has(this.wandererEntity, 'jump') || this.ecs.has(this.wandererEntity, 'climb') || this.atHelm() !== undefined) return false;
+    const pl = this.wandererComp();
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
+    const said = dir && Number.isFinite(dir.x) && Number.isFinite(dir.y) && Math.hypot(dir.x, dir.y) > 1e-6 ? dir : undefined;
+    const d0 = said ?? this.jumpDirection();
+    const n = Math.hypot(d0.x, d0.y);
+    const dx = d0.x / n, dy = d0.y / n;
     const from = this.wandererCarpet();
     const real = this.wandererPos();
     // From the floor one stands on (T70): the ground floor, the floor above, the roof.
@@ -5066,10 +5082,10 @@ export class Kernel {
     return !(typeof z === 'number' && Number.isFinite(z) && z > this.groundAt(x, y) + 0.3);
   }
 
-  /** Whether the wanderer acting swims now (T438): in the simulation (not in the corona, not in the studio), not in the air of a jump. */
+  /** Whether the wanderer acting swims now (T438): in the simulation (not in the corona, not in the studio), not in the air of a jump nor on a climb (T477). */
   swimming(): boolean {
     const p = this.wandererPos();
-    if (!p || this.corona.isInterior(p.x) || !(Math.hypot(p.x, p.y) < this.config.circleRadius) || this.ecs.has(this.wandererEntity, 'jump')) return false;
+    if (!p || this.corona.isInterior(p.x) || !(Math.hypot(p.x, p.y) < this.config.circleRadius) || this.ecs.has(this.wandererEntity, 'jump') || this.ecs.has(this.wandererEntity, 'climb')) return false;
     const c = this.wandererCarpet();
     return this.swimsAt(c.x, c.y, p.z);
   }
@@ -5175,17 +5191,152 @@ export class Kernel {
     return { s, y: j.h0 + (j.h1 - j.h0) * s + 4 * j.peak * s * (1 - s) };
   }
 
+  /**
+   * Puts the body of the wanderer acting at a point of the carpet (T477), its feet at `z`: who walks on this kernel (alone, a thin client's own)
+   * moves on their circle and the carpet brings them back; who walks from a client of their own (`remote`) stays where they are on it and the
+   * carpet under them moves, as `stepWanderer` does, so that a jump or a climb the server carries never takes them toward the corona.
+   */
+  private carryBody(x: number, y: number, z: number): void {
+    const p = this.wandererPos();
+    if (this.remote.has(this.wanderer().id)) {
+      const c = this.carpet();
+      if (c) Object.assign(c, { ox: x - p.x, oy: y - p.y });
+      p.z = z;
+      return;
+    }
+    const { ox, oy } = this.offset();
+    Object.assign(p, { x: x - ox, y: y - oy, z });
+  }
+
+  /**
+   * How high the wanderer acting climbs now (T477, ADR-0251), in levels: the largest `bonus.climb` of what they wear or hold (a rope, a climbing
+   * pick) and `climb` of their states (what «Altro…» gives for a while), within `CLIMB`; 0 without a means.
+   */
+  climbReach(): number {
+    const held = equippedItem(this.inventory());
+    const bonuses = [...Object.values(this.outfit()), held].map((item) => (item ? this.content.get(item)?.bonus : undefined));
+    return climbOf(bonuses, Object.values(this.states()) as unknown as Array<Record<string, unknown>>);
+  }
+
+  /**
+   * The climb of the wanderer acting to a tile beside theirs (T477): undefined where there is none (not beside them, a rise a body walks, a
+   * tile one does not stand on, out of the simulation, on a floor or a deck); else its rise (levels, up > 0), the reach of their means and,
+   * if it is not made, why. Where it is made, the line the body goes along and the heights of its feet.
+   */
+  climbOffer(col: number, row: number): { rise: number; reach: number; refusal?: ClimbRefusal; climb?: ClimbComp } | undefined {
+    if (!Number.isInteger(col) || !Number.isInteger(row) || !this.inSim()) return undefined;
+    const at = this.wandererCarpet();
+    const fc = Math.floor(at.x), fr = Math.floor(at.y);
+    if (Math.abs(col - fc) + Math.abs(row - fr) !== 1) return undefined;
+    // The ground it starts from: not a floor of a model, not a deck (the climb is of the terrain's cliffs).
+    const feet = this.wandererPos().z;
+    if (this.aboard() !== undefined || (typeof feet === 'number' && Number.isFinite(feet) && Math.abs(feet - this.groundAt(at.x, at.y)) > 0.3)) return undefined;
+    const t = this.tileAt(col, row);
+    const def = t ? this.palette[t] : undefined;
+    if (!def || def.solid || crossingOf(def) !== 'walk' || this.solidTiles.has(`${col},${row}`)) return undefined;
+    const rise = this.levelAtTile(col, row) - this.levelAtTile(fc, fr);
+    if (Math.abs(rise) <= STEP) return undefined;
+    const reach = this.climbReach();
+    const say = (refusal: ClimbRefusal) => ({ rise, reach, refusal });
+    if (!climbable(rise)) return say('high');
+    if (this.ecs.has(this.wandererEntity, 'jump') || this.ecs.has(this.wandererEntity, 'climb') || this.atHelm() !== undefined) return say('busy');
+    const inv = this.inventory();
+    if (inv?.slots?.some((x) => !!x && isThing(x.item)) || totalWeight(inv, this.itemSpec) / this.carryCapacity() > CLIMB_LOAD) return say('load');
+    if (reach < Math.abs(rise)) return say('means');
+    const energy = Number(this.needs()?.energy);
+    if (Number.isFinite(energy) && energy < CLIMB_MIN_ENERGY) return say('tired');
+    const r = Number(this.ecs.get(this.wandererEntity, 'body')?.r) || 0.3;
+    const line = climbLine(at, r, fc, fr, col, row, rise > 0);
+    if (!line) return undefined;
+    const h1 = this.groundAt(line.to.x, line.to.y);
+    if (!this.bodyFree(line.to.x, line.to.y, r, h1)) return say('room');
+    const h0 = this.groundAt(at.x, at.y);
+    return { rise, reach, climb: startClimb(at, line, h0, h1, rise, this.gravity(), Number(this.needs()?.health)) };
+  }
+
+  /**
+   * «Arrampicati», «Calati giù» (T477): the wanderer acting climbs to a tile beside theirs, across a cliff within the reach of their means; the
+   * kernel carries the body (`climbTick`). False, said, when it is not made. A thin client climbs as alone and the server climbs the same on its
+   * world, whose climb is the one that counts.
+   */
+  climbTo(col: number, row: number): boolean {
+    const o = this.climbOffer(col, row);
+    if (!o) return false;
+    if (!o.climb) {
+      this.message(CLIMB_WORDS.refusal[o.refusal ?? 'busy'], 'warn');
+      return false;
+    }
+    const pl = this.wandererComp();
+    const at = this.wandererCarpet();
+    const ex = col - Math.floor(at.x), ey = row - Math.floor(at.y);
+    if (pl) pl.facing = ex > 0 ? 'right' : ex < 0 ? 'left' : ey > 0 ? 'down' : 'up';
+    this.ecs.set(this.wandererEntity, 'climb', o.climb);
+    this.bus.emit('wanderer:climbed', { id: this.wanderer().id, rise: o.rise });
+    return true;
+  }
+
+  /** The climb under way, if any (T477): how far along it is (0-1), the height of the feet (tiles) and whether the body is on the face, for the renderer. */
+  climbing(): { s: number; y: number; face: boolean } | undefined {
+    const c = saneClimb(this.ecs.get(this.wandererEntity, 'climb'));
+    if (!c) return undefined;
+    const p = climbPoint(c);
+    return { s: p.s, y: p.z, face: onFace(c) };
+  }
+
+  /** Whether the kernel carries a wanderer's body now (T477): in a jump or on a climb. The server takes no step of theirs meanwhile. */
+  carriedBody(id: string): boolean {
+    if (!this.wanderersById.has(id)) return false;
+    return this.as(id, () => this.ecs.has(this.wandererEntity, 'jump') || this.ecs.has(this.wandererEntity, 'climb'));
+  }
+
+  /**
+   * The climb carries the wanderer along its line, whatever the walking did this tick (T477): to the foot of the face, up or down it, onto the
+   * ground beyond; there it ends. On the face the energy goes; a blow (the health less than last seen) or the energy at zero and the body falls
+   * back to the foot (`fallFromClimb`). The world decides it: a thin client carries its own climb as the server will, and the server says the
+   * fall (`wanderer:pushed`).
+   */
+  private climbTick(dt: number): void {
+    const raw = this.ecs.get(this.wandererEntity, 'climb');
+    if (raw === undefined) return;
+    const c = saneClimb(raw);
+    if (!c || !this.inSim()) return void this.ecs.remove(this.wandererEntity, 'climb');
+    if (!this.mirror) {
+      const n = this.needs();
+      const health = Number(n?.health);
+      const blow = Number.isFinite(health) && c.health !== undefined && health < c.health - 1e-6;
+      if (Number.isFinite(health)) c.health = health;
+      if (n && onFace(c) && Number.isFinite(n.energy)) n.energy = Math.max(0, n.energy - c.cost * dt);
+      if (blow || (n && onFace(c) && Number.isFinite(n.energy) && n.energy <= 0)) return void this.fallFromClimb();
+    }
+    c.t = Math.min(climbDuration(c), c.t + dt);
+    const p = climbPoint(c);
+    this.carryBody(p.x, p.y, p.z);
+    if (c.t >= climbDuration(c)) this.ecs.remove(this.wandererEntity, 'climb');
+  }
+
+  /** The wanderer acting falls off their climb (T477): back to its foot, on the low side, and the world says it. False when they are not climbing. */
+  fallFromClimb(): boolean {
+    const c = saneClimb(this.ecs.get(this.wandererEntity, 'climb'));
+    this.ecs.remove(this.wandererEntity, 'climb');
+    if (!c) return false;
+    const p = fallPoint(c);
+    this.carryBody(p.x, p.y, p.z);
+    const id = this.wanderer().id;
+    this.tell(id, CLIMB_WORDS.fell, 'warn');
+    this.bus.emit('wanderer:pushed', { id });
+    return true;
+  }
+
   /** The jump carries the wanderer along its line, whatever the walking did this tick; landed, it ends. */
   private jumpTick(dt: number): void {
     const j: JumpComp | undefined = this.ecs.get(this.wandererEntity, 'jump');
     if (!j) return;
     const ok = [j.from?.x, j.from?.y, j.to?.x, j.to?.y, j.t, j.dur, j.h0, j.h1, j.peak].every(Number.isFinite) && j.dur > 0;
-    if (!ok || this.zone !== 'sim') return void this.ecs.remove(this.wandererEntity, 'jump');
+    if (!ok || !this.inSim()) return void this.ecs.remove(this.wandererEntity, 'jump');
     j.t += dt;
     const s = Math.min(1, j.t / j.dur);
-    const { ox, oy } = this.offset();
     // The feet go from one floor to the other (T70): landed, they stand on the floor of the landing.
-    Object.assign(this.wandererPos(), { x: j.from.x + (j.to.x - j.from.x) * s - ox, y: j.from.y + (j.to.y - j.from.y) * s - oy, z: j.h0 + (j.h1 - j.h0) * s });
+    this.carryBody(j.from.x + (j.to.x - j.from.x) * s, j.from.y + (j.to.y - j.from.y) * s, j.h0 + (j.h1 - j.h0) * s);
     if (s >= 1) this.ecs.remove(this.wandererEntity, 'jump');
   }
 
@@ -7574,6 +7725,8 @@ export class Kernel {
   /** E: corona → edit code; rune → pick; otherwise the menu of the nearest entity (or a pickup directly). */
   async interact(): Promise<void> {
     if (this.zone === 'corona' || this.zone === 'studio') return this.interactStudio();
+    // On a climb (T477) the hands are on the rock.
+    if (this.ecs.has(this.wandererEntity, 'climb')) return;
     if (this.pickUpRune()) return;
     const { id: target, col, row } = this.inFront();
     // At the helm, or on a deck with nothing else in front (T439): the vehicle's menu.
@@ -7603,6 +7756,9 @@ export class Kernel {
     // A thing of the world carried goes down here (T292); the kernel says why when it does not.
     const held = equippedItem(this.inventory());
     if (t && this.zone === 'sim' && isThing(held)) options.push({ id: `t:${PUT_DOWN}`, label: `Posa ${this.itemInfo(held!).name} qui`, enabled: true });
+    // A cliff beside the wanderer (T477): up it or down it, with the means they have; the kernel says what is missing.
+    const cliff = t ? this.climbOffer(col, row) : undefined;
+    if (cliff) options.push({ id: `t:${CLIMB_ACTION}`, label: cliff.rise > 0 ? CLIMB_WORDS.up : CLIMB_WORDS.down, enabled: !!cliff.climb, reason: cliff.climb ? undefined : CLIMB_WORDS.refusal[cliff.refusal ?? 'busy'] });
     if (t) {
       for (const a of t.actions ?? []) if (a.effects?.length) options.push({ id: `t:${a.id}`, label: `${a.label} (${t.name})`, enabled: !a.requires || countItem(this.inventory(), a.requires) > 0, reason: a.requires && countItem(this.inventory(), a.requires) <= 0 ? `serve: ${this.itemInfo(a.requires).name}` : undefined });
       options.push({ id: 't:altro', label: `Altro… (${t.name})`, enabled: true });
@@ -7619,7 +7775,7 @@ export class Kernel {
 
   /** Right click: the menu of a tile near the wanderer (real-space point → carpet tile). */
   contextAt(rx: number, ry: number): boolean {
-    if (this.zone !== 'sim') return false;
+    if (this.zone !== 'sim' || this.ecs.has(this.wandererEntity, 'climb')) return false;
     const { ox, oy } = this.offset();
     const col = Math.floor(rx + ox);
     const row = Math.floor(ry + oy);
@@ -7637,6 +7793,7 @@ export class Kernel {
   async performMenu(option: string, entity: Id, col: number, row: number): Promise<void> {
     if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
     if (option === 't:altro') return void this.bus.emit('ui:freeaction', { id: -1, col, row, name: this.palette[this.tileAt(col, row) ?? '']?.name ?? 'qui' });
+    if (option === `t:${CLIMB_ACTION}`) return void this.climbTo(col, row);
     if (option === `t:${PUT_DOWN}`) {
       const at = this.inventory().equipped;
       if (at === null || !isThing(this.inventory().slots[at]?.item)) return this.message(putRefusal('nothing', ''), 'warn');
@@ -7658,7 +7815,14 @@ export class Kernel {
     const code = this.tileAt(col, row);
     const t = code ? this.palette[code] : undefined;
     if (!t || !code) return '';
-    return this.judgeFree({ tile: { col, row }, key: `tile:${code}`, name: t.name, description: t.description ?? t.name, tags: [t.layer ?? 'ground'], container: false, kind: 'terreno (una casella del mondo)', learnTile: code }, text);
+    // «Altro…: mi arrampico» on a cliff (T477): the Narrator gives a state that climbs; if it reaches now, the climb begins.
+    const who = this.wanderer().id;
+    const before = this.climbReach();
+    const told = await this.judgeFree({ tile: { col, row }, key: `tile:${code}`, name: t.name, description: t.description ?? t.name, tags: [t.layer ?? 'ground'], container: false, kind: 'terreno (una casella del mondo)', learnTile: code }, text);
+    // After the wait the wanderer acting is said again (V-022): `as` never spans an await. Who walks from a client of their own climbs when
+    // the client asks, as from the menu (it carries the climb as the server does): their client knows of the state with the next update.
+    if (this.wanderersById.has(who) && !this.remote.has(who)) this.as(who, () => this.climbReach() > before && this.climbOffer(col, row)?.climb && this.climbTo(col, row));
+    return told;
   }
 
   /** The entity you are facing (or standing next to). */
@@ -7902,6 +8066,8 @@ export class Kernel {
         const dy = b.y - me.y;
         const d = Math.hypot(dx, dy) || 1;
         const force = Math.max(0, Math.min(6, Number(e.force ?? 3) || 0));
+        // A push throws who climbs off the rock (T477).
+        this.as(to, () => this.fallFromClimb());
         this.stepWanderer(to, { x: b.x + (dx / d) * force, y: b.y + (dy / d) * force }, force);
         this.bus.emit('wanderer:pushed', { id: to });
       } else if (!body.includes(e)) out.push(...this.applyEffects([e], undefined, { x: b.x, y: b.y }));
@@ -10873,6 +11039,11 @@ export class Kernel {
       if (target !== undefined && !this.ecs.alive.has(target)) target = undefined;
       const { value, failed } = this.runModule('core.effects', 'apply', target, this.wandererEntity, clone(e), at?.x, at?.y);
       if (failed) break;
+      // A state that climbs (T477): its reach is the kernel's to keep, whatever the world's core.effects copies of it.
+      if (e.type === 'state' && e.climb) {
+        const st = this.states()[e.name] as Record<string, unknown> | undefined;
+        if (st && typeof st === 'object') st.climb = e.climb;
+      }
       if (typeof value === 'string' && value) out.push(value);
     }
     this.runesDirty = true;
@@ -12571,7 +12742,12 @@ export class Kernel {
     for (const w of this.wanderersById.keys()) this.as(w, () => this.swimmingTick(dt));
     // The breath (T446): only where the world counts it, whoever moves the wanderer.
     if (this.config.nature.oxygen) for (const w of this.wanderersById.keys()) this.as(w, () => this.breathingTick(dt));
-    for (const w of this.wanderersById.keys()) !this.remote.has(w) && this.as(w, () => this.jumpTick(dt));
+    // The jumps and the climbs (T477): of every wanderer, also of who walks from a client of their own: the server carries them, and takes no step meanwhile.
+    for (const w of this.wanderersById.keys())
+      this.as(w, () => {
+        this.jumpTick(dt);
+        this.climbTick(dt);
+      });
     this.keepGods();
     this.syncRunes();
     this.sanitize();
@@ -12599,6 +12775,9 @@ export class Kernel {
       this.runModule(s.manifest.id, 'update', dt);
       this.runningSystem = undefined;
     }
+    // Its jump and its climb (T477), as alone: the server makes the same on its world, and its are the ones that count.
+    this.jumpTick(dt);
+    this.climbTick(dt);
     // The shore that stopped them (T438): the client walks its wanderer, so it says why (the needs are the server's).
     this.sayTooLoaded();
     this.sanitize();

@@ -52,6 +52,7 @@ const EFFECT_SCHEMA: Schema = {
     speed: { type: 'NUMBER' },
     weight: { type: 'NUMBER' },
     light: { type: 'NUMBER' },
+    climb: { type: 'INTEGER', description: 'state: how high a cliff the condition lets one climb, in quarters of a tile (4 = a tile, 12 = three tiles, the most)' },
     bond: { type: 'STRING' },
     quantity: { type: 'INTEGER' },
     to: { type: 'STRING', description: 'terrain: name of the resulting terrain' },
@@ -101,7 +102,7 @@ export const EFFECTS_GUIDE = [
   'shield {duration}: the wanderer is protected',
   'push {force}: the thing is pushed away',
   'summon {module}: something or someone that already exists in the world appears',
-  'state {name, speed, weight, light, duration}: a condition of the wanderer that makes a new mechanic possible (on horseback: speed 1.8; with the backpack: weight 15; with the torch: light 5; duration in seconds, 0 = until it is removed)',
+  'state {name, speed, weight, light, climb, duration}: a condition of the wanderer that makes a new mechanic possible (on horseback: speed 1.8; with the backpack: weight 15; with the torch: light 5; roped up, a sure grip: climb 12, and the wanderer climbs a cliff beside them up to three tiles high; duration in seconds, 0 = until it is removed)',
   'remove_state {name}: a condition ends (getting off the horse, putting down the backpack)',
   'ONLY ON A PERSON — bond {bond}: what they become to the wanderer, a word of the world (amico, innamorata, moglie, marito, nemico…); memory {text, weight 1-3}: what they will remember; birth {name}: a child is born (only between spouses, and only if the person wants it)',
 ].join('\n');

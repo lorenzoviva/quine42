@@ -31,6 +31,7 @@ import { terrainPhysicsErrors } from './nature';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
+import { CLIMB } from './network';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -760,6 +761,8 @@ export function validateEffects(raw: unknown, ctx: EffectContext): EffectVerdict
         if (e.speed !== undefined) st.speed = num(e.speed, 0.3, 3, 1);
         if (e.weight !== undefined) st.weight = num(e.weight, -20, 60, 0);
         if (e.light !== undefined) st.light = num(e.light, 0, 8, 0);
+        // How high it lets one climb (T477): whole levels, within a climb of three tiles.
+        if (e.climb !== undefined) st.climb = Math.round(num(e.climb, 1, CLIMB, CLIMB));
         out.effects.push(st);
         break;
       }
@@ -824,7 +827,7 @@ export function describeEffect(e: Effect, names: EffectNames): string {
     case 'birth':
       return `fa nascere ${e.name ?? 'qualcuno'}`;
     case 'state': {
-      const what = [e.speed !== undefined && `velocità × ${e.speed}`, e.weight && `peso ${signed(e.weight)}`, e.light && `luce ${e.light}`].filter(Boolean).join(', ');
+      const what = [e.speed !== undefined && `velocità × ${e.speed}`, e.weight && `peso ${signed(e.weight)}`, e.light && `luce ${e.light}`, e.climb && `arrampica fino a ${e.climb / 4} caselle`].filter(Boolean).join(', ');
       return `stato «${e.name}»${what ? ` (${what})` : ''}${e.duration ? lasting(e.duration) : ' finché non si toglie'}`;
     }
     case 'remove_state':

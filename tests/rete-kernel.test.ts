@@ -24,9 +24,9 @@ import { developAll } from './espressivita/banco';
 
 const S = 18;
 /** A plateau in the middle of every place: tiles 6-11 of its columns and rows, `h` levels up (its border is the relief's). */
-const plateau = (h: number) => (c: number, r: number) => {
+const plateau = (h: number, lo = 6, hi = 11) => (c: number, r: number) => {
   const a = ((c % S) + S) % S, b = ((r % S) + S) % S;
-  return a >= 6 && a <= 11 && b >= 6 && b <= 11 ? h : 0;
+  return a >= lo && a <= hi && b >= lo && b <= hi ? h : 0;
 };
 const onPlateau = (c: number, r: number) => plateau(1)(c, r) === 1;
 
@@ -60,15 +60,15 @@ function walkTo(k: Kernel, x: number, y: number, steps = 80) {
  * A row of a planned place where the plateau's west edge is clean: three walked tiles below it and three on it, none on a lot or a ramp,
  * each side at one level, the plateau `h` levels up. World coordinates: the row and the column of the plateau's first tile.
  */
-function edgeOf(k: Kernel, h: number): { row: number; col: number } | undefined {
+function edgeOf(k: Kernel, h: number, want?: (ch: Chunk, cell: number) => boolean, lo = 6, hi = 11): { row: number; col: number } | undefined {
   for (const ch of planned(k)) {
     const onRamp = new Set(Object.keys(ch.ramps ?? {}).map(Number));
     const inLot = (c: number, r: number) => ch.lots.some((b) => c >= b.x0 && c <= b.x1 && r >= b.y0 && r <= b.y1);
-    for (let r = 6; r <= 11; r++) {
-      const cols = [3, 4, 5, 6, 7, 8];
+    for (let r = lo; r <= hi; r++) {
+      const cols = [lo - 3, lo - 2, lo - 1, lo, lo + 1, lo + 2];
       const ok = cols.every((c) => walked(k, ch.cx * S + c, ch.cy * S + r) && !onRamp.has(r * S + c) && !inLot(c, r));
       const lv = cols.map((c) => level(k, ch.cx * S + c, ch.cy * S + r));
-      if (ok && lv[0] === lv[1] && lv[1] === lv[2] && lv[3] === lv[4] && lv[4] === lv[5] && lv[3] - lv[2] === h) return { row: ch.cy * S + r, col: ch.cx * S + 6 };
+      if (ok && lv[0] === lv[1] && lv[1] === lv[2] && lv[3] === lv[4] && lv[4] === lv[5] && lv[3] - lv[2] === h && (!want || want(ch, r * S + lo))) return { row: ch.cy * S + r, col: ch.cx * S + lo };
     }
   }
   return undefined;
@@ -162,7 +162,7 @@ describe('a plateau eight levels high (T474, the synthetic rise)', () => {
     expect(ramps).toBeGreaterThan(0);
   }, 120_000);
 
-  it('the jump clears a tile and not two; the way of the people never crosses a cliff, and goes round by a ramp', async () => {
+  it('the jump clears a tile and not two; the way of the people never crosses a cliff: round by a ramp, or none to an enclave', async () => {
     const k = await boot(plateau(4));
     const edge = edgeOf(k, 4);
     expect(edge, 'a clean edge of the plateau').toBeDefined();
@@ -184,11 +184,20 @@ describe('a plateau eight levels high (T474, the synthetic rise)', () => {
     k.jump();
     for (let i = 0; i < 120; i++) k.tick(1 / 60);
     expect(k.wandererCarpet().x).toBeLessThan(high!.col);
-    // The way of the people: every step of it walked, none across the edge of the plateau.
-    const h = high!;
+    // The way of the people: every step of it walked, none across the edge of the plateau. A plateau of 36 tiles is kept as an enclave a
+    // climb reaches (T477: every world climbs) and no way of theirs goes up; one of 100 (31 % of the place, beyond the mountainous quota) is
+    // joined, and the way goes round by a ramp.
+    const kept = edgeOf(k, 8, (ch, cell) => ch.network!.enclaves.some((e) => e.kept && e.cells.includes(cell)));
+    expect(kept, 'a plateau kept as an enclave').toBeDefined();
+    const people = (a: { col: number; row: number }) => findRoute([a.col - 3, a.row], [a.col + 2, a.row], (c, r) => k.free(c + 0.5, r + 0.5, 0.35), (c, r, nc, nr) => !k.riseOnStep(c, r, nc, nr), 0, 4000);
+    expect(people(kept!), 'the people do not climb to an enclave').toBeUndefined();
+    k.syntheticRise(plateau(8, 4, 13));
+    const joined = edgeOf(k, 8, (ch, cell) => ch.network!.reach[cell] === 1, 4, 13);
+    expect(joined, 'a plateau the network joins').toBeDefined();
+    const h = joined!;
     expect(k.riseOnStep(h.col - 1, h.row, h.col, h.row)).toBe(true);
     expect(k.riseOnStep(h.col - 1, h.row - 1, h.col, h.row)).toBe(true);
-    const way = findRoute([h.col - 3, h.row], [h.col + 2, h.row], (c, r) => k.free(c + 0.5, r + 0.5, 0.35), (c, r, nc, nr) => !k.riseOnStep(c, r, nc, nr), 0, 4000);
+    const way = people(h);
     expect(way, 'the plateau is joined: a way goes round, by a ramp').toBeDefined();
     for (let i = 1; i < way!.length; i++) expect(k.riseOnStep(way![i - 1][0], way![i - 1][1], way![i][0], way![i][1])).toBe(false);
     expect(way!.length).toBeGreaterThan(6);

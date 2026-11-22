@@ -423,7 +423,9 @@ export class Wanderer {
     const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) + ride : k.floorAt(pcf.x, pcf.y, p.z)) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
-    const y = jump ? Math.max(floor, jump.y) : floor;
+    // A climb (T477): the feet go up or down the face, whatever the ground under them; the camera does not follow them (`lift`).
+    const scaling = k.zone === 'sim' ? k.climbing() : undefined;
+    const y = scaling ? scaling.y : jump ? Math.max(floor, jump.y) : floor;
     this.lift = y - floor;
     const sink = swims ? Math.max(0, k.floorAt(pcf.x, pcf.y, p.z) - swimFloor(k, pcf.x, pcf.y) - ride) : 0;
     this.sunk += (sink - this.sunk) * Math.min(1, dt * 14);
@@ -449,10 +451,12 @@ export class Wanderer {
     ud.cx = on.x;
     ud.cy = on.y;
     turnTowards(this.view, goal, dt);
-    if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * (swims ? 4 : 7);
+    // On the face of a climb the limbs reach and pull, slower than a walk.
+    if (scaling?.face) this.view.phase += dt * 5;
+    else if (walking && !jump) this.view.phase += Math.max(moved, 0.05) * (swims ? 4 : 7);
     else if (swims) this.view.phase += dt * 1.5;
     if (swims) swimLimbs(this.view, walking, dt, t);
-    else animateLimbs(this.view, walking && !jump, dt, t);
+    else animateLimbs(this.view, !!scaling?.face || (walking && !jump), dt, t);
     // What it wields, in hand (T288), with the wanderer's material: never cut, as its body.
     hold(k, this.view, heldBy(k, k.wandererEntity), MAT.corona, t, (o) => (o.userData.player = true), heldSeedOf(k, k.wandererEntity));
   }

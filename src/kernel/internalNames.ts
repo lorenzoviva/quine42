@@ -749,9 +749,9 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       altro: 'other', chat: 'chat', dici: 'say', dai: 'give', oggetto: 'item', contenitore: 'container', fabbrica: 'craft', pannello: 'panel',
       casella: 'tile', ramo: 'branch', pubblica: 'publish', segui: 'follow', agente: 'agent', ricarica: 'recharge', ingresso: 'welcome',
       aggiorna: 'update', correzione: 'correction', esito: 'result', rifiuto: 'refusal', mondo: 'world', concilio: 'council', file: 'file',
-      carta: 'card', ritmo: 'pace', regione: 'region',
+      carta: 'card', ritmo: 'pace', regione: 'region', salto: 'jump',
     },
-    note: '`card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo) e `region` (T375, ADR-0201: le regioni del master) nascono inglesi; `carta`, `ritmo` e `regione` sono solo le parole del concetto, nessun client le ha mandate',
+    note: '`card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo), `region` (T375, ADR-0201: le regioni del master) e `jump` (T477, ADR-0251: il salto che il server fa) nascono inglesi; `carta`, `ritmo`, `regione` e `salto` sono solo le parole del concetto, nessun client le ha mandate',
   }),
   d({
     id: 'valori-filo',

@@ -234,8 +234,8 @@ export type Effect =
   | { type: 'memory'; text: string; weight?: number }
   | { type: 'birth'; name?: string }
   // New mechanics: a state of the wanderer (on horseback, rowing, wearing a backpack…) that changes how
-  // fast they go, how much they carry, how far they see; duration 0 = until taken off.
-  | { type: 'state'; name: string; speed?: number; weight?: number; light?: number; duration?: number }
+  // fast they go, how much they carry, how far they see, how high they climb (T477: levels, at most `CLIMB`); duration 0 = until taken off.
+  | { type: 'state'; name: string; speed?: number; weight?: number; light?: number; climb?: number; duration?: number }
   | { type: 'remove_state'; name: string };
 
 export const EFFECT_TYPES = ['message', 'needs', 'create_item', 'consume', 'destroy', 'open', 'container', 'terrain', 'relief', 'fire', 'light', 'shield', 'push', 'summon', 'bond', 'memory', 'birth', 'state', 'remove_state'] as const;
