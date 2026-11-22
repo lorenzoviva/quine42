@@ -1,0 +1,157 @@
+{
+ "giro": "giro1",
+ "braccio": "prima",
+ "concetto": "barca",
+ "classe": "vessel",
+ "taglia": "large",
+ "specialita": "coachbuilder",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 7,
+ "voti": [
+  6,
+  7
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "pezzi staccati: 8% dei voxel non è attaccato al corpo principale (7 pezzi)"
+   ]
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-4-argon",
+   "secondi": 27,
+   "prompt": 7597,
+   "cached": 0,
+   "output": 2305,
+   "thoughts": 0,
+   "usd": 0.038244,
+   "sistema": 23295,
+   "esito": "scartato",
+   "motivo": "pezzi staccati: 8% dei voxel non è attaccato al corpo principale (7 pezzi)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 18,
+   "prompt": 9942,
+   "cached": 0,
+   "output": 2170,
+   "thoughts": 0,
+   "usd": 0.041584,
+   "sistema": 23295,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 3024,
+   "cached": 0,
+   "output": 82,
+   "thoughts": 266,
+   "usd": 0.007668,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-4-argon",
+   "secondi": 25,
+   "prompt": 10946,
+   "cached": 0,
+   "output": 2651,
+   "thoughts": 0,
+   "usd": 0.048402,
+   "sistema": 23295,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 3004,
+   "cached": 0,
+   "output": 52,
+   "thoughts": 0,
+   "usd": 0.004974,
+   "sistema": 6179,
+   "voto": 7
+  }
+ ],
+ "token": {
+  "prompt": 34513,
+  "cached": 0,
+  "output": 7260,
+  "thoughts": 266
+ },
+ "usd": 0.14087,
+ "usdGemini": 0.14087,
+ "secondi": 77,
+ "sistema": {
+  "caratteri": 23295,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "vessel"
+  ]
+ },
+ "registro": {
+  "coachbuilder": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 30429,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "furl",
+   "hoist"
+  ],
+  "import": [],
+  "nascoste": 3,
+  "traslucide": [],
+  "luci": 1,
+  "parti": [],
+  "aree": [
+   "boarding",
+   "helm",
+   "hold"
+  ],
+  "colori": 16,
+  "semi": 0
+ }
+}

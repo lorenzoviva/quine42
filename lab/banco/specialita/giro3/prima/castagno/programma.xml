@@ -1,0 +1,35 @@
+<!-- Castagno: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 3/10 -->
+<sequence values="BTFLNV" size="40 40 60" symmetry="(xy)" name="Castagno">
+  <color symbol="T" value="5d4037" name="tronco"/>
+  <color symbol="F" value="2e7d32" name="chioma"/>
+  <color symbol="L" value="4caf50" name="chioma al sole"/>
+  <color symbol="N" value="1b5e20" name="chioma in ombra"/>
+  <color symbol="V" hidden="True" name="sagoma"/>
+
+  <!-- Robust trunk, taller now to meet the 48 height requirement -->
+  <cylinder at="20 20 0" size="6 6 48" color="T" on="B"/>
+  
+  <!-- Broad, round canopy shape, starting higher up -->
+  <ellipsoid at="20 20 50" size="38 38 28" color="V" on="B"/>
+  
+  <!-- Fill the canopy shape with leaves -->
+  <all steps="3" symmetry="(xyz)">
+    <rule in="T V" out="T F"/>
+    <rule in="F V" out="F F"/>
+  </all>
+  <one steps="4000" symmetry="(xyz)" in="F V" out="F F"/>
+  
+  <!-- Remove the shape guide -->
+  <all in="V" out="B"/>
+
+  <!-- Add texture: light and shadow on the leaves -->
+  <prl steps="1">
+    <rule in="B F" out="B L" p="0.3"/>
+    <rule in="F B" out="N B" p="0.7"/>
+  </prl>
+  
+  <!-- Cleanup: ensure no floating leaves -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="F" out="B" values="B" sum="0..5"/>
+  </convolution>
+</sequence>

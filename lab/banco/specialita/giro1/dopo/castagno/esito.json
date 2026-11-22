@@ -1,0 +1,152 @@
+{
+ "giro": "giro1",
+ "braccio": "dopo",
+ "concetto": "castagno",
+ "classe": "tree",
+ "specialita": "landscaper",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 10% dei voxel non è attaccato al corpo principal",
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 27% dei voxel non è attaccato al corpo principal",
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 9% dei voxel non è attaccato al corpo principale"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5678,
+   "cached": 0,
+   "output": 636,
+   "thoughts": 2069,
+   "usd": 0.005477,
+   "sistema": 18345,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2762,
+   "cached": 0,
+   "output": 104,
+   "thoughts": 204,
+   "usd": 0.006915,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 5678,
+   "cached": 2035,
+   "output": 716,
+   "thoughts": 1696,
+   "usd": 0.004579625,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 10% dei voxel non è attaccato al corpo principal"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6467,
+   "cached": 4073,
+   "output": 563,
+   "thoughts": 1885,
+   "usd": 0.004372325,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 27% dei voxel non è attaccato al corpo principal"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6314,
+   "cached": 4072,
+   "output": 590,
+   "thoughts": 110,
+   "usd": 0.0017123,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 9% dei voxel non è attaccato al corpo principale"
+  }
+ ],
+ "token": {
+  "prompt": 26899,
+  "cached": 10180,
+  "output": 2609,
+  "thoughts": 5964
+ },
+ "usd": 0.02306,
+ "usdGemini": 0.02306,
+ "secondi": 30,
+ "sistema": {
+  "caratteri": 18345,
+  "ruolo": 9839,
+  "sezione": 2039,
+  "esempi": [
+   "tree"
+  ]
+ },
+ "registro": {
+  "landscaper": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 3950,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 1,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 4,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 4,
+  "semi": 0.596
+ }
+}

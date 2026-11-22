@@ -1,0 +1,5 @@
+[sculptor] propone: «Castagno» (albero, Paesaggista, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Castagno»: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 10% dei voxel non è attaccato al corpo principal
+[kernel → sculptor] scarta: «Castagno»: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 27% dei voxel non è attaccato al corpo principal
+[kernel → sculptor] scarta: «Castagno»: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 9% dei voxel non è attaccato al corpo principale
+[artist → sculptor] obietta: «Castagno»: 6/10 — Il tronco è troppo cilindrico e rigido.

@@ -1,0 +1,3 @@
+[sculptor] propone: «Casetta del pastore» (edificio piccolo, Capomastro, gemini-4-argon)
+[kernel → sculptor] scarta: «Casetta del pastore»: riga 88, <Mark>: nodo sconosciuto (noti: one all prl sequence markov convolution path map wfc convchain pieces box ellipsoid cylinder cone line import union col
+[artist → sculptor] approva: «Casetta del pastore»: 7/10 — I dettagli in pietra sulle pareti sono rumorosi e sparsi come micro-voxel.

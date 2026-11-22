@@ -1,0 +1,159 @@
+{
+ "giro": "giro2",
+ "braccio": "prima",
+ "concetto": "mugnaia",
+ "classe": "person",
+ "specialita": "figurist",
+ "modello": "gemini-3.8-flash",
+ "fatto": true,
+ "voto": 7,
+ "voti": [
+  5,
+  7
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "pezzi staccati: 30% dei voxel non è attaccato al corpo principale (2 pezzi)"
+   ]
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.8-flash",
+   "secondi": 12,
+   "prompt": 7589,
+   "cached": 5543,
+   "output": 1423,
+   "thoughts": 0,
+   "usd": 0.007286475000000001,
+   "sistema": 23517,
+   "esito": "scartato",
+   "motivo": "pezzi staccati: 30% dei voxel non è attaccato al corpo principale (2 pezzi)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.8-flash",
+   "secondi": 11,
+   "prompt": 9052,
+   "cached": 0,
+   "output": 1400,
+   "thoughts": 0,
+   "usd": 0.012039,
+   "sistema": 23517,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2768,
+   "cached": 0,
+   "output": 85,
+   "thoughts": 325,
+   "usd": 0.007842,
+   "sistema": 6179,
+   "voto": 5
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-3.8-flash",
+   "secondi": 9,
+   "prompt": 10188,
+   "cached": 0,
+   "output": 1224,
+   "thoughts": 0,
+   "usd": 0.012231,
+   "sistema": 23517,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2768,
+   "cached": 979,
+   "output": 85,
+   "thoughts": 134,
+   "usd": 0.00480135,
+   "sistema": 6179,
+   "voto": 7
+  }
+ ],
+ "token": {
+  "prompt": 32365,
+  "cached": 6522,
+  "output": 4217,
+  "thoughts": 459
+ },
+ "usd": 0.0442,
+ "usdGemini": 0.0442,
+ "secondi": 39,
+ "sistema": {
+  "caratteri": 23517,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "person"
+  ]
+ },
+ "registro": {
+  "figurist": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 3027,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [
+   "leg",
+   "arm",
+   "head"
+  ],
+  "aree": [],
+  "colori": 12,
+  "semi": 0,
+  "arti": {
+   "leg": 2,
+   "arm": 6,
+   "head": 1
+  },
+  "artiIndovinati": false
+ }
+}

@@ -1,0 +1,174 @@
+{
+ "giro": "giro1",
+ "braccio": "dopo",
+ "concetto": "barca",
+ "classe": "vessel",
+ "taglia": "large",
+ "specialita": "coachbuilder",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "riga 49, <intersection>: nodo sconosciuto (noti: one all prl sequence markov convolution path map wfc convchain pieces box ellipsoid cylinder cone line import u"
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "pezzi staccati: 8% dei voxel non è attaccato al corpo principale (5 pezzi)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-4-argon",
+   "secondi": 18,
+   "prompt": 6228,
+   "cached": 0,
+   "output": 2168,
+   "thoughts": 0,
+   "usd": 0.034136,
+   "sistema": 19082,
+   "esito": "scartato",
+   "motivo": "riga 49, <intersection>: nodo sconosciuto (noti: one all prl sequence markov convolution path map wfc convchain pieces box ellipsoid cylinder cone line import u"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 17,
+   "prompt": 8465,
+   "cached": 0,
+   "output": 2082,
+   "thoughts": 0,
+   "usd": 0.03775,
+   "sistema": 19082,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 3008,
+   "cached": 0,
+   "output": 79,
+   "thoughts": 189,
+   "usd": 0.006924,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-4-argon",
+   "secondi": 17,
+   "prompt": 9445,
+   "cached": 0,
+   "output": 2313,
+   "thoughts": 0,
+   "usd": 0.04202,
+   "sistema": 19082,
+   "esito": "scartato",
+   "motivo": "pezzi staccati: 8% dei voxel non è attaccato al corpo principale (5 pezzi)"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 21,
+   "prompt": 11798,
+   "cached": 0,
+   "output": 2315,
+   "thoughts": 0,
+   "usd": 0.046746,
+   "sistema": 19082,
+   "esito": "passa"
+  },
+  {
+   "n": 6,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 3046,
+   "cached": 0,
+   "output": 73,
+   "thoughts": 287,
+   "usd": 0.007809,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 41990,
+  "cached": 0,
+  "output": 9030,
+  "thoughts": 476
+ },
+ "usd": 0.17539,
+ "usdGemini": 0.17539,
+ "secondi": 82,
+ "sistema": {
+  "caratteri": 19082,
+  "ruolo": 9839,
+  "sezione": 2822,
+  "esempi": [
+   "vessel"
+  ]
+ },
+ "registro": {
+  "coachbuilder": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 28388,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "furl",
+   "hoist"
+  ],
+  "import": [],
+  "nascoste": 2,
+  "traslucide": [],
+  "luci": 1,
+  "parti": [],
+  "aree": [
+   "boarding",
+   "helm",
+   "hold"
+  ],
+  "colori": 14,
+  "semi": 0
+ }
+}

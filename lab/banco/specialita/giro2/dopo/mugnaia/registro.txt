@@ -1,0 +1,2 @@
+[sculptor] propone: «Mugnaia» (persona, Figurinista, gemini-3.8-flash)
+[artist → sculptor] obietta: «Mugnaia»: 6/10 — Il copricapo sporge troppo in altezza alterando la figura

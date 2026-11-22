@@ -1,0 +1,105 @@
+{
+ "giro": "giro2",
+ "braccio": "prima",
+ "concetto": "rocca",
+ "classe": "structure",
+ "taglia": "large",
+ "specialita": "architect",
+ "modello": "gemini-4-argon",
+ "fatto": false,
+ "voti": [],
+ "cantina": false,
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 4,
+   "motivi": [
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 17 × 8 voxel (1,06 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "piano",
+   "modello": "gemini-4-argon",
+   "secondi": 30,
+   "prompt": 7598,
+   "cached": 5549,
+   "output": 2323,
+   "thoughts": 0,
+   "usd": 0.027882900000000002,
+   "sistema": 19888,
+   "esito": "piano"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "intero",
+   "modello": "gemini-4-argon",
+   "secondi": 50,
+   "prompt": 9994,
+   "cached": 0,
+   "output": 5342,
+   "thoughts": 0,
+   "usd": 0.073408,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 17 × 8 voxel (1,06 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 45,
+   "prompt": 24902,
+   "cached": 0,
+   "output": 5410,
+   "thoughts": 0,
+   "usd": 0.103904,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 52,
+   "prompt": 24812,
+   "cached": 0,
+   "output": 5465,
+   "thoughts": 0,
+   "usd": 0.104274,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra"
+  }
+ ],
+ "token": {
+  "prompt": 67306,
+  "cached": 5549,
+  "output": 18540,
+  "thoughts": 0
+ },
+ "usd": 0.30947,
+ "usdGemini": 0.30947,
+ "secondi": 183,
+ "sistema": {
+  "caratteri": 19888,
+  "ruolo": 16015,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "architect": 4
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

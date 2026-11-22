@@ -1,0 +1,105 @@
+{
+ "giro": "giro1",
+ "braccio": "dopo",
+ "concetto": "rocca",
+ "classe": "structure",
+ "taglia": "large",
+ "specialita": "architect",
+ "modello": "gemini-4-argon",
+ "fatto": false,
+ "voti": [],
+ "cantina": false,
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 4,
+   "motivi": [
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 21 × 8 voxel (1,31 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 11 × 8 voxel (0,69 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "piano",
+   "modello": "gemini-4-argon",
+   "secondi": 30,
+   "prompt": 8775,
+   "cached": 0,
+   "output": 2484,
+   "thoughts": 0,
+   "usd": 0.04239,
+   "sistema": 23933,
+   "esito": "piano"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "intero",
+   "modello": "gemini-4-argon",
+   "secondi": 45,
+   "prompt": 11338,
+   "cached": 0,
+   "output": 5368,
+   "thoughts": 0,
+   "usd": 0.076356,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 42,
+   "prompt": 25862,
+   "cached": 0,
+   "output": 5326,
+   "thoughts": 0,
+   "usd": 0.104984,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 21 × 8 voxel (1,31 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 38,
+   "prompt": 26066,
+   "cached": 0,
+   "output": 5219,
+   "thoughts": 0,
+   "usd": 0.104322,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 11 × 8 voxel (0,69 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s"
+  }
+ ],
+ "token": {
+  "prompt": 72041,
+  "cached": 0,
+  "output": 18397,
+  "thoughts": 0
+ },
+ "usd": 0.32805,
+ "usdGemini": 0.32805,
+ "secondi": 160,
+ "sistema": {
+  "caratteri": 23933,
+  "ruolo": 20060,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "architect": 4
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

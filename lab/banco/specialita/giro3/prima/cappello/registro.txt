@@ -1,0 +1,3 @@
+[sculptor] propone: «Cappello di paglia» (oggetto piccolo, Sarto, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Cappello di paglia»: non tocca terra: il voxel più basso è a z=1, deve appoggiarsi a z=0
+[artist → sculptor] obietta: «Cappello di paglia»: 6/10 — La forma generale è troppo alta e stretta, ricordando un uovo o un alveare anziché un cappello a tesa larga.

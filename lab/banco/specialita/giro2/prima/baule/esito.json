@@ -1,0 +1,149 @@
+{
+ "giro": "giro2",
+ "braccio": "prima",
+ "concetto": "baule",
+ "classe": "furniture",
+ "specialita": "joiner",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "riga 26, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 7505,
+   "cached": 4076,
+   "output": 421,
+   "thoughts": 2269,
+   "usd": 0.004994149999999999,
+   "sistema": 23872,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2724,
+   "cached": 0,
+   "output": 88,
+   "thoughts": 285,
+   "usd": 0.007443,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 7505,
+   "cached": 4076,
+   "output": 438,
+   "thoughts": 2546,
+   "usd": 0.00543515,
+   "sistema": 23872,
+   "esito": "scartato",
+   "motivo": "riga 26, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 7991,
+   "cached": 4077,
+   "output": 463,
+   "thoughts": 147,
+   "usd": 0.001995425,
+   "sistema": 23872,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2724,
+   "cached": 0,
+   "output": 84,
+   "thoughts": 345,
+   "usd": 0.007947,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 28449,
+  "cached": 12229,
+  "output": 1494,
+  "thoughts": 5592
+ },
+ "usd": 0.02781,
+ "usdGemini": 0.02781,
+ "secondi": 25,
+ "sistema": {
+  "caratteri": 23872,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "furniture"
+  ]
+ },
+ "registro": {
+  "joiner": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 2991,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 5,
+  "semi": 0.06
+ }
+}

@@ -1,0 +1,25 @@
+<!-- Cappello di paglia: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 6/10 -->
+<sequence values="BYHh" size="12 12 12" symmetry="(xy)" name="Cappello di paglia">
+  <color symbol="Y" value="ffec27"/>
+  <color symbol="H" value="e4bb40"/>
+  <color symbol="h" value="8a6f30"/>
+  
+  <ellipsoid at="6 6 4" size="6 6 6" color="Y"/>
+  <cylinder at="6 6 2" size="12 12 2" color="Y"/>
+  <cylinder at="6 6 3" size="7 7 1" color="H"/>
+
+  <all>
+    <rule in="Y B" out="h Y"/>
+    <rule in="H B" out="h H"/>
+  </all>
+</sequence>
+
+<worn zone="head">
+  <all>
+    <rule in="[rm] z" out="Y z"/>
+    <rule in="[rm]/z" out="Y/z"/>
+    <rule in="[rm]z" out="Yz"/>
+    <rule in="z[rm]" out="zY"/>
+    <rule in="[rm] Y" out="H Y"/>
+  </all>
+</worn>

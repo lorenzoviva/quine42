@@ -1,0 +1,189 @@
+{
+ "giro": "giro2",
+ "braccio": "prima",
+ "concetto": "cappello",
+ "classe": "object",
+ "specialita": "tailor",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 5,
+ "voti": [
+  5,
+  4
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 3,
+   "motivi": [
+    "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0",
+    "<worn> (riga 16), sul corpo di prova in piedi: \"[..]\" non è ammesso in un'uscita: [rm]/."
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 6,
+   "prompt": 6575,
+   "cached": 4073,
+   "output": 305,
+   "thoughts": 1816,
+   "usd": 0.0039088249999999995,
+   "sistema": 21442,
+   "esito": "scartato",
+   "motivo": "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6926,
+   "cached": 4074,
+   "output": 340,
+   "thoughts": 127,
+   "usd": 0.00151535,
+   "sistema": 21442,
+   "esito": "scartato",
+   "motivo": "<worn> (riga 16), sul corpo di prova in piedi: \"[..]\" non è ammesso in un'uscita: [rm]/."
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6972,
+   "cached": 4074,
+   "output": 295,
+   "thoughts": 2445,
+   "usd": 0.00493635,
+   "sistema": 21442,
+   "esito": "passa"
+  },
+  {
+   "n": 4,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 2,
+   "prompt": 2784,
+   "cached": 0,
+   "output": 85,
+   "thoughts": 0,
+   "usd": 0.004941,
+   "sistema": 6179,
+   "voto": 5
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6575,
+   "cached": 4073,
+   "output": 306,
+   "thoughts": 137,
+   "usd": 0.001391825,
+   "sistema": 21442,
+   "esito": "scartato",
+   "motivo": "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+  },
+  {
+   "n": 6,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6927,
+   "cached": 4074,
+   "output": 326,
+   "thoughts": 126,
+   "usd": 0.0014930999999999998,
+   "sistema": 21442,
+   "esito": "passa"
+  },
+  {
+   "n": 7,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 2,
+   "prompt": 2784,
+   "cached": 0,
+   "output": 95,
+   "thoughts": 0,
+   "usd": 0.005031,
+   "sistema": 6179,
+   "voto": 4
+  }
+ ],
+ "token": {
+  "prompt": 39543,
+  "cached": 20368,
+  "output": 1752,
+  "thoughts": 4651
+ },
+ "usd": 0.02322,
+ "usdGemini": 0.02322,
+ "secondi": 24,
+ "sistema": {
+  "caratteri": 21442,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "forbici"
+  ]
+ },
+ "registro": {
+  "tailor": 5
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 318,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 2,
+  "semi": 0,
+  "sezioni": [
+   "head"
+  ],
+  "vestito": {
+   "in piedi": "B",
+   "a quattro zampe": "B"
+  }
+ }
+}

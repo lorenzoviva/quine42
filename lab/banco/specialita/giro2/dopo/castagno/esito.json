@@ -1,0 +1,146 @@
+{
+ "giro": "giro2",
+ "braccio": "dopo",
+ "concetto": "castagno",
+ "classe": "tree",
+ "specialita": "landscaper",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": false,
+ "voti": [],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "riga 34, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)",
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 49% dei voxel non è attaccato al corpo principal",
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)"
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 16% dei voxel non è attaccato al corpo principal",
+    "troppo basso: alto 23 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "riga 28, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5678,
+   "cached": 0,
+   "output": 538,
+   "thoughts": 2443,
+   "usd": 0.005891,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "riga 34, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6264,
+   "cached": 4072,
+   "output": 534,
+   "thoughts": 2514,
+   "usd": 0.0052218,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 49% dei voxel non è attaccato al corpo principal"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 6285,
+   "cached": 4072,
+   "output": 561,
+   "thoughts": 2696,
+   "usd": 0.00554055,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 6,
+   "prompt": 5678,
+   "cached": 2035,
+   "output": 595,
+   "thoughts": 1747,
+   "usd": 0.004474625,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato); pezzi staccati: 16% dei voxel non è attaccato al corpo principal"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 6346,
+   "cached": 4072,
+   "output": 395,
+   "thoughts": 2862,
+   "usd": 0.0055558000000000005,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 23 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 6,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6123,
+   "cached": 4072,
+   "output": 604,
+   "thoughts": 135,
+   "usd": 0.00172305,
+   "sistema": 18345,
+   "esito": "scartato",
+   "motivo": "riga 28, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  }
+ ],
+ "token": {
+  "prompt": 36374,
+  "cached": 18323,
+  "output": 3227,
+  "thoughts": 12397
+ },
+ "usd": 0.02841,
+ "usdGemini": 0.02841,
+ "secondi": 42,
+ "sistema": {
+  "caratteri": 18345,
+  "ruolo": 9839,
+  "sezione": 2039,
+  "esempi": [
+   "tree"
+  ]
+ },
+ "registro": {
+  "landscaper": 6
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

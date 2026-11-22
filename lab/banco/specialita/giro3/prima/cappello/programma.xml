@@ -1,0 +1,25 @@
+<!-- Cappello di paglia: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 6/10 -->
+<sequence values="B P p" size="12 12 12" name="Cappello di paglia" symmetry="(xy)">
+  <color symbol="P" value="e6d08a" name="paglia"/>
+  <color symbol="p" value="c2a550" name="intreccio"/>
+  
+  <!-- Brim at z=0 -->
+  <cylinder at="6 6 0" radius="6" height="1" color="P"/>
+  <!-- Crown starting at z=1 -->
+  <cylinder at="6 6 1" radius="4" height="3" color="P"/>
+  
+  <!-- Texture (weave) -->
+  <all steps="20">
+    <rule in="P" out="p" p="0.2"/>
+  </all>
+
+  <worn zone="head">
+    <all>
+      <rule in="[rm] z" out="P z"/>
+      <rule in="[rm]/z" out="P/z"/>
+      <rule in="[rm]z" out="Pz"/>
+      <rule in="z[rm]" out="zP"/>
+    </all>
+    <all in="P [rmoB]" out="P *"/>
+  </worn>
+</sequence>

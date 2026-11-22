@@ -1,0 +1,12 @@
+{
+ "cacheOpus": true,
+ "giro": "cache-opus-prova1",
+ "nota": "La prima prova dei segni della cache (22/11): tre chiamate di Opus 5.5 via OpenRouter (A Capomastro, B Capomastro, C Figurinista). Il banco non le ha contate (il kernel sostituisce onCall del modello al boot) e ha salvato tre volte l'usage della prima: di A si sa che ha scritto in cache 9 163 token su 9 197 (cache_write_tokens) e ne ha letti 0, per 0,046051 $; di B e C non si sa. Qui il registro le conta tutte e tre al costo di A, il più alto possibile (una scrittura): 0,138153 $.",
+ "usd": 0.138153,
+ "usdOpenRouter": 0.138153,
+ "chiamate": [
+  { "passo": "A, Capomastro (freddo)", "specialita": "mason", "usage": { "prompt_tokens": 9197, "completion_tokens": 5, "cost": 0.046051, "prompt_tokens_details": { "cached_tokens": 0, "cache_write_tokens": 9163 }, "completion_tokens_details": { "reasoning_tokens": 0 } } },
+  { "passo": "B, Capomastro di nuovo", "specialita": "mason", "usage": "non salvato" },
+  { "passo": "C, Figurinista", "specialita": "figurist", "usage": "non salvato" }
+ ]
+}

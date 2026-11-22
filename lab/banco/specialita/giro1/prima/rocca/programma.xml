@@ -1,0 +1,269 @@
+<!-- rocca di confine: sculpted by gemini-4-argon (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhuswdtabvcCgpqr" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Main Keep interior: 11 cells wide (55 voxels along x), 10 cells deep (50 voxels along y) -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="5"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="4"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="5"/>
+      <prl in="H" out="h"/>
+
+      <!-- Keep walls -->
+      <all in="hE" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Flank watchtower on one of the side walls (seed chooses side & position) -->
+      <one in="EEw/EEw/EEw/EEw" out="tt*/tt*/tt*/tt*" symmetry="(x)" steps="1"/>
+      <prl in="E/t" out="t/*" p="0.5" steps="1" symmetry="()"/>
+      <all in="t[Ew]" out="*v"/>
+      <all in="v[Ew]/*v" out="*v/**"/>
+      <!-- Connect tower interior to keep interior -->
+      <all in="twh" out="tth" symmetry="(x)"/>
+
+      <!-- Side garrison wing on the opposite side wall (seed chooses position) -->
+      <one in="wEE/wEE/wEE/wEE" out="*aa/*aa/*aa/*aa" symmetry="(x)" steps="1"/>
+      <prl in="a/E" out="*/a" p="0.5" steps="1" symmetry="()"/>
+      <all in="aE" out="*b"/>
+      <all in="bE/*b" out="*b/**"/>
+      <!-- Connect wing interior to keep interior -->
+      <all in="hwb" out="hha" symmetry="(x)"/>
+
+      <!-- Mark back 5 rows of keep interior as 'u' (cellar zone: 55 voxels wide x 25 deep, leaving 25 voxels front floor h) -->
+      <all in="w/h/h/h/h/h/h" out="*/u/u/u/u/u/*" symmetry="()"/>
+
+      <!-- Mark stair zone 's' (4 cells = 20 voxels along x, 2 cells = 10 voxels along y) against the front wall inside h -->
+      <one in="hhhhhhhhhhh/hhhhhhhhhhh/wwwwwwwwwww" out="****ssss***/****ssss***/***********" symmetry="()" steps="1"/>
+
+      <!-- Front courtyard / forecourt in front of keep -->
+      <all in="w/E" out="*/c" symmetry="()" steps="2"/>
+      <all in="cE" out="*c" symmetry="(x)" steps="1"/>
+
+      <!-- At Huge (where 7+ cells of E remain around the keep), expand courtyard into a full surrounding bailey with curtain wall C, corner bastions p, gatehouse g, and well q -->
+      <all in="wEEEEEEE" out="*ccccC**" symmetry="(x)" steps="1"/>
+      <all in="E/E/E/E/E/[wvb]" out="*/C/c/c/c/*" symmetry="()" steps="1"/>
+      <all in="c/E/E/E" out="*/c/c/*" symmetry="()" steps="1"/>
+      <all in="cE/*c" out="*c/**" steps="6"/>
+      <all in="c/E/E" out="*/C/*" symmetry="()"/>
+      <all in="cEE" out="*C*" symmetry="(x)"/>
+      <all in="CE/*C" out="*C/**"/>
+
+      <!-- Corner bastions 'p' on outer corners of curtain wall C (only at Huge+) -->
+      <one in="EE/EC" out="*p/**" steps="4"/>
+      <all in="p[EC]" out="*p" steps="1"/>
+      <all in="p*/*[EC]" out="**/*p" steps="1"/>
+
+      <!-- Courtyard well/cistern 'q' in a 3x3 clear courtyard space (only fits at Huge+) -->
+      <one in="ccc/ccc/ccc" out="***/*q*/***" steps="1"/>
+
+      <!-- Main door 'd' centered on front keep wall, gatehouse 'g' through outer curtain wall, and road 'r' to front edge -->
+      <one in="wwwwwww/ccccccc" out="**ddd**/**rrr**" symmetry="()" steps="1"/>
+      <all in="r/c" out="*/r" symmetry="()"/>
+      <all in="r/[CE]" out="*/r" symmetry="()"/>
+      <all in="Cr" out="gr" symmetry="(x)" steps="1"/>
+      <all in="Cg" out="gg" symmetry="(x)" steps="1"/>
+    </sequence>
+
+    <map scale="5 5 1" values="BEhuswdtabvcCgpqrfFWJLRKUGXYQZzDPVOkNMTS#20#21#90#91#92#93#94" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="u" out="uuuuu/uuuuu/uuuuu/uuuuu/uuuuu"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="t" out="ttttt/ttttt/ttttt/ttttt/ttttt"/>
+      <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="b" out="bbbbb/bbbbb/bbbbb/bbbbb/bbbbb"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="C" out="CCCCC/CCCCC/CCCCC/CCCCC/CCCCC"/>
+      <rule in="g" out="ggggg/ggggg/ggggg/ggggg/ggggg"/>
+      <rule in="p" out="ppppp/ppppp/ppppp/ppppp/ppppp"/>
+      <rule in="q" out="ccccc/cqqqc/cqZqc/cqqqc/ccccc"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+
+      <sequence symmetry="(xy)">
+        <!-- Define unions for parts -->
+        <union symbol="+" values="WJXYG"/>
+        <union symbol="=" values="fFR"/>
+        <union symbol="%" values="WJX"/>
+
+        <!-- 1. Mark D on the first layer under the soil (z=19) directly under 'u' before anything else rises -->
+        <all in="u B" out="* D" symmetry="()"/>
+
+        <!-- 2. Ground paving & well -->
+        <all in="B q" out="q X" steps="4"/>
+        <prl in="q" out="B"/>
+        <all in="B Z" out="Z z" steps="2"/>
+        <prl in="Z" out="B"/>
+
+        <!-- 3. Outer bailey curtain wall C (24 tall), corner bastions p (34 tall), gatehouse g (38 tall) -->
+        <all in="B C" out="C X" steps="24"/>
+        <prl in="C" out="B"/>
+        <all in="B p" out="p X" steps="34"/>
+        <prl in="p" out="B"/>
+        <all in="B g" out="g r" steps="1"/>
+        <all in="B g" out="g B" steps="29"/>
+        <all in="B g" out="g G" steps="8"/>
+        <prl in="g" out="B"/>
+
+        <!-- 4. Side garrison wing: walls b (36 tall) and interior a (1 storey = 32 + slab) -->
+        <all in="B b" out="b Y" steps="8"/>
+        <all in="B b" out="b Q" steps="12"/>
+        <all in="B b" out="b Y" steps="16"/>
+        <prl in="b" out="B"/>
+        <all in="B a" out="a f" steps="1"/>
+        <all in="B a" out="a B" steps="31"/>
+        <all in="B a" out="a R" steps="1"/>
+        <prl in="a" out="B"/>
+
+        <!-- 5. Flank watchtower: walls v (76 tall) and interior t (2 storeys + roof terrace at 64) -->
+        <all in="B v" out="v J" steps="10"/>
+        <all in="B v" out="v Q" steps="12"/>
+        <all in="B v" out="v J" steps="20"/>
+        <all in="B v" out="v Q" steps="12"/>
+        <all in="B v" out="v J" steps="22"/>
+        <prl in="v" out="B"/>
+        <all in="B t" out="t f" steps="1"/>
+        <all in="B t" out="t B" steps="31"/>
+        <all in="B t" out="t F" steps="1"/>
+        <all in="B t" out="t B" steps="31"/>
+        <all in="B t" out="t R" steps="1"/>
+        <prl in="t" out="B"/>
+
+        <!-- 6. Main Keep walls w & front door wall d (68 tall: 2 storeys of 32 + 4 parapet base) -->
+        <all steps="8"><rule in="B w" out="w W"/><rule in="B d" out="d P"/></all>
+        <all steps="12"><rule in="B w" out="w Q"/><rule in="B d" out="d W"/></all>
+        <all steps="22"><rule in="B w" out="w W"/><rule in="B d" out="d W"/></all>
+        <all steps="12"><rule in="B w" out="w Q"/><rule in="B d" out="d Q"/></all>
+        <all steps="14"><rule in="B w" out="w W"/><rule in="B d" out="d W"/></all>
+        <prl><rule in="w" out="B"/><rule in="d" out="B"/></prl>
+
+        <!-- 7. Main Keep floors: h, u, s (z=20 floor f, z=21 stair strip T on s, z=52 slab F, z=84 roof terrace R) -->
+        <all steps="1">
+          <rule in="B h" out="h f"/>
+          <rule in="B u" out="u f"/>
+          <rule in="B s" out="s f"/>
+        </all>
+        <all in="B s" out="s T" steps="1" symmetry="()"/>
+        <all steps="31">
+          <rule in="B h" out="h B"/>
+          <rule in="B u" out="u B"/>
+        </all>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1">
+          <rule in="B h" out="h F"/>
+          <rule in="B u" out="u F"/>
+          <rule in="B s" out="s F"/>
+        </all>
+        <all steps="31">
+          <rule in="B h" out="h B"/>
+          <rule in="B u" out="u B"/>
+          <rule in="B s" out="s B"/>
+        </all>
+        <all steps="1">
+          <rule in="B h" out="h R"/>
+          <rule in="B u" out="u R"/>
+          <rule in="B s" out="s R"/>
+        </all>
+        <prl>
+          <rule in="h" out="B"/>
+          <rule in="u" out="B"/>
+          <rule in="s" out="B"/>
+        </prl>
+
+        <!-- 8. Include part-cellar after floors have risen and before part-stair -->
+        <import file="part-cellar"/>
+
+        <!-- 9. Include part-stair -->
+        <import file="part-stair"/>
+
+        <!-- 10. Seed main front door O at foot of front door wall P (where road r meets P at z=20) -->
+        <all in="P/r" out="O/*" symmetry="()" steps="1"/>
+        <all in="P/O" out="O/*" symmetry="()" steps="4"/>
+        <prl in="P" out="W"/>
+
+        <!-- Include part-door -->
+        <import file="part-door"/>
+
+        <!-- 11. Include part-battlements and part-slits on fortification walls -->
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- 12. Windows in the Q bands on all sides -->
+        <one steps="18">
+          <rule in="BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ BQ/BQ/BQ/BQ/BQ" out="*L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L *L/*L/*L/*L/*L"/>
+        </one>
+        <all in="LQQQQB" out="*LLLL*"/>
+        <prl in="Q" out="W"/>
+
+        <!-- 13. Chimney on the keep roof -->
+        <one in="B B R" out="* K *" steps="1" symmetry="()"/>
+        <all in="B K" out="K *" steps="12"/>
+      </sequence>
+    </map>
+  </map>
+
+  <!-- Palette: warm medieval stone, timber, slate/terracotta accents, high contrast -->
+  <color symbol="E" value="#7a8c56" name="erba" hidden="True"/>
+  <color symbol="H" value="#8c7b65" name="centro" hidden="True"/>
+  <color symbol="h" value="#b89f7d" name="pavimento della sala" area="keep" hidden="True"/>
+  <color symbol="u" value="#b89f7d" name="pavimento sopra la cantina" area="keep" hidden="True"/>
+  <color symbol="s" value="#b89f7d" name="zona della scala" area="keep" hidden="True"/>
+  <color symbol="w" value="#75787d" name="base del muro" area="keep" hidden="True"/>
+  <color symbol="d" value="#75787d" name="soglia del portone" area="keep" hidden="True"/>
+  <color symbol="t" value="#a38c6b" name="base della torre" area="tower" hidden="True"/>
+  <color symbol="v" value="#5e6166" name="fondazione della torre" area="tower" hidden="True"/>
+  <color symbol="a" value="#bfa786" name="base dell'ala" area="keep" hidden="True"/>
+  <color symbol="b" value="#82858a" name="fondazione dell'ala" area="keep" hidden="True"/>
+  <color symbol="C" value="#686b70" name="fondazione della cinta" area="courtyard" hidden="True"/>
+  <color symbol="g" value="#54575c" name="base del corpo di guardia" area="courtyard" hidden="True"/>
+  <color symbol="p" value="#54575c" name="base della torretta" area="tower" hidden="True"/>
+  <color symbol="q" value="#686b70" name="base della cisterna" area="courtyard" hidden="True"/>
+  <color symbol="Z" value="#416b75" name="fondo della cisterna" area="courtyard" hidden="True"/>
+
+  <!-- Visible ground & structure materials -->
+  <color symbol="c" value="#9c9384" name="lastricato del cortile" area="courtyard"/>
+  <color symbol="r" value="#877d6e" name="strada lastricata" area="yard"/>
+  <color symbol="W" value="#7c8085" name="pietra del mastio" area="keep"/>
+  <color symbol="J" value="#64686e" name="pietra della torre" area="tower"/>
+  <color symbol="Y" value="#8a8d91" name="muro dell'ala di guardia" area="keep"/>
+  <color symbol="X" value="#6e7175" name="cinta muraria" area="courtyard"/>
+  <color symbol="G" value="#595c61" name="arco del corpo di guardia" area="courtyard"/>
+  <color symbol="M" value="#8c9096" name="merlatura"/>
+  <color symbol="f" value="#9e7348" name="tavolato in legno" area="keep"/>
+  <color symbol="F" value="#87603a" name="solaio di quercia" area="keep"/>
+  <color symbol="R" value="#9c4a3b" name="terrazza in cotto" area="keep"/>
+  <color symbol="K" value="#5c352d" name="comignolo in mattoni"/>
+  <color symbol="L" value="#2b3842" name="finestra"/>
+  <color symbol="U" value="#23272b" name="feritoia"/>
+  <color symbol="z" value="#3b7a8c" name="acqua della cisterna" area="courtyard"/>
+
+  <!-- Parts colours: door (O, o, N), stair (k, T), cellar (D, V) -->
+  <color symbol="O" value="#6e4427" name="portone in rovere"/>
+  <color symbol="o" value="#4a2c17" name="assi del portone"/>
+  <color symbol="N" value="#4f5257" name="stipite in pietra"/>
+  <color symbol="k" value="#ab8154" name="gradini"/>
+  <color symbol="T" value="#ab8154" name="scala"/>
+  <color symbol="D" value="#706658" name="lastricato della cantina" area="keep"/>
+  <color symbol="V" value="#524c44" name="muro della cantina" area="keep"/>
+  <color symbol="P" value="#7c8085" name="muro frontale"/>
+  <color symbol="Q" value="#7c8085" name="fascia muraria"/>
+
+  <color symbol="#20" value="#6e4427" name="portone aperto" hidden="True"/>
+  <color symbol="#21" value="#4a2c17" name="assi aperte" hidden="True"/>
+
+  <action name="open" label="Apri la porta">
+    <all>
+      <rule in="O" out="#20"/>
+      <rule in="o" out="#21"/>
+    </all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all>
+      <rule in="#20" out="O"/>
+      <rule in="#21" out="o"/>
+    </all>
+  </action>
+</sequence>

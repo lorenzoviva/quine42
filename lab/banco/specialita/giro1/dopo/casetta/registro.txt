@@ -1,0 +1,3 @@
+[sculptor] propone: «Casetta del pastore» (edificio piccolo, Capomastro, gemini-4-argon)
+[kernel → sculptor] scarta: «Casetta del pastore»: troppo basso: alto 20 voxel, la sua classe chiede almeno 30 (le cose simili hanno le stesse proporzioni)
+[artist → sculptor] obietta: «Casetta del pastore»: 6/10 — Mancano la porta e la finestra sul fronte della casetta.

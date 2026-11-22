@@ -1,0 +1,156 @@
+{
+ "giro": "giro1",
+ "braccio": "dopo",
+ "concetto": "cappello",
+ "classe": "object",
+ "specialita": "tailor",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  4
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5258,
+   "cached": 0,
+   "output": 299,
+   "thoughts": 2694,
+   "usd": 0.005804,
+   "sistema": 17367,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2746,
+   "cached": 0,
+   "output": 70,
+   "thoughts": 105,
+   "usd": 0.005694,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5258,
+   "cached": 2034,
+   "output": 276,
+   "thoughts": 2703,
+   "usd": 0.00532535,
+   "sistema": 17367,
+   "esito": "scartato",
+   "motivo": "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 5580,
+   "cached": 2034,
+   "output": 273,
+   "thoughts": 2250,
+   "usd": 0.0047218500000000005,
+   "sistema": 17367,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2784,
+   "cached": 0,
+   "output": 112,
+   "thoughts": 145,
+   "usd": 0.006489,
+   "sistema": 6179,
+   "voto": 4
+  }
+ ],
+ "token": {
+  "prompt": 21626,
+  "cached": 4068,
+  "output": 1030,
+  "thoughts": 7897
+ },
+ "usd": 0.02803,
+ "usdGemini": 0.02803,
+ "secondi": 30,
+ "sistema": {
+  "caratteri": 17367,
+  "ruolo": 9839,
+  "sezione": 2960,
+  "esempi": [
+   "forbici"
+  ]
+ },
+ "registro": {
+  "tailor": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 566,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 3,
+  "semi": 0,
+  "sezioni": [
+   "head"
+  ],
+  "vestito": {
+   "in piedi": "B",
+   "a quattro zampe": "B"
+  }
+ }
+}

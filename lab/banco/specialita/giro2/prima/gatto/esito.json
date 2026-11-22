@@ -1,0 +1,142 @@
+{
+ "giro": "giro2",
+ "braccio": "prima",
+ "concetto": "gatto",
+ "classe": "animal",
+ "specialita": "figurist",
+ "modello": "gemini-3.8-flash",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.8-flash",
+   "secondi": 9,
+   "prompt": 7514,
+   "cached": 5469,
+   "output": 1261,
+   "thoughts": 0,
+   "usd": 0.006672675,
+   "sistema": 23385,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2757,
+   "cached": 1000,
+   "output": 54,
+   "thoughts": 185,
+   "usd": 0.0049365,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-3.8-flash",
+   "secondi": 6,
+   "prompt": 9950,
+   "cached": 0,
+   "output": 1125,
+   "thoughts": 0,
+   "usd": 0.01168125,
+   "sistema": 23385,
+   "esito": "passa"
+  },
+  {
+   "n": 4,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2721,
+   "cached": 0,
+   "output": 70,
+   "thoughts": 80,
+   "usd": 0.0054315,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 22942,
+  "cached": 6469,
+  "output": 2510,
+  "thoughts": 265
+ },
+ "usd": 0.02872,
+ "usdGemini": 0.02872,
+ "secondi": 21,
+ "sistema": {
+  "caratteri": 23385,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "animal"
+  ]
+ },
+ "registro": {
+  "figurist": 2
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 865,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [
+   "head",
+   "leg",
+   "tail"
+  ],
+  "aree": [],
+  "colori": 15,
+  "semi": 0,
+  "arti": {
+   "leg": 4,
+   "tail": 1,
+   "head": 1
+  },
+  "artiIndovinati": false
+ }
+}
