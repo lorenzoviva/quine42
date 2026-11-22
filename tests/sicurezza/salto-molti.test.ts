@@ -1,4 +1,4 @@
-// V-047 (T477, ADR-0251): the jump and the climb in a game of many. A client says only that it jumps (a direction) or climbs (a tile beside
+// V-047 (T477, ADR-0252): the jump and the climb in a game of many. A client says only that it jumps (a direction) or climbs (a tile beside
 // it, through `tile`): the server makes them on its world, with its rules and the means the wanderer has there, carries the body and takes no
 // step of the client meanwhile; once it has landed, the server's place is the one that counts. A jump of garbage throws nothing and moves nobody
 // beyond what a jump on the server's world reaches; a step onto the top of a cliff without a climb is stopped by the cliff (rule 10).

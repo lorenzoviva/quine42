@@ -1,4 +1,4 @@
-// The climb (T477, ADR-0251: the row 4 of T459, R3, `docs/design/terreno-3d.md` § 3.5; D67 C1). A movement of the kernel as the jump is
+// The climb (T477, ADR-0252: the row 4 of T459, R3, `docs/design/terreno-3d.md` § 3.5; D67 C1). A movement of the kernel as the jump is
 // (ADR-0080): from a tile to one beside it across a cliff (more than a step, `STEP`, and at most three tiles, `CLIMB`), within the reach
 // of the means the wanderer has, the largest of the `climb` of what they wear or hold (`bonus.climb`: a rope, a climbing pick) and of their
 // states (`climb` of a state, which an effect gives for some seconds: «Altro…: mi arrampico»). The body goes to the foot of the face,

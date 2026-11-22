@@ -1,4 +1,4 @@
-# ADR-0251 — Arrampicarsi, e il salto e l'arrampicata in molti fatti dal server
+# ADR-0252 — Arrampicarsi, e il salto e l'arrampicata in molti fatti dal server
 
 Data: 2026-11-22 · Stato: accettato (task T477 del backlog, la riga 4 dello studio di T459, R3, `docs/design/terreno-3d.md` § 3.5; la
 risposta dell'autore del 21/11, D67 C1) · Estende ADR-0250 (il punto 3, i mezzi; `CLIMB` e `keptPass`), ADR-0080 (il salto), ADR-0058 e

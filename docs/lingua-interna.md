@@ -1537,7 +1537,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/session/protocol.ts (ClientMsg, ServerMsg)`, `src/session/server.ts (LIMITS)`, `src/session/thin.ts`, `src/session/client.ts`
 - **Tocca**: filo · **lingua**: inglese · **task**: T308b, contratto 0.5
-- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo), `region` (T375, ADR-0201: le regioni del master) e `jump` (T477, ADR-0251: il salto che il server fa) nascono inglesi; `carta`, `ritmo`, `regione` e `salto` sono solo le parole del concetto, nessun client le ha mandate
+- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo), `region` (T375, ADR-0201: le regioni del master) e `jump` (T477, ADR-0252: il salto che il server fa) nascono inglesi; `carta`, `ritmo`, `regione` e `salto` sono solo le parole del concetto, nessun client le ha mandate
 
 | italiano | interno |
 |---|---|

@@ -5209,7 +5209,7 @@ export class Kernel {
   }
 
   /**
-   * How high the wanderer acting climbs now (T477, ADR-0251), in levels: the largest `bonus.climb` of what they wear or hold (a rope, a climbing
+   * How high the wanderer acting climbs now (T477, ADR-0252), in levels: the largest `bonus.climb` of what they wear or hold (a rope, a climbing
    * pick) and `climb` of their states (what «Altro…» gives for a while), within `CLIMB`; 0 without a means.
    */
   climbReach(): number {

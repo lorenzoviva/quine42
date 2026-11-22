@@ -1,4 +1,4 @@
-// The climb (T477, ADR-0251: the row 4 of T459, R3): a movement of the kernel as the jump, up or down a cliff beside the wanderer within the
+// The climb (T477, ADR-0252: the row 4 of T459, R3): a movement of the kernel as the jump, up or down a cliff beside the wanderer within the
 // reach of their means (a rope, a climbing pick: `bonus.climb`; a state «Altro…» gives: `climb`), slow and tiring, interrupted by a blow or
 // by the energy at zero. On the synthetic rise of the tests (`syntheticRise`, never saved): the menu of the tile says what is missing, the rope
 // of the seed climbs eight levels, the face takes time and energy, nothing climbs beyond three tiles. In a game of many the jump and the climb
