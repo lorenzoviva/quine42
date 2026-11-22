@@ -712,7 +712,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Programma degli strati
 - **Inglese**: `EnvironmentDef.strata`, `programStrata`, `runStrata`, `strataProgramErrors`, `STRATA_LIMITS`, `STRATA_EXAMPLE`, `genesis.strata`, `designStrata`, `ownStrata`
-- **Definizione**: il programma MarkovJunior in 3D di un ambiente che dice che cosa sta sotto che cosa nei suoi luoghi: in cima la superficie, il codice della bozza procedurale di ogni colonna, sotto la terra ancora da decidere (il primo valore); solo regole e il loro ordine, con una simmetria che tiene l'alto e il basso (`symmetry="(xy)"`); dove non scrive uno strato vale la bozza degli strati. Lo prova il validatore sulle bozze di prova; lo scrive il Cartografo alla Genesi coi terreni degli strati del mondo (T478, ADR-0248).
+- **Definizione**: il programma MarkovJunior in 3D di un ambiente che dice che cosa sta sotto che cosa nei suoi luoghi: in cima la superficie, il codice della bozza procedurale di ogni colonna, sotto la terra ancora da decidere (il primo valore); solo regole e il loro ordine, con una simmetria che tiene l'alto e il basso (`symmetry="(xy)"`); dove non scrive uno strato vale la bozza degli strati. Lo prova il validatore sulle bozze di prova; lo scrive il Cartografo alla Genesi coi terreni degli strati del mondo (T478, ADR-0249).
 - **Dove vive**: `src/kernel/strata.ts`, `src/kernel/agents/genesis.ts`, `src/kernel/validator.ts`, `src/kernel/kernel.ts`, `universe/modules/world.layouts/manifest.json`
 - **Da non usare**: `sottosuolo` (il nome del progetto in ADR-0091), «programma del sottosuolo», «layout degli strati» (il layout è la pianta)
 - **Fermo**: `strata` negli ambienti dei manifest (`layouts.<id>.strata`), `genesis.strata`.

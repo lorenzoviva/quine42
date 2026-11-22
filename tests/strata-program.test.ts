@@ -1,4 +1,4 @@
-// The strata as rules (T478, ADR-0248, the row 5 of T459): an environment's program of the strata, a MarkovJunior program in 3D on the
+// The strata as rules (T478, ADR-0249, the row 5 of T459): an environment's program of the strata, a MarkovJunior program in 3D on the
 // place's box under the surface of the draft, tried by the validator on the drafts of trial; a new plan has six rows by it and says so
 // (`strataDepth`), a plan of before keeps the draft's four; the Cartographer writes the strata of the world and the programs at the Genesis.
 

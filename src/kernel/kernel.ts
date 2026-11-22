@@ -4506,7 +4506,7 @@ export class Kernel {
   }
 
   /**
-   * How the strata of a place are made (T478, ADR-0248): a plan that says `strataDepth` (a new one) has them by its environment's program over
+   * How the strata of a place are made (T478, ADR-0249): a plan that says `strataDepth` (a new one) has them by its environment's program over
    * the draft, the draft's in every cell the program decides nothing (`programStrata`), or the draft's where its environment has none; a plan of
    * before the draft's 4 rows (T418); a place still a draft the draft's, as deep as a new plan. A program that does not run gives the draft's, and
    * the kernel says it once.

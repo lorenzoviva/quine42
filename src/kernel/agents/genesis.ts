@@ -375,7 +375,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartographer');
   }
 
-  // What lies under the ground (T478, ADR-0248): the terrains of the strata and, for each environment, the program of its strata.
+  // What lies under the ground (T478, ADR-0249): the terrains of the strata and, for each environment, the program of its strata.
   const under = Object.keys(layouts).length ? await designStrata(c, layouts, palette, checkLayout, theme) : { strata: {}, programs: {} };
   for (const [id, program] of Object.entries(under.programs)) layouts[id]!.strata = program;
 
@@ -500,7 +500,7 @@ export function ownStrata(raw: unknown, palette: Record<string, TerrainDef>): { 
 }
 
 /**
- * Genesis (T478, ADR-0248): the Cartographer writes the terrains of the strata of this world and, for each environment, the program that says
+ * Genesis (T478, ADR-0249): the Cartographer writes the terrains of the strata of this world and, for each environment, the program that says
  * what lies under what in its places. The strata of its first answer stay (of the second only if the first had none); each program is tried as
  * the world runs it (`checkLayout` with the strata, `strataProgramErrors`) and goes back once with the reasons; one still invalid is left out,
  * and that environment's places have the draft's strata. Nothing of it stops the Genesis: without strata of its own the world has the seed's.

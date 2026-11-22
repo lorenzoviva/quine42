@@ -4,7 +4,7 @@
 // them (`ChunkPlan.strata`), a plan of before has them again from its draft. They are only a look: they block nothing and nobody stands
 // in them (a body under the ground stands in a model). Pure functions: no kernel, no three.js.
 //
-// The strata as rules (T478, ADR-0248, the row 5 of T459): an environment may have a program of the strata (`EnvironmentDef.strata`), a
+// The strata as rules (T478, ADR-0249, the row 5 of T459): an environment may have a program of the strata (`EnvironmentDef.strata`), a
 // MarkovJunior program in 3D on the place's box, S × S tiles and `STRATA_DEPTH` rows deep under a top layer the kernel writes, the surface:
 // every column's code of the procedural draft (the nature that was there before the environment). Its rules say what lies under what, a
 // layer at a time; what it leaves undecided, or writes that is not a stratum, is the draft's (`programStrata`). Only rules and their order
@@ -164,7 +164,7 @@ export const stratumRow = (depth: number, rows = STRATA_DEPTH): number => (Numbe
 // ---------------------------------------------------------------------------------------------------------------- the strata as rules (T478)
 
 /**
- * What a program of the strata may do (T478, ADR-0248): its text; the steps of a run (the validator wants it finished within them on every
+ * What a program of the strata may do (T478, ADR-0249): its text; the steps of a run (the validator wants it finished within them on every
  * draft of trial, and a run cut by its steps is the same on every machine); the milliseconds of a run, a safety a program the validator took
  * never meets (a run cut by the time is not the same everywhere: the place keeps the draft's strata).
  */
@@ -243,7 +243,7 @@ export interface StrataRun {
 }
 
 /**
- * Runs a program of the strata on a place's draft (T478, ADR-0248): a grid S × S × (depth + 1), its top layer the surface (each column's
+ * Runs a program of the strata on a place's draft (T478, ADR-0249): a grid S × S × (depth + 1), its top layer the surface (each column's
  * code of the draft where the program reads it, else the base code of its biome, else nothing, the program's first value), under it the
  * program's first value, the earth not yet decided. Never throws: what does not compile or run says why.
  */
@@ -296,7 +296,7 @@ export function runStrata(
 }
 
 /**
- * The strata of a place by its environment's program (T478, ADR-0248): the program's stratum where it decided one, the draft's (`draftStrata`)
+ * The strata of a place by its environment's program (T478, ADR-0249): the program's stratum where it decided one, the draft's (`draftStrata`)
  * in every other cell; the draft's everywhere, with the reason, where the program does not compile or run or its time ran out. Deterministic
  * from the place, its draft, the program and the world's seed.
  */
@@ -354,7 +354,7 @@ export function strataLine(strata: Record<string, TerrainDef>): string {
 }
 
 /**
- * Why an environment's program of the strata is not good (T478, ADR-0248), or nothing: run as the world runs it on every draft of trial
+ * Why an environment's program of the strata is not good (T478, ADR-0249), or nothing: run as the world runs it on every draft of trial
  * (`sampleDrafts`, a draft its rows), it is made of rules and their order with a symmetry that keeps the up and the down, its first value is
  * the earth not yet decided (neither a stratum nor a code of the drafts), it finishes within its steps, it writes under the ground only strata,
  * and on the drafts it decides some.

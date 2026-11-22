@@ -561,7 +561,7 @@ export class Validator {
         errors.push(`${id}: ${e instanceof MjError ? e.message : (e as Error).message}`);
       }
     });
-    // The program of its strata (T478, ADR-0248), if it has one: run on the same drafts as the world runs it.
+    // The program of its strata (T478, ADR-0249), if it has one: run on the same drafts as the world runs it.
     if (def.strata !== undefined) for (const e of strataProgramErrors(def.strata, drafts, palette, strata)) errors.push(`${id}: strati: ${e}`);
     return [...new Set(errors)];
   }

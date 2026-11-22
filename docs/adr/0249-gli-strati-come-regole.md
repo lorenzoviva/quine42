@@ -1,4 +1,4 @@
-# ADR-0248 — Gli strati come regole: il programma degli strati di ogni ambiente
+# ADR-0249 — Gli strati come regole: il programma degli strati di ogni ambiente
 
 Data: 2026-11-22 · Stato: accettato (task T478 del backlog, la riga 5 dello studio di T459, `docs/design/terreno-3d.md` § 4.1-4.2) ·
 Riferimenti: ADR-0091 punto 5 (la profondità del terreno: «il programma» lì si chiamava `sottosuolo`), ADR-0136 (la versione del kernel),

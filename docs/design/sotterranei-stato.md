@@ -305,7 +305,7 @@ Resta la rigenerazione dei modelli con le cantine (T411).
 
 ## 11. Dopo T478: gli strati come regole
 
-Il programma degli strati di ogni ambiente (ADR-0248): sotto la superficie della bozza, MarkovJunior in 3D dice che cosa sta sotto che cosa,
+Il programma degli strati di ogni ambiente (ADR-0249): sotto la superficie della bozza, MarkovJunior in 3D dice che cosa sta sotto che cosa,
 la bozza di T418 dove non decide; sei righe nei piani nuovi. Nel borgo del seme la terra per una casella, l'argilla spessa dei vasai, qua e là la
 lente della falda dei pozzi, poi la roccia viva. Verificato nella preview della build (`?skip&offline&dev&teleport=15.5,-5.5`, il luogo 0,-1
 del borgo, il taglio abbassato a mano come in § 8): a 3,5 caselle i tappi sono argilla, roccia viva e la falda in blu; a 4,5, la riga 4 che un

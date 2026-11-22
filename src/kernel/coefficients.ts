@@ -104,7 +104,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'genesis.physics', agente: 'physicist', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.review', agente: 'arbiter', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.layouts', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
-  // T478: the terrains of the strata and the program of the strata of each environment, once or twice at the Genesis (ADR-0248).
+  // T478: the terrains of the strata and the program of the strata of each environment, once or twice at the Genesis (ADR-0249).
   { compito: 'genesis.strata', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.atlas', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.cast', agente: 'narrator', modo: 'non regolabile', nota: GENESIS_ONCE },

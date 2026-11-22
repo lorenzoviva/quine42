@@ -257,7 +257,7 @@ sequenceDiagram
   `OBJECT` con: `ambienti` (arr con `id`, `nome`, `descrizione`, `tipo`: enum esterno/interno/misto, `programma_json`: stringa JSON del programma MarkovJunior).
 - **Validazione**: Esecuzione di prova in [`checkLayout()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/layout.ts) e riparazione automatica sintattica con [`repairProgram()`](file:///H:/projects/rune/.claude/worktrees/t67/src/mj/engine.ts).
 
-#### 6b. `genesis.strata` (T478, ADR-0248)
+#### 6b. `genesis.strata` (T478, ADR-0249)
 - **Agente**: `cartografo`
 - **Caller**: `designStrata()` in `src/kernel/agents/genesis.ts`, dopo gli ambienti validi.
 - **Contesto**: gli ambienti (id, nome, descrizione), i terreni delle mappe; al secondo giro gli strati del primo, fermi. Temperatura: 0.5.
