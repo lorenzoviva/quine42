@@ -112,6 +112,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: nessuno
 - **Fermo**: il valore `draft` di `stage`.
 
+### Raggio
+- **Inglese**: `reach`, `Reach`, `REACH`, `inReach`, `inReachOf`, `placeInReach`, `Walker`, `nextPace`, `measurePaces`
+- **Definizione**: i luoghi che un viandante può raggiungere presto: entro poche caselle da lui, o sulla via che fa per i prossimi secondi al suo passo. Solo per un luogo in raggio il Concilio lavora: il piano, le cose nominate a terra, le cose nuove, il modello della sua struttura (T488, ADR-0244). Le bozze fuori raggio si vedono e si guardano soltanto.
+- **Dove vive**: `src/kernel/reach.ts`, `src/kernel/kernel.ts` (`pumpDevelopment`, `pumpAsks`), `src/kernel/modeldirector.ts`
+- **Da non usare**: «vista» (è ciò che la camera carica), «raggio del cerchio» (è il cerchio di simulazione, `circleRadius`), «distanza di caricamento»
+
 ### Layout
 - **Inglese**: `layout`, `LayoutResult`
 - **Definizione**: la procedura che porta una bozza al luogo finito: varchi, programma, sentieri, edifici del piano.

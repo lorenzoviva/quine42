@@ -1,0 +1,147 @@
+{
+ "kernel": "H:\\projects\\rune\\.claude\\worktrees\\t488",
+ "reach": {
+  "near": 8,
+  "ahead": 8,
+  "aheadMax": 54,
+  "side": 4,
+  "moving": 0.5
+ },
+ "minutes": 18.000277777764786,
+ "plannedBefore": 25,
+ "plannedInWalk": 90,
+ "calls": {
+  "forge.code": 2,
+  "forge.review": 2,
+  "plot.weave": 2,
+  "chunk.plan": 59,
+  "content.define": 44,
+  "content.items": 2,
+  "content.physics": 2,
+  "npc.individuate": 53,
+  "content.review": 2,
+  "content.recipes": 2,
+  "council.session": 1,
+  "forge.concept": 1,
+  "forge.physics": 1,
+  "npc.dialogue": 1
+ },
+ "sculpted": {
+  "simple": 8,
+  "figure": 6,
+  "structure": 3
+ },
+ "onDraft": 0,
+ "longestOnDraft": 0,
+ "aheadDraft": 0,
+ "usdRun": 1.795887520755335,
+ "usdList": 1.733854925,
+ "perHourRun": 5.986199356235742,
+ "perHourList": 5.779427227979048,
+ "rows": [
+  {
+   "task": "chunk.plan",
+   "n": 59,
+   "run": 0.15251946218487397,
+   "list": 0.155696575
+  },
+  {
+   "task": "npc.individuate",
+   "n": 53,
+   "run": 0.23020232000000002,
+   "list": 0.24127852500000002
+  },
+  {
+   "task": "content.define",
+   "n": 44,
+   "run": 0.12104074074074073,
+   "list": 0.0809028
+  },
+  {
+   "task": "forge.code",
+   "n": 2,
+   "run": 0.00856342857142857,
+   "list": 0.00268115
+  },
+  {
+   "task": "forge.review",
+   "n": 2,
+   "run": 0.003745142857142857,
+   "list": 0.00345175
+  },
+  {
+   "task": "plot.weave",
+   "n": 2,
+   "run": 0.00425275,
+   "list": 0.00425275
+  },
+  {
+   "task": "content.items",
+   "n": 2,
+   "run": 0.0131125,
+   "list": 0.0040002
+  },
+  {
+   "task": "content.physics",
+   "n": 2,
+   "run": 0.0065525,
+   "list": 0.0021216
+  },
+  {
+   "task": "content.review",
+   "n": 2,
+   "run": 0.0056365,
+   "list": 0.00324785
+  },
+  {
+   "task": "content.recipes",
+   "n": 2,
+   "run": 0.0136355,
+   "list": 0.0038515999999999997
+  },
+  {
+   "task": "council.session",
+   "n": 1,
+   "run": 0.0031555,
+   "list": 0.0017666749999999999
+  },
+  {
+   "task": "forge.concept",
+   "n": 1,
+   "run": 0.003495583333333333,
+   "list": 0.001988025
+  },
+  {
+   "task": "forge.physics",
+   "n": 1,
+   "run": 0.001342923076923077,
+   "list": 0.0011435
+  },
+  {
+   "task": "npc.dialogue",
+   "n": 1,
+   "run": 0.001641925,
+   "list": 0.001641925
+  }
+ ],
+ "models": [
+  {
+   "kind": "simple",
+   "n": 8,
+   "run": 0.2442857122040073,
+   "list": 0.14396160000000002
+  },
+  {
+   "kind": "figure",
+   "n": 6,
+   "run": 0.16247070491803278,
+   "list": 0.2138184
+  },
+  {
+   "kind": "structure",
+   "n": 3,
+   "run": 0.8202343278688524,
+   "list": 0.86805
+  }
+ ]
+}

@@ -1,0 +1,134 @@
+{
+ "kernel": "H:\\projects\\rune\\.claude\\worktrees\\t488\\lab\\tmp-t488\\base",
+ "reach": "prima di T488",
+ "minutes": 18.00027777776586,
+ "plannedBefore": 29,
+ "plannedInWalk": 281,
+ "calls": {
+  "chunk.plan": 252,
+  "content.define": 183,
+  "council.session": 1,
+  "forge.concept": 1,
+  "content.items": 2,
+  "forge.physics": 1,
+  "content.physics": 2,
+  "forge.code": 1,
+  "content.review": 2,
+  "forge.review": 1,
+  "content.recipes": 2,
+  "plot.weave": 2,
+  "npc.individuate": 17
+ },
+ "sculpted": {
+  "figure": 4,
+  "simple": 8,
+  "structure": 5
+ },
+ "onDraft": 0,
+ "longestOnDraft": 0,
+ "aheadDraft": 0,
+ "usdRun": 3.005691753989966,
+ "usdList": 2.8375782749999994,
+ "perHourRun": 10.018817901919146,
+ "perHourList": 9.458448286298138,
+ "rows": [
+  {
+   "task": "chunk.plan",
+   "n": 252,
+   "run": 0.6514390588235295,
+   "list": 0.6650091
+  },
+  {
+   "task": "content.define",
+   "n": 183,
+   "run": 0.5034194444444444,
+   "list": 0.3364821
+  },
+  {
+   "task": "npc.individuate",
+   "n": 17,
+   "run": 0.07383848000000001,
+   "list": 0.07739122500000001
+  },
+  {
+   "task": "content.items",
+   "n": 2,
+   "run": 0.0131125,
+   "list": 0.0040002
+  },
+  {
+   "task": "content.physics",
+   "n": 2,
+   "run": 0.0065525,
+   "list": 0.0021216
+  },
+  {
+   "task": "content.review",
+   "n": 2,
+   "run": 0.0056365,
+   "list": 0.00324785
+  },
+  {
+   "task": "content.recipes",
+   "n": 2,
+   "run": 0.0136355,
+   "list": 0.0038515999999999997
+  },
+  {
+   "task": "plot.weave",
+   "n": 2,
+   "run": 0.00425275,
+   "list": 0.00425275
+  },
+  {
+   "task": "council.session",
+   "n": 1,
+   "run": 0.0031555,
+   "list": 0.0017666749999999999
+  },
+  {
+   "task": "forge.concept",
+   "n": 1,
+   "run": 0.003495583333333333,
+   "list": 0.001988025
+  },
+  {
+   "task": "forge.physics",
+   "n": 1,
+   "run": 0.001342923076923077,
+   "list": 0.0011435
+  },
+  {
+   "task": "forge.code",
+   "n": 1,
+   "run": 0.004281714285714285,
+   "list": 0.001340575
+  },
+  {
+   "task": "forge.review",
+   "n": 1,
+   "run": 0.0018725714285714285,
+   "list": 0.001725875
+  }
+ ],
+ "models": [
+  {
+   "kind": "figure",
+   "n": 4,
+   "run": 0.10831380327868852,
+   "list": 0.1425456
+  },
+  {
+   "kind": "simple",
+   "n": 8,
+   "run": 0.2442857122040073,
+   "list": 0.14396160000000002
+  },
+  {
+   "kind": "structure",
+   "n": 5,
+   "run": 1.367057213114754,
+   "list": 1.44675
+  }
+ ]
+}

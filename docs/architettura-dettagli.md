@@ -395,6 +395,20 @@ congelato, sentieri garantiti, edifici) → lotti: ogni edificio diventa una str
 verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul pavimento del modello; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064), bottino
 `terreno`, rune su tratti liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `lux` (`luce` fino al contratto 0.1).
 **Il luogo che il budget ferma** (ADR-0231, T457, kernel 0.10.7): se il Cartografo non si può chiedere perché il budget è finito (`BudgetError`: il testo della sessione, `ai.maxText`; il tetto del giorno del varco; una chiave senza credito) il luogo resta bozza trattenuta, niente piano di ripiego salvato né carta, e per `Kernel.BUDGET_RETRY` (60 s del mondo, `budgetHeld()`) i luoghi nuovi restano bozze senza chiamate; poi uno si richiede. `planAhead` risponde `no`. Ogni altro fallimento (tre risposte invalide, un errore) dà ancora il ripiego del kernel, «Terra senza nome» con un ambiente del mondo, salvato.
+**Il raggio** (ADR-0244, T488, kernel 0.10.20): il Concilio lavora per un luogo solo quando un viandante può raggiungerlo presto. Il kernel carica
+ancora tutto ciò che la camera vede (bozze, gratis), ma `pumpDevelopment` chiede il Cartografo solo per le bozze **in raggio** (`src/kernel/reach.ts`,
+puro: il quadrato del luogo entro `near` caselle dal viandante, 8, o entro `side` caselle, 4, della via che fa per i prossimi `ahead` secondi al suo
+passo, 8, al più `aheadMax` caselle, 54; il passo lo misura il kernel a ogni tick dalla posizione sul tappeto, `measurePaces`, `nextPace`: una media di
+mezzo secondo, un salto non è un passo), il più vicino per primo (la distanza dal centro, l'ordine di prima), tre alla volta; con più viandanti attorno a
+ognuno (`walkersNow`). Le bozze fuori raggio si guardano soltanto per ciò che non costa (`develop(ch, false, true)`: il piano che l'universo ha, il blocco,
+la regione del master, il mare aperto e il vuoto) e, se servirebbe il Cartografo, restano bozze segnate `far` finché non entrano in raggio. La quota della
+lobby, il budget e il ritmo del mondo valgono come prima. Ciò che un piano chiede al Concilio (le cose nominate a terra, `content.define`; le cose nuove,
+la Fucina; i ritmi dei pacchetti, dei tipi di abitanti e delle sessioni, che battono sui luoghi entrati in raggio, `exploredCount`) è in `ch.asks` e parte
+quando il luogo è in raggio, una volta a caricamento (`pumpAsks`); `planAhead` (la generazione differita) lo chiede subito. Lo Scultore delle strutture
+(`ModelDirector.missing()`) vede solo le strutture dei luoghi in raggio, la più vicina prima (`inReach`, `wandererDistance`); `missing(true)` le vede
+tutte, per ciò che non costa (un'altra taglia, una carta) e per la generazione. Gli individui erano già entro 9 caselle. I test degli altri sottosistemi
+allargano `near` a ogni luogo caricato (`tests/setup/reach-wide.ts`, `Kernel.REACH`); `tests/raggio.test.ts` prova quello del gioco. La misura della prima
+run e la sessione scriptata: `lab/banco/run-1/consumi.md` (`lab/scripts/consumi-run.ts`, `lab/scripts/sessione-cammino.ts`).
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,
 unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello (`appearance.model` suo, con la `classe`) lo scrive poi lo Scultore; gli oggetti dei pacchetti
 hanno una forma comune (`forma-…`, un programma per forma, ricolorato), i terreni con cose sopra un modello loro. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →
