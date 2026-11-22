@@ -35,7 +35,7 @@ stessa specie, sono come l'autore l'ha disegnato.
 
 ## Conseguenze
 
-- Kernel 0.10.21 (solo `Z`): nessun programma del seme ha `under` o `vpt`, le voci restano come sono, le richieste e le chiavi delle forme
+- Kernel 0.10.22 (solo `Z`): nessun programma del seme ha `under` o `vpt`, le voci restano come sono, le richieste e le chiavi delle forme
   dei programmi di oggi sono le stesse (l'impronta dei luoghi di `lab/scripts/impronta-terreno.ts` uguale prima e dopo).
 - Sicurezza: nessuna superficie nuova. Due attributi della radice, letti come interi in un intervallo chiuso; il loro effetto è la `base`
   che il kernel già dava da `cellar` (al più 120 voxel, entro i tetti delle forme).
