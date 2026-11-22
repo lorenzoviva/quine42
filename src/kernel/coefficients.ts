@@ -137,7 +137,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'model.sculpt', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'e revisioni' },
   { compito: 'model.judge', agente: 'artist', modo: 'diretta', coefficiente: 'reviews' },
   { compito: 'model.action', agente: 'sculptor', modo: 'diretta', coefficiente: 'actions', nota: '«Altro…» che cambia la forma' },
-  // T472: a part of the world from a good model of a trade that has fewer than its parts, at most twice a session per trade (ADR-0242).
+  // T472: a part of the world from a good model of a trade that has fewer than its parts, at most twice a session per trade (ADR-0243).
   { compito: 'model.part', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'dopo un modello con voto ≥ 6: una parte che i modelli del suo mestiere includono, presa se la griglia resta la stessa' },
   { compito: 'physics.reshape', agente: 'physicist', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona (il Referente): la fisica di un terreno o la gravità del mondo, a mondo acceso (T452)' },
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
@@ -369,7 +369,7 @@ export const REUSE_ASKED = 0.4;
 export const REUSE_HIT = 0.4;
 export const REUSE_SHARE = REUSE_ASKED * REUSE_HIT;
 /**
- * The parts of the world (T472, ADR-0242): the share of the models sculpted with a vote of at least 6 (`EXAMPLE_SCORE`; T473 measured a mean of
+ * The parts of the world (T472, ADR-0243): the share of the models sculpted with a vote of at least 6 (`EXAMPLE_SCORE`; T473 measured a mean of
  * 6.0-6.3 with the specialties), and the most requests of a part an hour (two trades asked their two times of a session): a few in the first
  * hours of a universe, none once its trades have their `WORLD_PARTS`. Assumptions, as the hour is.
  */

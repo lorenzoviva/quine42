@@ -1,4 +1,4 @@
-// The parts of the world (T472, S6 of T458, ADR-0242): parts the Sculptor of a universe takes from a good model of its own, beside the parts
+// The parts of the world (T472, S6 of T458, ADR-0243): parts the Sculptor of a universe takes from a good model of its own, beside the parts
 // of the seed (ADR-0182, ADR-0241). The Sculptor says which lines of the model make the part and what its contract is (`readPartAnswer`);
 // the kernel writes the part (those lines as they are, in a root with the values of the grid they write on and the model's colours and
 // unions) and the model with `<import>` in their place (`composePart`), and takes the part only if the model so rewritten makes the same
@@ -275,7 +275,7 @@ export function composePart(xml: string, answer: PartAnswer, source: { id: strin
     '<!--',
     first,
     '',
-    `A part of this world (T472, ADR-0242): lines ${from}-${to} of «${commentSafe(source.name)}» (${source.id}), which includes it in their place. It works on what the`,
+    `A part of this world (T472, ADR-0243): lines ${from}-${to} of «${commentSafe(source.name)}» (${source.id}), which includes it in their place. It works on what the`,
     'program that includes it has drawn: alone it draws nothing.',
     '-->',
     `<${tag} values="${values}">`,

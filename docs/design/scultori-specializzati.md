@@ -365,7 +365,7 @@ il bordo. **Il banco** (`lab/banco/parti/`, `lab/scripts/banco-parti.ts`, `tests
 la casetta del Capomastro, la villetta offline dello Scultore con `part-window` al posto delle sue finestre a caso (passa i controlli a Grande
 e a Enorme, 31 finestre); nel laboratorio 3D le parti da sole e i modelli. Che lo Scultore le usi coi modelli veri resta da vedere (S7, T473).
 
-**Fatto in T472 (S6, la via B, ADR-0242)**: dopo un modello che entra con voto ≥ 6 il direttore chiede al suo mestiere una parte (`model.part`,
+**Fatto in T472 (S6, la via B, ADR-0243)**: dopo un modello che entra con voto ≥ 6 il direttore chiede al suo mestiere una parte (`model.part`,
 manopola `models`, una carta del mondo), al più due volte a sessione per mestiere e finché il mestiere ne ha meno di quattro. **Che cosa è
 cambiato dal previsto**: lo Scultore **non riscrive** il modello: vede il programma con le righe numerate e dice quali righe sono la parte e il
 suo contratto (`<part name lines reads writes>`), il kernel scrive la parte (quelle righe come sono, coi `values` della loro griglia, i colori e

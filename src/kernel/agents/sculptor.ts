@@ -596,7 +596,7 @@ export function partResources(files: FileMap, specialty: SculptorSpecialty = 'ar
 }
 
 /**
- * The parts of the world of a trade (T472, ADR-0242): those the Sculptor took from the good models of this universe, or that came with the
+ * The parts of the world of a trade (T472, ADR-0243): those the Sculptor took from the good models of this universe, or that came with the
  * cards that include them, whose entry serves the specialty; the best voted first, at most `WORLD_PARTS` and `room` (what `MAX_PARTS` leaves
  * to them after the parts of the seed). One line each, with the model it was taken from and its contract.
  */
@@ -997,7 +997,7 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     prompt += proc
       ? `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`
       : `\n\n${TRADE_PARTS}\n${parts.join('\n')}`;
-  // The parts of the world of the trade (T472, ADR-0242), in what MAX_PARTS leaves: a world without them asks as before.
+  // The parts of the world of the trade (T472, ADR-0243), in what MAX_PARTS leaves: a world without them asks as before.
   const own = worldPartResources(c.files, specialty, MAX_PARTS - parts.length);
   if (own.length) prompt += `\n\n${WORLD_PARTS_LINE}\n${own.join('\n')}`;
   const images: string[] = [];

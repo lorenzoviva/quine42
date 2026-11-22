@@ -8181,7 +8181,7 @@ export class Kernel {
 
   /**
    * A program enters the library (or replaces one): validated, written with its index entry, committed. A part of the world is never written
-   * anew (T472, ADR-0242): a new version is a new part, with a name of its own (`addWorldPart`).
+   * anew (T472, ADR-0243): a new version is a new part, with a name of its own (`addWorldPart`).
    */
   addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; author: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
@@ -8215,7 +8215,7 @@ export class Kernel {
   }
 
   /**
-   * A part of the world the Sculptor took from a model of this library (T472, ADR-0242): taken only if the model, rewritten with `<import>` in
+   * A part of the world the Sculptor took from a model of this library (T472, ADR-0243): taken only if the model, rewritten with `<import>` in
    * place of the part's lines, makes the same grid voxel by voxel on every seed the world gives it (`PART_SEEDS` at least, `sameGridErrors`);
    * the part validated as a part (alone it compiles and finishes, includes nothing, says its contract), the model as a model. One commit of
    * the Council with the part's card (`model.part`, paid by who paid for the model): the part's program and entry (`part: true`, its specialty,
@@ -8451,7 +8451,7 @@ export class Kernel {
     const kind = info.class === SOUND_CLASS ? 'sound' : 'model';
     const family = cardFamily(this.files, id);
     const ids = new Set(family);
-    // A part of the world that came with a card stays while a model includes it (T472, ADR-0242): it goes once nobody does.
+    // A part of the world that came with a card stays while a model includes it (T472, ADR-0243): it goes once nobody does.
     const users = isWorldPart(id, info) ? partUsers(this.files, id).filter((u) => !ids.has(u)) : [];
     if (users.length) return no(`la parte «${name}» è inclusa da ${users.map((u) => `«${reasonText(this.forms.info(u)?.name, 60) || u}»`).join(', ')}: si toglie quando nessuno la include più`);
     const why = family.map((f) => this.broken.get(f)?.reason).find(Boolean);
@@ -11565,7 +11565,7 @@ export class Kernel {
   }
 
   /**
-   * The cards of `ids` and those of the parts of the world the models among them include (T472, ADR-0242): the models that include a part are
+   * The cards of `ids` and those of the parts of the world the models among them include (T472, ADR-0243): the models that include a part are
    * its uses, so a model used in a place, a plot or a prompt is a use of its parts too.
    */
   withParts(ids: Iterable<string>): string[] {

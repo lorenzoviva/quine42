@@ -110,7 +110,7 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
 }
 
 /**
- * A part of the world (T472, ADR-0242) is a model, tried as a part: its text says what a part must (`worldPartErrors`: one program, nothing
+ * A part of the world (T472, ADR-0243) is a model, tried as a part: its text says what a part must (`worldPartErrors`: one program, nothing
  * included nor read, its contract, none of the letters the parts of the seed keep); it compiles alone in `box`, within the world's ceilings,
  * and alone, from an empty box, it finishes. What it draws alone does not count: it works on what whoever includes it has drawn, and the
  * kernel took it only where the model rewritten with it made the same grid on every seed (`sameGridErrors`).

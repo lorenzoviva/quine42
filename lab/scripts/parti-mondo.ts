@@ -1,4 +1,4 @@
-// The parts of the world (T472, S6 of T458, ADR-0242), offline: what the local Sculptor cuts from the programs of the seed (`mockPart`, the
+// The parts of the world (T472, S6 of T458, ADR-0243), offline: what the local Sculptor cuts from the programs of the seed (`mockPart`, the
 // last rule node of a root `<sequence>`), whether each program rewritten with its part makes the same grid on every seed the world gives it
 // (`sameGridErrors`), and what it costs in tokens: the request of `model.part` as it goes to the models (its system, the Sculptor's of the trade;
 // the program with its lines numbered) and the line a part adds to every request of its trade (`worldPartResources`). Tokens at 3.5 characters

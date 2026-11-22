@@ -1,4 +1,4 @@
-// The Sculptor takes a part of the world from a good model of its own (T472, S6 of T458, ADR-0242). After a model passes with a vote of at
+// The Sculptor takes a part of the world from a good model of its own (T472, S6 of T458, ADR-0243). After a model passes with a vote of at
 // least `EXAMPLE_SCORE` (the author's 6), the Sculptor of its trade gets the program with its lines numbered and says which of them are a
 // part other things of its trade would want (a wheel, a row of windows, a door that opens), with the part's contract; the kernel writes the
 // part and the model with `<import>` in place of those lines (`composePart`, src/kernel/worldparts.ts), and takes it only if the model so

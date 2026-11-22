@@ -870,7 +870,7 @@ flowchart TD
   ```
 - **Validazione**: [`checkAction()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/agents/sculptor.ts#L328): compila, finisce in 8s, cambia almeno un voxel, non cancella oltre il 50% dei voxel visibili.
 
-#### 37b. `model.part` (T472, ADR-0242)
+#### 37b. `model.part` (T472, ADR-0243)
 - **Agente**: `sculptor`, il mestiere del modello (`specialtyOf`)
 - **Modello**: quello che ha scolpito il modello (`modelFor` della sua classe)
 - **Caller**: `extractPart()` in `src/kernel/agents/parts.ts`, chiamato da `ModelDirector.part()` subito dopo un modello che entra con voto ≥ 6 (al più due volte a sessione per mestiere, finché il mestiere ha meno di quattro parti del mondo).

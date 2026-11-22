@@ -114,7 +114,7 @@ export interface ModelInfo {
    */
   specialty?: string | string[];
   /**
-   * A part of the world (T472, ADR-0242): the Sculptor took it from a good model of this universe (or it came with a card that includes it);
+   * A part of the world (T472, ADR-0243): the Sculptor took it from a good model of this universe (or it came with a card that includes it);
    * only the kernel writes it, with an id `part-<words>-<hash>` (`isWorldPart`). It is never written anew nor taken away while a model includes it.
    */
   part?: boolean;

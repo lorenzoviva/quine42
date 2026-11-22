@@ -1,4 +1,4 @@
-# ADR-0242 — Le parti del mondo estratte da un modello buono: la stessa griglia, il nome del programma, il viaggio con le carte
+# ADR-0243 — Le parti del mondo estratte da un modello buono: la stessa griglia, il nome del programma, il viaggio con le carte
 
 Data: 2026-11-22 · Stato: accettato (task T472 del backlog, S6 dello studio T458, step 44) · Riferimenti: ADR-0239 (lo Scultore a specialità e
 le parti del mondo, punto 9), ADR-0241 (le parti dei mestieri, la via A), ADR-0171 (`<import>`), ADR-0176 (i tetti del mondo), ADR-0142 (il

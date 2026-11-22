@@ -1,4 +1,4 @@
-// The parts of the world, B: taken from a good model (T472, S6 of T458, ADR-0242). The Sculptor of a trade says which lines of a model it made
+// The parts of the world, B: taken from a good model (T472, S6 of T458, ADR-0243). The Sculptor of a trade says which lines of a model it made
 // are a part and what the part's contract is; the kernel writes the part and the model with `<import>` in their place, and takes it only if
 // the model so rewritten makes the same grid, voxel by voxel, on every seed the world gives it. A part of the world has a name of its program,
 // includes nothing, never changes nor goes while a model includes it, is a card of its own (`model.part`), is offered to the requests of its

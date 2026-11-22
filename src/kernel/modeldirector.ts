@@ -355,7 +355,7 @@ export class ModelDirector {
   }
 
   /**
-   * The trade a model just made may give a part of the world to (T472, ADR-0242), or undefined: only while the director sculpts with the models
+   * The trade a model just made may give a part of the world to (T472, ADR-0243), or undefined: only while the director sculpts with the models
    * (the local ones write no part), for a model the Artist gave at least `EXAMPLE_SCORE`, of a trade (not the actions) with fewer than
    * `WORLD_PARTS` parts and asked fewer than `PART_TRIES` times this session; the knob of the models above 0, a universe that is written.
    */

@@ -179,7 +179,7 @@ export function artOf(card: Card, files: FileMap, forms: Forms): FormRequest | u
   switch (card.tipo) {
     case 'model': {
       const id = Object.keys(forms.models()).find((m) => slug(m) === card.id.slice('model:'.length)) ?? '';
-      // A part of the world draws nothing alone (T472, ADR-0242): its picture is the model it was taken from, which includes it.
+      // A part of the world draws nothing alone (T472, ADR-0243): its picture is the model it was taken from, which includes it.
       const info = forms.info(id);
       const from = info?.part === true && typeof info.from === 'string' && forms.info(info.from) ? info.from : undefined;
       return forms.request(from ?? id, 1);

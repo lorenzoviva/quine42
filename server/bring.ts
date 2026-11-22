@@ -221,7 +221,7 @@ async function includedFiles(root: string, xml: string): Promise<{ texts: Record
 }
 
 /**
- * What a brought card reads, sorted (T472, ADR-0242): the parts of the world of its universe go with it, as cards of their own (they include
+ * What a brought card reads, sorted (T472, ADR-0243): the parts of the world of its universe go with it, as cards of their own (they include
  * nothing, and must say so); anything else it reads (the parts of the seed, a rule file) must be in the universe it enters, and is checked
  * there as it is there. A part already here with the same program is the same part; with another, the card does not come.
  */
