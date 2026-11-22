@@ -1,0 +1,173 @@
+{
+ "from": "orichalcum prima-della-run-1..HEAD",
+ "seconds": 958,
+ "points": [
+  {
+   "x": 0,
+   "y": 0,
+   "t": 0,
+   "why": "arrivo"
+  },
+  {
+   "x": -6.3,
+   "y": -4.5,
+   "t": 120,
+   "why": "salvataggio"
+  },
+  {
+   "x": -27,
+   "y": -9,
+   "t": 165.8,
+   "why": "preso in -2,-1"
+  },
+  {
+   "x": -9,
+   "y": -27,
+   "t": 220.8,
+   "why": "preso in -1,-2"
+  },
+  {
+   "x": -5.7,
+   "y": -18.8,
+   "t": 240,
+   "why": "salvataggio"
+  },
+  {
+   "x": -9,
+   "y": -9,
+   "t": 260.9,
+   "why": "preso in -1,-1"
+  },
+  {
+   "x": 9,
+   "y": -45,
+   "t": 342.6,
+   "why": "preso in 0,-3"
+  },
+  {
+   "x": 0.9,
+   "y": -47.7,
+   "t": 360,
+   "why": "salvataggio"
+  },
+  {
+   "x": -9,
+   "y": -63,
+   "t": 385.3,
+   "why": "preso in -1,-4"
+  },
+  {
+   "x": -27,
+   "y": -45,
+   "t": 420.8,
+   "why": "preso in -2,-3"
+  },
+  {
+   "x": -27,
+   "y": -63,
+   "t": 445.9,
+   "why": "preso in -2,-4"
+  },
+  {
+   "x": -45,
+   "y": -63,
+   "t": 471,
+   "why": "preso in -3,-4"
+  },
+  {
+   "x": -38.6,
+   "y": -62.2,
+   "t": 480,
+   "why": "salvataggio"
+  },
+  {
+   "x": -27,
+   "y": -99,
+   "t": 584,
+   "why": "preso in -2,-6"
+  },
+  {
+   "x": 0,
+   "y": 0,
+   "t": 584,
+   "jump": true,
+   "why": "rinato"
+  },
+  {
+   "x": 11.6,
+   "y": 22.7,
+   "t": 600,
+   "why": "salvataggio"
+  },
+  {
+   "x": 9,
+   "y": 63,
+   "t": 621.6,
+   "helm": true,
+   "why": "preso in 0,3"
+  },
+  {
+   "x": 9,
+   "y": 99,
+   "t": 640.9,
+   "helm": true,
+   "why": "preso in 0,5"
+  },
+  {
+   "x": -9,
+   "y": 135,
+   "t": 662.5,
+   "helm": true,
+   "why": "preso in -1,7"
+  },
+  {
+   "x": -9,
+   "y": 189,
+   "t": 691.4,
+   "helm": true,
+   "why": "preso in -1,10"
+  },
+  {
+   "x": -10.2,
+   "y": 242.4,
+   "t": 720,
+   "helm": true,
+   "why": "salvataggio"
+  },
+  {
+   "x": 9,
+   "y": 261,
+   "t": 741.8,
+   "helm": true,
+   "why": "preso in 0,14"
+  },
+  {
+   "x": 92.5,
+   "y": 348.1,
+   "t": 840,
+   "helm": true,
+   "why": "salvataggio"
+  },
+  {
+   "x": 99,
+   "y": 333,
+   "t": 857.9,
+   "helm": true,
+   "why": "preso in 5,18"
+  },
+  {
+   "x": 117,
+   "y": 315,
+   "t": 885.6,
+   "helm": true,
+   "why": "preso in 6,17"
+  },
+  {
+   "x": 174.1,
+   "y": 280.9,
+   "t": 958,
+   "helm": true,
+   "why": "salvataggio"
+  }
+ ]
+}

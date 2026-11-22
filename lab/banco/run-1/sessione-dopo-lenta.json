@@ -1,0 +1,134 @@
+{
+ "kernel": ".",
+ "planLatency": 12,
+ "reach": {
+  "near": 8,
+  "ahead": 10,
+  "aheadMax": 60,
+  "side": 4,
+  "moving": 0.5
+ },
+ "minutes": 18.00027777776141,
+ "plannedBefore": 25,
+ "plannedInWalk": 91,
+ "calls": {
+  "npc.individuate": 56,
+  "chunk.plan": 60,
+  "content.define": 42,
+  "content.items": 2,
+  "content.physics": 2,
+  "content.review": 2,
+  "content.recipes": 2,
+  "council.session": 1,
+  "forge.concept": 1,
+  "forge.physics": 1,
+  "forge.code": 1,
+  "forge.review": 1
+ },
+ "sculpted": {
+  "figure": 4,
+  "simple": 7,
+  "structure": 4
+ },
+ "onDraft": 5.9,
+ "longestOnDraft": 5.6,
+ "aheadDraft": 19.5,
+ "usdRun": 1.9826709307775552,
+ "usdList": 1.9375946000000002,
+ "perHourRun": 6.608801114926333,
+ "perHourList": 6.458548997706526,
+ "rows": [
+  {
+   "task": "chunk.plan",
+   "n": 60,
+   "run": 0.15510453781512606,
+   "list": 0.15833550000000002
+  },
+  {
+   "task": "npc.individuate",
+   "n": 56,
+   "run": 0.24323264000000003,
+   "list": 0.25493580000000005
+  },
+  {
+   "task": "content.define",
+   "n": 42,
+   "run": 0.11553888888888889,
+   "list": 0.0772254
+  },
+  {
+   "task": "content.items",
+   "n": 2,
+   "run": 0.0131125,
+   "list": 0.0040002
+  },
+  {
+   "task": "content.physics",
+   "n": 2,
+   "run": 0.0065525,
+   "list": 0.0021216
+  },
+  {
+   "task": "content.review",
+   "n": 2,
+   "run": 0.0056365,
+   "list": 0.00324785
+  },
+  {
+   "task": "content.recipes",
+   "n": 2,
+   "run": 0.0136355,
+   "list": 0.0038515999999999997
+  },
+  {
+   "task": "council.session",
+   "n": 1,
+   "run": 0.0031555,
+   "list": 0.0017666749999999999
+  },
+  {
+   "task": "forge.concept",
+   "n": 1,
+   "run": 0.003495583333333333,
+   "list": 0.001988025
+  },
+  {
+   "task": "forge.physics",
+   "n": 1,
+   "run": 0.001342923076923077,
+   "list": 0.0011435
+  },
+  {
+   "task": "forge.code",
+   "n": 1,
+   "run": 0.004281714285714285,
+   "list": 0.001340575
+  },
+  {
+   "task": "forge.review",
+   "n": 1,
+   "run": 0.0018725714285714285,
+   "list": 0.001725875
+  }
+ ],
+ "models": [
+  {
+   "kind": "figure",
+   "n": 4,
+   "run": 0.10831380327868852,
+   "list": 0.1425456
+  },
+  {
+   "kind": "simple",
+   "n": 7,
+   "run": 0.21374999817850637,
+   "list": 0.12596640000000003
+  },
+  {
+   "kind": "structure",
+   "n": 4,
+   "run": 1.0936457704918032,
+   "list": 1.1574
+  }
+ ]
+}

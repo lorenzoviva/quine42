@@ -40,7 +40,7 @@ import { Input } from './input';
 import { discoverModules, readConfig, repairAiSettings } from './universe';
 import { askedRunes, carpetLine, CARPET_TOKENS, tileIndex, COUNCIL_RUNE, extractLines, tokenize, type RuneComp, type RuneLine } from './runes';
 import { hash32, hashStr, hex, Rng } from './rng';
-import { knobOfTask, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, type ActorConfig, type Coefficients } from './coefficients';
+import { knobOfTask, MAX_SESSIONS, onBeat, Rationing, rationedKnob, repairActor, repairCoefficients, type ActorConfig, type Coefficients } from './coefficients';
 import { BudgetError, type AiModels } from './ai/models';
 import type { DecisionModels } from './ai/decisions';
 import { billedModel } from './ai/prices';
@@ -92,6 +92,7 @@ import { internalComponent, internalEvent, internalFields, internalName, interna
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
+import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
@@ -205,6 +206,13 @@ export interface Chunk {
   chi?: string;
   /** Known to have no saved plan, and waiting for the universe's quota of new places (T40). */
   held?: boolean;
+  /**
+   * Looked up and found to need the Cartographer, out of every wanderer's reach (T488, ADR-0245): a draft until someone can reach it soon;
+   * not looked up again while it is loaded.
+   */
+  far?: boolean;
+  /** What its plan asks the Council for (the things named on its ground, the new ones it wants; T488): asked when it is in reach, once a load. */
+  asks?: () => void;
   /** In a thin client (T51b): the ground dug and the water that has flowed, as the server's plan has them. */
   digs?: Record<string, number>;
   water?: Record<string, WaterRecord>;
@@ -681,6 +689,24 @@ export class Kernel {
   /** At most this many of the same kind of character in the loaded world (individuals: one). */
   static NPC_CAP = 2;
   private plannedCount = 0;
+  /** Places come in reach of a wanderer with their plan (T488): the rhythms of the world (packs, kinds, sessions) beat on these. */
+  private exploredCount = 0;
+  /**
+   * What is made for a place, only when a wanderer can reach it soon (T488, ADR-0245, `src/kernel/reach.ts`): the game's `REACH`. The tests of
+   * something else widen `near` to every place loaded (Infinity), as the kernel planned before (tests/setup/reach-wide.ts).
+   */
+  static get REACH(): Reach {
+    return KERNEL_REACH.current;
+  }
+  static set REACH(r: Reach) {
+    KERNEL_REACH.current = r;
+  }
+  /** The places planned at a time (T40), and one more for the place under a wanderer's feet (T488). */
+  static DEVELOPERS = 3;
+  /** Seconds of the world over which a wanderer's pace is measured (T488). */
+  static PACE_WINDOW = 0.25;
+  /** Where each wanderer was when their pace was last measured and how fast they go (T488): the way ahead of the reach. */
+  private paces = new Map<string, { x: number; y: number; t: number; vx: number; vy: number }>();
   private growing = false;
   private forging = new Set<string>();
   private developers = 0;
@@ -2103,18 +2129,67 @@ export class Kernel {
     return this.chunks.get(ch.key) === ch;
   }
 
-  /** Plans the drafts nearest to any wanderer in the world (T40: not in the studio), a few at a time. */
-  private pumpDevelopment(): void {
-    if (this.generationHeld || this.developers >= 3) return;
-    const S = this.config.chunkSize;
-    const at: Array<{ x: number; y: number }> = [];
+  /**
+   * The wanderers in the world (not in the studio, T40) as the reach sees them (T488): where they are and how fast they go, measured here from
+   * where they were at least `PACE_WINDOW` seconds of the world ago (`nextPace`: a page may run several ticks in a frame, and a client's steps
+   * come in bursts, so a tick alone would see jumps and stops). Called once a tick; who left the world loses their pace.
+   */
+  private measurePaces(): Walker[] {
+    const out: Walker[] = [];
+    const now = this.time;
+    const kept = new Set<string>();
     for (const w of this.wanderersById.keys())
       this.as(w, () => {
         if (this.corona.isInterior(this.wandererPos().x)) return;
         const pc = this.wandererCarpet();
-        at.push({ x: pc.x / S - 0.5, y: pc.y / S - 0.5 });
+        let was = this.paces.get(w);
+        if (!was || now - was.t >= Kernel.PACE_WINDOW || now < was.t) {
+          const v = was && now > was.t ? nextPace(was, was, pc, now - was.t) : { vx: 0, vy: 0 };
+          was = { x: pc.x, y: pc.y, t: now, ...v };
+          this.paces.set(w, was);
+        }
+        kept.add(w);
+        out.push({ x: pc.x, y: pc.y, vx: was.vx, vy: was.vy });
       });
-    if (!at.length) return;
+    for (const w of [...this.paces.keys()]) if (!kept.has(w)) this.paces.delete(w);
+    this.walkersNow = out;
+    return out;
+  }
+
+  /** The wanderers as the reach saw them this tick (T488). */
+  private walkersNow: Walker[] = [];
+
+  /**
+   * Whether the place of a point of the world is in reach of a wanderer (T488, ADR-0245): near one, or on the way one is going. What the Council
+   * makes for a place (its plan, the things named on its ground, the new ones it asks for, the model of its structure) waits for this.
+   */
+  inReach(x: number, y: number): boolean {
+    const S = this.config.chunkSize;
+    return inReach(this.walkersNow, Math.floor(x / S), Math.floor(y / S), S, Kernel.REACH);
+  }
+
+  /** Whether the place (cx, cy) is in reach of a wanderer (T488). */
+  placeInReach(cx: number, cy: number): boolean {
+    return inReach(this.walkersNow, cx, cy, this.config.chunkSize, Kernel.REACH);
+  }
+
+  /** Tiles from a point of the world to the nearest wanderer in it (T488; Infinity with nobody): what is in reach is made nearest first. */
+  wandererDistance(p: { x: number; y: number }): number {
+    let best = Infinity;
+    for (const w of this.walkersNow) best = Math.min(best, Math.hypot(w.x - p.x, w.y - p.y));
+    return Number.isFinite(best) ? best : Infinity;
+  }
+
+  /**
+   * Plans the drafts in reach of a wanderer (T488, ADR-0245), the nearest first, a few at a time; the drafts out of reach are only looked up, for
+   * what costs nothing (a plan the universe has, the open sea, a filler, a place of a block): what would need the Cartographer waits there.
+   */
+  private pumpDevelopment(): void {
+    const walkers = this.measurePaces();
+    this.pumpAsks();
+    // Three at a time; one more only for the place under a wanderer's feet, which never waits for the others (T488).
+    if (this.generationHeld || this.developers > Kernel.DEVELOPERS || !walkers.length) return;
+    const S = this.config.chunkSize;
     // A place the local models left a draft (T433) is not asked again in this session: they would not plan it now either.
     // Nor one the budget stopped a moment ago (T457): asked again when `BUDGET_RETRY` has passed.
     const quota = this.chunkQuota() && !this.localModelsAbroad() && !this.budgetHeld();
@@ -2125,17 +2200,43 @@ export class Kernel {
       const kind = regionKind(this.masterRegionOf(c));
       return kind === 'filler' || (kind !== 'held' && (quota || !c.held));
     });
-    const dist = (c: Chunk) => Math.min(...at.map((p) => Math.hypot(c.cx - p.x, c.cy - p.y)));
-    drafts.sort((a, b) => dist(a) - dist(b));
-    for (const ch of drafts.slice(0, 3 - this.developers)) {
+    const dist = (c: Chunk) => nearestCentre(walkers, c.cx, c.cy, S);
+    const soon = drafts.filter((c) => inReach(walkers, c.cx, c.cy, S, Kernel.REACH));
+    const looked = drafts.filter((c) => !c.far && !soon.includes(c));
+    soon.sort((a, b) => dist(a) - dist(b));
+    looked.sort((a, b) => dist(a) - dist(b));
+    const feet = soon.find((c) => walkers.some((w) => squareDistance(w.x, w.y, c.cx, c.cy, S) === 0));
+    const picked = this.developers < Kernel.DEVELOPERS ? [...soon, ...looked].slice(0, Kernel.DEVELOPERS - this.developers) : feet ? [feet] : [];
+    for (const ch of picked) {
+      const far = !soon.includes(ch);
       ch.developing = true;
       this.developers++;
-      void this.develop(ch).finally(() => {
+      void this.develop(ch, false, far).finally(() => {
         ch.developing = false;
         this.developers--;
       });
     }
   }
+
+  /** What the loaded places ask the Council for, asked now for those in reach (T488): a place asks once a load. */
+  private pumpAsks(): void {
+    if (!this.asking.size) return;
+    for (const key of [...this.asking]) {
+      const ch = this.chunks.get(key);
+      if (!ch?.asks || ch.stage !== 'planned') {
+        this.asking.delete(key);
+        continue;
+      }
+      if (!this.placeInReach(ch.cx, ch.cy) || this.paceHeld()) continue;
+      const asks = ch.asks;
+      ch.asks = undefined;
+      this.asking.delete(key);
+      asks();
+    }
+  }
+
+  /** The loaded places with something to ask the Council for (T488). */
+  private asking = new Set<string>();
 
   /**
    * The deferred generation (T207, ADR-0143): the place (cx, cy) planned now, with nobody near it and outside the quota of new places per
@@ -2157,6 +2258,13 @@ export class Kernel {
       this.developers--;
     }
     const stage = ch.stage as Chunk['stage']; // develop() changed it
+    // Planned ahead on purpose (the deferred generation): what it asks the Council for is asked now, with nobody near (T488).
+    if (stage === 'planned' && ch.asks && !this.paceHeld()) {
+      const asks = ch.asks;
+      ch.asks = undefined;
+      this.asking.delete(ch.key);
+      asks();
+    }
     return stage !== 'planned' ? 'no' : known ? 'noto' : 'nuovo';
   }
 
@@ -2271,8 +2379,11 @@ export class Kernel {
     return undefined;
   }
 
-  /** Brings a chunk from draft to planned, reusing the cached plan when possible. */
-  private async develop(ch: Chunk, noQuota = false): Promise<void> {
+  /**
+   * Brings a chunk from draft to planned, reusing the cached plan when possible. `far` (T488): out of every wanderer's reach, only what costs
+   * nothing; a place that would need the Cartographer stays a draft, marked `far`, until someone can reach it soon.
+   */
+  private async develop(ch: Chunk, noQuota = false, far = false): Promise<void> {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
     // A plan whose environment is gone belongs to another world (a Genesis under the same title, ADR-0134): planned again.
@@ -2325,6 +2436,12 @@ export class Kernel {
       if (this.alive(ch)) this.applyPlan(ch, plan);
       return;
     }
+    // Out of reach (T488): the Cartographer is asked only for a place someone can reach soon.
+    if (far) {
+      ch.far = true;
+      return;
+    }
+    ch.far = false;
     // New to the universe: planned once, here, at the expense of who wanted it first (T40), within the quota.
     if (!noQuota && (!this.chunkQuota() || this.budgetHeld())) {
       if (!ch.held) this.council.say('kernel', 'info', this.paceHeld() ? `luogo ${ch.key}: il mondo è in pausa, resta abbozzato` : this.budgetHeld() ? `luogo ${ch.key}: il Concilio non ha budget, resta abbozzato` : `luogo ${ch.key}: troppi luoghi nuovi in un minuto, aspetta`, 'cartographer', 'chunk.plan');
@@ -3028,27 +3145,34 @@ export class Kernel {
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
-    // Held (T373): what a known place would ask the Council for waits; the place comes back with it when it is loaded again. A place of a filler
-    // region (T375) asks nothing, not even the rhythms its exploring would beat: the master filled it so as not to pay for it.
-    const asks = !this.paceHeld() && regionKind(this.masterRegionOf(ch)) !== 'filler';
-    if (asks && unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
-      if (!this.alive(ch)) return;
-      defs.forEach((d, i) => {
-        const tile = place.pick('outside');
-        if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
-      });
-    });
-    for (const f of asks ? (plan.fresh ?? []) : []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
     this.runesDirty = true;
     if (away !== undefined) this.npc.onReturn(ch.key, away);
     // The capsules of its landings (T448).
     this.dockCapsules(ch);
     this.bus.emit('chunk:planned', { key: ch.key });
-    // The rhythms of the world (T45b): stretched by the coefficients of generation; none while the world is held (T373).
-    if (!asks) return;
-    if (onBeat(this.plannedCount, 10, coef.packs)) void this.growContent('esplorazione');
-    if (onBeat(this.plannedCount, 7, coef.inhabitants)) void this.growCast(plan.place);
-    if ((this.plannedCount === 3 && coef.sessions > 0) || onBeat(this.plannedCount, 12, coef.sessions)) void this.holdSession();
+    // A place of a filler region (T375) asks nothing, not even the rhythms its exploring would beat: the master filled it so as not to pay for it.
+    ch.asks = undefined;
+    this.asking.delete(ch.key);
+    if (regionKind(this.masterRegionOf(ch)) === 'filler') return;
+    // What it asks the Council for, asked when it is in reach of a wanderer (T488, ADR-0245: a place loaded at the edge of the view asks nothing),
+    // once a load. Held (T373): it waits while the world is held.
+    ch.asks = () => {
+      if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {
+        if (!this.alive(ch)) return;
+        defs.forEach((d, i) => {
+          const tile = place.pick('outside');
+          if (tile !== undefined) this.spawnItem(d.id, at(tile).x, at(tile).y, 1, ch.key, `${ch.key}#n${i}`);
+        });
+      });
+      for (const f of plan.fresh ?? []) if (this.kept(`${ch.key}:${f.concept}`, coef.entities)) void this.forgeForChunk(ch, f, place.pick, at);
+      // The rhythms of the world (T45b): stretched by the coefficients of generation, on the places that came in reach (T488).
+      this.exploredCount++;
+      if (onBeat(this.exploredCount, 10, coef.packs)) void this.growContent('esplorazione');
+      if (onBeat(this.exploredCount, 7, coef.inhabitants)) void this.growCast(plan.place);
+      if ((this.exploredCount === 3 && coef.sessions > 0) || onBeat(this.exploredCount, 12, coef.sessions)) void this.holdSession();
+    };
+    this.asking.add(ch.key);
+    this.pumpAsks();
   }
 
   /** How often every agent asks the model (T45b): universe.json → ai.coefficienti, repaired. */
@@ -3920,7 +4044,7 @@ export class Kernel {
    * intervene (items, a new inhabitant, a new entity). The base logic is theirs; so are its changes.
    */
   async holdSession(force = false): Promise<string> {
-    if (!force && (this.sessions >= 4 || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return 'none';
+    if (!force && (this.sessions >= MAX_SESSIONS || this.generationHeld || this.paceHeld() || this.ai.name === 'offline')) return 'none';
     this.sessions++;
     // The summary goes to the Arbiter's prompt (English since T310); the rules, people and places are the world's words.
     const rules = this.rules().slice(-12).map((r) => `- ${r.text}: ${r.possible ? 'possible' : 'not possible'}`).join('\n');
@@ -8613,7 +8737,7 @@ export class Kernel {
     const card = `la carta «${name}» è tolta${why ? ` (${why})` : ''}`;
     if (kind === 'model') {
       // What the world still names (a module, an item, a structure of a concept): the director would sculpt it, if it could.
-      const wanted = this.sculpting.missing().filter((r) => ids.has(r.id));
+      const wanted = this.sculpting.missing(true).filter((r) => ids.has(r.id));
       const blocked = wanted.length ? this.sculpting.blocked() : undefined;
       if (!blocked) return undefined;
       for (const r of wanted) this.noteShortfall({ request: `il modello di «${r.nome}»`, agent: 'sculptor', task: 'model.sculpt', outcome: 'fault', reason: `${card}; ${blocked}` });
@@ -10866,7 +10990,7 @@ export class Kernel {
       faults: this.faults.list(),
       wanderer: chunkOf(pc.x, pc.y),
       players: this.players(),
-      chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, name: c.place?.name })),
+      chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, ...(c.far ? { far: true } : {}), name: c.place?.name })),
       locate,
       chunkSize: S,
     });
