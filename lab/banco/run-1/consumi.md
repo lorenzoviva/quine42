@@ -115,3 +115,64 @@ a 0,50 $: **0,478 $ al varco** (0,418 nel registro dell'universo; Jev 0,0008 $).
   del Cartografo, chiesti nell'ordine della via a uno ogni 3 s, ognuno pronto circa 4 s prima che il viandante ci arrivi, solo la riga
   percorsa, **nessun campione su 567 sulla bozza** (`raggio-offline.jpg`: il luogo pianificato sotto i piedi, le bozze della riga accanto
   in alto); e nella sessione del cammino coi piani a 12 s (§ 3): 5,9 s sulla bozza in 18 minuti.
+
+## 6. Le strutture riusate e il tetto orario (T495, ADR-0247)
+
+La risposta a D69: il Cartografo riusa le strutture che il mondo ha, con un seme nuovo (D69.2); un tetto orario dei soli programmi nuovi,
+2 l'ora a pieno dettaglio, che il master alza nella lobby (D69.3). Si rifà tutto così:
+
+```bash
+npx vite-node lab/scripts/semi-strutture.ts -- ../beta-run-1/universes/orichalcum --semi 12      # i semi oltre i quattro provati, senza chiamate
+npx vite-node lab/scripts/riuso-cartografo.ts -- ../beta-run-1/universes/orichalcum --root <cartella col .env> --luoghi 24 --ora 60 --json lab/banco/run-1/riuso-gemini-invito.json   # costa
+git archive 3474d1a6 src universe server site lab/handmade lab/suono | tar -x -C <cartella>      # il kernel del base, col raggio e senza il riuso
+(cd <cartella> && npx vite-node <questo progetto>/lab/scripts/sessione-cammino.ts -- --minuti 18 --sorgente . --json <questo progetto>/lab/banco/run-1/sessione-t495-prima.json)
+# dalla sua cartella: il seme si legge da /universe/ della radice di vite, e quello di un kernel più nuovo lo farebbe un universo da leggere soltanto
+npx vite-node lab/scripts/sessione-cammino.ts -- --minuti 18 --tetto 60 --json lab/banco/run-1/sessione-t495-dopo-tetto60.json
+npx vite-node lab/scripts/sessione-cammino.ts -- --minuti 18 --json lab/banco/run-1/sessione-t495-dopo.json
+```
+
+### 6.1 Che cosa chiedevano i piani della run
+
+Nei 291 piani nuovi della run ci sono **281 strutture di 234 concetti**, ma di soli **37 generi** (la prima parola del concetto): capanno 42,
+rimessa 40, officina 30, deposito 28, capannone 23, magazzino 23, serra 14, cascina 11, casa 9; i primi sei sono il 66 %. All'inizio della run la
+libreria aveva 16 strutture dell'epoca del mondo (le steampunk del catalogo e quattro di Argon, i `struttura-…` col programma sul disco) di
+10 generi: il **35 %** delle strutture chieste era già di uno di quei generi (capanno, officina, capannone, stazione, faro…), e lo Scultore le
+ha scolpite come concetti nuovi perché il Cartografo non le vedeva (gli si offrivano solo le carte portate, nessuna in `orichalcum`). Nella run
+lo Scultore ne ha fatte cinque (16 chiamate di Argon, 1,04 $), quattro di generi che la libreria aveva (capanno ×2, deposito, cascina).
+
+### 6.2 I semi oltre i quattro provati
+
+`lab/scripts/semi-strutture.ts` prova ogni struttura che il Cartografo può riusare coi controlli dello Scultore a un seme (`checkSeed`: finisce,
+due piani raggiunti, le parti abitabili alla loro misura, la cantina raggiunta dalla porta), ai semi 1-12:
+
+| universo | strutture | semi provati | cadono | oltre il quarto |
+|---|---|---|---|---|
+| `orichalcum` | 21 | 252 | 12 (la cantina non raggiunta: la cascina di Opus ai semi 1, 2, 3, 5, 6, 8, 11, 12, l'officina meccanica Enorme ai 5, 6, 10, 12) | 9 |
+| `sidera` | 17 | 204 | 0 | 0 |
+| `neapolis` | 17 | 204 | 1 | 1 |
+| `aurora` | 12 | 144 | 0 | 0 |
+| **insieme** | **67** | **804** | **13 (1,6 %)** | **10** |
+
+Un seme oltre il quarto regge quasi come i primi quattro (1,9 % contro 1,1 %), e ciò che cade è la cantina. (Misurato prima che il kernel togliesse dall'offerta i nomi che portano
+all'id di un'altra struttura: oggi `orichalcum` ne offre 20, senza `struttura-cattedrale`, «Cattedrale degli Ingranaggi», il cui id derivato è
+quello di `struttura-cattedrale-degli-ingranaggi`.) Quindi il seme nuovo, dal luogo
+(`reuseSeed`, da 5 a 4100), alle strutture senza cantina; quelle con la cantina, e le carte portate, tengono il seme del loro lotto.
+
+### 6.3 Il Cartografo vero davanti alle strutture del mondo
+
+`lab/scripts/riuso-cartografo.ts`: Flash-Lite pianifica luoghi nuovi attorno a quelli che `orichalcum` ha, su una copia in memoria
+(niente si scrive), ogni altra chiamata ai modelli locali; le 21 strutture dell'epoca del mondo offerte.
+
+| prova | luoghi | strutture nei piani | riusate | concetti nuovi | $ |
+|---|---|---|---|---|---|
+| il prompt che preferisce il riuso, il tetto che non morde (`--ora 60`) | 24 | 28 | 28 | 0 | 0,073 |
+| il tetto a 0 (lo schema lascia passare solo le strutture del mondo) | 8 | 11 | 11 | 0 | 0,025 |
+| col codice finale: l'invito ogni dieci piani (`--ora 60`) | 24 | 29 | 27 | 2 (al decimo e al ventesimo piano) | 0,077 |
+
+Flash-Lite riusa sempre, ma sceglie quasi sempre la più adatta al genere del luogo: «il capanno di collaudo delle chiatte» in 11 dei 15 porti (12 volte su 28)
+(ognuno col suo seme, un edificio diverso: 22 delle 28 strutture hanno un seme nuovo, le altre 6 la cantina), e un mondo così non avrebbe più un genere nuovo. Per questo il kernel, sotto il tetto, dopo
+`FRESH_EVERY` (10) piani senza un concetto nuovo invita il Cartografo a darne uno al luogo seguente (`freshWanted`); il tetto orario resta il
+limite. Con l'invito Flash-Lite ha dato due concetti nuovi in 24 luoghi, uno ogni dieci come voleva l'autore: «Capanno di vetro temperato con
+telaio in ferro» in una giungla, e «il capanno di collaudo delle chiatte a vapore», cioè il nome di una struttura del mondo tagliato prima di
+«su palafitte sopra l'acqua». Così il kernel riconosce anche un nome che è l'inizio dell'altro in almeno quattro parole (`reusableOf`,
+`SHORT_NAME_WORDS`): quel doppione ora è un riuso, e dei due concetti nuovi ne resta uno. Le quattro prove con Gemini sono costate 0,182 $.

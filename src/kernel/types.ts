@@ -409,6 +409,11 @@ export interface AiConfig {
   timeout?: number;
   /** New places a universe of many plans per minute, for everyone together (T40; default 20). */
   placesPerMinute?: number;
+  /**
+   * New programs of the structures a plan asks for, an hour of the world, for the whole world (T495, ADR-0247; default 2,
+   * `NEW_STRUCTURES_PER_HOUR`): over it the Cartographer wears again the structures the world has, with another seed. The lobby, fixed on entering.
+   */
+  newStructuresPerHour?: number;
   /** Where the slow tasks of every agent run (T68, ADR-0077): `api` (default) or a subscription's CLI, `claude` (ADR-0106). */
   provider?: import('./ai/subscription').Provider;
   /** Agent id → provider, the exceptions to `provider`. Only in single play and development, never on the server of many. */
@@ -422,7 +427,7 @@ export interface AiConfig {
 }
 
 /** What the master sets before entering (T247, ADR-0133): every knob of the consumption, none of the providers'. */
-export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'sculptors' | 'sculptorTier' | 'coefficients' | 'actor' | 'minimums' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxPieces' | 'placesPerMinute' | 'thinking'>>;
+export type AiSettings = Partial<Pick<AiConfig, 'textModel' | 'sculptors' | 'sculptorTier' | 'coefficients' | 'actor' | 'minimums' | 'maxText' | 'maxForges' | 'maxPacks' | 'maxCast' | 'maxModels' | 'maxPieces' | 'placesPerMinute' | 'newStructuresPerHour' | 'thinking'>>;
 
 /** Quality and spending minimums of an universe (T45d). */
 export interface AiMinimums {

@@ -9,6 +9,7 @@ import { cacheable, costOf, EXPLICIT_CACHE, priceOf } from './ai/prices';
 import { JEV_MODEL } from './ai/decisions';
 import { repairSculptorTier, sculptorsOn, type AiRoute, type SculptorAiModels, type SculptorTier } from './agents/sculptor';
 import type { AiConfig } from './types';
+import type { BudgetKey } from './universe';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
 
 export const COEFFICIENT_KEYS = ['sessions', 'dialogues', 'plots', 'reviews', 'models', 'people', 'inhabitants', 'packs', 'entities', 'pieces', 'chunks', 'words', 'looks', 'actions', 'magic', 'death', 'repairs', 'studio', 'lives', 'interiors'] as const;
@@ -94,8 +95,9 @@ const GENESIS_ONCE = "una volta, alla Genesi: la lobby viene dopo; chi non vuole
  * The census of every call (docs/conversazioni.md, T67): what regulates it. `diretta` and `indiretta` name their
  * coefficient; `non regolabile` is only the Genesis, with the reason in `nota` (a test holds this: T247). `via: 'decide'` is a closed
  * decision (ADR-0157): it goes to the layer of decisions (`ai/decisions.ts`, Jev), never to a model that writes, and only these tasks may.
+ * `tetto` is a budget of the lobby that caps a share of the task besides its coefficient (T495: the new programs of the structures an hour).
  */
-export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; via?: 'decide'; freeText?: true; nota?: string }> = [
+export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 'indiretta' | 'non regolabile'; coefficiente?: CoefficientKey; tetto?: BudgetKey; via?: 'decide'; freeText?: true; nota?: string }> = [
   { compito: 'genesis.bible', agente: 'narrator', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.style', agente: 'artist', modo: 'non regolabile', nota: GENESIS_ONCE },
   { compito: 'genesis.terrain', agente: 'cartographer', modo: 'non regolabile', nota: GENESIS_ONCE },
@@ -134,7 +136,8 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'text.read', agente: 'narrator', modo: 'diretta', coefficiente: 'looks', nota: '«Leggi»' },
   { compito: 'referente.coordinate', agente: 'liaison', modo: 'diretta', coefficiente: 'studio', nota: 'nella corona' },
   { compito: 'agent.chat', agente: 'liaison', modo: 'diretta', coefficiente: 'studio', nota: 'nella corona' },
-  { compito: 'model.sculpt', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'e revisioni' },
+  // T495 (ADR-0247): the new programs of the structures a plan asks for, an hour of the world, for the whole world; the reuse never counts.
+  { compito: 'model.sculpt', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', tetto: 'newStructuresPerHour', nota: 'e revisioni; delle strutture dei luoghi al più «Strutture nuove all’ora» programmi nuovi, il riuso con un seme nuovo non conta' },
   { compito: 'model.judge', agente: 'artist', modo: 'diretta', coefficiente: 'reviews' },
   { compito: 'model.action', agente: 'sculptor', modo: 'diretta', coefficiente: 'actions', nota: '«Altro…» che cambia la forma' },
   // T472: a part of the world from a good model of a trade that has fewer than its parts, at most twice a session per trade (ADR-0243).

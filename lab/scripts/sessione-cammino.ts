@@ -1,12 +1,16 @@
 // T488: a scripted session of walking, offline, with the calls counted: the path of the first run of the beta (lab/banco/run-1/percorso.json,
 // written by consumi-run.ts) walked again over the seed's world in `--minuti` minutes of the world, by a kernel on local models that answer
 // as Gemini did in the run, after the time Gemini takes (in the world's time, not the machine's):
-//   npx vite-node lab/scripts/sessione-cammino.ts -- [--minuti 18] [--sorgente <cartella con src/ e universe/>] [--vicino <caselle>] [--latenza-piano 6] [--json f]
+//   npx vite-node lab/scripts/sessione-cammino.ts -- [--minuti 18] [--sorgente <cartella con src/ e universe/>] [--vicino <caselle>] [--latenza-piano 6] [--nuove 0] [--invito 1] [--tetto 2] [--json f]
 // `--sorgente` runs another kernel (the one of before: `git archive <commit> src universe | tar -x -C <cartella>`); `--vicino Infinity` widens the
 // reach of T488 to every loaded place (the rule of before, in this kernel).
 // The models are the local ones (MockAiModels) under another name, so the kernel asks what it asks a real model (packs, kinds, sessions); the
 // plans of the Cartographer get what Gemini's had in the run (per plan: 3 things on the ground, some never seen before; 1.2 structures, most of
 // a new concept; half a new thing asked for). The Sculptor is not run: each model it would make is counted by class and takes its time.
+// T495: a kernel that offers the Cartographer the structures of the world (`known`) gets one of them back, a new concept only with the share
+// `--nuove` (0: Flash-Lite in `riuso-cartografo.ts` wore one of them in every place), or `--invito` when the kernel invites one (`freshWanted`), and
+// never over the ceiling of the hour (`--tetto`, `ai.newStructuresPerHour`); a structure
+// the Sculptor would make enters the library (the generic structure's program under its id), so that the next places may wear it again.
 // The dollars: each call at what a call of its task cost in the run (`lab/banco/run-1/misura.json`), each model at what a model of its kind
 // cost; and at the lobby's estimate (`callCost`, `structureCost`). Also how long the wanderer stood on a draft.
 import { promises as fs } from 'node:fs';
@@ -21,6 +25,9 @@ const opt = (name: string, def?: string) => {
 const root = path.resolve(opt('--sorgente', path.resolve(import.meta.dirname ?? '.', '../..'))!);
 const minutes = Number(opt('--minuti', '18'));
 const near = opt('--vicino');
+const freshShare = Number(opt('--nuove', '0'));
+const invited = Number(opt('--invito', '1'));
+const ceiling = opt('--tetto');
 const load = async (p: string) => import(pathToFileURL(path.join(root, p)).href);
 const { Kernel } = await load('src/kernel/kernel.ts');
 const { bundledFiles } = await load('src/kernel/bundle.ts');
@@ -29,6 +36,8 @@ const { MockAiModels } = await load('src/kernel/ai/mock.ts');
 const { MemoryChunks } = await load('src/kernel/chunks.ts');
 const { emptyUsage } = await load('src/kernel/ai/models.ts');
 const { callCost, structureCost, sculptPlan, repairCoefficients } = await load('src/kernel/coefficients.ts');
+// The structures of the world worn again (T495): only a kernel that has them.
+const reuse = await load('src/kernel/reuse.ts').catch(() => undefined);
 if (near !== undefined) {
   if (!Kernel.REACH) throw new Error('questo kernel non ha il raggio di T488: --vicino non vale');
   Kernel.REACH = { ...Kernel.REACH, near: Number(near) };
@@ -94,7 +103,19 @@ class RunLike {
     // The run's plans: 3 things on the ground (some new to the world), 1.2 structures (most of a new concept), half a new thing.
     const known = [...((d.wanted as string[]) ?? []), 'pane', 'mela', 'corda'];
     plan.ground = [0, 1, 2].map(() => (r() < 0.35 ? newName() : known[Math.floor(r() * known.length)]));
-    if (!plan.structures?.length && !d.start) plan.structures = r() < 0.75 ? [{ concept: r() < 0.7 ? `edificio ${newName()}` : 'la bottega del borgo' }] : [];
+    // With the structures of the world offered (T495): one of them, a new concept only with `--nuove` and under the ceiling (the schema says so).
+    const offered = d.known as Array<{ concept: string; sizes: string[] }> | undefined;
+    const wear = () => {
+      const k = offered![Math.floor(r() * offered!.length)];
+      return [{ concept: k.concept, size: k.sizes.find((t) => t !== 'huge' && t !== 'gargantuan') ?? k.sizes[0] }];
+    };
+    if (!plan.structures?.length && !d.start) {
+      const has = r() < 0.75;
+      if (!has) plan.structures = [];
+      else if (offered && d.newStructures === false) plan.structures = offered.length ? wear() : [];
+      else if (offered?.length && r() >= (d.freshWanted ? invited : freshShare)) plan.structures = wear();
+      else plan.structures = [{ concept: r() < 0.7 ? `edificio ${newName()}` : 'la bottega del borgo' }];
+    }
     if (r() < 0.5) plan.fresh = [{ concept: `strumento ${newName()}`, where: 'outside' }];
     return JSON.stringify(plan);
   }
@@ -104,22 +125,30 @@ const ai = new RunLike();
 // --- The world: the seed's, its first places planned as a generated universe has them ---
 const files = { ...bundledFiles };
 const u = JSON.parse(files['universe.json']);
-u.ai = { ...u.ai, maxText: 1200 };
+u.ai = { ...u.ai, maxText: 1200, ...(ceiling !== undefined ? { newStructuresPerHour: Number(ceiling) } : {}) };
 files['universe.json'] = JSON.stringify(u);
 const k = await Kernel.boot({ files, store: memoryStore(), ai, chunks: new MemoryChunks() });
 // The Sculptor counted, not run; the Musician and the Scenografo quiet (the run asked neither).
 const sculpted: Record<string, number> = {};
 const director = k.sculpting as any;
-director.make = async (req: { id: string; classe: string; taglia?: string }) => {
+const generic = k.files['models/structure.xml'];
+director.make = async (req: { id: string; nome: string; classe: string; taglia?: string; shareWith?: string[] }) => {
   director.busy = true;
+  // A new program of a structure of a plan counts in the hour (T495; a kernel of before has no hour).
+  director.noteProgram?.(req);
   director.used++;
   const kind = ['structure', 'building'].includes(req.classe) ? 'structure' : ['person', 'animal', 'beast'].includes(req.classe) ? 'figure' : 'simple';
   sculpted[kind] = (sculpted[kind] ?? 0) + 1;
   await later(SCULPT_TIME[req.classe] ?? 15);
-  director.skip.add(req.id);
+  // A structure of a plan enters the library, so that the places after may wear it again (the generic's program under its id, a card of the
+  // world); anything else is only counted.
+  const plan = req.shareWith !== undefined && !req.id.startsWith('casa-comune-');
+  if (!plan || !k.addModel(req.id, generic, { class: req.classe, name: req.nome, ...(req.taglia ? { size: req.taglia } : {}) }, `banco: ${req.nome}`, { task: 'model.sculpt', author: 'sculptor' })) director.skip.add(req.id);
+  else added++;
   director.busy = false;
   return true;
 };
+let added = 0;
 k.composing.pump = () => {};
 k.furnishing.pump = () => {};
 const flush = () => new Promise<void>((r) => setImmediate(r));
@@ -151,7 +180,22 @@ const planned0 = [...k.chunks.values()].filter((c: any) => c.stage === 'planned'
 const place = (x: number, y: number) => k.chunks.get(`${Math.floor(x / S)},${Math.floor(y / S)}`);
 let onDraft = 0, aheadDraft = 0, longest = 0, run = 0;
 const plannedKeys = new Set<string>();
-k.bus.on('chunk:planned', (e: { key: string }) => plannedKeys.add(e.key));
+const structureLog: Array<{ key: string; concept: string; worn: boolean; fresh: boolean }> = [];
+const seenConcepts = new Set<string>();
+const plannedBefore = new Set([...k.chunks.values()].filter((c: any) => c.stage === 'planned').map((c: any) => c.key));
+k.bus.on('chunk:planned', (e: { key: string }) => {
+  if (plannedKeys.has(e.key)) return;
+  plannedKeys.add(e.key);
+  if (plannedBefore.has(e.key)) return;
+  // A structure of the plan is worn again when the library has its model as the plan is applied, or (T495) its concept is one of the world's
+  // (another size of it is copied with no call); a concept new to the world is one neither has, the first time the walk meets it.
+  for (const s of k.chunks.get(e.key)?.plan?.structures ?? []) {
+    const worn = !!k.forms.info(k.structureModelOf(s.concept, s.size)) || !!reuse?.reusableOf((k as any).reusable(), s.concept);
+    const name = s.concept.toLowerCase();
+    structureLog.push({ key: e.key, concept: s.concept, worn, fresh: !worn && !seenConcepts.has(name) });
+    seenConcepts.add(name);
+  }
+});
 const start = k.time;
 const dt = 1 / 60;
 let last = at(0);
@@ -216,6 +260,14 @@ const out = {
   minutes: seconds / 60,
   plannedBefore: planned0,
   plannedInWalk: plannedKeys.size,
+  // T495: what the plans of the walk asked of the structures: how many, how many the library had already (worn again), of how many concepts.
+  newStructuresPerHour: (k as any).newStructuresPerHour?.(),
+  freshShare: (k as any).newStructuresPerHour ? freshShare : undefined,
+  structures: structureLog.length,
+  structuresWorn: structureLog.filter((x) => x.worn).length,
+  structureConcepts: new Set(structureLog.map((x) => x.concept.toLowerCase())).size,
+  structureFresh: structureLog.filter((x) => x.fresh).length,
+  structuresAdded: added,
   calls,
   sculpted,
   onDraft: Math.round(onDraft * 10) / 10,
@@ -232,6 +284,7 @@ const json = opt('--json');
 if (json) await fs.writeFile(json, JSON.stringify(out, null, 1) + '\n');
 console.log(`kernel ${root}; raggio ${JSON.stringify(out.reach)}`);
 console.log(`${out.minutes.toFixed(1)} minuti; luoghi pianificati prima del cammino ${planned0}, nel cammino ${plannedKeys.size}; sulla bozza ${out.onDraft} s (al più ${out.longestOnDraft} di fila), bozza due caselle davanti ${out.aheadDraft} s`);
+console.log(`strutture nei piani del cammino ${out.structures}, riusate ${out.structuresWorn}, concetti ${out.structureConcepts}, nuovi al mondo ${out.structureFresh}; tetto ${out.newStructuresPerHour ?? 'nessuno'}, nuove ${out.freshShare ?? '-'}`);
 console.log(`${total('run').toFixed(3)} $ ai costi della run (${out.perHourRun.toFixed(2)} $/h), ${total('list').toFixed(3)} $ alla stima della lobby (${out.perHourList.toFixed(2)} $/h)`);
 for (const r of rows) console.log(`  ${r.task} ${r.n} ${r.run.toFixed(3)} ${r.list.toFixed(3)}`);
 for (const m of models) console.log(`  modelli ${m.kind} ${m.n} ${m.run.toFixed(3)} ${m.list.toFixed(3)}`);

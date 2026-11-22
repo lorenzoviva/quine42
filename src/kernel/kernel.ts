@@ -65,6 +65,7 @@ import { gates, layout, type Lot, type LayoutResult, articulationPoints } from '
 import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
+import { FRESH_EVERY, NEW_STRUCTURES_PER_HOUR, nearestSize, newSeedFor, reusableEntry, reusableOf, reusableStructures, reuseSeed, StructureHour, type ReusableStructure } from './reuse';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeKind, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
@@ -321,8 +322,11 @@ interface ChunkLot {
   x: number;
   y: number;
   form: FormComp;
-  /** `cellar` (T417): tiles of cellar the Cartographer asked for, which the `ModelDirector` asks the Sculptor for. */
-  structure: { concept: string; class: string; size?: SizeTier; model?: string; stage?: number; cellar?: number };
+  /**
+   * `cellar` (T417): tiles of cellar the Cartographer asked for, which the `ModelDirector` asks the Sculptor for. `seed` (T495): the seed of a
+   * structure of the world worn again, from its place (the plan's), once it wears its own model.
+   */
+  structure: { concept: string; class: string; size?: SizeTier; model?: string; stage?: number; cellar?: number; seed?: number };
 }
 
 /** A planned place in miniature (T26): positions in tiles from the place's top-left corner, levels in `LEVEL`s. */
@@ -604,6 +608,14 @@ export class Kernel {
   readonly forms: Forms;
   /** The Sculptor at work on the models the world lacks. */
   readonly sculpting = new ModelDirector(this);
+  /**
+   * The new concepts of structure the plans of this session brought, in the hour of the world (T495, ADR-0247): under the ceiling
+   * (`ai.newStructuresPerHour`) the Cartographer may ask one more, over it only the structures the world has.
+   */
+  readonly structureHour = new StructureHour();
+  /** The plans since one brought a concept of structure new to the world (T495): at `FRESH_EVERY` the Cartographer is invited to give one. */
+  plansSinceFresh = 0;
+  private reusableCache?: { files: FileMap; broken: number; list: ReusableStructure[] };
   /** The Musician at work on the music the world lacks. */
   readonly composing = new ScoreDirector(this);
   /** The Scenografo at work on the interiors the buildings lack (T410, ADR-0214). */
@@ -1744,7 +1756,9 @@ export class Kernel {
       const fc: FormComp = this.ecs.get(id, 'form');
       if (!fc.wanted || !this.forms.usable(fc.wanted)) continue;
       fc.model = fc.wanted;
-      fc.seed = this.forms.seedFor(fc.wanted, this.ecs.get(id, 'origin')?.key ?? String(id));
+      // A structure of the world worn again (T495) has the seed of its place, the rest their own.
+      const placed = this.ecs.get(id, 'structure') as { model?: string; seed?: number } | undefined;
+      fc.seed = placed?.seed !== undefined && placed.model === fc.wanted ? placed.seed : this.forms.seedFor(fc.wanted, this.ecs.get(id, 'origin')?.key ?? String(id));
       delete fc.wanted;
       this.instanceFeet.delete(id);
     }
@@ -2465,6 +2479,8 @@ export class Kernel {
         ch.held = true;
         return;
       }
+      // The structures of the world it asks again wear them with a seed of their own; a new concept counts in the hour (T495).
+      this.wearAgain(ch, plan);
       // A new plan's stamps cut their buildings for the structures at 16 (T407); a plan of before does not say it, and keeps its stamps.
       plan.vpt = STRUCTURE_VPT;
       // And it swims (T438, ADR-0224): its layout joins it through the water one swims and never digs it; a plan of before does not say it.
@@ -2732,7 +2748,10 @@ export class Kernel {
           region: region ? { name: region.name, description: region.description } : undefined,
           ...(island ? { island } : {}),
           rari: this.rareAllowed(ch),
-          ...(this.broughtStructures().length ? { brought: this.broughtStructures() } : {}),
+          // The structures the world has, the brought ones among them (T495): asked again by their concept; a new one only under the hour's ceiling.
+          known: this.knownStructures(this.rareAllowed(ch)),
+          newStructures: this.newStructureAllowed(),
+          freshWanted: this.newStructureAllowed() && this.plansSinceFresh >= FRESH_EVERY - 1,
           chi: ch.chi,
         });
         const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable, rides);
@@ -3222,8 +3241,15 @@ export class Kernel {
       const fits = (t: SizeTier) => side !== undefined && Math.max(...this.lotTiles(cls, t, s.concept).slice(0, 2)) <= side;
       const allowed = this.rareAllowed(ch);
       const ok = (t: SizeTier) => fits(t) && (!RARE_SIZES.includes(t) || (!rare && allowed.includes(t)));
-      let t: SizeTier | undefined = s.size;
-      while (t && !ok(t)) t = sizeRank(t) > 0 ? SIZE_TIERS[sizeRank(t) - 1].id : undefined;
+      // A structure the world has (T495) takes the largest of its sizes the lot holds, up to the one asked: worn again, not a program of a new
+      // size; only if none fits, the size the lot holds, as any.
+      const known = reusableOf(this.reusable(), s.concept);
+      const asked = s.size;
+      let t: SizeTier | undefined = known ? [...known.sizes].reverse().find((x) => sizeRank(x) <= sizeRank(asked) && ok(x)) : undefined;
+      if (!t) {
+        t = s.size;
+        while (t && !ok(t)) t = sizeRank(t) > 0 ? SIZE_TIERS[sizeRank(t) - 1].id : undefined;
+      }
       if (!t) delete s.size;
       else s.size = t;
       if (t && RARE_SIZES.includes(t)) {
@@ -3249,11 +3275,80 @@ export class Kernel {
     const brought = this.broughtStructures().find((b) => sameName(b.concept, concept) && (size === undefined ? b.size === undefined : (b.size ?? classOf(b.class)?.taglia) === size));
     if (brought) return brought.id;
     const sized = structureModel(concept, size), plain = structureModel(concept);
-    if (sized === plain || this.forms.info(sized)) return sized;
+    if (this.forms.info(sized)) return sized;
+    // A structure the world has at that size (T495), whatever its id: the seed's of a world of its age, one of the catalogue a universe was
+    // given; after the id its concept names, as before (`reusableStructures` offers no concept whose id is another structure's).
+    const known = reusableOf(this.reusable(), concept);
+    const own = known?.entries.find((e) => e.size === (size ?? classOf(known.class)?.taglia));
+    if (own) return own.id;
+    if (sized === plain) return sized;
     const old = this.forms.info(plain), xml = this.files[`models/${plain}.xml`];
     if (!old || !xml) return sized;
     const same = (sizeOf(old.size)?.id ?? classOf(old.class)?.taglia) === size;
     return !same && old.class === 'structure' && shareableProgram(xml) ? sized : plain;
+  }
+
+  /**
+   * The structures the world has, which a plan asks again by their concept (T495, ADR-0247): the Sculptor's and the brought ones, those the
+   * world wears (not an isolated card), by concept; how many places wear each is `knownStructures`'s.
+   */
+  reusable(): ReusableStructure[] {
+    const c = this.reusableCache;
+    if (c && c.files === this.files && c.broken === this.broken.size) return c.list;
+    const list = reusableStructures(this.files, (id) => this.forms.usable(id));
+    this.reusableCache = { files: this.files, broken: this.broken.size, list };
+    return list;
+  }
+
+  /**
+   * The structures of the world as the Cartographer is told them (T495): with the places that wear each (the ledger of the cards), the least
+   * worn first; of the rare sizes only those the place may still have (`rari`, ADR-0092), and a structure with no other size not at all.
+   */
+  knownStructures(rari: readonly SizeTier[] = []): Array<{ concept: string; sizes: SizeTier[]; uses: number; cellar: boolean }> {
+    return this.reusable()
+      .map((s) => ({ concept: s.concept, sizes: s.sizes.filter((t) => !RARE_SIZES.includes(t) || rari.includes(t)), cellar: s.cellar, uses: s.entries.reduce((n, e) => n + this.cards.uses(`model:${nodeSlug(e.id)}`).chunks, 0) }))
+      .filter((s) => s.sizes.length)
+      .sort((a, b) => a.uses - b.uses || a.concept.localeCompare(b.concept));
+  }
+
+  /** The new programs of the structures an hour of the world, for the whole world (T495): the lobby's `ai.newStructuresPerHour`, fixed on entering. */
+  newStructuresPerHour(): number {
+    const n = this.config.ai.newStructuresPerHour;
+    return typeof n === 'number' && Number.isFinite(n) && n >= 0 ? Math.round(n) : NEW_STRUCTURES_PER_HOUR;
+  }
+
+  /**
+   * Whether a plan may ask a new concept of structure now (T495): fewer than the ceiling began in the hour of the world before now. The deferred
+   * generation (ADR-0143) has no ceiling: the master's subscription pays for it, and the world is made before anyone plays.
+   */
+  newStructureAllowed(): boolean {
+    return this.ai.name === 'differita' || this.structureHour.allows(this.time, this.newStructuresPerHour());
+  }
+
+  /**
+   * A new plan's structures (T495, ADR-0247): one the world has is worn again, by its concept as the library names it, at the size of it nearest
+   * to the one asked, with a seed of its own from the place (`reuseSeed`; one with a cellar or a brought card at the seed of its lot); a cellar
+   * asked of one that has none is not asked. A concept new to the world counts in the hour. Before the place is saved: on every load the same.
+   */
+  private wearAgain(ch: Pick<Chunk, 'cx' | 'cy'>, plan: ChunkPlan): void {
+    this.plansSinceFresh++;
+    if (!plan.structures?.length) return;
+    const known = this.reusable();
+    plan.structures = plan.structures.map(readStructure).map((s, slot) => {
+      const { seed: _said, ...asked } = s;
+      const r = reusableOf(known, s.concept);
+      const size = r && nearestSize(r.sizes, s.size ?? classOf(r.class)!.taglia);
+      const entry = r && size && reusableEntry(r, size);
+      if (!r || !size || !entry) {
+        if (asked.concept) {
+          this.structureHour.note(this.time);
+          this.plansSinceFresh = 0;
+        }
+        return asked;
+      }
+      const { cellar: _c, ...rest } = asked;
+      return { ...rest, concept: r.concept, size, ...(s.cellar && entry.cellar ? { cellar: true } : {}), ...(newSeedFor(entry) ? { seed: reuseSeed(this.config.seed, ch.cx, ch.cy, slot) } : {}) };
+    });
   }
 
   /**
@@ -3343,7 +3438,8 @@ export class Kernel {
       }
       const origin = `${ch.key}#s${i}`;
       const model = this.forms.resolve(own, classe);
-      const form: FormComp = { model, seed: this.forms.seedFor(model, origin), yaw, ...(own && own !== model ? { wanted: own, classe } : {}) };
+      // A structure of the world worn again has the seed of its place (T495), once it wears its own model; the generic of before, its lot's.
+      const form: FormComp = { model, seed: req?.seed !== undefined && model === own ? req.seed : this.forms.seedFor(model, origin), yaw, ...(own && own !== model ? { wanted: own, classe } : {}) };
       const done = this.savedForms.get(origin);
       if (done?.length) form.done = [...done];
       lots.push({
@@ -3352,7 +3448,7 @@ export class Kernel {
         x: ch.cx * S + (b.x0 + b.x1 + 1) / 2,
         y: ch.cy * S + (b.y0 + b.y1 + 1) / 2,
         form,
-        structure: { concept: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), class: classe, ...(req?.size ? { size: req.size } : {}), ...(own ? { model: own } : {}), ...(req?.cellar && hasCellar(classe, req.size) ? { cellar: cellarFor(req.size) } : {}) },
+        structure: { concept: req?.concept ?? house ?? (classe === 'structure' ? 'una casa' : 'una casetta'), class: classe, ...(req?.size ? { size: req.size } : {}), ...(own ? { model: own } : {}), ...(req?.cellar && hasCellar(classe, req.size) ? { cellar: cellarFor(req.size) } : {}), ...(req?.seed !== undefined ? { seed: req.seed } : {}) },
       });
     }
     return { tiles: tiles.join(''), lots };

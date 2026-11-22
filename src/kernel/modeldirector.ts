@@ -15,6 +15,7 @@ import { hashStr, hex } from './rng';
 import { italianName } from './internalNames';
 import { sameName } from './bring';
 import type { DecisionQuestion } from './ai/decisions';
+import { ownModelId, reusableOf, structureModel, StructureHour } from './reuse';
 
 /**
  * The classes whose missing models may wear one of the library before the Sculptor is asked (T349, ADR-0157 §4.1, D45.2): furniture,
@@ -74,16 +75,8 @@ const COMMON_HOUSE = 'casa-comune-';
 /** The model of a world's common houses (ADR-0134): another description, another model, so a new Genesis does not find the old one. */
 export const commonHouseModel = (house: string, classe: string) => `${COMMON_HOUSE}${classe}-${hex(hashStr(house))}`;
 
-export const ownModelId = (id: string) => id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cosa';
-
-/**
- * The model of a structure the Cartographer asks for (ADR-0043): one per concept and size (ADR-0160). The class's own size has no
- * suffix, as ever; the others say theirs, so a Huge fort and a Gargantuan one are two entries, which share one program when it scales.
- */
-export function structureModel(concept: string, size?: SizeTier): string {
-  const suffix = size && size !== 'large' ? `-${size}` : '';
-  return `struttura-${ownModelId(concept).slice(0, 30 - suffix.length)}${suffix}`;
-}
+// Here since T495: the structures of the world worn again find their entries by the same ids (reuse.ts).
+export { ownModelId, structureModel };
 
 /**
  * The tiles of cellar a structure the Cartographer asks with one gets (T417, ADR-0091 point 4): one, two for the rare sizes (Huge, Gargantuan,
@@ -139,6 +132,8 @@ export class ModelDirector {
   private partTries = new Map<SculptorSpecialty, number>();
   /** The parts of the world this session took (T472). */
   partsTaken = 0;
+  /** The new programs of the structures the Sculptor began, in the hour of the world (T495): at most `ai.newStructuresPerHour`. */
+  readonly programs = new StructureHour();
 
   constructor(private k: Kernel) {}
 
@@ -203,7 +198,9 @@ export class ModelDirector {
       const place = k.chunkAt(pos.x, pos.y)?.place;
       // With its cellar, if the Cartographer asked for one (T417): the request says how deep, the Sculptor digs it.
       const cellar = s.cellar && hasCellar(s.class, s.size) ? s.cellar : undefined;
-      out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}) });
+      // A structure the world has at another size (T495) shares its program if it scales, whatever its id.
+      const known = reusableOf(k.reusable(), s.concept)?.entries.map((e) => e.id) ?? [];
+      out.push({ id: s.model!, nome: s.concept, shareWith: [...new Set([...structureSiblings(s.concept), ...known])].filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}) });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;
@@ -320,8 +317,27 @@ export class ModelDirector {
     // What another size already has costs nothing, and does not wait for the budget; nor what came with the cards (in reach or not, T488).
     for (const r of this.missing(true)) if (this.free(r)) return;
     if (this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().models <= 0) return;
-    const req = this.missing()[0];
+    // Over the ceiling of the hour (T495) a structure of a plan waits for its program: the generic of its class meanwhile; the rest goes on.
+    const req = this.missing().find((r) => !this.overHour(r));
     if (req) void this.make(req);
+  }
+
+  /**
+   * A structure a plan asked for (ADR-0043), not a common house nor a model of a module: what the ceiling of the new programs of the hour counts
+   * (T495). Its request is the one that may share another size's program (`shareWith`).
+   */
+  static planStructure(req: Pick<SculptRequest, 'id' | 'shareWith'>): boolean {
+    return req.shareWith !== undefined && !req.id.startsWith(COMMON_HOUSE);
+  }
+
+  /** Whether a request waits for the hour (T495): a structure of a plan, its program new, the hour's ceiling reached; the deferred generation has none. */
+  overHour(req: SculptRequest): boolean {
+    return ModelDirector.planStructure(req) && this.k.ai.name !== 'differita' && !this.programs.allows(this.k.time, this.k.newStructuresPerHour());
+  }
+
+  /** A new program of a structure of a plan begins (T495): it counts in the hour. What the library gave (`reuse`, `free`) never does. */
+  noteProgram(req: SculptRequest): void {
+    if (ModelDirector.planStructure(req)) this.programs.note(this.k.time);
   }
 
   /**
@@ -333,6 +349,7 @@ export class ModelDirector {
     const cls = classOf(req.classe);
     try {
       if (await this.reuse(req)) return true;
+      this.noteProgram(req);
       this.used++;
       this.lastSpecialty = requestSpecialty(req);
       const coef = this.k.coefficients();
