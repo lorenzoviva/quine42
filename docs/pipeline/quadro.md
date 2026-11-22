@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 622 (claude). Crediti: vedi `stato`.
+Aggiornato il 22/11/2026, epoca 623 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -50,5 +50,5 @@ Aggiornato il 22/11/2026, epoca 622 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **622 (claude):** **T470** integrato (`ad2477e4`: sezioni dei sei mestieri, S4 di T458, kernel invariato; qualità coi modelli veri in T473, ora pronto); in corso T471.
-- **621 (claude):** autore ha approvato T487 T488 T489 (step 34).
+- **623 (claude):** **T471** integrato (`66daaebd`, ADR-0241, kernel 0.10.18: parti `part-wheel`, `part-window`, `part-leaf` nel seme con `specialty`, +320 token a chiamata; visto nel lab 3D; uso dallo Scultore vero in T473, ora in corso; parti estratte e carte in T472). Claude 5h 40 % (reset 04:40Z), settimana 39 % (reset 26/11).
+- **622 (claude):** **T470** integrato (`ad2477e4`: sezioni dei sei mestieri, S4 di T458, kernel invariato).
