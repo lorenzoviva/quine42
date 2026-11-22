@@ -22,7 +22,10 @@ mostra e ciò che l'originale vi ha stampato.
 4. **La regola che l'autore ne ha ricavato è vera a metà.** «Per uscire serve un'ultima `all` o `one` che non trova» descrive bene il suo
    forte, ma da noi il ciclo finisce in un passo in cui **nessun** figlio cambia niente, qualunque sia l'ultimo: una `prl` a moneta come
    ultimo figlio basta (test). Ciò che è speciale nell'ultimo figlio è un'altra cosa: quando lavora lui, tutti ripartono da capo.
-5. **Il consiglio** (§ 7): non allineare il motore all'originale (A1); aggiungere un ciclo esplicito, `<repeat>` con `p` e `max` (A2), che
+5. **Allineare il motore costerebbe soprattutto fuori dai cicli** (§ 5): pochi programmi usano `<markov>` (6 nel seme, nessuno scritto dal
+   Concilio negli universi), ma le strutture degli universi mettono una `<sequence>` dentro la `<map>` per la simmetria, e l'originale la
+   ripete: 54 programmi su 64 dei cinque universi darebbero un'altra griglia, 21 non finirebbero più. Nessuno si può riscrivere voxel per voxel.
+6. **Il consiglio** (§ 7): non allineare il motore all'originale (A1); aggiungere un ciclo esplicito, `<repeat>` con `p` e `max` (A2), che
    non tocca un solo programma di oggi, e riscrivere la guida dei cicli (B) col modello del § 1 e gli idiomi del forte. La scelta è
    dell'autore: [`domande/T498.md`](../pipeline/domande/T498.md).
 
@@ -190,7 +193,38 @@ alla scala piena. Nel gioco sarebbe un modello che non finisce: fallito.
 
 ## 5. Chi usa `<markov>`, e che cosa gli succederebbe
 
-‹CENSIMENTO›
+Il censimento (`markov-originale.ts -- --censimento`, le righe intere in [`misure.md`](../../lab/banco/markov/misure.md)) legge l'XML del
+seme, dei 1 531 programmi di `lab/` nel repository, del forte dell'autore, dei cinque universi generati sul disco (`aurora`, `mesa`,
+`neapolis`, `orichalcum`, `sidera`, quelli di `npm run universi:cloud` e della prima run) e, per confronto, dei 159 modelli di mxgmn. Conta i
+cicli e come sono fatti e i **rami annidati** (una `sequence` o un `markov` che non è la radice: l'originale li ripete, § 2). Poi fa girare
+ogni programma trovato, semi 1 e 2, col nostro motore e con la copia col flusso dell'originale, alla scatola che gli dà il gioco: la stessa
+griglia o un'altra.
+
+| dove | programmi letti | con `<markov>` | cicli | con rami annidati | confrontati | un'altra griglia col flusso dell'originale | di cui non finiscono più |
+|---|---|---|---|---|---|---|---|
+| seme | 140 | 6 | 11 | 5 | 6 | 2 (`circuito-3D`, `part-wheel`) | 0 |
+| laboratorio | 1 531 | 51 | 121 | 102 | 100 (17 non compilano fuori dalla loro cartella) | 27 | 2 |
+| forte dell'autore | 1 | 1 | 5 | 1 | 1 | 1 | 1 |
+| `aurora` | 136 | 4 | 7 | 2 | 4 | 1 | 0 |
+| `mesa` | 183 | 3 | 6 | 4 | 5 | 3 | 1 |
+| `neapolis` | 187 | 3 | 6 | 19 | 20 | 18 | 10 |
+| `orichalcum` | 190 | 3 | 6 | 16 | 17 | 15 | 4 |
+| `sidera` | 163 | 2 | 5 | 17 | 18 | 17 | 6 |
+| modelli di mxgmn | 159 | 58 | 93 | 52 | — | — | — |
+
+Come si legge:
+
+- **Pochi cicli, e quasi tutti del seme.** Negli universi i programmi con un `<markov>` sono le copie di quelli del seme (`circuito-3D`, le
+  parti `part-leaf`, `part-wheel`, `part-window`, `sound-final-battle`, l'animazione di `corona-lampione`); il Concilio non ne ha scritto
+  nessuno. Fra i cicli del seme cambiano `circuito-3D` (un `markov` con dentro un `markov` e una sequenza) e `part-wheel` (una sequenza nel
+  ciclo); gli altri quattro, liste di regole, no.
+- **Ciò che cambierebbe davvero sono le sequenze annidate, non i cicli.** Le strutture degli universi (scritte dallo Scultore o da Claude Cloud)
+  mettono una `<sequence symmetry="(xy)">` dentro la `<map>` per cambiare la simmetria: da noi gira una volta, con l'originale si ripete
+  finché trova da fare. Su 64 programmi confrontati negli universi 54 darebbero un'altra griglia e **21 non finirebbero più** (le `all
+  steps="1"` che rifanno lo stesso lavoro a ogni giro). Il conto è per difetto: una parte del seme inclusa con `<import>` è anch'essa una
+  sequenza annidata, e il censimento sull'XML non la vede.
+- **Nei modelli di mxgmn** il `<markov>` è quasi sempre una lista di regole (79 cicli su 93 senza rami dentro né `steps`, il caso in cui i
+  due motori coincidono); i rami annidati ci sono in 52 programmi su 159, scritti per la sua semantica.
 
 ## 6. Le proposte
 
@@ -210,8 +244,9 @@ giri vuoti; a parte, se si vuole, `one` che ignora `p` e `p="0"`.
   dell'originale**: una sequenza dentro una sequenza si ripete (d3); un ciclo finisce solo quando un giro intero, dal suo inizio, non trova
   niente: i piani a moneta così come sono scritti non finiscono, e scriverli per l'originale vuole che ogni nodo del piano dipenda dal segno;
   una `prl` che non cambia niente gira per sempre (d8). Una forma che non finisce, nel gioco, è una forma fallita (il tempo di
-  `MODEL_TIME`), e allo Scultore un programma che non finisce torna con un errore: un giro in più pagato. (3) Il forte dell'autore va
-  segnato o riscritto nel ciclo 4.
+  `MODEL_TIME`), e allo Scultore un programma che non finisce torna con un errore: un giro in più pagato. (3) **Quanto cambierebbe** (§ 5):
+  2 programmi del seme, 27 del laboratorio, il forte dell'autore e 54 programmi su 64 dei cinque universi, 21 dei quali non finirebbero
+  più; soprattutto per le sequenze annidate, che oggi non sono cicli e lo diventerebbero.
 
 ### A2. Un ciclo esplicito, in più
 
@@ -259,7 +294,11 @@ intera: a ogni passo lavora il primo figlio che può».
 
 ### Che cosa costerebbe a chi usa `<markov>`
 
-‹COSTO›
+| | cosa cambia nei programmi di oggi | che cosa si scrive | il contratto |
+|---|---|---|---|
+| A1 | almeno 2 del seme, 27 del laboratorio, il forte, 54 su 64 negli universi (21 non finiscono): tutti da segnare perché girino come oggi | ogni `models/*.xml` degli universi, le carte fatte a mano e portate, le parti del mondo, il seme; due flussi nel motore | cambia (0.11) |
+| A2 | niente | il nodo nuovo, dove lo si vuole; i prompt | no (un incremento) |
+| B | niente | i prompt | no |
 
 ## 7. Il consiglio
 
@@ -268,7 +307,8 @@ guida di T469 dice cose giuste in un modo che anche l'autore legge diversamente.
 ripete, un'uscita a moneta, un tetto) senza toccare un programma di oggi né il contratto. A1 renderebbe impossibile, così com'è scritto,
 l'idioma dei piani, renderebbe facili i cicli che non finiscono e vorrebbe due flussi nel motore per sempre, perché i programmi di prima non
 si riscrivono voxel per voxel. Le quattro differenze dei nodi di regola (d7-d10) non si propone di toglierle: cambierebbero programmi ben
-oltre i cicli (ogni `one` con regole di `p` diversi) e che da noi una regola che non cambia niente non conti come progresso (l’esempio del task) è già così, ed è un pregio: nell’originale una `prl` così non finisce mai (d8).
+oltre i cicli (ogni `one` con regole di `p` diversi). E «una `prl` che non applica niente non conta come progresso», l'esempio del
+task, da noi è già così (una corrispondenza c'è solo dove la regola cambia qualcosa): è nell'originale che una `prl` così non finisce mai (d8).
 
 ## 8. Che cosa non è provato
 

@@ -18,7 +18,7 @@ il nostro motore e MarkovJunior di mxgmn fanno cose diverse, ciò che l'original
 ```bash
 npx vite-node lab/scripts/markov-originale.ts -- --differenze                 # i d*: l'originale, la copia, il nostro motore
 npx vite-node lab/scripts/markov-originale.ts -- --cicli --semi 400           # i l*: la misura di ogni ciclo su 400 semi
-npx vite-node lab/scripts/markov-originale.ts -- --forte --semi 2             # il forte dell'autore (copia del 22/11), alla sua scatola
+npx vite-node lab/scripts/markov-originale.ts -- --forte --semi 3 --tempo 120 # il forte dell’autore (copia del 22/11) alla sua scatola; la copia ha 120 s
 npx vite-node lab/scripts/markov-originale.ts -- --censimento --universi <cartella degli universi> [--originale <modelli di mxgmn>]
 npx vite-node lab/scripts/markov-originale.ts -- --registra --semi 400        # rifà originale.json (serve l'originale costruito, sotto)
 ```
