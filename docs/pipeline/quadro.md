@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 621 (claude). Crediti: vedi `stato`.
+Aggiornato il 22/11/2026, epoca 622 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -50,5 +50,5 @@ Aggiornato il 22/11/2026, epoca 621 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **621 (claude):** autore ha approvato i tre task della run: T487 T488 T489 nel backlog (step 34).
-- **618 (claude):** **T469** integrato (cicli `<markov>`, `convchain` col campione nel nodo, ADR-0240, kernel 0.10.17; manca la prova coi modelli veri, T473); pronti T470 T471 T474 T486 T478 T482.
+- **622 (claude):** **T470** integrato (`ad2477e4`: sezioni dei sei mestieri, S4 di T458, kernel invariato; qualità coi modelli veri in T473, ora pronto); in corso T471.
+- **621 (claude):** autore ha approvato T487 T488 T489 (step 34).
