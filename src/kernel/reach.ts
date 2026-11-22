@@ -26,11 +26,11 @@ export interface Reach {
 }
 
 /**
- * The reach of the game. At 6 tiles a second on foot the way ahead is 48 tiles, between two and three places: a plan of Flash-Lite takes a few
- * seconds, three at a time, and one in seven is written again. `near` is a little under half a place: from the middle of a place only it, from
+ * The reach of the game. At 6 tiles a second on foot the way ahead is 60 tiles, more than three places: a plan of Flash-Lite took 3-5 seconds
+ * in the browser (T488), 11-12 while the arrival in a world asked for a dozen other things, three at a time, and one in seven is written again. `near` is a little under half a place: from the middle of a place only it, from
  * near its edge the one beside.
  */
-export const REACH: Reach = { near: 8, ahead: 8, aheadMax: 54, side: 4, moving: 0.5 };
+export const REACH: Reach = { near: 8, ahead: 10, aheadMax: 60, side: 4, moving: 0.5 };
 
 /**
  * The reach the kernel uses (`Kernel.REACH` reads and writes it): the game's. The tests of something else widen `near` to every loaded place
@@ -75,12 +75,22 @@ export function inReach(walkers: readonly Walker[], cx: number, cy: number, S: n
   return walkers.some((w) => inReachOf(w, cx, cy, S, r));
 }
 
-/** How near the place (cx, cy) is to the nearest walker, by its centre: what is in reach is made in this order. */
-export function nearestCentre(walkers: readonly Walker[], cx: number, cy: number, S: number): number {
+/**
+ * How near the place (cx, cy) is to the nearest walker, by its centre, from where the walker will be in `lead` seconds at their pace: what is in
+ * reach is made in this order, the places ahead before those behind; standing still, the order of before T488.
+ */
+export function nearestCentre(walkers: readonly Walker[], cx: number, cy: number, S: number, lead = LEAD): number {
   let best = Infinity;
-  for (const w of walkers) best = Math.min(best, centreDistance(w.x, w.y, cx, cy, S));
+  for (const w of walkers) {
+    const v = paceOf(w);
+    const k = v > 0 ? lead : 0;
+    best = Math.min(best, centreDistance(w.x + (w.vx || 0) * k, w.y + (w.vy || 0) * k, cx, cy, S));
+  }
   return best;
 }
+
+/** Seconds ahead from where the places in reach are ordered (T488): about where the wanderer will be when the first of them is planned. */
+export const LEAD = 2;
 
 /**
  * The pace of a wanderer from where they were a moment ago (`was`, `dt` seconds of the world before) to where they are: an average over about
@@ -94,5 +104,5 @@ export function nextPace(prev: { vx: number; vy: number }, was: { x: number; y: 
   return { vx: (prev.vx || 0) + (ix - (prev.vx || 0)) * k, vy: (prev.vy || 0) + (iy - (prev.vy || 0)) * k };
 }
 
-/** Tiles a second beyond which a move is a jump, not a pace: three times the fastest step of a body on foot. */
-export const JUMP_PACE = 30;
+/** Tiles a second beyond which a move is a jump, not a pace: twice the fastest step of a body on foot (6, 6.9 on a road) or of a vehicle. */
+export const JUMP_PACE = 15;

@@ -1,7 +1,7 @@
 // T488: a scripted session of walking, offline, with the calls counted: the path of the first run of the beta (lab/banco/run-1/percorso.json,
 // written by consumi-run.ts) walked again over the seed's world in `--minuti` minutes of the world, by a kernel on local models that answer
 // as Gemini did in the run, after the time Gemini takes (in the world's time, not the machine's):
-//   npx vite-node lab/scripts/sessione-cammino.ts -- [--minuti 18] [--sorgente <cartella con src/ e universe/>] [--vicino <caselle>] [--json f]
+//   npx vite-node lab/scripts/sessione-cammino.ts -- [--minuti 18] [--sorgente <cartella con src/ e universe/>] [--vicino <caselle>] [--latenza-piano 6] [--json f]
 // `--sorgente` runs another kernel (the one of before: `git archive <commit> src universe | tar -x -C <cartella>`); `--vicino Infinity` widens the
 // reach of T488 to every loaded place (the rule of before, in this kernel).
 // The models are the local ones (MockAiModels) under another name, so the kernel asks what it asks a real model (packs, kinds, sessions); the
@@ -53,7 +53,7 @@ function at(t: number): { x: number; y: number; helm: boolean } {
 
 // --- Gemini's time and Gemini's plans ---
 /** Seconds of the world a call takes (a guess from the run: Flash-Lite with a little thinking; the Sculptor's structure is five calls of Argon). */
-const LATENCY: Record<string, number> = { 'chunk.plan': 6, 'content.define': 5, 'npc.individuate': 8, 'council.session': 6 };
+const LATENCY: Record<string, number> = { 'chunk.plan': Number(opt('--latenza-piano', '6')), 'content.define': 5, 'npc.individuate': 8, 'council.session': 6 };
 const SCULPT_TIME: Record<string, number> = { structure: 150, building: 150, person: 45, animal: 45, beast: 45, figure: 45 };
 let now = 0;
 const waiting: Array<{ at: number; done: () => void }> = [];
@@ -210,7 +210,8 @@ const models = Object.entries(sculpted).map(([kind, n]) => ({ kind, n, run: n * 
 const total = (key: 'run' | 'list') => rows.reduce((s, r) => s + r[key], 0) + models.reduce((s, r) => s + r[key], 0);
 const perHour = (x: number) => (x * 3600) / seconds;
 const out = {
-  kernel: root,
+  kernel: path.relative(process.cwd(), root) || '.',
+  planLatency: LATENCY['chunk.plan'],
   reach: Kernel.REACH ?? 'prima di T488',
   minutes: seconds / 60,
   plannedBefore: planned0,

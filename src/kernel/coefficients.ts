@@ -245,17 +245,17 @@ export const modelGap = (c: number): number => (c <= 0 ? Infinity : Math.round(6
 // again offline in 18 minutes, the local models answering as Gemini did in the run (`lab/scripts/sessione-cammino.ts`,
 // `lab/banco/run-1/sessione-dopo.json`, `lab/banco/run-1/consumi.md`); the run itself, before the reach, asked for 870 places an hour.
 export const HOUR = {
-  /** New places planned: those that came in reach of the wanderer (59 plans in 18 minutes; 40 was a guess before T488). */
+  /** New places planned: those that came in reach of the wanderer (60 plans in 18 minutes; 40 was a guess before T488). */
   luoghi: 200,
   /** Days of the world (10 minutes each). */
   giorni: 6,
-  /** Individuals made per place planned (53 `npc.individuate` in 18 minutes, for the people within 9 tiles of the wanderer). */
-  persone: 0.75,
+  /** Individuals made per place planned (50 `npc.individuate` in 18 minutes, for the people within 9 tiles of the wanderer). */
+  persone: 0.7,
   /** Seconds out of the hour spent near two people who could talk. */
   vicini: 1800,
   /** Environments walked in that no program names yet. */
   ambientiSenzaBrano: 4,
-  /** New entities the Cartographer asks for (0.52 a plan in the run; the Forge takes `ai.maxForges`), calls for unknown items on the ground (44 in 59 plans), per place. */
+  /** New entities the Cartographer asks for (0.52 a plan in the run; the Forge takes `ai.maxForges`), calls for unknown items on the ground (45 in 60 plans), per place. */
   nuovi: 0.5,
   ignoti: 0.75,
   /**

@@ -197,7 +197,9 @@ describe('la stima', () => {
     expect(plain.righe.some((r) => /quarta parete/i.test(r.voce))).toBe(false);
     const row = jev.righe.find((r) => /quarta parete/i.test(r.voce))!;
     expect(row.chiamate).toBeGreaterThan(0);
-    expect(row.dollari).toBeLessThan(0.005);
+    // Less than a cent an hour (T488: with the places in reach, about 150 texts of the Council an hour: 0,6 cents).
+    expect(row.dollari).toBeLessThan(0.01);
+    expect(row.dollari).toBeLessThan(jev.dollari / 100);
     const off = hourlyEstimate({ ...cfg, coefficients: { ...FULL_DETAIL, sessions: 0 } }, undefined, { decisions: true });
     expect(off.righe.some((r) => /quarta parete/i.test(r.voce))).toBe(false);
   });

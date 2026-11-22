@@ -92,7 +92,7 @@ import { internalComponent, internalEvent, internalFields, internalName, interna
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
-import { inReach, KERNEL_REACH, nearestCentre, nextPace, type Reach, type Walker } from './reach';
+import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
@@ -700,7 +700,11 @@ export class Kernel {
   static set REACH(r: Reach) {
     KERNEL_REACH.current = r;
   }
-  /** Where each wanderer was last tick and how fast they go (T488): the way ahead of the reach. */
+  /** The places planned at a time (T40), and one more for the place under a wanderer's feet (T488). */
+  static DEVELOPERS = 3;
+  /** Seconds of the world over which a wanderer's pace is measured (T488). */
+  static PACE_WINDOW = 0.25;
+  /** Where each wanderer was when their pace was last measured and how fast they go (T488): the way ahead of the reach. */
   private paces = new Map<string, { x: number; y: number; t: number; vx: number; vy: number }>();
   private growing = false;
   private forging = new Set<string>();
@@ -2107,7 +2111,8 @@ export class Kernel {
 
   /**
    * The wanderers in the world (not in the studio, T40) as the reach sees them (T488): where they are and how fast they go, measured here from
-   * where they were last tick (`nextPace`). Called once a tick; who left the world loses their pace.
+   * where they were at least `PACE_WINDOW` seconds of the world ago (`nextPace`: a page may run several ticks in a frame, and a client's steps
+   * come in bursts, so a tick alone would see jumps and stops). Called once a tick; who left the world loses their pace.
    */
   private measurePaces(): Walker[] {
     const out: Walker[] = [];
@@ -2117,11 +2122,14 @@ export class Kernel {
       this.as(w, () => {
         if (this.corona.isInterior(this.wandererPos().x)) return;
         const pc = this.wandererCarpet();
-        const was = this.paces.get(w);
-        const v = was ? nextPace(was, was, pc, now - was.t) : { vx: 0, vy: 0 };
-        this.paces.set(w, { x: pc.x, y: pc.y, t: now, ...v });
+        let was = this.paces.get(w);
+        if (!was || now - was.t >= Kernel.PACE_WINDOW || now < was.t) {
+          const v = was && now > was.t ? nextPace(was, was, pc, now - was.t) : { vx: 0, vy: 0 };
+          was = { x: pc.x, y: pc.y, t: now, ...v };
+          this.paces.set(w, was);
+        }
         kept.add(w);
-        out.push({ x: pc.x, y: pc.y, ...v });
+        out.push({ x: pc.x, y: pc.y, vx: was.vx, vy: was.vy });
       });
     for (const w of [...this.paces.keys()]) if (!kept.has(w)) this.paces.delete(w);
     this.walkersNow = out;
@@ -2159,7 +2167,8 @@ export class Kernel {
   private pumpDevelopment(): void {
     const walkers = this.measurePaces();
     this.pumpAsks();
-    if (this.generationHeld || this.developers >= 3 || !walkers.length) return;
+    // Three at a time; one more only for the place under a wanderer's feet, which never waits for the others (T488).
+    if (this.generationHeld || this.developers > Kernel.DEVELOPERS || !walkers.length) return;
     const S = this.config.chunkSize;
     // A place the local models left a draft (T433) is not asked again in this session: they would not plan it now either.
     // Nor one the budget stopped a moment ago (T457): asked again when `BUDGET_RETRY` has passed.
@@ -2176,7 +2185,9 @@ export class Kernel {
     const looked = drafts.filter((c) => !c.far && !soon.includes(c));
     soon.sort((a, b) => dist(a) - dist(b));
     looked.sort((a, b) => dist(a) - dist(b));
-    for (const ch of [...soon, ...looked].slice(0, 3 - this.developers)) {
+    const feet = soon.find((c) => walkers.some((w) => squareDistance(w.x, w.y, c.cx, c.cy, S) === 0));
+    const picked = this.developers < Kernel.DEVELOPERS ? [...soon, ...looked].slice(0, Kernel.DEVELOPERS - this.developers) : feet ? [feet] : [];
+    for (const ch of picked) {
       const far = !soon.includes(ch);
       ch.developing = true;
       this.developers++;
@@ -10845,7 +10856,7 @@ export class Kernel {
       faults: this.faults.list(),
       wanderer: chunkOf(pc.x, pc.y),
       players: this.players(),
-      chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, name: c.place?.name })),
+      chunks: [...this.chunks.values()].map((c) => ({ cx: c.cx, cy: c.cy, stage: c.stage, developing: c.developing, ...(c.far ? { far: true } : {}), name: c.place?.name })),
       locate,
       chunkSize: S,
     });

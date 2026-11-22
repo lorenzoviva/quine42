@@ -1,5 +1,5 @@
 {
- "kernel": "H:\\projects\\rune\\.claude\\worktrees\\t488\\lab\\tmp-t488\\base",
+ "kernel": "il kernel del base (9bf8c4b1, git archive src universe)",
  "reach": "prima di T488",
  "minutes": 18.00027777776586,
  "plannedBefore": 29,
@@ -130,5 +130,6 @@
    "run": 1.367057213114754,
    "list": 1.44675
   }
- ]
+ ],
+ "planLatency": 6
 }

@@ -398,8 +398,9 @@ verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul p
 **Il raggio** (ADR-0244, T488, kernel 0.10.20): il Concilio lavora per un luogo solo quando un viandante può raggiungerlo presto. Il kernel carica
 ancora tutto ciò che la camera vede (bozze, gratis), ma `pumpDevelopment` chiede il Cartografo solo per le bozze **in raggio** (`src/kernel/reach.ts`,
 puro: il quadrato del luogo entro `near` caselle dal viandante, 8, o entro `side` caselle, 4, della via che fa per i prossimi `ahead` secondi al suo
-passo, 8, al più `aheadMax` caselle, 54; il passo lo misura il kernel a ogni tick dalla posizione sul tappeto, `measurePaces`, `nextPace`: una media di
-mezzo secondo, un salto non è un passo), il più vicino per primo (la distanza dal centro, l'ordine di prima), tre alla volta; con più viandanti attorno a
+passo, 10, al più `aheadMax` caselle, 60; il passo lo misura il kernel a ogni tick dalla posizione sul tappeto, `measurePaces`, `nextPace`: una media di
+mezzo secondo su finestre di un quarto di secondo del mondo, `PACE_WINDOW`, e un salto oltre 15 caselle al secondo non è un passo), il più vicino
+per primo dal punto dove il viandante sarà fra 2 secondi (`LEAD`; fermo, l'ordine di prima), tre alla volta più uno solo per il luogo sotto i piedi; con più viandanti attorno a
 ognuno (`walkersNow`). Le bozze fuori raggio si guardano soltanto per ciò che non costa (`develop(ch, false, true)`: il piano che l'universo ha, il blocco,
 la regione del master, il mare aperto e il vuoto) e, se servirebbe il Cartografo, restano bozze segnate `far` finché non entrano in raggio. La quota della
 lobby, il budget e il ritmo del mondo valgono come prima. Ciò che un piano chiede al Concilio (le cose nominate a terra, `content.define`; le cose nuove,

@@ -1,30 +1,30 @@
 {
- "kernel": "H:\\projects\\rune\\.claude\\worktrees\\t488",
+ "kernel": ".",
+ "planLatency": 6,
  "reach": {
   "near": 8,
-  "ahead": 8,
-  "aheadMax": 54,
+  "ahead": 10,
+  "aheadMax": 60,
   "side": 4,
   "moving": 0.5
  },
  "minutes": 18.000277777764786,
  "plannedBefore": 25,
- "plannedInWalk": 90,
+ "plannedInWalk": 92,
  "calls": {
   "forge.code": 2,
   "forge.review": 2,
   "plot.weave": 2,
-  "chunk.plan": 59,
-  "content.define": 44,
+  "chunk.plan": 60,
+  "content.define": 45,
+  "npc.individuate": 50,
   "content.items": 2,
   "content.physics": 2,
-  "npc.individuate": 53,
   "content.review": 2,
   "content.recipes": 2,
   "council.session": 1,
   "forge.concept": 1,
-  "forge.physics": 1,
-  "npc.dialogue": 1
+  "forge.physics": 1
  },
  "sculpted": {
   "simple": 8,
@@ -34,28 +34,28 @@
  "onDraft": 0,
  "longestOnDraft": 0,
  "aheadDraft": 0,
- "usdRun": 1.795887520755335,
- "usdList": 1.733854925,
- "perHourRun": 5.986199356235742,
- "perHourList": 5.779427227979048,
+ "usdRun": 1.786551277311513,
+ "usdList": 1.7230333500000001,
+ "perHourRun": 5.955079025008338,
+ "perHourList": 5.743355867969146,
  "rows": [
   {
    "task": "chunk.plan",
-   "n": 59,
-   "run": 0.15251946218487397,
-   "list": 0.155696575
+   "n": 60,
+   "run": 0.15510453781512606,
+   "list": 0.15833550000000002
   },
   {
    "task": "npc.individuate",
-   "n": 53,
-   "run": 0.23020232000000002,
-   "list": 0.24127852500000002
+   "n": 50,
+   "run": 0.21717200000000003,
+   "list": 0.22762125000000002
   },
   {
    "task": "content.define",
-   "n": 44,
-   "run": 0.12104074074074073,
-   "list": 0.0809028
+   "n": 45,
+   "run": 0.12379166666666666,
+   "list": 0.0827415
   },
   {
    "task": "forge.code",
@@ -116,12 +116,6 @@
    "n": 1,
    "run": 0.001342923076923077,
    "list": 0.0011435
-  },
-  {
-   "task": "npc.dialogue",
-   "n": 1,
-   "run": 0.001641925,
-   "list": 0.001641925
   }
  ],
  "models": [

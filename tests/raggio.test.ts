@@ -10,7 +10,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { MemoryChunks } from '../src/kernel/chunks';
 import type { TextCall } from '../src/kernel/ai/models';
-import { inReach, inReachOf, JUMP_PACE, nextPace, REACH, squareDistance } from '../src/kernel/reach';
+import { inReach, inReachOf, JUMP_PACE, nearestCentre, nextPace, REACH, squareDistance } from '../src/kernel/reach';
 import { HOUR, hourlyEstimate } from '../src/kernel/coefficients';
 import { readConfig } from '../src/kernel/universe';
 import { readFileSync } from 'node:fs';
@@ -99,24 +99,33 @@ describe('il raggio, funzioni pure (T488)', () => {
 
   it('in cammino: i luoghi sulla via davanti, per «ahead» secondi del suo passo, non quelli dietro né lontani di lato', () => {
     const walking = { ...middleOf(0, 0), vx: 6, vy: 0 };
-    // 48 tiles ahead from the middle of (0, 0): (1, 0) and (2, 0) and the edge of (3, 0).
-    for (const cx of [1, 2, 3]) expect(inReachOf(walking, cx, 0, S)).toBe(true);
-    expect(inReachOf(walking, 4, 0, S)).toBe(false);
+    // 60 tiles ahead from the middle of (0, 0), to x = 69, and 4 beside: (1, 0) to (3, 0) and the edge of (4, 0), which starts at 72.
+    for (const cx of [1, 2, 3, 4]) expect(inReachOf(walking, cx, 0, S)).toBe(true);
+    expect(inReachOf(walking, 5, 0, S)).toBe(false);
     expect(inReachOf(walking, -1, 0, S)).toBe(false);
     expect(inReachOf(walking, 2, 1, S)).toBe(false);
     expect(inReachOf(walking, 2, -1, S)).toBe(false);
-    // Slower, less of the way: at 2 tiles a second, 16 tiles.
+    // Slower, less of the way: at 2 tiles a second, 20 tiles, to x = 29.
     const slow = { ...middleOf(0, 0), vx: 2, vy: 0 };
     expect(inReachOf(slow, 1, 0, S)).toBe(true);
     expect(inReachOf(slow, 2, 0, S)).toBe(false);
     // A vehicle that goes fast: never more than `aheadMax` tiles.
     const fast = { ...middleOf(0, 0), vx: 20, vy: 0 };
-    expect(inReachOf(fast, 3, 0, S)).toBe(true);
-    expect(inReachOf(fast, 4, 0, S)).toBe(false);
+    expect(inReachOf(fast, 4, 0, S)).toBe(true);
+    expect(inReachOf(fast, 5, 0, S)).toBe(false);
     // Of more wanderers, any.
     expect(inReach([walking, { ...middleOf(10, 10), vx: 0, vy: 0 }], 10, 10, S)).toBe(true);
     expect(inReach([walking, { ...middleOf(10, 10), vx: 0, vy: 0 }], 10, 12, S)).toBe(false);
     expect(inReach([], 0, 0, S)).toBe(false);
+  });
+
+  it("l'ordine: fermo, dal centro più vicino (come prima); in cammino, i luoghi davanti prima di quelli alle spalle", () => {
+    const still = { x: 20, y: 9, vx: 0, vy: 0 };
+    // Standing near the edge between (0, 0) and (1, 0): (1, 0) is nearer by its centre.
+    expect(nearestCentre([still], 1, 0, S)).toBeLessThan(nearestCentre([still], 0, 0, S));
+    // Walking west from there: (0, 0), ahead, comes before (1, 0), behind.
+    const west = { ...still, vx: -6 };
+    expect(nearestCentre([west], 0, 0, S)).toBeLessThan(nearestCentre([west], 1, 0, S));
   });
 
   it('il passo è una media del cammino; un salto (un teletrasporto, una rinascita) non è un passo', () => {
