@@ -74,10 +74,16 @@ solo per i programmi nuovi, mai per il riuso con un seme nuovo (D69.3).
   prove senza l'invito): 24 luoghi, 28 strutture, **28 riusate**, nessun concetto nuovo; il capanno di collaudo delle chiatte in 11 porti su 15.
   Col tetto a 0, 8 luoghi, 11 strutture, tutte del mondo. Con l'invito (0,077 $): 24 luoghi, 29 strutture, 27 riusate e 2 concetti nuovi, al
   decimo e al ventesimo piano; uno era il nome di una struttura del mondo accorciato, che ora è un riuso. Le prove con Gemini: 0,182 $.
-- **Il cammino della run, prima e dopo**: in `lab/banco/run-1/consumi.md` § 6.
+- **Il cammino della run, prima e dopo** (`lab/banco/run-1/consumi.md` § 6.4, 18 minuti, il Cartografo finto che riusa come Flash-Lite):
+  prima 1,787 $ (5,96 $/h), 31 concetti nuovi, tre strutture di Argon (0,82 $); dopo, col tetto a 2, 1,244 $ (4,15 $/h), le 47 strutture dei
+  piani tutte del mondo, una sola scolpita (0,27 $); col tetto a 60, solo gli inviti, 1,517 $; un Cartografo che inventa nel 30 % dei luoghi,
+  col tetto a 2, lo stesso 1,244 $. Su un'ora intera circa 3,8 $/h a pieno dettaglio, da 6: sotto 1 $/h non si scende con questa leva sola
+  (D69.4: si dichiara il consumo). La stima della lobby la rifà T496.
 - Il prompt del piano ha al più 40 righe in più (circa 15 token l'una): circa 0,02 $ l'ora sui piani di Flash-Lite.
 - Un universo maturo si ripete di più (è la scelta dell'autore): le strutture meno usate vengono offerte prima.
 - I piani di prima non hanno `seed`: i loro lotti restano come sono. La stima oraria della lobby la rifà T496.
+- Un piano costa un poco di più al kernel (il contesto delle strutture del mondo): `tests/gravity.test.ts`, che cercava il suo tratto libero sul primo
+  luogo pianificato che trovava, ora lo cerca sui tre luoghi che aspetta, e non dipende più da quanto dura un piano.
 - `KERNEL_VERSION` 0.10.23: gli universi della 0.10 restano buoni (un campo in più nei piani nuovi, un budget in più).
 - Sicurezza: nessuna superficie nuova (un campo di `ai` nominato nella lobby, `LOBBY_AI_FIELDS`; un campo dei piani scritto dal kernel, che la
   risposta del Cartografo non può dire; niente sul filo né per Lua).

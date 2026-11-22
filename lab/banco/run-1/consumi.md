@@ -176,3 +176,33 @@ limite. Con l'invito Flash-Lite ha dato due concetti nuovi in 24 luoghi, uno ogn
 telaio in ferro» in una giungla, e «il capanno di collaudo delle chiatte a vapore», cioè il nome di una struttura del mondo tagliato prima di
 «su palafitte sopra l'acqua». Così il kernel riconosce anche un nome che è l'inizio dell'altro in almeno quattro parole (`reusableOf`,
 `SHORT_NAME_WORDS`): quel doppione ora è un riuso, e dei due concetti nuovi ne resta uno. Le quattro prove con Gemini sono costate 0,182 $.
+
+### 6.4 Il cammino della run, prima e dopo
+
+Il percorso della run in 18 minuti del mondo (§ 3), il Cartografo finto come Gemini nella run: un piano su quattro senza strutture, gli altri con
+una struttura; davanti alle strutture del mondo (le 12 del seme, il mondo offline è dell'epoca del seme) ne veste una, come Flash-Lite nella prova
+(§ 6.3, `--nuove 0`), e un concetto nuovo quando il kernel lo invita (`--invito 1`); una struttura scolpita entra nella libreria. «Prima» è il
+kernel del base (il raggio, senza il riuso), «dopo» questo.
+
+| | prima | dopo (tetto 2) | dopo, tetto 60 | dopo, un concetto nuovo nel 30 % dei luoghi, tetto 2 |
+|---|---|---|---|---|
+| piani del Cartografo | 60 | 60 | 60 | 60 |
+| strutture nei piani del cammino | 47 | 47 | 47 | 47 |
+| di cui riusate | 3 (la bottega del borgo) | 47 | 35 | 47 |
+| concetti nuovi al mondo | 31 | 0 | 5 | 0 |
+| strutture scolpite (Argon) | 3 (0,82 $) | 1 (0,27 $) | 2 (0,55 $) | 1 (0,27 $) |
+| cose / figure scolpite | 8 / 6 | 8 / 6 | 8 / 6 | 8 / 6 |
+| individui | 48 | 51 | 51 | 51 |
+| secondi sulla bozza | 0 | 0 | 0 | 0 |
+| costo ai prezzi della run | **1,787 $ (5,96 $/h)** | **1,244 $ (4,15 $/h)** | 1,517 $ (5,06 $/h) | 1,244 $ (4,15 $/h) |
+| costo alla stima della lobby | 1,723 $ (5,74 $/h) | 1,149 $ (3,83 $/h) | 1,438 $ (4,79 $/h) | 1,149 $ (3,83 $/h) |
+
+Il «prima» rifà il «dopo» di T488 (1,79 $, § 3). Col tetto a 2 i due programmi nuovi della prima ora li prendono già i 25 luoghi attorno
+all'inizio (il forno del borgo e due inviti), così nei 18 minuti del cammino nessun concetto nuovo: tutte le strutture dei luoghi raggiunti
+sono del mondo, ognuna col suo seme. Il Cartografo che inventa di più non cambia niente: il tetto è dei programmi, non delle sue parole. Senza
+tetto (60) restano gli inviti, uno ogni dieci piani: cinque concetti nuovi, due scolpiti.
+
+Su un'ora intera il tetto vale al più 2 strutture di Argon (circa 0,55-0,70 $), contro le 10 l'ora del «prima» (circa 2,7 $): il resto del
+cammino «dopo» è circa 3,2 $/h (gli individui 0,22 $ in 18 minuti, i piani 0,16, le definizioni 0,12, le cose e le figure dello Scultore 0,41),
+quindi circa **3,8 $/h** a pieno dettaglio al passo della run, da 6. Sotto 1 $/h non si scende con questa leva sola (D69.4: si dichiara il
+consumo); la stima della lobby col tetto la rifà T496.
