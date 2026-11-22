@@ -100,7 +100,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 31 | Quattro ambientazioni, generate senza browser dai crediti che avanzano | I | in corso | T152 T153 T207 T88 T411 T433 T435 T436 T454 T455 |
 | 32 | Il kernel regge mesi di vita, e gli NPC agiscono davvero | I | raggiunto | T183 T245 T260 T261 T262 T263 T245a T245b T245c T245d T245e T245f T274 T280 T297 T298 T299 T300 T302 T312 T317 T319 T320 T321 |
 | 33 | Il rapporto aureo in HUD, pannelli e in ciò che si genera da qui in poi | I | raggiunto | T241 T242 |
-| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T311 T316 T315 T400 T401 T457 T487 T488 T489 |
+| 34 | Pronti per la beta: server, guida, notizie, home, consumo in lobby, registro dei fallimenti del Concilio | I | in corso | T45f T232 T234 T236 T237 T238 T243 T244 T247 T248 T249 T250 T251 T252 T265 T283 T284 T285 T286 T311 T316 T315 T400 T401 T457 T487 T488 T489 T495 T496 |
 | 35 | Il sito è il launcher del gioco | II | in attesa | T233 T235 |
 | 36 | Il gioco in quattro lingue | III | in attesa | T239 |
 | 37 | Altri universi: spazio, pirati, cowboy | III | in corso | T184 T185 T278 T432 T437 T438 T439 T440 T441 T442 T443 T444 T445 T446 T447 T448 T449 T450 T451 T452 T453 |
@@ -110,7 +110,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 41 | I giocatori modificano le carte nei laboratori; le carte passano da un universo all'altro prima della Genesi | I | raggiunto | T293 T294 T295 T296 |
 | 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | raggiunto | T306 T307a T314 T307b T308a T308b T309 T310 T310b T318 T328 |
 | 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in corso | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 T379 T381 T383 T387 T388 T389 T390 T393 |
-| 44 | Gli Scultori specializzati: prompt per classe, esempi, pezzi condivisi per universo | III | in corso | T458 T467 T468 T469 T470 T471 T472 T473 T490 T491 |
+| 44 | Gli Scultori specializzati: prompt per classe, esempi, pezzi condivisi per universo | III | in corso | T458 T467 T468 T469 T470 T471 T472 T473 T490 T491 T497 T498 |
 | 45 | Il terreno in tre dimensioni: strati, montagne, fondali, la regola 10 rivista, automi cellulari | III | in corso | T459 T474 T475 T476 T477 T478 T479 T480 T481 T482 T483 T484 T485 T486 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.

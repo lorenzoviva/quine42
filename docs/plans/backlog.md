@@ -6431,7 +6431,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: una barca chiesta alla Fucina si guida; la chiatta di `orichalcum` si guida o non promette di farlo; test offline del riconoscimento, del validatore e della riparazione; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
 - Esito: ? (senza riga)
 
-### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `in attesa`
+### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `fatto` (`8d9386f3`)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
 - Step: 34
 - Contesto: richiesta dell'autore del 21/11 dopo la prima run (`dossier T457`): in 18 minuti da soli in `orichalcum` 2,93 $ (Scultore Argon 16 chiamate 1,04 $; `chunk.plan` 238 chiamate 0,62 $; `content.define` 162 chiamate 0,45 $; Artista 24 0,20 $; Scultore Flash-Lite 40 0,15 $; individui 25 0,11 $). Il mondo ha pianificato 238 luoghi e definito 162 oggetti, molti più di quanti il giocatore potesse vedere: la stima della lobby (~1,4 $/h, T352) non tiene. Registro della run: `H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum\world\usage.json` (e il registro del varco); non toccare quell'universo.
@@ -6509,3 +6509,51 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — il lab 3D con `forte-handmade-segrete.xml` mostra le segrete sotto il suolo; una struttura del seme con cantina nel gioco offline invariata.
 - Quando è fatto: commit su `task/T494` con ADR e documenti; sicurezza: il validatore cambia (un attributo nuovo sulla radice), dire «nessuna superficie nuova» o la voce aggiunta.
 - Esito: attributi `under` e `vpt` sulla radice: il compilatore e i controlli li leggono, la voce che dice `cellar` o `vpt` vince, lo Scultore non li scrive mai (tolti anche `under`); lab 3D, editor e carte fatte a mano leggono l'XML; forte-handmade-segrete.xml con `under="20" vpt="10"`; kernel 0.10.21, ADR-0245, documenti; sicurezza: nessuna superficie nuova (due interi in un intervallo chiuso sulla radice, al più 120 voxel di base); `HANDMADE_VPT` resta solo per forte-handmade.xml finché l'autore non vi scrive `vpt="10"`; non provato nel browser il gioco offline con una cantina del seme (coperto da impronta e test).
+
+### T495 · Le strutture si riusano con un seme nuovo, e un tetto orario per i programmi nuovi (D69.2, D69.3) — `da fare`
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
+- Step: 34
+- Contesto: risposta dell'autore a D69 del 22/11 (`docs/userchats/to-do-2026-11-22.md`, `docs/pipeline/domande/T488.md`; nasce da T488: `dossier T488`, `dossier T493`). Dopo il raggio la run costa ~6 $/h, di cui ~4 $/h di Scultore delle strutture. L'autore credeva il riuso già applicato: i programmi MarkovJunior delle strutture sono variabili apposta (`ModelInfo.seeds`, ADR-0160), quindi il Cartografo deve riusare le strutture che l'universo ha già con un seme nuovo invece di chiedere ogni volta un concetto nuovo. `model.reuse` (T349, Jev) oggi decide solo prima dello Scultore per una richiesta già fatta. La leva 1 (strutture solo dove ci si ferma) è **rifiutata**: non farla.
+- Cosa fare:
+  1. Misura: sul registro e sui piani della run (`H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum`, non toccarlo) e col cammino offline di `lab/scripts/sessione-cammino.ts`, quante strutture nuove si chiedono e quante avrebbero potuto essere una struttura dell'universo con un altro seme.
+  2. Il Cartografo, pianificando un luogo, vede le strutture che l'universo ha (concetto, classe, taglie, quante volte usate) e sceglie di preferenza una di quelle: il kernel le dà un seme nuovo, deterministico dal luogo (regola dei semi condivisi), mai dall'orologio; un concetto nuovo solo quando nessuna è adatta (obiettivo indicativo: uno ogni ~10 luoghi, da misurare, non un tetto rigido). Il riuso non chiama lo Scultore né l'Artista.
+  3. Un tetto orario di **programmi nuovi** delle strutture (proposta 2 l'ora a pieno dettaglio), una manopola della lobby che il master alza (regola 8b-bis: fissata all'ingresso, riga di `CENSUS`); oltre il tetto il Cartografo deve riusare; il riuso con un seme nuovo non conta mai nel tetto. Con più viandanti il tetto è del mondo.
+  4. Rifai il cammino di T488 prima e dopo (chiamate e $/h al listino), scrivilo in `lab/banco/run-1/consumi.md`; la stima oraria della lobby la rifà T496.
+- Test: il Cartografo offline che riusa (seme diverso, nessuna chiamata allo Scultore), il tetto che spinge al riuso, il seme deterministico, la manopola fissata a partita in corso.
+- Browser: no (prova offline col cammino; se avanzano, al più 0,50 $ di Gemini vero su un clone).
+- Quando è fatto: misura prima/dopo, riuso, tetto, test; ADR (quando il Concilio chiede strutture nuove), AGENTS.md, glossario, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+
+### T496 · Il consumo dichiarato: la stima della lobby con la cache vera e il costo sempre in vista (D68.2a, D69.4) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Step: 34
+- Dipende da: T495
+- Contesto: risposte dell'autore del 22/11 (`docs/userchats/to-do-2026-11-22.md`): D68.2a sì (la cache implicita di Google misurata da T473 è 1-5 % su Argon, la stima della lobby dice 60 %; 16-18 % su 3.8 Flash, la stima 0 %; le specialità azzerano quella di Flash-Lite al cambio mestiere; `lab/banco/specialita/README.md`, `dossier T473`); D68.2b no per ora (niente cache esplicita sul nucleo dello Scultore); D69.4: «dichiariamo sempre il consumo; se il prezzo non scende molto va bene, basta dichiararlo». Nasce da T473, T488, T495.
+- Cosa fare:
+  1. Correggi `IMPLICIT_CACHE_SHARE`/`NO_IMPLICIT_CACHE` (e ciò che la stima della lobby usa) coi dati misurati di T473 e della run, e rifai la stima oraria dopo T495 sul cammino di T488.
+  2. Il consumo è sempre dichiarato: nella lobby e nella Genesi la stima oraria per regolazione e per chi paga (già c'è: verifica che tenga conto del raggio, del riuso e del tetto di T495); in gioco il consumo della sessione e la sua proiezione oraria visibili al master e a chi paga (pannello `P` o HUD), da `world/usage.json` e dal costo detto (`CallRecord.usd`). Fuori dal mondo (regola 0): solo nell'interfaccia, mai nei contenuti.
+  3. Confronto stima/misura scritto in `lab/banco/run-1/consumi.md`.
+- Test: la stima con la cache corretta; la proiezione dal registro.
+- Browser: sì — lobby e pannello in gioco offline: la stima e il consumo si vedono e hanno senso.
+- Quando è fatto: stima corretta e confrontata, consumo in vista, test; AGENTS.md se cambia `#lobby`/`#costi`. Sicurezza: nessuna superficie nuova (ciò che esce ai client a elenco, regola 8f).
+
+### T497 · Paesaggista con la chioma attaccata, Mobiliere con `close` (D68.1) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 44
+- Contesto: D68.1 approvata dall'autore il 22/11. Dalla prova pagata di T473 (`lab/banco/specialita/README.md`, `dossier T473`, `dossier T470`): il Paesaggista ora stacca la chioma dal tronco (6/11 scarti contro 2/10 prima, un castagno fallito); il Mobiliere ha `open` senza `close` nell'esempio, e i bauli restano aperti (`close` scritto 0/6).
+- Cosa fare: in `universe/prompts/agents/sculptor/` (Paesaggista e Mobiliere) la chioma attaccata ai rami e `close` accanto a `open`, dentro i token del § 2.2 dello studio; se serve un controllo dello Scultore che rifiuti la chioma che galleggia (`groundJoins`); poi la mini-prova pagata sul solo castagno e su un baule con `--specialita --solo` (Flash-Lite, ~0,10 $, **tetto 0,30 $** sul registro della cartella).
+- Test: `tests/sculptor-trades.test.ts` aggiornato; i prompt nei tetti.
+- Browser: no.
+- Quando è fatto: prompt corretti, prova pagata con voti e costo nel README del banco. Sicurezza: nessuna superficie nuova.
+
+### T498 · Studio: `<markov>` e `<sequence>` nel nostro motore contro l'originale, dal forte dell'autore (D68.3) — `da fare`
+- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 2
+- Step: 44
+- Contesto: risposta dell'autore a D68.3 del 22/11, per intero in `docs/userchats/to-do-2026-11-22.md` (con la copia del forte alle righe citate: `docs/userchats/forte-handmade-2026-11-22.xml`). L'autore crede che il nostro motore (`src/mj/engine.ts`) non sia identico a MarkovJunior originale (repository `mxgmn/MarkovJunior`, C#) nel `<markov>`: per uscire da un ciclo serve un ultimo nodo `all`/`one` che non trova corrispondenze, una `prl` finale non lo ferma; lo trova frustrante ma indispensabile per la variabilità, e descrive i quattro cicli del forte (righe 21-24, 31-35, 94-103, 198-260 con 216-226 annidato). Argon scrive il ciclo 0/12 in T473. T469 ha fissato l'idioma attuale (`tests/mj-markov.test.ts`, «il corpo di `<markov><sequence>` riparte dal primo figlio a ogni passo»). Nasce da T473, T469: `dossier T473`, `dossier T469`.
+- Cosa fare:
+  1. Leggi il sorgente dell'originale (`MarkovNode`, `SequenceNode`/`Branch`, `RuleNode`/`OneNode`/`AllNode`/`ParallelNode`, `steps`, `p`, quando un nodo «riesce») e confrontalo riga per riga con il nostro: dove siamo uguali, dove diversi, con un test per ogni differenza (stessa griglia, stesso seme, cosa fa l'originale per come è scritto).
+  2. Spiega in termini semplici i quattro cicli del forte dell'autore: perché si fermano o no, cosa farebbero con la semantica dell'originale.
+  3. Proponi, con i pro e i contro: (A) allineare il motore all'originale o renderlo più semplice da usare (es. una `prl` che non applica niente non conta come progresso, o un modo esplicito di uscire), riscrivendo i pochi programmi che usano `<markov>` (seme, banco, universi, forte dell'autore) perché diano **la stessa griglia voxel per voxel** (ADR-0142; contratto se cambia la primitiva); (B) lasciare il motore e riscrivere la spiegazione nel nucleo e nell'Architetto con gli idiomi che funzionano (i quattro del forte). Misura quanti programmi del seme, del laboratorio e degli universi usano `<markov>` e come cambierebbero.
+  4. Scrivi lo studio in `docs/design/markov.md` e la domanda per l'autore in `docs/pipeline/domande/T498.md` (A o B, col consiglio). Non cambiare il motore né i prompt in questo task.
+- Test: i test delle differenze (anche `it.fails` dove l'originale farebbe altro), nessun cambio di comportamento.
+- Browser: no.
+- Quando è fatto: studio, test delle differenze, domanda; kernel invariato. Sicurezza: nessuna superficie nuova.
