@@ -1102,6 +1102,12 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   ricaricare dei file ciò che è fuori si dimentica; un worker che si ferma o con luoghi fuori tace 20 s si abbandona e la pagina fa da sé.
   La stessa mesh byte per byte: `tests/terreno-worker.test.ts` (ogni lettura della mesh nella finestra, il worker uguale alla pagina) e
   l'impronta di `lab/scripts/impronta-terreno.ts`. Una lettura nuova della mesh va in `ChunkSource`, `kernelSource`, `ChunkInput`, `inputSource`.
+- **Nessun fotogramma senza terreno** (T492): la mesh di un luogo caricato resta in scena finché quella nuova non la sostituisce nello stesso
+  fotogramma (`showChunk`); si toglie solo quando il luogo non è più caricato. Al ricaricare dei file (`universe:reloaded`, a ogni commit del
+  Concilio: un pacchetto, un modello, un luogo pianificato) le mesh non si tolgono: diventano vecchie (`staleChunks`, la firma `STALE_SIG` che
+  nessun luogo ha) e si rifanno poche a fotogramma, ognuna al posto della sua. Prima le toglieva tutte e per un fotogramma, o una dozzina col
+  worker, restava solo il cielo dove erano suolo, molo e mare. `tests/sfarfallio.test.ts` lo fissa fotogramma per fotogramma, sulla pagina,
+  col worker e camminando; le catture in `lab/banco/sfarfallio/`.
 - **Voxel luminosi** (ADR-0046): `<color glow="True">` fa brillare una lettera (fiamme, finestre, rune, neon): attributo
   `glow` nelle mesh, senza occlusione, emissione nei materiali; il renderer disegna in un target con la maschera del
   bagliore nell'alfa e un bloom leggero prende solo ciò che brilla (`src/render/bloom.ts`); nelle foto non prende ombra.
