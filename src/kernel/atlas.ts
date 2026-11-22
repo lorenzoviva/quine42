@@ -9,6 +9,7 @@ import { internalFields, internalName, internalValues, italianName } from './int
 import { cleanText } from './cleantext';
 import { metaBreak } from './fourthwall';
 import { NATURE_ACCEPTS } from './nature';
+import { readRoughness, ROUGHNESS, ROUGHNESS_NAME, type Roughness } from './network';
 
 /**
  * What a region the master declared does to the new places inside it (T375, ADR-0188 §5, D54.6): `filler` repeats an environment the world
@@ -42,6 +43,12 @@ export interface Region {
    * over an asteroid). Absent, what the terrain, the environment and the body of the void say. Read only where the world counts the breath.
    */
   air?: boolean;
+  /**
+   * Only on a region of the master (T474, ADR-0250): how rough its new places are for the rule 10 of the steps, whatever their relief
+   * measures: `flat` and `hilly` keep every part of them joined to their paths, `mountainous` and `rugged` keep the enclaves their relief
+   * has (a share of a place, their pass within a means of the world). Absent, the relief's own. Written into a place's plan when it is planned.
+   */
+  roughness?: Roughness;
   /**
    * The island of an archipelago this region names (T441, ADR-0229): the Cartographer's, written when the first place on it is planned. Its
    * centre and radius say where the island is on the atlas; its shape is the kernel's (`islands.ts`) and never changes. Not a region of
@@ -117,6 +124,15 @@ export function regionAir(r: Region | undefined): boolean | undefined {
   return typeof r.air === 'boolean' ? r.air : undefined;
 }
 
+/**
+ * The roughness a region gives its new places (T474): only a region of the master that is the world's (not held), and only one of the
+ * four. Undefined: the relief of each place says it.
+ */
+export function regionRoughness(r: Region | undefined): Roughness | undefined {
+  if (!r?.master || r.kind === 'held') return undefined;
+  return readRoughness(r.roughness);
+}
+
 /** The kinds in the words of the master's tools. */
 export const REGION_KIND_NAME: Record<RegionKind | 'plan', string> = { plan: 'ambiente', filler: 'riempitivo', held: 'trattenuta' };
 /** What each kind means, for the master. */
@@ -144,6 +160,8 @@ export interface RegionRequest {
   gravity?: number;
   /** Whether its places have air (T446): true or false; absent, none of its own. */
   air?: boolean;
+  /** How rough its new places are (T474): one of `ROUGHNESS`; absent, their relief's. */
+  roughness?: Roughness;
 }
 
 const has = (o: Record<string, unknown>, k: string) => Object.prototype.hasOwnProperty.call(o, k);
@@ -184,6 +202,9 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
   const air = r.air === undefined || r.air === null || r.air === '' ? undefined : typeof r.air === 'boolean' ? r.air : null;
   if (air === null) errors.push('l’aria: c’è o non c’è (vero o falso), o quella dei suoi luoghi');
   else if (air !== undefined && kind === 'held') errors.push('l’aria: una regione trattenuta non è ancora del mondo, non ne ha una');
+  const roughness = r.roughness === undefined || r.roughness === null || r.roughness === '' ? undefined : (readRoughness(r.roughness) ?? null);
+  if (roughness === null) errors.push(`l’asprezza: ${ROUGHNESS.map((x) => ROUGHNESS_NAME[x]).join(', ')}, o quella del suo rilievo`);
+  else if (roughness !== undefined && kind === 'held') errors.push('l’asprezza: una regione trattenuta non è ancora del mondo, non ne ha una');
   const regions = atlas.regions.slice();
   const id = r.id === undefined ? undefined : typeof r.id === 'string' ? r.id : null;
   const at = id ? regions.findIndex((x) => x.id === id) : -1;
@@ -203,6 +224,7 @@ export function masterRegion(atlas: Atlas, raw: unknown, environments: Record<st
     ...(kind ? { kind } : {}),
     ...(gravity !== undefined && gravity !== null ? { gravity } : {}),
     ...(typeof air === 'boolean' ? { air } : {}),
+    ...(roughness ? { roughness } : {}),
   };
   if (at >= 0) regions[at] = region;
   else regions.push(region);

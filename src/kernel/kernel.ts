@@ -26,8 +26,8 @@ import { cleanText } from './cleantext';
 import { biblePages, touchingNodes, type BibleShown } from './bible';
 import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from './lathe';
 import type { Rule } from './types';
-import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAir, regionAt, regionGravity, regionKind, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
-import { STAMP_SHAPES } from './stamps';
+import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAir, regionAt, regionGravity, regionKind, regionRoughness, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
+import { defaultCodes, STAMP_SHAPES } from './stamps';
 import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { dayPhase, declaredFor, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
@@ -64,7 +64,7 @@ import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
-import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
+import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlanContext, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { FRESH_EVERY, NEW_STRUCTURES_PER_HOUR, nearestSize, newSeedFor, reusableEntry, reusableOf, reusableStructures, reuseSeed, StructureHour, type ReusableStructure } from './reuse';
 import { WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeKind, type ForgeOrigin } from './agents/forge';
@@ -93,6 +93,7 @@ import { internalComponent, internalEvent, internalFields, internalName, interna
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, programStrata, readStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow } from './strata';
+import { addMoved, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
@@ -149,6 +150,10 @@ const DECK_SLACK = 0.05;
  * beside a land, the deep water for who carries too much) the deck there does, if it is within a step: from the edge into a capsule.
  */
 const DECK_STEP = UNDER_STEP;
+/** The synthetic rise of the tests and of the console (T474, `syntheticRise`): levels over the land, by the world's coordinates. */
+interface Rise {
+  fn: (col: number, row: number) => number;
+}
 /** The system that walks a wanderer (T439): it does not run for who holds a helm. */
 const HELM_STILLS = 'core.movement';
 /** The bump of a hull pressing against the shore is said again only after this many seconds without one (T439). */
@@ -219,6 +224,14 @@ export interface Chunk {
   water?: Record<string, WaterRecord>;
   /** The strata under its ground (T418): from its plan or its draft (`Kernel.strataOf`), from the server's place in a thin client. */
   strata?: string[];
+  /**
+   * Its ramps (T474, ADR-0250): the earth the kernel moved so that what the world gives as reachable is joined on the steps, tile → levels
+   * (up or down), added to its levels as the digs are; derived when its plan is laid out (`networkOf`), the server's in a thin client
+   * (`ChunkView.ramps`). None with the relief of today.
+   */
+  ramps?: Record<string, number>;
+  /** Its network (T474): what is joined to its first gate on the steps, its enclaves, its roughness; derived with its plan, never saved. */
+  network?: Network;
 }
 
 export interface LineState {
@@ -657,7 +670,7 @@ export class Kernel {
   /** Solid entities with a model, by the cells their footprint reaches (they block by their voxels). */
   private reliefCache?: { key: string; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
-  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Lot[]; block?: LotBox; field: Int16Array; levels: Int16Array }>();
+  private levelCache = new WeakMap<Chunk, { tiles: string; lots: Lot[]; block?: LotBox; field: Int16Array; ramps?: Record<string, number>; rise?: Rise; levels: Int16Array; steep: boolean }>();
   /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
   private worldField?: { relief: Relief; sea: number; ground: number; tiles: Map<Chunk, string>; levels: Map<Chunk, Int16Array> };
   /** Bumped when the ground is dug or the water flows (T51b): the world's levels are made again. */
@@ -2489,6 +2502,9 @@ export class Kernel {
       plan.swim = true;
       // And its strata (T418), by its environment's program over the draft (T478): the plan keeps them, and says how they are made.
       plan.strataDepth = STRATA_DEPTH;
+      // And how rough it is, where a region of the master says it (T474): a region changed later does not move the place.
+      const roughness = regionRoughness(this.masterRegionOf(ch));
+      if (roughness) plan.roughness = roughness;
       this.withStrata(ch, plan);
       this.cardChunk(ch, plan, ch.chi);
     } finally {
@@ -2654,7 +2670,9 @@ export class Kernel {
    */
   private fillerPlan(region: Region): ChunkPlan {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
+    // The roughness the master said for the region (T474) is the plan's, as for a place the Cartographer plans there.
+    const roughness = regionRoughness(region);
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH, ...(roughness ? { roughness } : {}) };
   }
 
   /** Whether a draft is all open sea (T441): every tile deep water one swims. */
@@ -2711,6 +2729,36 @@ export class Kernel {
     this.council.say('cartographer', 'propone', `${island.islet ? 'isolotto' : 'isola'} «${name.text}» (${center.join(',')})`, undefined, 'chunk.plan');
   }
 
+  /**
+   * What the Cartographer is told of a place's relief (T474, ADR-0250): from its draft as if alone (its levels and the rise of the tests),
+   * laid out bare, the enclaves its network keeps with the roughness of the master's region or of its relief. Undefined where no two tiles
+   * beside each other are more than a step apart (every place of the relief of today: nothing is said) or none is kept.
+   */
+  private draftRelief(ch: Chunk): PlanContext['relief'] {
+    const S = this.config.chunkSize;
+    const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
+    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles: ch.draft, draft: ch.draft }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
+    const levels = Int16Array.from(field);
+    this.riseOn(ch, levels, ch.draft, []);
+    if (!steepOf(levels, S, (i) => liquid(ch.draft[i]))) return undefined;
+    let bare: LayoutResult;
+    try {
+      bare = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode: this.pathCode(), swim: true });
+    } catch {
+      return undefined;
+    }
+    const tiles = bare.grid.join('');
+    const ground = this.groundOfPlace(tiles, levels, [], true);
+    const roughness = regionRoughness(this.masterRegionOf(ch)) ?? roughnessOf(ground);
+    if (keptPass(roughness) < 0) return undefined;
+    const kept = placeNetwork(ground, bare.start, bare.mustReach, { roughness }).enclaves.filter((e) => e.kept);
+    if (!kept.length) return undefined;
+    let walked = 0;
+    for (let i = 0; i < S * S; i++) if (ground.walked(i)) walked++;
+    const share = kept.reduce((a, e) => a + e.walked, 0) / Math.max(1, walked);
+    return { roughness, enclaves: kept.length, share, means: meansOf(Math.max(...kept.map((e) => e.pass))) };
+  }
+
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
   private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
@@ -2753,6 +2801,11 @@ export class Kernel {
           rari: this.rareAllowed(ch),
           // The structures the world has, the brought ones among them (T495): asked again by their concept; a new one only under the hour's ceiling.
           known: this.knownStructures(this.rareAllowed(ch)),
+          // Where its draft keeps enclaves (T474): how rough it is, and that a thing may stand in one.
+          ...(() => {
+            const relief = this.draftRelief(ch);
+            return relief ? { relief } : {};
+          })(),
           newStructures: this.newStructureAllowed(),
           freshWanted: this.newStructureAllowed() && this.plansSinceFresh >= FRESH_EVERY - 1,
           chi: ch.chi,
@@ -3021,8 +3074,10 @@ export class Kernel {
    * Where a plan puts its runes and entities: reachable cells, inside or outside lots, never on gates or doors.
    * Deterministic, the same for the world and for the model of places (T26): what was already taken keeps its cell,
    * so the rest does not move. `pick` goes on for what comes later (entities forged for the place, items introduced).
+   * With the network of the steps (T474, ADR-0250) reachable is what it joins: nothing the world gives as reachable stands in an enclave,
+   * and what the Cartographer puts `enclave` stands in one the roughness kept (none: anywhere). With the relief of today the two are the same.
    */
-  private placementsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key'>, plan: ChunkPlan, result: LayoutResult): Placements {
+  private placementsOf(ch: Pick<Chunk, 'cx' | 'cy' | 'key'>, plan: ChunkPlan, result: LayoutResult, net?: Network): Placements {
     const S = this.config.chunkSize;
     const rng = new Rng(hash32(this.config.seed, ch.cx, ch.cy, 991));
     const occupied = new Set<number>(result.gates);
@@ -3033,17 +3088,21 @@ export class Kernel {
     // A planet's pad (T449) stays clear: its capsule stands there.
     if (this.bandOf(ch.cx)) for (const a of this.dockApron(ch)) occupied.add(a);
     const indoorSet = new Set(result.lots.flatMap((b) => b.floor));
-    const reach = [...result.reachable];
+    // Only what a rise parts from the network leaves the cells of before (`apart`): with the relief of today, none.
+    const reachable = net ? new Set([...result.reachable].filter((i) => net.apart[i] !== 1)) : result.reachable;
+    const enclave = net ? net.enclaves.filter((e) => e.kept).flatMap((e) => e.cells).filter((i) => result.reachable.has(i) && !indoorSet.has(i)) : [];
+    const reach = [...reachable];
     const indoor = reach.filter((i) => indoorSet.has(i));
     // What goes under (T417): on the floor of a lot whose structure has a cellar; else inside, as without one.
     const cellars = this.cellarLots({ ...ch, lots: result.lots }, plan);
     const belowSet = new Set(result.lots.flatMap((b, i) => (cellars.has(i) ? b.floor : [])));
     const below = indoor.filter((i) => belowSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
-    const freeTiles = new Set<number>(result.reachable);
+    const freeTiles = new Set<number>([...reachable, ...enclave]);
     let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
-      let pool = (where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      const kept = where === 'enclave' ? enclave.filter((i) => !occupied.has(i)) : [];
+      let pool = (kept.length ? kept : where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
       if (solid) pool = pool.filter((i) => !arts.has(i));
       if (!pool.length) return undefined;
       const tile = pool[rng.int(pool.length)];
@@ -3073,7 +3132,7 @@ export class Kernel {
         const col = 1 + rng.int(Math.max(1, S - 1 - w));
         let ok = col + w <= S - 1;
         for (let k = -1; k <= w && ok; k++) if (occupied.has(row * S + col + k)) ok = false;
-        for (let k = 0; k < w && ok; k++) if (!result.reachable.has(row * S + col + k) || indoorSet.has(row * S + col + k)) ok = false;
+        for (let k = 0; k < w && ok; k++) if (!reachable.has(row * S + col + k) || indoorSet.has(row * S + col + k)) ok = false;
         if (!ok) continue;
         for (let k = 0; k < w; k++) occupied.add(row * S + col + k);
         toks.forEach((token, j) => runes.push({ token, line: i, col: ch.cx * S + col + j, row: ch.cy * S + row, origin: `${ch.key}#r${i}.${j}` }));
@@ -3121,7 +3180,9 @@ export class Kernel {
     const away = this.npc.returnToPlace(ch, plan);
     this.claimSizes(ch, plan);
     const structures = this.settleLots(ch, plan, pathCode);
-    const place = this.placementsOf(ch, plan, result);
+    // Its network of the steps (T474): what the world gives as reachable joined to its first gate, its ramps, its enclaves.
+    this.knowNetwork(ch, this.networkOf(ch, plan, result, ch.tiles, ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots));
+    const place = this.placementsOf(ch, plan, result, ch.network);
     const at = (tile: number) => ({ x: ch.cx * S + (tile % S) + 0.5, y: ch.cy * S + Math.floor(tile / S) + 0.5 });
     // On a lot: on the floor of its structure (once its form is ready), not inside its walls.
     const inLot = (tile: number) => {
@@ -3513,13 +3574,18 @@ export class Kernel {
     const { result, tiles: laid, block } = this.layoutOf(ch, plan, pathCode, true);
     const { tiles, lots } = this.lotsOf({ ...ch, tiles: laid, lots: result.lots }, plan, pathCode);
     const boxes = this.structureLots({ ...ch, lots: result.lots }, plan);
-    const place = this.placementsOf(ch, plan, result);
+    // The lot of a block lies at the block's level (T370).
+    const lotBoxes = block ? [this.blockLotBox(block, ch), ...result.lots] : result.lots;
+    // Its network of the steps (T474), as the world's: the same things where they are, the same ramps.
+    const net = this.networkOf(ch, plan, result, tiles, lotBoxes);
+    const place = this.placementsOf(ch, plan, result, net);
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
     // Its own levels, as if alone (T51a): the same miniature whether or not the places around are loaded.
     const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
     const height = (c: number, r: number) => field[r * S + c];
-    // The lot of a block lies at the block's level (T370).
-    const levels = chunkLevels(tiles, S, liquid, height, block ? [this.blockLotBox(block, ch), ...result.lots] : result.lots);
+    const levels = chunkLevels(tiles, S, liquid, height, lotBoxes);
+    this.riseOn(ch, levels, tiles, lotBoxes);
+    addMoved(levels, net.moved);
     const local = (tile: number) => ({ x: (tile % S) + 0.5, y: Math.floor(tile / S) + 0.5 });
     const entities: ChunkMiniature['entities'] = [];
     for (const { index, cell } of place.objects) {
@@ -3972,23 +4038,126 @@ export class Kernel {
     this.groundVersion++;
   }
 
-  /** The height (tiles) of the ground at a point of the simulation: the world's levels (T51a); lots lie flat. */
+  /** The height (tiles) of the ground at a point of the simulation: the world's levels (T51a); lots lie flat; the earth of the ramps (T474). */
   groundAt(x: number, y: number): number {
     const col = Math.floor(x), row = Math.floor(y);
     const S = this.config.chunkSize;
     const cx = Math.floor(col / S), cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
     if (!ch) return Math.max(this.seaLevel, this.relief.level(col, row)) * LEVEL;
+    return this.placeLevels(ch).levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
+  }
+
+  /**
+   * The levels of a loaded place (T51a, T474): the world's field, its lots flat (the lot of a block at the block's level, T370), the rise of
+   * the tests where one is set (`syntheticRise`), the earth of its ramps; with whether two of its tiles beside each other are more than a step apart
+   * (`steep`: never with the relief of today, and then the collision asks no more).
+   */
+  private placeLevels(ch: Chunk): { levels: Int16Array; steep: boolean } {
+    const S = this.config.chunkSize;
     const field = this.levelsOf(ch);
     let l = this.levelCache.get(ch);
-    if (l?.tiles !== ch.tiles || l.lots !== ch.lots || l.field !== field || l.block !== ch.blockLot) {
-      // The lot of a block lies at the block's level, for all its places (T370).
+    if (l?.tiles !== ch.tiles || l.lots !== ch.lots || l.field !== field || l.block !== ch.blockLot || l.ramps !== ch.ramps || l.rise !== this.rise) {
       const lots = ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots;
-      const levels = chunkLevels(ch.tiles, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => field[r * S + c], lots);
-      l = { tiles: ch.tiles, lots: ch.lots, block: ch.blockLot, field, levels };
+      const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
+      const levels = chunkLevels(ch.tiles, S, liquid, (c, r) => field[r * S + c], lots);
+      this.riseOn(ch, levels, ch.tiles, lots);
+      addMoved(levels, ch.ramps);
+      l = { tiles: ch.tiles, lots: ch.lots, block: ch.blockLot, field, ramps: ch.ramps, rise: this.rise, levels, steep: steepOf(levels, S, (i) => liquid(ch.tiles[i])) };
       this.levelCache.set(ch, l);
     }
-    return l.levels[(row - cy * S) * S + (col - cx * S)] * LEVEL;
+    return l;
+  }
+
+  /**
+   * The synthetic rise (T474): levels a test or the console adds to the land of the loaded places (never to their water nor their lots), so
+   * that the rule 10 of the steps is seen at work on cliffs the relief of today never has. Never saved, never from Lua, never on the wire.
+   */
+  private rise?: Rise;
+
+  /**
+   * Sets (or, without a function, takes away) the synthetic rise of the tests and of the console (T474): `fn(col, row)` levels (a quarter of a
+   * tile each, at most 64 either way) over the ground of the simulation. The loaded places lay out their network again with it (their ramps
+   * and enclaves; what stands on them stays where it is) and are drawn again. Only on the kernel that sets it: a thin client is its own.
+   */
+  syntheticRise(fn?: (col: number, row: number) => number): void {
+    this.rise = typeof fn === 'function' ? { fn } : undefined;
+    for (const ch of this.chunks.values()) {
+      if (!this.mirror && ch.stage === 'planned' && ch.plan) {
+        const { result } = this.layoutOf(ch, ch.plan, this.pathCode(), true);
+        this.knowNetwork(ch, this.networkOf(ch, ch.plan, result, ch.tiles, ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots));
+      }
+      ch.levels = (ch.levels ?? 0) + 1;
+    }
+    this.groundVersion++;
+    this.npc.forgetWays();
+  }
+
+  /** The rise of the tests on the land of a place's levels (T474): a function that throws or says no number adds nothing. */
+  private riseOn(ch: Pick<Chunk, 'cx' | 'cy'>, levels: Int16Array, tiles: string, lots: readonly LotBox[]): void {
+    const rise = this.rise?.fn;
+    if (!rise) return;
+    const S = this.config.chunkSize;
+    for (let i = 0; i < S * S; i++) {
+      if (this.palette[tiles[i]]?.layer === 'liquid') continue;
+      const c = i % S, r = (i - c) / S;
+      if (lots.some((b) => c >= b.x0 && c <= b.x1 && r >= b.y0 && r <= b.y1)) continue;
+      let v = 0;
+      try {
+        v = Number(rise(ch.cx * S + c, ch.cy * S + r));
+      } catch {
+        v = 0;
+      }
+      if (Number.isFinite(v)) levels[i] += Math.max(-64, Math.min(64, Math.round(v)));
+    }
+  }
+
+  /**
+   * The network of a planned place (T474, ADR-0250): its levels as if alone (the miniature's: its own water and banks, its lots flat, no dig,
+   * the rise of the tests), what a body walks and swims on its tiles, and what the world gives as reachable joined to the layout's start on
+   * the steps (`placeNetwork`): the other gates, the doors and the edge of a block's lot or a landing (`mustReach`), its paths and piers, the
+   * start of the world. Kept apart only the enclaves the roughness concedes: the plan's (`roughness`, a region of the master) or the relief's.
+   */
+  private networkOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, result: LayoutResult, tiles: string, lots: readonly LotBox[]): Network {
+    const S = this.config.chunkSize;
+    const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
+    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles, draft: ch.draft }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
+    const levels = chunkLevels(tiles, S, liquid, (c, r) => field[r * S + c], [...lots]);
+    this.riseOn(ch, levels, tiles, lots);
+    const ground = this.groundOfPlace(tiles, levels, lots, plan.swim === true);
+    const codes = defaultCodes(this.palette, this.pathCode());
+    const ways: number[] = [];
+    for (let i = 0; i < S * S; i++) if (tiles[i] === codes.road || tiles[i] === codes.pier) ways.push(i);
+    // The start of the world (0, 0) is the corner of the four places around it.
+    const corner = ch.cx === 0 && ch.cy === 0 ? 0 : ch.cx === -1 && ch.cy === 0 ? S - 1 : ch.cx === 0 && ch.cy === -1 ? (S - 1) * S : ch.cx === -1 && ch.cy === -1 ? S * S - 1 : -1;
+    const targets = [...result.mustReach, ...ways, ...(corner >= 0 ? [corner] : [])];
+    const roughness = readRoughness(plan.roughness) ?? roughnessOf(ground);
+    return placeNetwork(ground, result.start, targets, { roughness });
+  }
+
+  /** A place's tiles as the network reads them (T474): walked, swum where the plan swims (T438), fixed on the border, the lots and the water. */
+  private groundOfPlace(tiles: string, levels: ArrayLike<number>, lots: readonly LotBox[], swim: boolean): PlaceGround {
+    const S = this.config.chunkSize;
+    const lot = new Uint8Array(S * S);
+    for (const b of lots) for (let r = Math.max(0, b.y0); r <= Math.min(S - 1, b.y1); r++) for (let c = Math.max(0, b.x0); c <= Math.min(S - 1, b.x1); c++) lot[r * S + c] = 1;
+    const def = (i: number) => this.palette[tiles[i]];
+    return {
+      size: S,
+      levels,
+      walked: (i) => def(i)?.solid === false,
+      swum: (i) => swim && crossingOf(def(i)) === 'swim',
+      fixed: (i) => {
+        const c = i % S, r = (i - c) / S;
+        return c === 0 || r === 0 || c === S - 1 || r === S - 1 || lot[i] === 1 || def(i)?.layer === 'liquid';
+      },
+    };
+  }
+
+  /** A place's network becomes its (T474): its ramps for the levels, and a word when something the world gives as reachable stays apart. */
+  private knowNetwork(ch: Chunk, net: Network): void {
+    ch.network = net;
+    ch.ramps = Object.keys(net.moved).length ? net.moved : undefined;
+    if (net.stranded.length && !this.mirror) this.council.say('kernel', 'info', `luogo ${ch.key}: ${net.stranded.length} caselle che il mondo dà per raggiungibili restano oltre un dirupo che nessuna rampa scavalca`, 'cartographer', 'chunk.plan');
   }
 
   /** Where a solid entity's model stands (tiles): the ground under its middle, or, for a thing in a cellar, its height (T417). */
@@ -4615,11 +4784,69 @@ export class Kernel {
     return !this.solidTiles.has(`${col},${row}`);
   }
 
-  /** Carpet-space collision test of a box of half-size r, whose feet are at height z (tiles; none: the ground floor). */
+  /**
+   * Carpet-space collision test of a box of half-size r, whose feet are at height z (tiles; none: the ground floor): its tiles, a rise of the
+   * ground under it that a body does not walk (T474: two tiles beside each other more than a step apart), the models.
+   */
   free(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (!this.freeTile(Math.floor(x + dx), Math.floor(y + dy))) return false;
+    if (this.acrossRise(x, y, r)) return false;
     return !this.formBlocks(x, y, r, z);
+  }
+
+  /**
+   * Whether a box (carpet space, half-size r) stands across a rise of the ground no body walks (T474, ADR-0250, rule 10): two tiles beside each
+   * other under it, not both swum, more than `STEP` levels apart. A body walking from one to the other meets it, as it meets a solid tile:
+   * up and down alike. Inside one place with no such rise (every place of the relief of today) it asks nothing more.
+   */
+  private acrossRise(x: number, y: number, r: number): boolean {
+    const c0 = Math.floor(x - r), c1 = Math.floor(x + r), r0 = Math.floor(y - r), r1 = Math.floor(y + r);
+    if (c0 === c1 && r0 === r1) return false;
+    const ch = this.chunkAt(c0, r0);
+    if (ch && ch === this.chunkAt(c1, r1) && !this.quickLevels(ch).steep) return false;
+    for (let row = r0; row <= r1; row++)
+      for (let col = c0; col <= c1; col++) {
+        if (col < c1 && this.riseBetween(col, row, col + 1, row)) return true;
+        if (row < r1 && this.riseBetween(col, row, col, row + 1)) return true;
+      }
+    return false;
+  }
+
+  /** Whether two tiles beside each other are more than a step apart (T474): not when both are swum (the water joins the water). */
+  private riseBetween(col: number, row: number, toCol: number, toRow: number): boolean {
+    const swum = (c: number, r: number) => crossingOf(this.palette[this.tileAt(c, r) ?? '']) === 'swim';
+    if (swum(col, row) && swum(toCol, toRow)) return false;
+    return Math.abs(this.levelAtTile(col, row) - this.levelAtTile(toCol, toRow)) > STEP;
+  }
+
+  /** The level of a tile of the simulation (T474): its place's, the ramps evened; the relief's where no place is loaded. */
+  private levelAtTile(col: number, row: number): number {
+    const S = this.config.chunkSize;
+    const ch = this.chunkAt(col, row);
+    if (!ch) return Math.max(this.seaLevel, this.relief.level(col, row));
+    return this.quickLevels(ch).levels[(row - ch.cy * S) * S + (col - ch.cx * S)];
+  }
+
+  /**
+   * The levels of a place for the collision (T474): the last made, while its own tiles, lots, ramps and the rise are those they were made with;
+   * else made again (`placeLevels`). The field of the loaded world they come from is not asked again at every box (`levelsOf` goes through
+   * every place loaded, T459 § 1.6): it changes with the water of the places around, which keeps the land within a step of it, and `groundAt`
+   * (the feet, the frame) makes them again as soon as it changes.
+   */
+  private quickLevels(ch: Chunk): { levels: Int16Array; steep: boolean } {
+    const l = this.levelCache.get(ch);
+    if (l && l.tiles === ch.tiles && l.lots === ch.lots && l.block === ch.blockLot && l.ramps === ch.ramps && l.rise === this.rise) return l;
+    return this.placeLevels(ch);
+  }
+
+  /**
+   * Whether a step between two tiles (beside each other or across a corner) meets a rise of the ground (T474): for a step across a corner, any
+   * of the four edges between its four tiles, as the box of a body crossing the corner stands on all four.
+   */
+  riseOnStep(col: number, row: number, toCol: number, toRow: number): boolean {
+    if (col === toCol || row === toRow) return this.riseBetween(col, row, toCol, toRow);
+    return this.riseBetween(col, row, toCol, row) || this.riseBetween(toCol, row, toCol, toRow) || this.riseBetween(col, row, col, toRow) || this.riseBetween(col, toRow, toCol, toRow);
   }
 
   /**
@@ -4647,12 +4874,20 @@ export class Kernel {
     return tooLoadedToSwim(totalWeight(inv, this.itemSpec) / this.carryCapacity(), inv.slots.some((s) => !!s && isThing(s.item)));
   }
 
-  /** Carpet-space collision of the wanderer acting (T438): as `free`, but they swim where the water is swum (NPCs and things do not). */
+  /**
+   * Carpet-space collision of the wanderer acting (T438): as `free`, but they swim where the water is swum (NPCs and things do not); a rise of
+   * the ground a body does not walk stops them too (T474), but on a vehicle's deck, which carries them over what is under it.
+   */
   bodyFree(x: number, y: number, r: number, z?: number): boolean {
     if (![x, y, r].every(Number.isFinite)) return false;
     const heavy = this.tooLoaded();
+    let decked = false;
     // On a vehicle's deck (T439) the water under it does not count: the hull carries the body.
-    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) if (this.deckAt(x + dx, y + dy, z, DECK_STEP) === undefined && !this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
+    for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
+      if (this.deckAt(x + dx, y + dy, z, DECK_STEP) !== undefined) decked = true;
+      else if (!this.bodyTile(Math.floor(x + dx), Math.floor(y + dy), heavy)) return false;
+    }
+    if (!decked && this.acrossRise(x, y, r)) return false;
     return !this.formBlocks(x, y, r, z);
   }
 
@@ -4663,7 +4898,7 @@ export class Kernel {
     const { ox, oy } = this.offset();
     // Inside the studio's buildings: rooms with walls, shelves and desks.
     if (this.corona.isInterior(x)) return [[-r, -r], [r, -r], [-r, r], [r, r]].every(([dx, dy]) => this.corona.free(x + dx, y + dy));
-    let sim = false;
+    let sim = 0, decked = false;
     let heavy: boolean | undefined;
     for (const [dx, dy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
       const px = x + dx;
@@ -4674,9 +4909,12 @@ export class Kernel {
         if (!this.corona.free(px, py)) return false;
         continue;
       }
-      sim = true;
-      if (this.deckAt(px + ox, py + oy, z, DECK_STEP) === undefined && !this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
+      sim++;
+      if (this.deckAt(px + ox, py + oy, z, DECK_STEP) !== undefined) decked = true;
+      else if (!this.bodyTile(Math.floor(px + ox), Math.floor(py + oy), (heavy ??= this.tooLoaded()))) return false;
     }
+    // A rise of the ground the body does not walk (T474): where the box is all in the simulation and on no deck.
+    if (sim === 4 && !decked && this.acrossRise(x + ox, y + oy, r)) return false;
     return !sim || !this.formBlocks(x + ox, y + oy, r, z);
   }
 
@@ -5825,7 +6063,8 @@ export class Kernel {
    * points cover the way, so an edge or a rise anywhere on it is in one of them).
    */
   private stepsBetween(c: number, r: number, nc: number, nr: number, body: number): boolean {
-    if (!this.solidForms.has(`${c},${r}`) && !this.solidForms.has(`${nc},${nr}`)) return true;
+    // Where no model stands the tiles and the rise of the ground between them say it (T474).
+    if (!this.solidForms.has(`${c},${r}`) && !this.solidForms.has(`${nc},${nr}`)) return !this.riseOnStep(c, r, nc, nr);
     const x0 = c + 0.5, y0 = r + 0.5;
     let z = this.floorAt(x0, y0);
     for (const t of [0.5, 1]) {
@@ -7955,7 +8194,7 @@ export class Kernel {
       const added = this.settleDeclared(ch, ch.plan);
       if (!added.length) continue;
       const { result } = this.layoutOf(ch, ch.plan, this.pathCode(), true);
-      const place = this.placementsOf(ch, ch.plan, result);
+      const place = this.placementsOf(ch, ch.plan, result, ch.network);
       for (const i of added) {
         const o = ch.plan.objects[i];
         const m = this.modules.get(o.module);
@@ -10990,6 +11229,7 @@ export class Kernel {
       free: (x, y, r, z) => k.free(x, y, r, z),
       floorAt: (x, y, z) => k.floorAt(x, y, z),
       formOn: (col, row) => k.solidForms.has(`${col},${row}`),
+      riseOnStep: (col, row, toCol, toRow) => k.riseOnStep(col, row, toCol, toRow),
       nearest: (x, y, r, tag) => k.nearest(x, y, r, tag),
       interiorPoints: (structure) => k.interiorPoints(structure),
       // A place of the people is always one of the kernel's chunks: the port hands out no other.

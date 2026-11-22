@@ -116,6 +116,8 @@ export interface NpcHost {
   floorAt(x: number, y: number, z?: number): number;
   /** Whether a solid model stands on a tile (else the tiles say it all). */
   formOn(col: number, row: number): boolean;
+  /** Whether a step between two tiles (beside each other or across a corner) meets a rise of the ground no body walks (T474, ADR-0250). */
+  riseOnStep(col: number, row: number, toCol: number, toRow: number): boolean;
   /** The nearest entity within r with a tag. */
   nearest(x: number, y: number, r: number, tag?: string): Id | undefined;
   /** Where one stands inside a structure, on its floor. */

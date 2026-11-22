@@ -38,6 +38,7 @@
 | [I pianeti e il viaggio](#pianeti) | `src/kernel/planets.ts`, `src/render/planet.ts`, `src/kernel/relief.ts` |
 | [La fisica rimodellabile e la natura del mondo](#fisica) | `src/kernel/nature.ts`, `src/kernel/agents/genesis.ts`, `src/kernel/migrations.ts` |
 | [Il rilievo](#rilievo) | `src/kernel/relief.ts` |
+| [La rete e le enclavi (la regola 10 dei gradini)](#rete) | `src/kernel/network.ts`, `src/kernel/kernel.ts`, `src/kernel/npc/places.ts` |
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
 | [Lotti e strutture, scale e piani](#lotti) | `src/kernel/layout.ts`, `src/kernel/forms.ts` |
 | [Le taglie](#taglie) | `src/mj/classes.ts` |
@@ -781,7 +782,8 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   Cartografo con l'ambiente della regione; `filler` (il **riempitivo**), il kernel li stende col programma dell'ambiente e il seme del luogo
   (`fillerPlan` in `develop`: nome e descrizione della regione, nessuna cosa, persona, runa o struttura chiesta, nessuna carta, il piano salvato),
   senza chiamate né battiti del mondo (`applyPlan`), fuori dalla quota e dalla pausa; `held` (la **trattenuta**), restano bozze (la pompa e
-  `planAhead` li saltano) finché il master non la libera o la cambia. I luoghi già pianificati restano come sono. Le dichiara e le libera solo il
+  `planAhead` li saltano) finché il master non la libera o la cambia. `roughness` (T474, ADR-0250) dice l'asprezza dei suoi luoghi nuovi
+  per la regola 10 dei gradini (`regionRoughness`, mai una trattenuta), scritta nel loro piano (`#rete`). I luoghi già pianificati restano come sono. Le dichiara e le libera solo il
   master: `Kernel.declareRegion`, `releaseRegion`, controllate da `masterRegion` (`cleanText`, `metaBreak`, `MASTER_REGION_LIMITS`: raggio 0-8,
   centro entro 200, 32 regioni, nome 40 e descrizione 200 caratteri; un ambiente del mondo, facoltativo per `held`; mai sul primo luogo; un `id`
   cambia solo una regione del master), scritte dal kernel in `world/atlas.json` con un commit suo; sul filo il messaggio `region` (`declare` con
@@ -1734,7 +1736,63 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   i chunk; `Chunk.levels` ridisegna chi cambia livelli); ogni lotto è piano, con un anello
   attorno, e il resto del chunk si piega verso di lui lasciando il bordo al campo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
   suolo, `floorAt` la comprende (i modelli stanno sul suolo sotto il loro centro); il renderer disegna colonne con i fianchi e
-  posa tutto sul suolo. Corona e studio restano piani.
+  posa tutto sul suolo. Corona e studio restano piani. Dal T474 un dislivello oltre due livelli fra vicini non si cammina (la regola 10
+  dei gradini, qui sotto): col rilievo di oggi non ce n'è nessuno.
+
+<a id="rete"></a>
+## La rete e le enclavi (la regola 10 dei gradini)
+
+ADR-0250 (T474, la riga 1 dello studio di T459, `docs/design/terreno-3d.md` § 2). Il modulo puro è `src/kernel/network.ts`; il kernel lo usa
+in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende, i piazzamenti.
+
+- **I gradini**: `STEP` (2 livelli, mezza casella) si cammina, oltre no, in salita e in discesa; `JUMP` (4) è il salto della terra;
+  `CLIMB` (12, tre caselle) l'arrampicata che verrà (R3). Due caselle nuotate si uniscono qualunque sia il loro livello.
+- **La collisione** (`free`, `bodyFree`, `freeReal`): una scatola a cavallo di due caselle vicine (un lato, non la diagonale) più di un
+  gradino lontane è bloccata (`acrossRise`, `riseBetween`), come davanti a una casella solida; il ponte di un veicolo porta chi vi sta. La
+  usano il passo del server (`stepWanderer`), Lua (`world.free`, `world.free_real`), il controllo del passo delle vie delle persone
+  (`stepFree` con `NpcHost.riseOnStep`: le persone vanno solo sulla rete) e ciò che spezzerebbe un luogo (`stepsBetween`). Il percorso
+  veloce: i livelli di un luogo dicono se vi è un dislivello oltre il gradino (`steep`, `steepOf`); se no, una scatola dentro il luogo non
+  chiede altro. Per la collisione i livelli sono gli ultimi fatti finché caselle, lotti, rampe e rialzo non cambiano (`quickLevels`): il
+  campo del mondo caricato non si richiede a ogni scatola.
+- **I livelli di un luogo** (`placeLevels`, dietro `groundAt`): il campo del mondo caricato (`worldLevels`), i lotti piani
+  (`chunkLevels`), il rialzo sintetico se c'è, la terra mossa dalle rampe del luogo (`addMoved`, `Chunk.ramps`). Uguali nel client sottile, che
+  riceve la terra mossa.
+- **La rete di un luogo** (`networkOf` → `placeNetwork`), fatta in `applyPlan` e nel modellino, mai salvata (`Chunk.network`): i livelli
+  del luogo da solo (come il modellino: la sua acqua, i lotti, nessuno scavo, il rialzo), le caselle camminate e nuotate (nuotate solo nei piani
+  col segno `swim`), fermi il bordo, i lotti e l'acqua; dal primo varco (`LayoutResult.start`) si uniscono sui gradini i bersagli: gli altri
+  varchi, le porte, l'orlo del lotto di un blocco e dell'approdo (`LayoutResult.mustReach`), le caselle di sentiero e di molo, l'angolo della
+  partenza nei quattro luoghi attorno a 0, 0; solo ciò che le caselle da sole uniscono alla partenza (il resto è del layout). Un bersaglio
+  staccato ha la sua **rampa**: la via più corta (in caselle) fra quelle non raggiunte; le caselle ferme si passano come appoggi (con
+  l'estremo sulla rete, e il bersaglio se è fermo), ogni tratto fra due appoggi lungo abbastanza per la loro differenza di livello; `evenRamp`
+  tiene i due appoggi di un tratto e porta ogni casella in mezzo il più vicino possibile al suo livello con ogni gradino entro `STEP`; un
+  bersaglio muovibile e da solo (una casella di sentiero) si pareggia dall'altro estremo fino a lui (`free`). La rete tiene la terra mossa
+  casella per casella (`Network.moved`), che diventa `Chunk.ramps`. Ciò che nessuna rampa raggiunge (`stranded`) il kernel lo dice nel
+  registro. Al più `MAX_RAMPS` rampe.
+- **Le enclavi**: le parti camminate per `ENCLAVE_TILES` (4) caselle o più che solo un dislivello stacca dalla rete, col **valico** (il
+  dislivello più piccolo verso la rete) e il mezzo (`meansOf`: `jump`, `climb`, `build`). Tenute se l'asprezza lo concede
+  (`keptPass`, `ROUGHNESS_QUOTA`: montuosa fino al 15 % delle caselle camminate col valico entro un salto, impervia fino al 35 % con ogni
+  valico; piana e collinare nessuna), unite con una rampa altrimenti (dalle caselle del loro orlo, `RAMP_SOURCES`). `Network.apart` sono le
+  caselle che un riempimento delle sole caselle unirebbe e i gradini no.
+- **L'asprezza** (`roughnessOf`): la quota dei lati fra caselle aperte oltre un gradino (`ROUGH_EDGES`: montuosa dal 2 %, impervia dal 10 % o
+  con un lato oltre `CLIMB`), piana se la terra non varia più di `FLAT_SPAN`. Quella del master vince: `Region.roughness` (una regione sua,
+  non trattenuta; `masterRegion` la legge, il modulo «Dichiara regione» la offre, il messaggio `region` la porta), scritta in
+  `ChunkPlan.roughness` quando un luogo nuovo si pianifica nella regione (anche il riempitivo): i luoghi pianificati prima restano come sono.
+- **I piazzamenti** (`placementsOf`): dalle caselle raggiungibili del layout si tolgono quelle di `apart`; `where: 'enclave'` sceglie fra
+  le caselle delle enclavi tenute (fuori dai lotti), altrimenti dovunque. Col rilievo di oggi `apart` è vuoto e ogni cosa sta dove stava.
+- **Il Cartografo** (`draftRelief`): dalla bozza del luogo da sola (i suoi livelli, il rialzo, il layout nudo) la rete con l'asprezza del
+  master o del rilievo; se tiene enclavi, `PlanContext.relief` porta l'asprezza, quante, quanta parte e il mezzo più duro, la richiesta ha
+  la riga (`reliefLine`) e lo schema `enclave` fra i posti; altrimenti la richiesta e lo schema sono quelli di prima. I modelli locali vi
+  mettono un forziere.
+- **Sul filo**: `ChunkView.ramps` dal server al client, la terra mossa (`readMoved`: caselle del luogo e livelli interi entro `MAX_MOVED`;
+  il resto si scarta), che il client aggiunge ai suoi livelli; nessun messaggio nuovo dal client.
+- **Il rialzo sintetico** (`Kernel.syntheticRise(fn)`): dei test e della console, `fn(col, row)` livelli (al più 64) sulla terra dei luoghi
+  caricati, mai sull'acqua né sui lotti; i luoghi caricati rifanno la loro rete (rampe ed enclavi; ciò che vi sta resta dov'è) e si ridisegnano;
+  senza funzione si toglie. Mai salvato, mai da Lua, mai sul filo (un client sottile ha il suo). Per vedere un dirupo dalla console:
+  `quine.syntheticRise((c, r) => (c >= 3 && c <= 8 && r >= 3 && r <= 8 ? 8 : 0))`, poi `quine.chunkAt(4, 4).network`.
+- **Inerte col rilievo di oggi**: misurato su 328 luoghi pianificati offline, nessuna coppia di caselle vicine aperte oltre il gradino su 165 395
+  (`lab/scripts/rete-gradini.ts`; con `--rialzo 8` 434 rampe su 327 luoghi, 21 enclavi tenute, nessuna casella staccata); `tests/rete-kernel.test.ts` lo tiene, con `tests/luoghi-campione.test.ts`. Restano a R1 il rilievo
+  i cui dirupi `worldLevels` e `chunkLevels` non spianino, i varchi col livello del lato, i lotti sulle terrazze; a R3 il salto e
+  l'arrampicata nel passo del server.
 
 <a id="acqua"></a>
 ## L'acqua che scorre

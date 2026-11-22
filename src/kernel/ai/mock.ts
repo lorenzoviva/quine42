@@ -745,10 +745,12 @@ export class MockAiModels implements AiModels, DecisionModels {
     // Now and then a house with a cellar and a chest down there (T417, ADR-0091 point 4), drawn apart: the rest of the plan stays the one it was;
     // never around the start, whose places the offline worlds and their tests know as they were.
     const cellar = Math.max(Math.abs(ctx.cx), Math.abs(ctx.cy)) >= CELLAR_FROM && ctx.catalog.some((m) => m.id === CELLAR_THING) && new Rng(hashStr(`cellar|${ctx.cx}|${ctx.cy}`)).chance(CELLAR_CHANCE);
+    // Where the place keeps an enclave (T474: only with a relief that has cliffs, never in a place of today), a chest up there.
+    const ledge = !!ctx.relief?.enclaves && ctx.catalog.some((m) => m.id === CELLAR_THING);
     return {
       place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
       environment: ambiente,
-      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
+      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ledge ? [{ module: CELLAR_THING, where: 'enclave' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,

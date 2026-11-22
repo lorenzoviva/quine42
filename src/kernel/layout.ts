@@ -39,6 +39,10 @@ export interface LayoutResult {
   reachable: Set<number>;
   carved: number;
   steps: number;
+  /** The tile the connectivity starts from (T474): the first gate the lot of a block does not cover, or the land nearest the middle. */
+  start: number;
+  /** What the layout joined to `start` (T474): the other gates (not on the void), the doors, the apron; the network of the steps joins them too. */
+  mustReach: number[];
   /** With `stages` (the phases of the model of places, T26): the grid with its gates, and after the program. */
   stages?: { gated: string[]; programmed: string[] };
 }
@@ -284,7 +288,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const grid = rows();
   // Where entities may be placed is what is walked (T438): nothing is set on the water, even where it joins the place.
   const reachable = swim ? new Set([...reach].filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false)) : reach;
-  return { grid, lots: findLots(grid, size, palette), gates: gateTiles, reachable, carved, steps, ...(stages ? { stages } : {}) };
+  return { grid, lots: findLots(grid, size, palette), gates: gateTiles, reachable, carved, steps, start, mustReach, ...(stages ? { stages } : {}) };
 }
 
 /** The walked cell nearest the middle of a place (T445: where a place of the void with no gate is joined from); 0 if none. */

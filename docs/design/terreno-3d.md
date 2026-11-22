@@ -594,7 +594,7 @@ Non sono nel backlog: li scrive chi pianifica, dopo le risposte dell'autore. Il 
 
 | # | Task | Dipende da | Costo | Browser |
 |---:|---|---|---:|---|
-| 1 | **R0 · La regola 10 della rete e delle enclavi**: l'ADR (§ 8) e la regola in `AGENTS.md`; i gradini in `free`/`bodyFree`, nel passo del server e nel controllo del passo di `findRoute`; il grafo dei gradini e le rampe nel layout; le enclavi segnate nel piano (derivate), il posto `enclave`; l'asprezza delle regioni (misurata, e del master); inerte col rilievo di oggi (`luoghi-campione` verde), provato con un rilievo sintetico | — | 5 % | sì (un dirupo sintetico dalla console) |
+| 1 | **R0 · La regola 10 della rete e delle enclavi**: l'ADR (§ 8) e la regola in `AGENTS.md`; i gradini in `free`/`bodyFree`, nel passo del server e nel controllo del passo di `findRoute`; il grafo dei gradini e le rampe nel layout; le enclavi segnate nel piano (derivate), il posto `enclave`; l'asprezza delle regioni (misurata, e del master); inerte col rilievo di oggi (`luoghi-campione` verde), provato con un rilievo sintetico; *fatto in T474, ADR-0250* (le rampe come terra mossa per casella, il rialzo sintetico `syntheticRise`, il valico per «il passo»; i varchi col livello del lato e i lotti sulle terrazze restano a R1) | — | 5 % | sì (un dirupo sintetico dalla console) |
 | 2 | **R1 · Il rilievo vero**: `nature.relief` alla Genesi (ferma come `game`), `generate_relief` nel generatore del seme (massicci, terrazze, passi, conche, il letto), `Relief` che lo legge per quei mondi, `k` che si cammina, i lotti sulle terrazze, la richiesta del Cartografo col rilievo del luogo, l'ambientazione che lo porta | 1 | 6 % | sì |
 | 3 | **R2 · Il taglio verso la camera**: il disco di T416 acceso quando il terreno copre il viandante, all'altezza della testa, con le bande degli strati | 2 | 3 % | sì |
 | 4 | **R3 · Arrampicarsi**: `climb` come il salto ma lento e faticoso, `bonus.climb`, lo stato `climb` dagli effetti, «Arrampicati» nel menu della casella, il Narratore che lo sa dare; il salto e l'arrampicata nel passo del server | 1 | 4 % | sì |
@@ -617,7 +617,7 @@ voce nel glossario nello stesso commit (rete, enclave, passo, asprezza, gradino,
 
 ## 8. L'ADR proposto
 
-Da copiare in `docs/adr/0239-…` con il primo task (R0), con le risposte dell'autore al posto delle raccomandazioni.
+Da copiare in `docs/adr/0239-…` con il primo task (R0), con le risposte dell'autore al posto delle raccomandazioni. *Copiato in T474 come [ADR-0250](../adr/0250-la-regola-10-della-rete-e-delle-enclavi.md), con le risposte di D67 (A1, B1, C1, D3, E1; V0 rinviato).*
 
 > **ADR-0239 — Il terreno vero a colonne, la regola 10 della rete e delle enclavi, gli automi del kernel**
 >

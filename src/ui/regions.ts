@@ -5,6 +5,7 @@
 import type { Kernel } from '../kernel/kernel';
 import { MASTER_REGION_LIMITS, REGION_KIND_NAME, REGION_KIND_NOTE, regionKind, type Region, type RegionKind } from '../kernel/atlas';
 import { NATURE_ACCEPTS } from '../kernel/nature';
+import { readRoughness, ROUGHNESS, ROUGHNESS_NAME } from '../kernel/network';
 import { el } from './dom';
 
 type Kind = RegionKind | 'plan';
@@ -31,7 +32,8 @@ export function regionLine(k: Kernel, r: Region): string {
   const env = r.environment ? (k.content.layouts[r.environment]?.name ?? r.environment) : '';
   const gravity = typeof r.gravity === 'number' ? `, gravità ${r.gravity}` : '';
   const air = r.air === false ? ', senz’aria' : r.air === true ? ', con aria' : '';
-  return `«${r.name}» — ${REGION_KIND_NAME[kind]}${env ? ` (${env})` : ''}, centro ${r.center[0]},${r.center[1]}, raggio ${r.radius}${gravity}${air}`;
+  const rough = readRoughness(r.roughness);
+  return `«${r.name}» — ${REGION_KIND_NAME[kind]}${env ? ` (${env})` : ''}, centro ${r.center[0]},${r.center[1]}, raggio ${r.radius}${gravity}${air}${rough ? `, ${ROUGHNESS_NAME[rough]}` : ''}`;
 }
 
 export interface RegionFormOptions {
@@ -46,7 +48,8 @@ export interface RegionFormOptions {
 
 /**
  * The form: name, description, centre, radius, what it does (filler, held, the Cartographer's environment), the environment among those the
- * world has, the gravity of its places (T447: empty, the world's) and, in a world that counts the breath, its air (T446: empty, the places'). «Dichiara» asks the kernel; what does not hold stays here with every reason.
+ * world has, the gravity of its places (T447: empty, the world's), how rough its new places are (T474: empty, their relief's) and, in a world
+ * that counts the breath, its air (T446: empty, the places'). «Dichiara» asks the kernel; what does not hold stays here with every reason.
  */
 export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
   const L = MASTER_REGION_LIMITS;
@@ -69,6 +72,9 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
   const breath = k.nature().oxygen;
   const air = el('select', { 'data-region': 'air' }, el('option', { value: '' }, 'quella dei luoghi'), el('option', { value: 'true' }, 'con aria'), el('option', { value: 'false' }, 'senz’aria')) as HTMLSelectElement;
   air.value = typeof r?.air === 'boolean' ? String(r.air) : '';
+  // How rough its new places are (T474): with the relief of today every place is joined anyway; it counts where the relief has cliffs.
+  const roughness = el('select', { 'data-region': 'roughness' }, el('option', { value: '' }, 'quella del rilievo'), ...ROUGHNESS.map((x) => el('option', { value: x }, ROUGHNESS_NAME[x]))) as HTMLSelectElement;
+  roughness.value = readRoughness(r?.roughness) ?? '';
   const meaning = el('div', { class: 'note' });
   const said = el('div', { class: 'note', 'data-region': 'said' });
   const explain = () => {
@@ -90,6 +96,7 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
       environment: environment.value,
       ...(gravity.value.trim() ? { gravity: Number(gravity.value) } : {}),
       ...(breath && air.value ? { air: air.value === 'true' } : {}),
+      ...(roughness.value ? { roughness: roughness.value } : {}),
     };
     void k
       .declareRegion(request)
@@ -108,6 +115,7 @@ export function regionForm(k: Kernel, o: RegionFormOptions): HTMLElement {
     el('div', { class: 'row' }, 'centro ', cx, ' ', cy, ' raggio ', radius, ' luoghi'),
     el('div', { class: 'row' }, kind, ' ', environment),
     el('div', { class: 'row', title: `il salto e il passo nei suoi luoghi; 1 è la terra, da ${glo} a ${ghi}` }, 'gravità ', gravity),
+    el('div', { class: 'row', title: 'quanto dei suoi luoghi nuovi resta oltre un dirupo, da raggiungere saltando, arrampicandosi o costruendo: piana e collinare tutto unito ai sentieri' }, 'asprezza ', roughness),
     ...(breath ? [el('div', { class: 'row', title: 'se nei suoi luoghi si respira: senza, l’ossigeno cala' }, 'aria ', air)] : []),
     meaning,
     said,

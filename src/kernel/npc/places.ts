@@ -178,11 +178,12 @@ export class Places {
 
   /**
    * Whether a body (half-size r, under half a tile) steps from the middle of a free tile to the middle of the next: with no model on
-   * the tiles the step touches, the tiles say it all (the box stays inside them, and the ground is never in the way); else, walked.
+   * the tiles the step touches, the tiles say it all (the box stays inside them) with the ground between them, a rise no body walks
+   * (T474: the people go only on the network, they do not jump nor climb); else, walked.
    */
   private stepFree(c: number, r: number, nc: number, nr: number, body: number): boolean {
     const h = this.host;
-    if (!h.formOn(c, r) && !h.formOn(nc, nr) && !h.formOn(nc, r) && !h.formOn(c, nr)) return true;
+    if (!h.formOn(c, r) && !h.formOn(nc, nr) && !h.formOn(nc, r) && !h.formOn(c, nr)) return !h.riseOnStep(c, r, nc, nr);
     return this.walkable(c + 0.5, r + 0.5, nc + 0.5, nr + 0.5, body);
   }
 
