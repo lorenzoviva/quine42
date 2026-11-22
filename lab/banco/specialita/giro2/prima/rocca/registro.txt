@@ -1,0 +1,5 @@
+[sculptor] propone: «rocca di confine» (struttura grande, Architetto, gemini-4-argon)
+[kernel → sculptor] scarta: «rocca di confine»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); porta: 17 × 8 voxel (1,06 × 0,50 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s
+[kernel → sculptor] scarta: «rocca di confine»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra
+[kernel → sculptor] scarta: «rocca di confine»: taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: un pavimento sotto il suolo non si raggiunge dal piano terra
+[sculptor] errore: «rocca di confine»: nessun programma valido

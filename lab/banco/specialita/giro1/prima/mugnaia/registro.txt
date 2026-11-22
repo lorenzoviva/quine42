@@ -1,0 +1,3 @@
+[sculptor] propone: «Mugnaia» (persona, Figurinista, gemini-3.8-flash)
+[kernel → sculptor] scarta: «Mugnaia»: pezzi staccati: 32% dei voxel non è attaccato al corpo principale (2 pezzi)
+[artist → sculptor] approva: «Mugnaia»: 7/10 — Il fazzoletto e la testa sono sproporzionati rispetto al corpo

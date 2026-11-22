@@ -1,0 +1,107 @@
+{
+ "giro": "giro3",
+ "braccio": "dopo",
+ "concetto": "mugnaia",
+ "classe": "person",
+ "specialita": "figurist",
+ "modello": "gemini-3.8-flash",
+ "fatto": true,
+ "voto": 7,
+ "voti": [
+  7
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.8-flash",
+   "secondi": 9,
+   "prompt": 5978,
+   "cached": 3935,
+   "output": 1148,
+   "thoughts": 0,
+   "usd": 0.006132375,
+   "sistema": 18459,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2732,
+   "cached": 0,
+   "output": 78,
+   "thoughts": 235,
+   "usd": 0.006915,
+   "sistema": 6179,
+   "voto": 7
+  }
+ ],
+ "token": {
+  "prompt": 8710,
+  "cached": 3935,
+  "output": 1226,
+  "thoughts": 235
+ },
+ "usd": 0.01305,
+ "usdGemini": 0.01305,
+ "secondi": 13,
+ "sistema": {
+  "caratteri": 18459,
+  "ruolo": 9839,
+  "sezione": 1977,
+  "esempi": [
+   "person"
+  ]
+ },
+ "registro": {
+  "figurist": 1
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 2464,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [
+   "leg",
+   "head",
+   "arm"
+  ],
+  "aree": [],
+  "colori": 13,
+  "semi": 0.008,
+  "arti": {
+   "leg": 2,
+   "arm": 2,
+   "head": 1
+  },
+  "artiIndovinati": false
+ }
+}

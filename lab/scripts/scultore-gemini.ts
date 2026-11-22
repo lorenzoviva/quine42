@@ -8,6 +8,8 @@
 // reasoning, the system instructions in the cache, the cost it says), with OPENROUTER_API_KEY from <root>/.env; the Artist stays on Gemini.
 // Then --tetto counts OpenRouter's dollars as well. --offline answers with a fake OpenRouter (the offline Sculptor's program, a cost of 0).
 // T303: `--interno` asks the structure with its interior in the same program (the Scenografo's way (a), `lab/scripts/scenografo-misura.ts`).
+// T473 (S7 of T458): `--specialita` is the paid trial of the Sculptor's specialties, in `lab/scripts/scultore-specialita.ts`: the same
+// concepts of every trade with the prompt of before T468 and today's, on the game's models, into lab/banco/specialita (its README).
 //
 //   npx vite-node lab/scripts/scultore-gemini.ts -- [--root ../../..] [--giro giro1] [--pensiero low|medium|high] [--scultore <modello>] [--solo forte,fattoria] [--taglie large,huge] [--tetto 10] [--out lab/banco/taglie/gemini]
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-carbon,claude-sonnet-5-5 [--ripeti 2] [--primo 1] [--sforzo low] [--cli-cmd "claude"] [--senza-immagini] [--finestra 80] [--offline] --out lab/banco/taglie/modelli
@@ -15,6 +17,8 @@
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --misura [--out lab/banco/taglie/gemini]     # no call: measures and photographs the programs kept
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --concetti                                   # no call: concepts against seeds (T337), Gemini's and the hand-written
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --tabella --out lab/banco/taglie/modelli     # no call: the table of every model (and T355's), → <out>/tabella.md
+//   npx vite-node lab/scripts/scultore-gemini.ts -- --specialita [--giro giro1] [--solo castagno,…] [--tetto 6] [--offline]   # T473: the two prompts, every trade
+//   npx vite-node lab/scripts/scultore-gemini.ts -- --specialita --tabella | --misura | --cache-opus                          # T473: no call, or the cache marks on Opus
 //
 // → <out>/<giro>/<concetto>-<taglia>/{chiamate/<n>-<compito>.md, programma.xml, esito.json, <taglia del giro>.png}, <out>/<giro>/misure.json;
 //   with --modelli <out>/<modello>/giro<n>/… instead, and <out>/settimana.json (Claude's week and 5-hour window before and after).
@@ -44,6 +48,7 @@ import { direct, readKey } from './gemini';
 import { claudeCliModels, readWindow, routed, type ClaudeCall, type ClaudeWindow } from './claude-cli';
 import { OPENROUTER_API, OPENROUTER_MODELS, OpenRouterAiModels } from '../../src/kernel/ai/openrouter';
 import { png } from './png';
+import { specialita } from './scultore-specialita';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const opt = (k: string) => (args.includes(`--${k}`) ? args[args.indexOf(`--${k}`) + 1] : undefined);
@@ -565,6 +570,10 @@ const rounds: Array<{ out: string; scultore?: string }> = MODELLI
   ? MODELLI.flatMap((m) => Array.from({ length: RIPETI }, (_, i) => ({ out: path.join(BASE, m, `${opt('giro') ?? 'giro'}${i + PRIMO}`), scultore: m })))
   : [{ out: path.join(BASE, opt('giro') ?? 'giro1'), scultore: opt('scultore') }];
 
+if (args.includes('--specialita')) {
+  await specialita(args);
+  process.exit(0);
+}
 if (args.includes('--concetti')) {
   concetti();
   process.exit(0);

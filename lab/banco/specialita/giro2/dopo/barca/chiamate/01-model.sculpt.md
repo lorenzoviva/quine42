@@ -1,0 +1,133 @@
+# model.sculpt · primo · gemini-4-argon · 22 s · 6228 token d'ingresso (0 in cache), 2362 d'uscita, 0 di ragionamento · $0.04
+
+## Richiesta
+
+Sculpt: Barca da pesca
+What it looks like: una barca a vela con lo scafo di legno
+Class: vessel · box 40 × 96 × 64 voxels · at least 19 tall
+A vessel: a tile is 16 voxels, a person 24 tall, a step 3. The bow toward large y, the stern toward small y.
+Write waterline="N" on the root: the N lowest layers (z=0 to N-1) are under the water, the kernel lays the hull that deep (1 to 40, less than 64). The hull at z=N-1 must be closed (the sea does not get in) and at least 2 times as long (along y) as wide, its foremost eighth at most 75% of its width (the bow narrows).
+Mark with area="boarding" the letter where one comes aboard (a gangway, a ladder, a step in the gap of the rail) and with area="helm" the helm (a wheel, a tiller), aft on the deck; area="hold" the floor of the hold, if it has one. The deck is dry (its floor at z=N or above), a step up or down at a time from the boarding (at most 3 voxels), with 12 voxels free over it; at least 50% of it over the hull at the waterline; the helm within 0.75 tiles of it. Sails and rigging above the head of whoever walks the deck.
+
+## Risposta
+
+<sequence values="BHWIODPRGTMNASsCLF" size="40 96 64" waterline="10">
+  <!-- Hull: lower half of an egg, hollowed out, stern cut flat and closed by a transom -->
+  <ellipsoid at="19.5 47.5 0" size="38 94 36" color="H"/>
+  <ellipsoid at="19.5 47.5 2" size="32 88 32" color="I" on="H"/>
+  <box at="19.5 47.5 18" size="40 96 46" color="B"/>
+  <box at="19.5 3.5 0" size="40 8 64" color="B"/>
+  <box at="19.5 8 0" size="40 2 18" color="H" on="I"/>
+
+  <!-- Rudder at the stern -->
+  <box at="19.5 5 2" size="2 6 16" color="R"/>
+  <box at="19.5 9 18" size="2 6 2" color="R"/>
+
+  <!-- Keel along the bottom -->
+  <box at="19.5 46 0" size="2 74 2" color="W" on="H"/>
+
+  <!-- Deck at z=16, leaving 1 voxel of hull rim at z=17 -->
+  <box at="19.5 47.5 16" size="40 96 1" color="D" on="I"/>
+
+  <!-- Hold floor at bottom of interior -->
+  <all in="I H" out="O *" steps="1"/>
+  <!-- Clear remaining interior -->
+  <prl in="I" out="B"/>
+
+  <!-- Plank lines on the deck -->
+  <box at="11 47.5 16" size="1 80 1" color="P" on="D"/>
+  <box at="16 47.5 16" size="1 80 1" color="P" on="D"/>
+  <box at="23 47.5 16" size="1 80 1" color="P" on="D"/>
+  <box at="28 47.5 16" size="1 80 1" color="P" on="D"/>
+
+  <!-- Wales (dark horizontal bands) on outside of hull -->
+  <box at="19.5 47.5 11" size="40 96 1" color="W" on="H"/>
+  <box at="19.5 47.5 15" size="40 96 1" color="W" on="H"/>
+
+  <!-- Rail at z=18 and z=19 on top of the hull rim (z=17) -->
+  <all in="B H" out="R *" steps="1"/>
+  <all in="B R" out="R *" steps="1"/>
+
+  <!-- Raised sheer at bow and stern -->
+  <box at="19.5 82 20" size="40 24 1" color="R" on="B"/>
+  <all in="R B" out="B *" steps="1"/>
+  <box at="19.5 12 20" size="40 10 1" color="R" on="B"/>
+  <all in="R B" out="B *" steps="1"/>
+
+  <!-- Boarding gaps amidships (y=40..54): open z=19, boarding step at z=17..18 -->
+  <box at="19.5 47 19" size="40 14 2" color="B" on="R"/>
+  <box at="19.5 47 18" size="40 14 1" color="G" on="R"/>
+  <box at="19.5 47 17" size="40 14 1" color="G" on="H"/>
+
+  <!-- Fishing accessories on deck: wooden crates and rolled net along the sides -->
+  <!-- Forward port crate -->
+  <box at="12 64 17" size="5 7 4" color="C" on="B"/>
+  <box at="12 64 20" size="3 5 1" color="A" on="C"/>
+  <!-- Forward starboard crate -->
+  <box at="27 64 17" size="5 7 4" color="C" on="B"/>
+  <box at="27 64 20" size="3 5 1" color="A" on="C"/>
+  <!-- Aft port coiled rope / net -->
+  <box at="11 32 17" size="4 8 3" color="N" on="B"/>
+  <!-- Aft starboard fish crate -->
+  <box at="28 32 17" size="4 6 3" color="C" on="B"/>
+
+  <!-- Hatch to the hold forward of the mast -->
+  <box at="19.5 63 17" size="8 8 2" color="W" on="B"/>
+  <box at="19.5 63 18" size="6 6 1" color="P" on="W"/>
+
+  <!-- Helm aft: steering post and wheel -->
+  <box at="19.5 18 17" size="2 2 7" color="T"/>
+  <box at="19.5 19.5 21" size="7 1 7" color="T"/>
+
+  <!-- Stern lantern on a wooden post -->
+  <box at="19.5 8 20" size="2 2 6" color="M"/>
+  <box at="19.5 8 26" size="2 2 3" color="F"/>
+  <box at="19.5 8 29" size="4 4 1" color="W"/>
+
+  <!-- Bowsprit at the bow -->
+  <line at="19 82 19" to="19 95 23" r="1" color="M"/>
+
+  <!-- Main mast (stepped at y=52) -->
+  <box at="19.5 52 17" size="2 2 45" color="M"/>
+
+  <!-- Lower yard (boom) at z=34 (18 voxels above z=16 deck, clear of head) -->
+  <box at="19.5 53.5 34" size="30 1 2" color="N"/>
+  <!-- Upper yard at z=58 -->
+  <box at="19.5 53.5 58" size="34 1 2" color="N"/>
+
+  <!-- Main sail between z=36 and z=57, slightly billowed forward -->
+  <box at="19.5 54.5 36" size="30 1 22" color="S"/>
+  <box at="19.5 55.5 39" size="26 1 16" color="S"/>
+  <box at="19.5 54.5 39" size="26 1 16" color="B"/>
+  <!-- Ochre stripe across the sail for visual warmth -->
+  <box at="19.5 55.5 45" size="26 1 4" color="L" on="S"/>
+
+  <!-- Fore stay from masthead to bowsprit (high above deck) -->
+  <line at="19 53 60" to="19 92 34" r="0" color="N" on="B"/>
+
+  <color symbol="H" value="7a4928" name="scafo"/>
+  <color symbol="W" value="4a2a14" name="fasciame scuro"/>
+  <color symbol="D" value="c29b61" name="ponte"/>
+  <color symbol="P" value="8c673a" name="assi del ponte"/>
+  <color symbol="R" value="4a2a14" name="parapetto"/>
+  <color symbol="G" value="9e7744" name="imbarco" area="boarding"/>
+  <color symbol="T" value="5c3419" name="timone" area="helm"/>
+  <color symbol="O" value="633c1c" name="fondo della stiva" area="hold"/>
+  <color symbol="M" value="6b4222" name="albero"/>
+  <color symbol="N" value="4a2e16" name="pennone"/>
+  <color symbol="S" value="f2ead8" name="vela"/>
+  <color symbol="L" value="c85a32" name="fascia della vela"/>
+  <color symbol="C" value="8a5a32" name="cassa da pesca"/>
+  <color symbol="A" value="7a9ab8" name="pescato"/>
+  <color symbol="F" value="ffcc55" glow="True" name="lanterna di poppa"/>
+  <color symbol="I" hidden="True" name="dentro lo scafo"/>
+  <color symbol="s" hidden="True" name="vela ammainata"/>
+
+  <action name="furl" label="Ammaina le vele">
+    <all in="S" out="s"/>
+    <all in="L" out="s"/>
+  </action>
+  <action name="hoist" label="Issa le vele">
+    <all in="s" out="S"/>
+  </action>
+</sequence>

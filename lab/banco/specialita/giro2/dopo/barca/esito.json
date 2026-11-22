@@ -1,0 +1,140 @@
+{
+ "giro": "giro2",
+ "braccio": "dopo",
+ "concetto": "barca",
+ "classe": "vessel",
+ "taglia": "large",
+ "specialita": "coachbuilder",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-4-argon",
+   "secondi": 22,
+   "prompt": 6228,
+   "cached": 0,
+   "output": 2362,
+   "thoughts": 0,
+   "usd": 0.036076,
+   "sistema": 19082,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 2,
+   "prompt": 3044,
+   "cached": 0,
+   "output": 83,
+   "thoughts": 0,
+   "usd": 0.005313,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-4-argon",
+   "secondi": 20,
+   "prompt": 9785,
+   "cached": 0,
+   "output": 2379,
+   "thoughts": 0,
+   "usd": 0.04336,
+   "sistema": 19082,
+   "esito": "passa"
+  },
+  {
+   "n": 4,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 3046,
+   "cached": 1269,
+   "output": 118,
+   "thoughts": 266,
+   "usd": 0.006311850000000001,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 22103,
+  "cached": 1269,
+  "output": 4942,
+  "thoughts": 266
+ },
+ "usd": 0.09106,
+ "usdGemini": 0.09106,
+ "secondi": 49,
+ "sistema": {
+  "caratteri": 19082,
+  "ruolo": 9839,
+  "sezione": 2822,
+  "esempi": [
+   "vessel"
+  ]
+ },
+ "registro": {
+  "coachbuilder": 2
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 16281,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "furl",
+   "hoist"
+  ],
+  "import": [],
+  "nascoste": 2,
+  "traslucide": [],
+  "luci": 1,
+  "parti": [],
+  "aree": [
+   "hold",
+   "boarding",
+   "helm"
+  ],
+  "colori": 15,
+  "semi": 0
+ }
+}

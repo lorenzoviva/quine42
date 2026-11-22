@@ -6452,7 +6452,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — su un clone di `orichalcum`: un oggetto preso dice cosa farne, una ricetta si scopre.
 - Quando è fatto: il rapporto, la regola nel Narratore e nel validatore coi test offline, la marcatura degli esistenti; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T490 · Integrare T473 nel base (conflitto in lab/3d/catalog.ts) — `da fare`
+### T490 · Integrare T473 nel base (conflitto in lab/3d/catalog.ts) — `fatto` (`f182490a`)
 - Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
 - Step: 44
 - Contesto: `integra T473` (la prova pagata delle specialità, S7 di T458) si è fermato su un solo conflitto, in `lab/3d/catalog.ts`: nel frattempo T471 è entrato nel base aggiungendo il gruppo delle parti del seme (`parts`) negli stessi punti in cui T473 aggiunge il gruppo della prova delle specialità (`specialties`). Nasce da T473 e T471: `dossier T473`, `dossier T471`.
@@ -6460,3 +6460,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: typecheck e suite intera coi turni.
 - Browser: no (T471 e T473 già verificati nel browser).
 - Quando è fatto: commit di merge su `task/T490`; poi l'orchestratore integra T490 e `integra T473` toglie worktree e branch di T473. Sicurezza: nessuna superficie nuova.
+- Esito: integrato `task/T473` su `task/T490` (commit `f182490a`), risolto il conflitto in `lab/3d/catalog.ts` mantenendo le aggiunte di T471 e T473, verificati i file fusi automaticamente, `typecheck` e `npm test` (283/283 file, 3827 passati, 1 saltato) verdi; kernel invariato (0.10.18), nessun ADR; sicurezza: nessuna superficie nuova.

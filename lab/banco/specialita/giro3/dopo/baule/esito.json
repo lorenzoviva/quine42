@@ -1,0 +1,149 @@
+{
+ "giro": "giro3",
+ "braccio": "dopo",
+ "concetto": "baule",
+ "classe": "furniture",
+ "specialita": "joiner",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  5
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "non tocca terra: il voxel più basso è a z=4, deve appoggiarsi a z=0"
+   ]
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 5972,
+   "cached": 0,
+   "output": 733,
+   "thoughts": 2722,
+   "usd": 0.0066755,
+   "sistema": 19122,
+   "esito": "scartato",
+   "motivo": "non tocca terra: il voxel più basso è a z=4, deve appoggiarsi a z=0"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 2,
+   "prompt": 6751,
+   "cached": 4074,
+   "output": 735,
+   "thoughts": 122,
+   "usd": 0.0020566,
+   "sistema": 19122,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 2760,
+   "cached": 1004,
+   "output": 50,
+   "thoughts": 188,
+   "usd": 0.004926600000000001,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 3,
+   "prompt": 5972,
+   "cached": 2035,
+   "output": 754,
+   "thoughts": 126,
+   "usd": 0.002355125,
+   "sistema": 19122,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2762,
+   "cached": 1005,
+   "output": 98,
+   "thoughts": 317,
+   "usd": 0.00652125,
+   "sistema": 6179,
+   "voto": 5
+  }
+ ],
+ "token": {
+  "prompt": 24217,
+  "cached": 8118,
+  "output": 2370,
+  "thoughts": 3475
+ },
+ "usd": 0.02254,
+ "usdGemini": 0.02254,
+ "secondi": 22,
+ "sistema": {
+  "caratteri": 19122,
+  "ruolo": 9839,
+  "sezione": 2285,
+  "esempi": [
+   "furniture"
+  ]
+ },
+ "registro": {
+  "joiner": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 1750,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 0,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 4,
+  "semi": 0
+ }
+}

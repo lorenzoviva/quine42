@@ -1,0 +1,165 @@
+{
+ "cacheOpus": true,
+ "giro": "cache-opus",
+ "usd": 0.029352,
+ "usdOpenRouter": 0.029352,
+ "registro": 0.029352,
+ "chiamate": [
+  {
+   "passo": "A, Capomastro",
+   "specialita": "mason",
+   "risposta": "pronto",
+   "secondi": 2,
+   "parti": {
+    "ruolo": 9839,
+    "sezione": 2458,
+    "esempi": 1
+   },
+   "prompt": 9197,
+   "letti": 9163,
+   "scritti": 0,
+   "usd": 0.0020686,
+   "registrata": true,
+   "usage": {
+    "prompt_tokens": 9197,
+    "completion_tokens": 5,
+    "total_tokens": 9202,
+    "cost": 0.0020686,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 9163,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0020686,
+     "upstream_inference_prompt_cost": 0.0019686,
+     "upstream_inference_completions_cost": 0.0001
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   }
+  },
+  {
+   "passo": "B, Capomastro di nuovo",
+   "specialita": "mason",
+   "risposta": "pronto",
+   "secondi": 2,
+   "parti": {
+    "ruolo": 9839,
+    "sezione": 2458,
+    "esempi": 1
+   },
+   "prompt": 9197,
+   "letti": 9163,
+   "scritti": 0,
+   "usd": 0.0020686,
+   "registrata": true,
+   "usage": {
+    "prompt_tokens": 9197,
+    "completion_tokens": 5,
+    "total_tokens": 9202,
+    "cost": 0.0020686,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 9163,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0020686,
+     "upstream_inference_prompt_cost": 0.0019686,
+     "upstream_inference_completions_cost": 0.0001
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   }
+  },
+  {
+   "passo": "C, Paesaggista",
+   "specialita": "landscaper",
+   "risposta": "pronto",
+   "secondi": 2,
+   "parti": {
+    "ruolo": 9839,
+    "sezione": 2039,
+    "esempi": 1
+   },
+   "prompt": 7501,
+   "letti": 5384,
+   "scritti": 2087,
+   "usd": 0.0117318,
+   "registrata": true,
+   "usage": {
+    "prompt_tokens": 7501,
+    "completion_tokens": 5,
+    "total_tokens": 7506,
+    "cost": 0.0117318,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 5384,
+     "cache_write_tokens": 2087,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0117318,
+     "upstream_inference_prompt_cost": 0.0116318,
+     "upstream_inference_completions_cost": 0.0001
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   }
+  },
+  {
+   "passo": "D, Mobiliere",
+   "specialita": "joiner",
+   "risposta": "pronto",
+   "secondi": 1,
+   "parti": {
+    "ruolo": 9839,
+    "sezione": 2285,
+    "esempi": 1
+   },
+   "prompt": 7852,
+   "letti": 5384,
+   "scritti": 2434,
+   "usd": 0.0134828,
+   "registrata": true,
+   "usage": {
+    "prompt_tokens": 7852,
+    "completion_tokens": 5,
+    "total_tokens": 7857,
+    "cost": 0.0134828,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 5384,
+     "cache_write_tokens": 2434,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.0134828,
+     "upstream_inference_prompt_cost": 0.0133828,
+     "upstream_inference_completions_cost": 0.0001
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 0,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   }
+  }
+ ]
+}

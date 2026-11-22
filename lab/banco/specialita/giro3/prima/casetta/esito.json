@@ -1,0 +1,97 @@
+{
+ "giro": "giro3",
+ "braccio": "prima",
+ "concetto": "casetta",
+ "classe": "building",
+ "specialita": "mason",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 7,
+ "voti": [
+  7
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-4-argon",
+   "secondi": 20,
+   "prompt": 8351,
+   "cached": 0,
+   "output": 2163,
+   "thoughts": 0,
+   "usd": 0.038332,
+   "sistema": 26288,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2756,
+   "cached": 1000,
+   "output": 100,
+   "thoughts": 276,
+   "usd": 0.006168,
+   "sistema": 6179,
+   "voto": 7
+  }
+ ],
+ "token": {
+  "prompt": 11107,
+  "cached": 1000,
+  "output": 2263,
+  "thoughts": 276
+ },
+ "usd": 0.0445,
+ "usdGemini": 0.0445,
+ "secondi": 25,
+ "sistema": {
+  "caratteri": 26288,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": [
+   "building"
+  ]
+ },
+ "registro": {
+  "mason": 1
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 12572,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 1,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 6,
+  "traslucide": [],
+  "luci": 1,
+  "parti": [],
+  "aree": [],
+  "colori": 14,
+  "semi": 0.103
+ }
+}

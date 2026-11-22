@@ -1,0 +1,105 @@
+{
+ "giro": "giro3",
+ "braccio": "dopo",
+ "concetto": "rocca",
+ "classe": "structure",
+ "taglia": "large",
+ "specialita": "architect",
+ "modello": "gemini-4-argon",
+ "fatto": false,
+ "voti": [],
+ "cantina": false,
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 4,
+   "motivi": [
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 24 voxel (1,50 caselle), una stanza ne vuole almeno 28 (",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: dalla porta non si scende in cantina",
+    "taglia Grande, seme 1: piani: 1 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 15 voxel (0,94 caselle), una stanza ne vuole almeno 28 ("
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "piano",
+   "modello": "gemini-4-argon",
+   "secondi": 23,
+   "prompt": 8775,
+   "cached": 0,
+   "output": 2161,
+   "thoughts": 0,
+   "usd": 0.03916,
+   "sistema": 23933,
+   "esito": "piano"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "intero",
+   "modello": "gemini-4-argon",
+   "secondi": 43,
+   "prompt": 12232,
+   "cached": 0,
+   "output": 4975,
+   "thoughts": 0,
+   "usd": 0.074214,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 24 voxel (1,50 caselle), una stanza ne vuole almeno 28 ("
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 45,
+   "prompt": 26473,
+   "cached": 0,
+   "output": 4947,
+   "thoughts": 0,
+   "usd": 0.102416,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); cantina: dalla porta non si scende in cantina"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 35,
+   "prompt": 26307,
+   "cached": 0,
+   "output": 4844,
+   "thoughts": 0,
+   "usd": 0.101054,
+   "sistema": 23933,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 1 (serve ≥ 2); stanza: la più grande in cui si sta in piedi ha il lato di 15 voxel (0,94 caselle), una stanza ne vuole almeno 28 ("
+  }
+ ],
+ "token": {
+  "prompt": 73787,
+  "cached": 0,
+  "output": 16927,
+  "thoughts": 0
+ },
+ "usd": 0.31684,
+ "usdGemini": 0.31684,
+ "secondi": 151,
+ "sistema": {
+  "caratteri": 23933,
+  "ruolo": 20060,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "architect": 4
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

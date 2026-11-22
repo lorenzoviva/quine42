@@ -1,0 +1,312 @@
+# model.sculpt · revisione · gemini-4-argon · 25 s · 10217 token d'ingresso (0 in cache), 2116 d'uscita, 0 di ragionamento · $0.04 · 1 immagini
+
+## Richiesta
+
+Sculpt: Casetta del pastore
+What it looks like: una casetta di pietra a un piano col tetto di paglia, la porta davanti e una finestra
+Class: building · box 50 × 50 × 50 voxels · at least 30 tall
+
+Your program:
+<sequence values="BXQIWNDnOURrGHhkmP" size="25 25 25" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume casa"/>
+  <color symbol="Q" hidden="True" name="prisma tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" hidden="True" name="porta aperta"/>
+  <color symbol="P" value="5a534a" name="zoccolo pietra"/>
+  <color symbol="D" value="8c8478" name="pietra chiara"/>
+  <color symbol="N" value="3d2817" name="legno scuro travi"/>
+  <color symbol="n" value="6e4726" name="legno medio"/>
+  <color symbol="O" value="8f582d" name="porta asse"/>
+  <color symbol="U" value="7cb8c9" alpha="0.45" name="vetro finestra"/>
+  <color symbol="R" value="d9a84e" name="paglia chiara"/>
+  <color symbol="r" value="8c6222" name="paglia bordo scuro"/>
+  <color symbol="G" value="5c7a3b" name="muschio verde"/>
+  <color symbol="H" value="24150b" name="ferramenta e segni"/>
+  <color symbol="h" hidden="True" name="misure possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+
+  <!-- Shuffle for seed variations -->
+  <box at="12 0 24" size="25 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- Seed drops to ground -->
+  <one in="X B" out="B X"/>
+
+  <!-- Rectangular plan: up to 17 along x, 13 along y, 10 tall -->
+  <all in="XB" out="*X" steps="8" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="9"/>
+
+  <!-- Seed-driven variation in width and depth -->
+  <box at="18 0 0" size="5 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/*" out="k/k"/>
+    <rule in="*/k" out="k/k"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="k*" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <box at="0 7 0" size="1 4 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <!-- Eaves and gable roof along y (slopes on x) -->
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **" symmetry="(x)"/>
+  <all in="R/B X/B" out="*/R */*" symmetry="(y)"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="8"/>
+  <!-- Two slopes erosion -->
+  <all in="*Q B*" out="*B **" symmetry="(x)"/>
+
+  <!-- Front and back gable (north and south) in wood -->
+  <all in="R Q" out="* n" symmetry="(y)"/>
+  <all in="n Q" out="* n" symmetry="(y)"/>
+
+  <!-- Hollow out the interior so the door leads inside -->
+  <all in="XXX/XXX/XXX XXX/XXX/XXX" out="***/*I*/*** ***/*I*/***"/>
+  <all in="X" out="D"/>
+  <all in="I" out="B"/>
+  <all in="Q" out="R"/>
+
+  <!-- Stone chimney on one side of the roof -->
+  <one in="R D D" out="D D D" steps="1"/>
+  <all in="B R D D" out="D * * *" steps="1"/>
+  <all in="B D R" out="D * *" steps="1"/>
+  <all in="B D D" out="P * *" steps="1"/>
+
+  <!-- Dark stone plinth at the base of the walls -->
+  <all in="D D" out="* P" steps="1"/>
+  <all in="D P" out="P *" steps="1"/>
+
+  <!-- Sturdy wooden beams on the four outer corners -->
+  <all in="BB/BD" out="**/*N"/>
+  <all in="BB/BP" out="**/*N"/>
+
+  <!-- Front facade (large y, south): DOOR through the wall, 8 voxels tall (16 after scale 2) + stone step -->
+  <one steps="1" symmetry="()"
+       in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB PPPP/BBBB PPPP/BBBB"
+       out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/**** NOON/**** NOON/**** NOON/*PP*"/>
+
+  <!-- Front window with wooden frame beside the door -->
+  <one steps="1" symmetry="()"
+       in="DDD/BBB DDD/BBB DDD/BBB"
+       out="NNN/*** NUN/*** NNN/***"/>
+
+  <!-- Side window -->
+  <one steps="1" symmetry="(x)"
+       in="D/B D/B D/B"
+       out="N/* U/* N/*"/>
+
+  <!-- Fine resolution: scale x2 to reach 50x50x50 box -->
+  <map scale="2 2 2" values="BWPDNnOURrGHd">
+    <rule in="P" out="PP/PP PP/PP"/>
+    <rule in="D" out="DD/DD DD/DD"/>
+    <rule in="N" out="NN/NN NN/NN"/>
+    <rule in="n" out="nn/nn nn/nn"/>
+    <rule in="O" out="OO/OO OO/OO"/>
+    <rule in="U" out="UU/UU UU/UU"/>
+    <rule in="R" out="RR/RR RR/RR"/>
+    <rule in="r" out="rr/rr rr/rr"/>
+    <rule in="G" out="GG/GG GG/GG"/>
+    <rule in="H" out="HH/HH HH/HH"/>
+    <color symbol="d" value="5a534a" name="corso pietra"/>
+
+    <!-- Roof eaves and ridge clearly marked in darker thatch -->
+    <all in="RB" out="r*" steps="1"/>
+    <all in="R/B" out="r/*" steps="1"/>
+    <all in="B R R" out="* r *" steps="1"/>
+
+    <!-- Clean horizontal stone courses and vertical joints -->
+    <all in="DD DD" out="dd **" steps="1"/>
+    <prl in="DD/DD" out="*d/**" p="0.18" steps="1"/>
+
+    <!-- Gable timber plank lines -->
+    <all in="nn nn" out="NN **" steps="1"/>
+
+    <!-- Door details: vertical plank separation and iron latch -->
+    <all in="OOOO" out="*H*H" symmetry="()" steps="1"/>
+    <one in="HO" out="HH" symmetry="()" steps="1"/>
+
+    <!-- Window cross frame -->
+    <all in="UU" out="UN" symmetry="()" steps="1"/>
+    <all in="U U" out="N *" symmetry="()" steps="1"/>
+
+    <!-- Moss patch at the base -->
+    <prl in="B/P" out="*/G" p="0.25" steps="1"/>
+  </map>
+
+  <action name="open" label="Apri la porta">
+    <all in="O" out="W"/>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all in="W" out="O"/>
+  </action>
+</sequence>
+The attached image shows it from four sides. The Artist gave it 6/10.
+Problems: Mancano la porta e la finestra specificate; I dettagli della pietra sono pixel dispersi invece di linee pulite; Il tetto ha un colore marrone scuro uniforme anziché l'aspetto della paglia
+Advice: Aggiungi una porta di legno e una finestra ben definite; Semplifica la trama dei muri di pietra usando pochi tratti netti; Usa un colore giallo ocra o paglia chiaro per il tetto
+Improve it: answer with the whole program.
+
+## Risposta
+
+<sequence values="BXQIWNDnOURrGHhkmP" size="25 25 25" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume casa"/>
+  <color symbol="Q" hidden="True" name="prisma tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" hidden="True" name="porta aperta"/>
+  <color symbol="P" value="5c564e" name="zoccolo pietra scura"/>
+  <color symbol="D" value="a8a096" name="muro pietra chiara"/>
+  <color symbol="N" value="3b2414" name="legno scuro travi"/>
+  <color symbol="n" value="6e4726" name="legno timpano"/>
+  <color symbol="O" value="8f582d" name="porta di legno"/>
+  <color symbol="U" value="7cc4d9" alpha="0.45" name="vetro finestra"/>
+  <color symbol="R" value="e8be5a" name="paglia giallo ocra"/>
+  <color symbol="r" value="b88c32" name="paglia bordo"/>
+  <color symbol="G" value="5c7a3b" name="muschio verde"/>
+  <color symbol="H" value="21130a" name="ferramenta e segni"/>
+  <color symbol="h" hidden="True" name="misure possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+
+  <!-- Shuffle for seed variations -->
+  <box at="12 0 24" size="25 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- Seed drops to ground -->
+  <one in="X B" out="B X"/>
+
+  <!-- Rectangular plan: 17 along x, 13 along y, 10 tall -->
+  <all in="XB" out="*X" steps="8" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="9"/>
+
+  <!-- Seed-driven variation in width and depth -->
+  <box at="19 0 0" size="4 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/*" out="k/k"/>
+    <rule in="*/k" out="k/k"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="k*" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <box at="0 6 0" size="1 3 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <!-- Eaves and gable roof along x (slopes on y, front and back) -->
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **" symmetry="(x)"/>
+  <all in="R/B X/B" out="*/R */*" symmetry="(y)"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="7"/>
+  <!-- Two slopes erosion -->
+  <all in="*Q B*" out="*B **" symmetry="(x)"/>
+
+  <!-- Front and back gable (north and south) in wood -->
+  <all in="R Q" out="* n" symmetry="(y)"/>
+  <all in="n Q" out="* n" symmetry="(y)"/>
+
+  <!-- Stone walls and roof -->
+  <all in="X" out="D"/>
+  <all in="Q" out="R"/>
+
+  <!-- Sturdy wooden beams on the four outer corners -->
+  <all in="BB/BD" out="**/*N"/>
+
+  <!-- Front facade (large y, south): prominent wooden DOOR (6 tall = 12 voxels) and frame -->
+  <one steps="1" symmetry="()"
+       in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB"
+       out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/**** NOON/**** NOON/*PP*"/>
+
+  <!-- Front window with wooden frame beside the door on the south facade -->
+  <one steps="1" symmetry="()"
+       in="DDD/BBB DDD/BBB DDD/BBB DDD/BBB"
+       out="NNN/*** NUN/*** NUN/*** NNN/***"/>
+
+  <!-- Side window (east or west) -->
+  <one steps="1" symmetry="(x)"
+       in="BBB/DDD BBB/DDD BBB/DDD"
+       out="***/NNN ***/NUN ***/NNN"/>
+
+  <!-- Stone chimney rising on one side of the roof -->
+  <one in="B R R D" out="P P P *" steps="1"/>
+  <all in="B P P" out="P * *" steps="2"/>
+
+  <!-- Dark stone plinth only at the very bottom row (z=0) -->
+  <box at="0 0 0" size="25 25 1" color="h" on="D"/>
+  <all in="h" out="P"/>
+
+  <!-- Hollow out the interior behind the door -->
+  <all in="DDD/DDD/DDD DDD/DDD/DDD" out="***/*I*/*** ***/*I*/***"/>
+  <all in="O/I" out="O/B" symmetry="()"/>
+  <all in="I" out="B"/>
+
+  <!-- Fine resolution: scale x2 to reach 50x50x50 box -->
+  <map scale="2 2 2" values="BWPDNnOURrGHd">
+    <rule in="P" out="PP/PP PP/PP"/>
+    <rule in="D" out="DD/DD DD/DD"/>
+    <rule in="N" out="NN/NN NN/NN"/>
+    <rule in="n" out="nn/nn nn/nn"/>
+    <rule in="O" out="OO/OO OO/OO"/>
+    <rule in="U" out="UU/UU UU/UU"/>
+    <rule in="R" out="RR/RR RR/RR"/>
+    <rule in="r" out="rr/rr rr/rr"/>
+    <rule in="G" out="GG/GG GG/GG"/>
+    <rule in="H" out="HH/HH HH/HH"/>
+    <color symbol="d" value="787066" name="corso pietra"/>
+
+    <!-- Roof eaves and steps in warm golden-brown thatch, keeping the top bright straw -->
+    <all in="R B" out="r *" steps="1"/>
+    <all in="B R/B R" out="* */* r" steps="1"/>
+
+    <!-- Clean horizontal stone courses (few neat lines, no scattered noise) -->
+    <all in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB" out="****/**** dddd/**** ****/**** ****/****" steps="4"/>
+    <all in="DDDD/BBBB DDDD/BBBB" out="***d/**** ***d/****" steps="3"/>
+
+    <!-- Gable vertical timber plank lines -->
+    <all in="nnnn/BBBB" out="*N**/****" symmetry="(y)" steps="4"/>
+
+    <!-- Door details: clean vertical plank line and dark iron handle -->
+    <all in="OOOO/BBBB" out="*H**/****" symmetry="()" steps="6"/>
+    <one in="OO/BB OO/BB" out="*H/** *H/**" symmetry="()" steps="1"/>
+
+    <!-- Window cross frame -->
+    <all in="UU" out="UN" symmetry="()" steps="1"/>
+    <all in="U U" out="N *" symmetry="()" steps="1"/>
+  </map>
+
+  <action name="open" label="Apri la porta">
+    <all in="O" out="W"/>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all in="W" out="O"/>
+  </action>
+</sequence>

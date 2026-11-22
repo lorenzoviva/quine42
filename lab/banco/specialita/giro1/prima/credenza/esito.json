@@ -1,0 +1,82 @@
+{
+ "giro": "giro1",
+ "braccio": "prima",
+ "concetto": "credenza",
+ "classe": "furniture",
+ "specialita": "actions",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voti": [],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.action",
+   "tipo": "azione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 5,
+   "prompt": 7679,
+   "cached": 4076,
+   "output": 51,
+   "thoughts": 1506,
+   "usd": 0.0033381500000000002,
+   "sistema": 20749,
+   "esito": "passa"
+  }
+ ],
+ "token": {
+  "prompt": 7679,
+  "cached": 4076,
+  "output": 51,
+  "thoughts": 1506
+ },
+ "usd": 0.00334,
+ "usdGemini": 0.00334,
+ "secondi": 5,
+ "sistema": {
+  "caratteri": 20749,
+  "ruolo": 16876,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "actions": 1
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 2239,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open"
+  ],
+  "import": [],
+  "nascoste": 8,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 5,
+  "semi": 0.379,
+  "azioneCambia": 143,
+  "azioneFinisce": true
+ }
+}

@@ -1,0 +1,154 @@
+{
+ "giro": "giro1",
+ "braccio": "dopo",
+ "concetto": "casetta",
+ "classe": "building",
+ "specialita": "mason",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "troppo basso: alto 20 voxel, la sua classe chiede almeno 30 (le cose simili hanno le stesse proporzioni)"
+   ]
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-4-argon",
+   "secondi": 22,
+   "prompt": 6920,
+   "cached": 0,
+   "output": 2121,
+   "thoughts": 0,
+   "usd": 0.03505,
+   "sistema": 21711,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 20 voxel, la sua classe chiede almeno 30 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 20,
+   "prompt": 9087,
+   "cached": 0,
+   "output": 2067,
+   "thoughts": 0,
+   "usd": 0.038844,
+   "sistema": 21711,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 5,
+   "prompt": 2773,
+   "cached": 0,
+   "output": 79,
+   "thoughts": 412,
+   "usd": 0.0085785,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "revisione",
+   "modello": "gemini-4-argon",
+   "secondi": 20,
+   "prompt": 10185,
+   "cached": 0,
+   "output": 2221,
+   "thoughts": 0,
+   "usd": 0.04258,
+   "sistema": 21711,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 5,
+   "prompt": 2737,
+   "cached": 0,
+   "output": 79,
+   "thoughts": 526,
+   "usd": 0.0095505,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 31702,
+  "cached": 0,
+  "output": 6567,
+  "thoughts": 938
+ },
+ "usd": 0.1346,
+ "usdGemini": 0.1346,
+ "secondi": 73,
+ "sistema": {
+  "caratteri": 21711,
+  "ruolo": 9839,
+  "sezione": 2458,
+  "esempi": [
+   "building"
+  ]
+ },
+ "registro": {
+  "mason": 3
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 27256,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 1,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open",
+   "close"
+  ],
+  "import": [],
+  "nascoste": 6,
+  "traslucide": [
+   "U"
+  ],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 12,
+  "semi": 0.26
+ }
+}

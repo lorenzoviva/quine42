@@ -1,0 +1,5 @@
+[sculptor] propone: «Castagno» (albero, Paesaggista, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Castagno»: riga 17, <rule>: "in" è un solo simbolo (una lettera o # e un numero)
+[kernel → sculptor] scarta: «Castagno»: riga 20, <rule>: "in" è un solo simbolo (una lettera o # e un numero)
+[kernel → sculptor] scarta: «Castagno»: riga 16, <rule>: "in" è un solo simbolo (una lettera o # e un numero)
+[artist → sculptor] obietta: «Castagno»: 6/10 — Il tronco è sproporzionatamente sottile per un castagno.
