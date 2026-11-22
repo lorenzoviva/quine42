@@ -183,16 +183,16 @@ export class InventoryPanel {
     } else if (this.tab.startsWith('ui:')) {
       this.renderPanel(side, this.tab.slice(3));
     } else if (this.tab === 'crea') {
-      const { available, all } = k.recipes();
-      const sorted = [...all].sort((a, b) => Number(available.has(b.id)) - Number(available.has(a.id)));
+      // What what one carries opens (T489, ADR-0250): the recipes of the things in the bag, with what is still missing; never the world's list.
+      const { available, opened } = k.recipes();
       side.append(
         el('div', { class: 'name' }, 'Ricette'),
         this.freeLine('Altro… cosa vuoi fabbricare con ciò che porti?', 'Il Concilio valuta…', async (text) => {
           const r = await k.freeCraft(text);
           return r.story;
         }),
-        ...(sorted.length
-          ? sorted.map((r) => {
+        ...(opened.length
+          ? opened.map(({ recipe: r, missing }) => {
               const ok = available.has(r.id);
               const btn = el('button', { class: ok ? 'primary' : '' }, 'Crea');
               if (!ok) btn.setAttribute('disabled', '');
@@ -202,9 +202,10 @@ export class InventoryPanel {
               };
               const parts = r.inputs.map((i) => `${k.itemInfo(i.item).name} ×${i.count}`).join(' + ');
               const tools = r.tools?.length ? ` (con ${r.tools.map((t) => k.itemInfo(t).name).join(', ')})` : '';
-              return el('div', { class: `recipe${ok ? ' ok' : ''}` }, el('div', {}, el('b', {}, k.itemInfo(r.output.item).name), r.output.count > 1 ? ` ×${r.output.count}` : ''), el('div', { class: 'parts' }, parts + tools), btn);
+              const lacks = missing.length ? ` — ti manca: ${missing.map((m) => `${k.itemInfo(m.item).name}${m.count > 1 ? ` ×${m.count}` : ''}`).join(', ')}` : '';
+              return el('div', { class: `recipe${ok ? ' ok' : ''}` }, el('div', {}, el('b', {}, k.itemInfo(r.output.item).name), r.output.count > 1 ? ` ×${r.output.count}` : ''), el('div', { class: 'parts' }, parts + tools + lacks), btn);
             })
-          : [el('div', { class: 'empty' }, 'Nessuna ricetta conosciuta.')]),
+          : [el('div', { class: 'empty' }, 'Niente di ciò che porti sembra servire a fare qualcosa. Raccogli, apri, guarda: le cose dicono a cosa servono.')]),
       );
     } else {
       const s = inv.slots[this.sel];
@@ -233,6 +234,10 @@ export class InventoryPanel {
         const thing = isThing(s.item);
         if (info.spec.equippable) btn(inv.equipped === this.sel ? 'Riponi' : thing ? 'Solleva' : 'Impugna', () => k.equipSlot(this.sel), 'primary');
         for (const a of def?.actions ?? []) if (a.effects?.length) btn(a.label, () => k.itemAct(this.sel, a.id), 'primary');
+        // What it makes (T489): a recipe it opens that one can make now, from where it is held.
+        const { available } = k.recipes();
+        const ready = k.content.recipes.filter((x) => available.has(x.id) && (x.inputs.some((i) => i.item === s.item) || (x.tools ?? []).includes(s.item)));
+        for (const r of ready.filter((x, i) => ready.findIndex((y) => y.output.item === x.output.item) === i).slice(0, 2)) btn(`Fai ${k.itemInfo(r.output.item).name}`, () => k.craft(r.id), 'primary');
         btn(thing ? 'Posa davanti a te' : 'Getta', () => k.dropSlot(this.sel));
         if (s.count > 1) btn('Getta 1', () => k.dropSlot(this.sel, 1));
         const e = info.effects ?? {};
@@ -243,6 +248,8 @@ export class InventoryPanel {
           el('div', { class: 'descr' }, info.description),
           el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${thing ? ' · si porta sopra la testa (F per posare)' : info.spec.equippable ? ' · si impugna (F)' : ''}${zone ? ` · si indossa ${ZONE_WORDS[zone]}${worn.has(this.sel) ? ' (indossato)' : ''}` : ''}`),
           effects ? el('div', { class: 'control' }, effects) : '',
+          // What one does with it (T489, ADR-0250), in the world's words.
+          ...k.itemUseWords(s.item).map((line) => el('div', { class: 'use' }, line)),
           info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
           actions,
           this.freeLine(`Altro… cosa fai con ${info.name.toLowerCase()}?`, 'Il Concilio valuta…', (text) => k.freeItemAction(this.sel, text)),

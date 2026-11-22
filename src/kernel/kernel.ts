@@ -30,7 +30,7 @@ import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, isl
 import { STAMP_SHAPES } from './stamps';
 import { repairProgram, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
-import { dayPhase, declaredFor, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
+import { dayPhase, declaredFor, housePhases, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
 import { Npc, type NpcHost } from './npc';
 import { buildGraph, GRAPH_FILE, graphHash, mergeChunks, chunksOf, readGraph, slug as nodeSlug, type GraphChunk, type WorldGraph } from './graph';
 import { situation as buildSituation, type PlayerSpot, type Situation } from './situation';
@@ -78,7 +78,8 @@ import { councilSession, inventRune, judgeAction, judgeCraft, judgeDeath, nameSp
 import { canonWithRune, MAX_MAGIC_RUNES, validateNewRune } from './magic';
 import { cleanPanel, designMechanic } from './agents/mechanics';
 import { BENCH, cleanCases, runCase, textKey, type BenchEntry, type BenchRun, type BenchScene, type BenchShown } from './bench';
-import { assemblePack, defineItems, itemPack, toItemDef, type Identity } from './agents/content';
+import { assemblePack, defineItems, itemPack, type Identity, type Pack } from './agents/content';
+import { markedPacks, useWords, usesOf, type DeclaredUse, type UseWorld } from './itemuse';
 import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWorn, moveSlot, newInventory, putSlot, readInventory, removeItem, takeFromSlot, takeOff, thingOf, totalWeight, type Inventory } from './inventory';
 import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
 import { isWornZone, wornSections } from '../mj/worn';
@@ -89,7 +90,7 @@ import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validW
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
 import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
-import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
+import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, internalValues, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { draftStrata, programStrata, readStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow } from './strata';
@@ -178,6 +179,8 @@ const WATER_STEPS = 10;
 const MAX_DIG = 8;
 /** How long the facts of an individual the master declares may be (T376), in characters: a line of a player. */
 const DECLARED_FACTS = 600;
+/** The end of what the seed's `core.items` says of a thing it does not use (T489): then the kernel says what one does with it. */
+const USE_FALLBACK = 'Prova a impugnarlo (F) o a combinarlo.';
 /** What the fault `universe:kernel` says first (T312): the panel of the faults, which shows the head of a reason, says the world is read-only. */
 export const READ_ONLY_WORDS = 'sola lettura: niente si salva, il Concilio usa i modelli locali';
 
@@ -972,6 +975,7 @@ export class Kernel {
     k.ensureAtlas();
     k.npc.reviewSociety();
     k.npc.reviewPlots();
+    k.markDecorations();
     void k.seedGraphChunks();
     void k.reviewFourthWall();
     k.ai.limits = { text: k.config.ai.maxText };
@@ -5254,6 +5258,7 @@ export class Kernel {
     }
     this.bus.emit('item:picked', { item: pk.item });
     this.message(`Raccolto: ${info.name}${added > 1 ? ` ×${added}` : ''}`);
+    this.hintRecipes(pk.item);
     return true;
   }
 
@@ -5268,7 +5273,9 @@ export class Kernel {
     if (!custom && !def?.effects && this.wornZone(slot.item)) return this.wearSlot(index);
     if (!custom && def?.equippable && !def.effects && !['light', 'clothing'].includes(def.category)) return this.equipSlot(index);
     const { value, failed } = this.runModule(custom ?? 'core.items', custom ? 'on_use' : 'use', this.wandererEntity, slot.item);
-    if (!failed && typeof value === 'string' && value) this.message(value);
+    // What the seed's `core.items` says of a thing it does not use (T489): what one does with it, in the world's words.
+    const notSo = !custom && typeof value === 'string' && value.endsWith(USE_FALLBACK);
+    if (!failed && typeof value === 'string' && value) this.message(notSo ? `${this.itemInfo(slot.item).name}: ${this.itemUseWords(slot.item).join(' ')}` : value);
     this.bus.emit('item:used', { item: slot.item });
   }
 
@@ -7035,6 +7042,7 @@ export class Kernel {
     if (!moved) return this.message("L'inventario è pieno.", 'warn');
     takeFromSlot(box.inv, slot, moved);
     this.message(`Prendi: ${this.itemInfo(s.item).name}${moved > 1 ? ` ×${moved}` : ''}`);
+    this.hintRecipes(s.item);
   }
 
   putIntoContainer(id: Id, slot: number): void {
@@ -7100,11 +7108,39 @@ export class Kernel {
     return Math.floor(n) - left;
   }
 
-  /** Recipes the player can make now, and all known ones. */
-  recipes(): { available: Set<string>; all: Recipe[] } {
+  /**
+   * Recipes the player can make now, all those of the world, and those what they carry opens (T489, ADR-0250: the «Crea» tab shows only
+   * these, a thing held tells what it makes, never the list of the world): with what is still missing, ready first.
+   */
+  recipes(): { available: Set<string>; all: Recipe[]; opened: Array<{ recipe: Recipe; missing: Array<{ item: string; count: number }> }> } {
     const inv = this.inventory();
-    const ok = this.content.craftable((item) => countItem(inv, item));
-    return { available: new Set(ok.map((r) => r.id)), all: this.content.recipes };
+    const has = (item: string) => countItem(inv, item);
+    const ok = this.content.craftable(has);
+    const opened = this.content.recipes
+      .filter((r) => [...r.inputs.map((i) => i.item), ...(r.tools ?? [])].some((id) => has(id) > 0))
+      .map((recipe) => ({ recipe, missing: [...recipe.inputs.map((i) => ({ item: i.item, count: Math.max(0, i.count - has(i.item)) })), ...(recipe.tools ?? []).map((t) => ({ item: t, count: has(t) > 0 ? 0 : 1 }))].filter((x) => x.count > 0) }))
+      .sort((a, b) => a.missing.length - b.missing.length);
+    return { available: new Set(ok.map((r) => r.id)), all: this.content.recipes, opened };
+  }
+
+  /** Recipes already told to a wanderer (T489), `<wanderer>|<recipe>`: a thought comes once a session. */
+  private hinted = new Set<string>();
+
+  /**
+   * A thing just taken that completes a recipe (T489, ADR-0250): the wanderer thinks of what they could make with what they carry, once
+   * for each recipe, in the world's words («Con X e Y potresti fare Z.»), never a list.
+   */
+  private hintRecipes(item: string): void {
+    const inv = this.inventory();
+    const ready = this.content.craftable((x) => countItem(inv, x)).filter((r) => r.inputs.some((i) => i.item === item) || (r.tools ?? []).includes(item));
+    const me = this.wanderer().id;
+    for (const r of ready) {
+      if (this.hinted.has(`${me}|${r.id}`)) continue;
+      this.hinted.add(`${me}|${r.id}`);
+      const parts = [...new Set([...r.inputs.map((i) => i.item), ...(r.tools ?? [])])].map((id) => this.itemInfo(id).name);
+      this.message(`Con ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}` : parts[0]} potresti fare: ${this.itemInfo(r.output.item).name}.`, 'good');
+      return;
+    }
   }
 
   craft(recipeId: string): boolean {
@@ -7182,7 +7218,7 @@ export class Kernel {
       if (!id) return { ok: false, story: `${j.story} Ma non hai «${t}».` };
       if (!inputs.some((i) => i.item === id)) tools.push(id);
     }
-    const result = this.content.byName(j.result!) ?? (await this.introduceItems([j.result!], `fabbricato dal viandante: ${j.description ?? text}`, me))[0];
+    const result = this.content.byName(j.result!) ?? (await this.introduceItems([j.result!], `fabbricato dal viandante: ${j.description ?? text}`, me, { keep: true }))[0];
     if (!result) return { ok: false, story: `${j.story} (ma il Concilio non riesce a dire cosa ne esca)` };
     let id = `ricetta.${slug(result.name)}`;
     while (this.content.recipes.some((r) => r.id === id)) id += '-2';
@@ -7216,7 +7252,7 @@ export class Kernel {
     if (!verdict.possible || !verdict.result) return verdict.reason;
     let result = this.content.byName(verdict.result)?.id;
     if (!result) {
-      const defs = await this.introduceItems([verdict.result], `ottenuto combinando ${ia.name} e ${ib.name}: ${verdict.description ?? ''}`, me);
+      const defs = await this.introduceItems([verdict.result], `ottenuto combinando ${ia.name} e ${ib.name}: ${verdict.description ?? ''}`, me, { keep: true });
       result = defs[0]?.id;
       if (!result) return 'Il Concilio non riesce a dare forma al risultato.';
     }
@@ -7525,17 +7561,19 @@ export class Kernel {
         const identity: Identity | undefined = this.ecs.get(id, 'identity');
         const key = `${modId ?? this.ecs.get(id, 'pickup')?.item}|${identity?.name ?? ''}`;
         let text = this.examined.get(key);
+        // A thing lying there (T489): what one does with it, in the world's words, after what the Narrator sees, and to the Narrator too.
+        const pk = this.ecs.get(id, 'pickup');
+        const use = pk ? this.itemUseWords(pk.item) : [];
         if (!text) {
-          const pk = this.ecs.get(id, 'pickup');
           const what = pk ? this.itemInfo(pk.item) : { name: speaker, description: `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`, lore: m?.lore };
           try {
-            text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore }, this.worldFacts(), this.focusOn([what.name, modId && `kind:${nodeSlug(modId)}`], this.ecs.get(id, 'pos')));
+            text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore, ...(use.length ? { use: use.join(' ') } : {}) }, this.worldFacts(), this.focusOn([what.name, modId && `kind:${nodeSlug(modId)}`], this.ecs.get(id, 'pos')));
             this.examined.set(key, text);
           } catch (e) {
             text = `${what.description} (${(e as Error).message})`;
           }
         }
-        say(text);
+        say([text, ...use].filter(Boolean).join(' '));
         return;
       }
       default:
@@ -7779,7 +7817,7 @@ export class Kernel {
     };
     let v = validateEffects(j.possible ? j.effects : [], ectx);
     if (v.unknownItems.length) {
-      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`, me);
+      await this.introduceItems(v.unknownItems, `nati dall'azione «${text}» su ${sub.name}`, me, { keep: true });
       v = validateEffects(j.possible ? j.effects : [], ectx);
     }
     v.effects = v.effects.filter((e) => !(e.type === 'consume' && e.item === sub.key));
@@ -10977,7 +11015,7 @@ export class Kernel {
       itemInfo: (id) => k.itemInfo(id),
       itemSpec: (id) => k.itemSpec(id),
       wornZone: (item) => k.wornZone(item),
-      introduceItems: (names, context, chi) => k.introduceItems(names, context, chi),
+      introduceItems: (names, context, chi, opts) => k.introduceItems(names, context, chi, opts),
       noteMentions: (names, context) => k.noteMentions(names, context),
       get chunks() {
         return k.chunks;
@@ -11231,34 +11269,192 @@ export class Kernel {
     while (this.wanted.size > 24) this.wanted.delete(this.wanted.values().next().value!);
   }
 
-  /** New items, defined by the Narrator, written into the "citati" pack, committed. */
-  async introduceItems(names: string[], context: string, chi?: string): Promise<ItemDef[]> {
+  // --- What a thing is for (T489, ADR-0250) ----------------------------------------------------------------------------------------
+
+  /**
+   * What of the world gives a thing its uses (T489, ADR-0250): the recipes (with `extra`, those of a pack not written yet), the trades, the
+   * actions of the things, the terrains and the items that want something carried, the slots of the mechanics' panels, what can be cut,
+   * the materials of the building sites, what the missions wait for, whether the world counts the breath.
+   */
+  useWorld(extra: readonly Recipe[] = []): UseWorld {
+    const wants: Array<{ label: string; on: string; requires: string }> = [];
+    let cuttable = false;
+    for (const m of this.modules.values()) {
+      const man = m.manifest;
+      if (Array.isArray(man.tags) && man.tags.includes('tagliabile')) cuttable = true;
+      for (const a of man.actions ?? []) if (a?.requires && a.label) wants.push({ label: a.label, on: man.name, requires: a.requires });
+    }
+    for (const t of Object.values(this.palette)) for (const a of t.actions ?? []) if (a?.requires && a.effects?.length) wants.push({ label: a.label, on: t.name, requires: a.requires });
+    for (const d of this.content.items.values()) for (const a of d.actions ?? []) if (a?.requires && a.effects?.length) wants.push({ label: a.label, on: d.name, requires: a.requires });
+    const slots = this.uiPanels().flatMap(({ panel }) => panel.elements.filter((e) => e.type === 'slot' && e.accepts?.length).map((e) => ({ panel: panel.title, label: e.label ?? e.id ?? '', accepts: e.accepts! })));
+    const materials = new Set([...housePhases(undefined), ...this.ventures().flatMap((v) => v.phases ?? [])].flatMap((ph) => Object.keys(ph.materials ?? {})));
+    const awaited = new Map<string, string>();
+    for (const pl of readPlots(this.repo.working)) {
+      const q = pl.quest;
+      if (q && q.state !== 'completed' && q.goal.type === 'bring' && q.goal.item) awaited.set(normName(q.goal.item), q.goal.to ?? q.from);
+    }
+    return {
+      recipes: [...this.content.recipes, ...extra],
+      jobs: this.jobPrograms(),
+      wants,
+      slots,
+      scripted: (d) => !!d.module && (this.sandbox.has(d.module, 'on_use') || this.sandbox.has(d.module, 'on_action')),
+      cuttable,
+      materials,
+      awaited,
+      breath: !!this.config.nature?.oxygen,
+    };
+  }
+
+  /** What one does with a thing, in the world's words (T489): for the inventory and «Esamina»; nothing for a rune or a thing of the world. */
+  itemUseWords(item: string, world: UseWorld = this.useWorld()): string[] {
+    const def = this.content.items.get(item);
+    if (!def) return [];
+    const inv = this.inventory();
+    return useWords(usesOf(def, world), { name: (id) => this.itemInfo(id).name, has: (id) => countItem(inv, id) });
+  }
+
+  /** The places one wears things on in this world (T489): the zones of the body, and those the slots of the mechanics' panels accept. */
+  private wearPlaces(): string[] {
+    const places = new Set(internalValues('posti'));
+    return [...new Set(['head', 'torso', 'back', ...this.uiPanels().flatMap(({ panel }) => panel.elements.flatMap((e) => (e.type === 'slot' ? (e.accepts ?? []) : [])).filter((a) => places.has(a)))])];
+  }
+
+  /** Things of the world a recipe of the Narrator may name (T489): the last of those one makes things with, at most 40. */
+  private recipeNames(): string[] {
+    return [...this.content.items.values()].filter((d) => ['material', 'tool', 'food', 'drink', 'medicine', 'light'].includes(d.category)).map((d) => d.name).slice(-40);
+  }
+
+  /**
+   * The actions new things declare (T489), with the effects the validator lets through (an item named by `create_item` among the things of
+   * the world or of the pack): an action of words only is not a use, and goes.
+   */
+  private settleActions(items: ItemDef[]): void {
+    const own = new Map(items.map((d) => [normName(d.name), d.id]));
+    const ectx = { palette: this.palette, item: (n: string) => this.content.byName(n)?.id ?? own.get(normName(n)), module: () => undefined, loot: new Set(Object.keys(this.content.loot)) };
+    for (const d of items) {
+      if (!d.actions) continue;
+      const kept = d.actions.flatMap((a) => {
+        const effects = validateEffects(a.effects, ectx).effects;
+        return effects.some((e) => e.type !== 'message') ? [{ ...a, effects }] : [];
+      });
+      if (kept.length) d.actions = kept;
+      else delete d.actions;
+    }
+  }
+
+  /** What of a pack of new things has no use (the validator's rule, T489): by id, the reason. */
+  private refusedUses(pack: Pack & { declared?: Map<string, DeclaredUse> }): Map<string, string> {
+    this.settleActions(pack.items);
+    return this.validator.validateItemUses(pack.items, this.useWorld(pack.recipes), pack.declared);
+  }
+
+  /**
+   * What has no use after the Narrator had its reasons (T489): kept as a decoration (`keep`: what the wanderer made or was given), or out of
+   * the pack with the recipes and the loot it was in, until what is left holds (a thing whose only use was a recipe with one that went, goes
+   * too). The reasons of all that went.
+   */
+  private dropRefused(pack: Pack & { declared?: Map<string, DeclaredUse> }, refused: Map<string, string>, keep: boolean): Map<string, string> {
+    if (keep) {
+      for (const d of pack.items) if (refused.has(d.id)) d.decoration = true;
+      return new Map();
+    }
+    const gone = new Map<string, string>();
+    for (let more = refused; more.size; more = this.validator.validateItemUses(pack.items, this.useWorld(pack.recipes), pack.declared)) {
+      for (const [id, why] of more) gone.set(id, why);
+      pack.items = pack.items.filter((d) => !gone.has(d.id));
+      pack.recipes = pack.recipes.filter((r) => ![r.output.item, ...r.inputs.map((i) => i.item), ...(r.tools ?? [])].some((id) => gone.has(id)));
+      for (const [k, t] of Object.entries(pack.loot)) {
+        const entries = t.entries.filter((e) => !(e.item && gone.has(e.item)));
+        if (entries.length) pack.loot[k] = { ...t, entries };
+        else delete pack.loot[k];
+      }
+    }
+    return gone;
+  }
+
+  /**
+   * New items, defined by the Narrator, written into the "citati" pack, committed. Each with a use the world knows (T489, ADR-0250): what
+   * the validator sends back goes to the Narrator once more, with the reasons; what still has none is left out, or, `keep` (a thing the
+   * wanderer made, combined, brought out of an action, was given or entrusted), stays as a decoration.
+   */
+  async introduceItems(names: string[], context: string, chi?: string, opts: { keep?: boolean } = {}): Promise<ItemDef[]> {
     const fresh = [...new Set(names.map((n) => n.trim()).filter((n) => n.length >= 2 && !this.content.byName(n)))].slice(0, 6);
     if (!fresh.length) return names.map((n) => this.content.byName(n)).filter((d): d is ItemDef => !!d);
-    let raw;
+    const request = `definire ${fresh.join(', ')}: ${context}`;
+    const ask = { places: this.wearPlaces(), known: this.recipeNames() };
+    let raw: Awaited<ReturnType<typeof defineItems>>;
     try {
-      raw = await defineItems(this.council, fresh, context);
+      raw = await defineItems(this.council, fresh, context, ask);
     } catch (e) {
       this.council.say('narrator', 'errore', (e as Error).message);
-      this.noteShortfall({ request: `definire ${fresh.join(', ')}: ${context}`, who: chi, agent: 'narrator', task: 'content.define', outcome: 'error', reason: (e as Error).message });
+      this.noteShortfall({ request, who: chi, agent: 'narrator', task: 'content.define', outcome: 'error', reason: (e as Error).message });
       return [];
     }
-    const taken = new Set(this.content.items.keys());
-    const defs = raw.map((r) => toItemDef(r, taken)).filter((d): d is ItemDef => !!d);
+    // At most a few more than were asked: what a recipe makes, defined in the same answer; never a thing the world has already.
+    const asked = new Set(fresh.map(normName));
+    raw = raw.filter((r) => asked.has(normName(String(r?.name ?? ''))) || !this.content.byName(String(r?.name ?? ''))).slice(0, fresh.length + 3);
+    const known = new Map([...this.content.items.values()].map((d) => [normName(d.name), d.id]));
+    const assemble = () => assemblePack({ items: raw, recipes: [], loot: [] }, known, new Set(this.content.items.keys()));
+    let pack = assemble();
+    let refused = this.refusedUses(pack);
+    if (refused.size) {
+      const why = [...refused.values()].join('; ');
+      this.council.say('kernel', 'scarta', why, 'narrator', 'content.define');
+      const back = pack.items.filter((d) => refused.has(d.id)).map((d) => d.name);
+      const said = new Set(back.map(normName));
+      try {
+        const again = await defineItems(this.council, back, context, { ...ask, feedback: why });
+        raw = [...raw.filter((r) => !said.has(normName(String(r?.name ?? '')))), ...again.filter((r) => said.has(normName(String(r?.name ?? ''))) || !this.content.byName(String(r?.name ?? ''))).slice(0, back.length + 2)];
+        pack = assemble();
+        refused = this.refusedUses(pack);
+      } catch (e) {
+        this.council.say('narrator', 'errore', (e as Error).message);
+      }
+    }
+    if (refused.size && opts.keep) this.council.say('kernel', 'corregge', `da tenere: ${pack.items.filter((d) => refused.has(d.id)).map((d) => d.name).join(', ')}`, 'narrator', 'content.define');
+    const gone = refused.size ? this.dropRefused(pack, refused, !!opts.keep) : new Map<string, string>();
+    if (gone.size) this.noteShortfall({ request, who: chi, agent: 'narrator', task: 'content.define', outcome: 'invalid', reason: [...gone.values()].join('; ').slice(0, 400) });
+    const structural = this.validator.validateItems(pack.items);
+    const defs = structural.length ? [] : pack.items;
     if (!defs.length) {
-      this.noteShortfall({ request: `definire ${fresh.join(', ')}: ${context}`, who: chi, agent: 'narrator', task: 'content.define', outcome: 'invalid', reason: 'nessuna definizione valida' });
+      if (!gone.size) this.noteShortfall({ request, who: chi, agent: 'narrator', task: 'content.define', outcome: 'invalid', reason: structural.join('; ') || 'nessuna definizione valida' });
       return [];
     }
-    this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: [], loot: {} });
+    this.writePack('modules/items.citati/manifest.json', { id: 'items.citati', name: 'Oggetti di cui si è parlato', description: 'Oggetti entrati nel mondo perché qualcuno ne ha parlato.' }, { items: defs, recipes: pack.recipes, loot: {} });
     this.applyFiles({ ...this.repo.working });
     this.commitContent(`contenuti: ${defs.map((d) => d.name).join(', ')}`, 'items.citati', 'narrator');
     return defs;
   }
 
+  /**
+   * The things of before T489 without a use (ADR-0250): they stay, marked as decorations by the kernel (`decoration: true` in their pack),
+   * in a commit of the kernel, without calls; a use found later wins over the mark. Only the packs of the universe, not those it has from the
+   * seed (`seed.json`), whose things have their uses; not in a mirror, on the bench nor in a universe that is only read.
+   */
+  private markDecorations(): void {
+    if (this.mirror || this.bench || this.readOnly()) return;
+    const world = this.useWorld();
+    const { changes, marked } = markedPacks(this.repo.working, (it) => usesOf(this.content.items.get(it.id) ?? it, world).length > 0);
+    if (!marked.length) return;
+    for (const [p, content] of Object.entries(changes)) this.repo.write(p, content);
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`riparazione: ${marked.length} ${marked.length === 1 ? 'oggetto' : 'oggetti'} da tenere (${marked.slice(0, 6).join(', ')}${marked.length > 6 ? '…' : ''})`, 'kernel');
+    this.log('kernel', `oggetti senza uso marcati da tenere: ${marked.length}`);
+  }
+
   private writePack(path: string, head: { id: string; name: string; description: string }, pack: { items: ItemDef[]; recipes: any[]; loot: Record<string, any> }): void {
     const existing = this.repo.working[path] ? JSON.parse(this.repo.working[path]) : { ...head, kind: 'data', version: '0.1.0', items: [], recipes: [], loot: {} };
     existing.items = [...(existing.items ?? []), ...pack.items];
-    existing.recipes = [...(existing.recipes ?? []), ...pack.recipes];
+    // A recipe's id is the world's (T489: the things a definition makes come in at every call): a second one with the same id takes a number.
+    const ids = new Set([...this.content.recipes.map((r) => r.id), ...(existing.recipes ?? []).map((r: Recipe) => r.id)]);
+    const fresh = pack.recipes.map((r: Recipe) => {
+      let id = r.id;
+      for (let n = 2; ids.has(id); n++) id = `${r.id}-${n}`;
+      ids.add(id);
+      return id === r.id ? r : { ...r, id };
+    });
+    existing.recipes = [...(existing.recipes ?? []), ...fresh];
     existing.loot = { ...(existing.loot ?? {}), ...pack.loot };
     this.repo.write(path, JSON.stringify(existing, null, 2) + '\n');
   }
@@ -11270,9 +11466,16 @@ export class Kernel {
     this.packsUsed++;
     try {
       const tags = [...new Set([...this.content.items.values()].flatMap((d) => d.tags))].slice(0, 30);
-      const raw = await itemPack(this.council, { count, existing: [...this.content.items.values()].map((d) => d.name), hints: [...this.wanted].map((id) => this.itemInfo(id).name), tags });
+      const raw = await itemPack(this.council, { count, existing: [...this.content.items.values()].map((d) => d.name), hints: [...this.wanted].map((id) => this.itemInfo(id).name), tags, places: this.wearPlaces() });
       const known = new Map([...this.content.items.values()].map((d) => [normName(d.name), d.id]));
       const pack = assemblePack(raw, known, new Set(this.content.items.keys()));
+      // Every thing with a use the world knows (T489, ADR-0250): what has none goes, with the recipes it was in, and the Narrator hears why.
+      const refused = this.refusedUses(pack);
+      if (refused.size) {
+        const gone = this.dropRefused(pack, refused, false);
+        this.council.say('kernel', 'scarta', [...gone.values()].join('; '), 'narrator', 'content.items');
+        this.noteShortfall({ request: `un pacchetto di oggetti: ${reason}`, who: chi, agent: 'narrator', task: 'content.items', outcome: 'invalid', reason: [...gone.values()].join('; ').slice(0, 400) });
+      }
       const errors = this.validator.validateItems(pack.items);
       if (errors.length || !pack.items.length) {
         this.council.say('kernel', 'scarta', `pacchetto: ${errors.join('; ') || 'vuoto'}`, 'narrator');

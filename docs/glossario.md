@@ -1367,6 +1367,19 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `crafting` (per la ricetta; il gesto è «fabbricare»)
 - **Fermo**: il messaggio `fabbrica`, `items.scoperte`.
 
+### Uso di un oggetto
+- **Inglese**: `ItemUse`, `usesOf`, `UseWorld`, `useWords`, `useError`, `validateItemUses`, `DECLARED_USES`, `useWorld`, `itemUseWords`
+- **Definizione**: ciò che il kernel sa fare con un oggetto, letto dai dati: si consuma con i suoi effetti, si accende, è una borsa, si indossa o entra in un posto di una scheda, ha un'azione propria con effetti, un'azione del mondo lo chiede, taglia, entra in una ricetta (consumato o come attrezzo), un mestiere ci lavora, un cantiere lo prende, una missione lo aspetta. Il Narratore lo dà quando definisce un oggetto (`use`), il validatore rifiuta col motivo un oggetto senza uso, l'inventario e «Esamina» lo dicono in parole del mondo. Uscire da una ricetta non è un uso (`madeBy`); il ruolo (cibo, attrezzo, chiave…) non è un uso (T489, ADR-0250).
+- **Dove vive**: `src/kernel/itemuse.ts`, `src/kernel/agents/content.ts`, `src/kernel/validator.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `funzione` (dell'oggetto), `utilità`
+
+### Da tenere
+- **Inglese**: `decoration`, `markDecorations`, `markedPacks`
+- **Definizione**: il segno di un oggetto che si tiene per com'è o per ricordo, non per un lavoro: lo dichiara il Narratore (`use: decoration`), il kernel lo scrive sugli oggetti di prima senza uso, senza chiamate; un uso trovato dopo vince sul segno (T489, ADR-0250).
+- **Dove vive**: `src/kernel/types.ts`, `src/kernel/itemuse.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `soprammobile`, `inutile`
+- **Fermo**: il campo `decoration` degli oggetti dei pacchetti.
+
 ### Bisogni
 - **Inglese**: `needs`
 - **Definizione**: i valori del corpo del viandante (salute, fame…, e il mana), tenuti da `sys.needs`.

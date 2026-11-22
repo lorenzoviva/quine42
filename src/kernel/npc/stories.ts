@@ -168,7 +168,7 @@ export class Stories {
     this.host.recordRule({ key: `missione|${plotId}`, text: `missione di ${q.from}: ${q.text}`, possible: true, story: `compiuta da${who === 'il viandante' ? 'l viandante' : ` ${who}`}`, effects: ['missione'] }, false);
     this.host.message(`Missione compiuta: ${q.text}`, 'good');
     if (q.reward) {
-      const d = this.host.content.byName(q.reward) ?? (await this.host.introduceItems([q.reward], `ricompensa di ${q.from}`))[0];
+      const d = this.host.content.byName(q.reward) ?? (await this.host.introduceItems([q.reward], `ricompensa di ${q.from}`, undefined, { keep: true }))[0];
       if (d && this.host.as(by, () => this.host.give(d.id, 1))) this.host.message(`${q.from} ti ricompensa: ${d.name}`, 'good');
     }
   }
