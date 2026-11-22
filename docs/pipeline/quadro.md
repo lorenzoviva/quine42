@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 631 (claude). Crediti: vedi `stato`.
+Aggiornato il 22/11/2026, epoca 634 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -24,7 +24,7 @@ Aggiornato il 22/11/2026, epoca 631 (claude). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-- **Dopo la prima run (autore 21/11, 18 min in `orichalcum`, 2,93 $, chiatte non guidabili, oggetti senza uso chiaro):** T487 veicoli dal Concilio e T488 generazione a misura del giocatore (< 1 $/h) a priorità 2, T489 oggetti con un uso (dopo T488) a priorità 3; step 34, claude extra, approvati.
+- **Dopo la prima run (autore 21/11, 18 min in `orichalcum`, 2,93 $, chiatte non guidabili, oggetti senza uso chiaro):** T487 integrato; T488 fatto in parte (raggio, 10 → 6 $/h; `integra` in conflitto in AGENTS.md → **T493** su hydrogen, approvato; ADR-0245, kernel 0.10.21) con D69 sulle leve; T492 sfarfallio del terreno in corso, T489 oggetti con un uso (dopo T488) a priorità 3; step 34, claude extra, approvati.
 - **Step 44 (Scultori specializzati):** T467-T471 integrati (`66daaebd`, kernel 0.10.18, ADR-0239..0241); **T473** integrato via **T490** (`8c1b613b`, `d24702ea`; prova pagata 4,21 $/6 $, browser verificato; proposte in **D68**). **T472** integrato via **T491** (parti del mondo estratte, `model.part`, kernel 0.10.19, ADR-0243; Scultore vero non provato).
 0. **Prima run in closed beta (autore 20/11):** **T457** (priorità 1, claude extra): branch `beta/run-1` da un commit verde, universi clonati, prova con Gemini vero ≤ 0,50 $, `docs/beta/run-1.md` col comando per l'autore. Fase III aperta con due studi approvati (step 44 **T458** Scultori specializzati, few-shot, pezzi condivisi, `<markov>`; step 45 **T459** terreno 3D, regola 10 rivista, automi di acqua e vento), richieste in `docs/userchats/to-do-2026-11-20.md`.
    **Pronti:** T303 integrato (misura dello Scenografo, `docs/design/scenografo.md` § 9-10: interno insieme 1,00 $/edificio 3/4, programma di secondo stadio 0,071 $/tipo, mobili come dati 0,014 $/tipo; raccomanda dati come base e programma come secondo passo; 5 task proposti, da approvare); T404 integrato (`0e405ad0`, ADR-0208, kernel 0.8.2, contratto 0.8: forte dell'autore a 10 vpx su blocco 3 × 3 parametrico, visto nel browser; mancano il forte nel seme (decide T371), mura alte, blocchi oltre 3 × 3) ; T405 integrato (`488251a1`, ADR-0209, kernel 0.9.0, contratto 0.9: strutture a regole a 16 vpx, voci senza `vpt` a 16, migrazione 0.8→0.9; visto nel browser, confronto 20/16 solo in numeri); T406 integrato (`c1c8dfdd`: misura Scenografo a 16 vpx, spazio ×1,5 ma ancora una stanza per piano in un corpo di 35-45 voxel su 100; vie (a) 1,03 $, (b) 0,082 $, (c) 0,014 $ a tipo; § 10 di `scenografo.md` propone 6 task 0-5, il nuovo 0 «la casa che usa la Grande» con soglia di pavimento da decidere → D62); T407 integrato (ADR-0211, kernel 0.9.1: lotti dei timbri a 16, visto nel browser; restano castello visto solo nei dati, borgo più rado, strutture senza taglia che sporgono sui lotti piccoli del Cartografo); T371 fatto (forte = metro dell'ottima, ADR-0210, visto nel lab 3D; scala 4,7-6,2/10 sui forti degli Scultori) ma in conflitto col base → T408 (merge, claude, approvato); Fable sospeso dall'autore il 17/11 ( nota: in `stato` le percentuali sono il **residuo**, non il consumato). T398 integrato (`2ba77b90`, ADR-0207, kernel 0.8.1: `ai.sculptorTier` standard/performante/massimo, Fable 5.1 nell'elenco; visto nel browser offline, nessuna chiamata vera a Fable). T397 chiuso: il giro pagato di T402 (integrato) dà Opus via OpenRouter 4/4, 0,61 $ a riuscita, 2,42 $ spesi; il passaggio dell'1/12 resta.
@@ -35,6 +35,7 @@ Aggiornato il 22/11/2026, epoca 631 (claude). Crediti: vedi `stato`.
 ## Attese dall'autore
 
 - **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
+- **D69 (T488, leve sotto 1 $/h):** 1 strutture dove ci si ferma, 2 riuso delle strutture, 3 tetto orario, 4 meno chiamate per luogo, 5 Low Detail predefinito; consiglio 1+2+cose a terra a gruppi.
 - **D68 (T473, prova specialità):** 1) fix Paesaggista (chioma staccata) + Mobiliere (`close`) con mini-prova castagno (~0,10 $); 2) cache Gemini nella stima lobby (con/dopo T488) ed eventuale cache esplicita sul nucleo; 3) `<markov>` su Opus o tolto, e prova mirata rocca con/senza cantina (`aperte.md`).
 
 ## Regole attive
@@ -52,5 +53,5 @@ Aggiornato il 22/11/2026, epoca 631 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **631 (claude):** **T487** integrato (`578aa573`, ADR-0244, kernel 0.10.20: la Fucina scrive `vehicle` a ciò che il nome dice un mezzo, ormeggio dei mezzi dei piani, riparazione all’avvio; visto nel browser offline su `orichalcum`, Fucina vera no; da guardare «troppo carico per nuotare» a bordo della chiatta). In corso T488.
-- **630 (claude):** **T491** e **T472** integrati (conflitto AGENTS.md risolto: ADR-0242 + ADR-0243).
+- **634 (claude):** T488 in attesa (D69); `integra T488` in conflitto → T493 (hydrogen). T492 in corso.
+- **631 (claude):** **T487** integrato (`578aa573`, ADR-0244, kernel 0.10.20).
