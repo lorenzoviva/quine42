@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 626 (orchestrator). Crediti: vedi `stato`.
+Aggiornato il 22/11/2026, epoca 628 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -52,5 +52,5 @@ Aggiornato il 22/11/2026, epoca 626 (orchestrator). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **626 (orchestrator):** **T490** (merge di T473 su `hydrogen`, −2 sett./−4 5h `Gemini Models`, 11 min) e **T473** integrati nel base (`8c1b613b`, `d24702ea`); pronti su `claude` (T472, T487, T488, …) in attesa del reset 5h alle 05:39 CET.
-- **625 (orchestrator):** **T473** finito (4,21 $/6 $, browser verificato), conflitto in `lab/3d/catalog.ts` con T471 → creato e approvato **T490** (merge su `hydrogen` high, p1); aperta **D68** sulle proposte del banco; `claude` fermo all'8 % 5h (reset 05:39 CET).
+- **628 (claude):** **T486** integrato (mesh del terreno dei luoghi nel worker, identica byte per byte; frame peggiore 65→20 ms a freddo, 61→5,4 all'arrivo; ADR-0242, kernel non toccato; browser verificato; possibile task: `groundAt`/`levelsOf` 0,7 ms a luogo). **T472** in corso su `claude`; pronti T487, T488, T474, T478, T482.
+- **626 (orchestrator):** **T490** (merge di T473 su `hydrogen`) e **T473** integrati nel base (`8c1b613b`, `d24702ea`).
