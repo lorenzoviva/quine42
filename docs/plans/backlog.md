@@ -6348,12 +6348,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 3.2, il disco di T416.
 - Cosa fare: la riga 3. Browser: sì.
 
-### T477 · R3 · Arrampicarsi (riga 4 di T459) — `da fare`
+### T477 · R3 · Arrampicarsi (riga 4 di T459) — `fatto` (`191ba7bc`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
 - Step: 45
 - Dipende da: T474
 - Contesto: § 3.5; C1: movimento del kernel con l'attrezzo, fino a 3 caselle.
 - Cosa fare: la riga 4; il salto e l'arrampicata controllati nel passo del server; «sicurezza:» nell'esito. Browser: sì.
+- Esito: arrampicata del kernel (`src/kernel/climb.ts`, ADR-0251, kernel 0.10.27): «Arrampicati»/«Calati giù» nel menu della casella entro tre caselle (`CLIMB`) con la portata del mezzo (`bonus.climb`, la corda del seme impugnabile a 12; `climb` di uno stato, campo nuovo dell'effetto `state` che il Narratore conosce, «Altro…: mi arrampico» lo dà e avvia l'arrampicata), lenta e faticosa, caduta al piede a un colpo, una spinta o a energia zero, senza danno; ogni mondo arrampica (`keptPass` con `climb`: col rialzo 8, 318 rampe e 140 enclavi tenute invece di 434 e 21; test di T474 adattato); in molti il salto (messaggio nuovo `jump`) e l'arrampicata (`tile _climb`) li rifà il server sul suo mondo, porta il corpo spostando il tappeto, ignora i passi finché non atterra e corregge all'atterraggio, lo specchio li prevede; il salto guarda la zona del viandante (`inSim`); renderer coi piedi sulla parete; ADR, AGENTS, architettura, glossario, lingua interna (`jump`), studio § 3.5 e § 7; test nuovi `tests/arrampicata.test.ts`, `tests/sicurezza/salto-molti.test.ts`; suite intera verde tranne `tests/site-video.test.ts`, che fallisce per disco pieno su C: (ENOSPC su un file da 4 GB) e passa con TEMP su H:; non provato: salto e arrampicata fra due schede vere, gli altri viandanti che vedono arco e parete, il Narratore vero; sicurezza: V-047 (il messaggio `jump`, la direzione letta guardando il tipo, nessun passo preso mentre il server porta il corpo, arrampicata solo coi mezzi che il viandante ha sul server, il ritmo di ogni messaggio), chiusa col suo test.
 
 ### T478 · S1 · Gli strati come regole (riga 5 di T459) — `fatto` (`07e75814`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4
