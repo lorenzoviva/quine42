@@ -7109,7 +7109,7 @@ export class Kernel {
   }
 
   /**
-   * Recipes the player can make now, all those of the world, and those what they carry opens (T489, ADR-0250: the «Crea» tab shows only
+   * Recipes the player can make now, all those of the world, and those what they carry opens (T489, ADR-0251: the «Crea» tab shows only
    * these, a thing held tells what it makes, never the list of the world): with what is still missing, ready first.
    */
   recipes(): { available: Set<string>; all: Recipe[]; opened: Array<{ recipe: Recipe; missing: Array<{ item: string; count: number }> }> } {
@@ -7127,7 +7127,7 @@ export class Kernel {
   private hinted = new Set<string>();
 
   /**
-   * A thing just taken that completes a recipe (T489, ADR-0250): the wanderer thinks of what they could make with what they carry, once
+   * A thing just taken that completes a recipe (T489, ADR-0251): the wanderer thinks of what they could make with what they carry, once
    * for each recipe, in the world's words («Con X e Y potresti fare Z.»), never a list.
    */
   private hintRecipes(item: string): void {
@@ -11269,10 +11269,10 @@ export class Kernel {
     while (this.wanted.size > 24) this.wanted.delete(this.wanted.values().next().value!);
   }
 
-  // --- What a thing is for (T489, ADR-0250) ----------------------------------------------------------------------------------------
+  // --- What a thing is for (T489, ADR-0251) ----------------------------------------------------------------------------------------
 
   /**
-   * What of the world gives a thing its uses (T489, ADR-0250): the recipes (with `extra`, those of a pack not written yet), the trades, the
+   * What of the world gives a thing its uses (T489, ADR-0251): the recipes (with `extra`, those of a pack not written yet), the trades, the
    * actions of the things, the terrains and the items that want something carried, the slots of the mechanics' panels, what can be cut,
    * the materials of the building sites, what the missions wait for, whether the world counts the breath.
    */
@@ -11374,7 +11374,7 @@ export class Kernel {
   }
 
   /**
-   * New items, defined by the Narrator, written into the "citati" pack, committed. Each with a use the world knows (T489, ADR-0250): what
+   * New items, defined by the Narrator, written into the "citati" pack, committed. Each with a use the world knows (T489, ADR-0251): what
    * the validator sends back goes to the Narrator once more, with the reasons; what still has none is left out, or, `keep` (a thing the
    * wanderer made, combined, brought out of an action, was given or entrusted), stays as a decoration.
    */
@@ -11428,7 +11428,7 @@ export class Kernel {
   }
 
   /**
-   * The things of before T489 without a use (ADR-0250): they stay, marked as decorations by the kernel (`decoration: true` in their pack),
+   * The things of before T489 without a use (ADR-0251): they stay, marked as decorations by the kernel (`decoration: true` in their pack),
    * in a commit of the kernel, without calls; a use found later wins over the mark. Only the packs of the universe, not those it has from the
    * seed (`seed.json`), whose things have their uses; not in a mirror, on the bench nor in a universe that is only read.
    */
@@ -11469,7 +11469,7 @@ export class Kernel {
       const raw = await itemPack(this.council, { count, existing: [...this.content.items.values()].map((d) => d.name), hints: [...this.wanted].map((id) => this.itemInfo(id).name), tags, places: this.wearPlaces() });
       const known = new Map([...this.content.items.values()].map((d) => [normName(d.name), d.id]));
       const pack = assemblePack(raw, known, new Set(this.content.items.keys()));
-      // Every thing with a use the world knows (T489, ADR-0250): what has none goes, with the recipes it was in, and the Narrator hears why.
+      // Every thing with a use the world knows (T489, ADR-0251): what has none goes, with the recipes it was in, and the Narrator hears why.
       const refused = this.refusedUses(pack);
       if (refused.size) {
         const gone = this.dropRefused(pack, refused, false);

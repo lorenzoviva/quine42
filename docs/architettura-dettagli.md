@@ -511,7 +511,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
 - **Il salto** (ADR-0080, T56b): Spazio (`kernel.jump()`) nella simulazione: verso dove si cammina o si guarda, sopra ciò che non va più in alto di `JUMP_UP` (1,05 caselle, `topUnder` sui `Form.levels`) e sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a `JUMP_FAR` (2,6) caselle dove il corpo sta, altrimenti salto sul posto. Con i piani (T70) si salta dal pavimento su cui si sta (`pos.z`), conta il pieno che comincia sotto `JUMP_UP` (non il soffitto) e si atterra sul pavimento più alto che si supera (`floorBelow`). Componente `jump` del viandante (`salto` fino al contratto 0.4) portato da `jumpTick` dopo i sistemi; `kernel.jumping()` per arco e ombra. Nella corona, nello studio e nel kernel specchio Spazio fa ciò che fa `E`.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
-- **Ogni oggetto ha un uso** (ADR-0250, T489): gli usi di un oggetto si leggono dai dati (`src/kernel/itemuse.ts`, puro: `usesOf(def,
+- **Ogni oggetto ha un uso** (ADR-0251, T489): gli usi di un oggetto si leggono dai dati (`src/kernel/itemuse.ts`, puro: `usesOf(def,
   world)`, con `Kernel.useWorld()` che raccoglie ricette, programmi dei mestieri, le azioni con `requires` di cose, terreni e oggetti, i
   posti delle schede delle meccaniche, `tagliabile`, i materiali dei cantieri, ciò che le missioni aspettano, il respiro): si consuma con
   effetti, si accende, borsa, addosso (una zona del corpo, o un posto di una scheda per il suo posto o, con un bonus, per categoria o

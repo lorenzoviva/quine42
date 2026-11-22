@@ -1,7 +1,7 @@
 // T489: what every thing the Council generated in a universe on disk is for, without opening it in a browser and without writing anything:
 //   npx vite-node lab/scripts/oggetti-uso.ts -- universes/<nome> [--tag prima-della-run-1] [--scrivi f.md] [--json f]
 // A kernel on the local models opens the universe in memory (the plans of maps/ are not read) and, for every thing of the packs that are not
-// the seed's (`seed.json`) and of the things forged with a module of their own, says the uses the kernel finds (`usesOf`, ADR-0250: an
+// the seed's (`seed.json`) and of the things forged with a module of their own, says the uses the kernel finds (`usesOf`, ADR-0251: an
 // effect, an action, a recipe it goes into, a trade, a place on the body, a site, a mission), where it comes from (the recipes it comes out
 // of, the trades that make it), its role (food, a tool, a garment, a bag, a key, a material) or that it has none, and so the kernel marks it
 // as a decoration (`markDecorations`). With --tag, which things came in after that tag (the things of the run).
@@ -118,7 +118,7 @@ const marked = k.repo.log().find((c) => c.message.startsWith('riparazione:') && 
 
 const lines: string[] = [];
 lines.push(`# Gli oggetti di «${k.config.name}»: a cosa servono (T489)`, '');
-lines.push(`Generato da \`npx vite-node lab/scripts/oggetti-uso.ts -- ${path.relative(process.cwd(), dir).replace(/\\/g, '/')}${tag ? ` --tag ${tag}` : ''}\` sul kernel ${k.config.kernel ?? ''}: un kernel sui modelli locali apre l'universo in memoria e legge gli usi che il kernel riconosce (\`usesOf\`, ADR-0250), senza chiamate e senza scrivere niente. Sono gli oggetti dei pacchetti che non sono del seme e quelli forgiati con un modulo loro.`, '');
+lines.push(`Generato da \`npx vite-node lab/scripts/oggetti-uso.ts -- ${path.relative(process.cwd(), dir).replace(/\\/g, '/')}${tag ? ` --tag ${tag}` : ''}\` sul kernel ${k.config.kernel ?? ''}: un kernel sui modelli locali apre l'universo in memoria e legge gli usi che il kernel riconosce (\`usesOf\`, ADR-0251), senza chiamate e senza scrivere niente. Sono gli oggetti dei pacchetti che non sono del seme e quelli forgiati con un modulo loro.`, '');
 lines.push('## In breve', '');
 lines.push(`- Oggetti generati: **${rows.length}**${tag ? `, di cui **${inRun.length}** entrati dopo il tag \`${tag}\` (la run)` : ''}.`);
 lines.push(`- Con almeno un uso: **${rows.length - none.length}** (${pct(rows.length - none.length, rows.length)}); **senza nessun uso: ${none.length}** (${pct(none.length, rows.length)})${tag ? `, nella run ${inRun.filter((r) => !r.kinds.length).length} su ${inRun.length} (${pct(inRun.filter((r) => !r.kinds.length).length, inRun.length)})` : ''}.`);
@@ -137,7 +137,7 @@ lines.push(`- I pacchetti (\`items.pacco-*\`, la Genesi) hanno le ricette accant
 lines.push(`- La materia e gli attrezzi sono i più muti: una materia che nessuna ricetta usa, un attrezzo che non apre niente. Il cibo e i capi hanno quasi sempre un uso (l'effetto, il posto addosso).`);
 lines.push(`- Un uso c'era e non si vedeva: ${kindTotals.needed} oggetti servono a un'azione di una cosa o di una persona del mondo («Dai un pane per del carbone» al caldaista), ma niente lo diceva dove li si tiene; la scheda «Crea» elencava tutte le ricette del mondo (${k.content.recipes.length} qui), anche di cose mai viste.`);
 lines.push(`- Nessun oggetto dei pacchetti ha un'azione propria (le ${kindTotals.action} azioni sono dei moduli forgiati): le azioni le impara solo «Altro…». Una chiave non apre niente: il kernel non ha serrature, la chiave è un ruolo, non un uso, finché un'azione del mondo non la chiede.`, '');
-lines.push('## Dopo T489 (ADR-0250)', '');
+lines.push('## Dopo T489 (ADR-0251)', '');
 lines.push('- Il Narratore dà a ogni oggetto un uso fra quelli che il kernel sa fare (`use`: consume, wear, light, bag, action, craft, decoration) con ciò che lo regge; il validatore rifiuta col motivo ciò che non ne ha e il Narratore lo riceve una volta; poi l\'oggetto resta fuori, o resta da tenere se lo ha fatto il viandante o gli è stato dato.');
 lines.push(`- Gli oggetti di prima senza uso restano, marcati da tenere dal kernel senza chiamate (qui ${none.length}); un uso trovato dopo vince sul segno.`);
 lines.push('- L\'inventario e «Esamina» dicono cosa ci si fa, con parole del mondo; la scheda «Crea» mostra solo le ricette che ciò che si porta apre, con ciò che manca; un oggetto preso che completa una ricetta fa pensare il viandante a cosa potrebbe fare.', '');

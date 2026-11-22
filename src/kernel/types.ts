@@ -141,7 +141,7 @@ export interface ItemDef {
   /** Where it is worn or held (head, torso, legs, feet, hands, weapon, shield, ring…; ids since T310b, `posti`), for slots. */
   slot?: string;
   /**
-   * Kept for itself (T489, ADR-0250): an ornament, a keepsake, something to look at, not a thing to work with. The Narrator declares it
+   * Kept for itself (T489, ADR-0251): an ornament, a keepsake, something to look at, not a thing to work with. The Narrator declares it
    * (`use: decoration`), the kernel writes it on the things of before that have no use (`markDecorations`); a use found later wins.
    */
   decoration?: boolean;

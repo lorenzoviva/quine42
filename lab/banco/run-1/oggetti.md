@@ -1,6 +1,6 @@
 # Gli oggetti di «orichalcum»: a cosa servono (T489)
 
-Generato da `npx vite-node lab/scripts/oggetti-uso.ts -- ../beta-run-1/universes/orichalcum --tag prima-della-run-1` sul kernel 0.10.25: un kernel sui modelli locali apre l'universo in memoria e legge gli usi che il kernel riconosce (`usesOf`, ADR-0250), senza chiamate e senza scrivere niente. Sono gli oggetti dei pacchetti che non sono del seme e quelli forgiati con un modulo loro.
+Generato da `npx vite-node lab/scripts/oggetti-uso.ts -- ../beta-run-1/universes/orichalcum --tag prima-della-run-1` sul kernel 0.10.25: un kernel sui modelli locali apre l'universo in memoria e legge gli usi che il kernel riconosce (`usesOf`, ADR-0251), senza chiamate e senza scrivere niente. Sono gli oggetti dei pacchetti che non sono del seme e quelli forgiati con un modulo loro.
 
 ## In breve
 
@@ -59,7 +59,7 @@ Generato da `npx vite-node lab/scripts/oggetti-uso.ts -- ../beta-run-1/universes
 - Un uso c'era e non si vedeva: 25 oggetti servono a un'azione di una cosa o di una persona del mondo («Dai un pane per del carbone» al caldaista), ma niente lo diceva dove li si tiene; la scheda «Crea» elencava tutte le ricette del mondo (53 qui), anche di cose mai viste.
 - Nessun oggetto dei pacchetti ha un'azione propria (le 2 azioni sono dei moduli forgiati): le azioni le impara solo «Altro…». Una chiave non apre niente: il kernel non ha serrature, la chiave è un ruolo, non un uso, finché un'azione del mondo non la chiede.
 
-## Dopo T489 (ADR-0250)
+## Dopo T489 (ADR-0251)
 
 - Il Narratore dà a ogni oggetto un uso fra quelli che il kernel sa fare (`use`: consume, wear, light, bag, action, craft, decoration) con ciò che lo regge; il validatore rifiuta col motivo ciò che non ne ha e il Narratore lo riceve una volta; poi l'oggetto resta fuori, o resta da tenere se lo ha fatto il viandante o gli è stato dato.
 - Gli oggetti di prima senza uso restano, marcati da tenere dal kernel senza chiamate (qui 321); un uso trovato dopo vince sul segno.

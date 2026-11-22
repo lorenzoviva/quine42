@@ -1,4 +1,4 @@
-# ADR-0250 — Ogni oggetto ha un uso: il Narratore lo dà, il validatore lo vuole, il mondo lo dice
+# ADR-0251 — Ogni oggetto ha un uso: il Narratore lo dà, il validatore lo vuole, il mondo lo dice
 
 Data: 2026-11-22 · Stato: accettato (task T489 del backlog, richiesta dell'autore del 21/11 dopo la prima run, T457) ·
 Riferimenti: ADR-0025 (niente meta-gioco), ADR-0130 (le mancanze), ADR-0140 (i mestieri come programmi), ADR-0147 (le imprese),

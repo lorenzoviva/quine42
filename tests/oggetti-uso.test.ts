@@ -1,4 +1,4 @@
-// Things one understands (T489, ADR-0250): every thing of the world has a use the kernel knows how to do, or is kept as a decoration.
+// Things one understands (T489, ADR-0251): every thing of the world has a use the kernel knows how to do, or is kept as a decoration.
 // The uses read from the data (an effect, a place on the body, a bag, an action with effects, a recipe it goes into, a trade, a building
 // site, a mission, what an action of the world wants carried), the words of the world that say them (never a word of the game), the rule
 // of the validator, the Narrator who gives a use and hears why when it did not (once more, then the thing is left out or, if the wanderer

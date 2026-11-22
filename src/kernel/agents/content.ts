@@ -25,7 +25,7 @@ const ACTION_EFFECT_SCHEMA: Schema = {
   properties: Object.fromEntries(ACTION_FIELDS.map((k) => [k, k === 'type' ? { type: 'STRING', enum: ACTION_EFFECTS } : EFFECT_SCHEMA.properties![k]])),
 };
 
-/** What a thing is for (T489, ADR-0250): the use the Narrator gives it, among those the world knows, with what backs it. */
+/** What a thing is for (T489, ADR-0251): the use the Narrator gives it, among those the world knows, with what backs it. */
 const USE_FIELDS: Record<string, Schema> = {
   use: {
     type: 'STRING',
@@ -196,7 +196,7 @@ export async function itemPack(c: Council, opts: { count: number; existing: stri
         opts.hints.length ? `Include, if consistent with the world: ${opts.hints.join(', ')}.` : '',
         opts.existing.length ? `They exist already (do not repeat them): ${opts.existing.slice(-80).join(', ')}.` : '',
         `"effects" (from -50 to 60) only for what is consumed: hunger/thirst/energy/health restored. "stack": how many stack (1 for tools and weapons). "weight" in units (the wanderer carries 20). "tags": words useful to find and combine them, like the common ones (in Italian e.g. cucina, legno, metallo, erbe, bottega, contadino). Common tags to use: ${opts.tags.join(', ')}.`,
-        // What every thing is for (T489, ADR-0250): the tools and the materials of a pack go into its recipes (written next).
+        // What every thing is for (T489, ADR-0251): the tools and the materials of a pack go into its recipes (written next).
         useRule(opts.places ?? [], []),
         'Tools and materials are mostly "craft": the recipes written next will use them.',
         feedback && `The Arbiter objected: ${feedback}`,

@@ -183,7 +183,7 @@ export class InventoryPanel {
     } else if (this.tab.startsWith('ui:')) {
       this.renderPanel(side, this.tab.slice(3));
     } else if (this.tab === 'crea') {
-      // What what one carries opens (T489, ADR-0250): the recipes of the things in the bag, with what is still missing; never the world's list.
+      // What what one carries opens (T489, ADR-0251): the recipes of the things in the bag, with what is still missing; never the world's list.
       const { available, opened } = k.recipes();
       side.append(
         el('div', { class: 'name' }, 'Ricette'),
@@ -248,7 +248,7 @@ export class InventoryPanel {
           el('div', { class: 'descr' }, info.description),
           el('div', { class: 'props' }, `${info.category} · peso ${info.spec.weight}${info.spec.stackable ? ` · pila fino a ${info.spec.maxStack}` : ''}${thing ? ' · si porta sopra la testa (F per posare)' : info.spec.equippable ? ' · si impugna (F)' : ''}${zone ? ` · si indossa ${ZONE_WORDS[zone]}${worn.has(this.sel) ? ' (indossato)' : ''}` : ''}`),
           effects ? el('div', { class: 'control' }, effects) : '',
-          // What one does with it (T489, ADR-0250), in the world's words.
+          // What one does with it (T489, ADR-0251), in the world's words.
           ...k.itemUseWords(s.item).map((line) => el('div', { class: 'use' }, line)),
           info.tags.length ? el('div', { class: 'props' }, info.tags.join(', ')) : '',
           actions,

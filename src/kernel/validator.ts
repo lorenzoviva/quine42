@@ -452,7 +452,7 @@ export class Validator {
   }
 
   /**
-   * The rule of the uses (T489, ADR-0250): a new thing of the Council has a use the world knows (`usesOf`: eaten, worn, lit, a bag, an
+   * The rule of the uses (T489, ADR-0251): a new thing of the Council has a use the world knows (`usesOf`: eaten, worn, lit, a bag, an
    * action with effects, a recipe, a trade, a site, a mission) or is a decoration; else the reason, by id, which goes back to the Narrator.
    * Only for what the Council writes now: the things of before are marked by the kernel (`markDecorations`), never refused on loading.
    */

@@ -1,4 +1,4 @@
-// What a thing is for (T489, ADR-0250): every item of the world has a use the kernel knows how to do, or is kept as a decoration.
+// What a thing is for (T489, ADR-0251): every item of the world has a use the kernel knows how to do, or is kept as a decoration.
 // The uses are read from the data (the item itself and the world around it: recipes, trades, the actions of things and terrains, the
 // slots of the mechanics' panels, the building sites, the missions), never asked of a model; a decoration is a mark on the item
 // (`ItemDef.decoration`), which the Narrator declares or the kernel writes on the things of before that have no use. The same reading
