@@ -6443,6 +6443,18 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — la prova con Gemini vero su un clone di `orichalcum` o `sidera`: i luoghi vicini si pianificano in tempo, niente bozze davanti ai piedi.
 - Quando è fatto: il costo misurato prima e dopo, la stima della lobby aggiornata, i test del raggio e dell'ordine; ADR se cambia quando il Concilio lavora, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
 
+### T492 · Il terreno che sfarfalla: per un fotogramma sparisce tutto il suolo — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 34
+- Contesto: segnalazione dell'autore del 22/11 dal video della prima run (T457, ramo `beta/run-1`, 21/11 23:22, `orichalcum`, «Porto dei Bastimenti — il molo del faro di Tramontana»): a brevissima distanza tra due fotogrammi l'intero terreno (suolo, molo, mare) svanisce e resta solo lo sfondo del cielo, mentre mobili, strutture, individui, rune e luci restano. Catture: `docs/userchats/sfarfallio-2026-11-22-1.png` (senza terreno) e `-2.png` (normale). La run è su un base precedente a T449 (origine mobile del renderer) e a T486 (mesh del terreno nel worker, ADR-0242): il difetto c'era già prima; va cercato e verificato su entrambi.
+- Ipotesi da controllare (nessuna dimostrata): il luogo rifatto (acqua che scorre, `kernel.dig`, piano che arriva, cambio di luogo) che toglie la mesh vecchia prima che quella nuova sia pronta; tutte le mesh dei luoghi tolte e rimesse insieme quando cambia l'insieme dei luoghi caricati; il frustum culling con `boundingSphere` sbagliata o vecchia; l'ordine dei passaggi del cartone o del mare (`sea.ts`) che per un fotogramma copre il terreno.
+- Cosa fare:
+  1. Riprodurlo: preview della build, `orichalcum` copiato (o il seme) offline, camminare tra luoghi e vicino all'acqua registrando per ogni fotogramma quante mesh di terreno sono in scena e visibili (`misura-frame.mjs` o uno strumento di `window.quine`); prima sul base di oggi, e se non si vede, sul commit della run.
+  2. Trovare la causa con la prova, non per ipotesi; correggerla così che una mesh di un luogo resti in scena finché quella nuova non la sostituisce nello stesso fotogramma (e lo stesso per il mare).
+  3. Un test che fissi l'invariante (nessun fotogramma con un luogo caricato senza mesh), dove si può senza browser.
+- Browser: sì — camminare a lungo tra luoghi e sull'acqua nella preview: nessun fotogramma senza terreno (catture prima e dopo in `lab/banco/sfarfallio/`).
+- Quando è fatto: causa scritta nell'esito, correzione, test; kernel alzato solo se tocca `src/kernel/`. Sicurezza: nessuna superficie nuova.
+
 ### T489 · Oggetti che si capiscono: ogni oggetto generato ha un uso — `da fare`
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 3
 - Step: 34
