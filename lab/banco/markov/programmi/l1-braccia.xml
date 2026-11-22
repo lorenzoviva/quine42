@@ -1,0 +1,14 @@
+<!-- The first loop of the author's fort (docs/userchats/forte-handmade-2026-11-22.xml, lines 19-27) on its plan at a quarter of the scale:
+     the lot z inside a border E of 5 cells, the centre N (start grid l1-braccia.txt). Four arms leave N and grow a cell a turn while 7 z
+     are ahead; at every turn each arm stops with p 0.035 (a → l). Then the rectangle between the arms. U is [Nx]. -->
+<sequence values="EzNaxlA" symmetry="(xy)">
+  <union symbol="U" values="Nx"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <markov>
+    <prl in="a" out="l" p="0.035"/>
+    <all in="Uazzzzzzz" out="*xa******"/>
+  </markov>
+  <prl in="l" out="a"/>
+  <prl in="a" out="A"/>
+  <all in="Uz/*U" out="*x/**"/>
+</sequence>

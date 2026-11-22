@@ -1,0 +1,1 @@
+<sequence values="BRG" symmetry="()"><one steps="6"><rule in="RB" out="*R" p="0.001"/><rule in="BG" out="G*"/></one></sequence>

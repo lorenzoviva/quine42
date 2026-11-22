@@ -1,0 +1,15 @@
+<!-- The storeys of the author's fort (lines 197-261) reduced as in tests/mj-markov.test.ts (T469): on a column 2 x 2 x 64 with the ground t
+     (start grid l4-piani.txt) the mark M opens a storey; the sequence (not the last child) builds it, four layers, and turns the mark into
+     N; the coin <prl p="0.5" in="N" out="M"/>, then the last child, which turns N back into M and starts all again. -->
+<sequence values="BtwFMN" symmetry="()">
+  <one in="t" out="M" steps="1"/>
+  <markov>
+    <sequence>
+      <all in="M" out="N" steps="1"/>
+      <all in="B t" out="t w" steps="3"/>
+      <all in="B t" out="t F" steps="1"/>
+    </sequence>
+    <prl p="0.5" in="N" out="M"/>
+    <all in="N" out="M" steps="1"/>
+  </markov>
+</sequence>

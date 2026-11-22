@@ -1256,7 +1256,13 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   è un ciclo il cui corpo riparte dal primo figlio a ogni passo, un passo a giro (l'uscita, un segno raro; ciò che lo propaga; la
   crescita), e una sequenza che non è l'ultimo figlio tiene il suo posto da un passo all'altro (i piani a moneta). Nell'originale di mxgmn
   la sequenza dentro un `markov` corre fino in fondo: `tests/mj-markov.test.ts` fissa la nostra semantica coi due idiomi del forte
-  dell'autore (il mastio che cresce finché la strada o il segno non lo ferma, i piani a moneta), voxel per voxel. **Il prompt**: nel nucleo il
+  dell'autore (il mastio che cresce finché la strada o il segno non lo ferma, i piani a moneta), voxel per voxel. **Contro l'originale**
+  (T498, D68.3, lo studio [`docs/design/markov.md`](design/markov.md)): MarkovJunior di mxgmn compilato e fatto girare (`lab/banco/markov/`,
+  il suo `Program.cs` senza grafica), otto differenze ognuna con un programma di poche celle e un `it.fails` (`tests/mj-markov-originale.test.ts`):
+  nell'originale un ramo che comincia tiene il turno e ogni ramo che non è la radice si ripete finché trova da fare, i passi dei figli di un
+  `markov` valgono per tutto il ciclo, una regola applica anche dove non cambia niente, `one` non legge `p`; i cicli 1-3 del forte danno lo
+  stesso risultato, i piani a moneta con l'originale non finiscono; `lab/scripts/markov-originale.ts` fa girare i programmi del gioco con
+  una copia del motore (in `lab/out/`) coi rami dell'originale. **Il prompt**: nel nucleo il
   ciclo, la `map` frazionaria e `clear="False"`; nell'Architetto il ciclo del mastio (la stanza `u`, l'uscita, il segno che si allarga, la
   crescita) e i piani a moneta, le trame con `<convchain>` sul piano (e perché la `wfc` no: decide la sua scatola), la cantina con
   `part-cellar` (D sotto il pavimento prima che la stanza salga, la cantina che regge e si raggiunge dalla porta), la piena scala della

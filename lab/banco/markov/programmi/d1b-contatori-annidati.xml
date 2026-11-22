@@ -1,0 +1,1 @@
+<sequence values="BRG" symmetry="()"><markov><one in="RB" out="*R" steps="2"/><one in="BG" out="G*" steps="1"/></markov></sequence>
