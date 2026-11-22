@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 22/11/2026, epoca 649 (claude). Crediti: vedi `stato`.
+Aggiornato il 23/11/2026, epoca 652 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -51,5 +51,5 @@ Aggiornato il 22/11/2026, epoca 649 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **648 (claude):** D/T498 → A1 → T500 (studio e catena dell'allineamento a MarkovJunior).
 - **649 (claude):** T499 e T489 integrati (kernel 0.10.27).
+- **652 (claude):** T477 arrampicata fatta (V-047, visto nel browser) ma `integra` in conflitto con T489 → **T502** (hydrogen, 2 %, ADR-0252, kernel 0.10.28). Pipeline spenta con `ferma --dopo` (riavvio dell’autore per Neon e soglia 2 %).
