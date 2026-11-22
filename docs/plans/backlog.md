@@ -6487,3 +6487,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit di merge su `task/T491`; poi l'orchestratore integra T491 e `integra T472` toglie worktree e branch di T472. Sicurezza: nessuna superficie nuova.
 - Esito: `task/T472` unito in `task/T491` (`a756c124`), risolto il conflitto in `AGENTS.md` tenendo sia il worker del terreno (`ADR-0242`) sia le parti del mondo (`ADR-0243`), verificati i documenti fusi senza doppioni né rimandi errati a `ADR-0242`, kernel `0.10.19` confermato in `version.ts` e `package.json`, `typecheck` (0) e `npm test` (285 file, 3859 passati, 1 saltato) verdi; sicurezza: nessuna superficie nuova.
+
+### T493 · Integrare T488 nel base (conflitto in AGENTS.md) — `da fare`
+- Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
+- Step: 34
+- Contesto: `integra T488` (il raggio del Concilio, `src/kernel/reach.ts`, ADR rinumerato a ADR-0245 sul ramo) si è fermato su un conflitto in `AGENTS.md`: nel frattempo T487 è entrato nel base (ADR-0244, i veicoli del Concilio, kernel 0.10.20) toccando le stesse righe. Nasce da T488 e T487: `dossier T488`, `dossier T487`.
+- Cosa fare: nel worktree `git merge task/T488`; in `AGENTS.md` tenere entrambe le aggiunte (i veicoli del Concilio di T487 con ADR-0244 e il raggio di T488 con ADR-0245; mai ADR-0244 per il raggio); controllare che i file fusi automaticamente (`docs/architettura-dettagli.md`, `docs/glossario.md`, `docs/adr/README.md`, `docs/pipeline/domande/T488.md`) non abbiano doppioni, tagli né rimandi a ADR-0244 per il raggio; kernel **0.10.21** in `src/kernel/version.ts` e `package.json` (0.10.20 è di T487); `typecheck` e suite di test coi turni (`turno typecheck`, `turno test`).
+- Test: typecheck e suite intera coi turni.
+- Browser: no.
+- Quando è fatto: commit di merge su `task/T493`; poi l'orchestratore integra T493 e `integra T488` toglie worktree e branch di T488. Sicurezza: nessuna superficie nuova.
