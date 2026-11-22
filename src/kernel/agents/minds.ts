@@ -177,12 +177,15 @@ export async function npcSheet(c: Council, who: SheetSubject, focus?: string[], 
   return String(r.sheet ?? '').trim().slice(0, 2400);
 }
 
-/** "Esamina": the Narrator describes what the player looks at (cached by the kernel). */
-export async function examine(c: Council, what: { name: string; description: string; lore?: string }, facts: Record<string, unknown>, focus?: string[]): Promise<string> {
+/**
+ * "Esamina": the Narrator describes what the player looks at (cached by the kernel). `use`: what one does with a thing (T489, the kernel's
+ * words), which the description agrees with; the kernel says it after.
+ */
+export async function examine(c: Council, what: { name: string; description: string; lore?: string; use?: string }, facts: Record<string, unknown>, focus?: string[]): Promise<string> {
   const r = await c.ask<{ text: string }>(
     'narrator',
     'text.examine',
-    `The wanderer looks closely at «${what.name}» (${what.description}${what.lore ? `; ${what.lore}` : ''}). Describe in 2-3 sentences what they notice: concrete details, materials, smells, a small narrative clue. Context: ${JSON.stringify(facts)}.`,
+    `The wanderer looks closely at «${what.name}» (${what.description}${what.lore ? `; ${what.lore}` : ''}). Describe in 2-3 sentences what they notice: concrete details, materials, smells, a small narrative clue.${what.use ? ` What one does with it in the world: ${what.use} Let what they notice agree with it (a sign of its use), without repeating it.` : ''} Context: ${JSON.stringify(facts)}.`,
     READ_SCHEMA,
     { data: { what, facts }, temperature: 0.9, focus },
   );

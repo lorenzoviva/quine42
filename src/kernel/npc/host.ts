@@ -98,7 +98,7 @@ export interface NpcHost {
   /** The zone of the body a thing is worn on (T353), or undefined if it is not worn (`Kernel.wornZone`). */
   wornZone(item: string): WornZone | undefined;
   /** New items defined by the Narrator (the «citati» pack). */
-  introduceItems(names: string[], context: string, chi?: string): Promise<ItemDef[]>;
+  introduceItems(names: string[], context: string, chi?: string, opts?: { keep?: boolean }): Promise<ItemDef[]>;
   /** Things mentioned in a talk become part of the world. */
   noteMentions(names: string[], context: string): Promise<void>;
 

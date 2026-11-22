@@ -512,6 +512,27 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
 - **Il salto** (ADR-0080, T56b): Spazio (`kernel.jump()`) nella simulazione: verso dove si cammina o si guarda, sopra ciò che non va più in alto di `JUMP_UP` (1,05 caselle, `topUnder` sui `Form.levels`) e sopra l'acqua, mai sopra muri, rocce o caselle solide del terreno; atterra nel primo punto da 1 a `JUMP_FAR` (2,6) caselle dove il corpo sta, altrimenti salto sul posto. Con i piani (T70) si salta dal pavimento su cui si sta (`pos.z`), conta il pieno che comincia sotto `JUMP_UP` (non il soffitto) e si atterra sul pavimento più alto che si supera (`floorBelow`). Componente `jump` del viandante (`salto` fino al contratto 0.4) portato da `jumpTick` dopo i sistemi; `kernel.jumping()` per arco e ombra. Nella corona, nello studio e nel kernel specchio Spazio fa ciò che fa `E`.
 - **Contenuti** (ADR-0012): `ItemDef` in pacchetti; bottino per tag; contenitori; ricette; bisogni
   (`needs` sul giocatore, `sys.needs`); uso generico in `core.items`; menu azioni (`E`).
+- **Ogni oggetto ha un uso** (ADR-0251, T489): gli usi di un oggetto si leggono dai dati (`src/kernel/itemuse.ts`, puro: `usesOf(def,
+  world)`, con `Kernel.useWorld()` che raccoglie ricette, programmi dei mestieri, le azioni con `requires` di cose, terreni e oggetti, i
+  posti delle schede delle meccaniche, `tagliabile`, i materiali dei cantieri, ciò che le missioni aspettano, il respiro): si consuma con
+  effetti, si accende, borsa, addosso (una zona del corpo, o un posto di una scheda per il suo posto o, con un bonus, per categoria o
+  etichetta), un'azione propria con effetti o un modulo che reagisce, ciò che un'azione del mondo chiede, ciò che taglia, una ricetta
+  (consumato o attrezzo), un mestiere (`with`, `take`, `eat`), un cantiere, una missione; uscire da una ricetta è come si ottiene
+  (`madeBy`), non un uso. **Da tenere** è il segno `ItemDef.decoration`. Il Narratore dà a ogni oggetto un uso in `content.define` e
+  `content.items` (`use` fra `DECLARED_USES`, con `effects`, `slot`, `container`, `action` con effetti del suo insieme chiuso, `recipe`
+  coi nomi esatti; la regola è `useRule`, coi posti del mondo e 40 nomi che una ricetta può dire; ciò che una ricetta fa e non esiste lo
+  definisce nella stessa risposta; `declaredRecipes` le porta ad `assemblePack`). Il kernel prova le azioni con `validateEffects`
+  (`settleActions`: di sole parole non è un uso), poi il validatore (`validateItemUses`, `useError`) rifiuta col motivo ciò che non ha un
+  uso: `introduceItems` lo rimanda una volta al Narratore (`content.define` col `feedback`), poi lo lascia fuori con una mancanza, o, con
+  `keep` (fabbricato, combinato, nato da un'azione, ricompensa, cosa affidata), lo tiene da tenere; in un pacchetto esce con le ricette e
+  il bottino in cui era (`dropRefused`). All'avvio `markDecorations` marca da tenere gli oggetti dei pacchetti dell'universo senza uso
+  (non quelli in `seed.json`), in un commit del kernel, senza chiamate, una volta. Le parole del mondo (`useWords`, `Kernel.itemUseWords`)
+  stanno nell'inventario sotto la descrizione, dopo «Esamina» su un oggetto a terra (il Narratore riceve l'uso per la descrizione) e al
+  posto del «non si usa così» di `core.items` («Usa» e i tasti 1-6; `USE_FALLBACK`). Le combinazioni si leggono dove si tiene l'oggetto:
+  «Crea» mostra solo le ricette che ciò che si porta apre, con ciò che manca (`recipes().opened`); un oggetto dice con che cosa fa che
+  cosa e cosa si ha già, con «Fai …» per la ricetta pronta; un oggetto preso a terra o da un contenitore che completa una ricetta fa
+  pensare il viandante («Con X e Y potresti fare: Z.», `hintRecipes`, una volta a sessione per ricetta). Il rapporto di un universo sul
+  disco: `lab/scripts/oggetti-uso.ts` (quello della prima run in `lab/banco/run-1/oggetti.md`).
 - **Posare sui mobili** (ADR-0150, T291): nel menu di una cosa (`E`, tasto destro) chi impugna qualcosa ha «Posa *X* qui sopra»
   (`perform(id, 'posa')` → `kernel.placeOn`; su ciò che è già posato «Posa *X* accanto», sullo stesso mobile). Un **mobile** è una
   cosa ferma e solida di classe `mobile` (non `pushable`, non una persona né una struttura); il **ripiano** è un pavimento della sua

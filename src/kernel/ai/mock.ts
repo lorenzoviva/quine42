@@ -668,8 +668,9 @@ export class MockAiModels implements AiModels, DecisionModels {
     const food = ws.some((w) => EDIBLE.includes(w));
     // A garment (T353): a thing of clothing with its place (the ids of T310b), so that whoever names it wears it.
     const slot = /cappell|berrett|cappucc|elm/i.test(name) ? 'head' : /tunic|giubb|grembiul|camici|corazz|vest/i.test(name) ? 'torso' : /mantell|sciall|capp[ae]\b/i.test(name) ? 'back' : undefined;
-    if (slot) return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo portano nel regno`, category: 'clothing', weight: 0.8, stack: 1, tags: ['stoffa'], slot, equippable: false, look: name, shape: 'sack' };
-    return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo si trova nel regno`, category: food ? 'food' : 'misc', weight: 0.5, stack: food ? 5 : 1, tags: [food ? 'cucina' : 'casa'], effects: food ? { hunger: 15 } : undefined, equippable: false, look: name, shape: food ? 'bread' : 'sack' };
+    // Every thing with its use (T489): worn, eaten, or kept.
+    if (slot) return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo portano nel regno`, category: 'clothing', weight: 0.8, stack: 1, tags: ['stoffa'], slot, equippable: false, look: name, shape: 'sack', use: 'wear' };
+    return { name: name.trim().replace(/^./, (c) => c.toUpperCase()), description: `${name}, come lo si trova nel regno`, category: food ? 'food' : 'misc', weight: 0.5, stack: food ? 5 : 1, tags: [food ? 'cucina' : 'casa'], effects: food ? { hunger: 15 } : undefined, equippable: false, look: name, shape: food ? 'bread' : 'sack', use: food ? 'consume' : 'decoration' };
   }
 
   private items(count: number, existing: string[], hints: string[]): unknown[] {
@@ -677,7 +678,7 @@ export class MockAiModels implements AiModels, DecisionModels {
     for (const [name, category, description, weight, stack, tags, e] of STOCK) {
       if (out.length >= count) break;
       if (existing.includes(name)) continue;
-      out.push({ name, category, description, weight, stack, tags, effects: e ? { hunger: e.hunger, thirst: e.thirst, energy: e.energy, health: e.health } : undefined, equippable: category === 'tool', look: description, shape: category === 'food' ? 'fruit' : category === 'drink' ? 'bottle' : category === 'tool' ? 'tool' : 'sack' });
+      out.push({ name, category, description, weight, stack, tags, effects: e ? { hunger: e.hunger, thirst: e.thirst, energy: e.energy, health: e.health } : undefined, equippable: category === 'tool', look: description, shape: category === 'food' ? 'fruit' : category === 'drink' ? 'bottle' : category === 'tool' ? 'tool' : 'sack', use: e ? 'consume' : category === 'light' ? 'light' : 'decoration' });
     }
     return out;
   }

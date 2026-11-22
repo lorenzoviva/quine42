@@ -41,7 +41,7 @@ export interface ActionJudgement {
   shape?: string;
 }
 
-const EFFECT_SCHEMA: Schema = {
+export const EFFECT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
     // The effects and their fields are internal since T310 (the prompts are English); validateEffects still makes an Italian one internal.
