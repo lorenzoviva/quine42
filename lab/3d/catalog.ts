@@ -2,7 +2,7 @@
 // the earlier sessions) and a few of MarkovJunior's own 3D models, with the part each plays in the world.
 
 import type { Vec3 } from '../../src/mj/engine';
-import { mjxIncludes } from '../../src/mj/model';
+import { mjxIncludes, rootVptOf } from '../../src/mj/model';
 import { boxOf, classOf, densityFor, sizeOf, STRUCTURE_VPT, VESSEL_TILES, VESSEL_VPT, type SizeTier } from '../../src/mj/classes';
 import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { mockVesselProgram } from '../../src/kernel/ai/mockVessel';
@@ -293,7 +293,7 @@ for (const [file, xml] of Object.entries(handmade)) {
   const base = file.replace(/^.*\//, '').replace(/\.xml$/, '');
   const target = base.split('.')[0];
   // The windmill of step 8.2B is a large structure: its box is the class's (5 × 5 × 4 tiles).
-  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'handmade', xml, vpt: HANDMADE_VPT[target] ?? 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
+  CATALOG.push({ id: `${target}`, name: `${target}`, role: 'handmade', xml, vpt: rootVptOf(xml) ?? HANDMADE_VPT[target] ?? 20, source: sourceOf(xml) || `scolpito a mano da un autore umano`, handmade: true });
 }
 
 

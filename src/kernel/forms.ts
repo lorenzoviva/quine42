@@ -12,7 +12,9 @@ import { areasOf, columnAreasOf, type AreaMap } from '../mj/areas';
 import { boxOf, classOf, CLASSES, growsByRules, isVessel, scaledTiles, STRUCTURE_VPT, tilesOf, VESSEL_VPT, voxelsOf, type AssetClass } from '../mj/classes';
 import { Mj3Error, type Grid3, type PaletteEntry, type Vec3 } from '../mj/engine';
 import { colorTable, floors, footprint, surfaces, type Levels, type VoxelGrid } from '../mj/mesh';
-import { compileMjx, mjxIncludes, type MjxClip } from '../mj/model';
+import { compileMjx, mjxIncludes, rootVptOf, underOf, type MjxClip } from '../mj/model';
+
+export { rootVptOf, underOf };
 import { hexColor } from '../mj/palette';
 import { act, FORM_RUN_LIMITS, MAX_FORM_TIME, MAX_FORM_XML, runMjx } from '../mj/run';
 import { symbolOf } from '../mj/symbols';
@@ -46,15 +48,26 @@ export function vptOf(info: Pick<ModelInfo, 'class' | 'size' | 'vpt'> | undefine
 }
 
 /**
- * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `sotto`, from 1 to 3
- * (a cellar, a crypt); 0 for anything else.
+ * An index entry as the kernel reads it with its program (T494, ADR-0246): the root's `vpt` is its density where it says none (an entry
+ * that says one wins); the same object if the program says nothing, so an entry of today is read as ever. Never written back.
  */
+export function withRoot<T extends Pick<ModelInfo, 'class' | 'vpt'>>(info: T, xml: string | undefined): T;
+export function withRoot<T extends Pick<ModelInfo, 'class' | 'vpt'>>(info: T | undefined, xml: string | undefined): T | undefined;
+export function withRoot<T extends Pick<ModelInfo, 'class' | 'vpt'>>(info: T | undefined, xml: string | undefined): T | undefined {
+  if (!info || info.vpt !== undefined) return info;
+  const vpt = rootVptOf(xml);
+  return vpt === undefined ? info : { ...info, vpt };
+}
+
 /**
  * The voxels of a model under the ground (T52b): its cellar's tiles at the density its entry says, at 20 if it says none (T405, ADR-0209:
- * a structure at 16 keeps the cellar of 20 voxels a tile its program writes, 1.25 tiles deep).
+ * a structure at 16 keeps the cellar of 20 voxels a tile its program writes, 1.25 tiles deep). An entry that says no `cellar` takes the
+ * program's `under` (T494, ADR-0246), in voxels as it was drawn; one that says `cellar` (0 too: none) wins.
  */
-export function cellarVoxels(info: Pick<ModelInfo, 'class' | 'size' | 'vpt' | 'cellar'> | undefined): number {
-  return cellarOf(info as ModelInfo) * (typeof info?.vpt === 'number' ? vptOf(info) : VPT);
+export function cellarVoxels(info: Pick<ModelInfo, 'class' | 'size' | 'vpt' | 'cellar'> | undefined, xml?: string): number {
+  if (info?.cellar === undefined && xml) return underOf(xml);
+  const e = withRoot(info, xml);
+  return cellarOf(e as ModelInfo) * (typeof e?.vpt === 'number' ? vptOf(e) : VPT);
 }
 
 /**
@@ -68,7 +81,15 @@ export function waterlineOf(xml: string): number {
   return Number.isInteger(n) && n >= 1 && n <= 40 ? n : 0;
 }
 
-export function cellarOf(info: ModelInfo | undefined): number {
+/**
+ * How many tiles of a model stand under the ground (ADR-0091, T52b): its index entry's `cellar`, from 1 to 3 (a cellar, a crypt); 0 for
+ * anything else. Without one, the program's `under` at the entry's density, whole tiles up (T494, ADR-0246: 20 voxels at 10 are 2).
+ */
+export function cellarOf(info: ModelInfo | undefined, xml?: string): number {
+  if (info?.cellar === undefined && xml) {
+    const under = underOf(xml);
+    return under ? Math.min(3, Math.ceil(under / vptOf(withRoot(info ?? { class: 'object' }, xml)))) : 0;
+  }
   const n = info?.cellar;
   return typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 3 ? n : 0;
 }
@@ -807,7 +828,7 @@ export function formKey(q: FormRequest): string {
     return interiorKey(bare, { way: 'data', text: interiorText(interior), seed: interior.seed });
   }
   const files = q.files && Object.keys(q.files).length ? JSON.stringify(Object.entries(q.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : '';
-  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(q.base ? [String(q.base)] : [])]) + q.xml + files;
+  return JSON.stringify([String(q.seed), q.size?.map(String) ?? null, q.tint?.symbol ?? null, q.tint?.color ?? null, ...(typeof q.base === 'number' ? [String(q.base)] : [])]) + q.xml + files;
 }
 
 /**
@@ -933,7 +954,7 @@ export class InlineRunner implements FormRunner {
 /** The pure part of running a form (the browser's worker does the same, then makes meshes). */
 export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof compileMjx>; finished: boolean } {
   if (q.xml.length > MAX_FORM_XML) throw new Mj3Error(`programma troppo lungo (max ${MAX_FORM_XML} caratteri)`);
-  const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.base ? { base: q.base } : {}), ...(q.files ? { files: q.files, ...(q.model ? { self: q.model } : {}) } : {}) });
+  const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(typeof q.base === 'number' ? { base: q.base } : {}), ...(q.files ? { files: q.files, ...(q.model ? { self: q.model } : {}) } : {}) });
   if (q.tint && m.program.palette[q.tint.symbol]) m.program.palette[q.tint.symbol] = { ...m.program.palette[q.tint.symbol], color: q.tint.color };
   // A program with pieces may be larger, and its pieces have their own time besides the model's (T339, ADR-0178).
   const r = runMjx(m, q.seed, { deadline: Math.min(q.tempo ?? MODEL_TIME, MAX_FORM_TIME), limits: FORM_RUN_LIMITS });
@@ -1020,6 +1041,19 @@ export class Forms {
 
   info(id: string): ModelInfo | undefined {
     return this.files[`${MODELS_DIR}${id}.xml`] ? (this.library[id] ?? { class: 'object' }) : undefined;
+  }
+
+  /**
+   * An entry as the forms read it (T494, ADR-0246): with its program's root `vpt` where it says none (`withRoot`); `info` stays the entry as
+   * it is written. Its cellar from the program's `under` is `cellarVoxels(entry, xml)`.
+   */
+  entry(id: string): ModelInfo | undefined {
+    return withRoot(this.library[id], this.files[`${MODELS_DIR}${id}.xml`]);
+  }
+
+  /** The voxels of a model's cellar as the world runs it (T494): its entry's `cellar`, or its program's `under`. */
+  cellarVoxelsOf(id: string): number {
+    return cellarVoxels(this.entry(id), this.files[`${MODELS_DIR}${id}.xml`]);
   }
 
   /** The hash of a program as it is written now, with the files it reads: what a form of it is a form of. Undefined if there is no such program. */
@@ -1111,10 +1145,10 @@ export class Forms {
   request(model: string, seed: number, tint?: string, opts: { bare?: boolean } = {}): FormRequest | undefined {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
-    const info = this.library[model];
+    const info = this.entry(model);
     const cls = this.classOf(model);
     const vpt = vptOf(info);
-    const under = cellarVoxels(info);
+    const under = cellarVoxels(info, xml);
     // The tint as the palette reads it (T288): the packs write `hsl(…)`, and a letter with a colour the meshes cannot read vanished.
     const color = info?.tint ? hexColor(tint) : undefined;
     // The letter as the engine holds it: `#12` is one character (T342).
@@ -1130,7 +1164,7 @@ export class Forms {
       vpt,
       model,
       ...(info?.time ? { tempo: info.time } : {}),
-      ...(under && /\s(?:soil|suolo)="/.test(rootTag(xml)) ? { base: under } : {}),
+      ...((under || underOf(xml)) && /\s(?:soil|suolo)="/.test(rootTag(xml)) ? { base: under } : {}),
       ...(Object.keys(this.includesOf(model)).length ? { files: this.includesOf(model) } : {}),
       ...(interior ? { interior } : {}),
     };
@@ -1169,7 +1203,7 @@ export class Forms {
         const q = this.request(id, 1, undefined, { bare: true });
         if (q) furniture[id] = { xml: q.xml, seed: 1, vpt: q.vpt, model: id, ...(q.size ? { size: q.size } : {}), ...(q.tempo ? { tempo: q.tempo } : {}), ...(q.files ? { files: q.files } : {}) };
       }
-      const data = { rules: spec.rules, furniture, base: cellarVoxels(this.library[model]) };
+      const data = { rules: spec.rules, furniture, base: cellarVoxels(this.entry(model), this.files[`${MODELS_DIR}${model}.xml`]) };
       if (Object.keys(furniture).length) out = { data, hash: hashStr(interiorText({ ...data, seed: 0 })) };
     }
     this.interiors.set(model, out ?? null);
@@ -1206,7 +1240,7 @@ export class Forms {
   private form(model: string, seed: number, tint: string | undefined, bare: boolean): Form | undefined {
     const h = this.hashOf(model);
     if (h === undefined) return undefined;
-    const info = this.library[model];
+    const info = this.entry(model);
     const interior = bare ? undefined : this.interiorOf(model, seed);
     const key = this.keyOf(model, seed, tint, h, !!interior);
     let f = this.forms.get(key);
@@ -1216,7 +1250,7 @@ export class Forms {
     if (interior) req.interior = interior;
     const cls = this.classOf(model);
     const vpt = req.vpt;
-    const under = cellarVoxels(info);
+    const under = cellarVoxels(info, this.files[`${MODELS_DIR}${model}.xml`]);
     f = { key, model, seed, status: 'pending', cls, reach: 0, vpt, base: 0, ...(interior ? { furnished: true } : {}) };
     this.forms.set(key, f);
     const form = f;
@@ -1321,7 +1355,7 @@ export class Forms {
 
   /** The box a large structure's entry runs a program without `size` in (ADR-0160), as the validator must try it; undefined for the other classes. */
   structureBox(model: string): Vec3 | undefined {
-    const info = this.library[model];
+    const info = this.entry(model);
     if (!info || info.class !== 'structure') return undefined;
     return [...entryBox(this.classOf(model), info)] as Vec3;
   }
@@ -1331,7 +1365,7 @@ export class Forms {
    * fort: `size="500 500 150"` at 10 voxels a tile, 50 × 50 × 15 tiles), else its entry's (`entryBox`); undefined for another class.
    */
   entryTiles(model: string): [number, number, number] | undefined {
-    const info = this.library[model];
+    const info = this.entry(model);
     if (!info || info.class !== 'structure') return undefined;
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     const own = xml && /\ssize="(\d+)\s+(\d+)\s+(\d+)"/.exec(rootTag(xml));
@@ -1344,8 +1378,8 @@ export class Forms {
   compiled(model: string) {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
-    const info = this.library[model];
-    const size = sizeFor(xml, this.classOf(model), info, cellarVoxels(info));
+    const info = this.entry(model);
+    const size = sizeFor(xml, this.classOf(model), info, cellarVoxels(info, xml));
     const files = this.includesOf(model);
     return compileMjx(xml, { ...(size ? { size } : {}), ...(Object.keys(files).length ? { files, self: model } : {}) });
   }

@@ -7,7 +7,7 @@
 import { analyse } from '../mj/check';
 import { boxUnderMaxSide, classOf, CLASSES, SIZE_TIERS, type SizeTier } from '../mj/classes';
 import { run, runOn, type Grid3, type GridLimits } from '../mj/engine';
-import { compileMjx, MJX_FILE_RE } from '../mj/model';
+import { compileMjx, MJX_FILE_RE, underOf } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
@@ -200,7 +200,9 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     }
     const cls = classOf(q.class)!;
     // The box as the game gives it (`Forms`): the program's own `size`, or its class's at its size.
-    const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxUnderMaxSide(cls, q.size);
+    // With the cellar its root says (T494, ADR-0246: `under`), as deep as the world runs it.
+    const own = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxUnderMaxSide(cls, q.size);
+    const box = own && ([own[0], own[1], own[2] + underOf(q.xml)] as typeof own);
     // What a brought card reads (T472): the files the store read from the disk; a handmade card none.
     const files = programFiles(q.files);
     if ('error' in files) return [files.error];

@@ -37,6 +37,8 @@ export interface Built {
   ok: true;
   grid: { X: number; Y: number; Z: number; cells: Uint8Array; alphabet: string[] };
   palette: Record<string, PaletteEntry>;
+  /** The voxels under the soil (T494, ADR-0246): the root's `under`, where the program has a soil; 0 otherwise. */
+  base: number;
   body: MeshData;
   limbs: LimbMesh[];
   clips: Array<{ name: string; label?: string; frames: MeshData[] }>;
@@ -81,6 +83,7 @@ self.onmessage = (ev: MessageEvent<BuildRequest>) => {
       ok: true,
       grid: { X: g.X, Y: g.Y, Z: g.Z, cells: g.cells, alphabet: g.alphabet },
       palette: pal,
+      base: m.program.soil !== undefined ? (m.program.soilAt ?? 0) : 0,
       body,
       limbs,
       clips,

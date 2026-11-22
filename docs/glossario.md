@@ -605,6 +605,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: nessuno
 - **Fermo**: l'attributo `suolo` nei programmi.
 
+### Cantina della radice
+- **Inglese**: `under`, `underOf`, `rootVptOf`, `withRoot`, `withoutRootDensity`
+- **Definizione**: `under="N"` sulla radice di un programma, i voxel che scava sotto il suolo (la lettera del suolo sta allo strato N dove chi lo fa girare non dice un'altra `base`); `vpt="N"`, la densità per cui un programma fatto a mano è disegnato. Sono predefiniti: la voce che non dice `cellar` ne ricava le caselle (`under / vpt`, per eccesso), quella che non dice `vpt` lo prende; la voce che li dice vince, e lo Scultore non li scrive mai (T494, ADR-0246).
+- **Dove vive**: `src/mj/model.ts`, `src/kernel/forms.ts`, `src/kernel/agents/sculptor.ts` (`withoutRootDensity`)
+- **Da non usare**: `sotto` (è il nome di prima del campo `cellar` della voce), `profondità`
+- **Fermo**: gli attributi `under` e `vpt` della radice dei programmi.
+
 ### Struttura procedurale
 - **Inglese**: `procedural`, `growsByRules`, `shareableProgram`, `structureModel`, `STRUCTURE_SEEDS`, `ModelInfo.seeds`, `STRUCTURE_SIDE`, `densityFor`, `entryBox`
 - **Definizione**: una struttura grande (classe `structure`, da Grande in su) il cui programma cresce a regole, senza una scatola sua: un seme è un altro edificio dello stesso genere, e lo stesso programma serve più taglie, una voce della libreria per taglia.

@@ -217,7 +217,8 @@ const buckets = new Map<number, Entity[]>();
 function place(a: Asset, x: number, z: number, yaw: number, vpt = a.entry.vpt): Entity {
   const e = vpt === a.entry.vpt ? a.entry : { ...a.entry, vpt };
   const root = new THREE.Group();
-  root.position.set(x, 0, z);
+  // A program with a cellar (T494, ADR-0246: `under` on its root) goes that much under the meadow: its soil on the ground, as in the world.
+  root.position.set(x, -a.built.base / vpt, z);
   root.rotation.y = yaw;
   root.scale.setScalar(a.entry.vpt / vpt);
   // What is not a figure nor a plant is cut over the wanderer's head when inside (T403: also the editor's and the bench's structures).
@@ -251,7 +252,8 @@ function place(a: Asset, x: number, z: number, yaw: number, vpt = a.entry.vpt): 
     const g = a.built.grid;
     t.grid = { X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [], epoch: 0 };
     // Body height: from just above the floor to about knee-to-shoulder of a person.
-    t.foot = e.id === 'fiore' ? undefined : footprint(t.grid, a.built.palette, stepOf(e) + 1, Math.ceil(0.7 * e.vpt));
+    const base = a.built.base;
+    t.foot = e.id === 'fiore' ? undefined : footprint(t.grid, a.built.palette, base + stepOf(e) + 1, base + Math.ceil(0.7 * e.vpt));
     t.floor = floors(t.grid, a.built.palette, stepOf(e));
   }
   if (e.id === 'falo') {
@@ -318,7 +320,7 @@ function floorAt(wx: number, wz: number): number {
   let h = 0;
   for (const t of buckets.get(Math.floor(wx) + Math.floor(wz) * 4096) ?? []) {
     const p = t.floor && local(t, wx, wz);
-    if (p) h = Math.max(h, t.floor![p[0] + p[1] * t.grid!.X] / t.entry.vpt);
+    if (p) h = Math.max(h, (t.floor![p[0] + p[1] * t.grid!.X] - t.asset.built.base) / t.entry.vpt);
   }
   return h;
 }
@@ -553,7 +555,7 @@ function doAction(t: Entity, name: string) {
     const fr = clipFrames(t.grid!, anim, 1);
     t.frames.forEach((f, i) => (f.geometry = geometry(meshVoxels(fr[i], pal, { vpt: built }))));
   }
-  t.foot = footprint(t.grid!, pal, stepOf(t.entry) + 1, Math.ceil(0.7 * t.entry.vpt));
+  t.foot = footprint(t.grid!, pal, t.asset.built.base + stepOf(t.entry) + 1, t.asset.built.base + Math.ceil(0.7 * t.entry.vpt));
   t.floor = floors(t.grid!, pal, stepOf(t.entry));
   t.action = undefined;
 }
@@ -756,6 +758,8 @@ function tick(now: number) {
   prompt.hidden = !near;
   if (near) prompt.textContent = `E — ${near.a.label}`;
   cut.constant = cutAt ?? (inside ? (player?.root.position.y ?? 0) + 1.05 : 1000);
+  // Cut under the ground (T494), the meadow goes too: a cellar is seen from above, as the world opens the terrain over it.
+  if (ground) ground.visible = cut.constant > 0;
 
   cam.yaw += (cam.yawGoal - cam.yaw) * Math.min(1, dt * 8);
   const off = new THREE.Vector3(Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), Math.cos(cam.yaw) * Math.cos(cam.pitch)).multiplyScalar(cam.dist);
