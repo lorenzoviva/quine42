@@ -4,7 +4,9 @@
 // Sculptor writes it, the entity shows the generic model of its class. Within a budget per session.
 
 import type { Kernel } from './kernel';
-import { procedural, requestSpecialty, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptorSpecialty, type SculptRequest } from './agents/sculptor';
+import { EXAMPLE_SCORE, procedural, requestSpecialty, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptorSpecialty, type SculptRequest, type SculptResult } from './agents/sculptor';
+import { extractPart, PART_TASK, PART_TRIES } from './agents/parts';
+import { WORLD_PARTS } from './worldparts';
 import { classOf, densityFor, growsByRules, guessClass, isVessel, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
 import { cellarOf, type ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
@@ -133,6 +135,10 @@ export class ModelDirector {
   private nextAt = 0;
   /** The trade the Sculptor was last asked for (T468): its requests come first, while the cache keeps its prefix. */
   private lastSpecialty?: SculptorSpecialty;
+  /** How many times this session each trade was asked for a part of the world (T472): at most `PART_TRIES`. */
+  private partTries = new Map<SculptorSpecialty, number>();
+  /** The parts of the world this session took (T472). */
+  partsTaken = 0;
 
   constructor(private k: Kernel) {}
 
@@ -334,6 +340,8 @@ export class ModelDirector {
       // Its cellar (T417): the one the program holds, which the entry says, so the library runs it under the ground.
       const added = this.k.addModel(req.id, r.xml, { class: req.classe, ...modelSize(req), name: req.nome, author: r.model, ...(cls && procedural(cls, req.taglia) ? { seeds: STRUCTURE_SEEDS } : {}), ...(r.score !== undefined ? { score: r.score } : {}), ...(req.tinta ? { tint: 'C' } : {}), ...(r.cellar ? { cellar: r.cellar } : {}) }, `scultore: ${req.nome}`, SCULPTED);
       if (!added) this.lacking(req, 'invalid', this.k.lastDiscard('sculptor', 'model.sculpt'));
+      // A good model of a trade that lacks its parts may give one (T472): while the cache still keeps the trade's prefix.
+      else await this.part(req, r);
       return added;
     } catch (e) {
       if (e instanceof BudgetError) this.stopped = true;
@@ -343,6 +351,41 @@ export class ModelDirector {
       return false;
     } finally {
       this.busy = false;
+    }
+  }
+
+  /**
+   * The trade a model just made may give a part of the world to (T472, ADR-0243), or undefined: only while the director sculpts with the models
+   * (the local ones write no part), for a model the Artist gave at least `EXAMPLE_SCORE`, of a trade (not the actions) with fewer than
+   * `WORLD_PARTS` parts and asked fewer than `PART_TRIES` times this session; the knob of the models above 0, a universe that is written.
+   */
+  partWanted(req: Pick<SculptRequest, 'classe' | 'taglia' | 'worn'>, score: number | undefined): SculptorSpecialty | undefined {
+    if (!this.active || score === undefined || score < EXAMPLE_SCORE) return undefined;
+    if (this.k.coefficients().models <= 0 || this.k.readOnly() !== undefined) return undefined;
+    const specialty = requestSpecialty(req);
+    if (specialty === 'actions' || (this.partTries.get(specialty) ?? 0) >= PART_TRIES) return undefined;
+    return this.k.worldParts(specialty).length >= WORLD_PARTS ? undefined : specialty;
+  }
+
+  /**
+   * Asks the Sculptor for a part of a model just made (T472): one call on the model that sculpted it, the kernel takes the part if the model
+   * rewritten with it makes the same grid on every seed (`addWorldPart`). True if it did. Never throws: a part is the world's own good, not
+   * something it lacks, so what goes wrong is said in the feed and is no shortfall.
+   */
+  async part(req: SculptRequest, r: Pick<SculptResult, 'model' | 'score'>): Promise<boolean> {
+    const specialty = this.partWanted(req, r.score);
+    const xml = this.k.files[`models/${req.id}.xml`];
+    if (!specialty || !xml) return false;
+    this.partTries.set(specialty, (this.partTries.get(specialty) ?? 0) + 1);
+    try {
+      const out = await extractPart(this.k.council, { id: req.id, xml, nome: req.nome, classe: req.classe, ...(req.taglia ? { taglia: req.taglia } : {}), ...(req.worn ? { worn: req.worn } : {}), score: r.score! }, r.model, (made) => this.k.addWorldPart(req.id, made, { specialty, author: r.model }), this.k.worldParts(specialty));
+      if (!out.id) return false;
+      this.partsTaken++;
+      return true;
+    } catch (e) {
+      if (e instanceof BudgetError) this.stopped = true;
+      this.k.council.say('sculptor', 'errore', `parte di «${req.nome}»: ${(e as Error).message}`, undefined, PART_TASK);
+      return false;
     }
   }
 

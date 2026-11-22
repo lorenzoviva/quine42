@@ -50,6 +50,7 @@ export const CARD_MAKERS: Readonly<Record<string, readonly string[]>> = {
   'forge.concept': ['forge.concept', 'forge.code', 'forge.physics', 'forge.review'],
   'model.sculpt': ['model.sculpt', 'model.judge'],
   'model.reuse': ['model.reuse'],
+  'model.part': ['model.part'],
   'sound.compose': ['sound.compose'],
   'content.items': ['content.items', 'content.physics', 'content.recipes', 'content.review'],
   'items.citati': ['content.define'],
@@ -127,10 +128,10 @@ export class CardCosts {
 
 /**
  * The tasks the whole world pays for (decision 4): the Genesis, the Council's sessions, plots and what the
- * people do among themselves, the reviews and repairs, the models the library lacks. Every other call is paid
- * by the wanderer it is made for (the place they explore, their chats, their «Altro…», their requests).
+ * people do among themselves, the reviews and repairs, the models the library lacks and the parts of the world taken from them (T472).
+ * Every other call is paid by the wanderer it is made for (the place they explore, their chats, their «Altro…», their requests).
  */
-const COMMON_TASK = /^(genesis\.|council\.|plot\.|review\.|npc\.dialogue$|forge\.fix$|model\.(sculpt|judge|resculpt|reuse)$|sound\.compose$|interior\.design$|content\.)/;
+const COMMON_TASK = /^(genesis\.|council\.|plot\.|review\.|npc\.dialogue$|forge\.fix$|model\.(sculpt|judge|resculpt|reuse|part)$|sound\.compose$|interior\.design$|content\.)/;
 
 export function isCommonTask(task: string): boolean {
   return COMMON_TASK.test(task);

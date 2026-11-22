@@ -7,7 +7,7 @@
 import { analyse } from '../mj/check';
 import { boxUnderMaxSide, classOf, CLASSES, SIZE_TIERS, type SizeTier } from '../mj/classes';
 import { run, runOn, type Grid3, type GridLimits } from '../mj/engine';
-import { compileMjx } from '../mj/model';
+import { compileMjx, MJX_FILE_RE } from '../mj/model';
 import { parseXml, XmlError } from '../mj/xml';
 import { classSeeds, rootTag } from './forms';
 import { metaBreak } from './fourthwall';
@@ -135,6 +135,27 @@ export interface HandmadeProgram {
   xml: string;
   class?: string;
   size?: string;
+  /**
+   * The files of models/ the program reads (T472): only for a card brought from a universe, read from the disk by the store, never said by a
+   * client (the parts of the seed of the universe it enters, the parts of the world it brings along). A handmade card reads none.
+   */
+  files?: Record<string, string>;
+}
+
+/** The files a program to check reads, as they came (`HandmadeProgram.files`): plain names of models/, text, within the world's ceilings; else why not. */
+export function programFiles(raw: unknown): Record<string, string> | { error: string } {
+  if (raw === undefined) return {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'i file che il programma legge non si leggono' };
+  const out: Record<string, string> = {};
+  let chars = 0;
+  for (const [name, text] of Object.entries(raw as Record<string, unknown>)) {
+    const m = /^(.+)\.(xml|txt)$/.exec(name);
+    if (!m || !MJX_FILE_RE.test(m[1]) || typeof text !== 'string') return { error: `file del programma non valido: ${name.slice(0, 60)}` };
+    chars += text.length;
+    out[name] = text;
+  }
+  if (Object.keys(out).length > WORLD_NODE_LIMITS.files || chars > WORLD_NODE_LIMITS.fileChars) return { error: `legge troppi file di models/ (al più ${WORLD_NODE_LIMITS.files}, ${WORLD_NODE_LIMITS.fileChars} caratteri)` };
+  return out;
 }
 
 /** Why kind, class and size cannot be, without running anything. */
@@ -180,11 +201,14 @@ export function handmadeProgramErrors(q: HandmadeProgram, limits: HandmadeLimits
     const cls = classOf(q.class)!;
     // The box as the game gives it (`Forms`): the program's own `size`, or its class's at its size.
     const box = /\ssize="/.test(rootTag(q.xml)) ? undefined : boxUnderMaxSide(cls, q.size);
-    const m = compileMjx(q.xml, box ? { size: box } : {});
+    // What a brought card reads (T472): the files the store read from the disk; a handmade card none.
+    const files = programFiles(q.files);
+    if ('error' in files) return [files.error];
+    const m = compileMjx(q.xml, { ...(box ? { size: box } : {}), ...(Object.keys(files).length ? { files } : {}) });
     if (m.sound) return ['questo programma è un suono (<sound>): salvalo come suono'];
-    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a card reads no files, so no wfc nor import, and a convchain only
-    // with its sample written in the node (T469, ADR-0240).
-    const nodes = worldNodeErrors(m, q.xml);
+    // The nodes of T333-T335 within the world's ceilings (T336, ADR-0176): a handmade card reads no files, so no wfc nor import, and a
+    // convchain only with its sample written in the node (T469, ADR-0240); a brought card the parts it includes (T472).
+    const nodes = worldNodeErrors(m, q.xml, files);
     if (nodes.length) return nodes;
     if (m.actions.length > limits.actions) return [`troppe azioni: ${m.actions.length}, al più ${limits.actions}`];
     if (m.animations.length > limits.animations) return [`troppe animazioni: ${m.animations.length}, al più ${limits.animations}`];

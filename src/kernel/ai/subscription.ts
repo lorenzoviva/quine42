@@ -36,9 +36,10 @@ export const cliEffortOf = (e: unknown): string | undefined => (typeof e === 'st
 /**
  * The tasks already slow enough that a CLI answering in seconds or minutes changes nothing for whoever plays.
  * The Artist's judgement (`model.judge`) looks at photos: it stays on the API. The Scenografo's interior (`interior.design`, T410) is asked
- * once per type of building, while the bare building is already there: it may wait for the queue.
+ * once per type of building, while the bare building is already there: it may wait for the queue. A part of the world (`model.part`,
+ * T472) follows the model it is taken from.
  */
-const SLOW = [/^genesis\./, /^forge\./, /^model\.(sculpt|resculpt)$/, /^council\.session$/, /^mechanic\.design$/, /^interior\.design$/];
+const SLOW = [/^genesis\./, /^forge\./, /^model\.(sculpt|resculpt|part)$/, /^council\.session$/, /^mechanic\.design$/, /^interior\.design$/];
 
 export const slowTask = (task: string): boolean => SLOW.some((r) => r.test(task));
 

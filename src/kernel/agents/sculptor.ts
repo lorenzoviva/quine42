@@ -27,6 +27,7 @@ import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
 import { wornErrors, wornSections, type WornZone } from '../../mj/worn';
+import { isWorldPart, partContract, WORLD_PARTS, worldPartsIn } from '../worldparts';
 import type { Council } from './council';
 
 export type ModelCategory = 'simple' | 'figure' | 'structure';
@@ -430,14 +431,8 @@ const byId = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
  */
 export function examplesFor(files: FileMap, request: ExampleRequest | string): string[] {
   const req: ExampleRequest = typeof request === 'string' ? { classe: request } : request;
-  let index: Record<string, Partial<ModelInfo> | undefined> = {};
-  try {
-    // The fields of 0.3 (`classe`, `autore`, `voto`) read internal (T308a).
-    index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
-  } catch {
-    index = {};
-  }
-  if (!index || typeof index !== 'object' || Array.isArray(index)) index = {};
+  // The fields of 0.3 (`classe`, `autore`, `voto`) read internal (T308a).
+  const index = libraryIndex(files);
   const worn = !!req.worn;
   const own = classOf(req.classe);
   const size = (t: unknown) => (own ? (sizeOf(typeof t === 'string' ? t : undefined)?.id ?? own.taglia) : undefined);
@@ -566,35 +561,65 @@ export function partSpecialties(info: Partial<ModelInfo> | undefined): SculptorS
   return said.length ? [...new Set(said)] : ['architect'];
 }
 
-/**
- * The parts a request may include (T354, ADR-0183; by specialty since T471, ADR-0241): the programs `models/part-*.xml` of the universe (the
- * parts of the seed, ADR-0182, and in time those of the world, ADR-0239) whose entry serves the request's specialty (`partSpecialties`),
- * each with its contract for the program that includes it, the first paragraph of the comment at its top. One line per part, in the order
- * of their names, at most `MAX_PARTS`; empty if the universe has none for that trade. Without `fortified` (T434), not the parts of a fort
- * (`FORT_PARTS`). The architect gets the parts one lives in and the windows; the mason the windows and the leaves; the joiner the leaves and
- * the wheel; the coachbuilder the wheel.
- */
-export function partResources(files: FileMap, specialty: SculptorSpecialty = 'architect', fortified = true): string[] {
+/** The library's index as the Sculptor reads it: the fields of 0.3 internal (T308a); what does not read is an empty library. */
+function libraryIndex(files: FileMap): Record<string, Partial<ModelInfo> | undefined> {
   let index: Record<string, Partial<ModelInfo> | undefined> = {};
   try {
     index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
   } catch {
     index = {};
   }
-  if (!index || typeof index !== 'object' || Array.isArray(index)) index = {};
+  return index && typeof index === 'object' && !Array.isArray(index) ? index : {};
+}
+
+/**
+ * The parts of the seed a request may include (T354, ADR-0183; by specialty since T471, ADR-0241): the programs `models/part-*.xml` of the
+ * universe that are not parts of the world (those are `worldPartResources`'s) whose entry serves the request's specialty (`partSpecialties`),
+ * each with its contract for the program that includes it, the first paragraph of the comment at its top. One line per part, in the order
+ * of their names, at most `MAX_PARTS`; empty if the universe has none for that trade. Without `fortified` (T434), not the parts of a fort
+ * (`FORT_PARTS`). The architect gets the parts one lives in and the windows; the mason the windows and the leaves; the joiner the leaves and
+ * the wheel; the coachbuilder the wheel.
+ */
+export function partResources(files: FileMap, specialty: SculptorSpecialty = 'architect', fortified = true): string[] {
+  const index = libraryIndex(files);
   const out: string[] = [];
   for (const [path, text] of Object.entries(files)) {
     const name = /^models\/(part-[a-z0-9-]+)\.xml$/.exec(path);
     if (!name || typeof text !== 'string') continue;
-    if (!partSpecialties(Object.prototype.hasOwnProperty.call(index, name[1]) ? index[name[1]] : undefined).includes(specialty)) continue;
+    const entry = Object.prototype.hasOwnProperty.call(index, name[1]) ? index[name[1]] : undefined;
+    if (isWorldPart(name[1], entry) || !partSpecialties(entry).includes(specialty)) continue;
     // The parts of a fort only to a fortification (T434): offered to a cathedral or a station, the Sculptor crowned them with merlons (T153).
     if (!fortified && (FORT_PARTS as readonly string[]).includes(name[1])) continue;
-    const comment = /^\s*<!--([\s\S]*?)-->/.exec(text)?.[1]?.trim();
-    const contract = comment?.split(/\n\s*\n/)[0]?.replace(/\s*\n\s*/g, ' ').trim();
-    out.push(`- <import file="${name[1]}"/>: ${contract || 'a part of the seed (no contract written at its top)'}`);
+    out.push(`- <import file="${name[1]}"/>: ${partContract(text) || 'a part of the seed (no contract written at its top)'}`);
   }
   return out.sort().slice(0, MAX_PARTS);
 }
+
+/**
+ * The parts of the world of a trade (T472, ADR-0243): those the Sculptor took from the good models of this universe, or that came with the
+ * cards that include them, whose entry serves the specialty; the best voted first, at most `WORLD_PARTS` and `room` (what `MAX_PARTS` leaves
+ * to them after the parts of the seed). One line each, with the model it was taken from and its contract.
+ */
+export function worldPartResources(files: FileMap, specialty: SculptorSpecialty, room = WORLD_PARTS): string[] {
+  const index = libraryIndex(files);
+  return worldPartsIn(files, index as Record<string, unknown>)
+    .filter((p) => partSpecialties(p.entry as Partial<ModelInfo>).includes(specialty))
+    .slice(0, Math.max(0, Math.min(WORLD_PARTS, room)))
+    .map((p) => {
+      const from = typeof p.entry.from === 'string' ? index[p.entry.from]?.name : undefined;
+      return `- <import file="${p.id}"/>${from ? ` (from «${from}»)` : ''}: ${partContract(p.xml) || 'a part of this world'}`;
+    });
+}
+
+/** The parts of the world of a trade with their programs, the best first (T472): what the director counts and the request of a new one lists. */
+export function worldPartsOf(files: FileMap, specialty: SculptorSpecialty): Array<{ id: string; xml: string }> {
+  return worldPartsIn(files, libraryIndex(files) as Record<string, unknown>)
+    .filter((p) => partSpecialties(p.entry as Partial<ModelInfo>).includes(specialty))
+    .map(({ id, xml }) => ({ id, xml }));
+}
+
+/** What the request says before the parts of the world (T472): they are included as the parts of the seed are. */
+export const WORLD_PARTS_LINE = 'Parts of this world, taken from its own good models, that the program may include in the same way where the thing has one (each says what it reads and writes; never use S nor #90-#97):';
 
 /**
  * What the request of a thing in one box says before its parts (T471): the architect's prompt teaches the parts one lives in, the sections of
@@ -972,6 +997,9 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
     prompt += proc
       ? `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`
       : `\n\n${TRADE_PARTS}\n${parts.join('\n')}`;
+  // The parts of the world of the trade (T472, ADR-0243), in what MAX_PARTS leaves: a world without them asks as before.
+  const own = worldPartResources(c.files, specialty, MAX_PARTS - parts.length);
+  if (own.length) prompt += `\n\n${WORLD_PARTS_LINE}\n${own.join('\n')}`;
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {
@@ -1090,9 +1118,12 @@ export interface ActionLetter {
 /** The program's own box, or its class's (as the library runs it). */
 const boxFor = (xml: string, cls: AssetClass): { size?: Vec3 } => (/<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml) ? {} : { size: boxOf(cls) });
 
-/** The letters of the finished model, the drawn ones with how many voxels they colour: what an action rewrites. */
-export function actionLetters(xml: string, cls: AssetClass): { background: string; letters: ActionLetter[] } {
-  const model = compileMjx(xml, boxFor(xml, cls));
+/** What a program compiles with: its box, and the files it reads (`filesOf`: a part it includes, T472), if any. */
+const compileOptions = (xml: string, cls: AssetClass, files: MjxFiles) => ({ ...boxFor(xml, cls), ...(Object.keys(files).length ? { files } : {}) });
+
+/** The letters of the finished model, the drawn ones with how many voxels they colour: what an action rewrites. `files` are those it reads. */
+export function actionLetters(xml: string, cls: AssetClass, files: MjxFiles = {}): { background: string; letters: ActionLetter[] } {
+  const model = compileMjx(xml, compileOptions(xml, cls, files));
   const g = runMjx(model, 1, { deadline: 8_000 }).grid;
   const counts = new Map<number, number>();
   for (const c of g.cells) counts.set(c, (counts.get(c) ?? 0) + 1);
@@ -1117,13 +1148,13 @@ export function extractAction(raw: string, name: string, label: string): string 
 /**
  * The kernel's checks on a new action: the program with it compiles; on the finished model the action
  * finishes, changes something, and does not empty it (at least half of what is drawn stays drawn).
- * Returns the program with the action beside the root, or the reason.
+ * Returns the program with the action beside the root, or the reason. `files` are those the program reads (a part it includes, T472).
  */
-export function checkAction(xml: string, clip: string, name: string, cls: AssetClass): { xml?: string; error?: string } {
+export function checkAction(xml: string, clip: string, name: string, cls: AssetClass, files: MjxFiles = {}): { xml?: string; error?: string } {
   if ([...xml.matchAll(/<action\s[^>]*name="([^"]*)"/g)].some((m) => m[1] === name)) return { error: `il modello ha già un'azione "${name}"` };
   const full = `${xml.trimEnd()}\n${clip.trim()}\n`;
   try {
-    const model = compileMjx(full, boxFor(full, cls));
+    const model = compileMjx(full, compileOptions(full, cls, files));
     const a = model.actions.find((x) => x.name === name);
     if (!a) return { error: `manca <action name="${name}">` };
     const r = runMjx(model, 1, { deadline: 8_000 });
@@ -1149,9 +1180,11 @@ export function checkAction(xml: string, clip: string, name: string, cls: AssetC
 /** The Sculptor writes an action for a model; undefined if none passes the kernel's checks. */
 export async function sculptAction(c: Council, req: ActionRequest, model: string, retries = 2): Promise<{ xml: string; calls: number } | undefined> {
   const cls = classOf(req.classe) ?? classOf('object')!;
+  // A model that includes a part reads it (T472): of the seed or of the world, from the universe's models/.
+  const files = filesOf(req.xml, c.files);
   let info: ReturnType<typeof actionLetters>;
   try {
-    info = actionLetters(req.xml, cls);
+    info = actionLetters(req.xml, cls, files);
   } catch {
     return undefined;
   }
@@ -1173,7 +1206,7 @@ export async function sculptAction(c: Council, req: ActionRequest, model: string
     calls++;
     const raw = await c.write('sculptor', 'model.action', p, { role, system: [section], model, temperature: 0.4, specialty: 'actions', data: { request: req, background: info.background, letters: info.letters } });
     const clip = extractAction(raw, req.azione, req.etichetta);
-    const checked = clip ? checkAction(req.xml, clip, req.azione, cls) : { error: 'manca <action>…</action>' };
+    const checked = clip ? checkAction(req.xml, clip, req.azione, cls, files) : { error: 'manca <action>…</action>' };
     if (checked.xml) return { xml: checked.xml, calls };
     last = { clip: clip ?? raw.slice(0, 400), error: checked.error };
     c.say('kernel', 'scarta', `azione «${req.etichetta}» di «${req.nome}»: ${checked.error?.slice(0, 160)}`, 'sculptor', 'model.action');

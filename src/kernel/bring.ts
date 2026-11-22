@@ -14,6 +14,7 @@ import type { CardChoice, FileMap } from './types';
 import { validWandererId } from './wandererIds';
 import { classOf, densityFor, densityOf, growsByRules, scaledTiles, sizeOf, TILE } from '../mj/classes';
 import { soundPrograms, SOUND_CLASS, type SoundPurpose } from '../mj/sound';
+import { isWorldPart } from './worldparts';
 
 /** A card the master chooses: a model or a sound of a universe, or a handmade card. Only names: what it is, the store reads from the disk. */
 export type BringRef = { universe: string; model: string } | { handmade: string };
@@ -81,7 +82,8 @@ export function readIndex(files: FileMap): Record<string, Record<string, any>> {
 
 /**
  * The cards of a universe one may bring: the entries of its library that are cards (generated, with a `card`; the seed's are in every
- * universe, and nobody's), with their program, a model of a known class or a sound. In the order of their ids.
+ * universe, and nobody's), with their program, a model of a known class or a sound. In the order of their ids. Not the parts of the world
+ * (T472): they come with the cards that include them.
  */
 export function kinCards(files: FileMap): KinCard[] {
   const index = readIndex(files);
@@ -89,7 +91,7 @@ export function kinCards(files: FileMap): KinCard[] {
   const out: KinCard[] = [];
   for (const id of Object.keys(index).sort()) {
     const e = index[id];
-    if (!MODEL_ID_RE.test(id) || !e || typeof e !== 'object' || !isCardStamp(e.card) || files[`${MODELS_DIR}${id}.xml`] === undefined) continue;
+    if (!MODEL_ID_RE.test(id) || !e || typeof e !== 'object' || !isCardStamp(e.card) || files[`${MODELS_DIR}${id}.xml`] === undefined || isWorldPart(id, e)) continue;
     const name = typeof e.name === 'string' && e.name.trim() ? e.name.trim().slice(0, 120) : id;
     const score = typeof e.score === 'number' && Number.isFinite(e.score) ? Math.max(0, Math.min(10, Math.round(e.score))) : undefined;
     if (e.class === SOUND_CLASS) {
@@ -167,6 +169,13 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
   if (typeof e.score === 'number' && Number.isFinite(e.score)) info.score = Math.max(0, Math.min(10, Math.round(e.score)));
   if (typeof e.tint === 'string' && /^[A-Za-z]$/.test(e.tint)) info.tint = e.tint;
   if (typeof e.author === 'string' && /^[\p{L}\p{N} ._:-]{1,60}$/u.test(e.author)) info.author = e.author;
+  // A part of the world that comes with a card that includes it (T472): it stays a part, of the trades it served, from the model it was taken from.
+  if (!('handmade' in src) && isWorldPart(src.id, e)) {
+    info.part = true;
+    const trades = (Array.isArray(e.specialty) ? e.specialty : [e.specialty]).filter((s: unknown): s is string => typeof s === 'string' && /^[a-z]{3,20}$/.test(s)).slice(0, 8);
+    if (trades.length) info.specialty = trades.length === 1 ? trades[0] : trades;
+    if (typeof e.from === 'string' && MODEL_ID_RE.test(e.from)) info.from = e.from;
+  }
   if (src.kind === 'sound') {
     const sound = purposeOf(src.id, 'handmade' in src ? {} : e, src.xml);
     if (sound) info.sound = sound;
