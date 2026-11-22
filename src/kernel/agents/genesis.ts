@@ -13,6 +13,7 @@ import { internalFields, internalName } from '../internalNames';
 import { FORGE_KINDS, type ForgeKind } from './forge';
 import { TIMELESS_LAYOUTS } from '../themes';
 import { DEPTHS, physicsOf, TERRAIN_LIMITS, WATER_CODES, type Crossing, type Geography } from '../nature';
+import { SEED_STRATA, STRATA_DEPTH, STRATA_EXAMPLE, strataErrors, strataPalette, STRATUM_ROLES } from '../strata';
 
 /**
  * Codes the procedural draft and the kernel rely on: every palette must define them. Their layer and how a body crosses them (T437,
@@ -227,7 +228,8 @@ export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
   );
 }
 
-export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>) => string[];
+/** How the kernel tries an environment (`validateLayout` on the drafts of trial); `strata`, the terrains of the strata its program may write (T478). */
+export type LayoutCheck = (id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>, strata?: Record<string, TerrainDef>) => string[];
 
 /**
  * What came with the cards before the Genesis (T295, ADR-0170), as its agents are told: the Artist every model and sound by name and class
@@ -373,6 +375,10 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartographer');
   }
 
+  // What lies under the ground (T478, ADR-0249): the terrains of the strata and, for each environment, the program of its strata.
+  const under = Object.keys(layouts).length ? await designStrata(c, layouts, palette, checkLayout, theme) : { strata: {}, programs: {} };
+  for (const [id, program] of Object.entries(under.programs)) layouts[id]!.strata = program;
+
   const cast = await c.ask<{ modules: Array<{ type?: string; request?: string }> }>(
     'narrator',
     'genesis.cast',
@@ -400,6 +406,8 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
   const house = typeof style.common_houses === 'string' ? style.common_houses.trim().slice(0, 200) : '';
   if (house && !metaBreak(house, wordsOf(base))) tm.commonHouse = house;
   else delete tm.commonHouse;
+  // The strata of this world (T478), where the Cartographer wrote some that are good, under them the seed's (`strataPalette`); else the seed's.
+  tm.strata = Object.keys(under.strata).length ? under.strata : { ...SEED_STRATA };
   files[terrainPath] = JSON.stringify(tm, null, 2) + '\n';
   if (Object.keys(layouts).length >= 1) {
     const lp = 'modules/world.layouts/manifest.json';
@@ -410,4 +418,153 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     files[lp] = JSON.stringify(lm, null, 2) + '\n';
   }
   return { files, cast: moduli.slice(0, 14), wandererPrompt: style.protagonist, palette };
+}
+
+// ---------------------------------------------------------------------------------------------------------------- the strata (T478)
+
+/** Kinds of earth and rock the Cartographer writes under the ground of a world at most (T478): with the seed's, within `strataErrors`' 16. */
+export const MAX_OWN_STRATA = 8;
+
+const STRATA_SCHEMA: Schema = {
+  type: 'OBJECT',
+  properties: {
+    strata: {
+      type: 'ARRAY',
+      description: `4-${MAX_OWN_STRATA} kinds of earth and rock under the ground of this world`,
+      items: {
+        type: 'OBJECT',
+        properties: {
+          code: { type: 'STRING', description: 'one uppercase letter other than E, not a code of the terrains' },
+          name: { type: 'STRING' },
+          description: { type: 'STRING', description: 'what it is like: material, colour, what is in it' },
+          color: { type: 'STRING', description: 'hexadecimal #rrggbb, well apart from the others' },
+          role: { type: 'STRING', enum: [...STRATUM_ROLES, 'other'] },
+        },
+        required: ['code', 'name', 'description', 'color', 'role'],
+      },
+    },
+    environments: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { id: { type: 'STRING' }, program: { type: 'STRING', description: 'the MarkovJunior XML that says what lies under what in its places' } },
+        required: ['id', 'program'],
+      },
+    },
+  },
+  required: ['strata', 'environments'],
+};
+
+/** The codes of the procedural draft, as the request of the strata tells them: what the top layer of a program holds. */
+const DRAFT_LINE = 'g (grass, earth), p (path), t (wood), j (jungle), n (snow), s (sand), w (shallow water), o (sea), r (rock), k (mountain)';
+
+/**
+ * The terrains of the strata the Cartographer wrote (T478), read without trusting them: one uppercase letter each but E (the earth not yet
+ * decided of the programs, the seed's too), not a code of the terrains and not twice, good as a stratum (`strataErrors`), a role of the draft
+ * at most once (its `id`, so the draft takes it: `roleCodes`); at most `MAX_OWN_STRATA`. What is left out, and why.
+ */
+export function ownStrata(raw: unknown, palette: Record<string, TerrainDef>): { strata: Record<string, TerrainDef>; problems: string[] } {
+  const strata: Record<string, TerrainDef> = {};
+  const problems: string[] = [];
+  const roles = new Set<string>();
+  for (const s of Array.isArray(raw) ? raw.slice(0, MAX_OWN_STRATA * 2) : []) {
+    const t = (s && typeof s === 'object' ? s : {}) as { code?: unknown; name?: unknown; description?: unknown; color?: unknown; role?: unknown };
+    const code = typeof t.code === 'string' ? t.code.trim() : '';
+    if (!/^[A-Z]$/.test(code) || code === 'E') {
+      problems.push(`strato «${String(t.name ?? t.code)}»: il codice è una lettera maiuscola, non E (la terra ancora da decidere dei programmi)`);
+      continue;
+    }
+    if (palette[code] || strata[code]) {
+      problems.push(`strato ${code}: il codice è già ${palette[code] ? 'un terreno' : 'un altro strato'}`);
+      continue;
+    }
+    const role = typeof t.role === 'string' && (STRATUM_ROLES as readonly string[]).includes(t.role) && !roles.has(t.role) ? t.role : undefined;
+    const def: TerrainDef = {
+      ...(role ? { id: role } : {}),
+      name: typeof t.name === 'string' ? t.name.trim().slice(0, 40) : '',
+      description: typeof t.description === 'string' ? t.description.trim().slice(0, 200) : '',
+      color: typeof t.color === 'string' ? t.color.trim().toLowerCase() : '',
+      solid: true,
+      layer: 'stratum',
+    };
+    const errs = strataErrors({ [code]: def });
+    if (errs.length) {
+      problems.push(errs[0]!);
+      continue;
+    }
+    if (Object.keys(strata).length >= MAX_OWN_STRATA) break;
+    if (role) roles.add(role);
+    strata[code] = def;
+  }
+  return { strata, problems };
+}
+
+/**
+ * Genesis (T478, ADR-0249): the Cartographer writes the terrains of the strata of this world and, for each environment, the program that says
+ * what lies under what in its places. The strata of its first answer stay (of the second only if the first had none); each program is tried as
+ * the world runs it (`checkLayout` with the strata, `strataProgramErrors`) and goes back once with the reasons; one still invalid is left out,
+ * and that environment's places have the draft's strata. Nothing of it stops the Genesis: without strata of its own the world has the seed's.
+ */
+export async function designStrata(
+  c: Council,
+  layouts: Record<string, EnvironmentDef>,
+  palette: Record<string, TerrainDef>,
+  checkLayout: LayoutCheck,
+  theme: string,
+): Promise<{ strata: Record<string, TerrainDef>; programs: Record<string, string> }> {
+  let own: Record<string, TerrainDef> = {};
+  const programs: Record<string, string> = {};
+  let wanted = Object.keys(layouts);
+  let feedback = '';
+  for (let round = 0; round < 2 && wanted.length; round++) {
+    const fixed = Object.keys(own).length ? own : undefined;
+    const raw = await c.ask<{ strata?: unknown; environments?: Array<{ id?: unknown; program?: unknown }> }>(
+      'cartographer',
+      'genesis.strata',
+      [
+        `Write what lies under the ground of this world, of its land and its age: the strata (4-${MAX_OWN_STRATA} kinds of earth and rock the cuts under the ground show: under the steppe the loess, under the volcano the basalt, under the marsh the peat) and, for each environment, a short program that says what lies under what in its places.`,
+        fixed
+          ? `The strata are these; keep them as they are: ${Object.entries(fixed).map(([k, t]) => `${k} ${t.name}${t.id ? ` (${t.id})` : ''}`).join(', ')}.`
+          : 'Each stratum: a code (one uppercase letter other than E, not a code of the terrains), a name and a description in the language of the world, a colour #rrggbb well apart from the others, and its role if it plays one: topsoil (the earth under meadows and woods), clay (the earth under it), sandbed (under the sand), mud (under the waters), bedrock (what everything rests on, at the bottom); other for the rest (water in the gravel, a vein of ore, roots, ash).',
+        `Each program is MarkovJunior XML in 3D on the tiles of a place, ${STRATA_DEPTH} rows deep under a top layer. The kernel writes the top layer, each column's ground in the draft of nature, one of ${DRAFT_LINE}; every cell under it starts as the root's first value, the earth not decided yet. A rule is two layers separated by a space, the upper one first: <all in="g E" out="g T"/> is «under the grass, the topsoil T»; "*" in out keeps the cell; two cells side by side in a layer are written together ("VB"). Use only one, all and prl (with p and steps) inside a sequence or a markov, and <union symbol="?" values="gtj"/> for a set of codes. The root is <sequence values="E…" symmetry="(xy)">: E first (neither a terrain nor a stratum), then the codes it reads and the strata it writes; symmetry="(xy)" keeps the up and the down. Under the surface write only strata: a cell left undecided is the kernel's (earth, clay, rock).`,
+        `Example, with the codes of its strata (T topsoil, C clay, A packed sand, M mud, B bedrock, V a vein):\n${STRATA_EXAMPLE}`,
+        'Make the underground of each environment its own (under the village the potters\' clay and the water of the wells, under the desert sand deep down, in the mountains the rock right under the ground, under the lake the mud), 5-15 rules each.',
+        `Environments:\n${wanted.map((id) => `- ${id}: ${layouts[id]!.name} — ${layouts[id]!.description}`).join('\n')}`,
+        `Terrains of the maps (not strata): ${paletteLine(palette)}`,
+        feedback && `SOME PROGRAMS WERE INVALID, fix them: ${feedback}`,
+      ]
+        .filter(Boolean)
+        .join('\n\n'),
+      STRATA_SCHEMA,
+      { data: { theme, environments: wanted.map((id) => ({ id, name: layouts[id]!.name, description: layouts[id]!.description })), strata: fixed ?? null, feedback }, temperature: 0.5 },
+    );
+    if (!fixed) {
+      const read = ownStrata(raw.strata, palette);
+      own = read.strata;
+      if (read.problems.length) c.say('kernel', 'scarta', read.problems.slice(0, 3).join('; '), 'cartographer');
+      if (Object.keys(own).length) c.say('cartographer', 'propone', `strati: ${Object.entries(own).map(([k, t]) => `${k}=${t.name}`).join(', ')}`);
+    }
+    const all = strataPalette(own);
+    const problems: string[] = [];
+    for (const e of Array.isArray(raw.environments) ? raw.environments : []) {
+      const id = typeof e?.id === 'string' ? e.id : '';
+      if (!wanted.includes(id) || programs[id] || typeof e.program !== 'string') continue;
+      const errs = checkLayout(id, { ...layouts[id]!, strata: e.program }, palette, all);
+      if (errs.length) problems.push(...errs.slice(0, 2));
+      else programs[id] = e.program;
+    }
+    wanted = wanted.filter((id) => !programs[id]);
+    feedback = problems.join('; ');
+    if (problems.length) c.say('kernel', 'scarta', problems.slice(0, 3).join('; '), 'cartographer');
+  }
+  if (Object.keys(programs).length) c.say('cartographer', 'propone', `sottosuolo di ${Object.keys(programs).map((id) => layouts[id]!.name).join(', ')}`);
+  return { strata: own, programs };
+}
+
+/** The terrains of the maps in one line, for the request of the strata: their codes, not to be taken for strata. */
+function paletteLine(palette: Record<string, TerrainDef>): string {
+  return Object.entries(palette)
+    .filter(([k]) => k !== '?')
+    .map(([k, t]) => `${k} ${t.name}`)
+    .join(', ');
 }

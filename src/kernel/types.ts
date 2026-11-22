@@ -198,6 +198,11 @@ export interface EnvironmentDef {
   environment: 'outdoor' | 'indoor' | 'mixed';
   program: import('./mj').MjNode;
   /**
+   * The program of its strata (T478, ADR-0249): a MarkovJunior program in 3D (XML) that says what lies under what in its places, run by the
+   * kernel when a place of it is planned over the draft (`programStrata`, strata.ts); without it, or where it decides nothing, the draft's.
+   */
+  strata?: string;
+  /**
    * Only false says (T446, ADR-0238): its places have no air to breathe (a flooded shaft, the bare rock of an airless moon). Read only where
    * the world counts the breath (`nature.oxygen`); a terrain without air, a vehicle's deck and the master's region say before it.
    */

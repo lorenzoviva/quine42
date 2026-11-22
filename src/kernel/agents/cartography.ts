@@ -105,6 +105,11 @@ export interface ChunkPlan {
    */
   strata?: string[];
   /**
+   * How its strata are made (T478, ADR-0249): `STRATA_DEPTH` (6) for a new plan, its rows by its environment's program over the draft (or the
+   * draft's, without one); absent in a plan of before, whose strata are the draft's 4 (`strataDepthOf`). Written only by the kernel.
+   */
+  strataDepth?: number;
+  /**
    * The mark of the layout that swims (T438, ADR-0224): true, written by the kernel on every plan it makes, the water one swims joins the
    * place and is never dug; absent, a plan of before, whose layout keeps the paths it dug on the water (they are its bridges and piers).
    */

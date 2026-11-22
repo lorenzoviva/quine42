@@ -26,7 +26,7 @@ import { analyzeSound } from '../mj/soundanalysis';
 import { reservedName } from './paths';
 import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
-import { strataErrors } from './strata';
+import { strataErrors, strataPalette, strataProgramErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
@@ -532,9 +532,10 @@ export class Validator {
 
   /**
    * A layout program must compile, write only known terrain, terminate, and leave a playable chunk on
-   * real drafts (enough walkable ground once the kernel has carved its paths).
+   * real drafts (enough walkable ground once the kernel has carved its paths); the program of its strata, if it has one (T478), is tried on
+   * the same drafts (`strataProgramErrors`), with `strata` the terrains of the strata it may write (the seed's if not said).
    */
-  validateLayout(id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>, drafts: string[][]): string[] {
+  validateLayout(id: string, def: EnvironmentDef, palette: Record<string, TerrainDef>, drafts: string[][], strata: Record<string, TerrainDef> = strataPalette(undefined)): string[] {
     const errors: string[] = [];
     if (!def || typeof def.name !== 'string' || typeof def.description !== 'string') return [`${id}: name e description obbligatori`];
     // The air of its places (T446): only false says.
@@ -560,6 +561,8 @@ export class Validator {
         errors.push(`${id}: ${e instanceof MjError ? e.message : (e as Error).message}`);
       }
     });
+    // The program of its strata (T478, ADR-0249), if it has one: run on the same drafts as the world runs it.
+    if (def.strata !== undefined) for (const e of strataProgramErrors(def.strata, drafts, palette, strata)) errors.push(`${id}: strati: ${e}`);
     return [...new Set(errors)];
   }
 

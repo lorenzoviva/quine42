@@ -718,11 +718,18 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: nessuno (nulla su disco né sul filo: ogni client lo calcola da sé).
 
 ### Strato
-- **Inglese**: `stratum`, `strata`, `SEED_STRATA`, `strataPalette`, `draftStrata`, `readStrata`, `stratumAt`, `strataOf`, `STRATA_DEPTH`
-- **Definizione**: ciò che sta sotto una casella, una riga per casella di profondità: un terreno con `layer: 'stratum'` fra gli `strata` del generatore (terra, argilla, sabbia compatta, fango, roccia viva nel seme), scelto per colonna dalla bozza degli strati (il bioma della bozza procedurale e un hash della casella e del seme). Solo aspetto: si vede nei tagli sotto terra (ADR-0091 punto 5, T418).
+- **Inglese**: `stratum`, `strata`, `SEED_STRATA`, `strataPalette`, `draftStrata`, `readStrata`, `stratumAt`, `strataOf`, `strataRowsAt`, `STRATA_DEPTH`, `STRATA_DEPTH_BEFORE`, `strataDepth`, `strataDepthOf`
+- **Definizione**: ciò che sta sotto una casella, una riga per casella di profondità (6 in un piano nuovo, che lo dice con `strataDepth`; 4 in uno di prima): un terreno con `layer: 'stratum'` fra gli `strata` del generatore (terra, argilla, sabbia compatta, fango, roccia viva, falda, vena, radici nel seme; alla Genesi il Cartografo scrive quelli del mondo), scelto dal programma degli strati dell'ambiente e, dove non decide, per colonna dalla bozza degli strati (il bioma della bozza procedurale e un hash della casella e del seme). Solo aspetto: si vede nei tagli sotto terra (ADR-0091 punto 5, T418, T478).
 - **Dove vive**: `src/kernel/strata.ts`, `src/kernel/kernel.ts`, `src/render/terrain.ts`, `universe/modules/world.terrain/manifest.json`
-- **Da non usare**: «strato» per `TerrainDef.layer` in generale (è il tipo di disegno di un terreno: `ground`, `wall`…; uno strato del terreno è `stratum`), `sottosuolo` (è il programma dell'ambiente, ancora da fare), `layer` per uno strato sotto terra
-- **Fermo**: `strata` nei manifest dei generatori, nel piano (`maps/`, `ChunkPlan.strata`) e sul filo (`ChunkView.strata`); `stratum` in `TerrainLayer`.
+- **Da non usare**: «strato» per `TerrainDef.layer` in generale (è il tipo di disegno di un terreno: `ground`, `wall`…; uno strato del terreno è `stratum`), `sottosuolo` (è il programma degli strati), `layer` per uno strato sotto terra
+- **Fermo**: `strata` nei manifest dei generatori, nel piano (`maps/`, `ChunkPlan.strata`, `ChunkPlan.strataDepth`) e sul filo (`ChunkView.strata`); `stratum` in `TerrainLayer`.
+
+### Programma degli strati
+- **Inglese**: `EnvironmentDef.strata`, `programStrata`, `runStrata`, `strataProgramErrors`, `STRATA_LIMITS`, `STRATA_EXAMPLE`, `genesis.strata`, `designStrata`, `ownStrata`
+- **Definizione**: il programma MarkovJunior in 3D di un ambiente che dice che cosa sta sotto che cosa nei suoi luoghi: in cima la superficie, il codice della bozza procedurale di ogni colonna, sotto la terra ancora da decidere (il primo valore); solo regole e il loro ordine, con una simmetria che tiene l'alto e il basso (`symmetry="(xy)"`); dove non scrive uno strato vale la bozza degli strati. Lo prova il validatore sulle bozze di prova; lo scrive il Cartografo alla Genesi coi terreni degli strati del mondo (T478, ADR-0249).
+- **Dove vive**: `src/kernel/strata.ts`, `src/kernel/agents/genesis.ts`, `src/kernel/validator.ts`, `src/kernel/kernel.ts`, `universe/modules/world.layouts/manifest.json`
+- **Da non usare**: `sottosuolo` (il nome del progetto in ADR-0091), «programma del sottosuolo», «layout degli strati» (il layout è la pianta)
+- **Fermo**: `strata` negli ambienti dei manifest (`layouts.<id>.strata`), `genesis.strata`.
 
 ### Dispositivo
 - **Inglese**: `device`, `DEVICE_MARGIN`, `DEVICE_SLOTS`

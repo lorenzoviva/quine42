@@ -1189,10 +1189,11 @@ export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel,
 
 /**
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
- * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there. Throws Mj3Error with
- * the line.
+ * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there; `colors` the colours
+ * of symbols the caller knows and the palette of MarkovJunior lacks (the strata of the world, T478: `#1` is the seed's earth), under the
+ * program's own `<color>`. Throws Mj3Error with the line.
  */
-export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string } = {}): MjxModel {
+export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string; colors?: Readonly<Record<string, string>> } = {}): MjxModel {
   let roots: XmlElement[];
   try {
     roots = parseXml(src);
@@ -1224,7 +1225,8 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   const palette: Record<string, PaletteEntry> = {};
   for (const ch of c.declared) {
     if (ch === values[0]) continue;
-    const base = MJ_PALETTE[ch];
+    const known = opts.colors?.[ch];
+    const base = MJ_PALETTE[ch] ?? (known ? { color: known, name: symbolName(ch) } : undefined);
     const own = c.colors[ch];
     if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`il simbolo "${symbolName(ch)}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${symbolName(ch)}" value="rrggbb"/>`);
     palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}), ...(own?.area ? { area: own.area } : {}) };

@@ -393,7 +393,7 @@ export function regenerationPlan(k: Kernel, places: readonly PlannedPlace[], tar
     const why: string[] = forced ? ['chiesto dal comando'] : [];
     for (const c of candidates) {
       if (c.program) {
-        const errs = k.validator.validateLayout(id, { ...k.content.layouts[id], program: c.program }, k.palette, k.sampleDrafts());
+        const errs = k.validator.validateLayout(id, { ...k.content.layouts[id], program: c.program }, k.palette, k.sampleDrafts(), k.strata);
         if (errs.length) {
           why.push(`${c.how}: ${errs[0]}`);
           continue;
@@ -524,7 +524,7 @@ async function recutStep(k: Kernel, e: EnvironmentRedo, all: readonly PlannedPla
   for (let attempt = 1; attempt <= RECUT_TRIES; attempt++) {
     const r = await recutEnvironment(k.council, { id: e.id, def, palette: k.palette, need: e.need ?? LEAST_LOT, least: LEAST_LOT, small: STRUCTURE_LOT, places: told, ...(feedback ? { feedback } : {}) });
     const program = r.program ? repairProgram(r.program, []) : null;
-    const errs = !program ? [r.error ?? 'programma mancante o incomprensibile'] : k.validator.validateLayout(e.id, { ...def, program }, k.palette, k.sampleDrafts());
+    const errs = !program ? [r.error ?? 'programma mancante o incomprensibile'] : k.validator.validateLayout(e.id, { ...def, program }, k.palette, k.sampleDrafts(), k.strata);
     const faults = program && !errs.length ? recutFaults(k, places, program, targets) : [];
     if (program && !errs.length && !faults.length) {
       const why = k.setEnvironmentProgram(e.id, program, `rigenerazione: l'ambiente ${e.id} per le strutture a 16 (riscritto dal Cartografo)`);
