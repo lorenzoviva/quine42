@@ -1,0 +1,19 @@
+<!-- Wardrobe with two leaves that open (T471, lab/banco/parti/README.md): how the joiner uses part-leaf. A hollow body with two shelves,
+     the two leaves on its front with their hinges at the two ends, a cornice; open and close swap the leaves shut and open. -->
+<sequence values="BNKLD#80#81#82#83" size="20 20 20" symmetry="(xy)">
+  <color symbol="N" value="6a4428" name="legno"/><color symbol="K" value="4a2e18" name="cornice"/><color symbol="L" value="8b5a32" name="anta"/>
+  <color symbol="#83" value="8b5a32" name="anta aperta"/><color symbol="D" value="5e3c22" name="ripiano"/>
+  <!-- The body, 12 wide, 8 deep, 18 tall, hollow behind its front, two shelves inside. -->
+  <box at="10 9 0" size="12 8 18" color="N"/>
+  <box at="10 9 2" size="10 6 14" color="B" on="N"/>
+  <box at="10 9 6" size="10 6 1" color="D" on="B"/>
+  <box at="10 9 11" size="10 6 1" color="D" on="B"/>
+  <!-- The leaves: the front over the hollow, one voxel thick; their hinges in the air in front of the two ends. -->
+  <box at="10 12 2" size="10 1 14" color="L" on="N"/>
+  <all in="NL/BB" out="**/*#80" symmetry="(x)"/>
+  <!-- The cornice on top, out by one at the front and the sides. -->
+  <box at="10 9 18" size="14 10 1" color="K"/>
+  <import file="part-leaf"/>
+</sequence>
+<action name="open" label="Apri le ante"><all><rule in="L" out="#82"/><rule in="#81" out="#83"/></all></action>
+<action name="close" label="Chiudi le ante"><all><rule in="#82" out="L"/><rule in="#83" out="#81"/></all></action>

@@ -1,6 +1,7 @@
-// The parts one lives in, as sub-blocks of the seed (T346, ADR-0182, lab/banco/taglie/README.md): universe/models/part-*.xml, each a
-// program that a structure includes with <import file="part-…"/> and that alone builds its own scene from its origin, so that it is
-// validated and measured on its own. Their long patterns are written here by repetition; the XML is what runs.
+// The parts one lives in, as sub-blocks of the seed (T346, ADR-0182, lab/banco/taglie/README.md), and the parts of the trades (T471,
+// ADR-0241, lab/banco/parti/README.md): universe/models/part-*.xml, each a program that a model includes with <import file="part-…"/>
+// and that alone builds its own scene from its origin, so that it is validated and measured on its own. Their long patterns are written
+// here by repetition; the XML is what runs.
 //
 // The comment at the top of every part has two paragraphs: the first is its contract for the program that includes it (the letters it
 // reads and writes, the unions to redefine), and the Sculptor's request carries it as it is (`partResources`, T354, ADR-0183); the second
@@ -17,7 +18,7 @@ const layers = (...ls) => ls.join(' ');
 /** Alone, a part builds its scene from the origin letter S, which an include never has: these nodes do nothing included. */
 const SCENE_NOTE = 'an include has no origin, so from S nothing happens there';
 /** The comment at the top of a part: the contract (for the request), a blank line, what it builds alone and who wrote it. */
-const note = (contract, alone) => `<!--\n${contract.trim()}\n\n${alone.trim()} Written by lab/banco/taglie/parti.mjs (T346, T354; ADR-0182, ADR-0183).\n-->`;
+const note = (contract, alone, by = 'T346, T354; ADR-0182, ADR-0183') => `<!--\n${contract.trim()}\n\n${alone.trim()} Written by lab/banco/taglie/parti.mjs (${by}).\n-->`;
 
 /** The house of the trial: a floor of 55 × 35 on the ground, walls two thick, two storeys of 32, the slab, a door of 11 × 30. */
 function house({ floor, slab, ground, door }) {
@@ -267,7 +268,249 @@ ${house({ floor: '#96', slab: '#95', ground: '#93', door: '#94' })}
 `;
 }
 
-export const PARTS = { 'part-stair': stair(), 'part-door': door(), 'part-battlements': battlements(), 'part-slits': slits(), 'part-cellar': cellar() };
+// ------------------------------------------------------------------------------------------------------------------------------------
+// The parts of the trades (T471, S5 of T458, ADR-0239, ADR-0241): written by hand in the seed like the five above, for the specialties of
+// the Sculptor that sculpt in one box (the index says which, `specialty`): the wheel, the windows, the leaves and lids that open. Each
+// marks what it reads with letters the includer writes and works only from them, so that it does the same at any density and in any
+// box; alone it builds its own trial scene from S, which an include never has.
+
+const TRADES = 'T471; ADR-0182, ADR-0239, ADR-0241';
+
+/**
+ * A pattern in an upright plane, from its cells `{u, v, s}`: u along the plane's level axis (y for a plane across an axle along x, x for
+ * one across an axle along y), v up; every other cell "*". MarkovJunior's layers go from the top, rows along y, a row along x.
+ */
+function upright(axis, cells) {
+  const us = cells.map((c) => c.u), vs = cells.map((c) => c.v);
+  const [u0, u1, v0, v1] = [Math.min(...us), Math.max(...us), Math.min(...vs), Math.max(...vs)];
+  const at = new Map(cells.map((c) => [`${c.u},${c.v}`, c.s]));
+  const layer = (v) => {
+    const row = [];
+    for (let u = u0; u <= u1; u++) row.push(at.get(`${u},${v}`) ?? '*');
+    return axis === 'x' ? row.join('/') : row.join('');
+  };
+  const out = [];
+  for (let v = v1; v >= v0; v--) out.push(layer(v));
+  return out.join(' ');
+}
+/** A rule in an upright plane: the cells it reads, and those it writes (`*` elsewhere in the output). */
+function uprightRule(axis, cells, writes) {
+  const all = [...cells, ...writes.filter((w) => !cells.some((c) => c.u === w.u && c.v === w.v)).map((w) => ({ ...w, s: '*' }))];
+  const out = all.map((c) => ({ u: c.u, v: c.v, s: writes.find((w) => w.u === c.u && w.v === c.v)?.s ?? '*' }));
+  return `<rule in="${upright(axis, all)}" out="${upright(axis, out)}"/>`;
+}
+const ORTH = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+const DIAG = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+
+/** The markers of the wheel, the same in each of its two passes: the hub, the plumb line and its foot, the front and the new front, the tyre and the felloe where the growth stops, the disc. */
+const [HUB, PLUMB, FOOT, FRONT, NEW, TYRE, FELLOE, DISC] = ['#90', '#91', '#92', '#93', '#94', '#95', '#96', '#97'];
+
+/** The wheels on the axles along one axis: a pass of part-wheel. */
+function wheelPass(axis, n) {
+  const c = (u, v, s) => ({ u, v, s });
+  const R = (cells, writes) => uprightRule(axis, cells, writes);
+  const across = axis === 'x' ? 'y' : 'x';
+  const hubs = axis === 'x' ? `<all in="B/H/B" out="*/${HUB}/*" steps="1"/>` : `<all in="BHB" out="*${HUB}*" steps="1"/>`;
+  const grow = (dirs) => dirs.flatMap(([du, dv]) => [R([c(0, 0, FRONT), c(du, dv, `[B${PLUMB}]`)], [c(du, dv, NEW)]), R([c(0, 0, FRONT), c(du, dv, FOOT)], [c(du, dv, TYRE)])]);
+  const first = ORTH.flatMap(([du, dv]) =>
+    dv === -1
+      ? [R([c(0, 0, HUB), c(0, -1, PLUMB)], [c(0, -1, NEW)]), R([c(0, 0, HUB), c(0, -1, FOOT)], [c(0, -1, TYRE)])]
+      : [R([c(0, 0, HUB), c(du, dv, `[B${PLUMB}]`), c(0, -1, `[${PLUMB}${FOOT}]`)], [c(du, dv, NEW)])],
+  );
+  const stop = [...ORTH, ...DIAG].flatMap(([du, dv]) => [R([c(0, 0, `[${TYRE}${FELLOE}]`), c(du, dv, NEW)], [c(du, dv, TYRE)]), R([c(0, 0, `[${TYRE}${FELLOE}]`), c(du, dv, FRONT)], [c(du, dv, FELLOE)])]);
+  const spokes = (dirs, mark) => [
+    ...dirs.map(([du, dv]) => R([c(0, 0, HUB), c(du, dv, DISC)], [c(du, dv, mark)])),
+    ...dirs.map(([du, dv]) => R([c(0, 0, `[${HUB}${mark}]`), c(du, dv, mark), c(2 * du, 2 * dv, DISC)], [c(2 * du, 2 * dv, mark)])),
+  ];
+  return `
+  <!-- ${n}. The wheels on an axle along ${axis}, in the plane of ${across} and z: the hubs with air on both sides along ${across}. -->
+  ${hubs}
+  <!-- The plumb line, from under the hub down through the air to whatever is under it: its foot is where the wheel touches. -->
+  <all in="${HUB} B" out="* ${FOOT}" steps="1"/>
+  <all in="${FOOT} B" out="${PLUMB} ${FOOT}"/>
+  <!-- The first ring, only round a hub with its plumb line; then a ring a turn, by eight neighbours and by four (an octagon), until a
+       ring reaches the foot: that ring is the tyre, the one inside it the felloe, and that wheel grows no more. -->
+  <all steps="1">${first.join('')}</all>
+  <prl in="${NEW}" out="${FRONT}" steps="1"/>
+  <markov>
+    <prl>${stop.join('')}</prl>
+    <sequence>
+      <prl>${grow([...ORTH, ...DIAG]).join('')}</prl>
+      <prl in="${FRONT}" out="${DISC}"/>
+      <prl in="${NEW}" out="${FRONT}"/>
+      <prl>${grow(ORTH).join('')}</prl>
+      <prl in="${FRONT}" out="${DISC}"/>
+    </sequence>
+    <prl in="${NEW}" out="${FRONT}"/>
+  </markov>
+  <!-- Eight spokes from the hub to the felloe, each straight: a spoke grows only from the hub or from the spoke before it in its line. -->
+  <all>${spokes(ORTH, PLUMB).join('')}</all>
+  <all>${spokes(DIAG, FOOT).join('')}</all>
+  <prl><rule in="${PLUMB}" out="J"/><rule in="${FOOT}" out="J"/><rule in="${FELLOE}" out="J"/><rule in="${TYRE}" out="I"/><rule in="${HUB}" out="I"/><rule in="${DISC}" out="B"/><rule in="${FRONT}" out="B"/><rule in="${NEW}" out="B"/></prl>`;
+}
+
+function wheel() {
+  return `${note(
+    `Wheels on an axle (part-wheel), included after the piece and its axles are built: mark each hub with H, on the axle or just past its
+end, with air on both sides of it across the axle and under it (two H side by side along the axle: a wheel two thick). The wheel grows
+round its hub in the plane across the axle, as large as the hub is high over what is under it (the ground, a floor, a deck), and touches
+it: I the iron tyre and hub, J the felloe and eight spokes (give I and J your colours). Two wheels in one plane must not touch.`,
+    'Alone it builds a cart from its origin, an axle along x with a wheel at each end, so that it is validated on its own.',
+    TRADES,
+  )}
+<sequence values="BSHIJ${HUB}${PLUMB}${FOOT}${FRONT}${NEW}${TYRE}${FELLOE}${DISC}" size="21 17 14" symmetry="()" origin="bottom">
+  <color symbol="H" value="3a3632" name="mozzo"/><color symbol="I" value="45423e" name="cerchione e mozzo di ferro"/><color symbol="J" value="9a6a3c" name="quarti e raggi"/>
+  <color symbol="S" value="7a5232" name="carro di prova"/>
+  <color symbol="${HUB}" hidden="True"/><color symbol="${PLUMB}" hidden="True"/><color symbol="${FOOT}" hidden="True"/><color symbol="${FRONT}" hidden="True"/>
+  <color symbol="${NEW}" hidden="True"/><color symbol="${TYRE}" hidden="True"/><color symbol="${FELLOE}" hidden="True"/><color symbol="${DISC}" hidden="True"/>
+  <!-- 0. Alone (${SCENE_NOTE}): S rises to the axle (6), the axle along x, a hub past each end, a bed of 15 × 11 over it. -->
+  <all in="B S" out="S B" steps="6"/>
+  <all in="SB" out="*S" symmetry="(x)" steps="7"/>
+  <all in="SB" out="*H" symmetry="(x)" steps="1"/>
+  <all in="B S" out="${NEW} *" steps="1"/>
+  <all in="${NEW}/B" out="*/${NEW}" symmetry="(y)" steps="5"/>
+  <all in="B ${NEW}" out="${FRONT} *" steps="1"/>
+  <prl><rule in="${NEW}" out="S"/><rule in="${FRONT}" out="S"/></prl>
+${wheelPass('x', 1)}
+${wheelPass('y', 2)}
+</sequence>
+`;
+}
+
+/** The window's measures: the pier between two windows, the least wall left to an end, a window's width with its jambs, how deep the wall opens behind the glass. */
+const WINDOW = { pier: 6, edge: 3, wide: 8, deep: 6 };
+/**
+ * The markers of the window: the line in front of the band, the eaten line, the middle, the jambs and the panes in the air, their columns in
+ * the wall, the opening; the stretches with no windows are marked with the jambs' column before there is any.
+ */
+const [LINE, EATEN, MID, JAMB, PANE, JAMBS, PANES, OPENING] = ['#90', '#91', '#92', '#93', '#94', '#95', '#96', '#97'];
+const BLOCKED = JAMBS;
+
+function windows() {
+  const { pier, edge, wide, deep } = WINDOW;
+  const frame = (glass) => `${JAMB}${rep(PANE, glass)}${JAMB}`;
+  return `${note(
+    `Rows of windows (part-window), included after the walls have risen, outside <pieces> and before part-slits: mark with U a band of your
+walls through their whole thickness, as tall as a window with its sill and lintel (8 to 16), with your wall above and under it.
+On every straight stretch of a face with air in front and past its ends (a corner, a door) it centres a window ${wide} wide (${wide + 1} on an odd
+stretch), then outward piers of ${pier} and windows of ${wide} while ${edge} of wall stay at the end (on a stretch that runs to the edge of the box, from
+its free end; none on the faces of an inner corner, a room): the frame N, the sill jutting out by one, the glass G, the wall open behind it. What is left of the band stays U: turn it back to your wall
+after (<prl in="U" out="W"/>). Give N and G your colours.`,
+    'Alone it builds a house of 45 × 34 from its origin, its walls with the band, and opens its windows, so that it is validated on its own.',
+    TRADES,
+  )}
+<sequence values="BSUNG${LINE}${EATEN}${MID}${JAMB}${PANE}${JAMBS}${PANES}${OPENING}" size="49 38 30" symmetry="(xy)" origin="bottom" ground="${MID}">
+  <color symbol="G" value="3d5566" alpha="0.7" name="vetro"/><color symbol="N" value="6b4a2e" name="telaio"/><color symbol="U" value="b9b0a0" name="fascia di prova"/>
+  <color symbol="S" value="a39d90" name="muro di prova"/>
+  <color symbol="${LINE}" hidden="True"/><color symbol="${EATEN}" hidden="True"/><color symbol="${MID}" hidden="True"/><color symbol="${JAMB}" hidden="True"/>
+  <color symbol="${PANE}" hidden="True"/><color symbol="${JAMBS}" hidden="True"/><color symbol="${PANES}" hidden="True"/><color symbol="${OPENING}" hidden="True"/>
+  <!-- 0. Alone (${SCENE_NOTE}): a house of 45 × 34 from S, walls two thick, the band U from 8 to 21, wall up to 27. -->
+  <all in="S${MID}" out="*S" symmetry="(x)" steps="22"/>
+  <all in="S/${MID}" out="*/S" symmetry="(y)" steps="16"/>
+  <all in="S/${MID}" out="*/S" symmetry="()" steps="1"/>
+  <prl in="${MID}" out="B" steps="1"/>
+  <prl in="${rows(rep('S', 5), 5)}" out="${rows('*****', 2)}/**${EATEN}**/${rows('*****', 2)}" steps="1"/>
+  <all in="B S" out="${JAMB} *" steps="1"/>
+  <all in="B ${JAMB}" out="${JAMB} S" steps="7"/>
+  <all in="B ${JAMB}" out="${JAMB} U" steps="14"/>
+  <all in="B ${JAMB}" out="${JAMB} S" steps="5"/>
+  <prl><rule in="${JAMB}" out="S"/><rule in="${EATEN}" out="S"/></prl>
+
+  <!-- 1. The line in the air in front of the band's lowest row, along every face: in front of every row, then only where none is under it. -->
+  <all in="BU" out="${LINE}*"/>
+  <prl in="${LINE} ${LINE}" out="B *"/>
+  <!-- 2. Where the line turns, an inner corner (a room, the inside of an L), the stretches that meet there have no windows: the turn and
+       all that follows it in its line. -->
+  <prl in="${LINE}${LINE}/${LINE}*" out="${BLOCKED}*/**"/>
+  <all in="${BLOCKED}${LINE}" out="*${BLOCKED}"/>
+  <prl in="${BLOCKED}" out="B"/>
+  <!-- 3. The middle of every straight stretch with air past both its ends (a corner, a door): eaten from both ends at once. -->
+  <markov>
+    <prl><rule in="[B${EATEN}]${LINE}[B${EATEN}]" out="*${MID}*"/><rule in="[B${EATEN}]${LINE}${LINE}[B${EATEN}]" out="*${MID}${MID}*"/></prl>
+    <prl in="[B${EATEN}]${LINE}${LINE}" out="*${EATEN}*"/>
+  </markov>
+  <prl in="${EATEN}" out="${LINE}"/>
+  <!-- 4. A window on the middle, ${wide} wide on an even stretch and ${wide + 1} on an odd one, with ${edge} of wall at least to its sides; then outward a pier
+       of ${pier} and a window of ${wide}, as long as ${edge} stay to the end. -->
+  <all>
+    <rule in="${rep(LINE, edge + 3)}${MID}${MID}${rep(LINE, edge + 3)}" out="${rep('*', edge)}${frame(wide - 2)}${rep('*', edge)}"/>
+    <rule in="${rep(LINE, edge + 4)}${MID}${rep(LINE, edge + 4)}" out="${rep('*', edge)}${frame(wide - 1)}${rep('*', edge)}"/>
+  </all>
+  <all in="${PANE}${JAMB}${rep(LINE, pier + wide + edge)}" out="**${rep('*', pier)}${frame(wide - 2)}${rep('*', edge)}"/>
+  <!-- 5. A stretch with air past one end only (the other on the edge of the box, where no middle is found): from that end ${edge} of wall,
+       a window, and on outward as above. -->
+  <all in="B${rep(LINE, edge + wide + pier)}" out="*${rep('*', edge)}${frame(wide - 2)}${rep('*', pier)}"/>
+  <all in="${PANE}${JAMB}${rep(LINE, pier + wide + edge)}" out="**${rep('*', pier)}${frame(wide - 2)}${rep('*', edge)}"/>
+  <prl><rule in="${LINE}" out="B"/><rule in="${MID}" out="B"/></prl>
+  <!-- 6. Into the wall and up the band: a jamb is frame from the sill to the lintel; a pane has the sill at the bottom, the lintel at the
+       top (the last of its column) and glass between; the sill out by one in front. -->
+  <prl><rule in="${JAMB}U" out="*${JAMBS}"/><rule in="${PANE}U" out="*${PANES}"/></prl>
+  <all><rule in="U ${JAMBS}" out="${JAMBS} *"/><rule in="U [${PANES}${EATEN}]" out="${EATEN} *"/></all>
+  <prl in="${EATEN} ${EATEN}" out="* ${LINE}"/>
+  <prl><rule in="${JAMBS}" out="N"/><rule in="${PANES}" out="N"/><rule in="${EATEN}" out="N"/><rule in="${LINE}" out="G"/><rule in="${JAMB}" out="N"/><rule in="${PANE}" out="N"/></prl>
+  <!-- 7. Behind the glass the wall opens, up to ${deep} deep. -->
+  ${Array.from({ length: deep }, (_, d) => `<all in="G${rep(OPENING, d)}U" out="${rep('*', d + 1)}${OPENING}"/>`).join('\n  ')}
+  <prl in="${OPENING}" out="B"/>
+</sequence>
+`;
+}
+
+/** The letters of part-leaf the includer writes and colours: the hinge, the leaf open (hidden), the leaf shut when open (hidden), the leaf open when shown. */
+const [HINGE, SWUNG, SHUT, SHOWN] = ['#80', '#81', '#82', '#83'];
+/** Its markers: for the upright leaves the claim, the marker, its trail; for the lids the same three. */
+const [CLAIM, MARK, TRAIL, CLAIM2, MARK2, TRAIL2] = ['#90', '#91', '#92', '#93', '#94', '#95'];
+
+function leaf() {
+  return `${note(
+    `Leaves and lids that open (part-leaf), included after the piece is built: write each leaf shut with L, one voxel thick on a face with
+air in front of it, and its hinge with ${HINGE}, the air cell in front of the end it turns on, at every layer of the leaf (a lid: the air over
+its back edge, all along it). It writes ${SWUNG}, hidden, where the leaf turns open on its hinge, out into the air as far as the leaf is wide
+(leave that air free; two hinges at the two ends of one run of L share it). The actions are yours: <action name="open" label="Apri le
+ante"><all><rule in="L" out="${SHUT}"/><rule in="${SWUNG}" out="${SHOWN}"/></all></action>, close back; ${SHUT} is hidden, give ${SHOWN} the colour of L.`,
+    'Alone it builds a kneading chest from its origin, two leaves on its front and a lid on its top, so that it is validated and opened on its own.',
+    TRADES,
+  )}
+<sequence values="BSL${HINGE}${SWUNG}${SHUT}${SHOWN}${CLAIM}${MARK}${TRAIL}${CLAIM2}${MARK2}${TRAIL2}" size="23 21 20" symmetry="(xy)" origin="bottom">
+  <color symbol="L" value="7a5232" name="anta"/><color symbol="${HINGE}" hidden="True" name="cardine"/><color symbol="${SWUNG}" hidden="True" name="anta aperta, nascosta"/>
+  <color symbol="${SHUT}" hidden="True" name="anta chiusa, nascosta"/><color symbol="${SHOWN}" value="7a5232" name="anta aperta"/>
+  <color symbol="S" value="5e3c22" name="madia di prova"/>
+  <color symbol="${CLAIM}" hidden="True"/><color symbol="${MARK}" hidden="True"/><color symbol="${TRAIL}" hidden="True"/>
+  <color symbol="${CLAIM2}" hidden="True"/><color symbol="${MARK2}" hidden="True"/><color symbol="${TRAIL2}" hidden="True"/>
+  <!-- 0. Alone (${SCENE_NOTE}): a kneading chest of 15 × 7 × 14 from S, two leaves on its front, a lid on its top, the hinges at their ends. -->
+  <all in="SB" out="*S" symmetry="(x)" steps="7"/>
+  <all in="S/B" out="*/S" symmetry="(y)" steps="3"/>
+  <all in="B S" out="S *" steps="13"/>
+  <box at="11 13 2" size="13 1 10" color="L" on="S"/>
+  <box at="11 10 13" size="13 5 1" color="L" on="S"/>
+  <all in="SL/BB" out="**/*${HINGE}" symmetry="(x)"/>
+  <all in="B/B S/L" out="*/${HINGE} */*" symmetry="()"/>
+
+  <!-- 1. Leaves on an upright hinge, layer by layer. The cell behind the hinge is claimed first and the hinge is its cell open; the claim
+       goes along the leaf, leaves a mark in front of every cell it takes and starts a marker one step out on the diagonal toward the hinge,
+       which goes on along it until it stands in the hinge's line, past the cells already open: the leaf open is as long as the leaf. The
+       claim is decided on the grid as it was (prl): where two leaves meet on an odd cell both take it, the same at every layer. -->
+  <markov>
+    <prl in="[${SWUNG}${CLAIM}]/${SWUNG}/${MARK}" out="*/*/${SWUNG}"/>
+    <prl in="[${TRAIL}${SWUNG}]${MARK}/B*" out="*${TRAIL}/${MARK}*"/>
+    <prl in="${CLAIM}L/[${SWUNG}${TRAIL}]B/B*" out="*${CLAIM}/*${TRAIL}/${MARK}*"/>
+    <all in="L/${HINGE}" out="${CLAIM}/${SWUNG}"/>
+  </markov>
+  <prl><rule in="${CLAIM}" out="L"/><rule in="${MARK}" out="B"/><rule in="${TRAIL}" out="B"/></prl>
+  <!-- 2. Lids on a lying hinge, upward: the same in an upright plane. -->
+  <markov>
+    <prl in="${MARK2} ${SWUNG} [${SWUNG}${CLAIM2}]" out="${SWUNG} * *"/>
+    <prl in="B/* [${TRAIL2}${SWUNG}]/${MARK2}" out="${MARK2}/* */${TRAIL2}"/>
+    <prl in="B/* [${SWUNG}${TRAIL2}]/B ${CLAIM2}/L" out="${MARK2}/* */${TRAIL2} */${CLAIM2}"/>
+    <all in="${HINGE} L" out="${SWUNG} ${CLAIM2}"/>
+  </markov>
+  <prl><rule in="${CLAIM2}" out="L"/><rule in="${MARK2}" out="B"/><rule in="${TRAIL2}" out="B"/></prl>
+</sequence>
+<action name="open" label="Apri"><all><rule in="L" out="${SHUT}"/><rule in="${SWUNG}" out="${SHOWN}"/></all></action>
+<action name="close" label="Chiudi"><all><rule in="${SHUT}" out="L"/><rule in="${SHOWN}" out="${SWUNG}"/></all></action>
+`;
+}
+
+export const PARTS = { 'part-stair': stair(), 'part-door': door(), 'part-battlements': battlements(), 'part-slits': slits(), 'part-cellar': cellar(), 'part-wheel': wheel(), 'part-window': windows(), 'part-leaf': leaf() };
 
 const dir = new URL('../../../universe/models/', import.meta.url);
 for (const [id, xml] of Object.entries(PARTS)) fs.writeFileSync(new URL(`${id}.xml`, dir), xml);

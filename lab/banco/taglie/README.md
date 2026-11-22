@@ -43,7 +43,8 @@ npx vite-node lab/scripts/banco-taglie.ts -- --solo scultore-villetta,scultore-r
 | `part-slits` | dopo i merli: sotto il centro di ogni merlo di 5 una feritoia `U` di 1 × 6 attraverso l'unione `%` | la stessa torre: 16 feritoie |
 
 I marcatori delle parti sono `#90`-`#91`; la lettera `S` è la scena di prova, che un'inclusione non ha mai (quei nodi non fanno niente
-inclusi).
+inclusi). Le parti dei mestieri (la ruota, le finestre, le ante e i coperchi, T471) le scrive lo stesso `parti.mjs`; le misura il loro banco,
+[`../parti/README.md`](../parti/README.md).
 
 ![le parti da sole](parti.png)
 

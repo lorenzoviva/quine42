@@ -326,6 +326,26 @@ finestre del primo palazzo buono, e la città prende un'aria sola.
 - **Sicurezza**: nessuna superficie nuova. Le parti sono file di `models/`, che il Concilio scrive già (`councilMayWrite`), e passano dal
   validatore come ogni modello.
 
+**Fatto in T471 (S5, la via A, ADR-0241)**: tre parti del seme scritte a mano come le cinque abitabili, dallo stesso generatore
+(`lab/banco/taglie/parti.mjs`): **`part-wheel`** (il mozzo `H` che chi include segna sull'asse o oltre la sua fine; la ruota nel piano
+attraverso l'asse, lungo x o lungo y, grande quanto il mozzo è alto su ciò che ha sotto, ad anelli ottagonali finché tocca: cerchione e mozzo
+`I`, quarti e otto razze `J`), **`part-window`** (la fascia `U`: una finestra centrata su ogni tratto con l'aria oltre i due capi, poi
+pilastri di 6 e finestre di 8, telaio `N` col davanzale che sporge, vetro `G`, il muro aperto dietro; nessuna negli angoli interni; un tratto
+che corre al bordo della scatola dal suo capo libero) e **`part-leaf`** (l'anta `L` e il cardine `#80` davanti al suo capo: `#81`,
+nascosta, dove l'anta va aperta, quanto è larga; i coperchi verso l'alto; le azioni di chi include, `#82` e `#83`). La voce dell'indice dice la
+specialità (`specialty`, una o un elenco; senza, l'Architetto, come le parti di prima e le voci che un universo tiene) e
+`partResources(files, specialty, fortified)` le offre al mestiere, al più otto; ai mestieri in una scatola con una riga che dice come si usa
+una parte (`TRADE_PARTS`). **Che cosa è cambiato dal previsto**: l'anta è anche il coperchio, e le parti vanno a due mestieri (la finestra
+all'Architetto e al Capomastro, l'anta al Capomastro e al Mobiliere, la ruota al Mobiliere e al Carrozziere: le ruote dei carri oggi le scolpisce
+il Mobiliere, perché un veicolo di terra non ha una classe); la ruota non legge il segno dell'asse ma il mozzo (un asse lungo il carro ha la
+ruota a ogni capo, una carriola a metà); le righe dei contratti sono 170-215 token, non 60-120: 416 token in più a richiesta del Mobiliere, 491 del
+Capomastro, 216 del Carrozziere, 178 dell'Architetto (41 in meno nel suo prompt, che nomina la parte al posto della ricetta
+delle finestre a caso), 320 in media pesata, 0,016 $ l'ora oggi e 0,030 $ dall'1/12
+([`misure-s5.md`](scultori-specializzati/misure-s5.md), `countTokens`; i sistemi degli altri mestieri non cambiano); una faccia sul bordo della scatola non ha finestre, perché un pattern non vede
+il bordo. **Il banco** (`lab/banco/parti/`, `lab/scripts/banco-parti.ts`, `tests/seed-parts.test.ts`): l'armadio e il carretto del Mobiliere,
+la casetta del Capomastro, la villetta offline dello Scultore con `part-window` al posto delle sue finestre a caso (passa i controlli a Grande
+e a Enorme, 31 finestre); nel laboratorio 3D le parti da sole e i modelli. Che lo Scultore le usi coi modelli veri resta da vedere (S7, T473).
+
 ## 5. `<markov>` come ciclo con l'uscita, e gli altri nodi che il prompt non insegna (e)
 
 ### 5.1 Come il kernel lo esegue

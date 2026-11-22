@@ -108,6 +108,11 @@ export interface ModelInfo {
    * the kernel places them on every seed (`src/kernel/furnish.ts`). Read without trusting it (`readInterior`).
    */
   interior?: InteriorSpec;
+  /**
+   * The specialties of the Sculptor whose requests offer this part (T471, ADR-0241): only on a part (`models/part-<name>.xml`), one or more of
+   * `SculptorSpecialty`; a part without it is the architect's, as every part of the seed was before. Read without trusting it (`partSpecialties`).
+   */
+  specialty?: string | string[];
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */

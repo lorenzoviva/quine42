@@ -1,0 +1,46 @@
+<!--
+Leaves and lids that open (part-leaf), included after the piece is built: write each leaf shut with L, one voxel thick on a face with
+air in front of it, and its hinge with #80, the air cell in front of the end it turns on, at every layer of the leaf (a lid: the air over
+its back edge, all along it). It writes #81, hidden, where the leaf turns open on its hinge, out into the air as far as the leaf is wide
+(leave that air free; two hinges at the two ends of one run of L share it). The actions are yours: <action name="open" label="Apri le
+ante"><all><rule in="L" out="#82"/><rule in="#81" out="#83"/></all></action>, close back; #82 is hidden, give #83 the colour of L.
+
+Alone it builds a kneading chest from its origin, two leaves on its front and a lid on its top, so that it is validated and opened on its own. Written by lab/banco/taglie/parti.mjs (T471; ADR-0182, ADR-0239, ADR-0241).
+-->
+<sequence values="BSL#80#81#82#83#90#91#92#93#94#95" size="23 21 20" symmetry="(xy)" origin="bottom">
+  <color symbol="L" value="7a5232" name="anta"/><color symbol="#80" hidden="True" name="cardine"/><color symbol="#81" hidden="True" name="anta aperta, nascosta"/>
+  <color symbol="#82" hidden="True" name="anta chiusa, nascosta"/><color symbol="#83" value="7a5232" name="anta aperta"/>
+  <color symbol="S" value="5e3c22" name="madia di prova"/>
+  <color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/>
+  <color symbol="#93" hidden="True"/><color symbol="#94" hidden="True"/><color symbol="#95" hidden="True"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): a kneading chest of 15 × 7 × 14 from S, two leaves on its front, a lid on its top, the hinges at their ends. -->
+  <all in="SB" out="*S" symmetry="(x)" steps="7"/>
+  <all in="S/B" out="*/S" symmetry="(y)" steps="3"/>
+  <all in="B S" out="S *" steps="13"/>
+  <box at="11 13 2" size="13 1 10" color="L" on="S"/>
+  <box at="11 10 13" size="13 5 1" color="L" on="S"/>
+  <all in="SL/BB" out="**/*#80" symmetry="(x)"/>
+  <all in="B/B S/L" out="*/#80 */*" symmetry="()"/>
+
+  <!-- 1. Leaves on an upright hinge, layer by layer. The cell behind the hinge is claimed first and the hinge is its cell open; the claim
+       goes along the leaf, leaves a mark in front of every cell it takes and starts a marker one step out on the diagonal toward the hinge,
+       which goes on along it until it stands in the hinge's line, past the cells already open: the leaf open is as long as the leaf. The
+       claim is decided on the grid as it was (prl): where two leaves meet on an odd cell both take it, the same at every layer. -->
+  <markov>
+    <prl in="[#81#90]/#81/#91" out="*/*/#81"/>
+    <prl in="[#92#81]#91/B*" out="*#92/#91*"/>
+    <prl in="#90L/[#81#92]B/B*" out="*#90/*#92/#91*"/>
+    <all in="L/#80" out="#90/#81"/>
+  </markov>
+  <prl><rule in="#90" out="L"/><rule in="#91" out="B"/><rule in="#92" out="B"/></prl>
+  <!-- 2. Lids on a lying hinge, upward: the same in an upright plane. -->
+  <markov>
+    <prl in="#94 #81 [#81#93]" out="#81 * *"/>
+    <prl in="B/* [#95#81]/#94" out="#94/* */#95"/>
+    <prl in="B/* [#81#95]/B #93/L" out="#94/* */#95 */#93"/>
+    <all in="#80 L" out="#81 #93"/>
+  </markov>
+  <prl><rule in="#93" out="L"/><rule in="#94" out="B"/><rule in="#95" out="B"/></prl>
+</sequence>
+<action name="open" label="Apri"><all><rule in="L" out="#82"/><rule in="#81" out="#83"/></all></action>
+<action name="close" label="Chiudi"><all><rule in="#82" out="L"/><rule in="#83" out="#81"/></all></action>

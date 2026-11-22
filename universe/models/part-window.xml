@@ -1,0 +1,68 @@
+<!--
+Rows of windows (part-window), included after the walls have risen, outside <pieces> and before part-slits: mark with U a band of your
+walls through their whole thickness, as tall as a window with its sill and lintel (8 to 16), with your wall above and under it.
+On every straight stretch of a face with air in front and past its ends (a corner, a door) it centres a window 8 wide (9 on an odd
+stretch), then outward piers of 6 and windows of 8 while 3 of wall stay at the end (on a stretch that runs to the edge of the box, from
+its free end; none on the faces of an inner corner, a room): the frame N, the sill jutting out by one, the glass G, the wall open behind it. What is left of the band stays U: turn it back to your wall
+after (<prl in="U" out="W"/>). Give N and G your colours.
+
+Alone it builds a house of 45 × 34 from its origin, its walls with the band, and opens its windows, so that it is validated on its own. Written by lab/banco/taglie/parti.mjs (T471; ADR-0182, ADR-0239, ADR-0241).
+-->
+<sequence values="BSUNG#90#91#92#93#94#95#96#97" size="49 38 30" symmetry="(xy)" origin="bottom" ground="#92">
+  <color symbol="G" value="3d5566" alpha="0.7" name="vetro"/><color symbol="N" value="6b4a2e" name="telaio"/><color symbol="U" value="b9b0a0" name="fascia di prova"/>
+  <color symbol="S" value="a39d90" name="muro di prova"/>
+  <color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#93" hidden="True"/>
+  <color symbol="#94" hidden="True"/><color symbol="#95" hidden="True"/><color symbol="#96" hidden="True"/><color symbol="#97" hidden="True"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): a house of 45 × 34 from S, walls two thick, the band U from 8 to 21, wall up to 27. -->
+  <all in="S#92" out="*S" symmetry="(x)" steps="22"/>
+  <all in="S/#92" out="*/S" symmetry="(y)" steps="16"/>
+  <all in="S/#92" out="*/S" symmetry="()" steps="1"/>
+  <prl in="#92" out="B" steps="1"/>
+  <prl in="SSSSS/SSSSS/SSSSS/SSSSS/SSSSS" out="*****/*****/**#91**/*****/*****" steps="1"/>
+  <all in="B S" out="#93 *" steps="1"/>
+  <all in="B #93" out="#93 S" steps="7"/>
+  <all in="B #93" out="#93 U" steps="14"/>
+  <all in="B #93" out="#93 S" steps="5"/>
+  <prl><rule in="#93" out="S"/><rule in="#91" out="S"/></prl>
+
+  <!-- 1. The line in the air in front of the band's lowest row, along every face: in front of every row, then only where none is under it. -->
+  <all in="BU" out="#90*"/>
+  <prl in="#90 #90" out="B *"/>
+  <!-- 2. Where the line turns, an inner corner (a room, the inside of an L), the stretches that meet there have no windows: the turn and
+       all that follows it in its line. -->
+  <prl in="#90#90/#90*" out="#95*/**"/>
+  <all in="#95#90" out="*#95"/>
+  <prl in="#95" out="B"/>
+  <!-- 3. The middle of every straight stretch with air past both its ends (a corner, a door): eaten from both ends at once. -->
+  <markov>
+    <prl><rule in="[B#91]#90[B#91]" out="*#92*"/><rule in="[B#91]#90#90[B#91]" out="*#92#92*"/></prl>
+    <prl in="[B#91]#90#90" out="*#91*"/>
+  </markov>
+  <prl in="#91" out="#90"/>
+  <!-- 4. A window on the middle, 8 wide on an even stretch and 9 on an odd one, with 3 of wall at least to its sides; then outward a pier
+       of 6 and a window of 8, as long as 3 stay to the end. -->
+  <all>
+    <rule in="#90#90#90#90#90#90#92#92#90#90#90#90#90#90" out="***#93#94#94#94#94#94#94#93***"/>
+    <rule in="#90#90#90#90#90#90#90#92#90#90#90#90#90#90#90" out="***#93#94#94#94#94#94#94#94#93***"/>
+  </all>
+  <all in="#94#93#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90" out="********#93#94#94#94#94#94#94#93***"/>
+  <!-- 5. A stretch with air past one end only (the other on the edge of the box, where no middle is found): from that end 3 of wall,
+       a window, and on outward as above. -->
+  <all in="B#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90" out="****#93#94#94#94#94#94#94#93******"/>
+  <all in="#94#93#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90#90" out="********#93#94#94#94#94#94#94#93***"/>
+  <prl><rule in="#90" out="B"/><rule in="#92" out="B"/></prl>
+  <!-- 6. Into the wall and up the band: a jamb is frame from the sill to the lintel; a pane has the sill at the bottom, the lintel at the
+       top (the last of its column) and glass between; the sill out by one in front. -->
+  <prl><rule in="#93U" out="*#95"/><rule in="#94U" out="*#96"/></prl>
+  <all><rule in="U #95" out="#95 *"/><rule in="U [#96#91]" out="#91 *"/></all>
+  <prl in="#91 #91" out="* #90"/>
+  <prl><rule in="#95" out="N"/><rule in="#96" out="N"/><rule in="#91" out="N"/><rule in="#90" out="G"/><rule in="#93" out="N"/><rule in="#94" out="N"/></prl>
+  <!-- 7. Behind the glass the wall opens, up to 6 deep. -->
+  <all in="GU" out="*#97"/>
+  <all in="G#97U" out="**#97"/>
+  <all in="G#97#97U" out="***#97"/>
+  <all in="G#97#97#97U" out="****#97"/>
+  <all in="G#97#97#97#97U" out="*****#97"/>
+  <all in="G#97#97#97#97#97U" out="******#97"/>
+  <prl in="#97" out="B"/>
+</sequence>

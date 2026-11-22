@@ -163,12 +163,12 @@ A wall with a walk on top: 24 (`steps="23"`); a tower 40; a parapet one more tha
   (`f/W/W/W/W/W/f`) in a wall along x. The
   actions are yours: `<action name="open" label="Apri la porta"><all><rule in="O" out="#20"/><rule in="o" out="#21"/></all></action>` and
   `close` back, with hidden letters.
-- **The parts of the seed** the request lists are the parts one lives in, already right: include each with `<import file="…"/>` at the point
-  where it goes (after the columns have risen), instead of writing it, and give its letters your colours (`<color>`). Each reads a union you
-  redefine with your letters (`<union symbol="+" values="…"/>` in your program wins): `+` your walls, `=` your floors and slabs, `%` a fort's
-  walls with slits. The request says what each part reads and writes.
-- **Windows** in the band: `<one steps="14"><rule in="BU/BU/BU/BU/BU/BU BU/BU/BU/BU/BU/BU …8 layers…" out="*L/*L/*L/*L/*L/*L …"/></one>`
-  then through the wall `<all in="LUUUUB" out="*LLLL*"/>` and the rest of the band back to the wall `<prl in="U" out="W"/>`.
+- **The parts of the seed** the request lists are the parts one lives in and the windows, already right: include each with `<import
+  file="…"/>` at the point where it goes (after the columns have risen), instead of writing it, and give its letters your colours
+  (`<color>`), never using them for anything else. Each reads a union you redefine with your letters (`<union symbol="+" values="…"/>` in
+  your program wins): `+` your walls, `=` your floors and slabs, `%` a fort's walls with slits. The request says what each part reads and writes.
+- **Windows** in the band: `part-window` sets them in rows, centred on every face, framed and glazed, never here and there; then the
+  rest of the band back to the wall, `<prl in="U" out="W"/>`.
 - **Roofs**: the eaves `<all in="RB" out="*R" steps="1"/>`, then a hip roof with a slope of one in two: `<all in="*****/*****/**B**/*****/*****
   **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="10" symmetry="()"/>`; a flat top
   ends in a parapet, a fort's in `part-battlements` and `part-slits`; cones on round towers, pitches on halls, a chimney

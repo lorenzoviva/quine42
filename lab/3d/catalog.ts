@@ -7,6 +7,7 @@ import { boxOf, classOf, sizeOf, STRUCTURE_VPT, VESSEL_TILES, VESSEL_VPT, type S
 import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { mockVesselProgram } from '../../src/kernel/ai/mockVessel';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
+import { villettaWithWindows } from '../banco/parti/villetta';
 
 export type Role = 'player' | 'npc' | 'animal' | 'tree' | 'plant' | 'rock' | 'prop' | 'structure' | 'official' | 'handmade' | 'bench';
 
@@ -41,6 +42,8 @@ export interface Entry {
   sculpted?: boolean;
   /** A vessel of the bench of the vessels (T440, lab/banco/navi/) at one of its sizes. */
   vessels?: boolean;
+  /** A part of the seed alone, or a model that includes the parts of its trade (T471, lab/banco/parti/): only for the developers. */
+  parts?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -209,6 +212,49 @@ for (const [t, name] of Object.entries(VESSEL_NAMES) as Array<[SizeTier, string]
   CATALOG.push({ id: `navi:offline-${t}`, name: `Nave dei modelli locali, ${sizeOf(t)!.name}: ${name} (${VESSEL_TILES[t].join(' × ')} caselle)`, role: 'structure', xml, vpt: VESSEL_VPT, size: box, source: sourceOf(xml), vessels: true });
 }
 
+// The parts of the seed (T471, lab/banco/parti/README.md): each alone, as its own scene shows it, and the models of the bench that include
+// those of their trade (the wardrobe and the cart of the joiner, the cottage of the mason, the Sculptor's country house with part-window), at
+// the density they are drawn for. Only for the developers: the players' labs have no parts of the seed.
+const PART_NAMES: Record<string, string> = {
+  'part-stair': 'la scala',
+  'part-door': 'la porta',
+  'part-battlements': 'i merli',
+  'part-slits': 'le feritoie',
+  'part-cellar': 'la cantina',
+  'part-window': 'le finestre',
+  'part-leaf': 'le ante e i coperchi',
+  'part-wheel': 'la ruota',
+};
+const FURNITURE_PARTS = new Set(['part-leaf', 'part-wheel']);
+for (const [file, xml] of Object.entries(seedParts)) {
+  const id = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  CATALOG.push({ id: `parti:${id}`, name: `Parte del seme: ${PART_NAMES[id] ?? id} (da sola)`, role: FURNITURE_PARTS.has(id) ? 'prop' : 'structure', xml, vpt: FURNITURE_PARTS.has(id) ? 20 : STRUCTURE_VPT, source: sourceOf(xml), parts: true });
+}
+const partModels = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/parti/*.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+const PART_MODELS: Record<string, { name: string; role: Role; size: Vec3; vpt: number }> = {
+  armadio: { name: 'Armadio con le ante (part-leaf, il Mobiliere)', role: 'prop', size: [20, 20, 20], vpt: 20 },
+  carretto: { name: 'Carretto a quattro ruote (part-wheel, il Mobiliere)', role: 'prop', size: [40, 40, 40], vpt: 20 },
+  casetta: { name: 'Casetta con le finestre e la porta che si apre (part-window, part-leaf, il Capomastro)', role: 'structure', size: [50, 50, 50], vpt: 20 },
+};
+for (const [file, xml] of Object.entries(partModels)) {
+  const id = file.replace(/^.*\//, '').replace(/\.xml$/, '');
+  const p = PART_MODELS[id];
+  if (p) CATALOG.push({ id: `parti:${id}`, name: p.name, role: p.role, xml, vpt: p.vpt, size: p.size, source: sourceOf(xml), parts: true, ...withIncludes(xml) });
+}
+// The offline house rewritten (lab/banco/parti/villetta.ts): if the house changed under it the lab goes on without it (the test says so).
+const villetta = (): string | undefined => {
+  try {
+    return villettaWithWindows();
+  } catch {
+    return undefined;
+  }
+};
+const xmlVilletta = import.meta.env.MODE !== 'production' ? villetta() : undefined;
+if (xmlVilletta) {
+  const xml = xmlVilletta;
+  CATALOG.push({ id: 'parti:villetta', name: 'Villetta dello Scultore con le finestre di part-window (l’Architetto, Grande)', role: 'structure', xml, vpt: STRUCTURE_VPT, size: [100, 100, 80], source: sourceOf(xml), parts: true, ...withIncludes(xml) });
+}
+
 /**
  * The density a hand drawn model is drawn for, if not the lab's 20 (T404, D61): the author's fort, 500 × 500 voxels, is 50 × 50 tiles at
  * 10 voxels a tile, as its entry says in a world (`vpt: 10`, ADR-0208); the «voxel per casella» of the inspector starts from it.
@@ -249,12 +295,13 @@ export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
   ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
   ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && !e.vessels && ['prop', 'structure'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && !e.vessels && !e.parts && ['prop', 'structure'].includes(e.role)],
   ['Navi alle taglie (T440)', (e) => !!e.vessels],
   ...(DEV_TOOLS
     ? ([
       ['MarkovJunior (originali)', (e) => e.role === 'official'],
       ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
+      ['Banco: le parti del seme, da sole e nei modelli (T471)', (e) => !!e.parts],
       ['Banco: strutture che si adattano alla taglia (T338, T346)', (e) => !!e.sizes],
       ['Banco: gli Scultori sulle taglie (T391, T402)', (e) => !!e.sculpted],
       ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],

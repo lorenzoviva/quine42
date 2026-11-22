@@ -1000,29 +1000,61 @@
  },
  "part-stair": {
   "class": "structure",
+  "specialty": "architect",
   "name": "Parte: la scala (da sola, la casa di prova)",
   "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
  },
  "part-door": {
   "class": "structure",
+  "specialty": "architect",
   "name": "Parte: la porta (da sola, il muro di prova)",
   "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
  },
  "part-battlements": {
   "class": "structure",
+  "specialty": "architect",
   "name": "Parte: i merli (da soli, la torre di prova)",
   "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
  },
  "part-slits": {
   "class": "structure",
+  "specialty": "architect",
   "name": "Parte: le feritoie (da sole, la torre di prova)",
   "author": "a mano (Claude Code, T346): un sottoblocco del seme da includere con <import>, ADR-0182"
  },
  "part-cellar": {
   "class": "structure",
+  "specialty": "architect",
   "name": "Parte: la cantina (da sola, la casa di prova con la cantina)",
   "author": "a mano (Claude Code, T417): un sottoblocco del seme da includere con <import>, ADR-0182, ADR-0091",
   "cellar": 1
+ },
+ "part-window": {
+  "class": "structure",
+  "specialty": [
+   "architect",
+   "mason"
+  ],
+  "name": "Parte: le finestre (da sole, la casa di prova)",
+  "author": "a mano (Claude Code, T471): una parte del seme da includere con <import>, ADR-0182, ADR-0239, ADR-0241"
+ },
+ "part-leaf": {
+  "class": "furniture",
+  "specialty": [
+   "joiner",
+   "mason"
+  ],
+  "name": "Parte: le ante e i coperchi (da soli, la madia di prova)",
+  "author": "a mano (Claude Code, T471): una parte del seme da includere con <import>, ADR-0182, ADR-0239, ADR-0241"
+ },
+ "part-wheel": {
+  "class": "furniture",
+  "specialty": [
+   "joiner",
+   "coachbuilder"
+  ],
+  "name": "Parte: la ruota (da sola, il carro di prova)",
+  "author": "a mano (Claude Code, T471): una parte del seme da includere con <import>, ADR-0182, ADR-0239, ADR-0241"
  },
  "cellar-shelf": {
   "class": "furniture",

@@ -552,24 +552,55 @@ export function libraryResources(files: FileMap): string[] {
   return out.sort().slice(0, 40);
 }
 
+/** The most parts one request lists (T471, S5 of T458 § 4.2): each is a line of its contract, 100-400 tokens. */
+export const MAX_PARTS = 8;
+
 /**
- * The parts one lives in that a structure may include (T354, ADR-0183): the programs `models/part-*.xml` of the universe (the sub-blocks
- * of the seed, ADR-0182), each with its contract for the program that includes it, the first paragraph of the comment at its top. One
- * entry per part, for the request; empty if the universe has none. Without `fortified` (T434), not the parts of a fort (`FORT_PARTS`).
+ * The specialties a part serves (T471, ADR-0241), from its entry in `models/index.json`: `specialty`, one specialty or a list of them, never
+ * `actions` (an action rewrites a model that is made); what is not one is dropped. Without any, the architect's: every part of the seed was
+ * the structures' before T471, and a universe keeps the entries its index has (only the seed's new ones arrive, `mergeEntries`).
  */
-export function partResources(files: FileMap, fortified = true): string[] {
+export function partSpecialties(info: Partial<ModelInfo> | undefined): SculptorSpecialty[] {
+  const raw = info && typeof info === 'object' ? info.specialty : undefined;
+  const said = (Array.isArray(raw) ? raw : [raw]).filter((s): s is SculptorSpecialty => typeof s === 'string' && s !== 'actions' && (SPECIALTIES as readonly string[]).includes(s));
+  return said.length ? [...new Set(said)] : ['architect'];
+}
+
+/**
+ * The parts a request may include (T354, ADR-0183; by specialty since T471, ADR-0241): the programs `models/part-*.xml` of the universe (the
+ * parts of the seed, ADR-0182, and in time those of the world, ADR-0239) whose entry serves the request's specialty (`partSpecialties`),
+ * each with its contract for the program that includes it, the first paragraph of the comment at its top. One line per part, in the order
+ * of their names, at most `MAX_PARTS`; empty if the universe has none for that trade. Without `fortified` (T434), not the parts of a fort
+ * (`FORT_PARTS`). The architect gets the parts one lives in and the windows; the mason the windows and the leaves; the joiner the leaves and
+ * the wheel; the coachbuilder the wheel.
+ */
+export function partResources(files: FileMap, specialty: SculptorSpecialty = 'architect', fortified = true): string[] {
+  let index: Record<string, Partial<ModelInfo> | undefined> = {};
+  try {
+    index = internalFields('modelIndex', JSON.parse(files['models/index.json'] ?? '{}'));
+  } catch {
+    index = {};
+  }
+  if (!index || typeof index !== 'object' || Array.isArray(index)) index = {};
   const out: string[] = [];
   for (const [path, text] of Object.entries(files)) {
     const name = /^models\/(part-[a-z0-9-]+)\.xml$/.exec(path);
     if (!name || typeof text !== 'string') continue;
+    if (!partSpecialties(Object.prototype.hasOwnProperty.call(index, name[1]) ? index[name[1]] : undefined).includes(specialty)) continue;
     // The parts of a fort only to a fortification (T434): offered to a cathedral or a station, the Sculptor crowned them with merlons (T153).
     if (!fortified && (FORT_PARTS as readonly string[]).includes(name[1])) continue;
     const comment = /^\s*<!--([\s\S]*?)-->/.exec(text)?.[1]?.trim();
     const contract = comment?.split(/\n\s*\n/)[0]?.replace(/\s*\n\s*/g, ' ').trim();
     out.push(`- <import file="${name[1]}"/>: ${contract || 'a part of the seed (no contract written at its top)'}`);
   }
-  return out.sort();
+  return out.sort().slice(0, MAX_PARTS);
 }
+
+/**
+ * What the request of a thing in one box says before its parts (T471): the architect's prompt teaches the parts one lives in, the sections of
+ * the other trades do not, so the request says how a part is used. The architect's request keeps its line of before.
+ */
+export const TRADE_PARTS = 'Parts of the seed the program may include with <import file="…"/> where the thing has one, instead of writing it: build what the part reads, mark what it asks, include it, give its letters your colours and use them for nothing else (each says what it reads and writes; never use S nor #90-#97):';
 
 /** The voxels of cellar a request asks for (T417): only a structure that grows by rules has one, `cellar` tiles of 20 voxels (`cellarVoxels`). */
 export const cellarOfRequest = (cls: AssetClass, taglia: string | undefined, cellar: number | undefined): number =>
@@ -934,9 +965,13 @@ async function write(c: Council, req: SculptRequest, cls: AssetClass, model: str
   let prompt = describe(req, cls);
   const resources = libraryResources(c.files);
   if (resources.length) prompt += `\n\nFiles of models/ the program may read (wfc tileset or sample, convchain sample, rules with file/fin/fout):\n${resources.join('\n')}`;
-  // The parts one lives in (ADR-0182), with their contracts: a structure includes them instead of writing them (T354).
-  const parts = proc ? partResources(c.files, fortifiedOf(req)) : [];
-  if (parts.length) prompt += `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`;
+  // The parts of the trade (ADR-0182, ADR-0241), with their contracts: a structure includes the parts one lives in instead of writing them
+  // (T354); every other trade the parts of its own, where the thing has one (T471: the windows, the leaves and lids, the wheel).
+  const parts = partResources(c.files, specialty, fortifiedOf(req));
+  if (parts.length)
+    prompt += proc
+      ? `\n\nParts of the seed the program includes with <import file="…"/> (each says what it reads and writes; never use S nor #90-#97):\n${parts.join('\n')}`
+      : `\n\n${TRADE_PARTS}\n${parts.join('\n')}`;
   const images: string[] = [];
   if (req.previous) prompt += `\n\nIts current program:\n${req.previous}\n${req.desiderio ? `What is wished: ${req.desiderio}\n` : ''}Redo it: answer with the whole program.`;
   if (previous) {

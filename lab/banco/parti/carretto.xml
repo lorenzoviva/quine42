@@ -1,0 +1,19 @@
+<!-- Cart on four wheels (T471, lab/banco/parti/README.md): how the joiner uses part-wheel, a piece of furniture of size Large. Two axles
+     along x under the bed, the hubs two thick past their ends; the wheels are as large as the hubs are high, and touch the ground. -->
+<sequence values="BXNKH" size="40 40 40" symmetry="(xy)">
+  <color symbol="X" value="3e2614" name="assale"/><color symbol="N" value="8b5a2b" name="cassone"/><color symbol="K" value="5e3c22" name="sponde e stanghe"/>
+  <color symbol="I" value="2f2f33" name="cerchioni"/><color symbol="J" value="a0703c" name="ruote"/>
+  <!-- The axles at 8 voxels, the hubs past their ends. -->
+  <box at="20 10 8" size="22 1 1" color="X"/>
+  <box at="20 28 8" size="22 1 1" color="X"/>
+  <all in="XBB" out="*HH" symmetry="(x)" steps="1"/>
+  <!-- The bed on two bolsters, its sides three high, the shafts out in front. -->
+  <box at="20 10 9" size="20 1 1" color="K"/>
+  <box at="20 28 9" size="20 1 1" color="K"/>
+  <box at="20 19 10" size="20 28 2" color="N"/>
+  <all in="BB NB" out="K* **" steps="1"/>
+  <all in="B K" out="K *" steps="2"/>
+  <box at="14 36 10" size="1 8 1" color="K"/>
+  <box at="25 36 10" size="1 8 1" color="K"/>
+  <import file="part-wheel"/>
+</sequence>

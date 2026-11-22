@@ -1712,6 +1712,40 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   tracciati, appezzamenti a incastro, pascoli recintati con i cancelli a sbarre, il fienile a lato) e la casa di T338 (due piani, tettoia,
   fieno); il forte con la cinta di 12 e il camminamento, le torri cave con la porta dal camminamento, merli e feritoie dalle parti; i
   controlli `merlonRuns` e `animalLetters`, le aree per taglia, `--parti` per le parti da sole.
+- **Le parti dei mestieri** (ADR-0241, T471, S5 dello studio T458 § 4, kernel 0.10.18): tre parti del seme scritte a mano come le cinque
+  abitabili e dallo stesso generatore (`lab/banco/taglie/parti.mjs`), per i mestieri che scolpiscono in una scatola sola. **`part-wheel`**
+  (Mobiliere e Carrozziere): chi include segna il mozzo `H` sull'asse o appena oltre la sua fine, con aria ai due lati attraverso l'asse e
+  sotto; la ruota cresce attorno al mozzo nel piano attraverso l'asse (un asse lungo x o lungo y, due passate con gli stessi marcatori),
+  grande quanto il mozzo è alto su ciò che ha sotto (la verticale che scende fino a terra, a un pavimento, a un ponte: il suo piede), ad
+  anelli ottagonali (otto vicini e quattro, alternati) finché un anello non tocca il piede: quell'anello è il cerchione `I`, quello dentro
+  i quarti `J`, otto razze `J` dritte dal mozzo, il mozzo di ferro `I`; due `H` affiancati lungo l'asse fanno una ruota spessa due, un
+  mozzo senz'aria sotto nessuna. **`part-window`** (Architetto e Capomastro): chi include segna `U`, una fascia dei muri per tutto il loro
+  spessore; la parte prende la riga d'aria davanti alla riga più bassa della fascia, ne toglie i tratti che girano (un angolo interno: una
+  stanza, l'interno di una L), trova il mezzo di ogni tratto con l'aria oltre i due capi (un angolo, una porta) mangiandolo dai due capi
+  insieme e vi centra una finestra (8 su un tratto pari, 9 su uno dispari, 3 di muro almeno ai lati), poi verso fuori pilastri di 6 e
+  finestre di 8; un tratto libero da un capo solo (l'altro sul bordo della scatola) le ha da quel capo. Telaio `N` (stipiti, architrave, il
+  davanzale che sporge di uno), vetro `G`, il muro aperto dietro il vetro fino a 6 di profondità; il resto della fascia resta `U` e chi
+  include lo rende al muro. Fuori da `<pieces>` (misura muri interi) e prima di `part-slits` (le feritoie sono `U` anch'esse); una faccia
+  sul bordo della scatola non ha aria davanti e resta senza. **`part-leaf`** (Mobiliere e Capomastro): chi include scrive l'anta chiusa
+  `L`, uno spessore su una faccia con aria davanti, e il cardine `#80` nell'aria davanti al capo su cui gira, a ogni strato (un coperchio:
+  sopra il suo bordo di dietro, per tutto il bordo); la parte scrive `#81`, nascosta, dove l'anta va aperta: la cella dietro il cardine è la
+  prima presa e il cardine la sua cella aperta, la presa corre lungo l'anta lasciando un segno davanti a ogni cella e un marcatore un passo
+  fuori sulla diagonale verso il cardine, che la percorre fino alla riga del cardine; due cardini ai capi di una fila di `L` se la dividono a
+  metà (la presa si decide sulla griglia com'era, `prl`: la cella di mezzo di una fila dispari va alle due ante, uguale a ogni strato); i coperchi allo stesso modo in un piano diritto, verso l'alto. Le azioni sono di chi include (`open`: `L` → `#82` nascosta, `#81` →
+  `#83` col colore di `L`; `close` all'indietro). **Le lettere**: i marcatori privati restano `#90`-`#97` e la scena `S`; ciò che una parte
+  scrive e chi include colora non si usa per altro (la villetta offline ha la siepe `G`: nella copia del banco con `part-window` è `Z`).
+  **Per specialità**: la voce dell'indice dice a chi serve una parte (`ModelInfo.specialty`, una o un elenco; `partSpecialties`, letta senza
+  fidarsi: senza, l'Architetto, come ogni parte di prima e le voci che un universo tiene, `mergeEntries` porta solo le nuove), e
+  `partResources(files, specialty, fortified)` le elenca alla richiesta di quel mestiere, al più `MAX_PARTS` otto, in ordine di nome; ai
+  mestieri in una scatola con la riga `TRADE_PARTS` (costruire ciò che la parte legge, segnare ciò che chiede, includerla, dare i colori e non
+  usarne le lettere per altro), all'Architetto con la sua riga di prima. L'Architetto riceve anche `part-window` (il suo prompt la nomina per le
+  finestre, al posto della ricetta a caso), il Capomastro finestre e ante, il Mobiliere ante e ruota, il Carrozziere la ruota; Paesaggista, Sarto, Figurinista e le azioni
+  nessuna (le righe costano 170-215 token l'una: 416 in più a richiesta del Mobiliere, 491 del Capomastro, 216 del Carrozziere, 178
+  dell'Architetto, il cui prompt nomina `part-window` al posto della ricetta delle finestre a caso; 320 in media pesata, 0,016 $ l'ora oggi e
+  0,030 $ dall'1/12, `docs/design/scultori-specializzati/misure-s5.md`). **Il
+  banco** (`lab/banco/parti/`, `lab/scripts/banco-parti.ts`, `tests/seed-parts.test.ts`): le parti da sole, l'armadio e il carretto del
+  Mobiliere, la casetta del Capomastro, la villetta dello Scultore con `part-window` al posto delle sue finestre (passa i controlli a Grande e
+  a Enorme, 31 finestre, mezzo secondo in più ai controlli); nel laboratorio 3D il gruppo «Banco: le parti del seme, da sole e nei modelli».
 - **Lo Scultore delle strutture senza scheletro, a blocchi** (ADR-0183, T354, kernel 0.6.10, passo 2 di D48): il prompt dopo `<!-- strutture -->` (dal T468 il prompt dell'Architetto, `architect.md`, ADR-0239) non ha più
   un programma da ricopiare (T337: lo scheletro era il 78-92 % di ogni programma, e ogni concetto dava lo stesso edificio) ma un metodo in tre
   livelli dentro un programma solo: la composizione del concetto sul piano a un quinto (`map scale="1/5 1/5 1"`, una cella un quarto di
@@ -1721,8 +1755,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   con gli attrezzi provati (il corpo da una linea per il centro e una moneta su una cella sola, l'ala, cortile e cinta, le torri sugli angoli
   convessi, la via dal centro al fronte, `field` per «il più lontano dal portone», la zona della scala col pianerottolo, ciò che entra con i
   pattern di terreno libero a `steps="1"`, gli anelli oltre il costruito misurati dal cortile verso fuori) e il divieto delle lettere delle parti
-  (`S`, `#90`-`#97`). **Le parti nella richiesta** (`partResources` in `sculptor.ts`, come `libraryResources`): per ogni `models/part-*.xml` il
-  primo paragrafo del commento in testa, il contratto per chi include. **Due blocchi** (`BLOCKS`): la prima richiesta chiede la composizione
+  (`S`, `#90`-`#97`). **Le parti nella richiesta** (`partResources` in `sculptor.ts`, come `libraryResources`; per specialità dal T471, qui sopra): per ogni
+  `models/part-*.xml` del mestiere il primo paragrafo del commento in testa, il contratto per chi include. **Due blocchi** (`BLOCKS`): la prima richiesta chiede la composizione
   sola (`isPlanOnly`: una `map` che non torna), il kernel la fa girare a tre semi e al primo della taglia successiva con il suolo letto come
   `ground` (`planBlock`) e rimanda le piante in testo con quanto differiscono i semi; la seconda il programma intero con le piante davanti; una
   risposta che già torna alla scatola si controlla come programma intero (offline una chiamata). Ciò che non passa torna con il motivo e il suo
@@ -1833,7 +1867,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   feritoie solo su una fortificazione. Chi lo è lo dice la richiesta (`SculptRequest.fortified`; la rigenerazione la mette quando il concetto
   che il mondo indossa lo dice) o il nome (`isFortified` in `src/mj/classes.ts`: forte, castello, rocca, mastio, bastione, cittadella, mura,
   torre di guardia, `fortificat…`, in italiano e in inglese; una torre da sola no, né una caserma che non si dice fortificata); solo a lei la
-  richiesta elenca `part-battlements` e `part-slits` (`FORT_PARTS`, `partResources(files, fortified)`) e dice che le appartengono, a ogni altra
+  richiesta elenca `part-battlements` e `part-slits` (`FORT_PARTS`, `partResources(files, 'architect', fortified)`) e dice che le appartengono, a ogni altra
   dice che non ne ha e che le sue cime piatte finiscono in un cornicione, un parapetto pieno, una ringhiera, un lucernario o una cupola
   (`UNFORTIFIED_LINE`). Trovato da T153: con l'elenco intero e il forte come forma, cattedrali, bistrot, laboratori e stazioni avevano i merli.
 - **Gli interni, la parte del kernel** (ADR-0212, T409; il progetto in `docs/design/scenografo.md`): un edificio che cresce a regole cambia
