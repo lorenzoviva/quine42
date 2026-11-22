@@ -15,7 +15,7 @@ import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, C
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
-import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, staleChunks, tileForms, type TerrainView } from './terrain';
 import { ChunkMesher } from './chunkmesher';
 import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
@@ -151,11 +151,10 @@ export class Renderer {
 
   /** Everything built from the universe's files is built again (terrain colours, the corona's rooms). */
   private reset(): void {
-    for (const v of this.chunks.values()) {
-      this.world.remove(v.group);
-      disposeChunk(v);
-    }
-    this.chunks.clear();
+    // The places' meshes stay on screen until theirs anew take their place (T492): every commit of the Council reloads the files, and taking
+    // them all away here left a frame, or a dozen while the worker made them again, with only the sky where the ground was. Stale, they are
+    // made again a few a frame and each replaced in the same frame its new one comes (`showChunk`); a place no longer loaded goes as ever.
+    staleChunks(this.chunks);
     // What the worker brings back now is of the files before.
     this.mesher.forget();
     this.syncCut(undefined);

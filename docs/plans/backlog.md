@@ -6443,7 +6443,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — la prova con Gemini vero su un clone di `orichalcum` o `sidera`: i luoghi vicini si pianificano in tempo, niente bozze davanti ai piedi.
 - Quando è fatto: il costo misurato prima e dopo, la stima della lobby aggiornata, i test del raggio e dell'ordine; ADR se cambia quando il Concilio lavora, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T492 · Il terreno che sfarfalla: per un fotogramma sparisce tutto il suolo — `da fare`
+### T492 · Il terreno che sfarfalla: per un fotogramma sparisce tutto il suolo — `fatto` (`7aa571d6`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Step: 34
 - Contesto: segnalazione dell'autore del 22/11 dal video della prima run (T457, ramo `beta/run-1`, 21/11 23:22, `orichalcum`, «Porto dei Bastimenti — il molo del faro di Tramontana»): a brevissima distanza tra due fotogrammi l'intero terreno (suolo, molo, mare) svanisce e resta solo lo sfondo del cielo, mentre mobili, strutture, individui, rune e luci restano. Catture: `docs/userchats/sfarfallio-2026-11-22-1.png` (senza terreno) e `-2.png` (normale). La run è su un base precedente a T449 (origine mobile del renderer) e a T486 (mesh del terreno nel worker, ADR-0242): il difetto c'era già prima; va cercato e verificato su entrambi.
@@ -6454,6 +6454,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
   3. Un test che fissi l'invariante (nessun fotogramma con un luogo caricato senza mesh), dove si può senza browser.
 - Browser: sì — camminare a lungo tra luoghi e sull'acqua nella preview: nessun fotogramma senza terreno (catture prima e dopo in `lab/banco/sfarfallio/`).
 - Quando è fatto: causa scritta nell'esito, correzione, test; kernel alzato solo se tocca `src/kernel/`. Sicurezza: nessuna superficie nuova.
+- Esito: causa: ogni commit del Concilio ricarica i file (`universe:reloaded`) e `Renderer.reset` toglieva tutte le mesh dei luoghi, rifatte tre per fotogramma (una dozzina di fotogrammi col worker); ora restano in scena segnate come vecchie (`staleChunks`, `STALE_SIG`) e ognuna è sostituita nello stesso fotogramma della nuova; prova nella preview (prima 32/32 luoghi senza mesh dopo la ricarica, dopo zero persi camminando e sull'acqua); `tests/sfarfallio.test.ts` (pagina, worker, camminata; falliscono senza la correzione); kernel non toccato; non riprodotto nel browser sul commit della run (solo letto: il codice era lo stesso) né su `orichalcum`; sicurezza: nessuna superficie nuova.
 
 ### T489 · Oggetti che si capiscono: ogni oggetto generato ha un uso — `da fare`
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 3

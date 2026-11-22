@@ -71,6 +71,17 @@ export interface TerrainView {
   group: THREE.Group;
 }
 
+/** The signature of a place's mesh made of files that are no more (T492): no place has it, so the place is made again. */
+export const STALE_SIG = '';
+
+/**
+ * The places' meshes made of the files before a reload (T492): they stay on screen, each until its new one replaces it in the same frame,
+ * and are made again (their signature matches no place's).
+ */
+export function staleChunks(views: Map<string, TerrainView>): void {
+  for (const v of views.values()) v.sig = STALE_SIG;
+}
+
 /** The forms of what stands on a terrain, with their geometries (`tileForms`). */
 type TileForms = Array<{ form: Form; geo: ModelGeo }>;
 
