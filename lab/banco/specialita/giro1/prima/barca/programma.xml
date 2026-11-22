@@ -1,0 +1,126 @@
+<!-- Barca da pesca: sculpted by gemini-4-argon (step 9), the Artist's vote 7/10 -->
+<sequence values="BHIDFRGTOMNSsKkWCPEL" size="40 96 64" waterline="10">
+  <!-- Main hull: wooden egg shape, hollowed out, flat stern transom -->
+  <ellipsoid at="19.5 47.5 0" size="38 96 36" color="H"/>
+  <ellipsoid at="19.5 47.5 2" size="32 90 32" color="I" on="H"/>
+  <!-- Cut upper half above z=17 -->
+  <box at="19.5 47.5 18" size="40 96 46" color="B"/>
+  <!-- Cut stern flat and close transom -->
+  <box at="19.5 3.5 0" size="40 8 64" color="B"/>
+  <box at="19.5 8 0" size="38 2 18" color="H" on="I"/>
+
+  <!-- Keel and stempost attached directly to hull -->
+  <box at="19.5 48 0" size="2 80 4" color="K" on="H"/>
+  <box at="19.5 88 2" size="2 4 16" color="K"/>
+
+  <!-- Rubbing strake / trim around the upper hull -->
+  <all in="B H" out="W *" steps="1"/>
+  <all in="W H" out="* K" steps="1"/>
+  <prl in="W" out="B"/>
+
+  <!-- Main deck at z=16..17 -->
+  <box at="19.5 47.5 16" size="38 90 2" color="D" on="I"/>
+
+  <!-- Hold floor at bottom of interior -->
+  <all in="I H" out="O *" steps="1"/>
+  <prl in="I" out="B"/>
+
+  <!-- Deck plank lines (dark seams along y) -->
+  <box at="13 48 17" size="1 72 1" color="F" on="D"/>
+  <box at="17 48 17" size="1 72 1" color="F" on="D"/>
+  <box at="22 48 17" size="1 72 1" color="F" on="D"/>
+  <box at="26 48 17" size="1 72 1" color="F" on="D"/>
+
+  <!-- Bulwark / rail around the hull rim -->
+  <all in="B H" out="R *" steps="1"/>
+  <all in="B K" out="R *" steps="1"/>
+  <all in="B R" out="R *" steps="1"/>
+
+  <!-- Boarding gaps amidships on port and starboard (z=18..19) -->
+  <box at="19.5 48 19" size="40 16 2" color="B" on="R"/>
+  <box at="19.5 48 18" size="40 16 1" color="G" on="R"/>
+  <box at="19.5 48 17" size="40 16 1" color="G" on="H"/>
+  <box at="19.5 48 17" size="40 16 1" color="G" on="K"/>
+
+  <!-- Fish hold hatch forward-midships (resting on deck z=17, raised and high contrast) -->
+  <box at="19.5 45 18" size="10 12 2" color="K"/>
+  <box at="19.5 45 19" size="8 10 1" color="F"/>
+  <box at="19.5 45 19" size="2 8 1" color="K"/>
+
+  <!-- Fishing crates, barrels and nets resting directly on deck at z=18 (high contrast against light deck) -->
+  <box at="11 58 18" size="5 7 3" color="C"/>
+  <box at="11 58 20" size="3 5 1" color="P"/>
+  <box at="11 67 18" size="5 6 3" color="C"/>
+  <box at="11 67 20" size="3 4 1" color="P"/>
+  <box at="28 61 18" size="5 10 2" color="E"/>
+  <box at="28 61 20" size="3 6 1" color="E"/>
+  <box at="11 32 18" size="4 4 4" color="C"/>
+  <box at="28 34 18" size="4 8 2" color="E"/>
+
+  <!-- Aft tiller / helm post and wheel attached to deck z=17 -->
+  <box at="19.5 18 18" size="2 2 10" color="T"/>
+  <box at="19.5 15 21" size="2 6 2" color="T"/>
+  <box at="19.5 19 23" size="6 2 6" color="T"/>
+
+  <!-- Main mast stepped at y=55 from z=18 up to z=61 -->
+  <box at="19.5 55 18" size="2 2 44" color="M"/>
+  <box at="19.5 55 18" size="4 4 2" color="K"/>
+
+  <!-- Mizzen mast aft at y=26 from z=18 up to z=54 -->
+  <box at="19.5 26 18" size="2 2 36" color="M"/>
+  <box at="19.5 26 18" size="4 4 2" color="K"/>
+
+  <!-- Bowsprit jutting forward, firmly rooted into bow deck and rail -->
+  <box at="19.5 85 18" size="2 10 2" color="M"/>
+  <box at="19.5 91 19" size="2 5 2" color="M"/>
+
+  <!-- Large main boom, gaff/upper yard and jib boom (all above z=42 so 25 voxels free over deck) -->
+  <box at="19.5 46 42" size="2 24 2" color="N"/>
+  <box at="19.5 46 60" size="2 24 2" color="N"/>
+  <box at="19.5 73 42" size="2 34 2" color="N"/>
+
+  <!-- Large full-bellied main lugsail (curving slightly to port for 3D fullness from all 4 views) -->
+  <box at="19.5 46 44" size="2 22 16" color="S"/>
+  <box at="18 46 45" size="3 18 14" color="S"/>
+
+  <!-- Large jib / foresail forward from main mast to bowsprit -->
+  <box at="19.5 72 44" size="2 32 16" color="S"/>
+  <box at="18.5 70 45" size="2 24 12" color="S"/>
+  <!-- Diagonal cut on foresail leech for tall triangular jib silhouette -->
+  <box at="19.5 85 56" size="6 10 6" color="B" on="S"/>
+  <box at="19.5 81 58" size="6 10 4" color="B" on="S"/>
+  <box at="19.5 87 52" size="6 6 6" color="B" on="S"/>
+
+  <!-- Aft mizzen boom, upper yard and sail -->
+  <box at="19.5 19 42" size="2 18 2" color="N"/>
+  <box at="19.5 19 53" size="2 18 2" color="N"/>
+  <box at="19.5 19 44" size="2 16 9" color="S"/>
+  <box at="18.5 19 45" size="2 12 7" color="S"/>
+
+  <!-- Lantern at the stern post and masthead -->
+  <box at="19.5 9 18" size="2 2 6" color="K"/>
+  <box at="19.5 9 24" size="2 2 2" color="L"/>
+  <box at="19.5 55 62" size="2 2 2" color="L"/>
+
+  <color symbol="H" value="6e4726" name="scafo"/>
+  <color symbol="K" value="2e1a0d" name="chiglia e cinta"/>
+  <color symbol="D" value="c8a268" name="ponte"/>
+  <color symbol="F" value="5c4022" name="commenti e boccaporto"/>
+  <color symbol="R" value="4a2e18" name="murata"/>
+  <color symbol="G" value="9c7844" name="imbarco" area="boarding"/>
+  <color symbol="T" value="3b2312" name="timone" area="helm"/>
+  <color symbol="O" value="735030" name="fondo della stiva" area="hold"/>
+  <color symbol="M" value="5e3f22" name="albero"/>
+  <color symbol="N" value="3d2614" name="boma e picco"/>
+  <color symbol="S" value="d96b38" name="vela al terzo"/>
+  <color symbol="C" value="593a1e" name="cassa del pesce"/>
+  <color symbol="P" value="9ab8c7" name="pescato"/>
+  <color symbol="E" value="234233" name="reti da pesca"/>
+  <color symbol="L" value="ffcc55" glow="True" name="lanterna"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="W" hidden="True" name="segno"/>
+  <color symbol="s" hidden="True" name="vela ammainata"/>
+
+  <action name="furl" label="Ammaina le vele"><all in="S" out="s"/></action>
+  <action name="hoist" label="Issa le vele"><all in="s" out="S"/></action>
+</sequence>

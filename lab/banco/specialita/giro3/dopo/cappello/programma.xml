@@ -1,0 +1,19 @@
+<!-- Cappello di paglia: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 6/10 -->
+<sequence values="BHh" size="12 12 12" name="Cappello di paglia">
+  <color symbol="H" value="e4bb40"/>
+  <color symbol="h" value="8a6f30"/>
+  <cylinder at="6 6 0" size="12 12 2" color="H"/>
+  <ellipsoid at="6 6 2" size="8 8 4" color="H"/>
+  <prl p="0.2" steps="5">
+    <rule in="H" out="h"/>
+  </prl>
+  <worn zone="head">
+    <all>
+      <rule in="[rm] z" out="H z"/>
+      <rule in="[rm]/z" out="H/z"/>
+      <rule in="[rm]z" out="Hz"/>
+      <rule in="z[rm]" out="zH"/>
+    </all>
+    <all in="H [rmoB]" out="H *"/>
+  </worn>
+</sequence>

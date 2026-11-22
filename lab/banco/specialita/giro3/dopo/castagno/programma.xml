@@ -1,0 +1,26 @@
+<!-- Castagno: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 6/10 -->
+<sequence values="BTLSG" size="40 40 60" symmetry="(xy)" name="Castagno">
+  <color symbol="T" value="6b4a2e" name="tronco"/>
+  <color symbol="L" value="4b692f" name="foglie"/>
+  <color symbol="S" value="354724" name="ombra"/>
+  <color symbol="G" value="84a956" name="luce"/>
+
+  <!-- Base del tronco larga -->
+  <cylinder at="20 20 0" size="8 8 2" color="T"/>
+  <!-- Tronco robusto -->
+  <cylinder at="20 20 2" size="4 4 40" color="T"/>
+
+  <!-- Chioma tonda -->
+  <ellipsoid at="20 20 40" size="32 32 20" color="L" on="B"/>
+
+  <!-- Dettaglio della chioma: rende la forma meno geometrica -->
+  <convolution neighborhood="Moore" steps="2">
+    <rule in="B" out="L" values="L" sum="2..26"/>
+  </convolution>
+
+  <!-- Luci e ombre per dare volume -->
+  <prl steps="1">
+    <rule in="L" out="S" p="0.3"/>
+    <rule in="L" out="G" p="0.3"/>
+  </prl>
+</sequence>

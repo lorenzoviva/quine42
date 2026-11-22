@@ -1,0 +1,5 @@
+[sculptor] propone: «Cappello di paglia» (oggetto piccolo, Sarto, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Cappello di paglia»: non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0
+[kernel → sculptor] scarta: «Cappello di paglia»: <worn> (riga 16), sul corpo di prova in piedi: "[..]" non è ammesso in un'uscita: [rm]/.
+[kernel → sculptor] scarta: «Cappello di paglia»: non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0
+[artist → sculptor] obietta: «Cappello di paglia»: 5/10 — La tesa larga non si distingue chiaramente dalla cupola del cappello.

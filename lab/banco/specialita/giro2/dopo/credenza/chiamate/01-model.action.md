@@ -1,0 +1,87 @@
+# model.action · azione · gemini-3.1-flash-lite · 1 s · 4762 token d'ingresso (0 in cache), 51 d'uscita, 104 di ragionamento · $0.0014
+
+## Richiesta
+
+The wanderer, in front of «Credenza», does: «apro le ante della credenza». The Council decided that its look changes like this: le due ante si aprono e si vede dentro.
+
+Write ONE rule <action name="open" label="Apri le ante">nodes</action> for the program below: the nodes run once on the finished model and change it (like the door that opens: <action name="open" label="Apri la porta"><all><rule in="O" out="h"/></all></action>).
+
+Use ONLY the letters of the finished model (the empty cell is B): N (legno scuro, #5e3c22, 1815 voxels), K (cornice, #6a4428, 234 voxels), L (anta, #7a5232, 126 voxels), n (ombra, #3e2614, 47 voxels), I (maniglia d'ottone, #c8b070, 17 voxels). Change a part of the model, do not empty it; put steps on the rules that could repeat forever. It will hold for all the things of this kind.
+
+The program:
+<!-- Sideboard, procedural (Cantiere 2): the dark wood, the doors, the cornice and the brass handles of the original. The seed picks how
+     tall it is (from 10 to 18 voxels: a low dresser or a wardrobe), how wide it is, whether there are two or three doors and how many vases stand on top. -->
+<sequence values="BNnLKIhkwabcde" size="20 20 20" symmetry="(xy)" name="Credenza">
+  <color symbol="N" value="5e3c22" name="legno scuro"/>
+  <color symbol="n" value="3e2614" name="ombra"/>
+  <color symbol="L" value="7a5232" name="anta"/>
+  <color symbol="K" value="6a4428" name="cornice"/>
+  <color symbol="I" value="c8b070" name="maniglia d'ottone"/>
+  <color symbol="h" hidden="True" name="altezze possibili"/>
+  <color symbol="k" hidden="True" name="la quota scelta"/>
+  <color symbol="w" hidden="True" name="i fianchi che possono mancare"/>
+  <color symbol="a" hidden="True" name="scelta"/>
+  <color symbol="b" hidden="True" name="scelta"/>
+  <color symbol="c" hidden="True" name="dove possono stare i divisori delle ante"/>
+  <color symbol="d" hidden="True" name="il divisorio scelto"/>
+  <color symbol="e" hidden="True" name="un vaso che nasce"/>
+  <!-- The largest possible body: the outer sides are there or not, each on its own -->
+  <box at="10 7 0" size="18 12 19" color="w"/>
+  <box at="10 7 0" size="14 12 19" color="N"/>
+  <prl in="w" out="a" p="0.003" steps="1"/>
+  <all>
+    <rule in="aw" out="aa"/>
+    <rule in="a w" out="a a"/>
+    <rule in="w a" out="a a"/>
+  </all>
+  <all in="a" out="N"/>
+  <all in="w" out="B"/>
+  <!-- The doors: the whole front, then the dividers at one of the two splits -->
+  <box at="10 13 2" size="20 1 18" color="L" on="B"/>
+  <all in="L/B" out="*/*"/>
+  <all in="LN/BB" out="**/**"/>
+  <box at="10 13 0" size="20 1 2" color="n" on="B"/>
+  <box at="10 13 2" size="1 1 1" color="c" on="L"/>
+  <box at="7 13 2" size="1 1 1" color="c" on="L"/>
+  <box at="13 13 2" size="1 1 1" color="c" on="L"/>
+  <one steps="1">
+    <rule in="c" out="d"/>
+    <rule in="c" out="d"/>
+    <rule in="c" out="d"/>
+  </one>
+  <all in="c" out="L"/>
+  <!-- Two doors if the divider is at the centre; two doors and an open shelf if it is to one side -->
+  <all in="L d" out="d *"/>
+  <all in="d" out="n"/>
+  <!-- The doors with no body behind them (the missing sides) go back to air -->
+  <all in="B/L" out="*/B" symmetry="()"/>
+  <!-- The height -->
+  <box at="0 0 10" size="1 1 9" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k [NLn]" out="* K"/>
+  <all in="k" out="B"/>
+  <!-- The cornice on top, jutting out by one -->
+  <prl in="KB" out="*K" p="1" steps="1"/>
+  <!-- The brass handles: two, on the front, wherever they fall -->
+  <one in="L/B" out="*/I" symmetry="()" steps="2"/>
+  <!-- On top, from zero to three vases -->
+  <prl in="B K" out="e *" p="0.006" steps="1"/>
+  <all in="B e" out="e *" steps="2"/>
+  <all in="eB" out="*e" steps="1"/>
+  <all in="e" out="I"/>
+</sequence>
+
+
+Answer with the <action> only.
+
+## Risposta
+
+<action name="open" label="Apri le ante">
+  <all>
+    <rule in="L" out="B"/>
+    <rule in="I" out="B"/>
+  </all>
+</action>

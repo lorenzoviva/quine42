@@ -1,0 +1,105 @@
+{
+ "giro": "giro3",
+ "braccio": "prima",
+ "concetto": "rocca",
+ "classe": "structure",
+ "taglia": "large",
+ "specialita": "architect",
+ "modello": "gemini-4-argon",
+ "fatto": false,
+ "voti": [],
+ "cantina": false,
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 4,
+   "motivi": [
+    "taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 11 × 1 voxel (0,69 × 0,06 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s",
+    "taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 15 × 11 voxel (0,94 × 0,69 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui ",
+    "taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 24 voxel (1,50 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "piano",
+   "modello": "gemini-4-argon",
+   "secondi": 27,
+   "prompt": 7598,
+   "cached": 5549,
+   "output": 1879,
+   "thoughts": 0,
+   "usd": 0.023442900000000003,
+   "sistema": 19888,
+   "esito": "piano"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "intero",
+   "modello": "gemini-4-argon",
+   "secondi": 59,
+   "prompt": 10995,
+   "cached": 0,
+   "output": 5278,
+   "thoughts": 0,
+   "usd": 0.07477,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 11 × 1 voxel (0,69 × 0,06 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui s"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 45,
+   "prompt": 25585,
+   "cached": 0,
+   "output": 5127,
+   "thoughts": 0,
+   "usd": 0.10244,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: piani: 0 (serve ≥ 2); porta: 15 × 11 voxel (0,94 × 0,69 caselle), una porta è almeno 11 × 30 a ogni taglia; stanza: la più grande in cui "
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 46,
+   "prompt": 25334,
+   "cached": 0,
+   "output": 5194,
+   "thoughts": 0,
+   "usd": 0.102608,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 24 voxel (1,50 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s"
+  }
+ ],
+ "token": {
+  "prompt": 69512,
+  "cached": 5549,
+  "output": 17478,
+  "thoughts": 0
+ },
+ "usd": 0.30326,
+ "usdGemini": 0.30326,
+ "secondi": 183,
+ "sistema": {
+  "caratteri": 19888,
+  "ruolo": 16015,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "architect": 4
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

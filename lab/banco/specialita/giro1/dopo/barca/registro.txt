@@ -1,0 +1,4 @@
+[sculptor] propone: «Barca da pesca» (nave o barca, Carrozziere, gemini-4-argon)
+[kernel → sculptor] scarta: «Barca da pesca»: riga 49, <intersection>: nodo sconosciuto (noti: one all prl sequence markov convolution path map wfc convchain pieces box ellipsoid cylinder cone line import u
+[kernel → sculptor] scarta: «Barca da pesca»: pezzi staccati: 8% dei voxel non è attaccato al corpo principale (5 pezzi)
+[artist → sculptor] obietta: «Barca da pesca»: 6/10 — La vela appare troppo piccola rispetto all'albero e poco definita.

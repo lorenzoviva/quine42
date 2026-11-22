@@ -453,6 +453,28 @@ dentro. Le stime sono nella misura della pipeline.
 Ognuna di S1-S6 si chiude con `npm test`, `npm run typecheck` e la misura `prompt-tokens.ts -- --scultore --conta` prima e dopo. Nessuna
 chiama i modelli. S7 sì, e va approvata dall'autore per la spesa.
 
+**Fatto in T473 (S7, 4,21 $ sul tetto di 6 $)**: [`lab/banco/specialita/`](../../lab/banco/specialita/README.md),
+`scultore-gemini.ts -- --specialita` (il codice in `lab/scripts/scultore-specialita.ts`). Due bracci con il solo prompt diverso: «prima» il
+prompt di prima di T468 (`4116e7df^`, intero, come il kernel lo dà a un universo senza il segno del nucleo), «dopo» il nucleo e le sezioni di
+S2-S4; tutto il resto uguale (il kernel 0.10.17, gli esempi di S1, il seme, i modelli e il ragionamento del gioco). Nove concetti, uno per
+mestiere più l'azione e due figure (castagno, baule, «Apri le ante» sulla credenza, cappello in testa, mugnaia, gatto, casetta, barca da pesca,
+rocca di confine Grande con la cantina), tre giri: 54 richieste, 150 chiamate dello Scultore, 77 dell'Artista. **Che cosa è venuto**: (1) nessuna
+differenza misurabile nel passaggio e nei voti (25 e 23 modelli fatti su 27, 31 e 28 programmi su 47 al primo colpo, voto medio 6,0 e 6,3: il
+rumore di tre richieste per concetto); la rocca cade nei due bracci (1 su 3 e 0 su 3) per i piani, le porte, le stanze e la cantina. (2)
+L'ingresso scende come misurato offline: la prima chiamata 6 164 token invece di 7 519, una chiamata fuori dall'Architetto 6 778 invece di
+8 106, l'Architetto 18 201 invece di 17 064. (3) **Sulla via di Google i dollari non scendono**: la cache implicita di Gemini serviva il prompt
+di prima, uguale per ogni mestiere (Flash-Lite 51 % dell'ingresso, la prima chiamata di un concetto 9 volte su 12), e con le specialità serve
+meno (32 %, 0 su 12: il comune non passa da un mestiere all'altro); con più uscita, un modello fatto costa 0,050 $ invece di 0,042 $ fuori
+dall'Architetto. Argon ha avuto dalla cache l'1-5 % (la lobby stima il 60 %), 3.8 Flash il 16-18 % (la lobby: niente). (4) **Su OpenRouter i
+segni di T468 funzionano** (Opus 5.5): lo stesso mestiere legge 9 163 token su 9 197 dalla cache, un mestiere nuovo legge il comune (5 384) e
+scrive la sua parte. (5) Le istruzioni nuove si vedono dove nominano un meccanismo: la porta che si apre e si chiude e i vetri del Capomastro
+(3 su 3 contro 0 su 3), le trame `<convchain>` dell'Architetto (12 risposte su 12 contro 0), le braccia staccate della mugnaia (2 su 3
+contro 0), il coperchio del baule (1 su 3), i castagni che cambiano col seme; non il ciclo `<markov><sequence>` (0 su 12 nei due bracci), né
+`close` (0 su 6). (6) Un effetto da correggere: con «Growing like nature» la chioma si stacca dal tronco (6 scarti su 11 contro 2 su 10). Le
+proposte (la chioma attaccata, `close` nell'esempio del Mobiliere, la cache di Gemini nel conto della lobby, il ciclo su Opus o via, la rocca
+con la cantina) sono nel README del banco. Nel browser: i 48 programmi tenuti nel laboratorio 3D (il gruppo «Banco: le specialità dello
+Scultore»), la porta della casetta e il coperchio del baule provati.
+
 ### 6.1 L'ADR proposto (da approvare)
 
 > **ADR-NNNN — Lo Scultore a specialità e le parti del mondo** (proposto da T458)
@@ -489,7 +511,10 @@ chiama i modelli. S7 sì, e va approvata dall'autore per la spesa.
 ## 7. Che cosa non è provato
 
 - **Nessuna qualità è misurata**: che le specialità facciano programmi migliori, che gli esempi scelti per voto aiutino, che la guida dei
-  cicli venga usata, che le istruzioni dei mestieri di S4 vengano seguite. Offline si misurano i token, non i programmi. È S7.
+  cicli venga usata, che le istruzioni dei mestieri di S4 vengano seguite. Offline si misurano i token, non i programmi. È S7. **T473 (S7)**:
+  tre giri su Gemini non mostrano programmi migliori né peggiori (nel rumore); le istruzioni dei mestieri sono seguite dove nominano un
+  meccanismo, la guida dei cicli no (Argon non la scrive mai), una (la chioma del Paesaggista) ha un effetto da correggere. Gli esempi per
+  voto restano non provati (un mondo nuovo non ne ha), e la qualità su Opus pure (provata solo la cache).
 - La Genesi è quella offline: 11 modelli. Una con Gemini ne chiede circa 20, e il risparmio per Genesi raddoppia (resta sotto i due
   centesimi).
 - I pesi delle classi vengono da cinque universi generati in buona parte dalla coda degli abbonamenti (la rigenerazione dei modelli,
@@ -498,4 +523,6 @@ chiama i modelli. S7 sì, e va approvata dall'autore per la spesa.
 - Il controllo «la stessa griglia» della via B non è provato: che una parte inclusa consumi lo stesso caso del testo che sostituisce si
   legge nel motore (`importNode` compila il programma incluso al suo posto), va provato in S6.
 - La semantica di `<markov>` era letta nel codice: T469 l'ha provata (`tests/mj-markov.test.ts`). Che lo Scultore usi la guida dei cicli resta da
-  vedere coi modelli veri (S7).
+  vedere coi modelli veri (S7). T473: su Argon no, in nessuna delle 24 risposte della rocca dei due bracci.
+- Che l'ordine del sistema faccia servire il comune dalla cache a ogni mestiere (§ 2.3): T473 l'ha provato. Sì su OpenRouter coi segni
+  (Opus 5.5), no con la cache implicita di Gemini (la prima chiamata di un mestiere nuovo 0 volte su 12).

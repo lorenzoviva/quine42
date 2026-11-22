@@ -1,0 +1,84 @@
+# model.sculpt · correzione · gemini-3.1-flash-lite · 2 s · 6751 token d'ingresso (4074 in cache), 735 d'uscita, 122 di ragionamento · $0.0021
+
+## Richiesta
+
+Sculpt: Baule da viaggio
+What it looks like: un baule di legno coi cerchi di ferro e il coperchio bombato
+Class: furniture · box 20 × 20 × 20 voxels
+
+The program you wrote:
+<sequence values="BNISK" size="20 20 20" name="Baule da viaggio">
+  <color symbol="N" value="8b5a2b" name="legno"/>
+  <color symbol="I" value="4a4f5a" name="ferro"/>
+  <color symbol="S" value="d4a017" name="serratura"/>
+  <color symbol="K" value="8b5a2b" name="coperchio"/>
+
+  <!-- Corpo principale -->
+  <box at="10 10 4" size="16 12 8" color="N"/>
+
+  <!-- Coperchio bombato (gradini) -->
+  <box at="10 10 12" size="16 12 1" color="K"/>
+  <box at="10 10 13" size="14 10 1" color="K"/>
+  <box at="10 10 14" size="12 8 1" color="K"/>
+  <box at="10 10 15" size="10 6 1" color="K"/>
+
+  <!-- Cerchi di ferro (verticali) -->
+  <box at="4 10 4" size="1 12 8" color="I"/>
+  <box at="16 10 4" size="1 12 8" color="I"/>
+  <box at="4 10 12" size="1 12 1" color="I"/>
+  <box at="16 10 12" size="1 12 1" color="I"/>
+  <box at="4 10 13" size="1 10 1" color="I"/>
+  <box at="16 10 13" size="1 10 1" color="I"/>
+  <box at="4 10 14" size="1 8 1" color="I"/>
+  <box at="16 10 14" size="1 8 1" color="I"/>
+  <box at="4 10 15" size="1 6 1" color="I"/>
+  <box at="16 10 15" size="1 6 1" color="I"/>
+
+  <!-- Cerchio centrale e serratura -->
+  <box at="10 10 4" size="1 12 8" color="I"/>
+  <box at="10 10 12" size="1 12 1" color="I"/>
+  <box at="10 10 13" size="1 10 1" color="I"/>
+  <box at="10 10 14" size="1 8 1" color="I"/>
+  <box at="10 10 15" size="1 6 1" color="I"/>
+  <box at="10 16 8" size="2 1 2" color="S"/>
+</sequence>
+It does not pass: non tocca terra: il voxel più basso è a z=4, deve appoggiarsi a z=0
+Fix it and answer with the whole program.
+
+## Risposta
+
+<sequence values="BNISK" size="20 20 20" name="Baule da viaggio">
+  <color symbol="N" value="8b5a2b" name="legno"/>
+  <color symbol="I" value="4a4f5a" name="ferro"/>
+  <color symbol="S" value="d4a017" name="serratura"/>
+  <color symbol="K" value="8b5a2b" name="coperchio"/>
+
+  <!-- Corpo principale: poggia a terra (z=0) -->
+  <box at="10 10 0" size="16 12 8" color="N"/>
+
+  <!-- Coperchio bombato (gradini) -->
+  <box at="10 10 8" size="16 12 1" color="K"/>
+  <box at="10 10 9" size="14 10 1" color="K"/>
+  <box at="10 10 10" size="12 8 1" color="K"/>
+  <box at="10 10 11" size="10 6 1" color="K"/>
+
+  <!-- Cerchi di ferro (verticali) -->
+  <box at="4 10 0" size="1 12 8" color="I"/>
+  <box at="16 10 0" size="1 12 8" color="I"/>
+  <box at="4 10 8" size="1 12 1" color="I"/>
+  <box at="16 10 8" size="1 12 1" color="I"/>
+  <box at="4 10 9" size="1 10 1" color="I"/>
+  <box at="16 10 9" size="1 10 1" color="I"/>
+  <box at="4 10 10" size="1 8 1" color="I"/>
+  <box at="16 10 10" size="1 8 1" color="I"/>
+  <box at="4 10 11" size="1 6 1" color="I"/>
+  <box at="16 10 11" size="1 6 1" color="I"/>
+
+  <!-- Cerchio centrale e serratura -->
+  <box at="10 10 0" size="1 12 8" color="I"/>
+  <box at="10 10 8" size="1 12 1" color="I"/>
+  <box at="10 10 9" size="1 10 1" color="I"/>
+  <box at="10 10 10" size="1 8 1" color="I"/>
+  <box at="10 10 11" size="1 6 1" color="I"/>
+  <box at="10 16 4" size="2 1 2" color="S"/>
+</sequence>

@@ -3,7 +3,7 @@
 
 import type { Vec3 } from '../../src/mj/engine';
 import { mjxIncludes } from '../../src/mj/model';
-import { boxOf, classOf, sizeOf, STRUCTURE_VPT, VESSEL_TILES, VESSEL_VPT, type SizeTier } from '../../src/mj/classes';
+import { boxOf, classOf, densityFor, sizeOf, STRUCTURE_VPT, VESSEL_TILES, VESSEL_VPT, type SizeTier } from '../../src/mj/classes';
 import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { mockVesselProgram } from '../../src/kernel/ai/mockVessel';
 import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official';
@@ -41,6 +41,8 @@ export interface Entry {
   sculpted?: boolean;
   /** A vessel of the bench of the vessels (T440, lab/banco/navi/) at one of its sizes. */
   vessels?: boolean;
+  /** A program of the paid trial of the Sculptor's specialties (T473, lab/banco/specialita/): only for the developers. */
+  specialties?: boolean;
 }
 
 const files = import.meta.glob('../mjx/models/*.xml', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -209,6 +211,30 @@ for (const [t, name] of Object.entries(VESSEL_NAMES) as Array<[SizeTier, string]
   CATALOG.push({ id: `navi:offline-${t}`, name: `Nave dei modelli locali, ${sizeOf(t)!.name}: ${name} (${VESSEL_TILES[t].join(' × ')} caselle)`, role: 'structure', xml, vpt: VESSEL_VPT, size: box, source: sourceOf(xml), vessels: true });
 }
 
+// The paid trial of the Sculptor's specialties (T473, lab/banco/specialita/): every program kept, with the prompt of before T468 (`prima`) and
+// today's (`dopo`), at the density of its class in the game and, where the program has no box of its own (the cupboard of the seed with its
+// action, the structure that grows by rules), in its class's at its size. Only for the developers.
+const trade = (import.meta.env.MODE !== 'production' ? import.meta.glob('../banco/specialita/**/programma.xml', { query: '?raw', import: 'default', eager: true }) : {}) as Record<string, string>;
+const TRADE_CONCEPTS: Record<string, { name: string; cls: string; size?: SizeTier; role: Role }> = {
+  castagno: { name: 'Castagno', cls: 'tree', role: 'tree' },
+  baule: { name: 'Baule da viaggio', cls: 'furniture', role: 'prop' },
+  credenza: { name: 'Credenza con «Apri le ante»', cls: 'furniture', role: 'prop' },
+  cappello: { name: 'Cappello di paglia', cls: 'object', role: 'prop' },
+  mugnaia: { name: 'Mugnaia', cls: 'person', role: 'npc' },
+  gatto: { name: 'Gatto rosso', cls: 'animal', role: 'animal' },
+  casetta: { name: 'Casetta del pastore', cls: 'building', role: 'structure' },
+  barca: { name: 'Barca da pesca', cls: 'vessel', size: 'large', role: 'structure' },
+  rocca: { name: 'Rocca di confine', cls: 'structure', size: 'large', role: 'structure' },
+};
+for (const [file, xml] of Object.entries(trade)) {
+  const m = /specialita\/([^/]+)\/(prima|dopo)\/([a-z]+)\/programma\.xml$/.exec(file);
+  const c = m && TRADE_CONCEPTS[m[3]];
+  const cls = c && classOf(c.cls);
+  if (!m || !c || !cls) continue;
+  const sized = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml.replace(/<!--[\s\S]*?-->/g, ''));
+  CATALOG.push({ id: `specialita:${m[1]}/${m[2]}/${m[3]}`, name: `${c.name} · ${m[2] === 'prima' ? 'prompt di prima' : 'specialità'} · ${m[1]}`, role: c.role, xml, vpt: densityFor(cls, c.size), ...(sized ? {} : { size: boxOf(cls, c.size) }), source: sourceOf(xml), specialties: true, ...withIncludes(xml) });
+}
+
 /**
  * The density a hand drawn model is drawn for, if not the lab's 20 (T404, D61): the author's fort, 500 × 500 voxels, is 50 × 50 tiles at
  * 10 voxels a tile, as its entry says in a world (`vpt: 10`, ADR-0208); the «voxel per casella» of the inspector starts from it.
@@ -247,9 +273,9 @@ export const DEV_TOOLS: boolean = import.meta.env.MODE !== 'production';
 
 export const byId = (id: string) => CATALOG.find((e) => e.id === id);
 export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
-  ['Persone e animali', (e) => !e.trial && ['player', 'npc', 'animal'].includes(e.role)],
-  ['Piante e rocce', (e) => !e.trial && ['tree', 'plant', 'rock'].includes(e.role)],
-  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && !e.vessels && ['prop', 'structure'].includes(e.role)],
+  ['Persone e animali', (e) => !e.trial && !e.specialties && ['player', 'npc', 'animal'].includes(e.role)],
+  ['Piante e rocce', (e) => !e.trial && !e.specialties && ['tree', 'plant', 'rock'].includes(e.role)],
+  ['Oggetti e strutture', (e) => !e.trial && !e.pieces && !e.sizes && !e.sculpted && !e.vessels && !e.specialties && ['prop', 'structure'].includes(e.role)],
   ['Navi alle taglie (T440)', (e) => !!e.vessels],
   ...(DEV_TOOLS
     ? ([
@@ -257,6 +283,7 @@ export const GROUPS: Array<[string, (e: Entry) => boolean]> = [
       ['Banco: modelli grandi a pezzi (T339)', (e) => !!e.pieces],
       ['Banco: strutture che si adattano alla taglia (T338, T346)', (e) => !!e.sizes],
       ['Banco: gli Scultori sulle taglie (T391, T402)', (e) => !!e.sculpted],
+      ['Banco: le specialità dello Scultore, prima e dopo (T473)', (e) => !!e.specialties],
       ['Gemini: prove degli step 8.2A e 8.2B', (e) => !!e.trial],
       ['Modelli dell\'editor', (e) => !!e.handmade],
       ['Modelli del banco', (e) => !!e.bench],

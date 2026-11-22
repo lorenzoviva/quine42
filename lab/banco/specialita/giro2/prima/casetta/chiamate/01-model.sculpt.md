@@ -1,0 +1,168 @@
+# model.sculpt · primo · gemini-4-argon · 26 s · 8351 token d'ingresso (0 in cache), 2353 d'uscita, 0 di ragionamento · $0.04
+
+## Richiesta
+
+Sculpt: Casetta del pastore
+What it looks like: una casetta di pietra a un piano col tetto di paglia, la porta davanti e una finestra
+Class: building · box 50 × 50 × 50 voxels · at least 30 tall
+
+## Risposta
+
+<sequence values="BXQIWNDnOURrGHSCchkm" size="25 25 25" origin="True" symmetry="(xy)">
+  <color symbol="X" hidden="True" name="volume casa"/>
+  <color symbol="Q" hidden="True" name="prisma tetto"/>
+  <color symbol="I" hidden="True" name="interno"/>
+  <color symbol="D" value="8c8478" name="pietra chiara"/>
+  <color symbol="S" value="665f55" name="pietra camino e basamento"/>
+  <color symbol="N" value="3d2614" name="legno scuro travi"/>
+  <color symbol="n" value="6e4624" name="legno medio"/>
+  <color symbol="O" value="995d2d" name="porta di legno"/>
+  <color symbol="U" value="76b8cc" name="vetro finestra"/>
+  <color symbol="R" value="d9a848" name="paglia dorata"/>
+  <color symbol="r" value="9e7127" name="paglia in ombra"/>
+  <color symbol="G" value="567d38" name="muschio verde"/>
+  <color symbol="H" value="24150b" name="ferramenta e interno camino"/>
+  <color symbol="C" value="a86b3a" name="legna da ardere"/>
+  <color symbol="c" value="d6a370" name="taglio legna"/>
+  <color symbol="h" hidden="True" name="misure possibili"/>
+  <color symbol="k" hidden="True" name="il taglio"/>
+  <color symbol="m" hidden="True" name="mescola"/>
+
+  <!-- Shuffle per variare il generatore ad ogni seme -->
+  <box at="12 0 24" size="25 2 1" color="m"/>
+  <prl in="m" out="B" p="0.5" steps="1"/>
+  <all in="m" out="B"/>
+
+  <!-- Il seme scende a terra -->
+  <one in="X B" out="B X"/>
+
+  <!-- Pianta rettangolare: fino a 15 lungo x, 13 lungo y -->
+  <all in="XB" out="*X" steps="7" symmetry="(x)"/>
+  <all in="X/B" out="*/X" steps="6" symmetry="(y)"/>
+  <all in="B X" out="X *" steps="9"/>
+
+  <!-- Variazione procedurale delle dimensioni tramite tagli -->
+  <box at="17 0 0" size="5 1 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k/*" out="k/k"/>
+    <rule in="*/k" out="k/k"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="k*" out="kk"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <box at="0 9 0" size="1 6 1" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all symmetry="()">
+    <rule in="k*" out="kk"/>
+    <rule in="*k" out="kk"/>
+    <rule in="* k" out="k k"/>
+    <rule in="k *" out="k k"/>
+    <rule in="*/k" out="k/k"/>
+  </all>
+  <all in="k" out="B"/>
+
+  <box at="24 24 7" size="1 1 3" color="h"/>
+  <one in="h" out="k" steps="1"/>
+  <all in="h" out="B"/>
+  <all in="k*" out="kk"/>
+  <all in="* k" out="k *"/>
+  <all in="k" out="B"/>
+
+  <!-- Grondaie e spioventi del tetto di paglia lungo x -->
+  <all in="B X" out="R *"/>
+  <all in="RB XB" out="*R **" symmetry="(x)"/>
+  <all in="B R" out="Q *"/>
+  <all in="B Q" out="Q *" steps="7"/>
+  <!-- Erosione a due falde spioventi -->
+  <all in="*Q B*" out="*B **" symmetry="(x)"/>
+
+  <!-- Frontone nord e sud in legno medio -->
+  <all in="R Q" out="* n" symmetry="(y)"/>
+  <all in="n Q" out="* n" symmetry="(y)"/>
+
+  <!-- Conversione volumi in pietra e paglia -->
+  <all in="X" out="D"/>
+  <all in="Q" out="R"/>
+
+  <!-- Basamento in pietra più scura a terra -->
+  <all in="D D" out="* S" steps="1"/>
+  <all in="S D" out="S *"/>
+
+  <!-- Travi di legno scuro sui quattro angoli esterni -->
+  <all in="BB/BD" out="**/*N"/>
+  <all in="BB/BS" out="**/*N"/>
+
+  <!-- Camino in pietra sul retro o sul fianco -->
+  <one steps="1" symmetry="(x)"
+       in="BB/DD BB/DD BB/DD BB/DD BB/DD BB/DD BB/RR"
+       out="SS/DD SS/DD SS/DD SS/DD SS/DD SS/DD SS/RR"/>
+  <all in="B S" out="S *" steps="7"/>
+
+  <!-- Facciata anteriore (y grande, verso sud): PORTA di legno con cornice -->
+  <one steps="1" symmetry="()"
+       in="DDDD/BBBB DDDD/BBBB DDDD/BBBB DDDD/BBBB SSSS/BBBB"
+       out="NNNN/**** NOON/**** NOON/**** NOON/**** NOON/****"/>
+
+  <!-- FINESTRA con cornice di legno sulla facciata anteriore accanto alla porta -->
+  <one steps="1" symmetry="()"
+       in="DDD/BBB DDD/BBB DDD/BBB"
+       out="NNN/*** NUN/*** NNN/***"/>
+
+  <!-- Piccola finestra anche su un fianco -->
+  <one steps="1" symmetry="(x)"
+       in="BDB/BBB BDB/BBB BDB/BBB"
+       out="BNB/*** BUB/*** BNB/***"/>
+
+  <!-- Catasta di legna del pastore appoggiata al muro esterno -->
+  <one steps="1" symmetry="(x)"
+       in="BBB/SSS BBB/SSS"
+       out="CCC/SSS CCC/SSS"/>
+
+  <!-- Risoluzione fine: scala x2 per arrivare al box 50x50x50 (altezza > 32) -->
+  <map scale="2 2 2" values="BDNSnOURrGHCcdFp">
+    <rule in="D" out="DD/DD DD/DD"/>
+    <rule in="S" out="SS/SS SS/SS"/>
+    <rule in="N" out="NN/NN NN/NN"/>
+    <rule in="n" out="nn/nn nn/nn"/>
+    <rule in="O" out="OO/OO OO/OO"/>
+    <rule in="U" out="UU/UU UU/UU"/>
+    <rule in="R" out="RR/RR RR/RR"/>
+    <rule in="r" out="rr/rr rr/rr"/>
+    <rule in="G" out="GG/GG GG/GG"/>
+    <rule in="H" out="HH/HH HH/HH"/>
+    <rule in="C" out="CC/cC CC/cC"/>
+    <color symbol="d" value="524c44" name="fuga tra pietre"/>
+    <color symbol="F" value="a8a094" name="pietra in luce"/>
+    <color symbol="p" value="bae8f5" name="riflesso vetro"/>
+
+    <!-- Tetto di paglia: gradini morbidi e bordi inferiori in ombra netta -->
+    <prl in="RB" out="r*" steps="1"/>
+    <prl in="B R" out="* r" p="0.25" steps="1"/>
+
+    <!-- Corsi di pietra puliti e leggibili (stile cartone) -->
+    <all in="DD DD" out="*d **" steps="1"/>
+    <prl in="DD/DD" out="*d/**" p="0.25" steps="1"/>
+    <prl in="B D" out="* F" p="0.2" steps="1"/>
+
+    <!-- Bocca scura in cima al camino -->
+    <all in="B/B S/S" out="*/* H/*" steps="1"/>
+
+    <!-- Dettaglio porta: assi verticali e maniglia in ferro scuro -->
+    <all in="OO" out="*H" symmetry="()" steps="1"/>
+    <all in="O O" out="O H" symmetry="()" steps="1"/>
+
+    <!-- Dettaglio finestra: telaio a croce e riflesso chiaro sul vetro -->
+    <all in="UU" out="Up" symmetry="()" steps="1"/>
+    <all in="U U" out="N *" symmetry="()" steps="1"/>
+
+    <!-- Muschio alla base sul lato nord e attorno al basamento -->
+    <prl in="B/S" out="*/G" p="0.4" steps="1" symmetry="()"/>
+    <prl in="G S" out="* G" p="0.3" steps="1" symmetry="()"/>
+    <prl in="G D" out="* G" p="0.2" steps="1" symmetry="()"/>
+  </map>
+</sequence>

@@ -1,0 +1,3 @@
+[sculptor] propone: «Barca da pesca» (nave o barca, Carrozziere, gemini-4-argon)
+[kernel → sculptor] scarta: «Barca da pesca»: pezzi staccati: 8% dei voxel non è attaccato al corpo principale (7 pezzi)
+[artist → sculptor] approva: «Barca da pesca»: 7/10 — Le vele appaiono leggermente rigide e piatte nelle viste laterali.

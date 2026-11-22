@@ -1,0 +1,176 @@
+{
+ "giro": "giro1",
+ "braccio": "prima",
+ "concetto": "rocca",
+ "classe": "structure",
+ "taglia": "large",
+ "specialita": "architect",
+ "modello": "gemini-4-argon",
+ "fatto": true,
+ "voto": 8,
+ "voti": [
+  8
+ ],
+ "cantina": true,
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 4,
+   "motivi": [
+    "taglia Grande, seme 1: cantina: dalla porta non si scende in cantina",
+    "taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 21 voxel (1,31 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "piano",
+   "modello": "gemini-4-argon",
+   "secondi": 29,
+   "prompt": 7598,
+   "cached": 0,
+   "output": 2109,
+   "thoughts": 0,
+   "usd": 0.036286,
+   "sistema": 19888,
+   "esito": "piano"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "intero",
+   "modello": "gemini-4-argon",
+   "secondi": 41,
+   "prompt": 11040,
+   "cached": 0,
+   "output": 5070,
+   "thoughts": 0,
+   "usd": 0.07278,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: cantina: dalla porta non si scende in cantina"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 36,
+   "prompt": 24333,
+   "cached": 0,
+   "output": 5090,
+   "thoughts": 0,
+   "usd": 0.099566,
+   "sistema": 19888,
+   "esito": "scartato",
+   "motivo": "taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 21 voxel (1,31 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-4-argon",
+   "secondi": 40,
+   "prompt": 24973,
+   "cached": 0,
+   "output": 5055,
+   "thoughts": 0,
+   "usd": 0.100496,
+   "sistema": 19888,
+   "esito": "passa"
+  },
+  {
+   "n": 5,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 3,
+   "prompt": 3200,
+   "cached": 0,
+   "output": 119,
+   "thoughts": 190,
+   "usd": 0.007581,
+   "sistema": 6179,
+   "voto": 8
+  }
+ ],
+ "token": {
+  "prompt": 71144,
+  "cached": 0,
+  "output": 17443,
+  "thoughts": 190
+ },
+ "usd": 0.31671,
+ "usdGemini": 0.31671,
+ "secondi": 159,
+ "sistema": {
+  "caratteri": 19888,
+  "ruolo": 16015,
+  "sezione": 0,
+  "esempi": []
+ },
+ "registro": {
+  "architect": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 165109,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 2,
+  "mapFrazionaria": 1,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open",
+   "close"
+  ],
+  "import": [
+   "part-cellar",
+   "part-stair",
+   "part-door",
+   "part-battlements",
+   "part-slits"
+  ],
+  "nascoste": 24,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [
+   "keep",
+   "tower",
+   "courtyard",
+   "yard"
+  ],
+  "colori": 28,
+  "semi": 0.409,
+  "ottima": 4.7,
+  "ottimaVoci": {
+   "courtyard": 0.04,
+   "courtyardBends": 1,
+   "wallBends": 24.5,
+   "cornerTowers": 0.16,
+   "towers": 1,
+   "wallHeight": 1.56,
+   "topHeight": 3.33,
+   "skyline": 8,
+   "storeys": 3,
+   "upperStoreys": 1,
+   "roomFloors": 1,
+   "crenels": 0.32,
+   "openings": 0.32,
+   "keepFromGate": 0.08
+  },
+  "base": 20
+ }
+}
