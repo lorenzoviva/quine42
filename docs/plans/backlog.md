@@ -6309,12 +6309,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: studio T458, riga S6 e § 4.3-4.4; soglia del voto 6 (come T467). Dipende da T471.
 - Cosa fare: la riga S6; ADR; «sicurezza:» nell'esito. Browser: no.
 
-### T473 · La prova pagata delle specialità (S7 di T458) — `da fare`
+### T473 · La prova pagata delle specialità (S7 di T458) — `fatto` (`08d34d67`)
 - Step: 44
 - Pipeline: claude · sforzo max · stima 3% · approvato · priorità 2
 - Dipende da: T468, T469, T470
 - Contesto: studio T458, riga S7. Dipende da T468, T469, T470. Spesa approvata dall'autore il 21/11: lo sforzo max vale per le sessioni in abbonamento; la prova pagata resta quella dello studio (3-5 $) con **tetto 6 $ sul registro**; se servisse di più, fermarsi e chiedere.
 - Cosa fare: la riga S7, col tetto sul registro. Browser: sì, le foto dei modelli.
+- Esito: la prova pagata delle specialità (S7 di T458) in `lab/banco/specialita/` (`scultore-gemini.ts --specialita`, codice in `lab/scripts/scultore-specialita.ts`): 9 concetti col prompt di prima di T468 e con quello di oggi, 3 giri sui modelli del gioco, 4,21 $ sul registro (tetto 6 $); nessuna differenza misurabile nel passaggio e nei voti (25/23 modelli su 27, 31/28 programmi su 47 al primo colpo, voto 6,0/6,3; la rocca Grande con la cantina cade in entrambi, 1/3 e 0/3); ingresso −16/−18 % fuori dall'Architetto (+7 % l'Architetto), ma la cache implicita di Gemini serviva meglio il prompt intero (Flash-Lite 51 % contro 32 %, la prima chiamata di un mestiere nuovo 9/12 contro 0/12), quindi sulla via di Google i dollari non scendono (0,050 contro 0,042 $ a modello fuori dall'Architetto); Argon 1-5 % dalla cache e 3.8 Flash 16-18 % (la lobby stima 60 % e 0); su OpenRouter i segni di cache di T468 verificati con Opus 5.5; istruzioni seguite dove nominano un meccanismo (porta e vetri 3/3 contro 0/3, convchain 12/12 contro 0/12, braccia della mugnaia 2/3 contro 0/3), il ciclo `<markov>` e `close` mai, la chioma del Paesaggista si stacca (6/11 scarti contro 2/10); proposte nel README; laboratorio 3D col gruppo dei 48 programmi; studio, AGENTS.md e architettura aggiornati; kernel invariato, nessun ADR; non provati la qualità delle strutture su Opus e gli esempi per voto; la prima prova della cache (0,138 $) aveva un errore del banco ed è contata al massimo; sicurezza: nessuna superficie nuova (solo lab/ e docs).
 
 ## Step 45 — il terreno in tre dimensioni (D67, autore 21/11: A1, B1, C1, D3, E1)
 
