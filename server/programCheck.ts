@@ -82,7 +82,8 @@ export function processChecker(o: ProcessCheckerOptions): ProgramChecker {
       // Out of memory, or dead some other way: the program asked for more than a card may have. Killed because the server stops: nobody judged it.
       child.on('exit', () => finish(stopped ? { busy: true } : { errors: ['il controllo si è fermato: il programma chiede più di quanto una carta può avere'] }));
       child.on('error', () => finish({ errors: ['il controllo non è partito: riprova tra poco'] }));
-      child.send({ t: 'check', id: 1, program: { kind: q.kind, xml: q.xml, ...(q.class !== undefined ? { class: q.class } : {}), ...(q.size !== undefined ? { size: q.size } : {}) } } satisfies ToWorld);
+      // A brought card's files (T472) were read by the store from the disk: the process reads them again (`programFiles`).
+      child.send({ t: 'check', id: 1, program: { kind: q.kind, xml: q.xml, ...(q.class !== undefined ? { class: q.class } : {}), ...(q.size !== undefined ? { size: q.size } : {}), ...(q.files ? { files: q.files } : {}) } } satisfies ToWorld);
     });
 
   return {

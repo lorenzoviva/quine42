@@ -77,7 +77,7 @@ export interface UsageFile {
    */
   masterPaid?: Record<string, Record<string, Tally>>;
   /**
-   * day → the Sculptor's specialty (`landscaper`, `joiner`…, T468, ADR-0239) → tally: the calls of `model.sculpt` and `model.action` the
+   * day → the Sculptor's specialty (`landscaper`, `joiner`…, T468, ADR-0239) → tally: the calls of `model.sculpt`, `model.action` and `model.part` the
    * calls themselves said they were for, so that the trades are measured apart. Absent where no call said one.
    */
   specialties?: Record<string, Record<string, Tally>>;

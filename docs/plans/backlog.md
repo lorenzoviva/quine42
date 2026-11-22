@@ -6464,7 +6464,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit di merge su `task/T490`; poi l'orchestratore integra T490 e `integra T473` toglie worktree e branch di T473. Sicurezza: nessuna superficie nuova.
 - Esito: integrato `task/T473` su `task/T490` (commit `f182490a`), risolto il conflitto in `lab/3d/catalog.ts` mantenendo le aggiunte di T471 e T473, verificati i file fusi automaticamente, `typecheck` e `npm test` (283/283 file, 3827 passati, 1 saltato) verdi; kernel invariato (0.10.18), nessun ADR; sicurezza: nessuna superficie nuova.
 
-### T491 · Integrare T472 nel base (conflitto in AGENTS.md) — `da fare`
+### T491 · Integrare T472 nel base (conflitto in AGENTS.md) — `fatto` (`a756c124`)
 - Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
 - Step: 44
 - Contesto: `integra T472` (le parti del mondo estratte, S6 di T458, kernel 0.10.19, ADR-0243 già rinumerato da 0242 sul ramo) si è fermato su un conflitto in `AGENTS.md`: nel frattempo T486 è entrato nel base (ADR-0242, la mesh dei luoghi nel worker del terreno) toccando le stesse righe. Nasce da T472 e T486: `dossier T472`, `dossier T486`.
@@ -6472,3 +6472,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: typecheck e suite intera coi turni.
 - Browser: no.
 - Quando è fatto: commit di merge su `task/T491`; poi l'orchestratore integra T491 e `integra T472` toglie worktree e branch di T472. Sicurezza: nessuna superficie nuova.
+- Esito: `task/T472` unito in `task/T491` (`a756c124`), risolto il conflitto in `AGENTS.md` tenendo sia il worker del terreno (`ADR-0242`) sia le parti del mondo (`ADR-0243`), verificati i documenti fusi senza doppioni né rimandi errati a `ADR-0242`, kernel `0.10.19` confermato in `version.ts` e `package.json`, `typecheck` (0) e `npm test` (285 file, 3859 passati, 1 saltato) verdi; sicurezza: nessuna superficie nuova.

@@ -870,6 +870,14 @@ flowchart TD
   ```
 - **Validazione**: [`checkAction()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/agents/sculptor.ts#L328): compila, finisce in 8s, cambia almeno un voxel, non cancella oltre il 50% dei voxel visibili.
 
+#### 37b. `model.part` (T472, ADR-0243)
+- **Agente**: `sculptor`, il mestiere del modello (`specialtyOf`)
+- **Modello**: quello che ha scolpito il modello (`modelFor` della sua classe)
+- **Caller**: `extractPart()` in `src/kernel/agents/parts.ts`, chiamato da `ModelDirector.part()` subito dopo un modello che entra con voto ≥ 6 (al più due volte a sessione per mestiere, finché il mestiere ha meno di quattro parti del mondo).
+- **Contesto**: il nucleo e la sezione del mestiere (`sculptorRole`, `sculptorSection`: lo stesso prefisso delle sue sculture), le parti del mondo che il mestiere ha già. Temperatura: 0.4. Non-JSON (poche righe di XML).
+- **Prompt utente** (in inglese): il modello e il suo voto, che cosa è una parte (un tratto di nodi interi di una `<sequence>` che lavora sulle lettere già disegnate), le parti che ci sono, il programma con le righe numerate (`numberedLines`), la risposta `<part name="…" lines="A-B" reads="…" writes="…">il contratto</part>` o `<none/>`; al secondo tentativo la risposta di prima e il motivo.
+- **Validazione Kernel**: `readPartAnswer`, `composePart` (le righe intere, i nodi, niente import né file, niente `S` né `#90`-`#97`, le lettere scritte disegnate), il validatore (la parte come parte, `worldPartModelErrors`; il modello riscritto come modello), la stessa griglia su ogni seme del mondo (`sameGridErrors`, tre almeno), poi `Kernel.addWorldPart`: un commit del Concilio con la carta della parte.
+
 ---
 
 ### Macro-Processo 8: Progettazione Meccaniche e Interfacce
