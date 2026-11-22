@@ -194,6 +194,9 @@ Sulla finestra caricata (108 × 90 caselle, 9 720 celle a una cella per casella)
 2. **La mesh del terreno di oggi è già uno scatto**: `buildChunk` costa 7,5 ms a luogo (30 al 95° percentile) sul thread principale, e
    `syncChunks` ne fa fino a tre a frame; T331 contava 5 long task fino a 170 ms all'arrivo in luoghi nuovi. Qualunque terreno più ricco
    va fatto in un worker; questo vale anche senza T459 (il punto 3 delle raccomandazioni di T331).
+   *Fatto in T486 (ADR-0242, M0 del § 7)*: la mesh si fa nel worker del terreno da una copia di ciò che legge, uguale byte per byte; con
+   `misura-frame.mjs` prima e dopo (`lab/terreno-3d/misure/m0-prima.json`, `m0-dopo.json`) il frame peggiore della mesh dei luoghi scende da
+   65 a 20 ms al caricamento a freddo e da 61 a 5,4 all'arrivo. Dei 7,5 ms di `buildChunk` due terzi erano le letture di `groundAt`.
 3. **L'automa fisico a una cella per casella è sostenibile** (0,34 ms a tick); a quattro no (4,9 ms): la risoluzione fine è disegno.
 4. **Il Lua non fa girare un campo.** Neanche a passo intero (2,3 ms a tick a 10 Hz per un fuoco); va bene per gli eventi.
 5. **MarkovJunior è il linguaggio delle regole discrete** (1,6 volte la tabella del kernel) e delle adiacenze fra strati (2,1 ms a
@@ -603,7 +606,7 @@ Non sono nel backlog: li scrive chi pianifica, dopo le risposte dell'autore. Il 
 | 10 | **A1 · L'acqua che scorre**: `flow` sui luoghi caricati a una cella per casella, le sorgenti della bozza, la superficie dell'automa per il nuoto e lo scafo, le correnti, il sonno, lo scavo dentro di lui (al posto di `water.ts` dove c'è) | 2, 9 | 5 % | sì |
 | 11 | **A2 · Il vento**: `wind` a una cella ogni tre caselle a 10 Hz, il vento dominante dal tempo del mondo, la vela che lo legge (`power`), il fumo e il fuoco sottovento, l'erba e gli alberi, il vento grossolano ai client | 9 | 4 % | sì |
 | 12 | **A3 · L'acqua a schermo sulla GPU**: un campo d'onde a quattro celle per casella in due texture, mosso dalle correnti, dagli scafi e da chi nuota; niente nel kernel né sul filo | 10 | 4 % | sì |
-| 13 | **M0 · La mesh dei luoghi in un worker** (il punto 3 di T331, che questo studio rimisura: 7,5 ms a luogo, 30 al p95, fino a tre a frame): `buildChunk` fuori dal thread principale, la stessa mesh byte per byte | — | 3 % | sì |
+| 13 | **M0 · La mesh dei luoghi in un worker** (il punto 3 di T331, che questo studio rimisura: 7,5 ms a luogo, 30 al p95, fino a tre a frame): `buildChunk` fuori dal thread principale, la stessa mesh byte per byte; *fatto in T486, ADR-0242* | — | 3 % | sì |
 | — | *rinviato, solo se approvato*: **V0 · Il sottosuolo in voxel** a 2 per casella sotto le colonne, nei luoghi che lo chiedono, in un worker, con le grotte come pavimenti; contratto nuovo | 5, 13 | 10-12 % | sì |
 
 **Totale**: 55 % (senza V0). **Le montagne con l'arrampicata** (1-4): 18 %. **Il mare sotto** (7-8): 8 %. **Gli strati** (5-6): 7 %.

@@ -207,7 +207,8 @@ I task che ne seguono, da approvare:
    nel caricamento a freddo di un viandante nel cerchio nessun `corona-*` passa prima dei modelli del suo luogo, e attraversare il bordo
    non fa scatti (rimisurato). Da decidere con l'autore se chi è master li vuole subito.
 3. **Gli scatti all'arrivo**: 5 long task fino a 170 ms quando nascono luoghi nuovi, fuori dal tick. Trovarli con un profilo della pagina
-   (CDP `Profiler`, come `misura-mj.ts` in Node) e spezzarli o spostarli in un worker.
+   (CDP `Profiler`, come `misura-mj.ts` in Node) e spezzarli o spostarli in un worker. *La mesh dei luoghi è in un worker da T486
+   (ADR-0242)*: il suo frame peggiore da 61 a 5,4 ms all'arrivo; i long task dell'arrivo da 15 a 5, e quelli che restano non sono suoi.
 4. Poi, se serve, **rimisurare con `misura-frame.mjs` e `misura-mj.ts`** su un mondo del Concilio (più persone, strutture più grandi) e
    su una GPU integrata. Riaprire la questione WebGPU solo se, dopo il punto 1, il programma supera la metà del lavoro dei worker **e** le
    scansioni intere superano il 40 % del programma; e in quel caso partire dalla mesh sulla GPU (parallela per natura, nessun seme da

@@ -1091,6 +1091,17 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   validatore prova i programmi degli ambienti e dove il campionario li mostra.
 - **Mappa** (ADR-0011, 0040): caselle colorate per terreno, strati `ground floor wall door liquid vegetation rock`: l'acqua è
   più bassa con le sponde, i muri sono estrusi, le porte un varco sotto l'architrave; gli edifici dei luoghi non sono più caselle ma strutture; sulle caselle con `TerrainDef.model` (bosco, roccia) stanno istanze di quel modello, ruotate e spostate.
+- **La mesh dei luoghi in un worker** (ADR-0242, T486): la mesh del terreno di un luogo è un insieme di array fatto da `chunkArrays`
+  (`src/render/terrainmesh.ts`, senza three.js, con le funzioni del mare di `src/render/seawave.ts`) da un elenco chiuso di letture
+  (`ChunkSource`: le caselle del luogo, le caselle e il suolo fino a `CHUNK_MARGIN` = 2 caselle oltre i bordi, i buchi delle cantine suoi e
+  dei quattro vicini, la tavolozza nel suo ordine, i colori accesi da `rgbOf`, i terreni coi modelli pronti). Sulla pagina le letture sono
+  il kernel (`buildChunk`, per i test e quando non c'è il worker); il renderer manda invece al worker del terreno (`src/render/terrainworker.ts`,
+  governato da `ChunkMesher`, `src/render/chunkmesher.ts`) una copia (`chunkInput` → `ChunkInput`), fino a tre a frame e non oltre 1,5 ms, un
+  luogo alla volta; gli array tornano trasferiti e `chunkView` ne fa le mesh (le istanze composte e raggruppate per forma come prima). Ciò
+  che cambia mentre un luogo è fuori si richiede al ritorno (la firma `chunkSig` è vecchia): l'ultimo fatto vince, mai una coda; al
+  ricaricare dei file ciò che è fuori si dimentica; un worker che si ferma o con luoghi fuori tace 20 s si abbandona e la pagina fa da sé.
+  La stessa mesh byte per byte: `tests/terreno-worker.test.ts` (ogni lettura della mesh nella finestra, il worker uguale alla pagina) e
+  l'impronta di `lab/scripts/impronta-terreno.ts`. Una lettura nuova della mesh va in `ChunkSource`, `kernelSource`, `ChunkInput`, `inputSource`.
 - **Voxel luminosi** (ADR-0046): `<color glow="True">` fa brillare una lettera (fiamme, finestre, rune, neon): attributo
   `glow` nelle mesh, senza occlusione, emissione nei materiali; il renderer disegna in un target con la maschera del
   bagliore nell'alfa e un bloom leggero prende solo ciò che brilla (`src/render/bloom.ts`); nelle foto non prende ombra.
@@ -2025,7 +2036,7 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
 - Niente immagini (step 9): il costo dell'aspetto è testo, un programma per tipo (vedi il report 8.2B, sezione 4).
 - Tick ≈ 5 ms in Node con ~100 entità (`sys.wander` il più costoso); budget di istruzioni Lua ~1.5×.
-- **Il terreno in 3D e gli automi** (T459, [`docs/design/terreno-3d.md`](design/terreno-3d.md), misurato con `lab/terreno-3d/` e `misura-frame.mjs --terreno`): a colonne col rilievo vero 2,5 ms in più a luogo e 3,5 KB, in voxel a 4 per casella 433 ms e 405 KB a luogo, il frame uguale (la GPU non vede il terreno); l'acqua a tubi virtuali a una cella per casella 0,34 ms a tick, il vento D2Q9 a una cella ogni tre caselle 0,1 ms a passo; lo stesso automa discreto in Lua 34-155 volte la tabella del kernel; `buildChunk` 7,5 ms a luogo sul thread principale (30 al p95).
+- **Il terreno in 3D e gli automi** (T459, [`docs/design/terreno-3d.md`](design/terreno-3d.md), misurato con `lab/terreno-3d/` e `misura-frame.mjs --terreno`): a colonne col rilievo vero 2,5 ms in più a luogo e 3,5 KB, in voxel a 4 per casella 433 ms e 405 KB a luogo, il frame uguale (la GPU non vede il terreno); l'acqua a tubi virtuali a una cella per casella 0,34 ms a tick, il vento D2Q9 a una cella ogni tre caselle 0,1 ms a passo; lo stesso automa discreto in Lua 34-155 volte la tabella del kernel; `buildChunk` 7,5 ms a luogo sul thread principale (30 al p95), dal T486 in un worker (ADR-0242): il frame peggiore della mesh dei luoghi da 65 a 20 ms al caricamento a freddo, da 61 a 5,4 all'arrivo; la copia per il worker costa 0,7 ms a luogo, quasi tutto `groundAt` (1,15 µs a chiamata: `levelsOf` scorre ogni luogo caricato per sapere se il campo dei livelli è fresco).
 - **Dove va il tempo** (T331, [`docs/design/gpu.md`](design/gpu.md)): nel browser il frame sta in 5-8 ms su 16,7 (tick 2,6-3,5 ms, di cui Lua il 60 %; disegno 2,3-3,9 ms; GPU 2-4 ms su una RTX 2070), l'acqua non costa; nei worker l'83 % del tempo di un modello è la mesh (`meshVoxels`), non il programma, e gli edifici della corona sono i lavori più lunghi del caricamento. MarkovJunior su WebGPU non conviene ora. Si rimisura con `lab/scripts/misura-frame.mjs` e `lab/scripts/misura-mj.ts`.
 - Lezione ricorrente: i modelli non contano caratteri né caselle. Il kernel ripara le forme (griglie,
   regole dei programmi, nomi nelle ricette) e posiziona le cose; si scarta solo ciò che non si capisce.

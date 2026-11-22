@@ -8,7 +8,7 @@ kernel né three.js), lo stesso in Node e nella pagina. Niente di questo è del 
 | [`vie.ts`](vie.ts) | le vie e gli automi: il rilievo vero (`trueRelief`: massicci, terrazze, passi, il letto sotto l'acqua), la regola 10 sul grafo dei gradini con le rampe e le enclavi (`stepGraph`, anche alla lettera con `strict`), il viandante nascosto alla camera (`hiddenFromCamera`), gli strati in MarkovJunior (`STRATA_XML`, `strataMj`), il terreno in voxel (`voxelPlace`, `terrainXml`, i pavimenti 3D `voxelFloors`, la mesh fusa `voxelMesh`), la mesh a colonne (`columnsMesh`), l'acqua a tubi virtuali (`PipesWater`), il vento D2Q9 (`LbmWind`), il fumo (`Diffuse`), il fuoco a tabella (`RuleTable`) e lo stesso fuoco in MarkovJunior e in Lua |
 | [`misura.ts`](misura.ts) | le misure in Node sul kernel offline del seme: per luogo (oggi, colonne, voxel a 1, 2, 4, 8), la memoria, i triangoli, la regola 10, il Lua della grande scala, gli automi per passo; scrive `misure/node.md` e `misure/node.json` |
 | [`pagina.ts`](pagina.ts) | le stesse vie nella pagina, per il frame: `window.__t459.where()`, `.ground('columns' \| 'voxels2' \| 'voxels4')`, `.automata(true)`, `.restore()`; la compila e la valuta `misura-frame.mjs --terreno` |
-| [`misure/`](misure/) | i rapporti della corsa dello studio: `node.md` e `node.json` (Node), `frame.json` (il browser) |
+| [`misure/`](misure/) | i rapporti della corsa dello studio: `node.md` e `node.json` (Node), `frame.json` (il browser); `m0-prima.json` e `m0-dopo.json`, `misura-frame.mjs` senza modalità prima e dopo la mesh dei luoghi in un worker (T486, ADR-0242) |
 
 ```bash
 # per luogo e per passo, in Node (circa 10 minuti; --luoghi e --voxel per una prova più corta)

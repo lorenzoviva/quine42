@@ -29,6 +29,9 @@
 // how long each place took to make, the triangles, the buffers, the JS heap before and after), then today's ground with the automata
 // on (the water as virtual pipes every tick, the wind at 10 Hz, the water's surface following them). Only that, as `--blocco`.
 //
+// The meshes of the places (T486): their worker's jobs are counted apart ('terreno', from a copy sent to the arrays back), and each part of
+// the drawing says its worst frames too (p99, the worst, how many over 4 ms), where a place's mesh made on the page's thread shows.
+//
 // Nothing of the game changes: the probe wraps requestAnimationFrame, WebGL and Worker before the page, and the kernel's and the
 // renderer's methods from the console (`window.quine`, `window.view`), as an instance property over the prototype's. The wanderer's
 // saved position is removed from `universes/` before the load (T214): run it against a preview of a throwaway checkout.
@@ -114,7 +117,7 @@ const PROBE = `(() => {
       });
       const post = this.postMessage.bind(this);
       this.postMessage = (msg, ...rest) => {
-        const kind = msg?.req ? 'forma' : msg?.read ? 'lettura' : 'suono';
+        const kind = msg?.req ? 'forma' : msg?.read ? 'lettura' : msg?.chunk ? 'terreno' : 'suono';
         m.open.set(me + ':' + (msg?.id ?? '?'), { at: performance.now(), kind, model: msg?.req?.model });
         return post(msg, ...rest);
       };
@@ -256,6 +259,12 @@ function summary(label, d) {
     parts: Object.fromEntries(Object.entries(parts).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, (v / span) * 1000])),
     perTick: Object.fromEntries(Object.entries(parts).filter(([k]) => k.startsWith('kernel')).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, ticks ? v / ticks : 0])),
     perFrame: Object.fromEntries(Object.entries(parts).filter(([k]) => k.startsWith('disegno')).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, frames.length ? v / frames.length : 0])),
+    // The worst frames of each part of the drawing (T486): a place's mesh made on the page's thread is a frame of its own, the mean hides it.
+    perFrameWorst: Object.fromEntries(Object.keys(parts).filter((k) => k.startsWith('disegno')).map((k) => {
+      const xs = frames.map((f) => f.parts[k] ?? 0);
+      return [k, { p99: sorted(xs)[Math.floor(xs.length * 0.99)] ?? 0, max: Math.max(0, ...xs), over4: xs.filter((x) => x > 4).length }];
+    })),
+    terrain: (() => { const t = d.jobs.filter((j) => j.kind === 'terreno').map((j) => j.back - j.sent); return { jobs: t.length, median: median(t), p95: p95(t), max: Math.max(0, ...t) }; })(),
     workers: { workers, jobs: d.jobs.length, forms: forms.length, formMs: { median: median(forms.map((j) => j.back - j.sent)), p95: p95(forms.map((j) => j.back - j.sent)), max: Math.max(0, ...forms.map((j) => j.back - j.sent)) }, busyShare: workers ? busy / (span * workers) : 0, stillOpen: d.open },
     long: { n: d.long.length, ms: d.long.reduce((a, l) => a + l.ms, 0), max: Math.max(0, ...d.long.map((l) => l.ms)) },
   };
@@ -269,7 +278,8 @@ function summary(label, d) {
   console.log(`per tick:`);
   for (const [k, v] of Object.entries(row.perTick)) console.log(`  ${f1(v)} ms  ${k}`);
   console.log(`per frame:`);
-  for (const [k, v] of Object.entries(row.perFrame)) console.log(`  ${f1(v)} ms  ${k}`);
+  for (const [k, v] of Object.entries(row.perFrame)) console.log(`  ${f1(v)} ms  ${k}${row.perFrameWorst[k]?.max > 1 ? ` (p99 ${row.perFrameWorst[k].p99.toFixed(2)}, il frame peggiore ${row.perFrameWorst[k].max.toFixed(2)}, ${row.perFrameWorst[k].over4} frame oltre 4 ms)` : ''}`);
+  if (row.terrain.jobs) console.log(`terreno    ${row.terrain.jobs} mesh di luoghi nel worker del terreno · mediana ${row.terrain.median.toFixed(1)} ms, p95 ${row.terrain.p95.toFixed(1)}, max ${row.terrain.max.toFixed(1)} (dall'invio alla risposta)`);
   console.log(`worker     ${row.workers.workers} attivi · ${row.workers.jobs} lavori (${row.workers.forms} programmi) · un programma mediana ${row.workers.formMs.median.toFixed(0)} ms, p95 ${row.workers.formMs.p95.toFixed(0)}, max ${row.workers.formMs.max.toFixed(0)} · occupati ${(100 * row.workers.busyShare).toFixed(0)} % · in corso alla fine ${row.workers.stillOpen}`);
   const slow = forms.sort((a, b) => b.back - b.sent - (a.back - a.sent)).slice(0, 8);
   if (slow.length) console.log(`i più lenti: ${slow.map((j) => `${j.model ?? '?'} ${(j.back - j.sent).toFixed(0)} ms`).join(' · ')}`);
