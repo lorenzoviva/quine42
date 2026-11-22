@@ -355,9 +355,9 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: la chiave della cache `quine:pianeta:v<LOD_VERSION>:…` nel `localStorage`.
 
 ### Origine mobile
-- **Inglese**: `geometry(origin)`, `swellPhases`, `phaseAttribute`, `foamPhase`
+- **Inglese**: `arrays(origin)`, `swellPhases`, `phaseAttribute`, `foamPhase`
 - **Definizione**: i vertici di un luogo relativi al suo angolo e il gruppo posto lì in doppia precisione, le fasi delle onde calcolate in doppia precisione, il taglio sotto terra in caselle intere relative: a un milione di caselle dall'origine un sessantaquattresimo di casella resta tale (T449, ADR-0236).
-- **Dove vive**: `src/render/terrain.ts`, `src/render/sea.ts`, `src/render/renderer.ts`
+- **Dove vive**: `src/render/terrainmesh.ts`, `src/render/terrain.ts`, `src/render/seawave.ts`, `src/render/sea.ts`, `src/render/renderer.ts`
 - **Da non usare**: `floating origin` nei testi italiani, `origine fluttuante`
 - **Fermo**: niente su disco né sul filo.
 
@@ -427,14 +427,14 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 ### Onda lunga
 - **Inglese**: `swell`, `SWELL`, `swellAt`, `seaSwell`, `seaWeight`, `seaLift`
 - **Definizione**: il moto dell'acqua a schermo: tre onde sinusoidali di dove sta un punto del tappeto e del tempo, le creste più chiare; ferma dove l'acqua tocca altro (la riva, l'acqua di un altro livello), piena in mare aperto; chi nuota ci galleggia sopra. Solo disegno, nessun dato (T451).
-- **Dove vive**: `src/render/sea.ts`, `src/render/terrain.ts`
+- **Dove vive**: `src/render/seawave.ts`, `src/render/sea.ts`, `src/render/terrain.ts`
 - **Da non usare**: `marea` (l'acqua non sale né scende nei dati), `moto ondoso`
 - **Fermo**: —
 
 ### Schiuma
-- **Inglese**: `foam`, `FoamBuilder`, `FOAM_WIDTH`
+- **Inglese**: `foam`, `FoamBuilder`, `FoamStrips`, `FOAM_WIDTH`
 - **Definizione**: la striscia bianca sull'acqua lungo ciò che la ferma alla sua altezza (una riva, un molo, una roccia), che va e viene; la stessa tinta fa la scia. Solo disegno (T451).
-- **Dove vive**: `src/render/sea.ts`
+- **Dove vive**: `src/render/seawave.ts`, `src/render/sea.ts`
 - **Da non usare**: `spuma`, `risacca`
 - **Fermo**: —
 
@@ -443,6 +443,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Definizione**: la schiuma che un veicolo lascia sull'acqua dietro la poppa quando va: due bracci che si allargano e il ribollire nel mezzo, che svaniscono in pochi secondi. Solo disegno, dal moto che si vede (T451).
 - **Dove vive**: `src/render/sea.ts`, `src/render/entities.ts`
 - **Da non usare**: `traccia` (è del programma MarkovJunior, ADR-0118), `solco`
+- **Fermo**: —
+
+### Worker del terreno
+- **Inglese**: `ChunkMesher`, `chunkInput`, `ChunkInput`, `chunkArrays`, `ChunkArrays`, `ChunkSource`, `chunkView`, `CHUNK_MARGIN`
+- **Definizione**: il worker che fa le mesh del terreno dei luoghi fuori dal thread della pagina, da una **copia** di ciò che la mesh di un luogo legge del kernel (le sue caselle, le caselle e il suolo fino a due caselle oltre i bordi, i buchi delle cantine, la tavolozza coi colori, i terreni coi modelli pronti); rende gli array, uguali byte per byte a quelli che la pagina farebbe; un luogo alla volta, l'ultimo fatto vince; se si ferma o tace la pagina fa da sé (T486, ADR-0242).
+- **Dove vive**: `src/render/chunkmesher.ts`, `src/render/terrainworker.ts`, `src/render/terrainmesh.ts`, `src/render/terrain.ts`
+- **Da non usare**: `worker delle forme` (è il pool dei programmi dei modelli, `WorkerRunner`), `specchio del kernel` (il worker non tiene uno stato: riceve una copia per luogo)
 - **Fermo**: —
 
 ### Rollio

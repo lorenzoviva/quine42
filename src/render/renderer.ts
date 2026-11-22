@@ -15,7 +15,8 @@ import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, C
 import { CUT, U } from './materials';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
-import { buildChunk, buildCut, chunkSig, cutSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, tileForms, type TerrainView } from './terrain';
+import { ChunkMesher } from './chunkmesher';
 import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
@@ -58,6 +59,8 @@ export class Renderer {
   /** The simulation, in carpet coordinates. */
   private world = new THREE.Group();
   private chunks = new Map<string, TerrainView>();
+  /** The places' meshes made off the page's thread (T486); without a worker, or once it stops, here. */
+  private mesher = new ChunkMesher();
   /** The caps of the cut under the ground (T416): built again when one changes tile or floor down there, or the camera turns. */
   private cut?: { sig: string; mesh?: THREE.Mesh };
   /** How much of the sun and the sky is left (T416): less the deeper one is under the ground, eased. */
@@ -153,6 +156,8 @@ export class Renderer {
       disposeChunk(v);
     }
     this.chunks.clear();
+    // What the worker brings back now is of the files before.
+    this.mesher.forget();
     this.syncCut(undefined);
     this.corona?.reset();
     this.entities.clear();
@@ -578,29 +583,55 @@ export class Renderer {
     this.cut = { sig, mesh };
   }
 
-  /** Builds the chunks that are new or changed (a few per frame), drops the unloaded ones. */
+  /**
+   * Builds the chunks that are new or changed, drops the unloaded ones. Their meshes are made in a worker (T486): a few copies of what they read
+   * sent each frame, one at a time a place, and what came back put on screen; what changed while it was out goes again. Without the worker,
+   * a few made here each frame, as before.
+   */
   private syncChunks(): void {
     const k = this.kernel;
-    let budget = 3;
     // Which terrains' models are ready: chunks are built again when theirs arrive.
     const models = Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('');
+    // What the worker made: on screen, unless its place has gone or what stands on it is no longer ready (then it goes again, its signature is old).
+    for (const got of this.mesher.take()) {
+      const ch = k.chunks.get(got.key);
+      if (!ch) continue;
+      // What failed there fails here too, as it did before the worker.
+      const nv = got.arrays ? chunkView(k, ch, got.arrays, got.sig) : buildChunk(k, ch, models);
+      if (nv) this.showChunk(nv);
+    }
+    let budget = 3;
+    const from = performance.now();
     for (const ch of k.chunks.values()) {
       const v = this.chunks.get(ch.key);
-      if (v && v.sig === chunkSig(k, ch, models)) continue;
-      if (budget-- <= 0) continue;
-      if (v) {
-        this.world.remove(v.group);
-        disposeChunk(v);
+      const sig = chunkSig(k, ch, models);
+      if (v && v.sig === sig) continue;
+      if (this.mesher.working) {
+        // A copy costs a tenth of a mesh (most of it the ground's heights): a few each frame, and not past a millisecond and a half.
+        if (this.mesher.asking(ch.key) || budget <= 0 || (budget < 3 && performance.now() - from > 1.5)) continue;
+        budget--;
+        this.mesher.ask(ch.key, sig, chunkInput(k, ch));
+        continue;
       }
-      const nv = buildChunk(k, ch, models);
-      this.world.add(nv.group);
-      this.chunks.set(ch.key, nv);
+      if (budget-- <= 0) continue;
+      this.showChunk(buildChunk(k, ch, models));
     }
     for (const [key, v] of [...this.chunks]) if (!k.chunks.has(key)) {
       this.world.remove(v.group);
       disposeChunk(v);
       this.chunks.delete(key);
     }
+  }
+
+  /** A place's meshes on screen, in the place of what it had. */
+  private showChunk(nv: TerrainView): void {
+    const v = this.chunks.get(nv.key);
+    if (v) {
+      this.world.remove(v.group);
+      disposeChunk(v);
+    }
+    this.world.add(nv.group);
+    this.chunks.set(nv.key, nv);
   }
 
   private drawOverlay(studio: StudioRoom, revealed: boolean, interior: boolean, g: number): void {

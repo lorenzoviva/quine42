@@ -6409,12 +6409,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 5.4; il campo d'onde a quattro celle per lato o più, mosso dalle correnti dell'automa a due.
 - Cosa fare: la riga 12. Browser: sì.
 
-### T486 · M0 · La mesh dei luoghi in un worker (riga 13 di T459) — `da fare`
+### T486 · M0 · La mesh dei luoghi in un worker (riga 13 di T459) — `fatto` (`d3bf0c2a`)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
 - Step: 45
 - Dipende da: T459
 - Contesto: § 1.6 punto 2, il punto 3 di T331.
 - Cosa fare: la riga 13; la stessa mesh byte per byte; `misura-frame.mjs` prima e dopo. Browser: sì.
+- Esito: la mesh del terreno dei luoghi si fa nel worker del terreno da una copia di ciò che legge del kernel, identica byte per byte (test con ogni lettura nella copia, impronta `bf19e2fdbfb56b15` uguale prima e dopo, confronto nel browser sui 35 luoghi); `misura-frame.mjs` prima e dopo: il frame peggiore della mesh dei luoghi da 65 a 20 ms al caricamento a freddo e da 61 a 5,4 all'arrivo, i long task da 20 a 5 e da 15 a 5; ADR-0242, voce nel glossario, AGENTS.md e architettura aggiornati, kernel non toccato (niente cambio di versione); da fare: la copia costa 0,7 ms a luogo, quasi tutto `groundAt` (`levelsOf` scorre ogni luogo caricato), possibile task sul kernel; non provati: GPU integrate, il worker che si blocca in un browser vero (solo nei test), il multigiocatore (solo disegno sul client); sicurezza: nessuna superficie nuova.
 
 ### T487 · Veicoli dal Concilio: la barca generata si guida — `da fare`
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 2
