@@ -95,7 +95,7 @@ import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
-import { repairVehicleClaims, vehicleSpot, worldMedia, type VehicleSpot } from './vehicleclaim';
+import { COUNCIL_ORIGINS, repairVehicleClaims, vehicleSpot, worldMedia, type VehicleSpot } from './vehicleclaim';
 import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
@@ -1576,7 +1576,8 @@ export class Kernel {
     const out = this.catalog();
     if (this.vehicleCount() >= MAX_VEHICLES) return out;
     for (const m of this.modules.values()) {
-      const spec = m.manifest.id === CAPSULE ? undefined : this.vehicleSpecFor(m.manifest);
+      // The Council's (a module it forged says its origin): what is written by hand, and the seed's capsule, the plans do not place.
+      const spec = m.manifest.id === CAPSULE || !COUNCIL_ORIGINS.has(m.manifest.origin ?? '') ? undefined : this.vehicleSpecFor(m.manifest);
       if (!spec || !this.vehicleSpotIn(ch, m.manifest, spec, undefined, ch.draft)) continue;
       const on = spec.medium === 'water' ? "si guida sull'acqua" : spec.medium === 'land' ? 'si guida su terra' : 'si guida nel vuoto';
       out.push({ id: m.manifest.id, name: m.manifest.name, kind: 'vehicle', tiles: [], context: `${m.manifest.context ?? m.manifest.description ?? ''} (${on})` });

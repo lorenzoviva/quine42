@@ -177,8 +177,10 @@ describe('the repair of the universes made before (T487)', () => {
     expect(k.catalogFor({ cx: 7, cy: 7, draft: 'o'.repeat(S * S) }).find((c) => c.id === BARGE)?.kind).toBe('vehicle');
     expect(k.catalogFor({ cx: 7, cy: 7, draft: 'g'.repeat(S * S) }).map((c) => c.id)).not.toContain(BARGE);
     expect(k.catalog().map((c) => c.id)).not.toContain(BARGE);
-    // Nor the seed's capsule, which the landings have.
+    // Nor the seed's capsule, which the landings have, nor a vehicle written by hand.
     expect(k.catalogFor({ cx: 7, cy: 7, draft: 'o'.repeat(S * S) }).map((c) => c.id)).not.toContain('vehicle.capsule');
+    const hand = await Kernel.boot({ files: { ...bundledFiles, 'modules/obj.barca-a-mano/manifest.json': JSON.stringify({ ...bargeManifest(), id: 'obj.barca-a-mano', origin: undefined, vehicle: vehicleFor('water') }) }, store: memoryStore(), ai: new MockAiModels() });
+    expect(hand.catalogFor({ cx: 7, cy: 7, draft: 'o'.repeat(S * S) }).map((c) => c.id)).not.toContain('obj.barca-a-mano');
   }, 60_000);
 
   it('a plan keeps one vehicle a place', async () => {

@@ -40,7 +40,7 @@ la sua sorella è che ciò che sembra un mezzo si guida.
    Come pavimento per ogni modulo forgiato, `validateForged` rifiuta una cosa del mondo che si presenta come un veicolo senza `vehicle`
    (`vehicleClaimErrors`); non `parseManifest`, che legge anche gli universi di prima e i moduli scritti a mano.
 4. **Il Cartografo può chiederne uno nel piano**, ma solo dove si muove: il catalogo di un luogo (`catalogFor`, non `catalog`, che resta
-   quello del Concilio e dei test) offre, col tipo `vehicle`, i veicoli del Concilio che stanno nella bozza del luogo con tutta la loro
+   quello del Concilio e dei test) offre, col tipo `vehicle`, i veicoli del Concilio (un'`origin` sua: genesi, agente, cartografo, combinazione; non quelli scritti a mano) che stanno nella bozza del luogo con tutta la loro
    scatola su ciò che li porta, finché il mondo ne ha meno di `MAX_VEHICLES`; mai la capsula del seme, che hanno gli approdi. Un veicolo per
    luogo: il secondo lo toglie `validatePlan` («un veicolo per luogo»). Il prompt glielo dice solo quando il catalogo ne ha uno; i modelli
    locali lo mettono, a parte, dove è offerto (le estrazioni del resto non cambiano).

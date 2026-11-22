@@ -1542,7 +1542,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   mezzo, `MEDIUM_DEFAULTS`; il pescaggio solo sull'acqua, basso se non detto profondo), solido, non spinto, mai `takeable`, e sull'acqua la
   classe `vessel`. Il Narratore che dice `none` a un nome di mezzo torna una volta col motivo (`vehicleRefusal`), poi `ForgeRejected` del
   Narratore; `validateForged` rifiuta con `vehicleClaimErrors` (non `parseManifest`, che legge anche il disco). **Il piano**: `catalogFor(ch)`
-  aggiunge i veicoli del Concilio (non la capsula del seme) che stanno nella bozza del luogo (`vehicleSpotIn` sulla `draft`), col tipo
+  aggiunge i veicoli del Concilio (`COUNCIL_ORIGINS`; non quelli scritti a mano né la capsula del seme) che stanno nella bozza del luogo (`vehicleSpotIn` sulla `draft`), col tipo
   `vehicle`, finché il mondo ne ha meno di `MAX_VEHICLES` (`vehicleCount`: nel mondo e in attesa nel salvataggio); il prompt del Cartografo
   lo dice solo allora; `validatePlan(…, vehicles)` ne tiene uno per luogo; i modelli locali lo mettono a parte (`ride`). **Dove nasce**
   (`vehicleSpot`, puro): i centri ogni mezza casella e i due versi (prua verso +y o +x), la scatola della classe alla taglia (`vehicleBox`,
