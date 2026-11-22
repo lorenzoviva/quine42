@@ -256,7 +256,71 @@ chioma tonda sul tronco col piede). Nessun errore della pagina.
   fra Grande ed Enorme, senza cantina).
 - **Il voto dell'Artista** dà quasi sempre 6 (29 voti finali su 42): distingue poco.
 
+## La correzione di T497: la chioma attaccata e `close` (D68.1)
+
+Data: 2026-11-22 · Le proposte 1 e 2 qui sotto, approvate dall'autore (D68.1) · Tetto 0,30 $ sul registro di
+[`t497/`](t497/), una cartella a parte perché il registro di questa ne aveva già 4,21 · **Spesa: 0,181 $**.
+
+**Perché la chioma si staccava.** Nei castagni di T473 la causa è quasi sempre la stessa: il segno della chioma (`<ellipsoid at="20 20 45"
+size="38 38 25"/>`) messo con `at` al mezzo della chioma, mentre una forma posa sul suo `at` (il centro della base, come dice il nucleo):
+la chioma comincia a z 40-48 e il tronco finisce a 20. Poi le foglie posate da sole nel segno, e la convoluzione che toglie anche quelle
+che tengono le altre.
+
+**Che cosa è cambiato** (`universe/prompts/agents/sculptor/`, nei token del § 2.2 dello studio: il Paesaggista a 12 035 caratteri col
+nucleo su 12 045, il Mobiliere a 12 194 su 12 210):
+
+- il Paesaggista, in «Growing like nature»: «The crown stays on its wood: a shape rests on its `at` (the base, not the middle), so start
+  the crown's mark below the trunk's top; leaves grow only beside wood or leaves. A convolution frays only its outside (a leaf with few
+  leaves round it). Off the wood it floats: the kernel throws it away.» (la chioma tolta dalla riga delle forme, due frasi accorciate);
+- il Mobiliere, in «What the world does with them»: le due azioni scritte, `open` e `close` (`<rule in="l" out="L"/><rule in="U"
+  out="u"/>`), e «without `close` the chest stays open».
+
+Nessun controllo nuovo: la chioma che galleggia la scartava già `analyse` (il corpo più grande che non tocca terra, i pezzi staccati);
+`tests/sculptor-trades.test.ts` prova sul kernel che la chioma col segno sotto la cima del tronco passa, quella col segno a metà galleggia
+e viene scartata, e che le foglie cresciute dal legno non galleggiano mai; e prende `open` e `close` dalla sezione così come sono.
+
+**La mini-prova**: castagno e baule, il solo braccio «dopo», tre giri (sei alberi e sei bauli scritti, due programmi a modello e l'Artista
+che sceglie), sugli stessi modelli e nello stesso modo di T473.
+
+```bash
+npx vite-node lab/scripts/scultore-gemini.ts -- --specialita --out lab/banco/specialita/t497 --giro t497-1 --bracci dopo --solo castagno,baule --tetto 0.30
+```
+
+| | T473 «prima» | T473 «dopo» | T497 |
+|---|---|---|---|
+| castagni fatti | 3 su 3 | 2 su 3 | 2 su 3 |
+| castagni al primo colpo | 2 su 6 | 1 su 6 | 0 su 6 |
+| scarti del castagno per la chioma che galleggia | 2 su 10 | 6 su 11 | **2 su 13** |
+| … per «troppo basso» | — | — | 8 su 13 |
+| voti finali del castagno | 6, 6, 3 | 6, 6 | 6, 6 |
+| bauli fatti | 3 su 3 | 3 su 3 | 3 su 3 |
+| bauli al primo colpo | 5 su 6 | 4 su 6 | 4 su 6 |
+| bauli tenuti con `open` e il coperchio aperto nascosto | 0 su 3 | 1 su 3 | **3 su 3** |
+| … e anche `close` | 0 su 3 | 0 su 3 | **2 su 3** |
+| risposte del baule con `close` | 0 su 7 | 0 su 8 | 9 su 10 |
+| voti finali del baule | 6, 6, 6 | 6, 6, 6 | 6, 6, 6 |
+| costo a giro (castagno + baule) | 0,050 $ | 0,051 $ | 0,060 $ |
+
+Ciò che dice:
+
+- **La chioma non galleggia più** quasi mai: 2 scarti su 13, e i castagni tenuti hanno il tronco che sale dentro la chioma (`<cylinder
+  size="6 6 48"/>` sotto `<ellipsoid at="20 20 45"/>`). Ma Flash-Lite mette ancora l'ellissoide a z 40-45, e dove il tronco non sale
+  (una regola di crescita scritta al contrario, `in="B r" out="T r"`, o l'idioma del pino del seme copiato male) le foglie, che ora
+  crescono solo dal legno, non nascono: il castagno è «troppo basso» (2-18 voxel contro 48). Il kernel lo scarta lo stesso e i
+  castagni fatti restano 2 su 3: il guasto si è spostato dalla chioma al tronco.
+- **Il baule si chiude**: nelle risposte `close` c'è 9 volte su 10, nei bauli tenuti 2 su 3 (l'unico senza, nel giro 1, è la
+  seconda risposta, che l'Artista ha preferito: 6 contro 4).
+- Tre giri sono pochi per il passaggio (al primo colpo, i voti); reggono il conto di `close` e il cambio del motivo degli scarti.
+
+Il prossimo passo per il Paesaggista, se serve: l'idioma del tronco che sale (una cella che cresce, `<rule in="B r" out="r T"/>`, come
+il pino del seme) o l'esempio di un albero a foglia larga accanto al pino; il budget del § 2.2 è pieno (10 caratteri liberi), quindi
+andrebbe tolto altro.
+
+Il registro di questa cartella con `t497/` è 4,39 $ (4,21 di T473 e 0,18 di T497).
+
 ## Proposte per l'autore
+
+Le proposte 1 e 2 le ha fatte T497 (qui sopra).
 
 1. **Il Paesaggista**: una riga in «Growing like nature» che tenga la chioma attaccata (la chioma cresce dalle punte dei rami e i rami
    restano; ciò che la convoluzione toglie non la stacca dal tronco), e la stessa prova sul solo castagno (Flash-Lite, circa 0,10 $ per sei

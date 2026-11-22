@@ -8,7 +8,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { Council } from '../src/kernel/agents/council';
-import { DEFAULT_SCULPTORS, sculpt, sculptAction, sculptorRole, sculptorSection, specialtyOf, type SculptorSpecialty, type SculptRequest } from '../src/kernel/agents/sculptor';
+import { checkProgram, DEFAULT_SCULPTORS, sculpt, sculptAction, sculptorRole, sculptorSection, specialtyOf, type SculptorSpecialty, type SculptRequest } from '../src/kernel/agents/sculptor';
 import { BODY_R, stepOf, VPT, waterlineOf } from '../src/kernel/forms';
 import { blockShape, findSpot, type Support } from '../src/kernel/placing';
 import type { FileMap } from '../src/kernel/types';
@@ -28,8 +28,8 @@ const section = (t: Trade) => sculptorSection(bundledFiles, t);
 
 /** What only the new text of each trade says (T470): its title and a line of it. */
 const MARKS: Record<Trade, string[]> = {
-  landscaper: ['## Growing like nature', 'the lowest quarter stays still', 'Write no animation for it'],
-  joiner: ['## What the world does with them', 'labelled by the part', "the handle, not the hammer's head"],
+  landscaper: ['## Growing like nature', 'the lowest quarter stays still', 'Write no animation for it', 'The crown stays on its wood'],
+  joiner: ['## What the world does with them', 'labelled by the part', "the handle, not the hammer's head", 'without `close` the chest stays open'],
   tailor: ['## Every body', 'from the outside in', 'two main colours'],
   figurist: ['## How the kernel moves a figure', 'swing in diagonal pairs', 'without `part="arm"` nothing is seen'],
   mason: ['## Building in one box', 'a house a person enters', 'A monument stands on its base'],
@@ -137,6 +137,27 @@ describe('le sezioni dei mestieri (T470)', () => {
 });
 
 describe('ciò che le sezioni dicono del kernel è vero (T470)', () => {
+  it('Paesaggista: una forma posa sul suo at; la chioma messa a metà galleggia e il kernel la scarta, quella cresciuta dal legno no (T497)', () => {
+    // A chestnut in the tree's box: a trunk, a crown 26 tall; placed whole on its mark, or grown from the wood inside it.
+    const tree = (crownAt: number, trunk: number, grown: boolean) => `<sequence values="BTLV" size="40 40 60" symmetry="(xy)" name="Castagno">
+      <color symbol="T" value="6b4a2e"/><color symbol="L" value="2f6b3a"/><color symbol="V" hidden="True"/>
+      <cylinder at="20 20 0" size="8 8 ${trunk}" color="T" on="B"/>
+      <ellipsoid at="20 20 ${crownAt}" size="32 32 26" color="V" on="B"/>
+      ${grown ? '<all steps="40" symmetry="(xyz)"><rule in="TV" out="TL"/><rule in="LV" out="LL"/></all><all in="V" out="B"/>' : '<all in="V" out="L"/>'}
+    </sequence>`;
+    const error = (crownAt: number, trunk: number, grown: boolean) => checkProgram(tree(crownAt, trunk, grown), classOf('tree')!).error;
+    const floats = /il corpo principale galleggia|pezzi staccati/;
+    // The mark's `at` is its bottom: below the trunk's top the crown holds, the trunk inside it.
+    expect(error(30, 40, false)).toBeUndefined();
+    expect(error(30, 40, true)).toBeUndefined();
+    // At the crown's middle, as the chestnuts of T473 put it (z 40-48), it starts above the wood and floats; so over a short trunk.
+    expect(error(44, 40, false)).toMatch(floats);
+    expect(error(30, 20, false)).toMatch(floats);
+    // Leaves that grow only beside wood or leaves never float: where the wood does not reach the mark there is no crown at all.
+    expect(error(44, 40, true) ?? '').not.toMatch(floats);
+    expect(error(30, 20, true)).toMatch(/troppo basso/);
+  });
+
   it('Paesaggista: il vento piega per altezza, il quarto più basso fermo e la cima di più', () => {
     const top = 20;
     const g = grid(1, 1, top, ['.', 'T'], () => 'T');
@@ -153,8 +174,10 @@ describe('ciò che le sezioni dicono del kernel è vero (T470)', () => {
   });
 
   it('Mobiliere: il coperchio del prompt si apre e si chiude, e il menu offre solo l’azione che cambia il modello ora', () => {
-    const open = /`(<action name="open"[^`]*<\/action>)`/.exec(section('joiner'))![1];
-    const close = open.replace('name="open"', 'name="close"').replace(/label="[^"]*"/, 'label="Chiudi il coperchio"').replace('in="L" out="l"', 'in="l" out="L"').replace('in="u" out="U"', 'in="U" out="u"');
+    // Both actions as the section writes them (T497: `close` beside `open`, or the chest stays open).
+    const action = (name: string) => new RegExp('`(<action name="' + name + '"[^`]*</action>)`').exec(section('joiner'))![1];
+    const open = action('open');
+    const close = action('close');
     // A chest: the body, the shut lid on it, the open lid marked where it goes (raised at the back), hidden.
     const xml = `<sequence values="BWLlUu" size="9 9 12">
       <color symbol="W" value="7a5634"/><color symbol="L" value="5a3a1e"/><color symbol="U" value="5a3a1e"/>

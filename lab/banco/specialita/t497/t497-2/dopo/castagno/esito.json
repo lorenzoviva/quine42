@@ -1,0 +1,146 @@
+{
+ "giro": "t497-2",
+ "braccio": "dopo",
+ "concetto": "castagno",
+ "classe": "tree",
+ "specialita": "landscaper",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": false,
+ "voti": [],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)",
+    "troppo basso: alto 5 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "troppo basso: alto 10 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "il modello è vuoto: nessun voxel visibile (i codici senza colore nella palette sono invisibili)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 10,
+   "prompt": 5725,
+   "cached": 2035,
+   "output": 491,
+   "thoughts": 2570,
+   "usd": 0.005564875,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6267,
+   "cached": 4072,
+   "output": 479,
+   "thoughts": 2157,
+   "usd": 0.00460455,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 5 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 3,
+   "prompt": 6253,
+   "cached": 4072,
+   "output": 595,
+   "thoughts": 126,
+   "usd": 0.00172855,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 10 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5725,
+   "cached": 2035,
+   "output": 854,
+   "thoughts": 1759,
+   "usd": 0.004892875,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 3,
+   "prompt": 6628,
+   "cached": 4073,
+   "output": 900,
+   "thoughts": 134,
+   "usd": 0.0022915749999999997,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 6,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 3,
+   "prompt": 6674,
+   "cached": 4074,
+   "output": 926,
+   "thoughts": 101,
+   "usd": 0.00229235,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "il modello è vuoto: nessun voxel visibile (i codici senza colore nella palette sono invisibili)"
+  }
+ ],
+ "token": {
+  "prompt": 37272,
+  "cached": 20361,
+  "output": 4245,
+  "thoughts": 6847
+ },
+ "usd": 0.02137,
+ "usdGemini": 0.02137,
+ "secondi": 35,
+ "sistema": {
+  "caratteri": 18499,
+  "ruolo": 9839,
+  "sezione": 2193,
+  "esempi": [
+   "tree"
+  ]
+ },
+ "registro": {
+  "landscaper": 6
+ },
+ "note": [],
+ "errore": "nessun programma valido"
+}

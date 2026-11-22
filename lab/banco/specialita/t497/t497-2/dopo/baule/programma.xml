@@ -1,0 +1,42 @@
+<!-- Baule da viaggio: sculpted by gemini-3.1-flash-lite (step 9), the Artist's vote 6/10 -->
+<sequence values="BNIL#80#81#82#83" size="20 20 20" name="Baule da viaggio">
+  <color symbol="N" value="8a5a30"/>
+  <color symbol="I" value="4a4f5a"/>
+  <color symbol="L" value="9a6a3a"/>
+  <color symbol="#80" value="333333" hidden="True"/>
+  <color symbol="#81" value="000000" hidden="True"/>
+  <color symbol="#82" value="000000" hidden="True"/>
+  <color symbol="#83" value="9a6a3a" hidden="True"/>
+
+  <!-- Body -->
+  <box at="10 10 0" size="16 12 8" color="N"/>
+
+  <!-- Iron Bands -->
+  <box at="10 4 0" size="16 1 8" color="I"/>
+  <box at="10 16 0" size="16 1 8" color="I"/>
+  <box at="4 10 0" size="1 12 8" color="I"/>
+  <box at="16 10 0" size="1 12 8" color="I"/>
+
+  <!-- Rounded Lid -->
+  <box at="10 10 8" size="16 12 4" color="L"/>
+  <box at="10 10 12" size="14 10 2" color="L"/>
+
+  <!-- Hinge for part-leaf -->
+  <box at="2 10 8" size="1 12 1" color="#80"/>
+
+  <import file="part-leaf"/>
+
+  <action name="open" label="Apri il coperchio">
+    <all>
+      <rule in="L" out="#82"/>
+      <rule in="#81" out="#83"/>
+    </all>
+  </action>
+
+  <action name="close" label="Chiudi il coperchio">
+    <all>
+      <rule in="#82" out="L"/>
+      <rule in="#83" out="#81"/>
+    </all>
+  </action>
+</sequence>
