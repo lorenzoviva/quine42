@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 23/11/2026, epoca 654 (claude). Crediti: vedi `stato`.
+Aggiornato il 23/11/2026, epoca 659 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -38,7 +38,7 @@ Aggiornato il 23/11/2026, epoca 654 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
-- **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237, nessuna riga in `consumi.jsonl`): al primo task pronto adatto (programmazione di più file, senza browser) assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
+- **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237): primo task vero **T479** (epoca 659); al prossimo task pronto adatto (programmazione di più file, senza browser) assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
 - **19/11 17:05 (epoca 567):** autore ha chiuso D64 e D65 (fuori per 1-2 ore): T437-T451 pianificati e approvati, `mesa` nel generatore. Autonomia: lanciare e integrare la catena T437→.
 - **19/11 16:58 (epoca 565):** **T436** integrato (`da373cc3`, ADR-0223, kernel `0.9.21`, step 31 `raggiunto`; cartella `worktrees/t436` bloccata su Windows e ramo `task/T436` rimasto). Claude fermo al 3 % settimana fino al reset delle 15:59Z (16:59 CET). Autonomia fino alle 18:00 CET (**D66** aperta).
 - **19/11 15:56 (epoca 562):** **T435** integrato (`694e7833`, kernel 0.9.20; worktree e ramo rimossi); aggiramento in `.pipeline/budget.json` (`residuo: 21`, `sessione: 90`, `letto: 15:55Z`) ripristinato per lanciare **T436** sul 5 % residuo prima del reset delle 16:00Z. Autonomia fino alle 18:00 CET (**D66** aperta).
@@ -52,5 +52,5 @@ Aggiornato il 23/11/2026, epoca 654 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **652 (claude):** T477 arrampicata fatta (V-047, visto nel browser) ma `integra` in conflitto con T489 → **T502** (hydrogen, 2 %, ADR-0252, kernel 0.10.28). Pipeline spenta con `ferma --dopo` (riavvio dell’autore per Neon e soglia 2 %).
 - **654 (claude):** pipeline riaccesa dopo lo spegnimento (Neon disponibile, soglia 2 %); **T502** in corso su hydrogen (integra T477 con T489). Pronti: T501, T500, T475, T479, T482.
+- **659 (claude):** **T502** e **T477** integrati (`aaf2be2d`, `9ad1ae9a`; arrampicata, V-047, ADR-0252, kernel 0.10.28). **T479** assegnato a `neon` (sforzo xhigh, 4 %): prima prova vera di Neon, da misurare. Pronti: T501, T500, T475, T482.
