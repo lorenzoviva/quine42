@@ -1,0 +1,1872 @@
+{
+ "rows": [
+  {
+   "key": "pebble",
+   "spec": "landscaper",
+   "system": 4966,
+   "role": 3025,
+   "section": 597,
+   "examples": 637,
+   "prompt": 47,
+   "waste": 176,
+   "wasted": [
+    "class:rock",
+    "class:bush",
+    "class:tree",
+    "craft.wind"
+   ],
+   "before": 4693
+  },
+  {
+   "key": "rock",
+   "spec": "landscaper",
+   "system": 5047,
+   "role": 3025,
+   "section": 597,
+   "examples": 718,
+   "prompt": 56,
+   "waste": 176,
+   "wasted": [
+    "class:pebble",
+    "class:bush",
+    "class:tree",
+    "craft.wind"
+   ],
+   "before": 4774
+  },
+  {
+   "key": "bush",
+   "spec": "landscaper",
+   "system": 4937,
+   "role": 3025,
+   "section": 597,
+   "examples": 608,
+   "prompt": 53,
+   "waste": 136,
+   "wasted": [
+    "class:pebble",
+    "class:rock",
+    "class:tree"
+   ],
+   "before": 4664
+  },
+  {
+   "key": "tree",
+   "spec": "landscaper",
+   "system": 5333,
+   "role": 3025,
+   "section": 597,
+   "examples": 1004,
+   "prompt": 50,
+   "waste": 125,
+   "wasted": [
+    "class:pebble",
+    "class:rock",
+    "class:bush"
+   ],
+   "before": 5060
+  },
+  {
+   "key": "object",
+   "spec": "joiner",
+   "system": 4675,
+   "role": 3025,
+   "section": 649,
+   "examples": 294,
+   "prompt": 44,
+   "waste": 382,
+   "wasted": [
+    "class:furniture",
+    "colour",
+    "craft.opening",
+    "craft.shelves",
+    "craft.carrying"
+   ],
+   "before": 4287
+  },
+  {
+   "key": "object-tinted",
+   "spec": "joiner",
+   "system": 4675,
+   "role": 3025,
+   "section": 649,
+   "examples": 294,
+   "prompt": 71,
+   "waste": 314,
+   "wasted": [
+    "class:furniture",
+    "craft.opening",
+    "craft.shelves",
+    "craft.carrying"
+   ],
+   "before": 4287
+  },
+  {
+   "key": "object-worn",
+   "spec": "tailor",
+   "system": 4891,
+   "role": 3025,
+   "section": 865,
+   "examples": 294,
+   "prompt": 72,
+   "waste": 67,
+   "wasted": [
+    "colour"
+   ],
+   "before": 4672
+  },
+  {
+   "key": "furniture",
+   "spec": "joiner",
+   "system": 5627,
+   "role": 3025,
+   "section": 649,
+   "examples": 1246,
+   "prompt": 50,
+   "waste": 213,
+   "wasted": [
+    "class:object",
+    "colour",
+    "craft.holding"
+   ],
+   "before": 5239
+  },
+  {
+   "key": "person",
+   "spec": "figurist",
+   "system": 5625,
+   "role": 3025,
+   "section": 571,
+   "examples": 1322,
+   "prompt": 58,
+   "waste": 139,
+   "wasted": [
+    "class:animal",
+    "class:beast",
+    "craft.fours"
+   ],
+   "before": 5318
+  },
+  {
+   "key": "animal",
+   "spec": "figurist",
+   "system": 5561,
+   "role": 3025,
+   "section": 571,
+   "examples": 1258,
+   "prompt": 47,
+   "waste": 179,
+   "wasted": [
+    "class:person",
+    "class:beast",
+    "craft.hand"
+   ],
+   "before": 5254
+  },
+  {
+   "key": "beast",
+   "spec": "figurist",
+   "system": 7076,
+   "role": 3025,
+   "section": 571,
+   "examples": 2773,
+   "prompt": 50,
+   "waste": 105,
+   "wasted": [
+    "class:person",
+    "class:animal"
+   ],
+   "before": 6769
+  },
+  {
+   "key": "monument",
+   "spec": "mason",
+   "system": 5725,
+   "role": 3025,
+   "section": 732,
+   "examples": 1261,
+   "prompt": 55,
+   "waste": 403,
+   "wasted": [
+    "class:building",
+    "class:structure",
+    "sizes",
+    "craft.door",
+    "craft.windows",
+    "craft.roofs"
+   ],
+   "before": 5306
+  },
+  {
+   "key": "building",
+   "spec": "mason",
+   "system": 6589,
+   "role": 3025,
+   "section": 732,
+   "examples": 2125,
+   "prompt": 55,
+   "waste": 202,
+   "wasted": [
+    "class:monument",
+    "class:structure",
+    "sizes",
+    "craft.monument"
+   ],
+   "before": 6170
+  },
+  {
+   "key": "structure-medium",
+   "spec": "mason",
+   "system": 6589,
+   "role": 3025,
+   "section": 732,
+   "examples": 2125,
+   "prompt": 77,
+   "waste": 129,
+   "wasted": [
+    "class:monument",
+    "class:building",
+    "craft.monument"
+   ],
+   "before": 6170
+  },
+  {
+   "key": "structure-large",
+   "spec": "architect",
+   "system": 6797,
+   "role": 6089,
+   "section": 0,
+   "examples": 0,
+   "prompt": 1358,
+   "waste": 0,
+   "wasted": [],
+   "before": 6797
+  },
+  {
+   "key": "structure-fort",
+   "spec": "architect",
+   "system": 6797,
+   "role": 6089,
+   "section": 0,
+   "examples": 0,
+   "prompt": 1619,
+   "waste": 0,
+   "wasted": [],
+   "before": 6797
+  },
+  {
+   "key": "vessel",
+   "spec": "coachbuilder",
+   "system": 5590,
+   "role": 3025,
+   "section": 787,
+   "examples": 1071,
+   "prompt": 334,
+   "waste": 0,
+   "wasted": [],
+   "before": 5354
+  },
+  {
+   "key": "action",
+   "spec": "actions",
+   "system": 2998,
+   "role": 1642,
+   "section": 649,
+   "examples": 0,
+   "prompt": 1461,
+   "waste": 489,
+   "wasted": [
+    "class:object",
+    "class:furniture",
+    "trade:joiner",
+    "colour",
+    "other:Glass and water",
+    "craft.shelves",
+    "craft.carrying",
+    "craft.holding",
+    "craft:joiner"
+   ],
+   "before": 2610
+  }
+ ],
+ "share": {
+  "pebble": 0,
+  "rock": 2,
+  "bush": 0,
+  "tree": 7,
+  "object": 3,
+  "object-tinted": 84,
+  "object-worn": 4,
+  "furniture": 100,
+  "person": 75,
+  "animal": 1,
+  "beast": 0,
+  "monument": 27,
+  "building": 71,
+  "structure-medium": 5,
+  "structure-large": 49,
+  "structure-fort": 0,
+  "vessel": 0
+ },
+ "callsPerModel": 1.9053738317757012,
+ "hourCalls": 50.5,
+ "modelsPerHour": 26.503985285101162,
+ "genesis": {
+  "object": 1,
+  "furniture": 1,
+  "object-tinted": 4,
+  "person": 1,
+  "tree": 2,
+  "rock": 2
+ },
+ "parts": {
+  "nucleo|intro": 153,
+  "nucleo|coordinates": 189,
+  "nucleo|program": 94,
+  "nucleo|palette": 411,
+  "nucleo|palette.colours": 168,
+  "nucleo|patterns": 220,
+  "nucleo|nodes": 895,
+  "nucleo|look.field": 42,
+  "nucleo|look.observe": 38,
+  "nucleo|look.children": 195,
+  "nucleo|sculpt": 532,
+  "nucleo|traps": 96,
+  "sezione landscaper|class:pebble": 43,
+  "sezione landscaper|class:rock": 43,
+  "sezione landscaper|class:bush": 39,
+  "sezione landscaper|class:tree": 50,
+  "sezione landscaper|trade:landscaper": 150,
+  "sezione landscaper|craft.wind": 44,
+  "sezione landscaper|craft:landscaper": 229,
+  "sezione joiner|class:object": 41,
+  "sezione joiner|class:furniture": 38,
+  "sezione joiner|trade:joiner": 27,
+  "sezione joiner|colour": 68,
+  "sezione joiner|other:Glass and water": 90,
+  "sezione joiner|craft.opening": 164,
+  "sezione joiner|craft.shelves": 72,
+  "sezione joiner|craft.carrying": 40,
+  "sezione joiner|craft.holding": 104,
+  "sezione joiner|craft:joiner": 9,
+  "sezione tailor|class:object": 41,
+  "sezione tailor|trade:tailor": 37,
+  "sezione tailor|worn": 503,
+  "sezione tailor|craft:tailor": 220,
+  "sezione tailor|colour": 67,
+  "sezione figurist|class:person": 52,
+  "sezione figurist|class:animal": 53,
+  "sezione figurist|class:beast": 47,
+  "sezione figurist|program.limbs": 61,
+  "sezione figurist|sculpt.people": 28,
+  "sezione figurist|trade:figurist": 24,
+  "sezione figurist|craft.fours": 39,
+  "sezione figurist|craft.hand": 80,
+  "sezione figurist|craft:figurist": 189,
+  "sezione mason|class:monument": 42,
+  "sezione mason|class:building": 46,
+  "sezione mason|class:structure": 58,
+  "sezione mason|sizes": 61,
+  "sezione mason|trade:mason": 107,
+  "sezione mason|craft.door": 122,
+  "sezione mason|craft.windows": 49,
+  "sezione mason|craft.roofs": 67,
+  "sezione mason|craft.monument": 41,
+  "sezione mason|craft:mason": 141,
+  "architect|structures:intro": 140,
+  "architect|structures:What matters most: the composition comes from the concept": 239,
+  "architect|structures:The measure of «done well»: the reference fort": 288,
+  "architect|structures:The method: three levels, one program": 584,
+  "architect|structures:A. The composition (the plan, a cell a third of a tile)": 1199,
+  "architect|structures:Loops: grow until a mark stops it": 484,
+  "architect|structures:Textures: `<convchain>` on the plan": 230,
+  "architect|structures:What fits: the size decides what is built, not how big": 665,
+  "architect|structures:B. The heights: columns by steps": 526,
+  "architect|structures:C. The full scale: the doors, the parts, the facades": 869,
+  "architect|structures:Under the ground: a cellar": 141,
+  "architect|structures:A Gargantuan's full scale in pieces": 343,
+  "architect|structures:What the game checks on every seed, at both sizes": 182,
+  "architect|structures:How to answer, block by block": 212,
+  "sezione coachbuilder|class:vessel": 69,
+  "sezione coachbuilder|trade:coachbuilder": 25,
+  "sezione coachbuilder|vessels": 459,
+  "sezione coachbuilder|craft:coachbuilder": 236,
+  "nucleo delle azioni|intro": 153,
+  "nucleo delle azioni|coordinates": 189,
+  "nucleo delle azioni|program": 94,
+  "nucleo delle azioni|patterns": 220,
+  "nucleo delle azioni|nodes": 895,
+  "nucleo delle azioni|traps": 96
+ },
+ "fixed": {
+  "principles": 507,
+  "language": 128,
+  "context": 73
+ },
+ "core": 3025,
+ "routes": {
+  "Google, oggi": {
+   "perCall": 0.00006973896995708153,
+   "tokensCut": 190.48681790312688,
+   "genesis": 0.0007205650000000002,
+   "hour": 0.0035218179828326174,
+   "share": 0.00240919478372591,
+   "examplesHour": 0.024892243881054568,
+   "callSpend": 0.02894700354996934,
+   "lobby": 1.588951725,
+   "savedTokens": -308.41385652973634,
+   "savedPerCall": -0.00012185836909871242,
+   "genesisSaved": -0.001131975,
+   "savedHour": -0.006153847639484978
+  },
+  "Google, dall’1/12": {
+   "perCall": 0.00011065830778663397,
+   "tokensCut": 190.48681790312688,
+   "genesis": 0.0007205650000000002,
+   "hour": 0.005588244543225015,
+   "share": 0.002079307577914099,
+   "examplesHour": 0.04051322403433476,
+   "callSpend": 0.053218825806253825,
+   "lobby": 2.7463517250000002,
+   "savedTokens": -308.41385652973634,
+   "savedPerCall": -0.00019012633966891473,
+   "genesisSaved": -0.001131975,
+   "savedHour": -0.009601380153280194
+  },
+  "OpenRouter, dall’1/12": {
+   "perCall": 0.00011065830778663397,
+   "tokensCut": 190.48681790312688,
+   "genesis": 0.0007205650000000002,
+   "hour": 0.005588244543225015,
+   "share": 0.002079307577914099,
+   "examplesHour": 0.04051322403433476,
+   "callSpend": 0.053218825806253825,
+   "lobby": 2.7463517250000002,
+   "savedTokens": -308.41385652973634,
+   "savedPerCall": -0.00019012633966891473,
+   "genesisSaved": -0.001131975,
+   "savedHour": -0.009601380153280194
+  }
+ },
+ "examples": {
+  "chosen": {
+   "prima": {
+    "seme": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "masso-muschioso"
+      ],
+      "tokens": 1394
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "cespuglio-con-bacche"
+      ],
+      "tokens": 1226
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "quercia"
+      ],
+      "tokens": 2229
+     },
+     "object": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-tinted": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-worn": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "furniture": {
+      "ids": [
+       "barile",
+       "falo"
+      ],
+      "tokens": 2340
+     },
+     "person": {
+      "ids": [
+       "viandante",
+       "contadina"
+      ],
+      "tokens": 5308
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "viandante"
+      ],
+      "tokens": 3659
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "corona-totem"
+      ],
+      "tokens": 6682
+     },
+     "building": {
+      "ids": [
+       "pozzo",
+       "building"
+      ],
+      "tokens": 4379
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "fattoria"
+      ],
+      "tokens": 6317
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [
+       "vessel",
+       "capsule"
+      ],
+      "tokens": 2014
+     }
+    },
+    "aurora": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "masso-muschioso"
+      ],
+      "tokens": 1394
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "cespuglio-con-bacche"
+      ],
+      "tokens": 1226
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "quercia"
+      ],
+      "tokens": 2229
+     },
+     "object": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 509
+     },
+     "object-tinted": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 509
+     },
+     "object-worn": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 509
+     },
+     "furniture": {
+      "ids": [
+       "barile",
+       "falo"
+      ],
+      "tokens": 2340
+     },
+     "person": {
+      "ids": [
+       "viandante",
+       "person"
+      ],
+      "tokens": 3723
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "viandante"
+      ],
+      "tokens": 3659
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "corona-totem"
+      ],
+      "tokens": 6682
+     },
+     "building": {
+      "ids": [
+       "building",
+       "pozzo (6)"
+      ],
+      "tokens": 3376
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "fattoria"
+      ],
+      "tokens": 6317
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "mesa": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "masso-muschioso"
+      ],
+      "tokens": 1394
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "cespuglio-con-bacche"
+      ],
+      "tokens": 1226
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "quercia"
+      ],
+      "tokens": 2229
+     },
+     "object": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-tinted": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-worn": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "furniture": {
+      "ids": [
+       "barile",
+       "falo"
+      ],
+      "tokens": 2340
+     },
+     "person": {
+      "ids": [
+       "viandante",
+       "contadina"
+      ],
+      "tokens": 5308
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "npc-fumo (5)"
+      ],
+      "tokens": 2796
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "corona-totem"
+      ],
+      "tokens": 6682
+     },
+     "building": {
+      "ids": [
+       "pozzo",
+       "building"
+      ],
+      "tokens": 4379
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "fattoria"
+      ],
+      "tokens": 6317
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "neapolis": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "masso-muschioso"
+      ],
+      "tokens": 1394
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "cespuglio-con-bacche"
+      ],
+      "tokens": 1226
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "quercia"
+      ],
+      "tokens": 2229
+     },
+     "object": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-tinted": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-worn": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "furniture": {
+      "ids": [
+       "barile",
+       "falo"
+      ],
+      "tokens": 2340
+     },
+     "person": {
+      "ids": [
+       "viandante",
+       "contadina"
+      ],
+      "tokens": 5308
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "viandante"
+      ],
+      "tokens": 3659
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "lampione"
+      ],
+      "tokens": 1661
+     },
+     "building": {
+      "ids": [
+       "pozzo",
+       "building"
+      ],
+      "tokens": 4379
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "fattoria"
+      ],
+      "tokens": 6317
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "orichalcum": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "masso-muschioso"
+      ],
+      "tokens": 1394
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "cespuglio-con-bacche"
+      ],
+      "tokens": 1226
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "quercia"
+      ],
+      "tokens": 2229
+     },
+     "object": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-tinted": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "object-worn": {
+      "ids": [
+       "object",
+       "forbici"
+      ],
+      "tokens": 933
+     },
+     "furniture": {
+      "ids": [
+       "barile",
+       "falo"
+      ],
+      "tokens": 2340
+     },
+     "person": {
+      "ids": [
+       "viandante",
+       "contadina"
+      ],
+      "tokens": 5308
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "viandante"
+      ],
+      "tokens": 3659
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "telegrafo-pneumatico"
+      ],
+      "tokens": 3660
+     },
+     "building": {
+      "ids": [
+       "pozzo",
+       "building"
+      ],
+      "tokens": 4379
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "fattoria"
+      ],
+      "tokens": 6317
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "sidera": {
+     "pebble": {
+      "ids": [
+       "pebble",
+       "rock"
+      ],
+      "tokens": 1346
+     },
+     "rock": {
+      "ids": [
+       "rock",
+       "sidera-cristallo"
+      ],
+      "tokens": 1994
+     },
+     "bush": {
+      "ids": [
+       "bush",
+       "sidera-felce-spirale"
+      ],
+      "tokens": 1999
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "sidera-albero-vetro"
+      ],
+      "tokens": 2574
+     },
+     "object": {
+      "ids": [
+       "circuito-3D",
+       "corona-drone"
+      ],
+      "tokens": 10351
+     },
+     "object-tinted": {
+      "ids": [
+       "circuito-3D",
+       "corona-drone"
+      ],
+      "tokens": 10351
+     },
+     "object-worn": {
+      "ids": [
+       "circuito-3D",
+       "corona-drone"
+      ],
+      "tokens": 10351
+     },
+     "furniture": {
+      "ids": [
+       "corona-lampione",
+       "furniture"
+      ],
+      "tokens": 12636
+     },
+     "person": {
+      "ids": [
+       "corona-gerboa-musician",
+       "person"
+      ],
+      "tokens": 6789
+     },
+     "animal": {
+      "ids": [
+       "animal",
+       "corona-gerboa-musician"
+      ],
+      "tokens": 6725
+     },
+     "beast": {
+      "ids": [
+       "beast",
+       "animal"
+      ],
+      "tokens": 4022
+     },
+     "monument": {
+      "ids": [
+       "monument",
+       "sidera-camera-equilibrio"
+      ],
+      "tokens": 2871
+     },
+     "building": {
+      "ids": [
+       "building",
+       "sidera-cupola"
+      ],
+      "tokens": 4254
+     },
+     "structure-medium": {
+      "ids": [
+       "structure",
+       "part-stair"
+      ],
+      "tokens": 5484
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    }
+   },
+   "dopo": {
+    "seme": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree"
+      ],
+      "tokens": 1004
+     },
+     "object": {
+      "ids": [
+       "forbici"
+      ],
+      "tokens": 294
+     },
+     "object-tinted": {
+      "ids": [
+       "forbici"
+      ],
+      "tokens": 294
+     },
+     "object-worn": {
+      "ids": [
+       "forbici"
+      ],
+      "tokens": 294
+     },
+     "furniture": {
+      "ids": [
+       "furniture"
+      ],
+      "tokens": 1246
+     },
+     "person": {
+      "ids": [
+       "person"
+      ],
+      "tokens": 1322
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-medium": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [
+       "vessel"
+      ],
+      "tokens": 1071
+     }
+    },
+    "aurora": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree"
+      ],
+      "tokens": 1004
+     },
+     "object": {
+      "ids": [
+       "object"
+      ],
+      "tokens": 224
+     },
+     "object-tinted": {
+      "ids": [
+       "object"
+      ],
+      "tokens": 224
+     },
+     "object-worn": {
+      "ids": [
+       "object"
+      ],
+      "tokens": 224
+     },
+     "furniture": {
+      "ids": [
+       "furniture",
+       "letto (7)"
+      ],
+      "tokens": 2090
+     },
+     "person": {
+      "ids": [
+       "person",
+       "contadina (6)"
+      ],
+      "tokens": 2770
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building",
+       "pozzo (6)"
+      ],
+      "tokens": 3376
+     },
+     "structure-medium": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "mesa": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree",
+       "terreno-cactus-fitti (6)"
+      ],
+      "tokens": 2917
+     },
+     "object": {
+      "ids": [
+       "forbici",
+       "shape-tool (7)"
+      ],
+      "tokens": 732
+     },
+     "object-tinted": {
+      "ids": [
+       "forbici",
+       "shape-tool (7)"
+      ],
+      "tokens": 732
+     },
+     "object-worn": {
+      "ids": [
+       "forbici"
+      ],
+      "tokens": 294
+     },
+     "furniture": {
+      "ids": [
+       "furniture",
+       "obj-branda-da-ferroviere (6)"
+      ],
+      "tokens": 2390
+     },
+     "person": {
+      "ids": [
+       "person",
+       "npc-cestaia (6)"
+      ],
+      "tokens": 3518
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-medium": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "neapolis": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree"
+      ],
+      "tokens": 1004
+     },
+     "object": {
+      "ids": [
+       "forbici",
+       "shape-blade (7)"
+      ],
+      "tokens": 755
+     },
+     "object-tinted": {
+      "ids": [
+       "forbici",
+       "shape-blade (7)"
+      ],
+      "tokens": 755
+     },
+     "object-worn": {
+      "ids": [
+       "forbici"
+      ],
+      "tokens": 294
+     },
+     "furniture": {
+      "ids": [
+       "furniture",
+       "banco-officina (6)"
+      ],
+      "tokens": 2412
+     },
+     "person": {
+      "ids": [
+       "person",
+       "neapolis-cittadino (6)"
+      ],
+      "tokens": 2417
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-medium": {
+      "ids": [
+       "building",
+       "struttura-bistrot-medium (7)"
+      ],
+      "tokens": 6733
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "orichalcum": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree"
+      ],
+      "tokens": 1004
+     },
+     "object": {
+      "ids": [
+       "chiave-inglese",
+       "shape-bottle (7)"
+      ],
+      "tokens": 1656
+     },
+     "object-tinted": {
+      "ids": [
+       "chiave-inglese",
+       "shape-bottle (7)"
+      ],
+      "tokens": 1656
+     },
+     "object-worn": {
+      "ids": [
+       "chiave-inglese"
+      ],
+      "tokens": 1228
+     },
+     "furniture": {
+      "ids": [
+       "furniture",
+       "valvola-manometro (6)"
+      ],
+      "tokens": 2143
+     },
+     "person": {
+      "ids": [
+       "person",
+       "npc-fuochista (6)"
+      ],
+      "tokens": 3412
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building",
+       "caldaia-vapore (7)"
+      ],
+      "tokens": 3515
+     },
+     "structure-medium": {
+      "ids": [
+       "building",
+       "obj-argano-a-vapore-d-ormegg (6)"
+      ],
+      "tokens": 7164
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    },
+    "sidera": {
+     "pebble": {
+      "ids": [
+       "pebble"
+      ],
+      "tokens": 637
+     },
+     "rock": {
+      "ids": [
+       "rock"
+      ],
+      "tokens": 718
+     },
+     "bush": {
+      "ids": [
+       "bush"
+      ],
+      "tokens": 608
+     },
+     "tree": {
+      "ids": [
+       "tree"
+      ],
+      "tokens": 1004
+     },
+     "object": {
+      "ids": [
+       "sidera-drone",
+       "shape-blade (6)"
+      ],
+      "tokens": 1821
+     },
+     "object-tinted": {
+      "ids": [
+       "sidera-drone",
+       "shape-blade (6)"
+      ],
+      "tokens": 1821
+     },
+     "object-worn": {
+      "ids": [
+       "sidera-drone"
+      ],
+      "tokens": 1198
+     },
+     "furniture": {
+      "ids": [
+       "furniture",
+       "sidera-estrattore-plasma (6)"
+      ],
+      "tokens": 2465
+     },
+     "person": {
+      "ids": [
+       "person",
+       "sidera-colono (6)"
+      ],
+      "tokens": 2334
+     },
+     "animal": {
+      "ids": [
+       "animal"
+      ],
+      "tokens": 1258
+     },
+     "beast": {
+      "ids": [
+       "beast"
+      ],
+      "tokens": 2773
+     },
+     "monument": {
+      "ids": [
+       "monument"
+      ],
+      "tokens": 1261
+     },
+     "building": {
+      "ids": [
+       "building",
+       "casa-comune-building-052c7ac8 (6)"
+      ],
+      "tokens": 3914
+     },
+     "structure-medium": {
+      "ids": [
+       "building"
+      ],
+      "tokens": 2125
+     },
+     "structure-large": {
+      "ids": [],
+      "tokens": 0
+     },
+     "structure-fort": {
+      "ids": [],
+      "tokens": 0
+     },
+     "vessel": {
+      "ids": [],
+      "tokens": 0
+     }
+    }
+   }
+  },
+  "hours": {
+   "Google, oggi": {
+    "seme": {
+     "prima": 0.07456461637952176,
+     "dopo": 0.024892243881054568
+    },
+    "aurora": {
+     "prima": 0.060044800337216424,
+     "dopo": 0.040664653439607595
+    },
+    "mesa": {
+     "prima": 0.07450449475168608,
+     "dopo": 0.0387290463396689
+    },
+    "neapolis": {
+     "prima": 0.06373504897915389,
+     "dopo": 0.03468601355303494
+    },
+    "orichalcum": {
+     "prima": 0.06804660150521151,
+     "dopo": 0.04872720973022685
+    },
+    "sidera": {
+     "prima": 0.1001773794604537,
+     "dopo": 0.04400644496014714
+    }
+   },
+   "tokens": {
+    "seme": {
+     "prima": 2528.0055180870627,
+     "dopo": 936.319435928878
+    },
+    "aurora": {
+     "prima": 2083.7381974248924,
+     "dopo": 1490.8154506437766
+    },
+    "mesa": {
+     "prima": 2526.4181483752295,
+     "dopo": 1646.122011036174
+    },
+    "neapolis": {
+     "prima": 2278.648681790312,
+     "dopo": 1514.077253218884
+    },
+    "orichalcum": {
+     "prima": 2377.9245861434697,
+     "dopo": 1972.2636419374612
+    },
+    "sidera": {
+     "prima": 7160.515634580011,
+     "dopo": 1943.1968117719186
+    }
+   },
+   "Google, dall’1/12": {
+    "seme": {
+     "prima": 0.11633634128448803,
+     "dopo": 0.04051322403433476
+    },
+    "aurora": {
+     "prima": 0.09612778105456773,
+     "dopo": 0.06338096657265481
+    },
+    "mesa": {
+     "prima": 0.11627621965665233,
+     "dopo": 0.05435002649294911
+    },
+    "neapolis": {
+     "prima": 0.09467720648375229,
+     "dopo": 0.052147509708767616
+    },
+    "orichalcum": {
+     "prima": 0.10330031153586755,
+     "dopo": 0.07424455815450642
+    },
+    "sidera": {
+     "prima": 0.13268765020846104,
+     "dopo": 0.0697741482955242
+    }
+   },
+   "OpenRouter, dall’1/12": {
+    "seme": {
+     "prima": 0.11633634128448803,
+     "dopo": 0.04051322403433476
+    },
+    "aurora": {
+     "prima": 0.09612778105456773,
+     "dopo": 0.06338096657265481
+    },
+    "mesa": {
+     "prima": 0.11627621965665233,
+     "dopo": 0.05435002649294911
+    },
+    "neapolis": {
+     "prima": 0.09467720648375229,
+     "dopo": 0.052147509708767616
+    },
+    "orichalcum": {
+     "prima": 0.10330031153586755,
+     "dopo": 0.07424455815450642
+    },
+    "sidera": {
+     "prima": 0.13268765020846104,
+     "dopo": 0.0697741482955242
+    }
+   }
+  }
+ },
+ "fewShot": {
+  "il forte dell’autore, intero (forte-handmade.xml)": 10354,
+  "il forte: il ciclo che allarga il mastio (<markov> con l’uscita z)": 131,
+  "il forte: il cortile a bracci che si fermano a caso (il primo <markov>)": 118,
+  "il forte: i piani del mastio, uno dopo l’altro finché il 50 % lo ferma": 1125,
+  "il forte: le viste in testo (forte-v1-viste.txt)": 2894,
+  "riferimento del banco: forte.xml": 9652,
+  "riferimento del banco: palazzina.xml": 10283,
+  "riferimento del banco: tempio.xml": 6453,
+  "riferimento del banco: cantiere.xml": 3758,
+  "riferimento del banco: cantina.xml": 4503,
+  "la villetta offline (MOCK_STRUCTURE_PROGRAM)": 4441,
+  "parte del seme: part-battlements.xml": 743,
+  "parte del seme: part-cellar.xml": 4408,
+  "parte del seme: part-door.xml": 707,
+  "parte del seme: part-slits.xml": 817,
+  "parte del seme: part-stair.xml": 2797
+ }
+}

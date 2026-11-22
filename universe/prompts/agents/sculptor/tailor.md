@@ -17,6 +17,17 @@ and `o` go back to the body, `r` and `m` to air. Never use z, o, r, m as letters
 the air in front of it, `[rm]z` and `z[rm]` the air at its sides. Keep the face free; let a cloak fall (`M [rm]` → `M M`). A helmet:
 `<worn zone="head"><all><rule in="[rm] z" out="I z"/><rule in="[rm]/z" out="I/z"/><rule in="[rm]z" out="Iz"/><rule in="z[rm]" out="zI"/></all><all in="I [rmoB]" out="G *"/></worn>`
 
+## Every body
+<!-- the tailor's craft (T470, S4 of T458 § 2.1): the zones on every body, the order, what shows where the section does not run -->
+- The air of a zone: over and round the head 3 voxels, round the torso 2, behind the back 3 deep and 2 wider on each side, from the
+  ground to over the shoulders (on all fours, along the back). A brim, a crest, a cloak keep inside it.
+- The same section dresses the wanderer and the people of the world, of every size and shape: find the places by the zone's
+  patterns, never by counts or coordinates.
+- Things go on from the outside in (the back, the torso, the head): a later one never covers an earlier one.
+- Where the section does not run, the zone wears the thing's two main colours, the letter with the most voxels and the most used one
+  that reads apart from it: let them be the cloth and its trim.
+- The program is the thing as it lies on the ground and in the bag: a hat upright, a cloak folded, a pack standing.
+
 ## The colour of the thing
 If the request says so, the model serves many things of the same kind (bottles, sacks, fruits):
 use the letter C for the main colour, the game recolours it for each thing; the rest (cork, string,

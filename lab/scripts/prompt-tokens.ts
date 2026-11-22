@@ -465,15 +465,21 @@ async function sculptorSpecialties(): Promise<void> {
     if (!key) return Math.round(text.length / 3.5);
     const seen = counted.get(text);
     if (seen !== undefined) return seen;
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:countTokens', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }] }),
-    });
-    const j = (await res.json()) as { totalTokens?: number };
-    if (!res.ok || typeof j.totalTokens !== 'number') throw new Error(`countTokens ${res.status}`);
-    counted.set(text, j.totalTokens);
-    return j.totalTokens;
+    // A busy server (429, 5xx) answers again after a while (T470): a few tries, a little longer each time; any other answer is an error.
+    for (let attempt = 0; ; attempt++) {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:countTokens', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }] }),
+      });
+      const j = (await res.json().catch(() => ({}))) as { totalTokens?: number };
+      if (res.ok && typeof j.totalTokens === 'number') {
+        counted.set(text, j.totalTokens);
+        return j.totalTokens;
+      }
+      if (attempt >= 4 || !(res.status === 429 || res.status >= 500)) throw new Error(`countTokens ${res.status}`);
+      await new Promise((ok) => setTimeout(ok, 2000 * (attempt + 1)));
+    }
   };
 
   const recorded: Recorded[] = [];
@@ -548,6 +554,8 @@ async function sculptorSpecialties(): Promise<void> {
     id: string;
     text: string;
   }
+  /** A whole item of a list that starts with these words, on all its lines: up to the next item, a blank line or the end. */
+  const bullet = (id: string, start: string): [string, RegExp] => [id, new RegExp(`^- ${start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?(?=\\n- |\\n\\n|(?![\\s\\S]))`, 'm')];
   /** A role or a section cut at its titles, and inside some of them the lines that serve one kind of request only. */
   const cut = (role: string): Part[] => {
     const out: Part[] = [];
@@ -584,6 +592,13 @@ async function sculptorSpecialties(): Promise<void> {
       else if (title.startsWith('Traps')) take('traps', s, []);
       else if (title.startsWith('Worn')) take('worn', s, []);
       else if (title.startsWith('Vessels')) take('vessels', s, []);
+      // The crafts of T470 (S4): inside some of them the lines that serve some classes of the trade only.
+      else if (title.startsWith('Growing like nature')) take('craft:landscaper', s, [bullet('craft.wind', 'Trees and bushes bend')]);
+      else if (title.startsWith('What the world does')) take('craft:joiner', s, [bullet('craft.opening', 'Opening:'), bullet('craft.shelves', 'Putting down:'), bullet('craft.carrying', 'Carrying:'), bullet('craft.holding', 'Holding:')]);
+      else if (title.startsWith('Every body')) take('craft:tailor', s, []);
+      else if (title.startsWith('How the kernel moves')) take('craft:figurist', s, [bullet('craft.fours', 'On all fours:'), bullet('craft.hand', 'The hand is')]);
+      else if (title.startsWith('Building in one box')) take('craft:mason', s, [bullet('craft.door', 'A door one goes through'), bullet('craft.windows', 'Windows are marks'), bullet('craft.roofs', 'Roofs:'), bullet('craft.monument', 'A monument stands')]);
+      else if (title.startsWith('Building a hull')) take('craft:coachbuilder', s, []);
       else take(`other:${title}`, s, []);
     }
     return out;
@@ -603,7 +618,8 @@ async function sculptorSpecialties(): Promise<void> {
     const cls = classOf(c.req.classe)!;
     const figure = ['person', 'animal', 'beast'].includes(cls.id);
     if (c.spec === 'architect') return true;
-    if (c.spec === 'actions') return ['intro', 'coordinates', 'program', 'patterns', 'nodes', 'traps', 'look.children'].includes(part);
+    // An action writes `<action>`s: of its trade's section it uses the lines on opening and shutting (T470).
+    if (c.spec === 'actions') return ['intro', 'coordinates', 'program', 'patterns', 'nodes', 'traps', 'look.children', 'craft.opening'].includes(part);
     if (part === 'palette.colours' || part.startsWith('trade:') || part === 'trade') return true;
     if (part === 'look.files') return resources.length > 0;
     if (part.startsWith('class:')) return part === `class:${cls.id}`;
@@ -614,6 +630,16 @@ async function sculptorSpecialties(): Promise<void> {
     if (part === 'showcase') return examples.some((x) => SHOWCASE.some((id) => x.includes(id)));
     if (part === 'worn') return !!c.req.worn;
     if (part === 'vessels') return isVessel(cls);
+    // The lines of the crafts of T470 that serve some classes of their trade only: the wind the plants, opening, putting down and
+    // carrying the furniture, holding the objects; four legs the animals and the beasts, the hand who has hands; doors, windows and
+    // roofs what one enters, the base of a monument the monuments.
+    if (part === 'craft.wind') return cls.id === 'tree' || cls.id === 'bush';
+    if (part === 'craft.opening' || part === 'craft.shelves' || part === 'craft.carrying') return cls.id === 'furniture';
+    if (part === 'craft.holding') return cls.id === 'object';
+    if (part === 'craft.fours') return cls.id === 'animal' || cls.id === 'beast';
+    if (part === 'craft.hand') return cls.id === 'person' || cls.id === 'beast';
+    if (part === 'craft.door' || part === 'craft.windows' || part === 'craft.roofs') return cls.id === 'building' || cls.id === 'structure';
+    if (part === 'craft.monument') return cls.id === 'monument';
     return true;
   };
 
@@ -693,7 +719,7 @@ async function sculptorSpecialties(): Promise<void> {
     });
   }
   // The measure of before (`--prima`, a --json of this mode before T468): the system each request had then.
-  const prima = opt('prima') ? (JSON.parse(fs.readFileSync(path.resolve(opt('prima')!), 'utf8')) as { rows: Array<{ key: string; system: number; role: number }> }) : undefined;
+  const prima = opt('prima') ? (JSON.parse(fs.readFileSync(path.resolve(opt('prima')!), 'utf8')) as { rows: Array<{ key: string; system: number; role: number; section?: number }> }) : undefined;
   const before = new Map((prima?.rows ?? []).map((x) => [x.key, x]));
 
   // The share of the Sculptor's work: the real universes (or `--universi`), each kind by its calls (two programs for a simple thing,
@@ -899,13 +925,14 @@ async function sculptorSpecialties(): Promise<void> {
     json.examples = { chosen, hours };
   }
 
-  // The trades (T468): what each reads now (its role and its section) against the role of before, and what of it its requests do not use.
-  out.push('', '### Le specialità: ciò che leggono', '', `| specialità | richieste | ruolo e sezione | di cui non serve (la richiesta che ne usa meno) |${prima ? ' ruolo di prima | differenza |' : ''}`, `|---|---|---:|---:|${prima ? '---:|---:|' : ''}`);
+  // The trades (T468): what each reads now (its role and its section) against what it read before, and what of it its requests do not use.
+  out.push('', '### Le specialità: ciò che leggono', '', `| specialità | richieste | ruolo e sezione | di cui non serve (la richiesta che ne usa meno) |${prima ? ' ruolo e sezione di prima | differenza |' : ''}`, `|---|---|---:|---:|${prima ? '---:|---:|' : ''}`);
   for (const spec of [...new Set(rows.map((x) => x.c.spec))]) {
     const of = rows.filter((x) => x.c.spec === spec);
     const reads = Math.max(...of.map((x) => x.role + x.section));
     const unused = Math.max(...of.map((x) => x.waste));
-    const then = Math.max(0, ...of.map((x) => before.get(x.c.key)?.role ?? 0));
+    // What the same requests read before: the role and, since T468, the section (a measure of before T468 has the whole prompt as its role).
+    const then = Math.max(0, ...of.map((x) => (before.get(x.c.key)?.role ?? 0) + (before.get(x.c.key)?.section ?? 0)));
     out.push(`| ${spec} (${S.SPECIALTY_NAMES[spec as keyof typeof S.SPECIALTY_NAMES]}) | ${of.map((x) => x.c.key).join(', ')} | ${fmt(reads)} | ${fmt(unused)} |${prima ? ` ${then ? fmt(then) : '—'} | ${then ? `${reads - then > 0 ? '+' : ''}${fmt(reads - then)}` : '—'} |` : ''}`);
   }
 
@@ -944,7 +971,7 @@ async function sculptorSpecialties(): Promise<void> {
   console.log(out.join('\n'));
   if (opt('json')) fs.writeFileSync(path.resolve(opt('json')!), JSON.stringify(json, null, 1) + '\n');
   const head = [
-    '# Il prompt dello Scultore, richiesta per richiesta (T458, T468)',
+    '# Il prompt dello Scultore, richiesta per richiesta (T458, S1-S4)',
     '',
     `Scritto da \`npx vite-node lab/scripts/prompt-tokens.ts -- ${argv.join(' ')}\` il ${new Date().toISOString().slice(0, 10)}, kernel ${(await import('../../src/kernel/version')).KERNEL_VERSION}: nessuna chiamata ai modelli (\`countTokens\` è gratis). Lo studio è [\`../scultori-specializzati.md\`](../scultori-specializzati.md).`,
     '',

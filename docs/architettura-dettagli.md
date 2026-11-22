@@ -1239,6 +1239,29 @@ pacchetto di oggetti → cast (5 npc diversi, 5 oggetti/mobili, 2 strumenti) →
   margine 24 dà la griglia intera a Gargantuesca, col 12 la scala si spezza. **Per l'autore**: «Come si usa `<pieces>`» in
   `lab/banco/pezzi/README.md`, i tre `<pieces>` del suo forte esaminati da `lab/scripts/pezzi-forte-autore.ts`. La misura del prompt:
   `docs/design/scultori-specializzati/misure-s3.md`.
+- **Le sezioni dei mestieri** (T470, S4 dello studio T458 § 2.1; solo i prompt del seme, il kernel non cambia): ogni sezione ha, sotto un
+  titolo suo, ciò che il kernel fa delle cose del suo mestiere, letto nel codice. Il Paesaggista «Growing like nature»: il seme che sceglie le
+  misure (un segno nascosto per ogni misura possibile, `<one … steps="1">` ne prende una), le famiglie di forma, il vento che piega per
+  altezza col quarto più basso fermo (`sway` di `meshVoxels`) senza `<animation>`, il piede. Il Mobiliere «What the world does with them»:
+  aprire e chiudere con `open` e `close` e un segno nascosto dove va il coperchio aperto, il menu che offre solo l'azione che cambia il modello
+  ora (`modelActions`; l'etichetta dice la parte, «Apri» è già del contenitore); posare su una faccia piana a una sola altezza (`findSpot`);
+  portare sopra la testa (`overheadPose`); impugnare dalla forma (`gripOf`: la parte che non brilla, poi il legno, poi quella con meno voxel,
+  il largo nel mezzo, ciò che è raccolto appeso per la cima). Il Sarto «Every body»: l'aria di ogni zona (`REACH`, `reachOf`), la stessa sezione
+  sul viandante e sugli individui di ogni taglia, l'ordine dal fuori al dentro (`DRESSING_ORDER`), i due colori della via C (`mainColors`), il
+  programma come la cosa posata. Il Figurinista «How the kernel moves a figure»: un arto è un pezzo delle lettere di una parte (a 26 vicini), i
+  perni, il passo, le quattro zampe in coppie diagonali, la testa che dice il collo, le mani di `handsOf` (la destra a x piccola, niente
+  `part="arm"` niente in mano). Il Capomastro «Building in one box»: decidere in grande e rifinire in piccolo, la scatola della classe
+  (ADR-0219), la porta alla misura del corpo con `open` e `close`, il basamento, le finestre come segni, i tetti, i materiali, i monumenti. Il
+  Carrozziere «Building a hull»: lo scafo come massa svuotata, i buchi sopra la linea di galleggiamento perché uno nello strato sotto allaga
+  lo scafo (`measureVessel`), l'orlo, alberi e vele, il ponte da un capo all'altro. Le ruote e gli assi, il portello e il ponte di una capsula
+  aspettano che quei veicoli abbiano una classe e i loro controlli («un'astronave dello Scultore» di ADR-0234); le radici verso l'acqua no,
+  nella scatola di un modello l'acqua non c'è. `tests/sculptor-trades.test.ts`: ogni richiesta porta il testo del suo mestiere e nessun altro
+  (un'azione quello del mestiere del suo modello), nucleo e sezione stanno nei token del § 2.2 (a 3,3 caratteri a token), e ciò che le sezioni
+  dicono del kernel è vero (il vento, il coperchio del prompt che si apre e si chiude a turno, il ripiano, la presa, l'aria delle zone e i due
+  colori, il rig e le mani, la porta e il corpo, lo scafo allagato). `prompt-tokens.ts -- --scultore` divide anche le righe dei mestieri che
+  servono a qualche classe sola. La misura (`docs/design/scultori-specializzati/misure-s4.md`): le sezioni da 571 a 865 token, nucleo e sezione
+  da 3 596 a 3 890 (il § 2.2 diceva 3 650-4 000), +308 token a chiamata in media pesata, +0,006 $ l'ora oggi e +0,010 $ dall'1/12; con S2 e S3
+  l'ora dello Scultore costa 0,016 $ meno di prima di T468 oggi e 0,018 $ dall'1/12 (il § 2.2 diceva 0,016 e 0,021).
 - **Gli esempi dello Scultore** (T467, S1 dello studio T458 § 3.2, kernel 0.10.15): in fondo al sistema di ogni richiesta che non cresce a
   regole («## Examples (programs of the library)», dopo il nucleo, i principi, la «Lingua», la guida di stile e, dal T468, la sezione del
   mestiere) al più due programmi della libreria,

@@ -17,3 +17,14 @@ its deck goes with it. Its box is long: the bow toward large y, the stern toward
 - Sails that come and go are `<action>`s: `furl` («Ammaina le vele») turns the sail into a hidden letter, `hoist` («Issa le vele») back.
 - Cabins are rooms under a deck or a poop: a ceiling over them, a door to the deck. A small boat is simple; a galleon has more: a forecastle
   and a sterncastle, two or three masts, gunports, a figurehead at the bow.
+
+## Building a hull
+<!-- the coachbuilder's craft (T470, S4 of T458 § 2.1): how a hull is built so that it floats and reads; wheels and a capsule's hatch wait for their class (ADR-0234) -->
+- A mass first, then hollowed: the lower half of an egg as long and wide as the box, or layers that widen from the keel up; a hidden
+  letter a voxel or two inside the skin, cleared over the deck; the stern cut flat and shut by a transom, the bow finer than the stern.
+- Gunports, oar holes and windows go above the waterline: a hole in the layer under it floods the hull, and the deck no longer stands
+  over it.
+- The sheer, the top edge of the sides, rises toward the bow and the stern; planks and wales are marks along the hull, not steps in it.
+- Masts 2 × 2 voxels, a sail a skin of one voxel on its yard, rigging in lines of one voxel down to the rail; a bowsprit and a
+  figurehead at the bow, the rudder at the stern under the transom.
+- One deck one walks from end to end: the poop and the forecastle up a stair, a step at a time; nothing across it lower than the head.
