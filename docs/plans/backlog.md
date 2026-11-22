@@ -6536,7 +6536,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — lobby e pannello in gioco offline: la stima e il consumo si vedono e hanno senso.
 - Quando è fatto: stima corretta e confrontata, consumo in vista, test; AGENTS.md se cambia `#lobby`/`#costi`. Sicurezza: nessuna superficie nuova (ciò che esce ai client a elenco, regola 8f).
 
-### T497 · Paesaggista con la chioma attaccata, Mobiliere con `close` (D68.1) — `da fare`
+### T497 · Paesaggista con la chioma attaccata, Mobiliere con `close` (D68.1) — `fatto` (`5ec1deea`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 44
 - Contesto: D68.1 approvata dall'autore il 22/11. Dalla prova pagata di T473 (`lab/banco/specialita/README.md`, `dossier T473`, `dossier T470`): il Paesaggista ora stacca la chioma dal tronco (6/11 scarti contro 2/10 prima, un castagno fallito); il Mobiliere ha `open` senza `close` nell'esempio, e i bauli restano aperti (`close` scritto 0/6).
@@ -6544,6 +6544,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: `tests/sculptor-trades.test.ts` aggiornato; i prompt nei tetti.
 - Browser: no.
 - Quando è fatto: prompt corretti, prova pagata con voti e costo nel README del banco. Sicurezza: nessuna superficie nuova.
+- Esito: Paesaggista: «The crown stays on its wood» (la chioma posa sul suo `at` sotto la cima del tronco, foglie solo dal legno, convoluzione solo da fuori); Mobiliere: `close` accanto a `open` nell'esempio; nei token del § 2.2 (margine 10 e 16 caratteri); nessun controllo nuovo (`analyse` scartava già la chioma che galleggia); `tests/sculptor-trades.test.ts` aggiornato (la chioma provata sul kernel, `open`/`close` presi dalla sezione); mini-prova pagata in `lab/banco/specialita/t497/` (solo il braccio «dopo», tre giri, Flash-Lite, 0,181 $ su 0,30): chioma che galleggia 2 scarti su 13 contro 6 su 11, bauli tenuti con `close` 2 su 3 contro 0 su 3 (risposte 9 su 10), castagni fatti 2 su 3 come prima, gli scarti ora per il tronco che non sale («troppo basso» 8 su 13), voti 6; risultati nel README del banco e nello studio; suite (3 897 passati) e typecheck verdi; kernel invariato, nessun ADR; non provati il passaggio al primo colpo con più di tre giri né un esempio per il tronco che sale (il tetto del § 2.2 è pieno); sicurezza: nessuna superficie nuova.
 
 ### T498 · Studio: `<markov>` e `<sequence>` nel nostro motore contro l'originale, dal forte dell'autore (D68.3) — `da fare`
 - Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 2

@@ -1,0 +1,137 @@
+{
+ "giro": "t497-3",
+ "braccio": "dopo",
+ "concetto": "baule",
+ "classe": "furniture",
+ "specialita": "joiner",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6415,
+   "cached": 4073,
+   "output": 679,
+   "thoughts": 2245,
+   "usd": 0.005073325,
+   "sistema": 19192,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 6,
+   "prompt": 2743,
+   "cached": 0,
+   "output": 103,
+   "thoughts": 302,
+   "usd": 0.0077595,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 11,
+   "prompt": 6415,
+   "cached": 4073,
+   "output": 661,
+   "thoughts": 3237,
+   "usd": 0.006534325,
+   "sistema": 19192,
+   "esito": "passa"
+  },
+  {
+   "n": 4,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 5,
+   "prompt": 2760,
+   "cached": 0,
+   "output": 114,
+   "thoughts": 298,
+   "usd": 0.007848,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 18333,
+  "cached": 8146,
+  "output": 1557,
+  "thoughts": 6082
+ },
+ "usd": 0.02722,
+ "usdGemini": 0.02722,
+ "secondi": 30,
+ "sistema": {
+  "caratteri": 19192,
+  "ruolo": 9839,
+  "sezione": 2355,
+  "esempi": [
+   "furniture"
+  ]
+ },
+ "registro": {
+  "joiner": 2
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 2034,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open",
+   "close"
+  ],
+  "import": [
+   "part-leaf"
+  ],
+  "nascoste": 10,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 7,
+  "semi": 0.081
+ }
+}

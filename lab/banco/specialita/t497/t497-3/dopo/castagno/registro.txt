@@ -1,0 +1,7 @@
+[sculptor] propone: «Castagno» (albero, Paesaggista, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 14 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 18 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 16 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: riga 28, <rule>: "in" è un solo simbolo (una lettera o # e un numero)
+[kernel → sculptor] scarta: «Castagno»: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)
+[artist → sculptor] obietta: «Castagno»: 6/10 — Il tronco è troppo sottile per essere un castagno dal tronco largo.

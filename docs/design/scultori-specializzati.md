@@ -512,6 +512,13 @@ proposte (la chioma attaccata, `close` nell'esempio del Mobiliere, la cache di G
 con la cantina) sono nel README del banco. Nel browser: i 48 programmi tenuti nel laboratorio 3D (il gruppo «Banco: le specialità dello
 Scultore»), la porta della casetta e il coperchio del baule provati.
 
+**T497** (D68.1, 22/11) ha corretto le prime due proposte: al Paesaggista la chioma che resta sul legno (una forma posa sul suo `at`, la
+base e non il mezzo: gli Scultori di T473 mettevano il segno della chioma a z 40-48 sopra un tronco di 20; le foglie solo accanto al
+legno o alle foglie; la convoluzione solo da fuori), al Mobiliere `close` scritto accanto a `open`, nei token del § 2.2. La mini-prova
+pagata (`lab/banco/specialita/t497/`, solo «dopo», tre giri, 0,18 $): chioma che galleggia 2 scarti su 13 (6 su 11 in T473), castagni
+fatti 2 su 3 come prima (gli scarti ora sono il tronco che non sale, 8 su 13: «troppo basso»); bauli tenuti con `close` 2 su 3 (0 su 3),
+risposte con `close` 9 su 10.
+
 ### 6.1 L'ADR proposto (da approvare)
 
 > **ADR-NNNN — Lo Scultore a specialità e le parti del mondo** (proposto da T458)

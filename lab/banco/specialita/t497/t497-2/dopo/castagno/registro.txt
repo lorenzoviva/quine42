@@ -1,0 +1,8 @@
+[sculptor] propone: «Castagno» (albero, Paesaggista, gemini-3.1-flash-lite)
+[kernel → sculptor] scarta: «Castagno»: il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 5 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 10 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: troppo basso: alto 2 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)
+[kernel → sculptor] scarta: «Castagno»: il modello è vuoto: nessun voxel visibile (i codici senza colore nella palette sono invisibili)
+[sculptor] errore: «Castagno»: nessun programma valido

@@ -1,0 +1,185 @@
+{
+ "giro": "t497-3",
+ "braccio": "dopo",
+ "concetto": "castagno",
+ "classe": "tree",
+ "specialita": "landscaper",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "troppo basso: alto 14 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "troppo basso: alto 18 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)",
+    "troppo basso: alto 16 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 3,
+   "motivi": [
+    "riga 28, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)",
+    "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 4,
+   "prompt": 5725,
+   "cached": 2035,
+   "output": 881,
+   "thoughts": 174,
+   "usd": 0.002555875,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 14 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 6656,
+   "cached": 4073,
+   "output": 932,
+   "thoughts": 1550,
+   "usd": 0.004470575,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 18 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 6708,
+   "cached": 4074,
+   "output": 867,
+   "thoughts": 2198,
+   "usd": 0.00535785,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 16 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5725,
+   "cached": 2035,
+   "output": 691,
+   "thoughts": 1696,
+   "usd": 0.004553875,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "riga 28, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 10,
+   "prompt": 6464,
+   "cached": 4073,
+   "output": 539,
+   "thoughts": 2845,
+   "usd": 0.005775575,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "il corpo principale galleggia: la parte più grande non tocca z=0 (ciò che la regge è staccato)"
+  },
+  {
+   "n": 6,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 6315,
+   "cached": 4072,
+   "output": 517,
+   "thoughts": 2500,
+   "usd": 0.0051880500000000005,
+   "sistema": 18499,
+   "esito": "passa"
+  },
+  {
+   "n": 7,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2758,
+   "cached": 0,
+   "output": 74,
+   "thoughts": 164,
+   "usd": 0.006279,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 40351,
+  "cached": 20362,
+  "output": 4501,
+  "thoughts": 11127
+ },
+ "usd": 0.03418,
+ "usdGemini": 0.03418,
+ "secondi": 52,
+ "sistema": {
+  "caratteri": 18499,
+  "ruolo": 9839,
+  "sezione": 2193,
+  "esempi": [
+   "tree"
+  ]
+ },
+ "registro": {
+  "landscaper": 6
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 6575,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 2,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 1,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 4,
+  "semi": 0.688
+ }
+}

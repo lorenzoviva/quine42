@@ -1,0 +1,169 @@
+{
+ "giro": "t497-1",
+ "braccio": "dopo",
+ "concetto": "baule",
+ "classe": "furniture",
+ "specialita": "joiner",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  4,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 3,
+   "motivi": [
+    "riga 35, <one>: \"in\" è scritto in due modi (l'attributo in e il figlio <in>): se ne usa uno solo",
+    "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+   ]
+  },
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6415,
+   "cached": 0,
+   "output": 733,
+   "thoughts": 2070,
+   "usd": 0.00580825,
+   "sistema": 19192,
+   "esito": "scartato",
+   "motivo": "riga 35, <one>: \"in\" è scritto in due modi (l'attributo in e il figlio <in>): se ne usa uno solo"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 7206,
+   "cached": 4075,
+   "output": 735,
+   "thoughts": 1937,
+   "usd": 0.004892625,
+   "sistema": 19192,
+   "esito": "scartato",
+   "motivo": "non tocca terra: il voxel più basso è a z=2, deve appoggiarsi a z=0"
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 10,
+   "prompt": 7196,
+   "cached": 4075,
+   "output": 730,
+   "thoughts": 3145,
+   "usd": 0.006694625,
+   "sistema": 19192,
+   "esito": "passa"
+  },
+  {
+   "n": 4,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 6,
+   "prompt": 2752,
+   "cached": 0,
+   "output": 128,
+   "thoughts": 333,
+   "usd": 0.008277,
+   "sistema": 6179,
+   "voto": 4
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6415,
+   "cached": 4073,
+   "output": 729,
+   "thoughts": 2182,
+   "usd": 0.005053825,
+   "sistema": 19192,
+   "esito": "passa"
+  },
+  {
+   "n": 6,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2743,
+   "cached": 0,
+   "output": 131,
+   "thoughts": 120,
+   "usd": 0.0063735,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 32727,
+  "cached": 12223,
+  "output": 3186,
+  "thoughts": 9787
+ },
+ "usd": 0.0371,
+ "usdGemini": 0.0371,
+ "secondi": 44,
+ "sistema": {
+  "caratteri": 19192,
+  "ruolo": 9839,
+  "sezione": 2355,
+  "esempi": [
+   "furniture"
+  ]
+ },
+ "registro": {
+  "joiner": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 1560,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open"
+  ],
+  "import": [
+   "part-leaf"
+  ],
+  "nascoste": 10,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 6,
+  "semi": 0.066
+ }
+}

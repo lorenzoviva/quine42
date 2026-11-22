@@ -1,0 +1,157 @@
+{
+ "giro": "t497-2",
+ "braccio": "dopo",
+ "concetto": "baule",
+ "classe": "furniture",
+ "specialita": "joiner",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": true,
+   "passa": true,
+   "chiamate": 1,
+   "motivi": []
+  },
+  {
+   "primoColpo": false,
+   "passa": false,
+   "chiamate": 3,
+   "motivi": [
+    "riga 19, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)",
+    "riga 16, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)",
+    "riga 19, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 6415,
+   "cached": 4073,
+   "output": 553,
+   "thoughts": 2175,
+   "usd": 0.004779325,
+   "sistema": 19192,
+   "esito": "passa"
+  },
+  {
+   "n": 2,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 5,
+   "prompt": 2724,
+   "cached": 0,
+   "output": 94,
+   "thoughts": 235,
+   "usd": 0.007047,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 3,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 6415,
+   "cached": 4073,
+   "output": 710,
+   "thoughts": 2130,
+   "usd": 0.004947325,
+   "sistema": 19192,
+   "esito": "scartato",
+   "motivo": "riga 19, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 7173,
+   "cached": 4075,
+   "output": 642,
+   "thoughts": 2821,
+   "usd": 0.006070875,
+   "sistema": 19192,
+   "esito": "scartato",
+   "motivo": "riga 16, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 9,
+   "prompt": 7105,
+   "cached": 4075,
+   "output": 648,
+   "thoughts": 2599,
+   "usd": 0.005729875,
+   "sistema": 19192,
+   "esito": "scartato",
+   "motivo": "riga 19, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  }
+ ],
+ "token": {
+  "prompt": 29832,
+  "cached": 16296,
+  "output": 2647,
+  "thoughts": 9960
+ },
+ "usd": 0.02857,
+ "usdGemini": 0.02857,
+ "secondi": 38,
+ "sistema": {
+  "caratteri": 19192,
+  "ruolo": 9839,
+  "sezione": 2355,
+  "esempi": [
+   "furniture"
+  ]
+ },
+ "registro": {
+  "joiner": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 2454,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 0,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [
+   "open",
+   "close"
+  ],
+  "import": [
+   "part-leaf"
+  ],
+  "nascoste": 10,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 4,
+  "semi": 0
+ }
+}

@@ -1,0 +1,166 @@
+{
+ "giro": "t497-1",
+ "braccio": "dopo",
+ "concetto": "castagno",
+ "classe": "tree",
+ "specialita": "landscaper",
+ "modello": "gemini-3.1-flash-lite",
+ "fatto": true,
+ "voto": 6,
+ "voti": [
+  6,
+  6
+ ],
+ "scritture": [
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "riga 25, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+   ]
+  },
+  {
+   "primoColpo": false,
+   "passa": true,
+   "chiamate": 2,
+   "motivi": [
+    "troppo basso: alto 39 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+   ]
+  }
+ ],
+ "chiamate": [
+  {
+   "n": 1,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5725,
+   "cached": 0,
+   "output": 560,
+   "thoughts": 1798,
+   "usd": 0.00496825,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "riga 25, <rule>: \"in\" è un solo simbolo (una lettera o # e un numero)"
+  },
+  {
+   "n": 2,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 6333,
+   "cached": 4072,
+   "output": 539,
+   "thoughts": 1591,
+   "usd": 0.00386205,
+   "sistema": 18499,
+   "esito": "passa"
+  },
+  {
+   "n": 3,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 4,
+   "prompt": 2758,
+   "cached": 0,
+   "output": 82,
+   "thoughts": 266,
+   "usd": 0.007269,
+   "sistema": 6179,
+   "voto": 6
+  },
+  {
+   "n": 4,
+   "compito": "model.sculpt",
+   "tipo": "primo",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 8,
+   "prompt": 5725,
+   "cached": 2035,
+   "output": 589,
+   "thoughts": 1900,
+   "usd": 0.004706875,
+   "sistema": 18499,
+   "esito": "scartato",
+   "motivo": "troppo basso: alto 39 voxel, la sua classe chiede almeno 48 (le cose simili hanno le stesse proporzioni)"
+  },
+  {
+   "n": 5,
+   "compito": "model.sculpt",
+   "tipo": "correzione",
+   "modello": "gemini-3.1-flash-lite",
+   "secondi": 7,
+   "prompt": 6364,
+   "cached": 4072,
+   "output": 609,
+   "thoughts": 1616,
+   "usd": 0.0040123,
+   "sistema": 18499,
+   "esito": "passa"
+  },
+  {
+   "n": 6,
+   "compito": "model.judge",
+   "tipo": "giudizio",
+   "modello": "gemini-3.5-flash",
+   "secondi": 5,
+   "prompt": 2762,
+   "cached": 0,
+   "output": 122,
+   "thoughts": 280,
+   "usd": 0.007761,
+   "sistema": 6179,
+   "voto": 6
+  }
+ ],
+ "token": {
+  "prompt": 29667,
+  "cached": 10179,
+  "output": 2501,
+  "thoughts": 7451
+ },
+ "usd": 0.03258,
+ "usdGemini": 0.03258,
+ "secondi": 39,
+ "sistema": {
+  "caratteri": 18499,
+  "ruolo": 9839,
+  "sezione": 2193,
+  "esempi": [
+   "tree"
+  ]
+ },
+ "registro": {
+  "landscaper": 4
+ },
+ "note": [],
+ "indicatori": {
+  "voxel": 9513,
+  "finisce": true,
+  "cicli": 0,
+  "markov": 0,
+  "convchain": 0,
+  "wfc": 0,
+  "map": 0,
+  "mapFrazionaria": 0,
+  "pieces": 0,
+  "field": 0,
+  "path": 0,
+  "convolution": 2,
+  "rotazioni": 0,
+  "animazioni": 0,
+  "azioni": [],
+  "import": [],
+  "nascoste": 2,
+  "traslucide": [],
+  "luci": 0,
+  "parti": [],
+  "aree": [],
+  "colori": 3,
+  "semi": 0.609
+ }
+}
