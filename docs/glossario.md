@@ -300,10 +300,16 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
-- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina, una capsula sul vuoto (T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227).
-- **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/kernel.ts`, `world/state.json → vehicles`
+- **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina, una capsula sul vuoto (T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227). Ciò che sembra un veicolo lo è: una cosa del mondo il cui nome dice un mezzo ha `vehicle`, che la Fucina scrive, il validatore dei moduli forgiati vuole e la riparazione dà ai moduli del Concilio di prima (T487, ADR-0244).
+- **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/vehicleclaim.ts`, `src/kernel/kernel.ts`, `world/state.json → vehicles`
 - **Da non usare**: `mezzo`, `nave` e `barca` (per la primitiva: sono ciò che il Concilio ne fa), `cavalcatura`
 - **Fermo**: `vehicle` nei manifest e come componente, `vehicles` in `world/state.json`, `medium` `water`/`land`/`void`, l'azione `board` («Sali a bordo», T448).
+
+### Ormeggio
+- **Inglese**: `berths`, `atBerth`, `leaveBerth`, `placeVehicle`, `vehicleSpot`
+- **Definizione**: il posto dove il piano di un luogo ha messo un veicolo (sull'acqua che lo porta, vicino a una riva). Finché nessuno lo muove il veicolo è del suo luogo: non si salva, se ne va col luogo e torna con lui; mosso, lascia l'ormeggio ed è di nessun luogo (T487, ADR-0244).
+- **Dove vive**: `src/kernel/vehicleclaim.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: `attracco` (è l'approdo della capsula, `dockOf`), `posto barca`, `banchina` (è un luogo)
 
 ### Capsula
 - **Inglese**: `CAPSULE` (`vehicle.capsule`), `CAPSULE_TILES`, `dockCapsules`, `idleCapsule`

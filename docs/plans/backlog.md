@@ -6429,6 +6429,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
   4. Una migrazione o una riparazione per gli universi esistenti: le entità generate che sono veicoli finti (come la chiatta di `orichalcum`) prendono `vehicle` dal kernel o restano decorazione dichiarata; prova su un clone di `orichalcum`.
 - Browser: sì — su un clone di `orichalcum` (offline va bene, e una chiamata vera alla Fucina se il tetto lo regge, ≤ 0,20 $): sali sulla chiatta, timone, muoviti.
 - Quando è fatto: una barca chiesta alla Fucina si guida; la chiatta di `orichalcum` si guida o non promette di farlo; test offline del riconoscimento, del validatore e della riparazione; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+- Esito: ? (senza riga)
 
 ### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `da fare`
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2

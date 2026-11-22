@@ -28,7 +28,8 @@ import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 import { strataErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
-import { vehicleSpecErrors } from './vehicle';
+import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
+import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
@@ -482,10 +483,13 @@ export class Validator {
     return [];
   }
 
-  /** A forged module: manifest shape, Lua that compiles, uses only the API and loads. */
-  validateForged(manifest: Manifest, logic: string, existingIds: Set<string>, opts: { system?: boolean } = {}): string[] {
+  /**
+   * A forged module: manifest shape, Lua that compiles, uses only the API and loads; and what looks like a vehicle is one (T487, ADR-0244:
+   * `media` what the world's vehicles move on, the void only in a world of the void).
+   */
+  validateForged(manifest: Manifest, logic: string, existingIds: Set<string>, opts: { system?: boolean; media?: readonly VehicleMedium[] } = {}): string[] {
     const path = `modules/${manifest.id}/manifest.json`;
-    const errors = [...this.parseManifest(path, JSON.stringify(manifest)).errors];
+    const errors = [...this.parseManifest(path, JSON.stringify(manifest)).errors, ...vehicleClaimErrors(manifest, opts.media).map((e) => `${path}: ${e}`)];
     if (existingIds.has(manifest.id)) errors.push(`id già esistente: ${manifest.id}`);
     // Systems only from the Forge of mechanics, and only with a panel (ADR-0028).
     if (manifest.kind !== 'entity' && manifest.kind !== 'item' && !(opts.system && manifest.kind === 'system' && manifest.ui)) errors.push(`la Fucina non può creare moduli di tipo ${manifest.kind}`);
@@ -562,7 +566,8 @@ export class Validator {
    * The Cartographer's plan: place and environment are essential (fatal); objects, runes and new
    * things that break a rule are dropped one by one, so nothing invalid ever enters the world.
    */
-  validatePlan(plan: ChunkPlan, layouts: Set<string>, placeable: Set<string>): PlanVerdict {
+  /** `vehicles` (T487): the modules of `placeable` that are vehicles, at most one of which a place has. */
+  validatePlan(plan: ChunkPlan, layouts: Set<string>, placeable: Set<string>, vehicles: ReadonlySet<string> = new Set()): PlanVerdict {
     const errors: string[] = [];
     const dropped: string[] = [];
     // An environment of the seed by its Italian id of the contract 0.1 (T307a): the one it became.
@@ -572,10 +577,18 @@ export class Validator {
     if (typeof plan.place?.description !== 'string' || plan.place.description.length > 300) errors.push('luogo.descrizione non valida');
     if (!layouts.has(plan.layout)) errors.push(`ambiente sconosciuto "${plan.layout}" (scegli tra: ${[...layouts].join(', ')})`);
     if (errors.length) return { errors, plan, dropped };
+    let rides = 0;
     const objects = plan.objects.filter((o) => {
-      if (placeable.has(o.module)) return true;
-      dropped.push(`oggetto ${o.module}: modulo inesistente o non posizionabile`);
-      return false;
+      if (!placeable.has(o.module)) {
+        dropped.push(`oggetto ${o.module}: modulo inesistente o non posizionabile`);
+        return false;
+      }
+      // A vehicle a place (T487): one, where the kernel found it can move (the catalogue offers it only there).
+      if (vehicles.has(o.module) && rides++ > 0) {
+        dropped.push(`oggetto ${o.module}: un veicolo per luogo`);
+        return false;
+      }
+      return true;
     });
     const runes = plan.runes
       .map((r) => lex(r).join(' '))

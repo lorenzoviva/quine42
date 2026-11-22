@@ -1527,7 +1527,37 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 - **Non è di un luogo** (come `moved`, ADR-0168): `spawnModuleEntity` gli dà un'origine (`freshOrigin` se non ne ha), lo toglie al suo luogo
   (niente `chunk`) e mette l'origine in `consumed`; al più `MAX_VEHICLES` (32), oltre un veicolo di un luogo è una cosa del luogo e Lua non ne fa.
   Il salvataggio: `world/state.json → vehicles` (`vehiclesToSave`: modulo, origine, x, y, verso, ancora; `restoreVehicles` al caricamento, letto con
-  `readVehicles`; un modulo che non c'è aspetta nel salvataggio). La Genesi li toglie. Il carico non si salva ancora (la stiva, T444). Il catalogo del Cartografo non offre i veicoli (`catalog`): li fanno Lua e i porti (T443).
+  `readVehicles`; un modulo che non c'è aspetta nel salvataggio). La Genesi li toglie. Il carico non si salva ancora (la stiva, T444). Il catalogo del Concilio non offre i veicoli (`catalog`); quello del piano
+  di un luogo sì, dove si muovono (`catalogFor`, T487, sotto).
+- **I veicoli del Concilio** (ADR-0244, T487, kernel 0.10.20): **ciò che sembra un veicolo si guida**, la sorella della regola 10. **Che cosa
+  si presenta come un veicolo** (`src/kernel/vehicleclaim.ts`): una cosa del mondo (`kind: entity`, senza persona) il cui nome comincia, dopo
+  articoli e aggettivi che vanno davanti (`LEAD`), con un nome di mezzo dell'italiano (`IT_HEADS`: barca, chiatta, zattera, canoa, gondola,
+  battello, nave, veliero, scialuppa…; carro, carretto, carrozza, calesse, slitta…; capsula, navetta) o lo ha nelle prime parole in inglese
+  (`EN_WORDS`, prima di «of», «with»…), o con un tag `veicolo`/`vehicle` e un altro che dice il mezzo (`vehicleMediumIn`). Il vuoto solo in un
+  mondo del vuoto (`worldMedia`). Mai ciò che il nome dice decorazione (`NOT_A_RIDE`: relitto, arenata, in secca, in bottiglia, modellino,
+  giocattolo, dipinto, insegna, rotto; wreck, model, toy…), né ciò che va su rotaia o vola, né una parola che comincia come un mezzo
+  (barcaiolo, carrozzeria). **La Fucina** (`forge.ts`): il concetto ha `vehicle` (`water|land|void|none`), il Fisico per un veicolo
+  `vehicle_speed`, `vehicle_accel`, `vehicle_turn`, `draught` (`vehicleLine`); `conceptMedium` è il mezzo del Narratore se il mondo lo ha,
+  altrimenti quello del nome; `assembleManifest` scrive `vehicle` (`vehicleFor`: i numeri del Fisico dentro `VEHICLE_LIMITS`, o quelli del
+  mezzo, `MEDIUM_DEFAULTS`; il pescaggio solo sull'acqua, basso se non detto profondo), solido, non spinto, mai `takeable`, e sull'acqua la
+  classe `vessel`. Il Narratore che dice `none` a un nome di mezzo torna una volta col motivo (`vehicleRefusal`), poi `ForgeRejected` del
+  Narratore; `validateForged` rifiuta con `vehicleClaimErrors` (non `parseManifest`, che legge anche il disco). **Il piano**: `catalogFor(ch)`
+  aggiunge i veicoli del Concilio (`COUNCIL_ORIGINS`; non quelli scritti a mano né la capsula del seme) che stanno nella bozza del luogo (`vehicleSpotIn` sulla `draft`), col tipo
+  `vehicle`, finché il mondo ne ha meno di `MAX_VEHICLES` (`vehicleCount`: nel mondo e in attesa nel salvataggio); il prompt del Cartografo
+  lo dice solo allora; `validatePlan(…, vehicles)` ne tiene uno per luogo; i modelli locali lo mettono a parte (`ride`). **Dove nasce**
+  (`vehicleSpot`, puro): i centri ogni mezza casella e i due versi (prua verso +y o +x), la scatola della classe alla taglia (`vehicleBox`,
+  `tilesOf`) con `SPOT_MARGIN` attorno tutta su ciò che lo porta (`carries`) e dentro il luogo; prima dove una casella dello scafo è entro
+  `BOARD_REACH` da una che si cammina (una distanza a 8 vicini), poi la più vicina alla casella del piano, poi la prima in ordine di
+  lettura. `placeVehicle` (in `applyPlan`, che estrae comunque la casella del piano perché il resto non cambi, e in `forgeForChunk`): niente in
+  uno specchio, con l'origine già consumata o già nel mondo, oltre `MAX_VEHICLES` o senza un posto; altrimenti `spawnModuleEntity` e il verso
+  del posto (`vehicle:placed` sul bus). **L'ormeggio** (`berths`: luogo, origine, posto, verso): appena posato è del suo luogo, l'origine non
+  consumata, non salvato (`vehiclesToSave`); `unloadChunk` lo toglie se è ancora all'ormeggio (`atBerth`: lì, col verso di allora,
+  all'ancora, nessuno al timone né a bordo) e il luogo lo rimette quando torna; il primo spostamento (`vehicleTick`) lo stacca
+  (`leaveBerth`: l'origine consumata, il salvataggio lo tiene). **La riparazione** (`repairVehicleClaims`, puro, chiamato da `boot` dopo
+  `applyFiles`, `Kernel.repairVehicleClaims`): i manifest con un'`origin` del Concilio (`COUNCIL_ORIGINS`), senza `vehicle`, non `takeable`, che
+  si presentano come veicoli prendono `vehicleFor(medium)`, `solid: true`, `pushable: false`, niente `vel`; la classe `vessel` sull'acqua solo
+  se il modello non è nell'indice né in `models/`; un commit del kernel «riparazione: si guidano …», mai in uno specchio, nel banco o in un
+  universo di sola lettura. `lab/scripts/veicoli-finti.ts` lo dice di un universo sul disco. `tests/veicoli-concilio.test.ts`.
 - **Lua** (V-045): `world.vehicle(id)` (una copia, con `aboard` e `helm` come corpi), `world.vehicle_set(id, t)` (`power` 0…1; `thrust` e `steer`
   −1…1 solo senza timoniere; `anchored`; `helm` a un viandante sul ponte, in silenzio se non può, o `false`), `world.vehicle_of(id)`. La `pos` e
   il `vehicle` di un veicolo arrivano a Lua come copie, `vehicle` non si scrive né nasce da `ecs.spawn`. `mech.barca` di T183 è il vento sulla
