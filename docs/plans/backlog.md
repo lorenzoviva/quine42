@@ -6459,7 +6459,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: causa scritta nell'esito, correzione, test; kernel alzato solo se tocca `src/kernel/`. Sicurezza: nessuna superficie nuova.
 - Esito: causa: ogni commit del Concilio ricarica i file (`universe:reloaded`) e `Renderer.reset` toglieva tutte le mesh dei luoghi, rifatte tre per fotogramma (una dozzina di fotogrammi col worker); ora restano in scena segnate come vecchie (`staleChunks`, `STALE_SIG`) e ognuna è sostituita nello stesso fotogramma della nuova; prova nella preview (prima 32/32 luoghi senza mesh dopo la ricarica, dopo zero persi camminando e sull'acqua); `tests/sfarfallio.test.ts` (pagina, worker, camminata; falliscono senza la correzione); kernel non toccato; non riprodotto nel browser sul commit della run (solo letto: il codice era lo stesso) né su `orichalcum`; sicurezza: nessuna superficie nuova.
 
-### T489 · Oggetti che si capiscono: ogni oggetto generato ha un uso — `da fare`
+### T489 · Oggetti che si capiscono: ogni oggetto generato ha un uso — `fatto` (`63e5e360`)
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 3
 - Step: 34
 - Dipende da: T488
@@ -6471,6 +6471,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
   4. Gli universi esistenti: gli oggetti senza uso restano, marcati decorazione dal kernel, senza chiamate.
 - Browser: sì — su un clone di `orichalcum`: un oggetto preso dice cosa farne, una ricetta si scopre.
 - Quando è fatto: il rapporto, la regola nel Narratore e nel validatore coi test offline, la marcatura degli esistenti; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+- Esito: ogni oggetto ha un uso che il kernel sa fare o è da tenere (ADR-0250, kernel 0.10.25). Gli usi si leggono dai dati (`src/kernel/itemuse.ts`). Il Narratore dà l'uso in `content.define` e `content.items`; il validatore rifiuta col motivo ciò che non ne ha, il Narratore lo riceve una volta, poi l'oggetto resta fuori con una mancanza, o resta da tenere se il viandante l'ha fatto o ricevuto. Gli oggetti di prima senza uso li marca il kernel all'avvio, in un commit suo, senza chiamate (321 in `orichalcum`). Inventario, «Esamina» e «Usa» dicono cosa ci si fa; «Crea» mostra solo le ricette aperte da ciò che si porta; raccogliere ciò che completa una ricetta fa pensare il viandante. Il seme ha tre ricette nuove (secchio, lanterna, torcia), il sacco è una borsa. Rapporto in `lab/banco/run-1/oggetti.md` (`lab/scripts/oggetti-uso.ts`), test offline in `tests/oggetti-uso.test.ts`, ADR, `AGENTS.md`, glossario. Suite intera con 3947 test passati; `site-video` è caduto per disco C: pieno e da solo passa. Typecheck e build verdi. Non provato: gli schemi nuovi del Narratore con Gemini vero. Sicurezza: nessuna superficie nuova.
 
 ### T490 · Integrare T473 nel base (conflitto in lab/3d/catalog.ts) — `fatto` (`f182490a`)
 - Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
