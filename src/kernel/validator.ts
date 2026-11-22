@@ -16,7 +16,7 @@ export { repairCoefficients, repairActor } from './coefficients';
 export { repairMinimums } from './universe';
 import { boxOf, classOf, CLASSES, sizeOf, SIZE_TIERS } from '../mj/classes';
 import { Mj3Error } from '../mj/engine';
-import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, type MjxFiles, type MjxModel } from '../mj/model';
+import { compileMjx, MJX_FILE_RE, mjxIncludes, patternText, underOf, type MjxFiles, type MjxModel } from '../mj/model';
 import type { Node3, NodeCeilings } from '../mj/engine';
 import { parseXml, type XmlElement } from '../mj/xml';
 import { isNoteLine, symbolName, symbolTokens } from '../mj/symbols';
@@ -86,12 +86,13 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
   if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
   time = Math.min(time, MAX_FORM_TIME);
   try {
-    const base = opts.base && opts.base > 0 ? opts.base : 0;
+    // Without a cellar said by whoever asks, the program's own `under` (T494, ADR-0245), as the world will run it.
+    const base = typeof opts.base === 'number' ? (opts.base > 0 ? opts.base : 0) : underOf(xml);
     const own = /<(?!!)[a-z]+\b[^>]*\ssize="/i.test(xml);
     const [X, Y, Z] = box ?? boxOf(classOf('object')!);
     const size: [number, number, number] | undefined = own ? undefined : [X, Y, Z + base];
     const self = /^models\/([^/]+)\.xml$/.exec(path)?.[1];
-    const m = compileMjx(xml, { ...(size ? { size } : {}), ...(base ? { base } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
+    const m = compileMjx(xml, { ...(size ? { size } : {}), ...(base || underOf(xml) ? { base } : {}), ...(files && Object.keys(files).length ? { files, ...(self ? { self } : {}) } : {}) });
     const nodes = worldNodeErrors(m, xml, files ?? {});
     if (nodes.length) return nodes.map((e) => `${path}: ${e}`);
     if (m.sound) {

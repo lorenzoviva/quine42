@@ -42,6 +42,7 @@ import {
 } from './cad';
 import { MJ_PALETTE } from '../../src/mj/palette';
 import { symbolOf } from '../../src/mj/symbols';
+import { rootVptOf } from '../../src/mj/model';
 import type { PaletteEntry } from '../../src/mj/engine';
 import { startCards, type CardsBar } from '../handmade/bar';
 import { boxFor } from '../handmade/logic';
@@ -3571,7 +3572,9 @@ function loadSelectedPreset() {
   if (!entry) return;
 
   codeInput.value = entry.xml.trim();
-  vptSelect.value = String(entry.vpt || 20);
+  const own = String(entry.vpt || 20);
+  if (![...vptSelect.options].some((o) => o.value === own)) vptSelect.append(new Option(`${own} vpt`, own));
+  vptSelect.value = own;
   seedInput.value = '1';
   onCodeChange();
   void triggerBuild().then(() => {
@@ -3589,7 +3592,7 @@ let cards: CardsBar | undefined;
 function openProgram(xml: string, meta: { class?: string; size?: string; vpt?: number }) {
   hasCustomColorsPrev = null;
   cardMeta = { class: meta.class, size: meta.size };
-  const vpt = String(meta.vpt ?? 20);
+  const vpt = String(meta.vpt ?? rootVptOf(xml) ?? 20);
   if (![...vptSelect.options].some((o) => o.value === vpt)) vptSelect.append(new Option(`${vpt} vpt`, vpt));
   vptSelect.value = vpt;
   presetSelect.value = '';

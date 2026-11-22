@@ -59,7 +59,7 @@ import type { InteriorSpec } from './furnish';
 import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, SPECIALTY_NAMES, worldPartsOf, type AiRoute, type SculptorAiModels, type SculptorSpecialty } from './agents/sculptor';
 import { PART_SEEDS, PART_TASK, sameGridErrors, type PartTaken } from './agents/parts';
 import { isWorldPart, partsInUse, partUsers, WORLD_PART_RE, WORLD_PARTS, type ComposedPart } from './worldparts';
-import { cellarVoxels, entryBox, MODELS_INDEX, type ModelInfo } from './forms';
+import { cellarVoxels, entryBox, MODELS_INDEX, withRoot, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
@@ -857,7 +857,7 @@ export class Kernel {
     k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.validator.modelBox = (id) => k.forms.structureBox(id);
     k.validator.modelGrows = (id) => !!k.forms.info(id) && growsByRules(k.forms.classOf(id), k.forms.info(id)?.size);
-    k.validator.modelBase = (id) => cellarVoxels(k.forms.info(id));
+    k.validator.modelBase = (id) => k.forms.cellarVoxelsOf(id);
     k.validator.modelFile = (name) => k.forms.file(name);
     k.validator.modelPart = (id) => isWorldPart(id, k.forms.info(id));
     // A brought card that fails here is isolated (T296): a program that throws or stops its worker, a form with nothing to see.
@@ -8327,7 +8327,7 @@ export class Kernel {
     // Its own time and whether it grows by rules are its entry's, which is not in the library yet (T370).
     const cls = classOf(info.class);
     // With its cellar (T417): tried as deep as the library will run it.
-    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, info) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && growsByRules(cls, info.size), base: cellarVoxels(info) });
+    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, xml)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && growsByRules(cls, info.size), base: cellarVoxels(info, xml) });
     if (errors.length) {
       this.council.say('kernel', 'scarta', errors.join('; '), card?.author === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
       return false;
@@ -8384,7 +8384,7 @@ export class Kernel {
     const cls = classOf(info.class) ?? classOf('object')!;
     const partErrors = this.validator.validateFile(partPath, made.part, boxOf(cls), { part: true });
     if (partErrors.length) return no(partErrors.join('; '));
-    const modelErrors = this.validator.validateFile(sourcePath, made.rewritten, info.class === 'structure' ? entryBox(classOf('structure')!, info) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: growsByRules(cls, info.size), base: cellarVoxels(info), files: { [`${made.id}.xml`]: made.part } });
+    const modelErrors = this.validator.validateFile(sourcePath, made.rewritten, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, made.rewritten)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: growsByRules(cls, info.size), base: cellarVoxels(info, made.rewritten), files: { [`${made.id}.xml`]: made.part } });
     if (modelErrors.length) return no(modelErrors.join('; '));
     // The same grid on every seed the world gives it; the runs yield between them, so a world of many does not fall silent (ADR-0110).
     const seeds = Math.max(PART_SEEDS, this.forms.seedsOf(source));

@@ -6,7 +6,7 @@
 // cards, ADR-0084), the doubles, the choice open or closed. Pure: the store (server/bring.ts) and the kernel read the same.
 
 import { costFields, type CardStamp } from './cards';
-import { MODELS_DIR, MODELS_INDEX, type ModelInfo } from './forms';
+import { MODELS_DIR, MODELS_INDEX, rootVptOf, type ModelInfo } from './forms';
 import { contentText, fingerprint, HANDMADE_ID_RE, HANDMADE_ORIGIN, readOrigins, type CardOrigin } from './heritage';
 import { internalCardsIn, internalFields } from './internalNames';
 import { UNIVERSE_NAME_RE } from './paths';
@@ -164,6 +164,8 @@ export function broughtEntry(src: BringSource, master: string): { info: ModelInf
   const e: Record<string, any> = 'handmade' in src ? { size: src.size } : src.entry;
   const info: ModelInfo = { class: classe, name: src.name };
   if (src.kind === 'model') Object.assign(info, sized(classe, e.size, e.vpt, 'handmade' in src));
+  // A handmade program that says its density on its root (T494, ADR-0245) runs at it: its entry does not say another.
+  if ('handmade' in src && rootVptOf(src.xml) !== undefined) delete info.vpt;
   if (Number.isInteger(e.cellar) && e.cellar >= 1 && e.cellar <= 3) info.cellar = e.cellar;
   if (Number.isInteger(e.seeds) && e.seeds >= 1 && e.seeds <= 8) info.seeds = e.seeds;
   if (typeof e.score === 'number' && Number.isFinite(e.score)) info.score = Math.max(0, Math.min(10, Math.round(e.score)));

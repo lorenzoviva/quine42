@@ -498,6 +498,16 @@ export function withSize(xml: string, box: Vec3): string {
 /** A program without a box of its own, and without a `map` that leaves the box's scale: the library runs it in the box of each entry's size (ADR-0160, ADR-0182). */
 export const shareableProgram = (xml: string): boolean => !scales(xml) && !/\ssize="/.test(/<(?!!)[a-z]+\b[^>]*>/i.exec(xml.replace(/<!--[\s\S]*?-->/g, ''))?.[0] ?? '');
 
+/**
+ * The root without `vpt` and `under` (T494, ADR-0245): the defaults of a hand drawn program, never the Sculptor's. Its density is
+ * `densityFor` or its entry's, its cellar the one the request asks (the entry's `cellar`): written there, they would change the box, the
+ * lot and the soil the kernel gives it.
+ */
+export function withoutRootDensity(xml: string): string {
+  const m = /<(?!!)([a-z]+)\b([^>]*)>/i.exec(xml);
+  return m && /\s(?:vpt|under)="/.test(m[2]) ? xml.slice(0, m.index) + `<${m[1]}${m[2].replace(/\s(?:vpt|under)="[^"]*"/g, '')}>` + xml.slice(m.index + m[0].length) : xml;
+}
+
 /** The root without its `size`: a procedural program takes the box it is given. */
 export function withoutSize(xml: string): string {
   const m = /<(?!!)([a-z]+)\b([^>]*)>/i.exec(xml);
@@ -636,6 +646,8 @@ export const cellarOfRequest = (cls: AssetClass, taglia: string | undefined, cel
  * `opts.cellar` (T417): the tiles of cellar the request asks for; the box is that much deeper and the cellar must hold and be reached from the door.
  */
 export function checkProgram(xml: string, cls: AssetClass, taglia?: string, files: MjxFiles = {}, opts: CheckOptions = {}): Checked {
+  // The density and the cellar are the entry's (T494, ADR-0245): a Sculptor's root never says them.
+  xml = withoutRootDensity(xml);
   const base = cellarOfRequest(cls, taglia, opts.cellar);
   if (!procedural(cls, taglia)) return checkOnce(xml, cls, taglia, 1, files);
   // A procedural structure (ADR-0160): every seed the world shows at its size, and the first at the next size, which shares it.
