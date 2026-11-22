@@ -174,8 +174,8 @@
   "intervalloLanciMinuti": 10,
   "approvazione": "manuale",
   "sforzoPredefinito": "high",
-  "riserva": 3,
-  "sogliaUnSolo": 10,
+  "riserva": 1,
+  "sogliaUnSolo": 2,
   "attesaLimiteMinuti": 60,
   "controlloSecondi": 60,
   "providers": {

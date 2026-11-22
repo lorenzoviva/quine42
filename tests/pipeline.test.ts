@@ -465,7 +465,7 @@ describe('piani e finestra delle 5 ore (ADR-0119)', () => {
   });
 
   it('fitsOn: la settimana è scalata, la finestra conta solo per i task nuovi, nessuna eccezione sotto la soglia', () => {
-    const c = withPlans('pro');
+    const c = { ...withPlans('pro'), riserva: 3, sogliaUnSolo: 10 }; // the thresholds this test is about, not the author's config
     const budget = (residuo: number, sessione: number) => ({ claude: { residuo, sessione, slot: 2, tetto: 2, contatori: counters(sessione, FAR) } });
     const t = { estimate: 1, priority: 10 };
     expect(P.fitsOn('claude', t, { budget: budget(50, 70), config: c, nowMs: NOW })).toBe(true);

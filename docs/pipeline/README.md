@@ -147,7 +147,7 @@ muore, al riavvio `esegui` segue i task ancora vivi e riprende la conversazione 
   ogni `usoSecondi`), ma **mai sotto 1** (la previsione non chiude mai tutti gli slot di un modello; a 0 si va solo con crediti esauriti o quota 429);
   non sale oltre i task che il provider ha in programma (in corso, pronti, bloccati solo da altri task: non quelli
   in attesa dell'autore). La decisione di non dare nuovi task a un provider per un po' è dell'orchestratore (`sospendi <provider> [fino a <data>]` / `riattiva <provider>`).
-  Sotto `sogliaUnSolo` (10 %, settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
+  Sotto `sogliaUnSolo` (2 % dal 22/11, prima 10 %; settimana o 5 ore) nessun task nuovo e al più uno in corso, nessuno su
   quello dell'orchestratore. Un task a **priorità 0** (le urgenze dell'autore) può usare uno slot in più, mai oltre il tetto.
   `stato` (e `PIANO.md`, l'interfaccia web) mostra per provider tetto, slot, sospensione, task in programma, esaurimento previsto e reset;
 - **il generatore sui crediti che avanzano** (ADR-0177, T88): se a slot pieni Claude arriverebbe al reset settimanale con almeno
