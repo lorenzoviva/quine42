@@ -6451,3 +6451,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
   4. Gli universi esistenti: gli oggetti senza uso restano, marcati decorazione dal kernel, senza chiamate.
 - Browser: sì — su un clone di `orichalcum`: un oggetto preso dice cosa farne, una ricetta si scopre.
 - Quando è fatto: il rapporto, la regola nel Narratore e nel validatore coi test offline, la marcatura degli esistenti; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+
+### T490 · Integrare T473 nel base (conflitto in lab/3d/catalog.ts) — `da fare`
+- Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
+- Step: 44
+- Contesto: `integra T473` (la prova pagata delle specialità, S7 di T458) si è fermato su un solo conflitto, in `lab/3d/catalog.ts`: nel frattempo T471 è entrato nel base aggiungendo il gruppo delle parti del seme (`parts`) negli stessi punti in cui T473 aggiunge il gruppo della prova delle specialità (`specialties`). Nasce da T473 e T471: `dossier T473`, `dossier T471`.
+- Cosa fare: nel worktree `git merge task/T473`; in `lab/3d/catalog.ts` tenere entrambe le aggiunte: import `densityFor`, campi `parts?: boolean` e `specialties?: boolean` in `Entry`, entrambi i blocchi che popolano `CATALOG` (parti del seme di T471 e specialità di T473), entrambi i filtri `!e.parts` e `!e.specialties` in `GROUPS` (e `!e.specialties` anche in «Persone e animali» e «Piante e rocce»), ed entrambi i gruppi in `DEV_TOOLS` (quello di T471: «Banco: le parti del seme, da sole e nei modelli» e quello di T473: «Banco: le specialità dello Scultore, prima e dopo»); controllare che gli altri file fusi automaticamente (`AGENTS.md`, `docs/architettura-dettagli.md`, `docs/design/scultori-specializzati.md`) non abbiano doppioni né tagli; `typecheck` e suite di test coi turni (`turno typecheck`, `turno test`). Nessun ADR, kernel invariato (0.10.18).
+- Test: typecheck e suite intera coi turni.
+- Browser: no (T471 e T473 già verificati nel browser).
+- Quando è fatto: commit di merge su `task/T490`; poi l'orchestratore integra T490 e `integra T473` toglie worktree e branch di T473. Sicurezza: nessuna superficie nuova.
