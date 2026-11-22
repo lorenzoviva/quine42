@@ -400,6 +400,36 @@ interrotto (un colpo, l'energia a zero), il corpo torna giù. Il kernel lo verif
 corpo sta, a portata. Gli individui no. In molti il server lo conduce come il salto (che oggi in molti è solo da soli: va aperto lì per
 entrambi).
 
+**Com'è andata (T477, ADR-0252).** La riga 4 è fatta (`src/kernel/climb.ts`, `docs/architettura-dettagli.md#regole-effetti` e
+`#multigiocatore`, la voce V-047 della sicurezza). Rispetto alla proposta:
+
+- **Da una casella a una accanto**, su un lato, non dal «bordo di un dirupo» qualunque: il corpo va al piede della parete sulla casella bassa,
+  sale o scende, passa oltre il bordo (tre tempi; la parete 0,42 s a livello in salita, 0,25 in discesa, per la gravità entro 0,5-2).
+  «Arrampicati» e «Calati giù» sono voci del menu della casella, spente col motivo di ciò che manca (il mezzo, troppo alto, le mani
+  impegnate, troppo stanco, nessun posto in cima): chi non ha la corda sa che una corda servirebbe.
+- **Il mezzo**: `bonus.climb` di ciò che si indossa o si impugna (la corda del seme si impugna e dà 12) e `climb` di uno stato, il campo
+  nuovo dell'effetto `state` (non uno stato chiamato `climb`: ogni stato può arrampicare, «in arrampicata», «presa salda»). «Altro…: mi
+  arrampico» dà lo stato e, se basta, l'arrampicata comincia.
+- **La fatica**: un livello di energia a livello in salita (0,4 in discesa), sulla parete soltanto; a zero, a un colpo o a una spinta il corpo
+  torna al piede, senza danno (un danno farebbe di tre caselle una trappola mortale coi livelli della morte alti: da decidere col rilievo vero).
+- **Ogni mondo arrampica**: `keptPass` con `climb` vero, così un luogo montuoso tiene le enclavi fino a tre caselle (prima fino al salto);
+  col plateau sintetico di otto livelli la cima resta un'enclave e le persone non vi vanno; uno di cento caselle, oltre la quota, ha la rampa.
+  Misurato (`lab/scripts/rete-gradini.ts -- --rialzo 8`, 327 luoghi): 318 rampe e 140 enclavi tenute, nessuna casella staccata (con la sola
+  regola del salto erano 434 e 21); la rete di un luogo 0,68 ms in mediana.
+- **In molti** il salto e l'arrampicata li fa il server, «controllati nel passo»: lo specchio li prevede e li dice (`jump {dx, dy}`, `tile`
+  con `_climb`), il server li rifà sul suo mondo, porta il corpo spostando il tappeto (chi gioca da un suo client resta dov'è sul cerchio)
+  e non prende passi finché non atterra; poi confronta l'ultimo passo detto con dove lo ha. Il salto e l'arrampicata guardano la zona del
+  viandante, non quella del kernel (prima, sul server, il salto di un altro viandante dipendeva dalla zona del master). Gli altri vedono
+  chi salta o si arrampica scivolare: l'arco e la parete non vanno sul filo.
+- **Inerte col rilievo di oggi**: nessun dirupo, nessuna voce nel menu; la corda impugnabile e il salto in molti sono le sole cose nuove.
+- **Nel browser** (la build, `?skip&offline`, il plateau di otto livelli dalla console come in T474): ai piedi della parete il menu dà
+  «Arrampicati» spento, «Ti serve una corda o una piccozza per una parete così»; con la corda in mano si accende, il viandante va al piede
+  della parete, sale (a metà i piedi a 1,84 caselle fra 1 e 3) e passa in cima (x 6,42, il suolo a 3), 8,7 di energia spesi; «Calati giù»
+  lo riporta sotto; con 3 di energia scivola giù a metà e il mondo lo dice. Nessun errore del gioco in console. Non provato nel browser: il
+  salto e l'arrampicata fra due schede di una partita di molti (provati coi collegamenti finti).
+
+  ![Il viandante a metà della parete, la corda in mano](terreno-3d/03-arrampicata.png)
+
 ---
 
 ## 4. Gli strati come concetto trasversale (c)
@@ -624,7 +654,7 @@ Non sono nel backlog: li scrive chi pianifica, dopo le risposte dell'autore. Il 
 | 1 | **R0 · La regola 10 della rete e delle enclavi**: l'ADR (§ 8) e la regola in `AGENTS.md`; i gradini in `free`/`bodyFree`, nel passo del server e nel controllo del passo di `findRoute`; il grafo dei gradini e le rampe nel layout; le enclavi segnate nel piano (derivate), il posto `enclave`; l'asprezza delle regioni (misurata, e del master); inerte col rilievo di oggi (`luoghi-campione` verde), provato con un rilievo sintetico; *fatto in T474, ADR-0250* (le rampe come terra mossa per casella, il rialzo sintetico `syntheticRise`, il valico per «il passo»; i varchi col livello del lato e i lotti sulle terrazze restano a R1) | — | 5 % | sì (un dirupo sintetico dalla console) |
 | 2 | **R1 · Il rilievo vero**: `nature.relief` alla Genesi (ferma come `game`), `generate_relief` nel generatore del seme (massicci, terrazze, passi, conche, il letto), `Relief` che lo legge per quei mondi, `k` che si cammina, i lotti sulle terrazze, la richiesta del Cartografo col rilievo del luogo, l'ambientazione che lo porta | 1 | 6 % | sì |
 | 3 | **R2 · Il taglio verso la camera**: il disco di T416 acceso quando il terreno copre il viandante, all'altezza della testa, con le bande degli strati | 2 | 3 % | sì |
-| 4 | **R3 · Arrampicarsi**: `climb` come il salto ma lento e faticoso, `bonus.climb`, lo stato `climb` dagli effetti, «Arrampicati» nel menu della casella, il Narratore che lo sa dare; il salto e l'arrampicata nel passo del server | 1 | 4 % | sì |
+| 4 | **R3 · Arrampicarsi**: `climb` come il salto ma lento e faticoso, `bonus.climb`, lo stato `climb` dagli effetti, «Arrampicati» nel menu della casella, il Narratore che lo sa dare; il salto e l'arrampicata nel passo del server; *fatto in T477, ADR-0252* (da una casella a quella accanto, `climb` come campo di uno stato, la caduta senza danno, ogni mondo arrampica, in molti il server li rifà e porta il corpo) | 1 | 4 % | sì |
 | 5 | **S1 · Gli strati come regole**: il programma `strata` di ogni ambiente (il validatore lo prova sulle bozze e vuole `(xy)`), il Cartografo che lo scrive alla Genesi coi terreni degli strati (il seguito di T418), 6 righe nei piani nuovi (`strataDepth`); *fatto in T478, ADR-0249* | — | 4 % | sì (i tagli) |
 | 6 | **S2 · Gli strati nel Concilio**: `world.stratum_at`, il contesto del Narratore, la richiesta dello Scultore Architetto (gli strati sotto il lotto: le pareti della cantina), le stanze dello Scenografo per strato | 5 | 3 % | no |
 | 7 | **R4 · Il fondale**: il letto come colonna sotto una superficie trasparente, il posto `underwater` del Cartografo, gli strati del fondale | 2 | 3 % | sì |

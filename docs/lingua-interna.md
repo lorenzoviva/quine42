@@ -247,7 +247,7 @@ posto di un pannello sul filo).
 | [Campi dei piani dei luoghi (`maps/*.json`)](#campi-piani) | campi | 15 | disco, filo | T308a (0.4) |
 | [Campi di `models/index.json` e attributi dei programmi](#campi-modelli) | campi | 17 | disco, prompt | T308a (0.4) |
 | [Percorsi dell’universo e del server](#percorsi) | percorsi | 17 | disco, filo | T308a (0.4) |
-| [Messaggi del protocollo (`t`)](#messaggi) | valori | 33 | filo | T308b (0.5) |
+| [Messaggi del protocollo (`t`)](#messaggi) | valori | 34 | filo | T308b (0.5) |
 | [Operazioni e stati sul filo](#valori-filo) | valori | 24 | filo | T308b (0.5) |
 | [Campi dei messaggi](#campi-filo) | campi | 53 | filo | T308b (0.5) |
 | [Componenti visibili a Lua](#componenti) | valori | 16 | disco, filo, Lua, prompt | T308b (0.5) |
@@ -266,7 +266,7 @@ posto di un pannello sul filo).
 | [Dove si riapre gli occhi dopo la morte](#ripartenza) | valori | 2 | prompt, solo codice | T310b (0.7) |
 | [Bonus di una cosa indossata o impugnata](#bonus) | valori | 6 | disco, Lua, prompt | T310b (0.7) |
 | [Campi delle risposte del Concilio (gli schemi delle richieste)](#campi-risposte) | campi | 164 | prompt | T310b (0.7) |
-| **totale** | | **1181** | | T307a: 199 · T307b: 303 · T308a: 275 · T308b: 166 · T310b: 238 |
+| **totale** | | **1182** | | T307a: 199 · T307b: 303 · T308a: 275 · T308b: 167 · T310b: 238 |
 
 <a id="classi"></a>
 ### Classi dei modelli (`classi`)
@@ -1537,7 +1537,7 @@ posto di un pannello sul filo).
 
 - **Dove si legge**: `src/session/protocol.ts (ClientMsg, ServerMsg)`, `src/session/server.ts (LIMITS)`, `src/session/thin.ts`, `src/session/client.ts`
 - **Tocca**: filo · **lingua**: inglese · **task**: T308b, contratto 0.5
-- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo) e `region` (T375, ADR-0201: le regioni del master) nascono inglesi; `carta`, `ritmo` e `regione` sono solo le parole del concetto, nessun client le ha mandate
+- **Nota**: `card` (T296, ADR-0172: il master toglie una carta portata), `pace` (T373, ADR-0196: il ritmo del mondo), `region` (T375, ADR-0201: le regioni del master) e `jump` (T477, ADR-0252: il salto che il server fa) nascono inglesi; `carta`, `ritmo`, `regione` e `salto` sono solo le parole del concetto, nessun client le ha mandate
 
 | italiano | interno |
 |---|---|
@@ -1574,6 +1574,7 @@ posto di un pannello sul filo).
 | `carta` | `card` |
 | `ritmo` | `pace` |
 | `regione` | `region` |
+| `salto` | `jump` |
 
 <a id="valori-filo"></a>
 ### Operazioni e stati sul filo (`valori-filo`)

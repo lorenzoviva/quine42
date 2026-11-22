@@ -64,7 +64,7 @@ for (const [p, text] of Object.entries(up.files).sort(([a], [b]) => a.localeComp
 }
 
 const ROLE: Record<ItemRole, string> = { food: 'cibo', tool: 'attrezzo', garment: 'capo', container: 'contenitore', key: 'chiave', material: 'materia', light: 'luce', magic: 'magia', other: 'altro' };
-const KIND: Record<ItemUseKind, string> = { consume: 'effetto', light: 'si accende', bag: 'borsa', wear: 'posto addosso', action: 'azione', needed: 'serve a un\'azione del mondo', cuts: 'taglia', ingredient: 'ricetta (entra)', tool: 'ricetta (attrezzo)', trade: 'mestiere', venture: 'cantiere', quest: 'missione', decoration: 'decorazione' };
+const KIND: Record<ItemUseKind, string> = { consume: 'effetto', light: 'si accende', bag: 'borsa', wear: 'posto addosso', hold: 'impugnato', action: 'azione', needed: 'serve a un\'azione del mondo', cuts: 'taglia', ingredient: 'ricetta (entra)', tool: 'ricetta (attrezzo)', trade: 'mestiere', venture: 'cantiere', quest: 'missione', decoration: 'decorazione' };
 
 function said(u: ItemUse): string {
   switch (u.kind) {
@@ -72,6 +72,8 @@ function said(u: ItemUse): string {
       return `effetto: ${u.verb} ${Object.entries(u.effects).map(([e, v]) => `${e} ${v! > 0 ? '+' : ''}${v}`).join(' ')}`;
     case 'wear':
       return u.zone ? `addosso: ${u.zone}` : `addosso: «${u.slot}» di ${u.panel}`;
+    case 'hold':
+      return u.climb ? `impugnato: arrampica ${u.climb}` : 'impugnato con bonus';
     case 'action':
       return u.label ? `azione: «${u.label}»` : 'azione: il suo modulo';
     case 'needed':

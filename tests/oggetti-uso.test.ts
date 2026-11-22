@@ -44,6 +44,10 @@ describe('the uses of a thing (T489)', () => {
     // A cloak by the words of its name; boots have no zone of the body.
     expect(usesOf(thing({ id: 'item.mantello', name: 'Mantello di lana', category: 'clothing' }), none)).toEqual([{ kind: 'wear', zone: 'back' }]);
     expect(kinds(thing({ id: 'item.stivali', name: 'Stivali', category: 'clothing', slot: 'feet' }))).toEqual([]);
+    // Held in hand with a bonus (such as the rope's climb, ADR-0252): a use without recipes too; zero bonuses do not count.
+    expect(usesOf(thing({ id: 'item.corda', equippable: true, bonus: { climb: 12 } }), none)).toEqual([{ kind: 'hold', climb: 12 }]);
+    expect(usesOf(thing({ id: 'item.piccozza', equippable: true, bonus: { attack: 2 } }), none)).toEqual([{ kind: 'hold' }]);
+    expect(kinds(thing({ id: 'item.finto', equippable: true, bonus: { climb: 0, speed: 1 } }))).toEqual([]);
   });
 
   it('reads what the world does with it: a slot of a panel, its actions, what an action wants, what cuts, recipes, trades, sites, missions', () => {
@@ -91,6 +95,7 @@ describe('the uses of a thing (T489)', () => {
       [thing({ id: 'item.lume', category: 'light' }), none],
       [thing({ id: 'item.borsa', container: { size: 4 } }), none],
       [thing({ id: 'item.cappello', slot: 'head', category: 'clothing' }), none],
+      [thing({ id: 'item.corda', equippable: true, bonus: { climb: 12 } }), none],
       [thing({ id: 'item.stoffa' }), { recipes }],
       [thing({ id: 'item.martello' }), { recipes }],
       [thing({ id: 'item.ascia', tags: ['taglio'] }), { recipes: [], cuttable: true }],
@@ -107,11 +112,12 @@ describe('the uses of a thing (T489)', () => {
     expect(said[2]).toEqual(['Si usa su di sé: cura.']);
     expect(said[4]).toEqual(['Ci stanno dentro 4 cose.']);
     expect(said[5]).toEqual(['Si indossa sulla testa.']);
-    expect(said[6]).toEqual(['Con questo, usando Ago, si fa: Toppa di tela.']);
-    expect(said[7]).toEqual(['Serve a fare Secchio con item.asse.']);
+    expect(said[6]).toEqual(['Impugnato, aiuta a salire sulle pareti.']);
+    expect(said[7]).toEqual(['Con questo, usando Ago, si fa: Toppa di tela.']);
+    expect(said[8]).toEqual(['Serve a fare Secchio con item.asse.']);
     // The mark and nothing say the same: kept, for what it is.
-    expect(said[9]).toEqual(said[10]);
-    expect(said[9][0]).toMatch(/si tiene/);
+    expect(said[10]).toEqual(said[11]);
+    expect(said[10][0]).toMatch(/si tiene/);
     // What the wanderer already has.
     expect(words(usesOf(thing({ id: 'item.stoffa' }), { recipes }), (id) => (id === 'item.ago' ? 1 : 0))).toEqual(['Con questo, usando Ago (ce l’hai), si fa: Toppa di tela.']);
     // The recipes a thing opens: ready first, with what is missing.
@@ -339,10 +345,11 @@ describe('where a thing is held (T489)', () => {
     const pc = k.wandererCarpet();
     await k.perform(k.spawnItem('item.martello', pc.x + 1, pc.y), 'esamina');
     expect(dialogs.at(-1)).toMatch(/Serve a fare Secchio con Asse di legno e Corda\./);
-    k.give('item.corda', 1);
-    const slot = k.inventory().slots.findIndex((s) => s?.item === 'item.corda');
+    k.give('item.asse', 1);
+    const slot = k.inventory().slots.findIndex((s) => s?.item === 'item.asse');
     k.useSlot(slot);
-    expect(said.at(-1)).toBe('Corda: Con questo e Asse di legno, usando Martello, si fa: Secchio.');
-    expect(countItem(k.inventory(), 'item.corda')).toBe(1);
+    expect(said.at(-1)).toBe('Asse di legno: Con questo e Corda, usando Martello, si fa: Secchio.');
+    expect(countItem(k.inventory(), 'item.asse')).toBe(1);
+    expect(k.itemUseWords('item.corda')).toEqual(['Impugnato, aiuta a salire sulle pareti.', 'Con questo e Asse di legno (ce l’hai), usando Martello, si fa: Secchio.']);
   });
 });

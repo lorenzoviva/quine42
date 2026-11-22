@@ -796,4 +796,5 @@ export const UNCOVERED = {
   'V-044': 'il kit non ha chiavi di TypeSafe né di OpenRouter e non esce sulla rete: i due varchi e il kernel si provano coi fornitori finti, tests/sicurezza/testo-viandante.test.ts',
   'V-045': 'ciò che Lua chiede a un veicolo si vede solo dentro il kernel e la sandbox: lo prova tests/sicurezza/veicolo.test.ts',
   'V-046': 'il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts',
+  'V-047': 'il salto e l’arrampicata in molti si provano sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/salto-molti.test.ts',
 };

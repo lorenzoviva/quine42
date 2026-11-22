@@ -26,6 +26,7 @@ import { coast, offDeck, onDeck, readVehicleView, turnBetween, type VehiclePose,
 import { SEA_DRAFT } from '../kernel/relief';
 import { readStrata } from '../kernel/strata';
 import { readMoved } from '../kernel/network';
+import { CLIMB_ACTION } from '../kernel/climb';
 import { readPace } from '../kernel/worldPace';
 import type { Region, RegionAnswer, RegionRequest } from '../kernel/atlas';
 
@@ -147,6 +148,7 @@ export class ThinClient {
   frame(dt: number): void {
     const k = this.k;
     this.clock += dt;
+    if (this.waitingState.length) this.waitingState = this.waitingState.filter((w) => w.until >= this.clock);
     this.sail(dt);
     const f = Math.min(1, dt * FOLLOW);
     for (const [id, to] of this.targets) {
@@ -174,7 +176,9 @@ export class ThinClient {
     const pose = deck !== undefined ? k.vehiclePose(deck) : undefined;
     const [sx, sy] = on !== undefined && pose ? onDeck(pose, at.x, at.y) : [at.x, at.y];
     const still = this.lastStep.on === (pose ? on : undefined) && Math.hypot(sx - this.lastStep.x, sy - this.lastStep.y) <= 0.005;
-    if (this.clock - this.lastStep.t >= STEP_EVERY && !still) {
+    // In a jump or on a climb (T477) the server carries the body as this mirror does: no step until it has landed.
+    const carried = k.ecs.has(k.wandererEntity, 'jump') || k.ecs.has(k.wandererEntity, 'climb');
+    if (this.clock - this.lastStep.t >= STEP_EVERY && !still && !carried) {
       if (on !== undefined && pose) {
         this.lastStep = { x: sx, y: sy, t: this.clock, on };
         this.session.move(at.x, at.y, { on, lx: sx, ly: sy });
@@ -272,6 +276,8 @@ export class ThinClient {
         if (m.players && this.session.master) this.players();
         if (m.me) this.carried(m.me.x, m.me.y);
         if (m.state || this.adopt) this.state();
+        // What waited for the wanderer's state (T477): it has come.
+        if (m.state) for (const w of this.waitingState.splice(0)) if (w.until >= this.clock) w.fn();
         for (const n of m.notices ?? []) this.notice(n);
         this.adopt = false;
         if (Math.abs(m.time - this.k.time) > 0.5) this.k.time = m.time;
@@ -771,6 +777,14 @@ export class ThinClient {
     const studio = k.interact.bind(k);
     k.interact = async () => (k.zone === 'sim' ? this.interact() : studio());
     k.perform = (id, action) => this.perform(id, action);
+    // The jump (T477): made here at once, as alone, and told to the server, which makes it on its world; where it lands is the server's.
+    const jumpHere = k.jump.bind(k);
+    k.jump = (dir) => {
+      const d = dir ?? k.jumpDirection();
+      if (!jumpHere(d)) return false;
+      this.session.jump(d.x, d.y);
+      return true;
+    };
     // Putting down on furniture (T291) is the server's: the thing comes with its next update, on the shelf the server chose.
     k.placeOn = async (id) => {
       await this.perform(id, 'posa');
@@ -939,10 +953,37 @@ export class ThinClient {
       if (option.startsWith('e:') && entity >= 0) return this.perform(entity, option.slice(2));
       // «Altro…» on the tile opens its window here; the words go with freeTileAction.
       if (option === 't:altro') return here.performMenu(option, entity, col, row);
+      // A climb (T477): at once here, as alone, and asked of the server; refused, the body is put back where it was.
+      if (option === `t:${CLIMB_ACTION}`) return this.climb(col, row, () => void here.performMenu(option, entity, col, row));
       if (option.startsWith('t:')) await this.carry({ t: 'tile', col, row, action: option.slice(2) });
     };
-    k.freeTileAction = (col, row, text) => words(this.carry({ t: 'other', col, row, text }));
+    k.freeTileAction = async (col, row, text) => {
+      // «Altro…: mi arrampico» (T477): the state that climbs comes with the next update; then the climb is asked, as from the menu.
+      const before = k.climbReach();
+      const said = await words(this.carry({ t: 'other', col, row, text }));
+      this.afterState(() => k.climbReach() > before && !!k.climbOffer(col, row)?.climb && void k.performMenu(`t:${CLIMB_ACTION}`, -1, col, row));
+      return said;
+    };
   }
+
+  /**
+   * A climb (T477): made here at once (`now`), as the server will make it on its world; if the server refuses it, the climb here ends and the
+   * body goes back to where it started (the server has it there).
+   */
+  private async climb(col: number, row: number, now: () => void): Promise<void> {
+    const k = this.k;
+    const start = k.wandererCarpet();
+    const o = await this.carry({ t: 'tile', col, row, action: CLIMB_ACTION }, now);
+    if (o.ok || !k.ecs.has(k.wandererEntity, 'climb')) return;
+    k.ecs.remove(k.wandererEntity, 'climb');
+    this.putMe(start.x, start.y);
+  }
+
+  /** Something to do once the next state of the wanderer has come from the server (T477), if it comes within a second; else nothing. */
+  private afterState(fn: () => unknown): void {
+    this.waitingState.push({ fn, until: this.clock + 1 });
+  }
+  private waitingState: Array<{ fn: () => unknown; until: number }> = [];
 
   /**
    * Something done with what the wanderer carries: `now`, if given, does here at once what the server will do (and
@@ -980,6 +1021,8 @@ export class ThinClient {
   /** E in the world: a rune under or in front of the wanderer, an entity to pick up in front, or the menu of the tile. */
   private async interact(): Promise<void> {
     const k = this.k;
+    // On a climb (T477) the hands are on the rock, as alone.
+    if (k.ecs.has(k.wandererEntity, 'climb')) return;
     const pc = k.wandererCarpet();
     const facing = k.wandererComp()?.facing;
     const [dx, dy] = facing === 'left' ? [-1, 0] : facing === 'right' ? [1, 0] : facing === 'up' ? [0, -1] : [0, 1];
