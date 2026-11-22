@@ -1,0 +1,135 @@
+{
+ "universe": "orichalcum",
+ "model": "gemini-3.1-flash-lite",
+ "newStructuresPerHour": 0,
+ "known": 21,
+ "places": 8,
+ "calls": 8,
+ "usd": 0.025097575,
+ "structures": 11,
+ "worn": 11,
+ "fresh": 0,
+ "placesWithFresh": 0,
+ "rows": [
+  {
+   "place": "-4,4",
+   "name": "Scalo del Canale Bruma",
+   "environment": "harbour",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 859,
+     "worn": true
+    },
+    {
+     "concept": "Capanno del Capo-Porto",
+     "seed": 1390,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "4,-4",
+   "name": "Cunicoli di Solfara Profonda",
+   "environment": "dungeon",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "size": "large",
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "4,-3",
+   "name": "Giardino della Fuliggine — Il Viale dei Sospiri",
+   "environment": "giardino_fuliggine",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "Capanno dell'addetto alle chiuse",
+     "seed": 2110,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "3,4",
+   "name": "Campagne delle Trebbie — L'Approdo del Mietitore",
+   "environment": "campagne_trebbie",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "Cascina delle trebbiatrici",
+     "size": "medium",
+     "seed": 2989,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-5,5",
+   "name": "Accampamento dei Fuochisti",
+   "environment": "baracche",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "size": "medium",
+     "worn": true
+    },
+    {
+     "concept": "Capanno dell'addetto alle chiuse",
+     "seed": 3197,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-5",
+   "name": "Molo dei Rottami Ferroviari",
+   "environment": "harbour",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "Capanno del Capo-Porto",
+     "seed": 2680,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-4,5",
+   "name": "Darsena delle Lamiere Arrugginite",
+   "environment": "harbour",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 3308,
+     "worn": true
+    },
+    {
+     "concept": "Deposito dei lingotti",
+     "seed": 1973,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-4",
+   "name": "Scalo della Neve Grigia",
+   "environment": "harbour",
+   "fresh": false,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 2570,
+     "worn": true
+    }
+   ]
+  }
+ ]
+}

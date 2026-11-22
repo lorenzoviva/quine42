@@ -1,0 +1,356 @@
+{
+ "universe": "orichalcum",
+ "model": "gemini-3.1-flash-lite",
+ "newStructuresPerHour": 60,
+ "known": 21,
+ "places": 24,
+ "calls": 24,
+ "usd": 0.07293149999999998,
+ "structures": 28,
+ "worn": 28,
+ "fresh": 0,
+ "placesWithFresh": 0,
+ "rows": [
+  {
+   "place": "-4,4",
+   "name": "Approdo del Palombaro Errante",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 859,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "4,-4",
+   "name": "Accampamento della Cengia Alta",
+   "environment": "baracche",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "size": "medium",
+     "worn": true
+    },
+    {
+     "concept": "Capanno del Capo-Porto",
+     "seed": 1362,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "4,-3",
+   "name": "Giardino della Fuliggine — Il Viale del Gelo Grigio",
+   "environment": "giardino_fuliggine",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno degli aeronauti, con le brande, le carte dei venti e la stufa",
+     "seed": 2110,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "3,4",
+   "name": "Campagne delle Trebbie — Molo dei Mietitori",
+   "environment": "campagne_trebbie",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Cascina delle trebbiatrici",
+     "size": "medium",
+     "seed": 2989,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-5,5",
+   "name": "Deposito di Scarti Metallici",
+   "environment": "magazzini_ramelli",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "size": "large",
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-5",
+   "name": "Approdo delle Chiatte Ghiacciate",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 2680,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-4,5",
+   "name": "Sotto-Cantiere del Palombaro",
+   "environment": "baracche",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Capanno dell'addetto alle chiuse",
+     "size": "small",
+     "seed": 3308,
+     "worn": true
+    },
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-4",
+   "name": "Bacino delle Lastre di Ghiaccio",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 2570,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-3",
+   "name": "Molo del Ghiaccio Sottile",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "size": "medium",
+     "seed": 2590,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-2",
+   "name": "Approdo delle Lastre Gelate",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "size": "medium",
+     "seed": 3934,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,-1",
+   "name": "Molo del Gelo Persistente",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "size": "medium",
+     "seed": 2008,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,0",
+   "name": "Scalo del Ghiaccio Sospeso",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Faro a vapore (faro con il sotterraneo)",
+     "size": "large",
+     "seed": 1288,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,1",
+   "name": "Molo dei Ghiacci Residui",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 333,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "5,2",
+   "name": "Molo dei Bastimenti Dimenticati",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 1514,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-5,3",
+   "name": "Molo dei Relitti Ghiacciati",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 1464,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "3,5",
+   "name": "Approdo dei Mietitori alle Acque Grige",
+   "environment": "campagne_trebbie",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Cascina delle trebbiatrici",
+     "size": "medium",
+     "seed": 1281,
+     "worn": true
+    },
+    {
+     "concept": "Capanno dell'addetto alle chiuse",
+     "seed": 3011,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "4,-5",
+   "name": "Darsena delle Lame Arrugginite",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Capanno del Capo-Porto",
+     "seed": 2765,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-5,4",
+   "name": "Darsena delle Vaporiere Arrugginite",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "size": "medium",
+     "seed": 2354,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-6,6",
+   "name": "Serre di Vetro dell'Ovest",
+   "environment": "baracche",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "size": "medium",
+     "seed": 2711,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "6,-6",
+   "name": "Approdo delle Chiatte Ghiacciate",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Capanno del Capo-Porto",
+     "seed": 3541,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-5,6",
+   "name": "Borgo dei Fochi Bassi",
+   "environment": "baracche",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "size": "medium",
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "6,-5",
+   "name": "Darsena della Brina Eterna",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Taverna delle caldaie (taverna con la cantina)",
+     "size": "large",
+     "seed": 2298,
+     "worn": true
+    },
+    {
+     "concept": "il capanno di collaudo delle chiatte a vapore, su palafitte sopra l'acqua",
+     "seed": 1654,
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "-4,6",
+   "name": "Sella dei Venti Metallici",
+   "environment": "mountains",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Officina meccanica (officina con la cantina)",
+     "worn": true
+    }
+   ]
+  },
+  {
+   "place": "6,-4",
+   "name": "Molo del Ghiaccio Nero",
+   "environment": "harbour",
+   "fresh": true,
+   "structures": [
+    {
+     "concept": "Faro a vapore (faro con il sotterraneo)",
+     "size": "large",
+     "seed": 3109,
+     "worn": true
+    }
+   ]
+  }
+ ]
+}

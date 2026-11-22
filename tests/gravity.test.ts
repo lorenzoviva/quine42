@@ -38,7 +38,8 @@ async function scene(gravity?: number, away = false) {
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const files = gravity === undefined ? bundledFiles : { ...bundledFiles, 'universe.json': JSON.stringify({ ...cfg, nature: { ...DEFAULT_NATURE, gravity } }, null, 2) + '\n' };
   const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
-  const wanted = away ? ['0,0', '-1,0', '-1,-1'] : ['0,0'];
+  // The places the row is looked for on, waited for and only those (T495): which others are planned by then depends on how long a plan takes.
+  const wanted = away ? ['0,0', '-1,0', '-1,-1'] : ['0,0', '0,-1', '-1,0'];
   for (let i = 0; i < 240 && wanted.some((c) => k.chunks.get(c)?.stage !== 'planned'); i++) {
     k.tick(1 / 60);
     await new Promise((r) => setTimeout(r, 25));
@@ -50,7 +51,7 @@ async function scene(gravity?: number, away = false) {
   for (let y = -10; y <= 10 && !spot; y++)
     for (let x = away ? -17 : -10; x <= (away ? -9 : 6) && !spot; x++) {
       let ok = true;
-      for (let dy = -1; dy <= 1 && ok; dy++) for (let dx = 0; dx <= 8 && ok; dx++) ok = k.free(x + dx + 0.5, y + dy + 0.5, 0.45) && !!k.chunkAt(x + dx, y + dy)?.plan;
+      for (let dy = -1; dy <= 1 && ok; dy++) for (let dx = 0; dx <= 8 && ok; dx++) ok = k.free(x + dx + 0.5, y + dy + 0.5, 0.45) && !!k.chunkAt(x + dx, y + dy)?.plan && wanted.includes(k.chunkAt(x + dx, y + dy)!.key);
       if (ok) spot = [x + 0.5, y + 0.5];
     }
   expect(spot).toBeDefined();

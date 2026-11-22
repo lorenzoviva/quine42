@@ -164,7 +164,7 @@
 
 - **Un modello nuovo nel Concilio** (T466): il prezzo con la data, gli elenchi a id fissi dei varchi, dove il gioco lo sceglie, la stima, il banco pagato col tetto e la sicurezza, passo per passo, in [`docs/guide/nuovo-modello.md`](guide/nuovo-modello.md) (parte A).
 - **Google Gemini**: `gemini-3.1-flash-lite` (testo), in
-  `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`),
+  `universe/universe.json → ai` con i budget (`maxText`, `maxForges`, `maxPacks`, `maxCast`; in multigiocatore `placesPerMinute`; i programmi nuovi delle strutture all’ora, `newStructuresPerHour`, 2, ADR-0247),
   il ragionamento (`thinking`, `low`) e il tempo massimo (`timeout`). Prezzi in `src/kernel/ai/prices.ts` (con la data).
   **L'Attore** (`ai.actor`, ADR-0116, T157): spento se non detto, e allora nulla cambia; acceso (un booleano, il nome di un modello o `{acceso, modello}`,
   `repairActor`), il Narratore scrive la scheda di ogni individuo alla sua prima battuta (`npc.sheet`, `Individual.scheda`, riscritta solo se cambiano legami o
@@ -410,6 +410,28 @@ quando il luogo è in raggio, una volta a caricamento (`pumpAsks`); `planAhead` 
 tutte, per ciò che non costa (un'altra taglia, una carta) e per la generazione. Gli individui erano già entro 9 caselle. I test degli altri sottosistemi
 allargano `near` a ogni luogo caricato (`tests/setup/reach-wide.ts`, `Kernel.REACH`); `tests/raggio.test.ts` prova quello del gioco. La misura della prima
 run e la sessione scriptata: `lab/banco/run-1/consumi.md` (`lab/scripts/consumi-run.ts`, `lab/scripts/sessione-cammino.ts`).
+**Il riuso delle strutture e le strutture nuove all'ora** (ADR-0247, T495, kernel 0.10.23): i programmi delle strutture crescono a regole e
+cambiano col seme (ADR-0160), così il Cartografo, pianificando un luogo, riceve le strutture che il mondo ha (`PlanContext.known`,
+`Kernel.knownStructures`: concetto, taglie, cantina, in quanti luoghi, le meno usate prima, al più 40; `src/kernel/reuse.ts`, puro:
+`reusableStructures`, le voci `struttura-…` dello Scultore e le carte portate, di classe `structure` o `building`, mai parti, case comuni né la
+corona, quelle del seme solo in un mondo della sua epoca, `seed.json` e `seedAged`; delle taglie rare solo quelle che il luogo può ancora avere) e
+ne sceglie una quando sta bene, scrivendone il concetto esatto; un concetto nuovo solo quando nessuna va, circa un luogo su dieci (`reuseLines`), e
+dopo `FRESH_EVERY` (10) piani senza uno, sotto il tetto, il kernel lo invita a darne uno (`freshWanted`, `plansSinceFresh`: Flash-Lite da solo riusa
+sempre, e sempre la più adatta al genere del luogo). Il
+kernel, sul piano nuovo e prima di salvarlo (`wearAgain`), riscrive il concetto come lo dice la libreria, alla taglia più vicina che ha
+(`nearestSize`; un nome che è l'inizio dell'altro in almeno quattro parole è la stessa struttura, `reusableOf`, `SHORT_NAME_WORDS`), e gli dà un seme suo dal luogo (`PlanStructure.seed`, `reuseSeed`: dal seme del mondo, dal luogo e dal posto della struttura,
+oltre i quattro semi che lo Scultore ha provato, mai dall'orologio); una struttura con la cantina e una carta portata tengono il seme del loro lotto
+(`newSeedFor`: oltre il quarto seme cade più spesso il controllo della cantina; una carta che fallisce si isolerebbe). Il lotto la veste a quel seme
+(`lotsOf`, il componente `structure.seed`, anche quando passa dal generico al suo modello); `claimSizes` le dà la taglia più grande che ha e che il
+lotto tiene; `structureModelFor` la trova per concetto qualunque sia il suo id, e il `ModelDirector` dà a un'altra taglia il programma che scala
+(`shareWith` coi suoi id). Niente Scultore né Artista: il modello c'è. Un concetto nuovo conta nell'ora del mondo (`Kernel.structureHour`,
+`StructureHour`, 3600 s di `kernel.time`); al tetto (`ai.newStructuresPerHour`, 2 se non detto, 0-60, una regolazione della lobby, ferma a
+partita in corso, la riga `tetto` di `model.sculpt` nel censimento) il Cartografo riceve solo le strutture del mondo, e lo schema lascia passare
+solo i loro concetti (o nessuna struttura, se il mondo non ne ha); il `ModelDirector` non comincia più programmi nuovi di strutture dei piani di quanti
+ne dice l'ora (`programs`, `overHour`, `noteProgram`: le case comuni, i modelli dei moduli, ciò che dà la libreria, `model.reuse`, e le copie di
+un'altra taglia non contano), e una struttura oltre aspetta col generico della sua classe. Con più viandanti il tetto è del mondo. La generazione
+differita (`ai.name` `differita`) non ha il tetto. La misura: i semi delle strutture di quattro universi (`lab/scripts/semi-strutture.ts`), il
+cammino prima e dopo (`lab/scripts/sessione-cammino.ts --nuove --tetto`), in `lab/banco/run-1/consumi.md` § 6.
 **Fucina**: concetto (tipo, contesto, aspetto, comandi, azioni, contenitore, cose portate, persona,
 unicità) → fisica → codice → Arbitro → validatore → commit → bibbia; il modello (`appearance.model` suo, con la `classe`) lo scrive poi lo Scultore; gli oggetti dei pacchetti
 hanno una forma comune (`forma-…`, un programma per forma, ricolorato), i terreni con cose sopra un modello loro. **Genesi**: bibbia → stile → terreni (Fisico) → Arbitro → ambienti (provati) →

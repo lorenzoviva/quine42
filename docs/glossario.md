@@ -619,6 +619,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «struttura parametrica»
 - **Fermo**: il campo `seeds` in `models/index.json`; il suffisso della taglia negli id `struttura-<concetto>-<taglia>`.
 
+### Struttura riusata
+- **Inglese**: `reusableStructures`, `ReusableStructure`, `reusableOf`, `SHORT_NAME_WORDS`, `reusableEntry`, `knownStructures`, `wearAgain`, `reuseSeed`, `newSeedFor`
+- **Definizione**: una struttura che il mondo ha già (scolpita per lui, o venuta con le carte; quelle del seme solo in un mondo della sua epoca), che il Cartografo chiede di nuovo col suo concetto per un luogo nuovo: il kernel la veste con un seme suo, dal luogo (un altro edificio dello stesso genere), senza chiamare lo Scultore né l'Artista; una con la cantina e una carta portata tengono il seme del loro lotto (T495, ADR-0247).
+- **Dove vive**: `src/kernel/reuse.ts`, `src/kernel/kernel.ts` (`wearAgain`, `structureModelFor`, `claimSizes`), `src/kernel/agents/cartography.ts`
+- **Da non usare**: «struttura copiata», «clone della struttura» (il clone è un universo, ADR-0068), «riuso dei modelli» (è `model.reuse`, la decisione di Jev prima dello Scultore)
+- **Fermo**: il campo `seed` delle strutture dei piani in `maps/`.
+
+### Strutture nuove all'ora
+- **Inglese**: `newStructuresPerHour`, `NEW_STRUCTURES_PER_HOUR`, `StructureHour`, `structureHour`, `newStructureAllowed`, `overHour`, `noteProgram`, `FRESH_EVERY`, `freshWanted`, `plansSinceFresh`
+- **Definizione**: il tetto dei programmi nuovi delle strutture dei luoghi in un'ora del mondo, per tutto il mondo (2 se la lobby non dice altro, 0-60): oltre, il Cartografo chiede solo le strutture che il mondo ha e lo Scultore non comincia un programma nuovo di struttura; il riuso con un seme nuovo non conta mai. Sotto, dopo dieci piani senza un concetto nuovo, il Cartografo è invitato a darne uno. Una regolazione della lobby, ferma a partita in corso (T495, ADR-0247).
+- **Dove vive**: `src/kernel/reuse.ts`, `src/kernel/kernel.ts`, `src/kernel/modeldirector.ts`, `src/kernel/universe.ts` (`BUDGET_SCALE`), `src/ui/lobby.ts`
+- **Da non usare**: «strutture all'ora» senza «nuove» (le strutture riusate non hanno tetto), «quota delle strutture» (la quota è dei luoghi al minuto)
+- **Fermo**: il campo `ai.newStructuresPerHour` di `universe.json`.
+
 ### Densità delle strutture
 - **Inglese**: `STRUCTURE_VPT`, `structureVoxels`, `vptOf`
 - **Definizione**: i voxel per casella a cui si mostra una struttura che cresce a regole: 16 dal T405 (ADR-0209), con i voxel che aveva a 20 (100, 150, 500 di lato), un quarto più grande accanto al viandante; una voce che non dice la sua densità (`vpt`) è a 16, una che la dice resta alla sua. È la densità per voce (`vpt`, ADR-0049) quando la voce non la scrive.

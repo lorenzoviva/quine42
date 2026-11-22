@@ -160,6 +160,28 @@ export const CELLAR_CHANCE = 0.2;
 /** How far from the start (places) the offline plans may have one. */
 export const CELLAR_FROM = 2;
 export const CELLAR_HOUSE = 'la casa con la cantina';
+
+/** The rare sizes (ADR-0092): an offline plan wears a structure of the world again at a common one. */
+const RARE: readonly string[] = ['huge', 'gargantuan'];
+
+/**
+ * The structures of an offline plan (T495, ADR-0247): its own, unless the world builds no new kind now (`newStructures` false, the ceiling of
+ * the hour): then, for each, one the world has (`known`), drawn by the place, with a cellar if it asks one and without if not, at its first common
+ * size; none if the world has none. Drawn apart: a plan under the ceiling stays the one it was.
+ */
+function worldStructures(ctx: PlanContext, own: Array<{ concept: string; cellar?: boolean }>): Array<{ concept: string; size?: string; cellar?: boolean }> {
+  if (ctx.newStructures !== false) return own;
+  const known = ctx.known ?? [];
+  return own.flatMap((s, i) => {
+    // Of a common size (a house, a mill), as a place usually has lots for: the rare sizes are for the places that deserve them.
+    const common = known.filter((k) => k.sizes.some((t) => !RARE.includes(t)));
+    const fit = common.filter((k) => !!s.cellar === k.cellar);
+    const list = fit.length ? fit : common;
+    if (!list.length) return [];
+    const k = list[new Rng(hashStr(`reuse|${ctx.cx}|${ctx.cy}|${i}`)).int(list.length)];
+    return [{ concept: k.concept, size: k.sizes.find((t) => !RARE.includes(t))!, ...(s.cellar && k.cellar ? { cellar: true } : {}) }];
+  });
+}
 export const CELLAR_THING = 'obj.chest';
 /** The seed's harbour (T443): the offline plans choose it on the shore of an island, never elsewhere. */
 export const HARBOUR = 'harbour';
@@ -713,8 +735,8 @@ export class MockAiModels implements AiModels, DecisionModels {
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,
-      // The start has its bakery: a structure of its own, which the Sculptor writes.
-      structures: ctx.start ? [{ concept: 'il forno del borgo' }] : cellar ? [{ concept: CELLAR_HOUSE, cellar: true }] : [],
+      // The start has its bakery: a structure of its own, which the Sculptor writes; over the ceiling of the hour (T495) one the world has.
+      structures: worldStructures(ctx, ctx.start ? [{ concept: 'il forno del borgo' }] : cellar ? [{ concept: CELLAR_HOUSE, cellar: true }] : []),
       // The island it stands on, if nobody has named it (T441): drawn apart, the rest of the plan stays the one it was.
       ...(ctx.island && !ctx.island.name ? { island: islandName(ctx.cx, ctx.cy, !!ctx.island.islet, ctx.island.body) } : {}),
     };

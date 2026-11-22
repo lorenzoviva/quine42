@@ -11,6 +11,7 @@ import { sizeOf, type SizeTier } from '../../mj/classes';
 import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 import type { Geography } from '../nature';
+import { REUSE_OFFERED, reuseLines } from '../reuse';
 
 /**
  * What the Cartographer is told at the Genesis of an archipelago (T443, ADR-0230): the shores are most of its places, so among its environments
@@ -118,6 +119,11 @@ export interface PlanStructure {
   concept: string;
   size?: SizeTier;
   cellar?: boolean;
+  /**
+   * The seed of a structure of the world worn again (T495, ADR-0247): written by the kernel when the plan is new and its concept is one the
+   * library has (`reuseSeed`, from the place), never by the Cartographer; absent, the seed of its lot (`seedFor`), as ever.
+   */
+  seed?: number;
 }
 
 export interface PlanContext {
@@ -150,6 +156,15 @@ export interface PlanContext {
   chi?: string;
   /** The structures that came with the cards (T295, ADR-0170): asked by their concept and size, they are worn as they are, at no cost. */
   brought?: Array<{ concept: string; size?: SizeTier }>;
+  /**
+   * The structures the world has (T495, ADR-0247), the brought ones among them: the Cartographer asks one again by its concept, the kernel
+   * builds it with another seed; in their order (the least worn first).
+   */
+  known?: Array<{ concept: string; sizes: SizeTier[]; uses: number; cellar: boolean }>;
+  /** Whether a new concept of structure may be asked now (T495): false over the ceiling of the hour (`ai.newStructuresPerHour`), then only `known`. */
+  newStructures?: boolean;
+  /** A new concept is welcome here (T495): under the ceiling, and `FRESH_EVERY` plans brought none. */
+  freshWanted?: boolean;
 }
 
 export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under'];
@@ -181,7 +196,9 @@ const PLAN_SCHEMA: Schema = {
 export function readStructure(s: any): PlanStructure {
   // A plan of before the contract 0.4 says `taglia` and `concetto`; a size in the Italian of 0.1 is still the one it means.
   const size = sizeOf(internalName('taglie', String(s?.size ?? s?.taglia ?? '').trim().toLowerCase()))?.id ?? (s?.importante === true ? 'huge' : undefined);
-  return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}), ...(s?.cellar === true ? { cellar: true } : {}) };
+  // The seed of a structure worn again (T495) is the kernel's: a whole number of its span, else none.
+  const seed = typeof s?.seed === 'number' && Number.isInteger(s.seed) && s.seed >= 1 && s.seed < 2 ** 31 ? s.seed : undefined;
+  return { concept: String(s?.concept ?? s?.concetto ?? '').trim(), ...(size ? { size } : {}), ...(s?.cellar === true ? { cellar: true } : {}), ...(seed !== undefined ? { seed } : {}) };
 }
 
 export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan> {
@@ -197,7 +214,8 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     '"fresh": almost always empty; only a concrete thing or a character the place calls for and that does not exist among the modules; for a thing, "takeable": true if a wanderer could lift it and set it down elsewhere (a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
     `"runes": 0-2 fragments taken exactly from this list: ${ctx.fragments.map((f) => `«${f}»`).join(', ')}.`,
     '"structures": 0-2 buildings or constructions of this place, if the environment has some of its age (e.g. "the mill on the river", "the tram depot", "the boiler works"): each becomes a whole model one can enter, on the lots of the environment (the other lots have common houses). "cellar": true, now and then, for one that has rooms under the ground (the barrel cellar of an inn, the crypt of a temple, the vault of a bank): then put what belongs down there in "objects" with "where": under.',
-    ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "structures".` : '',
+    ...(ctx.known ? reuseLines(ctx.known, ctx.newStructures !== false, ctx.freshWanted === true) : []),
+    !ctx.known && ctx.brought?.length ? `These structures are already built in the library: ${ctx.brought.slice(0, 30).map((b) => `«${b.concept}»${b.size ? ` (${b.size})` : ''}`).join(', ')}. When one fits this place, write EXACTLY its concept (and its size) in "structures".` : '',
     `"size" (optional, as the sizes of D&D: tiny, small, medium, large, huge, gargantuan): medium a house, large a mill, a station or a tower; the kernel fits it to the lot.`,
     ctx.rari?.length
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
@@ -210,9 +228,12 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     .join('\n\n');
   // The environment can only be one of the existing ids: the schema says so. An island nobody has named yet is named with it (T441).
   const unnamed = !!ctx.island && !ctx.island.name;
+  // Over the ceiling of the hour (T495) a structure is one the world has, or none: the schema lets only their concepts through.
+  const { structures: _s, ...rest } = PLAN_SCHEMA.properties!;
+  const structures: Record<string, Schema> = ctx.newStructures === false ? (ctx.known?.length ? { structures: knownStructures(ctx.known) } : {}) : { structures: PLAN_SCHEMA.properties!.structures };
   const schema: Schema = {
     ...PLAN_SCHEMA,
-    properties: { ...PLAN_SCHEMA.properties!, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
+    properties: { ...rest, ...structures, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
     ...(unnamed ? { required: [...PLAN_SCHEMA.required!, 'island'] } : {}),
   };
   const raw = await c.ask<any>('cartographer', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
@@ -225,11 +246,21 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ground: (raw?.ground ?? []).slice(0, 4).map(String),
     fresh: (raw?.fresh ?? []).slice(0, 1).map((o: any) => ({ concept: String(o?.concept ?? ''), where: whereOf(o?.where), ...(typeof o?.takeable === 'boolean' ? { takeable: o.takeable } : {}) })),
     runes: (raw?.runes ?? []).slice(0, 3).map(String),
-    structures: (raw?.structures ?? []).slice(0, 3).map(readStructure),
+    // The seed is never the Cartographer's (T495): the kernel writes it for a structure of the world worn again.
+    structures: (Array.isArray(raw?.structures) ? raw.structures : []).slice(0, 3).map((x: unknown) => {
+      const { seed: _seed, ...said } = readStructure(x);
+      return said;
+    }),
     // The island's name as said (T441): the kernel checks it and writes it on the atlas, never in the plan.
     ...(unnamed && raw?.island ? { island: raw.island } : {}),
   } as ChunkPlan;
 }
+
+/** The structures of a plan when only those of the world may be asked (T495): their concepts as an enumeration, as the environments. */
+const knownStructures = (known: NonNullable<PlanContext['known']>): Schema => ({
+  type: 'ARRAY',
+  items: { type: 'OBJECT', properties: { concept: { type: 'STRING', enum: known.slice(0, REUSE_OFFERED).map((k) => k.concept) }, size: { type: 'STRING', enum: internalValues('taglie') }, cellar: { type: 'BOOLEAN' } }, required: ['concept'] },
+});
 
 /** The island's name and a line about it, as the Cartographer gives them with the first place on it (T441). */
 const ISLAND_SCHEMA: Schema = { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] };

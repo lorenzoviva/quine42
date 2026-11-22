@@ -78,7 +78,7 @@ export function withinMinimums(ai: AiConfig): AiConfig {
 export const SCULPTOR_CLASSES = ['simple', 'figure', 'structure', 'important', 'artist', 'musician'] as const;
 
 /** What every budget of `ai` may be, [least, most]: `placesPerMinute` at 0 would stop the world from having places at all. */
-export const BUDGET_SCALE = { maxText: [0, 20000], maxForges: [0, 50], maxPacks: [0, 50], maxCast: [0, 50], maxModels: [0, 400], maxPieces: [0, 100], placesPerMinute: [1, 120] } as const;
+export const BUDGET_SCALE = { maxText: [0, 20000], maxForges: [0, 50], maxPacks: [0, 50], maxCast: [0, 50], maxModels: [0, 400], maxPieces: [0, 100], placesPerMinute: [1, 120], newStructuresPerHour: [0, 60] } as const;
 export type BudgetKey = keyof typeof BUDGET_SCALE;
 export const BUDGET_KEYS = Object.keys(BUDGET_SCALE) as BudgetKey[];
 

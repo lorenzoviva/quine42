@@ -16,7 +16,7 @@ const UNIVERSE_FIELDS = ['name', 'kernel', 'kernels', 'seed', 'circleRadius', 'c
 // `expenses` (T372, ADR-0188): whoever enters reads who pays for the match before entering.
 const GAME_FIELDS = ['mode', 'death', 'pvp', 'freeActionsBetweenPlayers', 'master', 'expenses'];
 /** What the lobby and the site's pages show of `ai`, and what the hourly estimate reads (`publicFiles` only). Not `provider`, `agents`, `thinking`, `timeout`. */
-const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxPieces', 'placesPerMinute', 'thinking', 'actor'];
+const LOBBY_AI_FIELDS = ['textModel', 'sculptors', 'coefficients', 'minimums', 'maxText', 'maxForges', 'maxPacks', 'maxCast', 'maxModels', 'maxPieces', 'placesPerMinute', 'newStructuresPerHour', 'thinking', 'actor'];
 
 /**
  * What a client reads of a manifest. An entity in the world reaches it from the server (form, body, menu: `ENTITY_PARTS`), so

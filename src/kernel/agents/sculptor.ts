@@ -683,6 +683,16 @@ export function checkProgram(xml: string, cls: AssetClass, taglia?: string, file
 }
 
 /**
+ * The Sculptor's checks of a program at one seed of its size (T495): what `checkProgram` does at each of its seeds, for a seed the world gives
+ * a structure it wears again (`lab/scripts/semi-strutture.ts` measures how the seeds past `STRUCTURE_SEEDS` hold). The error, or undefined.
+ */
+export function checkSeed(xml: string, cls: AssetClass, taglia: string | undefined, seed: number, files: MjxFiles = {}, opts: CheckOptions = {}): string | undefined {
+  xml = withoutRootDensity(xml);
+  const base = cellarOfRequest(cls, taglia, opts.cellar);
+  return checkOnce(procedural(cls, taglia) ? withoutSize(xml) : xml, cls, taglia, seed, files, opts, base).error;
+}
+
+/**
  * How tall a model of a class must be at a size: a share of its box; a structure that grows by rules a share of its class's own box,
  * at every size (T338): a larger area adds what fits, and need not be taller.
  */

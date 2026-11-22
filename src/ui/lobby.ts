@@ -18,6 +18,7 @@ import { CardChoicePanel } from './cardchoice';
 import { el } from './dom';
 import { openRouterBox, PROPOSED_LIMIT, type OpenRouterLink } from './openrouter';
 import { tierPicker } from './sculptortier';
+import { NEW_STRUCTURES_PER_HOUR } from '../kernel/reuse';
 
 export interface LobbyOptions {
   name: string;
@@ -64,8 +65,9 @@ const BUDGET_NAMES: Record<BudgetKey, string> = {
   maxModels: 'Modelli per sessione',
   maxPieces: 'Brani per sessione',
   placesPerMinute: 'Luoghi nuovi al minuto',
+  newStructuresPerHour: 'Strutture nuove all’ora',
 };
-const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxPieces: 8, placesPerMinute: 20 };
+const BUDGET_DEFAULTS: Partial<Record<BudgetKey, number>> = { maxPacks: 4, maxCast: 3, maxModels: 40, maxPieces: 8, placesPerMinute: 20, newStructuresPerHour: NEW_STRUCTURES_PER_HOUR };
 const CLASS_NAMES: Record<(typeof SCULPTOR_CLASSES)[number], string> = { simple: 'Scultore, cose semplici', figure: 'Scultore, figure', structure: 'Scultore, strutture', important: 'Scultore, strutture importanti', artist: 'Artista (giudizio)', musician: 'Musicista' };
 const THINKING: Array<[string, string]> = [['off', 'predefinito del modello'], ['low', 'basso'], ['medium', 'medio'], ['high', 'alto']];
 
