@@ -13,6 +13,8 @@ import { fallbackDeath } from '../gameSetup';
 import { italianName } from '../internalNames';
 import { symbolTokens } from '../../mj/symbols';
 import { boxOf, classOf } from '../../mj/classes';
+import { parseXml, type XmlElement } from '../../mj/xml';
+import { RESERVED_PART_SYMBOLS } from '../worldparts';
 import { mockVesselProgram } from './mockVessel';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
@@ -95,6 +97,53 @@ export function mockWorn(program: string, zone: string): string {
   return `<worn zone="${zone}">\n  <all>${rules.join('')}</all>\n</worn>`;
 }
 
+/** The nodes of a program (as `MJX_NODES`): what stands one after the other in a `<sequence>`. */
+const NODE_TAGS = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'wfc', 'convchain', 'pieces', 'box', 'ellipsoid', 'cylinder', 'cone', 'line']);
+
+/**
+ * The offline Sculptor's part of a program (T472, when the local models are asked to cut one, `MockAiModels.parts`): the last rule node of its
+ * root `<sequence>` (an `all`, a `prl` or a `one` that starts its own line, after another node), with the letters its rules read and draw;
+ * `<none/>` where there is none, or where the grid uses the letters the parts of the seed keep.
+ */
+export function mockPart(xml: string, nome: string): string {
+  let roots: XmlElement[];
+  try {
+    roots = parseXml(xml);
+  } catch {
+    return '<none/>';
+  }
+  const root = roots.find((r) => !['animation', 'action', 'worn'].includes(r.name));
+  const values = root?.attrs.values;
+  if (!root || root.name !== 'sequence' || !values) return '<none/>';
+  const codes = symbolTokens(values).filter((t) => t.code);
+  if (codes.some((t) => RESERVED_PART_SYMBOLS.has(t.code!))) return '<none/>';
+  const lines = xml.split('\n');
+  // The line of the root's closing tag (from 1): the last one before what stands beside it.
+  const beside = roots.find((r) => r !== root && r.line > root.line);
+  let close = beside ? beside.line - 1 : lines.length;
+  while (close > 0 && !lines[close - 1].includes(`</${root.name}>`)) close--;
+  const kids = root.children;
+  const firstNode = kids.find((k) => NODE_TAGS.has(k.name));
+  const letters = (s: string | undefined) => symbolTokens(s ?? '').filter((t) => t.code).map((t) => t.text);
+  for (let i = kids.length - 1; i >= 0; i--) {
+    const k = kids[i];
+    if (!['all', 'prl', 'one'].includes(k.name) || k === firstNode) continue;
+    const from = k.line;
+    const to = (kids[i + 1]?.line ?? close) - 1;
+    if (to < from || !lines[from - 1].trimStart().startsWith(`<${k.name}`)) continue;
+    const span = lines.slice(from - 1, to).join('\n');
+    if (/<import\b|\s(?:fin|fout|file|tileset|sample)="/.test(span)) continue;
+    const rules = [k, ...k.children.filter((c) => c.name === 'rule')];
+    const ins = rules.flatMap((r) => [...letters(r.attrs.in), ...letters(r.children.find((c) => c.name === 'in')?.text)]);
+    const outs = rules.flatMap((r) => [...letters(r.attrs.out), ...letters(r.children.find((c) => c.name === 'out')?.text)]);
+    const reads = [...new Set(ins)];
+    const writes = [...new Set(outs)].filter((s) => s !== codes[0].text);
+    if (!writes.length) continue;
+    return `<part name="finitura" lines="${from}-${to}" reads="${reads.join('')}" writes="${writes.join('')}">The last step of «${nome.replace(/[<>"]/g, '')}»: where ${reads.join(' ') || 'nothing'} is drawn it draws ${writes.join(' ')}. Include it once the shape is built, and give ${writes.join(' ')} your colours.</part>`;
+  }
+  return '<none/>';
+}
+
 export const MOCK_FIELD_PROGRAM = `<sequence values="BCRGW" ground="C" symmetry="(xy)">
   <one in="B C" out="G *" steps="1"/>
   <one in="B C" out="R *" steps="1"/>
@@ -129,6 +178,11 @@ export class MockAiModels implements AiModels, DecisionModels {
   limits: Limits = { text: Infinity };
   /** Probability that a first chunk plan is broken on purpose. */
   corruptRate = 0.15;
+  /**
+   * Whether the local Sculptor takes parts of the world from its models (T472, `mockPart`): off, it answers `<none/>`, as a game without a key
+   * never asks (the director sculpts only with the models); a test turns it on.
+   */
+  parts = false;
   latency = 15;
   /** Individuals drawn so far: each a different individual, the same ones in every run (T35). */
   private drawn = 0;
@@ -201,6 +255,9 @@ export class MockAiModels implements AiModels, DecisionModels {
       }
       case 'model.judge':
         return { score: 7, recognizable: true, problems: [], advice: [] };
+      case 'model.part':
+        // A part of the world (T472): the local models find nothing worth sharing, unless a test asks them to cut the last step of a program.
+        return this.parts ? mockPart(String(d.xml ?? ''), String(d.request?.nome ?? 'cosa')) : '<none/>';
       case 'genesis.terrain':
         return {
           terrains: [

@@ -365,6 +365,23 @@ il bordo. **Il banco** (`lab/banco/parti/`, `lab/scripts/banco-parti.ts`, `tests
 la casetta del Capomastro, la villetta offline dello Scultore con `part-window` al posto delle sue finestre a caso (passa i controlli a Grande
 e a Enorme, 31 finestre); nel laboratorio 3D le parti da sole e i modelli. Che lo Scultore le usi coi modelli veri resta da vedere (S7, T473).
 
+**Fatto in T472 (S6, la via B, ADR-0242)**: dopo un modello che entra con voto ≥ 6 il direttore chiede al suo mestiere una parte (`model.part`,
+manopola `models`, una carta del mondo), al più due volte a sessione per mestiere e finché il mestiere ne ha meno di quattro. **Che cosa è
+cambiato dal previsto**: lo Scultore **non riscrive** il modello: vede il programma con le righe numerate e dice quali righe sono la parte e il
+suo contratto (`<part name lines reads writes>`), il kernel scrive la parte (quelle righe come sono, coi `values` della loro griglia, i colori e
+le unioni del modello) e il modello con `<import>` al loro posto: poche centinaia di token d'uscita invece di un programma intero, e nessuna
+riga ricopiata male. La stessa griglia si prova su **ogni seme che il mondo dà al modello** (tre almeno: una persona ne ha otto), con lo stesso
+aspetto di ogni lettera e le stesse azioni; il modello riscritto entra al posto di quello di prima (il primo uso della parte, e l'esempio che
+insegna a includerla); una parte coi nodi di una che c'è già non si scrive, il modello include quella. Il nome è del testo (`part-<parole>-<hash>`),
+e la parte non ha una scena di prova: il validatore la prova da sola solo perché compili e finisca, la prova vera è il modello da cui viene.
+Prima di scrivere il codice si è misurato che un `<import>` al posto di un tratto di una `<sequence>` dà la stessa griglia (54 programmi del
+seme, sei semi, i `values` in un altro ordine, senza la simmetria) e dentro un `<markov>` no (9 prove su 32). Il viaggio con le carte: lo store
+legge dal disco la chiusura degli `<import>` di una carta, porta con lei le parti del mondo e legge il resto dove la carta entra; prima il
+controllo delle carte portate compilava senza i file inclusi, e una struttura con `part-door` non si portava. Il clone le tiene. Le misure
+([`misure-s6.md`](scultori-specializzati/misure-s6.md), `lab/scripts/parti-mondo.ts -- --conta`): lo Scultore locale taglia una parte da 16
+programmi del seme su 54, tutte con la stessa griglia; la richiesta 7 035 token, la riga di una parte nelle richieste del suo mestiere 71; nell'ora
+0,034 $ oggi e 0,047 $ dall'1/12, nelle prime sessioni. Che lo Scultore vero scelga righe che servono ad altri modelli resta da provare coi modelli.
+
 ## 5. `<markov>` come ciclo con l'uscita, e gli altri nodi che il prompt non insegna (e)
 
 ### 5.1 Come il kernel lo esegue
@@ -541,7 +558,10 @@ Scultore»), la porta della casetta e il coperchio del baule provati.
   Opus): un mondo giocato con Gemini può chiedere più figure e meno strutture.
 - I token sono di Gemini (`countTokens` di Flash-Lite); su Opus il tokenizzatore è un altro.
 - Il controllo «la stessa griglia» della via B non è provato: che una parte inclusa consumi lo stesso caso del testo che sostituisce si
-  legge nel motore (`importNode` compila il programma incluso al suo posto), va provato in S6.
+  legge nel motore (`importNode` compila il programma incluso al suo posto), va provato in S6. **T472**: provato per un tratto di nodi di una
+  `<sequence>` (54 programmi del seme, sei semi: sempre la stessa griglia), non dentro un `<markov>` (9 prove su 32 cambiano); il kernel prende
+  una parte solo dopo averlo provato sul suo modello, su ogni seme del mondo (`sameGridErrors`, `tests/world-parts.test.ts`). Non provato: che lo
+  Scultore vero scelga righe che altri modelli del suo mestiere possano includere.
 - La semantica di `<markov>` era letta nel codice: T469 l'ha provata (`tests/mj-markov.test.ts`). Che lo Scultore usi la guida dei cicli resta da
   vedere coi modelli veri (S7). T473: su Argon no, in nessuna delle 24 risposte della rocca dei due bracci.
 - Che l'ordine del sistema faccia servire il comune dalla cache a ogni mestiere (§ 2.3): T473 l'ha provato. Sì su OpenRouter coi segni

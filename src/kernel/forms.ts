@@ -113,6 +113,13 @@ export interface ModelInfo {
    * `SculptorSpecialty`; a part without it is the architect's, as every part of the seed was before. Read without trusting it (`partSpecialties`).
    */
   specialty?: string | string[];
+  /**
+   * A part of the world (T472, ADR-0242): the Sculptor took it from a good model of this universe (or it came with a card that includes it);
+   * only the kernel writes it, with an id `part-<words>-<hash>` (`isWorldPart`). It is never written anew nor taken away while a model includes it.
+   */
+  part?: boolean;
+  /** The model of this universe a part of the world was taken from (T472): the line that offers the part names it. */
+  from?: string;
 }
 
 /** What an entity's look is: which program, which seed, which way it faces, what has been done to it. */

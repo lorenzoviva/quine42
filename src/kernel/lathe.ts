@@ -104,7 +104,9 @@ export function latheExecute(
   const cls = forms.classOf(entry.id);
   const root = rootTag(entry.xml);
   const size = /\ssize="/.test(root) ? undefined : boxOf(cls);
-  const m = compileMjx(entry.xml, size ? { size } : {});
+  // A model that includes a part (of the seed or of the world, T472) reads it from the library.
+  const files = forms.includesOf(entry.id);
+  const m = compileMjx(entry.xml, { ...(size ? { size } : {}), ...(Object.keys(files).length ? { files } : {}) });
 
   const r = runMjx(m, seed, { snapshots: snapshotsCount, deadline: 10_000 });
   const g = r.grid;

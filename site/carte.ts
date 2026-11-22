@@ -177,8 +177,13 @@ export function artOf(card: Card, files: FileMap, forms: Forms): FormRequest | u
     return forms.request(model, forms.seedFor(model, who), m.appearance.color);
   };
   switch (card.tipo) {
-    case 'model':
-      return forms.request(Object.keys(forms.models()).find((id) => slug(id) === card.id.slice('model:'.length)) ?? '', 1);
+    case 'model': {
+      const id = Object.keys(forms.models()).find((m) => slug(m) === card.id.slice('model:'.length)) ?? '';
+      // A part of the world draws nothing alone (T472, ADR-0242): its picture is the model it was taken from, which includes it.
+      const info = forms.info(id);
+      const from = info?.part === true && typeof info.from === 'string' && forms.info(info.from) ? info.from : undefined;
+      return forms.request(from ?? id, 1);
+    }
     case 'item': {
       const model = forms.resolve(entry?.model ?? entry?.appearance?.model, 'oggetto');
       return forms.request(model, 1, entry?.color ?? entry?.appearance?.color);

@@ -30,6 +30,9 @@ import { isGenerating, isWorldLit } from './generation';
 import { rootsOf, runGit } from './git';
 import { HandmadeArchive, modelFiles } from './handmade';
 import type { ProgramChecker } from './programCheck';
+import { isWorldPart, worldPartErrors } from '../src/kernel/worldparts';
+import { MJX_FILE_RE, mjxIncludes } from '../src/mj/model';
+import { WORLD_NODE_LIMITS } from '../src/kernel/validator';
 
 /** The name a brought card keeps: a text of another universe, maybe of another player. One line, no markup, nothing invisible, the fourth wall. */
 export function cleanBroughtName(raw: unknown): { text: string } | { error: string } {
@@ -144,8 +147,11 @@ export type BringOutcome =
   | { ok: true; changes: Record<string, string>; message: string; brought: Array<{ id: string; kind: 'model' | 'sound'; name: string; from: string }> }
   | (Refusal & { cards?: BringRefusal[] });
 
-/** One card read from the disk as it may enter: its source for the entry, or why not. Nothing of what it is comes from the client. */
-async function sourceOf(ref: BringRef, o: BringContext, roots: Set<string>, kinRoots: Map<string, Promise<string[]>>, destination: string): Promise<{ source: BringSource } | { reason: string }> {
+/**
+ * One card read from the disk as it may enter: its source for the entry, or why not. Nothing of what it is comes from the client. A card of a
+ * universe says what it reads there (`reads`, T472) and that universe's index, where its parts of the world are.
+ */
+async function sourceOf(ref: BringRef, o: BringContext, roots: Set<string>, kinRoots: Map<string, Promise<string[]>>, destination: string): Promise<{ source: BringSource; reads?: { texts: Record<string, string>; missing: string[]; over?: true }; index?: Record<string, Record<string, any>> } | { reason: string }> {
   if ('handmade' in ref) {
     if (!o.labs()) return { reason: 'i laboratori non sono aperti: le carte fatte a mano non entrano' };
     let found: { card: HandmadeCard } | undefined;
@@ -169,12 +175,81 @@ async function sourceOf(ref: BringRef, o: BringContext, roots: Set<string>, kinR
   if (v.contract !== KERNEL_CONTRACT) return { reason: `è del kernel ${v.kernel}: le carte vengono solo dal contratto ${KERNEL_CONTRACT}` };
   const files = await modelFiles(root, ref.model);
   const xml = files[`${MODELS_DIR}${ref.model}.xml`];
-  const entry = readIndex(files)[ref.model];
+  const index = readIndex(files);
+  const entry = index[ref.model];
   if (xml === undefined || !entry || typeof entry !== 'object') return { reason: `nessun modello «${ref.model}» in «${ref.universe}»` };
   if (!entry.card) return { reason: 'non è una carta: i modelli del seme sono già in ogni universo' };
+  if (isWorldPart(ref.model, entry)) return { reason: 'è una parte del mondo: viene con le carte che la includono' };
   const name = cleanBroughtName(typeof entry.name === 'string' && entry.name.trim() ? entry.name : ref.model);
   if ('error' in name) return { reason: name.error };
-  return { source: { kind: entry.class === SOUND_CLASS ? 'sound' : 'model', universe: ref.universe, id: ref.model, entry, xml, name: name.text } };
+  return { source: { kind: entry.class === SOUND_CLASS ? 'sound' : 'model', universe: ref.universe, id: ref.model, entry, xml, name: name.text }, reads: await includedFiles(root, xml), index };
+}
+
+/**
+ * The files of models/ a program reads in its universe (T472): what it imports (imports of imports too), its rule files, tilesets and samples,
+ * read from the disk round by round as `mjxIncludes` finds them, with the names of those that are not there. Never more than a program of the
+ * world may read (`WORLD_NODE_LIMITS`: 64 files, 200 000 characters): past that nothing more is read, and the card does not come (`over`).
+ */
+async function includedFiles(root: string, xml: string): Promise<{ texts: Record<string, string>; missing: string[]; over?: true }> {
+  const texts: Record<string, string> = {};
+  const missing = new Set<string>();
+  let chars = 0;
+  for (let round = 0; round < 8; round++) {
+    const asked = new Set<string>();
+    mjxIncludes(xml, (f) => {
+      if (Object.hasOwn(texts, f)) return texts[f];
+      if (!missing.has(f)) asked.add(f);
+      return undefined;
+    });
+    if (!asked.size) break;
+    for (const f of asked) {
+      if (Object.keys(texts).length + missing.size >= WORLD_NODE_LIMITS.files) return { texts, missing: [...missing], over: true };
+      const file = path.join(root, MODELS_DIR, f);
+      const size = MJX_FILE_RE.test(f.slice(0, -4)) ? await fs.stat(file).then((st) => (st.isFile() ? st.size : -1)).catch(() => -1) : -1;
+      if (size < 0) {
+        missing.add(f);
+        continue;
+      }
+      chars += size;
+      if (chars > WORLD_NODE_LIMITS.fileChars * 4) return { texts, missing: [...missing], over: true };
+      const text = await readText(file);
+      if (text === undefined) missing.add(f);
+      else texts[f] = text;
+    }
+  }
+  return { texts, missing: [...missing] };
+}
+
+/**
+ * What a brought card reads, sorted (T472, ADR-0242): the parts of the world of its universe go with it, as cards of their own (they include
+ * nothing, and must say so); anything else it reads (the parts of the seed, a rule file) must be in the universe it enters, and is checked
+ * there as it is there. A part already here with the same program is the same part; with another, the card does not come.
+ */
+async function sortedReads(reads: { texts: Record<string, string>; missing: string[]; over?: true }, index: Record<string, Record<string, any>>, root: string): Promise<{ files: Record<string, string>; parts: Array<{ id: string; entry: Record<string, any>; xml: string }> } | { reason: string }> {
+  if (reads.over) return { reason: `legge troppi file di models/, o troppo lunghi (al più ${WORLD_NODE_LIMITS.files}, ${WORLD_NODE_LIMITS.fileChars} caratteri)` };
+  const files: Record<string, string> = {};
+  const parts: Array<{ id: string; entry: Record<string, any>; xml: string }> = [];
+  // What its universe does not have either is read here, if it is here.
+  for (const file of reads.missing) {
+    const here = await readText(path.join(root, MODELS_DIR, file));
+    if (here === undefined) return { reason: `legge models/${file}, che in questo universo non c'è` };
+    files[file] = here;
+  }
+  for (const [file, text] of Object.entries(reads.texts)) {
+    const id = file.replace(/\.(xml|txt)$/, '');
+    const entry = file.endsWith('.xml') ? index[id] : undefined;
+    const here = await readText(path.join(root, MODELS_DIR, file));
+    if (entry && isWorldPart(id, entry) && entry.card) {
+      if (here !== undefined && here !== text) return { reason: `porta la parte «${id}», che in questo universo c'è con un altro programma` };
+      const errors = worldPartErrors(text);
+      if (errors.length) return { reason: `la sua parte «${id}»: ${errors[0]}` };
+      files[file] = text;
+      if (here === undefined) parts.push({ id, entry, xml: text });
+    } else if (entry?.card) return { reason: `include «${id}», che non è una parte: si porta da sé` };
+    else if (here === undefined) return { reason: `legge models/${file}, che in questo universo non c'è` };
+    else files[file] = here;
+  }
+  return { files, parts };
 }
 
 /**
@@ -198,6 +273,8 @@ export async function bringCards(name: string, rawCards: unknown, o: BringContex
   const entries: Record<string, ModelInfo> = {};
   const programs: Record<string, string> = {};
   const brought: Array<{ id: string; kind: 'model' | 'sound'; name: string; from: string }> = [];
+  /** The parts of the world already coming with a card of this choice (T472): another card that includes one brings it no second time. */
+  const travelling = new Map<string, true>();
   for (const ref of said.refs) {
     const s = await sourceOf(ref, o, roots, kinRoots, name);
     if ('reason' in s) {
@@ -209,8 +286,31 @@ export async function bringCards(name: string, rawCards: unknown, o: BringContex
       refused.push({ card: refText(ref), reason: made.error });
       continue;
     }
+    // What it reads (T472): its parts of the world come with it; the rest must be here, and the check reads it as it is here.
+    const sorted = s.reads && s.index ? await sortedReads(s.reads, s.index, root) : { files: {}, parts: [] };
+    if ('reason' in sorted) {
+      refused.push({ card: refText(ref), reason: sorted.reason });
+      continue;
+    }
+    const parts: Array<{ id: string; info: ModelInfo; xml: string; name: string }> = [];
+    let partRefused: string | undefined;
+    for (const p of sorted.parts) {
+      if (travelling.has(p.id)) continue;
+      const pname = cleanBroughtName(typeof p.entry.name === 'string' && p.entry.name.trim() ? p.entry.name : p.id);
+      const pmade = 'error' in pname ? pname : broughtEntry({ kind: 'model', universe: 'handmade' in ref ? '' : ref.universe, id: p.id, entry: p.entry, xml: p.xml, name: pname.text }, o.master);
+      if ('error' in pmade) {
+        partRefused = `la sua parte «${p.id}»: ${pmade.error}`;
+        break;
+      }
+      parts.push({ id: p.id, info: pmade.info, xml: p.xml, name: 'error' in pname ? p.id : pname.text });
+    }
+    if (partRefused) {
+      refused.push({ card: refText(ref), reason: partRefused });
+      continue;
+    }
     // The program as a handmade card's (ADR-0161): every seed of its class in the box the game gives it, within caps measured on the seed.
-    const program = made.info.class === SOUND_CLASS ? { kind: 'sound' as const, xml: s.source.xml } : { kind: 'model' as const, xml: s.source.xml, class: made.info.class, ...(made.info.size ? { size: made.info.size } : {}) };
+    const reads = Object.keys(sorted.files).length ? { files: sorted.files } : {};
+    const program = made.info.class === SOUND_CLASS ? { kind: 'sound' as const, xml: s.source.xml } : { kind: 'model' as const, xml: s.source.xml, class: made.info.class, ...(made.info.size ? { size: made.info.size } : {}), ...reads };
     const checked = await o.checker.check(program);
     if ('busy' in checked) return { status: 503, refused: 'il controllo dei programmi è occupato: riprova tra poco' };
     if (checked.errors.length) {
@@ -221,6 +321,12 @@ export async function bringCards(name: string, rawCards: unknown, o: BringContex
     entries[id] = made.info;
     programs[`${MODELS_DIR}${id}.xml`] = s.source.xml;
     brought.push({ id, kind: s.source.kind, name: s.source.name, from: 'handmade' in ref ? 'fatta a mano' : ref.universe });
+    for (const p of parts) {
+      travelling.set(p.id, true);
+      entries[p.id] = p.info;
+      programs[`${MODELS_DIR}${p.id}.xml`] = p.xml;
+      brought.push({ id: p.id, kind: 'model', name: p.name, from: 'handmade' in ref ? 'fatta a mano' : ref.universe });
+    }
   }
   if (refused.length) return { status: 422, refused: refused.length === said.refs.length ? 'nessuna carta può entrare' : 'alcune carte non possono entrare: toglile e riprova', cards: refused };
   const when = choice.choice === 'clone' ? 'prima del primo ingresso' : 'prima della Genesi';

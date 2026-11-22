@@ -29,6 +29,7 @@ import { internalCardsIn, internalEffect, internalFields, internalManifest, inte
 import { strataErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
 import { vehicleSpecErrors } from './vehicle';
+import { worldPartErrors } from './worldparts';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -103,6 +104,28 @@ export function modelErrors(path: string, xml: string, time = 8_000, box?: [numb
     const worn = wornErrors(xml, { background: symbolName(m.background), palette: m.program.palette });
     // A structure that grows by rules is a whole of parts on the ground (T370): what rests on the bottom is one body.
     return [...analyse(r, m.program.palette, { grounded: true, groundJoins: !!opts.groundJoins, base: base < r.grid.Z ? base : 0 }).errors, ...worn].map((e) => `${path}: ${e}`);
+  } catch (e) {
+    return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
+  }
+}
+
+/**
+ * A part of the world (T472, ADR-0242) is a model, tried as a part: its text says what a part must (`worldPartErrors`: one program, nothing
+ * included nor read, its contract, none of the letters the parts of the seed keep); it compiles alone in `box`, within the world's ceilings,
+ * and alone, from an empty box, it finishes. What it draws alone does not count: it works on what whoever includes it has drawn, and the
+ * kernel took it only where the model rewritten with it made the same grid on every seed (`sameGridErrors`).
+ */
+export function worldPartModelErrors(path: string, xml: string, time = 8_000, box?: [number, number, number]): string[] {
+  if (xml.length > MAX_FORM_XML) return [`${path}: programma troppo lungo (max ${MAX_FORM_XML} caratteri)`];
+  const text = worldPartErrors(xml);
+  if (text.length) return text.map((e) => `${path}: ${e}`);
+  try {
+    const m = compileMjx(xml, { size: box ?? boxOf(classOf('object')!) });
+    const nodes = worldNodeErrors(m, xml);
+    if (nodes.length) return nodes.map((e) => `${path}: ${e}`);
+    if (m.sound) return [`${path}: una parte non è un suono`];
+    const r = runMjx(m, 1, { deadline: Math.min(time, MAX_FORM_TIME), limits: FORM_LIMITS, ceilings: WORLD_NODE_LIMITS });
+    return r.finished ? [] : [`${path}: la parte da sola non finisce in ${Math.round(time / 1000)} secondi (ogni crescita deve avere steps)`];
   } catch (e) {
     return [`${path}: ${e instanceof Mj3Error ? e.message : (e as Error).message}`];
   }
@@ -328,6 +351,8 @@ export class Validator {
   modelBase: (id: string) => number = () => 0;
   /** A file of models/ by its name there (`torre.xml`, `porta.txt`), for the programs that read others (T333), set by the kernel. */
   modelFile: (name: string) => string | undefined = () => undefined;
+  /** Whether a model of the library is a part of the world (T472, its entry says `part: true`): it is tried as a part. Set by the kernel. */
+  modelPart: (id: string) => boolean = () => false;
 
   constructor(private sandbox: Sandbox) {}
 
@@ -428,13 +453,19 @@ export class Validator {
     return e ? [e] : [];
   }
 
-  /** `entry`: what the index entry of a model not in the library yet says (its own time, whether it grows by rules, T370). */
-  validateFile(path: string, content: string, box?: [number, number, number], entry?: { time?: number; grows?: boolean; base?: number }): string[] {
+  /**
+   * `entry`: what the index entry of a model not in the library yet says (its own time, whether it grows by rules, T370; whether it is a part
+   * of the world, T472) and the files of models/ it will read that are not written yet (a part the model includes, T472).
+   */
+  validateFile(path: string, content: string, box?: [number, number, number], entry?: { time?: number; grows?: boolean; base?: number; part?: boolean; files?: Record<string, string> }): string[] {
     if (path.endsWith('.lua')) return this.checkLua(path, content);
     if (/^models\/[^/]+\.xml$/.test(path) && isTileset(content)) return tilesetErrors(path, content, (f) => this.modelFile(f));
     if (/^models\/[^/]+\.xml$/.test(path)) {
       const id = path.slice('models/'.length, -'.xml'.length);
-      return modelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, (f) => this.modelFile(f)), { groundJoins: entry?.grows ?? this.modelGrows(id), base: entry?.base ?? this.modelBase(id) });
+      if (entry?.part ?? this.modelPart(id)) return worldPartModelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id));
+      const extra = entry?.files ?? {};
+      const read = (f: string) => (Object.prototype.hasOwnProperty.call(extra, f) ? extra[f] : this.modelFile(f));
+      return modelErrors(path, content, entry?.time ?? this.modelTime(id), box ?? this.modelBox(id), mjxIncludes(content, read), { groundJoins: entry?.grows ?? this.modelGrows(id), base: entry?.base ?? this.modelBase(id) });
     }
     if (/^models\/[^/]+\.txt$/.test(path)) return ruleFileErrors(path, content);
     // The master's directives (T374): sections the Council reads, within their caps; what breaks the fourth wall is left out, not an error.

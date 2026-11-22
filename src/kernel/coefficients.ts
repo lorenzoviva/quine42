@@ -63,7 +63,7 @@ export const COEFFICIENT_INFO: Record<CoefficientKey, { nome: string; agente: st
   dialogues: { nome: 'Dialoghi tra individui', agente: 'narrator', modo: 'diretta', testo: 'al più uno ogni 40 secondi; a 0,5 ogni 80, a 0 solo saluti', minimo: "gli individui si scambiano solo saluti" },
   plots: { nome: 'Trame', agente: 'narrator', modo: 'diretta', testo: 'una nuova quando nessuna è aperta; a 0,5 un giorno sì e uno no', minimo: "nessuna trama nuova" },
   reviews: { nome: 'Revisioni dei modelli', agente: 'sculptor', modo: 'diretta', testo: "sotto 0,75 un programma per le cose semplici, sotto 0,5 niente revisione, sotto 0,25 niente giudizio dell'Artista", minimo: "un programma solo, senza revisione né giudizio" },
-  models: { nome: 'Modelli nuovi', agente: 'sculptor', modo: 'diretta', testo: 'una pausa tra un modello e il successivo: nessuna a 1, un minuto a 0,5', minimo: "solo i modelli generici" },
+  models: { nome: 'Modelli nuovi', agente: 'sculptor', modo: 'diretta', testo: 'una pausa tra un modello e il successivo: nessuna a 1, un minuto a 0,5; dopo un modello buono, finché il suo mestiere ne ha poche, una parte del mondo', minimo: "solo i modelli generici" },
   people: { nome: 'Individui per luogo', agente: 'narrator', modo: 'indiretta', testo: 'meno individui: meno risposte e dialoghi', minimo: "nessun individuo nuovo" },
   inhabitants: { nome: 'Tipi di abitanti', agente: 'narrator', modo: 'indiretta', testo: 'un tipo nuovo ogni 7 luoghi; a 0,5 ogni 14', minimo: "solo i tipi di abitanti che ci sono" },
   packs: { nome: 'Pacchetti di oggetti', agente: 'narrator', modo: 'indiretta', testo: 'un pacchetto ogni 10 luoghi; a 0,5 ogni 20', minimo: "solo gli oggetti che ci sono" },
@@ -137,6 +137,8 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   { compito: 'model.sculpt', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'e revisioni' },
   { compito: 'model.judge', agente: 'artist', modo: 'diretta', coefficiente: 'reviews' },
   { compito: 'model.action', agente: 'sculptor', modo: 'diretta', coefficiente: 'actions', nota: '«Altro…» che cambia la forma' },
+  // T472: a part of the world from a good model of a trade that has fewer than its parts, at most twice a session per trade (ADR-0242).
+  { compito: 'model.part', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'dopo un modello con voto ≥ 6: una parte che i modelli del suo mestiere includono, presa se la griglia resta la stessa' },
   { compito: 'physics.reshape', agente: 'physicist', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona (il Referente): la fisica di un terreno o la gravità del mondo, a mondo acceso (T452)' },
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
   { compito: 'review.fourthwall', agente: 'narrator', modo: 'indiretta', coefficiente: 'sessions', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
@@ -309,6 +311,13 @@ export const CALL_TOKENS: Record<string, CallTokens> = {
    * T303 measured on Opus (172-221 tokens of rules).
    */
   'interior.design': { prompt: 2600, prefix: 1650, output: 220 },
+  /**
+   * T472, offline on the seed (`lab/scripts/parti-mondo.ts --conta`, `docs/design/scultori-specializzati/misure-s6.md`): the system of the trade
+   * (the core and its section, the principles, the «Lingua», the style; no examples) and the program with its lines numbered, 7 035 tokens in
+   * the mean of 16 requests, 4 820 of them the system; the output not measured: a few lines (the part's lines, its letters, its contract, some
+   * 200 tokens) with the thinking of a short task.
+   */
+  'model.part': { prompt: 7000, prefix: 4800, output: 1200 },
 };
 /**
  * The share of the stable prefix the implicit cache serves in a session (T325: about 0,6 with calls of mixed sessions, all of it warm; never
@@ -359,6 +368,13 @@ const PACK_CALLS = 4;
 export const REUSE_ASKED = 0.4;
 export const REUSE_HIT = 0.4;
 export const REUSE_SHARE = REUSE_ASKED * REUSE_HIT;
+/**
+ * The parts of the world (T472, ADR-0242): the share of the models sculpted with a vote of at least 6 (`EXAMPLE_SCORE`; T473 measured a mean of
+ * 6.0-6.3 with the specialties), and the most requests of a part an hour (two trades asked their two times of a session): a few in the first
+ * hours of a universe, none once its trades have their `WORLD_PARTS`. Assumptions, as the hour is.
+ */
+export const GOOD_MODELS = 0.4;
+export const PARTS_PER_HOUR = 4;
 /** Tokens of a `model.reuse` question: the thing and the library of its class (about 300 on an offline Genesis; more as the library grows). */
 const REUSE_WEIGHT = { prompt: 800, cached: 0, output: 0 };
 /** Tokens of a `text.fourthwall` call: four questions (about 450), the world in a line and the text (T313's bench: 569 with a short text). */
@@ -473,6 +489,10 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
     structures * structureCost(sc.structure, date);
   add(COEFFICIENT_INFO.models.nome, 'diretta', writes, sculptCost);
   add(COEFFICIENT_INFO.reviews.nome, 'diretta', judges, judges * callCost(sc.artist, 'model.judge', date));
+  // The parts of the world (T472): a request on the model of the thing for a share of the good ones, within the most an hour asks.
+  const parts = plan.giudizio ? Math.min(models * GOOD_MODELS, PARTS_PER_HOUR) : 0;
+  const partCost = structureShare * callCost(sc.structure, 'model.part', date) + (1 - structureShare) * (0.5 * callCost(sc.simple, 'model.part', date) + 0.5 * callCost(sc.figure, 'model.part', date));
+  add('Parti del mondo', 'diretta', parts, parts * partCost);
   // The Musician: a program for each environment that has none, a third of them sent back once.
   const pause = pieceGap(c.pieces);
   const pieces = Number.isFinite(pause) ? Math.min(H.ambientiSenzaBrano, 3600 / pause, ai.maxPieces ?? 8) * 1.34 : 0;

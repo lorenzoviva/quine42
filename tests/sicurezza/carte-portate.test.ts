@@ -75,7 +75,28 @@ describe('le carte portate (V-033)', () => {
       'catena-strana': { class: 'object', name: 'Catena', card: { ...stamp, origins: [{ holder: 'x'.repeat(300), universe: 'primo', fingerprint: [1] }] } },
       gonfio: { class: 'object', name: 'Gonfio', card: stamp, time: 9_000_000, vpt: 1, advice: ['tutto'], problems: ['niente'], cellar: 99, seeds: 1000, tint: 'CC', score: 1e9 },
     };
-    const changes = { 'models/index.json': JSON.stringify(index), 'models/barile.xml': seed('barile'), 'models/ciclo.xml': ENDLESS, 'models/bomba.xml': BOMB, 'models/marcato.xml': seed('object'), 'models/timbro-strano.xml': seed('object'), 'models/catena-strana.xml': seed('object'), 'models/gonfio.xml': seed('object') };
+    // The parts of the world that would travel with a card (T472): one that includes another file, one that does not end, a model that
+    // includes another card that is not a part.
+    const PART = (body: string) => `<!--\nA part.\n-->\n<sequence values="BCW">\n${body}\n</sequence>\n`;
+    const USER = (part: string) => `<sequence values="BCW" size="8 8 8">\n  <box at="4 4 0" size="6 6 4" color="C"/>\n  <import file="${part}"/>\n</sequence>\n`;
+    Object.assign(index, {
+      'part-includes-00000001': { class: 'object', part: true, name: 'Parte', card: stamp },
+      'part-endless-00000002': { class: 'object', part: true, name: 'Parte', card: stamp },
+      'usa-include': { class: 'object', name: 'Usa include', card: stamp },
+      'usa-ciclo': { class: 'object', name: 'Usa ciclo', card: stamp },
+      'usa-barile': { class: 'object', name: 'Usa barile', card: stamp },
+      'usa-tanti': { class: 'object', name: 'Usa tanti', card: stamp },
+    });
+    const parts = {
+      'models/part-includes-00000001.xml': PART('  <import file="barile"/>'),
+      'models/part-endless-00000002.xml': PART('  <markov><one in="C" out="W"/><one in="W" out="C"/></markov>'),
+      'models/usa-include.xml': USER('part-includes-00000001'),
+      'models/usa-ciclo.xml': USER('part-endless-00000002'),
+      'models/usa-barile.xml': USER('barile'),
+      // A thousand files named: the store reads no more than a program of the world may read.
+      'models/usa-tanti.xml': `<sequence values="BCW" size="8 8 8">\n${Array.from({ length: 1000 }, (_, i) => `  <import file="manca-${i}"/>`).join('\n')}\n</sequence>\n`,
+    };
+    const changes = { 'models/index.json': JSON.stringify(index), 'models/barile.xml': seed('barile'), 'models/ciclo.xml': ENDLESS, 'models/bomba.xml': BOMB, 'models/marcato.xml': seed('object'), 'models/timbro-strano.xml': seed('object'), 'models/catena-strana.xml': seed('object'), 'models/gonfio.xml': seed('object'), ...parts };
     expect((await ask('POST', '/api/universe/casa-carla/commit', { token: 'vero-uid-carla', body: { changes, message: 'la mano di Carla', author: 'player' } })).status).toBe(200);
   });
   afterAll(async () => {
@@ -107,6 +128,18 @@ describe('le carte portate (V-033)', () => {
     expect(why['casa-carla/marcato']).toMatch(/il nome/);
     expect(why['casa-carla/timbro-strano']).toMatch(/timbro/);
     expect(why['casa-carla/catena-strana']).toMatch(/catena/);
+    expect(readdirSync(path.join(dir, 'casa-alice', 'models'))).toEqual(['index.json']);
+  }, 60000);
+
+  it('V-033 ciò che una carta legge viene dal disco (T472): una parte che include o non finisce, un’altra carta inclusa, una parte da sola non entrano', async () => {
+    const r = await bring('casa-alice', ['usa-include', 'usa-ciclo', 'usa-barile', 'usa-tanti', 'part-endless-00000002'].map((model) => ({ universe: 'casa-carla', model })));
+    expect(r.status).toBe(422);
+    const why = Object.fromEntries(r.body.cards.map((c: { card: string; reason: string; errors?: string[] }) => [c.card, `${c.reason} ${c.errors?.join(' ') ?? ''}`]));
+    expect(why['casa-carla/usa-include']).toMatch(/la sua parte «part-includes-00000001»: una parte non include niente/);
+    expect(why['casa-carla/usa-ciclo']).toMatch(/non passa il controllo.*non finisce/);
+    expect(why['casa-carla/usa-barile']).toMatch(/include «barile», che non è una parte/);
+    expect(why['casa-carla/usa-tanti']).toMatch(/legge troppi file di models\//);
+    expect(why['casa-carla/part-endless-00000002']).toMatch(/viene con le carte che la includono/);
     expect(readdirSync(path.join(dir, 'casa-alice', 'models'))).toEqual(['index.json']);
   }, 60000);
 

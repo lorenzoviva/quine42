@@ -49,14 +49,16 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, formDeckAreas, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
-import { classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
+import { boxOf, classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { footprint, stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
 import { InteriorDirector, MAX_INTERIORS } from './interiordirector';
 import { INTERIOR_TASK } from './agents/scenographer';
 import type { InteriorSpec } from './furnish';
-import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, type AiRoute, type SculptorAiModels } from './agents/sculptor';
+import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, SPECIALTY_NAMES, worldPartsOf, type AiRoute, type SculptorAiModels, type SculptorSpecialty } from './agents/sculptor';
+import { PART_SEEDS, PART_TASK, sameGridErrors, type PartTaken } from './agents/parts';
+import { isWorldPart, partsInUse, partUsers, WORLD_PART_RE, WORLD_PARTS, type ComposedPart } from './worldparts';
 import { cellarVoxels, entryBox, MODELS_INDEX, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
@@ -582,6 +584,8 @@ export class Kernel {
   /** The origin of the server whose world this is (T365, ADR-0195): only the server says it; the cards it stamps name it. */
   private readonly server?: string;
   private cardIdsOf?: { files: FileMap; ids: Set<string> };
+  /** The cards of the parts of the world each model's card stands for (T472), read once per load of the files. */
+  private partCardsOf?: { files: FileMap; byModel: Map<string, string[]> };
   /** The places the graph of the world knows (ADR-0045): planned chunks, by key. */
   private graphChunks = new Map<string, GraphChunk>();
   private graphCache?: { files: FileMap; places: number; graph: WorldGraph };
@@ -854,6 +858,7 @@ export class Kernel {
     k.validator.modelGrows = (id) => !!k.forms.info(id) && growsByRules(k.forms.classOf(id), k.forms.info(id)?.size);
     k.validator.modelBase = (id) => cellarVoxels(k.forms.info(id));
     k.validator.modelFile = (name) => k.forms.file(name);
+    k.validator.modelPart = (id) => isWorldPart(id, k.forms.info(id));
     // A brought card that fails here is isolated (T296): a program that throws or stops its worker, a form with nothing to see.
     k.forms.onReady = (f) => k.formReady(f);
     k.forms.onFail = (f) => k.formFailed(f);
@@ -899,7 +904,7 @@ export class Kernel {
     k.council.rationed = (task) => k.rationed(task);
     k.council.thinking = () => k.config.ai.thinking;
     k.council.readOnly = () => k.readOnly();
-    k.council.onFocus = (ids) => k.cards.use(ids, 'prompt', (id) => k.isCard(id));
+    k.council.onFocus = (ids) => k.cards.use(k.withParts(ids), 'prompt', (id) => k.isCard(id));
     // A mirror saves nothing of its own: its commits hold only the files it was told and the master's edits (T42b). The Council
     // is fenced in on a mirror too: a kernel on the master's branch is one (T42e).
     // The code written without a commit is not a valid state (T262): every commit takes it as HEAD has it.
@@ -8100,7 +8105,8 @@ export class Kernel {
    * Cartographer, to the Narrator or to the `ModelDirector`, which would copy it again under the id of a request.
    */
   broughtModels(): Array<{ id: string; info: ModelInfo }> {
-    if (this.broughtCache?.files !== this.files) this.broughtCache = { files: this.files, list: broughtModels(this.files) };
+    // A part of the world that came with a card (T472) is no thing of the world: nobody wears it, the Cartographer and the Narrator do not hear of it.
+    if (this.broughtCache?.files !== this.files) this.broughtCache = { files: this.files, list: broughtModels(this.files).filter(({ id, info }) => !isWorldPart(id, info)) };
     return this.broken.size ? this.broughtCache.list.filter(({ id }) => this.forms.usable(id)) : this.broughtCache.list;
   }
 
@@ -8173,9 +8179,16 @@ export class Kernel {
     return r;
   }
 
-  /** A program enters the library (or replaces one): validated, written with its index entry, committed. */
+  /**
+   * A program enters the library (or replaces one): validated, written with its index entry, committed. A part of the world is never written
+   * anew (T472, ADR-0242): a new version is a new part, with a name of its own (`addWorldPart`).
+   */
   addModel(id: string, xml: string, info: ModelInfo, message: string, card?: { task: string; author: string; chi?: string }): boolean {
     const path = `models/${id}.xml`;
+    if (isWorldPart(id, this.forms.info(id))) {
+      this.council.say('kernel', 'scarta', `«${id}» è una parte del mondo: non si riscrive (una versione nuova è un'altra parte)`, card?.author === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
+      return false;
+    }
     // A large structure's program without a box of its own runs in its class's at its size (ADR-0160): it is tried there.
     // Its own time and whether it grows by rules are its entry's, which is not in the library yet (T370).
     const cls = classOf(info.class);
@@ -8199,6 +8212,82 @@ export class Kernel {
     this.council.say('kernel', 'approva', `modello «${info.name ?? id}» (${id}) → validato, commit ${c.id}`, undefined, card?.task ?? 'model.sculpt');
     this.bus.emit('model:added', { id });
     return true;
+  }
+
+  /**
+   * A part of the world the Sculptor took from a model of this library (T472, ADR-0242): taken only if the model, rewritten with `<import>` in
+   * place of the part's lines, makes the same grid voxel by voxel on every seed the world gives it (`PART_SEEDS` at least, `sameGridErrors`);
+   * the part validated as a part (alone it compiles and finishes, includes nothing, says its contract), the model as a model. One commit of
+   * the Council with the part's card (`model.part`, paid by who paid for the model): the part's program and entry (`part: true`, its specialty,
+   * the model it came from) and the model with its import, its first use. A part with that id and another program, a model changed meanwhile,
+   * a part or a brought card as the model, a trade that has its parts, a universe that is only read: no, with the reason (`final` where asking
+   * again would change nothing).
+   */
+  async addWorldPart(source: string, composed: ComposedPart, opts: { specialty: SculptorSpecialty; author: string }): Promise<PartTaken> {
+    const info = this.forms.info(source);
+    const name = info?.name ?? source;
+    // The same nodes as a part the world has (another model of the trade, the same lines): the model includes that one, no second is written.
+    const body = (x: string) => x.replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+    const twin = Object.keys(this.forms.models()).find((id) => id !== composed.id && isWorldPart(id, this.forms.info(id)) && body(this.files[`models/${id}.xml`] ?? '') === body(composed.part));
+    const made: ComposedPart = twin ? { ...composed, id: twin, part: this.files[`models/${twin}.xml`]!, rewritten: composed.rewritten.replace(`<import file="${composed.id}"/>`, `<import file="${twin}"/>`) } : composed;
+    const no = (error: string, final = false): PartTaken => {
+      this.council.say('kernel', 'scarta', `parte da «${name}»: ${error.slice(0, 200)}`, 'sculptor', PART_TASK);
+      return final ? { error, final } : { error };
+    };
+    if (this.mirror) return no('le parti le prende il mondo, non uno specchio', true);
+    const sealed = this.readOnly();
+    if (sealed !== undefined) return no(sealed, true);
+    const sourcePath = `models/${source}.xml`;
+    if (!info || this.files[sourcePath] !== made.original) return no('il modello è cambiato nel frattempo', true);
+    if (/^part-/.test(source) || typeof info.brought === 'string') return no('una parte si prende da un modello di questo mondo, non da una parte né da una carta portata', true);
+    if (!WORLD_PART_RE.test(made.id)) return no(`«${made.id}» non è il nome di una parte del mondo`, true);
+    const partPath = `models/${made.id}.xml`;
+    const there = this.files[partPath];
+    if (there !== undefined && there !== made.part) return no(`c'è già un'altra «${made.id}»`, true);
+    if (there === undefined && worldPartsOf(this.files, opts.specialty).length >= WORLD_PARTS) return no(`${SPECIALTY_NAMES[opts.specialty]} ha già le sue ${WORLD_PARTS} parti del mondo`, true);
+    const broken = metaBreak(made.name, wordsOf(this.files), languageOf(this.files));
+    if (broken) return no(`il nome: nel mondo non si dice «${broken}»`);
+    const cls = classOf(info.class) ?? classOf('object')!;
+    const partErrors = this.validator.validateFile(partPath, made.part, boxOf(cls), { part: true });
+    if (partErrors.length) return no(partErrors.join('; '));
+    const modelErrors = this.validator.validateFile(sourcePath, made.rewritten, info.class === 'structure' ? entryBox(classOf('structure')!, info) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: growsByRules(cls, info.size), base: cellarVoxels(info), files: { [`${made.id}.xml`]: made.part } });
+    if (modelErrors.length) return no(modelErrors.join('; '));
+    // The same grid on every seed the world gives it; the runs yield between them, so a world of many does not fall silent (ADR-0110).
+    const seeds = Math.max(PART_SEEDS, this.forms.seedsOf(source));
+    const diff = await sameGridErrors(this.forms, source, made, seeds);
+    if (diff.length) return no(diff.join('; '));
+    if (this.files[sourcePath] !== made.original || (this.files[partPath] !== undefined && this.files[partPath] !== made.part)) return no('il modello è cambiato nel frattempo', true);
+    let index: Record<string, ModelInfo & { card?: CardStamp }> = {};
+    try {
+      index = JSON.parse(this.repo.working[MODELS_INDEX] ?? '{}');
+    } catch {
+      index = {};
+    }
+    this.repo.write(sourcePath, made.rewritten);
+    if (twin) {
+      // Only the model changes: it includes the part that was there. No card is made (what the call cost waits for the next of its kind).
+      this.applyFiles({ ...this.repo.working });
+      const c = this.repo.commit(`scultore: «${name}» include la parte «${index[twin]?.name ?? twin}»`, 'agent');
+      this.council.say('kernel', 'approva', `«${name}» include la parte del mondo che c'è già (${twin}), al posto delle righe ${made.from}-${made.to}: la stessa griglia su ${seeds} semi → commit ${c.id}`, undefined, PART_TASK);
+      this.bus.emit('model:added', { id: source });
+      return { id: twin };
+    }
+    // Who paid for the model pays for its part: the same payer, on the card of the part (ADR-0195: and what its calls cost).
+    const payer = index[source]?.card?.payer;
+    index[made.id] = { class: cls.id, specialty: opts.specialty, part: true, name: `Parte: ${made.name}`, author: opts.author, ...(typeof info.score === 'number' ? { score: info.score } : {}), from: source };
+    this.repo.write(partPath, made.part);
+    this.repo.write(MODELS_INDEX, JSON.stringify(index, null, 1) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    const c = this.commitContent(`scultore: la parte «${made.name}» da «${name}»`, PART_TASK, 'sculptor', payer);
+    this.council.say('kernel', 'approva', `parte del mondo «${made.name}» (${made.id}) da «${name}», righe ${made.from}-${made.to}: la stessa griglia su ${seeds} semi → commit ${c.id}`, undefined, PART_TASK);
+    this.bus.emit('model:added', { id: made.id });
+    this.bus.emit('model:added', { id: source });
+    return { id: made.id };
+  }
+
+  /** The parts of the world of a trade, with their programs, the best voted first (T472): what the director counts and offers. */
+  worldParts(specialty: SculptorSpecialty): Array<{ id: string; xml: string }> {
+    return worldPartsOf(this.files, specialty);
   }
 
   /**
@@ -8362,6 +8451,9 @@ export class Kernel {
     const kind = info.class === SOUND_CLASS ? 'sound' : 'model';
     const family = cardFamily(this.files, id);
     const ids = new Set(family);
+    // A part of the world that came with a card stays while a model includes it (T472, ADR-0242): it goes once nobody does.
+    const users = isWorldPart(id, info) ? partUsers(this.files, id).filter((u) => !ids.has(u)) : [];
+    if (users.length) return no(`la parte «${name}» è inclusa da ${users.map((u) => `«${reasonText(this.forms.info(u)?.name, 60) || u}»`).join(', ')}: si toglie quando nessuno la include più`);
     const why = family.map((f) => this.broken.get(f)?.reason).find(Boolean);
     // What wore it lets go first, while the library still says its class; the structures wear what their concept wears without it.
     for (const f of family) this.forms.isolate(f);
@@ -10517,7 +10609,7 @@ export class Kernel {
       focusOn: (refs, at) => k.focusOn(refs, at),
       noteShortfall: (note) => k.noteShortfall(note),
       resolve: (names) => k.graph().resolve(names),
-      useCards: (ids, kind) => k.cards.use(ids, kind, (id) => k.isCard(id)),
+      useCards: (ids, kind) => k.cards.use(k.withParts(ids), kind, (id) => k.isCard(id)),
     };
   }
 
@@ -11435,7 +11527,7 @@ export class Kernel {
       if (d) ids.push(...this.entityCards(d.id));
     }
     for (const s of plan.structures ?? []) ids.push(`model:${nodeSlug(this.structureModelFor(s.concept, s.size))}`);
-    this.cards.use(ids, 'chunks', (id) => this.isCard(id));
+    this.cards.use(this.withParts(ids), 'chunks', (id) => this.isCard(id));
   }
 
   /** The cards an entity in a place stands for: its module or item, and its model. */
@@ -11470,6 +11562,30 @@ export class Kernel {
     this.usage.record(r);
     this.billCall(r);
     this.cardCosts.note(r.task, callCost(r, r.day));
+  }
+
+  /**
+   * The cards of `ids` and those of the parts of the world the models among them include (T472, ADR-0242): the models that include a part are
+   * its uses, so a model used in a place, a plot or a prompt is a use of its parts too.
+   */
+  withParts(ids: Iterable<string>): string[] {
+    const list = [...ids];
+    if (this.partCardsOf?.files !== this.files) {
+      const byModel = new Map<string, string[]>();
+      for (const [part, users] of partsInUse(this.files)) {
+        if (!isWorldPart(part, this.forms.info(part))) continue;
+        for (const u of users) {
+          const card = `model:${nodeSlug(u)}`;
+          byModel.set(card, [...(byModel.get(card) ?? []), `model:${nodeSlug(part)}`]);
+        }
+      }
+      this.partCardsOf = { files: this.files, byModel };
+    }
+    const byModel = this.partCardsOf.byModel;
+    if (!byModel.size) return list;
+    const out = new Set(list);
+    for (const id of list) for (const p of byModel.get(id) ?? []) out.add(p);
+    return [...out];
   }
 
   /** Whether an id (of the graph's kind) is a card of this universe. */
