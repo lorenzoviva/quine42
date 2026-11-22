@@ -124,6 +124,11 @@ export class SessionClient {
     return seq;
   }
 
+  /** A jump (T477): said to the server, which makes it on its world; the client makes the same at once (no answer: refused, a correction). */
+  jump(dx: number, dy: number): void {
+    this.link.send({ t: 'jump', dx, dy });
+  }
+
   private heldSaid = '';
 
   /** The directions the wanderer holds (T263): said to the server only when they change. */

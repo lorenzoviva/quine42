@@ -6603,7 +6603,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì — la prova del punto 3 con screenshot.
 - Quando è fatto: branch `beta/run-2` col worktree pronto, universi copiati, controllati e taggati, `docs/beta/run-2.md`; commit su `task/T501` con la guida per il base; l'esito dice il comando, gli universi in ordine, il tetto e quanto è costata la prova. Sicurezza: nessuna superficie nuova (o le voci).
 
-### T502 · Integrare T477 nel base (conflitti in AGENTS.md, glossario-censimento, validator, items.base) — `da fare`
+### T502 · Integrare T477 nel base (conflitti in AGENTS.md, glossario-censimento, validator, items.base) — `fatto` (`83d76ee7`)
 - Pipeline: hydrogen · sforzo high · stima 2% · approvato · priorità 1
 - Step: 45
 - Contesto: `integra T477` (l'arrampicata del kernel, `src/kernel/climb.ts`, ADR-0251 e kernel 0.10.27 sul ramo) si è fermato su conflitti in `AGENTS.md`, `docs/glossario-censimento.md`, `src/kernel/validator.ts`, `universe/modules/items.base/manifest.json`: nel frattempo T489 (via T499: ogni oggetto ha un uso, ADR-0251, kernel 0.10.27) è entrato nel base toccando le stesse righe. Nasce da T477: `dossier T477`, `dossier T499`.
@@ -6611,3 +6611,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: typecheck e suite intera coi turni (anche `tests/arrampicata.test.ts`, `tests/sicurezza/salto-molti.test.ts`, i test degli usi degli oggetti).
 - Browser: no.
 - Quando è fatto: commit di merge su `task/T502`; poi l'orchestratore integra T502 e `integra T477` toglie worktree e branch di T477. Sicurezza: V-047 di T477, nessuna superficie nuova dal merge.
+- Esito: integrato `task/T477` in `task/T502` (`83d76ee7`) con ADR-0252, kernel `0.10.28`, conflitti risolti in `AGENTS.md`, `validator.ts`, `items.base/manifest.json` e `glossario-censimento.md` rigenerato, uso `hold` in `itemuse.ts` per oggetti impugnabili con `bonus` (`item.corda`), `turno typecheck` verde e tutti i 298 file della suite passati (295/298 in `turno test` con `TEMP` su `H:`, i 3 sensibili all'I/O passati 47/47 su `C:`, `site-video.test.ts` 73/73 su `H:`); sicurezza: V-047 di T477, nessuna superficie nuova dal merge.

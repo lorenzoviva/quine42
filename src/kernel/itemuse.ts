@@ -6,6 +6,7 @@
 // «Esamina» (in the world: what one does with it, never a list of the game) and the recipes a thing opens where it is held. Pure.
 
 import { normName, isCategory } from './content';
+import { climbLevels } from './climb';
 import { wornZoneOf, type WornZone } from './wearing';
 import type { ItemDef, Recipe } from './types';
 import type { JobProgram } from './npc/model';
@@ -23,6 +24,8 @@ export type ItemUse =
   | { kind: 'bag'; size: number }
   /** Worn on a zone of the body (ADR-0180), or put into a slot of a mechanic's panel (`ui`). */
   | { kind: 'wear'; zone?: WornZone; panel?: string; slot?: string }
+  /** Held in hand (`equippable`) with a bonus the world or its mechanics read (e.g. `bonus.climb`, ADR-0252). */
+  | { kind: 'hold'; climb?: number }
   /** Something done with it from the inventory: an action of its own with effects, or its module's `on_use`/`on_action`. */
   | { kind: 'action'; label: string }
   /** An action of a thing or of a terrain of the world wants it carried (`requires`: its id or one of its tags). */
@@ -52,7 +55,7 @@ const BACKED_BY: Readonly<Record<DeclaredUse, readonly ItemUseKind[]>> = {
   wear: ['wear'],
   light: ['light'],
   bag: ['bag'],
-  action: ['action', 'cuts', 'needed'],
+  action: ['action', 'cuts', 'needed', 'hold'],
   craft: ['ingredient', 'tool'],
   decoration: ['decoration'],
 };
@@ -93,8 +96,11 @@ function effectsOf(def: ItemDef): Partial<Record<(typeof NEEDS)[number], number>
   return out;
 }
 
-/** Whether a thing has the bonus a mechanic could read: some number that is not zero (a multiplier other than one). */
-const hasBonus = (def: ItemDef): boolean => !!def.bonus && typeof def.bonus === 'object' && Object.entries(def.bonus).some(([k, v]) => typeof v === 'number' && Number.isFinite(v) && v !== (k === 'speed' ? 1 : 0));
+/** Whether a thing has the bonus a mechanic or the kernel could read: some number that is not zero (a multiplier other than one; positive levels for `climb`). */
+const hasBonus = (def: ItemDef): boolean =>
+  !!def.bonus &&
+  typeof def.bonus === 'object' &&
+  Object.entries(def.bonus).some(([k, v]) => (k === 'climb' ? climbLevels(v) > 0 : typeof v === 'number' && Number.isFinite(v) && v !== (k === 'speed' ? 1 : 0)));
 
 const tagsOf = (def: ItemDef): string[] => (Array.isArray(def.tags) ? def.tags.filter((t): t is string => typeof t === 'string') : []);
 
@@ -122,6 +128,8 @@ export function usesOf(def: ItemDef, world: UseWorld): ItemUse[] {
       break;
     }
   }
+  const climb = climbLevels(def.bonus?.climb);
+  if (def.equippable && hasBonus(def)) out.push({ kind: 'hold', ...(climb ? { climb } : {}) });
   for (const a of def.actions ?? []) if (a && typeof a.label === 'string' && Array.isArray(a.effects) && a.effects.length) out.push({ kind: 'action', label: a.label });
   if (world.scripted?.(def)) out.push({ kind: 'action', label: '' });
   const wanted = new Set<string>();
@@ -269,6 +277,9 @@ export function useWords(uses: readonly ItemUse[], ctx: UseWordsContext, max = 4
         break;
       case 'wear':
         push(u.zone ? `Si indossa ${ZONE_SAID[u.zone]}.` : `Si mette in «${u.slot}» (${u.panel}).`);
+        break;
+      case 'hold':
+        push(u.climb ? 'Impugnato, aiuta a salire sulle pareti.' : 'Impugnato, aiuta chi lo porta.');
         break;
       case 'action':
         if (actions.length) push(`Puoi: ${listed(actions)}.`);

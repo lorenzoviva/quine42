@@ -529,6 +529,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/veicolo-molti.test.ts`, `tests/veicolo-molti.test.ts`
 - Esito: chiusa da T442 (ADR-0232), 20/11/2026, branch `task/T442`: le contromisure nascono col veicolo in molti. Non provato su una rete vera (i collegamenti finti dei test e due schede su una preview). T448 (ADR-0234) aggiunge «Sali a bordo» con la sua prova; le capsule del vuoto le mette solo il mondo (V-045: Lua non crea veicoli). T449 (ADR-0236) aggiunge il viaggio: «Rotta per …» (`travel:<fascia>`) solo da chi tiene i comandi di un veicolo del vuoto, verso una fascia della natura che non è quella dov'è, controllato dal kernel (`travelTo`) e mai da Lua; porta chi è a bordo spostando lo scorrimento del suo tappeto, all'approdo della destinazione e solo lì; di un veicolo esce in più `transit` (`from`, `to`, `t`, `total`, `jumped`), che il client legge senza fidarsi (`saneTransit` in `readVehicleView`) e mostra soltanto. Prova in `tests/pianeti.test.ts`.
 
+### V-047 · Il salto e l'arrampicata in molti: il server li fa, il client li dice soltanto
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: il messaggio `jump` (`dx`, `dy`) in `src/session/protocol.ts` e `SessionServer.leap`; l'arrampicata dal messaggio `tile` con l'azione `_climb` (`CLIMB_ACTION`); i passi mentre il server porta il corpo (`SessionServer.step`, `Client.claim`, `landed`); `Kernel.jump`, `climbTo`, `climbOffer`, `carriedBody`, `carryBody`, `climbTick`, `fallFromClimb` in `src/kernel/kernel.ts`; la portata dei mezzi (`bonus.climb`, `climb` di uno stato, `climbOf` in `src/kernel/climb.ts`)
+- Proprietà violata: un client non va dove non potrebbe andare (regole 7 e 10): dicendo di saltare o di arrampicarsi andrebbe in cima a un dirupo senza il mezzo, o più lontano di un salto, o, passi a raffica mentre il corpo è in aria, teletrasportato; la direzione di un salto letta senza guardarne il tipo getterebbe un'eccezione nel tick (V-021)
+- Prova: test (T477)
+- Contromisura: il client dice solo la direzione di un salto (due numeri, fatti un vettore unitario; ciò che non è un numero vale 0, e allora il verso del viandante) o la casella di un'arrampicata (gli interi e la portata di `tile`, `tileOutOfReach`); il server fa l'uno e l'altra sul suo mondo con le sue regole (`jump`: `JUMP_UP`, `JUMP_FAR`, `airFree`, il posto dove il corpo sta; `climbOffer`: una casella accanto, il dislivello oltre il gradino ed entro `CLIMB`, la portata dei mezzi che il viandante ha sul server, l'energia, il carico, il posto in cima), porta il corpo spostando il tappeto del viandante e mai fuori dal cerchio, e non prende nessun passo finché non è atterrato; tenuto l'ultimo passo detto nel frattempo, una volta a terra lo confronta con dove lo ha e, se differiscono, corregge. Rifiutato, un salto dà una correzione, un'arrampicata un esito falso, e il client toglie la sua. Il ritmo dei messaggi è quello di ogni messaggio (`LIMITS.rate`); un salto o un'arrampicata alla volta. La portata di un mezzo è letta senza fidarsi (interi, entro `CLIMB`), uno stato che arrampica lo dà solo un effetto validato (`validateEffects`)
+- Task: T477
+- Test: `tests/sicurezza/salto-molti.test.ts`, `tests/arrampicata.test.ts`
+- Esito: chiusa da T477 (ADR-0252), 22/11/2026, branch `task/T477`: le contromisure nascono col salto e l'arrampicata in molti (prima un client non saltava: Spazio faceva ciò che fa `E`). Non provato su una rete vera (i collegamenti finti dei test e una scheda su una preview); gli altri viandanti vedono chi salta o si arrampica scivolare dove il server lo ha, senza l'arco né la parete (niente di nuovo sul filo).
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -581,6 +592,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-044 | — | — | `testo-viandante.test.ts` | il kit non ha chiavi di TypeSafe né di OpenRouter e non esce sulla rete: i due varchi e il kernel si provano coi fornitori finti, tests/sicurezza/testo-viandante.test.ts |
 | V-045 | — | — | `veicolo.test.ts` | ciò che Lua chiede a un veicolo si vede solo dentro il kernel e la sandbox: lo prova tests/sicurezza/veicolo.test.ts |
 | V-046 | — | — | `veicolo-molti.test.ts` | il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts |
+| V-047 | — | — | `salto-molti.test.ts` | il salto e l’arrampicata in molti si provano sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/salto-molti.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

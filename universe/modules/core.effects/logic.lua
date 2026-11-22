@@ -119,10 +119,10 @@ function F.push(target, user, e)
   return nil
 end
 
--- A state of the wanderer: on horseback, in a boat, with the backpack. It changes speed, weight, light.
+-- A state of the wanderer: on horseback, in a boat, with the backpack, roped up. It changes speed, weight, light, how high one climbs.
 function F.state(_, user, e)
   local st = ecs.get(user, "states") or {}
-  st[e.name] = { speed = e.speed or 1, weight = e.weight or 0, light = e.light or 0, expires = (e.duration or 0) > 0 and (time + e.duration) or 0 }
+  st[e.name] = { speed = e.speed or 1, weight = e.weight or 0, light = e.light or 0, climb = e.climb or 0, expires = (e.duration or 0) > 0 and (time + e.duration) or 0 }
   ecs.set(user, "states", st)
   return nil
 end

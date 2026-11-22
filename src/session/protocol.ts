@@ -161,6 +161,11 @@ export type ClientMsg =
   | { t: 'step'; seq: number; x: number; y: number; on?: number }
   /** The directions the wanderer holds, in the world's terms (T263): what `input.held(action, id)` reads on the server. No answer. */
   | { t: 'keys'; held: string[] }
+  /**
+   * A jump (T477): toward (`dx`, `dy`), where the client's keys or face point. The server jumps on its world (`Kernel.jump`) and carries the
+   * body; no step of the client counts until it lands, and where it lands is the server's. No answer: refused, a correction.
+   */
+  | { t: 'jump'; dx?: number; dy?: number }
   | { t: 'phrase'; seq: number; tokens: string[] }
   | { t: 'inscribe'; seq: number }
   | { t: 'cast'; seq: number }
