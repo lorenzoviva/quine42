@@ -31,6 +31,7 @@ import { terrainPhysicsErrors } from './nature';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
+import { useError, type UseWorld } from './itemuse';
 
 const KINDS: ModuleKind[] = ['system', 'entity', 'item', 'player', 'generator', 'data'];
 const LAYERS = ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'];
@@ -448,6 +449,20 @@ export class Validator {
       if (!Array.isArray(it?.tags)) errors.push(`${w}: tags`);
     }
     return errors.slice(0, 6);
+  }
+
+  /**
+   * The rule of the uses (T489, ADR-0251): a new thing of the Council has a use the world knows (`usesOf`: eaten, worn, lit, a bag, an
+   * action with effects, a recipe, a trade, a site, a mission) or is a decoration; else the reason, by id, which goes back to the Narrator.
+   * Only for what the Council writes now: the things of before are marked by the kernel (`markDecorations`), never refused on loading.
+   */
+  validateItemUses(items: readonly ItemDef[], world: UseWorld, declared?: ReadonlyMap<string, string>): Map<string, string> {
+    const out = new Map<string, string>();
+    for (const d of items) {
+      const why = useError(d, world, declared?.get(d.id));
+      if (why) out.set(d.id, why);
+    }
+    return out;
   }
 
   checkLua(path: string, src: string): string[] {

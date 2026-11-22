@@ -171,7 +171,7 @@ export class Talk {
     });
     // "Take this to…": whoever asks hands over what is to be carried.
     if (carry) {
-      const d = this.host.content.byName(carry) ?? (await this.host.introduceItems([carry], `affidato da ${name} a ${this.people.wandererWord(me)}`))[0];
+      const d = this.host.content.byName(carry) ?? (await this.host.introduceItems([carry], `affidato da ${name} a ${this.people.wandererWord(me)}`, undefined, { keep: true }))[0];
       if (d && this.host.as(me.id, () => this.host.give(d.id, 1))) this.host.message(`${name} ti affida: ${d.name}`, 'good');
     }
     this.host.as(me.id, () => this.stories.questsOnTalk(name));

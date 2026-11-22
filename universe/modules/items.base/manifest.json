@@ -22,23 +22,24 @@
     { "id": "item.ascia", "name": "Ascia", "description": "Un'ascia da boscaiolo, pesante e affilata.", "category": "tool", "weight": 2.5, "stack": 1, "tags": ["legno", "metallo", "taglio", "bottega"], "glyph": "⚒", "color": "#a0a8b0", "equippable": true },
     { "id": "item.martello", "name": "Martello", "description": "Un martello da falegname.", "category": "tool", "weight": 1, "stack": 1, "tags": ["bottega", "metallo"], "glyph": "⚒", "color": "#9a8a7a", "equippable": true },
     { "id": "item.secchio", "name": "Secchio", "description": "Un secchio di legno cerchiato di ferro.", "category": "container", "weight": 1.5, "stack": 1, "tags": ["acqua", "contadino"], "glyph": "◘", "color": "#9a7040" },
-    { "id": "item.sacco", "name": "Sacco di iuta", "description": "Un sacco vuoto, ruvido al tatto.", "category": "container", "weight": 0.3, "stack": 5, "tags": ["contadino", "stoffa"], "glyph": "◘", "color": "#c0a070" },
+    { "id": "item.sacco", "name": "Sacco di iuta", "description": "Un sacco vuoto, ruvido al tatto.", "category": "container", "weight": 0.3, "stack": 1, "tags": ["contadino", "stoffa"], "glyph": "◘", "color": "#c0a070", "container": { "size": 4 } },
     { "id": "item.corda", "name": "Corda", "description": "Un rotolo di corda di canapa.", "category": "material", "weight": 0.8, "stack": 5, "tags": ["bottega", "viaggio"], "glyph": "▪", "color": "#c8a878" },
     { "id": "item.chiodi", "name": "Chiodi", "description": "Una manciata di chiodi di ferro.", "category": "material", "weight": 0.1, "stack": 50, "tags": ["bottega", "metallo"], "glyph": "▪", "color": "#8a8a90" },
     { "id": "item.asse", "name": "Asse di legno", "description": "Un'asse di legno grezzo.", "category": "material", "weight": 1.5, "stack": 10, "tags": ["legno", "bottega"], "glyph": "▪", "color": "#b08050" },
     { "id": "item.ciocco", "name": "Ciocco di legna", "description": "Legna da ardere tagliata.", "category": "material", "weight": 1.2, "stack": 10, "tags": ["legno", "bosco"], "glyph": "▪", "color": "#8a5a30" },
     { "id": "item.stoffa", "name": "Pezza di stoffa", "description": "Un ritaglio di lana grezza.", "category": "material", "weight": 0.1, "stack": 20, "tags": ["stoffa"], "glyph": "▪", "color": "#a07898" },
+    { "id": "item.torcia", "name": "Torcia", "description": "Un bastone con la stoffa avvolta in cima, unta di sego: brucia a lungo.", "category": "light", "weight": 0.6, "stack": 5, "tags": ["luce", "fuoco", "legno", "viaggio"], "glyph": "☼", "color": "#e07a30", "equippable": true },
     { "id": "item.candela", "name": "Candela di sego", "description": "Una candela corta che fa un po' di fumo.", "category": "light", "weight": 0.1, "stack": 10, "tags": ["casa", "luce"], "glyph": "☼", "color": "#f0e8c0" },
     { "id": "item.lanterna", "name": "Lanterna", "description": "Una lanterna di latta con i vetri affumicati.", "category": "light", "weight": 1, "stack": 1, "tags": ["luce", "metallo", "viaggio"], "glyph": "☼", "color": "#f0c040", "equippable": true },
     { "id": "item.acciarino", "name": "Acciarino", "description": "Pietra focaia e acciaio, per accendere il fuoco.", "category": "tool", "weight": 0.1, "stack": 1, "tags": ["fuoco", "viaggio"], "glyph": "⚒", "color": "#7a7a7a" },
     { "id": "item.mantello", "name": "Mantello di lana", "description": "Un mantello pesante, rattoppato.", "category": "clothing", "weight": 1.5, "stack": 1, "tags": ["stoffa", "viaggio"], "glyph": "Ʌ", "color": "#5a6a8a" },
-    { "id": "item.stivali", "name": "Stivali di cuoio", "description": "Stivali consumati ma robusti.", "category": "clothing", "weight": 1.2, "stack": 1, "tags": ["cuoio"], "glyph": "Ʌ", "color": "#6a4a30" },
+    { "id": "item.stivali", "name": "Stivali di cuoio", "description": "Stivali consumati ma robusti.", "category": "clothing", "weight": 1.2, "stack": 1, "tags": ["cuoio"], "glyph": "Ʌ", "color": "#6a4a30", "decoration": true },
     { "id": "item.cappello-paglia", "name": "Cappello di paglia", "description": "A tesa larga, sfrangiato dal sole: lo portano contadini e pastori.", "category": "clothing", "weight": 0.3, "stack": 1, "tags": ["paglia", "contadino", "pastore"], "glyph": "Ʌ", "color": "#d8b860", "slot": "head" },
     { "id": "item.grembiule-cuoio", "name": "Grembiule di cuoio", "description": "Spesso e bruciacchiato sull'orlo: il grembiule del fabbro e del fornaio.", "category": "clothing", "weight": 1, "stack": 1, "tags": ["cuoio", "fabbro", "fornaio"], "glyph": "Ʌ", "color": "#5a3a22", "slot": "torso" },
     { "id": "item.bastone", "name": "Bastone da cammino", "description": "Un ramo dritto e levigato dall'uso.", "category": "weapon", "weight": 1, "stack": 1, "tags": ["legno", "viaggio"], "glyph": "†", "color": "#a07848", "equippable": true },
     { "id": "item.moneta", "name": "Moneta di rame", "description": "Una moneta consumata con un volto illeggibile.", "category": "misc", "weight": 0.01, "stack": 99, "tags": ["denaro"], "glyph": "•", "color": "#c87a40" },
-    { "id": "item.dadi", "name": "Dadi d'osso", "description": "Due dadi. Escono sempre lo stesso numero.", "category": "misc", "weight": 0.02, "stack": 5, "tags": ["gioco", "locanda", "crepa"], "glyph": "•", "color": "#e8e0d0" },
-    { "id": "item.lettera", "name": "Lettera sigillata", "description": "Il sigillo è rotto. La lettera è indirizzata a te, ma non ricordi chi te l'abbia scritta.", "category": "misc", "weight": 0.01, "stack": 1, "tags": ["carta", "crepa"], "glyph": "•", "color": "#e8d8a0" }
+    { "id": "item.dadi", "name": "Dadi d'osso", "description": "Due dadi. Escono sempre lo stesso numero.", "category": "misc", "weight": 0.02, "stack": 5, "tags": ["gioco", "locanda", "crepa"], "glyph": "•", "color": "#e8e0d0", "decoration": true },
+    { "id": "item.lettera", "name": "Lettera sigillata", "description": "Il sigillo è rotto. La lettera è indirizzata a te, ma non ricordi chi te l'abbia scritta.", "category": "misc", "weight": 0.01, "stack": 1, "tags": ["carta", "crepa"], "glyph": "•", "color": "#e8d8a0", "decoration": true }
   ],
   "recipes": [
     { "id": "ricetta.benda", "name": "Benda", "inputs": [{ "item": "item.stoffa", "count": 2 }], "tools": ["item.coltello"], "output": { "item": "item.benda", "count": 2 } },
@@ -47,7 +48,10 @@
     { "id": "ricetta.asse", "name": "Asse da un ciocco", "inputs": [{ "item": "item.ciocco", "count": 2 }], "tools": ["item.ascia"], "output": { "item": "item.asse", "count": 1 } },
     { "id": "ricetta.bastone", "name": "Bastone", "inputs": [{ "item": "item.ciocco", "count": 1 }], "tools": ["item.coltello"], "output": { "item": "item.bastone", "count": 1 } },
     { "id": "ricetta.zuppa", "name": "Zuppa", "inputs": [{ "item": "item.erbe", "count": 2 }, { "item": "item.otre-acqua", "count": 1 }, { "item": "item.carne-secca", "count": 1 }], "output": { "item": "item.zuppa", "count": 1 } },
-    { "id": "ricetta.candela", "name": "Candela", "inputs": [{ "item": "item.stoffa", "count": 1 }, { "item": "item.carne-secca", "count": 1 }], "output": { "item": "item.candela", "count": 2 } }
+    { "id": "ricetta.candela", "name": "Candela", "inputs": [{ "item": "item.stoffa", "count": 1 }, { "item": "item.carne-secca", "count": 1 }], "output": { "item": "item.candela", "count": 2 } },
+    { "id": "ricetta.secchio", "name": "Secchio", "inputs": [{ "item": "item.asse", "count": 2 }, { "item": "item.corda", "count": 1 }], "tools": ["item.martello"], "output": { "item": "item.secchio", "count": 1 } },
+    { "id": "ricetta.lanterna", "name": "Lanterna", "inputs": [{ "item": "item.candela", "count": 1 }, { "item": "item.chiodi", "count": 2 }], "tools": ["item.martello"], "output": { "item": "item.lanterna", "count": 1 } },
+    { "id": "ricetta.torcia", "name": "Torcia", "inputs": [{ "item": "item.bastone", "count": 1 }, { "item": "item.stoffa", "count": 1 }], "tools": ["item.acciarino"], "output": { "item": "item.torcia", "count": 2 } }
   ],
   "loot": {
     "comune": { "rolls": [1, 3], "entries": [{ "tag": "food", "weight": 4 }, { "tag": "material", "weight": 3 }, { "tag": "misc", "weight": 2 }, { "tag": "light", "weight": 1 }, { "tag": "medicine", "weight": 1 }] },
