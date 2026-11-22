@@ -395,7 +395,7 @@ congelato, sentieri garantiti, edifici) → lotti: ogni edificio diventa una str
 verso la porta (ADR-0043) → cose su celle raggiungibili (quelle `dentro` sul pavimento del modello; niente cose solide su punti di articolazione né davanti alle porte, ADR-0064), bottino
 `terreno`, rune su tratti liberi. Il chunk (0,0) ha sempre `x`, `speed = speed` e la runa magica `lux` (`luce` fino al contratto 0.1).
 **Il luogo che il budget ferma** (ADR-0231, T457, kernel 0.10.7): se il Cartografo non si può chiedere perché il budget è finito (`BudgetError`: il testo della sessione, `ai.maxText`; il tetto del giorno del varco; una chiave senza credito) il luogo resta bozza trattenuta, niente piano di ripiego salvato né carta, e per `Kernel.BUDGET_RETRY` (60 s del mondo, `budgetHeld()`) i luoghi nuovi restano bozze senza chiamate; poi uno si richiede. `planAhead` risponde `no`. Ogni altro fallimento (tre risposte invalide, un errore) dà ancora il ripiego del kernel, «Terra senza nome» con un ambiente del mondo, salvato.
-**Il raggio** (ADR-0244, T488, kernel 0.10.20): il Concilio lavora per un luogo solo quando un viandante può raggiungerlo presto. Il kernel carica
+**Il raggio** (ADR-0245, T488, kernel 0.10.20): il Concilio lavora per un luogo solo quando un viandante può raggiungerlo presto. Il kernel carica
 ancora tutto ciò che la camera vede (bozze, gratis), ma `pumpDevelopment` chiede il Cartografo solo per le bozze **in raggio** (`src/kernel/reach.ts`,
 puro: il quadrato del luogo entro `near` caselle dal viandante, 8, o entro `side` caselle, 4, della via che fa per i prossimi `ahead` secondi al suo
 passo, 10, al più `aheadMax` caselle, 60; il passo lo misura il kernel a ogni tick dalla posizione sul tappeto, `measurePaces`, `nextPace`: una media di

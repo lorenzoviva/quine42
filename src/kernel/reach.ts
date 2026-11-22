@@ -1,4 +1,4 @@
-// Where the wanderers will be soon (T488, ADR-0244): what the Council makes for a place it makes only when someone can reach it soon. A place
+// Where the wanderers will be soon (T488, ADR-0245): what the Council makes for a place it makes only when someone can reach it soon. A place
 // is in reach of a wanderer if its square is within `near` tiles of them, or within `side` tiles of the way they are going for the next `ahead`
 // seconds (at most `aheadMax` tiles: a fast vehicle). Before, the kernel planned every place the camera saw and one more around (the first run
 // of the beta: 232 places planned in 16 minutes, 16 % of them reached). Pure: the kernel gives the wanderers, their pace measured by the kernel.

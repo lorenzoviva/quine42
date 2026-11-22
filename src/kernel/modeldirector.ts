@@ -190,7 +190,7 @@ export class ModelDirector {
       out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `a simple, recognisable ${forma}, like many things of the world (for example: ${d.name})`, classe: 'object', tinta: true, ...worn } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object', ...worn });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
-    // Gargantuan per realm, the kernel sees to it) by the best model. Only those of a place a wanderer can reach soon (T488, ADR-0244), the
+    // Gargantuan per realm, the kernel sees to it) by the best model. Only those of a place a wanderer can reach soon (T488, ADR-0245), the
     // nearest first; `all` every loaded one (what costs nothing: another size's program, a card's model).
     const structures = k.ecs
       .query('structure')

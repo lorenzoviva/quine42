@@ -1,4 +1,4 @@
-// The reach (T488, ADR-0244): what the Council makes for a place it makes only when a wanderer can reach it soon. The places in reach (near the
+// The reach (T488, ADR-0245): what the Council makes for a place it makes only when a wanderer can reach it soon. The places in reach (near the
 // wanderer, or on the way they are going) are planned, the nearest first; the others are only looked up for what costs nothing (a plan the universe
 // has, the open sea) and stay drafts; the things named on the ground of a planned place are defined when it comes in reach; the Sculptor of the
 // structures only for a place in reach; with more wanderers, around each; the pace of the world and the lobby's quota still hold.

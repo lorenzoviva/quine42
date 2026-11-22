@@ -2,7 +2,7 @@
 
 La prima run della beta (T457, `docs/beta/run-1.md`): il 21/11, da soli, una copia di `orichalcum` sul branch `beta/run-1`, 18 minuti di
 registrazione (16 del mondo), **2,93 $** al varco di Gemini. Qui: che cosa ha pagato e che cosa il viandante ne ha visto (§ 1), che cosa
-cambia il raggio di ADR-0244 sullo stesso percorso (§ 2-3), la stima della lobby (§ 4), la prova con Gemini vero (§ 5).
+cambia il raggio di ADR-0245 sullo stesso percorso (§ 2-3), la stima della lobby (§ 4), la prova con Gemini vero (§ 5).
 
 Si rifà tutto senza chiamate:
 

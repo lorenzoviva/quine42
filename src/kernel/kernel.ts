@@ -206,7 +206,7 @@ export interface Chunk {
   /** Known to have no saved plan, and waiting for the universe's quota of new places (T40). */
   held?: boolean;
   /**
-   * Looked up and found to need the Cartographer, out of every wanderer's reach (T488, ADR-0244): a draft until someone can reach it soon;
+   * Looked up and found to need the Cartographer, out of every wanderer's reach (T488, ADR-0245): a draft until someone can reach it soon;
    * not looked up again while it is loaded.
    */
   far?: boolean;
@@ -691,7 +691,7 @@ export class Kernel {
   /** Places come in reach of a wanderer with their plan (T488): the rhythms of the world (packs, kinds, sessions) beat on these. */
   private exploredCount = 0;
   /**
-   * What is made for a place, only when a wanderer can reach it soon (T488, ADR-0244, `src/kernel/reach.ts`): the game's `REACH`. The tests of
+   * What is made for a place, only when a wanderer can reach it soon (T488, ADR-0245, `src/kernel/reach.ts`): the game's `REACH`. The tests of
    * something else widen `near` to every place loaded (Infinity), as the kernel planned before (tests/setup/reach-wide.ts).
    */
   static get REACH(): Reach {
@@ -2140,7 +2140,7 @@ export class Kernel {
   private walkersNow: Walker[] = [];
 
   /**
-   * Whether the place of a point of the world is in reach of a wanderer (T488, ADR-0244): near one, or on the way one is going. What the Council
+   * Whether the place of a point of the world is in reach of a wanderer (T488, ADR-0245): near one, or on the way one is going. What the Council
    * makes for a place (its plan, the things named on its ground, the new ones it asks for, the model of its structure) waits for this.
    */
   inReach(x: number, y: number): boolean {
@@ -2161,7 +2161,7 @@ export class Kernel {
   }
 
   /**
-   * Plans the drafts in reach of a wanderer (T488, ADR-0244), the nearest first, a few at a time; the drafts out of reach are only looked up, for
+   * Plans the drafts in reach of a wanderer (T488, ADR-0245), the nearest first, a few at a time; the drafts out of reach are only looked up, for
    * what costs nothing (a plan the universe has, the open sea, a filler, a place of a block): what would need the Cartographer waits there.
    */
   private pumpDevelopment(): void {
@@ -3126,7 +3126,7 @@ export class Kernel {
     ch.asks = undefined;
     this.asking.delete(ch.key);
     if (regionKind(this.masterRegionOf(ch)) === 'filler') return;
-    // What it asks the Council for, asked when it is in reach of a wanderer (T488, ADR-0244: a place loaded at the edge of the view asks nothing),
+    // What it asks the Council for, asked when it is in reach of a wanderer (T488, ADR-0245: a place loaded at the edge of the view asks nothing),
     // once a load. Held (T373): it waits while the world is held.
     ch.asks = () => {
       if (unknown.length) void this.introduceItems(unknown, `trovati a terra in «${plan.place.name}»`).then((defs) => {

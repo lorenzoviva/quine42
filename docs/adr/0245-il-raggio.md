@@ -1,4 +1,4 @@
-# ADR-0244 — Il raggio: il Concilio lavora solo per i luoghi che un viandante può raggiungere presto
+# ADR-0245 — Il raggio: il Concilio lavora solo per i luoghi che un viandante può raggiungere presto
 
 Data: 2026-11-22 · Stato: accettato (task T488 del backlog, dopo la prima run della beta, T457) · Riferimenti: ADR-0040 (i luoghi nuovi e chi
 li paga), ADR-0043 (le strutture), ADR-0085 (i coefficienti e la stima oraria), ADR-0196 (il ritmo del mondo), ADR-0231 (il luogo che il

@@ -241,7 +241,7 @@ export const modelGap = (c: number): number => (c <= 0 ? Infinity : Math.round(6
 
 // The estimate of an hour of play: what a wanderer usually does in an hour, and what a call usually weighs. They are
 // assumptions, said as such on the screen; the ledger (`kernel.usage`) says what was really spent. The places, the things on their ground,
-// the people and the structures (T488, ADR-0244) are what the walk of the first run of the beta asked for with the reach: its path walked
+// the people and the structures (T488, ADR-0245) are what the walk of the first run of the beta asked for with the reach: its path walked
 // again offline in 18 minutes, the local models answering as Gemini did in the run (`lab/scripts/sessione-cammino.ts`,
 // `lab/banco/run-1/sessione-dopo.json`, `lab/banco/run-1/consumi.md`); the run itself, before the reach, asked for 870 places an hour.
 export const HOUR = {
