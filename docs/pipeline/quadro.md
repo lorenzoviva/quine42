@@ -38,6 +38,7 @@ Aggiornato il 23/11/2026, epoca 654 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237, nessuna riga in `consumi.jsonl`): al primo task pronto adatto (programmazione di più file, senza browser) assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
 - **19/11 17:05 (epoca 567):** autore ha chiuso D64 e D65 (fuori per 1-2 ore): T437-T451 pianificati e approvati, `mesa` nel generatore. Autonomia: lanciare e integrare la catena T437→.
 - **19/11 16:58 (epoca 565):** **T436** integrato (`da373cc3`, ADR-0223, kernel `0.9.21`, step 31 `raggiunto`; cartella `worktrees/t436` bloccata su Windows e ramo `task/T436` rimasto). Claude fermo al 3 % settimana fino al reset delle 15:59Z (16:59 CET). Autonomia fino alle 18:00 CET (**D66** aperta).
 - **19/11 15:56 (epoca 562):** **T435** integrato (`694e7833`, kernel 0.9.20; worktree e ramo rimossi); aggiramento in `.pipeline/budget.json` (`residuo: 21`, `sessione: 90`, `letto: 15:55Z`) ripristinato per lanciare **T436** sul 5 % residuo prima del reset delle 16:00Z. Autonomia fino alle 18:00 CET (**D66** aperta).
