@@ -85,7 +85,7 @@ lettera con 0,89.
   senza rampe, enclavi né caselle staccate, e i piazzamenti sono quelli di prima (`tests/rete-kernel.test.ts`, `tests/luoghi-campione.test.ts`
   verde). Col plateau sintetico di otto livelli in mezzo a ogni luogo (`--rialzo 8`): 434 rampe su 327 luoghi, 21 enclavi tenute, nessuna
   casella staccata; la rete di un luogo 0,66 ms (1,29 al p95). Il contratto non cambia (kernel
-  0.10.25): niente su disco, il filo ha un campo in più dal server al client.
+  0.10.26): niente su disco, il filo ha un campo in più dal server al client.
 - **Il costo**: il controllo del gradino in `free` è un'occhiata al segno `steep` del luogo quando la scatola sta su due caselle dello stesso
   luogo (circa 0,3 µs), due livelli quando sta a cavallo di due luoghi (circa 0,6 µs); la rete di un luogo si fa una volta quando il piano si
   stende (0,57 ms in mediana, 1,16 al p95, col rilievo di oggi).
