@@ -302,3 +302,15 @@ il taglio si spegne.
 | ![scaffali](sotterranei-stato/30-arredata-fra-gli-scaffali.jpg) davanti allo scaffale di fondo, che lo ferma | ![risalito](sotterranei-stato/31-arredata-risalito.jpg) risalito al piano terra: il taglio spento |
 
 Resta la rigenerazione dei modelli con le cantine (T411).
+
+## 11. Dopo T478: gli strati come regole
+
+Il programma degli strati di ogni ambiente (ADR-0248): sotto la superficie della bozza, MarkovJunior in 3D dice che cosa sta sotto che cosa,
+la bozza di T418 dove non decide; sei righe nei piani nuovi. Nel borgo del seme la terra per una casella, l'argilla spessa dei vasai, qua e là la
+lente della falda dei pozzi, poi la roccia viva. Verificato nella preview della build (`?skip&offline&dev&teleport=15.5,-5.5`, il luogo 0,-1
+del borgo, il taglio abbassato a mano come in § 8): a 3,5 caselle i tappi sono argilla, roccia viva e la falda in blu; a 4,5, la riga 4 che un
+piano di prima non ha, sotto la falda la roccia viva.
+
+| | |
+|---|---|
+| ![falda](sotterranei-stato/32-strati-programma-falda.jpg) il taglio 3,5 caselle sotto il suolo: argilla (rossa), roccia viva (grigia), la lente della falda (blu) | ![riga 4](sotterranei-stato/33-strati-programma-riga-4.jpg) a 4,5 caselle: sotto la falda la roccia viva, poche colonne d'argilla dove il suolo è più alto |

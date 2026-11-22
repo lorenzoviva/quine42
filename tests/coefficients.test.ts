@@ -89,8 +89,8 @@ describe('the coefficients of generation (T45b)', () => {
       if (c.modo === 'non regolabile') expect(c.coefficiente).toBeUndefined();
       else expect(COEFFICIENT_KEYS).toContain(c.coefficiente);
     }
-    expect(CENSUS.length).toBe(49);
-    expect(new Set(CENSUS.map((c) => c.compito)).size).toBe(49);
+    expect(CENSUS.length).toBe(50);
+    expect(new Set(CENSUS.map((c) => c.compito)).size).toBe(50);
   });
 
   it('the tokens of the estimate are the measured ones (T352): every task of the census it counts, a prefix inside the prompt', () => {

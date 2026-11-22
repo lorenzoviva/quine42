@@ -309,6 +309,30 @@
       "color": "#6d6a68",
       "solid": true,
       "layer": "stratum"
+    },
+    "6": {
+      "id": "aquifer",
+      "name": "falda",
+      "description": "ghiaia intrisa d'acqua dove scorre la falda",
+      "color": "#3768b0",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "7": {
+      "id": "ore",
+      "name": "vena",
+      "description": "una vena di minerale scuro e lucente nella roccia",
+      "color": "#b08d3c",
+      "solid": true,
+      "layer": "stratum"
+    },
+    "8": {
+      "id": "roots",
+      "name": "radici",
+      "description": "terra fitta di radici sotto il bosco",
+      "color": "#4a3522",
+      "solid": true,
+      "layer": "stratum"
     }
   },
   "roof": {

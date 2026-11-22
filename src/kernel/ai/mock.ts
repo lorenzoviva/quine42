@@ -17,6 +17,7 @@ import { parseXml, type XmlElement } from '../../mj/xml';
 import { RESERVED_PART_SYMBOLS } from '../worldparts';
 import { mockVesselProgram } from './mockVessel';
 import { vehicleMediumIn } from '../vehicleclaim';
+import { STRATA_EXAMPLE } from '../strata';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -342,6 +343,22 @@ export class MockAiModels implements AiModels, DecisionModels {
             { id: 'rotto', name: 'Programma rotto', description: 'non compila', type: 'outdoor', program_json: '{"type":"teletrasporta","dove":"altrove"}' },
           ],
         };
+      case 'genesis.strata': {
+        // Offline (T478) the strata of the pastoral world and the example program for every environment; the first one, asked the first time,
+        // without its symmetry, so the kernel sends it back once with the reason.
+        const envs: Array<{ id?: string }> = Array.isArray(d.environments) ? d.environments : [];
+        return {
+          strata: [
+            { code: 'T', name: 'terra rossa', description: 'terra rossiccia di pascolo, con sassi', color: '#7a4a2e', role: 'topsoil' },
+            { code: 'C', name: 'creta', description: 'creta grigia e fredda', color: '#9a8a78', role: 'clay' },
+            { code: 'A', name: 'sabbione', description: 'sabbia grossa pressata', color: '#c8b078', role: 'sandbed' },
+            { code: 'M', name: 'limo', description: 'limo nero dei torrenti', color: '#3e362c', role: 'mud' },
+            { code: 'B', name: 'calcare', description: 'il calcare su cui poggia il monte', color: '#a8a49a', role: 'bedrock' },
+            { code: 'V', name: 'vena di ferro', description: 'una vena rugginosa nel calcare', color: '#8a4a2a', role: 'other' },
+          ],
+          environments: envs.map((e, i) => ({ id: e.id, program: i === 0 && !d.feedback ? STRATA_EXAMPLE.replace(' symmetry="(xy)"', '') : STRATA_EXAMPLE })),
+        };
+      }
       case 'genesis.cast':
         return {
           modules: [

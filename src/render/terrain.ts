@@ -16,7 +16,7 @@ import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
-import { STRATA_DEPTH, stratumRow } from '../kernel/strata';
+import { stratumRow } from '../kernel/strata';
 import { foamGeometry, SEA_MAT } from './sea';
 import {
   BANK,
@@ -268,13 +268,15 @@ export function stratumColour(k: Kernel, x: number, z: number, depth: number, sh
 
 /**
  * A side of the column at (x, z) from `y` down to `ny` in the bands of its strata (T418, ADR-0091 point 6): a band a tile deep from its ground
- * down (`stratumRow`), the last one deeper down, the first one above the ground. Facing (dx, dz) on the plane `p`, from `a` to `e` along it.
+ * down (`stratumRow`), the last one of its place (6 rows in a new plan, 4 in one of before: T478) deeper down, the first one above the ground.
+ * Facing (dx, dz) on the plane `p`, from `a` to `e` along it.
  */
 export function strataSide(k: Kernel, b: Builder, x: number, z: number, dx: number, dz: number, p: number, a: number, e: number, y: number, ny: number, shade: number): void {
   const g = k.groundAt(x, z);
+  const rows = k.strataRowsAt(x, z);
   for (let top = y; top > ny; ) {
-    const row = stratumRow(g - top + 1e-6);
-    const bottom = row >= STRATA_DEPTH - 1 ? ny : Math.max(ny, g - row - 1);
+    const row = stratumRow(g - top + 1e-6, rows);
+    const bottom = row >= rows - 1 ? ny : Math.max(ny, g - row - 1);
     sideQuad(b, dx, dz, p, a, e, top, bottom, stratumColour(k, x, z, g - top + 1e-6, shade));
     top = bottom;
   }

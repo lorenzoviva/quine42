@@ -44,7 +44,7 @@ export interface CardStamp {
  */
 export const CARD_MAKERS: Readonly<Record<string, readonly string[]>> = {
   'genesis.cast': ['genesis.atlas', 'genesis.bible', 'genesis.cast', 'genesis.physics', 'genesis.review', 'genesis.style', 'genesis.terrain'],
-  'genesis.layouts': ['genesis.layouts'],
+  'genesis.layouts': ['genesis.layouts', 'genesis.strata'],
   'cartographer.environment': ['cartographer.environment'],
   'chunk.plan': ['chunk.plan'],
   'forge.concept': ['forge.concept', 'forge.code', 'forge.physics', 'forge.review'],

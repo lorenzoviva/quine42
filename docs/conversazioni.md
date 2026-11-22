@@ -257,6 +257,14 @@ sequenceDiagram
   `OBJECT` con: `ambienti` (arr con `id`, `nome`, `descrizione`, `tipo`: enum esterno/interno/misto, `programma_json`: stringa JSON del programma MarkovJunior).
 - **Validazione**: Esecuzione di prova in [`checkLayout()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/layout.ts) e riparazione automatica sintattica con [`repairProgram()`](file:///H:/projects/rune/.claude/worktrees/t67/src/mj/engine.ts).
 
+#### 6b. `genesis.strata` (T478, ADR-0248)
+- **Agente**: `cartografo`
+- **Caller**: `designStrata()` in `src/kernel/agents/genesis.ts`, dopo gli ambienti validi.
+- **Contesto**: gli ambienti (id, nome, descrizione), i terreni delle mappe; al secondo giro gli strati del primo, fermi. Temperatura: 0.5.
+- **Prompt utente** (in inglese): i terreni degli strati del mondo (4-8, una lettera maiuscola ciascuno che non sia `E` né un terreno, il ruolo `topsoil clay sandbed mud bedrock` o `other`) e per ogni ambiente un programma MarkovJunior 3D che dice che cosa sta sotto che cosa (la superficie della bozza in cima, `E` la terra da decidere, solo `one all prl` in `sequence`/`markov`, `symmetry="(xy)"`), con l'esempio `STRATA_EXAMPLE`; `[SOME PROGRAMS WERE INVALID, fix them: {feedback}]`.
+- **Response Schema** (`STRATA_SCHEMA`): `OBJECT` con `strata` (arr con `code`, `name`, `description`, `color`, `role`) ed `environments` (arr con `id`, `program`).
+- **Validazione**: `ownStrata` sugli strati; ogni programma con `validateLayout` e gli strati del mondo (`strataProgramErrors` sulle bozze di prova); gli invalidi tornano una volta col motivo, per loro soli.
+
 #### 7. `genesis.atlas`
 - **Agente**: `cartografo`
 - **Caller**: [`drawAtlas()`](file:///H:/projects/rune/.claude/worktrees/t67/src/kernel/agents/cartography.ts#L189-L203) in `src/kernel/agents/cartography.ts`

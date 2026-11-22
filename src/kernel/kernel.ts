@@ -92,7 +92,7 @@ import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
-import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
+import { draftStrata, programStrata, readStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow } from './strata';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
@@ -638,6 +638,8 @@ export class Kernel {
   palette: Record<string, TerrainDef> = {};
   /** The terrains of the strata under the ground (T418): the generator's `strata` over the seed's (`strataPalette`). */
   strata: Record<string, TerrainDef> = strataPalette(undefined);
+  /** The environments whose program of the strata the kernel found not to run (T478): said once, their places have the draft's. */
+  private strataFaults = new Set<string>();
   fragments: RuneFragment[] = [];
 
   readonly chunks = new Map<string, Chunk>();
@@ -2377,7 +2379,7 @@ export class Kernel {
   setEnvironmentProgram(id: string, program: MjNode, message: string): string | undefined {
     const m = [...this.modules.values()].find((x) => x.manifest.layouts?.[id]);
     if (!m) return `ambiente sconosciuto: ${id}`;
-    const errs = this.validator.validateLayout(id, { ...m.manifest.layouts![id], program }, this.palette, this.sampleDrafts());
+    const errs = this.validator.validateLayout(id, { ...m.manifest.layouts![id], program }, this.palette, this.sampleDrafts(), this.strata);
     if (errs.length) return errs.join('; ');
     let man: { layouts?: Record<string, Record<string, unknown>> };
     try {
@@ -2409,7 +2411,7 @@ export class Kernel {
       if (!this.alive(ch)) return;
       if (anchor) {
         ch.held = false;
-        const plan = { ...this.blockPlan(block, anchor), strata: this.strataOf(ch) };
+        const plan = this.withStrata(ch, this.blockPlan(block, anchor));
         await this.chunkStore.save(this.recordKey(ch), { plan });
         if (this.alive(ch)) this.applyPlan(ch, plan);
         return;
@@ -2426,7 +2428,7 @@ export class Kernel {
     }
     if (kind === 'filler' && this.content.layouts[region!.environment]) {
       ch.held = false;
-      const plan = { ...this.fillerPlan(region!), strata: this.strataOf(ch) };
+      const plan = this.withStrata(ch, this.fillerPlan(region!));
       await this.chunkStore.save(this.recordKey(ch), { plan });
       this.council.say('kernel', 'info', `luogo ${ch.key}: riempitivo «${region!.name}» (${this.content.layouts[plan.layout]?.name ?? plan.layout}), senza chiamate`, 'cartographer', 'chunk.plan');
       if (this.alive(ch)) this.applyPlan(ch, plan);
@@ -2445,7 +2447,7 @@ export class Kernel {
     // The void (T445, ADR-0233) the same: a place all void has nothing on it and costs nothing.
     if (this.openSea(ch.draft) || this.allVoid(ch.draft)) {
       ch.held = false;
-      const plan = { ...this.seaPlan(this.allVoid(ch.draft)), strata: this.strataOf(ch) };
+      const plan = this.withStrata(ch, this.seaPlan(this.allVoid(ch.draft)));
       await this.chunkStore.save(this.recordKey(ch), { plan });
       if (this.alive(ch)) this.applyPlan(ch, plan);
       return;
@@ -2485,8 +2487,9 @@ export class Kernel {
       plan.vpt = STRUCTURE_VPT;
       // And it swims (T438, ADR-0224): its layout joins it through the water one swims and never digs it; a plan of before does not say it.
       plan.swim = true;
-      // And its strata, from its draft (T418): the plan keeps them.
-      plan.strata = this.strataOf(ch);
+      // And its strata (T418), by its environment's program over the draft (T478): the plan keeps them, and says how they are made.
+      plan.strataDepth = STRATA_DEPTH;
+      this.withStrata(ch, plan);
       this.cardChunk(ch, plan, ch.chi);
     } finally {
       end();
@@ -2533,7 +2536,7 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
   }
 
   /**
@@ -2651,7 +2654,7 @@ export class Kernel {
    */
   private fillerPlan(region: Region): ChunkPlan {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
   }
 
   /** Whether a draft is all open sea (T441): every tile deep water one swims. */
@@ -2671,7 +2674,7 @@ export class Kernel {
 
   /** The plan of a place of open sea (T441), or of the void (T445): its name in the language of the world, no environment, nothing in it; the kernel's. */
   private seaPlan(empty = false): ChunkPlan {
-    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true };
+    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
   }
 
   /** The island a place stands on in an archipelago (T441), or its station or asteroid in the void (T445), with its region of the atlas if the Cartographer has named it. */
@@ -2851,7 +2854,7 @@ export class Kernel {
         let id = d.id;
         while (this.content.layouts[id]) id += '_';
         const def = program ? { name: d.name, description: d.description, environment: d.environment, program } : undefined;
-        const errs = def ? this.validator.validateLayout(id, def, palette, this.sampleDrafts()) : ['programma mancante o incomprensibile'];
+        const errs = def ? this.validator.validateLayout(id, def, palette, this.sampleDrafts(), this.strata) : ['programma mancante o incomprensibile'];
         if (errs.length) {
           feedback = errs.join('; ');
           this.council.say('kernel', 'scarta', `ambiente «${d.name}»: ${feedback}`, 'cartographer', 'cartographer.environment');
@@ -3099,8 +3102,8 @@ export class Kernel {
     const { result, tiles, block } = this.layoutOf(ch, plan, pathCode);
     ch.plan = plan;
     ch.place = plan.place;
-    // Its strata (T418): the plan's, or, for a plan of before, the draft's again.
-    ch.strata = readStrata(plan.strata, S, this.strata);
+    // Its strata (T418): the plan's, or, where it has none that are good, made again as it says (`strataOf`): a plan of before the draft's.
+    ch.strata = readStrata(plan.strata, S, this.strata, strataDepthOf(plan));
     // A place of a block (T370): the world knows its block from its plan too, and its ground lies flat on the lot.
     if (block) this.knowBlock(block, ch, plan);
     ch.blockLot = block ? this.blockLotBox(block, ch) : undefined;
@@ -4494,13 +4497,37 @@ export class Kernel {
   // --- Space & collisions ----------------------------------------------------------------------
 
   /**
-   * The strata under a place (T418, ADR-0091 point 5): its plan's, or the draft's (`draftStrata`, deterministic: a plan of before and a place
-   * still a draft have them from there, not saved). Kept on the place until its draft changes.
+   * The strata under a place (T418, ADR-0091 point 5): its plan's, or made again as its plan says they are made (`strataFor`, deterministic:
+   * a plan of before and a place still a draft have them from there, not saved). Kept on the place until its draft or its plan changes.
    */
   strataOf(ch: Chunk): string[] {
+    // What is kept was read (`readStrata`) or made here: whole, with codes of the strata.
+    return (ch.strata ??= this.strataFor(ch, ch.plan));
+  }
+
+  /**
+   * How the strata of a place are made (T478, ADR-0248): a plan that says `strataDepth` (a new one) has them by its environment's program over
+   * the draft, the draft's in every cell the program decides nothing (`programStrata`), or the draft's where its environment has none; a plan of
+   * before the draft's 4 rows (T418); a place still a draft the draft's, as deep as a new plan. A program that does not run gives the draft's, and
+   * the kernel says it once.
+   */
+  private strataFor(ch: Chunk, plan: ChunkPlan | undefined): string[] {
     const S = this.config.chunkSize;
-    // What is kept was read (`readStrata`) or drafted here: whole, with codes of the strata.
-    return (ch.strata ??= draftStrata(ch.draft, ch.cx, ch.cy, S, this.config.seed, this.palette, this.strata));
+    const depth = plan ? strataDepthOf(plan) : STRATA_DEPTH;
+    const program = plan?.strataDepth === STRATA_DEPTH && plan.layout ? this.content.layouts[plan.layout]?.strata : undefined;
+    if (program === undefined) return draftStrata(ch.draft, ch.cx, ch.cy, S, this.config.seed, this.palette, this.strata, depth);
+    const made = programStrata(program, ch.draft, ch.cx, ch.cy, S, this.config.seed, this.palette, this.strata, depth);
+    if (made.error && !this.strataFaults.has(plan!.layout)) {
+      this.strataFaults.add(plan!.layout);
+      this.council.say('kernel', 'info', `gli strati di «${this.content.layouts[plan!.layout]?.name ?? plan!.layout}»: ${made.error}; valgono quelli della bozza`, 'cartographer', 'chunk.plan');
+    }
+    return made.rows;
+  }
+
+  /** A plan the kernel saves, with its strata as it says they are made (T478): a new plan says `strataDepth`. */
+  private withStrata(ch: Chunk, plan: ChunkPlan): ChunkPlan {
+    plan.strata = this.strataFor(ch, plan);
+    return plan;
   }
 
   /** The stratum of a column at a depth under its ground (tiles, T418): the row it falls in (the last one deeper down), or undefined off the places. */
@@ -4509,7 +4536,15 @@ export class Kernel {
     const cx = Math.floor(col / S), cy = Math.floor(row / S);
     const ch = this.chunks.get(this.chunkKey(cx, cy));
     if (!ch) return undefined;
-    return this.strata[this.strataOf(ch)[stratumRow(depth)]?.[(row - cy * S) * S + (col - cx * S)] ?? ''];
+    const rows = this.strataOf(ch);
+    return this.strata[rows[stratumRow(depth, rows.length)]?.[(row - cy * S) * S + (col - cx * S)] ?? ''];
+  }
+
+  /** How many rows of strata the place of a column has (T478: 6 in a new plan, 4 in one of before), or those of a new plan off the places. */
+  strataRowsAt(col: number, row: number): number {
+    const S = this.config.chunkSize;
+    const ch = this.chunks.get(this.chunkKey(Math.floor(col / S), Math.floor(row / S)));
+    return ch ? this.strataOf(ch).length : STRATA_DEPTH;
   }
 
   /** Tile at a carpet cell, or undefined if its chunk is not loaded (never generates: may be called from Lua). */
@@ -8853,7 +8888,7 @@ export class Kernel {
     for (const id of this.modules.keys()) if (e.text.includes(id)) return this.modules.get(id)!.manifestPath;
     const t = e.task ?? '';
     if (t.startsWith('chunk.')) return 'modules/world.layouts/manifest.json';
-    if (t.startsWith('genesis.')) return t === 'genesis.terrain' || t === 'genesis.physics' ? 'modules/world.terrain/manifest.json' : 'world/bible.json';
+    if (t.startsWith('genesis.')) return t === 'genesis.terrain' || t === 'genesis.physics' || t === 'genesis.strata' ? 'modules/world.terrain/manifest.json' : 'world/bible.json';
     if (t.startsWith('content.')) return 'modules/items.base/manifest.json';
     if (t === 'action.judge') return 'modules/core.effects/logic.lua';
     if (t === 'spell.name') return this.files['modules/magic.spells/manifest.json'] ? 'modules/magic.spells/manifest.json' : 'modules/magic.runes/manifest.json';
@@ -11539,7 +11574,7 @@ export class Kernel {
       // The world is born again with the nature of its theme (T437, ADR-0224): fixed from here.
       this.chooseNature(theme);
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette) => this.validator.validateLayout(id, def, palette, this.sampleDrafts()), this.broughtForGenesis(), this.config.nature.geography, this.config.nature.oxygen);
+      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette, strata) => this.validator.validateLayout(id, def, palette, this.sampleDrafts(), strata ?? this.strata), this.broughtForGenesis(), this.config.nature.geography, this.config.nature.oxygen);
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);
       // Example content shipped on disk makes room for the generated world.

@@ -15,10 +15,12 @@ import {
   biomeOf,
   columnRoles,
   draftStrata,
+  programStrata,
   readStrata,
   roleCodes,
   SEED_STRATA,
   STRATA_DEPTH,
+  STRATA_DEPTH_BEFORE,
   strataErrors,
   strataPalette,
   stratumRow,
@@ -138,8 +140,8 @@ async function boot(chunks = new MemoryChunks()) {
 
 const saved = (chunks: MemoryChunks) => (chunks as unknown as { m: Map<string, ChunkRecord> }).m;
 
-describe('the strata in the world (T418)', () => {
-  it('a place planned keeps its strata in its plan, the draft\'s; a plan of before has them again from its draft', async () => {
+describe('the strata in the world (T418, T478)', () => {
+  it("a place planned keeps its strata in its plan, by its environment's program over the draft; a plan of before has the draft's", async () => {
     const { k, chunks } = await boot();
     const S = k.config.chunkSize;
     const ch = k.chunks.get('0,0')!;
@@ -147,27 +149,57 @@ describe('the strata in the world (T418)', () => {
     const records = [...saved(chunks).entries()].filter(([key]) => key.endsWith(':0,0'));
     expect(records).toHaveLength(1);
     const plan = records[0]![1].plan;
-    expect(plan.strata).toEqual(draftStrata(ch.draft, 0, 0, S, k.config.seed, k.palette, k.strata));
+    // A new plan (T478) says how its strata are made, and has six rows by the program of its environment.
+    expect(plan.strataDepth).toBe(STRATA_DEPTH);
+    expect(plan.strata).toHaveLength(STRATA_DEPTH);
+    const program = k.content.layouts[plan.layout]!.strata;
+    expect(typeof program).toBe('string');
+    expect(plan.strata).toEqual(programStrata(program, ch.draft, 0, 0, S, k.config.seed, k.palette, k.strata).rows);
+    expect(plan.strata).not.toEqual(draftStrata(ch.draft, 0, 0, S, k.config.seed, k.palette, k.strata));
     expect(k.strataOf(ch)).toEqual(plan.strata);
     // The column under a tile: its stratum at every depth, the last one deeper down.
     const top = k.stratumAt(3, 4, 0.5)!;
     expect(top.layer).toBe('stratum');
     expect(top).toBe(k.strata[plan.strata![0]![4 * S + 3]!]);
+    expect(k.stratumAt(3, 4, 5.5)).toBe(k.strata[plan.strata![5]![4 * S + 3]!]);
     expect(k.stratumAt(3, 4, 40)).toBe(k.strata[plan.strata![STRATA_DEPTH - 1]![4 * S + 3]!]);
+    expect(k.strataRowsAt(3, 4)).toBe(STRATA_DEPTH);
     expect(k.stratumAt(10_000, 10_000, 1)).toBeUndefined();
 
-    // The same world, its plans of before (without strata): the same strata, from the draft, and nothing else changes.
-    const before = new MemoryChunks();
+    // The same world, its plans without their strata but with the sign: made again the same, by the program.
+    const lost = new MemoryChunks();
     for (const [key, rec] of saved(chunks)) {
       const { strata: _, ...rest } = rec.plan;
-      await before.save(key, { plan: rest });
+      await lost.save(key, { plan: rest });
     }
-    const again = await boot(before);
+    const again = await boot(lost);
     const ch2 = again.k.chunks.get('0,0')!;
     expect(ch2.plan!.strata).toBeUndefined();
     expect(ch2.tiles).toBe(ch.tiles);
     expect(again.k.strataOf(ch2)).toEqual(plan.strata);
-  }, 90_000);
+
+    // Its plans of before (without the sign, and before T418 without strata): the draft's four rows, and nothing else changes.
+    const before = new MemoryChunks();
+    for (const [key, rec] of saved(chunks)) {
+      const { strata: _, strataDepth: __, ...rest } = rec.plan;
+      await before.save(key, { plan: rest });
+    }
+    const old = await boot(before);
+    const ch3 = old.k.chunks.get('0,0')!;
+    expect(ch3.tiles).toBe(ch.tiles);
+    const four = draftStrata(ch.draft, 0, 0, S, k.config.seed, k.palette, k.strata, STRATA_DEPTH_BEFORE);
+    expect(old.k.strataOf(ch3)).toEqual(four);
+    expect(old.k.strataRowsAt(3, 4)).toBe(STRATA_DEPTH_BEFORE);
+    expect(old.k.stratumAt(3, 4, 40)).toBe(old.k.strata[four[STRATA_DEPTH_BEFORE - 1]![4 * S + 3]!]);
+    // A plan of T418 kept its four rows: read as they are, never six.
+    const t418 = new MemoryChunks();
+    for (const [key, rec] of saved(chunks)) {
+      const { strataDepth: _, ...rest } = rec.plan;
+      await t418.save(key, { plan: key.endsWith(':0,0') ? { ...rest, strata: four } : rest });
+    }
+    const kept = await boot(t418);
+    expect(kept.k.strataOf(kept.k.chunks.get('0,0')!)).toEqual(four);
+  }, 120_000);
 });
 
 describe('the strata over the wire (T418)', () => {
