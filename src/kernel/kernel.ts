@@ -95,7 +95,8 @@ import { draftStrata, readStrata, strataPalette, stratumRow } from './strata';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
-import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
+import { repairVehicleClaims, vehicleSpot, worldMedia, type VehicleSpot } from './vehicleclaim';
+import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -926,6 +927,7 @@ export class Kernel {
       k.generationHeld = true;
       return k;
     }
+    k.repairVehicleClaims();
     k.loadState();
     k.ensureAtlas();
     k.npc.reviewSociety();
@@ -1563,6 +1565,23 @@ export class Kernel {
     return [...this.modules.values()]
       .filter((m) => m.manifest.kind === 'entity' && !this.vehicleSpecFor(m.manifest))
       .map((m) => ({ id: m.manifest.id, name: m.manifest.name, kind: m.manifest.persona ? 'npc' : m.manifest.container ? 'furniture' : 'object', tiles: m.manifest.spawn?.tiles ?? [], context: m.manifest.context ?? m.manifest.description ?? '' }));
+  }
+
+  /**
+   * The catalogue of a place's plan (T487, ADR-0244): the placeable modules and, kind `vehicle`, the vehicles of the Council that can move in
+   * this place (its draft has room where their hull floats or rolls, `vehicleSpot`), while the world has fewer than it keeps; never the seed's
+   * capsule, which the landings have (T448). One a place, and the kernel puts it where it moves.
+   */
+  catalogFor(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>): CatalogEntry[] {
+    const out = this.catalog();
+    if (this.vehicleCount() >= MAX_VEHICLES) return out;
+    for (const m of this.modules.values()) {
+      const spec = m.manifest.id === CAPSULE ? undefined : this.vehicleSpecFor(m.manifest);
+      if (!spec || !this.vehicleSpotIn(ch, m.manifest, spec, undefined, ch.draft)) continue;
+      const on = spec.medium === 'water' ? "si guida sull'acqua" : spec.medium === 'land' ? 'si guida su terra' : 'si guida nel vuoto';
+      out.push({ id: m.manifest.id, name: m.manifest.name, kind: 'vehicle', tiles: [], context: `${m.manifest.context ?? m.manifest.description ?? ''} (${on})` });
+    }
+    return out;
   }
 
   itemInfo(id: string): ItemInfo {
@@ -2579,7 +2598,9 @@ export class Kernel {
       .map(([dx, dy]) => this.chunks.get(this.chunkKey(ch.cx + dx, ch.cy + dy)))
       .filter((n): n is Chunk => !!n?.place)
       .map((n) => ({ place: n.place!.name, layout: n.plan?.layout ?? '' }));
-    const placeable = new Set(this.catalog().map((c) => c.id));
+    const catalog = this.catalogFor(ch);
+    const placeable = new Set(catalog.map((c) => c.id));
+    const rides = new Set(catalog.filter((c) => c.kind === 'vehicle').map((c) => c.id));
     // On an island of an archipelago (T441): its name, or the Cartographer names it with the first place on it.
     const under = this.islandUnder(ch);
     const body = under?.island.body ? { body: under.island.body } : {};
@@ -2588,7 +2609,7 @@ export class Kernel {
     for (let attempt = 0; attempt < 3 && layouts.length; attempt++) {
       try {
         const raw = await planChunk(this.council, {
-          cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog: this.catalog(),
+          cx: ch.cx, cy: ch.cy, terrain: this.terrainSummary(ch.draft), neighbors, layouts, catalog,
           fragments: this.fragments.map((f) => f.line), wanted: [...this.wanted].map((id) => this.itemInfo(id).name).slice(0, 8), start, attempt, feedback,
           region: region ? { name: region.name, description: region.description } : undefined,
           ...(island ? { island } : {}),
@@ -2596,7 +2617,7 @@ export class Kernel {
           ...(this.broughtStructures().length ? { brought: this.broughtStructures() } : {}),
           chi: ch.chi,
         });
-        const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable);
+        const verdict = this.validator.validatePlan(raw, new Set(layouts.map((l) => l.id)), placeable, rides);
         if (verdict.errors.length) {
           feedback = verdict.errors.join('; ');
           this.council.say('kernel', 'scarta', `luogo ${ch.key}: ${feedback} → rigenero`, 'cartographer', 'chunk.plan');
@@ -2982,6 +3003,12 @@ export class Kernel {
       if (m.manifest.persona && !declared && loadedOf(m.manifest.id) >= Kernel.NPC_CAP) continue;
       // Fewer people per place (T45b): fewer individuals, words and dialogues.
       if (m.manifest.persona && !declared && !this.kept(origin, coef.people)) continue;
+      // A vehicle (T487): where it can move, not on the tile drawn for it; nowhere in a place without what carries it.
+      const ride = this.vehicleSpecFor(m.manifest);
+      if (ride) {
+        this.placeVehicle(ch, m, ride, origin, cell);
+        continue;
+      }
       const p = at(cell);
       const sid = inLot(cell);
       if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y), plan.objects[index].where === 'under');
@@ -3943,8 +3970,15 @@ export class Kernel {
     ch.plan.fresh = ch.plan.fresh.filter((x) => x !== f);
     await this.chunkStore.save(this.recordKey(ch), { plan: ch.plan });
     const m = this.modules.get(r.id);
+    const origin = `${ch.key}#o${ch.plan.objects.length - 1}`;
+    // A vehicle the place asked for (T487): where it moves, or not here (the catalogue offers it where it can).
+    const ride = this.vehicleSpecFor(m?.manifest);
+    if (m && ride) {
+      if (this.alive(ch)) this.placeVehicle(ch, m, ride, origin);
+      return;
+    }
     const tile = pick(f.where, this.isSolidModule(m));
-    if (m && this.alive(ch) && tile !== undefined) this.spawnModuleEntity(m, at(tile).x, at(tile).y, ch.key, `${ch.key}#o${ch.plan.objects.length - 1}`);
+    if (m && this.alive(ch) && tile !== undefined) this.spawnModuleEntity(m, at(tile).x, at(tile).y, ch.key, origin);
   }
 
   private unloadChunk(ch: Chunk): void {
@@ -3957,6 +3991,12 @@ export class Kernel {
       if (this.ecs.get(id, 'chunk').key !== ch.key) continue;
       if (this.ecs.has(id, 'rune')) this.runesDirty = true;
       this.ecs.destroy(id);
+    }
+    // A vehicle still at the berth its plan gave it (T487) goes with its place, which makes it again when it comes back.
+    for (const [id, b] of [...this.berths]) {
+      if (b.key !== ch.key) continue;
+      if (this.atBerth(id)) this.ecs.destroy(id);
+      if (!this.ecs.alive.has(id) || this.ecs.get(id, 'origin')?.key !== b.origin) this.berths.delete(id);
     }
     // A capsule left idle in it (T448) goes back to its landing: the place of the landing makes it again when it comes.
     if (!this.mirror && this.config.nature.geography === 'void') {
@@ -5253,6 +5293,11 @@ export class Kernel {
   private decks: Deck[] = [];
   /** The vehicles of a save whose module is not here, or not a vehicle any more (T439): they wait in it, nothing comes into the world. */
   private waitingVehicles: VehicleRecord[] = [];
+  /**
+   * The vehicles a place's plan put at their berth (T487) and nobody has moved yet: of their place until then (they leave the world with it,
+   * are not saved, come back with it), so a harbour has its barge without filling the vehicles a world keeps. Moved, they are of no place.
+   */
+  private berths = new Map<Id, { key: string; origin: string; x: number; y: number; heading: number }>();
   /** The points of each hull (T439), by form. */
   private hulls = new WeakMap<Form, Float64Array>();
   /** When each wanderer was last pushed aside by a hull (T442): said again only after a while. */
@@ -5819,6 +5864,8 @@ export class Kernel {
       if (m) moves.push(m);
     }
     if (!moves.length) return;
+    // Moved off its berth (T487): of no place from now on, kept by the save, its place does not make it again.
+    for (const m of moves) if (this.berths.has(m.id)) this.leaveBerth(m.id);
     // The decks where they are now: who is carried is put on them, and checked against them.
     this.reindexVehicles(new Set(moves.map((m) => m.id)));
     for (const m of moves) this.carryAboard(m);
@@ -6279,6 +6326,92 @@ export class Kernel {
     return !!got && got.v.anchored && got.v.helm === undefined && !this.wanderersAboard(id).length;
   }
 
+  /** What this world's vehicles move on (T487): the water and the land, the void only in a world of the void. */
+  private media(): VehicleMedium[] {
+    return worldMedia(this.config.nature.geography);
+  }
+
+  /** The vehicles of the world (T487): in it, and waiting in the save for their module. */
+  private vehicleCount(): number {
+    return this.ecs.query('vehicle').length + this.waitingVehicles.length;
+  }
+
+  /** The box of a vehicle's form in tiles, across and along its bow (T487): its class at its size. */
+  private vehicleBox(man: Manifest): [number, number] {
+    const app = man.appearance as (Manifest['appearance'] & { taglia?: string }) | undefined;
+    const [w, l] = tilesOf(classOf(app?.class ?? '') ?? classOf('object')!, app?.size ?? app?.taglia);
+    return [w, l];
+  }
+
+  /**
+   * Where in a place a vehicle comes in (T487, `vehicleSpot`): its whole box on what carries it, near a shore one boards from, nearest to the
+   * tile `near`; on the place's tiles, or on its draft (`draft`, the catalogue of a place not planned yet).
+   */
+  private vehicleSpotIn(ch: Pick<Chunk, 'cx' | 'cy'>, man: Manifest, spec: VehicleSpec, near?: number, draft?: string): VehicleSpot | undefined {
+    const S = this.config.chunkSize;
+    const at = (c: number, r: number) => this.palette[(draft ? draft[c + r * S] : this.tileAt(ch.cx * S + c, ch.cy * S + r)) ?? ''];
+    const ground = { side: S, carries: (c: number, r: number) => carries(spec, at(c, r)), walks: (c: number, r: number) => ((t) => !!t && crossingOf(t) === 'walk')(at(c, r)) };
+    return vehicleSpot(ground, this.vehicleBox(man), near === undefined ? undefined : [near % S, Math.floor(near / S)]);
+  }
+
+  /**
+   * A vehicle of a place's plan comes into the world (T487, ADR-0244): where it can move (`vehicleSpotIn`), its bow along a side of the place;
+   * never on a tile that stops it nor in a place without what carries it, and, beyond the vehicles a world keeps, not at all (it would be a
+   * thing that looks like one and does not move, what rule 10 forbids). Of no place from then on, as every vehicle. Not in a mirror.
+   */
+  private placeVehicle(ch: Chunk, m: ModuleEntry, spec: VehicleSpec, origin: string, near?: number): Id | undefined {
+    if (this.mirror || this.consumed.has(origin) || this.vehicleCount() >= MAX_VEHICLES) return undefined;
+    if (this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === origin)) return undefined;
+    const spot = this.vehicleSpotIn(ch, m.manifest, spec, near);
+    if (!spot) return undefined;
+    const S = this.config.chunkSize;
+    const id = this.spawnModuleEntity(m, ch.cx * S + spot.x, ch.cy * S + spot.y, ch.key, origin);
+    const v: VehicleState | undefined = this.ecs.get(id, 'vehicle');
+    if (!v) {
+      this.ecs.destroy(id);
+      return undefined;
+    }
+    v.heading = spot.heading;
+    const fc: FormComp | undefined = this.ecs.get(id, 'form');
+    if (fc) fc.yaw = spot.heading;
+    // At its berth: of its place until someone moves it (not consumed, not saved).
+    this.consumed.delete(origin);
+    this.berths.set(id, { key: ch.key, origin, x: ch.cx * S + spot.x, y: ch.cy * S + spot.y, heading: spot.heading });
+    this.bus.emit('vehicle:placed', { id, place: ch.key });
+    return id;
+  }
+
+  /** Whether a vehicle is at the berth its place gave it (T487): where it was put, as it was put, at anchor, nobody at its helm nor aboard. */
+  private atBerth(id: Id): boolean {
+    const b = this.berths.get(id);
+    const got = b && this.ecs.get(id, 'origin')?.key === b.origin ? this.vehicleOf(id) : undefined;
+    const p = got ? this.ecs.get(id, 'pos') : undefined;
+    if (!got || !p || Math.hypot(p.x - b!.x, p.y - b!.y) > 0.05 || Math.abs(got.v.heading - b!.heading) > 0.01) return false;
+    return got.v.anchored && got.v.helm === undefined && !this.wanderersAboard(id).length;
+  }
+
+  /** A vehicle leaves its berth (T487): of no place, its origin consumed, the save keeps it where it goes. */
+  private leaveBerth(id: Id): void {
+    const b = this.berths.get(id);
+    this.berths.delete(id);
+    if (b && this.ecs.get(id, 'origin')?.key === b.origin) this.consumed.add(b.origin);
+  }
+
+  /**
+   * The vehicles of the Council made before T487 (ADR-0244): the modules it forged that present themselves as vehicles and have no `vehicle`
+   * (the barge of `orichalcum`) take it from the kernel (`repairVehicleClaims`), in a commit of the kernel. Not in a mirror nor a universe
+   * that is only read.
+   */
+  private repairVehicleClaims(): void {
+    if (this.mirror || this.bench || this.readOnly()) return;
+    const { changes, repaired } = repairVehicleClaims(this.repo.working);
+    if (!repaired.length) return;
+    for (const [p, content] of Object.entries(changes)) this.repo.write(p, content);
+    this.applyFiles({ ...this.repo.working });
+    this.repo.commit(`riparazione: si guidano ${repaired.join(', ')}`, 'kernel');
+    this.log('kernel', `veicoli riparati (ciò che sembra si comporta): ${repaired.join(', ')}`);
+  }
+
   /**
    * The capsule at every landing of a place that has just come into the world (T448, rule 10: between two lands of the void one goes only by
    * capsule): the seed's (`CAPSULE`), docked, where no vehicle is near the landing. The same guarantee as the gates: the kernel writes it,
@@ -6592,8 +6725,8 @@ export class Kernel {
       const got = this.vehicleOf(id);
       const p = this.ecs.get(id, 'pos');
       if (!got || !Number.isFinite(p?.x) || !Number.isFinite(p?.y)) continue;
-      // A capsule left idle (T448) is not kept: its landing makes it again when its place comes back.
-      if (this.idleCapsule(id)) continue;
+      // A capsule left idle (T448) is not kept: its landing makes it again when its place comes back. Nor a vehicle at its berth (T487).
+      if (this.idleCapsule(id) || this.berths.has(id)) continue;
       out.push({ module: this.ecs.get(id, 'module').id, origin: this.ecs.get(id, 'origin').key, x: r4(p.x), y: r4(p.y), heading: r4(got.v.heading), anchored: got.v.anchored });
     }
     return [...out, ...this.waitingVehicles].slice(0, MAX_VEHICLES);
@@ -10978,8 +11111,8 @@ export class Kernel {
     try {
       const r = await forge(
         this.council,
-        { prompt, origin, kind, chi, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name), ...(takeable !== undefined ? { takeable } : {}) },
-        (m, logic) => this.validator.validateForged(m, logic, new Set(ids)),
+        { prompt, origin, kind, chi, existingIds: ids, paletteCodes: Object.keys(this.palette).filter((c) => c !== '?' && !this.palette[c].solid), permissive, existingNames: [...this.modules.values()].filter((m) => m.manifest.kind === 'entity' || m.manifest.kind === 'item').map((m) => m.manifest.name), media: this.media(), ...(takeable !== undefined ? { takeable } : {}) },
+        (m, logic) => this.validator.validateForged(m, logic, new Set(ids), { media: this.media() }),
       );
       // What a character carries: existing items by name, new ones defined by the Narrator.
       if (r.concept.carries?.length) {
@@ -11206,6 +11339,7 @@ export class Kernel {
       // And its vehicles (T439).
       for (const id of this.ecs.query('vehicle')) this.ecs.destroy(id);
       this.waitingVehicles = [];
+      this.berths.clear();
       this.repo.write('world/state.json', null);
       for (const p of Object.keys(this.repo.working)) if (p.startsWith(PLAYERS_DIR)) this.repo.write(p, null);
       this.wanted.clear();

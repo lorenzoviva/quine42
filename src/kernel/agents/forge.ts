@@ -16,6 +16,8 @@ import { internalComponents, internalName, internalValues } from '../internalNam
 import { luaFor0_5, luaFor0_7 } from '../migrations';
 import { ownModelId } from '../modeldirector';
 import { AGENTS, type AgentId, type Council } from './council';
+import { VEHICLE_LIMITS, VEHICLE_MEDIA, type VehicleMedium } from '../vehicle';
+import { vehicleFor, vehicleMediumIn } from '../vehicleclaim';
 
 export type ForgeOrigin = 'genesi' | 'agente' | 'cartografo' | 'combinazione';
 
@@ -44,6 +46,8 @@ export interface ForgeRequest {
   chi?: string;
   /** Whether the thing can be taken and put down elsewhere (T292), when who asks for it decided (the Cartographer, for what a place calls for). */
   takeable?: boolean;
+  /** What a vehicle of this world may move on (T487, `worldMedia`): the water and the land, the void only in a world of the void. */
+  media?: VehicleMedium[];
 }
 
 /**
@@ -82,6 +86,11 @@ export interface Concept {
   tags: string[];
   /** For an object: a wanderer can lift it and put it down elsewhere (T292, ADR-0168), a cupboard yes, a well no. */
   takeable?: boolean;
+  /**
+   * For an object one rides and steers (T487, ADR-0244): what it moves on (a boat on the water, a cart on the land, a capsule in the void);
+   * `none`, or nothing, for everything else and for what only looks like one (a wreck, a model).
+   */
+  vehicle?: VehicleMedium | 'none';
 }
 
 /**
@@ -101,6 +110,11 @@ export interface PhysicsSpec {
   stackable: boolean;
   max_stack: number;
   equippable: boolean;
+  /** Of a vehicle (T487): its top speed (tiles a second), how fast it gathers way, how fast its bow turns, how deep it goes in the water. */
+  vehicle_speed?: number;
+  vehicle_accel?: number;
+  vehicle_turn?: number;
+  draught?: string;
   note?: string;
 }
 
@@ -154,6 +168,7 @@ const CONCEPT_SCHEMA: Schema = {
     carries: { type: 'ARRAY', items: { type: 'STRING' }, description: 'for an npc: things they carry' },
     tags: { type: 'ARRAY', items: { type: 'STRING' } },
     takeable: { type: 'BOOLEAN', description: 'for an object: true if a wanderer could lift it and set it down elsewhere (a cupboard, a chest, a stool, a crate), false if it is fixed or built in place (a well, an oven, a statue, an altar of stone)' },
+    vehicle: { type: 'STRING', enum: [...VEHICLE_MEDIA, 'none'], description: 'for an object a wanderer rides and steers: what it moves on (water: a boat, a barge, a raft; land: a cart, a wagon, a sledge; void: a capsule); none for everything else, and for what only looks like one (a wreck, a model, a toy)' },
   },
   required: ['name', 'type', 'description', 'lore', 'look', 'context', 'interaction', 'controls', 'tags'],
 };
@@ -171,6 +186,10 @@ const PHYSICS_SCHEMA: Schema = {
     stackable: { type: 'BOOLEAN' },
     max_stack: { type: 'INTEGER' },
     equippable: { type: 'BOOLEAN' },
+    vehicle_speed: { type: 'NUMBER', description: `only for a vehicle: its top speed in tiles a second (${VEHICLE_LIMITS.speed.join('-')})` },
+    vehicle_accel: { type: 'NUMBER', description: `only for a vehicle: how fast it gathers way, tiles a second squared (${VEHICLE_LIMITS.accel.join('-')})` },
+    vehicle_turn: { type: 'NUMBER', description: `only for a vehicle: how fast its bow turns at full way, radians a second (${VEHICLE_LIMITS.turn.join('-')})` },
+    draught: { type: 'STRING', enum: ['shallow', 'deep'], description: 'only for a vehicle on the water: shallow floats on every water, deep only on the sea' },
     note: { type: 'STRING' },
   },
   required: ['solid', 'pushable', 'mass', 'friction', 'radius', 'speed', 'weight', 'stackable', 'max_stack', 'equippable'],
@@ -235,6 +254,29 @@ export function requiredHooks(concept: Concept): string[] {
   return [...hooks];
 }
 
+/**
+ * The medium a concept rides on (T487, ADR-0244): an object only; what the Narrator said, if the world has it, else what its name says (the
+ * kernel's floor: a barge the Narrator forgot is still a barge); none if the Narrator said none, or nothing says one.
+ */
+export function conceptMedium(concept: Pick<Concept, 'type' | 'name' | 'tags' | 'vehicle'>, media: readonly VehicleMedium[] = ['water', 'land']): VehicleMedium | undefined {
+  if (concept.type !== 'object') return undefined;
+  const said = String(concept.vehicle ?? '').trim().toLowerCase();
+  if ((media as readonly string[]).includes(said)) return said as VehicleMedium;
+  if (said === 'none') return undefined;
+  return vehicleMediumIn(concept.name, concept.tags ?? [], media);
+}
+
+/**
+ * Why a concept goes back to the Narrator (T487, «ciò che sembra si comporta»): its name says a vehicle and the Narrator said it is none. A
+ * boat that never moves deceives as a wall one walks through: a medium, or a name that says what it is (a wreck, a model).
+ */
+export function vehicleRefusal(concept: Pick<Concept, 'type' | 'name' | 'tags' | 'vehicle'>, media: readonly VehicleMedium[] = ['water', 'land']): string | undefined {
+  if (concept.type !== 'object' || conceptMedium(concept, media)) return undefined;
+  const named = vehicleMediumIn(concept.name, concept.tags ?? [], media);
+  if (!named) return undefined;
+  return `«${concept.name}» si presenta come un mezzo che si guida, ma "vehicle" dice none: un mezzo che non si guida inganna come un muro che si attraversa. Scrivi "vehicle": "${named}", o fanne ciò che è davvero e dillo nel nome (un relitto, un modellino, una cosa ormeggiata per sempre).`;
+}
+
 /** A concept as the Narrator wrote it, with its closed values internal (T310b): a kind, an interaction or a control in the Italian of before is the one it means. */
 export function internalConcept(raw: Concept): Concept {
   const interaction = internalName('interazioni', String(raw.interaction ?? ''));
@@ -247,7 +289,7 @@ export function internalConcept(raw: Concept): Concept {
 }
 
 /** The kernel, not an agent, writes the manifest: agents provide its content, the shape is guaranteed. */
-export function assembleManifest(id: string, concept: Concept, physics: PhysicsSpec, code: CodeSpec, paletteCodes: string[], origin: ForgeOrigin): Manifest {
+export function assembleManifest(id: string, concept: Concept, physics: PhysicsSpec, code: CodeSpec, paletteCodes: string[], origin: ForgeOrigin, media?: readonly VehicleMedium[]): Manifest {
   let extra: Record<string, any> = {};
   try {
     const parsed = code.components_json ? JSON.parse(code.components_json) : {};
@@ -309,6 +351,16 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   // What a wanderer can carry elsewhere (T292): an object the Narrator (or who asked for it) says so of, of a class one lifts.
   const size = m.appearance!.size ?? (m.appearance as { taglia?: string }).taglia;
   if (concept.type === 'object' && concept.takeable === true && TAKEABLE_CLASSES.has(m.appearance!.class!) && size !== 'large') m.takeable = true;
+  // A vehicle (T487, ADR-0244): what looks like one behaves as one. Its medium and the Physicist's numbers within the kernel's limits; solid
+  // (its deck is its form's floors), never pushed nor taken; on the water a vessel, so the Sculptor makes it float (ADR-0228).
+  const medium = conceptMedium(concept, media);
+  if (medium) {
+    m.vehicle = vehicleFor(medium, { speed: physics.vehicle_speed, accel: physics.vehicle_accel, turn: physics.vehicle_turn, draught: physics.draught });
+    m.physics = { ...m.physics!, solid: true, pushable: false, speed: 0 };
+    delete m.takeable;
+    delete m.components!.vel;
+    if (medium === 'water') m.appearance!.class = 'vessel';
+  }
   return m;
 }
 
@@ -335,6 +387,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
         'For an npc: a concrete trade or role of the world (baker, guard, shepherd, healer, brigand, merchant…), never abstract roles; in "persona" the sheet of the kind of character (every individual will then have a name and a story of their own), in the language of the world: how they speak, what they want, what they know and believe of their world; in "carries" 3-6 common things of their trade.',
         req.existingNames?.length ? `They exist already (no doubles, neither of name nor of role): ${req.existingNames.slice(0, 80).join(', ')}.` : '',
         'For an object: in "actions" 1-4 concrete things one can do with it (open, sit down, draw water, sleep, light, pray…), with "requires" if a tool is needed; if it is a piece of furniture that holds things, "container" with capacity and loot table (in Italian: cucina, cassa, bottega, comune, contadino); "takeable" true if a wanderer could lift it and set it down elsewhere (a cupboard, a chest, a stool), false if it is fixed or built in place (a well, an oven, a statue).',
+        `For an object a wanderer rides and steers (a boat, a barge, a raft, a cart, a wagon, a sledge${(req.media ?? []).includes('void') ? ', a capsule' : ''}): "vehicle" says what it moves on, and it is really ridden: a deck one stands on, a helm one steers by. "vehicle": "none" for everything else, and for what only looks like one: then say it in the name (a wreck, a model, a boat hauled out for good).`,
         req.takeable !== undefined ? `Who asked for it decided: ${req.takeable ? 'a wanderer can lift it and set it down elsewhere ("takeable": true)' : 'it stays where it is built ("takeable": false)'}.` : '',
         'For an item list in "controls" at most two entries: "use" = effect on whoever uses it, or consumption (eat, drink, read, light); "action" = effect on what the wanderer has in front of them (cut, hit, open, dig).',
         'Do not create modules for elements of the terrain (paths, rivers, bridges, walls, meadows): those are the Cartographer\'s map. Create concrete things that stand on the terrain.',
@@ -352,6 +405,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
       [
         `Define the physics of this element consistently with what it is and with the look described:\n${JSON.stringify(concept, null, 1)}`,
         'Units: "radius" in tiles (0.2-0.5), "speed" in tiles/s (0 if it does not move by itself), "mass" in kg, "friction" 0-1 (how fast it stops if pushed), "weight" in inventory units (the wanderer carries 20 without slowing down).',
+        vehicleLine(conceptMedium(concept, req.media)),
         feedback && `The Arbiter objected: ${feedback}`,
       ]
         .filter(Boolean)
@@ -402,6 +456,16 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.name}`, 'narrator');
     c.say('narrator', 'corregge', `«${concept.name}» (${concept.type}): ${concept.description}`);
   }
+  // What looks like a vehicle behaves as one (T487, ADR-0244): a name that says a boat while the Narrator said none goes back to them once.
+  const refused = vehicleRefusal(concept, req.media);
+  if (refused) {
+    c.say('kernel', 'scarta', refused, 'narrator');
+    concept = decided(await askConcept(refused));
+    if (req.kind) concept.type = req.kind;
+    const still = vehicleRefusal(concept, req.media);
+    if (still || isStructure(concept)) throw new ForgeRejected(still ?? `ancora una struttura: ${concept.name}`, 'narrator');
+    c.say('narrator', 'corregge', `«${concept.name}» (${concept.type}): ${concept.description}`);
+  }
   let physics = await askPhysics(concept);
   c.say('physicist', 'propone', `${physics.solid ? 'solido' : 'attraversabile'}${physics.pushable ? ', spingibile' : ''}, ${physics.mass} kg, peso ${physics.weight}${physics.note ? ` — ${physics.note}` : ''}`);
   let code = await askCode(concept, physics);
@@ -422,6 +486,8 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     if (issues('narrator')) {
       concept = decided(await askConcept(issues('narrator')));
       if (req.kind) concept.type = req.kind;
+      // What the Arbiter's round gave back still behaves as it looks (T487): else the kernel's word, as for a name nobody gave a medium.
+      if (vehicleRefusal(concept, req.media)) concept = { ...concept, vehicle: undefined };
       c.say('narrator', 'corregge', `«${concept.name}»: ${concept.description}`);
     }
     if (issues('physicist') || issues('narrator')) {
@@ -436,7 +502,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
 
   // The kernel's validator has the last word; its errors go back to the Engineer.
   const id = moduleId(concept, req.existingIds);
-  let manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);
+  let manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin, req.media);
   for (let round = 0; ; round++) {
     const missing = requiredHooks(concept).filter((h) => !new RegExp(`function\\s+M\\.${h}\\b|M\\.${h}\\s*=\\s*function`).test(code.logic));
     const errors = [...validate(manifest, code.logic), ...missing.map((h) => `manca la funzione M.${h}`)];
@@ -445,10 +511,20 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     if (round >= 2) throw new ForgeRejected(`modulo non valido: ${errors.join('; ')}`, 'engineer');
     code = await askCode(concept, physics, errors.join('; '));
     c.say('engineer', 'corregge', 'logic.lua corretto');
-    manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin);
+    manifest = assembleManifest(id, concept, physics, code, req.paletteCodes, req.origin, req.media);
   }
 
-  return { id, manifest, logic: code.logic, concept, summary: `${concept.type === 'npc' ? 'Nuovo abitante' : concept.type === 'item' ? 'Nuovo strumento' : 'Nuovo oggetto'} «${concept.name}» (${id})${manifest.takeable ? ', si può spostare' : ''}` };
+  return { id, manifest, logic: code.logic, concept, summary: `${concept.type === 'npc' ? 'Nuovo abitante' : concept.type === 'item' ? 'Nuovo strumento' : manifest.vehicle ? 'Nuovo mezzo' : 'Nuovo oggetto'} «${concept.name}» (${id})${manifest.takeable ? ', si può spostare' : ''}${manifest.vehicle ? `, si guida (${MEDIUM_SAID[manifest.vehicle.medium as VehicleMedium]})` : ''}` };
+}
+
+/** How the summary of a forge says where a vehicle goes (T487). */
+const MEDIUM_SAID: Record<VehicleMedium, string> = { water: "sull'acqua", land: 'su terra', void: 'nel vuoto' };
+
+/** What the Physicist is told of a vehicle (T487): the numbers of the kernel's limits, with things of the world to measure them by. */
+function vehicleLine(m: VehicleMedium | undefined): string {
+  if (!m) return '';
+  const on = m === 'water' ? 'on the water' : m === 'land' ? 'on the land' : 'in the void';
+  return `It is a vehicle a wanderer rides and steers (${on}): "vehicle_speed" its top speed in tiles/s (${VEHICLE_LIMITS.speed.join('-')}; a body walks 6 and swims 2.4: a raft 1.5, a rowing boat or a barge 2-3, a sailing ship 3-5, a cart 3, a capsule 6), "vehicle_accel" how fast it gathers way (${VEHICLE_LIMITS.accel.join('-')}), "vehicle_turn" how fast its bow turns in radians/s (${VEHICLE_LIMITS.turn.join('-')}: a barge 0.5, a canoe 1.2)${m === 'water' ? ', "draught" deep only for a ship that sails the open sea, shallow for what floats on every water (a barge, a raft, a rowing boat)' : ''}.`;
 }
 
 /** A generated module failed at runtime: the Engineer gets the code and the error, and fixes it. */

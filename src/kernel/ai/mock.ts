@@ -16,6 +16,7 @@ import { boxOf, classOf } from '../../mj/classes';
 import { parseXml, type XmlElement } from '../../mj/xml';
 import { RESERVED_PART_SYMBOLS } from '../worldparts';
 import { mockVesselProgram } from './mockVessel';
+import { vehicleMediumIn } from '../vehicleclaim';
 
 const PLACES: Record<string, { nouns: string[]; descr: string[] }> = {
   forest: {
@@ -687,7 +688,9 @@ export class MockAiModels implements AiModels, DecisionModels {
     const objects: Array<{ module: string; where: string }> = [];
     // In the order of the ids of before T307b (`obj.letto`, not `obj.bed`): the offline worlds of the seed stay the ones they were.
     const legacy = (id: string) => italianName('moduli-seme', id);
-    for (const m of [...ctx.catalog].sort((a, b) => (legacy(a.id) < legacy(b.id) ? -1 : legacy(a.id) > legacy(b.id) ? 1 : 0))) {
+    // A vehicle the catalogue offers (T487) is apart: only where it can move, and the draws of the rest stay the ones they were.
+    const ride = ctx.catalog.find((m) => m.kind === 'vehicle');
+    for (const m of [...ctx.catalog].filter((x) => x.kind !== 'vehicle').sort((a, b) => (legacy(a.id) < legacy(b.id) ? -1 : legacy(a.id) > legacy(b.id) ? 1 : 0))) {
       if (objects.length >= 6) break;
       const p = m.kind === 'furniture' ? 0.45 : m.kind === 'npc' ? 0.35 : 0.25;
       if (rng.chance(p)) objects.push({ module: m.id, where: m.kind === 'furniture' ? 'inside' : 'outside' });
@@ -706,7 +709,7 @@ export class MockAiModels implements AiModels, DecisionModels {
     return {
       place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
       environment: ambiente,
-      objects: cellar ? [...objects, { module: CELLAR_THING, where: 'under' }] : objects,
+      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,
@@ -745,6 +748,8 @@ export class MockAiModels implements AiModels, DecisionModels {
       actions: type === 'object' ? [{ id: 'tocca', label: `Tocca ${nome.toLowerCase()}` }] : [],
       container: type === 'object' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capacity: 6, loot: 'cucina' } : undefined,
       carries: type === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
+      // A careful narrator (T487): what one rides says what it moves on, the rest none.
+      ...(type === 'object' ? { vehicle: vehicleMediumIn(nome, [], req.media) ?? vehicleMediumIn(req.prompt, [], req.media) ?? 'none' } : {}),
       // A careful narrator (T292): furniture and small things are lifted and set down elsewhere; what is built in place is not.
       ...(type === 'object' ? { takeable: /madia|cassa|credenza|armadio|baule|cesta|scaffale|sgabello|panca|sedia|tavol|botte|forziere|cassett/.test(req.prompt.toLowerCase()) && !/pozzo|forno|statua|altare|fontana|colonna|torre/.test(req.prompt.toLowerCase()) } : {}),
     };
@@ -754,7 +759,9 @@ export class MockAiModels implements AiModels, DecisionModels {
     const npc = c.type === 'npc';
     const item = c.type === 'item';
     const controls = c.controls ?? [];
-    return { solid: !npc && !item, pushable: false, mass: npc ? 70 : item ? 0.5 : 40, friction: 0.6, radius: npc ? 0.35 : item ? 0.25 : 0.45, speed: npc ? 1.1 : 0, weight: item ? 1 : 0, stackable: item && EDIBLE.includes(words(c.name ?? '')[0] ?? ''), max_stack: 10, equippable: item && !controls.some((x) => x.action === 'use') };
+    // A vehicle (T487): a barge's numbers, a cart's; the draught shallow, it floats on every water.
+    const ride = c.vehicle && c.vehicle !== 'none' ? { vehicle_speed: c.vehicle === 'land' ? 3 : 2.5, vehicle_accel: 1, vehicle_turn: 0.7, ...(c.vehicle === 'water' ? { draught: 'shallow' } : {}) } : {};
+    return { solid: !npc && !item, pushable: false, mass: npc ? 70 : item ? 0.5 : 40, friction: 0.6, radius: npc ? 0.35 : item ? 0.25 : 0.45, speed: npc ? 1.1 : 0, weight: item ? 1 : 0, stackable: item && EDIBLE.includes(words(c.name ?? '')[0] ?? ''), max_stack: 10, equippable: item && !controls.some((x) => x.action === 'use'), ...ride };
   }
 
   private code(c: Concept): string {
