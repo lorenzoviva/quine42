@@ -57,7 +57,7 @@ che è gratis. Niente da vedere nel browser.
   per cento, le proporzioni no;
 - i dollari sul modello di ogni classe (`modelFor`: Flash-Lite le cose semplici, 3.8 Flash le figure, Argon tutto ciò che è costruito, le
   navi comprese; dall'1/12 su OpenRouter Opus 5.5, `sculptorsOn`), con la cache implicita che serve il 60 % del prefisso stabile
-  (`IMPLICIT_CACHE_SHARE`, T325) tranne su 3.8 Flash (`NO_IMPLICIT_CACHE`);
+  (`IMPLICIT_CACHE_SHARE`, T325) tranne su 3.8 Flash (`NO_IMPLICIT_CACHE`; dal T496 una parte per modello, `IMPLICIT_CACHE`, ADR-0248);
 - quanto pesa ogni tipo: i modelli che lo Scultore ha scritto nei cinque universi veri (aurora, mesa, neapolis, orichalcum, sidera; non
   quelli a mano né i suoni; una struttura che cresce a regole una volta per programma, non per taglia): 100 mobili, 91 oggetti (84 tinti, 4
   indossati), 75 persone, 71 edifici, 49 strutture grandi, 27 monumenti, 7 alberi, 5 strutture medie, 2 rocce, 1 animale; nessuna nave

@@ -452,7 +452,7 @@ async function sculptorSpecialties(): Promise<void> {
   const S = await import('../../src/kernel/agents/sculptor');
   const { classOf, isFortified, isVessel, sizeOf, CLASSES } = await import('../../src/mj/classes');
   const { costOf, priceOf } = await import('../../src/kernel/ai/prices');
-  const { COEFFICIENT_INFO, hourlyEstimate, IMPLICIT_CACHE_SHARE, NO_IMPLICIT_CACHE, sculptPlan, STRUCTURE_SCULPT } = await import('../../src/kernel/coefficients');
+  const { COEFFICIENT_INFO, hourlyEstimate, implicitCacheShare, sculptPlan, STRUCTURE_SCULPT } = await import('../../src/kernel/coefficients');
   type Req = Parameters<typeof S.sculpt>[1];
 
   // Tokens: countTokens (free) or 3.5 characters a token (T434: sculptor.md 30 KB, 8 565 tokens).
@@ -653,7 +653,7 @@ async function sculptorSpecialties(): Promise<void> {
   const perToken = (model: string, day: string): number => {
     const p = priceOf(model, day);
     if (!p) return 0;
-    const s = NO_IMPLICIT_CACHE.has(model) ? 0 : IMPLICIT_CACHE_SHARE;
+    const s = implicitCacheShare(model);
     return ((1 - s) * p.input + s * p.cached) / 1e6;
   };
   const modelOf = (c: Case, route: 'google' | 'openrouter', day: string): string => {

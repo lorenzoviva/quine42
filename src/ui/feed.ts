@@ -5,6 +5,7 @@ import type { Kernel } from '../kernel/kernel';
 import { tallyLine, usd } from '../kernel/ai/usage';
 import { describeQueue, describeQueueDetails, describeSubscriptions, QueueAiModels, RoutedAiModels } from '../kernel/ai/subscription';
 import { el } from './dom';
+import { paceTag } from './spend';
 
 const VERBS: Record<string, string> = {
   propone: 'propone',
@@ -47,7 +48,7 @@ export class FeedPanel {
     host.append(this.root);
     const showCost = () => {
       const day = k.usage.day();
-      this.cost.textContent = `sessione ${usd(k.usage.session.usd)} · oggi ${usd(day.total.usd)} · in tutto ${usd(k.usage.total().usd)}`;
+      this.cost.textContent = `sessione ${usd(k.usage.session.usd)}${paceTag(k.spendView())} · oggi ${usd(day.total.usd)} · in tutto ${usd(k.usage.total().usd)}`;
       this.cost.title = [`Sessione: ${tallyLine(k.usage.session)}`, ...Object.entries(day.byModel).map(([m, t]) => `${m} (oggi): ${tallyLine(t)}`)].join('\n');
     };
     const showSubs = async () => {

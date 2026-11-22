@@ -15,7 +15,7 @@ import { memoryStore } from '../../src/kernel/repo';
 import { MockAiModels, mockPart } from '../../src/kernel/ai/mock';
 import type { TextCall } from '../../src/kernel/ai/models';
 import { costOf } from '../../src/kernel/ai/prices';
-import { CALL_TOKENS, IMPLICIT_CACHE_SHARE, NO_IMPLICIT_CACHE } from '../../src/kernel/coefficients';
+import { CALL_TOKENS, implicitCacheShare } from '../../src/kernel/coefficients';
 import { DEFAULT_SCULPTORS, categoryOf, specialtyOf, SPECIALTY_NAMES } from '../../src/kernel/agents/sculptor';
 import { extractPart, PART_SEEDS, sameGridErrors } from '../../src/kernel/agents/parts';
 import { composePart, partContract, readPartAnswer } from '../../src/kernel/worldparts';
@@ -100,7 +100,7 @@ for (const [id, info] of Object.entries(index)) {
   const system = await tokens(call.system ?? '');
   const request = system + (await tokens(call.prompt));
   const line = await tokens(`- <import file="${made.id}"/> (from «${info.name ?? id}»): ${partContract(made.part)}`);
-  const cached = NO_IMPLICIT_CACHE.has(model) ? 0 : Math.round(system * IMPLICIT_CACHE_SHARE);
+  const cached = Math.round(system * implicitCacheShare(model));
   const usd = costOf(model, { prompt: request, cached, output: CALL_TOKENS['model.part'].output }) ?? 0;
   rows.push({ id, cls: cls.id, trade: SPECIALTY_NAMES[trade], lines: `${made.from}-${made.to}`, seeds, same, request, system, line, usd });
 }

@@ -13,6 +13,7 @@ import type { WornZone } from '../kernel/wearing';
 import type { WorldPace } from '../kernel/worldPace';
 import type { RegionRequest } from '../kernel/atlas';
 import type { VehicleView } from '../kernel/vehicle';
+import type { SpendView } from '../kernel/ai/usage';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -36,6 +37,8 @@ export interface MyState {
   slots?: Record<string, Record<string, { item: string; count: number } | null>>;
   /** The wanderer's credit balance in USD (T45a). */
   credits?: number;
+  /** What the models cost in this session as this wanderer is shown it (T496): the world's to the master, their own to the others (`SpendView`). */
+  spend?: SpendView;
   /** What the panels of the mechanics show (T263, ADR-0139): `component.field` → value, only the fields a manifest's `ui` names. */
   fields?: Record<string, string | number | boolean>;
 }

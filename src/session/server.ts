@@ -17,6 +17,7 @@ import { equippedItem, shownInventory } from '../kernel/inventory';
 import { wornItems } from '../kernel/wearing';
 import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
 import { offDeck } from '../kernel/vehicle';
+import { shownSpend } from '../kernel/ai/usage';
 import { ENTITY_PARTS, type OnDeck, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 
 export interface SessionOptions {
@@ -1075,6 +1076,7 @@ export class SessionServer {
       slots: k.slots(),
       credits: k.creditsOf(c.id),
       fields: k.panelFields(),
+      spend: shownSpend(k.spendView(c.id)),
     }));
     const sKey = JSON.stringify(state);
     if (sKey !== c.state) out.state = JSON.parse(sKey);
