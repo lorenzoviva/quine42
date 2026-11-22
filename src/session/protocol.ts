@@ -63,6 +63,8 @@ export interface ChunkView {
   water?: Record<string, [number, number] | [number, number, string]>;
   /** The strata under its ground (T418, ADR-0091): rows of codes of the generator's `strata`; sent when the client has not had them yet. */
   strata?: string[];
+  /** Its ramps (T474, ADR-0250): the earth the server moved, tile → levels, so the client's ground is the server's; none today. */
+  ramps?: Record<string, number>;
   version: number;
 }
 

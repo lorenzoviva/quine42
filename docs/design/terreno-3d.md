@@ -306,6 +306,33 @@ taglio verso la camera che gli fa vedere dove va (§ 3.2).
 > le rampe scavati dal kernel; oltre la rete solo le **enclavi** che l'asprezza della regione concede, ognuna col suo passo entro un mezzo
 > del mondo (ADR-0239) … [i lotti, i timbri e il molo come oggi].
 
+### 2.7 Com'è andata (T474, ADR-0250)
+
+La riga 1 è fatta (`src/kernel/network.ts`, la regola in `AGENTS.md`, `docs/architettura-dettagli.md#rete`). Rispetto alla proposta:
+
+- **Le rampe sono la terra che muovono**, casella per casella come gli scavi (`Network.moved` → `Chunk.ramps` → `ChunkView.ramps`), non un
+  percorso da ripareggiare: il client sottile e il server hanno gli stessi livelli, e uno scavo su una rampa la cambia (regola 3).
+- **La rete unisce solo ciò che le caselle da sole uniscono** alla partenza: un pezzo di sentiero chiuso dagli alberi resta del layout, come
+  oggi (sui 328 luoghi del seme otto bersagli sarebbero stati «staccati» senza un dirupo). **Le caselle ferme** (il bordo, i lotti, l'acqua)
+  una rampa le passa come appoggi; **un bersaglio che si può muovere e da solo** (una casella di sentiero) si pareggia dall'altro estremo, una
+  parte (un'enclave da unire) parte dal suo orlo e resta intera. Col plateau sintetico di otto livelli: da 111 caselle staccate a 0.
+- **Il passo dell'enclave si chiama valico** (il «passo» è già quello di un terreno e del server, `docs/glossario.md`); le «zone» sono
+  l'**asprezza** di ogni luogo, misurata dal rilievo (montuosa dal 2 % dei lati oltre un gradino, impervia dal 10 %), e quella del master vale
+  per i luoghi nuovi, scritta nel piano.
+- **Le persone** non saltano e non si arrampicano; **il salto** resta quello di oggi (fino a `jumpUp()` in su; in giù non è limitato: con il
+  rilievo di oggi un salto giù per un pendio cambierebbe), e le conche di meno di quattro caselle più fonde di un salto restano a R1 e R3.
+- **La misura** (`lab/scripts/rete-gradini.ts`): col rilievo di oggi, su 328 luoghi pianificati offline nessuna coppia di caselle vicine
+  aperte oltre il gradino su 165 395, nessuna rampa, enclave o casella staccata; la rete di un luogo 0,57 ms in mediana. Il controllo del
+  gradino in `free` costa circa 0,3 µs a una scatola fra due caselle dello stesso luogo, 0,6 µs a cavallo di due luoghi.
+- **Nel browser** (la build, `?skip&offline`, un plateau di otto livelli dalla console:
+  `quine.syntheticRise((c, r) => (c >= 2 && c <= 7 && r >= 1 && r <= 6 ? 8 : 0))`): il kernel abbassa la strada che lo attraversava in una
+  rampa (3, 5, 7, 9 livelli) e tiene la cima come enclave col valico di 3 livelli (il luogo diventa montuoso); il viandante si ferma ai piedi
+  della parete (x 1,7) e sul suo orlo (x 2,3), sale e scende la rampa, salta il valico e atterra in cima, contro la parete di otto livelli
+  salta sul posto; tolto il rialzo, il luogo torna senza rampe né enclavi.
+
+  ![Il plateau sintetico, la strada abbassata a rampa e il viandante che la percorre](terreno-3d/01-plateau-e-rampa.jpg)
+  ![Il viandante fermo ai piedi della parete ovest del plateau](terreno-3d/02-ai-piedi-del-dirupo.jpg)
+
 ---
 
 ## 3. Il rilievo con picchi e avvallamenti, il fondale, il sottosuolo (b)
@@ -594,7 +621,7 @@ Non sono nel backlog: li scrive chi pianifica, dopo le risposte dell'autore. Il 
 
 | # | Task | Dipende da | Costo | Browser |
 |---:|---|---|---:|---|
-| 1 | **R0 · La regola 10 della rete e delle enclavi**: l'ADR (§ 8) e la regola in `AGENTS.md`; i gradini in `free`/`bodyFree`, nel passo del server e nel controllo del passo di `findRoute`; il grafo dei gradini e le rampe nel layout; le enclavi segnate nel piano (derivate), il posto `enclave`; l'asprezza delle regioni (misurata, e del master); inerte col rilievo di oggi (`luoghi-campione` verde), provato con un rilievo sintetico | — | 5 % | sì (un dirupo sintetico dalla console) |
+| 1 | **R0 · La regola 10 della rete e delle enclavi**: l'ADR (§ 8) e la regola in `AGENTS.md`; i gradini in `free`/`bodyFree`, nel passo del server e nel controllo del passo di `findRoute`; il grafo dei gradini e le rampe nel layout; le enclavi segnate nel piano (derivate), il posto `enclave`; l'asprezza delle regioni (misurata, e del master); inerte col rilievo di oggi (`luoghi-campione` verde), provato con un rilievo sintetico; *fatto in T474, ADR-0250* (le rampe come terra mossa per casella, il rialzo sintetico `syntheticRise`, il valico per «il passo»; i varchi col livello del lato e i lotti sulle terrazze restano a R1) | — | 5 % | sì (un dirupo sintetico dalla console) |
 | 2 | **R1 · Il rilievo vero**: `nature.relief` alla Genesi (ferma come `game`), `generate_relief` nel generatore del seme (massicci, terrazze, passi, conche, il letto), `Relief` che lo legge per quei mondi, `k` che si cammina, i lotti sulle terrazze, la richiesta del Cartografo col rilievo del luogo, l'ambientazione che lo porta | 1 | 6 % | sì |
 | 3 | **R2 · Il taglio verso la camera**: il disco di T416 acceso quando il terreno copre il viandante, all'altezza della testa, con le bande degli strati | 2 | 3 % | sì |
 | 4 | **R3 · Arrampicarsi**: `climb` come il salto ma lento e faticoso, `bonus.climb`, lo stato `climb` dagli effetti, «Arrampicati» nel menu della casella, il Narratore che lo sa dare; il salto e l'arrampicata nel passo del server | 1 | 4 % | sì |
@@ -617,7 +644,7 @@ voce nel glossario nello stesso commit (rete, enclave, passo, asprezza, gradino,
 
 ## 8. L'ADR proposto
 
-Da copiare in `docs/adr/0239-…` con il primo task (R0), con le risposte dell'autore al posto delle raccomandazioni.
+Da copiare in `docs/adr/0239-…` con il primo task (R0), con le risposte dell'autore al posto delle raccomandazioni. *Copiato in T474 come [ADR-0250](../adr/0250-la-regola-10-della-rete-e-delle-enclavi.md), con le risposte di D67 (A1, B1, C1, D3, E1; V0 rinviato).*
 
 > **ADR-0239 — Il terreno vero a colonne, la regola 10 della rete e delle enclavi, gli automi del kernel**
 >

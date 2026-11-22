@@ -6326,12 +6326,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 > prima le montagne (E1). V0 (sottosuolo in voxel) resta rinviato. L'ADR del § 8 prende il primo numero libero (0239 è preso), con le
 > risposte dell'autore al posto delle raccomandazioni e D3 nel punto 5. Ogni task che tocca `src/kernel/` sale di una `Z`; nessuno cambia il contratto.
 
-### T474 · R0 · La regola 10 della rete e delle enclavi (riga 1 di T459) — `da fare`
+### T474 · R0 · La regola 10 della rete e delle enclavi (riga 1 di T459) — `fatto` (`6d8a48e4`)
 - Pipeline: claude · sforzo max · stima 5% · approvato · priorità 3
 - Step: 45
 - Dipende da: T459
 - Contesto: `terreno-3d.md` § 2 e § 8; B1 (enclavi dove l'asprezza le concede), C1 (`CLIMB` fino a 3 caselle). Scrive l'ADR (primo numero libero) e la regola 10 in `AGENTS.md` (§ 2.6).
 - Cosa fare: la riga 1; inerte col rilievo di oggi (`tests/luoghi-campione.test.ts` verde), provato con un rilievo sintetico; voci del glossario; «sicurezza:» nell'esito (il passo del server). Browser: sì, un dirupo sintetico dalla console.
+- Esito: regola 10 della rete e delle enclavi (ADR-0250, kernel 0.10.25): gradino `STEP` nella collisione (`free`/`bodyFree`/`freeReal`, passo del server, vie delle persone con `riseOnStep`, `stepsBetween`), rete di ogni luogo con rampe come terra mossa (`placeNetwork`, `Chunk.ramps`, `ChunkView.ramps`), enclavi dove l'asprezza le concede (misurata, o del master con `Region.roughness` scritta in `ChunkPlan.roughness`), posto `enclave` del Cartografo solo dove il luogo ne ha, piazzamenti senza le caselle che un dislivello stacca, rialzo sintetico dei test e della console, `lab/scripts/rete-gradini.ts`; inerte col rilievo di oggi (328 luoghi, 0 dislivelli oltre il gradino su 165 395 coppie, luoghi-campione verde); ADR, AGENTS, architettura `#rete`, glossario, studio § 2.7, domanda T459 chiusa; non provato: rilievo vero e dirupi sui confini fra luoghi (R1), salto in discesa non limitato (R1/R3), partita a più giocatori vera, il Cartografo coi modelli veri, le quote dell'asprezza nel gioco; sicurezza: nessuna superficie nuova (il passo del server usa la stessa collisione, `ChunkView.ramps` va solo dal server al client ed è letto senza fidarsi da `readMoved`, `roughness` della regione solo dal master e validata da `masterRegion`).
 
 ### T475 · R1 · Il rilievo vero (riga 2 di T459) — `da fare`
 - Pipeline: claude · sforzo max · stima 6% · approvato · priorità 3

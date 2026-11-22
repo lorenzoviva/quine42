@@ -12,6 +12,7 @@ import { internalName, internalValues } from '../internalNames';
 import { paletteSummary, type CatalogEntry, type Council } from './council';
 import type { Geography } from '../nature';
 import { REUSE_OFFERED, reuseLines } from '../reuse';
+import type { Means, Roughness } from '../network';
 
 /**
  * What the Cartographer is told at the Genesis of an archipelago (T443, ADR-0230): the shores are most of its places, so among its environments
@@ -26,9 +27,10 @@ export const SHORE_LINE =
 
 /**
  * Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere; `under` (T417, ADR-0091 point 4) in the cellar
- * of a structure the plan asks with one, on its floors under the ground reached from the door; without a cellar, inside.
+ * of a structure the plan asks with one, on its floors under the ground reached from the door; without a cellar, inside; `enclave` (T474,
+ * ADR-0250) in a part of the place only a cliff parts from its paths (a ledge, a mesa), where the roughness keeps one; without, anywhere.
  */
-export type Where = 'inside' | 'outside' | 'anywhere' | 'under';
+export type Where = 'inside' | 'outside' | 'anywhere' | 'under' | 'enclave';
 
 export interface PlacedObject {
   module: string;
@@ -114,6 +116,11 @@ export interface ChunkPlan {
    * place and is never dug; absent, a plan of before, whose layout keeps the paths it dug on the water (they are its bridges and piers).
    */
   swim?: boolean;
+  /**
+   * How rough the place is for the rule 10 of the steps (T474, ADR-0250): written by the kernel when the plan is made in a region of the master
+   * that says it (`Region.roughness`); absent, the roughness its relief measures. A region changed later does not move the places it had.
+   */
+  roughness?: Roughness;
 }
 
 /**
@@ -170,11 +177,19 @@ export interface PlanContext {
   newStructures?: boolean;
   /** A new concept is welcome here (T495): under the ceiling, and `FRESH_EVERY` plans brought none. */
   freshWanted?: boolean;
+  /**
+   * The relief of the place where it keeps enclaves (T474, ADR-0250): its roughness, how many, how much of the place, the means the hardest
+   * asks. Absent for a place whose every part is joined to its paths (every place of the relief of today): nothing is said, and the schema has
+   * no `enclave`.
+   */
+  relief?: { roughness: Roughness; enclaves: number; share: number; means: Means };
 }
 
-export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under'];
+export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under', 'enclave'];
+/** The places the schema offers where the place has no enclave (T474): every one but `enclave`. */
+const WHERE_PLAIN = WHERE.filter((w) => w !== 'enclave');
 
-/** Where a thing stands, as the Cartographer wrote it (or a plan of before T310b, in Italian): one of the three, `anywhere` otherwise. */
+/** Where a thing stands, as the Cartographer wrote it (or a plan of before T310b, in Italian): one of `WHERE`, `anywhere` otherwise. */
 export const whereOf = (w: unknown): Where => {
   const said = internalName('dove-piano', String(w ?? ''));
   return WHERE.includes(said as Where) ? (said as Where) : 'anywhere';
@@ -185,9 +200,9 @@ const PLAN_SCHEMA: Schema = {
   properties: {
     place: { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] },
     environment: { type: 'STRING' },
-    objects: { type: 'ARRAY', items: { type: 'OBJECT', properties: { module: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE } }, required: ['module', 'where'] } },
+    objects: { type: 'ARRAY', items: { type: 'OBJECT', properties: { module: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE_PLAIN } }, required: ['module', 'where'] } },
     ground: { type: 'ARRAY', items: { type: 'STRING' } },
-    fresh: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE }, takeable: { type: 'BOOLEAN' } }, required: ['concept', 'where'] } },
+    fresh: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, where: { type: 'STRING', enum: WHERE_PLAIN }, takeable: { type: 'BOOLEAN' } }, required: ['concept', 'where'] } },
     runes: { type: 'ARRAY', items: { type: 'STRING' } },
     structures: { type: 'ARRAY', items: { type: 'OBJECT', properties: { concept: { type: 'STRING' }, size: { type: 'STRING', enum: internalValues('taglie') }, cellar: { type: 'BOOLEAN' } }, required: ['concept'] } },
   },
@@ -225,6 +240,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
     ctx.rari?.length
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
+    reliefLine(ctx.relief),
     ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
     islandLine(ctx.island),
     ctx.island ? (ctx.island.body ? VOID_LINE : SHORE_LINE) : '',
@@ -236,9 +252,11 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
   // Over the ceiling of the hour (T495) a structure is one the world has, or none: the schema lets only their concepts through.
   const { structures: _s, ...rest } = PLAN_SCHEMA.properties!;
   const structures: Record<string, Schema> = ctx.newStructures === false ? (ctx.known?.length ? { structures: knownStructures(ctx.known) } : {}) : { structures: PLAN_SCHEMA.properties!.structures };
+  // Where the place keeps enclaves (T474) a thing may stand in one: only then the schema says `enclave`.
+  const placed = ctx.relief ? withEnclave(rest) : rest;
   const schema: Schema = {
     ...PLAN_SCHEMA,
-    properties: { ...rest, ...structures, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
+    properties: { ...placed, ...structures, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
     ...(unnamed ? { required: [...PLAN_SCHEMA.required!, 'island'] } : {}),
   };
   const raw = await c.ask<any>('cartographer', 'chunk.plan', prompt, schema, { data: ctx, temperature: 0.9, chi: ctx.chi });
@@ -266,6 +284,27 @@ const knownStructures = (known: NonNullable<PlanContext['known']>): Schema => ({
   type: 'ARRAY',
   items: { type: 'OBJECT', properties: { concept: { type: 'STRING', enum: known.slice(0, REUSE_OFFERED).map((k) => k.concept) }, size: { type: 'STRING', enum: internalValues('taglie') }, cellar: { type: 'BOOLEAN' } }, required: ['concept'] },
 });
+
+/** The objects and the fresh things of the plan's schema with `enclave` among the places (T474). */
+function withEnclave(props: Record<string, Schema>): Record<string, Schema> {
+  const out = JSON.parse(JSON.stringify(props)) as Record<string, { items: { properties: { where: { enum: string[] } } } }>;
+  for (const k of ['objects', 'fresh']) if (out[k]?.items?.properties?.where) out[k].items.properties.where.enum = WHERE;
+  return out as unknown as Record<string, Schema>;
+}
+
+/** What the means of a pass are, in the request (T474). */
+const MEANS_WORDS: Record<Means, string> = { jump: 'jumping', climb: 'climbing', build: 'building their way up (steps cut in the rock, a ladder, a bridge) or digging' };
+
+/**
+ * What the Cartographer is told of a place that keeps enclaves (T474, ADR-0250): how rough it is, how many parts only a cliff parts from its
+ * paths, and that a thing meant to be found there may stand in one; whatever people need stays on the paths. Nothing for a place of today.
+ */
+export function reliefLine(relief: PlanContext['relief']): string {
+  if (!relief || relief.enclaves < 1) return '';
+  const rough = relief.roughness === 'rugged' ? 'rugged' : 'mountainous';
+  const share = Math.max(1, Math.round(relief.share * 100));
+  return `The ground of this place is ${rough}: cliffs part ${relief.enclaves === 1 ? 'one ledge or rise' : `${relief.enclaves} ledges and rises`} (about ${share}% of its tiles) from its paths, reached only by ${MEANS_WORDS[relief.means]}. A thing meant to be found there (a hidden chest, a nest, a shrine on a crag) may have "where": enclave; whatever people use, live in or need to reach stays elsewhere.`;
+}
 
 /** The island's name and a line about it, as the Cartographer gives them with the first place on it (T441). */
 const ISLAND_SCHEMA: Schema = { type: 'OBJECT', properties: { name: { type: 'STRING' }, description: { type: 'STRING' } }, required: ['name', 'description'] };

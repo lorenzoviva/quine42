@@ -178,6 +178,51 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `camminare sull'acqua`, `guadare` (non esiste un guado: l'acqua bassa si nuota anche lei), `galleggiare` (per il corpo; è degli scafi, T439)
 - **Fermo**: la causa `annegato` di `player.death`.
 
+### Gradino
+- **Inglese**: `STEP`, `JUMP`, `CLIMB`, `acrossRise`, `riseBetween`, `riseOnStep`, `steepOf`
+- **Definizione**: il dislivello fra due caselle vicine che un corpo cammina sempre, in salita e in discesa: mezza casella (2 livelli, `STEP`). Oltre è un **dirupo**, che non si cammina: fino a una casella si salta (`JUMP`), fino a tre si arrampicherà con un mezzo (`CLIMB`, R3), oltre si costruisce. Due caselle nuotate si uniscono qualunque sia il loro livello. La collisione lo controlla sui lati fra le caselle sotto un corpo, non sulle diagonali (T474, ADR-0250). Il gradino di un modello è un'altra misura (`stepOf`, un quinto di casella).
+- **Dove vive**: `src/kernel/network.ts`, `src/kernel/kernel.ts` (`free`, `bodyFree`, `freeReal`), `src/kernel/npc/places.ts`
+- **Da non usare**: «scalino», «pendenza» (un pendio di gradini si cammina; il salto è il movimento che supera un dirupo basso)
+
+### Rete
+- **Inglese**: `network`, `Network`, `placeNetwork`, `networkOf`, `PlaceGround`, `NetworkRules`, `apart`, `stranded`
+- **Definizione**: ciò che di un luogo è unito sui gradini al suo primo varco: gli altri varchi, le porte, l'orlo del lotto di un blocco e di un approdo, i sentieri, i moli, la partenza del mondo; lì il kernel mette ciò che il mondo dà per raggiungibile, e le persone vi camminano. Derivata dal piano, mai salvata; dove un dislivello ne stacca un pezzo il kernel scava una rampa, e ciò che nessuna rampa raggiunge resta staccato e il kernel lo dice (T474, ADR-0250).
+- **Dove vive**: `src/kernel/network.ts`, `src/kernel/kernel.ts` (`networkOf`, `placementsOf`)
+- **Da non usare**: «grafo dei gradini» (è come lo si conta), «rete stradale» (e il grafo, `graph`, è quello del mondo)
+
+### Rampa
+- **Inglese**: `ramp`, `ramps`, `evenRamp`, `moved`, `addMoved`, `readMoved`, `MAX_RAMPS`, `RAMP_SOURCES`, `MAX_MOVED`
+- **Definizione**: la via che il kernel pareggia perché ciò che un dislivello stacca torni sulla rete: la più corta fra le caselle non raggiunte, ognuna il più vicino possibile al suo livello con ogni gradino entro mezza casella, le caselle ferme (il bordo, i lotti, l'acqua) passate come sono. È la terra che muove, casella per casella, come gli scavi: nel luogo (`Chunk.ramps`) e ai client sottili (`ChunkView.ramps`) (T474, ADR-0250).
+- **Dove vive**: `src/kernel/network.ts`, `src/kernel/kernel.ts` (`placeLevels`), `src/session/thin.ts`
+- **Da non usare**: «scala» (è una cosa del mondo), «sentiero» (è scavato nelle caselle solide; la rampa muove i livelli), «terrapieno»
+- **Fermo**: il campo `ramps` di `ChunkView`.
+
+### Enclave
+- **Inglese**: `enclave`, `Enclave`, `enclaves`, `ENCLAVE_TILES`
+- **Definizione**: una parte di un luogo che si cammina per quattro caselle o più e che solo un dirupo stacca dalla sua rete (una cengia, una mesa, una conca), col suo valico; resta tale solo dove l'asprezza del luogo la concede, altrimenti il kernel la unisce con una rampa. Mai un varco, una porta, un sentiero. Il Cartografo vi può mettere una cosa da trovare col posto `enclave` (T474, ADR-0250).
+- **Dove vive**: `src/kernel/network.ts`, `src/kernel/agents/cartography.ts` (`Where`, `reliefLine`), `src/kernel/kernel.ts` (`draftRelief`)
+- **Da non usare**: «isola» (è dell'arcipelago), «sacca» (è ciò che caselle solide staccano, e il layout unisce con un sentiero), «zona irraggiungibile»
+- **Fermo**: il valore `enclave` di `where` nei piani.
+
+### Valico
+- **Inglese**: `pass`, `meansOf`, `Means`
+- **Definizione**: il dislivello più piccolo fra un'enclave e la rete, dove la si raggiunge; dice il mezzo che chiede: il salto fino a una casella, l'arrampicata fino a tre, oltre costruire (gradini scavati, una scala, un ponte) (T474, ADR-0250). Nello studio di T459 era «il passo».
+- **Dove vive**: `src/kernel/network.ts`
+- **Da non usare**: «passo» (è il passo di un terreno e quello del server), «soglia»
+
+### Asprezza
+- **Inglese**: `roughness`, `Roughness`, `ROUGHNESS`, `ROUGHNESS_NAME`, `ROUGHNESS_QUOTA`, `ROUGH_EDGES`, `FLAT_SPAN`, `roughnessOf`, `keptPass`, `readRoughness`, `regionRoughness`
+- **Definizione**: quanto è aspro un luogo per la regola 10 dei gradini: piana o collinare (ogni parte unita alla rete), montuosa (enclavi fino al 15 % delle sue caselle camminate, col valico entro un salto), impervia (fino al 35 %, ogni valico). Il kernel la misura dal rilievo senza chiamate (la quota dei lati oltre un gradino); il master la può dire per una regione sua, e vale per i luoghi nuovi, scritta nel piano (T474, ADR-0250).
+- **Dove vive**: `src/kernel/network.ts`, `src/kernel/atlas.ts` (`Region.roughness`), `src/kernel/agents/cartography.ts` (`ChunkPlan.roughness`), `src/ui/regions.ts`
+- **Da non usare**: «difficoltà», «pendenza», «zona» (lo studio di T459 diceva «le zone»)
+- **Fermo**: `roughness` e i valori `flat`, `hilly`, `mountainous`, `rugged` nell'atlante e nei piani.
+
+### Rialzo sintetico
+- **Inglese**: `syntheticRise`, `Rise`, `riseOn`
+- **Definizione**: i livelli che un test o la console aggiungono alla terra dei luoghi caricati (mai all'acqua né ai lotti) per vedere la regola 10 dei gradini al lavoro su dirupi che il rilievo di oggi non ha; mai salvato, mai da Lua, mai sul filo (T474, ADR-0250).
+- **Dove vive**: `src/kernel/kernel.ts`
+- **Da non usare**: «rilievo vero» (è quello del generatore, R1), «scavo» (è `dig`, che il mondo salva)
+
 ### Annegare
 - **Inglese**: `drown`, `DROWNED`
 - **Definizione**: morire nell'acqua: a energia finita la salute scende come per la fame e la sete, e a zero è una morte della partita, con il suo livello (`player.death`, causa «annegato») (T438, ADR-0225).
