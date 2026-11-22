@@ -133,11 +133,13 @@ describe('la stima oraria conta lo Scultore delle strutture della via', () => {
     expect(lite.dollari).toBeLessThan(argon.dollari);
   });
 
-  it('prima dell’1/12 OpenRouter costa come Google; dopo, Opus costa quanto Argon col prezzo raddoppiato', () => {
+  it('prima dell’1/12 OpenRouter costa come Google; dopo, Opus al prezzo di Argon raddoppiato, con più prefisso dalla cache', () => {
     expect(hourlyEstimate(ai, '2026-11-16', { route: 'openrouter' }).dollari).toBeCloseTo(hourlyEstimate(ai, '2026-11-16').dollari, 9);
     const google = hourlyEstimate(ai, '2026-12-02');
     const or = hourlyEstimate(ai, '2026-12-02', { route: 'openrouter' });
-    expect(or.dollari).toBeCloseTo(google.dollari, 9);
+    // The same list price from 1/12; Argon serves almost nothing from the implicit cache (T496), Opus reads its marked prefix (T468, T473).
+    expect(or.dollari).toBeLessThan(google.dollari);
+    expect(or.dollari).toBeGreaterThan(google.dollari * 0.9);
     expect(or.chiamate).toBe(google.chiamate);
   });
 });

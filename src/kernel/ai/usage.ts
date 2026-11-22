@@ -128,6 +128,8 @@ export class UsageLog {
   readonly sessionByPayer: Record<string, Tally> = {};
   /** This session by the Sculptor's specialty (T468). */
   readonly sessionBySpecialty: Record<string, Tally> = {};
+  /** Seconds of play of this session (T496): the kernel adds every tick, so that the session's spending is projected to an hour (`hourlyPace`). */
+  played = 0;
   /** Bumped at every call: the kernel writes the file when it changed. */
   version = 0;
   onChange?: () => void;
@@ -250,6 +252,52 @@ export class UsageLog {
     // Only where the master paid for someone (T372), only where a call said its specialty (T468): every other universe's file stays as it was.
     return JSON.stringify({ prices: PRICES_READ_ON, days: giorni, payers: paganti, ...(Object.keys(masterPaid).length ? { masterPaid } : {}), ...(Object.keys(specialties).length ? { specialties } : {}) } satisfies UsageFile, null, 1) + '\n';
   }
+}
+
+/** The seconds of play before the spending of a session is projected to an hour (T496): before them a call or two would say too much. */
+export const PACE_SECONDS = 120;
+
+/** What a session spends in an hour at its pace (T496, D69.4): its dollars over the seconds played, from `PACE_SECONDS` on; undefined before. */
+export function hourlyPace(usd: number, seconds: number): number | undefined {
+  if (!Number.isFinite(usd) || !Number.isFinite(seconds) || seconds < PACE_SECONDS) return undefined;
+  return (Math.max(0, usd) * 3600) / seconds;
+}
+
+/**
+ * The spending of the session as a wanderer is shown it (T496, D69.4), out of the world (rule 0: only the interface says it): `world` alone and
+ * for the master, everything the models cost; `mine` in a game of many where everyone pays: what this wanderer asked, and the common expenses
+ * of the session, divided between who plays; `master` where the master pays the match: what this wanderer asked, which the master pays.
+ * The dollars are the ledger's (`Tally.usd`: what the provider said where it says, else the price list), without the platform's fee.
+ */
+export interface SpendView {
+  whose: 'world' | 'mine' | 'master';
+  session: number;
+  /** `session` projected to an hour (`hourlyPace`); absent in the first `PACE_SECONDS`. */
+  hour?: number;
+  /** `mine`: the common expenses of the session, all of them. */
+  common?: number;
+}
+
+const WHOSE: ReadonlySet<SpendView['whose']> = new Set(['world', 'mine', 'master']);
+const money = (v: unknown, digits: number): number | undefined => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.round(v * 10 ** digits) / 10 ** digits : undefined);
+
+/** A spending as it goes on the wire (T496): the dollars to a thousandth, the hour to a cent, so that the state is not sent again at every tick. */
+export function shownSpend(v: SpendView): SpendView {
+  const hour = money(v.hour, 2);
+  const common = money(v.common, 3);
+  return { whose: v.whose, session: money(v.session, 3) ?? 0, ...(hour !== undefined ? { hour } : {}), ...(common !== undefined ? { common } : {}) };
+}
+
+/** A spending read from the wire (T496): what it is not is dropped; undefined if it says nothing usable. */
+export function readSpend(raw: unknown): SpendView | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const whose = typeof r.whose === 'string' && WHOSE.has(r.whose as SpendView['whose']) ? (r.whose as SpendView['whose']) : undefined;
+  const session = money(r.session, 9);
+  if (!whose || session === undefined) return undefined;
+  const hour = money(r.hour, 9);
+  const common = money(r.common, 9);
+  return { whose, session, ...(hour !== undefined ? { hour } : {}), ...(common !== undefined ? { common } : {}) };
 }
 
 /** "$0.0123" (four decimals under a cent), "$1.23". */

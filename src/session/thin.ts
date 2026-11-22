@@ -607,6 +607,7 @@ export class ThinClient {
     if (s.needs) k.ecs.set(pid, 'needs', { ...(k.needs() ?? {}), ...s.needs });
     if (s.states) k.ecs.set(pid, 'states', structuredClone(s.states));
     if (s.fields) k.takePanelFields(s.fields);
+    if (s.spend !== undefined) k.setSpendSeen(s.spend);
     if (typeof s.credits === 'number') {
       const prev = k.creditsOf(k.wanderer().id);
       k.setCredits(k.wanderer().id, s.credits);

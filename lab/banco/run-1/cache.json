@@ -1,0 +1,36 @@
+{
+ "universes": [
+  "orichalcum"
+ ],
+ "from": "2026-11-20",
+ "models": [
+  {
+   "model": "gemini-3.1-flash-lite",
+   "calls": 586,
+   "ofInput": 0.636,
+   "ofPrefix": 0.798,
+   "estimate": 0.8
+  },
+  {
+   "model": "gemini-4-argon",
+   "calls": 17,
+   "ofInput": 0,
+   "ofPrefix": 0,
+   "estimate": 0.05
+  },
+  {
+   "model": "gemini-3.8-flash",
+   "calls": 12,
+   "ofInput": 0.148,
+   "ofPrefix": 0.271,
+   "estimate": 0.25
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "calls": 24,
+   "ofInput": 0,
+   "ofPrefix": 0,
+   "estimate": 0
+  }
+ ]
+}

@@ -274,19 +274,24 @@ describe('il raggio nel kernel (T488)', () => {
   }, 60_000);
 });
 
-describe('la stima della lobby col ritmo di T488', () => {
-  it('i luoghi, le cose a terra, gli individui e le strutture di un’ora sono quelli della sessione del cammino, e la stima le segue', () => {
-    // The walk of the first run, offline, with the reach (lab/scripts/sessione-cammino.ts → lab/banco/run-1/sessione-dopo.json).
-    const walk = JSON.parse(readFileSync('lab/banco/run-1/sessione-dopo.json', 'utf8')) as { minutes: number; calls: Record<string, number>; sculpted: Record<string, number>; perHourList: number };
-    const hour = (n: number) => (n * 60) / walk.minutes;
+describe('la stima della lobby col ritmo di T488, il riuso e il tetto di T495, la cache di T496', () => {
+  it('i luoghi, le cose a terra, gli individui, i modelli e le strutture di un’ora sono quelli della sessione del cammino, e la stima le segue', () => {
+    // The walk of the first run, offline, with the reach and the reuse (lab/scripts/sessione-cammino.ts → lab/banco/run-1/sessione-t496.json;
+    // with the ceiling out of the way, sessione-t496-tetto60.json).
+    type Walk = { minutes: number; calls: Record<string, number>; sculpted: Record<string, number>; perHourList: number };
+    const walk = JSON.parse(readFileSync('lab/banco/run-1/sessione-t496.json', 'utf8')) as Walk;
+    const free = JSON.parse(readFileSync('lab/banco/run-1/sessione-t496-tetto60.json', 'utf8')) as Walk;
+    const hour = (n: number, w = walk) => (n * 60) / w.minutes;
     expect(HOUR.luoghi).toBeCloseTo(hour(walk.calls['chunk.plan']), -1);
     expect(HOUR.luoghi * HOUR.ignoti).toBeCloseTo(hour(walk.calls['content.define']), -1);
     expect(HOUR.luoghi * HOUR.persone * 1.2).toBeCloseTo(hour(walk.calls['npc.individuate']), -1);
-    expect(HOUR.strutture).toBeCloseTo(hour(walk.sculpted.structure), 0);
+    expect(HOUR.modelliCose).toBeCloseTo(walk.sculpted.simple / walk.calls['content.define'], 1);
+    expect(HOUR.modelliPersone).toBeCloseTo(walk.sculpted.figure / walk.calls['npc.individuate'], 1);
+    expect(HOUR.strutture).toBeCloseTo(hour(free.sculpted.structure, free), 0);
     // The lobby's estimate at full detail with the seed's models is what the walk cost at the estimate's prices, within a sixth (the lobby
-    // caps the models at `ai.maxModels` a session, the walk sculpted at its pace).
+    // caps the models at `ai.maxModels` a session and the new structures at two an hour, the walk sculpted at its pace).
     const ai = readConfig(bundledFiles).config.ai;
-    const h = hourlyEstimate(ai, '2026-11-21', { decisions: true });
+    const h = hourlyEstimate(ai, '2026-11-22', { decisions: true });
     expect(Math.abs(h.dollari - walk.perHourList) / walk.perHourList).toBeLessThan(1 / 6);
   });
 });

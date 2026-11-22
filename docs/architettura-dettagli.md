@@ -2140,7 +2140,15 @@ Il kernel è in console come `window.quine` (o `window.rune`) in singola e per i
 
 - **Registro dei consumi** (ADR-0039): ogni chiamata passa da `kernel.usage` (per giorno, modello e compito, in token e
   dollari, cache e ragionamento compresi) e va in `world/usage.json` con ogni commit; il costo è nel pannello del
-  Concilio (`G`). `GeminiAiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
+  Concilio (`G`).
+- **Il consumo dichiarato** (T496, ADR-0248): in gioco il costo dei modelli della sessione e il suo ritmo orario, sempre in vista nel pannello
+  `P` (il profilo) e nel pannello del Concilio, con la stima della lobby accanto da soli (`src/ui/spend.ts`, `Kernel.spendView`,
+  `hourlyPace` sui secondi giocati, `UsageLog.played`, dopo `PACE_SECONDS`); al master e da soli quello del mondo, agli altri viandanti
+  ciò che hanno chiesto e, dove ognuno paga, le spese comuni; in molti lo manda il server nello stato del viandante (`MyState.spend`,
+  `shownSpend`; lo specchio lo legge con `readSpend`). Solo nell'interfaccia, mai nel mondo (regola 0). La stima della lobby conta la cache
+  implicita misurata per modello (`IMPLICIT_CACHE`: Flash-Lite 0,8 del prefisso, 3.8 Flash 0,25, Argon 0,05, 3.5 Flash 0, un modello non
+  misurato 0,6; si rimisura con `lab/scripts/cache-registro.ts` sul registro di un universo), i token di risposta del registro della run e il
+  tetto delle strutture nuove (`newStructuresCeiling`); il confronto con il cammino e con la run è in `lab/banco/run-1/consumi.md` § 7. `GeminiAiModels` non ripete mai una richiesta scaduta (può essere stata pagata); ripete solo 429/5xx.
 
 - Testo per mondo: Genesi ~60 chiamate; poi 1 per luogo, 1-2 per individuo, ~4 per pacchetto di oggetti.
 - Niente immagini (step 9): il costo dell'aspetto è testo, un programma per tipo (vedi il report 8.2B, sezione 4).

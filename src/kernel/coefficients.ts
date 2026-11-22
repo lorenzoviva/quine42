@@ -11,6 +11,7 @@ import { repairSculptorTier, sculptorsOn, type AiRoute, type SculptorAiModels, t
 import type { AiConfig } from './types';
 import type { BudgetKey } from './universe';
 import { internalCoefficients, internalFields, internalSculptors } from './internalNames';
+import { NEW_STRUCTURES_PER_HOUR } from './reuse';
 
 export const COEFFICIENT_KEYS = ['sessions', 'dialogues', 'plots', 'reviews', 'models', 'people', 'inhabitants', 'packs', 'entities', 'pieces', 'chunks', 'words', 'looks', 'actions', 'magic', 'death', 'repairs', 'studio', 'lives', 'interiors'] as const;
 export type CoefficientKey = (typeof COEFFICIENT_KEYS)[number];
@@ -263,10 +264,18 @@ export const HOUR = {
   ignoti: 0.75,
   /**
    * Structures of a concept not sculpted yet (T397): one program per concept, shared by its sizes and seeds (ADR-0160), so far fewer than the
-   * structures the places show; the Sculptor of the structures writes these, the rest of the models are simple things and figures. The walk
-   * of the run: 3 in 18 minutes, the Sculptor busy with them most of the time (each place in reach brings a concept of its own).
+   * structures the places show; the Sculptor of the structures writes these, the rest of the models are simple things and figures. Since the
+   * reuse (T495, ADR-0247) the places wear the structures the world has with a seed of their own and a new concept comes when the kernel invites
+   * one, about every ten plans: the walk of the run with the ceiling out of the way (60) sculpted 2 in 18 minutes (3 before the reuse, 10 an
+   * hour). The ceiling of the lobby (`ai.newStructuresPerHour`, 2) takes the lower of the two.
    */
-  strutture: 10,
+  strutture: 7,
+  /**
+   * The models the things and the people of the places in reach ask for (T496): of the things defined on the ground, those that wear a model
+   * of their own (8 of 45 in the walk after T495), of the individuals made, those of a figure the world has not (6 of 51).
+   */
+  modelliCose: 0.18,
+  modelliPersone: 0.12,
   /** What the wanderer asks: words to people, «Altro…» and fabrications, «Esamina» and «Leggi». */
   parole: 20,
   azioni: 8,
@@ -276,8 +285,9 @@ export const HOUR = {
 /**
  * The tokens of a call, task by task, measured (T352, from T325): `prompt` the whole input (`countTokens` of Gemini on the requests of
  * 733 real calls rebuilt in neapolis, orichalcum, sidera and valmora), `prefix` its stable part (what the implicit cache may serve),
- * `output` the answer with the thinking where the walk measured it (`measured`), else the old guess (500, 3000 for a program, 300 for a
- * judgement). To measure them again: `npx vite-node lab/scripts/jev-casi-d-uso.ts -- --contesto --conta` (free), then `-- --rapporto`;
+ * `output` the answer with the thinking where it was measured (`measured`: the walk of T325, or the ledger of the first run of the beta for
+ * the tasks of the Forge, of the packs, of the sessions, the sheets and the models, T496: on Flash-Lite the thinking is most of it, two or three
+ * times the old guess), else the old guess (500 for a text, 300 for a judgement). To measure them again: `npx vite-node lab/scripts/jev-casi-d-uso.ts -- --contesto --conta` (free), then `-- --rapporto`;
  * the numbers are in `lab/banco/jev/casi-d-uso/riepilogo.md`, «Compito per compito» and «Un'ora di gioco».
  */
 export const TOKENS_MEASURED = '2026-11-06';
@@ -289,28 +299,28 @@ export interface CallTokens {
 }
 export const CALL_TOKENS: Record<string, CallTokens> = {
   'chunk.plan': { prompt: 7793, prefix: 5595, output: 964, measured: true },
-  'council.session': { prompt: 8042, prefix: 7362, output: 500 },
-  'forge.concept': { prompt: 9354, prefix: 8152, output: 500 },
-  'forge.physics': { prompt: 2807, prefix: 2283, output: 500 },
-  'forge.code': { prompt: 4597, prefix: 4138, output: 500 },
-  'forge.review': { prompt: 7877, prefix: 7359, output: 500 },
+  'council.session': { prompt: 8042, prefix: 7362, output: 1124, measured: true },
+  'forge.concept': { prompt: 9354, prefix: 8152, output: 1687, measured: true },
+  'forge.physics': { prompt: 2807, prefix: 2283, output: 404, measured: true },
+  'forge.code': { prompt: 4597, prefix: 4138, output: 2259, measured: true },
+  'forge.review': { prompt: 7877, prefix: 7359, output: 640, measured: true },
   /** Not in the walk: the old guess. */
   'forge.fix': { prompt: 3500, prefix: 0, output: 500 },
-  'content.items': { prompt: 9405, prefix: 8157, output: 500 },
-  'content.physics': { prompt: 2460, prefix: 2253, output: 500 },
-  'content.review': { prompt: 7453, prefix: 7328, output: 500 },
-  'content.recipes': { prompt: 9124, prefix: 8186, output: 500 },
-  'content.define': { prompt: 8781, prefix: 8197, output: 500 },
+  'content.items': { prompt: 9405, prefix: 8157, output: 3590, measured: true },
+  'content.physics': { prompt: 2460, prefix: 2253, output: 1393, measured: true },
+  'content.review': { prompt: 7453, prefix: 7328, output: 1086, measured: true },
+  'content.recipes': { prompt: 9124, prefix: 8186, output: 3999, measured: true },
+  'content.define': { prompt: 8781, prefix: 8197, output: 1339, measured: true },
   'npc.individuate': { prompt: 8529, prefix: 5762, output: 2132, measured: true },
   'npc.dialogue': { prompt: 6679, prefix: 5762, output: 500 },
   'npc.reply': { prompt: 7358, prefix: 5762, output: 842, measured: true },
-  'npc.sheet': { prompt: 7131, prefix: 5941, output: 500 },
+  'npc.sheet': { prompt: 7131, prefix: 5941, output: 1786, measured: true },
   'plot.weave': { prompt: 8714, prefix: 5941, output: 500 },
   'action.judge': { prompt: 8632, prefix: 6179, output: 756, measured: true },
   'text.examine': { prompt: 7380, prefix: 6124, output: 500 },
-  'model.sculpt': { prompt: 8997, prefix: 4678, output: 3000 },
+  'model.sculpt': { prompt: 8997, prefix: 4678, output: 1900, measured: true },
   /** With the photo (about 1.100 tokens). */
-  'model.judge': { prompt: 2876, prefix: 1548, output: 300 },
+  'model.judge': { prompt: 2876, prefix: 1548, output: 412, measured: true },
   'sound.compose': { prompt: 5597, prefix: 2388, output: 3000 },
   /**
    * Not in the walk (T410): the bakery of the seed's village sculpted offline, two seeds, 13 pieces of furniture, about 2.200 tokens at 4
@@ -327,11 +337,25 @@ export const CALL_TOKENS: Record<string, CallTokens> = {
   'model.part': { prompt: 7000, prefix: 4800, output: 1200 },
 };
 /**
- * The share of the stable prefix the implicit cache serves in a session (T325: about 0,6 with calls of mixed sessions, all of it warm; never
- * all, so the estimate takes the mixed one), and the models that served nothing from it (3.8 Flash, ten calls in a row).
+ * The share of the stable prefix Google's implicit cache serves, model by model (T496, D68.2a), measured on the ledger of the first run of the
+ * beta (`orichalcum`, 20-21/11, 586 calls of Flash-Lite, 17 of Argon, 24 of 3.5 Flash) and on T473's bench of the specialties
+ * (`lab/banco/specialita/README.md`, «La cache»): the tokens served over the prefix of `CALL_TOKENS`. Flash-Lite serves most of it (63 % of the
+ * whole input in the run, 0,8 of the prefix), Argon almost nothing (0 in the run, 1-5 % of the input on the bench), 3.5 Flash nothing with the
+ * photo, 3.8 Flash some (0 in the run's five sculptures, 16-18 % of the input on the bench: a quarter of the prefix). A model not measured
+ * takes `IMPLICIT_CACHE_SHARE` (T325's mixed sessions; so Opus and Fable on OpenRouter, whose prefix the marks of T468 keep: T473 read it from
+ * the cache on calls in a row, never measured over a session); `CACHE_MEASURED` is the day of the numbers. To measure them again: the ledger of a world
+ * that played (`world/usage.json`, `cached` over `prompt` task by task) and `lab/banco/run-1/consumi.md` § 7.
  */
+export const CACHE_MEASURED = '2026-11-22';
 export const IMPLICIT_CACHE_SHARE = 0.6;
-export const NO_IMPLICIT_CACHE: ReadonlySet<string> = new Set(['gemini-3.8-flash']);
+export const IMPLICIT_CACHE: Readonly<Record<string, number>> = {
+  'gemini-3.1-flash-lite': 0.8,
+  'gemini-3.8-flash': 0.25,
+  'gemini-3.5-flash': 0,
+  'gemini-4-argon': 0.05,
+};
+/** The share of the stable prefix the implicit cache serves on a model (`IMPLICIT_CACHE`, else the unmeasured one). */
+export const implicitCacheShare = (model: string): number => IMPLICIT_CACHE[model] ?? IMPLICIT_CACHE_SHARE;
 /** The calls of a Forge, of an item pack: their tokens are the mean of their tasks. */
 const FORGE_TASKS = ['forge.concept', 'forge.physics', 'forge.code', 'forge.review', 'forge.fix'];
 const PACK_TASKS = ['content.items', 'content.physics', 'content.review', 'content.recipes'];
@@ -341,7 +365,7 @@ export function callCost(model: string, tasks: string | string[], date?: string,
   const list = typeof tasks === 'string' ? [tasks] : tasks;
   const costs = list.map((t) => {
     const w = CALL_TOKENS[t];
-    const cached = cachedShare !== undefined ? Math.round(w.prompt * cachedShare) : NO_IMPLICIT_CACHE.has(model) ? 0 : Math.round(w.prefix * IMPLICIT_CACHE_SHARE);
+    const cached = cachedShare !== undefined ? Math.round(w.prompt * cachedShare) : Math.round(w.prefix * implicitCacheShare(model));
     return costOf(model, { prompt: w.prompt, cached, output: w.output }, date) ?? 0;
   });
   return costs.reduce((a, b) => a + b, 0) / costs.length;
@@ -359,8 +383,6 @@ export const ACTOR_PREFIX_TOKENS = 5400;
  * instructions are the stable part, and a long program back. Its own row of the estimate, on the structures' model of the route.
  */
 export const STRUCTURE_SCULPT = { calls: 3, prompt: 20000, prefix: 7500, output: 6500 } as const;
-/** The structures among the models an hour asks for: about one place in three shows one (ADR-0043), most of them of a concept already sculpted. */
-const STRUCTURES_PER_PLACE = 0.3;
 
 /** The sessions of the Council a session of play holds at most (`Kernel.holdSession`). */
 export const MAX_SESSIONS = 4;
@@ -394,7 +416,7 @@ const GUARD_WEIGHT = { prompt: 900, cached: 0, output: 0 };
 
 /** What a structure of a new concept costs on a model (T397's weights, `STRUCTURE_SCULPT`): about three calls; 0 for a model off the list. */
 export function structureCost(model: string, date?: string): number {
-  const call = costOf(model, { prompt: STRUCTURE_SCULPT.prompt, cached: NO_IMPLICIT_CACHE.has(model) ? 0 : Math.round(STRUCTURE_SCULPT.prefix * IMPLICIT_CACHE_SHARE), output: STRUCTURE_SCULPT.output }, date) ?? 0;
+  const call = costOf(model, { prompt: STRUCTURE_SCULPT.prompt, cached: Math.round(STRUCTURE_SCULPT.prefix * implicitCacheShare(model)), output: STRUCTURE_SCULPT.output }, date) ?? 0;
   return STRUCTURE_SCULPT.calls * call;
 }
 
@@ -414,6 +436,12 @@ export function sculptorTiers(ai: Pick<AiConfig, 'sculptors'>, route: AiRoute = 
     const model = sculptorsOn(internalSculptors(ai.sculptors ?? {}), route, date, tier).structure;
     return { tier, name: TIER_NAMES[tier], model, perStructure: structureCost(model, date) };
   });
+}
+
+/** The new programs of the structures an hour (T495, ADR-0247): the lobby's `ai.newStructuresPerHour` as the kernel reads it, else 2. */
+export function newStructuresCeiling(ai: Pick<AiConfig, 'newStructuresPerHour'>): number {
+  const n = ai.newStructuresPerHour;
+  return typeof n === 'number' && Number.isFinite(n) && n >= 0 ? Math.round(n) : NEW_STRUCTURES_PER_HOUR;
 }
 
 export interface HourLine {
@@ -476,14 +504,16 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
     const walls = fresh + kinds + people + plots * 1.3;
     add('Quarta parete sui testi nuovi (Jev)', 'indiretta', walls, walls * (costOf(JEV_MODEL, WALL_WEIGHT, date) ?? 0));
   }
-  // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it.
+  // Models: what is missing comes from new kinds, packs and structures; the pause between two of them caps it. Of the structures only the new
+  // concepts (T495): the others wear a program the world has, with no call; never more an hour than the lobby's ceiling.
   const gap = modelGap(c.models);
-  const structuresWanted = H.luoghi * STRUCTURES_PER_PLACE;
-  const wanted = (kinds + fresh + packs * 2 + structuresWanted) * (c.models > 0 ? 1 : 0);
+  const structuresWanted = Math.min(H.strutture, newStructuresCeiling(ai));
+  const wanted = (kinds + fresh + packs * 2 + unknown * H.modelliCose + people * H.modelliPersone + structuresWanted) * (c.models > 0 ? 1 : 0);
   let models = Math.min(wanted, Number.isFinite(gap) ? 3600 / (40 + gap) : 0, ai.maxModels ?? 40);
   const plan = sculptPlan(c.reviews);
-  // The structures of a new concept (T397), never more than their share of what is wanted: a share of the models, which the reuse thins as the rest.
-  const structureShare = models > 0 && wanted > 0 ? Math.min(H.strutture, (models * structuresWanted) / wanted) / models : 0;
+  // The structures of a new concept (T397, T495) come first within the models of the hour (they come in reach and the ceiling holds them); the
+  // reuse of the library thins them as the rest.
+  const structureShare = models > 0 ? Math.min(structuresWanted, models) / models : 0;
   // With Jev (T349) a share of them wears a model of the library: asked once each, not sculpted nor judged.
   const asked = opts.decisions ? models * REUSE_ASKED : 0;
   if (opts.decisions) {

@@ -126,8 +126,9 @@ Nessun varco prende un modello che non conosce: l'elenco è la difesa, non un de
 
 - [ ] `hourlyEstimate` (`coefficients.ts`) conta ogni compito col suo modello: i token per chiamata sono quelli misurati (`CALL_TOKENS`,
   `TOKENS_MEASURED`, si rimisurano gratis con `lab/scripts/jev-casi-d-uso.ts -- --contesto --conta`); le strutture con `STRUCTURE_SCULPT`.
-- [ ] **La cache implicita**: se il modello non la usa (3.8 Flash), va in `NO_IMPLICIT_CACHE`, altrimenti la stima conta un risparmio che
-  non c'è. **La cache esplicita** (ADR-0186): solo un modello con `storage` in `PRICES` (`cacheable`), solo per gli agenti di
+- [ ] **La cache implicita**: la parte del prefisso che Google serve da sé, per modello, in `IMPLICIT_CACHE` (ADR-0248); un modello non misurato
+  prende 0,6 (`IMPLICIT_CACHE_SHARE`): dopo la prima sessione vera la si misura col suo registro (`lab/scripts/cache-registro.ts -- universes/<nome>`)
+  e la si scrive, altrimenti la stima conta un risparmio che non c'è. **La cache esplicita** (ADR-0186): solo un modello con `storage` in `PRICES` (`cacheable`), solo per gli agenti di
   `CACHED_AGENTS` (`src/kernel/agents/council.ts`); `GeminiGate.writeCache` la scrive e la conta nel tetto del giorno.
 - [ ] Nell'esito: l'ora di gioco prima e dopo (dettaglio pieno e Low Detail, oggi e dopo il prossimo cambio di prezzo).
 - Test: `tests/coefficients.test.ts`, `tests/scultore-livello.test.ts`, `tests/attore.test.ts` per gli schemi simili.
@@ -280,7 +281,7 @@ le righe del gioco).
 - Cosa fare:
   (A, nel gioco) il prezzo in `prices.ts` con la data; <`OPENROUTER_MODELS` | `JEV_MODELS` | `CLI_MODELS`> e il varco
   <`GeminiGate` | `OpenRouterGate` | `TypeSafeGate` | la coda>; <dove si sceglie: `pricedAiModels` | `sculptorsOn` | `ai.sculptorTier`>;
-  la stima della lobby (`hourlyEstimate`, `NO_IMPLICIT_CACHE`, cache esplicita sì/no); il banco <script> prima `--offline`, poi pagato
+  la stima della lobby (`hourlyEstimate`, `IMPLICIT_CACHE`, cache esplicita sì/no); il banco <script> prima `--offline`, poi pagato
   con `--tetto <$>`; kernel `Z` +1.
   (B, nella pipeline) su <cli>: elenco, livelli, `/usage` prima e dopo le micro-prove; il provider `<nome>` in `config.json` e nella
   fixture (contatori misurati, `stessoContoDi`, `livelli`, rapporto provvisorio, tetto 1, `limiti.provider` invariato, piani,

@@ -8,6 +8,9 @@ import { icons } from './hud';
 import { $, el } from './dom';
 import { closeButton } from './panels';
 import { openRouterBox, type OpenRouterLink } from './openrouter';
+import { spendLines } from './spend';
+import { hourlyEstimate } from '../kernel/coefficients';
+import { keepsNothing } from '../kernel/ai/decisions';
 
 /** Keeps a profile: the answer is the profile as it was repaired, and what was repaired (in words). */
 export type ProfileKeeper = (p: Partial<Profile>) => Promise<{ ok: boolean; profile?: Profile; text?: string; reason?: string }>;
@@ -35,6 +38,8 @@ export class ProfilePanel {
   private seme = 1;
   /** «Collega OpenRouter» (T364): made again at every opening, so that it reads the key as it is now. */
   private keySlot = el('div', { class: 'account-section openrouter-section' });
+  /** What the models cost in this session and at what pace (T496): always said, out of the world. */
+  private spend = el('div', { class: 'account-section spend-section' });
   onClose?: () => void;
 
   constructor(
@@ -57,8 +62,14 @@ export class ProfilePanel {
       el('label', {}, 'Presentazione', this.presentazione),
       el('div', { class: 'row' }, save),
       this.status,
+      this.spend,
     );
     if (account) this.root.append(this.accountRow(account));
+    const again = () => {
+      if (this.isOpen) this.showSpend();
+    };
+    k.bus.on('usage', again);
+    k.bus.on('spend', again);
     if (openrouter) this.root.append(this.keySlot);
     this.root.addEventListener('keydown', (e) => {
       // Typing is not playing.
@@ -139,6 +150,7 @@ export class ProfilePanel {
     this.status.textContent = '';
     this.root.hidden = false;
     if (this.openrouter) this.keySlot.replaceChildren(openRouterBox(this.openrouter.link, { alone: this.openrouter.alone }));
+    this.showSpend();
     this.paint();
     this.nome.focus();
   }
@@ -146,6 +158,21 @@ export class ProfilePanel {
   close(): void {
     this.root.hidden = true;
     this.onClose?.();
+  }
+
+  /** The spending of the session (T496): the ledger's alone, what the server says in a game of many; the lobby's estimate where this kernel has the council. */
+  private showSpend(): void {
+    const k = this.k;
+    let estimate: number | undefined;
+    if (!k.mirror) {
+      try {
+        estimate = hourlyEstimate(k.config.ai, undefined, { decisions: k.council.decisions !== k.council.localAiModels, guards: keepsNothing(k.council.decisions), route: k.aiRoute() }).dollari;
+      } catch {
+        estimate = undefined;
+      }
+    }
+    const lines = spendLines(k.spendView(), { estimate, local: !k.mirror && k.ai.name === 'offline' });
+    this.spend.replaceChildren(el('div', { class: 'label' }, el('strong', {}, 'Consumo dei modelli')), ...lines.map((t) => el('div', { class: 'label spend-line' }, t)));
   }
 
   /** One photograph per seed of the program, in the cloak's colour: the chosen one framed. */

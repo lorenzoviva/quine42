@@ -2,7 +2,8 @@
 
 La prima run della beta (T457, `docs/beta/run-1.md`): il 21/11, da soli, una copia di `orichalcum` sul branch `beta/run-1`, 18 minuti di
 registrazione (16 del mondo), **2,93 $** al varco di Gemini. Qui: che cosa ha pagato e che cosa il viandante ne ha visto (§ 1), che cosa
-cambia il raggio di ADR-0245 sullo stesso percorso (§ 2-3), la stima della lobby (§ 4), la prova con Gemini vero (§ 5).
+cambia il raggio di ADR-0245 sullo stesso percorso (§ 2-3), la stima della lobby (§ 4), la prova con Gemini vero (§ 5); il riuso delle
+strutture e il tetto orario (§ 6, T495); la stima della lobby con la cache vera e il consumo in gioco (§ 7, T496).
 
 Si rifà tutto senza chiamate:
 
@@ -206,3 +207,87 @@ Su un'ora intera il tetto vale al più 2 strutture di Argon (circa 0,55-0,70 $),
 cammino «dopo» è circa 3,2 $/h (gli individui 0,22 $ in 18 minuti, i piani 0,16, le definizioni 0,12, le cose e le figure dello Scultore 0,41),
 quindi circa **3,8 $/h** a pieno dettaglio al passo della run, da 6. Sotto 1 $/h non si scende con questa leva sola (D69.4: si dichiara il
 consumo); la stima della lobby col tetto la rifà T496.
+
+## 7. La stima della lobby con la cache vera, e il consumo in gioco (T496, ADR-0248)
+
+La risposta a D68.2a (la cache implicita misurata) e a D69.4 («dichiariamo sempre il consumo»). Si rifà tutto senza chiamate:
+
+```bash
+npx vite-node lab/scripts/cache-registro.ts -- ../beta-run-1/universes/orichalcum --da 2026-11-20 --json lab/banco/run-1/cache.json
+npx vite-node lab/scripts/sessione-cammino.ts -- --minuti 18 --json lab/banco/run-1/sessione-t496.json
+npx vite-node lab/scripts/sessione-cammino.ts -- --minuti 18 --tetto 60 --json lab/banco/run-1/sessione-t496-tetto60.json
+```
+
+### 7.1 Quanto la cache di Google ha servito davvero
+
+`cache-registro.ts` legge il registro di `orichalcum` dei giorni della run (20-21/11): i token in cache su quelli d'ingresso, compito per compito,
+riportati al prefisso stabile che la stima dà a quel compito (`CALL_TOKENS`). Accanto, la prova delle specialità (T473, solo lo Scultore).
+
+| modello | chiamate nella run | in cache, dell'ingresso | del prefisso | il banco di T473 (ingresso) | la stima prima | la stima ora |
+|---|---:|---:|---:|---|---:|---:|
+| 3.1 Flash-Lite | 586 | 63,6 % | 80 % | 32-51 % | 60 % | **80 %** |
+| 4 Argon | 17 | 0 % | 0 % | 1-5 % | 60 % | **5 %** |
+| 3.8 Flash | 12 | 14,8 % (le battute dell'Attore, con la sua cache esplicita; lo Scultore 0 su 5) | 27 % | 16-18 % | 0 % | **25 %** |
+| 3.5 Flash (l'Artista, con la foto) | 24 | 0 % | 0 % | | 60 % | **0 %** |
+
+Un modello non misurato (3.5 Flash-Lite, Pro, Opus e Fable su OpenRouter, dove i segni di T468 tengono il prefisso: T473 lo ha visto letto su
+chiamate in fila, mai su una sessione) tiene il 60 % di T325. Nella stessa run i compiti mai misurati hanno risposto con due o tre volte i 500
+token supposti, quasi tutto ragionamento di Flash-Lite (`content.define` 1 339, `forge.code` 2 259, `content.recipes` 3 999; lo Scultore 1 900
+fra Flash-Lite e 3.8 Flash): ora sono quelli del registro (`measured: true`).
+
+Che cosa cambia a una chiamata, al listino del 22/11: un piano di Flash-Lite da 0,0026 a 0,0024 $ (la run: 0,0026), una definizione da
+0,0018 a 0,0027 $ (la run: 0,0028), una struttura di Argon (tre chiamate) da 0,29 a 0,31 $.
+
+### 7.2 La stima della lobby, rifatta
+
+Oltre alla cache, la stima conta ora il tetto delle strutture nuove di T495 (`newStructuresCeiling`: al più `ai.newStructuresPerHour` l'ora,
+senza tetto 7, quante il cammino ne scolpisce coi soli inviti del kernel: 2 in 18 minuti col tetto a 60), e fra i modelli dell'ora anche
+quelli delle cose a terra e delle persone dei luoghi in raggio (`HOUR.modelliCose` 0,18 delle cose definite, `HOUR.modelliPersone` 0,12
+degli individui: 8 su 45 e 6 su 51 nel cammino), sempre entro `ai.maxModels`. Le strutture riusate non sono modelli da fare.
+
+| a pieno dettaglio, prezzi del 22/11 | prima (T488) | ora |
+|---|---:|---:|
+| il seme, con Jev | 5,29 $/h | **3,50 $/h** (960 chiamate) |
+| il seme, senza Jev (offline, la Genesi nel browser) | | 3,77 $/h |
+| il seme, tetto 60 | 5,29 $/h | 4,81 $/h |
+| il seme a «Low Detail» | 1,70 $/h | 1,45 $/h |
+| `orichalcum` (l'Attore acceso) | 5,54 $/h | 3,86 $/h (tetto 60: 5,17) |
+| il seme dal 2/12 (Argon al doppio) su Google / su OpenRouter con Opus 5.5 | | 4,03 / 3,95 $/h |
+
+### 7.3 Stima e misura
+
+Il cammino della run (§ 6.4) col kernel di oggi: le sue chiamate pagate a ciò che una chiamata del loro compito è costata nella run e alla
+stima della lobby (`callCost`, con la cache e le risposte nuove).
+
+| | tetto 2 | tetto 60 |
+|---|---:|---:|
+| piani, definizioni, individui in 18 minuti | 60, 45, 51 | 60, 45, 51 |
+| strutture nei piani / riusate / concetti nuovi | 47 / 47 / 0 | 47 / 35 / 5 |
+| cose / figure / strutture scolpite | 8 / 6 / 1 | 8 / 6 / 2 |
+| ai costi della run | 1,244 $ (**4,15 $/h**) | 1,517 $ (5,06 $/h) |
+| alla stima della lobby, compito per compito | 1,176 $ (**3,92 $/h**; T495: 3,83 con la cache di prima) | 1,489 $ (4,96 $/h) |
+| la stima oraria della lobby | **3,50 $/h** | 4,81 $/h |
+
+Compito per compito la stima ora torna con la run: `content.define` 0,123 $ contro 0,124, `chunk.plan` 0,143 contro 0,155, gli individui
+0,219 contro 0,222 (in T495, con la cache e le risposte di prima, `content.define` 0,083 e `chunk.plan` 0,158). Ciò che resta lontano sono i modelli semplici (0,132 $ contro 0,244: nella run
+Flash-Lite ha fatto 4,4 chiamate per modello, la stima ne conta 2) e il ritmo dei modelli: in 18 minuti il cammino ne scolpisce 15, che
+sull'ora sarebbero 50, mentre la lobby li tiene a `ai.maxModels` (40) a sessione; e la struttura dei primi minuti, che la stima spalma sull'ora
+(al più 2). Per questo la stima oraria sta l'11 % sotto il cammino col tetto a 2 e il 3 % col tetto a 60, dentro il sesto che
+`tests/raggio.test.ts` tiene. Sulla via di Google il seme a pieno dettaglio costa dunque circa **3,5-4 $ l'ora** al passo della run, e il
+doppio di Argon dal 2/12 lo porta a circa 4.
+
+### 7.4 Il consumo sempre in vista
+
+D69.4: il prezzo resta sopra 1 $/h, e si dichiara. Nella Genesi e nella lobby la stima per regolazione e per chi paga c'era (§ 4) e ora tiene
+conto del raggio, del riuso e del tetto (sopra). In gioco (ADR-0248), nel pannello `P` (il profilo) e nel pannello del Concilio:
+
+- il costo dei modelli della sessione e, dopo due minuti di gioco, il suo ritmo orario: i dollari del registro (il costo detto dove il
+  provider lo dice, altrimenti il listino) sui secondi giocati (`Kernel.spendView`, `hourlyPace`); da soli accanto alla stima della lobby;
+- da soli e al master il consumo del mondo; agli altri viandanti ciò che hanno chiesto e, dove ognuno paga, le spese comuni della sessione;
+  dove paga il master, «le paga il master». In molti lo manda il server nello stato del viandante (`MyState.spend`), coi soli suoi numeri.
+
+Visto il 22/11 nel browser (la preview della build sulla porta 4961, `?offline`): la Genesi dice «Un'ora di gioco costa circa $3.769 (820
+chiamate)»; nel gioco il pannello `P` ha «Consumo dei modelli: Questa sessione: $0.0000 di modelli; il ritmo orario dopo i primi 2 minuti di
+gioco. La stima della lobby per queste regolazioni: circa $3.77 l'ora. Con i modelli locali non si spende niente.», e dopo una chiamata
+registrata a mano dalla console (0,10 $ a tre minuti di gioco) «Questa sessione: $0.10 di modelli; al ritmo di questa sessione circa $2.00
+l'ora.», col pannello del Concilio a «sessione $0.10 · $2.00/h · oggi $0.10».

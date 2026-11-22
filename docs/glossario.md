@@ -633,6 +633,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «strutture all'ora» senza «nuove» (le strutture riusate non hanno tetto), «quota delle strutture» (la quota è dei luoghi al minuto)
 - **Fermo**: il campo `ai.newStructuresPerHour` di `universe.json`.
 
+### Consumo della sessione
+- **Inglese**: `SpendView`, `spendView`, `setSpendSeen`, `spendLines`, `hourlyPace`, `PACE_SECONDS`, `shownSpend`, `readSpend`, `played`
+- **Definizione**: ciò che i modelli sono costati da quando la sessione è cominciata, come un viandante lo vede, e il suo ritmo orario (i dollari sui secondi giocati, dopo i primi due minuti): da soli e al master il consumo del mondo, agli altri viandanti ciò che hanno chiesto e, dove ognuno paga, le spese comuni; sempre detto, nel pannello `P` e nel pannello del Concilio, mai dentro il mondo (T496, ADR-0248).
+- **Dove vive**: `src/kernel/ai/usage.ts`, `src/kernel/kernel.ts`, `src/ui/spend.ts`, `src/ui/profile.ts`, `src/session/server.ts`
+- **Da non usare**: «stima» per il consumo misurato (la stima è quella della lobby, `hourlyEstimate`), «spesa oraria» per il ritmo (è una proiezione della sessione, non un tetto)
+- **Fermo**: il campo `spend` dello stato del viandante (`MyState`) sul filo.
+
+### Cache implicita
+- **Inglese**: `IMPLICIT_CACHE`, `implicitCacheShare`, `IMPLICIT_CACHE_SHARE`, `CACHE_MEASURED`
+- **Definizione**: la parte del prefisso stabile di una richiesta che Google serve da sé al prezzo della cache, senza che nessuno la scriva; la stima della lobby la conta per modello, misurata sul registro di un mondo che ha giocato (Flash-Lite 0,8, 3.8 Flash 0,25, Argon 0,05, 3.5 Flash 0; un modello non misurato 0,6; T496, ADR-0248). Non è la cache esplicita, che il varco scrive e paga (ADR-0186).
+- **Dove vive**: `src/kernel/coefficients.ts`, `lab/scripts/cache-registro.ts`
+- **Da non usare**: «cache» da sola quando si parla della stima (si dice quale: implicita o esplicita)
+- **Fermo**: nessuno.
+
 ### Densità delle strutture
 - **Inglese**: `STRUCTURE_VPT`, `structureVoxels`, `vptOf`
 - **Definizione**: i voxel per casella a cui si mostra una struttura che cresce a regole: 16 dal T405 (ADR-0209), con i voxel che aveva a 20 (100, 150, 500 di lato), un quarto più grande accanto al viandante; una voce che non dice la sua densità (`vpt`) è a 16, una che la dice resta alla sua. È la densità per voce (`vpt`, ADR-0049) quando la voce non la scrive.

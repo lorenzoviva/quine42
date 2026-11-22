@@ -44,7 +44,7 @@ import { knobOfTask, MAX_SESSIONS, onBeat, Rationing, rationedKnob, repairActor,
 import { BudgetError, type AiModels } from './ai/models';
 import type { DecisionModels } from './ai/decisions';
 import { billedModel } from './ai/prices';
-import { callCost, USAGE_FILE, UsageLog, type CallRecord } from './ai/usage';
+import { callCost, hourlyPace, readSpend, USAGE_FILE, UsageLog, type CallRecord, type SpendView } from './ai/usage';
 import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls';
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
@@ -9244,6 +9244,29 @@ export class Kernel {
     return this.gameSetup()?.master ?? SOLO;
   }
 
+  /**
+   * The spending of this session as a wanderer is shown it (T496, D69.4): alone and for the master the world's, else what the wanderer asked
+   * (with the common expenses where everyone pays); projected to an hour at the pace of the session. On a mirror, what the server said.
+   */
+  spendView(id: string = this.wanderer().id): SpendView {
+    if (this.mirror) return this.spendSeen ?? { whose: this.isMaster(id) ? 'world' : this.masterPays() ? 'master' : 'mine', session: 0 };
+    const u = this.usage;
+    const at = (usd: number) => ({ session: usd, ...(hourlyPace(usd, u.played) !== undefined ? { hour: hourlyPace(usd, u.played) } : {}) });
+    if (this.isMaster(id)) return { whose: 'world', ...at(u.session.usd) };
+    const own = u.sessionByPayer[id]?.usd ?? 0;
+    if (this.masterPays()) return { whose: 'master', ...at(own) };
+    return { whose: 'mine', ...at(own), common: u.sessionByPayer[COMUNE]?.usd ?? 0 };
+  }
+
+  /** On a mirror, the spending the server says (T496); read without trusting it. */
+  setSpendSeen(raw: unknown): void {
+    const v = readSpend(raw);
+    if (!v || JSON.stringify(v) === JSON.stringify(this.spendSeen)) return;
+    this.spendSeen = v;
+    this.bus.emit('spend', v);
+  }
+  private spendSeen?: SpendView;
+
   /** Whether every call of this match is charged to the master (T372, ADR-0188): a game of many whose expenses are the master's. */
   masterPays(): boolean {
     return this.manyPlayers() && this.gameSetup()?.expenses === 'master';
@@ -12208,6 +12231,7 @@ export class Kernel {
     if (this.dead) return;
     if (this.mirror) return this.mirrorTick(dt);
     this.time += dt;
+    this.usage.played += dt;
     for (const w of this.wanderersById.keys()) this.as(w, () => this.paceTick());
     this.tickCount++;
     this.luaCalls.clear();

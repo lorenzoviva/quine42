@@ -6,7 +6,7 @@ import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import type { TextCall } from '../src/kernel/ai/models';
 import { readConfig } from '../src/kernel/universe';
-import { CALL_TOKENS, callCost, CENSUS, COEFFICIENT_KEYS, NO_IMPLICIT_CACHE, TOKENS_MEASURED, FULL_DETAIL, hourlyEstimate, LOW_DETAIL, modelGap, onBeat, repairCoefficients, sculptPlan, stretch } from '../src/kernel/coefficients';
+import { CALL_TOKENS, callCost, CENSUS, COEFFICIENT_KEYS, implicitCacheShare, TOKENS_MEASURED, FULL_DETAIL, hourlyEstimate, LOW_DETAIL, modelGap, onBeat, repairCoefficients, sculptPlan, stretch } from '../src/kernel/coefficients';
 import { sculpt } from '../src/kernel/agents/sculptor';
 
 const DT = 1 / 60;
@@ -103,8 +103,8 @@ describe('the coefficients of generation (T45b)', () => {
     }
     // The narrative requests weigh what T325 measured, about twice the old guess of 3.500 tokens.
     expect(CALL_TOKENS['npc.reply'].prompt).toBeGreaterThan(7000);
-    // A model without the implicit cache pays the whole prompt; the Actor's explicit cache pays its share at the cache price.
-    expect(NO_IMPLICIT_CACHE.has('gemini-3.8-flash')).toBe(true);
+    // 3.8 Flash serves little of its prefix from the implicit cache (T496); the Actor's explicit cache pays its share at the cache price.
+    expect(implicitCacheShare('gemini-3.8-flash')).toBeLessThan(0.5);
     expect(callCost('gemini-3.8-flash', 'npc.reply', '2026-11-13')).toBeGreaterThan(callCost('gemini-3.8-flash', 'npc.reply', '2026-11-13', 0.7));
     expect(callCost('gemini-3.1-flash-lite', ['forge.concept', 'forge.code'])).toBeCloseTo((callCost('gemini-3.1-flash-lite', 'forge.concept') + callCost('gemini-3.1-flash-lite', 'forge.code')) / 2, 12);
   });
