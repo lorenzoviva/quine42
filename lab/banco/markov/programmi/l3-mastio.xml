@@ -1,0 +1,26 @@
+<!-- The keep of the author's fort (lines 88-106) on a courtyard x of 30 x 30 with the road v from the gate (start grid l3-mastio.txt), as in
+     tests/mj-markov.test.ts (T469): the keep K as far from the road as the yard allows, a square of 9 rings around it, then the loop: the
+     exit first (a k becomes the mark z, p 0.00005), what spreads the mark next, the growth last (a ring; touching the road it marks itself). -->
+<sequence values="BxvkzK" symmetry="(xy)">
+  <one in="x" out="K" steps="1"><field for="K" from="v" on="xv"/></one>
+  <all steps="9">
+    <rule in="Kx" out="*k"/>
+    <rule in="kx" out="*k"/>
+    <rule in="K*/*x" out="**/*k"/>
+    <rule in="k*/*x" out="**/*k"/>
+  </all>
+  <markov>
+    <sequence>
+      <prl p="0.00005" in="k" out="z"/>
+      <prl in="kz" out="zz" steps="100"/>
+      <all steps="1">
+        <rule in="Kx" out="*k"/>
+        <rule in="kx" out="*k"/>
+        <rule in="K*/*x" out="**/*k"/>
+        <rule in="k*/*x" out="**/*k"/>
+        <rule in="vk" out="vz"/>
+      </all>
+    </sequence>
+  </markov>
+  <prl in="z" out="k"/>
+</sequence>

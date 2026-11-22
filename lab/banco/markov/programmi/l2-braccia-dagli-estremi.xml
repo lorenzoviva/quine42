@@ -1,0 +1,30 @@
+<!-- The first two loops of the author's fort (lines 19-47): the rectangle of l1-braccia.xml, then from each of its ends A an arm in every
+     direction where the lot goes on, each stopping at random (a → l, the end left out) or seven cells from the edge; the rectangles they
+     span; narrow corridors closed. U is [Nx], V is [Ax]. -->
+<sequence values="EzNaxlA" symmetry="(xy)">
+  <union symbol="U" values="Nx"/>
+  <union symbol="V" values="Ax"/>
+  <all in="Nz" out="*a" steps="1"/>
+  <markov>
+    <prl in="a" out="l" p="0.035"/>
+    <all in="Uazzzzzzz" out="*xa******"/>
+  </markov>
+  <prl in="l" out="a"/>
+  <prl in="a" out="A"/>
+  <all in="Uz/*U" out="*x/**"/>
+  <all in="Az" out="*a" steps="1"/>
+  <markov>
+    <prl in="a" out="l" p="0.035"/>
+    <all in="Vazzzzzzz" out="*xa******"/>
+    <all in="Vz/*V" out="*x/**"/>
+  </markov>
+  <prl in="l" out="z"/>
+  <prl in="a" out="x"/>
+  <prl in="A" out="x"/>
+  <all steps="1" in="xzx" out="xxx"/>
+  <all steps="1" in="xzzx" out="xxxx"/>
+  <all steps="1" in="xzzzx" out="xxxxx"/>
+  <all steps="1" in="xzzzzx" out="xxxxxx"/>
+  <all steps="1" in="xzzzzzx" out="xxxxxxx"/>
+  <prl in="z" out="E"/>
+</sequence>

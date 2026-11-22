@@ -1,0 +1,1 @@
+<sequence values="BRac" symmetry="()"><markov><one in="Ra" out="Rc"/><sequence><one in="RB" out="Ra" steps="1"/><one in="aB" out="aa" steps="3"/></sequence></markov></sequence>

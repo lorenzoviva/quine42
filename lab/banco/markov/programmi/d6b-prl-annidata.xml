@@ -1,0 +1,1 @@
+<sequence values="BWGX" symmetry="()"><markov><prl in="G" out="W" steps="2"/><one in="WB" out="WG"/><one in="X" out="B"/></markov></sequence>
