@@ -1,0 +1,72 @@
+<!--
+Wheels on an axle (part-wheel), included after the piece and its axles are built: mark each hub with H, on the axle or just past its
+end, with air on both sides of it across the axle and under it (two H side by side along the axle: a wheel two thick). The wheel grows
+round its hub in the plane across the axle, as large as the hub is high over what is under it (the ground, a floor, a deck), and touches
+it: I the iron tyre and hub, J the felloe and eight spokes (give I and J your colours). Two wheels in one plane must not touch.
+
+Alone it builds a cart from its origin, an axle along x with a wheel at each end, so that it is validated on its own. Written by lab/banco/taglie/parti.mjs (T471; ADR-0182, ADR-0239, ADR-0241).
+-->
+<sequence values="BSHIJ#90#91#92#93#94#95#96#97" size="21 17 14" symmetry="()" origin="bottom">
+  <color symbol="H" value="3a3632" name="mozzo"/><color symbol="I" value="45423e" name="cerchione e mozzo di ferro"/><color symbol="J" value="9a6a3c" name="quarti e raggi"/>
+  <color symbol="S" value="7a5232" name="carro di prova"/>
+  <color symbol="#90" hidden="True"/><color symbol="#91" hidden="True"/><color symbol="#92" hidden="True"/><color symbol="#93" hidden="True"/>
+  <color symbol="#94" hidden="True"/><color symbol="#95" hidden="True"/><color symbol="#96" hidden="True"/><color symbol="#97" hidden="True"/>
+  <!-- 0. Alone (an include has no origin, so from S nothing happens there): S rises to the axle (6), the axle along x, a hub past each end, a bed of 15 × 11 over it. -->
+  <all in="B S" out="S B" steps="6"/>
+  <all in="SB" out="*S" symmetry="(x)" steps="7"/>
+  <all in="SB" out="*H" symmetry="(x)" steps="1"/>
+  <all in="B S" out="#94 *" steps="1"/>
+  <all in="#94/B" out="*/#94" symmetry="(y)" steps="5"/>
+  <all in="B #94" out="#93 *" steps="1"/>
+  <prl><rule in="#94" out="S"/><rule in="#93" out="S"/></prl>
+
+  <!-- 1. The wheels on an axle along x, in the plane of y and z: the hubs with air on both sides along y. -->
+  <all in="B/H/B" out="*/#90/*" steps="1"/>
+  <!-- The plumb line, from under the hub down through the air to whatever is under it: its foot is where the wheel touches. -->
+  <all in="#90 B" out="* #92" steps="1"/>
+  <all in="#92 B" out="#91 #92"/>
+  <!-- The first ring, only round a hub with its plumb line; then a ring a turn, by eight neighbours and by four (an octagon), until a
+       ring reaches the foot: that ring is the tyre, the one inside it the felloe, and that wheel grows no more. -->
+  <all steps="1"><rule in="[B#91] #90 [#91#92]" out="#94 * *"/><rule in="#90 #91" out="* #94"/><rule in="#90 #92" out="* #95"/><rule in="#90/[B#91] [#91#92]/*" out="*/#94 */*"/><rule in="[B#91]/#90 */[#91#92]" out="#94/* */*"/></all>
+  <prl in="#94" out="#93" steps="1"/>
+  <markov>
+    <prl><rule in="#94 [#95#96]" out="#95 *"/><rule in="#93 [#95#96]" out="#96 *"/><rule in="[#95#96] #94" out="* #95"/><rule in="[#95#96] #93" out="* #96"/><rule in="[#95#96]/#94" out="*/#95"/><rule in="[#95#96]/#93" out="*/#96"/><rule in="#94/[#95#96]" out="#95/*"/><rule in="#93/[#95#96]" out="#96/*"/><rule in="*/#94 [#95#96]/*" out="*/#95 */*"/><rule in="*/#93 [#95#96]/*" out="*/#96 */*"/><rule in="[#95#96]/* */#94" out="*/* */#95"/><rule in="[#95#96]/* */#93" out="*/* */#96"/><rule in="#94/* */[#95#96]" out="#95/* */*"/><rule in="#93/* */[#95#96]" out="#96/* */*"/><rule in="*/[#95#96] #94/*" out="*/* #95/*"/><rule in="*/[#95#96] #93/*" out="*/* #96/*"/></prl>
+    <sequence>
+      <prl><rule in="[B#91] #93" out="#94 *"/><rule in="#92 #93" out="#95 *"/><rule in="#93 [B#91]" out="* #94"/><rule in="#93 #92" out="* #95"/><rule in="#93/[B#91]" out="*/#94"/><rule in="#93/#92" out="*/#95"/><rule in="[B#91]/#93" out="#94/*"/><rule in="#92/#93" out="#95/*"/><rule in="*/[B#91] #93/*" out="*/#94 */*"/><rule in="*/#92 #93/*" out="*/#95 */*"/><rule in="#93/* */[B#91]" out="*/* */#94"/><rule in="#93/* */#92" out="*/* */#95"/><rule in="[B#91]/* */#93" out="#94/* */*"/><rule in="#92/* */#93" out="#95/* */*"/><rule in="*/#93 [B#91]/*" out="*/* #94/*"/><rule in="*/#93 #92/*" out="*/* #95/*"/></prl>
+      <prl in="#93" out="#97"/>
+      <prl in="#94" out="#93"/>
+      <prl><rule in="[B#91] #93" out="#94 *"/><rule in="#92 #93" out="#95 *"/><rule in="#93 [B#91]" out="* #94"/><rule in="#93 #92" out="* #95"/><rule in="#93/[B#91]" out="*/#94"/><rule in="#93/#92" out="*/#95"/><rule in="[B#91]/#93" out="#94/*"/><rule in="#92/#93" out="#95/*"/></prl>
+      <prl in="#93" out="#97"/>
+    </sequence>
+    <prl in="#94" out="#93"/>
+  </markov>
+  <!-- Eight spokes from the hub to the felloe, each straight: a spoke grows only from the hub or from the spoke before it in its line. -->
+  <all><rule in="#97 #90" out="#91 *"/><rule in="#90 #97" out="* #91"/><rule in="#90/#97" out="*/#91"/><rule in="#97/#90" out="#91/*"/><rule in="#97 #91 [#90#91]" out="#91 * *"/><rule in="[#90#91] #91 #97" out="* * #91"/><rule in="[#90#91]/#91/#97" out="*/*/#91"/><rule in="#97/#91/[#90#91]" out="#91/*/*"/></all>
+  <all><rule in="*/#97 #90/*" out="*/#92 */*"/><rule in="#90/* */#97" out="*/* */#92"/><rule in="#97/* */#90" out="#92/* */*"/><rule in="*/#90 #97/*" out="*/* #92/*"/><rule in="*/*/#97 */#92/* [#90#92]/*/*" out="*/*/#92 */*/* */*/*"/><rule in="[#90#92]/*/* */#92/* */*/#97" out="*/*/* */*/* */*/#92"/><rule in="#97/*/* */#92/* */*/[#90#92]" out="#92/*/* */*/* */*/*"/><rule in="*/*/[#90#92] */#92/* #97/*/*" out="*/*/* */*/* #92/*/*"/></all>
+  <prl><rule in="#91" out="J"/><rule in="#92" out="J"/><rule in="#96" out="J"/><rule in="#95" out="I"/><rule in="#90" out="I"/><rule in="#97" out="B"/><rule in="#93" out="B"/><rule in="#94" out="B"/></prl>
+
+  <!-- 2. The wheels on an axle along y, in the plane of x and z: the hubs with air on both sides along x. -->
+  <all in="BHB" out="*#90*" steps="1"/>
+  <!-- The plumb line, from under the hub down through the air to whatever is under it: its foot is where the wheel touches. -->
+  <all in="#90 B" out="* #92" steps="1"/>
+  <all in="#92 B" out="#91 #92"/>
+  <!-- The first ring, only round a hub with its plumb line; then a ring a turn, by eight neighbours and by four (an octagon), until a
+       ring reaches the foot: that ring is the tyre, the one inside it the felloe, and that wheel grows no more. -->
+  <all steps="1"><rule in="[B#91] #90 [#91#92]" out="#94 * *"/><rule in="#90 #91" out="* #94"/><rule in="#90 #92" out="* #95"/><rule in="#90[B#91] [#91#92]*" out="*#94 **"/><rule in="[B#91]#90 *[#91#92]" out="#94* **"/></all>
+  <prl in="#94" out="#93" steps="1"/>
+  <markov>
+    <prl><rule in="#94 [#95#96]" out="#95 *"/><rule in="#93 [#95#96]" out="#96 *"/><rule in="[#95#96] #94" out="* #95"/><rule in="[#95#96] #93" out="* #96"/><rule in="[#95#96]#94" out="*#95"/><rule in="[#95#96]#93" out="*#96"/><rule in="#94[#95#96]" out="#95*"/><rule in="#93[#95#96]" out="#96*"/><rule in="*#94 [#95#96]*" out="*#95 **"/><rule in="*#93 [#95#96]*" out="*#96 **"/><rule in="[#95#96]* *#94" out="** *#95"/><rule in="[#95#96]* *#93" out="** *#96"/><rule in="#94* *[#95#96]" out="#95* **"/><rule in="#93* *[#95#96]" out="#96* **"/><rule in="*[#95#96] #94*" out="** #95*"/><rule in="*[#95#96] #93*" out="** #96*"/></prl>
+    <sequence>
+      <prl><rule in="[B#91] #93" out="#94 *"/><rule in="#92 #93" out="#95 *"/><rule in="#93 [B#91]" out="* #94"/><rule in="#93 #92" out="* #95"/><rule in="#93[B#91]" out="*#94"/><rule in="#93#92" out="*#95"/><rule in="[B#91]#93" out="#94*"/><rule in="#92#93" out="#95*"/><rule in="*[B#91] #93*" out="*#94 **"/><rule in="*#92 #93*" out="*#95 **"/><rule in="#93* *[B#91]" out="** *#94"/><rule in="#93* *#92" out="** *#95"/><rule in="[B#91]* *#93" out="#94* **"/><rule in="#92* *#93" out="#95* **"/><rule in="*#93 [B#91]*" out="** #94*"/><rule in="*#93 #92*" out="** #95*"/></prl>
+      <prl in="#93" out="#97"/>
+      <prl in="#94" out="#93"/>
+      <prl><rule in="[B#91] #93" out="#94 *"/><rule in="#92 #93" out="#95 *"/><rule in="#93 [B#91]" out="* #94"/><rule in="#93 #92" out="* #95"/><rule in="#93[B#91]" out="*#94"/><rule in="#93#92" out="*#95"/><rule in="[B#91]#93" out="#94*"/><rule in="#92#93" out="#95*"/></prl>
+      <prl in="#93" out="#97"/>
+    </sequence>
+    <prl in="#94" out="#93"/>
+  </markov>
+  <!-- Eight spokes from the hub to the felloe, each straight: a spoke grows only from the hub or from the spoke before it in its line. -->
+  <all><rule in="#97 #90" out="#91 *"/><rule in="#90 #97" out="* #91"/><rule in="#90#97" out="*#91"/><rule in="#97#90" out="#91*"/><rule in="#97 #91 [#90#91]" out="#91 * *"/><rule in="[#90#91] #91 #97" out="* * #91"/><rule in="[#90#91]#91#97" out="**#91"/><rule in="#97#91[#90#91]" out="#91**"/></all>
+  <all><rule in="*#97 #90*" out="*#92 **"/><rule in="#90* *#97" out="** *#92"/><rule in="#97* *#90" out="#92* **"/><rule in="*#90 #97*" out="** #92*"/><rule in="**#97 *#92* [#90#92]**" out="**#92 *** ***"/><rule in="[#90#92]** *#92* **#97" out="*** *** **#92"/><rule in="#97** *#92* **[#90#92]" out="#92** *** ***"/><rule in="**[#90#92] *#92* #97**" out="*** *** #92**"/></all>
+  <prl><rule in="#91" out="J"/><rule in="#92" out="J"/><rule in="#96" out="J"/><rule in="#95" out="I"/><rule in="#90" out="I"/><rule in="#97" out="B"/><rule in="#93" out="B"/><rule in="#94" out="B"/></prl>
+</sequence>

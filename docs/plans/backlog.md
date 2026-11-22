@@ -6294,12 +6294,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga S4. Browser: no.
 - Esito: le sezioni di Paesaggista, Mobiliere, Sarto, Figurinista, Capomastro e Carrozziere hanno le istruzioni nuove di S4 (vento, seme e forme; aprire/chiudere, posare, portare, impugnare; aria delle zone, ordine e colori; rig, passo, quattro zampe, mani; porta, finestre, tetti, monumenti; metodo dello scafo), verificate sul kernel da `tests/sculptor-trades.test.ts` (una richiesta per classe porta solo il suo mestiere, budget del § 2.2, affermazioni provate); misura in `misure-s4.md`: +219…+419 token a sezione, nucleo+sezione 3 596-3 890 contro 3 650-4 000, +308 token a chiamata, +0,006 $/h oggi e +0,010 $/h dall'1/12; banco dei prompt aggiornato; suite (3 811 passati) e typecheck verdi; kernel invariato, nessun ADR; mancano ruote e capsule del Carrozziere (aspettano una classe e i controlli, ADR-0234) e le radici verso l'acqua (nessuna acqua nella scatola); non provata la qualità con i modelli veri (T473); sicurezza: nessuna superficie nuova.
 
-### T471 · Le parti del mondo, A: a mano nel seme (S5 di T458) — `da fare`
+### T471 · Le parti del mondo, A: a mano nel seme (S5 di T458) — `fatto` (`547241c6`)
 - Step: 44
 - Pipeline: claude · sforzo max · stima 3% · approvato · priorità 2
 - Dipende da: T468
 - Contesto: studio T458, riga S5 e § 4. Dipende da T468.
 - Cosa fare: la riga S5. Browser: sì, le parti da sole e in un modello nel laboratorio 3D.
+- Esito: tre parti dei mestieri nel seme (`part-wheel`, `part-window`, `part-leaf`) col contratto e la scena di prova; la voce `specialty` dell'indice (`partSpecialties`, senza l'Architetto) e `partResources(files, specialty, fortified)` al più otto, con la riga `TRADE_PARTS` ai mestieri in una scatola (Architetto finestre, Capomastro finestre e ante, Mobiliere ante e ruota, Carrozziere ruota); il prompt dell'Architetto nomina `part-window` al posto della ricetta delle finestre a caso e resta sotto la sua misura; banco `lab/banco/parti/` (armadio, carretto, casetta, villetta con `part-window` che passa i controlli a Grande e a Enorme), `lab/scripts/banco-parti.ts`, `tests/seed-parts.test.ts`, impronte delle tre parti nella fixture del motore (solo righe nuove); misura `misure-s5.md`: +320 token a chiamata in media pesata, +0,016 $/h oggi e +0,030 dall'1/12; ADR-0241, glossario, AGENTS.md, architettura, studio § 4, kernel 0.10.18; facce sul bordo della scatola senza finestre (limite dei pattern); non provato l'uso da parte dello Scultore coi modelli veri (T473); mancano le parti estratte e il viaggio con le carte (T472); sicurezza: nessuna superficie nuova.
 
 ### T472 · Le parti del mondo, B: estratte da un modello buono (S6 di T458) — `da fare`
 - Step: 44

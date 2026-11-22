@@ -10,7 +10,7 @@ import { classOf, isFortified } from '../src/mj/classes';
 
 const structure = classOf('structure')!;
 const request = (nome: string, more: Partial<SculptRequest> = {}): SculptRequest => ({ id: `struttura-${nome}`, nome, aspetto: nome, classe: 'structure', ...more });
-const listed = (fortified: boolean) => partResources(bundledFiles, fortified).map((p) => /file="([^"]+)"/.exec(p)![1]);
+const listed = (fortified: boolean) => partResources(bundledFiles, 'architect', fortified).map((p) => /file="([^"]+)"/.exec(p)![1]);
 
 const CIVIL = ['la cattedrale degli ingranaggi', 'bistrot', 'laboratorio di ricerca', 'stazione di transito', 'palazzina', 'chiesa moderna', 'torre panoramica', 'un faro', 'santuario della luce', 'caserma dei vigili', 'a railway station', 'a lighthouse', 'bell tower'];
 const FORTS = ['forte', 'un castello', 'la rocca sul passo', 'una fortezza di frontiera', 'torre di guardia', 'il mastio', 'bastione', 'caserma fortificata', 'cittadella', 'mura della città', 'a castle', 'a watchtower', 'stronghold', 'fortified barracks'];
@@ -36,8 +36,8 @@ describe('which structures are fortifications (T434)', () => {
 
 describe('the parts and the words of the request (T434)', () => {
   it('lists the parts of a fort only to a fortification', () => {
-    expect(listed(true)).toEqual(['part-battlements', 'part-cellar', 'part-door', 'part-slits', 'part-stair']);
-    expect(listed(false)).toEqual(['part-cellar', 'part-door', 'part-stair']);
+    expect(listed(true)).toEqual(['part-battlements', 'part-cellar', 'part-door', 'part-slits', 'part-stair', 'part-window']);
+    expect(listed(false)).toEqual(['part-cellar', 'part-door', 'part-stair', 'part-window']);
     expect([...FORT_PARTS]).toEqual(['part-battlements', 'part-slits']);
   });
 

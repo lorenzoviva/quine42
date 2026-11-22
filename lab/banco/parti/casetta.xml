@@ -1,0 +1,25 @@
+<!-- Cottage with windows and a door that opens (T471, lab/banco/parti/README.md): how the mason uses part-window and part-leaf, a building
+     of size Medium. Stone walls two thick with a band U for the windows, the door's leaf in the inner layer of the doorway with its hinge in
+     the room (it opens inward), a gable roof along x. -->
+<sequence values="BDURLNG#80#81#82#83" size="50 50 50" symmetry="(xy)">
+  <color symbol="D" value="8a8274" name="pietra"/><color symbol="R" value="a5482e" name="coppi"/><color symbol="N" value="5e3c22" name="telaio"/>
+  <color symbol="G" value="3d5566" alpha="0.7" name="vetro"/><color symbol="L" value="7a4a26" name="porta"/><color symbol="#83" value="7a4a26" name="porta aperta"/>
+  <color symbol="U" value="8a8274" name="pietra"/>
+  <!-- The walls: 40 × 28, two thick, 34 tall, the floor; the band of the windows from 12 to 23, through the walls. -->
+  <box at="25 26 0" size="40 28 34" color="D"/>
+  <box at="25 26 1" size="36 24 33" color="B" on="D"/>
+  <box at="25 26 12" size="40 28 12" color="U" on="D"/>
+  <!-- The doorway in the front wall, 11 × 30: the outer layer open, the leaf in the inner one; the hinge in the room, at its left end. -->
+  <box at="25 39 1" size="11 1 30" color="B" on="DU"/>
+  <box at="25 38 1" size="11 1 30" color="L" on="DU"/>
+  <all in="BB/[DU]L" out="*#80/**" symmetry="()"/>
+  <!-- The windows, then the rest of the band back to the stone; the door. -->
+  <import file="part-window"/>
+  <prl in="U" out="D"/>
+  <import file="part-leaf"/>
+  <!-- The roof: the eaves out by one, then a layer more over every row with roof on both sides (a gable along x). -->
+  <box at="25 26 34" size="42 30 1" color="R"/>
+  <all in="*/B/* R/R/R" out="*/R/* */*/*" symmetry="()"/>
+</sequence>
+<action name="open" label="Apri la porta"><all><rule in="L" out="#82"/><rule in="#81" out="#83"/></all></action>
+<action name="close" label="Chiudi la porta"><all><rule in="#82" out="L"/><rule in="#83" out="#81"/></all></action>
