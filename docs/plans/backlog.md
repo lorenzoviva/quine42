@@ -6431,7 +6431,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: una barca chiesta alla Fucina si guida; la chiatta di `orichalcum` si guida o non promette di farlo; test offline del riconoscimento, del validatore e della riparazione; ADR, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
 - Esito: ? (senza riga)
 
-### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `da fare`
+### T488 · Generazione a misura del giocatore: meno di 1 $/ora da soli — `in attesa`
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
 - Step: 34
 - Contesto: richiesta dell'autore del 21/11 dopo la prima run (`dossier T457`): in 18 minuti da soli in `orichalcum` 2,93 $ (Scultore Argon 16 chiamate 1,04 $; `chunk.plan` 238 chiamate 0,62 $; `content.define` 162 chiamate 0,45 $; Artista 24 0,20 $; Scultore Flash-Lite 40 0,15 $; individui 25 0,11 $). Il mondo ha pianificato 238 luoghi e definito 162 oggetti, molti più di quanti il giocatore potesse vedere: la stima della lobby (~1,4 $/h, T352) non tiene. Registro della run: `H:\projects\rune\.claude\worktrees\beta-run-1\universes\orichalcum\world\usage.json` (e il registro del varco); non toccare quell'universo.
@@ -6442,6 +6442,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
   4. Prova: una sessione offline scriptata di 18 minuti di cammino con le chiamate contate (mock), prima e dopo; obiettivo < 1 $/ora a pieno dettaglio da soli al listino; poi una prova breve con Gemini vero ≤ 0,50 $ su un clone.
 - Browser: sì — la prova con Gemini vero su un clone di `orichalcum` o `sidera`: i luoghi vicini si pianificano in tempo, niente bozze davanti ai piedi.
 - Quando è fatto: il costo misurato prima e dopo, la stima della lobby aggiornata, i test del raggio e dell'ordine; ADR se cambia quando il Concilio lavora, AGENTS.md, kernel alzato. Sicurezza: nessuna superficie nuova (o le voci).
+- Esito: il raggio è fatto e integrabile (`src/kernel/reach.ts`, Cartografo e richieste del piano solo in raggio, Scultore delle strutture solo in raggio, stima della lobby rifatta, ADR-0244, `AGENTS.md`, glossario, kernel 0.10.20, test del raggio e dell'ordine in `tests/raggio.test.ts`); costo misurato prima e dopo sul percorso della run: da 3,01 $ (10 $/h) a 1,79 $ (6 $/h), nessuna bozza sotto i piedi; obiettivo di 1 $/h non raggiunto (resta lo Scultore, circa 4 $/h): domanda con quattro leve in `docs/pipeline/domande/T488.md`; non provata col Gemini vero l'ultima correzione del passo e dell'ordine (tetto di 0,50 $ raggiunto, provata offline); sicurezza: nessuna superficie nuova.
 
 ### T492 · Il terreno che sfarfalla: per un fotogramma sparisce tutto il suolo — `fatto` (`7aa571d6`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
