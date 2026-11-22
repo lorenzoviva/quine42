@@ -292,7 +292,8 @@ async function* stepsOf(k: Kernel, r: DeferredRun, done: Set<string>): AsyncGene
   }
   const tried = new Set<string>();
   for (let made = 0; made < (r.modelli ?? k.config.ai.maxModels ?? 40); made++) {
-    const req = k.sculpting.missing().find((q) => !tried.has(q.id));
+    // Every loaded structure, with nobody near (T488: the reach is the game's, not the generation's).
+    const req = k.sculpting.missing(true).find((q) => !tried.has(q.id));
     if (!req) break;
     tried.add(req.id);
     // What costs nothing (another size, a card brought before the Genesis, T295) is not sculpted again.

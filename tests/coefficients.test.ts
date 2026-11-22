@@ -114,7 +114,8 @@ describe('the coefficients of generation (T45b)', () => {
     const full = hourlyEstimate({ ...cfg, coefficients: FULL_DETAIL });
     const low = hourlyEstimate({ ...cfg, coefficients: LOW_DETAIL.coefficients, sculptors: LOW_DETAIL.sculptors });
     expect(full.dollari).toBeGreaterThan(0);
-    expect(low.chiamate).toBeLessThan(full.chiamate * 0.6);
+    // The places in reach (T488: 200 an hour) are planned at every detail: a larger share of the calls than before.
+    expect(low.chiamate).toBeLessThan(full.chiamate * 0.7);
     expect(low.dollari).toBeLessThan(full.dollari * 0.5);
     // What the wanderer asks costs the same.
     const fixed = (h: typeof full) => h.righe.filter((r) => r.modo === 'non regolabile').reduce((s, r) => s + r.chiamate, 0);

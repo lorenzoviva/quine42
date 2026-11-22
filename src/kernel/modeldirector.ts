@@ -168,7 +168,7 @@ export class ModelDirector {
    * What is missing, in the order it matters: the common houses first, then in a queue by specialty (T468, `bySpecialty`): the trade
    * sculpted last, then the others where their first request is (people and things first, then items' shapes, then terrains).
    */
-  missing(): SculptRequest[] {
+  missing(all = false): SculptRequest[] {
     const k = this.k;
     const out: SculptRequest[] = [];
     const lacks = (id: string | undefined) => !!id && !k.forms.info(id) && !this.skip.has(id) && !out.some((r) => r.id === id);
@@ -190,11 +190,17 @@ export class ModelDirector {
       out.push(forma ? { id: d.model!, nome: `${forma} (forma comune degli oggetti)`, aspetto: `a simple, recognisable ${forma}, like many things of the world (for example: ${d.name})`, classe: 'object', tinta: true, ...worn } : { id: d.model!, nome: d.name, aspetto: d.look ?? d.description, classe: 'object', ...worn });
     }
     // Structures the Cartographer asked for (ADR-0043), at their size (ADR-0092): the rare ones (Huge per zone,
-    // Gargantuan per realm, the kernel sees to it) by the best model.
-    for (const id of k.ecs.query('structure')) {
+    // Gargantuan per realm, the kernel sees to it) by the best model. Only those of a place a wanderer can reach soon (T488, ADR-0245), the
+    // nearest first; `all` every loaded one (what costs nothing: another size's program, a card's model).
+    const structures = k.ecs
+      .query('structure')
+      .map((id) => ({ id, pos: k.ecs.get(id, 'pos') as { x: number; y: number } }))
+      .filter((s) => all || k.inReach(s.pos.x, s.pos.y))
+      .sort((a, b) => k.wandererDistance(a.pos) - k.wandererDistance(b.pos));
+    for (const { id, pos } of structures) {
       const s = k.ecs.get(id, 'structure') as { model?: string; concept: string; class: string; size?: SizeTier; cellar?: number };
       if (!lacks(s.model)) continue;
-      const place = k.chunkAt(k.ecs.get(id, 'pos').x, k.ecs.get(id, 'pos').y)?.place;
+      const place = k.chunkAt(pos.x, pos.y)?.place;
       // With its cellar, if the Cartographer asked for one (T417): the request says how deep, the Sculptor digs it.
       const cellar = s.cellar && hasCellar(s.class, s.size) ? s.cellar : undefined;
       out.push({ id: s.model!, nome: s.concept, shareWith: structureSiblings(s.concept).filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}) });
@@ -311,8 +317,8 @@ export class ModelDirector {
   /** Called every few seconds: starts the next model if idle. */
   pump(): void {
     if (!this.active || this.busy || this.k.generationHeld || this.k.paceHeld()) return;
-    // What another size already has costs nothing, and does not wait for the budget; nor what came with the cards.
-    for (const r of this.missing()) if (this.free(r)) return;
+    // What another size already has costs nothing, and does not wait for the budget; nor what came with the cards (in reach or not, T488).
+    for (const r of this.missing(true)) if (this.free(r)) return;
     if (this.used >= (this.k.config.ai.maxModels ?? 40) || this.k.time < this.nextAt || this.k.coefficients().models <= 0) return;
     const req = this.missing()[0];
     if (req) void this.make(req);

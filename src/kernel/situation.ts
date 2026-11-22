@@ -51,7 +51,7 @@ export interface SituationInput {
   wanderer: { cx: number; cy: number };
   /** The other wanderers connected (a multiplayer game). */
   players?: PlayerSpot[];
-  chunks: Array<{ cx: number; cy: number; stage: 'draft' | 'planned'; developing?: boolean; name?: string }>;
+  chunks: Array<{ cx: number; cy: number; stage: 'draft' | 'planned'; developing?: boolean; far?: boolean; name?: string }>;
   /** Where an individual is (their chunk), if anyone knows. */
   locate: (name: string) => { cx: number; cy: number } | undefined;
   chunkSize: number;
@@ -102,7 +102,7 @@ export function situation(s: SituationInput): Situation {
     if (c.stage !== 'draft') continue;
     // In a region the master holds (T375) it waits for them, not for the Cartographer.
     const held = !(c.cx === 0 && c.cy === 0) && regionKind(regionAt(s.atlas, c.cx, c.cy)) === 'held';
-    ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : held ? 'trattenuto: la regione aspetta il master' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
+    ops.push(at({ kind: 'chunk', label: `luogo ${c.cx},${c.cy}`, detail: c.developing ? 'il Cartografo lo sta pianificando' : held ? 'trattenuto: la regione aspetta il master' : c.far ? 'fuori raggio: aspetta un viandante vicino' : 'in coda', ...(c.developing ? { live: true } : {}) }, c));
   }
   for (const p of s.plots) {
     if (p.state !== 'active') continue;

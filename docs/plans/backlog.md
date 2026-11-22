@@ -6489,7 +6489,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit di merge su `task/T491`; poi l'orchestratore integra T491 e `integra T472` toglie worktree e branch di T472. Sicurezza: nessuna superficie nuova.
 - Esito: `task/T472` unito in `task/T491` (`a756c124`), risolto il conflitto in `AGENTS.md` tenendo sia il worker del terreno (`ADR-0242`) sia le parti del mondo (`ADR-0243`), verificati i documenti fusi senza doppioni né rimandi errati a `ADR-0242`, kernel `0.10.19` confermato in `version.ts` e `package.json`, `typecheck` (0) e `npm test` (285 file, 3859 passati, 1 saltato) verdi; sicurezza: nessuna superficie nuova.
 
-### T493 · Integrare T488 nel base (conflitto in AGENTS.md) — `da fare`
+### T493 · Integrare T488 nel base (conflitto in AGENTS.md) — `fatto` (`8d9386f3`)
 - Pipeline: hydrogen · sforzo high · stima 1% · approvato · priorità 1
 - Step: 34
 - Contesto: `integra T488` (il raggio del Concilio, `src/kernel/reach.ts`, ADR rinumerato a ADR-0245 sul ramo) si è fermato su un conflitto in `AGENTS.md`: nel frattempo T487 è entrato nel base (ADR-0244, i veicoli del Concilio, kernel 0.10.20) toccando le stesse righe. Nasce da T488 e T487: `dossier T488`, `dossier T487`.
@@ -6497,6 +6497,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: typecheck e suite intera coi turni.
 - Browser: no.
 - Quando è fatto: commit di merge su `task/T493`; poi l'orchestratore integra T493 e `integra T488` toglie worktree e branch di T488. Sicurezza: nessuna superficie nuova.
+- Esito: integrato `task/T488` su `task/T493` (commit `8d9386f3`), risolto il conflitto in `AGENTS.md` tenendo ADR-0244 per i veicoli di T487 e ADR-0245 per il raggio di T488, controllati i file fusi automaticamente, portato il kernel a `0.10.21` (`src/kernel/version.ts`, `package.json`, `universe/universe.json` e riferimenti ADR-0245); `turno typecheck` e `turno test` verdi (287 file, 3886 passati, 1 skippato preesistente in `tests/espressivita/aggiunte.test.ts`); sicurezza: nessuna superficie nuova.
 
 ### T494 · La cantina e la densità sulla radice del programma (`under`, `vpt` predefinito) — `da fare`
 - Pipeline: claude · sforzo medium · stima 3% · approvato · priorità 1

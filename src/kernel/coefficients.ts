@@ -240,26 +240,30 @@ export const interiorGap = (c: number): number => (c <= 0 ? Infinity : Math.roun
 export const modelGap = (c: number): number => (c <= 0 ? Infinity : Math.round(60 * (1 / c - 1)));
 
 // The estimate of an hour of play: what a wanderer usually does in an hour, and what a call usually weighs. They are
-// assumptions, said as such on the screen; the ledger (`kernel.usage`) says what was really spent.
+// assumptions, said as such on the screen; the ledger (`kernel.usage`) says what was really spent. The places, the things on their ground,
+// the people and the structures (T488, ADR-0245) are what the walk of the first run of the beta asked for with the reach: its path walked
+// again offline in 18 minutes, the local models answering as Gemini did in the run (`lab/scripts/sessione-cammino.ts`,
+// `lab/banco/run-1/sessione-dopo.json`, `lab/banco/run-1/consumi.md`); the run itself, before the reach, asked for 870 places an hour.
 export const HOUR = {
-  /** New places walked into. */
-  luoghi: 40,
+  /** New places planned: those that came in reach of the wanderer (60 plans in 18 minutes; 40 was a guess before T488). */
+  luoghi: 200,
   /** Days of the world (10 minutes each). */
   giorni: 6,
-  /** People met per place, and the share of them met for the first time. */
-  persone: 1.5,
+  /** Individuals made per place planned (50 `npc.individuate` in 18 minutes, for the people within 9 tiles of the wanderer). */
+  persone: 0.7,
   /** Seconds out of the hour spent near two people who could talk. */
   vicini: 1800,
   /** Environments walked in that no program names yet. */
   ambientiSenzaBrano: 4,
-  /** New entities the Cartographer asks for, unknown items on the ground, per place. */
-  nuovi: 0.3,
-  ignoti: 0.3,
+  /** New entities the Cartographer asks for (0.52 a plan in the run; the Forge takes `ai.maxForges`), calls for unknown items on the ground (45 in 60 plans), per place. */
+  nuovi: 0.5,
+  ignoti: 0.75,
   /**
    * Structures of a concept not sculpted yet (T397): one program per concept, shared by its sizes and seeds (ADR-0160), so far fewer than the
-   * structures the places show; the Sculptor of the structures writes these, the rest of the models are simple things and figures.
+   * structures the places show; the Sculptor of the structures writes these, the rest of the models are simple things and figures. The walk
+   * of the run: 3 in 18 minutes, the Sculptor busy with them most of the time (each place in reach brings a concept of its own).
    */
-  strutture: 4,
+  strutture: 10,
   /** What the wanderer asks: words to people, «Altro…» and fabrications, «Esamina» and «Leggi». */
   parole: 20,
   azioni: 8,
@@ -355,6 +359,9 @@ export const STRUCTURE_SCULPT = { calls: 3, prompt: 20000, prefix: 7500, output:
 /** The structures among the models an hour asks for: about one place in three shows one (ADR-0043), most of them of a concept already sculpted. */
 const STRUCTURES_PER_PLACE = 0.3;
 
+/** The sessions of the Council a session of play holds at most (`Kernel.holdSession`). */
+export const MAX_SESSIONS = 4;
+
 /** Calls of a Forge (concept, physics, code, review, and some repair), of an item pack. */
 const FORGE_CALLS = 5;
 const PACK_CALLS = 4;
@@ -433,7 +440,8 @@ export function hourlyEstimate(ai: AiConfig, date?: string, opts: { decisions?: 
   const per = (base: number, k: number) => (Number.isFinite(stretch(base, k)) ? H.luoghi / stretch(base, k) : 0);
 
   add(COEFFICIENT_INFO.chunks.nome, 'diretta', H.luoghi * c.chunks, text(H.luoghi * c.chunks, 'chunk.plan'));
-  const sessions = per(12, c.sessions);
+  // At most four sessions a session of play (`Kernel.holdSession`), whatever the places.
+  const sessions = Math.min(per(12, c.sessions), MAX_SESSIONS);
   add(COEFFICIENT_INFO.sessions.nome, 'diretta', sessions * (1 + FORGE_CALLS / 2), text(sessions, 'council.session') + text((sessions * FORGE_CALLS) / 2, FORGE_TASKS));
   const packs = Math.min(per(10, c.packs), ai.maxPacks ?? 4);
   add(COEFFICIENT_INFO.packs.nome, 'indiretta', packs * PACK_CALLS, text(packs * PACK_CALLS, PACK_TASKS));
