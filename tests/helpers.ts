@@ -36,6 +36,7 @@ export function fakeHost() {
     nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
     region_at: () => undefined,
     air_at: () => true,
+    stratum_at: () => undefined,
     islands: () => [],
     time: () => 1.5,
     log: (m) => logs.push(m),

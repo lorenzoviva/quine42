@@ -55,6 +55,11 @@ export interface Host {
    */
   air_at(x: number, y: number): boolean;
   /**
+   * The stratum under a tile at `depth` tiles below the ground (T479, ADR-0253): `{code, id, name, description, color}`, a fresh copy,
+   * or undefined off the loaded places. Read only: Lua reads the strata (a well finding an aquifer, a mine finding an ore vein), never writes them.
+   */
+  stratum_at(x: number, y: number, depth?: number): unknown;
+  /**
    * The islands of an archipelago within r tiles of (x, y) (T441), or the stations and asteroids of the void (T445, `body`): `{id, name, x, y,
    * radius, islet, body}` each, the nearest first, at most `MAX_ISLANDS_SEEN`; empty in a world that is neither. Read only: they are the kernel's.
    */
@@ -418,6 +423,7 @@ function emptyHost(): Host {
     nature: () => ({ geography: 'continent', sky: 'earth', day: 600, gravity: 1, oxygen: false }),
     region_at: () => undefined,
     air_at: () => true,
+    stratum_at: () => undefined,
     islands: () => [],
     vehicle: () => undefined,
     vehicle_set: () => false,

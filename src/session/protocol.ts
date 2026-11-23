@@ -75,6 +75,8 @@ export interface FormView {
   yaw?: number;
   tint?: string;
   done?: string[];
+  /** The stratum this building's cellar is dug into (T479, ADR-0253), when it has a cellar. */
+  stratum?: string;
 }
 
 /**

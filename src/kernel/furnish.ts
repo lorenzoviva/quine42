@@ -24,6 +24,7 @@ import type { MjxClip } from '../mj/model';
 import { BODY_R, formKey, runForm, stepOf, storeysOf, walkIn, type FormRequest, type FormResult } from './forms';
 import { boxOf, InteriorGuard, interiorPlan, NARROW, roomsOf, type Furnished, type InteriorPlan, type Refusal, type StoreyPlan } from './interior';
 import { hashStr, Rng } from './rng';
+import { sameStratum } from './strata';
 
 /**
  * The kinds of room a rule may name (T303): the largest of its storey, another of `ROOM_LEAST` tiles² or more, the others; and the cellar,
@@ -50,6 +51,11 @@ export interface InteriorRule {
   /** The area of the ground under the room, as the building's program names it (`areasOf`). */
   area?: string;
   room?: RoomKind;
+  /**
+   * The stratum the cellar is dug into (T479, ADR-0253): its canonical key (`clay`, `bedrock`, `aquifer`…); left out, any stratum.
+   * Only for the cellar (`room: 'cellar'`): ignored on a rule for another room.
+   */
+  stratum?: string;
   /** Ids of furniture of the library; for each piece one of them at random (an id said twice is chosen twice as often). */
   furniture: string[];
   count: number;
@@ -71,15 +77,20 @@ export interface InteriorData {
   seed: number;
   /** Voxels of the building under the ground (`Form.base`). */
   base: number;
+  /** The stratum this building's cellar is dug into (T479, ADR-0253), when its rules depend on it. */
+  stratum?: string;
 }
 
 const AREA_RE = /^[\p{L}\p{N}][\p{L}\p{N} _-]{0,39}$/u;
+
+/** Whether any rule depends on the stratum under the cellar (T479): buildings without such rules share one form across all strata. */
+export const hasStratumRules = (rules: readonly InteriorRule[]): boolean => rules.some((r) => !!r.stratum);
 
 /**
  * The rules of an answer or of an index entry, read without trusting them: a rule without a piece the catalogue has (`known`) or with no
  * count is dropped; what is out of range is brought back into it; the ids not in the catalogue are said apart, for the feedback.
  */
-export function readRules(raw: unknown, known: (id: string) => boolean): { rules: InteriorRule[]; unknown: string[] } {
+export function readRules(raw: unknown, known: (id: string) => boolean, knownStratum?: (stratum: string) => boolean): { rules: InteriorRule[]; unknown: string[] } {
   const list = raw && typeof raw === 'object' ? (raw as { rules?: unknown }).rules : undefined;
   const unknown = new Set<string>();
   const rules: InteriorRule[] = [];
@@ -96,8 +107,14 @@ export function readRules(raw: unknown, known: (id: string) => boolean): { rules
     if (!furniture.length || !count) continue;
     const storey = typeof o.storey === 'number' && Number.isInteger(o.storey) && o.storey >= 0 && o.storey <= INTERIOR_LIMITS.storey ? o.storey : undefined;
     const area = typeof o.area === 'string' && o.area.trim() !== '*' && AREA_RE.test(o.area.trim()) ? o.area.trim() : undefined;
-    const room = typeof o.room === 'string' && (ROOM_KINDS as readonly string[]).includes(o.room) ? (o.room as RoomKind) : undefined;
-    rules.push({ ...(storey !== undefined ? { storey } : {}), ...(area ? { area } : {}), ...(room ? { room } : {}), furniture, count });
+    const rawStratum = typeof o.stratum === 'string' ? o.stratum.trim() : '';
+    const candidateStratum = rawStratum && rawStratum !== '*' && AREA_RE.test(rawStratum) ? rawStratum.toLowerCase() : undefined;
+    const validStratum = candidateStratum && (!knownStratum || knownStratum(candidateStratum)) ? candidateStratum : undefined;
+    let room = typeof o.room === 'string' && (ROOM_KINDS as readonly string[]).includes(o.room) ? (o.room as RoomKind) : undefined;
+    // A rule that names a stratum without a room or storey above ground is a cellar rule; on an above-ground room `stratum` is ignored.
+    if (!room && storey === undefined && validStratum) room = 'cellar';
+    const stratum = room === 'cellar' ? validStratum : undefined;
+    rules.push({ ...(storey !== undefined ? { storey } : {}), ...(area ? { area } : {}), ...(room ? { room } : {}), ...(stratum ? { stratum } : {}), furniture, count });
   }
   return { rules, unknown: [...unknown] };
 }
@@ -128,7 +145,7 @@ export function interiorText(i: InteriorData): string {
       const k = formKey(i.furniture[id]);
       return [id, i.furniture[id].vpt, hashStr(k), k.length];
     });
-  return JSON.stringify([i.rules, i.base, pieces, FURNISHING]);
+  return JSON.stringify(i.stratum ? [i.rules, i.base, pieces, FURNISHING, i.stratum] : [i.rules, i.base, pieces, FURNISHING]);
 }
 
 // ---------------------------------------------------------------- the rooms
@@ -140,6 +157,8 @@ export interface InteriorRoom {
   /** Tiles² of body centres. */
   tiles: number;
   area?: string;
+  /** The stratum the cellar is dug into (T479, ADR-0253), only on rooms of kind `cellar`. */
+  stratum?: string;
   /** Its body centres, `x + y·X`, on `plan.storeys[at]`. */
   cells: number[];
   at: number;
@@ -149,7 +168,7 @@ export interface InteriorRoom {
  * The rooms of a building's plan, storey by storey above the ground, the largest first (the bench's `arredaDati`, T303); then the cellar's
  * (T419), its storey -1: after the others, so what a building's rules place above the ground is the same with or without a cellar rule.
  */
-export function interiorRooms(plan: InteriorPlan, areas: AreaMap = areasOf(plan.built, plan.palette, plan.vpt, plan.base)): InteriorRoom[] {
+export function interiorRooms(plan: InteriorPlan, areas: AreaMap = areasOf(plan.built, plan.palette, plan.vpt, plan.base), stratum?: string): InteriorRoom[] {
   const { X, vpt } = plan;
   const tileArea = new Map<string, string>();
   for (const [a, ts] of Object.entries(areas)) for (const [x, y] of ts) tileArea.set(`${x},${y}`, a);
@@ -167,7 +186,7 @@ export function interiorRooms(plan: InteriorPlan, areas: AreaMap = areasOf(plan.
       }
       const area = [...count.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0]?.[0];
       const kind: RoomKind = p.cellar ? 'cellar' : n === 0 ? 'hall' : tiles >= ROOM_LEAST ? 'room' : 'small';
-      out.push({ storey: p.cellar ? -1 : storey, kind, tiles, ...(area ? { area } : {}), cells, at });
+      out.push({ storey: p.cellar ? -1 : storey, kind, tiles, ...(area ? { area } : {}), ...(p.cellar && stratum ? { stratum } : {}), cells, at });
     });
     if (!p.cellar) storey++;
   }
@@ -176,10 +195,17 @@ export function interiorRooms(plan: InteriorPlan, areas: AreaMap = areasOf(plan.
 
 /**
  * The first rule that matches a room, or undefined (the room stays empty). The cellar only by a rule that names it (T419): the rules of
- * before, written when the cellar stayed empty, do not spill into it.
+ * before, written when the cellar stayed empty, do not spill into it. A rule that names a `stratum` (T479) matches only a cellar dug into
+ * that stratum; a cellar rule without `stratum` matches any cellar stratum as a fallback.
  */
-export const ruleFor = (rules: readonly InteriorRule[], r: Pick<InteriorRoom, 'storey' | 'kind' | 'area'>): InteriorRule | undefined =>
-  rules.find((x) => (x.storey === undefined || x.storey === r.storey) && (!x.area || x.area === r.area) && (x.room ? x.room === r.kind : r.kind !== 'cellar'));
+export const ruleFor = (rules: readonly InteriorRule[], r: Pick<InteriorRoom, 'storey' | 'kind' | 'area' | 'stratum'>): InteriorRule | undefined =>
+  rules.find(
+    (x) =>
+      (x.storey === undefined || x.storey === r.storey) &&
+      (!x.area || x.area === r.area) &&
+      (x.room ? x.room === r.kind : r.kind !== 'cellar') &&
+      (!x.stratum || (r.kind === 'cellar' && sameStratum(x.stratum, r.stratum))),
+  );
 
 /** Whether a storey's free floor, the cellar's too (T419), has room for anything: what the Scenografo would be asked for. */
 export const furnishable = (plan: InteriorPlan): boolean => plan.storeys.some((p) => p.free.some((v) => v === 1));
@@ -404,7 +430,7 @@ export const FURNISH_CAPS = { pieces: 64, guard: 96, walks: 12 } as const;
  * and kept only if the guard lets it (`InteriorGuard`, T409). The building's letters stay; the furniture's colours join its alphabet, one
  * letter per colour, never past the 255 a grid holds.
  */
-export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRule[], pieces: ReadonlyMap<string, FurniturePiece>, seed: number, guard = new InteriorGuard(plan)): Furnished {
+export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRule[], pieces: ReadonlyMap<string, FurniturePiece>, seed: number, guard = new InteriorGuard(plan), stratum?: string): Furnished {
   const built = plan.built;
   const { X, Y, Z, vpt } = plan;
   const XY = X * Y;
@@ -478,7 +504,7 @@ export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRul
   /** The pieces kept, in the order they were placed, and what each is. */
   const kept: number[][] = [];
   const items: NonNullable<Furnished['items']> = [];
-  for (const room of interiorRooms(plan)) {
+  for (const room of interiorRooms(plan, undefined, stratum)) {
     if (tried >= FURNISH_CAPS.pieces || walks >= FURNISH_CAPS.guard) break;
     const rule = ruleFor(rules, room);
     if (!rule) continue;
@@ -693,7 +719,7 @@ export function furnishForm(i: InteriorData, built: Pick<FormResult, 'grid' | 'p
     const base = i.base > 0 && i.base < built.grid.Z ? i.base : 0;
     const plan = interiorPlan({ grid: built.grid, palette: built.palette, vpt, base, actions, seed: i.seed });
     if (!furnishable(plan)) return undefined;
-    const f = furnishWithRules(plan, i.rules, pieces, i.seed);
+    const f = furnishWithRules(plan, i.rules, pieces, i.seed, undefined, i.stratum);
     return f.pieces ? f : undefined;
   } catch {
     return undefined;

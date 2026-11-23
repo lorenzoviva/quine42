@@ -6364,12 +6364,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 5. Browser: sì, i tagli.
 - Esito: il programma degli strati di ogni ambiente (`EnvironmentDef.strata`, MarkovJunior 3D sotto la superficie della bozza, solo regole con `(xy)`, la bozza di T418 dove non decide; `programStrata`, `strataProgramErrors` in `validateLayout`), 6 righe nei piani nuovi col segno `strataDepth` (i piani di prima le loro 4, `strataRowsAt` nel taglio), il Cartografo alla Genesi (`genesis.strata`: strati del mondo e programmi, gli invalidi rimandati una volta; censimento, carta degli ambienti, risposta offline), i programmi dei 21 ambienti del seme e gli strati falda/vena/radici, `compileMjx(…, { colors })`, kernel 0.10.25, ADR-0249, test `tests/strata-program.test.ts`; mancano S2 (Lua, Narratore, Scultore Architetto, Scenografo) e il programma per gli ambienti nuovi della corona; non provati la Genesi su Gemini vero, una cantina vera nel browser e il multigiocatore nel browser; sicurezza: nessuna superficie nuova (il programma è un dato dell'universo scritto dal Concilio o dal master, gira nel kernel con soli nodi di regole entro 20 000 passi e 500 ms sulla griglia di un luogo).
 
-### T479 · S2 · Gli strati nel Concilio (riga 6 di T459) — `da fare`
+### T479 · S2 · Gli strati nel Concilio (riga 6 di T459) — `fatto` (`04e08833`)
 - Pipeline: neon · sforzo xhigh · stima 4% · approvato · priorità 4
 - Step: 45
 - Dipende da: T478
 - Contesto: § 4.2; lo Scultore Architetto di T468.
 - Cosa fare: la riga 6; nuova API Lua `world.stratum_at` coi passi della convenzione. Browser: no.
+- Esito: T479 (S2 di T459, ADR-0253, kernel 0.10.29, commit 04e08833): aggiunti `world.stratum_at(x, y, depth)` in sola lettura per Lua, gli strati dei luoghi nel grafo (`GraphChunk.strata` / `focus`, `GRAPH_BUILD` 5) e in `worldFacts.sotto` per il Narratore, gli strati sotto il lotto in `SculptRequest.strata` per lo Scultore Architetto (`ModelDirector` e `regenerate.ts`, senza allargare `architect.md`), e le regole di cantina per strato dello Scenografo (`InteriorRule.stratum`, `FormComp.stratum`, `FormView.stratum`, cache per strato solo dove presente) con 15 nuovi test in `tests/strata-council.test.ts`; sicurezza: nessuna superficie nuova (`world.stratum_at` è in sola lettura, restituisce copie fresche e non genera luoghi; `FormView.stratum` espone solo la chiave dello strato sotto edifici visibili); non provato unicamente `tests/site-video.test.ts` per `ENOSPC` su `C:` (2,69 GB liberi < file da 4 GB del test, estraneo al task).
 
 ### T480 · R4 · Il fondale (riga 7 di T459) — `da fare`
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 4

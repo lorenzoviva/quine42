@@ -5,12 +5,13 @@
 // models by itself (offline the director is called by hand, from the console or a test).
 
 import { BudgetError } from './ai/models';
-import { designInterior, INTERIOR_TASK, type CataloguePiece, type MeasuredSeed } from './agents/scenographer';
+import { designInterior, INTERIOR_TASK, type CataloguePiece, type MeasuredSeed, type StratumOption } from './agents/scenographer';
 import { interiorGap } from './coefficients';
 import { furnishable, pieceOf } from './furnish';
 import { interiorPlan } from './interior';
 import type { Kernel } from './kernel';
 import { GENERIC } from './modeldirector';
+import { stratumKey } from './strata';
 import { classOf, growsByRules } from '../mj/classes';
 
 /** The most interiors a session asks for: one per type of building, and a world has few. */
@@ -124,9 +125,30 @@ export class InteriorDirector {
         this.skip.add(model);
         return { ok: false, summary: 'La libreria non ha mobili da posare.' };
       }
+      // Strata of the world when the building has a cellar (T479, ADR-0253), marking which one lies under its loaded instances.
+      const strata: StratumOption[] = [];
+      if (seeds.some((s) => s.plan.storeys.some((p) => p.cellar))) {
+        const under = new Set<string>();
+        for (const id of k.ecs.query('structure', 'form', 'pos')) {
+          const fc = k.ecs.get(id, 'form');
+          if (fc?.model !== model) continue;
+          const p = k.ecs.get(id, 'pos');
+          const s = k.ecs.get(id, 'structure') as { cellar?: number } | undefined;
+          const st = fc.stratum ?? k.cellarStratumAt(p.x, p.y, s?.cellar ?? 1);
+          if (st) under.add(st);
+        }
+        const seen = new Set<string>();
+        for (const [code, def] of Object.entries(k.strata)) {
+          const key = stratumKey(def, code);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          strata.push({ key, name: def.name, ...(def.description ? { description: def.description } : {}), ...(under.has(key) ? { underBuilding: true } : {}) });
+        }
+        strata.sort((a, b) => Number(!!b.underBuilding) - Number(!!a.underBuilding));
+      }
       this.used++;
       k.council.say('scenographer', 'propone', `l'interno di «${name}»`, undefined, INTERIOR_TASK);
-      const r = await designInterior(k.council, { model, name, box, vpt, seeds, catalogue }, chi ? { chi } : {});
+      const r = await designInterior(k.council, { model, name, box, vpt, seeds, catalogue, ...(strata.length ? { strata } : {}) }, chi ? { chi } : {});
       this.nextAt = k.time + k.pacedGap(interiorGap(k.coefficients().interiors));
       if (!r) {
         this.skip.add(model);
