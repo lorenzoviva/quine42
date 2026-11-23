@@ -6,8 +6,8 @@ import type { AgentId } from '../kernel/agents/council';
 import { $, el } from './dom';
 import { closeButton } from './panels';
 
-/** What a character decided, in the words of the world (the ids are T310b's: `follow`, `stay`, `wander`, `give`). */
-const ACTIONS: Record<string, string> = { follow: 'ti segue', stay: 'si ferma', wander: 'riprende a girovagare', give: 'ti dà qualcosa' };
+/** What a character decided, in the words of the world (the ids are T310b's); an action without words is not shown (T501: «quest» was). */
+const ACTIONS: Record<string, string> = { follow: 'ti segue', stay: 'si ferma', wander: 'riprende a girovagare', give: 'ti dà qualcosa', quest: 'ti affida una missione' };
 
 export class Chat {
   private root = $('#chat');
@@ -118,7 +118,8 @@ export class Chat {
     typing.remove();
     if (this.npc !== id) return;
     if (reply.say) this.log.append(this.line(name, reply.say, person ? 'note' : 'npc'));
-    if (reply.action !== 'none') this.log.append(el('div', { class: 'note' }, `(${name} ${ACTIONS[reply.action] ?? reply.action})`));
+    const did = ACTIONS[reply.action];
+    if (did) this.log.append(el('div', { class: 'note' }, `(${name} ${did})`));
     this.log.scrollTop = this.log.scrollHeight;
     this.input.focus();
   }

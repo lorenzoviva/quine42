@@ -15,10 +15,13 @@ Guida per l'autore (ADR-0131). Nessuno dei due passi tocca il codice.
 Come si prepara e si conduce una campagna (ospiti e inviti, ritmo, regioni, direttive), dal gioco e dal sito, e come si ospita una beta senza
 Firebase: [`campagna.md`](campagna.md). Non è una parte della pagina delle istruzioni: resta fuori dalla build.
 
-## La prima run della closed beta
+## Le run della closed beta
 
 Come si lancia la prima run registrata con Gemini vero (il branch `beta/run-1`, l'universo, il tetto, le regolazioni, che cosa fare se
 qualcosa va storto): [`run-1.md`](run-1.md). Come `campagna.md`, resta fuori dalla build.
+
+Le run successive, da soli sul kernel di oggi, sui cinque universi copiati e taggati (il branch `beta/run-2`, l'ordine degli universi, il
+tetto, che cosa è cambiato da run-1, dove guardare per l'analisi): [`run-2.md`](run-2.md).
 
 ## I laboratori per i giocatori
 

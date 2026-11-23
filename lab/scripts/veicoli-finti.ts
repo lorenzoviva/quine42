@@ -40,8 +40,8 @@ console.log(`commit della riparazione: ${k.repo.log().filter((c) => c.message.st
 const S = k.config.chunkSize;
 const w = k.wandererCarpet();
 const [wx, wy] = [Math.floor(w.x / S), Math.floor(w.y / S)];
-const placed: Array<{ id: number; place: string }> = [];
-k.bus.on('vehicle:placed', (e: { id: number; place: string }) => placed.push(e));
+const placed: Array<{ id: number; place: string; module?: string }> = [];
+k.bus.on('vehicle:placed', (e: { id: number; place: string }) => placed.push({ ...e, module: k.ecs.get(e.id, 'module')?.id }));
 for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) await k.planAhead(wx + dx, wy + dy);
 // The places near the wanderer come into the world as the game loads them.
 for (let i = 0; i < 400; i++) {
@@ -49,12 +49,17 @@ for (let i = 0; i < 400; i++) {
   if (i % 20 === 0) await new Promise((r) => setTimeout(r, 5));
 }
 console.log(`il viandante è nel luogo ${wx},${wy}; veicoli nel mondo: ${k.ecs.query('vehicle').length}`);
-for (const { id, place } of placed) {
+for (const { id, place, module } of placed) {
   const p = k.ecs.get(id, 'pos');
-  const m = k.modules.get(k.ecs.get(id, 'module')?.id)?.manifest;
+  const m = k.modules.get(module ?? '')?.manifest;
   const spec = vehicleSpecOf(m?.vehicle);
-  const t = k.tileAt(Math.floor(p.x), Math.floor(p.y));
   const name = k.chunks.get(place)?.place?.name ?? place;
+  // At its berth a vehicle is of its place (ADR-0244): it leaves the world with it (a wanderer saved dead wakes in the square, T501).
+  if (!p) {
+    console.log(`  ${module ?? '?'} in «${name}» (${place}): nato e uscito dal mondo col suo luogo`);
+    continue;
+  }
+  const t = k.tileAt(Math.floor(p.x), Math.floor(p.y));
   const shore = [...Array(7)].some((_, a) => [...Array(7)].some((_, b) => ((x) => !!x && !k.palette[x]?.solid)(k.tileAt(Math.floor(p.x) + a - 3, Math.floor(p.y) + b - 3))));
   console.log(`  ${m?.id} in «${name}» (${place}) a ${p.x.toFixed(1)},${p.y.toFixed(1)}: su «${t}» ${k.palette[t ?? '']?.name ?? '?'}, galleggia ${spec ? carries(spec, k.palette[t ?? '']) : '?'}, riva vicina ${shore}, menu ${k.actionsFor(id).map((o) => o.id).join(',') || '-'}`);
 }

@@ -13,7 +13,7 @@ import { SOLO } from '../wandererIds';
 import type { NpcHost } from './host';
 import type { Mind, Relation } from './model';
 import type { People } from './people';
-import { readPlots, secretsOf } from './plots';
+import { handsOver, readPlots, secretsOf } from './plots';
 import { bondWith, greeting, memoriesFor, memorySummary } from './society';
 import type { Speech } from './speech';
 import type { Stories } from './stories';
@@ -162,7 +162,9 @@ export class Talk {
           p.quest.state = 'accepted';
           p.quest.wanderer = me.id;
           given = p.quest.text;
-          if (p.quest.goal.type === 'bring') carry = p.quest.goal.item;
+          // Only a delivery (to someone else) is handed over: what is to be brought back to the giver is to be found, or the quest
+          // would be done as soon as it is accepted (T501).
+          if (p.quest.goal.type === 'bring' && handsOver(p.quest.goal.to, name)) carry = p.quest.goal.item;
           return true;
         });
         if (given) this.host.message(`Nuova missione da ${name}: ${given}`, 'good');

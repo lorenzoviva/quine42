@@ -3252,6 +3252,9 @@ export class Kernel {
     ch.asks = undefined;
     this.asking.delete(ch.key);
     if (regionKind(this.masterRegionOf(ch)) === 'filler') return;
+    // The local models over a world that is not theirs (T433, ADR-0222) ask nothing of a place the Council planned either (T501): its new
+    // things, the things on the ground, the packs, inhabitants and sessions its exploring would beat would be theirs, and saved.
+    if (this.localModelsAbroad()) return;
     // What it asks the Council for, asked when it is in reach of a wanderer (T488, ADR-0245: a place loaded at the edge of the view asks nothing),
     // once a load. Held (T373): it waits while the world is held.
     ch.asks = () => {
