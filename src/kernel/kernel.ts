@@ -691,6 +691,7 @@ export class Kernel {
     ground: (c, r) => Math.max(this.seaLevel, this.relief.level(c, r) + this.digAt(c, r)),
     record: (c, r) => this.waterAt(c, r),
     sea: () => this.seaLevel,
+    joined: (c, r, tc, tr) => !this.fallBetween(c, r, tc, tr),
   });
   /** The cellular automata of the world (T482, ADR-0254): parametric fields + MarkovJunior rules on the loaded window. */
   readonly automata = (() => {
@@ -4089,6 +4090,8 @@ export class Kernel {
    * The levels of a loaded place before its lots (T51a): one field for the whole loaded world (`worldLevels`:
    * the sea at its level, each body of water flat as a whole, the banks), made again when a place comes, goes
    * or changes its tiles. A place whose levels change while its tiles do not is drawn again (`Chunk.levels`).
+   * A place of the true relief is levelled alone (T504, ADR-0258): its water is the one its network reads (`networkOf`), so that the
+   * network's levels and those of the feet are the same tile by tile; only its digs and the water that has flowed are its own over them.
    */
   private levelsOf(ch: Chunk): Int16Array {
     const relief = this.relief, sea = this.seaLevel;
@@ -4096,27 +4099,32 @@ export class Kernel {
     let fresh = !!f && f.relief === relief && f.sea === sea && f.ground === this.groundVersion && f.tiles.size === this.chunks.size;
     if (fresh) for (const c of this.chunks.values()) if (f!.tiles.get(c) !== c.tiles) { fresh = false; break; }
     if (!fresh) {
-      const list = [...this.chunks.values()];
+      const all = [...this.chunks.values()];
       const S = this.config.chunkSize;
-      const keepCliffs = list.length > 0 && relief.hasCliffs(list[0].cx * S);
-      const out = worldLevels(
-        list,
-        S,
-        (code) => this.palette[code]?.layer === 'liquid',
-        (c, r) => relief.level(c, r) + this.digAt(c, r),
-        sea,
-        (k, i) => {
-          const w = this.waterOf(list[k])?.[i];
-          return w && w[1] > WET ? w[0] + w[1] : undefined;
-        },
-        keepCliffs,
-      );
-      const levels = new Map(list.map((c, i) => [c, out[i]]));
-      if (f) for (const c of list) {
+      const levels = new Map<Chunk, Int16Array>();
+      // The places of the true relief each alone, as their network (T504); those of the hills in one field, as ever (a band apart, T449).
+      for (const keepCliffs of [false, true]) {
+        const list = all.filter((c) => relief.hasCliffs(c.cx * S) === keepCliffs);
+        if (!list.length) continue;
+        const out = worldLevels(
+          list,
+          S,
+          (code) => this.palette[code]?.layer === 'liquid',
+          (c, r) => relief.level(c, r) + this.digAt(c, r),
+          sea,
+          (k, i) => {
+            const w = this.waterOf(list[k])?.[i];
+            return w && w[1] > WET ? w[0] + w[1] : undefined;
+          },
+          keepCliffs,
+        );
+        list.forEach((c, i) => levels.set(c, out[i]));
+      }
+      if (f) for (const c of all) {
         const old = f.levels.get(c);
         if (old && f.tiles.get(c) === c.tiles && old.some((v, i) => v !== levels.get(c)![i])) c.levels = (c.levels ?? 0) + 1;
       }
-      this.worldField = { relief, sea, ground: this.groundVersion, tiles: new Map(list.map((c) => [c, c.tiles])), levels };
+      this.worldField = { relief, sea, ground: this.groundVersion, tiles: new Map(all.map((c) => [c, c.tiles])), levels };
     }
     return this.worldField!.levels.get(ch)!;
   }
@@ -4144,6 +4152,18 @@ export class Kernel {
     const at = this.tileOf(col, row);
     return at && this.waterOf(at.ch)?.[at.tile];
   }
+  /**
+   * Whether two tiles beside each other are across a fall (T504): on the border of two places of the true relief, each levelled alone
+   * (`levelsOf`), more than a step apart in the world's field. The water that flows does not pour over it (`WaterWorld.joined`): the lake of
+   * a massif stays where it is when the ground beside it is dug.
+   */
+  private fallBetween(col: number, row: number, toCol: number, toRow: number): boolean {
+    const S = this.config.chunkSize;
+    if (Math.floor(col / S) === Math.floor(toCol / S) && Math.floor(row / S) === Math.floor(toRow / S)) return false;
+    if (!this.relief.hasCliffs(col) || !this.relief.hasCliffs(toCol)) return false;
+    return Math.abs(this.fieldAt(col, row) - this.fieldAt(toCol, toRow)) > STEP;
+  }
+
   /** The level of a tile in the world's field before the lots (T51a): the water's surface for water. */
   private fieldAt(col: number, row: number): number {
     const at = this.tileOf(col, row);

@@ -3,9 +3,14 @@
 // in reach are planned; for every planned place: the pairs of open tiles beside each other (walked or swum) and those more than a step apart
 // on the kernel's levels (`groundAt`, as the collision reads them), the diagonals apart (not an edge: not counted by the rule), its network
 // (ramps, enclaves kept and stranded, what only a rise parts from it, its roughness), the time to make it. With --rialzo N every place has a
-// plateau N levels high in its middle (`syntheticRise`). No call to the models, nothing written but the report:
+// plateau N levels high in its middle (`syntheticRise`). No call to the models, nothing written but the report.
+// The wanderer's walk plans the places as the game does, so two runs plan them differently (the timing of the local models): with
+// --griglia R the places of a square of (2R + 1)² around the origin are planned one by one (`planAhead`) and stay loaded, the same at every
+// run, so that two versions of the kernel can be compared pair by pair (`overPairs` in the JSON). Both count too the tiles where the
+// network's level is not the feet's (`netDiff`, T504: none since the true relief levels each place alone) and the falls of the water
+// between two places (`falls`: tiles of water beside each other across a border more than a step apart, swum as ever; the highest, `maxFall`):
 //
-//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18] [--rialzo 8] [--vero] [--arcipelago] [--json f]
+//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18 | --griglia 6] [--rialzo 8] [--vero] [--arcipelago] [--json f]
 
 import { writeFileSync } from 'node:fs';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -23,6 +28,7 @@ const RISE = Number(opt('rialzo', '0'));
 const TRUE_RELIEF = argv.includes('--vero');
 const ARCHIPELAGO = argv.includes('--arcipelago');
 const out = opt('json');
+const GRID = opt('griglia') === undefined ? undefined : Number(opt('griglia'));
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const files = (() => {
@@ -52,55 +58,78 @@ const level = (c: number, r: number) => Math.round(k.groundAt(c + 0.5, r + 0.5) 
 const planned = (ch: Chunk | undefined) => ch?.stage === 'planned';
 
 const seen = new Set<string>();
-const counts = { places: 0, pairs: 0, over: 0, diagonals: 0, ramps: 0, kept: 0, stranded: 0, apart: 0 };
+const counts = { places: 0, pairs: 0, over: 0, diagonals: 0, ramps: 0, kept: 0, stranded: 0, apart: 0, netDiff: 0, netPlaces: 0, falls: 0, maxFall: 0 };
+const overPairs: string[] = [];
 const roughness: Record<string, number> = {};
 const netMs: number[] = [];
 const t0 = performance.now();
-for (let j = 0; j < POINTS; j++)
-  for (let i = 0; i < POINTS; i++) {
-    const X = (i - (POINTS >> 1)) * 3 * S, Y = (j - (POINTS >> 1)) * 3 * S;
-    const p = k.wandererPos();
-    Object.assign(k.carpet()!, { ox: X - p.x, oy: Y - p.y });
-    for (let n = 0; n < 400; n++) {
-      k.tick(1 / 60);
-      await pause(20);
-      if ([...k.chunks.values()].filter((c) => k.inReach(c.cx * S + 1, c.cy * S + 1)).every((c) => c.stage !== 'draft')) break;
-    }
-    for (const ch of k.chunks.values()) {
-      if (!planned(ch) || seen.has(ch.key)) continue;
-      seen.add(ch.key);
-      counts.places++;
-      const net = ch.network as Network | undefined;
-      if (net) {
-        counts.ramps += net.ramps.length;
-        counts.kept += net.enclaves.filter((e) => e.kept).length;
-        counts.stranded += net.stranded.length;
-        counts.apart += net.apart.reduce((a, v) => a + v, 0);
-        roughness[net.roughness] = (roughness[net.roughness] ?? 0) + 1;
-        // The time of the network of the place again, as `applyPlan` makes it.
-        const kk = k as unknown as { layoutOf(ch: Chunk, plan: unknown, path: string, quiet: boolean): { result: unknown }; networkOf(...a: unknown[]): Network; pathCode(): string };
-        const { result } = kk.layoutOf(ch, ch.plan, kk.pathCode(), false);
-        const lots = ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots;
-        const a = performance.now();
-        kk.networkOf(ch, ch.plan, result, ch.tiles, lots);
-        netMs.push(performance.now() - a);
-      }
-      for (let r = 0; r < S; r++)
-        for (let c = 0; c < S; c++) {
-          const col = ch.cx * S + c, row = ch.cy * S + r;
-          const t = k.tileAt(col, row);
-          if (!open(t)) continue;
-          for (const [dc, dr] of [[1, 0], [0, 1]]) {
-            const u = k.tileAt(col + dc, row + dr);
-            if (!open(u) || !planned(k.chunkAt(col + dc, row + dr))) continue;
-            counts.pairs++;
-            if (!(swum(t) && swum(u)) && Math.abs(level(col, row) - level(col + dc, row + dr)) > STEP) counts.over++;
-          }
-          const d = k.tileAt(col + 1, row + 1);
-          if (open(d) && planned(k.chunkAt(col + 1, row + 1)) && !(swum(t) && swum(d)) && Math.abs(level(col, row) - level(col + 1, row + 1)) > STEP) counts.diagonals++;
-        }
-    }
+/** The places as the wanderer's walk plans them (the game's way), or a square planned one by one (--griglia: the same at every run). */
+async function* stations(): AsyncGenerator<void> {
+  if (GRID !== undefined) {
+    for (let cy = -GRID; cy <= GRID; cy++) for (let cx = -GRID; cx <= GRID; cx++) await k.planAhead(cx, cy);
+    yield;
+    return;
   }
+  for (let j = 0; j < POINTS; j++)
+    for (let i = 0; i < POINTS; i++) {
+      const X = (i - (POINTS >> 1)) * 3 * S, Y = (j - (POINTS >> 1)) * 3 * S;
+      const p = k.wandererPos();
+      Object.assign(k.carpet()!, { ox: X - p.x, oy: Y - p.y });
+      for (let n = 0; n < 400; n++) {
+        k.tick(1 / 60);
+        await pause(20);
+        if ([...k.chunks.values()].filter((c) => k.inReach(c.cx * S + 1, c.cy * S + 1)).every((c) => c.stage !== 'draft')) break;
+      }
+      yield;
+    }
+}
+for await (const _ of stations()) {
+  for (const ch of k.chunks.values()) {
+    if (!planned(ch) || seen.has(ch.key)) continue;
+    seen.add(ch.key);
+    counts.places++;
+    const net = ch.network as Network | undefined;
+    if (net) {
+      counts.ramps += net.ramps.length;
+      counts.kept += net.enclaves.filter((e) => e.kept).length;
+      counts.stranded += net.stranded.length;
+      counts.apart += net.apart.reduce((a, v) => a + v, 0);
+      roughness[net.roughness] = (roughness[net.roughness] ?? 0) + 1;
+      // The time of the network of the place again, as `applyPlan` makes it.
+      const kk = k as unknown as { layoutOf(ch: Chunk, plan: unknown, path: string, quiet: boolean): { result: unknown }; networkOf(...a: unknown[]): Network; pathCode(): string };
+      const { result } = kk.layoutOf(ch, ch.plan, kk.pathCode(), false);
+      const lots = ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots;
+      const a = performance.now();
+      kk.networkOf(ch, ch.plan, result, ch.tiles, lots);
+      netMs.push(performance.now() - a);
+      // The network's level against the feet's, tile by tile (T504).
+      let diff = 0;
+      for (let i = 0; i < S * S; i++) if (net.levels[i] !== level(ch.cx * S + (i % S), ch.cy * S + Math.floor(i / S))) diff++;
+      counts.netDiff += diff;
+      if (diff) counts.netPlaces++;
+    }
+    for (let r = 0; r < S; r++)
+      for (let c = 0; c < S; c++) {
+        const col = ch.cx * S + c, row = ch.cy * S + r;
+        const t = k.tileAt(col, row);
+        if (!open(t)) continue;
+        for (const [dc, dr] of [[1, 0], [0, 1]]) {
+          const u = k.tileAt(col + dc, row + dr);
+          if (!open(u) || !planned(k.chunkAt(col + dc, row + dr))) continue;
+          counts.pairs++;
+          const gap = Math.abs(level(col, row) - level(col + dc, row + dr));
+          if (swum(t) && swum(u)) {
+            if (gap > STEP && k.chunkAt(col + dc, row + dr) !== ch) (counts.falls++, (counts.maxFall = Math.max(counts.maxFall, gap)));
+          } else if (gap > STEP) {
+            counts.over++;
+            overPairs.push(`${col},${row}>${col + dc},${row + dr}`);
+          }
+        }
+        const d = k.tileAt(col + 1, row + 1);
+        if (open(d) && planned(k.chunkAt(col + 1, row + 1)) && !(swum(t) && swum(d)) && Math.abs(level(col, row) - level(col + 1, row + 1)) > STEP) counts.diagonals++;
+      }
+  }
+}
 const sorted = [...netMs].sort((a, b) => a - b);
 let reliefMs: { median: number; p95: number } | undefined;
 if (TRUE_RELIEF) {
@@ -117,6 +146,7 @@ if (TRUE_RELIEF) {
 }
 const report = {
   rise: RISE,
+  ...(GRID !== undefined ? { grid: GRID } : {}),
   trueRelief: TRUE_RELIEF,
   archipelago: ARCHIPELAGO,
   ...counts,
@@ -126,5 +156,5 @@ const report = {
   seconds: Math.round((performance.now() - t0) / 100) / 10,
 };
 console.log(JSON.stringify(report, null, 2));
-if (out) writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
+if (out) writeFileSync(out, JSON.stringify({ ...report, overPairs }, null, 2) + '\n');
 process.exit(0);

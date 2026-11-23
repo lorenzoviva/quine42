@@ -6650,7 +6650,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: test verdi, nessun solido sui moli dei porti di prova.
 - Esito: impedita la creazione di lotti/capanni sui moli (toPalette non marca indoor ponti/moli, defaultCodes rifiuta terreni indoor per pier/bridge, findLots esclude i moli), protette le caselle dei moli da regole/timbri (StampCut.piers in stamps.ts/mj.ts) e da ogni entità solida inclusa la testa foglia (LayoutResult.piers in layout.ts e placementsOf in kernel.ts); test aggiunti in tests/porti.test.ts per caso T503, testa foglia, porti del seme e Pirati offline (18/18); typecheck verde, suite completa 305/306 (mj-pieces verificata 12/12 a parte; fallisce solo site-video.test.ts per ENOSPC preesistente); non provato con Gemini né nel browser (non richiesto dal task).
 
-### T506 · Integrare T504 nel base (conflitto con T476: AGENTS.md, dettagli, ADR-0257, kernel 0.10.33) — `da fare`
+### T506 · Integrare T504 nel base (conflitto con T476: AGENTS.md, dettagli, ADR-0257, kernel 0.10.33) — `fatto` (`886712a4`)
 - Pipeline: neon · sforzo high · stima 2% · approvato · priorità 1
 - Step: 45
 - Contesto: `integra T504` (la rete e i passi col rilievo vero, l'acqua che non versa oltre una cascata fra luoghi) si è fermato su conflitti in `AGENTS.md` e `docs/architettura-dettagli.md`: nel frattempo T476 (il taglio verso la camera) è entrato nel base con lo stesso ADR-0257 e lo stesso kernel 0.10.33, e T505 (i moli) senza salto di versione. Nasce da T504, T476, T505: `dossier T504`, `dossier T476`.
@@ -6658,3 +6658,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/acqua-rete-passo.test.ts`, `tests/porti.test.ts`, `tests/strata-council.test.ts` e i test del taglio verso la camera verdi.
 - Browser: no (T504 e T476 visti nel browser).
 - Quando è fatto: commit su `task/T506`; poi l'orchestratore integra T506, e `integra T504` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: integrato `task/T504` su `3d` nel branch `task/T506` (`886712a4`), risolti i conflitti con T476 in `AGENTS.md` e `docs/architettura-dettagli.md` mantenendo entrambe le aggiunte, T476 resta su ADR-0257 e kernel 0.10.33, T504 su ADR-0258 e kernel 0.10.34 (`version.ts`, `package.json`, `universe/universe.json`, ADR 0258, `docs/adr/README.md`, `docs/architettura-dettagli.md`, `lab/banco/rilievo/README.md`); `typecheck` verde, test mirati verdi (71/71), suite intera 307/308 (`tests/site-video.test.ts` fallito solo per ENOSPC su C:, passato 73/73 con temp su H:); browser non richiesto; sicurezza: nessuna superficie nuova.
