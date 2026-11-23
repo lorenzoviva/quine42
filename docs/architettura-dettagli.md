@@ -618,7 +618,9 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   ricordi pesati, legami col viandante e figli (effetti `legame ricordo nascita`), trame e missioni
   (`world/plots.json`, diario nell'HUD). Ogni trama passa dal validatore (`reviewPlot` in `npc/plots.ts`): individui che
   esistono, animali da animali, legami del registro, rune del canone, niente quarta parete; ciò che non torna va al
-  Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte.
+  Narratore con il motivo, all'avvio `reviewPlots` ripara o ritira le trame aperte. Una missione «porta» accettata dà l'oggetto
+  solo se è una consegna a un altro («porta questa lettera a Berta», `handsOver`); ciò che va riportato a chi la chiede si trova,
+  altrimenti parlargli la compirebbe subito (T501, `tests/missione-porta.test.ts`).
 - **Il lavoro** (ADR-0140, T245b; progetto in `docs/design/comportamento-npc.md`): un mestiere con un **programma** (`jobs` di un
   modulo `data`, `job.<trade>/manifest.json`: nomi, posto, i compiti di ogni fase) si abbina per nome, poi per parola
   (`matchJob` in `npc/jobs.ts`); il programma passa dal validatore per riferimento (`validateJobProgram`: comportamenti di un elenco chiuso,

@@ -84,6 +84,16 @@ export function activeQuests(plots: Plot[], wanderer?: string): Array<{ plot: Pl
     .map((p) => ({ plot: p, quest: p.quest! }));
 }
 
+/**
+ * Whether whoever gives a «bring» quest hands over what is to be brought (T501): only a delivery to someone else («take this to
+ * Berta»). What is to be brought back to the giver («bring me a piece of the old pier») is to be found: handed over, the quest would be
+ * done as soon as it is accepted, since talking to the one it goes to delivers it (`questsOnTalk`).
+ */
+export function handsOver(to: string | undefined, from: string): boolean {
+  const name = (s: string) => s.trim().replace(/\s+/g, ' ').toLowerCase();
+  return !!to?.trim() && name(to) !== name(from);
+}
+
 /** All the words of a plot, for the fourth-wall filter. */
 export function plotText(p: Pick<Plot, 'title' | 'mystery' | 'beats' | 'quest'>): string {
   return [p.title, p.mystery, ...p.beats.flatMap((b) => [b.what, b.line ?? '', b.clue ?? '']), p.quest?.text ?? ''].join('\n');
