@@ -17,8 +17,10 @@ import { defaultCodes, harbour, MAX_PIER, PIER_INTO_DEEP, pierTouches, SHALLOW_P
 import { crossingOf, physicsOf, terrainPhysics, terrainPhysicsErrors } from '../src/kernel/nature';
 import { carries, toWorld } from '../src/kernel/vehicle';
 import { Council } from '../src/kernel/agents/council';
-import { ARCHIPELAGO_ENVIRONMENTS, designLayouts, planChunk, SHORE_LINE } from '../src/kernel/agents/cartography';
-import { TIMELESS_LAYOUTS } from '../src/kernel/themes';
+import { ARCHIPELAGO_ENVIRONMENTS, designLayouts, planChunk, SHORE_LINE, type ChunkPlan } from '../src/kernel/agents/cartography';
+import { BASE_CODES, toPalette } from '../src/kernel/agents/genesis';
+import { STEP } from '../src/kernel/network';
+import { TIMELESS_LAYOUTS, WORLD_THEMES } from '../src/kernel/themes';
 import { internalName } from '../src/kernel/internalNames';
 import type { Action } from '../src/kernel/input';
 import type { FileMap, TerrainDef } from '../src/kernel/types';
@@ -364,5 +366,271 @@ describe('from the pier aboard (T443)', () => {
     for (let i = 0; i < 60; i++) k.tick(1 / 60);
     expect(k.aboard()).toBe(boat);
     expect(k.swimming()).toBe(false);
+  }, 60_000);
+});
+
+// --- T505: nothing solid on a 1-tile-wide pier (rule 10, ADR-0064, ADR-0230) ---------------------------------------------------------
+
+/**
+ * Checks that every pier tile of a chunk is free of solid entities and that its head (the tile farthest into the water) is reachable on foot
+ * from a non-pier walkable shore tile (4-connected walk through free, non-solid tiles, within `STEP` in levels when `levels` is provided).
+ */
+function assertPierWalkableOnFoot(k: Kernel, cx: number, cy: number, pierTiles: ReadonlySet<number>, label: string): void {
+  const S = k.config.chunkSize;
+  const ch = k.chunks.get(`${cx},${cy}`)!;
+  expect(pierTiles.size, `${label}: deve avere almeno un molo`).toBeGreaterThanOrEqual(2);
+
+  // No building lot overlaps any pier tile.
+  for (const lot of ch.lots) {
+    for (const c of [...lot.floor, ...lot.walls, ...lot.doors]) {
+      expect(pierTiles.has(c), `${label}: lotto sul molo alla casella ${c}`).toBe(false);
+    }
+  }
+
+  // No solid entity (building, furniture, obstacle) stands on any pier tile.
+  const solidTiles = new Set<number>();
+  for (const id of k.ecs.query('chunk', 'pos', 'body')) {
+    if (k.ecs.get(id, 'chunk').key !== ch.key) continue;
+    if (!k.ecs.get(id, 'body')?.solid) continue;
+    const p = k.ecs.get(id, 'pos');
+    const lx = Math.floor(p.x) - cx * S;
+    const ly = Math.floor(p.y) - cy * S;
+    if (lx >= 0 && ly >= 0 && lx < S && ly < S) {
+      const idx = ly * S + lx;
+      expect(pierTiles.has(idx), `${label}: entità solida (${k.ecs.get(id, 'module')?.id ?? k.ecs.get(id, 'form')?.model}) sul molo a (${lx},${ly})`).toBe(false);
+      solidTiles.add(idx);
+    }
+  }
+
+  // Every pier tile itself is walked and free of solid bodies.
+  for (const idx of pierTiles) {
+    const lx = idx % S, ly = Math.floor(idx / S);
+    const def = k.palette[ch.tiles[idx]];
+    expect(def?.solid, `${label}: casella molo (${lx},${ly}) non calpestabile`).toBe(false);
+    expect(k.free(cx * S + lx + 0.5, cy * S + ly + 0.5, 0.2), `${label}: casella molo (${lx},${ly}) bloccata`).toBe(true);
+  }
+
+  // BFS on foot (walkable, non-solid, step <= STEP) from all non-pier shore tiles adjacent to the pier.
+  const levels = ch.network?.levels;
+  const walkable = (i: number) => {
+    if (solidTiles.has(i)) return false;
+    const def = k.palette[ch.tiles[i]];
+    if (!def || def.solid) return false;
+    const lx = i % S, ly = Math.floor(i / S);
+    return k.free(cx * S + lx + 0.5, cy * S + ly + 0.5, 0.2);
+  };
+  const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const shoreStarts: number[] = [];
+  for (const p of pierTiles) {
+    const x = p % S, y = Math.floor(p / S);
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= S || ny >= S) continue;
+      const n = ny * S + nx;
+      if (!pierTiles.has(n) && walkable(n) && (!levels || Math.abs(levels[n] - levels[p]) <= STEP)) shoreStarts.push(n);
+    }
+  }
+  expect(shoreStarts.length, `${label}: il molo non tocca nessuna riva libera a piedi`).toBeGreaterThan(0);
+
+  const reached = new Set<number>(shoreStarts);
+  const queue = [...shoreStarts];
+  while (queue.length) {
+    const cur = queue.pop()!;
+    const x = cur % S, y = Math.floor(cur / S);
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= S || ny >= S) continue;
+      const n = ny * S + nx;
+      if (reached.has(n) || !walkable(n)) continue;
+      if (levels && Math.abs(levels[n] - levels[cur]) > STEP) continue;
+      reached.add(n);
+      queue.push(n);
+    }
+  }
+
+  // Every pier tile — including its head — is reached on foot from the shore.
+  for (const p of pierTiles) {
+    expect(reached.has(p), `${label}: casella molo (${p % S},${Math.floor(p / S)}) non raggiungibile a piedi dalla riva`).toBe(true);
+  }
+}
+
+describe('nothing solid on a 1-tile-wide pier (T505)', () => {
+  it('reproduces the T503 shed-on-pier case: outdoor floors are never indoor, legacy indoor bridges never become lots', () => {
+    // 1. toPalette never marks outdoor floor terrains (bridges, piers, jetties) as `indoor: true`, while indoor floors stay `indoor: true`.
+    const raw = [
+      ...Object.entries(BASE_CODES).map(([code, b]) => ({ code, name: code === 'f' ? 'pavimento di cotto' : b.meaning, description: b.meaning, color: '#888888', layer: b.layer, solid: b.solid, speed: 1 })),
+      { code: 'l', name: 'lastricato', description: 'pietre lisce', color: '#9c958c', layer: 'floor' as const, solid: false, speed: 1 },
+      { code: 'z', name: 'ponte levatoio', description: 'assi sul fossato', color: '#8b6a42', layer: 'floor' as const, solid: false, speed: 1 },
+      { code: 'i', name: 'molo', description: 'tavole su pali', color: '#9c7a4e', layer: 'floor' as const, solid: false, speed: 1 },
+    ];
+    const pal = toPalette(raw, true);
+    expect(pal.f.indoor).toBe(true);
+    expect(pal.l.indoor).toBe(true);
+    expect(pal.z.indoor).toBeUndefined();
+    expect(pal.i.indoor).toBeUndefined();
+
+    // 2. Legacy palette where `z` (ponte levatoio) erroneously carried `indoor: true` (exact T503 bug):
+    //    `defaultCodes` refuses `z` for pier/bridge, and `findLots` ignores wall-less/door-less floors.
+    const legacyPal: Record<string, TerrainDef> = {
+      ...palette,
+      z: { ...palette.z, indoor: true },
+    };
+    delete legacyPal.i;
+    const legacyCodes = defaultCodes(legacyPal, 'p');
+    expect(legacyCodes.bridge).toBe('p');
+    expect(legacyCodes.pier).toBe('p');
+
+    // Even if a program explicitly forces an `indoor: true` code (`z`) onto the harbour pier, `findLots` excludes `piers` and creates no lot.
+    const forcedPier = layout(coast(7, 2, 0, 3), legacyPal, { cx: -3, cy: 0, seed: 1337, pathCode: 'p', swim: true, program: { type: 'stamp', shape: 'harbour', codes: { pier: 'z' } } as MjNode });
+    expect(forcedPier.piers.size).toBeGreaterThanOrEqual(2);
+    expect(forcedPier.lots).toEqual([]);
+
+    // Running the harbour layout on the legacy palette produces pier cells in `result.piers` and ZERO lots on the pier.
+    const res = layout(coast(7, 2, 0, 3), legacyPal, { cx: -3, cy: 0, seed: 1337, pathCode: 'p', swim: true, program: layouts.harbour.program as MjNode });
+    expect(res.piers.size).toBeGreaterThanOrEqual(2);
+    for (const b of res.lots) {
+      for (const c of [...b.floor, ...b.walls, ...b.doors]) expect(res.piers.has(c)).toBe(false);
+    }
+
+    // A rule after the harbour stamp cannot overwrite pier tiles with walls or trees.
+    const hostile: MjNode = {
+      type: 'sequence',
+      children: [
+        { type: 'stamp', shape: 'harbour' },
+        { type: 'all', rules: [{ in: 'i', out: 'h' }] },
+      ],
+    };
+    const rHostile = layout(coast(7, 2, 0, 5), palette, { cx: 1, cy: 1, seed: 7, pathCode: 'p', swim: true, program: hostile });
+    expect(rHostile.piers.size).toBeGreaterThanOrEqual(2);
+    for (const c of rHostile.piers) expect(rHostile.grid[Math.floor(c / S)][c % S]).toBe('i');
+  });
+
+  it('never places a solid entity on the leaf head of a 1-tile-wide pier, even when it is the only non-articulation tile', async () => {
+    const ai = new MockAiModels();
+    ai.latency = 0;
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai });
+    const cx = 30, cy = 30;
+    const g = (await import('../src/kernel/layout')).gates(cx, cy, S, k.config.seed);
+    const westRow = Math.floor(g[0] / S);
+    const eastRow = Math.floor(g[1] / S);
+    const mid = 12;
+    // Everything is deep sea, except a 1-tile-wide road joining westGate to eastGate (both gates are `occupied`, all interior tiles are
+    // articulation points) and a 3-tile pier (`i`) sticking out from (5, westRow): the pier's head is the ONLY non-articulation walkable tile!
+    const dir = westRow + 3 < S - 1 ? 1 : -1;
+    const draftRows = Array.from({ length: S }, (_, r) =>
+      Array.from({ length: S }, (_, c) => {
+        if (r === westRow && c <= mid) return 'p';
+        if (c === mid && r >= Math.min(westRow, eastRow) && r <= Math.max(westRow, eastRow)) return 'p';
+        if (r === eastRow && c >= mid) return 'p';
+        if (c === 5 && [1, 2, 3].some((step) => r === westRow + dir * step)) return 'i';
+        return 'o';
+      }).join(''),
+    );
+    const res = layout(draftRows, palette, { cx, cy, seed: k.config.seed, pathCode: 'p', swim: true });
+    const head = (westRow + dir * 3) * S + 5;
+    expect(res.piers.has(head)).toBe(true);
+    const plan: ChunkPlan = {
+      place: { name: 'Molo Stretto', description: 'Un molo sottile nel mare.' },
+      layout: 'harbour',
+      vpt: 16,
+      swim: true,
+      objects: [{ module: 'obj.chest', where: 'outside' }, { module: 'object.sign', where: 'anywhere' }],
+      ground: ['Mela rossa'],
+      fresh: [],
+      runes: [],
+    };
+    const place = (k as any).placementsOf({ cx, cy, key: `${cx},${cy}` }, plan, res);
+    for (const o of place.objects) expect(o.cell, 'nessun solido sulla testa foglia del molo').toBeUndefined();
+    // Non-solid ground items may still be placed.
+    expect(place.ground[0].cell).toBeDefined();
+  });
+
+  it('on seed harbours: no solid obstacle sits on any pier tile (including its head) and the head is reachable on foot', async () => {
+    const ai = new MockAiModels();
+    ai.latency = 0;
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai });
+    for (let i = 0; i < 60 && k.chunks.get('0,0')?.stage !== 'planned'; i++) {
+      k.tick(1 / 60);
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    const kk = k as any;
+
+    // Stress-test across all 4 coast orientations and many solid objects (chests, counters, signs, wells) to try to hit even the leaf head of the pier.
+    const solidPlan = (cx: number): ChunkPlan => ({
+      place: { name: `Porto di prova ${cx}`, description: 'Un molo sul mare.' },
+      layout: 'harbour',
+      vpt: 16,
+      swim: true,
+      objects: [
+        { module: 'obj.chest', where: 'outside' },
+        { module: 'obj.counter', where: 'outside' },
+        { module: 'object.sign', where: 'outside' },
+        { module: 'object.well', where: 'outside' },
+        { module: 'obj.bed', where: 'anywhere' },
+        { module: 'obj.cupboard', where: 'outside' },
+        { module: 'object.bush', where: 'outside' },
+        { module: 'obj.chest', where: 'outside' },
+        { module: 'object.sign', where: 'anywhere' },
+        { module: 'object.well', where: 'anywhere' },
+      ],
+      ground: ['Mela rossa'],
+      fresh: [],
+      runes: [],
+    });
+
+    for (let idx = 0; idx < 8; idx++) {
+      const cx = 20 + idx, cy = 20;
+      const draftRows = coast(7, idx % 2 === 0 ? 2 : 3, idx % 4, idx + 1);
+      const key = `${cx},${cy}`;
+      const ch = { cx, cy, key, draft: draftRows.join(''), tiles: draftRows.join(''), lots: [], stage: 'draft' as const, version: 0 };
+      k.chunks.set(key, ch as any);
+      const plan = solidPlan(idx);
+      const { result } = kk.layoutOf(ch, plan, kk.pathCode());
+      expect(result.piers.size, `porto seme ${idx}`).toBeGreaterThanOrEqual(2);
+      kk.applyPlan(ch, plan);
+      assertPierWalkableOnFoot(k, cx, cy, result.piers, `porto seme ${idx}`);
+    }
+  }, 30_000);
+
+  it('on offline Pirates harbours (true relief + archipelago): no shed or solid on any pier, every pier head reachable on foot', async () => {
+    const ai = new MockAiModels();
+    ai.latency = 0;
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai });
+    const pirates = WORLD_THEMES.find((t) => t.id === 'pirates')!;
+    expect(await k.runGenesis(pirates.text)).toBe(true);
+    expect(k.config.nature.relief).toBe('true');
+    expect(k.config.nature.geography).toBe('archipelago');
+    // The drawbridge/pier code `z` generated by Genesis must not be `indoor`.
+    expect(k.palette.z?.indoor).toBeUndefined();
+
+    // Plan chunks across the archipelago to cover multiple offline harbours (including 0,2 and -3,-1 where T503's shed appeared).
+    k.carpet()!.active = false;
+    const coords: Array<[number, number]> = [[0, 0], [0, 2], [-3, 0], [-3, -1], [-2, 0], [2, 0]];
+    for (const [cx, cy] of coords) {
+      const p = k.wandererPos();
+      const { ox, oy } = k.offset();
+      p.x = cx * S + 9 - ox;
+      p.y = cy * S + 9 - oy;
+      for (let i = 0; i < 200 && k.chunks.get(`${cx},${cy}`)?.stage !== 'planned'; i++) {
+        k.tick(1 / 60);
+        await new Promise((r) => setTimeout(r, 5));
+      }
+    }
+    // Keep stepping briefly so neighbouring harbours in flight also finish planning.
+    for (let i = 0; i < 40; i++) {
+      k.tick(1 / 60);
+      await new Promise((r) => setTimeout(r, 5));
+    }
+
+    const kk = k as any;
+    let harboursWithPier = 0;
+    for (const ch of k.chunks.values()) {
+      if (ch.stage !== 'planned' || ch.plan?.layout !== 'harbour') continue;
+      const { result } = kk.layoutOf(ch, ch.plan, kk.pathCode(), true);
+      if (!result.piers.size) continue;
+      harboursWithPier++;
+      assertPierWalkableOnFoot(k, ch.cx, ch.cy, result.piers, `porto Pirati (${ch.key})`);
+    }
+    expect(harboursWithPier).toBeGreaterThanOrEqual(2);
   }, 60_000);
 });

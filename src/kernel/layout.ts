@@ -37,6 +37,8 @@ export interface LayoutResult {
   gates: number[];
   /** Cells reachable from the gates: where entities may be placed (walked: with `swim` the water that joins them is not among them). */
   reachable: Set<number>;
+  /** Cells of piers and drawbridges (T505, ADR-0064, ADR-0230): no solid obstacle or building lot may sit on them, so a pier's head stays reachable on foot. */
+  piers: Set<number>;
   carved: number;
   steps: number;
   /** The tile the connectivity starts from (T474): the first gate the lot of a block does not cover, or the land nearest the middle. */
@@ -173,12 +175,12 @@ function carvePath(cells: string[][], size: number, palette: Record<string, Terr
   return null;
 }
 
-export function findLots(grid: string[], size: number, palette: Record<string, TerrainDef>): Lot[] {
+export function findLots(grid: string[], size: number, palette: Record<string, TerrainDef>, exclude?: ReadonlySet<number>): Lot[] {
   const seen = new Set<number>();
   const out: Lot[] = [];
   for (let i = 0; i < size * size; i++) {
     const t = palette[grid[Math.floor(i / size)][i % size]];
-    if (seen.has(i) || !t?.indoor) continue;
+    if (seen.has(i) || exclude?.has(i) || !t?.indoor) continue;
     const floor: number[] = [];
     const walls = new Set<number>();
     const doors = new Set<number>();
@@ -196,7 +198,7 @@ export function findLots(grid: string[], size: number, palette: Record<string, T
         if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
         const n = ny * size + nx;
         const nt = palette[grid[ny][nx]];
-        if (nt?.indoor) {
+        if (nt?.indoor && !exclude?.has(n)) {
           if (!seen.has(n) && Math.abs(dx) + Math.abs(dy) === 1) {
             seen.add(n);
             queue.push(n);
@@ -237,13 +239,15 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   const gated = opts.stages ? cells.map((r) => r.join('')) : undefined;
 
   // The layout program shapes the interior; the border ring stays exactly as the draft.
+  const codes = defaultCodes(palette, opts.pathCode);
+  const piers = new Set<number>();
   let steps = 0;
   if (opts.program) {
     // The stamps keep off each other and off the buildings the rules drew (T407): one lot, one structure.
     const built = Object.entries(palette).filter(([, t]) => t.layer === 'wall' || t.layer === 'door' || t.indoor).map(([c]) => c).join('');
-    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>(), ground: stampGround(palette), ...(opts.levels ? { levels: opts.levels } : {}) };
+    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>(), piers, ground: stampGround(palette), ...(opts.levels ? { levels: opts.levels } : {}) };
     const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border, cut };
-    steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
+    steps = run(resolveStamps(opts.program, codes), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];
     // The void is the kernel's (T445): a program neither builds on it nor opens it in the land.
     for (let i = 0; i < size * size; i++) if (voided(i) !== isVoid(palette[cells[Math.floor(i / size)][i % size]])) cells[Math.floor(i / size)][i % size] = draft[Math.floor(i / size)][i % size];
@@ -291,9 +295,15 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   }
 
   const grid = rows();
+  const pierCodes = new Set([codes.pier, codes.bridge].filter((c) => c && c !== opts.pathCode));
+  if (pierCodes.size) {
+    for (let i = 0; i < size * size; i++) {
+      if (pierCodes.has(grid[Math.floor(i / size)][i % size])) piers.add(i);
+    }
+  }
   // Where entities may be placed is what is walked (T438): nothing is set on the water, even where it joins the place.
   const reachable = swim ? new Set([...reach].filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false)) : reach;
-  return { grid, lots: findLots(grid, size, palette), gates: gateTiles, reachable, carved, steps, start, mustReach, ...(stages ? { stages } : {}) };
+  return { grid, lots: findLots(grid, size, palette, piers), gates: gateTiles, reachable, piers, carved, steps, start, mustReach, ...(stages ? { stages } : {}) };
 }
 
 /** The walked cell nearest the middle of a place (T445: where a place of the void with no gate is joined from); 0 if none. */

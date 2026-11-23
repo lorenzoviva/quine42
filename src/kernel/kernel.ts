@@ -3222,11 +3222,13 @@ export class Kernel {
     const below = indoor.filter((i) => belowSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
     const freeTiles = new Set<number>([...reachable, ...enclave]);
+    const piers = result.piers;
     let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
       const kept = where === 'enclave' ? enclave.filter((i) => !occupied.has(i)) : [];
       let pool = (kept.length ? kept : where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
-      if (solid) pool = pool.filter((i) => !arts.has(i));
+      // Rule 10 (ADR-0064, ADR-0230, T505): no solid obstacle on articulation points nor on any tile of a pier (including its head, a leaf of `freeTiles`).
+      if (solid) pool = pool.filter((i) => !arts.has(i) && !piers.has(i));
       if (!pool.length) return undefined;
       const tile = pool[rng.int(pool.length)];
       occupied.add(tile);
