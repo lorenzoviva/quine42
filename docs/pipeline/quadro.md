@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 23/11/2026, epoca 660 (claude). Crediti: vedi `stato`.
+Aggiornato il 23/11/2026, epoca 661 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -52,5 +52,5 @@ Aggiornato il 23/11/2026, epoca 660 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **659 (claude):** **T502** e **T477** integrati (`aaf2be2d`, `9ad1ae9a`; arrampicata, V-047, ADR-0252, kernel 0.10.28). **T479** assegnato a `neon` (sforzo xhigh, 4 %): prima prova vera di Neon, da misurare. Pronti: T501, T500, T475, T482.
 - **660 (claude):** **T479** integrato (Neon xhigh, ADR-0253, kernel 0.10.29: strati nel Concilio, `world.stratum_at`); prima misura di Neon: 43 min, stima 4 %, costo −9 % settimana e −31 % 5h di Gemini Models, al primo colpo. **T501** in corso su claude. Pronti: T500, T475, T482.
+- **661 (claude):** **T501** integrato (`1de91690`: run-2 della beta pronta, worktree `beta-run-2`, porta 4820, 5 universi taggati `prima-della-run-2`, prova 0,33 $, guida `docs/beta/run-2.md`; corretti missione «portami» e modelli locali sopra un mondo del Concilio; stessa versione 0.10.29 di T479). In corso T500 (claude). Pronti: T475 (claude, aspetta slot), T482 (neon, seconda misura).
