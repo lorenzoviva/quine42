@@ -6649,3 +6649,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (bastano i test; il molo l'ha già visto T503).
 - Quando è fatto: test verdi, nessun solido sui moli dei porti di prova.
 - Esito: impedita la creazione di lotti/capanni sui moli (toPalette non marca indoor ponti/moli, defaultCodes rifiuta terreni indoor per pier/bridge, findLots esclude i moli), protette le caselle dei moli da regole/timbri (StampCut.piers in stamps.ts/mj.ts) e da ogni entità solida inclusa la testa foglia (LayoutResult.piers in layout.ts e placementsOf in kernel.ts); test aggiunti in tests/porti.test.ts per caso T503, testa foglia, porti del seme e Pirati offline (18/18); typecheck verde, suite completa 305/306 (mj-pieces verificata 12/12 a parte; fallisce solo site-video.test.ts per ENOSPC preesistente); non provato con Gemini né nel browser (non richiesto dal task).
+
+### T506 · Integrare T504 nel base (conflitto con T476: AGENTS.md, dettagli, ADR-0257, kernel 0.10.33) — `da fare`
+- Pipeline: neon · sforzo high · stima 2% · approvato · priorità 1
+- Step: 45
+- Contesto: `integra T504` (la rete e i passi col rilievo vero, l'acqua che non versa oltre una cascata fra luoghi) si è fermato su conflitti in `AGENTS.md` e `docs/architettura-dettagli.md`: nel frattempo T476 (il taglio verso la camera) è entrato nel base con lo stesso ADR-0257 e lo stesso kernel 0.10.33, e T505 (i moli) senza salto di versione. Nasce da T504, T476, T505: `dossier T504`, `dossier T476`.
+- Cosa fare: nel worktree prima `git merge 3d`, poi `git merge task/T504`; T476 tiene ADR-0257 e 0.10.33, T504 prende il primo ADR libero nel base e il kernel 0.10.34 (file dell'ADR rinominato, indice degli ADR, ogni rimando in AGENTS.md, dettagli, glossario, codice, test, `version.ts`, `package.json`, `universe/universe.json`); nei conflitti due aggiunte nello stesso punto restano entrambe; il censimento del glossario, se in conflitto, rigenerato con `node tools/glossario/glossario.mjs`, mai a mano; nessun rimando che dica ancora ADR-0257 o 0.10.33 per T504.
+- Test: suite intera e typecheck coi turni; `tests/acqua-rete-passo.test.ts`, `tests/porti.test.ts`, `tests/strata-council.test.ts` e i test del taglio verso la camera verdi.
+- Browser: no (T504 e T476 visti nel browser).
+- Quando è fatto: commit su `task/T506`; poi l'orchestratore integra T506, e `integra T504` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
