@@ -9,7 +9,8 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshapedWords, MAX_RESHAPED } from './reshape';
-import { askReshape, RESHAPE_TASK } from './agents/physicist';
+import { askAutomaton, askReshape, AUTOMATON_TASK, RESHAPE_TASK } from './agents/physicist';
+import { AutomataEngine, automatonWords, cloneAutomata, validateAutomaton, type AutomatonSpec, type FieldSample } from './automata';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
 import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
@@ -688,6 +689,22 @@ export class Kernel {
     record: (c, r) => this.waterAt(c, r),
     sea: () => this.seaLevel,
   });
+  /** The cellular automata of the world (T482, ADR-0254): parametric fields + MarkovJunior rules on the loaded window. */
+  readonly automata = (() => {
+    const k = this;
+    return new AutomataEngine({
+      get seed() {
+        return k.config.seed;
+      },
+      get chunkSize() {
+        return k.config.chunkSize;
+      },
+      loadedChunks: () => [...k.chunks.values()].map((c) => [c.cx, c.cy] as [number, number]),
+      tileAt: (c, r) => k.tileAt(c, r) ?? '',
+      groundAt: (c, r) => Math.max(k.seaLevel, k.relief.level(c, r) + k.digAt(c, r)) * 0.25,
+      seaLevel: () => k.seaLevel * 0.25,
+    });
+  })();
   private solidForms = new Map<string, Array<SolidForm>>();
   /** The solid entities whose model has a cellar (T52b): where the terrain has a hole. */
   private cellars: SolidForm[] = [];
@@ -1078,6 +1095,9 @@ export class Kernel {
       air_at: (x, y) => (typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y) ? this.airAt(x, y) : true),
       // The strata under the ground (T479, ADR-0253): read only, fresh copy per call.
       stratum_at: (x, y, depth) => this.stratumInfoAt(x, y, depth),
+      // Cellular automata fields (T482, ADR-0254, V-048): read a sample copy or add a bounded source/sink.
+      field: (id, x, y) => this.automatonField(id, x, y),
+      field_add: (id, x, y, amount, amountY) => this.fieldAdd(id, x, y, amount, amountY),
       islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
       vehicle: (id) => this.vehicleView(id),
@@ -1704,11 +1724,13 @@ export class Kernel {
     const radiusChanged = !this.config || this.config.circleRadius !== config.circleRadius;
     const sizeChanged = !this.config || this.config.chunkSize !== config.chunkSize || this.config.seed !== config.seed;
     this.config = config;
+    this.automata.configure(config.nature.automata ?? []);
     if (this.ai?.textModel !== undefined && config.ai.textModel) this.ai.textModel = config.ai.textModel;
     this.forms.load(files);
     if (radiusChanged) this.corona = new Corona(config.circleRadius);
 
     if (opts.reset) {
+      this.automata.reset();
       this.stores.load(files);
       this.npc.reset(files);
       this.sandbox.reset();
@@ -4008,6 +4030,7 @@ export class Kernel {
     // Under water the bed moves as it is dug; land never goes below the sea.
     const wet = !!rec || this.palette[ch.tiles[tile]]?.layer === 'liquid';
     this.water.dig(c, r, wet ? moved : Math.max(this.seaLevel, before + moved) - Math.max(this.seaLevel, before));
+    this.automata.refreshTile(c, r);
     this.groundVersion++;
     ch.version++;
     this.saveChunkSoon(ch);
@@ -4834,6 +4857,7 @@ export class Kernel {
     // The day it was written (T245b): what ripens counts from here.
     (ch.plan.days ??= {})[String(tile)] = this.day();
     this.npc.forgetWays();
+    this.automata.refreshTile(col, row);
     this.saveChunkSoon(ch);
     return true;
   }
@@ -9469,7 +9493,7 @@ export class Kernel {
       return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     }
     const req = r.request ?? text;
-    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
+    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' || r.task === 'automaton' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
     switch (r.task) {
       case 'item':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'item', true)).summary };
@@ -9504,6 +9528,12 @@ export class Kernel {
       case 'physics': {
         // The Physicist reshapes the physics with the world on (T452, ADR-0235): a terrain, or the gravity of the world.
         const made = await this.reshapePhysics(req, chi);
+        if (!made.ok) return { say: r.say, forged: `Il Fisico non lo fa: ${made.reason}` };
+        return { say: r.say, forged: made.text };
+      }
+      case 'automaton': {
+        // The Physicist adds, tunes or removes a cellular automaton within the fixed load budget (T482, ADR-0254).
+        const made = await this.defineAutomaton(req, chi);
         if (!made.ok) return { say: r.say, forged: `Il Fisico non lo fa: ${made.reason}` };
         return { say: r.say, forged: made.text };
       }
@@ -10126,7 +10156,7 @@ export class Kernel {
       return;
     }
     if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, nature: this.worldNature }, null, 2) + '\n');
-    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità la rimodella il Fisico: universe.json la tiene com'era");
+    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità e gli automi li rimodella il Fisico: universe.json la tiene com'era");
   }
 
   /**
@@ -10134,9 +10164,36 @@ export class Kernel {
    * code is: the planet's whose draft the generator makes, else the one of the band of the wanderer acting; never the list of the planets.
    */
   nature(): WorldNature {
-    if (!this.config.nature.planets) return { ...this.config.nature };
-    const k = this.draftBand ?? (this.ecs.alive.has(this.wandererEntity) ? this.bandAt(this.wandererCarpet().x) : 0);
-    return natureOfBand(this.config.nature, k);
+    const base = !this.config.nature.planets
+      ? { ...this.config.nature }
+      : natureOfBand(this.config.nature, this.draftBand ?? (this.ecs.alive.has(this.wandererEntity) ? this.bandAt(this.wandererCarpet().x) : 0));
+    return base.automata ? { ...base, automata: cloneAutomata(base.automata) } : base;
+  }
+
+  /** Active cellular automata declared in `universe.json → nature.automata` (T482, copy). */
+  automataSpecs(): AutomatonSpec[] {
+    return cloneAutomata(this.config.nature.automata ?? []);
+  }
+
+  /** Reads a sample from a cellular automaton field at world coordinates `(x, y)` (T482): fresh copy, or undefined. */
+  automatonField(id: unknown, x: unknown, y: unknown): FieldSample | undefined {
+    if (typeof id !== 'string' || typeof x !== 'number' || typeof y !== 'number' || !this.automata.active) return undefined;
+    this.automata.syncWindow();
+    return this.automata.sample(id, x, y);
+  }
+
+  /**
+   * Adds a bounded source or sink to a cellular automaton field at `(x, y)` (T482, V-048).
+   * Ignored on mirror clients, for non-finite values, outside loaded places, or once per-tick caps are reached.
+   */
+  fieldAdd(id: unknown, x: unknown, y: unknown, amount: unknown, amountY?: unknown): boolean {
+    if (this.mirror || !this.automata.active) return false;
+    if (typeof id !== 'string' || typeof x !== 'number' || typeof y !== 'number' || typeof amount !== 'number') return false;
+    // Wasmoon passes Lua `nil` (omitted optional 5th argument) as JS `null`, not `undefined`.
+    const ay = amountY == null ? undefined : amountY;
+    if (ay !== undefined && typeof ay !== 'number') return false;
+    this.automata.syncWindow();
+    return this.automata.add(id, x, y, amount, ay);
   }
 
   /**
@@ -11351,6 +11408,83 @@ export class Kernel {
     const c = this.repo.commit(`il Fisico rimodella: ${said}`, 'agent');
     this.council.say('physicist', 'propone', `${said}${note ? ` — ${note}` : ''} (commit ${c.id})`, undefined, RESHAPE_TASK);
     return { ok: true, text: `Il Fisico rimodella il mondo: ${said}.` };
+  }
+
+  /**
+   * The Physicist declares, tunes or removes a cellular automaton in `universe.json → nature.automata` (T482, ADR-0254).
+   * Validated strictly without clamping (`validateAutomaton`); refused answers go back once with reasons.
+   * Written by the kernel's hand (`writeCommanded`) in one commit of the Council; only the master in multiplayer.
+   */
+  async defineAutomaton(request: string, chi: string = this.payerNow()): Promise<{ ok: true; text: string } | { ok: false; reason: string }> {
+    const lacking = (outcome: 'refusal' | 'invalid' | 'error', reason: string) => {
+      this.noteShortfall({ request, who: chi, agent: 'physicist', task: AUTOMATON_TASK, outcome, reason });
+      return { ok: false as const, reason };
+    };
+    if (this.readOnly() !== undefined) return { ok: false, reason: 'questo universo si legge soltanto' };
+    if (this.manyPlayers() && !this.isMaster()) return { ok: false, reason: 'solo il master cambia gli automi del mondo' };
+    const current = this.config.nature.automata ?? [];
+    let sentBack: string | undefined;
+    const refused: string[] = [];
+    for (let round = 0; round < 2; round++) {
+      let a;
+      try {
+        a = await askAutomaton(this.council, request, current, this.palette, { chi, sentBack });
+      } catch (e) {
+        return lacking('error', `il Fisico non risponde: ${(e as Error).message}`);
+      }
+      if (a.refusal && a.action === 'set' && !a.raw?.family) return lacking('refusal', [...refused, a.refusal].join('; '));
+      if (a.refusal && a.action === 'remove' && !a.id) return lacking('refusal', [...refused, a.refusal].join('; '));
+      if (a.action === 'remove') {
+        const hit = current.find((x) => x.id === a.id);
+        if (!hit) {
+          const why = a.id ? `automa «${a.id}» non esiste` : 'manca l’id dell’automa da togliere';
+          sentBack = why;
+          if (!refused.includes(why)) refused.push(why);
+          this.council.say('kernel', 'scarta', sentBack, 'physicist', AUTOMATON_TASK);
+          continue;
+        }
+        const remaining = current.filter((x) => x.id !== a.id).map((s) => (s.family === 'diffuse' && s.advect === a.id ? { ...s, advect: undefined } : s));
+        for (const s of remaining) if (s.family === 'diffuse' && s.advect === undefined) delete s.advect;
+        return this.applyAutomata(remaining, `rimosso ${a.id}`, a.note);
+      }
+      const checked = validateAutomaton(a.raw, { existing: current, palette: this.palette });
+      if (checked.ok) {
+        const replaced = current.some((x) => x.id === checked.spec.id);
+        const next = replaced ? current.map((x) => (x.id === checked.spec.id ? checked.spec : x)) : [...current, checked.spec];
+        return this.applyAutomata(next, `${replaced ? 'aggiornato' : 'aggiunto'} ${automatonWords(checked.spec)}`, a.note);
+      }
+      sentBack = checked.reasons.join('; ');
+      for (const why of checked.reasons) if (!refused.includes(why)) refused.push(why);
+      this.council.say('kernel', 'scarta', sentBack, 'physicist', AUTOMATON_TASK);
+    }
+    return lacking('invalid', refused.join('; ') || 'niente cambia');
+  }
+
+  private applyAutomata(nextList: AutomatonSpec[], summary: string, note?: string): { ok: true; text: string } | { ok: false; reason: string } {
+    const beforeFile = this.repo.working['universe.json'] ?? null;
+    const beforeNature = this.worldNature;
+    let raw: Record<string, unknown>;
+    try {
+      raw = internalFields('config', JSON.parse(beforeFile ?? '{}'));
+    } catch {
+      raw = {};
+    }
+    const nextNature: WorldNature = { ...this.config.nature };
+    if (nextList.length) nextNature.automata = cloneAutomata(nextList);
+    else delete nextNature.automata;
+    this.worldNature = nextNature;
+    this.writeCommanded('universe.json', JSON.stringify({ ...raw, nature: nextNature }, null, 2) + '\n');
+    this.applyFiles({ ...this.repo.working });
+    if (this.faults.list().some((f) => f.key === 'universe:config')) {
+      this.repo.write('universe.json', beforeFile);
+      this.commanded.delete('universe.json');
+      this.worldNature = beforeNature;
+      this.applyFiles({ ...this.repo.working });
+      return { ok: false, reason: 'il mondo si romperebbe' };
+    }
+    const c = this.repo.commit(`il Fisico definisce l'automa: ${summary}`, 'agent');
+    this.council.say('physicist', 'propone', `${summary}${note ? ` — ${note}` : ''} (commit ${c.id})`, undefined, AUTOMATON_TASK);
+    return { ok: true, text: `Il Fisico aggiorna gli automi: ${summary}.` };
   }
 
   /**
@@ -12997,6 +13131,8 @@ export class Kernel {
     }
     this.updateChunks();
     this.waterTick();
+    // Cellular automata (T482): deterministic step on the loaded window; stopped when `pace` is `hold`.
+    this.automata.tick(this.paceHeld());
     this.pumpDevelopment();
     if (this.time - this.lastSculptPump > 2) {
       this.lastSculptPump = this.time;
@@ -13010,6 +13146,7 @@ export class Kernel {
     this.rebuildSolids();
     for (const w of this.wanderersById.keys()) this.as(w, () => (this.wandererComp().load = totalWeight(this.inventory(), this.itemSpec) / this.carryCapacity()));
     this.syncRunes();
+    this.automata.beginTick();
     this.sandbox.tickBegin();
     this.runRunes();
     // Each system measured (T27a): how long it takes, how many entities it touches.

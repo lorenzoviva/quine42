@@ -60,6 +60,16 @@ export interface Host {
    */
   stratum_at(x: number, y: number, depth?: number): unknown;
   /**
+   * Reads a sample from a cellular automaton field at world tile `(x, y)` (T482): a number for scalar/discrete fields, or a fresh copy of a
+   * vector (`{depth, surface, vx, vy}` for `flow`, `{vx, vy}` for `wind`); undefined if the field does not exist or `(x, y)` is outside.
+   */
+  field(id: string, x: number, y: number): unknown;
+  /**
+   * Places a bounded source or sink in a cellular automaton field at `(x, y)` (T482, V-048): clamped per call and per tick, NaN/invalid
+   * ignored, false if refused or on a mirror client.
+   */
+  field_add(id: string, x: number, y: number, amount: number, amountY?: number): boolean;
+  /**
    * The islands of an archipelago within r tiles of (x, y) (T441), or the stations and asteroids of the void (T445, `body`): `{id, name, x, y,
    * radius, islet, body}` each, the nearest first, at most `MAX_ISLANDS_SEEN`; empty in a world that is neither. Read only: they are the kernel's.
    */
@@ -424,6 +434,8 @@ function emptyHost(): Host {
     region_at: () => undefined,
     air_at: () => true,
     stratum_at: () => undefined,
+    field: () => undefined,
+    field_add: () => false,
     islands: () => [],
     vehicle: () => undefined,
     vehicle_set: () => false,

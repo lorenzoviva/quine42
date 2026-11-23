@@ -830,6 +830,16 @@ local function make_api()
       if depth ~= nil and type(depth) ~= "number" then return nil end
       return host.stratum_at(x, y, depth or 0)
     end,
+    -- Cellular automata fields (T482, V-048): read a sample (copy) or add a bounded source/sink; never step a field in Lua.
+    field = function(id, x, y)
+      if type(id) ~= "string" or type(x) ~= "number" or type(y) ~= "number" then return nil end
+      return host.field(id, x, y)
+    end,
+    field_add = function(id, x, y, amount, amount_y)
+      if type(id) ~= "string" or type(x) ~= "number" or type(y) ~= "number" or type(amount) ~= "number" then return false end
+      if amount_y ~= nil and type(amount_y) ~= "number" then return false end
+      return host.field_add(id, x, y, amount, amount_y)
+    end,
     islands = function(x, y, r)
       if type(x) ~= "number" or type(y) ~= "number" then return {} end
       return host.islands(x, y, type(r) == "number" and r or 200)

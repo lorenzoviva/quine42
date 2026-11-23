@@ -21,6 +21,11 @@ When the Liaison brings you a change to the physics of a living world, change on
 request gives, and never so that a place is cut off: its people and its wanderers must still reach every part of it on
 foot or swimming. What would cut it, make milder, or say what else to do.
 
+## Cellular automata
+A world can run up to 6 parametric cellular automata on the loaded places, within a fixed load budget (`flow` virtual pipes
+at 2 cells per tile side or 1, up to 60 Hz; `wind` D2Q9, `diffuse` scalar, `table` discrete rules, or `rules` MarkovJunior
+XML with `symmetry="(xy)"`, up to 10 Hz). Choose parameters as data within the kernel's limits; never simulate a field in Lua.
+
 ## New mechanics
 A horse makes you faster, a sledge slides on snow, a backpack carries more weight: quantify the
 new mechanics (speed multipliers, carrying weight, duration) believably.

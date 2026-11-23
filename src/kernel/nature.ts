@@ -7,6 +7,7 @@
 // not asked»); each task that makes one true opens it here.
 
 import { cleanText } from './cleantext';
+import { repairAutomata, type AutomatonSpec } from './automata';
 import type { TerrainDef } from './types';
 
 // --- The terrain: how a body crosses a tile ------------------------------------------------------------------------------------------
@@ -197,6 +198,11 @@ export interface WorldNature {
    * stations and asteroids the band 0, the orbit. Only a world of the void has them; none, the world of today.
    */
   planets?: Planet[];
+  /**
+   * Cellular automata declared for this world (T482, ADR-0254): physical (`flow`, `wind`, `diffuse`) and discrete (`table`, `rules`) fields
+   * on the loaded window, written by the Physicist within the fixed load budget. Omitted when empty: worlds of before stay untouched.
+   */
+  automata?: AutomatonSpec[];
   geography: Geography;
   sky: Sky;
   /**
@@ -240,8 +246,10 @@ export function repairNature(raw: unknown): WorldNature {
   const geography = one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography);
   // The planets only around the void (T449): the orbit is the band 0, and a world of today has no far bands.
   const planets = geography === 'void' ? repairPlanets(r.planets) : [];
+  const automata = repairAutomata(r.automata);
   return {
     ...(planets.length ? { planets } : {}),
+    ...(automata.length ? { automata } : {}),
     geography,
     sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
     day: r.day === STILL_DAY ? STILL_DAY : num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
@@ -306,7 +314,9 @@ export const stillLight = (nature: Pick<WorldNature, 'day'> | undefined): boolea
 
 /** Whether two natures are the same world. */
 export const sameNature = (a: WorldNature, b: WorldNature): boolean =>
-  (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]) && JSON.stringify(a.planets ?? []) === JSON.stringify(b.planets ?? []);
+  (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]) &&
+  JSON.stringify(a.planets ?? []) === JSON.stringify(b.planets ?? []) &&
+  JSON.stringify(a.automata ?? []) === JSON.stringify(b.automata ?? []);
 
 // --- The gravity: how a body leaps and walks (T447, ADR-0226) ------------------------------------------------------------------------
 

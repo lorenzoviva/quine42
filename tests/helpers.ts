@@ -37,6 +37,8 @@ export function fakeHost() {
     region_at: () => undefined,
     air_at: () => true,
     stratum_at: () => undefined,
+    field: () => undefined,
+    field_add: () => false,
     islands: () => [],
     time: () => 1.5,
     log: (m) => logs.push(m),

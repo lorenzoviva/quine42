@@ -40,6 +40,7 @@
 | [Il rilievo](#rilievo) | `src/kernel/relief.ts` |
 | [La rete e le enclavi (la regola 10 dei gradini)](#rete) | `src/kernel/network.ts`, `src/kernel/kernel.ts`, `src/kernel/npc/places.ts` |
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
+| [Gli automi cellulari](#automi) | `src/kernel/automata.ts`, `src/kernel/agents/physicist.ts`, `src/kernel/nature.ts` |
 | [Lotti e strutture, scale e piani](#lotti) | `src/kernel/layout.ts`, `src/kernel/forms.ts` |
 | [Le taglie](#taglie) | `src/mj/classes.ts` |
 | [Il grafo del mondo](#grafo) | `src/kernel/graph.ts`, `world/graph.json` |
@@ -1847,6 +1848,32 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   (`rollOf`), e lascia la **scia** (`Sea`, in `Entities`): un punto ogni `WAKE.every` caselle oltre `WAKE.slow`, dal moto che si vede
   fotogramma per fotogramma (vale anche nello specchio), con due bracci che si allargano e il ribollire nel mezzo, in una mesh con i buffer
   fatti una volta. Chi nuota galleggia sull'onda; la camera no (`Wanderer.sunk` la toglie). Nessun numero è del kernel: non sale `Z`.
+
+<a id="automi"></a>
+## Gli automi cellulari
+
+- **La primitiva degli automi** (ADR-0254, T482, riga 9 di T459, D67 D3, kernel 0.10.30): `src/kernel/automata.ts` (`AutomataEngine`,
+  `kernel.automata`). Campi parametrici e deterministici sulla finestra dei luoghi caricati (raggruppati per cluster vicini da
+  `clusterChunks`, al più `MAX_WINDOWS_PER_AUTOMATON` 4 finestre e `MAX_CELLS_PER_AUTOMATON` 48 000 celle per finestra, con conservazione
+  dello stato nelle sovrapposizioni allo scorrere della finestra). Cinque famiglie: `flow` (tubi virtuali a **2 celle per lato di casella**,
+  `cell: 0.5` predefinito per D3, o `1`, fino a 60 Hz, percorso veloce senza muri: 1,244 ms/tick misurati su 216 × 180 celle, volume
+  conservato entro 1e−6 nei bacini chiusi), `wind` (D2Q9 BGK, `cell: 3|2|1`, fino a 10 Hz, 0,116 ms/passo a `cell: 3`), `diffuse` (diffusione,
+  decadimento e advezione upwind separata lungo un automa `wind` o `flow`, fino a 10 Hz), `table` (2–16 stati su vicinato di Moore in
+  tabelle piatte `Uint8Array` + `Float32Array`, caso da `hash32(seed, worldCellX, worldCellY, step)`), `rules` (programma MarkovJunior XML su
+  uno `Stepper` con `Stepper.setCell`, `symmetry="(xy)"` obbligatoria sulla radice, soli nodi `sequence|markov|convolution|prl|all|one`,
+  nessun `<import>`, `WORLD_NODE_LIMITS`, 1–4 passi per passo dell'automa).
+- **Carico statico e ritmo**: al più `MAX_AUTOMATA` (6) automi in `universe.json → nature.automata` (omesso quando vuoto: inerte sugli
+  universi esistenti, `water.ts` invariato); carico statico `Σ refCells × hz × steps × NS_PER_CELL / (1e6 × 60) ≤ LOAD_BUDGET_MS` (2,0 ms/tick
+  a 60 Hz, rimisurato su D3, mai un tetto a tempo). Avanzamento intero esatto su `TICK_HZ = 60`; il ritmo del mondo (`pace: hold`, ADR-0196)
+  li ferma tutti (`automata.tick(this.paceHeld())`).
+- **Il Fisico (`physics.automaton`)**: su richiesta del Referente (incarico `automaton`, manopola `studio` in `CENSUS`), `askAutomaton`
+  (`src/kernel/agents/physicist.ts`) aggiunge, regola o rimuove un automa; `Kernel.defineAutomaton` valida senza tagliare (`validateAutomaton`),
+  rimanda una volta coi motivi, scrive `universe.json → nature.automata` per mano del kernel (`writeCommanded`, lasciato passare da `keptNature`)
+  in un commit del Concilio; in molti solo sul ramo del master.
+- **Lua e sicurezza (V-048)**: `world.field(id, x, y)` legge una copia fresca (`{depth, surface, vx, vy}` per `flow`, `{vx, vy}` per `wind`,
+  un numero per gli altri); `world.field_add(id, x, y, amount, amount_y?)` mette sorgenti/pozzi su eventi entro `FIELD_ADD_LIMITS` (tetto per
+  chiamata, `maxCallsPerTick` 64 e tetto cumulativo per tick per automa), ignora `NaN`/`Infinity` e coordinate fuori finestra e rifiuta sugli
+  specchi (`mirror`). `tests/automi.test.ts`, `tests/sicurezza/automi.test.ts`.
 
 <a id="lotti"></a>
 ## Lotti e strutture, scale e piani

@@ -224,6 +224,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «difficoltà», «pendenza», «zona» (lo studio di T459 diceva «le zone»)
 - **Fermo**: `roughness` e i valori `flat`, `hilly`, `mountainous`, `rugged` nell'atlante e nei piani.
 
+### Automa
+- **Inglese**: `automaton`, `AutomatonSpec`, `AutomatonFamily`, `AutomataEngine`, `AUTOMATON_FAMILIES`, `LOAD_BUDGET_MS`, `MAX_AUTOMATA`, `AUTOMATON_TASK` (`physics.automaton`)
+- **Definizione**: un automa cellulare del kernel dichiarato in `universe.json → nature.automata`, di una delle cinque famiglie (`flow` a due celle per lato di casella sotto D3, `wind` D2Q9, `diffuse`, `table`, `rules` in MarkovJunior su `Stepper`), con parametri come dati entro un carico statico fisso (`LOAD_BUDGET_MS` 2,0 ms/tick), deterministico dal seme del mondo e fermato da `pace: hold`. Lo dichiara il Fisico (`physics.automaton`), mai il Lua (T482, ADR-0254).
+- **Dove vive**: `src/kernel/automata.ts`, `src/kernel/nature.ts`, `src/kernel/agents/physicist.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: «simulatore», «shader fisico», «sistema cellulare»
+- **Fermo**: `nature.automata`, le famiglie `flow`, `wind`, `diffuse`, `table`, `rules`, il compito `physics.automaton` e l'incarico `automaton` del Referente.
+
+### Campo
+- **Inglese**: `field`, `FieldSample`, `FlowSample`, `WindSample`, `FlowField`, `WindField`, `DiffuseField`, `TableField`, `RulesField`, `FIELD_ADD_LIMITS`, `world.field`, `world.field_add`
+- **Definizione**: lo stato vivo sulla finestra dei luoghi caricati di un automa del kernel (una o più finestre per gruppi di luoghi vicini, `clusterChunks`), campionato da Lua con `world.field(id, x, y)` (copia fresca: vettore per `flow`/`wind`, numero per scalari e discreti) e alimentato a eventi con `world.field_add(id, x, y, amount)` entro i tetti per chiamata e per tick (V-048). Diverso dal **campo di potenziale** di MarkovJunior (`<field>` in `src/mj/infer.ts`) e dal campo dei livelli del rilievo (`fieldAt`) (T482, ADR-0254).
+- **Dove vive**: `src/kernel/automata.ts`, `src/kernel/kernel.ts`, `src/kernel/prelude.lua`, `src/kernel/sandbox.ts`
+- **Da non usare**: «griglia» (è del motore MarkovJunior), «mappa fisica»
+- **Fermo**: l'API Lua `world.field` e `world.field_add`.
+
 ### Rialzo sintetico
 - **Inglese**: `syntheticRise`, `Rise`, `riseOn`
 - **Definizione**: i livelli che un test o la console aggiungono alla terra dei luoghi caricati (mai all'acqua né ai lotti) per vedere la regola 10 dei gradini al lavoro su dirupi che il rilievo di oggi non ha; mai salvato, mai da Lua, mai sul filo (T474, ADR-0250).
