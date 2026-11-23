@@ -54,4 +54,4 @@ Aggiornato il 23/11/2026, epoca 671 (claude). Crediti: vedi `stato`.
 ## Ultime 2 epoche
 
 - **670 (claude):** **T506** integrato (neon, merge di T504 con T476: T504 su ADR-0258, kernel 0.10.34); T504 chiuso. Lanciato T480 su neon.
-- **671 (claude):** **T480** integrato (`703c3925`, neon high, 3ª prova di Neon al primo colpo: il fondale R4, ADR-0259, kernel 0.10.35) **senza browser**, perché Claude è finito fino al 26/11 → **T507** verifica su claude. Niente altro lanciabile: T483 è da claude.
+- **671 (claude):** **T480** integrato (`703c3925`, neon high, 5º task di Neon al primo colpo dopo T479, T482, T505, T506: il fondale R4, ADR-0259, kernel 0.10.35) **senza browser**, perché Claude è finito fino al 26/11 → **T507** verifica su claude. Niente altro lanciabile: T483 è da claude.
