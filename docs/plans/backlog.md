@@ -6387,7 +6387,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 8; il passo del server; «sicurezza:» nell'esito. Browser: sì.
 
 ### T482 · A0 · La primitiva degli automi (riga 9 di T459) — `da fare`
-- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 4
+- Pipeline: neon · sforzo xhigh · stima 12% · approvato · priorità 4
 - Step: 45
 - Dipende da: T459
 - Contesto: § 5.5-5.6; **D3**: le famiglie fisiche (`flow`) a due celle per lato di casella, il tetto di celle per automa e il carico fisso rifatti su questa risoluzione (1,21 ms a tick per l'acqua, il bilancio di 1,5 ms va rimisurato e detto nell'ADR); il resto come lo studio.
