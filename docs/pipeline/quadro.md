@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 23/11/2026, epoca 664 (claude). Crediti: vedi `stato`.
+Aggiornato il 23/11/2026, epoca 666 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -53,5 +53,5 @@ Aggiornato il 23/11/2026, epoca 664 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **663 (claude):** **T482** integrato (`90fd76cd`, ADR-0254, V-048, kernel 0.10.30: primitiva degli automi `flow`/`wind`/`diffuse`/`table`/`rules`, `physics.automaton`, `world.field`; solo offline, rendering in A1/A2). Seconda misura di Neon: 54 min, −6 % sett., stima 12 %, al primo colpo. T475 (stima 6 %) aspetta: Claude settimana 7 %, soglia 2 %.
-- **664 (claude):** **T484** integrato (`956112fe`, ADR-0255, V-049, kernel 0.10.31: il vento a una cella per casella, vela `vehicle.sail`, `world.wind`, erba e fumo piegati; visto nel browser offline, non frame né molti). **T475** riassegnato a `neon` (xhigh, 12 %) perché Claude ha 5 % di settimana e la stima era 6 %: terza misura di Neon; la verifica nel browser la delega l’orchestratore a un subagente claude.
+- **665 (claude):** **T475** integrato (`85c31b64`, ADR-0256, kernel 0.10.32: rilievo vero, Neon al primo colpo, terza misura) → verifica **T503** lanciata.
+- **666 (claude):** **T503** integrato (visto nel browser Far West, Pirati, seme; `lab/banco/rilievo/`). Due difetti → **T504** (livello dell’acqua uguale fra rete e passo, claude extra 3 %, p2, prima di T480/T483) e **T505** (niente solidi sul molo, neon high 2 %, p3). In corso T476. Claude settimana 5 % (esaurimento ~12:00Z, reset 26/11 16:00Z).

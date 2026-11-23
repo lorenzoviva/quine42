@@ -6629,3 +6629,21 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì.
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T503`.
 - Esito: verifica nel browser di T475 su due universi offline (Far West e Pirati) e sul seme; screenshot e resoconto in lab/banco/rilievo/ (commit 7079d518). Funzionano relief 'true', terrazze, k camminabile, dirupi che fermano, rampa che si sale a gradini di 2, molo dei Pirati camminabile, seme collinare invariato, console senza errori del gioco. Difetto 1 (task proposto): networkOf livella l'acqua del luogo da solo, groundAt con i vicini; col rilievo vero un lago scende al livello dei vicini (6 luoghi su 11 in Far West; in (4,1) la rampa dal lago parte 8 livelli sopra l'acqua e non si sale, in (5,1) un lago da 53 a 0 in un pozzo di 14 caselle); serve lo stesso livello dell'acqua nelle due misure e un test che le confronti. Difetto 2 (minore, task proposto): un capanno solido a metà del molo largo una casella nel porto dei Pirati, testa del molo solo a nuoto. Non provati: Spazio e pianeti, multigiocatore, un lotto su una terrazza, le palafitte, Gemini. typecheck verde; npm test 305/306, fallisce solo site-video.test.ts per ENOSPC come in T475; nessun codice cambiato.
+
+### T504 · Il livello dell'acqua uguale fra la rete e il passo col rilievo vero — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · browser · priorità 2
+- Step: 45
+- Contesto: nasce da T503 (`dossier T503`, resoconto in `lab/banco/rilievo/`) sul rilievo vero di T475 (`dossier T475`, ADR-0256). `networkOf` livella l'acqua del luogo da solo, `groundAt` (il passo, la collisione) con i vicini: col rilievo vero un lago scende al livello dei vicini. In Far West 6 luoghi su 11; in (4,1) la rampa dal lago parte 8 livelli sopra l'acqua e non si sale, in (5,1) un lago da 53 a 0 in un pozzo di 14 caselle. Viola la regola 10 (ciò che sembra percorribile lo è).
+- Cosa fare: un solo livello dell'acqua per casella, lo stesso nella rete (`placeNetwork`, `networkOf`, `placeLevels`) e nel passo (`groundAt`, `bodyFree`, il passo del server); il lago non si svuota in un pozzo; col rilievo collinare niente cambia (impronta di `lab/scripts/impronta-terreno.ts` invariata sul seme).
+- Test: uno che, su luoghi col rilievo vero (Far West offline, i luoghi di T503), confronta i livelli della rete e del passo casella per casella e ritrova le rampe salibili; `rete-gradini.ts --vero` senza coppie aperte oltre il gradino nuove.
+- Browser: sì, riprovare (4,1) e (5,1) di Far West come in T503.
+- Quando è fatto: le due misure coincidono, test verdi, screenshot dei due luoghi.
+
+### T505 · Niente cose solide sul molo largo una casella — `da fare`
+- Pipeline: neon · sforzo high · stima 2% · approvato · priorità 3
+- Step: 45
+- Contesto: nasce da T503 (`dossier T503`): nel porto dei Pirati un capanno solido sta a metà del molo largo una casella; la testa del molo si raggiunge solo a nuoto. Regola 10 (niente solidi su punti di articolazione, ADR-0064; il molo di ADR-0230).
+- Cosa fare: il layout non posa cose solide sul molo (o su un suo punto di articolazione); la testa del molo resta raggiungibile a piedi dalla riva.
+- Test: sui porti del seme e dei Pirati offline la testa di ogni molo è raggiungibile a piedi; il caso del capanno di T503 riprodotto.
+- Browser: no (bastano i test; il molo l'ha già visto T503).
+- Quando è fatto: test verdi, nessun solido sui moli dei porti di prova.
