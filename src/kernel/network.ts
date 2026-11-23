@@ -250,7 +250,7 @@ export function placeNetwork(g: PlaceGround, start: number, targets: readonly nu
    * tile of a path, alone) is no anchor: the first stretch is evened from its far end back to it, as near as each tile was; a tile of a part
    * is kept, so that the part comes with it. The network is flooded again.
    */
-  const ramp = (source: number, loose = false): boolean => {
+  const findRamp = (source: number, loose: boolean, avoidDryFixed: boolean, allowRegrade = false): boolean => {
     const seen = new Uint8Array(N);
     const prev = new Int32Array(N).fill(-1);
     // The level of the last anchor on the way to each tile (none yet: free), and the steps since it.
@@ -269,22 +269,34 @@ export function placeNetwork(g: PlaceGround, start: number, targets: readonly nu
         const n = nb[k];
         if (!open(n) || seen[n] || blocked[n]) continue;
         if (reach[n]) {
-          if (!within(x, n)) continue;
-          const path = [n];
-          for (let c = x; c >= 0; c = prev[c]) path.push(c);
-          path.reverse();
-          // Its stretches between anchors: the end, every fixed tile on the way, the source if it is fixed.
-          let from = 0;
-          for (let i = 1; i < path.length; i++) {
-            if (i < path.length - 1 && !g.fixed(path[i])) continue;
-            evenRamp(lv, path.slice(from, i + 1), from === 0 && free[source] === 1);
-            from = i;
+          if (within(x, n)) {
+            const path = [n];
+            for (let c = x; c >= 0; c = prev[c]) path.push(c);
+            path.reverse();
+            const snap = allowRegrade ? Int16Array.from(lv) : undefined;
+            // Its stretches between anchors: the end, every fixed tile on the way, the source if it is fixed.
+            let from = 0;
+            for (let i = 1; i < path.length; i++) {
+              if (i < path.length - 1 && !g.fixed(path[i])) continue;
+              evenRamp(lv, path.slice(from, i + 1), from === 0 && free[source] === 1);
+              from = i;
+            }
+            const nextReach = flood([first]);
+            if (snap && (!nextReach[source] || wanted.some((w) => reach[w] && !nextReach[w]))) {
+              lv.set(snap);
+              continue;
+            }
+            ramps.push(path);
+            reach = nextReach;
+            return true;
           }
-          ramps.push(path);
-          reach = flood([first]);
-          return true;
+          // Last-resort regrade (T475): when an aligned border gate sits directly against already-reached interior land beyond a step,
+          // keep walking through unfixed reached tiles so the ramp can grade them smoothly down to the network.
+          if (!allowRegrade || g.fixed(n)) continue;
         }
         if (g.fixed(n)) {
+          // Pass 1 avoids stepping across dry fixed tiles (borders, lots) so a ramp accumulates length inside the place instead of resetting `since`.
+          if (avoidDryFixed && !g.swum(n)) continue;
           // A fixed tile is passed as it is: only near enough to the last anchor, and it is the next.
           if (!within(x, n)) continue;
           anchor[n] = lv[n];
@@ -302,6 +314,8 @@ export function placeNetwork(g: PlaceGround, start: number, targets: readonly nu
     }
     return false;
   };
+  const ramp = (source: number, loose = false): boolean =>
+    findRamp(source, loose, true, false) || findRamp(source, loose, false, false) || findRamp(source, loose, true, true);
   /**
    * A part joined to the network (T474): a ramp from one of its tiles, those on its rim first (the nearest to the network inside it), at most
    * `RAMP_SOURCES` tried.

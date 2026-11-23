@@ -202,6 +202,67 @@ export function islandDraft(draft: string, seed: number, cx: number, cy: number,
   return out.join('');
 }
 
+const smooth = (t: number) => t * t * (3 - 2 * t);
+const UNIT32 = 1 / 4294967296;
+function islandNoise(x: number, y: number, s: number): number {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = smooth(x - ix), fy = smooth(y - iy);
+  const a = hash32(ix, iy, s) * UNIT32, b = hash32(ix + 1, iy, s) * UNIT32;
+  const c = hash32(ix, iy + 1, s) * UNIT32, d = hash32(ix + 1, iy + 1, s) * UNIT32;
+  return a + (b - a) * fx + (c - a + (a - b + d - c) * fx) * fy;
+}
+
+/**
+ * The true relief of a place of an archipelago (T475, ADR-0256): the open sea around the islands keeps its deep bed (-8 to -28, reefs at
+ * -1), the shallows a shallow bed (-2 to -7) with surface at 0, the beach near sea level (0 to 2, walkable out of the water: rule 10), and
+ * the interior of each island rises steeply from its shore into terraces and headlands (gentler on cays and around the start). The islands
+ * stay the kernel's even if a universe rewrites `generate_relief`.
+ */
+export function islandRelief(levels: Int16Array, bed: Int16Array, seed: number, cx: number, cy: number, S: number): { levels: Int16Array; bed: Int16Array } {
+  const features = islandsOfPlace(seed, cx, cy, S);
+  const outL = Int16Array.from(levels);
+  const outB = Int16Array.from(bed);
+  for (let r = 0; r < S; r++)
+    for (let c = 0; c < S; c++) {
+      const i = r * S + c;
+      const wx = cx * S + c, wy = cy * S + r;
+      const px = wx + 0.5, py = wy + 0.5;
+      const { ground, island } = groundAt(features, px, py);
+      if (ground === 'sea') {
+        const reef = islandNoise(wx / 7, wy / 7, seed + 914) > 0.82;
+        const depth = reef ? 1 : 8 + Math.round(20 * islandNoise(wx / 11, wy / 11, seed + 915));
+        outL[i] = -depth;
+        outB[i] = -depth;
+      } else if (ground === 'shallows') {
+        const depth = 2 + Math.round(5 * islandNoise(wx / 11, wy / 11, seed + 915));
+        outL[i] = 0;
+        outB[i] = -depth;
+      } else if (ground === 'beach') {
+        const shore = island ? shoreAt(island, Math.atan2(py - island.y, px - island.x)) : BEACH;
+        const inland = island ? Math.max(0, shore - Math.hypot(px - island.x, py - island.y)) : 0;
+        // Every beach tile stays within a step of the sea (0..2), so a swimmer always climbs ashore (rule 10).
+        const h = Math.min(2, Math.max(0, Math.round(inland)));
+        outL[i] = h;
+        outB[i] = h;
+      } else {
+        const shore = island ? shoreAt(island, Math.atan2(py - island.y, px - island.x)) : BEACH;
+        const rho = island ? Math.hypot(px - island.x, py - island.y) : 0;
+        const inland = Math.max(0, shore - rho - BEACH);
+        // Smooth climb from the beach (level 2) up into steep inland headlands and terraces (gentler on cays and around the start).
+        const ramp = smooth(Math.min(1, inland / 8));
+        const origin = smooth(Math.min(1, Math.max(0, (Math.hypot(wx, wy) - 6) / 14)));
+        const raw = Math.max(0, levels[i]);
+        const isletScale = island?.islet ? 0.25 : 1;
+        // Add an island headland dome on larger islands so islands rise boldly over the sea even on lowland noise.
+        const dome = island && !island.islet ? Math.round(10 * smooth(Math.min(1, inland / Math.max(8, island.radius * 0.45))) * origin) : 0;
+        const lifted = Math.min(64, Math.max(2, 2 + Math.round(Math.max(0, raw + dome - 2) * ramp * isletScale * (0.25 + 0.75 * origin))));
+        outL[i] = lifted;
+        outB[i] = bed[i] < levels[i] ? Math.max(-32, lifted - Math.min(7, levels[i] - bed[i])) : lifted;
+      }
+    }
+  return { levels: outL, bed: outB };
+}
+
 /**
  * The island a place stands on (T441): the one with the most of its land and beach in the place, or undefined if the place is all water.
  * The Cartographer names it when the first place on it is planned.

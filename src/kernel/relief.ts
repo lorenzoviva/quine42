@@ -39,6 +39,18 @@ export function flatRelief(): Relief {
 
 /** Height of a level, in tiles. */
 export const LEVEL = 0.25;
+/** Highest level above the sea the kernel reads from `generate_relief` (T475, ADR-0256: 16 tiles). */
+export const RELIEF_PEAK = 64;
+/** Deepest level below the sea the kernel reads from `generate_relief` (T475, ADR-0256: 8 tiles). */
+export const RELIEF_DEPTH = 32;
+/** Default depth of shallow inland water when a generator gives only one line of levels (levels below surface). */
+export const SHALLOW_BED_DEPTH = 2;
+/** Maximum cached chunks kept by a `TrueRelief` instance (evicts oldest when exceeded). */
+const MAX_RELIEF_CHUNKS = 2048;
+/** Levels a body walks up or down between two tiles beside each other (mirrors `STEP` in network.ts). */
+const RELIEF_STEP = 2;
+/** Levels the earth's jump clears (mirrors `JUMP` in network.ts). */
+const RELIEF_JUMP = 4;
 /** The two repeating boxes: coprime sides, `Hills`' own height. */
 const SIDES = [64, 45];
 const DEPTH = 12;
@@ -141,9 +153,329 @@ export class Relief {
     return s;
   }
 
+  /** The level of the bed under water at (col, row), or the ground level on land (T475). With `Hills`, the level itself. */
+  bed(col: number, row: number): number {
+    return this.level(col, row);
+  }
+
+  /** Whether this relief keeps true cliffs and terraces at this world column (T475, ADR-0256). False for `Hills` and flat worlds. */
+  hasCliffs(_col = 0): boolean {
+    return false;
+  }
+
+  /** Base relief levels of a chunk for wire transport in a true-relief world (T475); undefined for `Hills` and flat worlds. */
+  chunkLevelsAt(_cx: number, _cy: number, _size: number): Int16Array | undefined {
+    return undefined;
+  }
+
   /** The height of a tile's ground, in tiles. */
   height(col: number, row: number): number {
     return this.level(col, row) * LEVEL;
+  }
+}
+
+/** A chunk's base levels (ground on land, surface or negative sea bed on water) and bed levels under water (T475). */
+export interface ChunkReliefData {
+  levels: Int16Array;
+  bed: Int16Array;
+}
+
+/** Provides raw chunk relief data for (cx, cy) from the world's generator (or thin client's chunks); undefined triggers fallback. */
+export type ChunkReliefSource = (cx: number, cy: number) => ChunkReliefData | undefined;
+
+/** Parses one line of `n` comma/space-separated integers, clamped to [lo, hi]; returns undefined on any invalid token or wrong count. */
+function parseLevelLine(line: string, n: number, lo: number, hi: number): Int16Array | undefined {
+  const parts = line.trim().split(/[\s,]+/);
+  if (parts.length !== n) return undefined;
+  const out = new Int16Array(n);
+  for (let i = 0; i < n; i++) {
+    const raw = parts[i];
+    if (!raw) return undefined;
+    const v = Number(raw);
+    if (!Number.isFinite(v)) return undefined;
+    out[i] = Math.max(lo, Math.min(hi, Math.round(v)));
+  }
+  return out;
+}
+
+/**
+ * Reads `generate_relief(cx, cy, seed, size)` without trusting Lua (T475, ADR-0256): one line of `size * size` whole levels (clamped to
+ * `[-RELIEF_DEPTH, RELIEF_PEAK]`), plus an optional second line of bed levels (clamped to `[-RELIEF_DEPTH, level]`). Anything malformed
+ * returns undefined so the kernel raises a fault and falls back cleanly (rule 7).
+ */
+export function parseRelief(raw: unknown, size: number): ChunkReliefData | undefined {
+  if (typeof raw !== 'string' || !Number.isInteger(size) || size <= 0) return undefined;
+  const n = size * size;
+  const lines = raw
+    .trim()
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (!lines.length || lines.length > 2) return undefined;
+  const levels = parseLevelLine(lines[0], n, -RELIEF_DEPTH, RELIEF_PEAK);
+  if (!levels) return undefined;
+  if (lines.length === 2) {
+    const bed = parseLevelLine(lines[1], n, -RELIEF_DEPTH, RELIEF_PEAK);
+    if (!bed) return undefined;
+    for (let i = 0; i < n; i++) if (bed[i] > levels[i]) bed[i] = levels[i];
+    return { levels, bed };
+  }
+  const bed = Int16Array.from(levels);
+  return { levels, bed };
+}
+
+/**
+ * Base relief levels read from the wire without trusting them (T475, `ChunkView.relief`): exact length `size * size`, whole numbers within
+ * `[-RELIEF_DEPTH, RELIEF_PEAK]`. Anything else is rejected (undefined).
+ */
+export function readRelief(v: unknown, size: number): Int16Array | undefined {
+  if (!Array.isArray(v) || v.length !== size * size) return undefined;
+  const out = new Int16Array(size * size);
+  for (let i = 0; i < out.length; i++) {
+    const n = v[i];
+    if (typeof n !== 'number' || !Number.isInteger(n) || n < -RELIEF_DEPTH || n > RELIEF_PEAK) return undefined;
+    out[i] = n;
+  }
+  return out;
+}
+
+/**
+ * The aligned level of a gate tile on a chunk border (T475, ADR-0250 § 2.4): a pure function of the two raw levels across the shared edge,
+ * so both chunks agree independently and walking through a gate never meets a cliff. When the two sides are already within `STEP` they stay
+ * unchanged; where sea meets a coastal cliff the land side steps down to `sea + STEP`; where two land sides differ by more than `STEP` both
+ * meet at `Math.floor((a + b) / 2)`.
+ */
+export function gateEdgeLevel(rawHere: number, rawAcross: number, sea: number): number {
+  const a = Math.max(sea, rawHere);
+  const b = Math.max(sea, rawAcross);
+  if (Math.abs(a - b) <= RELIEF_STEP) return rawHere;
+  if (rawHere < sea) return rawHere;
+  if (rawAcross < sea) return sea + RELIEF_STEP;
+  return Math.floor((a + b) / 2);
+}
+
+/**
+ * Eliminates tiny isolated interior pits (< 4 land tiles, not touching the chunk border) whose entire surrounding rim stands more than a jump
+ * (`RELIEF_JUMP` = 4 levels) higher (ADR-0250 § Consequences): raises them to `minRim - STEP` so nobody can jump down into a trap they
+ * cannot jump back out of. Never alters the border ring.
+ */
+export function mendPits(levels: Int16Array, size: number, sea = 0): void {
+  const S = size, N = S * S;
+  const dirs = [-1, 1, -S, S];
+  for (let pass = 0; pass < 3; pass++) {
+    let changed = false;
+    const checked = new Uint8Array(N);
+    for (let r = 1; r < S - 1; r++) {
+      for (let c = 1; c < S - 1; c++) {
+        const start = r * S + c;
+        if (checked[start] || levels[start] < sea) continue;
+        // Quick skip: only tiles with at least one neighbour higher than a jump can be in a deep pit.
+        const lv0 = levels[start];
+        if (levels[start - 1] <= lv0 + RELIEF_JUMP && levels[start + 1] <= lv0 + RELIEF_JUMP && levels[start - S] <= lv0 + RELIEF_JUMP && levels[start + S] <= lv0 + RELIEF_JUMP) continue;
+        const comp: number[] = [start];
+        const inComp = new Set<number>([start]);
+        let escape = false;
+        let maxIn = lv0;
+        for (let q = 0; q < comp.length; q++) {
+          const i = comp[q];
+          const ic = i % S, ir = (i - ic) / S;
+          if (ic === 0 || ir === 0 || ic === S - 1 || ir === S - 1) {
+            escape = true;
+            break;
+          }
+          for (const d of dirs) {
+            const n = i + d;
+            if (inComp.has(n)) continue;
+            const nl = levels[n];
+            if (nl < sea) {
+              escape = true;
+              break;
+            }
+            if (nl <= levels[i] + RELIEF_JUMP) {
+              inComp.add(n);
+              comp.push(n);
+              if (nl > maxIn) maxIn = nl;
+              if (comp.length >= 4) {
+                escape = true;
+                break;
+              }
+            }
+          }
+          if (escape) break;
+        }
+        for (const i of comp) checked[i] = 1;
+        if (escape) continue;
+        let minRim = Infinity;
+        for (const i of comp) {
+          for (const d of dirs) {
+            const n = i + d;
+            if (!inComp.has(n) && levels[n] < minRim) minRim = levels[n];
+          }
+        }
+        if (minRim > maxIn + RELIEF_JUMP && Number.isFinite(minRim)) {
+          const target = Math.max(sea, minRim - RELIEF_STEP);
+          for (const i of comp) {
+            if (levels[i] < target) {
+              levels[i] = target;
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+    if (!changed) break;
+  }
+}
+
+/**
+ * Whether a building or stamp footprint sits cleanly on a single terrace (T475, ADR-0256): no two 4-adjacent cells inside the footprint
+ * differ by more than a step (`RELIEF_STEP`), and its total elevation span stays small enough that flattening the lot to its median does
+ * not carve cliffs along its walls.
+ */
+export function onTerrace(
+  levels: ArrayLike<number>,
+  w: number,
+  x0: number,
+  y0: number,
+  pw: number,
+  ph: number,
+  mask?: (x: number, y: number) => boolean,
+): boolean {
+  let lo = Infinity, hi = -Infinity;
+  for (let y = 0; y < ph; y++) {
+    for (let x = 0; x < pw; x++) {
+      if (mask && !mask(x, y)) continue;
+      const idx = (y0 + y) * w + x0 + x;
+      const lv = levels[idx];
+      if (lv < lo) lo = lv;
+      if (lv > hi) hi = lv;
+      if (x + 1 < pw && (!mask || mask(x + 1, y)) && Math.abs(lv - levels[idx + 1]) > RELIEF_STEP) return false;
+      if (y + 1 < ph && (!mask || mask(x, y + 1)) && Math.abs(lv - levels[idx + w]) > RELIEF_STEP) return false;
+    }
+  }
+  if (lo > hi) return true;
+  const maxSpan = Math.max(2 * RELIEF_STEP, Math.min(8, Math.floor(Math.max(pw, ph) / 2) + 2));
+  return hi - lo <= maxSpan;
+}
+
+/**
+ * True relief provided chunk by chunk by the universe's generator `generate_relief` (T475, ADR-0256), with the kernel's guarantees:
+ * bounded height/depth (`RELIEF_PEAK`, `RELIEF_DEPTH`), no tiny impassable pits (`mendPits`), and gate levels aligned across chunk edges
+ * (`gateEdgeLevel`). Falls back lazily to `makeFallback` (`Hills` or flat) if the generator lacks `generate_relief` or fails (rule 7).
+ */
+export class TrueRelief extends Relief {
+  private rawCache = new Map<string, ChunkReliefData>();
+  private alignedCache = new Map<string, ChunkReliefData>();
+  private fallback?: Relief;
+
+  constructor(
+    private seed: number,
+    private size: number,
+    private source: ChunkReliefSource,
+    private makeFallback: () => Relief,
+    private alignGates = true,
+    private cacheMissing = true,
+  ) {
+    super(0, null);
+    (this as { max: number }).max = RELIEF_PEAK;
+  }
+
+  override get sea(): number {
+    return 0;
+  }
+
+  override hasCliffs(): boolean {
+    return true;
+  }
+
+  private put<V>(cache: Map<string, V>, key: string, value: V): V {
+    if (cache.size >= MAX_RELIEF_CHUNKS) {
+      const oldest = cache.keys().next().value;
+      if (oldest !== undefined) cache.delete(oldest);
+    }
+    cache.set(key, value);
+    return value;
+  }
+
+  private fallbackChunk(cx: number, cy: number): ChunkReliefData {
+    const S = this.size;
+    const fb = (this.fallback ??= this.makeFallback());
+    const sea = fb.sea;
+    const levels = new Int16Array(S * S);
+    const bed = new Int16Array(S * S);
+    for (let r = 0; r < S; r++)
+      for (let c = 0; c < S; c++) {
+        const v = Math.max(-RELIEF_DEPTH, Math.min(RELIEF_PEAK, fb.level(cx * S + c, cy * S + r) - sea));
+        levels[r * S + c] = v;
+        bed[r * S + c] = v;
+      }
+    return { levels, bed };
+  }
+
+  private rawChunk(cx: number, cy: number): ChunkReliefData {
+    const key = `${cx},${cy}`;
+    if (!this.cacheMissing) {
+      return this.source(cx, cy) ?? this.fallbackChunk(cx, cy);
+    }
+    const cached = this.rawCache.get(key);
+    if (cached) return cached;
+    const data = this.source(cx, cy) ?? this.fallbackChunk(cx, cy);
+    return this.put(this.rawCache, key, data);
+  }
+
+  /** Pit-mended and gate-aligned relief data for chunk (cx, cy). */
+  chunkData(cx: number, cy: number): ChunkReliefData {
+    if (!this.cacheMissing) {
+      return this.source(cx, cy) ?? this.fallbackChunk(cx, cy);
+    }
+    const key = `${cx},${cy}`;
+    const cached = this.alignedCache.get(key);
+    if (cached) return cached;
+    const raw = this.rawChunk(cx, cy);
+    const levels = Int16Array.from(raw.levels);
+    const bed = Int16Array.from(raw.bed);
+    const S = this.size;
+    mendPits(levels, S, 0);
+    for (let i = 0; i < S * S; i++) if (bed[i] > levels[i]) bed[i] = levels[i];
+    if (this.alignGates && S >= 5) {
+      const along = (a: number, b: number, c: number) => 2 + (hash32(this.seed, a, b, c) % (S - 4));
+      const west = along(cx, cy, 1);
+      const east = along(cx + 1, cy, 1);
+      const north = along(cx, cy, 2);
+      const south = along(cx, cy + 1, 2);
+      const pairs: Array<[number, number, number, number]> = [
+        [west * S, cx - 1, cy, west * S + (S - 1)],
+        [east * S + (S - 1), cx + 1, cy, east * S],
+        [north, cx, cy - 1, (S - 1) * S + north],
+        [(S - 1) * S + south, cx, cy + 1, south],
+      ];
+      for (const [idx, ncx, ncy, nidx] of pairs) {
+        const here = raw.levels[idx];
+        const across = this.rawChunk(ncx, ncy).levels[nidx];
+        const aligned = gateEdgeLevel(here, across, 0);
+        if (aligned !== here && here >= 0) {
+          levels[idx] = aligned;
+          if (bed[idx] > aligned) bed[idx] = aligned;
+        }
+      }
+    }
+    return this.put(this.alignedCache, key, { levels, bed });
+  }
+
+  override level(col: number, row: number): number {
+    const S = this.size;
+    const cx = Math.floor(col / S), cy = Math.floor(row / S);
+    return this.chunkData(cx, cy).levels[(row - cy * S) * S + (col - cx * S)];
+  }
+
+  override bed(col: number, row: number): number {
+    const S = this.size;
+    const cx = Math.floor(col / S), cy = Math.floor(row / S);
+    return this.chunkData(cx, cy).bed[(row - cy * S) * S + (col - cx * S)];
+  }
+
+  override chunkLevelsAt(cx: number, cy: number, size: number): Int16Array | undefined {
+    return size === this.size ? this.chunkData(cx, cy).levels : undefined;
   }
 }
 
@@ -196,7 +528,9 @@ export const SEA_DRAFT = 'o';
  * the sea; the sea (water where the draft says `o`, and all the water it touches) lies at the sea's level; every
  * other body of water lies flat, as a whole across the places, at the lowest of its tiles and never above
  * the land around it; the land goes down towards the water at most two levels a tile (its banks), so it
- * is climbed as ever. Only the given places count: the result is the same in whatever order they come,
+ * is climbed as ever. With `keepCliffs` (T475, ADR-0256, true relief) the water stays flat and never above the land,
+ * while land tiles are never lowered towards lower neighbours so cliffs, terraces and coastal headlands remain sharp.
+ * Only the given places count: the result is the same in whatever order they come,
  * and where a body of water goes on beyond them, it is followed as far as they go.
  *
  * It is the greatest field below the relief that keeps those bounds: a tile's level is the least, over all
@@ -206,13 +540,14 @@ export const SEA_DRAFT = 'o';
  * `pinned` (T51b) gives the surface of the water that has flowed (`water.ts`): those tiles of water keep it, never
  * lowered by what is around them, and the water they touch that has not flowed goes down to them as to any lower water.
  */
-export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: string) => boolean, level: (col: number, row: number) => number, sea: number, pinned?: (chunk: number, cell: number) => number | undefined): Int16Array[] {
+export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: string) => boolean, level: (col: number, row: number) => number, sea: number, pinned?: (chunk: number, cell: number) => number | undefined, keepCliffs = false): Int16Array[] {
   const S = size, A = S * S;
   const index = new Map<string, number>();
   chunks.forEach((c, i) => index.set(`${c.cx},${c.cy}`, i));
   const n = chunks.length * A;
   const out = chunks.map(() => new Int16Array(A));
   const wet = new Uint8Array(n);
+  const wasWet = new Uint8Array(n);
   const val = new Int32Array(n);
   const pin = new Uint8Array(n);
   let hi = sea;
@@ -222,6 +557,7 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
       const t = k * A + i;
       const c = i % S, r = (i - c) / S;
       wet[t] = liquid(ch.tiles[i]) ? 1 : 0;
+      wasWet[t] = ch.draft ? (liquid(ch.draft[i]) ? 1 : 0) : 0;
       const p = wet[t] ? pinned?.(k, i) : undefined;
       if (p !== undefined && Number.isFinite(p)) pin[t] = 1;
       val[t] = pin[t] ? Math.max(sea, Math.round(p!)) : wet[t] && ch.draft?.[i] === SEA_DRAFT ? sea : Math.max(sea, level(ch.cx * S + c, ch.cy * S + r));
@@ -260,6 +596,8 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
       done[t] = 1;
       for (let m = near(t, nb), x = 0; x < m; x++) {
         const u = nb[x];
+        // With `keepCliffs`, natural land cliffs stay intact; tiles built over draft water (piers, stilt huts) still sit within a step of the water.
+        if (keepCliffs && !wet[u] && !wasWet[u]) continue;
         const v = val[t] + (wet[u] ? 0 : 2);
         if (done[u] || pin[u] || v >= val[u]) continue;
         val[u] = v;
@@ -289,9 +627,10 @@ export interface LotBox {
  * is flat at the median level of its tiles, or as near as the border and the lots already laid allow (the
  * larger lots first, a tile keeps the first lot that takes it), and so is a ring of one tile around it where the land allows; the rest of the chunk bends towards
  * them, so that neighbours on land still differ by at most two levels, while the chunk's border keeps the
- * relief and meets the next chunk as before. Only the chunk's own tiles count, as for water.
+ * relief and meets the next chunk as before. With `keepCliffs` (T475, ADR-0256, true relief) each lot lies flat within its own terrace
+ * without bending to the border, only same-terrace ring tiles join it, and surrounding cliffs stay intact. Only the chunk's own tiles count, as for water.
  */
-export function chunkLevels(tiles: string, size: number, liquid: (code: string) => boolean, level: (c: number, r: number) => number, lots: LotBox[]): Int16Array {
+export function chunkLevels(tiles: string, size: number, liquid: (code: string) => boolean, level: (c: number, r: number) => number, lots: LotBox[], keepCliffs = false): Int16Array {
   const S = size;
   const out = waterLevels(tiles, S, liquid, level);
   const wet = (i: number) => liquid(tiles[i]);
@@ -304,6 +643,50 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
     if (c === 0 || r === 0 || c === S - 1 || r === S - 1) fixed[i] = 1;
   }
   const order = lots.map((l, i) => ({ l, i, area: (l.x1 - l.x0 + 1) * (l.y1 - l.y0 + 1) })).sort((a, b) => Number(b.l.level !== undefined) - Number(a.l.level !== undefined) || b.area - a.area || a.i - b.i);
+  if (keepCliffs) {
+    const flats = new Map<LotBox, number>();
+    const adjacentWater = (c: number, r: number): number => {
+      let hiW = -Infinity;
+      if (c > 0 && wet(r * S + c - 1)) hiW = Math.max(hiW, out[r * S + c - 1]);
+      if (c + 1 < S && wet(r * S + c + 1)) hiW = Math.max(hiW, out[r * S + c + 1]);
+      if (r > 0 && wet((r - 1) * S + c)) hiW = Math.max(hiW, out[(r - 1) * S + c]);
+      if (r + 1 < S && wet((r + 1) * S + c)) hiW = Math.max(hiW, out[(r + 1) * S + c]);
+      return hiW;
+    };
+    for (const { l } of order) {
+      const own: number[] = [];
+      let hiWater = -Infinity;
+      for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++)
+        for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) {
+          if (wet(r * S + c)) continue;
+          own.push(level(c, r));
+          hiWater = Math.max(hiWater, adjacentWater(c, r));
+        }
+      if (!own.length) continue;
+      own.sort((a, b) => a - b);
+      const flat = l.level !== undefined && Number.isFinite(l.level) ? l.level : Math.max(hiWater, own[own.length >> 1]);
+      flats.set(l, flat);
+      for (let r = Math.max(0, l.y0); r <= Math.min(S - 1, l.y1); r++)
+        for (let c = Math.max(0, l.x0); c <= Math.min(S - 1, l.x1); c++) {
+          const i = r * S + c;
+          if (wet(i) || fixed[i] === 2) continue;
+          out[i] = flat;
+          fixed[i] = 2;
+        }
+    }
+    // Flatten only ring tiles that already lie on the same terrace (within STEP of the lot) and not below adjacent water.
+    for (const [l, flat] of flats)
+      for (let r = Math.max(1, l.y0 - 1); r <= Math.min(S - 2, l.y1 + 1); r++)
+        for (let c = Math.max(1, l.x0 - 1); c <= Math.min(S - 2, l.x1 + 1); c++) {
+          const i = r * S + c;
+          if (wet(i) || fixed[i] >= 2) continue;
+          if (Math.abs(out[i] - flat) <= RELIEF_STEP && flat >= adjacentWater(c, r)) {
+            out[i] = flat;
+            fixed[i] = 2;
+          }
+        }
+    return out;
+  }
   // Within two levels a tile of what is already fixed, so that the land between can still be climbed.
   const reach = (x0: number, y0: number, x1: number, y1: number) => {
     let lo = -Infinity, hi = Infinity;
@@ -376,6 +759,8 @@ export function chunkLevels(tiles: string, size: number, liquid: (code: string) 
 export interface BandRelief {
   /** The first tile of the planet's own coordinates (its centre), carpet space. */
   x0: number;
+  /** Whether this planet uses true relief (T475). */
+  trueRelief?: boolean;
   /** The planet's relief and how much it is lifted so that its sea lies at the world's level. */
   make: () => { relief: Relief; shift: number };
 }
@@ -394,7 +779,7 @@ export class BandedRelief extends Relief {
   ) {
     super(0, null);
     this.made = planets.map(() => undefined);
-    (this as { max: number }).max = home.max;
+    (this as { max: number }).max = Math.max(home.max, planets.some((p) => p.trueRelief) ? RELIEF_PEAK : home.max);
   }
 
   private planet(k: number): { relief: Relief; shift: number } | undefined {
@@ -406,9 +791,35 @@ export class BandedRelief extends Relief {
     return this.home.sea;
   }
 
+  override hasCliffs(col = 0): boolean {
+    const k = this.bandOf(col);
+    if (!k) return this.home.hasCliffs(col);
+    return !!this.planets[k - 1]?.trueRelief;
+  }
+
   override level(col: number, row: number): number {
     const k = this.bandOf(col);
     const p = k ? this.planet(k) : undefined;
     return p ? p.relief.level(col - this.planets[k - 1].x0, row) + p.shift : this.home.level(col, row);
+  }
+
+  override bed(col: number, row: number): number {
+    const k = this.bandOf(col);
+    const p = k ? this.planet(k) : undefined;
+    return p ? p.relief.bed(col - this.planets[k - 1].x0, row) + p.shift : this.home.bed(col, row);
+  }
+
+  override chunkLevelsAt(cx: number, cy: number, size: number): Int16Array | undefined {
+    const k = this.bandOf(cx * size);
+    if (!k) return this.home.chunkLevelsAt(cx, cy, size);
+    const p = this.planet(k);
+    if (!p || !this.planets[k - 1]?.trueRelief) return undefined;
+    const localCx = cx - Math.round(this.planets[k - 1].x0 / size);
+    const raw = p.relief.chunkLevelsAt(localCx, cy, size);
+    if (!raw) return undefined;
+    if (!p.shift) return raw;
+    const shifted = new Int16Array(raw.length);
+    for (let i = 0; i < raw.length; i++) shifted[i] = Math.max(-RELIEF_DEPTH, Math.min(RELIEF_PEAK, raw[i] + p.shift));
+    return shifted;
   }
 }

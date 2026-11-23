@@ -19,6 +19,7 @@
 import { Rng } from './rng';
 import { stamp, STAMP_ROLES, STAMP_SHAPES, type StampCodes, type StampCut, type StampShape } from './stamps';
 import { internalName } from './internalNames';
+import { onTerrace } from './relief';
 
 /** A stamp's shape, internal: the Cartographer still writes the Italian of the contract 0.1 until its prompts change (T307a, T310). */
 const stampShape = (v: unknown): string => (typeof v === 'string' ? internalName('timbri', v) : '');
@@ -148,7 +149,10 @@ class RuleRunner extends Runner {
 
   private matches(g: MjGrid): Match[] {
     const out: Match[] = [];
+    const levels = g.cut?.levels;
+    const built = g.cut?.built;
     for (const pattern of this.patterns) {
+      const drawsBuilding = !!levels && !!built && pattern.output.some((put) => put !== null && built.includes(put));
       for (let y = 0; y + pattern.h <= g.h; y++)
         for (let x = 0; x + pattern.w <= g.w; x++) {
           let ok = true;
@@ -166,6 +170,11 @@ class RuleRunner extends Runner {
                 changes = true;
               }
             }
+          // In a true-relief world (T475), building rules only land on a flat terrace and never straddle a cliff.
+          if (ok && changes && drawsBuilding && !onTerrace(levels!, g.w, x, y, pattern.w, pattern.h, (i, j) => {
+            const put = pattern.output[j * pattern.w + i];
+            return put !== null && built!.includes(put);
+          })) ok = false;
           if (ok && changes) out.push({ pattern, x, y });
         }
     }

@@ -1482,12 +1482,12 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   ciò che universe.json dice, il resto della natura dalla Genesi). In una partita di molti il master lo chiede sul suo ramo (il suo specchio
   prende i file del ramo come il server li ha scritti, `writeCommanded`), e pubblicato lo hanno il mondo e ogni client (`TILE_FIELDS`,
   `UNIVERSE_FIELDS`). Mai da Lua. `tests/fisico-acceso.test.ts`.
-- **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`): la porta l'ambientazione
-  (`WorldTheme.nature`), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
-  com'era (`keepNature`, accanto a `keepGame`; la gravità no: la rimodella il Fisico, T452); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
-  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle, il giorno di 120-3600 secondi o 0 e il respiro), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
+- **La natura del mondo** (`universe.json → nature`, `WorldNature`: `geography`, `sky`, `day`, `gravity`, `oxygen`, `relief`, `automata`): la porta l'ambientazione
+  (`WorldTheme.nature`: Far West, Pirati e Spazio portano `relief: 'true'`, i Pirati anche `geography: 'archipelago'`; Medievale, Steampunk, Moderno e Futuristico restano collinari), la scrive il kernel a ogni Genesi (`chooseNature`), il primo universe.json la fissa e uno dopo che dice altro torna
+  com'era (`keepNature`, accanto a `keepGame`; la gravità e gli automi no: li rimodella il Fisico, T452, T482); `repairNature` accetta solo ciò che il kernel sa rendere vero (`NATURE_ACCEPTS`: il mondo
+  di oggi, `continent`, `earth`, 600 secondi, gravità 1, niente respiro, rilievo `hills` omesso; in più la gravità 0,2-2, l'arcipelago, il vuoto, le stelle, il giorno di 120-3600 secondi o 0, il respiro, il rilievo vero `true` e gli automi), e il resto è `DEFAULT_NATURE`, che non cambia mai perché è la natura
   degli universi che non la dicono. Il task che rende vero un valore lo apre lì (l'arcipelago T441, il vuoto, le stelle e il giorno T445, il respiro
-  T446; la gravità da T447) e lo dà alla sua ambientazione. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
+  T446, la gravità T447, il rilievo vero T475, gli automi T482) e lo dà alla sua ambientazione. Alla Genesi di un mondo col rilievo vero `baseCodesFor(true)` rende `k` roccia nuda camminabile (`layer: 'ground'`, `solid: false`, `cross: 'walk'`, senza modello di masso), mentre `r` resta masso solido. Pubblica: `nature` in `UNIVERSE_FIELDS`, i campi nuovi dei terreni in `TILE_FIELDS`
   (`src/session/files.ts`). Lua la legge con `world.nature()` (`Host.nature`, una copia a ogni chiamata), il kernel con `Kernel.nature()`.
 - **La gravità** (ADR-0226, T447, kernel 0.10.2): `nature.gravity` da 0,2 a 2 (`NATURE_ACCEPTS`), letta da `gravityOf` (1 fuori). Il salto ha
   la stessa spinta (`leapOf`): altezza e portata scalano con 1/g ma **mai sotto quelle della terra**, perché `reachableStoreys` e i controlli
@@ -1768,7 +1768,7 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
 <a id="rilievo"></a>
 ## Il rilievo
 
-- **Rilievo** (ADR-0048): il terreno ha le altezze. `Relief` (`src/kernel/relief.ts`) fa girare `Hills` di MarkovJunior
+- **Rilievo** (ADR-0048): il terreno ha le altezze. Nei mondi collinari `Relief` (`src/kernel/relief.ts`) fa girare `Hills` di MarkovJunior
   (o `world/rilievo.xml`) su due scatole di lati 64 e 45, lette come piastrelle che si ripetono e rammendate; il livello
   di una casella è la somma (un livello = un quarto di casella, fra vicini al più due: si sale sempre, non è mai un
   ostacolo). Il mare sta al suo livello (`universe.json → relief.sea`, o `Relief.sea`), la terra mai sotto; ogni specchio
@@ -1777,8 +1777,8 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   i chunk; `Chunk.levels` ridisegna chi cambia livelli); ogni lotto è piano, con un anello
   attorno, e il resto del chunk si piega verso di lui lasciando il bordo al campo (`chunkLevels`). `kernel.groundAt(x, y)` è l'altezza del
   suolo, `floorAt` la comprende (i modelli stanno sul suolo sotto il loro centro); il renderer disegna colonne con i fianchi e
-  posa tutto sul suolo. Corona e studio restano piani. Dal T474 un dislivello oltre due livelli fra vicini non si cammina (la regola 10
-  dei gradini, qui sotto): col rilievo di oggi non ce n'è nessuno.
+  posa tutto sul suolo. Corona e studio restano piani.
+- **Rilievo vero** (T475, ADR-0256, R1 di T459, kernel 0.10.32): acceso da `universe.json → nature.relief: 'true'` (scelto dall'ambientazione alla Genesi e fisso come `game`; Far West, Pirati e Spazio lo portano; i pianeti possono dichiarare `Planet.relief: 'true'`, gestito da `BandedRelief`). Il generatore del seme (`universe/modules/world.terrain/logic.lua`) espone `generate_relief(cx, cy, seed, size)`: due righe di `S × S` interi (livelli di superficie/suolo e livelli del **letto** sotto l'acqua: mare −8…−28 con secche −1, acqua bassa e fiumi 2…7 sotto la superficie continua con le rive), con piazza iniziale dolce, coste digradanti e massicci a terrazze di 8 livelli (dirupi di ~6 livelli) attraversati da passi; dove `nature.relief !== 'true'`, `generate_chunk` resta identico byte per byte. `TrueRelief` legge il generatore tramite `Kernel.genRelief` e `parseRelief` senza fidarsi di Lua (interi in `[-RELIEF_DEPTH, RELIEF_PEAK]`, cioè `[-32, 64]`, `bed <= level`, `SHALLOW_BED_DEPTH = 2` se manca la seconda riga; se manca o è malformato alza un guasto e ripiega su `Hills`, regola 7), chiude le buche piccole senza uscita (`mendPits`), allinea simmetricamente i varchi fra luoghi vicini (`gateEdgeLevel`), espone `Relief.bed(col, row)` e `hasCliffs()`, e nell'arcipelago applica `islandRelief` (`src/kernel/islands.ts`: spiagge `0..2` sempre approdabili, promontori e terrazze all'interno). Con `keepCliffs = true`: `worldLevels` conserva i dirupi naturali della terra e abbassa entro `STEP` solo le caselle costruite sopra acqua della bozza (`wasWet`: moli e palafitte); `chunkLevels` spiana il lotto sulla sua terrazza e unisce solo le caselle d'anello entro `STEP`; `blockLevel` crea un altopiano senza schiacciarlo ai bordi. `layoutOf` passa i livelli della bozza a `layout()`: `stamp()` (`stamps.ts`) e `RuleRunner.matches()` (`mj.ts`) posano edifici e timbri solo su terrazze (`onTerrace`), e `harbour()` chiede una radice camminabile a gradini dall'acqua. Alla Genesi `baseCodesFor(true)` rende `k` roccia nuda camminabile (mentre `r` resta masso solido). `draftRelief` arricchisce `PlanContext.relief` (`low`, `high`, `cliffs`, `terraces`) e `reliefLine` per il Cartografo sui luoghi non piani (`enclave` resta nello schema solo con enclavi tenute). In multigiocatore il server manda `ChunkView.relief` (`Kernel.chunkReliefOf`) ai client sottili, che lo validano con `readRelief` senza mai vedere il Lua del generatore (regole 7, 8f). Misure (`rete-gradini.ts --vero`): 158 luoghi continente (96,7 % dei lati entro un gradino, 180 rampe, 78 enclavi tenute, `networkOf` 0,59 ms, `generate_relief` 9,45 ms) e 83 luoghi arcipelago (0 caselle staccate, `networkOf` 0,65 ms). `tests/rilievo-vero.test.ts`.
 
 <a id="rete"></a>
 ## La rete e le enclavi (la regola 10 dei gradini)
@@ -1830,9 +1830,7 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   caricati, mai sull'acqua né sui lotti; i luoghi caricati rifanno la loro rete (rampe ed enclavi; ciò che vi sta resta dov'è) e si ridisegnano;
   senza funzione si toglie. Mai salvato, mai da Lua, mai sul filo (un client sottile ha il suo). Per vedere un dirupo dalla console:
   `quine.syntheticRise((c, r) => (c >= 3 && c <= 8 && r >= 3 && r <= 8 ? 8 : 0))`, poi `quine.chunkAt(4, 4).network`.
-- **Inerte col rilievo di oggi**: misurato su 328 luoghi pianificati offline, nessuna coppia di caselle vicine aperte oltre il gradino su 165 395
-  (`lab/scripts/rete-gradini.ts`; con `--rialzo 8` 434 rampe su 327 luoghi, 21 enclavi tenute, nessuna casella staccata; da T477, con l'arrampicata nel mondo, 318 rampe e 140 enclavi tenute, nessuna staccata); `tests/rete-kernel.test.ts` lo tiene, con `tests/luoghi-campione.test.ts`. Restano a R1 il rilievo
-  i cui dirupi `worldLevels` e `chunkLevels` non spianino, i varchi col livello del lato, i lotti sulle terrazze. R3 è fatto (ADR-0252):
+- **Inerte col rilievo collinare, attiva col rilievo vero**: col rilievo di prima (`Hills`), misurato su 328 luoghi pianificati offline, nessuna coppia di caselle vicine aperte oltre il gradino su 165 395 (`lab/scripts/rete-gradini.ts`; con `--rialzo 8` 434 rampe su 327 luoghi, 21 enclavi tenute, nessuna casella staccata; da T477, con l'arrampicata nel mondo, 318 rampe e 140 enclavi tenute, nessuna staccata); `tests/rete-kernel.test.ts` lo tiene, con `tests/luoghi-campione.test.ts`. R1 è fatto (T475, ADR-0256, `→ #rilievo`): il rilievo vero conserva i dirupi, allinea i varchi e posa i lotti sulle terrazze, e `placeNetwork` evita i fissi asciutti nel primo passaggio e può risagomare con rollback le caselle interne già raggiunte davanti a un varco allineato su un dirupo. R3 è fatto (ADR-0252):
   l'arrampicata (→ `#regole-effetti`) e il salto e l'arrampicata fatti dal server in molti (→ `#multigiocatore`).
 
 <a id="acqua"></a>

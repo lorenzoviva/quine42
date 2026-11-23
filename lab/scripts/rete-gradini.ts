@@ -5,7 +5,7 @@
 // (ramps, enclaves kept and stranded, what only a rise parts from it, its roughness), the time to make it. With --rialzo N every place has a
 // plateau N levels high in its middle (`syntheticRise`). No call to the models, nothing written but the report:
 //
-//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18] [--rialzo 8] [--json f]
+//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18] [--rialzo 8] [--vero] [--arcipelago] [--json f]
 
 import { writeFileSync } from 'node:fs';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -14,15 +14,29 @@ import { MockAiModels } from '../../src/kernel/ai/mock';
 import { memoryStore } from '../../src/kernel/repo';
 import { LEVEL } from '../../src/kernel/relief';
 import { STEP, type Network } from '../../src/kernel/network';
+import { DEFAULT_NATURE } from '../../src/kernel/nature';
 
 const argv = process.argv.slice(2);
 const opt = (k: string, d?: string) => (argv.includes(`--${k}`) ? argv[argv.indexOf(`--${k}`) + 1] : d);
 const POINTS = Number(opt('punti', '18'));
 const RISE = Number(opt('rialzo', '0'));
+const TRUE_RELIEF = argv.includes('--vero');
+const ARCHIPELAGO = argv.includes('--arcipelago');
 const out = opt('json');
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels() });
+const files = (() => {
+  if (!TRUE_RELIEF && !ARCHIPELAGO) return bundledFiles;
+  const cfg = JSON.parse(bundledFiles['universe.json']);
+  const terrain = JSON.parse(bundledFiles['modules/world.terrain/manifest.json']);
+  if (TRUE_RELIEF) terrain.tiles.k = { id: 'mountain', name: 'monte', description: 'roccia nuda di montagna', color: '#6e6a66', solid: false, cross: 'walk', layer: 'ground', speed: 0.9 };
+  return {
+    ...bundledFiles,
+    'universe.json': JSON.stringify({ ...cfg, nature: { ...DEFAULT_NATURE, ...(ARCHIPELAGO ? { geography: 'archipelago' } : {}), ...(TRUE_RELIEF ? { relief: 'true' } : {}) } }, null, 2) + '\n',
+    'modules/world.terrain/manifest.json': JSON.stringify(terrain, null, 2) + '\n',
+  };
+})();
+const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
 const S = k.config.chunkSize;
 if (RISE) {
   k.syntheticRise((c, r) => {
@@ -88,11 +102,27 @@ for (let j = 0; j < POINTS; j++)
     }
   }
 const sorted = [...netMs].sort((a, b) => a - b);
+let reliefMs: { median: number; p95: number } | undefined;
+if (TRUE_RELIEF) {
+  const gen = (k as unknown as { genRelief(cx: number, cy: number, band: number): unknown }).genRelief.bind(k);
+  const rms: number[] = [];
+  for (let j = -4; j <= 4; j++)
+    for (let i = -4; i <= 4; i++) {
+      const a = performance.now();
+      gen(i * 3, j * 3, 0);
+      rms.push(performance.now() - a);
+    }
+  rms.sort((a, b) => a - b);
+  reliefMs = { median: rms[rms.length >> 1] ?? 0, p95: rms[Math.floor(rms.length * 0.95)] ?? 0 };
+}
 const report = {
   rise: RISE,
+  trueRelief: TRUE_RELIEF,
+  archipelago: ARCHIPELAGO,
   ...counts,
   roughness,
   networkMs: { median: sorted[sorted.length >> 1] ?? 0, p95: sorted[Math.floor(sorted.length * 0.95)] ?? 0 },
+  ...(reliefMs ? { reliefMs } : {}),
   seconds: Math.round((performance.now() - t0) / 100) / 10,
 };
 console.log(JSON.stringify(report, null, 2));

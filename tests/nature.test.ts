@@ -106,29 +106,42 @@ describe('the palette of a Genesis (T437)', () => {
     expect(crossingOf(tiles.o)).toBe('swim');
     expect(crossingOf(k.palette.o)).toBe('swim');
     for (const t of Object.values(tiles)) expect(t.cross).toBe(crossingOf(t));
-    // The pirates bring the archipelago (T441), the only nature a theme brings yet.
-    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
-    expect(k.nature()).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago' });
+    // The pirates bring the archipelago (T441) and true relief (T475); k is walkable bare mountain rock in true-relief worlds.
+    expect(tiles.k).toMatchObject({ layer: 'ground', solid: false, cross: 'walk' });
+    expect(tiles.k.model).toBeUndefined();
+    expect(tiles.r).toMatchObject({ layer: 'rock', solid: true, cross: 'none' });
+    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' });
+    expect(k.nature()).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' });
   }, 60_000);
 });
 
 describe('the nature of the world (T437)', () => {
   it('is repaired to what this kernel can make true: anything else is the world of today', () => {
     expect(repairNature(undefined)).toEqual(DEFAULT_NATURE);
-    expect(repairNature({ geography: 'moon', sky: 'rainbow', day: 50, gravity: 9, oxygen: 'yes' })).toEqual(DEFAULT_NATURE);
-    // The archipelago is open since T441; the void, the stars and the day since T445 (the day 0 is a still light).
+    expect(repairNature({ geography: 'moon', relief: 'extreme', sky: 'rainbow', day: 50, gravity: 9, oxygen: 'yes' })).toEqual(DEFAULT_NATURE);
+    // The archipelago is open since T441; the void, the stars and the day since T445 (the day 0 is a still light); true relief since T475.
     expect(repairNature({ geography: 'archipelago', sky: 'stars' })).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', sky: 'stars' });
     expect(repairNature({ geography: 'void', sky: 'stars', day: 0 })).toEqual({ ...DEFAULT_NATURE, geography: 'void', sky: 'stars', day: 0 });
+    expect(repairNature({ relief: 'true' })).toEqual({ ...DEFAULT_NATURE, relief: 'true' });
+    expect(repairNature({ relief: 'hills' })).toEqual(DEFAULT_NATURE);
     expect(repairNature({ day: 5000 }).day).toBe(600);
     // The gravity is open since T447: 0.2-2, anything else the earth's.
     expect(repairNature({ gravity: 0.3 })).toEqual({ ...DEFAULT_NATURE, gravity: 0.3 });
     expect(repairNature({ gravity: 0.1 }).gravity).toBe(1);
     expect(repairNature({ geography: 'continent', day: NaN, gravity: '1' })).toEqual(DEFAULT_NATURE);
     expect(repairNature([1, 2])).toEqual(DEFAULT_NATURE);
-    // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441, the void, the stars and the day of T445.
-    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false, true] });
+    // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441, the void, the stars and the day of T445, the true relief of T475.
+    expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], relief: ['hills', 'true'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false, true] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
-    for (const t of WORLD_THEMES) expect(repairNature(t.nature), t.id).toEqual(t.id === 'pirates' ? { ...DEFAULT_NATURE, geography: 'archipelago' } : DEFAULT_NATURE);
+    for (const t of WORLD_THEMES) {
+      const want =
+        t.id === 'pirates'
+          ? { ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' }
+          : t.id === 'western' || t.id === 'space'
+            ? { ...DEFAULT_NATURE, relief: 'true' }
+            : DEFAULT_NATURE;
+      expect(repairNature(t.nature), t.id).toEqual(want);
+    }
   });
 
   it('is fixed like the game but the gravity (T452): a universe.json that says otherwise later is written back', async () => {

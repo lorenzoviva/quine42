@@ -36,6 +36,16 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
   n: { meaning: 'cold walkable, slow ground (snow, frost)', layer: 'ground', solid: false, cross: 'walk' },
 };
 
+/**
+ * Base codes for a world: in a true-relief world (T475, ADR-0256), mountains are relief (terraces and cliffs) rather than solid blocks, so
+ * `k` is walkable bare mountain rock (`layer: 'ground', solid: false, cross: 'walk'`, no boulder model) while `r` stays the solid boulder.
+ */
+export function baseCodesFor(trueRelief = false): typeof BASE_CODES {
+  return trueRelief
+    ? { ...BASE_CODES, k: { meaning: 'mountain bare rock, walkable with terraces and cliffs', layer: 'ground', solid: false, cross: 'walk' } }
+    : BASE_CODES;
+}
+
 /** What the Narrator asks the Forge for at the Genesis: a kind of what it creates (T310b, `tipi-fucina`) and the request. */
 export interface CastEntry {
   type: ForgeKind;
@@ -213,11 +223,13 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
 /**
  * The base codes keep their meaning whatever the models say: the engine depends on them. How a body crosses every terrain, its pace, the
  * fatigue and the depth of its water are written by `physicsOf` (T437, ADR-0224), within the kernel's limits: the water codes are swum.
+ * With `trueRelief` (T475, ADR-0256), `k` is walkable mountain rock (`layer: 'ground', solid: false, cross: 'walk'`, no boulder model).
  */
-export function toPalette(terrains: RawTerrain[]): Record<string, TerrainDef> {
+export function toPalette(terrains: RawTerrain[], trueRelief = false): Record<string, TerrainDef> {
+  const codes = baseCodesFor(trueRelief);
   return Object.fromEntries(
     terrains.map((t) => {
-      const base = BASE_CODES[t.code];
+      const base = codes[t.code];
       const layer = base?.layer ?? t.layer ?? (t.solid ? 'rock' : 'ground');
       const physics = physicsOf(layer, t, base?.cross, WATER_CODES[t.code]);
       // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
@@ -244,8 +256,9 @@ export interface GenesisBrought {
 
 const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(0, n).map((x) => `«${x.name}» (${x.class})`).join(', ');
 
-export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography, breath = false): Promise<GenesisPlan> {
+export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography, breath = false, trueRelief = false): Promise<GenesisPlan> {
   const data = { theme };
+  const baseCodes = baseCodesFor(trueRelief);
   // The fields of the bible are those of the file (English since T310b); `storia` of an answer of before is `history` here, not in internalAnswer.
   const askBible = async (feedback = ''): Promise<Bible> =>
     internalFields('bible', await c.ask<Bible>(
@@ -267,7 +280,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     c.ask<{ terrains: RawTerrain[]; roof: string }>(
       'cartographer',
       'genesis.terrain',
-      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(BASE_CODES).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; on the frontier planks, packed dirt, corral; on islands planks (for the piers), a reef (rock just under the water), coral, rigging; on a far world regolith, ice, glass of the greenhouses; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
+      `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(baseCodes).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; on the frontier planks, packed dirt, corral; on islands planks (for the piers), a reef (rock just under the water), coral, rigging; on a far world regolith, ice, glass of the greenhouses; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
       { data: { ...data, bible } },
     );
@@ -299,16 +312,19 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
 
   // The Physicist decides how a body crosses each terrain, and how fast (T437, ADR-0224): within the kernel's limits, which `toPalette` keeps.
   if (!errs.length) {
+    const fixedLine = trueRelief
+      ? 'Fixed rules: g, p, s, n, k, f, d are walked (k is bare mountain rock, walkable on terraces and ridges); t, j, r, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue.'
+      : 'Fixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue.';
     const phys = await c.ask<{ terrains: Array<{ code: string; cross?: Crossing; solid?: boolean; speed?: number; fatigue?: number; depth?: string; air?: unknown; note?: string }> }>(
       'physicist',
       'genesis.physics',
-      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow, deep or a reef (rock just under the surface: one swims over it, no hull floats on it).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\nFixed rules: g, p, s, n, f, d are walked; t, j, r, k, h are not crossed; w (shallow) and o (deep) are swum: of them say only the pace and the fatigue. Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).${breath ? PHYS_BREATH : ''}`,
+      `Review the physics of these terrains: how a body crosses each one (walk, swim or none) and at what pace (a multiplier: on foot ${TERRAIN_LIMITS.walkPace.join('-')}, swimming ${TERRAIN_LIMITS.swimPace.join('-')}); where one swims, how many times the energy it costs against walking (${TERRAIN_LIMITS.fatigue.join('-')}) and whether the water is shallow, deep or a reef (rock just under the surface: one swims over it, no hull floats on it).\n${terrain.terrains.map((t) => `${t.code} ${t.name} [${t.layer}]: ${t.description} (solid=${t.solid}, speed=${t.speed})`).join('\n')}\n${fixedLine} Walls, vegetation and rock are never crossed, floors and doors always walked; other ground is walked or not; another liquid is swum or not (lava, tar: none).${breath ? PHYS_BREATH : ''}`,
       breath ? PHYS_SCHEMA_BREATH : PHYS_SCHEMA,
       { data: { terrains: terrain.terrains } },
     );
     for (const p of phys.terrains ?? []) {
       const t = terrain.terrains.find((x) => x.code === p.code);
-      const base = t && BASE_CODES[t.code];
+      const base = t && baseCodes[t.code];
       // Of a base code only the water's pace and fatigue are the Physicist's; the rest is the kernel's.
       if (!t || (base && base.cross !== 'swim')) continue;
       const was = physicsOf(base ? base.layer : t.layer, t, base ? base.cross : undefined, WATER_CODES[t.code]);
@@ -323,7 +339,7 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
       if (now.cross !== was.cross || now.speed !== was.speed || now.fatigue !== was.fatigue) c.say('physicist', 'corregge', `${t.name}: ${now.cross === 'walk' ? 'calpestabile' : now.cross === 'swim' ? 'si nuota' : 'invalicabile'}, velocità ×${now.speed}${p.note ? ` — ${p.note}` : ''}`, 'cartographer');
     }
   }
-  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terrains);
+  const palette = errs.length ? (JSON.parse(base['modules/world.terrain/manifest.json']).tiles as Record<string, TerrainDef>) : toPalette(terrain.terrains, trueRelief);
 
   // The Arbiter checks that the story, the look and the land agree.
   const review = await c.ask<{ approved: boolean; problems: Array<{ agent: AgentId; problem: string }> }>(

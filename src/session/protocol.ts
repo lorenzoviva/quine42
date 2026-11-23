@@ -66,6 +66,8 @@ export interface ChunkView {
   strata?: string[];
   /** Its ramps (T474, ADR-0250): the earth the server moved, tile → levels, so the client's ground is the server's; none today. */
   ramps?: Record<string, number>;
+  /** Base relief levels of a place in a true-relief world (T475, ADR-0256): S×S whole levels, sent when the client has not had them yet. */
+  relief?: number[];
   version: number;
 }
 
