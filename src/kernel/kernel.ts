@@ -68,7 +68,7 @@ import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeF
 import { AGENTS, Council, readBible, wordsOf, type AgentId, type CatalogEntry, type FeedEntry } from './agents/council';
 import { designEnvironment, drawAtlas, planChunk, readStructure, type ChunkPlan, type PlanContext, type PlannedHouse, type WaterRecord, type Where } from './agents/cartography';
 import { FRESH_EVERY, NEW_STRUCTURES_PER_HOUR, nearestSize, newSeedFor, reusableEntry, reusableOf, reusableStructures, reuseSeed, StructureHour, type ReusableStructure } from './reuse';
-import { WaterFlow, WET, type WaterChange } from './water';
+import { DEEP, WaterFlow, WET, type WaterChange } from './water';
 import { forge, ForgeRejected, judgeCombination, repairLogic, slug, type ForgeKind, type ForgeOrigin } from './agents/forge';
 import { agentReply, examine, narrate, NARRATOR_PLAYS, liaisonReply, type Interpreter, type NpcReply, type Turn } from './agents/minds';
 import { planGenesis, type GenesisBrought } from './agents/genesis';
@@ -86,7 +86,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWo
 import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
 import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
-import { BandedRelief, chunkLevels, flatRelief, HILLS, LEVEL, parseRelief, Relief, RELIEF_PATH, TrueRelief, worldLevels, type ChunkReliefData, type LotBox } from './relief';
+import { BandedRelief, chunkLevels, flatRelief, HILLS, LEVEL, parseRelief, Relief, RELIEF_DEPTH, RELIEF_PATH, TrueRelief, worldLevels, type ChunkReliefData, type LotBox } from './relief';
 import { CardCosts, CardUses, CARDS_FILE, readServer, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
@@ -95,7 +95,7 @@ import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, internalValues, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { cameraCutAt, UNDER_STEP, undergroundAt, type CameraLine, type Cut, type Underground } from './underground';
-import { dominantCellarStratum, draftStrata, programStrata, readStrata, sampleLotStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow, summarizePlaceStrata, type LotStratum } from './strata';
+import { bedStratum, dominantCellarStratum, draftStrata, programStrata, readStrata, sampleLotStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow, summarizePlaceStrata, type LotStratum } from './strata';
 import { addMoved, FLAT_SPAN, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
 import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, climbDuration, climbLine, climbOf, climbPoint, fallPoint, onFace, saneClimb, startClimb, type ClimbComp, type ClimbRefusal } from './climb';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
@@ -240,6 +240,8 @@ export interface Chunk {
   network?: Network;
   /** In a thin client of a true-relief world (T475): base relief levels as the server computed them (`ChunkView.relief`). */
   relief?: Int16Array;
+  /** In a thin client of a true-relief world (T480): seabed levels as the server computed them (`ChunkView.bed`). */
+  bed?: Int16Array;
 }
 
 export interface LineState {
@@ -691,6 +693,7 @@ export class Kernel {
     ground: (c, r) => Math.max(this.seaLevel, this.relief.level(c, r) + this.digAt(c, r)),
     record: (c, r) => this.waterAt(c, r),
     sea: () => this.seaLevel,
+    bed: (c, r) => (this.relief.hasCliffs(c) ? this.bedLevelAt(c, r) : this.fieldAt(c, r) - DEEP),
     joined: (c, r, tc, tr) => !this.fallBetween(c, r, tc, tr),
   });
   /** The cellular automata of the world (T482, ADR-0254): parametric fields + MarkovJunior rules on the loaded window. */
@@ -2877,6 +2880,41 @@ export class Kernel {
     return { roughness, enclaves: kept.length, share, means, ...(Number.isFinite(lo) ? { low: lo - this.seaLevel, high: hi - this.seaLevel } : {}), cliffs, terraces };
   }
 
+  /**
+   * Summarizes the seabed of a draft place in a true-relief world (T480, ADR-0259) for the Cartographer's `PlanContext.seabed`:
+   * only when the place lies in a true-relief band and has at least 4 interior swimmable water tiles; undefined otherwise.
+   */
+  private draftSeabed(ch: Chunk): PlanContext['seabed'] {
+    const S = this.config.chunkSize;
+    if (!this.relief.hasCliffs(ch.cx * S)) return undefined;
+    let tiles = 0, deep = 0, reef = 0, maxDepth = 0;
+    const strataNames = new Set<string>();
+    const topRow = this.strataOf(ch)[0] ?? '';
+    for (let r = 1; r < S - 1; r++) {
+      for (let c = 1; c < S - 1; c++) {
+        const i = r * S + c;
+        const code = ch.draft[i] ?? '';
+        const t = this.palette[code];
+        if (t?.layer !== 'liquid' || crossingOf(t) !== 'swim') continue;
+        tiles++;
+        const col = ch.cx * S + c, row = ch.cy * S + r;
+        const rawLv = this.relief.level(col, row);
+        const rawBed = this.relief.bed(col, row);
+        const surf = Math.max(this.seaLevel, rawLv);
+        const b = t.depth === 'reef' ? surf - 1 : rawLv < this.seaLevel ? rawBed : rawBed < rawLv ? surf - (rawLv - rawBed) : surf - (t.depth === 'deep' ? 8 : DEEP);
+        const d = Math.max(1, surf - Math.max(-RELIEF_DEPTH, Math.min(surf - 1, b)));
+        if (d > maxDepth) maxDepth = d;
+        if (t.depth === 'reef' || d <= 1) reef++;
+        else if (d >= 6 || t.depth === 'deep') deep++;
+        const topDef = topRow[i] ? this.strata[topRow[i]!] : undefined;
+        const bs = bedStratum(t, d, topDef, this.strata);
+        if (bs?.name) strataNames.add(bs.name);
+      }
+    }
+    if (tiles < 4) return undefined;
+    return { tiles, deep, reef, maxDepth, strata: [...strataNames].slice(0, 4) };
+  }
+
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
   private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
     const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
@@ -2919,10 +2957,11 @@ export class Kernel {
           rari: this.rareAllowed(ch),
           // The structures the world has, the brought ones among them (T495): asked again by their concept; a new one only under the hour's ceiling.
           known: this.knownStructures(this.rareAllowed(ch)),
-          // Where its draft keeps enclaves (T474): how rough it is, and that a thing may stand in one.
+          // Where its draft keeps enclaves (T474) or has a seabed in true relief (T480): offered only then.
           ...(() => {
             const relief = this.draftRelief(ch);
-            return relief ? { relief } : {};
+            const seabed = this.draftSeabed(ch);
+            return { ...(relief ? { relief } : {}), ...(seabed ? { seabed } : {}) };
           })(),
           newStructures: this.newStructureAllowed(),
           freshWanted: this.newStructureAllowed() && this.plansSinceFresh >= FRESH_EVERY - 1,
@@ -3222,12 +3261,39 @@ export class Kernel {
     const belowSet = new Set(result.lots.flatMap((b, i) => (cellars.has(i) ? b.floor : [])));
     const below = indoor.filter((i) => belowSet.has(i));
     const outdoor = reach.filter((i) => !indoorSet.has(i) && this.palette[result.grid[Math.floor(i / S)][i % S]]?.layer !== 'door');
+    // Interior swimmable water tiles for `where: 'underwater'` in true-relief worlds (T480, ADR-0259): prefer depth >= 2 levels.
+    const hasBed = this.relief.hasCliffs(ch.cx * S);
+    const underwaterAll: number[] = [];
+    const underwaterDeep: number[] = [];
+    if (hasBed) {
+      for (let r = 1; r < S - 1; r++) {
+        for (let c = 1; c < S - 1; c++) {
+          const i = r * S + c;
+          if (indoorSet.has(i)) continue;
+          const code = result.grid[r][c];
+          if (!this.isClearWater(code)) continue;
+          underwaterAll.push(i);
+          const col = ch.cx * S + c, row = ch.cy * S + r;
+          const surf = Math.round(this.groundAt(col, row) / LEVEL);
+          if (surf - this.bedLevelAt(col, row) >= 2) underwaterDeep.push(i);
+        }
+      }
+    }
     const freeTiles = new Set<number>([...reachable, ...enclave]);
     const piers = result.piers;
     let arts = articulationPoints(freeTiles, S);
     const pick = (where: Where, solid = false): number | undefined => {
+      if (where === 'underwater') {
+        const deep = underwaterDeep.filter((i) => !occupied.has(i) && !piers.has(i));
+        const wet = deep.length ? deep : underwaterAll.filter((i) => !occupied.has(i) && !piers.has(i));
+        if (wet.length) {
+          const tile = wet[rng.int(wet.length)];
+          occupied.add(tile);
+          return tile;
+        }
+      }
       const kept = where === 'enclave' ? enclave.filter((i) => !occupied.has(i)) : [];
-      let pool = (kept.length ? kept : where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : where === 'outside' && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
+      let pool = (kept.length ? kept : where === 'under' && below.length ? below : (where === 'inside' || where === 'under') && indoor.length ? indoor : (where === 'outside' || where === 'underwater') && outdoor.length ? outdoor : reach).filter((i) => !occupied.has(i));
       // Rule 10 (ADR-0064, ADR-0230, T505): no solid obstacle on articulation points nor on any tile of a pier (including its head, a leaf of `freeTiles`).
       if (solid) pool = pool.filter((i) => !arts.has(i) && !piers.has(i));
       if (!pool.length) return undefined;
@@ -3267,7 +3333,8 @@ export class Kernel {
     });
     const objects = plan.objects.map((o, index) => {
       const m = this.modules.get(o.module);
-      return { index, cell: m ? pick(o.where, this.isSolidModule(m)) : undefined };
+      const w = o.where === 'underwater' && m?.manifest.persona ? 'outside' : o.where;
+      return { index, cell: m ? pick(w, this.isSolidModule(m)) : undefined };
     });
     // Things lying around: named by the Cartographer (those not known yet are introduced later), plus what the ground loot table yields.
     const ground = plan.ground.map((name, index) => {
@@ -3340,7 +3407,16 @@ export class Kernel {
       const p = at(cell);
       const sid = inLot(cell);
       if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y), plan.objects[index].where === 'under');
-      else this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
+      else {
+        const eid = this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
+        // Sunken/underwater object (T480): rests on the seabed below the water surface, never NPCs.
+        if (plan.objects[index].where === 'underwater' && !m.manifest.persona && this.hasBedAt(Math.floor(p.x)) && this.isClearWater(this.tileAt(Math.floor(p.x), Math.floor(p.y)))) {
+          const bedZ = this.bedAt(p.x, p.y);
+          const pos = this.ecs.get(eid, 'pos');
+          if (pos) pos.z = bedZ;
+          this.ecs.set(eid, 'below', { z: bedZ });
+        }
+      }
     }
 
     for (const g of place.ground) {
@@ -4020,8 +4096,9 @@ export class Kernel {
             this.config.seed,
             S,
             (cx, cy) => {
-              const lv = this.chunks.get(this.chunkKey(cx, cy))?.relief;
-              return lv ? { levels: lv, bed: lv } : undefined;
+              const ch = this.chunks.get(this.chunkKey(cx, cy));
+              const lv = ch?.relief;
+              return lv ? { levels: lv, bed: ch?.bed ?? lv } : undefined;
             },
             () => flatRelief(),
             false,
@@ -4049,8 +4126,9 @@ export class Kernel {
                     seed,
                     S,
                     (cx, cy) => {
-                      const lv = this.chunks.get(this.chunkKey(cx + planetPlace(band, S), cy))?.relief;
-                      return lv ? { levels: lv, bed: lv } : undefined;
+                      const ch = this.chunks.get(this.chunkKey(cx + planetPlace(band, S), cy));
+                      const lv = ch?.relief;
+                      return lv ? { levels: lv, bed: ch?.bed ?? lv } : undefined;
                     },
                     () => flatRelief(),
                     false,
@@ -4078,6 +4156,64 @@ export class Kernel {
     const S = this.config.chunkSize;
     if (!this.relief.hasCliffs(ch.cx * S)) return undefined;
     return this.relief.chunkLevelsAt(ch.cx, ch.cy, S);
+  }
+
+  /** Seabed levels of a place for the session wire (T480): only in true-relief worlds; undefined otherwise. */
+  chunkBedOf(ch: Pick<Chunk, 'cx' | 'cy'>): Int16Array | undefined {
+    const S = this.config.chunkSize;
+    if (!this.relief.hasCliffs(ch.cx * S)) return undefined;
+    return this.relief.chunkBedAt(ch.cx, ch.cy, S);
+  }
+
+  /** Whether the column lies in a true-relief band where swimmable water renders a visible seabed (T480, ADR-0259). */
+  hasBedAt(col: number): boolean {
+    return this.relief.hasCliffs(col);
+  }
+
+  /** Whether a terrain code is swimmable clear water (translucent over the seabed in true relief, T480; lava stays opaque). */
+  isClearWater(code: string | undefined): boolean {
+    const t = code ? this.palette[code] : undefined;
+    return t?.layer === 'liquid' && crossingOf(t) === 'swim';
+  }
+
+  /**
+   * The level of the solid bed at integer tile (col, row) (T480, ADR-0259): ground level on land; under liquid tiles the
+   * seabed level (from `WaterFlow` if flowed, `surf - 1` on a reef, the true-relief bed on sea/rivers/lakes, or `surf - 8`/`DEEP`
+   * when painted on flat ground), clamped to `[-RELIEF_DEPTH, surf - 1]`.
+   */
+  bedLevelAt(col: number, row: number): number {
+    const code = this.tileAt(col, row);
+    const t = code ? this.palette[code] : undefined;
+    const surf = Math.round(this.groundAt(col, row) / LEVEL);
+    if (t?.layer !== 'liquid') return surf;
+    const rec = this.waterAt(col, row);
+    if (rec && Number.isFinite(rec[0])) return Math.max(-RELIEF_DEPTH, Math.min(surf - 1, rec[0]));
+    if (t.depth === 'reef') return Math.max(-RELIEF_DEPTH, surf - 1);
+    if (this.relief.hasCliffs(col)) {
+      const rawLv = this.relief.level(col, row);
+      const rawBed = this.relief.bed(col, row);
+      const dig = this.digAt(col, row);
+      let b: number;
+      if (rawLv < this.seaLevel) b = rawBed + dig;
+      else if (rawBed < rawLv) b = surf - (rawLv - rawBed) + dig;
+      else b = surf - (t.depth === 'deep' ? 8 : DEEP) + dig;
+      return Math.max(-RELIEF_DEPTH, Math.min(surf - 1, b));
+    }
+    return Math.max(-RELIEF_DEPTH, surf - DEEP);
+  }
+
+  /** The height (tiles) of the solid bed at (x, y) (T480, ADR-0259): ground height on land, seabed height under liquid. */
+  bedAt(x: number, y: number): number {
+    return this.bedLevelAt(Math.floor(x), Math.floor(y)) * LEVEL;
+  }
+
+  /** The top stratum of the seabed at (col, row) (T480, ADR-0259): reef rock on reefs/1-level shoals, row 0 of strata elsewhere. */
+  bedStratumAt(col: number, row: number): TerrainDef | undefined {
+    const code = this.tileAt(col, row);
+    const t = code ? this.palette[code] : undefined;
+    const surf = Math.round(this.groundAt(col, row) / LEVEL);
+    const depth = Math.max(1, surf - this.bedLevelAt(col, row));
+    return bedStratum(t, depth, this.stratumAt(col, row, 0), this.strata);
   }
 
   /** The sea's level (T51a): `universe.json → rilievo.mare`, or the one the relief gives. */
@@ -4443,12 +4579,18 @@ export class Kernel {
   }
 
   /**
-   * The height (tiles) of a thing that stands in a cellar (T417): its `pos.z`, if it is more than a step under the ground there (on the
-   * server where `placeInside` put it; in a mirror from its `below`, which the client receives); undefined for anything else, and for a structure.
+   * The height (tiles) of a thing that stands in a cellar (T417) or on the seabed under water (T480): its `pos.z` (or `below.z` in a
+   * mirror), if it is under the ground/water surface there; undefined for anything else, and for a structure.
    */
   private cellarHeight(id: Id, p: { x: number; y: number; z?: number } | undefined): number | undefined {
-    if (!p || this.ecs.has(id, 'structure') || !Number.isFinite(p.z)) return undefined;
-    return p.z! < this.groundAt(p.x, p.y) - UNDER_STEP ? p.z : undefined;
+    if (!p || this.ecs.has(id, 'structure')) return undefined;
+    const below = this.ecs.get(id, 'below');
+    const z = Number.isFinite(p.z) ? p.z! : below && Number.isFinite(below.z) ? below.z : undefined;
+    if (z === undefined) return undefined;
+    const g = this.groundAt(p.x, p.y);
+    if (z < g - UNDER_STEP) return z;
+    if (below && Number.isFinite(below.z) && this.isClearWater(this.tileAt(Math.floor(p.x), Math.floor(p.y))) && z < g - 0.1) return z;
+    return undefined;
   }
 
   /** Where an entity's model is laid (tiles): on the ground under its middle, its cellar under it (T52b); a thing in a cellar on its floor (T417). */
@@ -4603,8 +4745,18 @@ export class Kernel {
       if (this.alive(ch)) this.placeVehicle(ch, m, ride, origin);
       return;
     }
-    const tile = pick(f.where, this.isSolidModule(m));
-    if (m && this.alive(ch) && tile !== undefined) this.spawnModuleEntity(m, at(tile).x, at(tile).y, ch.key, origin);
+    const w = f.where === 'underwater' && m?.manifest.persona ? 'outside' : f.where;
+    const tile = pick(w, this.isSolidModule(m));
+    if (m && this.alive(ch) && tile !== undefined) {
+      const p = at(tile);
+      const eid = this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
+      if (w === 'underwater' && !m.manifest.persona && this.hasBedAt(Math.floor(p.x)) && this.isClearWater(this.tileAt(Math.floor(p.x), Math.floor(p.y)))) {
+        const bedZ = this.bedAt(p.x, p.y);
+        const pos = this.ecs.get(eid, 'pos');
+        if (pos) pos.z = bedZ;
+        this.ecs.set(eid, 'below', { z: bedZ });
+      }
+    }
   }
 
   private unloadChunk(ch: Chunk): void {
@@ -13518,14 +13670,14 @@ export class Kernel {
       const p = this.ecs.get(id, 'pos');
       const fc: FormComp | undefined = this.ecs.get(id, 'form');
       const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
+      // A thing that stands in a cellar (T417) or on the seabed (T480) stands at its height, not on the ground/water over it.
+      const stand = this.cellarHeight(id, p);
       // A solid thing whose brought model stops nobody (T296, rule 10): the card is isolated, the thing blocks its tile until the generic is ready.
       if (!fc || !f?.foot || (f.footless && this.isBrought(fc.model) && this.cardBroke(fc.model, 'footless', breakReason('footless', { seed: f.seed })))) {
-        this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
+        if (stand === undefined) this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
         continue;
       }
       // An entity with a model blocks with its voxels: it is listed in every cell its footprint may reach.
-      // A thing that stands in a cellar (T417) stands at its height, not on the ground over it.
-      const stand = this.cellarHeight(id, p);
       const s: SolidForm = { id, x: p.x, y: p.y, yaw: fc.yaw, form: f, ...this.groundOf(id, fc, f), ...(stand !== undefined ? { stand } : {}), ...(this.ecs.has(id, 'vehicle') ? { vehicle: true as const } : {}) };
       if (s.vehicle) decks.set(id, s);
       if (s.hole) this.cellars.push(s);
@@ -13598,11 +13750,14 @@ export class Kernel {
       // What lies on furniture rests on the highest floor no higher than where it was put (T291): its shelf, or, if the furniture is
       // not there (gone, or its form still on its way), what is under it. Where it was put stays, so the shelf takes it back.
       const placed = this.ecs.get(id, 'placed');
-      // What stands in a cellar (T417) stays on its floor: in a mirror, where its height did not come, from `below`.
+      // What stands in a cellar (T417) or on the seabed (T480) stays at its height: in a mirror, where its height did not come, from `below`.
       const below = this.ecs.get(id, 'below');
       if (placed && Number.isFinite(placed.z)) p.z = this.floorBelow(p.x, p.y, placed.z + REST_SLACK);
-      else if (below && Number.isFinite(below.z) && this.solidForms.has(`${Math.floor(p.x)},${Math.floor(p.y)}`)) p.z = this.floorAt(p.x, p.y, Number.isFinite(p.z) ? p.z : below.z);
-      else settle(p, p.x, p.y);
+      else if (below && Number.isFinite(below.z)) {
+        if (this.isClearWater(this.tileAt(Math.floor(p.x), Math.floor(p.y)))) p.z = below.z;
+        else if (this.solidForms.has(`${Math.floor(p.x)},${Math.floor(p.y)}`)) p.z = this.floorAt(p.x, p.y, Number.isFinite(p.z) ? p.z : below.z);
+        else settle(p, p.x, p.y);
+      } else settle(p, p.x, p.y);
     }
   }
 

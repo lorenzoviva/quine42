@@ -68,6 +68,8 @@ export interface ChunkView {
   ramps?: Record<string, number>;
   /** Base relief levels of a place in a true-relief world (T475, ADR-0256): S×S whole levels, sent when the client has not had them yet. */
   relief?: number[];
+  /** Seabed levels of a place in a true-relief world (T480, ADR-0259): S×S whole levels, sent when the client has not had them yet. */
+  bed?: number[];
   version: number;
 }
 

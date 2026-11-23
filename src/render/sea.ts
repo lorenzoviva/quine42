@@ -82,6 +82,14 @@ export const SEA_MAT = {
     );
     sh.fragmentShader = `varying float vSeaH;\n${sh.fragmentShader}`.replace('#include <color_fragment>', CREST_FRAGMENT);
   }),
+  /** Clear swimmable water in true-relief worlds (T480, ADR-0259): translucent surface waving over the seabed, opacity by depth (`alpha`). */
+  clear: waving(clipped(lit({ vertexColors: true, transparent: true, depthWrite: false }), 'water-clear'), (sh) => {
+    sh.vertexShader = `varying float vSeaH;\n${sh.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>\n  vSeaH = wave * seaSwell(seaPhase, uTime) / ${SWELL_MAX.toFixed(4)};`,
+    );
+    sh.fragmentShader = `varying float vSeaH;\n${sh.fragmentShader}`.replace('#include <color_fragment>', CREST_FRAGMENT);
+  }),
   /** The foam on the shores, riding the swell as the water does. */
   foam: noInk(
     waving(clipped(lit({ color: FOAM, transparent: true, depthWrite: false }), 'foam'), (sh) => {

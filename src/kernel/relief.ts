@@ -168,6 +168,11 @@ export class Relief {
     return undefined;
   }
 
+  /** Seabed levels of a chunk for wire transport in a true-relief world (T480); undefined for `Hills` and flat worlds. */
+  chunkBedAt(_cx: number, _cy: number, _size: number): Int16Array | undefined {
+    return undefined;
+  }
+
   /** The height of a tile's ground, in tiles. */
   height(col: number, row: number): number {
     return this.level(col, row) * LEVEL;
@@ -476,6 +481,10 @@ export class TrueRelief extends Relief {
 
   override chunkLevelsAt(cx: number, cy: number, size: number): Int16Array | undefined {
     return size === this.size ? this.chunkData(cx, cy).levels : undefined;
+  }
+
+  override chunkBedAt(cx: number, cy: number, size: number): Int16Array | undefined {
+    return size === this.size ? this.chunkData(cx, cy).bed : undefined;
   }
 }
 
@@ -820,6 +829,20 @@ export class BandedRelief extends Relief {
     if (!p || !this.planets[k - 1]?.trueRelief) return undefined;
     const localCx = cx - Math.round(this.planets[k - 1].x0 / size);
     const raw = p.relief.chunkLevelsAt(localCx, cy, size);
+    if (!raw) return undefined;
+    if (!p.shift) return raw;
+    const shifted = new Int16Array(raw.length);
+    for (let i = 0; i < raw.length; i++) shifted[i] = Math.max(-RELIEF_DEPTH, Math.min(RELIEF_PEAK, raw[i] + p.shift));
+    return shifted;
+  }
+
+  override chunkBedAt(cx: number, cy: number, size: number): Int16Array | undefined {
+    const k = this.bandOf(cx * size);
+    if (!k) return this.home.chunkBedAt(cx, cy, size);
+    const p = this.planet(k);
+    if (!p || !this.planets[k - 1]?.trueRelief) return undefined;
+    const localCx = cx - Math.round(this.planets[k - 1].x0 / size);
+    const raw = p.relief.chunkBedAt(localCx, cy, size);
     if (!raw) return undefined;
     if (!p.shift) return raw;
     const shifted = new Int16Array(raw.length);

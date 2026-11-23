@@ -11,10 +11,21 @@ import { FoamStrips, phaseAttribute, waveAttribute, type FoamArrays } from './se
 export const WALL_H = 1.6;
 /** The water drawn under the level of its tiles (the swimmer sinks under it, T438). */
 export const WATER_Y = -0.18;
+/** One relief level in tiles (mirrors `LEVEL` in relief.ts, kept here so the terrain worker stays lean). */
+const BED_STEP = 0.25;
 /** How thick the edge of a land over the void is drawn (tiles, T445): a slab, not a cliff down to nothing. */
 export const VOID_SLAB = 0.9;
 /** How many seeds of a terrain's model stand on its tiles. */
 export const TILE_SEEDS = 3;
+
+/**
+ * Opacity of translucent swimmable water over a visible seabed as a function of depth in tiles (T480, ADR-0259):
+ * reefs and coastal shallows stay clear so the bed and sunken objects read cleanly; deep sea stays richly tinted.
+ */
+export function waterAlpha(depth: number): number {
+  if (!Number.isFinite(depth) || depth <= 0) return 0.34;
+  return Math.min(0.88, 0.34 + 0.54 * (1 - Math.exp(-depth * 0.55)));
+}
 
 /** What the sides of a part add to it: a step of the relief has its line at the top and at the foot, though the depth does not jump seen from the front. */
 const SIDE_PART = 128;
@@ -173,6 +184,18 @@ export interface ChunkSource extends GroundReads {
   ready(code: string): boolean;
   /** A colour lit as the renderer lights it (`rgbOf`, at full). */
   rgb(color: string | undefined): readonly number[];
+  /** Whether swimmable water renders translucent over a visible seabed column (T480, ADR-0259: true-relief worlds). */
+  hasBed?: boolean;
+  /** Height (tiles) of the solid bed at (x, z) (`Kernel.bedAt`). Required when `hasBed` is true. */
+  bedAt?(x: number, z: number): number;
+  /** Whether a terrain code is swimmable clear water (translucent over the seabed; lava stays opaque). */
+  isClear?(code: string): boolean;
+  /** Lit RGB of the top stratum of the seabed at (x, z) (`Kernel.bedStratumAt`). */
+  bedTopRgb?(x: number, z: number): readonly number[];
+  /** Number of strata rows at (x, z) (`Kernel.strataRowsAt`). */
+  strataRowsAt?(x: number, z: number): number;
+  /** Lit RGB of stratum row `row` (0-based from ground down) at (x, z). */
+  stratumRgbAt?(x: number, z: number, row: number): readonly number[];
 }
 
 const groundY = (t: TerrainLook | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
@@ -240,6 +263,8 @@ export interface ChunkArrays {
   ground: MeshArrays;
   solid?: MeshArrays;
   water?: MeshArrays & { wave: Float32Array; seaPhase: Float32Array };
+  /** Translucent waving surface of swimmable water over a visible seabed in true-relief worlds (T480, ADR-0259). */
+  clearWater?: MeshArrays & { wave: Float32Array; seaPhase: Float32Array; alpha: Float32Array };
   foam?: FoamArrays;
   /** In the order they were placed (terrain.ts groups them by form in that order). */
   instances: TileInstance[];
@@ -258,6 +283,10 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   const solid = new MeshBuilder();
   // The water's tops in a mesh of their own, which the swell moves (T451), and the foam along its shores.
   const water = new MeshBuilder();
+  // In true-relief worlds (T480, ADR-0259), swimmable water is drawn translucent in `clearWater` over the opaque seabed column in `ground`.
+  const hasBed = !!src.hasBed;
+  const clearWater = new MeshBuilder();
+  const clearAlpha: number[] = [];
   const waterTop = (x: number, z: number) => (src.terrain(src.tileAt(x, z) ?? '')?.layer === 'liquid' ? src.groundAt(x, z) + WATER_Y : undefined);
   const foam = new FoamStrips(waterTop);
   const X0 = src.cx * S, Z0 = src.cy * S;
@@ -270,7 +299,40 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   const holeAt = (x: number, z: number) => src.holeAt(x, z);
   const N = src.cells;
   const { tile, ground0, top, subTop } = terrainTops(src, holeAt, N);
+  const isClear = (code: string | undefined) => hasBed && !!code && src.terrain(code)?.layer === 'liquid' && !!src.isClear?.(code);
+  /** Top of the solid column at (x, z): seabed height (at least one level below surface) under clear water, else `top`. */
+  const colTop = (x: number, z: number) => {
+    const c = src.tileAt(x, z);
+    if (isClear(c) && src.bedAt) return Math.min(src.bedAt(x, z), ground0(x, z) - BED_STEP);
+    return top(x, z);
+  };
+  /** Smooth per-corner water opacity averaged across adjacent clear-water tiles so depth transitions have no tile seams. */
+  const cornerAlpha = (vx: number, vz: number, fallback: number): number => {
+    let sum = 0, cnt = 0;
+    for (const [ox, oz] of [[0, 0], [-1, 0], [0, -1], [-1, -1]] as const) {
+      const tx = vx + ox, tz = vz + oz;
+      if (isClear(src.tileAt(tx, tz))) {
+        sum += waterAlpha(Math.max(0, ground0(tx, tz) + WATER_Y - colTop(tx, tz)));
+        cnt++;
+      }
+    }
+    return cnt ? sum / cnt : fallback;
+  };
   const side = (dx: number, dz: number, p: number, a: number, b: number, y: number, ny: number, rgb: number[]) => sideQuad(ground, dx, dz, p, a, b, y, ny, rgb);
+  /** Vertical underwater bank or seabed drop drawn in bands of the column's strata (T480). */
+  const strataSideIn = (x: number, z: number, dx: number, dz: number, p: number, a: number, b: number, yTop: number, yBot: number, g: number, shade: number) => {
+    const rows = src.strataRowsAt?.(x, z) ?? 0;
+    if (rows <= 0 || !src.stratumRgbAt) {
+      side(dx, dz, p, a, b, yTop, yBot, lit(BANK, shade));
+      return;
+    }
+    for (let cur = yTop; cur > yBot; ) {
+      const row = Math.min(rows - 1, Math.max(0, Math.floor(g - cur + 1e-6)));
+      const bottom = row >= rows - 1 ? yBot : Math.max(yBot, g - row - 1);
+      side(dx, dz, p, a, b, cur, bottom, src.stratumRgbAt(x, z, row).map((v) => v * shade));
+      cur = bottom;
+    }
+  };
   /**
    * The sides of a tile towards a neighbour when one of the two is only partly over a cellar (T415): sub-cell by sub-cell
    * along the edge, where this tile's is higher than the neighbour's next to it; a run of the same heights is one quad.
@@ -351,8 +413,22 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
       ground.fixedPart = terrainPart.get(code) ?? 0;
       solid.fixedPart = undefined;
       const holed = holeAt(x, z);
+      const selfClear = isClear(code);
       if (holed?.cover) partTile(x, z, base);
-      else if (t?.layer === 'liquid') {
+      else if (selfClear) {
+        const by = colTop(x, z);
+        const bedRgb = (src.bedTopRgb?.(x, z) ?? src.rgb(BANK)).map((v) => v * k0);
+        ground.quad([x, by, z], [x, by, z + 1], [x + 1, by, z + 1], [x + 1, by, z], [0, 1, 0], bedRgb);
+        clearWater.fixedPart = ground.fixedPart;
+        clearWater.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
+        const fb = waterAlpha(Math.max(0, y - by));
+        const aa = cornerAlpha(x, z, fb), ab = cornerAlpha(x, z + 1, fb), ac = cornerAlpha(x + 1, z + 1, fb), ad = cornerAlpha(x + 1, z, fb);
+        clearAlpha.push(aa, ab, ac, aa, ac, ad);
+        for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+          const n = tile(x + dx, z + dz);
+          if (n && n.layer !== 'liquid' && top(x + dx, z + dz) >= y - 1e-6) foam.edge(x, z, dx, dz, y);
+        }
+      } else if (t?.layer === 'liquid') {
         water.fixedPart = ground.fixedPart;
         water.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
         // Foam where the water meets what stands at its level or higher and is not water: a shore, a quay, a rock.
@@ -362,19 +438,54 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
         }
       } else ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
       // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
-      // banks of earth down to the water.
+      // banks of earth down to the water, and in true-relief worlds strata bands under the water surface (T480).
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const n = tile(x + dx, z + dz);
+        const nx = x + dx, nz = z + dz;
+        const n = tile(nx, nz);
         // Over the void the edge of the land is a slab with its thickness (T445), darker underneath than a bank.
         const edge = n?.layer === 'void';
-        const earth = edge ? base.map((v) => v * 0.5) : n?.layer === 'liquid' && t?.layer !== 'liquid' ? lit(BANK) : base.map((v) => v * 0.72);
-        if (!edge && (holed?.cover || holeAt(x + dx, z + dz)?.cover)) {
-          subSides(x, z, dx, dz, earth);
+        if (!hasBed) {
+          const earth = edge ? base.map((v) => v * 0.5) : n?.layer === 'liquid' && t?.layer !== 'liquid' ? lit(BANK) : base.map((v) => v * 0.72);
+          if (!edge && (holed?.cover || holeAt(nx, nz)?.cover)) {
+            subSides(x, z, dx, dz, earth);
+            continue;
+          }
+          const ny = edge ? y - VOID_SLAB : top(nx, nz);
+          if (ny >= y) continue;
+          side(dx, dz, dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z, dx ? z : x, dx ? z + 1 : x + 1, y, ny, earth);
           continue;
         }
-        const ny = edge ? y - VOID_SLAB : top(x + dx, z + dz);
-        if (ny >= y) continue;
-        side(dx, dz, dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z, dx ? z : x, dx ? z + 1 : x + 1, y, ny, earth);
+        const nClear = isClear(src.tileAt(nx, nz));
+        const myTop = selfClear ? colTop(x, z) : y;
+        const p = dx === 1 ? x + 1 : dx === -1 ? x : dz === 1 ? z + 1 : z;
+        const a = dx ? z : x, b = dx ? z + 1 : x + 1;
+        if (selfClear && !edge) {
+          const nSurf = top(nx, nz);
+          if (nSurf < y - 1e-6) {
+            const bot = Math.max(nSurf, myTop);
+            if (bot < y) {
+              clearWater.fixedPart = ground.fixedPart;
+              sideQuad(clearWater, dx, dz, p, a, b, y, bot, base);
+              const fa = waterAlpha(Math.max(0, y - myTop));
+              for (let k = 0; k < 6; k++) clearAlpha.push(fa);
+            }
+          }
+        }
+        const ny = edge ? myTop - VOID_SLAB : colTop(nx, nz);
+        if (ny >= myTop) continue;
+        if (selfClear) {
+          strataSideIn(x, z, dx, dz, p, a, b, myTop, ny, g0, 0.78);
+        } else if (nClear) {
+          const wy = ground0(nx, nz) + WATER_Y;
+          if (holed?.cover) subSides(x, z, dx, dz, lit(BANK));
+          else if (myTop > wy) side(dx, dz, p, a, b, myTop, Math.max(ny, wy), lit(BANK));
+          const subTopY = Math.min(myTop, wy);
+          if (subTopY > ny) strataSideIn(x, z, dx, dz, p, a, b, subTopY, ny, g0, 0.78);
+        } else {
+          const earth = edge ? base.map((v) => v * 0.5) : n?.layer === 'liquid' && t?.layer !== 'liquid' ? lit(BANK) : base.map((v) => v * 0.72);
+          if (!edge && (holed?.cover || holeAt(nx, nz)?.cover)) subSides(x, z, dx, dz, earth);
+          else side(dx, dz, p, a, b, myTop, ny, earth);
+        }
       }
       switch (t?.layer) {
         case 'wall':
@@ -402,6 +513,10 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   if (!water.empty) {
     const w = water.arrays(origin);
     out.water = { ...w, wave: waveAttribute(w.position, waterTop, origin), seaPhase: phaseAttribute(w.position, origin) };
+  }
+  if (!clearWater.empty) {
+    const cw = clearWater.arrays(origin);
+    out.clearWater = { ...cw, wave: waveAttribute(cw.position, waterTop, origin), seaPhase: phaseAttribute(cw.position, origin), alpha: new Float32Array(clearAlpha) };
   }
   if (!foam.empty) out.foam = foam.arrays(origin);
   return out;
@@ -437,6 +552,13 @@ export interface ChunkInput {
   holes: Array<[at: number, depth: number, cover: Uint8Array | undefined]>;
   /** The terrains whose models are ready (`tileForms`). */
   ready: string[];
+  /** Seabed data for true-relief worlds (T480, ADR-0259); omitted when `!hasBed`. */
+  hasBed?: boolean;
+  clear?: string[];
+  bed?: Float64Array;
+  bedTop?: string[];
+  strataRows?: Uint8Array;
+  strataHex?: string[][];
 }
 
 /**
@@ -449,6 +571,7 @@ export function inputSource(input: ChunkInput): ChunkSource {
   const terrains = new Map<string, TerrainLook>(input.palette.map(([code, layer, color]) => [code, { layer, color }]));
   const holes = new Map<number, TileHole>(input.holes.map(([i, depth, cover]) => [i, cover ? { depth, cover } : { depth }]));
   const ready = new Set(input.ready);
+  const clearSet = input.clear ? new Set(input.clear) : undefined;
   const none = [NaN, NaN, NaN];
   return {
     S: input.S,
@@ -472,6 +595,29 @@ export function inputSource(input: ChunkInput): ChunkSource {
     },
     ready: (code) => ready.has(code),
     rgb: (color) => input.rgb[color || ''] ?? none,
+    ...(input.hasBed
+      ? {
+          hasBed: true,
+          bedAt: (x: number, z: number) => {
+            const i = at(x, z);
+            return i < 0 || !input.bed ? NaN : input.bed[i]!;
+          },
+          isClear: (code: string) => !!clearSet?.has(code),
+          bedTopRgb: (x: number, z: number) => {
+            const i = at(x, z);
+            return i < 0 || !input.bedTop ? none : (input.rgb[input.bedTop[i]!] ?? none);
+          },
+          strataRowsAt: (x: number, z: number) => {
+            const i = at(x, z);
+            return i < 0 || !input.strataRows ? 0 : input.strataRows[i]!;
+          },
+          stratumRgbAt: (x: number, z: number, row: number) => {
+            const i = at(x, z);
+            const hex = i >= 0 ? input.strataHex?.[i]?.[row] : undefined;
+            return hex !== undefined ? (input.rgb[hex] ?? none) : none;
+          },
+        }
+      : {}),
   };
 }
 
@@ -484,8 +630,9 @@ export function chunkBuffers(a: ChunkArrays): ArrayBuffer[] {
   const add = (...xs: Array<Float32Array | Uint8Array>) => {
     for (const x of xs) out.push(x.buffer as ArrayBuffer);
   };
-  for (const m of [a.ground, a.solid, a.water]) if (m) add(m.position, m.normal, m.color, m.part);
+  for (const m of [a.ground, a.solid, a.water, a.clearWater]) if (m) add(m.position, m.normal, m.color, m.part);
   if (a.water) add(a.water.wave, a.water.seaPhase);
+  if (a.clearWater) add(a.clearWater.wave, a.clearWater.seaPhase, a.clearWater.alpha);
   if (a.foam) add(a.foam.position, a.foam.normal, a.foam.seaPhase, a.foam.foamPhase, a.foam.foam, a.foam.wave, a.foam.glow, a.foam.alpha);
   return out;
 }

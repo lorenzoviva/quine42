@@ -823,10 +823,12 @@ export class MockAiModels implements AiModels, DecisionModels {
     const cellar = Math.max(Math.abs(ctx.cx), Math.abs(ctx.cy)) >= CELLAR_FROM && ctx.catalog.some((m) => m.id === CELLAR_THING) && new Rng(hashStr(`cellar|${ctx.cx}|${ctx.cy}`)).chance(CELLAR_CHANCE);
     // Where the place keeps an enclave (T474: only with a relief that has cliffs, never in a place of today), a chest up there.
     const ledge = !!ctx.relief?.enclaves && ctx.catalog.some((m) => m.id === CELLAR_THING);
+    // Where the place has a seabed (T480: only in true-relief worlds with swimmable water), a sunken chest on the bed, drawn apart.
+    const sunken = !!ctx.seabed?.tiles && ctx.catalog.some((m) => m.id === CELLAR_THING) && new Rng(hashStr(`seabed|${ctx.cx}|${ctx.cy}`)).chance(0.5);
     return {
       place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
       environment: ambiente,
-      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ledge ? [{ module: CELLAR_THING, where: 'enclave' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
+      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ledge ? [{ module: CELLAR_THING, where: 'enclave' }] : []), ...(sunken ? [{ module: CELLAR_THING, where: 'underwater' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,

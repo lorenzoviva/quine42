@@ -6374,12 +6374,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 6; nuova API Lua `world.stratum_at` coi passi della convenzione. Browser: no.
 - Esito: T479 (S2 di T459, ADR-0253, kernel 0.10.29, commit 04e08833): aggiunti `world.stratum_at(x, y, depth)` in sola lettura per Lua, gli strati dei luoghi nel grafo (`GraphChunk.strata` / `focus`, `GRAPH_BUILD` 5) e in `worldFacts.sotto` per il Narratore, gli strati sotto il lotto in `SculptRequest.strata` per lo Scultore Architetto (`ModelDirector` e `regenerate.ts`, senza allargare `architect.md`), e le regole di cantina per strato dello Scenografo (`InteriorRule.stratum`, `FormComp.stratum`, `FormView.stratum`, cache per strato solo dove presente) con 15 nuovi test in `tests/strata-council.test.ts`; sicurezza: nessuna superficie nuova (`world.stratum_at` è in sola lettura, restituisce copie fresche e non genera luoghi; `FormView.stratum` espone solo la chiave dello strato sotto edifici visibili); non provato unicamente `tests/site-video.test.ts` per `ENOSPC` su `C:` (2,69 GB liberi < file da 4 GB del test, estraneo al task).
 
-### T480 · R4 · Il fondale (riga 7 di T459) — `da fare`
+### T480 · R4 · Il fondale (riga 7 di T459) — `fatto` (`91e8030b`)
 - Pipeline: neon · sforzo high · stima 6% · approvato · priorità 4
 - Step: 45
 - Dipende da: T475
 - Contesto: § 3.3.
 - Cosa fare: la riga 7. Browser: sì.
+- Esito: implementato R4 (il fondale, ADR-0259, kernel 0.10.35): letto opaco a strati sotto acqua nuotabile trasparente (`SEA_MAT.clear`, `waterAlpha`, parità worker byte per byte; lava opaca e `Hills` invariati), `Kernel.bedAt`/`bedLevelAt`/`bedStratumAt`, `WaterWorld.bed`, strati secche/porto, posto `underwater` del Cartografo con `below` senza bloccare la superficie, e `ChunkView.bed` server → client validato con `readRelief` e `bed <= relief` (sicurezza: nessun nuovo messaggio client → server né API Lua, generatore Lua mai esposto ai client). Manca solo la verifica visiva nel browser; nota: `tests/site-video.test.ts` nella suite completa è fallito per `ENOSPC` su disco `C:` (2,1 GB liberi), estraneo al task.
 
 ### T481 · R5 · Immergersi (riga 8 di T459) — `da fare`
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 4
