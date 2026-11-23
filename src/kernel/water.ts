@@ -34,6 +34,11 @@ export interface WaterWorld {
   /** The sea's level: water there is the sea, it neither rises nor sinks. */
   sea(): number;
   /**
+   * The bed level under water at (col, row) (T480, ADR-0259), when the world has a real seabed: used in place of the fixed `DEEP`
+   * whenever strictly below the surface so deeper seas and shallows keep their real depth when water flows.
+   */
+  bed?(col: number, row: number): number;
+  /**
    * Whether water passes between two tiles beside each other (T504; all of them when not said): not over a fall, where the true relief keeps
    * each place's water its own and two places meet more than a step apart (`Kernel`): the lake of a massif does not pour into the valley.
    */
@@ -123,10 +128,17 @@ export class WaterFlow {
     if (!w.loaded(col, row) || this.cells.size >= MAX_CELLS) return undefined;
     const rec = w.record(col, row);
     const wet = w.wet(col, row);
-    if (wet && w.surface(col, row) <= w.sea()) c = { col, row, g: w.sea() - DEEP, w: DEEP, src: true, wasWet: true };
-    else if (rec && Number.isFinite(rec[0]) && Number.isFinite(rec[1])) c = { col, row, g: rec[0], w: Math.max(0, rec[1]), src: false, wasWet: wet };
-    else if (wet) c = { col, row, g: w.surface(col, row) - DEEP, w: DEEP, src: false, wasWet: true };
-    else c = { col, row, g: w.ground(col, row), w: 0, src: false, wasWet: false };
+    const surf = wet ? w.surface(col, row) : 0;
+    const rawBed = wet ? w.bed?.(col, row) : undefined;
+    const depth = (base: number) => (rawBed !== undefined && Number.isFinite(rawBed) && rawBed < base ? Math.max(1, base - rawBed) : DEEP);
+    if (wet && surf <= w.sea()) {
+      const d = depth(w.sea());
+      c = { col, row, g: w.sea() - d, w: d, src: true, wasWet: true };
+    } else if (rec && Number.isFinite(rec[0]) && Number.isFinite(rec[1])) c = { col, row, g: rec[0], w: Math.max(0, rec[1]), src: false, wasWet: wet };
+    else if (wet) {
+      const d = depth(surf);
+      c = { col, row, g: surf - d, w: d, src: false, wasWet: true };
+    } else c = { col, row, g: w.ground(col, row), w: 0, src: false, wasWet: false };
     c.said = this.say(c);
     this.cells.set(k, c);
     return c;

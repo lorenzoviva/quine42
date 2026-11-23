@@ -620,10 +620,17 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Fermo**: `nature.relief` (`hills`, `true`) in `universe.json`, `generate_relief` nel generatore Lua, `ChunkView.relief` sul filo.
 
 ### Letto
-- **Inglese**: `bed`, `SHALLOW_BED_DEPTH`, `ChunkReliefData`
-- **Definizione**: la quota del fondo sotto l'acqua (mare profondo, acqua bassa, secca) restituita da `generate_relief` accanto alla superficie e letta dal kernel con `Relief.bed` (fino a `RELIEF_DEPTH` livelli sotto il mare, mai sopra la superficie; uguale al livello sulla terra). Base per il fondale (R4) e l'acqua che scorre (A1) (T475, ADR-0256).
-- **Dove vive**: `src/kernel/relief.ts`, `src/kernel/islands.ts`, `universe/modules/world.terrain/logic.lua`
+- **Inglese**: `bed`, `bedAt`, `bedLevelAt`, `chunkBedAt`, `chunkBedOf`, `SHALLOW_BED_DEPTH`, `ChunkReliefData`
+- **Definizione**: la quota del fondo sotto l'acqua (mare profondo, acqua bassa, secca) restituita da `generate_relief` accanto alla superficie e letta dal kernel con `Relief.bed` e `Kernel.bedAt`/`bedLevelAt` (fino a `RELIEF_DEPTH` livelli sotto il mare, mai sopra la superficie; uguale al livello sulla terra). Usato dal fondale (R4, T480), dall'automa dell'acqua (`WaterWorld.bed`) e inviato ai client sottili in `ChunkView.bed` (T475, ADR-0256; T480, ADR-0259).
+- **Dove vive**: `src/kernel/relief.ts`, `src/kernel/islands.ts`, `src/kernel/kernel.ts`, `src/kernel/water.ts`, `src/session/protocol.ts`, `universe/modules/world.terrain/logic.lua`
 - **Da non usare**: nessuno (il mobile da riposo è un omonimo: vedi «Gli omonimi»)
+
+### Fondale
+- **Inglese**: `seabed`, `underwater`, `bedStratum`, `waterAlpha`, `clearWater`
+- **Definizione**: nei mondi col rilievo vero (`nature.relief: 'true'`), la colonna del letto sotto l'acqua nuotabile (`isClearWater`, mai la lava) disegnata con il suo strato superiore (`bedStratum`: roccia viva sulle secche e sui bassifondi a un livello, fango o sabbia altrove) e le bande degli strati su sponde e salti sommersi, visibile attraverso una superficie ondosa trasparente (`SEA_MAT.clear`) la cui opacità cresce con la profondità (`waterAlpha`). Il Cartografo riceve `PlanContext.seabed` e può collocare dettagli sommersi sul letto con `"where": "underwater"` (posati con `below`, mai persone né veicoli, senza bloccare chi nuota in superficie) (T480, ADR-0259).
+- **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/strata.ts`, `src/kernel/agents/cartography.ts`, `src/render/terrainmesh.ts`, `src/render/terrain.ts`, `src/render/sea.ts`
+- **Da non usare**: «fondo marino» (vale anche per fiumi, laghi e porti), «sottosuolo» (sono gli strati sotto la terra asciutta)
+- **Fermo**: `"underwater"` in `Where` (`maps/*.json → objects[].where`, `fresh[].where`), `ChunkView.bed` sul filo.
 
 ### Cascata
 - **Inglese**: `fallBetween`, `WaterWorld.joined`

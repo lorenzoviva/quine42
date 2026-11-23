@@ -28,9 +28,10 @@ export const SHORE_LINE =
 /**
  * Where a thing of a plan stands (T310b, `dove-piano`): inside the lots, outside them, anywhere; `under` (T417, ADR-0091 point 4) in the cellar
  * of a structure the plan asks with one, on its floors under the ground reached from the door; without a cellar, inside; `enclave` (T474,
- * ADR-0250) in a part of the place only a cliff parts from its paths (a ledge, a mesa), where the roughness keeps one; without, anywhere.
+ * ADR-0250) in a part of the place only a cliff parts from its paths (a ledge, a mesa), where the roughness keeps one; without, anywhere;
+ * `underwater` (T480, ADR-0259) on the seabed under swimmable water in a true-relief world (sunken chests, anchors, ruins, reefs); without, outside.
  */
-export type Where = 'inside' | 'outside' | 'anywhere' | 'under' | 'enclave';
+export type Where = 'inside' | 'outside' | 'anywhere' | 'under' | 'enclave' | 'underwater';
 
 export interface PlacedObject {
   module: string;
@@ -183,11 +184,16 @@ export interface PlanContext {
    * and buildable terraces. Absent for a plain hills place: nothing is said, and the schema has `enclave` only when `enclaves >= 1`.
    */
   relief?: { roughness: Roughness; enclaves: number; share: number; means: Means; low?: number; high?: number; cliffs?: number; terraces?: number };
+  /**
+   * The seabed of the place in a true-relief world when it has swimmable water with a visible bed underneath (T480, ADR-0259): how many
+   * interior water tiles, how many deep or reef tiles, maximum depth in levels, and the names of the seabed strata. Absent elsewhere.
+   */
+  seabed?: { tiles: number; deep: number; reef: number; maxDepth: number; strata: string[] };
 }
 
-export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under', 'enclave'];
-/** The places the schema offers where the place has no enclave (T474): every one but `enclave`. */
-const WHERE_PLAIN = WHERE.filter((w) => w !== 'enclave');
+export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under', 'enclave', 'underwater'];
+/** The places the schema offers where the place has neither enclaves nor a seabed (T474, T480). */
+const WHERE_PLAIN = WHERE.filter((w) => w !== 'enclave' && w !== 'underwater');
 
 /** Where a thing stands, as the Cartographer wrote it (or a plan of before T310b, in Italian): one of `WHERE`, `anywhere` otherwise. */
 export const whereOf = (w: unknown): Where => {
@@ -241,6 +247,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
       ? `The biggest sizes are rare: this part of the world may still have ${ctx.rari.map((t) => (t === 'huge' ? 'one "huge" structure (what is huge in its age: a castle, a power station, a skyscraper)' : 'one "gargantuan" structure (a citadel, a cathedral, a tower-city, an immense ruin)')).join(' and ')}: at most one per place, only if the place truly deserves it.`
       : 'No "huge" or "gargantuan" structures here: this part of the world already has its remarkable places.',
     reliefLine(ctx.relief),
+    seabedLine(ctx.seabed),
     ctx.feedback ? `THE PREVIOUS ATTEMPT WAS DISCARDED: ${ctx.feedback}. Fix it.` : '',
     islandLine(ctx.island),
     ctx.island ? (ctx.island.body ? VOID_LINE : SHORE_LINE) : '',
@@ -252,8 +259,12 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
   // Over the ceiling of the hour (T495) a structure is one the world has, or none: the schema lets only their concepts through.
   const { structures: _s, ...rest } = PLAN_SCHEMA.properties!;
   const structures: Record<string, Schema> = ctx.newStructures === false ? (ctx.known?.length ? { structures: knownStructures(ctx.known) } : {}) : { structures: PLAN_SCHEMA.properties!.structures };
-  // Where the place keeps enclaves (T474) a thing may stand in one: only then the schema says `enclave`.
-  const placed = ctx.relief && ctx.relief.enclaves > 0 ? withEnclave(rest) : rest;
+  // Where the place keeps enclaves (T474) or has a seabed (T480), the schema offers those places only then.
+  const extras: Where[] = [
+    ...(ctx.relief && ctx.relief.enclaves > 0 ? (['enclave'] as const) : []),
+    ...(ctx.seabed && ctx.seabed.tiles > 0 ? (['underwater'] as const) : []),
+  ];
+  const placed = withWhere(rest, extras);
   const schema: Schema = {
     ...PLAN_SCHEMA,
     properties: { ...placed, ...structures, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
@@ -285,11 +296,27 @@ const knownStructures = (known: NonNullable<PlanContext['known']>): Schema => ({
   items: { type: 'OBJECT', properties: { concept: { type: 'STRING', enum: known.slice(0, REUSE_OFFERED).map((k) => k.concept) }, size: { type: 'STRING', enum: internalValues('taglie') }, cellar: { type: 'BOOLEAN' } }, required: ['concept'] },
 });
 
-/** The objects and the fresh things of the plan's schema with `enclave` among the places (T474). */
-function withEnclave(props: Record<string, Schema>): Record<string, Schema> {
+/** The objects and the fresh things of the plan's schema with extra `Where` values (`enclave`, `underwater`; T474, T480). */
+function withWhere(props: Record<string, Schema>, extras: Where[]): Record<string, Schema> {
+  if (!extras.length) return props;
+  const allowed = [...WHERE_PLAIN, ...extras];
   const out = JSON.parse(JSON.stringify(props)) as Record<string, { items: { properties: { where: { enum: string[] } } } }>;
-  for (const k of ['objects', 'fresh']) if (out[k]?.items?.properties?.where) out[k].items.properties.where.enum = WHERE;
+  for (const k of ['objects', 'fresh']) if (out[k]?.items?.properties?.where) out[k].items.properties.where.enum = allowed;
   return out as unknown as Record<string, Schema>;
+}
+
+/**
+ * What the Cartographer is told of a place's seabed (T480, ADR-0259): only in true-relief worlds where the place has swimmable water
+ * with a visible bed underneath; nothing elsewhere.
+ */
+export function seabedLine(seabed: PlanContext['seabed']): string {
+  if (!seabed || seabed.tiles <= 0) return '';
+  const maxT = (seabed.maxDepth * 0.25).toFixed(1);
+  const parts: string[] = [`up to ${maxT} tiles deep`];
+  if (seabed.reef > 0) parts.push(`${seabed.reef} reef tiles`);
+  if (seabed.deep > 0) parts.push(`${seabed.deep} deep-water tiles`);
+  const bed = seabed.strata.length ? ` (bed: ${seabed.strata.join(', ')})` : '';
+  return `Seabed of this place: ${seabed.tiles} tiles of water with a visible bed ${parts.join(', ')}${bed}. Sunken or underwater details (a sunken chest, an anchor, ruins, amphorae, kelp, corals) may have "where": underwater; never people or vehicles.`;
 }
 
 /** What the means of a pass are, in the request (T474). */

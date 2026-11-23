@@ -724,7 +724,7 @@
           }
         ]
       },
-      "strata": "<sequence values=\"Egptjnswokr#1#2#3#4#5#6\" symmetry=\"(xy)\">\n  <union symbol=\"?\" values=\"gptjn\"/>\n  <union symbol=\"!\" values=\"wo\"/>\n  <union symbol=\"^\" values=\"rk\"/>\n  <all in=\"! E\" out=\"* #4\"/>\n  <all in=\"? E\" out=\"* #1\"/>\n  <all in=\"s E\" out=\"s #3\"/>\n  <all in=\"^ E\" out=\"* #5\"/>\n  <all in=\"#4 E\" out=\"#4 #4\" steps=\"1\"/>\n  <all in=\"#4 E\" out=\"#4 #6\"/>\n  <all in=\"#1 E\" out=\"#1 #2\"/>\n  <all in=\"#3 E\" out=\"#3 #2\"/>\n  <all in=\"#2 E\" out=\"#2 #2\" steps=\"1\"/>\n  <prl in=\"#6#2\" out=\"#6#6\" p=\"0.6\" steps=\"3\"/>\n  <all in=\"#6 E\" out=\"#6 #2\"/>\n  <all in=\"#2 E\" out=\"#2 #5\"/>\n  <all in=\"#5 E\" out=\"#5 #5\"/>\n</sequence>"
+      "strata": "<sequence values=\"Egptjnswokry#1#2#3#4#5#6\" symmetry=\"(xy)\">\n  <union symbol=\"?\" values=\"gptjn\"/>\n  <union symbol=\"^\" values=\"rky\"/>\n  <all in=\"o E\" out=\"o #4\"/>\n  <all in=\"w E\" out=\"w #3\"/>\n  <all in=\"? E\" out=\"* #1\"/>\n  <all in=\"s E\" out=\"s #3\"/>\n  <all in=\"^ E\" out=\"* #5\"/>\n  <all in=\"#4 E\" out=\"#4 #4\" steps=\"1\"/>\n  <all in=\"#4 E\" out=\"#4 #6\"/>\n  <all in=\"#1 E\" out=\"#1 #2\"/>\n  <all in=\"#3 E\" out=\"#3 #2\"/>\n  <all in=\"#2 E\" out=\"#2 #2\" steps=\"1\"/>\n  <prl in=\"#6#2\" out=\"#6#6\" p=\"0.6\" steps=\"3\"/>\n  <all in=\"#6 E\" out=\"#6 #2\"/>\n  <all in=\"#2 E\" out=\"#2 #5\"/>\n  <all in=\"#5 E\" out=\"#5 #5\"/>\n</sequence>"
     }
   }
 }

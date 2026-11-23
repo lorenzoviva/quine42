@@ -418,14 +418,29 @@ export class ThinClient {
   }
 
   private places(list: ChunkView[]): void {
+    const wetCode = Object.keys(this.k.palette).find((c) => c !== SEA_DRAFT && this.k.palette[c]?.layer === 'liquid') ?? SEA_DRAFT;
     for (const v of list) {
       const sea = new Set(v.sea);
+      const prev = this.k.chunks.get(v.key);
+      // Base relief and seabed levels in a true-relief world (T475, T480): the server's when sent, else kept; validated without trusting.
+      const relief = readRelief(v.relief, this.k.config.chunkSize) ?? prev?.relief;
+      let bed = readRelief(v.bed, this.k.config.chunkSize) ?? prev?.bed;
+      if (bed && relief) {
+        let clamped = false;
+        for (let i = 0; i < bed.length; i++) if (bed[i]! > relief[i]!) { clamped = true; break; }
+        if (clamped) {
+          bed = Int16Array.from(bed);
+          for (let i = 0; i < bed.length; i++) if (bed[i]! > relief[i]!) bed[i] = relief[i]!;
+        }
+      }
       this.k.chunks.set(v.key, {
         cx: v.cx,
         cy: v.cy,
         key: v.key,
-        // Only where the sea is, of the draft (T51a): the rest is the server's.
-        draft: v.sea ? [...v.tiles].map((c, i) => (sea.has(i) ? SEA_DRAFT : c)).join('') : v.tiles,
+        // Where the sea is (T51a), and where the true-relief bed lies under the surface (shallow draft water, T480) so `worldLevels` keeps the server's `wasWet`.
+        draft: v.sea || (bed && relief)
+          ? [...v.tiles].map((c, i) => (sea.has(i) ? SEA_DRAFT : bed && relief && bed[i]! < relief[i]! ? wetCode : c)).join('')
+          : v.tiles,
         tiles: v.tiles,
         version: v.version,
         stage: v.stage,
@@ -442,14 +457,11 @@ export class ThinClient {
         })(),
         // The strata (T418): the server's when it sends them, else the ones already had; never what is not good.
         ...(() => {
-          const strata = readStrata(v.strata, this.k.config.chunkSize, this.k.strata) ?? this.k.chunks.get(v.key)?.strata;
+          const strata = readStrata(v.strata, this.k.config.chunkSize, this.k.strata) ?? prev?.strata;
           return strata ? { strata } : {};
         })(),
-        // Base relief levels in a true-relief world (T475): the server's when sent, else kept; validated without trusting.
-        ...(() => {
-          const relief = readRelief(v.relief, this.k.config.chunkSize) ?? this.k.chunks.get(v.key)?.relief;
-          return relief ? { relief } : {};
-        })(),
+        ...(relief ? { relief } : {}),
+        ...(bed ? { bed } : {}),
       });
     }
   }

@@ -8,7 +8,7 @@ walkable zones) and places things and characters where you say (inside or outsid
 
 - Give each place a name and a sentence, consistent with the bible and with the neighbouring places, in the language of the world.
 - Everything belongs to the age the bible says: a village, a steam city, a metropolis; the examples below are only examples.
-- A believable world is full of things: furnished houses, tools, food, people with a trade.
+- A believable world is full of things: furnished houses, tools, food, people with a trade. When a place has a seabed, sunken objects (chests, anchors, ruins, corals) can go on it with `"where": "underwater"` (never people or vehicles).
 - Structures have a size of D&D (tiny, small, medium, large, huge, gargantuan): medium a house,
   large a mill, a station or a tower. Huge (a castle, a power station) and gargantuan (a citadel, a
   cathedral, a tower-city) are rare: one huge per zone of the world, one gargantuan per world; choose one only where the place deserves it, in an

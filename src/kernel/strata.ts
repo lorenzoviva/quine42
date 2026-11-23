@@ -90,12 +90,28 @@ export function roleCodes(palette: Record<string, TerrainDef>): Record<StratumRo
 /** What a column is, for the draft of its strata: from its tile of the procedural draft. */
 export type Biome = 'wet' | 'rock' | 'sand' | 'soil';
 
-/** The biome of a code of the procedural draft (and of its terrain): water and sea, rock and mountain, sand, the rest. */
+/** The biome of a code of the procedural draft (and of its terrain): reef rock, water and sea, rock and mountain, sand, the rest. */
 export function biomeOf(code: string, terrain: TerrainDef | undefined): Biome {
+  if (terrain?.depth === 'reef' || code === 'y') return 'rock';
   if (terrain?.layer === 'liquid' || code === 'o' || code === 'w') return 'wet';
   if (terrain?.layer === 'rock' || code === 'r' || code === 'k') return 'rock';
   if (code === 's' || terrain?.id === 'sand') return 'sand';
   return 'soil';
+}
+
+/**
+ * The stratum on top of the seabed under a swimmable water tile (T480, ADR-0259): on a reef (terrain `depth === 'reef'`, or a shoal
+ * only one level deep in true relief) the world's `bedrock` (bare reef rock); otherwise the place's top stratum (`top`, row 0 under
+ * the water — mud, sandbed, or what the environment's strata program wrote).
+ */
+export function bedStratum(
+  terrain: TerrainDef | undefined,
+  depthLevels: number,
+  top: TerrainDef | undefined,
+  strata: Record<string, TerrainDef>,
+): TerrainDef | undefined {
+  if (terrain?.depth === 'reef' || depthLevels <= 1) return strata[roleCodes(strata).bedrock] ?? top;
+  return top ?? strata[roleCodes(strata).mud];
 }
 
 /**

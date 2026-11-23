@@ -117,13 +117,13 @@ const holesKey = (k: Kernel, ch: Chunk) =>
 export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
   const v = (dx: number, dy: number) => {
     const n = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
-    return n ? `${n.version}.${n.levels ?? 0}` : -1;
+    return n ? `${n.version}.${n.levels ?? 0}${n.bed ? '.b' : ''}` : -1;
   };
   const n = (dx: number, dy: number) => {
     const o = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
     return o ? holesKey(k, o) : '';
   };
-  return `${ch.version}.${ch.levels ?? 0}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}`;
+  return `${ch.version}.${ch.levels ?? 0}${ch.bed ? '.b' : ''}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}`;
 }
 
 /** The holes over cellars of a place and of the four beside it, by tile of the carpet: what its mesh lowers (T52b, T415). */
@@ -141,9 +141,11 @@ function holesAround(k: Kernel, ch: Chunk): Map<string, TileHole> {
 function kernelSource(k: Kernel, ch: Chunk): ChunkSource & { forms: Map<string, TileForms | undefined> } {
   const holes = holesAround(k, ch);
   const forms = new Map<string, TileForms | undefined>();
+  const S = k.config.chunkSize;
+  const hasBed = k.hasBedAt(ch.cx * S);
   return {
     ...kernelReads(k),
-    S: k.config.chunkSize,
+    S,
     cx: ch.cx,
     cy: ch.cy,
     tiles: ch.tiles,
@@ -155,6 +157,16 @@ function kernelSource(k: Kernel, ch: Chunk): ChunkSource & { forms: Map<string, 
       return !!forms.get(code);
     },
     rgb: (color) => rgbOf(color),
+    ...(hasBed
+      ? {
+          hasBed: true,
+          bedAt: (x: number, z: number) => k.bedAt(x, z),
+          isClear: (code: string) => k.isClearWater(code),
+          bedTopRgb: (x: number, z: number) => rgbOf(k.bedStratumAt(x, z)?.color ?? BANK),
+          strataRowsAt: (x: number, z: number) => k.strataRowsAt(x, z),
+          stratumRgbAt: (x: number, z: number, row: number) => rgbOf(k.stratumAt(x, z, row)?.color ?? CUT_EARTH),
+        }
+      : {}),
     forms,
   };
 }
@@ -169,25 +181,52 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   const x0 = ch.cx * S - M, z0 = ch.cy * S - M;
   const codes: string[] = new Array(w * w);
   const ground = new Float64Array(w * w);
+  const hasBed = k.hasBedAt(ch.cx * S);
+  const bed = hasBed ? new Float64Array(w * w) : undefined;
+  const bedTop = hasBed ? new Array<string>(w * w) : undefined;
+  const strataRows = hasBed ? new Uint8Array(w * w) : undefined;
+  const strataHex = hasBed ? new Array<string[]>(w * w) : undefined;
+  const palette: ChunkInput['palette'] = [];
+  const rgb: ChunkInput['rgb'] = { '': rgbOf(undefined), [BANK]: rgbOf(BANK), [TRUNK]: rgbOf(TRUNK) };
+  if (hasBed) rgb[CUT_EARTH] = rgbOf(CUT_EARTH);
+  const ready: string[] = [];
+  const clear: string[] = [];
+  for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
+    palette.push([code, t.layer, t.color]);
+    rgb[t.color || ''] ??= rgbOf(t.color);
+    if (t.model && tileForms(k, code)) ready.push(code);
+    if (hasBed && k.isClearWater(code)) clear.push(code);
+  }
   for (let r = 0; r < w; r++)
     for (let c = 0; c < w; c++) {
-      codes[r * w + c] = k.tileAt(x0 + c, z0 + r) ?? '';
-      ground[r * w + c] = k.groundAt(x0 + c, z0 + r);
+      const i = r * w + c, x = x0 + c, z = z0 + r;
+      codes[i] = k.tileAt(x, z) ?? '';
+      ground[i] = k.groundAt(x, z);
+      if (hasBed) {
+        bed![i] = k.bedAt(x, z);
+        const bc = k.bedStratumAt(x, z)?.color ?? BANK;
+        rgb[bc] ??= rgbOf(bc);
+        bedTop![i] = bc;
+        const rows = k.strataRowsAt(x, z);
+        strataRows![i] = rows;
+        const hexes = new Array<string>(rows);
+        for (let d = 0; d < rows; d++) {
+          const sc = k.stratumAt(x, z, d)?.color ?? CUT_EARTH;
+          rgb[sc] ??= rgbOf(sc);
+          hexes[d] = sc;
+        }
+        strataHex![i] = hexes;
+      }
     }
   const holes: ChunkInput['holes'] = [];
   for (const [at, h] of holesAround(k, ch)) {
     const [x, z] = at.split(',').map(Number) as [number, number];
     if (x >= x0 && z >= z0 && x < x0 + w && z < z0 + w) holes.push([(z - z0) * w + (x - x0), h.depth, h.cover ? new Uint8Array(h.cover) : undefined]);
   }
-  const palette: ChunkInput['palette'] = [];
-  const rgb: ChunkInput['rgb'] = { '': rgbOf(undefined), [BANK]: rgbOf(BANK), [TRUNK]: rgbOf(TRUNK) };
-  const ready: string[] = [];
-  for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
-    palette.push([code, t.layer, t.color]);
-    rgb[t.color || ''] ??= rgbOf(t.color);
-    if (t.model && tileForms(k, code)) ready.push(code);
-  }
-  return { S, cx: ch.cx, cy: ch.cy, tiles: ch.tiles, cells: HOLE_CELLS, palette, rgb, x0, z0, w, codes, ground, holes, ready };
+  return {
+    S, cx: ch.cx, cy: ch.cy, tiles: ch.tiles, cells: HOLE_CELLS, palette, rgb, x0, z0, w, codes, ground, holes, ready,
+    ...(hasBed ? { hasBed: true, clear, bed, bedTop, strataRows, strataHex } : {}),
+  };
 }
 
 /**
@@ -233,6 +272,17 @@ export function chunkView(k: Kernel, ch: Chunk, a: ChunkArrays, sig: string, kno
     w.receiveShadow = true;
     w.userData.inkThing = TERRAIN_THING;
     group.add(w);
+  }
+  if (a.clearWater) {
+    const geo = meshGeometry(a.clearWater);
+    geo.setAttribute('wave', new THREE.BufferAttribute(a.clearWater.wave, 1));
+    geo.setAttribute('seaPhase', new THREE.BufferAttribute(a.clearWater.seaPhase, 3));
+    geo.setAttribute('alpha', new THREE.BufferAttribute(a.clearWater.alpha, 1));
+    const cw = new THREE.Mesh(geo, SEA_MAT.clear);
+    cw.receiveShadow = true;
+    cw.renderOrder = 0;
+    cw.userData.inkThing = TERRAIN_THING;
+    group.add(cw);
   }
   if (a.foam) {
     const fm = new THREE.Mesh(foamGeometry(a.foam), SEA_MAT.foam);
