@@ -94,7 +94,7 @@ import { checkKernelVersion, KERNEL_VERSION, stampKernel } from './version';
 import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, internalValues, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
-import { UNDER_STEP, undergroundAt, type Underground } from './underground';
+import { cameraCutAt, UNDER_STEP, undergroundAt, type CameraLine, type Cut, type Underground } from './underground';
 import { dominantCellarStratum, draftStrata, programStrata, readStrata, sampleLotStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow, summarizePlaceStrata, type LotStratum } from './strata';
 import { addMoved, FLAT_SPAN, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
 import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, climbDuration, climbLine, climbOf, climbPoint, fallPoint, onFace, saneClimb, startClimb, type ClimbComp, type ClimbRefusal } from './climb';
@@ -4406,6 +4406,18 @@ export class Kernel {
     if (!at && this.zone !== 'sim') return undefined;
     const p = at ?? { ...this.wandererCarpet(), z: this.wandererPos().z };
     return undergroundAt(p.x, p.y, this.floorAt(p.x, p.y, p.z), this.groundAt(p.x, p.y));
+  }
+
+  /**
+   * Whether the ground in front hides one from the camera (T476, ADR-0257, the true relief of ADR-0256): then the renderer cuts what stands
+   * over `cut` (the height of the head) in the disc on the camera's side (`around` false). The camera is the renderer's (`line`: its quarter,
+   * its rise, how far it stands); the ground is the kernel's, the columns of `groundAt`. At a point of the simulation with the height of the
+   * feet; without one, the wanderer, only in the simulation. With the relief of today (`Hills`) nothing ever hides.
+   */
+  cameraCut(line: CameraLine, at?: { x: number; y: number; z?: number }): Cut | undefined {
+    if (!at && this.zone !== 'sim') return undefined;
+    const p = at ?? { ...this.wandererCarpet(), z: this.wandererPos().z };
+    return cameraCutAt(p.x, p.y, this.floorAt(p.x, p.y, p.z), (x, y) => this.groundAt(x + 0.5, y + 0.5), line);
   }
 
   /**

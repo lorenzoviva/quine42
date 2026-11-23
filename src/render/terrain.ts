@@ -15,7 +15,7 @@ import { TERRAIN_THING } from './cartoon';
 import { casts, MAT, rgbOf } from './materials';
 import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
-import { CUT_REACH, cutDisc, inCutDisc, type Towards, type Underground } from '../kernel/underground';
+import { CUT_REACH, cutDisc, inCutDisc, type Cut, type Towards } from '../kernel/underground';
 import { stratumRow } from '../kernel/strata';
 import { foamGeometry, SEA_MAT } from './sea';
 import {
@@ -282,11 +282,11 @@ export function strataSide(k: Kernel, b: Builder, x: number, z: number, dx: numb
   }
 }
 
-/** What the cut's caps depend on: where and how high, towards where, and the chunks under the disc (their tiles, levels and holes). */
-export function cutSig(k: Kernel, u: Underground, towards: Towards): string {
+/** What the cut's caps depend on: where and how high, towards where, all around or only in front, and the chunks under the disc (their tiles, levels and holes). */
+export function cutSig(k: Kernel, u: Cut, towards: Towards): string {
   const S = k.config.chunkSize;
   const R = CUT_REACH + 1;
-  const parts = [`${u.tile.x},${u.tile.y},${u.cut.toFixed(3)},${towards.x},${towards.y}`];
+  const parts = [`${u.tile.x},${u.tile.y},${u.cut.toFixed(3)},${towards.x},${towards.y},${u.around ? 'o' : 'f'}`];
   for (let cy = Math.floor((u.tile.y - R) / S); cy <= Math.floor((u.tile.y + R) / S); cy++)
     for (let cx = Math.floor((u.tile.x - R) / S); cx <= Math.floor((u.tile.x + R) / S); cx++) {
       const ch = k.chunks.get(`${cx},${cy}`);
@@ -300,8 +300,10 @@ export function cutSig(k: Kernel, u: Underground, towards: Towards): string {
  * tile of the disc whose top is over the cut has a cap at the cut (on its sub-cells over it, where a cellar opens part of the tile) in the
  * colour of the stratum it reaches there, and every tile around the disc that stands over the cut has its side towards the disc down to the
  * cut in the bands of its strata (T418): the columns cut, never their empty inside. Undefined if nothing is over the cut. In carpet coordinates, with the chunks.
+ * The cut towards the camera (T476) is the same on the disc's camera side (`Cut.around` false): the row behind the one standing on keeps its
+ * columns, and their sides towards the disc are the cut's back wall, in bands.
  */
-export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mesh | undefined {
+export function buildCut(k: Kernel, u: Cut, towards: Towards): THREE.Mesh | undefined {
   const S = k.config.chunkSize;
   const N = HOLE_CELLS;
   const byChunk = new Map<string, Map<number, TileHole>>();
@@ -316,11 +318,11 @@ export function buildCut(k: Kernel, u: Underground, towards: Towards): THREE.Mes
   };
   const { subTop } = terrainTops(kernelReads(k), holeAt, N);
   const loaded = (x: number, z: number) => k.tileAt(x, z) !== undefined;
-  const inDisc = (x: number, z: number) => inCutDisc(x - u.tile.x, z - u.tile.y, towards);
+  const inDisc = (x: number, z: number) => inCutDisc(x - u.tile.x, z - u.tile.y, towards, u.around);
   // Over the cut by more than the shaders' nudge (`CUT_VERTEX`): what they do not draw.
   const over = (y: number) => y > u.cut + 0.01;
   const b = new Builder();
-  for (const { x, y: z } of cutDisc(u.tile, towards)) {
+  for (const { x, y: z } of cutDisc(u.tile, towards, u.around)) {
     if (!loaded(x, z)) continue;
     // The stratum the column reaches at the cut (T418).
     const cap = stratumColour(k, x, z, k.groundAt(x, z) - u.cut);
