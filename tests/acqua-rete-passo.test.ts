@@ -1,4 +1,4 @@
-// One level of the water for every tile, the same for the network and for the feet (T504, ADR-0257, rule 10).
+// One level of the water for every tile, the same for the network and for the feet (T504, ADR-0258, rule 10).
 //
 // With the true relief (T475, ADR-0256) a place's network (`networkOf`) levels its water as if the place were alone, while the feet
 // (`groundAt`, the collision, the server's step) read the field of the loaded world (`levelsOf`): a lake that touched the water of a lower

@@ -4088,7 +4088,7 @@ export class Kernel {
    * The levels of a loaded place before its lots (T51a): one field for the whole loaded world (`worldLevels`:
    * the sea at its level, each body of water flat as a whole, the banks), made again when a place comes, goes
    * or changes its tiles. A place whose levels change while its tiles do not is drawn again (`Chunk.levels`).
-   * A place of the true relief is levelled alone (T504, ADR-0257): its water is the one its network reads (`networkOf`), so that the
+   * A place of the true relief is levelled alone (T504, ADR-0258): its water is the one its network reads (`networkOf`), so that the
    * network's levels and those of the feet are the same tile by tile; only its digs and the water that has flowed are its own over them.
    */
   private levelsOf(ch: Chunk): Int16Array {

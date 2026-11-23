@@ -627,7 +627,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Cascata
 - **Inglese**: `fallBetween`, `WaterWorld.joined`
-- **Definizione**: il bordo fra due luoghi del rilievo vero dove le loro caselle vicine stanno a più di un gradino nel campo del mondo, di solito l'acqua di un luogo accanto a quella più bassa del vicino: col rilievo vero ogni luogo si livella da solo, per la rete e per i piedi, e la sua acqua sta al più basso delle sue caselle, mai a quella dei vicini. Due caselle d'acqua si nuotano anche lì; l'acqua che scorre non la passa (T504, ADR-0257).
+- **Definizione**: il bordo fra due luoghi del rilievo vero dove le loro caselle vicine stanno a più di un gradino nel campo del mondo, di solito l'acqua di un luogo accanto a quella più bassa del vicino: col rilievo vero ogni luogo si livella da solo, per la rete e per i piedi, e la sua acqua sta al più basso delle sue caselle, mai a quella dei vicini. Due caselle d'acqua si nuotano anche lì; l'acqua che scorre non la passa (T504, ADR-0258).
 - **Dove vive**: `src/kernel/kernel.ts`, `src/kernel/water.ts`, `src/kernel/relief.ts`
 - **Da non usare**: «dirupo» (è della terra, `STEP`), «salto» (è `jump`)
 

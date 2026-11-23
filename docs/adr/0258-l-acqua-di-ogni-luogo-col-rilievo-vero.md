@@ -1,4 +1,4 @@
-# ADR-0257 — L'acqua di ogni luogo col rilievo vero: un livello solo per la rete e per il passo
+# ADR-0258 — L'acqua di ogni luogo col rilievo vero: un livello solo per la rete e per il passo
 
 Data: 2026-11-23 · Stato: accettato (task T504 del backlog, nato dal difetto 1 di T503, `lab/banco/rilievo/README.md`) · Modifica ADR-0256 (punto 4: `worldLevels` con `keepCliffs`) · Estende ADR-0250 (la regola 10 della rete e delle enclavi), ADR-0094 (l'acqua che scorre), ADR-0048 (il rilievo e il mare)
 

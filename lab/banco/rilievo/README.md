@@ -43,7 +43,7 @@ e si sposta lo scorrimento (`carpet().ox/oy`); i passi con `keydown`/`keyup` di 
 - Il modo locale pianifica quasi solo laghi nei luoghi del massiccio (lo stesso mondo per ogni tema), quindi il difetto 1 è più
   frequente qui che con Gemini, ma non dipende dal Cartografo.
 
-## Dopo T504 (ADR-0257): l'acqua di ogni luogo
+## Dopo T504 (ADR-0258): l'acqua di ogni luogo
 
 Il difetto 1 è corretto nel kernel 0.10.33: col rilievo vero ogni luogo si livella da solo anche per i piedi (`worldLevels` con
 `keepCliffs` non attraversa il bordo), quindi `network.levels` e `groundAt` coincidono casella per casella. Build di `task/T504`,
