@@ -551,6 +551,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/automi.test.ts`, `tests/automi.test.ts`
 - Esito: chiusa da T482 (ADR-0254), 23/11/2026, branch `task/T482`: le contromisure nascono con la primitiva degli automi. Non provato in produzione su mondi con molti viandanti distribuiti né con il filo del vento (A2).
 
+### V-049 · Il vento sul filo (`update.wind`) e `world.wind`
+- Gravità: bassa
+- Stato: `chiusa`
+- Superficie: il campo `wind` di `welcome` e `update` (`WindView`, `src/session/protocol.ts`), `SessionServer.view` (`src/session/server.ts`), `SessionClient` e `ThinClient` che lo leggono, `Kernel.windViewAt`, `Kernel.applyWind`, `readWindView` e `fromBase64` (`src/kernel/wind.ts`), `world.wind` (`Host`, `prelude.lua`, `LUA_API`, `Kernel.worldWind`), `vehicle.sail` (`vehicleSpecOf`, `vehicleSpecErrors`)
+- Proprietà violata: degli automi esce solo ciò che un client disegna (regola 8f): nessuno stato del reticolo, nessun altro automa; un messaggio del server non fa allocare né rompere il client (regola 7: una vista troppo grande, con celle che non sono quante dice, numeri che non sono numeri, testo che non è base64 non è una vista); il vento non costa la rete di un viandante oltre il suo ritmo (regola 8e); Lua legge copie e non scrive il campo da `world.wind`; un client non scrive mai un campo
+- Prova: test (T484)
+- Contromisura: il server manda a ogni client solo la vista grossolana del vento del mondo attorno a chi segue (`WindView`: l'angolo, la misura, la cella, il vento dominante e due byte con segno a cella in base64, una cella ogni tre caselle su 108 × 90), fatta una volta per finestra e per mezzo secondo del mondo, al più `WIND_VIEW.hz` (2) volte al secondo del mondo e solo quando è cambiata, `null` quando il mondo non ha più vento; il client la legge con `readWindView` (interi entro ±1e7, misura 1-512 per lato e al più `WIND_VIEW.cap` 4 096 celle, cella 1-3, il vento dominante finito entro `WIND_MAX`, il testo al più quanto le celle chiedono e base64 vera con tante celle quante la misura dice), e lo specchio la tiene soltanto (non fa girare automi né scrive campi, `fieldAdd` rifiuta su uno specchio, V-048). `world.wind` restituisce ogni volta una copia nuova `{vx, vy, speed}` entro `WIND_MAX`, niente per ciò che non è un numero finito. `vehicle.sail` sta fra 0 e 1, solo sull'acqua, e il fattore della vela non supera `WIND_MAX`
+- Task: T484
+- Test: `tests/sicurezza/vento.test.ts`, `tests/vento.test.ts`
+- Esito: chiusa da T484 (ADR-0255), 23/11/2026, branch `task/T484`: le contromisure nascono col vento sul filo. Non provato su una rete vera (i collegamenti finti dei test e una preview).
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -605,6 +616,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-046 | — | — | `veicolo-molti.test.ts` | il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts |
 | V-047 | — | — | `salto-molti.test.ts` | il salto e l’arrampicata in molti si provano sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/salto-molti.test.ts |
 | V-048 | — | — | `automi.test.ts` | `world.field_add` e i tetti degli automi si vedono solo dentro il kernel e la sandbox: li prova tests/sicurezza/automi.test.ts |
+| V-049 | — | — | `vento.test.ts` | il vento sul filo si prova sul kernel e sul server di sessione coi collegamenti finti, `world.wind` dentro la sandbox: tests/sicurezza/vento.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

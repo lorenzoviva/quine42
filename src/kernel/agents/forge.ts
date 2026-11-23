@@ -355,7 +355,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
   // (its deck is its form's floors), never pushed nor taken; on the water a vessel, so the Sculptor makes it float (ADR-0228).
   const medium = conceptMedium(concept, media);
   if (medium) {
-    m.vehicle = vehicleFor(medium, { speed: physics.vehicle_speed, accel: physics.vehicle_accel, turn: physics.vehicle_turn, draught: physics.draught });
+    m.vehicle = vehicleFor(medium, { speed: physics.vehicle_speed, accel: physics.vehicle_accel, turn: physics.vehicle_turn, draught: physics.draught }, concept.name);
     m.physics = { ...m.physics!, solid: true, pushable: false, speed: 0 };
     delete m.takeable;
     delete m.components!.vel;

@@ -11,6 +11,7 @@ import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameS
 import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshapedWords, MAX_RESHAPED } from './reshape';
 import { askAutomaton, askReshape, AUTOMATON_TASK, RESHAPE_TASK } from './agents/physicist';
 import { AutomataEngine, automatonWords, cloneAutomata, validateAutomaton, type AutomatonSpec, type FieldSample } from './automata';
+import { readWindView, relativeWind, sailPush, viewBytes, viewCorner, WIND_VIEW, windHere, windInView, windSpecOf, windViewOf, type WindHere, type WindView } from './wind';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
 import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
@@ -703,6 +704,8 @@ export class Kernel {
       tileAt: (c, r) => k.tileAt(c, r) ?? '',
       groundAt: (c, r) => Math.max(k.seaLevel, k.relief.level(c, r) + k.digAt(c, r)) * 0.25,
       seaLevel: () => k.seaLevel * 0.25,
+      // The world's time in days (T484): what turns the prevailing wind, as it moves the light.
+      days: () => k.time / k.daySeconds(),
     });
   })();
   private solidForms = new Map<string, Array<SolidForm>>();
@@ -1098,6 +1101,8 @@ export class Kernel {
       // Cellular automata fields (T482, ADR-0254, V-048): read a sample copy or add a bounded source/sink.
       field: (id, x, y) => this.automatonField(id, x, y),
       field_add: (id, x, y, amount, amountY) => this.fieldAdd(id, x, y, amount, amountY),
+      // The world's wind (T484, ADR-0255): a copy, in the world's units; nil in a world without wind.
+      wind: (x, y) => this.worldWind(x, y),
       islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
       vehicle: (id) => this.vehicleView(id),
@@ -6673,7 +6678,8 @@ export class Kernel {
     }
     // Nobody aboard: it drops anchor, nothing pushes it.
     if (v.helm === undefined && !aboard.length) Object.assign(v, { anchored: true, thrust: 0, steer: 0 });
-    const step = vehicleStep(v, spec, dt);
+    // A sail (T484): the share of its way the world's wind gives it where it is, as the polar says.
+    const step = vehicleStep(v, spec, dt, spec.sail ? sailPush(spec.sail, v.heading, this.worldWind(p.x, p.y)) : 1);
     v.speed = step.speed;
     v.turn = step.turn;
     const moving = Math.abs(step.dx) + Math.abs(step.dy) > 1e-9;
@@ -10194,6 +10200,83 @@ export class Kernel {
     if (ay !== undefined && typeof ay !== 'number') return false;
     this.automata.syncWindow();
     return this.automata.add(id, x, y, amount, ay);
+  }
+
+  /** The coarse wind the server last said (T484): a mirror runs no automaton, its renderer and `worldWind` read this. */
+  private windSaid?: { view: WindView; bytes: Uint8Array };
+  /** The coarse views of the wind made in this slice of the world's time (T484), by corner: the wanderers of one window share one. */
+  private windViews = new Map<string, WindView>();
+  private windSlice = -1;
+
+  /** The id of the world's wind (T484): its first `wind` automaton, or none. */
+  windId(): string | undefined {
+    return windSpecOf(this.config.nature.automata)?.id;
+  }
+
+  /**
+   * The world's wind at a point of the world (T484, ADR-0255): where it blows and how strong, in the world's units (a full prevailing wind
+   * is 1), a copy. In a mirror what the server's coarse view says; beyond the automaton's window the prevailing wind; undefined in a world
+   * without wind. What `world.wind` gives Lua and what a sail feels.
+   */
+  worldWind(x: unknown, y: unknown): WindHere | undefined {
+    if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+    if (this.mirror) {
+      const said = this.windSaid;
+      return said ? windHere(...windInView(said.view, said.bytes, x, y)) : undefined;
+    }
+    const id = this.windId();
+    if (!id || !this.automata.active) return undefined;
+    this.automata.syncWindow();
+    const s = this.automata.sample(id, x, y);
+    const v = s && typeof s === 'object' ? relativeWind(s.vx, s.vy) : relativeWind(...(this.automata.prevailing(id) ?? [0, 0]));
+    return windHere(v[0], v[1]);
+  }
+
+  /**
+   * The coarse wind around a point of the world (T484, T459 § 5.4): what a client gets and draws, one cell every three tiles, made once
+   * for every window in each slice of the world's time (`WIND_VIEW.hz` a second) and shared by who is in it. In a mirror the server's.
+   */
+  windViewAt(x: number, y: number): WindView | undefined {
+    if (this.mirror) return this.windSaid?.view;
+    const id = this.windId();
+    if (!id || !this.automata.active || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+    const slice = Math.floor(this.time * WIND_VIEW.hz);
+    if (slice !== this.windSlice) {
+      this.windSlice = slice;
+      this.windViews.clear();
+    }
+    const [x0, y0] = viewCorner(x, y);
+    const key = `${x0},${y0}`;
+    let view = this.windViews.get(key);
+    if (!view) {
+      this.automata.syncWindow();
+      const p = relativeWind(...(this.automata.prevailing(id) ?? [0, 0]));
+      view = windViewOf(x, y, p, (wx, wy) => {
+        const s = this.automata.sample(id, wx, wy);
+        return s && typeof s === 'object' ? relativeWind(s.vx, s.vy) : undefined;
+      });
+      this.windViews.set(key, view);
+    }
+    return view;
+  }
+
+  /** The coarse wind around the wanderer, as the renderer draws it (T484): the server's in a mirror; undefined in a world without wind. */
+  windView(): WindView | undefined {
+    if (this.mirror) return this.windSaid?.view;
+    if (!this.windId() || !this.ecs.alive.has(this.wandererEntity)) return undefined;
+    const c = this.wandererCarpet();
+    return this.windViewAt(c.x, c.y);
+  }
+
+  /** What the server says of the wind (T484), read without trusting it: a mirror keeps it; `null` (the world has no wind any more) forgets it. */
+  applyWind(raw: unknown): void {
+    if (raw === null) {
+      this.windSaid = undefined;
+      return;
+    }
+    const view = readWindView(raw);
+    const bytes = view && viewBytes(view);
+    if (view && bytes) this.windSaid = { view, bytes };
   }
 
   /**

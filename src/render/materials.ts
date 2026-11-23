@@ -6,6 +6,20 @@
 import * as THREE from 'three';
 import { addShade, CARTOON, thingOf, toon } from './cartoon';
 import { CUT_RADIUS, CUT_STRETCH } from '../kernel/underground';
+import { WIND_MAX } from '../kernel/wind';
+
+/**
+ * The world's wind as the vertex shaders read it (T484, ADR-0255): the coarse view (`Kernel.windView`) in a small texture, east in red
+ * and south in green over `WIND_MAX`, 128 still; filtered between the middles of its cells, as `windInView` reads it.
+ */
+function windTexture(w = 1, h = 1, data = new Uint8Array(w * h * 4).fill(128)): THREE.DataTexture {
+  const t = new THREE.DataTexture(data, w, h, THREE.RGBAFormat, THREE.UnsignedByteType);
+  t.magFilter = THREE.LinearFilter;
+  t.minFilter = THREE.LinearFilter;
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  t.needsUpdate = true;
+  return t;
+}
 
 /** Shared uniforms: time (wind, flicker), wind strength, the radius beyond which the simulation is cut. */
 export const U = {
@@ -24,7 +38,42 @@ export const U = {
   cutTile: { value: new THREE.Vector2() },
   cutDir: { value: new THREE.Vector2(0, 1) },
   cutOff: { value: new THREE.Vector2() },
+  /**
+   * The world's wind (T484): its coarse view as a texture, where it lies (its corner from the whole part of the scroll, as `cutTile`, and
+   * one over its width and height in tiles), and 1 when the world has a wind; at 0 the vegetation sways as before, the same everywhere.
+   */
+  windTex: { value: windTexture() },
+  windBox: { value: new THREE.Vector4(0, 0, 1, 1) },
+  windOn: { value: 0 },
 };
+
+/** How far a full wind leans the top of what sways (tiles). */
+const WIND_LEAN = 0.25;
+
+/** The world's wind in the shaders: off for what stands beyond the circle (the corona), which is not the world. */
+const WIND_OFF = { value: 0 };
+const windUniforms = (on: { value: number } = U.windOn) => ({ uWindTex: U.windTex, uWindBox: U.windBox, uWindOn: on, uWindOff: U.cutOff });
+const WIND_PARS = `uniform sampler2D uWindTex;
+uniform vec4 uWindBox;
+uniform float uWindOn;
+uniform vec2 uWindOff;`;
+
+/** The texture of a coarse view of the wind (T484): reused while its size stays; `bytes` two signed bytes a cell, as the view has them. */
+export function windToTexture(w: number, h: number, bytes: Uint8Array): void {
+  let t = U.windTex.value;
+  if (t.image.width !== w || t.image.height !== h) {
+    t.dispose();
+    t = U.windTex.value = windTexture(w, h);
+  }
+  const data = t.image.data as Uint8Array;
+  for (let i = 0; i < w * h; i++) {
+    data[i * 4] = (((bytes[i * 2]! << 24) >> 24) + 128) & 255;
+    data[i * 4 + 1] = (((bytes[i * 2 + 1]! << 24) >> 24) + 128) & 255;
+    data[i * 4 + 2] = 128;
+    data[i * 4 + 3] = 255;
+  }
+  t.needsUpdate = true;
+}
 
 /** In the cartoon a glowing voxel is this much of its colour, plus `U.glow`: about what it is in the classic look by day. */
 const GLOW_BASE = 0.6;
@@ -130,15 +179,33 @@ export function glowing<M extends THREE.Material>(m: M, key: string, always = fa
   return m;
 }
 
-/** The vertex shader's wind: the `sway` weight of a vertex bends it. */
+/**
+ * The vertex shader's wind: the `sway` weight of a vertex bends it. Where the world has a wind (T484) the top leans the way it blows, as far
+ * as it is strong, breathing with it and fluttering across it, in the frame of the model (its yaw); else the sway of before, the same
+ * everywhere.
+ */
 const WIND_VERTEX = `#include <begin_vertex>
     vec3 swp = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     #ifdef USE_INSTANCING
     swp += (modelMatrix * vec4(instanceMatrix[3].xyz, 0.0)).xyz;
     #endif
     float ph = uTime * 1.7 + swp.x * 0.37 + swp.z * 0.61;
-    transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
-    transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);`;
+    if (uWindOn > 0.5) {
+      vec2 wq = (swp.xz + uWindOff - uWindBox.xy) * uWindBox.zw;
+      vec2 wv = (textureLod(uWindTex, wq, 0.0).rg * 255.0 - 128.0) / 127.0 * ${WIND_MAX.toFixed(3)};
+      float ws = length(wv);
+      vec2 wd = ws > 1e-3 ? wv / ws : vec2(0.0);
+      vec3 lean = vec3(wd.x, 0.0, wd.y) * (${WIND_LEAN.toFixed(3)} * ws * (1.0 + 0.35 * sin(ph)))
+        + vec3(-wd.y, 0.0, wd.x) * (uWind * (0.3 + ws) * 0.6 * cos(ph * 1.3));
+      mat3 wm = mat3(modelMatrix);
+      #ifdef USE_INSTANCING
+      wm = wm * mat3(instanceMatrix);
+      #endif
+      transformed += sway * (transpose(wm) * lean) / max(dot(wm[0], wm[0]), 1e-6);
+    } else {
+      transformed.x += sway * uWind * (sin(ph) + 0.35 * sin(ph * 2.3 + 1.0));
+      transformed.z += sway * uWind * 0.45 * cos(ph * 0.8);
+    }`;
 
 /** Where a vertex really stands, for the circle clip: instances (terrain models) are cut where they stand, not at the mesh origin. */
 const CLIP_VERTEX = `vec4 clipP = vec4(transformed, 1.0);
@@ -178,7 +245,8 @@ export function windy<M extends THREE.Material>(m: M, key: string): M {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = U.time;
     sh.uniforms.uWind = U.wind;
-    sh.vertexShader = `attribute float sway;\nuniform float uTime;\nuniform float uWind;\n${sh.vertexShader}`.replace('#include <begin_vertex>', WIND_VERTEX);
+    Object.assign(sh.uniforms, windUniforms(WIND_OFF));
+    sh.vertexShader = `attribute float sway;\nuniform float uTime;\nuniform float uWind;\n${WIND_PARS}\n${sh.vertexShader}`.replace('#include <begin_vertex>', WIND_VERTEX);
     addGlow(sh);
   };
   m.customProgramCacheKey = () => key;
@@ -197,7 +265,8 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
     sh.uniforms.uWind = U.wind;
     sh.uniforms.uClipR = U.clipR;
     if (cut) Object.assign(sh.uniforms, cutUniforms());
-    sh.vertexShader = `${sway ? 'attribute float sway;\n' : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${cut ? CUT_PARS_VERTEX : ''}\n${sh.vertexShader}`
+    if (sway) Object.assign(sh.uniforms, windUniforms());
+    sh.vertexShader = `${sway ? `attribute float sway;\n${WIND_PARS}\n` : ''}uniform float uTime;\nuniform float uWind;\nvarying vec2 vClipXZ;\n${cut ? CUT_PARS_VERTEX : ''}\n${sh.vertexShader}`
       .replace('#include <begin_vertex>', sway ? WIND_VERTEX : '#include <begin_vertex>')
       .replace('#include <project_vertex>', `#include <project_vertex>\n  ${CLIP_VERTEX}\n  ${cut ? CUT_VERTEX : ''}`);
     sh.fragmentShader = `uniform float uClipR;\nvarying vec2 vClipXZ;\n${cut ? CUT_PARS_FRAGMENT : ''}\n${sh.fragmentShader}`.replace(
@@ -236,13 +305,13 @@ export function idsOf(m: THREE.Material): THREE.Material | undefined {
     const pars: string = m.userData?.pars ?? '';
     const begin: string = m.userData?.begin ?? (sway ? WIND_VERTEX : '#include <begin_vertex>');
     const material = new THREE.ShaderMaterial({
-      uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR, ...(cut ? cutUniforms() : {}) },
+      uniforms: { uThing: { value: 0 }, uTime: U.time, uWind: U.wind, uClipR: U.clipR, ...(cut ? cutUniforms() : {}), ...(sway ? windUniforms(clip ? U.windOn : WIND_OFF) : {}) },
       side: m.side,
       clipping: true,
       clippingPlanes: m.clippingPlanes ?? null,
       vertexShader: `attribute float part;
 ${pars}
-${sway ? 'attribute float sway;' : ''}
+${sway ? `attribute float sway;\n${WIND_PARS}` : ''}
 uniform float uTime;
 uniform float uWind;
 ${clip ? 'varying vec2 vClipXZ;' : ''}

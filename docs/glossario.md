@@ -238,6 +238,34 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «griglia» (è del motore MarkovJunior), «mappa fisica»
 - **Fermo**: l'API Lua `world.field` e `world.field_add`.
 
+### Vento del mondo
+- **Inglese**: `worldWind`, `windId`, `windSpecOf`, `WindHere`, `relativeWind`, `windHere`, `WIND_MAX`, `world.wind`
+- **Definizione**: il primo automa `wind` che un mondo dichiara, a una cella per casella (la più fine che il carico fisso regge accanto all'acqua di D3), letto nelle unità del mondo (1 il vento dominante più forte, una raffica fino a 1,5): ciò che sentono la vela, il fuoco di `sys.fire`, l'erba, gli alberi e il fumo; per Lua `world.wind(x, y)`, una copia; in uno specchio ciò che dice la vista grossolana del server (T484, ADR-0255).
+- **Dove vive**: `src/kernel/wind.ts`, `src/kernel/kernel.ts`, `src/kernel/prelude.lua`, `src/kernel/sandbox.ts`
+- **Da non usare**: «meteo», «brezza» (è testo del mondo), «vento del materiale» (era l'oscillazione uguale dappertutto, `U.wind`)
+- **Fermo**: l'API Lua `world.wind` e i campi `vx`, `vy`, `speed` della sua copia.
+
+### Vento dominante
+- **Inglese**: `prevailing`, `prevailingAt`, `PREVAILING`, `days`
+- **Definizione**: il vento che entra nella finestra di un automa `wind` e vi soffia dove niente lo devia: la media della specifica (`prevailing`, o una direzione della rosa dal seme) girata e calmata lentamente col giorno del mondo e il seme, quattro chiavi al giorno, mai con l'orologio (T484, ADR-0255).
+- **Dove vive**: `src/kernel/automata.ts`
+- **Da non usare**: «vento di fondo», «inflow» (è il campo del reticolo)
+- **Fermo**: `prevailing` nella specifica di un automa `wind` di `nature.automata`.
+
+### Vista grossolana del vento
+- **Inglese**: `WindView`, `windViewOf`, `windViewAt`, `windView`, `readWindView`, `windInView`, `viewCorner`, `WIND_VIEW`, `applyWind`
+- **Definizione**: ciò che un client riceve e disegna del vento: una cella ogni tre caselle su 108 × 90 attorno al viandante, due byte con segno a cella in base64 e il vento dominante, al più due volte al secondo del mondo e solo quando cambia (`update.wind`), letta senza fidarsi; da soli il kernel la fa per il renderer (T484, ADR-0255, V-049).
+- **Dove vive**: `src/kernel/wind.ts`, `src/kernel/kernel.ts`, `src/session/server.ts`, `src/session/client.ts`, `src/render/materials.ts`
+- **Da non usare**: «mappa del vento», «vento compresso»
+- **Fermo**: il campo `wind` di `welcome` e `update` e i campi `x`, `y`, `w`, `h`, `cell`, `p`, `data` di `WindView`.
+
+### Vela
+- **Inglese**: `sail`, `sailPolar`, `sailPush`, `saysSail`, `SAIL`
+- **Definizione**: la parte della spinta di un veicolo sull'acqua che dà il vento del mondo (`vehicle.sail`, 0-1), come la polare dice l'angolo fra la prua e il vento (al traverso tutto, in poppa 0,7, controvento niente); il resto dai remi; senza vento o senza vela la spinta di prima. La Fucina la dà (0,75) a ciò che il nome dice un veliero (T484, ADR-0255).
+- **Dove vive**: `src/kernel/vehicle.ts`, `src/kernel/wind.ts`, `src/kernel/vehicleclaim.ts`, `src/kernel/kernel.ts`
+- **Da non usare**: «velatura», «potenza del vento» (`power` è ciò che chiede Lua)
+- **Fermo**: `sail` nel `vehicle` dei manifest.
+
 ### Rialzo sintetico
 - **Inglese**: `syntheticRise`, `Rise`, `riseOn`
 - **Definizione**: i livelli che un test o la console aggiungono alla terra dei luoghi caricati (mai all'acqua né ai lotti) per vedere la regola 10 dei gradini al lavoro su dirupi che il rilievo di oggi non ha; mai salvato, mai da Lua, mai sul filo (T474, ADR-0250).

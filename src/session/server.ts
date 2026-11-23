@@ -20,6 +20,7 @@ import { CLIMB_ACTION } from '../kernel/climb';
 import { offDeck } from '../kernel/vehicle';
 import { shownSpend } from '../kernel/ai/usage';
 import { ENTITY_PARTS, type OnDeck, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
+import { WIND_VIEW } from '../kernel/wind';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -259,6 +260,9 @@ interface Client {
   broken?: string;
   /** The pace of the world, as this client last heard of it (T373). */
   paceSeen?: string;
+  /** The coarse wind as this client last heard of it (T484) and the slice of the world's time it was looked at in. */
+  windSeen?: string;
+  windSlice?: number;
   /** What the other wanderers did to this one since the last update (T43a). */
   notices: Notice[];
   /** Spending ceiling for this session in USD (T45d: lobby). */
@@ -527,6 +531,7 @@ export class SessionServer {
       ...(u.players ? { players: u.players } : {}),
       ...(broken.length ? { broken } : {}),
       ...(pace.mode !== 'normal' ? { pace } : {}),
+      ...(u.wind ? { wind: u.wind } : {}),
     });
     return c;
   }
@@ -566,7 +571,7 @@ export class SessionServer {
         if (Object.keys(mine).length) c.link.send({ t: 'file', files: mine });
       }
       const u = this.view(c);
-      if (u.me || u.state || u.chunks || u.entities || u.gone || u.wanderers || u.departed || u.notices || u.broken || u.pace) c.link.send(u);
+      if (u.me || u.state || u.chunks || u.entities || u.gone || u.wanderers || u.departed || u.notices || u.broken || u.pace || u.wind !== undefined) c.link.send(u);
     }
   }
 
@@ -1107,6 +1112,15 @@ export class SessionServer {
     // What is around: the wanderer, or the player the master follows (T42c), while they are in the world.
     if (c.watch && (!this.clients.has(c.watch) || !k.inWorld(c.watch))) c.watch = undefined;
     const centre = (c.watch && k.wandererAt(c.watch)) || at;
+    // The coarse wind (T484, ADR-0255): around who the client follows, at most `WIND_VIEW.hz` times a second of the world, when it changed.
+    const windSlice = Math.floor(k.time * WIND_VIEW.hz);
+    if (windSlice !== c.windSlice) {
+      c.windSlice = windSlice;
+      const wind = k.windViewAt(centre.x, centre.y);
+      const windKey = wind ? `${wind.x},${wind.y},${wind.p.join(',')},${wind.data}` : '';
+      if (windKey !== (c.windSeen ?? '')) out.wind = wind ?? null;
+      c.windSeen = windKey;
+    }
     if (k.isMaster(c.id)) {
       const players = [...this.clients.keys()].flatMap((id) => {
         const o = id !== c.id && k.inWorld(id) ? k.wandererAt(id) : undefined;

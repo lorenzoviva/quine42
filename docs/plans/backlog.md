@@ -6401,12 +6401,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 5.2; D3: `flow` a due celle per lato di casella, il passo stabile a quella risoluzione (§ 1.5), il frame misurato nel browser.
 - Cosa fare: la riga 10. Browser: sì.
 
-### T484 · A2 · Il vento (riga 11 di T459) — `da fare`
+### T484 · A2 · Il vento (riga 11 di T459) — `fatto` (`4bbf4ec2`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4
 - Step: 45
 - Dipende da: T482
 - Contesto: § 5.3; D3 chiede la massima definizione: la risoluzione del vento la più fine che il carico fisso regge accanto all'acqua a due celle (lo studio proponeva una cella ogni tre caselle), misurata e scritta.
 - Cosa fare: la riga 11; il vento grossolano ai client a elenco (regola 8f). Browser: sì.
+- Esito: il vento di A2 (ADR-0255, kernel 0.10.31): una cella per casella misurata come la più fine accanto all'acqua di D3 (1,547 ms/tick statici; a due celle per lato 2,106, oltre il bilancio), passo spezzato nei tick fra due e identico byte per byte, vento dominante dal giorno e dal seme, vela `vehicle.sail` data dalla Fucina ai velieri, `world.wind` e `sys.fire` sottovento, vista grossolana ai client (`update.wind`, al più 2 Hz, letta senza fidarsi), erba e alberi piegati e fumo come disegno; typecheck verde; suite: falliscono solo `site-video` (C: senza i 4 GB che il test chiede; passa con la temp su H:) e un caso di `strata-council` sotto carico (passa da solo); non provati il frame nel browser col vento, il multigiocatore in un browser vero e una chiamata vera al Fisico; sicurezza: V-049 aggiunta (il vento sul filo e `world.wind`, `tests/sicurezza/vento.test.ts`).
 
 ### T485 · A3 · L'acqua a schermo sulla GPU (riga 12 di T459) — `da fare`
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 4

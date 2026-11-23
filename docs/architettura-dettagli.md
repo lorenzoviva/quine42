@@ -40,7 +40,7 @@
 | [Il rilievo](#rilievo) | `src/kernel/relief.ts` |
 | [La rete e le enclavi (la regola 10 dei gradini)](#rete) | `src/kernel/network.ts`, `src/kernel/kernel.ts`, `src/kernel/npc/places.ts` |
 | [L'acqua che scorre](#acqua) | `src/kernel/water.ts` |
-| [Gli automi cellulari](#automi) | `src/kernel/automata.ts`, `src/kernel/agents/physicist.ts`, `src/kernel/nature.ts` |
+| [Gli automi cellulari](#automi) | `src/kernel/automata.ts`, `src/kernel/wind.ts`, `src/kernel/agents/physicist.ts`, `src/kernel/nature.ts`, `src/render/smoke.ts` |
 | [Lotti e strutture, scale e piani](#lotti) | `src/kernel/layout.ts`, `src/kernel/forms.ts` |
 | [Le taglie](#taglie) | `src/mj/classes.ts` |
 | [Il grafo del mondo](#grafo) | `src/kernel/graph.ts`, `world/graph.json` |
@@ -1865,7 +1865,7 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   `clusterChunks`, al più `MAX_WINDOWS_PER_AUTOMATON` 4 finestre e `MAX_CELLS_PER_AUTOMATON` 48 000 celle per finestra, con conservazione
   dello stato nelle sovrapposizioni allo scorrere della finestra). Cinque famiglie: `flow` (tubi virtuali a **2 celle per lato di casella**,
   `cell: 0.5` predefinito per D3, o `1`, fino a 60 Hz, percorso veloce senza muri: 1,244 ms/tick misurati su 216 × 180 celle, volume
-  conservato entro 1e−6 nei bacini chiusi), `wind` (D2Q9 BGK, `cell: 3|2|1`, fino a 10 Hz, 0,116 ms/passo a `cell: 3`), `diffuse` (diffusione,
+  conservato entro 1e−6 nei bacini chiusi), `wind` (D2Q9 BGK, `cell: 1|2|3`, **una cella per casella** predefinita dal T484, fino a 10 Hz, 1,09 ms/passo a `cell: 1` spezzato nei tick fra due: 0,20 ms a tick), `diffuse` (diffusione,
   decadimento e advezione upwind separata lungo un automa `wind` o `flow`, fino a 10 Hz), `table` (2–16 stati su vicinato di Moore in
   tabelle piatte `Uint8Array` + `Float32Array`, caso da `hash32(seed, worldCellX, worldCellY, step)`), `rules` (programma MarkovJunior XML su
   uno `Stepper` con `Stepper.setCell`, `symmetry="(xy)"` obbligatoria sulla radice, soli nodi `sequence|markov|convolution|prl|all|one`,
@@ -1882,6 +1882,24 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   un numero per gli altri); `world.field_add(id, x, y, amount, amount_y?)` mette sorgenti/pozzi su eventi entro `FIELD_ADD_LIMITS` (tetto per
   chiamata, `maxCallsPerTick` 64 e tetto cumulativo per tick per automa), ignora `NaN`/`Infinity` e coordinate fuori finestra e rifiuta sugli
   specchi (`mirror`). `tests/automi.test.ts`, `tests/sicurezza/automi.test.ts`.
+- **Il vento** (ADR-0255, T484, riga 11 di T459, D67 D3, kernel 0.10.31; `src/kernel/wind.ts`): il vento del mondo è il suo primo automa `wind`
+  (`windSpecOf`, `Kernel.windId`), **a una cella per casella** (`DEFAULT_CELL.wind`): la più fine che il carico fisso regge accanto all'acqua
+  di D3 (statico 1,547 ms/tick con l'acqua, 1,631 col fumo e il fuoco; a due celle per lato 2,106, oltre), misurata da
+  `lab/scripts/misura-vento.ts` (`lab/terreno-3d/misure/vento.md`; `NS_PER_CELL.wind` 115). Il passo spezzato: `2 × H` unità (le righe
+  collidono, poi scorrono, poi i buffer si scambiano: `WindField.work`), il motore ne fa la stessa parte in ogni tick fra due passi
+  (`AutomataEngine.windTick`), lo stesso campo byte per byte. Il vento dominante dal tempo del mondo (`prevailingAt`, `PREVAILING`: quattro
+  chiavi al giorno, al più 0,6 radianti dalla media e metà della forza, dal seme; `AutomataWorld.days`, la media `prevailing` o una
+  direzione della rosa dal seme; solo aritmetica). Le unità del mondo: 1 il vento dominante più forte (`WIND_LIMITS.inflow`), una raffica
+  fino a `WIND_MAX` 1,5 (`relativeWind`, `windHere`). `Kernel.worldWind(x, y)` (copia `{vx, vy, speed}`, il dominante fuori dalla finestra,
+  in uno specchio dalla vista del server) e per Lua `world.wind(x, y)`; `sys.fire` brucia più lontano sottovento. **La vela**:
+  `vehicle.sail` 0-1 solo sull'acqua (`VehicleSpec.sail`), il passo con un fattore (`vehicleStep(…, push)`, `sailPush`, la polare
+  `sailPolar`); la Fucina dà `SAIL` 0,75 a ciò che il nome dice un veliero (`saysSail`, `vehicleFor`). **Ai client** (V-049): `update.wind`
+  e `welcome.wind`, un `WindView` (una cella ogni tre caselle su 108 × 90 attorno al viandante, due byte con segno a cella in base64, il
+  dominante), al più `WIND_VIEW.hz` 2 volte al secondo del mondo e solo quando cambia, una per finestra e mezzo secondo
+  (`Kernel.windViewAt`), `null` quando il mondo non ha più vento; il client la legge senza fidarsi (`readWindView`) e lo specchio la tiene
+  (`applyWind`). **A schermo**: la vista (`Kernel.windView`) in una texture (`U.windTex`, `windToTexture`), ciò che ha i pesi `sway` si
+  piega dove il vento soffia (`WIND_VERTEX`), la corona mai; ciò che ha `fire` fa sbuffi che il vento porta (`src/render/smoke.ts`, solo
+  disegno). Senza vento tutto come prima. `tests/vento.test.ts`, `tests/sicurezza/vento.test.ts`.
 
 <a id="lotti"></a>
 ## Lotti e strutture, scale e piani

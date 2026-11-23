@@ -50,6 +50,12 @@ export interface VehicleSpec {
    * nothing (a capsule is closed); another only if it says so (an open deck has the air of the tile under it).
    */
   air: boolean;
+  /**
+   * How much of its way the wind gives (T484, ADR-0255), 0…1: a sail. 0 (the most, a boat with oars, a cart, a capsule) the wind does not
+   * move; a vessel with `sail` draws that share from the world's wind as its polar says (`wind.ts → sailPush`), the rest from its oars.
+   * Only on the water; in a world without wind nothing changes.
+   */
+  sail: number;
 }
 
 /** What a manifest writes of a vehicle (`vehicle`), as read: nothing of it is trusted. */
@@ -60,6 +66,7 @@ export interface VehicleSaid {
   turn?: unknown;
   draught?: unknown;
   air?: unknown;
+  sail?: unknown;
 }
 
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -79,6 +86,7 @@ export function vehicleSpecOf(said: unknown): VehicleSpec | undefined {
     turn: within(finite(v.turn) ? v.turn : 0.8, VEHICLE_LIMITS.turn),
     draught: isDraught(v.draught) ? v.draught : 'shallow',
     air: v.air === true || (v.air !== false && v.medium === 'void'),
+    sail: v.medium === 'water' && finite(v.sail) ? within(v.sail, [0, 1]) : 0,
   };
 }
 
@@ -94,6 +102,7 @@ export function vehicleSpecErrors(said: unknown): string[] {
     if (n !== undefined && (!finite(n) || n < lo || n > hi)) out.push(`vehicle.${k} sta tra ${lo} e ${hi}`);
   }
   if (v.air !== undefined && typeof v.air !== 'boolean') out.push('vehicle.air deve essere true o false');
+  if (v.sail !== undefined && (!finite(v.sail) || v.sail < 0 || v.sail > 1 || v.medium !== 'water')) out.push('vehicle.sail (0-1, quanto della spinta dà il vento) solo sull’acqua');
   if (v.draught !== undefined && (!isDraught(v.draught) || v.medium !== 'water')) out.push(`vehicle.draught (${DRAUGHTS.join(', ')}) solo sull'acqua`);
   return out;
 }
@@ -162,9 +171,13 @@ export const TURN_AT_REST = 0.35;
 /** The anchor (the brake) stops it this many times faster than it gathers way. */
 export const ANCHOR_BRAKE = 3;
 
-/** One step of a vehicle (`dt` seconds): its new way and turn, and how it moves (tiles, radians) if nothing stops it. */
-export function vehicleStep(v: VehicleState, spec: VehicleSpec, dt: number): { speed: number; turn: number; dx: number; dy: number; dyaw: number } {
-  const target = v.anchored ? 0 : (v.thrust >= 0 ? v.thrust : v.thrust * REVERSE) * v.power * spec.speed;
+/**
+ * One step of a vehicle (`dt` seconds): its new way and turn, and how it moves (tiles, radians) if nothing stops it. `push` is the share of its
+ * way the world gives it now (T484: the wind in a sail, `sailPush`; 1 for what has none), over what the helm and Lua ask.
+ */
+export function vehicleStep(v: VehicleState, spec: VehicleSpec, dt: number, push = 1): { speed: number; turn: number; dx: number; dy: number; dyaw: number } {
+  const p = Number.isFinite(push) ? Math.max(0, push) : 1;
+  const target = v.anchored ? 0 : (v.thrust >= 0 ? v.thrust : v.thrust * REVERSE) * v.power * p * spec.speed;
   const a = spec.accel * (v.anchored ? ANCHOR_BRAKE : 1) * dt;
   const speed = v.speed + within(target - v.speed, [-a, a]);
   const grip = TURN_AT_REST + (1 - TURN_AT_REST) * Math.min(1, Math.abs(speed) / spec.speed);

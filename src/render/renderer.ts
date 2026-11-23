@@ -12,7 +12,9 @@ import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
 import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, CARTOON_STUDIO, cartoonLight, SHADE, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
-import { CUT, U } from './materials';
+import { CUT, U, windToTexture } from './materials';
+import { Smoke } from './smoke';
+import { viewBytes, type WindView } from '../kernel/wind';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
 import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, staleChunks, tileForms, type TerrainView } from './terrain';
@@ -69,6 +71,10 @@ export class Renderer {
   private runes: Runes;
   private wanderer: Wanderer;
   private lights: Lights;
+  /** The smoke of what burns, carried by the wind (T484). */
+  private smoke: Smoke;
+  /** The coarse wind in the texture now (T484): a new view, a new texture. */
+  private windShown?: WindView;
   /**
    * The corona and the studio (T41): only the master's client has them (src/master.ts, loaded on demand); a
    * player's never leaves the simulation.
@@ -130,6 +136,7 @@ export class Renderer {
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
     this.lights = new Lights(this.scene);
+    this.smoke = new Smoke(this.scene);
     this.yaw = (kernel.input.turn * Math.PI) / 2;
     this.yawGoal = this.yaw;
     this.overlay = new Overlay(overlay, this.camera);
@@ -346,6 +353,24 @@ export class Renderer {
     return { x: hit.x, y: hit.z };
   }
 
+  /** The coarse wind of the world in the shaders' texture (T484): its cells when the view is a new one, where it lies every frame. */
+  private syncWind(ix: number, iy: number): void {
+    const view = this.kernel.windView();
+    if (!view) {
+      U.windOn.value = 0;
+      this.windShown = undefined;
+      return;
+    }
+    if (view !== this.windShown) {
+      const bytes = viewBytes(view);
+      if (!bytes) return void (U.windOn.value = 0);
+      windToTexture(view.w, view.h, bytes);
+      this.windShown = view;
+    }
+    U.windOn.value = 1;
+    U.windBox.value.set(view.x - ix, view.y - iy, 1 / (view.w * view.cell), 1 / (view.h * view.cell));
+  }
+
   render(dt: number): void {
     const k = this.kernel;
     this.t += dt;
@@ -392,6 +417,8 @@ export class Renderer {
       // a million tiles from the origin too.
       const ix = Math.floor(ox), iy = Math.floor(oy);
       U.cutOff.value.set(ox - ix, oy - iy);
+      // The world's wind (T484): what the grass and the trees bend with, where it lies from the whole part of the scroll.
+      this.syncWind(ix, iy);
       if (under) U.cutTile.value.set(under.tile.x - ix, under.tile.y - iy);
       this.entities.update(dt, this.t, inside);
       this.runes.update(this.t);
@@ -455,6 +482,7 @@ export class Renderer {
       this.fog.far = air.far + up * 1.25;
     }
     this.lights.update(k, studio ? 0 : night, { ox, oy }, this.t, watch ? { x: 0, y: 0 } : p);
+    this.smoke.update(k, dt, { ox, oy }, !interior && !revealed && k.zone === 'sim');
     this.flash.intensity = this.flashUntil > this.t ? 6 * ((this.flashUntil - this.t) / 0.6) : 0;
 
     // The camera follows the wanderer, from above.
