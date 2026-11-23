@@ -866,7 +866,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Programma
 - **Inglese**: `program`, `checkProgram`, `repairProgram`
-- **Definizione**: il testo MarkovJunior (XML) di un modello o di un ambiente.
+- **Definizione**: il testo MarkovJunior (XML) di un modello o di un ambiente. Come gira lo dice MarkovJunior di mxgmn: dal T500 (la scelta A1 dell'autore) il metro è la **conformità** voxel per voxel all'originale, con lo stesso programma, la stessa griglia di partenza e lo stesso seme (il caso dell'originale si riproduce), misurata contro il C# e contro la sua traduzione riga per riga nel laboratorio (il riferimento, `lab/banco/conformita/`); le differenze di oggi, una per una, in `docs/design/markov-allineamento.md` e `tests/mj-conformita.test.ts`.
 - **Dove vive**: `src/mj/`, `src/kernel/mj.ts`
 - **Da non usare**: `codice` (è il Lua), `xml` (nei documenti)
 

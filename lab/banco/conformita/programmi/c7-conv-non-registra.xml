@@ -1,0 +1,1 @@
+<markov values="ACB" symmetry="()"><one in="A" out="B"/><convolution neighborhood="VonNeumann"><rule in="C" out="A"/></convolution></markov>

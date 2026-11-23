@@ -1,0 +1,19 @@
+<!-- Un borgo coi sentieri (T500): la piazza, le case con la porta, e un sentiero da ogni porta alla rete, fatto da `path`. Scritto per
+     l'originale (github.com/mxgmn/MarkovJunior) e per il nostro motore: gira nei due (lab/banco/conformita/README.md).
+     B prato, S piazza, H casa, D porta da collegare, d porta collegata, W sentiero. -->
+<sequence values="BSHDdW" origin="True" symmetry="(xy)">
+  <!-- La piazza: un quadrato di 5 attorno al centro. -->
+  <one in="BBBBB/BBBBB/BBSBB/BBBBB/BBBBB" out="SSSSS/SSSSS/SSSSS/SSSSS/SSSSS" steps="1"/>
+  <!-- Le case: un blocco di 5 × 4 con la porta su un lato e il prato attorno, al più dieci, dove c'è posto. -->
+  <one steps="10">
+    <rule in="BBBBBBB/BBBBBBB/BBBBBBB/BBBBBBB/BBBBBBB/BBBBBBB/BBBBBBB" out="BBBBBBB/BHHHHHB/BHHHHHB/BHHHHHB/BHHHHHB/BBBDBBB/BBBBBBB"/>
+  </one>
+  <!-- I sentieri: a ogni passo, prima si segna la porta che tocca la rete; se non c'è, `path` porta un sentiero dalla porta più vicina
+       (nell'originale; da noi una a caso) alla piazza o a un sentiero già fatto, sul prato, andando dritto finché può. Finisce quando
+       nessuna porta può più arrivare alla rete. -->
+  <markov>
+    <one in="DW" out="dW"/>
+    <one in="DS" out="dS"/>
+    <path from="D" to="SW" on="B" color="W" inertia="True"/>
+  </markov>
+</sequence>

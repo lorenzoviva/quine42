@@ -1,0 +1,1 @@
+<convolution values="BR" neighborhood="Moore"><rule in="B" out="R" values="R" sum="1..26"/></convolution>

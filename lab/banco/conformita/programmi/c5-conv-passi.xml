@@ -1,0 +1,1 @@
+<convolution values="BR" neighborhood="VonNeumann" steps="50"><rule in="B" out="R" values="R" sum="1..4"/></convolution>
