@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 23/11/2026, epoca 662 (claude). Crediti: vedi `stato`.
+Aggiornato il 23/11/2026, epoca 663 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -39,7 +39,7 @@ Aggiornato il 23/11/2026, epoca 662 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
-- **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237): primo task vero **T479** integrato al primo colpo (epoca 660: 43 min, −9 % sett., −31 % 5h, stima 4 %: costa più del doppio della stima); al prossimo task pronto adatto (programmazione di più file, senza browser) assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
+- **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237): primo task vero **T479** integrato al primo colpo (epoca 660: 43 min, −9 % sett., −31 % 5h, stima 4 %: costa più del doppio della stima); seconda misura **T482** integrata al primo colpo (54 min, −6 % sett., stima 12 %): due task senza rifacimenti, l’uscita dalla prova la decide l’autore; intanto al prossimo task adatto assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
 - **19/11 17:05 (epoca 567):** autore ha chiuso D64 e D65 (fuori per 1-2 ore): T437-T451 pianificati e approvati, `mesa` nel generatore. Autonomia: lanciare e integrare la catena T437→.
 - **19/11 16:58 (epoca 565):** **T436** integrato (`da373cc3`, ADR-0223, kernel `0.9.21`, step 31 `raggiunto`; cartella `worktrees/t436` bloccata su Windows e ramo `task/T436` rimasto). Claude fermo al 3 % settimana fino al reset delle 15:59Z (16:59 CET). Autonomia fino alle 18:00 CET (**D66** aperta).
 - **19/11 15:56 (epoca 562):** **T435** integrato (`694e7833`, kernel 0.9.20; worktree e ramo rimossi); aggiramento in `.pipeline/budget.json` (`residuo: 21`, `sessione: 90`, `letto: 15:55Z`) ripristinato per lanciare **T436** sul 5 % residuo prima del reset delle 16:00Z. Autonomia fino alle 18:00 CET (**D66** aperta).
@@ -53,5 +53,5 @@ Aggiornato il 23/11/2026, epoca 662 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **661 (claude):** **T501** integrato (`1de91690`: run-2 della beta pronta, worktree `beta-run-2`, porta 4820, 5 universi taggati `prima-della-run-2`, prova 0,33 $, guida `docs/beta/run-2.md`; corretti missione «portami» e modelli locali sopra un mondo del Concilio; stessa versione 0.10.29 di T479). In corso T500 (claude). Pronti: T475 (claude, aspetta slot), T482 (neon, seconda misura).
 - **662 (claude):** **T500** integrato (`0bb181c3`), D/T500 posta all'autore. In corso T482 (neon, seconda misura). Pronto T475 (claude). Claude settimana 7 % (reset 26/11 16:00Z).
+- **663 (claude):** **T482** integrato (`90fd76cd`, ADR-0254, V-048, kernel 0.10.30: primitiva degli automi `flow`/`wind`/`diffuse`/`table`/`rules`, `physics.automaton`, `world.field`; solo offline, rendering in A1/A2). Seconda misura di Neon: 54 min, −6 % sett., stima 12 %, al primo colpo. T475 (stima 6 %) aspetta: Claude settimana 7 %, soglia 2 %.
