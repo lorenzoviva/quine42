@@ -129,6 +129,8 @@ export class ThinClient {
     k.worldBroken(s.broken);
     // The pace of the world (T373): what the HUD says, as the world has it.
     k.applyPace(s.pace, true);
+    // The coarse wind (T484): what the grass and the trees bend with.
+    k.applyWind(s.wind ?? null);
   }
 
   /**
@@ -261,6 +263,7 @@ export class ThinClient {
         // The cards the world does not use (T296) first: the entities that come with them are drawn as the world has them.
         if (m.broken) this.k.worldBroken(this.session.broken);
         if (m.pace) this.k.applyPace(this.session.pace, true);
+        if (m.wind !== undefined) this.k.applyWind(this.session.wind ?? null);
         this.places(m.chunks ?? []);
         this.things(m.entities ?? []);
         for (const id of m.gone ?? []) this.drop(id);
@@ -329,6 +332,7 @@ export class ThinClient {
     k.worldBroken(s.broken);
     // The pace of the world (T373): what the HUD says, as the world has it.
     k.applyPace(s.pace, true);
+    k.applyWind(s.wind ?? null);
     this.places([...s.places.values()]);
     this.things([...s.entities.values()]);
     for (const o of s.others.values()) this.other(o);

@@ -14,6 +14,7 @@ import type { WorldPace } from '../kernel/worldPace';
 import type { RegionRequest } from '../kernel/atlas';
 import type { VehicleView } from '../kernel/vehicle';
 import type { SpendView } from '../kernel/ai/usage';
+import type { WindView } from '../kernel/wind';
 
 /** A tick of the server's world and its hour. */
 export interface Clock {
@@ -238,14 +239,17 @@ export type ServerMsg =
    * wanderer is the master (T41) and, only for the master, the platform fee their console shows (ADR-0132), the Council's feed so far and their branch (T42b); the
    * master's updates say (`players`) every player connected and where they are, when it changes (T42c).
    */
-  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[]; broken?: BrokenCard[]; pace?: WorldPace } & Clock)
+  | ({ t: 'welcome'; id: string; name: string; profile?: Profile; repaired?: string[]; settings?: { ok: boolean; reason?: string; repaired?: string[] }; anonymous?: true; master?: true; fee?: number; council?: FeedEntry[]; branch?: FileChanges; files: FileMap; me: Me; form?: FormView; state: MyState; chunks: ChunkView[]; entities: EntityView[]; wanderers: OtherView[]; players?: PlayerSpot[]; broken?: BrokenCard[]; pace?: WorldPace; wind?: WindView } & Clock)
   /**
+   * `wind` (T484, ADR-0255): the coarse wind around the wanderer (`WindView`: one cell every three tiles, two signed bytes a cell), in
+   * `welcome` and in `update` at most twice a second of the world and only when it changed; `null` when the world has no wind any more.
+   * Nothing else of the automata leaves the server (rule 8f, V-049).
    * `pace` (T373): the pace of the world, to every client, in `welcome` when it is not `normal` and in `update` when it changes: the HUD says
    * that the world is held, outside the world (D54.4).
    * `broken` (T296, ADR-0172): the brought cards that do not work in the world, when the list changes: every client draws the generic of their
    * class in their place, as the world does, and the master's console shows why.
    */
-  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[]; pace?: WorldPace } & Clock)
+  | ({ t: 'update'; me?: Me; state?: MyState; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; notices?: Notice[]; broken?: BrokenCard[]; pace?: WorldPace; wind?: WindView | null } & Clock)
   /** The step was not possible (too fast, through a wall), or the world moved them (T442: a hull's push, over the side): the wanderer is here; on a deck, there on it too. */
   | ({ t: 'correction'; seq: number; x: number; y: number } & OnDeck)
   /**

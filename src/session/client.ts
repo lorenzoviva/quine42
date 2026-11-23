@@ -10,6 +10,7 @@ import type { Profile } from '../kernel/wanderers';
 import { readBrokenCards, type BrokenCard } from '../kernel/brokencards';
 import { NORMAL_PACE, readPace, type WorldPace } from '../kernel/worldPace';
 import { isMove, type ClientLink, type ClientMsg, type ContainerView, type Dialog, type FileChanges, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerMsg, type EntityView } from './protocol';
+import { readWindView, type WindView } from '../kernel/wind';
 
 export interface Outcome {
   ok: boolean;
@@ -64,6 +65,8 @@ export class SessionClient {
   broken: BrokenCard[] = [];
   /** The pace of the world (T373), as the server last said: read, never taken as it came. */
   pace: WorldPace = NORMAL_PACE;
+  /** The coarse wind around the wanderer (T484), as the server last said: read, never taken as it came. */
+  wind?: WindView;
   /** What the other wanderers said to this one and gave them (T43a), oldest first. */
   readonly notices: Notice[] = [];
   /** Steps the server did not let through. */
@@ -167,6 +170,7 @@ export class SessionClient {
         this.feed.splice(0, this.feed.length, ...(m.council ?? []));
         this.broken = [];
         this.pace = NORMAL_PACE;
+        this.wind = undefined;
         this.places.clear();
         this.entities.clear();
         this.others.clear();
@@ -210,9 +214,11 @@ export class SessionClient {
     this.onMessage?.(m);
   }
 
-  private apply(m: { tick: number; time: number; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; broken?: unknown; pace?: unknown }): void {
+  private apply(m: { tick: number; time: number; chunks?: ChunkView[]; entities?: EntityView[]; gone?: number[]; wanderers?: OtherView[]; departed?: string[]; players?: PlayerSpot[]; broken?: unknown; pace?: unknown; wind?: unknown }): void {
     this.tick = m.tick;
     this.time = m.time;
+    // The coarse wind (T484): read, never taken as it came; `null` forgets it.
+    if (m.wind !== undefined) this.wind = m.wind === null ? undefined : readWindView(m.wind);
     if (m.players) this.players = m.players;
     if (m.broken !== undefined) this.broken = readBrokenCards(m.broken);
     if (m.pace !== undefined) this.pace = readPace(m.pace);

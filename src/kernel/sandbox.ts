@@ -70,6 +70,11 @@ export interface Host {
    */
   field_add(id: string, x: number, y: number, amount: number, amountY?: number): boolean;
   /**
+   * The world's wind at `(x, y)` (T484, ADR-0255): a fresh copy `{vx, vy, speed}` in the world's units (a full prevailing wind is 1, a gust
+   * at most 1.5); undefined in a world without wind.
+   */
+  wind(x: number, y: number): unknown;
+  /**
    * The islands of an archipelago within r tiles of (x, y) (T441), or the stations and asteroids of the void (T445, `body`): `{id, name, x, y,
    * radius, islet, body}` each, the nearest first, at most `MAX_ISLANDS_SEEN`; empty in a world that is neither. Read only: they are the kernel's.
    */
@@ -435,6 +440,7 @@ function emptyHost(): Host {
     air_at: () => true,
     stratum_at: () => undefined,
     field: () => undefined,
+    wind: () => undefined,
     field_add: () => false,
     islands: () => [],
     vehicle: () => undefined,

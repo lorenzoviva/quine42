@@ -798,4 +798,5 @@ export const UNCOVERED = {
   'V-046': 'il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts',
   'V-047': 'il salto e l’arrampicata in molti si provano sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/salto-molti.test.ts',
   'V-048': '`world.field_add` e i tetti degli automi si vedono solo dentro il kernel e la sandbox: li prova tests/sicurezza/automi.test.ts',
+  'V-049': 'il vento sul filo si prova sul kernel e sul server di sessione coi collegamenti finti, `world.wind` dentro la sandbox: tests/sicurezza/vento.test.ts',
 };

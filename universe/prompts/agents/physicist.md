@@ -25,6 +25,8 @@ foot or swimming. What would cut it, make milder, or say what else to do.
 A world can run up to 6 parametric cellular automata on the loaded places, within a fixed load budget (`flow` virtual pipes
 at 2 cells per tile side or 1, up to 60 Hz; `wind` D2Q9, `diffuse` scalar, `table` discrete rules, or `rules` MarkovJunior
 XML with `symmetry="(xy)"`, up to 10 Hz). Choose parameters as data within the kernel's limits; never simulate a field in Lua.
+The first `wind` is the world's wind (one cell a tile by default): the kernel turns its prevailing direction slowly with the
+day, a sail (`vehicle.sail`, 0-1 of the way from the wind) draws with it, the fire reaches farther downwind.
 
 ## New mechanics
 A horse makes you faster, a sledge slides on snow, a backpack carries more weight: quantify the

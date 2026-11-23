@@ -840,6 +840,11 @@ local function make_api()
       if amount_y ~= nil and type(amount_y) ~= "number" then return false end
       return host.field_add(id, x, y, amount, amount_y)
     end,
+    -- The world's wind (T484, ADR-0255): a copy {vx, vy, speed} in the world's units (a full prevailing wind is 1), nil without wind.
+    wind = function(x, y)
+      if type(x) ~= "number" or type(y) ~= "number" then return nil end
+      return host.wind(x, y)
+    end,
     islands = function(x, y, r)
       if type(x) ~= "number" or type(y) ~= "number" then return {} end
       return host.islands(x, y, type(r) == "number" and r or 200)

@@ -52,10 +52,13 @@ export const CELL_SIZES: Readonly<Record<AutomatonFamily, readonly CellSize[]>> 
   rules: [0.5, 1, 2],
 };
 
-/** Default cell size per family: `flow` defaults to 0.5 (2 cells/tile side, D3); `wind` to 3 (1 cell per 3 tiles); others to 1. */
+/**
+ * Default cell size per family: `flow` defaults to 0.5 (2 cells/tile side, D3); `wind` to 1 (one cell per tile, T484: the finest the fixed
+ * load holds beside the water at two cells per tile side, measured in `lab/scripts/misura-vento.ts`); others to 1.
+ */
 export const DEFAULT_CELL: Readonly<Record<AutomatonFamily, CellSize>> = {
   flow: 0.5,
-  wind: 3,
+  wind: 1,
   diffuse: 1,
   table: 1,
   rules: 1,
@@ -72,11 +75,12 @@ export const HZ_LIMITS: Readonly<Record<AutomatonFamily, { min: number; max: num
 
 /**
  * Measured cost per cell and step (nanoseconds), used for the deterministic static load check (`automatonLoadMs`).
- * Calibrated on `automata.ts` over the 108 × 90 reference window (D3: `flow` at `cell: 0.5` = 38,880 cells).
+ * Calibrated on `automata.ts` over the 108 × 90 reference window (D3: `flow` at `cell: 0.5` = 38,880 cells); `wind` measured again by T484
+ * (`lab/scripts/misura-vento.ts`: 112-115 ns a cell at every cell size, the step cut in rows as a whole one).
  */
 export const NS_PER_CELL: Readonly<Record<AutomatonFamily, number>> = {
   flow: 35,
-  wind: 100,
+  wind: 115,
   diffuse: 10,
   table: 42,
   rules: 65,
@@ -92,6 +96,14 @@ export const LOAD_BUDGET_MS = 2.0;
 /** Family-specific parameter limits: validated without clamping by `validateAutomaton`, safely repaired by `repairAutomata`. */
 export const FLOW_LIMITS = { gravity: [0.5, 20] as const, damp: [0.5, 0.999] as const, level: [-32, 64] as const, maxDepth: 32, maxSources: 8, maxWalls: 16 };
 export const WIND_LIMITS = { tau: [0.52, 2] as const, inflow: 0.08, maxSpeed: 0.12, layerHeight: [0, 32] as const, maxObstacles: 16 };
+/**
+ * How the prevailing wind turns with the world's time (T484, T459 § 5.3): a slow function of the day and the seed, as the light is, never of
+ * a clock. `perDay` keyframes to a day, each veering the mean direction by at most `veer` radians and taking up to `calm` of its strength;
+ * between two the wind eases from one to the other. Without `prevailing` the mean is `strength` toward one of 16 points of the compass, from
+ * the seed.
+ */
+export const PREVAILING = { perDay: 4, veer: 0.6, calm: 0.5, strength: 0.06 } as const;
+
 export const DIFFUSE_LIMITS = { rate: [0, 0.24] as const, decay: [0, 0.5] as const, sourceValue: [0, 100] as const, maxValue: 100, advectScale: [0, 2] as const, maxSources: 8, maxWalls: 16 };
 export const TABLE_LIMITS = { states: [2, 16] as const, maxRules: 64, maxInitial: 16, maxWalls: 16 };
 export const RULES_LIMITS = { chars: 8000, states: [2, 16] as const, steps: [1, 4] as const, maxInitial: 16 };
@@ -213,6 +225,8 @@ export interface AutomataWorld {
   tileAt(col: number, row: number): string;
   groundAt(col: number, row: number): number;
   seaLevel(): number;
+  /** The world's time in days (its time over the seconds of its day, T484): what turns the prevailing wind. 0 when absent. */
+  days?(): number;
 }
 
 /** Active rectangular window of one automaton in cell coordinates. */
@@ -233,6 +247,51 @@ const isFamily = (v: unknown): v is AutomatonFamily => typeof v === 'string' && 
 const isTileCode = (v: unknown): v is string => typeof v === 'string' && v.length === 1 && !'?*/[]~'.includes(v);
 const round4 = (v: number) => Math.round(v * 10_000) / 10_000;
 const UNIT = 1 / 4294967296;
+
+/** The 16 points of the compass as unit vectors (cos, sin of k × 22.5°), literal: the same in every engine. */
+const COMPASS: ReadonlyArray<readonly [number, number]> = [
+  [1, 0], [0.9238795325112867, 0.3826834323650898], [0.7071067811865476, 0.7071067811865476], [0.3826834323650898, 0.9238795325112867],
+  [0, 1], [-0.3826834323650898, 0.9238795325112867], [-0.7071067811865476, 0.7071067811865476], [-0.9238795325112867, 0.3826834323650898],
+  [-1, 0], [-0.9238795325112867, -0.3826834323650898], [-0.7071067811865476, -0.7071067811865476], [-0.3826834323650898, -0.9238795325112867],
+  [0, -1], [0.3826834323650898, -0.9238795325112867], [0.7071067811865476, -0.7071067811865476], [0.9238795325112867, -0.3826834323650898],
+];
+
+/** The keyframe `k` of the prevailing wind of a seed: how far it veers (radians) and how much of its strength it keeps. */
+function prevailingKey(seed: number, k: number): [number, number] {
+  const a = hash32(seed, k, 48411) * UNIT;
+  const b = hash32(seed, k, 48412) * UNIT;
+  return [(a * 2 - 1) * PREVAILING.veer, 1 - PREVAILING.calm * b];
+}
+
+/**
+ * The prevailing wind of a `wind` automaton at a time of the world (`days`: its time over the seconds of its day), in lattice units (T484):
+ * the mean (`prevailing`, or `PREVAILING.strength` toward a point of the compass from the seed) turned and eased by the keyframes of
+ * `PREVAILING`. Only arithmetic: the turn is a polynomial (|θ| ≤ 0.6: within 1e-4 of the sine), the length a square root, both the same in
+ * every engine. A mean of nothing stays still.
+ */
+export function prevailingAt(seed: number, days: number, spec: Pick<WindSpec, 'prevailing'> = {}): [number, number] {
+  const base = spec.prevailing ?? ((c) => [c[0] * PREVAILING.strength, c[1] * PREVAILING.strength] as [number, number])(COMPASS[hash32(seed, 48410) % 16]!);
+  const m = Math.sqrt(base[0] * base[0] + base[1] * base[1]);
+  if (!(m > 1e-6)) return [0, 0];
+  const t = (finite(days) && days > 0 ? days : 0) * PREVAILING.perDay;
+  const k = Math.floor(t);
+  const u = t - k;
+  const e = u * u * (3 - 2 * u);
+  const [a0, s0] = prevailingKey(seed, k);
+  const [a1, s1] = prevailingKey(seed, k + 1);
+  const th = a0 + (a1 - a0) * e;
+  const strength = s0 + (s1 - s0) * e;
+  const t2 = th * th;
+  const cos = 1 - (t2 / 2) * (1 - (t2 / 12) * (1 - t2 / 30));
+  const sin = th * (1 - (t2 / 6) * (1 - (t2 / 20) * (1 - t2 / 42)));
+  const dx = base[0] / m, dy = base[1] / m;
+  let rx = dx * cos - dy * sin, ry = dx * sin + dy * cos;
+  const r = Math.sqrt(rx * rx + ry * ry);
+  rx /= r;
+  ry /= r;
+  const len = Math.min(WIND_LIMITS.inflow, m) * strength;
+  return [rx * len, ry * len];
+}
 
 export const cellOf = (spec: Pick<AutomatonSpec, 'family' | 'cell'>): CellSize => spec.cell ?? DEFAULT_CELL[spec.family];
 export const hzOf = (spec: Pick<AutomatonSpec, 'family' | 'hz'>): number => spec.hz ?? HZ_LIMITS[spec.family].def;
@@ -933,6 +992,11 @@ const OPP = [0, 3, 4, 1, 2, 7, 8, 5, 6];
 /**
  * Lattice Boltzmann D2Q9 BGK wind automaton: 9 populations per cell stream and relax toward equilibrium, bouncing off
  * solid obstacles (massifs, buildings). Float32 storage, IEEE arithmetic only.
+ *
+ * A step is `2 × H` units of work (T484): first every row collides in place, then every row streams into the other buffer, and the
+ * buffers swap. `work(units)` does some of them, `step()` all that are left: the same step, byte for byte, however it is cut, so the
+ * engine spreads a step over the ticks between two (`AutomataEngine`), and what reads the field always reads a whole one (the moments
+ * a collision keeps are the ones `velocity` reads).
  */
 export class WindField {
   readonly n: number;
@@ -941,6 +1005,9 @@ export class WindField {
   readonly solid: Uint8Array;
   readonly tau: number;
   inflow: [number, number];
+  /** Units of the step under way already done (0: none under way), out of `2 × H`. */
+  done = 0;
+  private readonly edgeEq = new Float32Array(9);
 
   constructor(
     readonly ox: number,
@@ -969,14 +1036,50 @@ export class WindField {
     }
   }
 
+  /** The units of work of a whole step. */
+  get units(): number {
+    return 2 * this.H;
+  }
+
+  /** One whole step: what is left of the one under way, or a new one. */
   step(): void {
-    const { W, H, n, f, g, solid } = this;
+    this.work(this.units - this.done);
+  }
+
+  /** Does up to `units` units of the step under way (beginning one if none is); true when the step is whole and the buffers swapped. */
+  work(units: number): boolean {
+    const { H } = this;
+    let left = Math.min(Math.max(0, Math.floor(units)), 2 * H - this.done);
+    if (left <= 0) return false;
+    if (this.done === 0) {
+      // The edge's equilibrium for this step, from the inflow it began with.
+      const [ix, iy] = this.inflow;
+      const iuu = ix * ix + iy * iy;
+      for (let q = 0; q < 9; q++) {
+        const eu = EX[q]! * ix + EY[q]! * iy;
+        this.edgeEq[q] = WT[q]! * (1 + 3 * eu + 4.5 * eu * eu - 1.5 * iuu);
+      }
+    }
+    while (left-- > 0) {
+      const u = this.done++;
+      if (u < H) this.collideRow(u);
+      else this.streamRow(u - H);
+    }
+    if (this.done < 2 * H) return false;
+    this.done = 0;
+    const f = this.f;
+    this.f = this.g;
+    this.g = f;
+    return true;
+  }
+
+  private collideRow(y: number): void {
+    const { W, n, f, solid } = this;
     const omega = 1 / this.tau;
     const maxV = WIND_LIMITS.maxSpeed;
     const [ix, iy] = this.inflow;
-    const iuu = ix * ix + iy * iy;
-    // Collide.
-    for (let i = 0; i < n; i++) {
+    const end = (y + 1) * W;
+    for (let i = y * W; i < end; i++) {
       if (solid[i]) continue;
       let rho = 0, ux = 0, uy = 0;
       for (let q = 0; q < 9; q++) {
@@ -1003,31 +1106,26 @@ export class WindField {
         f[k] = f[k]! + omega * (eq - f[k]!);
       }
     }
-    // Stream with bounce-back on obstacles; boundary cells take prevailing equilibrium.
-    const edgeEq = new Float32Array(9);
-    for (let q = 0; q < 9; q++) {
-      const eu = EX[q]! * ix + EY[q]! * iy;
-      edgeEq[q] = WT[q]! * (1 + 3 * eu + 4.5 * eu * eu - 1.5 * iuu);
-    }
-    for (let y = 0; y < H; y++) {
-      const row = y * W;
-      for (let x = 0; x < W; x++) {
-        const i = row + x;
-        for (let q = 0; q < 9; q++) {
-          const sx = x - EX[q]!, sy = y - EY[q]!;
-          let v: number;
-          if (sx < 0 || sy < 0 || sx >= W || sy >= H) {
-            v = edgeEq[q]!;
-          } else {
-            const s = sy * W + sx;
-            v = solid[s] ? f[OPP[q]! * n + i]! : f[q * n + s]!;
-          }
-          g[q * n + i] = v;
+  }
+
+  /** Streams one row with bounce-back on obstacles; what comes from beyond the window is the edge's equilibrium. */
+  private streamRow(y: number): void {
+    const { W, H, n, f, g, solid, edgeEq } = this;
+    const row = y * W;
+    for (let x = 0; x < W; x++) {
+      const i = row + x;
+      for (let q = 0; q < 9; q++) {
+        const sx = x - EX[q]!, sy = y - EY[q]!;
+        let v: number;
+        if (sx < 0 || sy < 0 || sx >= W || sy >= H) {
+          v = edgeEq[q]!;
+        } else {
+          const s = sy * W + sx;
+          v = solid[s] ? f[OPP[q]! * n + i]! : f[q * n + s]!;
         }
+        g[q * n + i] = v;
       }
     }
-    this.f = g;
-    this.g = f;
   }
 
   velocity(x: number, y: number): [number, number] {
@@ -1075,6 +1173,8 @@ export class WindField {
   }
 
   copyFrom(prev: WindField): void {
+    // A step under way in the field that goes is finished first: what is copied is a whole one.
+    if (prev.done) prev.step();
     const x0 = Math.max(this.ox, prev.ox), x1 = Math.min(this.ox + this.W, prev.ox + prev.W);
     const y0 = Math.max(this.oy, prev.oy), y1 = Math.min(this.oy + this.H, prev.oy + prev.H);
     for (let wy = y0; wy < y1; wy++) {
@@ -1620,6 +1720,10 @@ export class AutomataEngine {
     this.syncWindow();
     for (const rt of this.list) {
       if (!rt.windows.length) continue;
+      if (rt.spec.family === 'wind') {
+        this.windTick(rt);
+        continue;
+      }
       rt.accum += rt.hz;
       while (rt.accum >= TICK_HZ) {
         rt.accum -= TICK_HZ;
@@ -1627,6 +1731,35 @@ export class AutomataEngine {
         rt.steps++;
       }
     }
+  }
+
+  /**
+   * One tick of a `wind` automaton (T484): its step is cut in the ticks from one to the next (`WindField.work`), the same share of what is
+   * left in each, and whole in the tick the accumulator says, as the other families' are. A new step begins with the prevailing wind of the
+   * world's time (`prevailingAt`). The same field as one step a time, byte for byte (`tests/vento.test.ts`): only the cost is spread.
+   */
+  private windTick(rt: AutomatonRuntime): void {
+    rt.accum += rt.hz;
+    const whole = rt.accum >= TICK_HZ;
+    // The ticks this step still has, this one too.
+    const ticks = whole ? 1 : 1 + Math.ceil((TICK_HZ - rt.accum) / rt.hz);
+    const spec = rt.spec as WindSpec;
+    for (const f of rt.windows as WindField[]) {
+      if (f.done === 0) f.inflow = prevailingAt(this.world.seed, this.world.days?.() ?? 0, spec);
+      if (whole) f.step();
+      else f.work(Math.ceil((f.units - f.done) / ticks));
+    }
+    if (whole) {
+      rt.accum -= TICK_HZ;
+      rt.steps++;
+    }
+  }
+
+  /** The prevailing wind of a `wind` automaton now (T484), in lattice units; undefined for any other id. */
+  prevailing(id: string): [number, number] | undefined {
+    const rt = this.byId.get(id);
+    if (!rt || rt.spec.family !== 'wind') return undefined;
+    return prevailingAt(this.world.seed, this.world.days?.() ?? 0, rt.spec);
   }
 
   /** Reads a sample at world coordinates `(x, y)` for `world.field(id, x, y)`: a fresh copy, or undefined. */
@@ -1754,7 +1887,7 @@ export class AutomataEngine {
       case 'flow':
         return new FlowField(win.ox, win.oy, win.W, win.H, win.cell, { gravity: s.gravity, damp: s.damp, level: s.level ?? this.world.seaLevel() });
       case 'wind':
-        return new WindField(win.ox, win.oy, win.W, win.H, win.cell, { tau: s.tau, prevailing: s.prevailing });
+        return new WindField(win.ox, win.oy, win.W, win.H, win.cell, { tau: s.tau, prevailing: prevailingAt(this.world.seed, this.world.days?.() ?? 0, s) });
       case 'diffuse':
         return new DiffuseField(win.ox, win.oy, win.W, win.H, win.cell, { rate: s.rate, decay: s.decay, advectScale: s.advectScale });
       case 'table':
@@ -1815,8 +1948,6 @@ export class AutomataEngine {
     if (s.family === 'flow') {
       const dt = 1 / rt.hz;
       for (const f of rt.windows) (f as FlowField).step(dt);
-    } else if (s.family === 'wind') {
-      for (const f of rt.windows) (f as WindField).step();
     } else if (s.family === 'diffuse') {
       const advId = s.advect;
       const advRt = advId ? this.byId.get(advId) : undefined;

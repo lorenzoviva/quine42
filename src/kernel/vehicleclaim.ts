@@ -86,6 +86,18 @@ export const MEDIUM_DEFAULTS: Readonly<Record<VehicleMedium, { speed: number; ac
   void: { speed: 6, accel: 2, turn: 1.2 },
 };
 
+/**
+ * What a name says of a sail (T484): a ship that goes by the wind («Veliero», «Galeone», «Barca a vela», «Sloop»). The kernel gives it
+ * `SAIL` of its way from the wind, so in a world with wind it sails and close to it slows; a rowing boat, a barge, a raft have none.
+ */
+const SAILS = /\b(?:vel[ae]|velier[oi]|brigantin[oi]|galeon[ei]|caravell[ae]|vascell[oi]|golett[ae]|feluc(?:a|he)|giunc(?:a|he)|catamaran[oi]|drakkar|sails?|sailboats?|sailing|sloops?|schooners?|galleons?|brigs?|brigantines?|caravels?|longships?|catamarans?|junks?)\b/i;
+
+/** The share of its way a vessel whose name says a sail takes from the wind (the rest from its oars): head to wind it still creeps. */
+export const SAIL = 0.75;
+
+/** Whether a name says a sail (T484). */
+export const saysSail = (name: unknown): boolean => typeof name === 'string' && SAILS.test(name);
+
 const num = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const within = (v: number, [lo, hi]: readonly [number, number]) => Math.round(Math.min(hi, Math.max(lo, v)) * 100) / 100;
 
@@ -93,7 +105,7 @@ const within = (v: number, [lo, hi]: readonly [number, number]) => Math.round(Ma
  * The `vehicle` of a manifest the kernel writes (T487): the medium, the numbers the Physicist said within the kernel's limits (else the
  * medium's own), the draught only on the water (shallow if not said deep).
  */
-export function vehicleFor(medium: VehicleMedium, said: { speed?: unknown; accel?: unknown; turn?: unknown; draught?: unknown } = {}): { medium: VehicleMedium; speed: number; accel: number; turn: number; draught?: Draught } {
+export function vehicleFor(medium: VehicleMedium, said: { speed?: unknown; accel?: unknown; turn?: unknown; draught?: unknown } = {}, name?: string): { medium: VehicleMedium; speed: number; accel: number; turn: number; draught?: Draught; sail?: number } {
   const d = MEDIUM_DEFAULTS[medium];
   const draught = medium === 'water' ? ((DRAUGHTS as readonly unknown[]).includes(said.draught) ? (said.draught as Draught) : 'shallow') : undefined;
   return {
@@ -102,6 +114,8 @@ export function vehicleFor(medium: VehicleMedium, said: { speed?: unknown; accel
     accel: within(num(said.accel) ? said.accel : d.accel, VEHICLE_LIMITS.accel),
     turn: within(num(said.turn) ? said.turn : d.turn, VEHICLE_LIMITS.turn),
     ...(draught ? { draught } : {}),
+    // A sail (T484): what the name says goes by the wind takes a share of its way from it.
+    ...(medium === 'water' && saysSail(name) ? { sail: SAIL } : {}),
   };
 }
 

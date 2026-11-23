@@ -344,7 +344,7 @@ export class MockAiModels implements AiModels, DecisionModels {
           return { action: 'set', id, family: 'diffuse', cell: 1, hz: 10, rate: 0.2, decay: 0.01, ...(wind ? { advect: wind.id, advectScale: 1 } : {}), note: 'Si spande nell’aria.' };
         }
         if (/vento|brezza|raffic/i.test(t)) {
-          return { action: 'set', id: 'wind', family: 'wind', cell: 3, hz: 10, tau: 0.58, prevailingX: 0.06, prevailingY: 0.02, layerHeight: 3, note: 'Il vento corre tra i monti.' };
+          return { action: 'set', id: 'wind', family: 'wind', cell: 1, hz: 10, tau: 0.58, prevailingX: 0.06, prevailingY: 0.02, layerHeight: 3, note: 'Il vento corre tra i monti.' };
         }
         if (/muff|cresc|regol|markov/i.test(t)) {
           const xml = d.sentBack
