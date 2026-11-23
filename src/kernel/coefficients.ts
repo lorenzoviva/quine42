@@ -146,6 +146,7 @@ export const CENSUS: Array<{ compito: string; agente: string; modo: 'diretta' | 
   // T472: a part of the world from a good model of a trade that has fewer than its parts, at most twice a session per trade (ADR-0243).
   { compito: 'model.part', agente: 'sculptor', modo: 'diretta', coefficiente: 'models', nota: 'dopo un modello con voto ≥ 6: una parte che i modelli del suo mestiere includono, presa se la griglia resta la stessa' },
   { compito: 'physics.reshape', agente: 'physicist', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona (il Referente): la fisica di un terreno o la gravità del mondo, a mondo acceso (T452)' },
+  { compito: 'physics.automaton', agente: 'physicist', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta nella corona (il Referente): aggiunge, cambia o toglie un automa cellulare del mondo, entro il carico fisso (T482)' },
   { compito: 'mechanic.design', agente: 'engineer', modo: 'diretta', coefficiente: 'studio', nota: 'su richiesta (sessioni e Referente)' },
   { compito: 'review.fourthwall', agente: 'narrator', modo: 'indiretta', coefficiente: 'sessions', nota: 'una volta per universo, per ciò che era nato prima del filtro: a 0 restano i ritiri che il kernel decide da sé' },
   { compito: 'sound.compose', agente: 'musician', modo: 'diretta', coefficiente: 'pieces', nota: 'per gli ambienti senza musica; ciò che chiede il viandante non si dirada' },

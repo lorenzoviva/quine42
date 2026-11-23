@@ -24,7 +24,7 @@ export interface TerrainChange {
 export const RESHAPED_TILE_FIELDS = ['cross', 'speed', 'fatigue', 'depth', 'air'] as const;
 
 /** The fields of the nature the Physicist may reshape with the world on: the rest is the Genesis's (`keptNature`). */
-export const RESHAPED_NATURE = ['gravity'] as const satisfies ReadonlyArray<keyof WorldNature>;
+export const RESHAPED_NATURE = ['gravity', 'automata'] as const satisfies ReadonlyArray<keyof WorldNature>;
 
 /** At most this many terrains in one request (a palette has at most 24). */
 export const MAX_RESHAPED = 8;
@@ -109,12 +109,13 @@ export function reshapedGravity(g: unknown): { ok: true; gravity: number } | { o
 }
 
 /**
- * The nature a universe.json says, against the one the world has: what the Physicist may reshape (the gravity) comes from what is said, the
- * rest from the world's, fixed at the Genesis (`keepNature`). Both already repaired (`repairNature`).
+ * The nature a universe.json says, against the one the world has: what the Physicist may reshape (the gravity and the cellular automata)
+ * comes from what is said, the rest from the world's, fixed at the Genesis (`keepNature`). Both already repaired (`repairNature`).
  */
 export function keptNature(world: WorldNature, said: WorldNature): WorldNature {
-  const out = { ...world };
-  for (const k of RESHAPED_NATURE) out[k] = said[k];
+  const out: WorldNature = { ...world, gravity: said.gravity };
+  if (said.automata?.length) out.automata = said.automata;
+  else delete out.automata;
   return out;
 }
 

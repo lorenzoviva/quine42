@@ -329,6 +329,67 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (d.sentBack && change.cross !== undefined) delete change.cross;
         return { terrains: Object.keys(change).length > 1 ? [change] : [], ...(gravity !== undefined ? { gravity } : {}), note: 'Chi passa di lì se ne accorgerà.' };
       }
+      case 'physics.automaton': {
+        // The Physicist declares, tunes or removes a cellular automaton (T482, ADR-0254).
+        const t = String(d.request ?? '');
+        const current: Array<{ id: string; family: string }> = Array.isArray(d.current) ? d.current : [];
+        if (/\b(togli|rimuovi|elimina|spegni)\b/i.test(t)) {
+          const hit = current.find((a) => new RegExp(`\\b${a.id}\\b`, 'i').test(t)) ?? current[current.length - 1];
+          if (!hit) return { action: 'remove', id: '', refusal: 'nessun automa da togliere' };
+          return { action: 'remove', id: hit.id, note: `Il campo ${hit.id} si placa.` };
+        }
+        if (/fumo|calor|odor|nebbia|umid/i.test(t)) {
+          const id = /calor/i.test(t) ? 'heat' : /odor/i.test(t) ? 'scent' : 'smoke';
+          const wind = current.find((a) => a.family === 'wind');
+          return { action: 'set', id, family: 'diffuse', cell: 1, hz: 10, rate: 0.2, decay: 0.01, ...(wind ? { advect: wind.id, advectScale: 1 } : {}), note: 'Si spande nell’aria.' };
+        }
+        if (/vento|brezza|raffic/i.test(t)) {
+          return { action: 'set', id: 'wind', family: 'wind', cell: 3, hz: 10, tau: 0.58, prevailingX: 0.06, prevailingY: 0.02, layerHeight: 3, note: 'Il vento corre tra i monti.' };
+        }
+        if (/muff|cresc|regol|markov/i.test(t)) {
+          const xml = d.sentBack
+            ? '<sequence values="FBA" symmetry="(xy)"><convolution neighborhood="Moore" steps="1"><rule in="F" out="B" sum="1..8" values="B" p="0.25"/><rule in="B" out="A"/></convolution></sequence>'
+            : /senza simmetria/i.test(t)
+              ? '<sequence values="FBA"><convolution neighborhood="Moore" steps="1"><rule in="F" out="B" sum="1..8" values="B" p="0.25"/></convolution></sequence>'
+              : '<sequence values="FBA" symmetry="(xy)"><convolution neighborhood="Moore" steps="1"><rule in="F" out="B" sum="1..8" values="B" p="0.25"/><rule in="B" out="A"/></convolution></sequence>';
+          return { action: 'set', id: 'moss', family: 'rules', cell: 1, hz: 10, program: xml, steps: 1, note: 'Cresce lento dove trova presa.' };
+        }
+        if (/fuoc|incendi|brac/i.test(t)) {
+          return {
+            action: 'set',
+            id: 'fire',
+            family: 'table',
+            cell: 1,
+            hz: 10,
+            states: 3,
+            counted: 1,
+            rules: [
+              { from: 0, min: 1, max: 8, to: 1, p: 0.2 },
+              { from: 1, min: 0, max: 8, to: 2, p: 1 },
+            ],
+            walls: ['w', 'o'],
+            note: 'Il fuoco divampa dove c’è esca.',
+          };
+        }
+        if (/acqu|flusso|corrent|lava/i.test(t)) {
+          const isLava = /lava/i.test(t);
+          // When sent back for exceeding the load budget, fall back to coarser cell=1 or lower hz.
+          const cell = d.sentBack || isLava ? 1 : 0.5;
+          const hz = d.sentBack ? 30 : isLava ? 20 : 60;
+          return {
+            action: 'set',
+            id: isLava ? 'lava' : 'water',
+            family: 'flow',
+            cell,
+            hz,
+            gravity: isLava ? 3 : 9.8,
+            damp: isLava ? 0.85 : 0.995,
+            sources: isLava ? [] : ['o'],
+            note: isLava ? 'La lava cola lenta sui pendii.' : 'L’acqua scorre e porta corrente.',
+          };
+        }
+        return { action: 'set', id: '', refusal: 'non si capisce quale campo fisico vuoi aggiungere' };
+      }
       case 'genesis.layouts':
         return {
           environments: [
@@ -507,6 +568,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (/\brun[ae]\b/i.test(t)) return { reply: 'Eccole.', task: 'rune', runes: [t.replace(/.*\brun[ae]\s+/i, '')] };
         if (/musica|brano|canzone|melodia/i.test(t)) return { reply: 'Lo porto al Musicista.', task: 'music', request: t };
         if (/\bcredit[io]\b/i.test(t)) return { reply: 'I crediti non passano dal Concilio.', task: 'none' };
+        // Cellular automata (T482): physical or discrete fields moving across loaded places.
+        if (/\bautoma\b|campo di (vento|fumo|calore|fuoco|acqua|lava|muffa)|vento che soffia|fumo che si spande|flusso d'acqua/i.test(t)) return { reply: 'Lo porto al Fisico.', task: 'automaton', request: t };
         // The physics with the world on (T452): how bodies go over a terrain, or the weight of every body.
         if (/gravit|si nuot|nuotar|non si attravers|invalicabil|calpestabil|più lent|più fatic|più profond/i.test(t)) return { reply: 'Lo porto al Fisico.', task: 'physics', request: t };
         if (/regola/i.test(t)) return { reply: 'Sarà una regola del mondo.', task: 'rule', request: t.replace(/.*regola:?\s*/i, '') };

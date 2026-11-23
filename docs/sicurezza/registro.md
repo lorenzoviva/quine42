@@ -540,6 +540,17 @@ Modello di una voce:
 - Test: `tests/sicurezza/salto-molti.test.ts`, `tests/arrampicata.test.ts`
 - Esito: chiusa da T477 (ADR-0252), 22/11/2026, branch `task/T477`: le contromisure nascono col salto e l'arrampicata in molti (prima un client non saltava: Spazio faceva ciò che fa `E`). Non provato su una rete vera (i collegamenti finti dei test e una scheda su una preview); gli altri viandanti vedono chi salta o si arrampica scivolare dove il server lo ha, senza l'arco né la parete (niente di nuovo sul filo).
 
+### V-048 · Gli automi per Lua (`world.field_add`) e il carico fisso
+- Gravità: media
+- Stato: `chiusa`
+- Superficie: `world.field` e `world.field_add` (`Host`, `prelude.lua`, `LUA_API`, `Kernel.automatonField`, `Kernel.fieldAdd`), `AutomataEngine.add`, `validateAutomaton`, `validateAutomata`, `repairAutomata`, `rulesProgramErrors`, `FIELD_ADD_LIMITS`, `LOAD_BUDGET_MS` (`src/kernel/automata.ts`), `Kernel.defineAutomaton` (`physics.automaton`)
+- Proprietà violata: un modulo Lua non può inondare il mondo, avvelenare i buffer numerici con `NaN`/`Infinity`, allocare griglie fuori dalla finestra caricata o mutare lo stato interno di un campo (regole 1, 7 e 8e); un client non scrive mai un campo; gli automi di `universe.json → nature.automata` non possono fermare il tick (carico fisso, tetto di celle e di automi, programmi `rules` senza import né nodi pesanti e con passi limitati) e in molti solo il master li dichiara
+- Prova: test (T482)
+- Contromisura: `world.field_add` controlla tipi e numeri finiti (`NaN`, `Infinity` e tipi errati ignorati, ritorna `false`), ignora coordinate fuori dalle finestre caricate (non alloca né carica luoghi), rifiuta su uno specchio (`mirror`), e applica tre tetti per automa (`FIELD_ADD_LIMITS`): tetto per chiamata (`flow` ±2 caselle, `wind` 0,04, `diffuse` ±10), tetto di chiamate per tick (`maxCallsPerTick` 64) e tetto cumulativo per tick (`flow` 8, `wind` 0,4, `diffuse` 50, discreti 64), con i valori dei campi sempre nei loro limiti (`FLOW_LIMITS.maxDepth`, `WIND_LIMITS.maxSpeed`, `DIFFUSE_LIMITS.maxValue`). `world.field` restituisce sempre una copia nuova. `validateAutomata` e `repairAutomata` fissano al più `MAX_AUTOMATA` (6) automi, `MAX_CELLS_PER_AUTOMATON` (48 000 celle per finestra, fino a `MAX_WINDOWS_PER_AUTOMATON` 4 finestre per gruppi distanti), il carico statico totale entro `LOAD_BUDGET_MS` (2,0 ms/tick a 60 Hz, D3) e per `rules` soli nodi `sequence|markov|convolution|prl|all|one`, `symmetry="(xy)"`, nessun `<import>`, `WORLD_NODE_LIMITS` e al più 4 passi per passo dell'automa. `defineAutomaton` solo per il master (regola 8b)
+- Task: T482
+- Test: `tests/sicurezza/automi.test.ts`, `tests/automi.test.ts`
+- Esito: chiusa da T482 (ADR-0254), 23/11/2026, branch `task/T482`: le contromisure nascono con la primitiva degli automi. Non provato in produzione su mondi con molti viandanti distribuiti né con il filo del vento (A2).
+
 ## Le prove dell'autore
 
 Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm run sicurezza:prove`, `tools/sicurezza/catalogo.mjs`) e di [`prove-f12.md`](prove-f12.md); i test stanno in `tests/sicurezza/`. Le misure in [`esiti/`](esiti/). `tests/sicurezza-kit.test.ts` controlla che la tabella e il catalogo dicano le stesse prove: una voce nuova ha qui la sua riga.
@@ -593,6 +604,7 @@ Chi prova ogni voce (T137). Le lettere sono le prove `V-NNN.x`: del kit (`npm ru
 | V-045 | — | — | `veicolo.test.ts` | ciò che Lua chiede a un veicolo si vede solo dentro il kernel e la sandbox: lo prova tests/sicurezza/veicolo.test.ts |
 | V-046 | — | — | `veicolo-molti.test.ts` | il veicolo in molti si prova sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/veicolo-molti.test.ts |
 | V-047 | — | — | `salto-molti.test.ts` | il salto e l’arrampicata in molti si provano sul kernel e sul server di sessione coi collegamenti finti: tests/sicurezza/salto-molti.test.ts |
+| V-048 | — | — | `automi.test.ts` | `world.field_add` e i tetti degli automi si vedono solo dentro il kernel e la sandbox: li prova tests/sicurezza/automi.test.ts |
 
 ## Ciò che nessuna voce copre ancora
 

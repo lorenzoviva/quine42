@@ -6386,12 +6386,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 3.3; l'ossigeno di T446.
 - Cosa fare: la riga 8; il passo del server; «sicurezza:» nell'esito. Browser: sì.
 
-### T482 · A0 · La primitiva degli automi (riga 9 di T459) — `da fare`
+### T482 · A0 · La primitiva degli automi (riga 9 di T459) — `fatto` (`cdb3375e`)
 - Pipeline: neon · sforzo xhigh · stima 12% · approvato · priorità 4
 - Step: 45
 - Dipende da: T459
 - Contesto: § 5.5-5.6; **D3**: le famiglie fisiche (`flow`) a due celle per lato di casella, il tetto di celle per automa e il carico fisso rifatti su questa risoluzione (1,21 ms a tick per l'acqua, il bilancio di 1,5 ms va rimisurato e detto nell'ADR); il resto come lo studio.
 - Cosa fare: la riga 9; test di determinismo; voce nel registro per `world.field_add`; «sicurezza:» nell'esito. Browser: no.
+- Esito: implementata la primitiva degli automi cellulari (A0 di T459, D3: `flow` a 2 celle/casella per lato, `wind`, `diffuse`, `table`, `rules` su `Stepper`) con carico statico fisso a 2.0 ms/tick (48.000 celle/automa), compito `physics.automaton` del Fisico e Referente, API Lua `world.field` / `world.field_add`, fermo su `pace: hold`, ADR-0254, glossario, documentazione, versione kernel `0.10.30` e test completi (`typecheck`, `npm test` 302/302, `build` verdi); non è provata una chiamata reale a Gemini (solo `MockAiModels` offline) e il rendering dei campi resta ai passi A1/A2; sicurezza: registrata e coperta V-048 in `docs/sicurezza/registro.md`, `tools/sicurezza/catalogo.mjs` e `tests/sicurezza/automi.test.ts` (tetti per chiamata/tick di `world.field_add`, copie fresche di `world.field`, rifiuto sui client specchio e per non-master, limiti statici e nodi ammessi per `rules`).
 
 ### T483 · A1 · L'acqua che scorre (riga 10 di T459) — `da fare`
 - Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 4

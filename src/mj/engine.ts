@@ -2500,6 +2500,21 @@ export class Stepper {
   tick(maxSteps: number): number {
     return this.go(maxSteps, true);
   }
+  /** Writes one cell from outside the program, keeping the census and the log in sync (T482). */
+  setCell(idx: number, v: number): boolean {
+    const g = this.grid;
+    if (idx < 0 || idx >= g.cells.length) return false;
+    const was = g.cells[idx]!;
+    if (was === v) return false;
+    g.cells[idx] = v;
+    if (this.context.census && this.context.census.cells === g.cells) this.context.census.moved(idx, was, v);
+    g.log.push(idx);
+    if (g.log.length > this.logCap) {
+      g.log.length = 0;
+      g.epoch++;
+    }
+    return true;
+  }
   private go(maxSteps: number, again: boolean): number {
     const outer = current;
     const was = keeping;
