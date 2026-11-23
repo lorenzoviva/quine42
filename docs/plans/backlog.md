@@ -6620,7 +6620,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit di merge su `task/T502`; poi l'orchestratore integra T502 e `integra T477` toglie worktree e branch di T477. Sicurezza: V-047 di T477, nessuna superficie nuova dal merge.
 - Esito: integrato `task/T477` in `task/T502` (`83d76ee7`) con ADR-0252, kernel `0.10.28`, conflitti risolti in `AGENTS.md`, `validator.ts`, `items.base/manifest.json` e `glossario-censimento.md` rigenerato, uso `hold` in `itemuse.ts` per oggetti impugnabili con `bonus` (`item.corda`), `turno typecheck` verde e tutti i 298 file della suite passati (295/298 in `turno test` con `TEMP` su `H:`, i 3 sensibili all'I/O passati 47/47 su `C:`, `site-video.test.ts` 73/73 su `H:`); sicurezza: V-047 di T477, nessuna superficie nuova dal merge.
 
-### T503 · Verifica nel browser del rilievo vero di T475 — `da fare`
+### T503 · Verifica nel browser del rilievo vero di T475 — `fatto` (`7079d518`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
 - Step: 45
 - Contesto: T475 (Neon, `59288d1f`, integrato `85c31b64`, ADR-0256, kernel 0.10.32) ha portato il rilievo vero (`nature.relief`, `generate_relief`, `TrueRelief`, terrazze, dirupi, `k` camminabile, `keepCliffs` per moli e palafitte) senza verifica nel browser (eseguito su agy). `dossier T475`.
@@ -6628,3 +6628,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo; un difetto trovato si scrive nell'esito come task proposto.
 - Browser: sì.
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T503`.
+- Esito: verifica nel browser di T475 su due universi offline (Far West e Pirati) e sul seme; screenshot e resoconto in lab/banco/rilievo/ (commit 7079d518). Funzionano relief 'true', terrazze, k camminabile, dirupi che fermano, rampa che si sale a gradini di 2, molo dei Pirati camminabile, seme collinare invariato, console senza errori del gioco. Difetto 1 (task proposto): networkOf livella l'acqua del luogo da solo, groundAt con i vicini; col rilievo vero un lago scende al livello dei vicini (6 luoghi su 11 in Far West; in (4,1) la rampa dal lago parte 8 livelli sopra l'acqua e non si sale, in (5,1) un lago da 53 a 0 in un pozzo di 14 caselle); serve lo stesso livello dell'acqua nelle due misure e un test che le confronti. Difetto 2 (minore, task proposto): un capanno solido a metà del molo largo una casella nel porto dei Pirati, testa del molo solo a nuoto. Non provati: Spazio e pianeti, multigiocatore, un lotto su una terrazza, le palafitte, Gemini. typecheck verde; npm test 305/306, fallisce solo site-video.test.ts per ENOSPC come in T475; nessun codice cambiato.
