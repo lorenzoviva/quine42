@@ -6661,3 +6661,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (T504 e T476 visti nel browser).
 - Quando è fatto: commit su `task/T506`; poi l'orchestratore integra T506, e `integra T504` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: integrato `task/T504` su `3d` nel branch `task/T506` (`886712a4`), risolti i conflitti con T476 in `AGENTS.md` e `docs/architettura-dettagli.md` mantenendo entrambe le aggiunte, T476 resta su ADR-0257 e kernel 0.10.33, T504 su ADR-0258 e kernel 0.10.34 (`version.ts`, `package.json`, `universe/universe.json`, ADR 0258, `docs/adr/README.md`, `docs/architettura-dettagli.md`, `lab/banco/rilievo/README.md`); `typecheck` verde, test mirati verdi (71/71), suite intera 307/308 (`tests/site-video.test.ts` fallito solo per ENOSPC su C:, passato 73/73 con temp su H:); browser non richiesto; sicurezza: nessuna superficie nuova.
+
+### T507 · Verifica nel browser del fondale di T480 — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
+- Step: 45
+- Contesto: T480 (Neon, `91e8030b`, integrato `703c3925`, ADR-0259, kernel 0.10.35) ha portato il fondale (R4): letto opaco a strati sotto l'acqua nuotabile trasparente (`SEA_MAT.clear`, `waterAlpha`), `Kernel.bedAt`, strati di secche e porto, posto `underwater` del Cartografo, `ChunkView.bed` ai client; eseguito su agy senza browser. Integrato prima della verifica perché la settimana di Claude è finita fino al 26/11. `dossier T480`.
+- Cosa fare: build e preview (`docs/architettura-dettagli.md#convalida-browser`) sul base; offline, un universo Pirati/arcipelago con `nature.relief: 'true'`: la trasparenza graduata dell'acqua sopra il letto, le bande degli strati su sponde sommerse e secche, schiuma e scia sopra l'acqua trasparente, un oggetto posato sul letto con `where: 'underwater'`, nuotare sopra senza esserne fermati; il seme (Valmora, `Hills`) e la lava invariati; console senza errori. Screenshot in `lab/banco/fondale/`.
+- Test: nessuno nuovo; un difetto trovato si scrive nell'esito come task proposto.
+- Browser: sì.
+- Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T507`.
