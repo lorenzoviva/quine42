@@ -12,14 +12,14 @@ import type { Kernel } from '../kernel/kernel';
 import { Bloom } from './bloom';
 import type { CoronaView, StudioRoom } from './coronaview';
 import { aerial, CARTOON, CARTOON_BLOOM_RADIUS, CARTOON_HEMI, CARTOON_INDOORS, CARTOON_STUDIO, cartoonLight, SHADE, SHADOW_INTENSITY, SHADOW_RADIUS, SUN_FROM } from './cartoon';
-import { CUT, U, windToTexture } from './materials';
+import { CUT, cutBackOf, U, windToTexture } from './materials';
 import { Smoke } from './smoke';
 import { viewBytes, type WindView } from '../kernel/wind';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
 import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, staleChunks, tileForms, type TerrainView } from './terrain';
 import { ChunkMesher } from './chunkmesher';
-import { dimAt, towardsCamera, type Underground } from '../kernel/underground';
+import { CAMERA_AIM, dimAt, towardsCamera, type CameraLine, type Cut, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
 import { HELM_VIEW, wheelFactor, zoomDistance, zoomMax } from './camera';
@@ -412,14 +412,17 @@ export class Renderer {
       CUT.constant = inside !== undefined ? 1.15 + k.floorAt(pc.x, pc.y, pc.z) : 1e9;
       // Under the ground (T416): what stands over the head in a disc around is cut, terrain too; the corona has nothing of it.
       under = watch ? k.underground(watch) : k.underground();
-      this.syncCut(under);
+      // Where the ground in front hides the wanderer from the camera (T476, the true relief): the same disc, at the head, on the camera's side.
+      // Not on a voyage (T449): the camera follows the vehicle aloft.
+      const cut: Cut | undefined = under ?? (voyage ? undefined : k.cameraCut(this.cameraLine(), watch));
+      this.syncCut(cut);
       // The cut in whole tiles of the carpet (T449): the shader gets the scroll's fraction and the tile relative to its whole part, small numbers
       // a million tiles from the origin too.
       const ix = Math.floor(ox), iy = Math.floor(oy);
       U.cutOff.value.set(ox - ix, oy - iy);
       // The world's wind (T484): what the grass and the trees bend with, where it lies from the whole part of the scroll.
       this.syncWind(ix, iy);
-      if (under) U.cutTile.value.set(under.tile.x - ix, under.tile.y - iy);
+      if (cut) U.cutTile.value.set(cut.tile.x - ix, cut.tile.y - iy);
       this.entities.update(dt, this.t, inside);
       this.runes.update(this.t);
     }
@@ -487,7 +490,7 @@ export class Renderer {
 
     // The camera follows the wanderer, from above.
     // It looks at the wanderer's middle, up and down the hills with it.
-    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y, watch.z) + 0.6, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + this.wanderer.sunk + 0.6, p.y);
+    const aim = watch ? new THREE.Vector3(0, k.floorAt(watch.x, watch.y, watch.z) + CAMERA_AIM, 0) : new THREE.Vector3(p.x, this.wanderer.view.root.position.y - this.wanderer.lift + this.wanderer.sunk + CAMERA_AIM, p.y);
     this.target.lerp(aim, Math.min(1, dt * 8));
     // On a voyage (T449) the altitude changes by a share of itself each second: the camera keeps the vehicle where it is, without easing.
     if (voyage || this.target.distanceTo(aim) > 30) this.target.copy(aim);
@@ -588,24 +591,32 @@ export class Renderer {
   }
 
   /**
-   * The cut under the ground (T416): the shaders' uniforms (`U.cutY`…) and the caps of the disc, built again only when what they depend
-   * on changes. Undefined: nothing is cut.
+   * The camera as the cut towards it reads it (T476): the quarter it looks from, the rise of its line, how far it stands on the flat.
    */
-  private syncCut(under: Underground | undefined): void {
+  private cameraLine(): CameraLine {
+    return { towards: towardsCamera(this.yawGoal), rise: Math.tan(this.pitch), reach: Math.cos(this.pitch) * this.distance };
+  }
+
+  /**
+   * The cut under the ground (T416) or towards the camera (T476): the shaders' uniforms (`U.cutY`…) and the caps of the disc, built again
+   * only when what they depend on changes. Undefined: nothing is cut.
+   */
+  private syncCut(cut: Cut | undefined): void {
     const k = this.kernel;
     const towards = towardsCamera(this.yawGoal);
-    U.cutY.value = under ? under.cut : 1e9;
-    if (under) {
-      U.cutTile.value.set(under.tile.x, under.tile.y);
+    U.cutY.value = cut ? cut.cut : 1e9;
+    if (cut) {
+      U.cutTile.value.set(cut.tile.x, cut.tile.y);
       U.cutDir.value.set(towards.x, towards.y);
+      U.cutBack.value = cutBackOf(cut.around);
     }
-    const sig = under ? cutSig(k, under, towards) : '';
+    const sig = cut ? cutSig(k, cut, towards) : '';
     if (this.cut?.sig === sig) return;
     if (this.cut?.mesh) {
       this.world.remove(this.cut.mesh);
       this.cut.mesh.geometry.dispose();
     }
-    const mesh = under ? buildCut(k, under, towards) : undefined;
+    const mesh = cut ? buildCut(k, cut, towards) : undefined;
     if (mesh) this.world.add(mesh);
     this.cut = { sig, mesh };
   }

@@ -830,6 +830,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «clipping», «scavo» (il kernel non scava)
 - **Fermo**: nessuno (nulla su disco né sul filo: ogni client lo calcola da sé).
 
+### Taglio verso la camera
+- **Inglese**: `cameraCut`, `cameraCutAt`, `hiddenFromCamera`, `CameraLine`, `CAMERA_AIM`, `Cut` (`around`), `cutBack` (`cutBackOf`)
+- **Definizione**: ciò che si vede quando il terreno davanti copre il viandante dalla camera 3/4 (col rilievo vero: un dirupo, una terrazza, la parete di una gola): il disco del taglio sotto terra all'altezza della sua testa, solo dal lato della camera (le caselle dietro la sua riga restano intere), con i tappi e le bande degli strati; si accende quando la linea dal mezzo del corpo alla camera passa sotto la cima di una colonna, fin dove la camera sta e mai oltre il disco (T476, ADR-0257, la riga 3 di T459).
+- **Dove vive**: `src/kernel/underground.ts`, `src/kernel/kernel.ts`, `src/render/renderer.ts`, `src/render/materials.ts`, `src/render/terrain.ts`
+- **Da non usare**: «occlusione», «trasparenza» (non si vede attraverso: si toglie), «taglio della camera» (la camera non si taglia)
+- **Fermo**: nessuno (nulla su disco né sul filo: ogni client lo calcola da sé).
+
 ### Strato
 - **Inglese**: `stratum`, `strata`, `SEED_STRATA`, `strataPalette`, `draftStrata`, `readStrata`, `stratumAt`, `stratumInfoAt`, `strataOf`, `strataRowsAt`, `STRATA_DEPTH`, `STRATA_DEPTH_BEFORE`, `strataDepth`, `strataDepthOf`, `stratumKey`, `sameStratum`, `strataSummary`, `summarizePlaceStrata`, `sampleLotStrata`, `dominantCellarStratum`, `lotStrataAt`, `cellarStratumAt`, `world.stratum_at`, `SculptRequest.strata`, `InteriorRule.stratum`, `FormComp.stratum` (e `strata` in `GraphChunk`, `stratum` in `FormView`)
 - **Definizione**: ciò che sta sotto una casella, una riga per casella di profondità (6 in un piano nuovo, che lo dice con `strataDepth`; 4 in uno di prima): un terreno con `layer: 'stratum'` fra gli `strata` del generatore (terra, argilla, sabbia compatta, fango, roccia viva, falda, vena, radici nel seme; alla Genesi il Cartografo scrive quelli del mondo), scelto dal programma degli strati dell'ambiente e, dove non decide, per colonna dalla bozza degli strati (il bioma della bozza procedurale e un hash della casella e del seme). Si vede nei tagli sotto terra (ADR-0091 punto 5, T418, T478) e lo leggono Lua (`world.stratum_at`), il Narratore (`GraphChunk.strata` / `focus`, `worldFacts.sotto`), lo Scultore Architetto (`SculptRequest.strata`) e lo Scenografo (`InteriorRule.stratum`, `FormComp.stratum`, T479, ADR-0253).

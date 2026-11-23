@@ -39,6 +39,11 @@ export const U = {
   cutDir: { value: new THREE.Vector2(0, 1) },
   cutOff: { value: new THREE.Vector2() },
   /**
+   * How far behind the row one stands on (tiles, against `cutDir`) the disc reaches (`cutBackOf`): all of it under the ground, only the
+   * camera's side of that row for the cut towards the camera (0, T476, `Cut.around`).
+   */
+  cutBack: { value: -1e9 },
+  /**
    * The world's wind (T484): its coarse view as a texture, where it lies (its corner from the whole part of the scroll, as `cutTile`, and
    * one over its width and height in tiles), and 1 when the world has a wind; at 0 the vegetation sways as before, the same everywhere.
    */
@@ -229,16 +234,24 @@ const CUT_PARS_FRAGMENT = `uniform float uCutY;
 uniform vec2 uCutTile;
 uniform vec2 uCutDir;
 uniform vec2 uCutOff;
+uniform float uCutBack;
 varying vec3 vCut;`;
 
-/** The disc of `inCutDisc` (src/kernel/underground.ts), on whole tiles: what stands over `uCutY` in it is not drawn. */
+/**
+ * The disc of `inCutDisc` (src/kernel/underground.ts), on whole tiles: what stands over `uCutY` in it is not drawn; with `uCutBack` at 0
+ * (the cut towards the camera, T476) only on the camera's side of the row one stands on.
+ */
 const CUT_FRAGMENT = `if (vCut.y > uCutY) {
     vec2 cutQ = floor(vCut.xz + uCutOff) - uCutTile;
-    vec2 cutR = cutQ - uCutDir * clamp(dot(cutQ, uCutDir), 0.0, ${CUT_STRETCH.toFixed(1)});
-    if (dot(cutR, cutR) <= ${(CUT_RADIUS * CUT_RADIUS + 0.5).toFixed(1)}) discard;
+    float cutA = dot(cutQ, uCutDir);
+    vec2 cutR = cutQ - uCutDir * clamp(cutA, 0.0, ${CUT_STRETCH.toFixed(1)});
+    if (cutA > uCutBack - 0.5 && dot(cutR, cutR) <= ${(CUT_RADIUS * CUT_RADIUS + 0.5).toFixed(1)}) discard;
   }`;
 
-const cutUniforms = () => ({ uCutY: U.cutY, uCutTile: U.cutTile, uCutDir: U.cutDir, uCutOff: U.cutOff });
+/** `U.cutBack` for a cut: the whole disc under the ground, only the camera's side towards it (T476). */
+export const cutBackOf = (around: boolean): number => (around ? -1e9 : 0);
+
+const cutUniforms = () => ({ uCutY: U.cutY, uCutTile: U.cutTile, uCutDir: U.cutDir, uCutOff: U.cutOff, uCutBack: U.cutBack });
 
 /** The wind without the circle clip, for what stands beyond the circle (T218): the corona's trees. */
 export function windy<M extends THREE.Material>(m: M, key: string): M {

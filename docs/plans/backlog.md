@@ -6342,12 +6342,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la riga 2. Browser: sì, un mondo col rilievo vero.
 - Esito: implementato il rilievo vero (nature.relief su Far West/Pirati/Spazio, generate_relief con letto e terrazze, TrueRelief con parseRelief/mendPits/gateEdgeLevel/islandRelief/BandedRelief, keepCliffs con wasWet per moli e palafitte, k camminabile, onTerrace, PlanContext.relief, ChunkView.relief, ADR-0256, glossario, kernel 0.10.32, commit 59288d1f); typecheck, build, 36/36 test:sicurezza e 305/306 suite verdi (site-video.test.ts fallito solo per ENOSPC su C: con 4 GB liberi); non provate chiamate reali a Gemini né verifica visiva nel browser; sicurezza: generate_relief validato e bloccato in [-RELIEF_DEPTH, RELIEF_PEAK] tramite parseRelief con fallback in caso di guasto e ChunkView.relief solo server→client validato da readRelief senza esporre il Lua del generatore ai client (regole 7, 8f)
 
-### T476 · R2 · Il taglio verso la camera (riga 3 di T459) — `da fare`
+### T476 · R2 · Il taglio verso la camera (riga 3 di T459) — `fatto` (`f3fd7d44`)
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
 - Step: 45
 - Dipende da: T475
 - Contesto: § 3.2, il disco di T416.
 - Cosa fare: la riga 3. Browser: sì.
+- Esito: taglio verso la camera (riga 3 di T459, ADR-0257, kernel 0.10.33): `hiddenFromCamera`/`cameraCutAt` in `underground.ts`, `Kernel.cameraCut`, il disco di T416 alla testa solo dal lato della camera (`Cut.around`, `U.cutBack`, `buildCut`/`cutSig`), renderer che lo chiede fuori da cantine e viaggi; misurato con `lab/scripts/taglio-camera.ts` (2,2 % delle viste col rilievo vero, 3,0 % arcipelago, 0 seme, 0 dopo il taglio, nessuna oltre il disco anche al timone); `tests/taglio-camera.test.ts`, typecheck verdi; suite 305/307: `site-video` fallisce per ENOSPC su C: (passa 73/73 con la cartella temporanea su H:) e `strata-council` per i tempi del multigiocatore sotto carico (passa 15/15 da solo); restano le ombre delle cose tagliate, la comparsa senza dissolvenza, niente oltre 9 caselle (orbita libera, timone), strutture e alberi non accendono il taglio; sicurezza: nessuna superficie nuova (niente server, sessione, Lua o filo)
 
 ### T477 · R3 · Arrampicarsi (riga 4 di T459) — `fatto` (`191ba7bc`)
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3

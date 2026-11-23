@@ -1,0 +1,27 @@
+{
+  "trueRelief": true,
+  "archipelago": false,
+  "distance": 30,
+  "reachTiles": 17.5,
+  "cutReach": 9,
+  "places": 73,
+  "tiles": 14155,
+  "views": 56620,
+  "hidden": 1232,
+  "after": 0,
+  "beyond": 0,
+  "hiddenPct": 2.2,
+  "afterPct": 0,
+  "beyondPct": 0,
+  "byQuarter": {
+    "south": 285,
+    "east": 204,
+    "north": 458,
+    "west": 285
+  },
+  "testMs": {
+    "median": 0.01239999999961583,
+    "p95": 0.01629999999931897
+  },
+  "seconds": 11
+}
