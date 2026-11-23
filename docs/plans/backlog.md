@@ -6335,7 +6335,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: regola 10 della rete e delle enclavi (ADR-0250, kernel 0.10.26): gradino `STEP` nella collisione (`free`/`bodyFree`/`freeReal`, passo del server, vie delle persone con `riseOnStep`, `stepsBetween`), rete di ogni luogo con rampe come terra mossa (`placeNetwork`, `Chunk.ramps`, `ChunkView.ramps`), enclavi dove l'asprezza le concede (misurata, o del master con `Region.roughness` scritta in `ChunkPlan.roughness`), posto `enclave` del Cartografo solo dove il luogo ne ha, piazzamenti senza le caselle che un dislivello stacca, rialzo sintetico dei test e della console, `lab/scripts/rete-gradini.ts`; inerte col rilievo di oggi (328 luoghi, 0 dislivelli oltre il gradino su 165 395 coppie, luoghi-campione verde); ADR, AGENTS, architettura `#rete`, glossario, studio § 2.7, domanda T459 chiusa; non provato: rilievo vero e dirupi sui confini fra luoghi (R1), salto in discesa non limitato (R1/R3), partita a più giocatori vera, il Cartografo coi modelli veri, le quote dell'asprezza nel gioco; sicurezza: nessuna superficie nuova (il passo del server usa la stessa collisione, `ChunkView.ramps` va solo dal server al client ed è letto senza fidarsi da `readMoved`, `roughness` della regione solo dal master e validata da `masterRegion`).
 
 ### T475 · R1 · Il rilievo vero (riga 2 di T459) — `da fare`
-- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 3
+- Pipeline: neon · sforzo xhigh · stima 12% · approvato · priorità 3
 - Step: 45
 - Dipende da: T474
 - Contesto: § 3.1 e § 6; A1. Le ambientazioni che lo portano: frontiera, Pirati, spazio; il medioevo resta collinare finché l'autore non dice altro.
