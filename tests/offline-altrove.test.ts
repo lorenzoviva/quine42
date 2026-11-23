@@ -90,6 +90,38 @@ describe('i modelli locali sopra un mondo del Concilio (T433)', () => {
     expect([...k.chunks.values()].filter((c) => c.stage === 'draft').every((c) => c.held)).toBe(true);
   });
 
+  it('offline: un luogo del Concilio che entra nel raggio non chiede niente ai modelli locali (T501)', async () => {
+    // `mesa` offline (T501): a place planned by the Council with a new thing still to forge (`fresh`) came in reach, and the local
+    // models forged «Erba» with the description of a signpost, saved in the universe with the plan rewritten.
+    const chunks = new Counting();
+    const made = await Kernel.boot({ files: councilFiles(), store: memoryStore(), ai: councilModels(), chunks });
+    await develop(made);
+    const here = made.chunks.get('0,0')!;
+    expect(here.stage).toBe('planned');
+    const key = chunks.saved.find((s) => /[^\d-]0,0$/.test(s))!;
+    const record = (await chunks.load(key))!;
+    await chunks.save(key, { plan: { ...record.plan, fresh: [{ concept: 'Cartello della gilda dei carrettieri, un palo con due frecce', where: 'outside' }] } });
+    made.repo.commit('il mondo del Concilio', 'kernel');
+    const files = { ...made.repo.working };
+
+    chunks.saved = [];
+    const ai = new MockAiModels();
+    const asked: string[] = [];
+    const text = ai.text.bind(ai);
+    ai.text = (call) => (asked.push(call.task ?? ''), text(call));
+    const k = await Kernel.boot({ files, store: memoryStore(), ai, chunks });
+    expect(k.localModelsAbroad()).toBe(true);
+    for (let i = 0; i < 120; i++) {
+      k.tick(1 / 30);
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    expect(k.chunks.get('0,0')?.stage).toBe('planned');
+    // Nothing asked of them: no new thing forged, no thing found on the ground defined, no pack, inhabitant or session.
+    expect(asked.filter((t) => /^(forge|content|council)\./.test(t))).toEqual([]);
+    expect(Object.keys(k.repo.working).filter((p) => p.startsWith('modules/') && !(p in files))).toEqual([]);
+    expect(chunks.saved).toEqual([]);
+  });
+
   it('il mondo dei modelli locali (Valmora, aurora, la Genesi offline) pianifica e salva come prima', async () => {
     const chunks = new Counting();
     const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), chunks });
