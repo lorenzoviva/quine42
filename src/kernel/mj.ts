@@ -166,7 +166,7 @@ class RuleRunner extends Runner {
               if (want !== null && !want.includes(cell)) ok = false;
               const put = pattern.output[k];
               if (put !== null && put !== cell) {
-                if (g.fixed?.has(idx)) ok = false;
+                if (g.fixed?.has(idx) || g.cut?.piers?.has(idx)) ok = false;
                 changes = true;
               }
             }

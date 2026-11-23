@@ -42,7 +42,8 @@ export function defaultCodes(palette: Record<string, TerrainDef>, pathCode = 'p'
   const by = (pred: (t: TerrainDef) => boolean, fallback: string) => codes.find(([, t]) => pred(t))?.[0] ?? fallback;
   const named = (ids: string[], re: RegExp, fallback: string) => codes.find(([, t]) => (t.id !== undefined && ids.includes(t.id)) || re.test(t.name))?.[0] ?? fallback;
   const wall = by((t) => t.layer === 'wall', 'h');
-  const bridge = named(['drawbridge', 'bridge'], /ponte|levatoi|bridge/i, pathCode);
+  // Bridges and piers are outdoor walked floors (T505): never an `indoor` floor, which `findLots` turns into a building lot.
+  const bridge = codes.find(([, t]) => crossingOf(t) === 'walk' && !t.indoor && ((t.id !== undefined && ['drawbridge', 'bridge'].includes(t.id)) || /ponte|levatoi|bridge/i.test(t.name)))?.[0] ?? pathCode;
   return {
     wall,
     floor: by((t) => t.layer === 'floor' && !!t.indoor, 'f'),
@@ -53,8 +54,8 @@ export function defaultCodes(palette: Record<string, TerrainDef>, pathCode = 'p'
     road: pathCode,
     rock: by((t) => t.layer === 'rock', wall),
     fence: named(['fence', 'palisade'], /recint|staccionat|palizzat|steccat|fence|palisade|paddock/i, wall),
-    // A pier is walked: a terrain the world calls so, if it is walked, otherwise the bridge's (T443).
-    pier: codes.find(([, t]) => crossingOf(t) === 'walk' && ((t.id !== undefined && ['pier', 'jetty', 'dock', 'boardwalk'].includes(t.id)) || /molo|pontil|banchin|tavolat|pier|jetty|dock|boardwalk/i.test(t.name)))?.[0] ?? bridge,
+    // A pier is walked and outdoor: a terrain the world calls so, if it is walked and not indoor, otherwise the bridge's (T443, T505).
+    pier: codes.find(([, t]) => crossingOf(t) === 'walk' && !t.indoor && ((t.id !== undefined && ['pier', 'jetty', 'dock', 'boardwalk'].includes(t.id)) || /molo|pontil|banchin|tavolat|pier|jetty|dock|boardwalk/i.test(t.name)))?.[0] ?? bridge,
     reef: by((t) => crossingOf(t) === 'swim' && terrainPhysics(t).depth === 'reef', ''),
   };
 }
@@ -90,6 +91,8 @@ export interface StampCut {
   built?: string;
   /** Cells the stamps of this place took, their whole box: written by each stamp, read by the next. */
   claimed?: Set<number>;
+  /** Cells of piers laid by `harbour` in this place (T505): never overwritten by rules or stamps, never turned into lots, never given solid obstacles. */
+  piers?: Set<number>;
   /** How a body crosses the codes of this world, for the harbour (T443): the layout says it from the palette. */
   ground?: StampGround;
   /** Base relief levels of this place (T475, only in true-relief worlds): a stamp sits on a terrace and never straddles a cliff. */
@@ -381,7 +384,7 @@ export function stamp(cells: string[], w: number, h: number, fixed: Set<number> 
       for (let x = 0; x < pw && ok; x++) {
         const i = (y0 + y) * w + x0 + x;
         const role = pat[y][x];
-        if (apart && cut?.claimed?.has(i)) ok = false;
+        if (cut?.piers?.has(i) || (apart && cut?.claimed?.has(i))) ok = false;
         else if (role && (fixed?.has(i) || (on && !on.includes(cells[i])) || (apart && cut?.built?.includes(cells[i])))) ok = false;
         // A wall or a fence of a stamp at 16 never touches the border (T407): a gate there would be shut in, walls are never dug.
         else if (apart && (role === 'wall' || role === 'fence') && [i - 1, i + 1, i - w, i + w].some((n) => fixed?.has(n))) ok = false;
@@ -525,6 +528,7 @@ export function harbour(cells: string[], w: number, h: number, fixed: Set<number
   for (const i of pier) {
     cells[i] = codes.pier;
     cut?.claimed?.add(i);
+    cut?.piers?.add(i);
   }
   // The root and the tile behind it stay to walk to the pier: no other stamp covers them.
   cut?.claimed?.add(r.y * w + r.x);

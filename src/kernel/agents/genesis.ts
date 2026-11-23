@@ -220,6 +220,9 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
   return errors;
 }
 
+/** Outdoor floors (bridges, piers, boardwalks): `layer: 'floor'` without `indoor: true`, so `findLots` never turns them into buildings (T505, ADR-0064, ADR-0230). */
+const OUTDOOR_FLOOR_RE = /ponte|levatoi|bridge|passerell|molo|pontil|banchin|tavolat|pier|jetty|dock|boardwalk|wharf|quay/i;
+
 /**
  * The base codes keep their meaning whatever the models say: the engine depends on them. How a body crosses every terrain, its pace, the
  * fatigue and the depth of its water are written by `physicsOf` (T437, ADR-0224), within the kernel's limits: the water codes are swum.
@@ -234,8 +237,9 @@ export function toPalette(terrains: RawTerrain[], trueRelief = false): Record<st
       const physics = physicsOf(layer, t, base?.cross, WATER_CODES[t.code]);
       // What stands on woods and rocks is a model of its own, which the Sculptor writes from the description.
       const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.code.charCodeAt(0)}` } : {};
+      const indoor = base?.indoor || (layer === 'floor' && !OUTDOOR_FLOOR_RE.test(t.name));
       // The air (T446): only the Physicist's false, never of a base code (one breathes over the water and on the ground of every world).
-      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(base?.indoor || layer === 'floor' ? { indoor: true } : {}), ...(!base && t.air === false ? { air: false } : {}) }];
+      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(indoor ? { indoor: true } : {}), ...(!base && t.air === false ? { air: false } : {}) }];
     }),
   );
 }

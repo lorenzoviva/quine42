@@ -6640,7 +6640,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì, riprovare (4,1) e (5,1) di Far West come in T503.
 - Quando è fatto: le due misure coincidono, test verdi, screenshot dei due luoghi.
 
-### T505 · Niente cose solide sul molo largo una casella — `da fare`
+### T505 · Niente cose solide sul molo largo una casella — `fatto` (`c97e9481`)
 - Pipeline: neon · sforzo high · stima 2% · approvato · priorità 3
 - Step: 45
 - Contesto: nasce da T503 (`dossier T503`): nel porto dei Pirati un capanno solido sta a metà del molo largo una casella; la testa del molo si raggiunge solo a nuoto. Regola 10 (niente solidi su punti di articolazione, ADR-0064; il molo di ADR-0230).
@@ -6648,3 +6648,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: sui porti del seme e dei Pirati offline la testa di ogni molo è raggiungibile a piedi; il caso del capanno di T503 riprodotto.
 - Browser: no (bastano i test; il molo l'ha già visto T503).
 - Quando è fatto: test verdi, nessun solido sui moli dei porti di prova.
+- Esito: impedita la creazione di lotti/capanni sui moli (toPalette non marca indoor ponti/moli, defaultCodes rifiuta terreni indoor per pier/bridge, findLots esclude i moli), protette le caselle dei moli da regole/timbri (StampCut.piers in stamps.ts/mj.ts) e da ogni entità solida inclusa la testa foglia (LayoutResult.piers in layout.ts e placementsOf in kernel.ts); test aggiunti in tests/porti.test.ts per caso T503, testa foglia, porti del seme e Pirati offline (18/18); typecheck verde, suite completa 305/306 (mj-pieces verificata 12/12 a parte; fallisce solo site-video.test.ts per ENOSPC preesistente); non provato con Gemini né nel browser (non richiesto dal task).
