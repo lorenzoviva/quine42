@@ -529,9 +529,11 @@ export const SEA_DRAFT = 'o';
  * other body of water lies flat, as a whole across the places, at the lowest of its tiles and never above
  * the land around it; the land goes down towards the water at most two levels a tile (its banks), so it
  * is climbed as ever. With `keepCliffs` (T475, ADR-0256, true relief) the water stays flat and never above the land,
- * while land tiles are never lowered towards lower neighbours so cliffs, terraces and coastal headlands remain sharp.
+ * while land tiles are never lowered towards lower neighbours so cliffs, terraces and coastal headlands remain sharp; and each place is
+ * levelled alone (T504): its water is its own, as its network reads it (`Kernel.networkOf`), never lowered by the water of the places
+ * around (a lake of a massif that touches the water of a valley across the border stays the lake it is, the border a fall between them).
  * Only the given places count: the result is the same in whatever order they come,
- * and where a body of water goes on beyond them, it is followed as far as they go.
+ * and where a body of water goes on beyond them (without `keepCliffs`), it is followed as far as they go.
  *
  * It is the greatest field below the relief that keeps those bounds: a tile's level is the least, over all
  * tiles, of their start plus the way between them (two levels for each tile of land entered, none for water),
@@ -573,6 +575,8 @@ export function worldLevels(chunks: WaterChunk[], size: number, liquid: (code: s
     for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       let nc = c + dc, nr = r + dr, kk = k;
       if (nc < 0 || nr < 0 || nc >= S || nr >= S) {
+        // With `keepCliffs` a place is levelled alone (T504): nothing crosses its border.
+        if (keepCliffs) continue;
         const o = index.get(`${ch.cx + Math.floor(nc / S)},${ch.cy + Math.floor(nr / S)}`);
         if (o === undefined) continue;
         kk = o;
