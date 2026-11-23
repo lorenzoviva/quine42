@@ -9,8 +9,9 @@ export interface WorldTheme {
   text: string;
   /**
    * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. The
-   * pirates bring the archipelago (T441, ADR-0229); the void and the stars of space come with T445-T450; every other theme is a world of
-   * today's nature, and a theme written by hand always is.
+   * pirates bring the archipelago (T441, ADR-0229); the frontier, the pirates and space bring true relief (T475, ADR-0256; medieval stays
+   * hilly); the void and the stars of space come with T450; every other theme is a world of today's nature, and a theme written by hand
+   * always is.
    */
   nature?: Partial<import('./nature').WorldNature>;
 }
@@ -94,6 +95,7 @@ Stories are born from the people: work, families, loves, debts, cattle drives, l
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the dust as
 in the riverbed. Prospectors pick them up with the nuggets, the store buys them by weight, the preacher warns against them;
 whoever has spoken one does not boast of it at the bar. What they really do is written in the canon of the runes.`,
+    nature: { relief: 'true' },
   },
   {
     id: 'pirates',
@@ -111,7 +113,7 @@ Stories are born from the people: work, crews, families, loves, debts, shares of
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the sand as
 in the jungle. Sailors keep them for luck, smugglers trade them, harbour masters tax them; whoever has spoken
 one tells it only to their own crew. What they really do is written in the canon of the runes.`,
-    nature: { geography: 'archipelago' },
+    nature: { geography: 'archipelago', relief: 'true' },
   },
   {
     id: 'space',
@@ -130,6 +132,7 @@ Stories are born from the people: work, families, loves, debts, shifts, harvests
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the dust as
 in the ice. They were here before the colony: the technicians measure them and understand nothing, the growers keep
 them in the greenhouse, the children collect them. What they really do is written in the canon of the runes.`,
+    nature: { relief: 'true' },
   },
 ];
 

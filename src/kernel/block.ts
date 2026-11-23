@@ -161,13 +161,17 @@ export function blockGates(standard: number[], b: BlockMark, S: number, seed: nu
 /**
  * The level the block's lot lies flat at, for all its places: the median of the relief over the lot (never below the sea), kept within
  * two levels a tile of the relief on the borders of its places outside the lot, which stays as the relief has it (ADR-0048), so the
- * ring between is climbed as ever. From the relief alone: the places, loaded or not, a thin client and the model of places agree.
+ * ring between is climbed as ever. With `keepCliffs` (T475, true relief) the lot is a plateau at its own median without bending to distant
+ * cliffs at the border: the network joins its apron to the gates with ramps. From the relief alone: the places, loaded or not, a thin
+ * client and the model of places agree.
  */
-export function blockLevel(b: BlockMark, S: number, level: (col: number, row: number) => number, sea: number): number {
+export function blockLevel(b: BlockMark, S: number, level: (col: number, row: number) => number, sea: number, keepCliffs = false): number {
   const l = blockLot(b, S);
   const own: number[] = [];
   for (let r = l.y0; r <= l.y1; r++) for (let c = l.x0; c <= l.x1; c++) own.push(Math.max(sea, level(c, r)));
   own.sort((a, z) => a - z);
+  const median = own[own.length >> 1];
+  if (keepCliffs) return median;
   let lo = -Infinity, hi = Infinity;
   for (const [px, py] of blockPlaces(b))
     for (let i = 0; i < S; i++)
@@ -179,7 +183,7 @@ export function blockLevel(b: BlockMark, S: number, level: (col: number, row: nu
         lo = Math.max(lo, v - 2 * d);
         hi = Math.min(hi, v + 2 * d);
       }
-  return Math.min(hi, Math.max(lo, own[own.length >> 1]));
+  return Math.min(hi, Math.max(lo, median));
 }
 
 /** A whole number from `lo` to `hi`; undefined if absent, null if present and anything else. */

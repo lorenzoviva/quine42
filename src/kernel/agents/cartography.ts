@@ -178,11 +178,11 @@ export interface PlanContext {
   /** A new concept is welcome here (T495): under the ceiling, and `FRESH_EVERY` plans brought none. */
   freshWanted?: boolean;
   /**
-   * The relief of the place where it keeps enclaves (T474, ADR-0250): its roughness, how many, how much of the place, the means the hardest
-   * asks. Absent for a place whose every part is joined to its paths (every place of the relief of today): nothing is said, and the schema has
-   * no `enclave`.
+   * The relief of the place where it keeps enclaves (T474, ADR-0250) or has true relief with terraces, cliffs or elevation (T475, ADR-0256):
+   * its roughness, how many enclaves, their share and the hardest pass's means, plus (in true relief) lowest/highest levels over sea, cliffs
+   * and buildable terraces. Absent for a plain hills place: nothing is said, and the schema has `enclave` only when `enclaves >= 1`.
    */
-  relief?: { roughness: Roughness; enclaves: number; share: number; means: Means };
+  relief?: { roughness: Roughness; enclaves: number; share: number; means: Means; low?: number; high?: number; cliffs?: number; terraces?: number };
 }
 
 export const WHERE: Where[] = ['inside', 'outside', 'anywhere', 'under', 'enclave'];
@@ -253,7 +253,7 @@ export async function planChunk(c: Council, ctx: PlanContext): Promise<ChunkPlan
   const { structures: _s, ...rest } = PLAN_SCHEMA.properties!;
   const structures: Record<string, Schema> = ctx.newStructures === false ? (ctx.known?.length ? { structures: knownStructures(ctx.known) } : {}) : { structures: PLAN_SCHEMA.properties!.structures };
   // Where the place keeps enclaves (T474) a thing may stand in one: only then the schema says `enclave`.
-  const placed = ctx.relief ? withEnclave(rest) : rest;
+  const placed = ctx.relief && ctx.relief.enclaves > 0 ? withEnclave(rest) : rest;
   const schema: Schema = {
     ...PLAN_SCHEMA,
     properties: { ...placed, ...structures, environment: { type: 'STRING', enum: ctx.layouts.map((l) => l.id) }, ...(unnamed ? { island: ISLAND_SCHEMA } : {}) },
@@ -296,14 +296,26 @@ function withEnclave(props: Record<string, Schema>): Record<string, Schema> {
 const MEANS_WORDS: Record<Means, string> = { jump: 'jumping', climb: 'climbing', build: 'building their way up (steps cut in the rock, a ladder, a bridge) or digging' };
 
 /**
- * What the Cartographer is told of a place that keeps enclaves (T474, ADR-0250): how rough it is, how many parts only a cliff parts from its
- * paths, and that a thing meant to be found there may stand in one; whatever people need stays on the paths. Nothing for a place of today.
+ * What the Cartographer is told of a place's relief (T474, ADR-0250; T475, ADR-0256): in true-relief worlds its elevation, terraces and
+ * cliffs (buildings sit only on flat terraces, never straddling a cliff), and where it keeps enclaves how many parts only a cliff parts
+ * from its paths, so a thing meant to be found there may stand in one. Nothing for a plain hills place of today.
  */
 export function reliefLine(relief: PlanContext['relief']): string {
-  if (!relief || relief.enclaves < 1) return '';
-  const rough = relief.roughness === 'rugged' ? 'rugged' : 'mountainous';
-  const share = Math.max(1, Math.round(relief.share * 100));
-  return `The ground of this place is ${rough}: cliffs part ${relief.enclaves === 1 ? 'one ledge or rise' : `${relief.enclaves} ledges and rises`} (about ${share}% of its tiles) from its paths, reached only by ${MEANS_WORDS[relief.means]}. A thing meant to be found there (a hidden chest, a nest, a shrine on a crag) may have "where": enclave; whatever people use, live in or need to reach stays elsewhere.`;
+  if (!relief) return '';
+  const parts: string[] = [];
+  if (relief.high !== undefined && relief.low !== undefined) {
+    const lo = (relief.low * 0.25).toFixed(1);
+    const hi = (relief.high * 0.25).toFixed(1);
+    const terraces = relief.terraces && relief.terraces > 1 ? ` across ${relief.terraces} terraces` : '';
+    const cliffs = relief.cliffs && relief.cliffs > 0 ? ', with cliffs between them (buildings sit only on flat terraces, never straddling a cliff)' : '';
+    parts.push(`Relief of this place (${relief.roughness}): the ground rises from ${lo} to ${hi} tiles above sea level${terraces}${cliffs}.`);
+  }
+  if (relief.enclaves >= 1) {
+    const rough = relief.roughness === 'rugged' ? 'rugged' : 'mountainous';
+    const share = Math.max(1, Math.round(relief.share * 100));
+    parts.push(`The ground of this place is ${rough}: cliffs part ${relief.enclaves === 1 ? 'one ledge or rise' : `${relief.enclaves} ledges and rises`} (about ${share}% of its tiles) from its paths, reached only by ${MEANS_WORDS[relief.means]}. A thing meant to be found there (a hidden chest, a nest, a shrine on a crag) may have "where": enclave; whatever people use, live in or need to reach stays elsewhere.`);
+  }
+  return parts.join(' ');
 }
 
 /** The island's name and a line about it, as the Cartographer gives them with the first place on it (T441). */

@@ -249,6 +249,8 @@ interface Client {
   places: Map<string, number>;
   /** The strata of each place as last sent (T418): sent again only when the place has others (its plan's in place of its draft's). */
   strata?: Map<string, string[]>;
+  /** The base relief levels of each place as last sent in a true-relief world (T475): sent once per chunk, or again if the relief changes. */
+  relief?: Map<string, Int16Array>;
   /** What the client knows of each entity in sight: what it is, and where it last was (on a deck, a vehicle's way: T442). */
   things: Map<number, { look: string; at: string }>;
   others: Map<string, string>;
@@ -1148,12 +1150,16 @@ export class SessionServer {
     const chunks: ChunkView[] = [];
     for (const ch of k.chunks.values()) {
       const far = Math.max(Math.abs(ch.cx * S + S / 2 - centre.x), Math.abs(ch.cy * S + S / 2 - centre.y)) - S / 2;
-      if (far > this.near || c.places.get(ch.key) === ch.version) continue;
+      const relief = k.chunkReliefOf(ch);
+      const sentRelief = relief ? (c.relief ??= new Map()) : undefined;
+      const newRelief = !!relief && sentRelief!.get(ch.key) !== relief;
+      if (far > this.near || (c.places.get(ch.key) === ch.version && !newRelief)) continue;
       c.places.set(ch.key, ch.version);
       const strata = k.strataOf(ch);
       const sent = (c.strata ??= new Map());
       const newStrata = sent.get(ch.key) !== strata;
       if (newStrata) sent.set(ch.key, strata);
+      if (newRelief) sentRelief!.set(ch.key, relief!);
       chunks.push({
         key: ch.key,
         cx: ch.cx,
@@ -1169,6 +1175,7 @@ export class SessionServer {
         ...(ch.plan?.water && Object.keys(ch.plan.water).length ? { water: { ...ch.plan.water } } : {}),
         ...(newStrata ? { strata: [...strata] } : {}),
         ...(ch.ramps ? { ramps: { ...ch.ramps } } : {}),
+        ...(newRelief ? { relief: [...relief!] } : {}),
       });
     }
     if (chunks.length) out.chunks = chunks;

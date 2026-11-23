@@ -607,10 +607,29 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Rilievo
 - **Inglese**: `relief`, `Relief`, `groundAt`
-- **Definizione**: le altezze del terreno: a ogni casella un livello, dal programma `Hills`.
+- **Definizione**: le altezze del terreno: a ogni casella un livello, dal programma `Hills` o, nei mondi col rilievo vero, dal generatore del terreno (`generate_relief`, T475, ADR-0256).
 - **Dove vive**: `src/kernel/relief.ts`
 - **Da non usare**: nessuno
 - **Fermo**: `rilievo` in `universe.json` e nell'effetto.
+
+### Rilievo vero
+- **Inglese**: `TrueRelief`, `ReliefKind`, `RELIEF_KINDS`, `hasTrueRelief`, `generate_relief`, `parseRelief`, `readRelief`, `RELIEF_PEAK`, `RELIEF_DEPTH`, `gateEdgeLevel`, `mendPits`, `islandRelief`, `chunkReliefOf`
+- **Definizione**: il rilievo con massicci, terrazze, dirupi, passi, conche e letto sotto l'acqua generato da `generate_relief(cx, cy, seed, size)` quando `universe.json → nature.relief` vale `true` (fissato alla Genesi come `game`; portato da Far West, Pirati e Spazio). Il kernel lo legge senza fidarsi entro `[-RELIEF_DEPTH, RELIEF_PEAK]`, allinea i varchi fra luoghi vicini (`gateEdgeLevel`), chiude le buche piccole senza uscita (`mendPits`), conserva i dirupi in `worldLevels`/`chunkLevels`/`blockLevel`, rende camminabile la roccia di montagna `k` e invia i livelli ai client sottili (`ChunkView.relief`, `readRelief`) (T475, ADR-0256).
+- **Dove vive**: `src/kernel/relief.ts`, `src/kernel/nature.ts`, `src/kernel/islands.ts`, `src/kernel/kernel.ts`, `universe/modules/world.terrain/logic.lua`
+- **Da non usare**: «terreno 3D» (il terreno resta a colonne), «rilievo del generatore»
+- **Fermo**: `nature.relief` (`hills`, `true`) in `universe.json`, `generate_relief` nel generatore Lua, `ChunkView.relief` sul filo.
+
+### Letto
+- **Inglese**: `bed`, `SHALLOW_BED_DEPTH`, `ChunkReliefData`
+- **Definizione**: la quota del fondo sotto l'acqua (mare profondo, acqua bassa, secca) restituita da `generate_relief` accanto alla superficie e letta dal kernel con `Relief.bed` (fino a `RELIEF_DEPTH` livelli sotto il mare, mai sopra la superficie; uguale al livello sulla terra). Base per il fondale (R4) e l'acqua che scorre (A1) (T475, ADR-0256).
+- **Dove vive**: `src/kernel/relief.ts`, `src/kernel/islands.ts`, `universe/modules/world.terrain/logic.lua`
+- **Da non usare**: nessuno (il mobile da riposo è un omonimo: vedi «Gli omonimi»)
+
+### Terrazza
+- **Inglese**: `onTerrace`
+- **Definizione**: una superficie del rilievo vero in cui nessun lato fra caselle vicine supera il gradino (`STEP`) e il salto complessivo resta contenuto; nei mondi col rilievo vero timbri, regole edilizie e lotti di struttura si posano solo su una terrazza, mai a cavallo di un dirupo (T475, ADR-0256).
+- **Dove vive**: `src/kernel/relief.ts`, `src/kernel/stamps.ts`, `src/kernel/mj.ts`
+- **Da non usare**: «ripiano» (è quello di un mobile), «altopiano» (è il lotto del blocco in montagna)
 
 ### Livello
 - **Inglese**: `level`, `levels`, `seaLevel`, `chunkLevels`
@@ -2365,6 +2384,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | fase / `phase` | dello sviluppo; del giorno (`DayPhase`); di un'onda (`src/audio/sfx.ts`); le F0-F8 del piano dello step 9, nell'archivio | «Fase» è la prima, con il suo numero romano |
 | ritmo / `pace` | del mondo, del master (`WorldPace`, il messaggio `pace`); per viandante, quanto spesso si può chiedere (`Pace` di `src/session/server.ts` e di `server/rates.ts`); il passo di chi cammina (`paceOf`, `paceTick` del kernel) | «Ritmo del mondo», «ritmo per viandante», «passo» |
 | step / `step` | obiettivo dello sviluppo; il passo di un calcolo nel codice (`archive.ts`); una sessione del metodo di prima, negli ADR e nei commenti («step 8.2B») | «Step» è il primo, con il suo numero |
+| letto | mobile dove ci si riposa (`mobile`); fondo sotto l'acqua (`Relief.bed`, `ChunkReliefData`) | il contesto («il letto del mare / del fiume») |
 
 ## Le scelte fatte
 

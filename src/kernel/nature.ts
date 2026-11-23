@@ -184,8 +184,14 @@ export const isVoid = (t: Pick<TerrainDef, 'layer'> | undefined): boolean => t?.
 
 /** What the draft makes of the world: land with its seas today; an archipelago (T441), the void with its stations (T445). */
 export type Geography = 'continent' | 'archipelago' | 'void';
+/** How the ground rises (T475, ADR-0256): today's rolling hills (`hills`, omitted) or true relief from `generate_relief` (`true`). */
+export const RELIEF_KINDS = ['hills', 'true'] as const;
+export type ReliefKind = (typeof RELIEF_KINDS)[number];
 /** The sky over it: the earth's, with its day and its night; the stars (T445). */
 export type Sky = 'earth' | 'stars';
+
+/** Whether a world (or a planet) uses the true relief of its generator (T475, ADR-0256). */
+export const hasTrueRelief = (n: Pick<WorldNature, 'relief'> | undefined): boolean => n?.relief === 'true';
 
 /**
  * The nature of a world (`universe.json → nature`): chosen at the Genesis with its theme and never changed after, written by the kernel,
@@ -203,6 +209,11 @@ export interface WorldNature {
    * on the loaded window, written by the Physicist within the fixed load budget. Omitted when empty: worlds of before stay untouched.
    */
   automata?: AutomatonSpec[];
+  /**
+   * The relief of the world (T475, ADR-0256): `'true'` when the generator provides massifs, terraces, cliffs and basins (`generate_relief`)
+   * and `k` is walkable mountain rock; omitted (`'hills'`) for the rolling hills of today. Fixed at the Genesis like the geography.
+   */
+  relief?: ReliefKind;
   geography: Geography;
   sky: Sky;
   /**
@@ -225,10 +236,11 @@ export const DEFAULT_NATURE: Readonly<WorldNature> = Object.freeze({ geography: 
 /**
  * What this kernel accepts of each field of the nature: what it can make true. A value outside is the default (the world of today). The
  * task that makes a value true widens its list here (ADR-0224 § the nature: `archipelago` open since T441, ADR-0229; `void`, `stars` and
- * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen since T446, ADR-0238; the gravity 0.2-2 since T447).
+ * the day since T445, ADR-0233: a day of 2 minutes to an hour, or 0, the light that never changes; the oxygen since T446, ADR-0238; the gravity 0.2-2 since T447; `relief` since T475, ADR-0256).
  */
-export const NATURE_ACCEPTS: { geography: readonly Geography[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
+export const NATURE_ACCEPTS: { geography: readonly Geography[]; relief: readonly ReliefKind[]; sky: readonly Sky[]; day: readonly [number, number]; gravity: readonly [number, number]; oxygen: readonly boolean[] } = {
   geography: ['continent', 'archipelago', 'void'],
+  relief: RELIEF_KINDS,
   sky: ['earth', 'stars'],
   day: [120, 3600],
   gravity: [0.2, 2],
@@ -244,12 +256,14 @@ export function repairNature(raw: unknown): WorldNature {
   const one = <T>(v: unknown, list: readonly T[], d: T): T => (list.includes(v as T) ? (v as T) : d);
   const num = (v: unknown, range: readonly [number, number], d: number): number => (finite(v) && v >= range[0] && v <= range[1] ? v : d);
   const geography = one(r.geography, NATURE_ACCEPTS.geography, DEFAULT_NATURE.geography);
+  const relief = one(r.relief, NATURE_ACCEPTS.relief, 'hills');
   // The planets only around the void (T449): the orbit is the band 0, and a world of today has no far bands.
   const planets = geography === 'void' ? repairPlanets(r.planets) : [];
   const automata = repairAutomata(r.automata);
   return {
     ...(planets.length ? { planets } : {}),
     ...(automata.length ? { automata } : {}),
+    ...(relief === 'true' ? { relief } : {}),
     geography,
     sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
     day: r.day === STILL_DAY ? STILL_DAY : num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
@@ -263,13 +277,14 @@ export function repairNature(raw: unknown): WorldNature {
 /**
  * A planet of a world of the void (`nature.planets[k - 1]` is the band k, `src/kernel/planets.ts`): its name in the world, the seed of its
  * ground and of its relief (the world's and its band's if not said), what its draft is made of (the generator's land with its seas: the
- * archipelago and the void are not open on a planet yet), its sky, its day, its gravity, and where its sea lies (levels of its relief over its
+ * archipelago and the void are not open on a planet yet), its relief (`'true'` for `generate_relief`, omitted for hills, T475), its sky, its day, its gravity, and where its sea lies (levels of its relief over its
  * lowest, as `universe.json → relief.sea`; the one its relief gives if not said). Fixed at the Genesis as the rest of the nature.
  */
 export interface Planet {
   name?: string;
   seed?: number;
   geography: 'continent';
+  relief?: ReliefKind;
   sky: Sky;
   day: number;
   gravity: number;
@@ -289,12 +304,12 @@ export function repairPlanets(raw: unknown): Planet[] {
     if (!p || typeof p !== 'object' || Array.isArray(p)) continue;
     const r = p as Record<string, unknown>;
     // A planet is a world with air under its own sky: its own nature within the same limits as the world's.
-    const n = repairNature({ geography: 'continent', sky: r.sky ?? 'earth', day: r.day, gravity: r.gravity });
+    const n = repairNature({ geography: 'continent', relief: r.relief, sky: r.sky ?? 'earth', day: r.day, gravity: r.gravity });
     const said = typeof r.name === 'string' ? cleanText(r.name, PLANET_ACCEPTS.name, 'il nome') : undefined;
     const name = said && 'text' in said ? said.text : '';
     const seed = typeof r.seed === 'number' && Number.isSafeInteger(r.seed) ? r.seed : undefined;
     const sea = finite(r.sea) && r.sea >= PLANET_ACCEPTS.sea[0] && r.sea <= PLANET_ACCEPTS.sea[1] ? Math.round(r.sea) : undefined;
-    out.push({ ...(name ? { name } : {}), ...(seed !== undefined ? { seed } : {}), geography: 'continent', sky: n.sky, day: n.day, gravity: n.gravity, ...(sea !== undefined ? { sea } : {}) });
+    out.push({ ...(name ? { name } : {}), ...(seed !== undefined ? { seed } : {}), geography: 'continent', ...(n.relief === 'true' ? { relief: 'true' as const } : {}), sky: n.sky, day: n.day, gravity: n.gravity, ...(sea !== undefined ? { sea } : {}) });
   }
   return out;
 }
@@ -315,6 +330,7 @@ export const stillLight = (nature: Pick<WorldNature, 'day'> | undefined): boolea
 /** Whether two natures are the same world. */
 export const sameNature = (a: WorldNature, b: WorldNature): boolean =>
   (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]) &&
+  (a.relief ?? 'hills') === (b.relief ?? 'hills') &&
   JSON.stringify(a.planets ?? []) === JSON.stringify(b.planets ?? []) &&
   JSON.stringify(a.automata ?? []) === JSON.stringify(b.automata ?? []);
 

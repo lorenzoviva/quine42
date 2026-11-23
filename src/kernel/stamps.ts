@@ -6,6 +6,7 @@
 
 import { STRUCTURE_VPT, TILE, type SizeTier } from '../mj/classes';
 import { crossingOf, terrainPhysics } from './nature';
+import { onTerrace } from './relief';
 import type { Rng } from './rng';
 import type { TerrainDef } from './types';
 
@@ -91,6 +92,8 @@ export interface StampCut {
   claimed?: Set<number>;
   /** How a body crosses the codes of this world, for the harbour (T443): the layout says it from the palette. */
   ground?: StampGround;
+  /** Base relief levels of this place (T475, only in true-relief worlds): a stamp sits on a terrace and never straddles a cliff. */
+  levels?: ArrayLike<number>;
 }
 
 /** The codes of a world by how a body crosses them (T443): the harbour lays its pier from what is walked over what is swum. */
@@ -386,6 +389,8 @@ export function stamp(cells: string[], w: number, h: number, fixed: Set<number> 
         else if (apart && role && [i - 1, i + 1, i - w, i + w].some((n) => cut?.built?.includes(cells[n]))) ok = false;
       }
     if (!ok) continue;
+    // In a true-relief world (T475), a stamp sits cleanly on a terrace and never straddles a cliff.
+    if (cut?.levels && !onTerrace(cut.levels, w, x0, y0, pw, ph, (x, y) => pat[y][x] !== null)) continue;
     // At 16 (T407) every way in on the edge of the stamp (a door, a bridge, a road) opens onto a tile one can reach: not the border of the
     // place nor a cell of the lot of a block (fixed), not another building nor what another stamp took; it is taken, so the next keeps off.
     const fronts: number[] = [];
@@ -471,12 +476,21 @@ export function harbour(cells: string[], w: number, h: number, fixed: Set<number
   const free = (x: number, y: number) => x >= 1 && y >= 1 && x < w - 1 && y < h - 1 && !fixed?.has(y * w + x) && !cut?.claimed?.has(y * w + x);
   const DIRS: Array<[number, number]> = [[0, 1], [1, 0], [0, -1], [-1, 0]];
   type Root = { x: number; y: number; dx: number; dy: number };
-  // Every root: a tile walked with another walked behind it, the water ahead.
+  // Every root: a tile walked with another walked behind it, the water ahead (and on a walkable shore when true relief is active, T475).
   const roots: Root[] = [];
   for (let y = 1; y < h - 1; y++)
     for (let x = 1; x < w - 1; x++) {
       if (!free(x, y) || !walked(y * w + x)) continue;
-      for (const [dx, dy] of DIRS) if (free(x + dx, y + dy) && swum((y + dy) * w + x + dx) && free(x - dx, y - dy) && walked((y - dy) * w + x - dx)) roots.push({ x, y, dx, dy });
+      for (const [dx, dy] of DIRS) {
+        if (!free(x + dx, y + dy) || !swum((y + dy) * w + x + dx) || !free(x - dx, y - dy) || !walked((y - dy) * w + x - dx)) continue;
+        if (cut?.levels) {
+          const wLv = cut.levels[(y + dy) * w + x + dx];
+          const rLv = cut.levels[y * w + x];
+          const bLv = cut.levels[(y - dy) * w + x - dx];
+          if (Math.abs(rLv - wLv) > 2 || Math.abs(bLv - rLv) > 2) continue;
+        }
+        roots.push({ x, y, dx, dy });
+      }
     }
   const lay = (r: Root): number[] | undefined => {
     const out: number[] = [];

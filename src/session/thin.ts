@@ -23,7 +23,7 @@ import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS, isMove, type OnDeck } from './protocol';
 import { coast, offDeck, onDeck, readVehicleView, turnBetween, type VehiclePose, type VehicleView } from '../kernel/vehicle';
-import { SEA_DRAFT } from '../kernel/relief';
+import { readRelief, SEA_DRAFT } from '../kernel/relief';
 import { readStrata } from '../kernel/strata';
 import { readMoved } from '../kernel/network';
 import { CLIMB_ACTION } from '../kernel/climb';
@@ -444,6 +444,11 @@ export class ThinClient {
         ...(() => {
           const strata = readStrata(v.strata, this.k.config.chunkSize, this.k.strata) ?? this.k.chunks.get(v.key)?.strata;
           return strata ? { strata } : {};
+        })(),
+        // Base relief levels in a true-relief world (T475): the server's when sent, else kept; validated without trusting.
+        ...(() => {
+          const relief = readRelief(v.relief, this.k.config.chunkSize) ?? this.k.chunks.get(v.key)?.relief;
+          return relief ? { relief } : {};
         })(),
       });
     }

@@ -72,6 +72,11 @@ export interface LayoutOptions {
    * plans with the mark (`ChunkPlan.swim`): a plan of before keeps the paths it dug on the water.
    */
   swim?: boolean;
+  /**
+   * Base relief levels of the place (T475, ADR-0256, only in true-relief worlds): stamps and building rules sit on flat terraces and never
+   * straddle a cliff. Absent in hills worlds, where no two neighbours differ by more than a step.
+   */
+  levels?: ArrayLike<number>;
 }
 
 const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -236,7 +241,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   if (opts.program) {
     // The stamps keep off each other and off the buildings the rules drew (T407): one lot, one structure.
     const built = Object.entries(palette).filter(([, t]) => t.layer === 'wall' || t.layer === 'door' || t.indoor).map(([c]) => c).join('');
-    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>(), ground: stampGround(palette) };
+    const cut = { vpt: opts.vpt ?? STRUCTURE_VPT, built, claimed: new Set<number>(), ground: stampGround(palette), ...(opts.levels ? { levels: opts.levels } : {}) };
     const grid = { w: size, h: size, cells: cells.flat(), fixed: reserved.size || apron.length ? new Set([...border, ...reserved, ...apron]) : border, cut };
     steps = run(resolveStamps(opts.program, defaultCodes(palette, opts.pathCode)), grid, hash32(opts.seed, opts.cx, opts.cy, 77));
     for (let i = 0; i < size * size; i++) cells[Math.floor(i / size)][i % size] = palette[grid.cells[i]] ? grid.cells[i] : draft[Math.floor(i / size)][i % size];

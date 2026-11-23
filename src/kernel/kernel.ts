@@ -13,7 +13,7 @@ import { askAutomaton, askReshape, AUTOMATON_TASK, RESHAPE_TASK } from './agents
 import { AutomataEngine, automatonWords, cloneAutomata, validateAutomaton, type AutomatonSpec, type FieldSample } from './automata';
 import { readWindView, relativeWind, sailPush, viewBytes, viewCorner, WIND_VIEW, windHere, windInView, windSpecOf, windViewOf, type WindHere, type WindView } from './wind';
 import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
-import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
+import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandRelief, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { AIR_AGAIN, airOf, ASPHYXIATED, breathOf, breathTick, FULL_OXYGEN, NO_AIR } from './air';
 import { themeOfText } from './themes';
@@ -86,7 +86,7 @@ import { addItem, CARRY_CAPACITY, countItem, HOTBAR, emptied, equippedItem, isWo
 import { keepWornMarks, wornItems, wornZoneOf, ZONE_WORDS, type WornZone } from './wearing';
 import { isWornZone, wornSections } from '../mj/worn';
 import { facingYaw, isThing, MAX_MOVED, PUT_DOWN, putRefusal, readMoved, readParts, splitBetween, takeRefusal, thingItem, thingModule, walkGroups, type MovedRecord, type PutFailure, type TakeFailure, type ThingParts, type TileArea, type Walk } from './moving';
-import { BandedRelief, chunkLevels, flatRelief, HILLS, LEVEL, Relief, RELIEF_PATH, worldLevels, type LotBox } from './relief';
+import { BandedRelief, chunkLevels, flatRelief, HILLS, LEVEL, parseRelief, Relief, RELIEF_PATH, TrueRelief, worldLevels, type ChunkReliefData, type LotBox } from './relief';
 import { CardCosts, CardUses, CARDS_FILE, readServer, COMUNE, allCards, collectionOf, moduleCardId, receivedBy, type Received, payerOf, chunkCardId, stampFiles, cardHolderOf, type Card, type CardStamp } from './cards';
 import { playerFile, PLAYERS_DIR, readWandererState, repairProfile, SOLO, validWandererId, WANDERER_NAME, wandererColor, wandererOf, wanderersIn, type Profile, type ProfileRepair, type Wanderer, type WandererState, PER_WANDERER } from './wanderers';
 import type { ActionDef, AiSettings, BenchCase, Effect, FileMap, Spell, UiPanel, ItemDef, ItemSpec, Manifest, ModuleEntry, GameSetup, GameExpenses, ChunkInfo, Recipe, RuneFragment, TerrainDef, UniverseConfig } from './types';
@@ -96,7 +96,7 @@ import { internalComponent, internalEvent, internalFields, internalName, interna
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
 import { dominantCellarStratum, draftStrata, programStrata, readStrata, sampleLotStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow, summarizePlaceStrata, type LotStratum } from './strata';
-import { addMoved, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
+import { addMoved, FLAT_SPAN, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
 import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, climbDuration, climbLine, climbOf, climbPoint, fallPoint, onFace, saneClimb, startClimb, type ClimbComp, type ClimbRefusal } from './climb';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
@@ -238,6 +238,8 @@ export interface Chunk {
   ramps?: Record<string, number>;
   /** Its network (T474): what is joined to its first gate on the steps, its enclaves, its roughness; derived with its plan, never saved. */
   network?: Network;
+  /** In a thin client of a true-relief world (T475): base relief levels as the server computed them (`ChunkView.relief`). */
+  relief?: Int16Array;
 }
 
 export interface LineState {
@@ -674,7 +676,7 @@ export class Kernel {
   private loadStopped = new Set<string>();
   private loadSaid = new Map<string, number>();
   /** Solid entities with a model, by the cells their footprint reaches (they block by their voxels). */
-  private reliefCache?: { key: string; relief: Relief };
+  private reliefCache?: { key: string; xml: string; genSrc: string; planets: WorldNature['planets']; relief: Relief };
   /** The level of every tile, per chunk (flat water, flat lots), while its tiles, lots and the world's levels stay the same. */
   private levelCache = new WeakMap<Chunk, { tiles: string; lots: Lot[]; block?: LotBox; field: Int16Array; ramps?: Record<string, number>; rise?: Rise; levels: Int16Array; steep: boolean }>();
   /** The levels of the loaded world before the lots (T51a), while its places, their tiles, the relief and the sea stay the same. */
@@ -2151,6 +2153,35 @@ export class Kernel {
     return '?'.repeat(n);
   }
 
+  /**
+   * True relief levels (and bed under water) of a place from the terrain generator's `generate_relief` (T475, ADR-0256): parsed without
+   * trusting Lua (`parseRelief`), with the kernel's islands imposed in an archipelago (`islandRelief`). Returns undefined if the generator
+   * lacks `generate_relief` or returns invalid data (raising a fault), so `TrueRelief` falls back cleanly (rule 7).
+   */
+  private genRelief(cx: number, cy: number, band = 0): ChunkReliefData | undefined {
+    const S = this.config.chunkSize;
+    if (this.bench) return { levels: new Int16Array(S * S), bed: new Int16Array(S * S) };
+    if (!this.terrain) return undefined;
+    const id = this.terrain.manifest.id;
+    if (!this.sandbox.has(id, 'generate_relief')) return undefined;
+    this.draftBand = band;
+    let got: { value: unknown; failed: boolean };
+    try {
+      got = this.runModule(id, 'generate_relief', cx, cy, this.bandSeed(band), S);
+    } finally {
+      this.draftBand = undefined;
+    }
+    if (got.failed) return undefined;
+    const parsed = parseRelief(got.value, S);
+    if (!parsed) {
+      this.faults.raise(`module:${id}:generate_relief`, `generate_relief deve restituire ${S * S} livelli interi`);
+      return undefined;
+    }
+    this.faults.clear(`module:${id}:generate_relief`);
+    if (band === 0 && this.config.nature.geography === 'archipelago') return islandRelief(parsed.levels, parsed.bed, this.config.seed, cx, cy, S);
+    return parsed;
+  }
+
   /** The scene of the bench (5 × 5 around the cell of the wanderer, (0, 0)); the first walkable terrain around it. */
   private benchDraft(cx: number, cy: number): string {
     const S = this.config.chunkSize;
@@ -2771,33 +2802,78 @@ export class Kernel {
   }
 
   /**
-   * What the Cartographer is told of a place's relief (T474, ADR-0250): from its draft as if alone (its levels and the rise of the tests),
-   * laid out bare, the enclaves its network keeps with the roughness of the master's region or of its relief. Undefined where no two tiles
-   * beside each other are more than a step apart (every place of the relief of today: nothing is said) or none is kept.
+   * What the Cartographer is told of a place's relief (T474, ADR-0250; T475, ADR-0256): from its draft as if alone (its levels and the rise
+   * of the tests), laid out bare, the enclaves its network keeps with the roughness of the master's region or of its relief, plus (in
+   * true-relief worlds) its elevation range, cliffs and buildable terraces. Undefined for a plain hills place without enclaves, or a flat
+   * place/open sea in true relief: nothing is said, and `enclave` enters the schema only when `enclaves >= 1`.
    */
   private draftRelief(ch: Chunk): PlanContext['relief'] {
     const S = this.config.chunkSize;
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
-    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles: ch.draft, draft: ch.draft }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
+    const relief = this.relief;
+    const keepCliffs = relief.hasCliffs(ch.cx * S);
+    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles: ch.draft, draft: ch.draft }], S, liquid, (c, r) => relief.level(c, r), this.seaLevel, undefined, keepCliffs)[0];
     const levels = Int16Array.from(field);
     this.riseOn(ch, levels, ch.draft, []);
-    if (!steepOf(levels, S, (i) => liquid(ch.draft[i]))) return undefined;
+    const steep = steepOf(levels, S, (i) => liquid(ch.draft[i]));
+    if (!keepCliffs && !steep) return undefined;
     let bare: LayoutResult;
     try {
-      bare = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode: this.pathCode(), swim: true });
+      bare = layout(this.rows(ch.draft), this.palette, { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode: this.pathCode(), swim: true, ...(keepCliffs ? { levels } : {}) });
     } catch {
       return undefined;
     }
     const tiles = bare.grid.join('');
     const ground = this.groundOfPlace(tiles, levels, [], true);
     const roughness = regionRoughness(this.masterRegionOf(ch)) ?? roughnessOf(ground);
-    if (keptPass(roughness, true) < 0) return undefined;
-    const kept = placeNetwork(ground, bare.start, bare.mustReach, { roughness, climb: true }).enclaves.filter((e) => e.kept);
-    if (!kept.length) return undefined;
-    let walked = 0;
-    for (let i = 0; i < S * S; i++) if (ground.walked(i)) walked++;
+    const kept = keptPass(roughness, true) >= 0 ? placeNetwork(ground, bare.start, bare.mustReach, { roughness, climb: true }).enclaves.filter((e) => e.kept) : [];
+    if (!keepCliffs) {
+      if (!kept.length) return undefined;
+      let walked = 0;
+      for (let i = 0; i < S * S; i++) if (ground.walked(i)) walked++;
+      const share = kept.reduce((a, e) => a + e.walked, 0) / Math.max(1, walked);
+      return { roughness, enclaves: kept.length, share, means: meansOf(Math.max(...kept.map((e) => e.pass))) };
+    }
+    let walked = 0, lo = Infinity, hi = -Infinity, cliffs = 0;
+    for (let i = 0; i < S * S; i++) {
+      const w = ground.walked(i);
+      const sw = ground.swum(i);
+      if (w) {
+        walked++;
+        if (levels[i] < lo) lo = levels[i];
+        if (levels[i] > hi) hi = levels[i];
+      }
+      if (!w && !sw) continue;
+      const c = i % S;
+      for (const n of [c + 1 < S ? i + 1 : -1, i + S < S * S ? i + S : -1]) {
+        if (n < 0 || (!ground.walked(n) && !ground.swum(n)) || (sw && ground.swum(n))) continue;
+        if (Math.abs(levels[i] - levels[n]) > STEP) cliffs++;
+      }
+    }
+    if (!kept.length && cliffs === 0 && (!Number.isFinite(lo) || hi - lo <= FLAT_SPAN)) return undefined;
+    // Count distinct walkable terraces (step-connected plateaus of at least 9 tiles, large enough for a building).
+    const seen = new Uint8Array(S * S);
+    let terraces = 0;
+    for (let i = 0; i < S * S; i++) {
+      if (seen[i] || !ground.walked(i)) continue;
+      const q = [i];
+      seen[i] = 1;
+      for (let h = 0; h < q.length; h++) {
+        const u = q[h], c = u % S, r = (u - c) / S;
+        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nc = c + dc, nr = r + dr;
+          if (nc < 0 || nr < 0 || nc >= S || nr >= S) continue;
+          const v = nr * S + nc;
+          if (seen[v] || !ground.walked(v) || Math.abs(levels[u] - levels[v]) > STEP) continue;
+          seen[v] = 1;
+          q.push(v);
+        }
+      }
+      if (q.length >= 9) terraces++;
+    }
     const share = kept.reduce((a, e) => a + e.walked, 0) / Math.max(1, walked);
-    return { roughness, enclaves: kept.length, share, means: meansOf(Math.max(...kept.map((e) => e.pass))) };
+    const means = kept.length ? meansOf(Math.max(...kept.map((e) => e.pass))) : 'jump';
+    return { roughness, enclaves: kept.length, share, means, ...(Number.isFinite(lo) ? { low: lo - this.seaLevel, high: hi - this.seaLevel } : {}), cliffs, terraces };
   }
 
   /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
@@ -3049,7 +3125,12 @@ export class Kernel {
     // The land at the hatch of a landing (T448) is walked and reached from the gates, with the edge of a block's lot if there is one.
     const docked = this.dockApron(ch);
     const apron = docked.length ? { apron: new Set([...(blockAt?.apron ?? []), ...docked]) } : {};
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(blockAt ?? {}), ...apron };
+    // In a true-relief world (T475), pass the place's base levels so stamps and building rules land on terraces and never straddle cliffs.
+    const relief = this.relief;
+    const trueLv = relief.hasCliffs(ch.cx * S)
+      ? { levels: worldLevels([{ cx: ch.cx, cy: ch.cy, tiles: ch.draft, draft: ch.draft }], S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r), this.seaLevel, undefined, true)[0] }
+      : {};
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(blockAt ?? {}), ...apron, ...trueLv };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
@@ -3098,7 +3179,8 @@ export class Kernel {
     const key = blockKey(b);
     let level = this.blockLevels.get(key);
     if (level?.relief !== this.relief || level.sea !== this.seaLevel) {
-      level = { relief: this.relief, sea: this.seaLevel, level: blockLevel(b, S, (c, r) => this.relief.level(c, r), this.seaLevel) };
+      const keepCliffs = this.relief.hasCliffs(b.x * S);
+      level = { relief: this.relief, sea: this.seaLevel, level: blockLevel(b, S, (c, r) => this.relief.level(c, r), this.seaLevel, keepCliffs) };
       this.blockLevels.set(key, level);
     }
     return { ...lotIn(b, S, ch.cx, ch.cy), level: level.level };
@@ -3631,9 +3713,11 @@ export class Kernel {
     const place = this.placementsOf(ch, plan, result, net);
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
     // Its own levels, as if alone (T51a): the same miniature whether or not the places around are loaded.
-    const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
+    const relief = this.relief;
+    const keepCliffs = relief.hasCliffs(ch.cx * S);
+    const field = worldLevels([{ ...ch, tiles }], S, liquid, (c, r) => relief.level(c, r), this.seaLevel, undefined, keepCliffs)[0];
     const height = (c: number, r: number) => field[r * S + c];
-    const levels = chunkLevels(tiles, S, liquid, height, lotBoxes);
+    const levels = chunkLevels(tiles, S, liquid, height, lotBoxes, keepCliffs);
     this.riseOn(ch, levels, tiles, lotBoxes);
     addMoved(levels, net.moved);
     const local = (tile: number) => ({ x: (tile % S) + 0.5, y: Math.floor(tile / S) + 0.5 });
@@ -3654,7 +3738,7 @@ export class Kernel {
     const runes = place.runes.filter((r) => !this.consumed.has(r.origin)).map((r) => ({ x: r.col - ch.cx * S + 0.5, y: r.row - ch.cy * S + 0.5, token: r.token, line: r.line, color: this.content.runes[r.token]?.color }));
     // The phases (T26): what changes from one to the next is lit; before the lots, the ground is not levelled for them.
     const changed = (a: string, b: string) => [...b].flatMap((c, i) => (c !== a[i] ? [i] : []));
-    const phase = (t: string, lit: number[], lv?: Int16Array) => ({ tiles: t, levels: [...(lv ?? chunkLevels(t, S, liquid, height, []))], lit: [...new Set(lit)].sort((a, b) => a - b) });
+    const phase = (t: string, lit: number[], lv?: Int16Array) => ({ tiles: t, levels: [...(lv ?? chunkLevels(t, S, liquid, height, [], keepCliffs))], lit: [...new Set(lit)].sort((a, b) => a - b) });
     const gated = result.stages!.gated.join(''), programmed = result.stages!.programmed.join('');
     const tileOf = (p: { x: number; y: number }) => Math.floor(p.y) * S + Math.floor(p.x);
     const phases = [
@@ -3901,49 +3985,96 @@ export class Kernel {
   }
 
   /**
-   * The relief of the simulation (ADR-0048), made the first time it is asked for, again if the seed or the program change. A world of the
-   * void is flat (T448, ADR-0234): a capsule docked at any edge has its deck a step over the land.
+   * The relief of the simulation (ADR-0048; true relief T475, ADR-0256), made the first time it is asked for, again if the seed, generator
+   * or program change. A world of the void is flat (T448, ADR-0234): a capsule docked at any edge has its deck a step over the land.
    */
   get relief(): Relief {
     const xml = this.files[RELIEF_PATH] ?? HILLS;
     const flat = this.config.nature.geography === 'void';
+    const trueRelief = !flat && this.config.nature.relief === 'true';
+    const planetsRef = this.config.nature.planets;
+    const genSrc = this.terrain ? (this.files[`modules/${this.terrain.manifest.id}/logic.lua`] ?? '') : '';
+    const baseKey = `${this.config.seed}|${flat ? 'flat' : trueRelief ? `true:${this.config.nature.geography}:${this.mirror ? 'm' : 's'}` : 'hills'}|${this.config.chunkSize}`;
+    const hit = this.reliefCache;
+    if (hit && hit.key === baseKey && hit.xml === xml && hit.genSrc === genSrc && hit.planets === planetsRef) return hit.relief;
     const planets = this.planets();
-    const key = `${this.config.seed}|${flat ? 'flat' : xml}|${this.config.chunkSize}|${JSON.stringify(planets)}`;
-    if (this.reliefCache?.key !== key) {
-      let relief: Relief;
-      if (flat) relief = flatRelief();
-      else try {
-        relief = new Relief(this.config.seed, xml);
+    const S = this.config.chunkSize;
+    const makeHills = (seed: number) => {
+      try {
+        const r = new Relief(seed, xml);
         this.faults.clear('universe:relief');
+        return r;
       } catch (e) {
         this.faults.raise('universe:relief', `${RELIEF_PATH}: ${(e as Error).message}`);
-        relief = new Relief(this.config.seed);
+        return new Relief(seed);
       }
-      // The planets (T449): each band its own hills and its sea, at the world's sea level.
-      if (planets.length) {
-        const S = this.config.chunkSize;
-        const home = relief;
-        const homeSea = this.config.relief?.sea ?? home.sea;
-        relief = new BandedRelief(
-          home,
-          (col) => this.bandAt(col),
-          planets.map((p, i) => ({
-            x0: planetPlace(i + 1, S) * S,
-            make: () => {
-              let r: Relief;
-              try {
-                r = new Relief(this.bandSeed(i + 1), this.files[RELIEF_PATH] ?? HILLS);
-              } catch {
-                r = new Relief(this.bandSeed(i + 1));
-              }
-              return { relief: r, shift: homeSea - (p.sea ?? r.sea) };
+    };
+    let relief: Relief;
+    if (flat) relief = flatRelief();
+    else if (trueRelief) {
+      relief = this.mirror
+        ? new TrueRelief(
+            this.config.seed,
+            S,
+            (cx, cy) => {
+              const lv = this.chunks.get(this.chunkKey(cx, cy))?.relief;
+              return lv ? { levels: lv, bed: lv } : undefined;
             },
-          })),
-        );
-      }
-      this.reliefCache = { key, relief };
+            () => flatRelief(),
+            false,
+            false,
+          )
+        : new TrueRelief(this.config.seed, S, (cx, cy) => this.genRelief(cx, cy, 0), () => makeHills(this.config.seed));
+    } else relief = makeHills(this.config.seed);
+    // The planets (T449): each band its own hills (or true relief, T475) and its sea, at the world's sea level.
+    if (planets.length) {
+      const home = relief;
+      const homeSea = this.config.relief?.sea ?? home.sea;
+      relief = new BandedRelief(
+        home,
+        (col) => this.bandAt(col),
+        planets.map((p, i) => ({
+          x0: planetPlace(i + 1, S) * S,
+          trueRelief: p.relief === 'true',
+          make: () => {
+            const band = i + 1;
+            const seed = this.bandSeed(band);
+            let r: Relief;
+            if (p.relief === 'true') {
+              r = this.mirror
+                ? new TrueRelief(
+                    seed,
+                    S,
+                    (cx, cy) => {
+                      const lv = this.chunks.get(this.chunkKey(cx + planetPlace(band, S), cy))?.relief;
+                      return lv ? { levels: lv, bed: lv } : undefined;
+                    },
+                    () => flatRelief(),
+                    false,
+                    false,
+                  )
+                : new TrueRelief(seed, S, (cx, cy) => this.genRelief(cx, cy, band), () => makeHills(seed));
+            } else {
+              try {
+                r = new Relief(seed, this.files[RELIEF_PATH] ?? HILLS);
+              } catch {
+                r = new Relief(seed);
+              }
+            }
+            return { relief: r, shift: homeSea - (p.sea ?? r.sea) };
+          },
+        })),
+      );
     }
-    return this.reliefCache.relief;
+    this.reliefCache = { key: baseKey, xml, genSrc, planets: planetsRef, relief };
+    return relief;
+  }
+
+  /** Base relief levels of a place for the session wire (T475): only in true-relief worlds; undefined otherwise. */
+  chunkReliefOf(ch: Pick<Chunk, 'cx' | 'cy'>): Int16Array | undefined {
+    const S = this.config.chunkSize;
+    if (!this.relief.hasCliffs(ch.cx * S)) return undefined;
+    return this.relief.chunkLevelsAt(ch.cx, ch.cy, S);
   }
 
   /** The sea's level (T51a): `universe.json → rilievo.mare`, or the one the relief gives. */
@@ -3965,10 +4096,19 @@ export class Kernel {
     if (!fresh) {
       const list = [...this.chunks.values()];
       const S = this.config.chunkSize;
-      const out = worldLevels(list, S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r) + this.digAt(c, r), sea, (k, i) => {
-        const w = this.waterOf(list[k])?.[i];
-        return w && w[1] > WET ? w[0] + w[1] : undefined;
-      });
+      const keepCliffs = list.length > 0 && relief.hasCliffs(list[0].cx * S);
+      const out = worldLevels(
+        list,
+        S,
+        (code) => this.palette[code]?.layer === 'liquid',
+        (c, r) => relief.level(c, r) + this.digAt(c, r),
+        sea,
+        (k, i) => {
+          const w = this.waterOf(list[k])?.[i];
+          return w && w[1] > WET ? w[0] + w[1] : undefined;
+        },
+        keepCliffs,
+      );
       const levels = new Map(list.map((c, i) => [c, out[i]]));
       if (f) for (const c of list) {
         const old = f.levels.get(c);
@@ -4111,7 +4251,7 @@ export class Kernel {
     if (l?.tiles !== ch.tiles || l.lots !== ch.lots || l.field !== field || l.block !== ch.blockLot || l.ramps !== ch.ramps || l.rise !== this.rise) {
       const lots = ch.blockLot ? [ch.blockLot, ...ch.lots] : ch.lots;
       const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
-      const levels = chunkLevels(ch.tiles, S, liquid, (c, r) => field[r * S + c], lots);
+      const levels = chunkLevels(ch.tiles, S, liquid, (c, r) => field[r * S + c], lots, this.relief.hasCliffs(ch.cx * S));
       this.riseOn(ch, levels, ch.tiles, lots);
       addMoved(levels, ch.ramps);
       l = { tiles: ch.tiles, lots: ch.lots, block: ch.blockLot, field, ramps: ch.ramps, rise: this.rise, levels, steep: steepOf(levels, S, (i) => liquid(ch.tiles[i])) };
@@ -4172,13 +4312,20 @@ export class Kernel {
   private networkOf(ch: Pick<Chunk, 'cx' | 'cy' | 'draft'>, plan: ChunkPlan, result: LayoutResult, tiles: string, lots: readonly LotBox[]): Network {
     const S = this.config.chunkSize;
     const liquid = (code: string) => this.palette[code]?.layer === 'liquid';
-    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles, draft: ch.draft }], S, liquid, (c, r) => this.relief.level(c, r), this.seaLevel)[0];
-    const levels = chunkLevels(tiles, S, liquid, (c, r) => field[r * S + c], [...lots]);
+    const relief = this.relief;
+    const keepCliffs = relief.hasCliffs(ch.cx * S);
+    const field = worldLevels([{ cx: ch.cx, cy: ch.cy, tiles, draft: ch.draft }], S, liquid, (c, r) => relief.level(c, r), this.seaLevel, undefined, keepCliffs)[0];
+    const levels = chunkLevels(tiles, S, liquid, (c, r) => field[r * S + c], [...lots], keepCliffs);
     this.riseOn(ch, levels, tiles, lots);
     const ground = this.groundOfPlace(tiles, levels, lots, plan.swim === true);
     const codes = defaultCodes(this.palette, this.pathCode());
     const ways: number[] = [];
-    for (let i = 0; i < S * S; i++) if (tiles[i] === codes.road || tiles[i] === codes.pier) ways.push(i);
+    // Border gates are already in `result.mustReach`; only interior road/pier tiles are added here so a draft road touching a border cliff is not an immovable non-gate target.
+    for (let r = 1; r < S - 1; r++)
+      for (let c = 1; c < S - 1; c++) {
+        const i = r * S + c;
+        if (tiles[i] === codes.road || tiles[i] === codes.pier) ways.push(i);
+      }
     // The start of the world (0, 0) is the corner of the four places around it.
     const corner = ch.cx === 0 && ch.cy === 0 ? 0 : ch.cx === -1 && ch.cy === 0 ? S - 1 : ch.cx === 0 && ch.cy === -1 ? (S - 1) * S : ch.cx === -1 && ch.cy === -1 ? S * S - 1 : -1;
     const targets = [...result.mustReach, ...ways, ...(corner >= 0 ? [corner] : [])];
@@ -10162,7 +10309,7 @@ export class Kernel {
       return;
     }
     if (this.repo.working['universe.json'] !== undefined) this.repo.write('universe.json', JSON.stringify({ ...raw, nature: this.worldNature }, null, 2) + '\n');
-    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità e gli automi li rimodella il Fisico: universe.json la tiene com'era");
+    this.council?.say('kernel', 'scarta', "la natura del mondo (geografia, rilievo, cielo, giorno, respiro) si sceglie solo alla Genesi, la gravità e gli automi li rimodella il Fisico: universe.json la tiene com'era");
   }
 
   /**
@@ -10325,6 +10472,7 @@ export class Kernel {
     }
     this.worldNature = nature;
     this.config = { ...this.config, nature };
+    this.trialDrafts = undefined;
     // The void is in the palette of a world of the void only (T445).
     this.palette = this.paletteOf(this.terrain?.manifest.tiles);
     this.writeCommanded('universe.json', JSON.stringify({ ...raw, nature }, null, 2) + '\n');
@@ -12516,7 +12664,16 @@ export class Kernel {
       // The world is born again with the nature of its theme (T437, ADR-0224): fixed from here.
       this.chooseNature(theme);
       onProgress?.('Il Concilio si riunisce');
-      const plan = await planGenesis(this.council, theme, this.repo.working, (id, def, palette, strata) => this.validator.validateLayout(id, def, palette, this.sampleDrafts(), strata ?? this.strata), this.broughtForGenesis(), this.config.nature.geography, this.config.nature.oxygen);
+      const plan = await planGenesis(
+        this.council,
+        theme,
+        this.repo.working,
+        (id, def, palette, strata) => this.validator.validateLayout(id, def, palette, this.sampleDrafts(), strata ?? this.strata),
+        this.broughtForGenesis(),
+        this.config.nature.geography,
+        this.config.nature.oxygen,
+        this.config.nature.relief === 'true',
+      );
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);
       // Example content shipped on disk makes room for the generated world.
