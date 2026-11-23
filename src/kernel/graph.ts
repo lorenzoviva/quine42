@@ -17,7 +17,7 @@ import { bondWith, playerFile, readWandererState, SOLO, STATE_FILE, wandererOf, 
 export const GRAPH_FILE = 'world/graph.json';
 export const GRAPH_SCHEMA = 1;
 /** The version of the builder: raise it when the graph is built differently, so the files are rewritten. */
-export const GRAPH_BUILD = 4;
+export const GRAPH_BUILD = 5;
 
 export type NodeType = 'individual' | 'kind' | 'chunk' | 'region' | 'environment' | 'structure' | 'plot' | 'item' | 'recipe' | 'rune' | 'spell' | 'rule' | 'fact';
 
@@ -125,6 +125,8 @@ export interface GraphChunk {
   /** Names of the items lying around. */
   a_terra?: string[];
   strutture?: string[];
+  /** The strata under the place, short names in the world's language (T479, ADR-0253). */
+  strata?: string[];
 }
 
 export interface GraphIssue {
@@ -166,7 +168,7 @@ export function graphSources(files: FileMap): string[] {
 export function chunksOf(data: GraphData | null | undefined): GraphChunk[] {
   return (data?.nodes ?? [])
     .filter((n) => (n.tipo === 'chunk' || (n.tipo as string) === 'luogo') && typeof n.cx === 'number' && typeof n.cy === 'number')
-    .map((n) => ({ cx: n.cx as number, cy: n.cy as number, nome: n.label, descrizione: n.descrizione as string | undefined, ambiente: typeof n.ambiente === 'string' ? internalName('ambienti', n.ambiente) : undefined, cose: n.cose as string[] | undefined, a_terra: n.a_terra as string[] | undefined, strutture: n.strutture as string[] | undefined }));
+    .map((n) => ({ cx: n.cx as number, cy: n.cy as number, nome: n.label, descrizione: n.descrizione as string | undefined, ambiente: typeof n.ambiente === 'string' ? internalName('ambienti', n.ambiente) : undefined, cose: n.cose as string[] | undefined, a_terra: n.a_terra as string[] | undefined, strutture: n.strutture as string[] | undefined, strata: Array.isArray(n.strata) ? n.strata.filter((x): x is string => typeof x === 'string') : undefined }));
 }
 
 /** The places of the previous graph file, then those given (which win), in a stable order. */
@@ -352,6 +354,7 @@ export class WorldGraph {
         case 'cita': break;
       }
     }
+    if (n.tipo === 'chunk' && Array.isArray(n.strata) && n.strata.length) parts.push(`sotto ${(n.strata as string[]).join(', ')}`);
     const merged = new Map<string, string[]>();
     for (const p of parts) {
       const [verb, ...rest] = p.split(' ');
@@ -551,7 +554,7 @@ export function buildGraph(files: FileMap, chunks: GraphChunk[] = [], speciesOf:
   // Places: the planned chunks, then the places the bible names that no chunk has.
   const chunkByName = new Map<string, string>();
   for (const p of chunkList) {
-    const id = g.add('chunk', `${p.cx}_${p.cy}`, p.nome, 'maps/', { cx: p.cx, cy: p.cy, descrizione: p.descrizione, ambiente: p.ambiente, cose: p.cose, a_terra: p.a_terra, strutture: p.strutture }, true);
+    const id = g.add('chunk', `${p.cx}_${p.cy}`, p.nome, 'maps/', { cx: p.cx, cy: p.cy, descrizione: p.descrizione, ambiente: p.ambiente, cose: p.cose, a_terra: p.a_terra, strutture: p.strutture, strata: p.strata }, true);
     if (!chunkByName.has(normName(p.nome))) chunkByName.set(normName(p.nome), id);
     const reg = regionAt(atlas, p.cx, p.cy);
     if (reg) g.link(id, `region:${slug(reg.id)}`, 'in_regione', 'world/atlas.json');

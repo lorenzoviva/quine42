@@ -28,6 +28,7 @@ import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
 import { wornErrors, wornSections, type WornZone } from '../../mj/worn';
 import { isWorldPart, partContract, WORLD_PARTS, worldPartsIn } from '../worldparts';
+import type { LotStratum } from '../strata';
 import type { Council } from './council';
 
 export type ModelCategory = 'simple' | 'figure' | 'structure';
@@ -133,6 +134,8 @@ export interface SculptRequest {
   cellar?: number;
   /** A military fortification (T434), if who asks knows it; else the words of its concept say it (`fortifiedOf`). */
   fortified?: boolean;
+  /** The strata under the structure's lot, from row 0 (0–1 tiles below the soil) down (T479, ADR-0253). */
+  strata?: LotStratum[];
 }
 
 /** Whether a structure asked for is a dwelling (T413, ADR-0213): the request says it, or its concept (`isDwelling`). */
@@ -786,6 +789,7 @@ export function describe(req: SculptRequest, cls: AssetClass): string {
     procedural(cls, req.taglia) && dwellingOf(req) && DWELLING_LINE,
     procedural(cls, req.taglia) && (fortifiedOf(req) ? FORTIFIED_LINE : UNFORTIFIED_LINE),
     cellarLine(req, cls),
+    strataLine(req, cls),
     isVessel(cls) && vesselLine(cls, req.taglia),
   ]
     .filter(Boolean)
@@ -801,6 +805,35 @@ function cellarLine(req: SculptRequest, cls: AssetClass): string | undefined {
   if (!base) return undefined;
   const vpt = densityFor(cls, req.taglia);
   return `It has a cellar under it: the box goes ${base} voxels (${(base / vpt).toFixed(2)} tiles) under the soil, which the kernel writes at z=${base}; z=0 to ${base - 1} are under the ground. Dig it with part-cellar: mark D under the floor of a room on the soil, away from the door and from the foot of the stair, then include part-cellar after the floors rise and before part-stair, and give D, V and k your colours. The cellar must hold: a body goes down to it on foot from the door, and every floor down there is reached; if it does not, the building comes in without it.`;
+}
+
+/**
+ * What the request says of the strata under the structure's lot (T479, ADR-0253): the layers from the soil down, with their colours and
+ * notable features (aquifers, veins, roots), so the Architect matches cellar walls/floor (V, D in part-cellar) and foundations to the real
+ * ground underneath. Only in requests that carry lot strata: the Architect's system prompt does not grow.
+ */
+function strataLine(req: SculptRequest, cls: AssetClass): string | undefined {
+  if (!req.strata?.length || !['structure', 'building', 'monument'].includes(cls.id)) return undefined;
+  const rows = [...req.strata].sort((a, b) => a.depth - b.depth);
+  const runs: Array<{ from: number; to: number; row: LotStratum }> = [];
+  const sameRow = (a: LotStratum, b: LotStratum) =>
+    a.key === b.key && a.name === b.name && a.color === b.color && JSON.stringify(a.also ?? []) === JSON.stringify(b.also ?? []);
+  for (const r of rows) {
+    const prev = runs.at(-1);
+    if (prev && prev.to === r.depth && sameRow(prev.row, r)) prev.to = r.depth + 1;
+    else runs.push({ from: r.depth, to: r.depth + 1, row: r });
+  }
+  const fmt = (g: { from: number; to: number; row: LotStratum }) => {
+    const r = g.row;
+    const desc = r.description ? `, ${r.description}` : '';
+    const also = r.also?.length ? ` + ${r.also.map((a) => `${a.name} (${a.color})`).join(', ')}` : '';
+    return `${g.from}–${g.to} tiles ${r.name} (${r.color}${desc})${also}`;
+  };
+  const base = cellarOfRequest(cls, req.taglia, req.cellar);
+  const guidance = base
+    ? 'The cellar descends through these strata: match the colours and materials of its walls (V) and floor (D) in part-cellar to the stratum it is dug into (e.g. clay brick or packed earth in clay, hewn stone in bedrock, damp masonry near an aquifer), and rest its foundations on the bedrock layer.'
+    : 'Rest the plinth and foundations naturally on this ground and its strata.';
+  return `Strata under the lot (below the soil): ${runs.map(fmt).join('; ')}. ${guidance}`;
 }
 
 /** Whether a vessel at a size carries people (T440): from Medium up it has a deck reached from where one boards, and the helm on it. */

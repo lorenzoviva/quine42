@@ -198,9 +198,11 @@ export class ModelDirector {
       const place = k.chunkAt(pos.x, pos.y)?.place;
       // With its cellar, if the Cartographer asked for one (T417): the request says how deep, the Sculptor digs it.
       const cellar = s.cellar && hasCellar(s.class, s.size) ? s.cellar : undefined;
+      // The strata under the structure's lot (T479, ADR-0253): so the Architect matches cellar walls/floor and foundations to them.
+      const strata = k.lotStrataAt(pos.x, pos.y, s.class, s.size, cellar);
       // A structure the world has at another size (T495) shares its program if it scales, whatever its id.
       const known = reusableOf(k.reusable(), s.concept)?.entries.map((e) => e.id) ?? [];
-      out.push({ id: s.model!, nome: s.concept, shareWith: [...new Set([...structureSiblings(s.concept), ...known])].filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}) });
+      out.push({ id: s.model!, nome: s.concept, shareWith: [...new Set([...structureSiblings(s.concept), ...known])].filter((x) => x !== s.model), aspetto: `${s.concept}: a building one enters, with the door at the front${cellar ? ', with a cellar under it' : ''}${place ? `, at «${place.name}» (${place.description})` : ''}`, classe: s.class, ...(s.size ? { taglia: s.size } : {}), contesto: place?.name, ...(s.model!.startsWith(COMMON_HOUSE) ? { dwelling: true } : {}), ...(cellar ? { cellar } : {}), ...(strata.length ? { strata } : {}) });
     }
     for (const [code, t] of Object.entries(k.palette)) {
       if (code === '?' || !lacks(t.model)) continue;

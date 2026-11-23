@@ -28,6 +28,17 @@ export interface MeasuredSeed {
   plan: InteriorPlan;
 }
 
+/** A stratum under the ground the Scenografo may furnish a cellar for (T479, ADR-0253). */
+export interface StratumOption {
+  /** Canonical key used in `InteriorRule.stratum` (e.g. `clay`, `bedrock`, `aquifer`). */
+  key: string;
+  /** Name in the language of the world. */
+  name: string;
+  description?: string;
+  /** True when a loaded building of this type currently stands over this stratum. */
+  underBuilding?: boolean;
+}
+
 export interface InteriorDesignRequest {
   /** Its id in the library and what the people would call it. */
   model: string;
@@ -37,6 +48,8 @@ export interface InteriorDesignRequest {
   vpt: number;
   seeds: MeasuredSeed[];
   catalogue: CataloguePiece[];
+  /** The strata of the world, when the building has a cellar (T479, ADR-0253). */
+  strata?: StratumOption[];
 }
 
 export interface InteriorDesign {
@@ -46,7 +59,7 @@ export interface InteriorDesign {
 }
 
 /** The schema of the answer: the ids of the catalogue as an enum, so a model that keeps to the schema names only what exists. */
-export function interiorSchema(ids: readonly string[]): Schema {
+export function interiorSchema(ids: readonly string[], strata?: readonly string[]): Schema {
   return {
     type: 'OBJECT',
     properties: {
@@ -59,6 +72,7 @@ export function interiorSchema(ids: readonly string[]): Schema {
             storey: { type: 'INTEGER', description: '0 the ground floor, 1 the one above…; left out, every storey (leave it out for the cellar)' },
             area: { type: 'STRING', description: 'the area of the ground under the room, as the request names it; left out, every area' },
             room: { type: 'STRING', enum: [...ROOM_KINDS], description: `hall the largest room of its storey, room another of at least ${ROOM_LEAST} tiles², small the others, cellar the floor under the ground its stair reaches (only a rule that names it furnishes it); left out, every room above the ground` },
+            ...(strata?.length ? { stratum: { type: 'STRING', enum: [...strata], description: 'only for room "cellar": the stratum the cellar is dug into (put specific stratum rules before a general cellar fallback rule); left out, any stratum' } } : {}),
             furniture: { type: 'ARRAY', items: { type: 'STRING', ...(ids.length ? { enum: [...ids] } : {}) }, description: 'ids of the list; for each piece one of them at random' },
             count: { type: 'INTEGER', description: `how many pieces, 1 to ${INTERIOR_LIMITS.count}` },
           },
@@ -82,7 +96,7 @@ export function catalogueText(catalogue: readonly CataloguePiece[]): string {
  * What the kernel tells the Scenografo of a building, seed by seed (the bench's `descrivi`, T303): its box, the body's measures, and for every
  * seed the storeys reached, the door, the parts one lives in, the rooms as the rules see them, the areas of the ground, the animals.
  */
-export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box' | 'vpt' | 'seeds'>): string {
+export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box' | 'vpt' | 'seeds' | 'strata'>): string {
   const { vpt, box } = req;
   const body = Math.round(2 * BODY_R * vpt);
   const lines = [
@@ -129,6 +143,15 @@ export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box'
     const animals = Object.keys(areas).filter((a) => ANIMAL_AREAS.test(a));
     lines.push(`- the animals stand on: ${animals.length ? `${animals.join(', ')}: their floor stays free` : 'no area of animals'}`);
   }
+  const hasCellarRoom = req.seeds.some((s) => s.plan.storeys.some((p) => p.cellar));
+  if (hasCellarRoom && req.strata?.length) {
+    lines.push(
+      '',
+      'Strata under the ground (for the cellar: furnish by stratum with "room": "cellar" and "stratum": "<key>" before a general "room": "cellar" fallback; e.g. a cool cellar in clay holds barrels and provisions, one carved in bedrock holds shelves or a crypt, one near an aquifer holds jars and cisterns):',
+    );
+    for (const s of req.strata)
+      lines.push(`- \`${s.key}\` (${s.name})${s.underBuilding ? ' [under this building]' : ''}${s.description ? `: ${s.description}` : ''}`);
+  }
   return lines.join('\n');
 }
 
@@ -139,13 +162,16 @@ export function describeBuilding(req: Pick<InteriorDesignRequest, 'name' | 'box'
 export async function designInterior(council: Council, req: InteriorDesignRequest, opts: { chi?: string } = {}): Promise<InteriorDesign | undefined> {
   const ids = req.catalogue.map((c) => c.id);
   const known = new Set(ids);
+  const hasCellarRoom = req.seeds.some((s) => s.plan.storeys.some((p) => p.cellar));
+  const strataKeys = hasCellarRoom && req.strata?.length ? req.strata.map((s) => s.key) : [];
+  const knownStrata = strataKeys.length ? new Set(strataKeys.map((s) => s.toLowerCase())) : undefined;
   const system = catalogueText(req.catalogue);
   const description = describeBuilding(req);
-  const data = { model: req.model, catalogue: ids, rooms: req.seeds.flatMap((s) => interiorRooms(s.plan).map((r) => ({ storey: r.storey, kind: r.kind, area: r.area, tiles: r.tiles }))) };
+  const data = { model: req.model, catalogue: ids, ...(strataKeys.length ? { strata: strataKeys } : {}), rooms: req.seeds.flatMap((s) => interiorRooms(s.plan).map((r) => ({ storey: r.storey, kind: r.kind, area: r.area, tiles: r.tiles }))) };
   let prompt = `${description}\n\nFurnish this building.`;
   for (let calls = 1; calls <= 2; calls++) {
-    const answer = await council.ask<unknown>('scenographer', INTERIOR_TASK, prompt, interiorSchema(ids), { system, data, ...(opts.chi ? { chi: opts.chi } : {}) });
-    const { rules, unknown } = readRules(answer, (id) => known.has(id));
+    const answer = await council.ask<unknown>('scenographer', INTERIOR_TASK, prompt, interiorSchema(ids, strataKeys), { system, data, ...(opts.chi ? { chi: opts.chi } : {}) });
+    const { rules, unknown } = readRules(answer, (id) => known.has(id), knownStrata ? (s) => knownStrata.has(s) : undefined);
     if (rules.length) {
       council.say('scenographer', 'propone', `interni di «${req.name}»: ${rules.length} regole, ${[...new Set(rules.flatMap((r) => r.furniture))].join(', ')}`, undefined, INTERIOR_TASK);
       return { rules, calls };

@@ -202,7 +202,7 @@ export class Entities {
   private sigOf(id: Id): string {
     const k = this.k;
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
-    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     const dressed = this.dressedOf(id, f, fc);
     return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}|${dressed?.key ?? ''}`;
   }
@@ -214,7 +214,7 @@ export class Entities {
     const figure = k.ecs.has(id, 'mind') || k.ecs.has(id, 'wander') || k.ecs.has(id, 'identity');
     const item = k.ecs.has(id, 'pickup');
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
-    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     const v = this.variant(id);
     // A building under way shows its stage (T245e); a figure what it wears (T290).
     const model = f && modelObject(k, f, fc, undefined, k.ecs.get(id, 'structure')?.stage, this.dressedOf(id, f, fc)?.geo);

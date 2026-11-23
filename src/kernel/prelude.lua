@@ -824,6 +824,12 @@ local function make_api()
       if type(x) ~= "number" or type(y) ~= "number" then return true end
       return host.air_at(x, y)
     end,
+    -- The strata under the ground (T479, ADR-0253): read only, a fresh copy per call.
+    stratum_at = function(x, y, depth)
+      if type(x) ~= "number" or type(y) ~= "number" then return nil end
+      if depth ~= nil and type(depth) ~= "number" then return nil end
+      return host.stratum_at(x, y, depth or 0)
+    end,
     islands = function(x, y, r)
       if type(x) ~= "number" or type(y) ~= "number" then return {} end
       return host.islands(x, y, type(r) == "number" and r or 200)

@@ -16,6 +16,7 @@ import { repairGameSetup } from '../validator';
 import { internalAnswer, internalFields, italianName } from '../internalNames';
 import { languageBlock, languageOf } from '../language';
 import { CAMPAIGN_FILE, campaignPrompt, readCampaign, type CampaignRead } from '../campaign';
+import { strataSummary } from '../strata';
 
 export type AgentId = 'narrator' | 'cartographer' | 'artist' | 'sculptor' | 'physicist' | 'engineer' | 'arbiter' | 'liaison' | 'actor' | 'musician' | 'scenographer';
 
@@ -101,6 +102,8 @@ export interface CatalogEntry {
 export interface WorldView {
   files: FileMap;
   palette: Record<string, TerrainDef>;
+  /** The strata under the ground of this world (T479, ADR-0253), when known. */
+  strata?: Record<string, TerrainDef>;
   catalog: CatalogEntry[];
   /** The graph of the world (ADR-0045), for the tasks with a focus. */
   graph?: () => WorldGraph;
@@ -313,7 +316,11 @@ export class Council {
       case 'actor':
       case 'narrator':
         if (focused) parts.push(`## The world\n${bibleHead(bible)}`);
-        else parts.push(`## Bible of the world\n${bibleSummary(bible, true)}`, `## Existing modules\n${catalogSummary(v.catalog)}`);
+        else {
+          parts.push(`## Bible of the world\n${bibleSummary(bible, true)}`, `## Existing modules\n${catalogSummary(v.catalog)}`);
+          const strataText = v.strata ? strataSummary(v.strata) : '';
+          if (strataText) parts.push(`## Strata under the ground\n${strataText}`);
+        }
         if (canon) parts.push(canon);
         if (lexicon) parts.push(lexicon);
         if (rules) parts.push(focused ? rulesSummary(v.files, FOCUSED_RULES) : rules);
@@ -346,9 +353,12 @@ export class Council {
         parts.push(`## Terrains\n${paletteSummary(v.palette)}`, `## Tone\n${bible?.tone ?? ''}`);
         if (rules) parts.push(rules);
         break;
-      case 'engineer':
+      case 'engineer': {
         parts.push(`## Bible (summary)\n${bible?.summary ?? ''}`, `## Terrains\n${paletteSummary(v.palette)}`);
+        const strataText = v.strata ? strataSummary(v.strata) : '';
+        if (strataText) parts.push(`## Strata under the ground\n${strataText}`);
         break;
+      }
       case 'arbiter':
         parts.push(`## Bible of the world\n${bibleSummary(bible)}`, `## Style guide\n${style}`, `## Terrains\n${paletteSummary(v.palette)}`);
         if (canon) parts.push(canon);

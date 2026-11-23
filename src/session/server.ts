@@ -1242,6 +1242,6 @@ export class SessionServer {
 
   private formOf(id: number | undefined): FormView | undefined {
     const f = id !== undefined ? this.kernel.ecs.get(id, 'form') : undefined;
-    return f ? { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}) } : undefined;
+    return f ? { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}), ...(f.stratum ? { stratum: f.stratum } : {}) } : undefined;
   }
 }

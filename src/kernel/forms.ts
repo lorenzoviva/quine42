@@ -21,7 +21,7 @@ import { symbolOf } from '../mj/symbols';
 import { hashStr } from './rng';
 import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
-import { furnishForm, furnitureOf, INTERIOR_LIMITS, interiorText, readInterior, type InteriorData, type InteriorSpec } from './furnish';
+import { furnishForm, furnitureOf, hasStratumRules, INTERIOR_LIMITS, interiorText, readInterior, type InteriorData, type InteriorSpec } from './furnish';
 import type { PieceBox } from './interior';
 
 export const MODELS_DIR = 'models/';
@@ -159,6 +159,8 @@ export interface FormComp {
    */
   wanted?: string;
   classe?: string;
+  /** The stratum this building's cellar is dug into (T479, ADR-0253): only affects forms whose interior has stratum rules. */
+  stratum?: string;
 }
 
 export interface FormRequest {
@@ -990,7 +992,7 @@ export class Forms {
    */
   private isolated = new Map<string, number>();
   /** The interiors of the buildings (T410) and the furniture they may hold, read once per load of the files. */
-  private interiors = new Map<string, { data: Omit<InteriorData, 'seed'>; hash: number } | null>();
+  private interiors = new Map<string, { data: Omit<InteriorData, 'seed'>; hash: number; hasStratum: boolean } | null>();
   private offered?: string[];
   /** Bumped whenever a form becomes ready (renderers rebuild what used stand-ins). */
   version = 0;
@@ -1142,7 +1144,7 @@ export class Forms {
    * What running a program with a seed takes (the site's card pictures run it in a worker of their own). A building whose entry has an
    * interior (T410) carries it, unless `bare` is asked: the building as the Sculptor wrote it.
    */
-  request(model: string, seed: number, tint?: string, opts: { bare?: boolean } = {}): FormRequest | undefined {
+  request(model: string, seed: number, tint?: string, opts: { bare?: boolean; stratum?: string } = {}): FormRequest | undefined {
     const xml = this.files[`${MODELS_DIR}${model}.xml`];
     if (!xml) return undefined;
     const info = this.entry(model);
@@ -1153,7 +1155,7 @@ export class Forms {
     const color = info?.tint ? hexColor(tint) : undefined;
     // The letter as the engine holds it: `#12` is one character (T342).
     const symbol = symbolOf(info?.tint);
-    const interior = opts.bare ? undefined : this.interiorOf(model, seed);
+    const interior = opts.bare ? undefined : this.interiorOf(model, seed, opts.stratum);
     return {
       xml,
       seed,
@@ -1192,10 +1194,10 @@ export class Forms {
   }
 
   /** A building's interior without its seed, and the hash of what it is: read once per load of the files (forms ask at every frame). */
-  private interiorBase(model: string): { data: Omit<InteriorData, 'seed'>; hash: number } | undefined {
+  private interiorBase(model: string): { data: Omit<InteriorData, 'seed'>; hash: number; hasStratum: boolean } | undefined {
     const known = this.interiors.get(model);
     if (known !== undefined) return known ?? undefined;
-    let out: { data: Omit<InteriorData, 'seed'>; hash: number } | undefined;
+    let out: { data: Omit<InteriorData, 'seed'>; hash: number; hasStratum: boolean } | undefined;
     const spec = this.interiorSpec(model);
     if (spec) {
       const furniture: Record<string, FormRequest> = {};
@@ -1204,22 +1206,32 @@ export class Forms {
         if (q) furniture[id] = { xml: q.xml, seed: 1, vpt: q.vpt, model: id, ...(q.size ? { size: q.size } : {}), ...(q.tempo ? { tempo: q.tempo } : {}), ...(q.files ? { files: q.files } : {}) };
       }
       const data = { rules: spec.rules, furniture, base: cellarVoxels(this.entry(model), this.files[`${MODELS_DIR}${model}.xml`]) };
-      if (Object.keys(furniture).length) out = { data, hash: hashStr(interiorText({ ...data, seed: 0 })) };
+      if (Object.keys(furniture).length) out = { data, hash: hashStr(interiorText({ ...data, seed: 0 })), hasStratum: hasStratumRules(spec.rules) };
     }
     this.interiors.set(model, out ?? null);
     return out;
   }
 
-  /** What a form of a building with an interior carries (T410): its rules, the furniture they name as each runs, the seed, the cellar. */
-  private interiorOf(model: string, seed: number): InteriorData | undefined {
+  /** The stratum key that matters for this model's interior (T479): undefined unless the interior has rules keyed by stratum. */
+  private effectiveStratum(model: string, stratum: string | undefined): string | undefined {
+    const s = stratum?.trim().toLowerCase();
+    return s && this.interiorBase(model)?.hasStratum ? s : undefined;
+  }
+
+  /** What a form of a building with an interior carries (T410): its rules, the furniture they name as each runs, the seed, the cellar, and the cellar stratum when rules use it. */
+  private interiorOf(model: string, seed: number, stratum?: string): InteriorData | undefined {
     const b = this.interiorBase(model);
-    return b && { ...b.data, seed };
+    if (!b) return undefined;
+    const st = this.effectiveStratum(model, stratum);
+    return { ...b.data, seed, ...(st ? { stratum: st } : {}) };
   }
 
   /** The key of a form: the interior's hash before the program's, so a furnished form is of its program as it is written now (`current`). */
-  private keyOf(model: string, seed: number, tint: string | undefined, h: number, furnished: boolean): string {
+  private keyOf(model: string, seed: number, tint: string | undefined, h: number, furnished: boolean, stratum?: string): string {
     const info = this.library[model];
-    const ih = furnished ? this.interiorBase(model)?.hash : undefined;
+    const b = furnished ? this.interiorBase(model) : undefined;
+    const st = furnished ? this.effectiveStratum(model, stratum) : undefined;
+    const ih = b ? (st ? hashStr(interiorText({ ...b.data, seed: 0, stratum: st })) : b.hash) : undefined;
     return `${model}#${seed}#${info?.tint && tint ? tint : ''}${ih !== undefined ? `#~${ih}` : ''}#${h}`;
   }
 
@@ -1227,8 +1239,8 @@ export class Forms {
    * The form of a program with a seed, if ready; starts running it otherwise. A building with an interior (T410) is its furnished form; if
    * that fails, the bare one (rule 7: an interior never breaks a building).
    */
-  get(model: string, seed: number, tint?: string): Form | undefined {
-    const f = this.form(model, seed, tint, false);
+  get(model: string, seed: number, tint?: string, stratum?: string): Form | undefined {
+    const f = this.form(model, seed, tint, false, stratum);
     return f?.furnished && f.status === 'failed' ? this.form(model, seed, tint, true) : f;
   }
 
@@ -1237,12 +1249,12 @@ export class Forms {
     return this.form(model, seed, tint, true);
   }
 
-  private form(model: string, seed: number, tint: string | undefined, bare: boolean): Form | undefined {
+  private form(model: string, seed: number, tint: string | undefined, bare: boolean, stratum?: string): Form | undefined {
     const h = this.hashOf(model);
     if (h === undefined) return undefined;
     const info = this.entry(model);
-    const interior = bare ? undefined : this.interiorOf(model, seed);
-    const key = this.keyOf(model, seed, tint, h, !!interior);
+    const interior = bare ? undefined : this.interiorOf(model, seed, stratum);
+    const key = this.keyOf(model, seed, tint, h, !!interior, stratum);
     let f = this.forms.get(key);
     if (f) return f;
     // Asked at every frame: only what is not there yet costs a request.
@@ -1313,8 +1325,8 @@ export class Forms {
    * The form if ready. A building whose furniture is not in yet (T410: the Scenografo has just answered) is the bare one meanwhile, if that
    * has run: it never goes back to a stand-in, and the guard says the furniture breaks nothing the bare one has.
    */
-  ready(model: string, seed: number, tint?: string): Form | undefined {
-    const f = this.get(model, seed, tint);
+  ready(model: string, seed: number, tint?: string, stratum?: string): Form | undefined {
+    const f = this.get(model, seed, tint, stratum);
     if (f?.status === 'ready') return f;
     if (!f?.furnished) return undefined;
     const h = this.hashOf(model);
@@ -1327,7 +1339,7 @@ export class Forms {
    * worker in tens of seconds, and `wait` gives up after two to six, as the timers go); at most `cap` ms. Undefined if there is no such program.
    * `bare`: the building without its interior (T410); a furnished one that failed is the bare one, as `get` says.
    */
-  async settled(model: string, seed: number, tint?: string, cap = SETTLE_CAP_MS, opts: { bare?: boolean } = {}): Promise<Form | undefined> {
+  async settled(model: string, seed: number, tint?: string, cap = SETTLE_CAP_MS, opts: { bare?: boolean; stratum?: string } = {}): Promise<Form | undefined> {
     const until = Date.now() + cap;
     const run = async (f: Form | undefined) => {
       const r = f && this.running.get(f);
@@ -1336,21 +1348,21 @@ export class Forms {
       await Promise.race([r, new Promise<void>((done) => (timer = setTimeout(done, Math.max(0, until - Date.now()))))]);
       clearTimeout(timer);
     };
-    let f = opts.bare ? this.bare(model, seed, tint) : this.get(model, seed, tint);
+    let f = opts.bare ? this.bare(model, seed, tint) : this.get(model, seed, tint, opts.stratum);
     await run(f);
     if (!opts.bare && f?.furnished && f.status === 'failed') await run((f = this.bare(model, seed, tint)));
     return f;
   }
 
   /** Waits for a form (tests, the Sculptor's checks). */
-  async wait(model: string, seed: number, tint?: string): Promise<Form | undefined> {
+  async wait(model: string, seed: number, tint?: string, stratum?: string): Promise<Form | undefined> {
     for (let i = 0; i < 400; i++) {
-      const f = this.get(model, seed, tint);
+      const f = this.get(model, seed, tint, stratum);
       if (!f || f.status === 'failed') return f;
       if (f.status === 'ready') return f;
       await new Promise((r) => setTimeout(r, 5));
     }
-    return this.get(model, seed, tint);
+    return this.get(model, seed, tint, stratum);
   }
 
   /** The box a large structure's entry runs a program without `size` in (ADR-0160), as the validator must try it; undefined for the other classes. */

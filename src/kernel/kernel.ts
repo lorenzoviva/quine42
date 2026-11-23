@@ -59,7 +59,7 @@ import type { InteriorSpec } from './furnish';
 import { categoryOf, repairSculptorTier, sculptAction, sculptorsOn, shareableProgram, SPECIALTY_NAMES, worldPartsOf, type AiRoute, type SculptorAiModels, type SculptorSpecialty } from './agents/sculptor';
 import { PART_SEEDS, PART_TASK, sameGridErrors, type PartTaken } from './agents/parts';
 import { isWorldPart, partsInUse, partUsers, WORLD_PART_RE, WORLD_PARTS, type ComposedPart } from './worldparts';
-import { cellarVoxels, entryBox, MODELS_INDEX, withRoot, type ModelInfo } from './forms';
+import { cellarOf, cellarVoxels, entryBox, MODELS_INDEX, withRoot, type ModelInfo } from './forms';
 import { Content, isCategory, normName, specOf } from './content';
 import { gates, layout, type Lot, type LayoutResult, articulationPoints } from './layout';
 import { blockGates, blockKey, blockLevel, blockPlaces, blockRecord, blockShapeFor, blocksAround, inBlock, lotIn, markOf, readBlockMark, readBlocks, reservedCells, sideOf, type Block, type BlockMark } from './block';
@@ -93,7 +93,7 @@ import { migratePlanRecord, migrateUniverse } from './migrations';
 import { internalComponent, internalEvent, internalFields, internalName, internalSculptors, internalValues, italianName, italianValues as italianFieldsOf } from './internalNames';
 import { ModuleStores } from './store';
 import { UNDER_STEP, undergroundAt, type Underground } from './underground';
-import { draftStrata, programStrata, readStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow } from './strata';
+import { dominantCellarStratum, draftStrata, programStrata, readStrata, sampleLotStrata, STRATA_DEPTH, strataDepthOf, strataPalette, stratumRow, summarizePlaceStrata, type LotStratum } from './strata';
 import { addMoved, keptPass, meansOf, placeNetwork, readRoughness, roughnessOf, STEP, steepOf, type Network, type PlaceGround } from './network';
 import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, climbDuration, climbLine, climbOf, climbPoint, fallPoint, onFace, saneClimb, startClimb, type ClimbComp, type ClimbRefusal } from './climb';
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
@@ -920,7 +920,7 @@ export class Kernel {
     // A brought card that fails here is isolated (T296): a program that throws or stops its worker, a form with nothing to see.
     k.forms.onReady = (f) => k.formReady(f);
     k.forms.onFail = (f) => k.formFailed(f);
-    k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, catalog: k.catalog(), graph: () => k.graph() }));
+    k.council = new Council(opts.ai, () => ({ files: k.files, palette: k.palette, strata: k.strata, catalog: k.catalog(), graph: () => k.graph() }));
     k.council.onFeed = (e) => {
       k.archive.onFeed(e, (x) => k.pathForFeed(x));
       k.bus.emit('council', e);
@@ -1076,6 +1076,8 @@ export class Kernel {
       region_at: (x, y) => this.regionInfoAt(x, y),
       // The air (T446): whether a body breathes there, a boolean.
       air_at: (x, y) => (typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y) ? this.airAt(x, y) : true),
+      // The strata under the ground (T479, ADR-0253): read only, fresh copy per call.
+      stratum_at: (x, y, depth) => this.stratumInfoAt(x, y, depth),
       islands: (x, y, r) => this.islandsSeen(x, y, r),
       // The vehicle (T439, ADR-0227): read, asked, never moved by Lua.
       vehicle: (id) => this.vehicleView(id),
@@ -1777,8 +1779,15 @@ export class Kernel {
       if (!fc.wanted || !this.forms.usable(fc.wanted)) continue;
       fc.model = fc.wanted;
       // A structure of the world worn again (T495) has the seed of its place, the rest their own.
-      const placed = this.ecs.get(id, 'structure') as { model?: string; seed?: number } | undefined;
+      const placed = this.ecs.get(id, 'structure') as { model?: string; seed?: number; cellar?: number } | undefined;
       fc.seed = placed?.seed !== undefined && placed.model === fc.wanted ? placed.seed : this.forms.seedFor(fc.wanted, this.ecs.get(id, 'origin')?.key ?? String(id));
+      // A structure with a cellar remembers the stratum under its lot (T479, ADR-0253) for per-stratum interiors.
+      if (!fc.stratum) {
+        const cellarTiles = placed?.cellar ?? cellarOf(this.forms.info(fc.model), this.files[`models/${fc.model}.xml`]);
+        const p = cellarTiles > 0 ? this.ecs.get(id, 'pos') : undefined;
+        const stratum = p ? this.cellarStratumAt(p.x, p.y, cellarTiles) : undefined;
+        if (stratum) fc.stratum = stratum;
+      }
       delete fc.wanted;
       this.instanceFeet.delete(id);
     }
@@ -1818,7 +1827,7 @@ export class Kernel {
   /** The actions of an entity's model that would change it now (open when closed, close when open). */
   modelActions(id: Id): Array<{ name: string; label: string }> {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
-    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     if (!fc || !f?.result?.actions.length) return [];
     const m = this.forms.compiled(fc.model);
     const now = instanceGrid(this.forms, f, fc.done ?? []);
@@ -1834,7 +1843,7 @@ export class Kernel {
   doModelAction(id: Id, name: string): boolean {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     if (!fc || !this.modelActions(id).some((a) => a.name === name)) return false;
-    const f = this.forms.ready(fc.model, fc.seed, fc.tint)!;
+    const f = this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum)!;
     const done = [...(fc.done ?? []), name];
     // Back to how it was made: nothing to remember. A long history keeps its last steps.
     const base = f.result!.grid.cells;
@@ -3171,7 +3180,8 @@ export class Kernel {
     // A place of a block (T370): the world knows its block from its plan too, and its ground lies flat on the lot.
     if (block) this.knowBlock(block, ch, plan);
     ch.blockLot = block ? this.blockLotBox(block, ch) : undefined;
-    this.graphChunks.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.structures?.map((x) => x.concept) });
+    const placeStrata = summarizePlaceStrata(this.strataOf(ch), this.strata);
+    this.graphChunks.set(ch.key, { cx: ch.cx, cy: ch.cy, nome: plan.place.name, descrizione: plan.place.description, ambiente: plan.layout, cose: plan.objects.map((o) => o.module), a_terra: plan.ground, strutture: plan.structures?.map((x) => x.concept), ...(placeStrata.length ? { strata: placeStrata } : {}) });
     this.graphChunksVersion++;
     ch.tiles = tiles;
     ch.lots = result.lots;
@@ -3532,6 +3542,11 @@ export class Kernel {
     for (const l of lots) {
       const st = stadi[l.origin];
       if (st !== undefined && Number.isFinite(st) && st < 1) l.structure = { ...l.structure, stage: Math.max(0, st) };
+      const cellarTiles = l.structure.cellar ?? cellarOf(this.forms.info(l.form.model), this.files[`models/${l.form.model}.xml`]);
+      if (cellarTiles > 0) {
+        const stratum = this.cellarStratumAt(l.x, l.y, cellarTiles, ch);
+        if (stratum) l.form = { ...l.form, stratum };
+      }
       out[l.index] = this.ecs.spawn({
         pos: { x: l.x, y: l.y },
         glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' },
@@ -3642,7 +3657,7 @@ export class Kernel {
   /** `stairKeep` (T431, tiles): how far a middle stays from the first treads of a stair up; 0 (people, what does not stop a body) not at all. */
   private interiorPoints(sid: Id, wellKeep = WELL_KEEP, stairKeep = 0): Array<{ x: number; y: number }> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
-    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     const p = this.ecs.get(sid, 'pos');
     // A house under way has no rooms yet: one lives there from its roof (T245e).
     if (!fc || !f?.floor || !p || (this.ecs.get(sid, 'structure')?.stage ?? 1) < 0.9) return [];
@@ -3720,7 +3735,7 @@ export class Kernel {
    */
   private cellarPoints(sid: Id): Array<{ x: number; y: number; z: number }> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
-    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     const p = this.ecs.get(sid, 'pos');
     if (!fc || !f?.floor || !p || f.base <= 0 || (this.ecs.get(sid, 'structure')?.stage ?? 1) < 0.9) return [];
     const ground = this.groundOf(sid, fc, f);
@@ -3779,7 +3794,7 @@ export class Kernel {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     // As long as its program runs (T281): in the browser a structure comes from a worker in tens of seconds, and what goes in
     // would otherwise go where the plan said, inside its walls.
-    if (fc) await this.forms.settled(fc.model, fc.seed, fc.tint);
+    if (fc) await this.forms.settled(fc.model, fc.seed, fc.tint, undefined, { stratum: fc.stratum });
     if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
     this.rebuildSolids();
     // Not where something already stands (`free`: a chest, a counter put there before, T281), and away from what is
@@ -3816,7 +3831,7 @@ export class Kernel {
       const others = this.ecs.query('structure', 'chunk').filter((id) => id !== sid && this.ecs.get(id, 'chunk').key === ch.key).sort((a, b) => a - b);
       for (const id of others) {
         const other: FormComp | undefined = this.ecs.get(id, 'form');
-        if (other) await this.forms.settled(other.model, other.seed, other.tint);
+        if (other) await this.forms.settled(other.model, other.seed, other.tint, undefined, { stratum: other.stratum });
         if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
         if (!this.ecs.alive.has(id)) continue;
         this.rebuildSolids();
@@ -4236,7 +4251,7 @@ export class Kernel {
   /** How far under the ground (tiles) an entity's model goes (T52b): the renderer lays it this much lower. */
   sunk(id: Id): number {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
-    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     return f ? f.base / f.vpt : 0;
   }
 
@@ -4705,14 +4720,75 @@ export class Kernel {
     return plan;
   }
 
-  /** The stratum of a column at a depth under its ground (tiles, T418): the row it falls in (the last one deeper down), or undefined off the places. */
-  stratumAt(col: number, row: number, depth: number): TerrainDef | undefined {
+  /** The code and definition of the stratum at integer column (col, row) and depth (tiles below ground), or undefined off loaded places. */
+  private stratumEntryAt(col: number, row: number, depth: number, hint?: Chunk): { code: string; def: TerrainDef } | undefined {
     const S = this.config.chunkSize;
     const cx = Math.floor(col / S), cy = Math.floor(row / S);
-    const ch = this.chunks.get(this.chunkKey(cx, cy));
+    const ch = hint && hint.cx === cx && hint.cy === cy ? hint : this.chunks.get(this.chunkKey(cx, cy));
     if (!ch) return undefined;
     const rows = this.strataOf(ch);
-    return this.strata[rows[stratumRow(depth, rows.length)]?.[(row - cy * S) * S + (col - cx * S)] ?? ''];
+    const code = rows[stratumRow(depth, rows.length)]?.[(row - cy * S) * S + (col - cx * S)];
+    const def = code ? this.strata[code] : undefined;
+    return code && def ? { code, def } : undefined;
+  }
+
+  /** The stratum of a column at a depth under its ground (tiles, T418): the row it falls in (the last one deeper down), or undefined off the places. */
+  stratumAt(col: number, row: number, depth: number): TerrainDef | undefined {
+    return this.stratumEntryAt(col, row, depth)?.def;
+  }
+
+  /**
+   * The stratum under a tile at `depth` tiles below the ground (default 0) for Lua (`world.stratum_at`, T479, ADR-0253): a fresh read-only
+   * copy `{code, id, name, description, color}`, or undefined if the coordinates are not finite numbers or the place is not loaded.
+   */
+  stratumInfoAt(x: unknown, y: unknown, depth?: unknown): { code: string; id?: string; name: string; description?: string; color: string } | undefined {
+    if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y)) return undefined;
+    if (depth !== undefined && depth !== null && (typeof depth !== 'number' || !Number.isFinite(depth))) return undefined;
+    const hit = this.stratumEntryAt(Math.floor(x), Math.floor(y), typeof depth === 'number' ? depth : 0);
+    if (!hit) return undefined;
+    const { code, def } = hit;
+    return { code, ...(def.id ? { id: def.id } : {}), name: def.name, ...(def.description ? { description: def.description } : {}), color: def.color };
+  }
+
+  /** The integer tile box of the lot containing (x, y) in `ch`, or a box of `side` tiles centred on (x, y). */
+  private lotBoxAt(x: number, y: number, side: number, hint?: Chunk): { x0: number; y0: number; x1: number; y1: number } {
+    const S = this.config.chunkSize;
+    const col = Math.floor(x), row = Math.floor(y);
+    const cx = Math.floor(col / S), cy = Math.floor(row / S);
+    const ch = hint && hint.cx === cx && hint.cy === cy ? hint : this.chunks.get(this.chunkKey(cx, cy));
+    if (ch) {
+      const lc = col - cx * S, lr = row - cy * S;
+      const box = [ch.blockLot, ...ch.lots].find((b) => b && lc >= b.x0 && lc <= b.x1 && lr >= b.y0 && lr <= b.y1);
+      if (box) return { x0: cx * S + box.x0, y0: cy * S + box.y0, x1: cx * S + box.x1, y1: cy * S + box.y1 };
+    }
+    const half = Math.max(0, Math.floor((Math.max(1, side) - 1) / 2));
+    return { x0: col - half, y0: row - half, x1: col + half, y1: row + half };
+  }
+
+  /**
+   * The strata under a structure's lot at (x, y) (T479, ADR-0253), from row 0 down, for the Sculptor Architect's request (`SculptRequest.strata`).
+   */
+  lotStrataAt(x: number, y: number, classe: string, size?: SizeTier, cellar?: number): LotStratum[] {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return [];
+    const ch = this.chunkAt(x, y);
+    if (!ch) return [];
+    const cls = classOf(classe);
+    const tiles = cls ? tilesOf(cls, size) : [3, 3, 3];
+    const side = Math.max(tiles[0], tiles[1]);
+    const box = this.lotBoxAt(x, y, side, ch);
+    const maxDepth = Math.min(this.strataOf(ch).length, Math.max(3, (cellar ?? 0) + 2));
+    return sampleLotStrata((c, r, d) => this.stratumEntryAt(c, r, d, ch), box, maxDepth);
+  }
+
+  /**
+   * The dominant stratum key a cellar at (x, y) is dug into (T479, ADR-0253), for the Scenografo's per-stratum cellar rules (`FormComp.stratum`).
+   */
+  cellarStratumAt(x: number, y: number, cellarTiles: number, hint?: Chunk): string | undefined {
+    if (!Number.isFinite(x) || !Number.isFinite(y) || cellarTiles <= 0) return undefined;
+    const ch = hint ?? this.chunkAt(x, y);
+    if (!ch) return undefined;
+    const box = this.lotBoxAt(x, y, 3, ch);
+    return dominantCellarStratum((c, r, d) => this.stratumEntryAt(c, r, d, ch), box, cellarTiles)?.key;
   }
 
   /** How many rows of strata the place of a column has (T478: 6 in a new plan, 4 in one of before), or those of a new plan off the places. */
@@ -11327,12 +11403,16 @@ export class Kernel {
   private worldFacts(): Record<string, unknown> {
     const held = equippedItem(this.inventory());
     const n = this.needs();
+    const pc = this.wandererCarpet();
+    const ch = this.chunkAt(pc.x, pc.y);
+    const sotto = ch ? summarizePlaceStrata(this.strataOf(ch), this.strata) : [];
     return {
-      luogo: this.chunkHere()?.name,
+      luogo: ch?.place?.name,
+      ...(sotto.length ? { sotto } : {}),
       ora: Math.floor(this.time),
       momento: this.daylight() > 0.6 ? 'giorno' : this.daylight() > 0.15 ? 'crepuscolo' : 'notte',
       // Locals know their surroundings: which places and regions are where.
-      dintorni: this.directionsAt(this.wandererCarpet().x, this.wandererCarpet().y),
+      dintorni: this.directionsAt(pc.x, pc.y),
       viandanteImpugna: held ? this.itemInfo(held).name : 'niente',
       viandante: n ? { fame: Math.round(100 - n.hunger), sete: Math.round(100 - n.thirst), stanchezza: Math.round(100 - n.energy) } : undefined,
     };
@@ -11563,6 +11643,11 @@ export class Kernel {
     const form: FormComp = { model, seed: Number.isFinite(h.seed) ? h.seed : this.forms.seedFor(model, h.origin), yaw: Number.isFinite(h.yaw) ? h.yaw : 0, ...(h.model && h.model !== model ? { wanted: h.model, classe } : {}) };
     const done = this.savedForms.get(h.origin);
     if (done?.length) form.done = [...done];
+    const cellarTiles = cellarOf(this.forms.info(model), this.files[`models/${model}.xml`]);
+    if (cellarTiles > 0) {
+      const stratum = this.cellarStratumAt(h.x, h.y, cellarTiles, ch);
+      if (stratum) form.stratum = stratum;
+    }
     const stadio = Number.isFinite(h.stage) ? Math.max(0, Math.min(1, h.stage)) : 1;
     this.ecs.spawn({ pos: { x: h.x, y: h.y }, glyph: { ch: '⌂', color: this.terrain?.manifest.roof?.color ?? '#9a4632' }, body: { r: 0.5, solid: true }, form, structure: { concept: String(h.concept ?? 'una casetta').slice(0, 80), class: classe, ...(h.model ? { model: h.model } : {}), ...(stadio < 1 ? { stage: stadio } : {}) }, chunk: { key: ch.key }, origin: { key: h.origin } });
   }
@@ -13018,7 +13103,7 @@ export class Kernel {
       if (!b.solid) continue;
       const p = this.ecs.get(id, 'pos');
       const fc: FormComp | undefined = this.ecs.get(id, 'form');
-      const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint);
+      const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
       // A solid thing whose brought model stops nobody (T296, rule 10): the card is isolated, the thing blocks its tile until the generic is ready.
       if (!fc || !f?.foot || (f.footless && this.isBrought(fc.model) && this.cardBroke(fc.model, 'footless', breakReason('footless', { seed: f.seed })))) {
         this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);

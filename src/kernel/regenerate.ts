@@ -15,6 +15,7 @@ import type { TerrainDef } from './types';
 import { procedural, sculpt, STRUCTURE_SEEDS, type SculptorAiModels, type SculptRequest, type SculptResult } from './agents/sculptor';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, modelSize } from './modeldirector';
 import { cellarOf } from './forms';
+import { readStrata, sampleLotStrata, strataDepthOf, type LotStratum } from './strata';
 import { sculptPlan } from './coefficients';
 import { classOf, growsByRules, isFortified, SIZE_TIERS, sizeOf, sizeRank, STRUCTURE_VPT, TILE, tilesOf, type SizeTier } from '../mj/classes';
 import { SOUND_CLASS } from '../mj/sound';
@@ -75,6 +76,8 @@ export interface Wearer {
   /** A structure of a plan asked with a cellar (T417). */
   cellar?: boolean;
   place?: { name: string; description?: string };
+  /** The strata under the structure's place, when its plan carries them (T479, ADR-0253). */
+  strata?: LotStratum[];
 }
 
 /** The models the world wears and who wears them: the modules (but the wanderers' bodies), the items, the plans' structures, the common houses. */
@@ -93,11 +96,25 @@ export function wearersOf(k: Kernel, places: readonly PlannedPlace[]): Map<strin
     add(app?.model, { kind: 'module', name: man.name, ...(app?.look ?? man.description ? { look: app?.look ?? man.description } : {}), ...(man.context ? { context: man.context } : {}), ...(sizeOf(app?.size) ? { size: sizeOf(app?.size)!.id } : {}) });
   }
   for (const d of k.content.items.values()) add(d.model, { kind: 'item', name: d.name, ...(d.look ?? d.description ? { look: d.look ?? d.description } : {}) });
-  for (const p of places)
+  const S = k.config.chunkSize;
+  for (const p of places) {
+    const rows = readStrata(p.plan.strata, S, k.strata, strataDepthOf(p.plan));
+    const placeStrata = rows
+      ? sampleLotStrata(
+          (col, row, d) => {
+            const code = rows[d]?.[row * S + col];
+            const def = code ? k.strata[code] : undefined;
+            return code && def ? { code, def } : undefined;
+          },
+          { x0: 0, y0: 0, x1: S - 1, y1: S - 1 },
+          Math.min(rows.length, 4),
+        )
+      : undefined;
     for (const raw of p.plan.structures ?? []) {
       const s = readStructure(raw);
-      add(k.structureModelOf(s.concept, s.size), { kind: 'structure', name: s.concept, ...(s.size ? { size: s.size } : {}), ...(s.cellar ? { cellar: true } : {}), place: { name: p.plan.place?.name ?? '', description: p.plan.place?.description } });
+      add(k.structureModelOf(s.concept, s.size), { kind: 'structure', name: s.concept, ...(s.size ? { size: s.size } : {}), ...(s.cellar ? { cellar: true } : {}), place: { name: p.plan.place?.name ?? '', description: p.plan.place?.description }, ...(placeStrata?.length ? { strata: placeStrata } : {}) });
     }
+  }
   const house = k.commonHouse();
   if (house) for (const classe of ['structure', 'building']) add(commonHouseModel(house, classe), { kind: 'house', name: house });
   return out;
@@ -142,6 +159,7 @@ export function requestOf(id: string, info: ModelInfo, wearers: readonly Wearer[
       // A fortification by the concept the world wears it as, when the entry's own name does not say it (T434).
       ...(isFortified(concept) ? { fortified: true } : {}),
       ...(cellar ? { cellar } : {}),
+      ...(s?.strata?.length ? { strata: s.strata } : {}),
       ...tinta,
     };
   }

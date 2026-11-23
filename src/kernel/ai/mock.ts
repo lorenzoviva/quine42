@@ -268,7 +268,7 @@ export class MockAiModels implements AiModels, DecisionModels {
         return { name: r.nome ?? `Aria ${SUFFIX[n % SUFFIX.length]}`, program, use: r.uso ?? 'music', environments: r.ambienti ?? (d.world?.ambienti ?? []).filter((a: string) => String(r.richiesta).includes(a) || String(r.richiesta).includes(italianName('ambienti', a))), moments: r.momenti ?? [] };
       }
       case 'interior.design':
-        return this.interior((d.catalogue ?? []) as string[]);
+        return this.interior((d.catalogue ?? []) as string[], Array.isArray(d.strata) ? (d.strata as string[]) : undefined);
       case 'model.action': {
         // Offline the Sculptor recolours part of the most used letter (or chips it away, if it cracks).
         const ls: Array<{ lettera: string }> = d.letters ?? [];
@@ -691,18 +691,28 @@ export class MockAiModels implements AiModels, DecisionModels {
    * catalogue with none of them gives its first pieces. And the cellar (T419): the seed's shelf and rack, which the kernel brings up to its
    * ceiling, and a barrel, four pieces; only if the catalogue has one of them.
    */
-  private interior(catalogue: string[]): unknown {
+  private interior(catalogue: string[], strata?: string[]): unknown {
     const have = (ids: string[]) => {
       const own = ids.filter((id) => catalogue.includes(id));
       return own.length ? own : catalogue.slice(0, 2);
     };
     if (!catalogue.length) return { rules: [] };
     const cellar = CELLAR_FURNITURE.filter((id) => catalogue.includes(id));
+    // Per-stratum cellar rules when the building has a cellar and strata are offered (T479, ADR-0253): barrels in clay, shelves/racks in bedrock,
+    // before the general cellar fallback. Without `strata` the rules stay identical to before.
+    const byStratum: Array<{ room: 'cellar'; stratum: string; furniture: string[]; count: number }> = [];
+    if (strata?.length && cellar.length) {
+      const barrels = cellar.filter((id) => id === 'barile');
+      const stone = cellar.filter((id) => id !== 'barile');
+      if (strata.includes('clay') && barrels.length) byStratum.push({ room: 'cellar', stratum: 'clay', furniture: barrels, count: 4 });
+      if (strata.includes('bedrock') && stone.length) byStratum.push({ room: 'cellar', stratum: 'bedrock', furniture: stone, count: 3 });
+    }
     return {
       rules: [
         { storey: 0, room: 'hall', furniture: have(['banco', 'credenza', 'barile']), count: 3 },
         { room: 'room', furniture: have(['letto', 'furniture']), count: 2 },
         { furniture: have(['barile']), count: 1 },
+        ...byStratum,
         ...(cellar.length ? [{ room: 'cellar', furniture: cellar, count: 4 }] : []),
       ],
     };

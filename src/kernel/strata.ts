@@ -383,3 +383,154 @@ export function strataProgramErrors(xml: unknown, drafts: string[][], palette: R
   if (!decided && !errors.size) errors.add('non decide nessuno strato sulle bozze di prova: le regole leggono la superficie (i codici della bozza) e scrivono gli strati sotto');
   return [...errors];
 }
+
+// ------------------------------------------------------------------------------------------------------------- the strata in the Council (T479)
+
+const ROLE_SET: ReadonlySet<string> = new Set<string>(STRATUM_ROLES);
+
+/**
+ * The canonical key of a stratum (T479, ADR-0253), used in interior rules and on building forms: its internal `id` when it has one (`clay`,
+ * `bedrock`, `aquifer`, `ore`, `roots`…), else an ASCII slug of its name (for custom Genesis strata with `role: 'other'`), else its code.
+ */
+export function stratumKey(def: Pick<TerrainDef, 'id' | 'name'>, code: string): string {
+  if (def.id) return def.id;
+  const slug = def.name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 32);
+  return slug || code.toLowerCase();
+}
+
+/** Whether two stratum keys (or names) match, ignoring case and outer spaces. */
+export const sameStratum = (a: string | undefined, b: string | undefined): boolean => !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/** Concise list of the strata of a world for Council prompts (Engineer, unfocused Narrator). */
+export function strataSummary(strata: Record<string, TerrainDef>): string {
+  return Object.entries(strata)
+    .filter(([code]) => isSymbolCode(code))
+    .map(([code, t]) => `- ${stratumKey(t, code)} (${symbolName(code)}) = ${t.name} (${t.color})${t.description ? `: ${t.description}` : ''}`)
+    .join('\n');
+}
+
+/**
+ * The strata present under a place, as short names in the world's language (T479, ADR-0253), for the graph and the Narrator's context:
+ * non-draft strata (aquifers, ore veins, roots, custom Genesis strata) come first so the Narrator always knows what is special beneath a
+ * place; the remaining slots up to `max` take the most common strata (leaving generic topsoil for last when slots are tight), then ordered
+ * from shallowest to deepest by mean depth.
+ */
+export function summarizePlaceStrata(rows: readonly string[], strata: Record<string, TerrainDef>, max = 4): string[] {
+  if (!rows.length || max <= 0) return [];
+  const stats = new Map<string, { name: string; count: number; depthSum: number; special: boolean; topsoil: boolean }>();
+  for (let d = 0; d < rows.length; d++) {
+    const row = rows[d]!;
+    for (let i = 0; i < row.length; i++) {
+      const def = strata[row[i]!];
+      if (!def?.name) continue;
+      const key = def.name.trim().toLowerCase();
+      const special = !def.id || !ROLE_SET.has(def.id);
+      const topsoil = def.id === 'topsoil';
+      const cur = stats.get(key);
+      if (cur) {
+        cur.count++;
+        cur.depthSum += d;
+        if (special) cur.special = true;
+        if (!topsoil) cur.topsoil = false;
+      } else {
+        stats.set(key, { name: def.name, count: 1, depthSum: d, special, topsoil });
+      }
+    }
+  }
+  const all = [...stats.values()];
+  const specials = all.filter((s) => s.special).sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : 1));
+  const common = all.filter((s) => !s.special).sort((a, b) => Number(a.topsoil) - Number(b.topsoil) || b.count - a.count || (a.name < b.name ? -1 : 1));
+  const picked = [...specials, ...common].slice(0, max);
+  picked.sort((a, b) => a.depthSum / a.count - b.depthSum / b.count || b.count - a.count || (a.name < b.name ? -1 : 1));
+  return picked.map((s) => s.name);
+}
+
+/** One row of strata under a structure's lot (T479, ADR-0253), for the Sculptor Architect's request. */
+export interface LotStratum {
+  /** Row index below the soil (0 = 0–1 tiles, 1 = 1–2 tiles…). */
+  depth: number;
+  code: string;
+  key: string;
+  name: string;
+  description?: string;
+  color: string;
+  /** Other notable (non-draft) strata also present in this row under the lot (e.g. an aquifer or an ore vein). */
+  also?: Array<{ name: string; color: string; description?: string }>;
+}
+
+/**
+ * Samples the strata row by row under an integer tile box `[x0..x1] × [y0..y1]` (T479, ADR-0253): for each row `0 .. depth - 1`, the
+ * dominant stratum under the lot plus any non-draft stratum (aquifer, vein, roots, custom) also present in that row.
+ */
+export function sampleLotStrata(
+  read: (col: number, row: number, depth: number) => { code: string; def: TerrainDef } | undefined,
+  box: { x0: number; y0: number; x1: number; y1: number },
+  depth = STRATA_DEPTH,
+): LotStratum[] {
+  const out: LotStratum[] = [];
+  for (let d = 0; d < depth; d++) {
+    const counts = new Map<string, { code: string; def: TerrainDef; n: number }>();
+    for (let r = box.y0; r <= box.y1; r++)
+      for (let c = box.x0; c <= box.x1; c++) {
+        const hit = read(c, r, d);
+        if (!hit) continue;
+        const cur = counts.get(hit.code);
+        if (cur) cur.n++;
+        else counts.set(hit.code, { code: hit.code, def: hit.def, n: 1 });
+      }
+    if (!counts.size) continue;
+    const ranked = [...counts.values()].sort((a, b) => b.n - a.n || (a.code < b.code ? -1 : 1));
+    const top = ranked[0]!;
+    const seenNames = new Set([top.def.name.toLowerCase()]);
+    const also: Array<{ name: string; color: string; description?: string }> = [];
+    for (const item of ranked.slice(1)) {
+      const special = !item.def.id || !ROLE_SET.has(item.def.id);
+      const low = item.def.name.toLowerCase();
+      if (!special || seenNames.has(low)) continue;
+      seenNames.add(low);
+      also.push({ name: item.def.name, color: item.def.color, ...(item.def.description ? { description: item.def.description } : {}) });
+    }
+    out.push({
+      depth: d,
+      code: top.code,
+      key: stratumKey(top.def, top.code),
+      name: top.def.name,
+      ...(top.def.description ? { description: top.def.description } : {}),
+      color: top.def.color,
+      ...(also.length ? { also } : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * The dominant stratum a cellar is dug into under an integer tile box (T479, ADR-0253), for the Scenografo's per-stratum cellar rules:
+ * sampled at row `Math.floor(cellarTiles)` (for a 1-tile cellar, 20 voxels = 1.25 tiles at 16 vpt, row 1 is where clay, aquifer, roots or
+ * bedrock sit; for deeper cellars row 2 or 3). Undefined without a cellar or without loaded tiles.
+ */
+export function dominantCellarStratum(
+  read: (col: number, row: number, depth: number) => { code: string; def: TerrainDef } | undefined,
+  box: { x0: number; y0: number; x1: number; y1: number },
+  cellarTiles: number,
+): { code: string; key: string; def: TerrainDef } | undefined {
+  if (!Number.isFinite(cellarTiles) || cellarTiles <= 0) return undefined;
+  const d = Math.max(1, Math.floor(cellarTiles));
+  const counts = new Map<string, { code: string; def: TerrainDef; n: number }>();
+  for (let r = box.y0; r <= box.y1; r++)
+    for (let c = box.x0; c <= box.x1; c++) {
+      const hit = read(c, r, d);
+      if (!hit) continue;
+      const cur = counts.get(hit.code);
+      if (cur) cur.n++;
+      else counts.set(hit.code, { code: hit.code, def: hit.def, n: 1 });
+    }
+  if (!counts.size) return undefined;
+  const top = [...counts.values()].sort((a, b) => b.n - a.n || (a.code < b.code ? -1 : 1))[0]!;
+  return { code: top.code, key: stratumKey(top.def, top.code), def: top.def };
+}
