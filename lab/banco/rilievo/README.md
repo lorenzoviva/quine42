@@ -42,3 +42,21 @@ e si sposta lo scorrimento (`carpet().ox/oy`); i passi con `keydown`/`keyup` di 
 - I Pirati: nessuna palafitta nei luoghi pianificati; il molo è uno.
 - Il modo locale pianifica quasi solo laghi nei luoghi del massiccio (lo stesso mondo per ogni tema), quindi il difetto 1 è più
   frequente qui che con Gemini, ma non dipende dal Cartografo.
+
+## Dopo T504 (ADR-0257): l'acqua di ogni luogo
+
+Il difetto 1 è corretto nel kernel 0.10.33: col rilievo vero ogni luogo si livella da solo anche per i piedi (`worldLevels` con
+`keepCliffs` non attraversa il bordo), quindi `network.levels` e `groundAt` coincidono casella per casella. Build di `task/T504`,
+`vite preview` sulla porta 4847, Claude in Chrome, una Genesi offline nuova del Far West (`t504-west`, seme 1337, gli stessi luoghi di T503).
+
+| Prova | Esito |
+|---|---|
+| Rete e passo | 15 luoghi pianificati attorno a (4,1) e (5,1): 0 caselle con livelli diversi (in T503 6 luoghi su 11) |
+| La rampa di (4,1) | dal lago a 6 a nuoto, poi 8, 10, 12, 13 a piedi coi tasti, a gradini di 2 al più; verso ovest da 8 il dirupo a 13 ferma (`06`) |
+| Il lago di (5,1) | tutto a 53, il più basso delle sue caselle, con le isolette d'erba a 55: un lago di montagna, non un pozzo (`07`) |
+| Il bordo fra (5,1) e (4,1) | una **cascata** di 47 livelli fra i due laghi: si nuota giù e su (l'acqua tocca l'acqua, come per la rete); a schermo una parete d'acqua (`08`) |
+| Console | nessun errore del gioco (i soliti tre messaggi dell'estensione), nessun guasto |
+
+Offline, `rete-gradini.ts -- --griglia 6 --vero` (169 luoghi, la stessa pianificazione a ogni corsa): coppie oltre il gradino da 4 736 a
+4 061 (678 tolte, 3 nuove su un bordo solo), caselle con rete e piedi diversi da 4 220 a 0, 202 cascate fra luoghi fino a 47 livelli;
+arcipelago da 172 a 139 (nessuna nuova). Resta da decidere la cascata: oggi si risale a nuoto anche quando è alta dodici caselle.

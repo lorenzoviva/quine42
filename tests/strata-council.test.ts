@@ -524,6 +524,8 @@ return M
         ],
       );
       const k = await Kernel.boot({ files, store: memoryStore(), ai: new MockAiModels() });
+      // The place is planned before the building is set on it (T504): a plan that lands later takes away what stands on its place.
+      expect(await k.planAhead(0, 0)).not.toBe('no');
       k.tick(1 / 60);
       const S = k.config.chunkSize;
       const ch = k.chunks.get('0,0')!;

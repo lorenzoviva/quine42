@@ -33,6 +33,11 @@ export interface WaterWorld {
   record(col: number, row: number): readonly [number, number, ...unknown[]] | undefined;
   /** The sea's level: water there is the sea, it neither rises nor sinks. */
   sea(): number;
+  /**
+   * Whether water passes between two tiles beside each other (T504; all of them when not said): not over a fall, where the true relief keeps
+   * each place's water its own and two places meet more than a step apart (`Kernel`): the lake of a massif does not pour into the valley.
+   */
+  joined?(col: number, row: number, toCol: number, toRow: number): boolean;
 }
 
 interface Cell {
@@ -97,12 +102,17 @@ export class WaterFlow {
       const a = queue.pop()!;
       for (const [dc, dr] of SIDES) {
         const k = key(a.col + dc, a.row + dr);
-        if (this.cells.has(k) || !this.world.wet(a.col + dc, a.row + dr)) continue;
+        if (this.cells.has(k) || !this.world.wet(a.col + dc, a.row + dr) || !this.joins(a.col, a.row, a.col + dc, a.row + dr)) continue;
         const b = this.take(a.col + dc, a.row + dr);
         if (b && !b.src) queue.push(b);
       }
     }
     return c;
+  }
+
+  /** Whether water passes between two tiles beside each other (`WaterWorld.joined`). */
+  private joins(col: number, row: number, toCol: number, toRow: number): boolean {
+    return !this.world.joined || this.world.joined(col, row, toCol, toRow);
   }
 
   private take(col: number, row: number): Cell | undefined {
@@ -172,6 +182,7 @@ export class WaterFlow {
       const outs: Array<[Cell, number]> = [];
       let total = 0;
       for (const [dc, dr] of SIDES) {
+        if (!this.joins(a.col, a.row, a.col + dc, a.row + dr)) continue;
         const b = this.cell(a.col + dc, a.row + dr);
         if (!b) continue;
         const hb = b.g + b.w;
