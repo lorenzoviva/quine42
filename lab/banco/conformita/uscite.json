@@ -1,0 +1,1115 @@
+{
+ "caso": {
+  "seeds": [
+   1,
+   2,
+   0,
+   42,
+   7,
+   123456789,
+   2147483647,
+   -5,
+   -2147483648,
+   1000000
+  ],
+  "draws": 60,
+  "lines": [
+   "SEED 1 N534011718 M0 D4602084536413308674 N1657007234 M6 D4601467938165712236 N760389092 M61856 D4591961437663123762 N1379662799 M0 D4598104212029538007 N687431273 M6 D4604319238393145320 N1406361028 M282 D4603717767255253462 N1512368656 M1507096884 D4606730063264401708 N200550235 M0 D4600552599130793070 N1713579631 M16 D4605324986800065882 N659767626 M883720047 D4606159827330710507 N1194650126 M1 D4604473916443640131 N29236707 M9 D4605437738759723634 N1844137836 M4096 D4602808466579450836 N1127983490 M0 D4607126541288053340 N1484135457 M2 D4601495884377069633 N1450422331 M677 D4602190172895610664 N525100016 M759101347 D4602915281988333088 N363842328 M1 D4604405453914129595 N848563345 M15 D4606730588785527328 N182621155 M1045455625 D4602463578467760251",
+   "SEED 2 N1655911537 M0 D4595148752689987300 N2115372437 M1 D4599196283002372430 N1722583523 M29199 D4597273892677589119 N24066104 M0 D4583941997369941483 N16237533 M3 D4600554831238719613 N600025793 M703 D4597647244017811358 N1570501868 M191129390 D4590619907681046776 N727406781 M0 D4604762337095634406 N1924045298 M81 D4604061861886415805 N1990365587 M106559670 D4604406662381192942 N1987453289 M1 D4591972487338913100 N83075461 M3 D4605828092910788735 N1475520778 M48758 D4604350966646170014 N199847669 M0 D4598564694219998323 N565327489 M3 D4606836271279344220 N1194098546 M17 D4602472384568395903 N734895659 M1042932910 D4603961732693040539 N1331714183 M0 D4606240462804176536 N1278553272 M43 D4590014725750129702 N933471871 M95663569 D4599010267440213745",
+   "SEED 0 N1559595546 M1 D4605092952940816201 N1198642031 M2 D4603209206250849477 N1945678308 M28978 D4606980204953243693 N587775847 M0 D4602090013159313656 N1358625013 M3 D4607021651580607377 N65212616 M862 D4607140509033411524 N1454235444 M675580731 D4605533271851550776 N1821177336 M2 D4584862607636260992 N1503113964 M52 D4606588111713715958 N1476653312 M587138601 D4590509008504850238 N401846963 M0 D4599024992332941754 N2122881600 M6 D4605047384608658533 N65271247 M24969 D4599853113852816402 N2056119311 M0 D4604624126625043070 N255459778 M1 D4606345631525113317 N1706746116 M337 D4601907961222825425 N315304373 M475269784 D4601058843394604360 N1543454120 M1 D4602462070875518397 N418573418 M87 D4605609970635166652 N1579254086 M921505857 D4604297854333976834",
+   "SEED 42 N1434747710 M0 D4593690293263409655 N1122627734 M1 D4598402069016190115 N1555655117 M33614 D4595424463065740391 N1634773126 M0 D4598307110124580840 N1085775344 M2 D4600534558355538845 N558871098 M517 D4585250799061576350 N1748346701 M1239520805 D4600831812153040976 N326832151 M0 D4604526665285837110 N1752737390 M53 D4586523094137255144 N1527192852 M158657451 D4606337658438418276 N1487325104 M1 D4595883011860313728 N89141974 M3 D4603427860443910784 N1763223987 M259 D4603000574531750213 N1729120475 M0 D4600599483656518070 N320230768 M0 D4587511993983056821 N1678565381 M626 D4592963752872835174 N536786791 M1658777195 D4598888710042620373 N1391882737 M0 D4586573710125535482 N1298281176 M51 D4587481107061277574 N902729453 M758686995 D4603835916793428160",
+   "SEED 7 N822959691 M1 D4604128425415429330 N112231158 M3 D4604265612433901148 N91104737 M62519 D4605773392500882687 N1836017217 M0 D4606572773873789712 N955236127 M0 D4606119157777854961 N863316912 M804 D4599712611018927232 N1861167928 M53742861 D4604903612486766304 N1214205864 M0 D4602283337438802079 N828889986 M2 D4606753436572906416 N53420804 M515725076 D4604648036888346108 N1656501810 M0 D4592737726896889154 N352269231 M0 D4589443979591939576 N1779919135 M9928 D4603056267725024915 N2001619505 M0 D4604126630756632974 N266254943 M0 D4603559271037550984 N2059963268 M718 D4603281131052484505 N1783873874 M314607078 D4597214289956776980 N1876106164 M2 D4606408307999670247 N1281019260 M81 D4604447098432950395 N392758157 M715412409 D4599758110811963203",
+   "SEED 123456789 N1091672793 M0 D4603777225444543997 N865414785 M9 D4604354684355602530 N172313993 M59316 D4603186330105781032 N1565172553 M0 D4607138393204174827 N2047240136 M3 D4606413557200488819 N1181460116 M889 D4591554945247933899 N1401613831 M1677713511 D4605547678539211373 N1613997923 M2 D4603080792139291439 N835826490 M73 D4604102726403104274 N1783772118 M121450800 D4594221829574617299 N1588695364 M1 D4606948133207692758 N1427790573 M2 D4594117208348764805 N1160280753 M9997 D4593957643149772870 N1772028210 M0 D4603706908420296213 N792792591 M3 D4604899288255809282 N1266618821 M832 D4602965758729914865 N1706506403 M810370709 D4606864948021018246 N1266860658 M1 D4606082453952016173 N977271804 M75 D4598760335743395922 N166042639 M14794147 D4595625215776383378",
+   "SEED 2147483647 N1559595546 M1 D4605092952965982025 N1198642031 M2 D4603209206242460869 N1945678308 M28978 D4606980204953243693 N587775835 M0 D4602090013159313656 N1358624999 M3 D4607021651580607377 N65212616 M862 D4607140509033411524 N1454235444 M675580701 D4605533271851550776 N1821177336 M2 D4584862607099390080 N1503113964 M52 D4606588111638218486 N1476653312 M587138601 D4590509008571959102 N401846963 M0 D4599024992332941754 N2122881612 M6 D4605047384608658533 N65271241 M24969 D4599853113852816402 N2056119313 M0 D4604624126625043070 N255459778 M1 D4606345631525113317 N1706746116 M337 D4601907961390597585 N315304373 M475269784 D4601058843545599304 N1543454120 M1 D4602462071127176637 N418573420 M87 D4605609970635166652 N1579254100 M921505857 D4604297854333976834",
+   "SEED -5 N726643700 M0 D4598408733740083395 N1342984399 M4 D4606537267597240954 N314199522 M62298 D4603544710557345548 N252243313 M0 D4600352924809263417 N150139960 M0 D4602354750623429254 N328503735 M964 D4591534659479851236 N1744901504 M538194202 D4602341240149481971 N160492772 M2 D4605195021672636658 N407958652 M74 D4597557090691292065 N1687192176 M996304008 D4592440004562075572 N70895484 M1 D4599216302222435768 N244591723 M3 D4606999155363984037 N369669604 M51675 D4596352212475775992 N1710407500 M0 D4592237075745853076 N2103870879 M5 D4603068631283320080 N425127191 M38 D4602998919379699266 N1364282588 M1894427599 D4607101084807162894 N2087846101 M0 D4602738290219576365 N421039406 M26 D4601732905091811172 N1038540372 M467512873 D4604671776019851563",
+   "SEED -2147483648 N1559595546 M1 D4605092952965982025 N1198642031 M2 D4603209206242460869 N1945678308 M28978 D4606980204953243693 N587775835 M0 D4602090013159313656 N1358624999 M3 D4607021651580607377 N65212616 M862 D4607140509033411524 N1454235444 M675580701 D4605533271851550776 N1821177336 M2 D4584862607099390080 N1503113964 M52 D4606588111638218486 N1476653312 M587138601 D4590509008571959102 N401846963 M0 D4599024992332941754 N2122881612 M6 D4605047384608658533 N65271241 M24969 D4599853113852816402 N2056119313 M0 D4604624126625043070 N255459778 M1 D4606345631525113317 N1706746116 M337 D4601907961390597585 N315304373 M475269784 D4601058843545599304 N1543454120 M1 D4602462071127176637 N418573420 M87 D4605609970635166652 N1579254100 M921505857 D4604297854333976834",
+   "SEED 1000000 N86827924 M0 D4605007182628424517 N1049575410 M9 D4600257096220330729 N1296254429 M55377 D4604281774731387842 N797460950 M0 D4606394238076872271 N1485011216 M5 D4605812190953751442 N1989988176 M932 D4599479485923411058 N136427507 M423044096 D4600069073012618470 N1171673297 M0 D4606389348130774378 N887806082 M53 D4606261950240355757 N1390102936 M582844196 D4604226417501863697 N1994498444 M0 D4598420456995929622 N1314367663 M2 D4605197147744363728 N722762444 M13038 D4598213006401225916 N77418123 M0 D4603161387733315017 N1755763316 M1 D4606143844851424984 N1569852036 M671 D4600013696917114924 N1838378002 M1272129441 D4605171322181498326 N371267573 M0 D4600877023520567950 N1842418255 M49 D4601465684759109970 N1817949712 M80884664 D4601040415157935043"
+  ]
+ },
+ "programmi": {
+  "c1-d-ignorato": {
+   "1": {
+    "letters": "GGGG",
+    "steps": 3,
+    "finished": true
+   },
+   "2": {
+    "letters": "GGGG",
+    "steps": 3,
+    "finished": true
+   },
+   "3": {
+    "letters": "GGGG",
+    "steps": 3,
+    "finished": true
+   }
+  },
+  "c2-la-map-chiude": {
+   "1": {
+    "letters": "WBBB",
+    "steps": 3,
+    "finished": true
+   },
+   "2": {
+    "letters": "BBBW",
+    "steps": 3,
+    "finished": true
+   },
+   "3": {
+    "letters": "BWBB",
+    "steps": 3,
+    "finished": true
+   }
+  },
+  "c3-path-dal-vicino": {
+   "1": {
+    "letters": "RWWGBBBBBR",
+    "steps": 1,
+    "finished": false
+   },
+   "2": {
+    "letters": "RWWGBBBBBR",
+    "steps": 1,
+    "finished": false
+   },
+   "3": {
+    "letters": "RWWGBBBBBR",
+    "steps": 1,
+    "finished": false
+   }
+  },
+  "c4-path-senza-colore": {
+   "1": {
+    "letters": "RRRG",
+    "steps": 1000,
+    "finished": false
+   },
+   "2": {
+    "letters": "RRRG",
+    "steps": 1000,
+    "finished": false
+   },
+   "3": {
+    "letters": "RRRG",
+    "steps": 1000,
+    "finished": false
+   }
+  },
+  "c5-conv-passi": {
+   "1": {
+    "letters": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRBBBBBBBBB",
+    "steps": 51,
+    "finished": true
+   },
+   "2": {
+    "letters": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRBBBBBBBBB",
+    "steps": 51,
+    "finished": true
+   },
+   "3": {
+    "letters": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRBBBBBBBBB",
+    "steps": 51,
+    "finished": true
+   }
+  },
+  "c6-conv-moore-3d": {
+   "1": "eccezione: Unhandled exception. System.Collections.Generic.KeyNotFoundException: The given key 'Moore' was not present in the dictionary.",
+   "2": "eccezione: Unhandled exception. System.Collections.Generic.KeyNotFoundException: The given key 'Moore' was not present in the dictionary.",
+   "3": "eccezione: Unhandled exception. System.Collections.Generic.KeyNotFoundException: The given key 'Moore' was not present in the dictionary."
+  },
+  "c7-conv-non-registra": {
+   "1": {
+    "letters": "BA",
+    "steps": 3,
+    "finished": true
+   },
+   "2": {
+    "letters": "BA",
+    "steps": 3,
+    "finished": true
+   },
+   "3": {
+    "letters": "BA",
+    "steps": 3,
+    "finished": true
+   }
+  },
+  "c8-unione-nel-nodo": {
+   "1": "errore: input code ? at line 1 is not found in codes / ERROR",
+   "2": "errore: input code ? at line 1 is not found in codes / ERROR",
+   "3": "errore: input code ? at line 1 is not found in codes / ERROR"
+  },
+  "c9-conv-2d-periodica": {
+   "1": {
+    "letters": "BBBBBBBBBBBBRBBBBBBBBBBBB",
+    "steps": 1,
+    "finished": true
+   },
+   "2": {
+    "letters": "BBBBBBBBBBBBRBBBBBBBBBBBB",
+    "steps": 1,
+    "finished": true
+   },
+   "3": {
+    "letters": "BBBBBBBBBBBBRBBBBBBBBBBBB",
+    "steps": 1,
+    "finished": true
+   }
+  },
+  "c10-prl-sovrapposte": {
+   "1": {
+    "letters": "RRB",
+    "steps": 1,
+    "finished": false
+   },
+   "2": {
+    "letters": "RRB",
+    "steps": 1,
+    "finished": false
+   },
+   "3": {
+    "letters": "RRB",
+    "steps": 1,
+    "finished": false
+   }
+  },
+  "c11-path-per-spigoli": {
+   "1": {
+    "letters": "RBBBWBBBG",
+    "steps": 1,
+    "finished": false
+   },
+   "2": {
+    "letters": "RBBBWBBBG",
+    "steps": 1,
+    "finished": false
+   },
+   "3": {
+    "letters": "RBBBWBBBG",
+    "steps": 1,
+    "finished": false
+   }
+  }
+ },
+ "modelli": {
+  "Apartemazements": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 275,
+     "finished": true,
+     "hash": "13b0bed2"
+    },
+    "2": {
+     "steps": 244,
+     "finished": true,
+     "hash": "aee24375"
+    },
+    "3": {
+     "steps": 298,
+     "finished": true,
+     "hash": "d5a0774d"
+    }
+   }
+  },
+  "CarmaTower": {
+   "size": [
+    12,
+    12,
+    18
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 3786,
+     "finished": true,
+     "hash": "05858fb3"
+    },
+    "2": {
+     "steps": 3243,
+     "finished": true,
+     "hash": "b8751bef"
+    },
+    "3": {
+     "steps": 2724,
+     "finished": true,
+     "hash": "99867e93"
+    }
+   }
+  },
+  "ClosedSurface": {
+   "size": [
+    12,
+    12,
+    12
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 324,
+     "finished": true,
+     "hash": "602d36dd"
+    },
+    "2": {
+     "steps": 305,
+     "finished": true,
+     "hash": "28411349"
+    },
+    "3": {
+     "steps": 326,
+     "finished": true,
+     "hash": "355b2029"
+    }
+   }
+  },
+  "ColoredKnots": {
+   "size": [
+    12,
+    12,
+    12
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 2134,
+     "finished": true,
+     "hash": "c24fae65"
+    },
+    "2": {
+     "steps": 2138,
+     "finished": true,
+     "hash": "635ce967"
+    },
+    "3": {
+     "steps": 2135,
+     "finished": true,
+     "hash": "c64b1fd3"
+    }
+   }
+  },
+  "Counting": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 2,
+     "finished": true,
+     "hash": "16d60315"
+    },
+    "2": {
+     "steps": 2,
+     "finished": true,
+     "hash": "16d60315"
+    },
+    "3": {
+     "steps": 2,
+     "finished": true,
+     "hash": "16d60315"
+    }
+   }
+  },
+  "DualRetraction3D": {
+   "size": [
+    27,
+    27,
+    27
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 107,
+     "finished": true,
+     "hash": "44bb2561"
+    },
+    "2": {
+     "steps": 136,
+     "finished": true,
+     "hash": "6b5895a2"
+    },
+    "3": {
+     "steps": 115,
+     "finished": true,
+     "hash": "82b74dd5"
+    }
+   }
+  },
+  "Escher": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 79,
+     "finished": true,
+     "hash": "e1bdf607"
+    },
+    "2": {
+     "steps": 75,
+     "finished": true,
+     "hash": "37f1fd1f"
+    },
+    "3": {
+     "steps": 96,
+     "finished": true,
+     "hash": "3073be43"
+    }
+   }
+  },
+  "EscherSurface": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 123,
+     "finished": true,
+     "hash": "82f5a049"
+    },
+    "2": {
+     "steps": 116,
+     "finished": true,
+     "hash": "2055a4cf"
+    },
+    "3": {
+     "steps": 118,
+     "finished": true,
+     "hash": "87974797"
+    }
+   }
+  },
+  "Growth": {
+   "size": [
+    29,
+    29,
+    29
+   ],
+   "steps": 3000,
+   "seeds": {
+    "1": {
+     "steps": 3000,
+     "finished": false,
+     "hash": "b6e757c0"
+    },
+    "2": {
+     "steps": 3000,
+     "finished": false,
+     "hash": "d36caa76"
+    },
+    "3": {
+     "steps": 3000,
+     "finished": false,
+     "hash": "a5e87678"
+    }
+   }
+  },
+  "Hills": {
+   "size": [
+    40,
+    40,
+    12
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 8018,
+     "finished": true,
+     "hash": "68594c14"
+    },
+    "2": {
+     "steps": 8019,
+     "finished": true,
+     "hash": "0f9090b5"
+    },
+    "3": {
+     "steps": 8014,
+     "finished": true,
+     "hash": "41d1fe57"
+    }
+   }
+  },
+  "Keys": {
+   "size": [
+    23,
+    23,
+    23
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 356,
+     "finished": true,
+     "hash": "eba88689"
+    },
+    "2": {
+     "steps": 356,
+     "finished": true,
+     "hash": "b287b9ab"
+    },
+    "3": {
+     "steps": 356,
+     "finished": true,
+     "hash": "d07ebb3a"
+    }
+   }
+  },
+  "Knots3D": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 175,
+     "finished": true,
+     "hash": "1b1587ab"
+    },
+    "2": {
+     "steps": 172,
+     "finished": true,
+     "hash": "c1e5d9ab"
+    },
+    "3": {
+     "steps": 173,
+     "finished": true,
+     "hash": "b282e8af"
+    }
+   }
+  },
+  "MazeGrowth": {
+   "size": [
+    27,
+    27,
+    27
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 2197,
+     "finished": true,
+     "hash": "ca2c7a58"
+    },
+    "2": {
+     "steps": 2197,
+     "finished": true,
+     "hash": "010deb40"
+    },
+    "3": {
+     "steps": 2197,
+     "finished": true,
+     "hash": "4a412278"
+    }
+   }
+  },
+  "MazeTrail": {
+   "size": [
+    27,
+    27,
+    27
+   ],
+   "steps": 1000,
+   "seeds": {
+    "1": {
+     "steps": 1000,
+     "finished": false,
+     "hash": "7c9a06eb"
+    },
+    "2": {
+     "steps": 1000,
+     "finished": false,
+     "hash": "85ef53f7"
+    },
+    "3": {
+     "steps": 1000,
+     "finished": false,
+     "hash": "a304dbd7"
+    }
+   }
+  },
+  "ModernHouse": {
+   "size": [
+    9,
+    9,
+    4
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 112,
+     "finished": true,
+     "hash": "796e80cd"
+    },
+    "2": {
+     "steps": 764,
+     "finished": true,
+     "hash": "8403fa93"
+    },
+    "3": {
+     "steps": 140,
+     "finished": true,
+     "hash": "6aaec5bf"
+    }
+   }
+  },
+  "NoDeadEnds": {
+   "size": [
+    19,
+    19,
+    19
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 730,
+     "finished": true,
+     "hash": "0ba7e323"
+    },
+    "2": {
+     "steps": 730,
+     "finished": true,
+     "hash": "f17d99d4"
+    },
+    "3": {
+     "steps": 730,
+     "finished": true,
+     "hash": "c4cbacd8"
+    }
+   }
+  },
+  "Noise": {
+   "size": [
+    24,
+    24,
+    24
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 12675,
+     "finished": true,
+     "hash": "928e0b17"
+    },
+    "2": {
+     "steps": 12675,
+     "finished": true,
+     "hash": "8847876b"
+    },
+    "3": {
+     "steps": 12675,
+     "finished": true,
+     "hash": "5899cb23"
+    }
+   }
+  },
+  "OddScale3D": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 3166,
+     "finished": true,
+     "hash": "4f80518b"
+    },
+    "2": {
+     "steps": 3447,
+     "finished": true,
+     "hash": "d0958b84"
+    },
+    "3": {
+     "steps": 3252,
+     "finished": true,
+     "hash": "a9af49e3"
+    }
+   }
+  },
+  "OpenCave3D": {
+   "size": [
+    40,
+    40,
+    40
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 116,
+     "finished": true,
+     "hash": "f7cad097"
+    },
+    "2": {
+     "steps": 120,
+     "finished": true,
+     "hash": "6bc07503"
+    },
+    "3": {
+     "steps": 55,
+     "finished": true,
+     "hash": "c63c1957"
+    }
+   }
+  },
+  "OrientedEscher": {
+   "size": [
+    6,
+    6,
+    6
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 23,
+     "finished": true,
+     "hash": "8acda4f7"
+    },
+    "2": {
+     "steps": 26,
+     "finished": true,
+     "hash": "1071cbbd"
+    },
+    "3": {
+     "steps": 14,
+     "finished": true,
+     "hash": "0a536880"
+    }
+   }
+  },
+  "ParallelGrowth": {
+   "size": [
+    29,
+    29,
+    29
+   ],
+   "steps": 24,
+   "seeds": {
+    "1": {
+     "steps": 24,
+     "finished": false,
+     "hash": "7b42fdce"
+    },
+    "2": {
+     "steps": 24,
+     "finished": false,
+     "hash": "7b42fdce"
+    },
+    "3": {
+     "steps": 24,
+     "finished": false,
+     "hash": "7b42fdce"
+    }
+   }
+  },
+  "Partitioning": {
+   "size": [
+    11,
+    11,
+    3
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 119,
+     "finished": true,
+     "hash": "3e9af47f"
+    },
+    "2": {
+     "steps": 113,
+     "finished": true,
+     "hash": "9edb50c0"
+    },
+    "3": {
+     "steps": 121,
+     "finished": true,
+     "hash": "192fa9c6"
+    }
+   }
+  },
+  "PeriodicEscher": {
+   "size": [
+    8,
+    8,
+    8
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 95,
+     "finished": true,
+     "hash": "e38e887d"
+    },
+    "2": {
+     "steps": 104,
+     "finished": true,
+     "hash": "1d26676f"
+    },
+    "3": {
+     "steps": 85,
+     "finished": true,
+     "hash": "935677c6"
+    }
+   }
+  },
+  "PillarsOfEternity": {
+   "size": [
+    9,
+    9,
+    9
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 84,
+     "finished": true,
+     "hash": "1514b4e5"
+    },
+    "2": {
+     "steps": 119,
+     "finished": true,
+     "hash": "b988cd3a"
+    },
+    "3": {
+     "steps": 105,
+     "finished": true,
+     "hash": "447eeee2"
+    }
+   }
+  },
+  "RegularSAW": {
+   "size": [
+    19,
+    19,
+    19
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 144,
+     "finished": true,
+     "hash": "742c41db"
+    },
+    "2": {
+     "steps": 316,
+     "finished": true,
+     "hash": "c11ce4c5"
+    },
+    "3": {
+     "steps": 212,
+     "finished": true,
+     "hash": "ad59bed3"
+    }
+   }
+  },
+  "RegularSAWRestart": {
+   "size": [
+    19,
+    19,
+    19
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 729,
+     "finished": true,
+     "hash": "fb5d91a5"
+    },
+    "2": {
+     "steps": 729,
+     "finished": true,
+     "hash": "e9ff6ef8"
+    },
+    "3": {
+     "steps": 729,
+     "finished": true,
+     "hash": "9fd32ddc"
+    }
+   }
+  },
+  "River": {
+   "size": [
+    20,
+    20,
+    20
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 13690,
+     "finished": true,
+     "hash": "336906e1"
+    },
+    "2": {
+     "steps": 13210,
+     "finished": true,
+     "hash": "8d8de035"
+    },
+    "3": {
+     "steps": 14320,
+     "finished": true,
+     "hash": "2c944151"
+    }
+   }
+  },
+  "SeaVilla": {
+   "size": [
+    10,
+    10,
+    4
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 1247,
+     "finished": true,
+     "hash": "62fa7103"
+    },
+    "2": {
+     "steps": 1294,
+     "finished": true,
+     "hash": "da36f806"
+    },
+    "3": {
+     "steps": 1080,
+     "finished": true,
+     "hash": "5d856978"
+    }
+   }
+  },
+  "SelectLongKnots": {
+   "size": [
+    10,
+    10,
+    10
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 1114,
+     "finished": true,
+     "hash": "23b705ef"
+    },
+    "2": {
+     "steps": 1079,
+     "finished": true,
+     "hash": "608de4e7"
+    },
+    "3": {
+     "steps": 1180,
+     "finished": true,
+     "hash": "d2dd7349"
+    }
+   }
+  },
+  "SoftPath": {
+   "size": [
+    80,
+    80,
+    80
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 178,
+     "finished": true,
+     "hash": "89d26bf2"
+    },
+    "2": {
+     "steps": 203,
+     "finished": true,
+     "hash": "4d1c67ec"
+    },
+    "3": {
+     "steps": 186,
+     "finished": true,
+     "hash": "2f209962"
+    }
+   }
+  },
+  "StairsPath": {
+   "size": [
+    33,
+    33,
+    33
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 29,
+     "finished": true,
+     "hash": "56dab3b8"
+    },
+    "2": {
+     "steps": 28,
+     "finished": true,
+     "hash": "11279804"
+    },
+    "3": {
+     "steps": 23,
+     "finished": true,
+     "hash": "bcf1c5d8"
+    }
+   }
+  },
+  "StochasticVoronoi": {
+   "size": [
+    50,
+    50,
+    50
+   ],
+   "steps": -1,
+   "seeds": {
+    "1": {
+     "steps": 125001,
+     "finished": true,
+     "hash": "a7644d51"
+    },
+    "2": {
+     "steps": 125001,
+     "finished": true,
+     "hash": "4fdb39f1"
+    },
+    "3": {
+     "steps": 125001,
+     "finished": true,
+     "hash": "8ed8605d"
+    }
+   }
+  },
+  "StrangeDungeon": {
+   "size": [
+    29,
+    29,
+    29
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 148,
+     "finished": true,
+     "hash": "b3ad2dcb"
+    },
+    "2": {
+     "steps": 161,
+     "finished": true,
+     "hash": "7984a71f"
+    },
+    "3": {
+     "steps": 152,
+     "finished": true,
+     "hash": "33a7e459"
+    }
+   }
+  },
+  "SubmergedKnots": {
+   "size": [
+    12,
+    12,
+    12
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 50000,
+     "finished": false,
+     "hash": "c72b5394"
+    },
+    "2": {
+     "steps": 50000,
+     "finished": false,
+     "hash": "4c3a918e"
+    },
+    "3": {
+     "steps": 50000,
+     "finished": false,
+     "hash": "7119245a"
+    }
+   }
+  },
+  "Surface": {
+   "size": [
+    10,
+    10,
+    10
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 509,
+     "finished": true,
+     "hash": "2f4b2fa1"
+    },
+    "2": {
+     "steps": 507,
+     "finished": true,
+     "hash": "cb1dd85e"
+    },
+    "3": {
+     "steps": 539,
+     "finished": true,
+     "hash": "8d780585"
+    }
+   }
+  },
+  "Voronoi": {
+   "size": [
+    60,
+    60,
+    60
+   ],
+   "steps": 50000,
+   "seeds": {
+    "1": {
+     "steps": 66,
+     "finished": true,
+     "hash": "29948cb1"
+    },
+    "2": {
+     "steps": 70,
+     "finished": true,
+     "hash": "7b141729"
+    },
+    "3": {
+     "steps": 77,
+     "finished": true,
+     "hash": "072a0c15"
+    }
+   }
+  }
+ },
+ "esempi": {
+  "borgo-sentieri": {
+   "1": {
+    "steps": 33,
+    "finished": true,
+    "hash": "f9b24391"
+   },
+   "2": {
+    "steps": 33,
+    "finished": true,
+    "hash": "4cfd6642"
+   },
+   "3": {
+    "steps": 33,
+    "finished": true,
+    "hash": "3b6432d9"
+   }
+  }
+ }
+}

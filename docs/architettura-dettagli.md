@@ -1316,7 +1316,15 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   nell'originale un ramo che comincia tiene il turno e ogni ramo che non è la radice si ripete finché trova da fare, i passi dei figli di un
   `markov` valgono per tutto il ciclo, una regola applica anche dove non cambia niente, `one` non legge `p`; i cicli 1-3 del forte danno lo
   stesso risultato, i piani a moneta con l'originale non finiscono; `lab/scripts/markov-originale.ts` fa girare i programmi del gioco con
-  una copia del motore (in `lab/out/`) coi rami dell'originale. **Il prompt**: nel nucleo il
+  una copia del motore (in `lab/out/`) coi rami dell'originale. **L'allineamento** (T500, la scelta A1 dell'autore, lo studio
+  [`docs/design/markov-allineamento.md`](design/markov-allineamento.md)): il caso dell'originale si riproduce (`System.Random` di .NET in
+  TypeScript, `lab/banco/conformita/dotnet-random.ts`), e l'originale tradotto riga per riga (`lab/banco/conformita/riferimento.ts`, il
+  **riferimento**, mai importato da `src/`) dà la stessa griglia del C# voxel per voxel e gli stessi passi su 30 dei 36 modelli 3D del
+  repository (`lab/banco/conformita/mxgmn/`, il loro testo così com'è); `tests/mj-conformita.test.ts` tiene il riferimento a ciò che il C#
+  ha stampato (`uscite.json`) e dice con un `it.fails` ogni differenza del nostro motore (`c1`-`c11`: `d="2"`, la `map` che chiude la corsa,
+  `path` dal `from` più vicino e per spigoli, la `convolution` e i suoi passi, i vicinati e la lista dei cambi, l'unione dentro un nodo, la `prl` che
+  scrive solo dove cambia). La catena dei task che allinea il motore dietro un interruttore e poi migra al contratto 0.11 è nello studio, § 8.
+  **Il prompt**: nel nucleo il
   ciclo, la `map` frazionaria e `clear="False"`; nell'Architetto il ciclo del mastio (la stanza `u`, l'uscita, il segno che si allarga, la
   crescita) e i piani a moneta, le trame con `<convchain>` sul piano (e perché la `wfc` no: decide la sua scatola), la cantina con
   `part-cellar` (D sotto il pavimento prima che la stanza salga, la cantina che regge e si raggiunge dalla porta), la piena scala della

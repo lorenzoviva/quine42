@@ -1,0 +1,1 @@
+<convolution values="BR" neighborhood="Moore" periodic="True" steps="1"><rule in="B" out="R" values="R" sum="3"/></convolution>
