@@ -6619,3 +6619,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: commit di merge su `task/T502`; poi l'orchestratore integra T502 e `integra T477` toglie worktree e branch di T477. Sicurezza: V-047 di T477, nessuna superficie nuova dal merge.
 - Esito: integrato `task/T477` in `task/T502` (`83d76ee7`) con ADR-0252, kernel `0.10.28`, conflitti risolti in `AGENTS.md`, `validator.ts`, `items.base/manifest.json` e `glossario-censimento.md` rigenerato, uso `hold` in `itemuse.ts` per oggetti impugnabili con `bonus` (`item.corda`), `turno typecheck` verde e tutti i 298 file della suite passati (295/298 in `turno test` con `TEMP` su `H:`, i 3 sensibili all'I/O passati 47/47 su `C:`, `site-video.test.ts` 73/73 su `H:`); sicurezza: V-047 di T477, nessuna superficie nuova dal merge.
+
+### T503 · Verifica nel browser del rilievo vero di T475 — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
+- Step: 45
+- Contesto: T475 (Neon, `59288d1f`, integrato `85c31b64`, ADR-0256, kernel 0.10.32) ha portato il rilievo vero (`nature.relief`, `generate_relief`, `TrueRelief`, terrazze, dirupi, `k` camminabile, `keepCliffs` per moli e palafitte) senza verifica nel browser (eseguito su agy). `dossier T475`.
+- Cosa fare: build e preview (`docs/architettura-dettagli.md#convalida-browser`) sul base; offline, un universo con rilievo vero (Far West, Pirati o Spazio: una Genesi offline col tema, o un universo portato a `nature.relief`); camminare su massicci, terrazze, rampe, roccia `k`; provare che i dirupi oltre il gradino fermano e che le rampe si salgono; un molo/palafitta sull'acqua; il seme (Valmora) invariato; console senza errori. Screenshot in `lab/banco/rilievo/`.
+- Test: nessuno nuovo; un difetto trovato si scrive nell'esito come task proposto.
+- Browser: sì.
+- Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T503`.
