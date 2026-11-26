@@ -552,8 +552,11 @@ function updateGutter(lineCount: number, errorLine?: number) {
 }
 
 function syncScroll() {
-  highlightLayer.scrollTop = codeInput.scrollTop;
-  highlightLayer.scrollLeft = codeInput.scrollLeft;
+  // The coloured layer follows the textarea by a translation, not by its own scroll (T517): the textarea's scrollbars make its range
+  // larger than the layer's, and a scroll clamped short leaves the letters a few pixels off where the caret and the selection are.
+  highlightLayer.scrollTop = 0;
+  highlightLayer.scrollLeft = 0;
+  codeOutput.style.transform = `translate(${-codeInput.scrollLeft}px, ${-codeInput.scrollTop}px)`;
   gutter.scrollTop = codeInput.scrollTop;
 }
 
@@ -1517,10 +1520,14 @@ codeInput.addEventListener('scroll', () => {
 });
 
 codeInput.addEventListener('click', (e) => {
+  // What is under the pointer is read before the tag inspector updates (T517): showing or hiding its bar moves the editor by a row,
+  // and a chip found after that is the one on the row next to the click.
+  const filterBtn = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-filter-btn', 6);
+  const hexEl = filterBtn ? null : findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-hex-code', 4);
+  const chip = filterBtn || hexEl ? null : findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-color-chip', 4);
   updateCursorPos();
 
   // 1. Check if an inline filter button was clicked (tok-filter-btn next to in, out, from, to)
-  const filterBtn = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-filter-btn', 6);
   if (filterBtn) {
     const pos = parseInt(filterBtn.dataset.pos || '0', 10);
     closeColorPickerPopup();
@@ -1529,7 +1536,6 @@ codeInput.addEventListener('click', (e) => {
   }
 
   // 2. Check if a hex code was clicked (tok-hex-code on symbol value definitions)
-  const hexEl = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-hex-code', 4);
   if (hexEl && hexEl.dataset.pos !== undefined) {
     const pos = parseInt(hexEl.dataset.pos, 10);
     const len = parseInt(hexEl.dataset.len || '6', 10);
@@ -1540,7 +1546,6 @@ codeInput.addEventListener('click', (e) => {
   }
 
   // 3. Check if a color chip was clicked (tok-color-chip in rule patterns)
-  const chip = findElementAtPoint<HTMLElement>(e.clientX, e.clientY, '.tok-color-chip', 4);
   if (chip && chip.dataset.pos !== undefined) {
     const attr = chip.dataset.attr || 'color';
     // User request: DO NOT show symbol menu on symbol definition (confusing)

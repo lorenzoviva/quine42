@@ -180,6 +180,11 @@ export function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;');
 }
 
+/** For an attribute of the markup: a value in single quotes may hold a double one. */
+function escapeAttr(str: string): string {
+  return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
 export function extractLineFromError(msg: string): number {
   const m = /(?:riga|line)\s+(\d+)/i.exec(msg);
   return m ? parseInt(m[1], 10) : 1;
@@ -306,10 +311,13 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
         out += `<span class="tok-punct">&lt;/</span>${escapeHtml(src.slice(i + 2))}`;
         break;
       }
-      const tagContent = src.slice(i + 2, gt).trim();
+      // The text exactly as written (T517): whitespace in "</one >" stays, or the rest of the line slides left.
+      const tagRaw = src.slice(i + 2, gt);
+      const tagContent = tagRaw.trim();
+      const lead = tagRaw.length - tagRaw.trimStart().length;
       const isMj = MJ_NODES.has(tagContent.toLowerCase());
       const tagCls = isMj ? 'tok-tag tok-mj-node' : 'tok-tag';
-      out += `<span class="tok-punct">&lt;/</span><span class="${tagCls}">${escapeHtml(tagContent)}</span><span class="tok-punct">&gt;</span>`;
+      out += `<span class="tok-punct">&lt;/</span>${escapeHtml(tagRaw.slice(0, lead))}<span class="${tagCls}">${escapeHtml(tagContent)}</span>${escapeHtml(tagRaw.slice(lead + tagContent.length))}<span class="tok-punct">&gt;</span>`;
       open = undefined;
       i = gt + 1;
       continue;
@@ -366,13 +374,17 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
       const isFilterAttr = ['in', 'out', 'from', 'to'].includes(attrName.toLowerCase());
       let filterBtn = '';
       if (isFilterAttr && options?.colorChips && rawVal !== undefined) {
-        filterBtn = `<button class="tok-filter-btn" type="button" data-tag="${escapeHtml(tagName)}" data-attr="${escapeHtml(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-val="${escapeHtml(rawVal)}" title="Apri '${escapeHtml(attrName)}' nel Filtro 3D">▦</button>`;
+        // No text of its own (T517): the glyph is CSS and the anchor has no width, so it sits in the space before the name and the
+        // letters after it stay where the textarea has them.
+        filterBtn = `<span class="tok-filter-anchor"><button class="tok-filter-btn" type="button" data-tag="${escapeAttr(tagName)}" data-attr="${escapeAttr(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-val="${escapeAttr(rawVal)}" title="Apri '${escapeAttr(attrName)}' nel Filtro 3D"></button></span>`;
       }
 
-      out += `<span class="${attrCls}">${escapeHtml(attrName)}${filterBtn}</span>`;
+      out += `${filterBtn}<span class="${attrCls}">${escapeHtml(attrName)}</span>`;
 
       if (match[2] !== undefined || match[3] !== undefined || match[4] !== undefined) {
-        out += '<span class="tok-punct">=</span>';
+        // From the name to the value as written (T517): "in = 'A'" keeps its spaces.
+        const valueAt = quote ? quoteIdx : match[0].length - (match[4] ?? '').length;
+        out += `<span class="tok-punct">${escapeHtml(match[0].slice(attrName.length, valueAt))}</span>`;
 
         const isSymbolDef = tagName.toLowerCase() === 'color' && attrName.toLowerCase() === 'symbol';
         if (options?.colorChips && quote && COLOR_ATTRS.has(attrName.toLowerCase()) && !isSymbolDef) {
@@ -383,7 +395,7 @@ export function highlightXml(src: string, options?: HighlightOptions): string {
           if (/^[0-9a-fA-F]{6}$/i.test(cleanHex)) {
             const hash = rawVal.startsWith('#') ? '#' : '';
             const title = `Colore hex #${cleanHex} · Clicca per aprire il color picker`;
-            out += `<span class="tok-val">${quote}<span class="tok-hex-code" data-tag="${escapeHtml(tagName)}" data-attr="${escapeHtml(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-hex="${cleanHex}" title="${title}"><span class="tok-hex-swatch" style="--swatch-hex:#${cleanHex};"></span>${hash}${cleanHex}</span>${quote}</span>`;
+            out += `<span class="tok-val">${quote}<span class="tok-hex-code" data-tag="${escapeAttr(tagName)}" data-attr="${escapeAttr(attrName)}" data-pos="${valStartInSrc}" data-len="${rawVal.length}" data-hex="${cleanHex}" title="${title}" style="--swatch-hex:#${cleanHex};">${hash}${cleanHex}</span>${quote}</span>`;
           } else {
             out += `<span class="tok-val">${quote}${escapeHtml(rawVal)}${quote}</span>`;
           }
