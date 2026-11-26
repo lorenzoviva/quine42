@@ -6672,6 +6672,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T507`.
 - Esito: verificati nel browser offline (mondo Pirati, rilievo vero): trasparenza graduata dell'acqua sul letto, bande degli strati sulle sponde sommerse, schiuma sopra l'acqua trasparente, oggetto `underwater` posato dal kernel sul letto (`below`, iniettato a mano nel piano perché offline il Cartografo non lo chiede), nuoto senza blocchi; seme `Hills` e lava invariati; console pulita; screenshot e rapporto in `lab/banco/fondale/`. Non provati: secche e porto (la palette offline dei Pirati non ha `y` né `i`), scia (nessun veicolo offline), multigiocatore. Task proposto: nella Genesi offline dei Pirati i terreni `y` e `i` e la cassa nel catalogo, per provare secche, porto e `underwater` senza Gemini. Typecheck verde; suite dei test non rilanciata (solo documenti e immagini).
 
+### T540 · La Genesi offline dei Pirati con secche, molo e una cosa sul fondale — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 1
+- Step: 45
+- Contesto: proposto da T507 (`dossier T507`, rapporto in `lab/banco/fondale/`), confermato dall'autore il 26/11: offline la palette dei Pirati non ha `y` (secca) né `i` (molo) e il Cartografo locale non chiede cose `underwater`, quindi secche, porto e oggetti sul letto si provano solo con Gemini. Vedi `dossier T443` (porti, ADR-0230), `dossier T480` (fondale, ADR-0259), `dossier T487` (veicoli nel catalogo).
+- Cosa fare: in `MockAiModels` (e dove la Genesi offline sceglie terreni e ambienti per il tema `pirates`) i terreni `y` e `i` del seme, l'ambiente del porto col timbro `harbour`, e nel piano offline di un luogo con acqua una cassa (o un relitto) con `where: 'underwater'` dal catalogo; se il catalogo lo porta, una barca all'ormeggio per provare la scia. Il seme (Valmora) e gli altri temi offline invariati.
+- Test: una Genesi offline Pirati ha `y` e `i` nella palette, almeno un luogo col molo che tocca l'acqua profonda (`pierTouches`) e una cosa posata sul letto (`below`); i test dei porti, del fondale e dei luoghi campione verdi.
+- Browser: sì (Genesi offline Pirati: secche, molo, la cassa sul fondale, nuotarci sopra, la barca se c'è; screenshot in `lab/banco/fondale/`).
+- Quando è fatto: test verdi, visto nel browser, kernel salito di Z se tocca `src/kernel/`.
+
 ## Richieste del 26/11/2026 (testo intero: `docs/userchats/to-do-2026-11-26.md`)
 
 ### T508 · Argon sul contatore `Gemini Models`: config e `modelli.md` — `da fare`
@@ -6887,11 +6896,11 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare e test: come la riga A1-10. Browser: no.
 - Quando è fatto: come la riga, con la misura dei token.
 
-### T536 · A1-11: i modelli di mxgmn come esempi — `in attesa`
-- Pipeline: claude · sforzo high · stima 4% · priorità 2
+### T536 · A1-11: i modelli di mxgmn come esempi — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
 - Step: 44
-- Contesto: § 8 riga A1-11; **aspetta la risposta 7** dell'autore (la spiegazione caratteri/token è in `domande/T500.md`). Dipende da T525, T535.
-- Cosa fare e test: come la riga A1-11, con la scelta della domanda 7. Browser: no.
+- Contesto: § 8 riga A1-11; risposta 7 (autore 26/11): **un estratto** di 2-3 mila token per i modelli grandi (ModernHouse, SeaVilla), entro `EXAMPLE_CHARS`, mai il modello intero; i terreni piccoli interi se ci stanno. Dipende da T525, T535.
+- Cosa fare e test: come la riga A1-11, con l'estratto della risposta 7. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T537 · A1-12: il controllo della varianza fra semi — `da fare`
