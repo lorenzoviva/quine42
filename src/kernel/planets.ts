@@ -47,7 +47,7 @@ export function natureOfBand(n: WorldNature, k: number): WorldNature {
   const { planets, ...world } = n;
   const p = k >= 1 ? planets?.[k - 1] : undefined;
   if (!p) return world;
-  return { ...DEFAULT_NATURE, geography: p.geography, ...(p.relief === 'true' ? { relief: 'true' as const } : {}), sky: p.sky, day: p.day, gravity: p.gravity, oxygen: world.oxygen };
+  return { ...DEFAULT_NATURE, geography: p.geography, ...(p.relief === 'true' ? { relief: 'true' as const } : {}), ...(p.climates ? { climates: [...p.climates] } : {}), sky: p.sky, day: p.day, gravity: p.gravity, oxygen: world.oxygen };
 }
 
 /** What the orbit is called, in the language of the world: the destination of the voyage back to the stations. */

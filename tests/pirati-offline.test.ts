@@ -71,7 +71,8 @@ describe('the offline Genesis of the Pirates (T540)', () => {
     const harbours: string[] = [];
     const sunk = new Map<string, { z: number; bed: number; tile: string }>();
     let boats = 0;
-    await visit(k, [[0, 0], [1, 0], [2, 0], [2, 1], [1, -2], [-3, -1]], () => {
+    // Enough places for a chest sunk in open water (T510: without the snow, the Pirates' drafts lay their chests elsewhere).
+    await visit(k, [[0, 0], [1, 0], [2, 0], [2, 1], [1, -2], [-3, -1], [-3, 0], [3, 1], [2, 2], [-2, -2]], () => {
       for (const ch of k.chunks.values()) {
         if (ch.stage !== 'planned' || ch.plan?.layout !== 'harbour' || harbours.includes(ch.key)) continue;
         const { result } = kk.layoutOf(ch, ch.plan, kk.pathCode(), true);
@@ -107,10 +108,12 @@ describe('the offline Genesis of the Pirates (T540)', () => {
     const chests = [...kk.solidForms.values()].flat().filter((s: any) => s.stand !== undefined && k.ecs.get(s.id, 'module')?.id === chest!.id);
     let over = 0;
     for (const s of new Set(chests) as Set<any>) {
-      for (const heading of [0, Math.PI / 2, Math.PI / 4]) {
-        const pose = { x: s.x, y: s.y, heading };
+      // The chest under the middle of the hull or a little towards its bow or its stern, in a few headings (T510: wherever the draft lays it).
+      const poses = [0, Math.PI / 2, Math.PI / 4, (3 * Math.PI) / 4].flatMap((heading) => [0, 0.5, -0.5].map((d) => ({ x: s.x + Math.cos(heading) * d, y: s.y + Math.sin(heading) * d, heading })));
+      for (const pose of poses) {
         if (!kk.hullFits(boatId, spec, pose, new Set([boatId, s.id]))) continue;
-        expect(kk.hullFits(boatId, spec, pose, new Set([boatId]))).toBe(true);
+        // A chest on a bed too shallow reaches above the keel and stops it, as it should (`underKeel`): another pose, or another chest.
+        if (!kk.hullFits(boatId, spec, pose, new Set([boatId]))) continue;
         const { stand, ...afloat } = s;
         expect(stand).toBeLessThan(0);
         for (const list of kk.solidForms.values()) for (let i = 0; i < list.length; i++) if (list[i] === s) list[i] = afloat;

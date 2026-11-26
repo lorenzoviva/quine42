@@ -110,8 +110,10 @@ describe('the palette of a Genesis (T437)', () => {
     expect(tiles.k).toMatchObject({ layer: 'ground', solid: false, cross: 'walk' });
     expect(tiles.k.model).toBeUndefined();
     expect(tiles.r).toMatchObject({ layer: 'rock', solid: true, cross: 'none' });
-    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' });
-    expect(k.nature()).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' });
+    // And their climates, without the snow (T510, ADR-0261).
+    const climates = ['temperate', 'desert', 'jungle'];
+    expect(JSON.parse(k.repo.working['universe.json']).nature).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true', climates });
+    expect(k.nature()).toEqual({ ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true', climates });
   }, 60_000);
 });
 
@@ -133,13 +135,19 @@ describe('the nature of the world (T437)', () => {
     // What it accepts is a list a task widens: the world of today, the gravity of T447, the archipelago of T441, the void, the stars and the day of T445, the true relief of T475.
     expect(NATURE_ACCEPTS).toEqual({ geography: ['continent', 'archipelago', 'void'], relief: ['hills', 'true'], sky: ['earth', 'stars'], day: [120, 3600], gravity: [0.2, 2], oxygen: [false, true] });
     expect(readConfig(bundledFiles).config.nature).toEqual(DEFAULT_NATURE);
+    // The frontier, the islands and the metropolis without the snow (T510, ADR-0261).
+    const noSnow = { climates: ['temperate', 'desert', 'jungle'] };
     for (const t of WORLD_THEMES) {
       const want =
         t.id === 'pirates'
-          ? { ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true' }
-          : t.id === 'western' || t.id === 'space'
-            ? { ...DEFAULT_NATURE, relief: 'true' }
-            : DEFAULT_NATURE;
+          ? { ...DEFAULT_NATURE, geography: 'archipelago', relief: 'true', ...noSnow }
+          : t.id === 'western'
+            ? { ...DEFAULT_NATURE, relief: 'true', ...noSnow }
+            : t.id === 'space'
+              ? { ...DEFAULT_NATURE, relief: 'true' }
+              : t.id === 'futuristico'
+                ? { ...DEFAULT_NATURE, ...noSnow }
+                : DEFAULT_NATURE;
       expect(repairNature(t.nature), t.id).toEqual(want);
     }
   });

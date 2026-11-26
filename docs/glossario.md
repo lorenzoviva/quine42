@@ -1847,8 +1847,15 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Inglese**: `nature`, `WorldNature`, `DEFAULT_NATURE`, `NATURE_ACCEPTS`, `repairNature`, `keepNature`, `chooseNature`, `world.nature`; i campi `geography` (`Geography`), `sky` (`Sky`), `day`, `gravity`, `oxygen`
 - **Definizione**: ciò di cui un mondo è fatto: la geografia della bozza, il cielo, la durata del giorno, la gravità, se i corpi contano il respiro. La porta l'ambientazione, si fissa alla Genesi come la partita e il kernel accetta solo ciò che sa rendere vero (ADR-0224). Non è un «reame» (le zone di 4 × 4) né l'«ambientazione» (il testo).
 - **Dove vive**: `src/kernel/nature.ts`, `universe.json → nature`, `src/kernel/kernel.ts`
-- **Da non usare**: `fisica del mondo` (per la natura), `reame`, `bioma` (sono le lettere del generatore), `clima`
+- **Da non usare**: `fisica del mondo` (per la natura), `reame`, `bioma` (sono le lettere del generatore), `clima` (per la natura intera: un clima è della bozza, sotto)
 - **Fermo**: `nature` in universe.json, `world.nature()`.
+
+### Clima della bozza
+- **Inglese**: `Climate`, `CLIMATES` (`temperate`, `desert`, `jungle`, `frozen`), `nature.climates`, `climatesOf`, `offClimate`, `CLIMATE_CODES`, `repairClimates`, `themeClimates`, `natureOfUniverse`, `offClimateWrites`, il segno `climates` dei piani e dei pianeti
+- **Definizione**: uno dei biomi su grande scala che il generatore disegna dalla temperatura e dall'umidità (la terra temperata, il deserto, la giungla, il gelo con la neve); un mondo, o un pianeta, ammette quelli della sua ambientazione (il Far West non ha la neve), gli altri non si disegnano nei luoghi nuovi (ADR-0261).
+- **Dove vive**: `src/kernel/nature.ts`, `src/kernel/themes.ts`, `universe/modules/world.terrain/logic.lua`, `src/kernel/kernel.ts` (`genDraft`)
+- **Da non usare**: `bioma` (sono le lettere del generatore), `stagione` (il mondo non ne ha)
+- **Fermo**: `climates` in `universe.json → nature` e nei pianeti, il segno `climates` dei piani.
 
 ### Gravità
 - **Inglese**: `gravity` (nella natura e nelle regioni), `gravityOf`, `gravityAt`, `regionGravity`, `leapOf`, `gaitOf`, `jumpUp`, `jumpFar`

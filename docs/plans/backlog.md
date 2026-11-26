@@ -6701,13 +6701,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (misure offline).
 - Quando è fatto: studio con misure, risposta sulla strada asfaltata, catena dei task, domande; kernel invariato.
 
-### T510 · I biomi dipendono dall'universo e dal pianeta (la neve in `mesa`) — `da fare`
+### T510 · I biomi dipendono dall'universo e dal pianeta (la neve in `mesa`) — `fatto` (`4084295c`)
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · browser · priorità 1
 - Contesto: run #2 dell'autore (26/11): in `mesa` (Far West) c'è la neve. I biomi devono venire dall'universo (la sua ambientazione e natura) e, nello spazio, dal pianeta (`natureOfBand`, ADR-0236). Le copie della run: worktree `H:\projects\rune\.claude\worktrees\beta-run-2`, `universes/<nome>` taggati `prima-della-run-2`.
 - Cosa fare: trovare da dove viene la neve (bioma del generatore per latitudine/quota, ambiente del seme, palette, Cartografo) con `git -C universes/mesa log prima-della-run-2..`; i biomi che un universo ammette dal suo tema e dalla sua natura (e per fascia di pianeta), scritti alla Genesi o derivati, con la riparazione degli universi di prima senza chiamate; nessun bioma fuori tema nei luoghi nuovi. ADR se cambia il contratto.
 - Test: un universo western non genera neve in nessun luogo di una griglia di prova; un pianeta ghiacciato sì.
 - Browser: sì (mesa offline sui luoghi nuovi).
 - Quando è fatto: niente neve a mesa nei luoghi nuovi, test verdi, visto nel browser.
+- Esito: `nature.climates` per universo e per pianeta (Far West, Pirati e Futuristico senza neve; la giungla resta, il suo `j` è il folto di ogni mondo, i cactus di `mesa`); il generatore li legge e il kernel fa da rete (`n → g`, `j → t`); gli ambienti che li scrivono non si offrono ai luoghi nuovi e non si prendono nuovi; alla Genesi `n` è un altro terreno; gli universi di prima derivano i climi dal tema senza chiamate; i piani di prima tengono la loro bozza (`ChunkPlan.climates`); `lab/scripts/climi-bozze.ts`, `tests/climi.test.ts`, `tests/pirati-offline.test.ts` ritoccato; kernel 0.10.38, ADR-0261. Non fatto: bibbia, individui e luoghi gelati della run restano (non si riscrivono senza chiamate); trovato e non toccato, da fare in un task a sé: in `world.terrain/logic.lua` `type(nature) == "table"` è sempre falso (userdata), quindi il ramo del rilievo vero e l'arcipelago del generatore non girano mai.
 
 ### T511 · La primitiva «portato da»: ogni entità può ancorare il suo moto a un'altra — `da fare`
 - Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 1

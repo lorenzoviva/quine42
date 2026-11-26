@@ -4,7 +4,8 @@
 -- when the world's nature has true relief (T475, ADR-0256).
 -- Deterministic: same seed, same coordinates, same world. It is only a continuous DRAFT:
 -- the Cartographer uses it as a starting point and transforms it. Codes of the draft: g p t w r (base),
--- s sand, j jungle, o sea, k mountain, n snow (biomes).
+-- s sand, j jungle, o sea, k mountain, n snow (biomes). The climates a world admits (nature.climates, T510): a climate it does not
+-- admit becomes the temperate land, or the first it admits; the snow on the cold peaks only where it admits the frozen land.
 local M = {}
 
 local function smooth(t) return t * t * (3 - 2 * t) end
@@ -91,6 +92,38 @@ local function bioma(C, wx, wy, seed)
   return temp, umid, cont
 end
 
+-- The climate of a column from its temperature and humidity, as the biomes below are drawn.
+local function climate_of(temp, umid)
+  if temp > 0.68 and umid < 0.42 then return "desert" end
+  if temp > 0.62 and umid > 0.6 then return "jungle" end
+  if temp < 0.3 then return "frozen" end
+  return "temperate"
+end
+
+local CLIMATES = { "temperate", "desert", "jungle", "frozen" }
+
+-- The climates the nature admits, as a set; nil when it says none (all of them, the world of today).
+local function is_data(v) local t = type(v); return t == "table" or t == "userdata" end
+
+local function admitted_climates(nature)
+  if not is_data(nature) or not is_data(nature.climates) then return nil end
+  local set, any = {}, false
+  for _, c in ipairs(nature.climates) do
+    if type(c) == "string" then set[c] = true; any = true end
+  end
+  return any and set or nil
+end
+
+-- The climate drawn where the world admits it; else the temperate land, else the first it admits.
+local function admitted(climate, set)
+  if not set or set[climate] then return climate end
+  if set.temperate then return "temperate" end
+  for _, c in ipairs(CLIMATES) do
+    if set[c] then return c end
+  end
+  return "temperate"
+end
+
 -- Large-scale true relief signal shared between generate_chunk (when nature.relief == "true") and generate_relief:
 -- massifs with terraces and passes, gentle coastal slopes, and deep/shallow beds under water.
 local function relief_at(C, wx, wy, seed, islands, cont_in, h_in, river_dist_in)
@@ -150,9 +183,12 @@ local function relief_at(C, wx, wy, seed, islands, cont_in, h_in, river_dist_in)
   return level, level, m
 end
 
-local function tile_at(C, wx, wy, seed, islands, true_relief)
-  -- The starting square is always clear.
-  if wx > -3 and wx < 3 and wy > -3 and wy < 3 then return "g" end
+local function tile_at(C, wx, wy, seed, islands, true_relief, climates)
+  -- The starting square is always clear: grass, or the open ground of the only climates the world admits (the ice of a frozen planet).
+  if wx > -3 and wx < 3 and wy > -3 and wy < 3 then
+    if not climates or climates.temperate or climates.jungle then return "g" end
+    return climates.frozen and "n" or "s"
+  end
   local h = fbm(C, wx, wy, seed)
   local m = fbm(C, wx, wy, seed + 7)
   local road = math.abs(vnoise(C, wx / 30, wy / 30, seed + 13) - 0.5) < 0.025
@@ -171,7 +207,7 @@ local function tile_at(C, wx, wy, seed, islands, true_relief)
     local lv, _, massif = relief_at(C, wx, wy, seed, islands, cont, h, river_dist)
     -- In true relief, k is walkable bare mountain rock on massifs and ridges; snow caps the highest cold peaks.
     if massif > 0.35 or lv >= 24 then
-      if lv >= 42 and temp < 0.55 then return "n" end
+      if lv >= 42 and temp < 0.55 and (not climates or climates.frozen) then return "n" end
       if h > 0.78 and r < 0.25 then return "r" end
       return "k"
     end
@@ -180,19 +216,20 @@ local function tile_at(C, wx, wy, seed, islands, true_relief)
   if h > 0.73 then return "r" end
   if fiume then return "w" end
   if road then return "p" end
-  if temp > 0.68 and umid < 0.42 then
+  local climate = admitted(climate_of(temp, umid), climates)
+  if climate == "desert" then
     -- Desert: sand, a few rocks, rare oases.
     if h < 0.3 then return "w" end
     if r < 0.03 then return "r" end
     return "s"
   end
-  if temp > 0.62 and umid > 0.6 then
+  if climate == "jungle" then
     -- Jungle: very dense, with clearings.
     if h < 0.3 then return "w" end
     if m > 0.45 and r < 0.8 then return "j" end
     return "g"
   end
-  if temp < 0.3 then
+  if climate == "frozen" then
     -- Frozen north: snow and firs.
     if h < 0.3 then return "w" end
     if m > 0.6 and r < 0.5 then return "t" end
@@ -211,9 +248,10 @@ function M.generate_chunk(cx, cy, seed, size)
   local nature = world.nature()
   local islands = type(nature) == "table" and nature.geography == "archipelago"
   local true_relief = type(nature) == "table" and nature.relief == "true"
+  local climates = admitted_climates(nature)
   for row = 0, size - 1 do
     for col = 0, size - 1 do
-      out[#out + 1] = tile_at(C, cx * size + col, cy * size + row, seed, islands, true_relief)
+      out[#out + 1] = tile_at(C, cx * size + col, cy * size + row, seed, islands, true_relief, climates)
     end
   end
   return table.concat(out)

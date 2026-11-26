@@ -12,7 +12,7 @@ import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshaped
 import { askAutomaton, askReshape, AUTOMATON_TASK, RESHAPE_TASK } from './agents/physicist';
 import { AutomataEngine, automatonWords, cloneAutomata, validateAutomaton, type AutomatonSpec, type FieldSample } from './automata';
 import { readWindView, relativeWind, sailPush, viewBytes, viewCorner, WIND_VIEW, windHere, windInView, windSpecOf, windViewOf, type WindHere, type WindView } from './wind';
-import { clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
+import { climatesOf, clockDay, crossingOf, gaitOf, gravityOf, isVoid, leapOf, offClimate, repairNature, sameNature, stillLight, terrainPhysics, VOID_CODE, voidTerrain, type WorldNature } from './nature';
 import { DOCK_NEAR, dockOf, islandAtTile, islandOf, islandDraft, islandOfPlace, islandPlaces, islandRelief, islandsNear, ISLANDS_REACH, MAX_ISLANDS_SEEN, OPEN_SEA, OPEN_VOID, voidDraft, voidGates, type Dock, type Island, type Lattice } from './islands';
 import { DROWNED, swimTick, TOO_LOADED, TOO_LOADED_EVERY, tooLoadedToSwim } from './swim';
 import { AIR_AGAIN, airOf, ASPHYXIATED, breathOf, breathTick, FULL_OXYGEN, NO_AIR } from './air';
@@ -30,7 +30,7 @@ import { latheExecute, latheModels, type LatheModelEntry, type LatheShown } from
 import type { Rule } from './types';
 import { ATLAS_FILE, defaultAtlas, direction, directionsFrom, directionWord, islandRegion, MASTER_REGION_LIMITS, masterRegion, placeRegion, readAtlas, REGION_KIND_NAME, regionAir, regionAt, regionGravity, regionKind, regionRoughness, withoutMasterRegion, writeAtlas, type Atlas, type Region, type RegionAnswer } from './atlas';
 import { defaultCodes, STAMP_SHAPES } from './stamps';
-import { repairProgram, type MjNode } from './mj';
+import { repairProgram, writtenCodes, type MjNode } from './mj';
 import { upgradeFromSeed, type PastCommit, type UniverseBackend } from './universes';
 import { dayPhase, declaredFor, housePhases, masterPlot, plotText, PLOTS_FILE, readPeople, readPlots, VENTURES_FILE, writePlots, type DeclaredPlace, type Individual, type JobProgram, type Mind, type Plot, type Species, type Venture } from './npc/model';
 import { Npc, type NpcHost } from './npc';
@@ -2114,6 +2114,9 @@ export class Kernel {
   /** The band whose draft the generator is making now (T449): what `world.nature()` says during `generate_chunk`. */
   private draftBand?: number;
 
+  /** Whether the draft being made is the one of a plan of before the climates (T510): `world.nature()` says none, all of them are drawn. */
+  private draftBefore = false;
+
   /**
    * The generator at a tile of a planet (T449: the levels of detail its globe is drawn with), in the planet's own coordinates: what its draft
    * has there, as `generate_chunk` of one tile, with the planet's seed; `?` where it fails. It neither counts nor raises anything (the draws
@@ -2136,7 +2139,9 @@ export class Kernel {
       this.luaModule = outer;
       this.draftBand = was;
     }
-    const c = typeof value === 'string' && value.length === 1 ? value : '?';
+    const drawn = typeof value === 'string' && value.length === 1 ? value : '?';
+    // A climate the planet does not admit (T510): what the kernel makes of it, whatever its generator says.
+    const c = offClimate(natureOfBand(this.config.nature, k)).get(drawn) ?? drawn;
     return this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?';
   }
 
@@ -2147,7 +2152,12 @@ export class Kernel {
     return `${this.config.name}|${k}|${this.bandSeed(k)}|${hashStr(src)}|${hashStr(colours)}`;
   }
 
-  private genDraft(cx: number, cy: number): string {
+  /**
+   * A place's draft. `plan`, the plan it has, if known: a plan of before the climates (T510, ADR-0261: it does not say `climates`) keeps the
+   * draft it was laid on, every climate of the generator (the snow of a Far West born before stays where its places were planned on it);
+   * a new place, or a plan that says them, has only the climates its world (or its planet) admits, and the kernel's floor on what is left.
+   */
+  private genDraft(cx: number, cy: number, plan?: Pick<ChunkPlan, 'climates'>): string {
     const S = this.config.chunkSize;
     const n = S * S;
     if (this.bench) return this.benchDraft(cx, cy);
@@ -2155,12 +2165,16 @@ export class Kernel {
       const id = this.terrain.manifest.id;
       // A planet's place (T449): its generator around its own centre, with its own seed, under its own nature.
       const band = this.bandOf(cx);
+      const before = !!plan && plan.climates !== true;
+      const off = before ? undefined : offClimate(natureOfBand(this.config.nature, band));
       this.draftBand = band;
+      this.draftBefore = before;
       let got: { value: unknown; failed: boolean };
       try {
         got = this.runModule(id, 'generate_chunk', band ? planetLocal(cx, band, S) : cx, cy, this.bandSeed(band), S);
       } finally {
         this.draftBand = undefined;
+        this.draftBefore = false;
       }
       const { value, failed } = got;
       if (!failed) {
@@ -2168,8 +2182,15 @@ export class Kernel {
         // in the void (T445, ADR-0233) its stations and asteroids, and the void around them.
         const lattice = this.lattice(cx);
         const drawn = typeof value === 'string' && value.length === n && lattice ? (lattice === 'void' ? voidDraft : islandDraft)(value, this.config.seed, cx, cy, S) : value;
-        // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void.
-        if (typeof drawn === 'string' && drawn.length === n) return [...drawn].map((c) => (this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?')).join('');
+        // A code the palette lacks becomes the nearest base terrain (sand → grass, sea → water…), never the void; a code of a climate the
+        // world does not admit (T510) what the kernel makes of it (snow → grass, jungle → trees), whatever the generator says.
+        if (typeof drawn === 'string' && drawn.length === n)
+          return [...drawn]
+            .map((d) => {
+              const c = off?.get(d) ?? d;
+              return this.palette[c] ? c : this.palette[DRAFT_FALLBACK[c]] ? DRAFT_FALLBACK[c] : '?';
+            })
+            .join('');
         this.faults.raise(`module:${id}:generate_chunk`, `generate_chunk deve restituire una stringa di ${n} caratteri`);
       }
     }
@@ -2441,7 +2462,7 @@ export class Kernel {
    * another program of its environment if given, without loading it.
    */
   structureLotSizes(cx: number, cy: number, plan: ChunkPlan, program?: MjNode): Array<{ w: number; h: number }> {
-    const draft = this.genDraft(cx, cy);
+    const draft = this.genDraft(cx, cy, plan);
     const { result } = this.layoutOf({ cx, cy, draft }, plan, this.pathCode(), true, program ?? this.content.layouts[plan.layout]?.program);
     return this.structureLots({ cx, cy, lots: result.lots }, plan)
       .map((b, i) => ({ i, w: b.x1 - b.x0 + 1, h: b.y1 - b.y0 + 1 }))
@@ -2454,7 +2475,7 @@ export class Kernel {
    * that did not hold a place's structures): the grid after the program, before the paths.
    */
   placeLaidOut(cx: number, cy: number, plan: ChunkPlan, program?: MjNode): string[] {
-    const { result } = this.layoutOf({ cx, cy, draft: this.genDraft(cx, cy) }, plan, this.pathCode(), true, program ?? this.content.layouts[plan.layout]?.program);
+    const { result } = this.layoutOf({ cx, cy, draft: this.genDraft(cx, cy, plan) }, plan, this.pathCode(), true, program ?? this.content.layouts[plan.layout]?.program);
     return result.stages?.programmed ?? result.grid;
   }
 
@@ -2511,7 +2532,11 @@ export class Kernel {
     const rec = await this.chunkStore.load(this.recordKey(ch));
     if (!this.alive(ch)) return;
     // A plan whose environment is gone belongs to another world (a Genesis under the same title, ADR-0134): planned again.
-    if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) return this.applyPlan(ch, rec.plan);
+    if (rec && (!rec.plan.layout || this.content.layouts[rec.plan.layout])) {
+      // A plan of before the climates (T510) is laid on the draft it was planned on, where the world restricts them.
+      if (rec.plan.climates !== true && natureOfBand(this.config.nature, this.bandOf(ch.cx)).climates) ch.draft = ch.tiles = this.genDraft(ch.cx, ch.cy, rec.plan);
+      return this.applyPlan(ch, rec.plan);
+    }
     // A place of a block whose plan is not saved yet (T370): the kernel's own, from the plan of the place with the structure, without a call.
     const block = this.blockOfPlace(ch.cx, ch.cy);
     if (block && block.anchor !== ch.key) {
@@ -2595,6 +2620,8 @@ export class Kernel {
       plan.vpt = STRUCTURE_VPT;
       // And it swims (T438, ADR-0224): its layout joins it through the water one swims and never digs it; a plan of before does not say it.
       plan.swim = true;
+      // And its climates (T510): its draft has only those its world admits; a plan of before does not say it, and keeps its draft.
+      plan.climates = true;
       // And its strata (T418), by its environment's program over the draft (T478): the plan keeps them, and says how they are made.
       plan.strataDepth = STRATA_DEPTH;
       // And how rough it is, where a region of the master says it (T474): a region changed later does not move the place.
@@ -2647,7 +2674,7 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH };
   }
 
   /**
@@ -2767,7 +2794,7 @@ export class Kernel {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
     // The roughness the master said for the region (T474) is the plan's, as for a place the Cartographer plans there.
     const roughness = regionRoughness(region);
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH, ...(roughness ? { roughness } : {}) };
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH, ...(roughness ? { roughness } : {}) };
   }
 
   /** Whether a draft is all open sea (T441): every tile deep water one swims. */
@@ -2787,7 +2814,7 @@ export class Kernel {
 
   /** The plan of a place of open sea (T441), or of the void (T445): its name in the language of the world, no environment, nothing in it; the kernel's. */
   private seaPlan(empty = false): ChunkPlan {
-    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, strataDepth: STRATA_DEPTH };
+    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH };
   }
 
   /** The island a place stands on in an archipelago (T441), or its station or asteroid in the void (T445), with its region of the atlas if the Cartographer has named it. */
@@ -2934,12 +2961,40 @@ export class Kernel {
     return { tiles, deep, reef, maxDepth, strata: [...strataNames].slice(0, 4) };
   }
 
-  /** Environments that belong to a region of the atlas are used only there; the rest anywhere. */
+  /**
+   * The codes of the climates a world (or the planet of a band) does not admit that a program of an environment writes (T510, ADR-0261): the
+   * snow of the «Alture della Brina» in the Far West. Such an environment is not offered for a new place, and a new one is not taken.
+   */
+  offClimateWrites(program: MjNode | undefined, band = 0): string[] {
+    const off = offClimate(natureOfBand(this.config.nature, band));
+    if (!off.size || !program) return [];
+    let written: Set<string>;
+    try {
+      written = writtenCodes(program);
+    } catch {
+      return [];
+    }
+    return [...off.keys()].filter((c) => written.has(c));
+  }
+
+  /** Why the kernel does not take a new environment of this world (T510): it writes a code of a climate the world does not admit. */
+  private climateErrors(id: string, program: MjNode | undefined, palette: Record<string, TerrainDef> = this.palette): string[] {
+    const off = this.offClimateWrites(program);
+    return off.length ? [`${id}: scrive ${off.map((c) => `«${palette[c]?.name ?? c}» (${c})`).join(', ')}, che in questo mondo non c'è: usa altri terreni`] : [];
+  }
+
+  /**
+   * Environments that belong to a region of the atlas are used only there; the rest anywhere. An environment that writes a climate the world
+   * does not admit (T510) is offered to no new place, its region's places included: they take the others.
+   */
   private environmentsFor(ch: Chunk): { layouts: Array<{ id: string; name: string; description: string; environment: string }>; region?: Region } {
-    const all = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
+    const band = this.bandOf(ch.cx);
+    const every = Object.entries(this.content.layouts).map(([id, l]) => ({ id, name: l.name, description: l.description, environment: l.environment }));
+    const fit = every.filter((l) => !this.offClimateWrites(this.content.layouts[l.id]?.program, band).length);
+    const all = fit.length ? fit : every;
     const atlas = this.atlasNow();
     const region = ch.cx === 0 && ch.cy === 0 ? undefined : regionAt(atlas, ch.cx, ch.cy);
-    if (region && this.content.layouts[region.environment]) return { layouts: all.filter((l) => l.id === region.environment), region };
+    if (region && all.some((l) => l.id === region.environment)) return { layouts: all.filter((l) => l.id === region.environment), region };
     // The master's regions do not take their environment away from the rest of the world (T375): nor the islands' (T441): only the Cartographer's regions are regional.
     const regional = new Set(atlas.regions.filter((r) => !r.master && r.island === undefined).map((r) => r.environment));
     const free = all.filter((l) => !regional.has(l.id));
@@ -3083,7 +3138,7 @@ export class Kernel {
         let id = d.id;
         while (this.content.layouts[id]) id += '_';
         const def = program ? { name: d.name, description: d.description, environment: d.environment, program } : undefined;
-        const errs = def ? this.validator.validateLayout(id, def, palette, this.sampleDrafts(), this.strata) : ['programma mancante o incomprensibile'];
+        const errs = def ? [...this.climateErrors(id, def.program, palette), ...this.validator.validateLayout(id, def, palette, this.sampleDrafts(), this.strata)] : ['programma mancante o incomprensibile'];
         if (errs.length) {
           feedback = errs.join('; ');
           this.council.say('kernel', 'scarta', `ambiente «${d.name}»: ${feedback}`, 'cartographer', 'cartographer.environment');
@@ -3791,7 +3846,7 @@ export class Kernel {
       .load(this.recordKey({ cx, cy, key } as Chunk))
       .then((rec) => {
         if (!rec?.plan || this.miniatures.get(key) !== entry) return;
-        entry.mini = this.miniatureOf({ cx, cy, key, draft: this.genDraft(cx, cy) }, rec.plan);
+        entry.mini = this.miniatureOf({ cx, cy, key, draft: this.genDraft(cx, cy, rec.plan) }, rec.plan);
         this.miniatureVersion++;
       })
       .catch(() => undefined);
@@ -10589,6 +10644,9 @@ export class Kernel {
     const base = !this.config.nature.planets
       ? { ...this.config.nature }
       : natureOfBand(this.config.nature, this.draftBand ?? (this.ecs.alive.has(this.wandererEntity) ? this.bandAt(this.wandererCarpet().x) : 0));
+    // The draft of a plan of before the climates (T510) is drawn with all of them, as it was.
+    if (this.draftBefore) delete base.climates;
+    else if (base.climates) base.climates = [...base.climates];
     return base.automata ? { ...base, automata: cloneAutomata(base.automata) } : base;
   }
 
@@ -12012,7 +12070,7 @@ export class Kernel {
     }
     for (const p of await this.plannedPlaces()) {
       if (seen.has(this.chunkKey(p.cx, p.cy))) continue;
-      const ch = { cx: p.cx, cy: p.cy, draft: this.genDraft(p.cx, p.cy) };
+      const ch = { cx: p.cx, cy: p.cy, draft: this.genDraft(p.cx, p.cy, p.plan) };
       if (this.laidWith(before, ch, p.plan) !== this.laidWith(after, ch, p.plan)) moved.push(`«${p.plan.place?.name ?? `${p.cx},${p.cy}`}»`);
     }
     if (!split.length && !moved.length) return undefined;
@@ -12937,11 +12995,12 @@ export class Kernel {
         this.council,
         theme,
         this.repo.working,
-        (id, def, palette, strata) => this.validator.validateLayout(id, def, palette, this.sampleDrafts(), strata ?? this.strata),
+        (id, def, palette, strata) => [...this.climateErrors(id, def.program, palette), ...this.validator.validateLayout(id, def, palette, this.sampleDrafts(), strata ?? this.strata)],
         this.broughtForGenesis(),
         this.config.nature.geography,
         this.config.nature.oxygen,
         this.config.nature.relief === 'true',
+        climatesOf(this.config.nature),
       );
       for (const [p, src] of Object.entries(plan.files)) this.repo.write(p, src);
       this.stampContent('genesis.layouts', 'cartographer', COMUNE);

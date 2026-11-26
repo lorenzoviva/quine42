@@ -11,7 +11,9 @@ export interface WorldTheme {
    * The nature of the world it brings to the Genesis (T437, ADR-0224), as `repairNature` reads it: only what the kernel can make true. The
    * pirates bring the archipelago (T441, ADR-0229); the frontier, the pirates and space bring true relief (T475, ADR-0256; medieval stays
    * hilly); the void and the stars of space come with T450; every other theme is a world of today's nature, and a theme written by hand
-   * always is.
+   * always is. The climates of its draft (T510, ADR-0261): no snow on the frontier, in the warm seas nor under the rain of the metropolis
+   * (the code `n` is cold ground whatever the Cartographer calls it); the jungle stays, its `j` is the thicket of each world (the cactus of
+   * the frontier); the others, as a theme written by hand, have them all.
    */
   nature?: Partial<import('./nature').WorldNature>;
 }
@@ -78,6 +80,7 @@ Stories are born from the people: work, families, loves, debts, shifts, smugglin
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the mud as
 on the asphalt. The companies buy them, couriers smuggle them, street sellers sell fake ones; on the street
 some call what they do magic, unashamed. What they really do is written in the canon of the runes.`,
+    nature: { climates: ['temperate', 'desert', 'jungle'] },
   },
   {
     id: 'western',
@@ -95,7 +98,7 @@ Stories are born from the people: work, families, loves, debts, cattle drives, l
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the dust as
 in the riverbed. Prospectors pick them up with the nuggets, the store buys them by weight, the preacher warns against them;
 whoever has spoken one does not boast of it at the bar. What they really do is written in the canon of the runes.`,
-    nature: { relief: 'true' },
+    nature: { relief: 'true', climates: ['temperate', 'desert', 'jungle'] },
   },
   {
     id: 'pirates',
@@ -113,7 +116,7 @@ Stories are born from the people: work, crews, families, loves, debts, shares of
 Here and there, on the ground, lie the runes: slabs carved with a sign that gives off a faint light, in the sand as
 in the jungle. Sailors keep them for luck, smugglers trade them, harbour masters tax them; whoever has spoken
 one tells it only to their own crew. What they really do is written in the canon of the runes.`,
-    nature: { geography: 'archipelago', relief: 'true' },
+    nature: { geography: 'archipelago', relief: 'true', climates: ['temperate', 'desert', 'jungle'] },
   },
   {
     id: 'space',
@@ -152,6 +155,17 @@ export function seedAged(theme: string | undefined): boolean {
 
 /** The theme a text is, as it is or with only its blank ends and line endings changed; a text rewritten is no theme of the list. */
 export function themeOfText(text: string): WorldTheme | undefined {
+  if (typeof text !== 'string') return undefined;
   const plain = (s: string) => s.replace(/\r\n/g, '\n').trim();
   return WORLD_THEMES.find((t) => plain(t.text) === plain(text));
+}
+
+/**
+ * The climates a universe of before takes from its theme (T510, ADR-0261), when its nature does not say them: its `prompts/theme.md` is a
+ * theme of the list as it is (`themeOfText`); a theme written by hand, or none, says nothing (all the climates, the world of today).
+ * Derived at every reading, never written: the repair costs no call and no commit.
+ */
+export function themeClimates(theme: string | undefined): import('./nature').Climate[] | undefined {
+  const said = theme === undefined ? undefined : themeOfText(theme)?.nature?.climates;
+  return said ? [...said] : undefined;
 }

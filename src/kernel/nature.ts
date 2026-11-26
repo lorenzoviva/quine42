@@ -190,6 +190,48 @@ export type ReliefKind = (typeof RELIEF_KINDS)[number];
 /** The sky over it: the earth's, with its day and its night; the stars (T445). */
 export type Sky = 'earth' | 'stars';
 
+/**
+ * The climates of the draft (T510, ADR-0261): the large-scale biomes the generator draws from its temperature and humidity (`world.terrain`):
+ * the temperate land (grass and woods), the desert, the jungle, the frozen land (snow and the snow on the cold peaks). A world admits some of
+ * them, by its theme or its planet: the Far West has no snow, the islands of the pirates no frost, an ice planet nothing but.
+ */
+export const CLIMATES = ['temperate', 'desert', 'jungle', 'frozen'] as const;
+export type Climate = (typeof CLIMATES)[number];
+
+/**
+ * The codes of the draft that only a climate draws (T510): the snow `n` of the frozen land, the jungle `j` of the hot and wet one, and
+ * what the kernel makes of them where the world does not admit the climate (its floor, whatever the generator says): the base ground and
+ * the trees. The sand of the desert is also the sand of the shore, and every world has shores: it is no code of the desert alone.
+ */
+export const CLIMATE_CODES: Readonly<Partial<Record<Climate, { code: string; instead: string }>>> = {
+  frozen: { code: 'n', instead: 'g' },
+  jungle: { code: 'j', instead: 't' },
+};
+
+/** The climates a nature admits: all of them where it says none (the world of today). */
+export const climatesOf = (n: Pick<WorldNature, 'climates'> | undefined): readonly Climate[] => n?.climates ?? CLIMATES;
+
+/** The codes of the draft a nature does not admit, each with what it becomes (T510): none in the world of today. */
+export function offClimate(n: Pick<WorldNature, 'climates'> | undefined): Map<string, string> {
+  const admitted = climatesOf(n);
+  const out = new Map<string, string>();
+  for (const c of CLIMATES) {
+    const k = CLIMATE_CODES[c];
+    if (k && !admitted.includes(c)) out.set(k.code, k.instead);
+  }
+  return out;
+}
+
+/**
+ * The climates said, as the kernel keeps them (T510): known ones, once each, in the order of `CLIMATES`, at least one; all of them, or
+ * none that is known, are no restriction (undefined, the world of today).
+ */
+export function repairClimates(raw: unknown): Climate[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const said = CLIMATES.filter((c) => raw.includes(c));
+  return said.length && said.length < CLIMATES.length ? said : undefined;
+}
+
 /** Whether a world (or a planet) uses the true relief of its generator (T475, ADR-0256). */
 export const hasTrueRelief = (n: Pick<WorldNature, 'relief'> | undefined): boolean => n?.relief === 'true';
 
@@ -214,6 +256,11 @@ export interface WorldNature {
    * and `k` is walkable mountain rock; omitted (`'hills'`) for the rolling hills of today. Fixed at the Genesis like the geography.
    */
   relief?: ReliefKind;
+  /**
+   * The climates its draft has (T510, ADR-0261): those of its theme, fixed at the Genesis like the geography; omitted, all of them (the
+   * world of today). A universe of before that does not say them takes its theme's (`themeClimates`, `readConfig`), without a call.
+   */
+  climates?: Climate[];
   geography: Geography;
   sky: Sky;
   /**
@@ -260,10 +307,12 @@ export function repairNature(raw: unknown): WorldNature {
   // The planets only around the void (T449): the orbit is the band 0, and a world of today has no far bands.
   const planets = geography === 'void' ? repairPlanets(r.planets) : [];
   const automata = repairAutomata(r.automata);
+  const climates = repairClimates(r.climates);
   return {
     ...(planets.length ? { planets } : {}),
     ...(automata.length ? { automata } : {}),
     ...(relief === 'true' ? { relief } : {}),
+    ...(climates ? { climates } : {}),
     geography,
     sky: one(r.sky, NATURE_ACCEPTS.sky, DEFAULT_NATURE.sky),
     day: r.day === STILL_DAY ? STILL_DAY : num(r.day, NATURE_ACCEPTS.day, DEFAULT_NATURE.day),
@@ -285,6 +334,8 @@ export interface Planet {
   seed?: number;
   geography: 'continent';
   relief?: ReliefKind;
+  /** The climates of its draft (T510): an ice planet only `frozen`; omitted, all of them. */
+  climates?: Climate[];
   sky: Sky;
   day: number;
   gravity: number;
@@ -304,12 +355,12 @@ export function repairPlanets(raw: unknown): Planet[] {
     if (!p || typeof p !== 'object' || Array.isArray(p)) continue;
     const r = p as Record<string, unknown>;
     // A planet is a world with air under its own sky: its own nature within the same limits as the world's.
-    const n = repairNature({ geography: 'continent', relief: r.relief, sky: r.sky ?? 'earth', day: r.day, gravity: r.gravity });
+    const n = repairNature({ geography: 'continent', relief: r.relief, climates: r.climates, sky: r.sky ?? 'earth', day: r.day, gravity: r.gravity });
     const said = typeof r.name === 'string' ? cleanText(r.name, PLANET_ACCEPTS.name, 'il nome') : undefined;
     const name = said && 'text' in said ? said.text : '';
     const seed = typeof r.seed === 'number' && Number.isSafeInteger(r.seed) ? r.seed : undefined;
     const sea = finite(r.sea) && r.sea >= PLANET_ACCEPTS.sea[0] && r.sea <= PLANET_ACCEPTS.sea[1] ? Math.round(r.sea) : undefined;
-    out.push({ ...(name ? { name } : {}), ...(seed !== undefined ? { seed } : {}), geography: 'continent', ...(n.relief === 'true' ? { relief: 'true' as const } : {}), sky: n.sky, day: n.day, gravity: n.gravity, ...(sea !== undefined ? { sea } : {}) });
+    out.push({ ...(name ? { name } : {}), ...(seed !== undefined ? { seed } : {}), geography: 'continent', ...(n.relief === 'true' ? { relief: 'true' as const } : {}), ...(n.climates ? { climates: n.climates } : {}), sky: n.sky, day: n.day, gravity: n.gravity, ...(sea !== undefined ? { sea } : {}) });
   }
   return out;
 }
@@ -331,6 +382,7 @@ export const stillLight = (nature: Pick<WorldNature, 'day'> | undefined): boolea
 export const sameNature = (a: WorldNature, b: WorldNature): boolean =>
   (Object.keys(DEFAULT_NATURE) as Array<keyof WorldNature>).every((k) => a[k] === b[k]) &&
   (a.relief ?? 'hills') === (b.relief ?? 'hills') &&
+  climatesOf(a).join() === climatesOf(b).join() &&
   JSON.stringify(a.planets ?? []) === JSON.stringify(b.planets ?? []) &&
   JSON.stringify(a.automata ?? []) === JSON.stringify(b.automata ?? []);
 
