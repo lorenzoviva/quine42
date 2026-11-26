@@ -47,4 +47,12 @@ export class Rng {
   chance(p: number): boolean {
     return this.next() < p;
   }
+  /** A draw that seeds a generator of its own, as the MarkovJunior engine forks one (src/mj/random.ts, `RunRandom`). */
+  seed(): number {
+    return this.int(0x7fffffff);
+  }
+  /** A generator of the same kind from a seed. */
+  spawn(seed: number): Rng {
+    return new Rng(seed);
+  }
 }
