@@ -6670,3 +6670,246 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo; un difetto trovato si scrive nell'esito come task proposto.
 - Browser: sì.
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T507`.
+
+## Richieste del 26/11/2026 (testo intero: `docs/userchats/to-do-2026-11-26.md`)
+
+### T508 · Argon sul contatore `Gemini Models`: config e `modelli.md` — `da fare`
+- Pipeline: hydrogen · sforzo medium · stima 1% · approvato · priorità 1
+- Contesto: l'autore il 26/11 «credo che argon non sia più su un contatore separato». Verificato dall'orchestratore: `agy -p /usage` mostra solo `Gemini Models` e `Claude and GPT models`; il gruppo `Gemini 4 Argon` non c'è più, ma `stato` legge ancora un conto `argon` suo (reset 30/11). `docs/pipeline/modelli.md` § 1 (righe 28-36) lo dice separato.
+- Cosa fare: in `tools/pipeline/config.json` il provider `argon` (e l'`orchestrator`) sul conto di `Gemini Models` (5 ore e settimana, come `gemini`/`hydrogen`/`neon`), la copia dei test allineata; `modelli.md` § 1 e 1.3 aggiornati con la data; il lettore di `/usage` che non si rompe se un gruppo sparisce. Solo la pipeline, niente kernel.
+- Test: i test della pipeline; `stato` mostra argon sul conto comune.
+- Browser: no.
+- Quando è fatto: `stato` coerente con `agy -p /usage`, commit.
+
+### T509 · Studio: il terreno ricco del Paesaggista (sottobosco, scavi, strade, ferrovie, modelli riusati a semi) — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Contesto: l'autore il 26/11: il Paesaggista non fa vegetazione folta (arbusti, cespugli, foglie secche, erba, brecciolino, pietre, grano, balle di fieno rotolanti col vento in `mesa`); deve poter **togliere** terreno (strada e marciapiedi a `neapolis`, ferrovia a `mesa`); «si può creare una strada asfaltata?»; più tridimensionalità; modelli variabili riusati cambiando il seme. Vedi `dossier T459` (studio del terreno 3D, `docs/design/terreno-3d.md`), `dossier T475` (rilievo vero), `dossier T484` (vento), `dossier T495` (riuso col seme), `dossier T467` (Scultore Paesaggista).
+- Cosa fare: lo studio in `docs/design/terreno-ricco.md`: (1) cosa sa fare oggi il Paesaggista e perché la vegetazione è rada (densità del Cartografo, tetti dei modelli per luogo, costo delle forme), con misure su un luogo di ogni universo; (2) il sottobosco come modelli piccoli riusati a semi (un programma per tipo, migliaia di istanze: instancing, LOD, memoria e draw call, misurato); le cose mosse dal vento (balle) sul vento di T484; (3) lo scavo: un terreno che sottrae (strada, marciapiede, binari, fossi) come terreno del generatore, come scavo del layout o come programma del Cartografo, con la regola 10 e la rete; la risposta sulla strada asfaltata oggi; (4) la tridimensionalità del terreno rispetto a T459; (5) la catena dei task (provider, sforzo, stima) e le domande col consiglio.
+- Test: nessuno (studio); eventuali misure in `lab/`.
+- Browser: no (misure offline).
+- Quando è fatto: studio con misure, risposta sulla strada asfaltata, catena dei task, domande; kernel invariato.
+
+### T510 · I biomi dipendono dall'universo e dal pianeta (la neve in `mesa`) — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · browser · priorità 1
+- Contesto: run #2 dell'autore (26/11): in `mesa` (Far West) c'è la neve. I biomi devono venire dall'universo (la sua ambientazione e natura) e, nello spazio, dal pianeta (`natureOfBand`, ADR-0236). Le copie della run: worktree `H:\projects\rune\.claude\worktrees\beta-run-2`, `universes/<nome>` taggati `prima-della-run-2`.
+- Cosa fare: trovare da dove viene la neve (bioma del generatore per latitudine/quota, ambiente del seme, palette, Cartografo) con `git -C universes/mesa log prima-della-run-2..`; i biomi che un universo ammette dal suo tema e dalla sua natura (e per fascia di pianeta), scritti alla Genesi o derivati, con la riparazione degli universi di prima senza chiamate; nessun bioma fuori tema nei luoghi nuovi. ADR se cambia il contratto.
+- Test: un universo western non genera neve in nessun luogo di una griglia di prova; un pianeta ghiacciato sì.
+- Browser: sì (mesa offline sui luoghi nuovi).
+- Quando è fatto: niente neve a mesa nei luoghi nuovi, test verdi, visto nel browser.
+
+### T511 · La primitiva «portato da»: ogni entità può ancorare il suo moto a un'altra — `da fare`
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 1
+- Contesto: run #2 (26/11): «qualunque cosa può essere un mezzo di trasporto»: il kernel deve poter ancorare i movimenti di un'entità a quelli di un'altra (appendersi a un drone, un NPC cavalcabile, stare nel taschino di qualcuno, i vagoni di un treno), se il Concilio è d'accordo. **Solo la primitiva**, niente casi particolari (tranne il motorino, T512). Vedi `dossier T439`, `dossier T442`, `dossier T487` (veicoli, ADR-0227, ADR-0232, ADR-0244), `src/kernel/vehicle.ts` (`carried`, `toWorld`).
+- Cosa fare: un componente scritto solo dal kernel (es. `carrier {by, lx, ly, lz, yaw}`): chi è portato segue la rototraslazione di chi porta (come il ponte di un veicolo), con i controlli della regola 10 e della collisione, lo sgancio (comando, ostacolo, chi porta sparisce), le catene (vagone dietro vagone, senza cicli, profondità a tetto); chi decide: un'azione del menu che il Concilio concede (regola, `<action>` o `on_act`) e un'API Lua validata da `Host`; in multigiocatore il server lo fa e i client lo prevedono come per `step.on`. ADR, `AGENTS.md`, voce in sicurezza se tocca il filo.
+- Test: un'entità portata segue chi la porta, si sgancia sugli ostacoli, nessun ciclo; in molti il passo del portato controllato.
+- Browser: sì (un caso di prova offline, anche con due schede).
+- Quando è fatto: la primitiva nel kernel con ADR, test verdi, vista nel browser.
+
+### T512 · Il motorino di `neapolis` si guida — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Contesto: run #2 (26/11): i motorini di `neapolis` sono ancora mobili; «sali e metti in moto» dà solo un messaggio. ADR-0244 dice che ciò che il nome dice un mezzo si guida (`vehicleMediumIn`, `repairVehicleClaims`). `dossier T487`; le copie della run in `beta-run-2`.
+- Cosa fare: perché il motorino sfugge (le parole di `vehicleMediumIn`: motorino, scooter, moto, bicicletta…; il concetto del Narratore), la riparazione all'avvio che gli dà `vehicle` di terra, e il posto dove il viandante sta (il ponte, o la sella con la primitiva di T511); mai mobili che fingono un mezzo.
+- Test: `repairVehicleClaims` su una copia di neapolis dà `vehicle` al motorino; il veicolo si muove sul suo terreno.
+- Browser: sì (neapolis, salire e guidare).
+- Quando è fatto: il motorino si guida in neapolis, test verdi. Dipende da T511.
+
+### T513 · Gli interni di `sidera`: un mobile davanti all'ingresso e una stanza senza porta — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Contesto: run #2 (26/11): in `sidera` una casa non era accessibile (un mobile bloccava l'ingresso) e un'altra non aveva accesso alla stanza sul retro con le scale (nessuna porta nella parete di mezzo). La guardia degli interni (ADR-0212, `InteriorGuard`) dovrebbe tenere il cammino dalla porta; i controlli dello Scultore (`reachableStoreys`) i piani raggiungibili. `dossier T409`, `dossier T410`, `dossier T413`; le copie della run in `beta-run-2`.
+- Cosa fare: ritrovare le due case (log della run, `models/index.json`), riprodurle offline; correggere la guardia (il cammino dalla porta esterna) e i controlli dello Scultore (ogni stanza a terra raggiungibile dalla porta, la scala raggiungibile), riparando i modelli guasti di sidera senza chiamate dove si può o rimettendoli nella coda dello Scultore.
+- Test: le due case riprodotte: ingresso libero, la stanza sul retro raggiunta, o il modello rifiutato col motivo.
+- Browser: sì.
+- Quando è fatto: le due case si percorrono in sidera, test verdi.
+
+### T514 · I mobili degli interni si usano — `da fare`
+- Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 1
+- Contesto: run #2 (26/11): in nessun universo i mobili dentro una casa sono interagibili. Lo Scenografo li posa come parte della forma dell'edificio (`furnishWithRules`, ADR-0214), forse senza entità. `dossier T410`, `dossier T419`.
+- Cosa fare: ogni mobile posato dall'interno diventa (o ha accanto) un'entità con le sue azioni, il suo contenitore, `takeable` dove il manifest lo dice, la posa sui ripiani (ADR-0150), senza moltiplicare il costo del disegno; lo stato salvato come per le cose del luogo; in molti come le altre entità.
+- Test: un edificio arredato offline ha i mobili con le azioni del loro manifest; aprire un baule dentro una casa.
+- Browser: sì (in un universo del Concilio e nel seme).
+- Quando è fatto: i mobili degli interni rispondono a E in ogni universo, test verdi.
+
+### T515 · Una fontana chiesta al Concilio non diventa un edificio che fallisce — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Contesto: run #2 (26/11): in `orichalcum` l'autore ha chiesto al Concilio una fontana nella mappa; il Concilio l'ha presa per un edificio e la generazione è fallita. Le copie della run in `beta-run-2`, `world/shortfalls.json`.
+- Cosa fare: dal registro della run capire chi ha classificato (Referente, Fucina, Cartografo) e perché è fallita; la classe giusta per le cose del paesaggio costruito (fontana, pozzo, statua, monumento: struttura piccola senza interno o arredo urbano), la guardia `isDwelling` che non vuole stanze da una fontana, il motivo del fallimento restituito all'agente giusto invece di arrendersi.
+- Test: offline, «metti una fontana in piazza» dà una cosa del luogo con un modello, senza fallire.
+- Browser: no (test offline); sì se cambia ciò che si vede.
+- Quando è fatto: la fontana nasce, test verdi.
+
+### T516 · Gemini Neon: chiudere la prova e provarlo come Scultore — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2
+- Contesto: l'autore il 26/11: le verifiche per far uscire Neon dalla prova non sono mai state completate; si era parlato di provarlo come Scultore (Architetto) e di valutare la qualità del codice MarkovJunior che scrive. Neon ha fatto T479, T482, T505, T506, T480 al primo colpo. Guida: `docs/guide/nuovo-modello.md` B.6; `docs/pipeline/modelli.md` 1.4-1.5; `dossier T465`.
+- Cosa fare: (1) il rapporto della prova di pipeline: i cinque task, consumi (`consumi.jsonl`), rifacimenti, cosa manca per B.6 (la prova di qualità su un task già fatto da Opus, col criterio scritto) e la proposta per l'autore; (2) Neon come Scultore Architetto: con la CLI `agy` (abbonamento, non API) sulle stesse richieste di `lab/scripts/scultore-gemini.ts` (`--specialita` / `--modelli`: forte e fattoria alle taglie del banco), voti con la scala di `lab/banco/riferimento/ottima.ts` e i controlli dello Scultore, accanto ad Argon, Opus e Fable già misurati; se Neon è raggiungibile anche via API, il costo. Rapporto in `lab/banco/taglie/modelli/neon.md`.
+- Test: nessuno nuovo (banco).
+- Browser: no.
+- Quando è fatto: rapporto con la proposta di uscita dalla prova e i voti di Neon come Architetto; kernel invariato.
+
+### T517 · Editor MJ: il testo sfasato in orizzontale — `da fare`
+- Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2
+- Contesto: l'autore il 26/11: nell'editor dei modelli (`/lab/editor/`) il testo a volte è sfasato orizzontalmente rispetto a dove appare quando lo si seleziona (lo sfasamento verticale era stato corretto in un task precedente, cercalo con `indice`). Rende difficile scrivere.
+- Cosa fare: riprodurre (tab, caratteri larghi, font, zoom, scorrimento orizzontale, righe lunghe) e correggere l'allineamento tra lo strato colorato e l'area di testo.
+- Test: un test del DOM se possibile; altrimenti la prova nel browser con le righe del forte.
+- Browser: sì.
+- Quando è fatto: testo e selezione allineati in orizzontale e in verticale sul forte dell'autore.
+
+### T518 · Editor MJ: pulsante «Render», interruttore dell'auto-render, la corsa che non blocca e prende l'ultima modifica — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2
+- Contesto: l'autore il 26/11: il forte impiega più di 30 s a disegnarsi nell'editor; ogni lettera rifà il rendering e blocca l'interfaccia; le modifiche fatte durante una corsa vengono applicate in ritardo e sbagliate (A → corsa A mentre B → finisce A, poi C → corsa di B).
+- Cosa fare: la corsa in un worker annullabile; un pulsante «Render» e un interruttore dell'auto-render (ricordato); con l'auto-render acceso una corsa nuova annulla quella in corso e parte dal testo di **ora** (debounce); l'interfaccia resta reattiva; lo stato della corsa visibile.
+- Test: la coda delle corse come funzione pura (modifica, annulla, parte l'ultima).
+- Browser: sì (il forte dell'autore).
+- Quando è fatto: modificare il forte durante una corsa non blocca e il risultato è sempre dell'ultimo testo.
+
+### T519 · Editor MJ: rifare solo ciò che è cambiato — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3
+- Contesto: l'autore il 26/11: cambiare un colore o rendere un simbolo di vetro non cambia la forma ma rifà tutto; aggiungere un nodo in fondo potrebbe ripartire dalla traccia; «non esageriamo» (il problema della fermata).
+- Cosa fare: distinguere le modifiche che toccano solo palette e materiali (`<color>`, `alpha`, `glow`, `hidden`) e ridisegnare solo la mesh dalla griglia tenuta; per un nodo aggiunto in fondo ripartire dalla griglia finale se il programma prima è identico (stesso testo compilato, stesso seme) e la semantica lo consente; altrimenti la corsa intera.
+- Test: la funzione che classifica la modifica; la griglia ripresa uguale voxel per voxel alla corsa intera sui casi permessi.
+- Browser: sì.
+- Quando è fatto: colori e vetro senza nuova corsa sul forte; il nodo in fondo ripreso; test verdi. Dipende da T518.
+
+### T520 · Editor MJ: il debug passo per passo, con l'istruzione in corso illuminata — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 3
+- Contesto: l'autore il 26/11: come il debugger dei DevTools: l'istruzione in esecuzione illuminata nel codice; al passaggio del mouse su un'istruzione se e quante volte corrisponde, per una probabilistica la stima delle sostituzioni (`one` → 1/26, `all p0.5` → 13/26); le istruzioni già eseguite coi match fatti, i `markov` coi cicli, quelle con `steps` le loro statistiche. Utile anche all'IA (T521). Il debug a gruppi di passi c'è già (`src/mj/trace.ts`, ADR-0118).
+- Cosa fare: la traccia per nodo legata alla riga XML (posizione nel sorgente dal compilatore); passo, avanti di un nodo, di N passi, fino a un punto d'interruzione; l'evidenza nell'editor; i suggerimenti al passaggio del mouse coi conti; i dati in una struttura serializzabile (per T521); la memoria a gruppi di passi come oggi.
+- Test: la traccia per nodo coi conti su programmi piccoli (`one`, `all p`, `prl`, `markov`), la riga giusta per ogni nodo.
+- Browser: sì.
+- Quando è fatto: debug passo per passo nel forte con l'istruzione illuminata e i conti; test verdi. Dipende da T518. Se troppo grande, spezzalo (traccia per riga; interfaccia).
+
+### T521 · Studio: l'assistente IA nell'editor MJ (vibe coding) — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 3
+- Contesto: l'autore il 26/11: un assistente nell'editor con API a consumo; l'utente scrive un prompt e sceglie cosa includere: la foto 3/4 del risultato (come all'Artista); il codice intero, una porzione o niente; uno o più passi della traccia, come screenshot del laboratorio (codice e render insieme, attento al telefono) o come dati strutturati (i dati del debugger; il render come cattura, foto 3/4 o voxel se pesa meno).
+- Cosa fare: studio in `docs/design/assistente-editor.md`: chi paga e con che chiave (regola 9: la chiave mai al browser; `OpenRouterGate` con la chiave del giocatore, `GeminiGate` in locale), quali modelli, i formati e i token di ogni allegato (misurati: foto, codice, traccia, voxel), il prompt (lo Scultore del mestiere?), l'applicazione delle modifiche proposte (diff accettato dall'utente), i laboratori dei giocatori (ADR-0169), la sicurezza; la catena dei task e le domande col consiglio.
+- Test: nessuno (studio); misure dei token con `countTokens`.
+- Browser: no.
+- Quando è fatto: studio con misure, catena e domande. Dipende da T520 (i dati del debugger).
+
+### T522 · Studio: strutture modulari e «seamless» (blocchi composti, WFC alla marian42, pianeti) — `da fare`
+- Pipeline: claude · sforzo max · stima 4% · approvato · priorità 3
+- Contesto: l'autore il 26/11: l'architettura di `neapolis` (note brutaliste) ha villette a parallelepipedi di cemento, piccole e singole; comporre questi blocchi in strutture più grandi e complesse, applicate al mondo come sostituzioni o in sovraimpressione. Riferimenti: https://marian42.de/article/infinite-wfc/ (WFC infinito a moduli, architettura romana), https://planetsmith.world/ e un post di r/Unity3D sui pianeti con WFC. Vedi `dossier T458`, `dossier T472` (parti del mondo), ADR-0206/0208 (lotto di più luoghi), `src/mj/wfc.ts` (ADR-0174), `dossier T500` (allineamento, la `wfc` che diverge apposta).
+- Cosa fare: studio in `docs/design/strutture-modulari.md`: i moduli come parti del mondo (un set di blocchi coi bordi compatibili, scritti dallo Scultore, verificati dal kernel), la composizione a WFC sopra i lotti o sopra più luoghi (infinita a pezzi come marian42: backtracking a finestre, determinismo dal seme, i luoghi caricati), sostituzione vs sovraimpressione, la regola 10 e le porte, il costo (chiamate una volta per set, poi zero), i pianeti; un prototipo nel lab con le villette di neapolis se costa poco; catena dei task e domande col consiglio.
+- Test: nessuno (studio); prototipo in `lab/`.
+- Browser: no (foto dal lab se c'è il prototipo).
+- Quando è fatto: studio, eventuale prototipo, catena e domande.
+
+### T523 · Le mesh in gioco: misurare vertici e triangoli e ottimizzarle — `da fare`
+- Pipeline: claude · sforzo extra · stima 3% · approvato · browser · priorità 3
+- Contesto: l'autore il 26/11 chiede come si ottimizzano vertici e triangoli in gioco. Risposta dell'orchestratore: `meshVoxels` (ADR-0185) toglie le facce nascoste e quelle sul fondo, ma non fonde le facce complanari (niente greedy meshing) né fa LOD, tranne il globo dei pianeti. `misura-frame.mjs`, `docs/design/gpu.md` (T331).
+- Cosa fare: misurare in un luogo del seme e di neapolis/sidera (triangoli, vertici, draw call, memoria GPU) per terreno, forme ed entità; un greedy meshing per colore/materiale/normale nelle forme e nel terreno che dà lo stesso aspetto (cartone, contorni, ombre, bagliore; attenzione ai materiali per voxel e al taglio della camera), con le misure prima e dopo; il terreno uguale byte per byte dove un test lo fissa, o l'impronta aggiornata con la ragione (`impronta-terreno.ts`).
+- Test: la mesh fusa copre le stesse facce esposte (stessa area); i test delle mesh verdi.
+- Browser: sì (screenshot prima/dopo, `misura-frame.mjs`).
+- Quando è fatto: meno triangoli misurati, aspetto uguale negli screenshot, test verdi.
+
+### T524 · La documentazione a livelli: una panoramica breve sopra i documenti lunghi, e un indice che scala — `da fare`
+- Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 2
+- Contesto: l'autore il 26/11: il progetto è cresciuto, i documenti degli agenti sono dettagliati ma troppo lunghi da verificare a mano; serve una gerarchia (un documento ridotto per la panoramica, poi i dettagli), anche per gli agenti; «perché non usavamo graphify?». Risposta dell'orchestratore: ADR-0045 lo tiene facoltativo e fuori dal progetto (niente skill, MCP né hook) perché allora il repository era piccolo e `Grep` bastava, e sui file dell'universo vede le chiavi JSON, non il significato. ADR-0120 ha già spezzato `AGENTS.md` in nucleo + `architettura-dettagli.md`.
+- Cosa fare: (1) una mappa dei documenti (dimensioni, chi li legge, sovrapposizioni: `AGENTS.md`, `architettura-dettagli.md`, `fasi.md`, backlog, quadro, ADR, glossario, studi); (2) la proposta di gerarchia a tre livelli (una pagina di panoramica per l'autore e per gli agenti, il nucleo, i dettagli per sottosistema) con le regole per tenerla coerente (chi aggiorna cosa, controlli automatici: link, lunghezze, voci del glossario); (3) graphify (o simili) rivalutato oggi, sul codice e sui documenti: cosa dà, costo, se metterlo nel flusso degli agenti; (4) **la panoramica scritta** (`docs/panoramica.md`, al più due pagine) come primo pezzo; il resto della ristrutturazione come catena di task con domande col consiglio. ADR se cambia la regola dei documenti.
+- Test: un test che controlla i link e le lunghezze dei documenti di livello 1, se proposto.
+- Browser: no.
+- Quando è fatto: mappa, proposta, panoramica scritta, valutazione di graphify, catena e domande.
+
+### T525 · A1-0: le risorse di mxgmn che mancano in testo — `da fare`
+- Pipeline: hydrogen · sforzo medium · stima 2% · approvato · priorità 2
+- Step: 44
+- Contesto: catena dell'allineamento a MarkovJunior, `docs/design/markov-allineamento.md` § 8, riga A1-0; risposte dell'autore a T500 in `docs/pipeline/domande/T500.md` (26/11). `dossier T500`.
+- Cosa fare e test: come la riga A1-0 dello studio. Browser: no.
+- Quando è fatto: i 6 modelli letti dal riferimento come `uscite.json`, test verdi.
+
+### T526 · A1-1: l'interruttore della semantica e System.Random nel motore — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-1 di `docs/design/markov-allineamento.md`; risposte 1-3 di T500 (A). `dossier T500`.
+- Cosa fare e test: come la riga A1-1, con l'ADR della scelta A1 e del criterio voxel per voxel (dove divergiamo apposta, la `wfc`, lo dice l'ADR). Browser: no.
+- Quando è fatto: interruttore spento e griglie di oggi invariate; ADR; test verdi.
+
+### T527 · A1-2: regole e corrispondenze dell'originale — `da fare`
+- Pipeline: claude · sforzo max · stima 8% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-2; risposta 4 di T500 (`one` uniforme senza `p`). Dipende da T526.
+- Cosa fare e test: come la riga A1-2. Browser: no.
+- Quando è fatto: gli `it.fails` della riga diventano `it` con l'interruttore acceso; spento invariato.
+
+### T528 · A1-3: i rami dell'originale — `da fare`
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-3. Dipende da T527.
+- Cosa fare e test: come la riga A1-3. Browser: no.
+- Quando è fatto: come la riga.
+
+### T529 · A1-4: `map`, `path`, `convolution`, `convchain` dell'originale — `da fare`
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-4. Dipende da T528.
+- Cosa fare e test: come la riga A1-4. Browser: no.
+- Quando è fatto: come la riga.
+
+### T530 · A1-5: `wfc` e inferenza dell'originale — `da fare`
+- Pipeline: claude · sforzo max · stima 7% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-5; risposta 2 di T500 (la `wfc` come proposto). Dipende da T529.
+- Cosa fare e test: come la riga A1-5. Browser: no.
+- Quando è fatto: come la riga.
+
+### T531 · A1-6: il compilatore legge l'originale così com'è — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-6; risposta 8 di T500 (le estensioni restano). Dipende da T526; in parallelo ai nodi se non tocca `engine.ts`.
+- Cosa fare e test: come la riga A1-6. Browser: no.
+- Quando è fatto: i 36 modelli dal loro testo, `c8`, test verdi.
+
+### T532 · A1-7: le prestazioni del motore allineato — `da fare`
+- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-7. Dipende da T530.
+- Cosa fare e test: come la riga A1-7. Browser: no.
+- Quando è fatto: misure scritte, tetti di tempo nei test delle forme.
+
+### T533 · A1-8: la migrazione 0.10 → 0.11 (accende la semantica dell'originale) — `da fare`
+- Pipeline: claude · sforzo max · stima 9% · approvato · browser · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-8; risposte 3 (A: convertire gli universi), 4 (A: le `one` con `p` diversi riscritte in nodi separati, vedi la risposta in `domande/T500.md`), 5 (A: il forte dell'autore riscritto coi piani a segno in una **copia accanto**; il file dell'autore non si tocca finché non approva). Dipende da T530, T531, T532.
+- Cosa fare e test: come la riga A1-8. Browser: sì (il forte riscritto e un universo migrato nel lab 3D e nel gioco offline).
+- Quando è fatto: contratto 0.11.0, ADR, `AGENTS.md`, test verdi, visto nel browser.
+
+### T534 · A1-9: il validatore e i controlli dello Scultore sul motore allineato — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-9. Dipende da T533.
+- Cosa fare e test: come la riga A1-9. Browser: no.
+- Quando è fatto: come la riga.
+
+### T535 · A1-10: i prompt dello Scultore con la semantica dell'originale — `da fare`
+- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-10; risposte 4 («`p` solo nella `prl`») e 8 (A: le forme come ancore, la crescita a regole). Dipende da T533.
+- Cosa fare e test: come la riga A1-10. Browser: no.
+- Quando è fatto: come la riga, con la misura dei token.
+
+### T536 · A1-11: i modelli di mxgmn come esempi — `in attesa`
+- Pipeline: claude · sforzo high · stima 4% · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-11; **aspetta la risposta 7** dell'autore (la spiegazione caratteri/token è in `domande/T500.md`). Dipende da T525, T535.
+- Cosa fare e test: come la riga A1-11, con la scelta della domanda 7. Browser: no.
+- Quando è fatto: come la riga.
+
+### T537 · A1-12: il controllo della varianza fra semi — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-12; risposta 6 (A: come avviso). Dipende da T535.
+- Cosa fare e test: come la riga A1-12. Browser: no.
+- Quando è fatto: l'avviso nei controlli dello Scultore, test verdi.
+
+### T538 · A1-13: l'esportazione verso l'originale — `da fare`
+- Pipeline: claude · sforzo high · stima 6% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-13 e § 3.8; risposta 8 (forme e `ground`/`soil` esportati valutandoli in una griglia di partenza, `pieces` tolto, `import` scritto al suo posto). Dipende da T533.
+- Cosa fare e test: come la riga A1-13. Browser: sì se si offre nel laboratorio o nell'editor.
+- Quando è fatto: come la riga.
+
+### T539 · A1-14: la varianza dopo l'allineamento, e la prova pagata degli Scultori — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 2
+- Step: 44
+- Contesto: § 8 riga A1-14. Dipende da T536, T537. La prova pagata col tetto che l'autore dirà (chiederlo prima di spendere).
+- Cosa fare e test: come la riga A1-14. Browser: no.
+- Quando è fatto: misura scritta, prova pagata col consenso dell'autore.
