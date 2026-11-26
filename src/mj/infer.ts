@@ -8,7 +8,7 @@
 //             and time
 // Pure functions on arrays: the engine (`GuidedRunner` in engine.ts) keeps the grid, the matches and the random numbers.
 
-import { Rng } from '../kernel/rng';
+import type { RunRandom } from './random';
 
 /** A rule (one symmetry variant) as inference reads it. */
 export interface InferRule {
@@ -438,9 +438,9 @@ export interface SearchOutcome {
 /**
  * MarkovJunior's Search.Run in three dimensions: a best-first search over the states the rules reach from `present`, ranked by the
  * estimates of the forward and backward potentials and the depth (`depthCoefficient`: below 0, deepest first), until a state whose
- * forward estimate is 0 (every cell in its future). Deterministic from `seed` within the ceilings of states and bytes.
+ * forward estimate is 0 (every cell in its future). Deterministic from `rng` (a generator of its own, T526) within the ceilings of states and bytes.
  */
-export function search(present: Uint8Array, future: Uint32Array, rules: Prepared[], X: number, Y: number, Z: number, C: number, all: boolean, ceilings: SearchCeilings, depthCoefficient: number, seed: number, now: () => number = Date.now): SearchOutcome {
+export function search(present: Uint8Array, future: Uint32Array, rules: Prepared[], X: number, Y: number, Z: number, C: number, all: boolean, ceilings: SearchCeilings, depthCoefficient: number, rng: RunRandom, now: () => number = Date.now): SearchOutcome {
   const N = present.length;
   const bpot = Array.from({ length: C }, () => new Int32Array(N));
   const fpot = Array.from({ length: C }, () => new Int32Array(N));
@@ -457,7 +457,6 @@ export function search(present: Uint8Array, future: Uint32Array, rules: Prepared
   const back: number[] = [rootBack];
   const fwd: number[] = [rootFwd];
   const visited = new Map<number, number[]>([[hashState(present), [0]]]);
-  const rng = new Rng(seed);
   const rank = (b: number) => (depthCoefficient < 0 ? 1000 - depth[b] : fwd[b] + back[b] + 2 * depthCoefficient * depth[b]) + 0.0001 * rng.next();
   const frontier = new Frontier();
   frontier.push(0, rank(0));

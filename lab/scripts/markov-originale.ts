@@ -119,6 +119,7 @@ async function originalEngine(): Promise<{ FLOW: { original: boolean }; run: typ
   };
   swap("from '../kernel/rng'", "from '../../../src/kernel/rng'", 1);
   swap("from './infer'", "from '../../../src/mj/infer'", 1);
+  swap("from './random'", "from '../../../src/mj/random'", 2);
   swap("from './symbols'", "from '../../../src/mj/symbols'", 1);
   swap("from './wfc'", "from '../../../src/mj/wfc'", 1);
   swap(

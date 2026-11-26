@@ -36,7 +36,9 @@
 // Programs written in MarkovJunior's own XML (lab/mjx) compile to these nodes with MarkovJunior's
 // semantics: map with `clear` (a new empty grid, rules wrapping round), conv with `sums`, unlimited steps.
 
-import { hash32, Rng } from '../kernel/rng';
+import { hash32 } from '../kernel/rng';
+import { randomFor, semanticsOf, type RunRandom, type Semantics } from './random';
+export type { Semantics } from './random';
 import { backwardPotentials, fieldPotential, goalReached, INFERENCE_LIMITS, makeWork, MAX_OBSERVED_CODES, prepare, search, type InferRule, type Prepared, type Work } from './infer';
 import { MAX_SYMBOLS, showSymbols, symbolName } from './symbols';
 import { convchainWeights, squareSubgroup, waveBytes, WFC_LIMITS, WfcError, WfcSolver } from './wfc';
@@ -224,6 +226,8 @@ export interface Program3 {
   /** Symbol → codes it stands for in rule inputs (MarkovJunior "union"). */
   unions?: Record<string, string>;
   program: Node3;
+  /** The semantics it was compiled for (T526, ADR-0263): `mj` only when the compiler was told so; absent, ours. */
+  semantics?: Semantics;
 }
 
 export const AIR = '.';
@@ -324,7 +328,10 @@ class Census {
 }
 
 /** The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. */
-let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings } | undefined;
+let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics } | undefined;
+
+/** The semantics of the run in progress (T526, ADR-0263): ours unless the run was told `mj`. */
+export const runSemantics = (): Semantics => current?.semantics ?? 'ours';
 
 /**
  * Ceilings a run may ask for besides the engine's own (the world's, T336, ADR-0176): past one the node is an error that says so, below
@@ -348,7 +355,7 @@ export interface NodeCeilings {
 const potentialCeiling = (): number => Math.min(INFERENCE_LIMITS.potentialBytes, current?.ceilings?.potentialBytes ?? Infinity);
 
 function censusOf(g: Grid3): Census {
-  if (current?.g !== g) current = { g };
+  if (current?.g !== g) current = { g, ...(current?.semantics ? { semantics: current.semantics } : {}) };
   if (!current.census?.fits(g)) current.census = new Census(g);
   return current.census;
 }
@@ -537,7 +544,7 @@ abstract class Runner {
     this.count = 0;
   }
   /** One step: true if the node changed the grid. */
-  abstract go(g: Grid3, rng: Rng): boolean;
+  abstract go(g: Grid3, rng: RunRandom): boolean;
 }
 
 /**
@@ -901,7 +908,7 @@ class RuleRunner extends Runner {
     return true;
   }
 
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.count >= this.limit) return false;
     this.sync(g);
     const keys = this.matches.keys;
@@ -1125,7 +1132,7 @@ class GuidedRunner extends RuleRunner {
   }
 
   /** The trajectory of the search (MarkovJunior: one try without `limit`, twenty with it), or null. Out of time, the run stops. */
-  private searchFrom(g: Grid3, rng: Rng): Uint8Array[] | null {
+  private searchFrom(g: Grid3, rng: RunRandom): Uint8Array[] | null {
     const C = this.alpha.codes.length;
     const { X, Y, Z } = g;
     const { rules } = this.rulesFor(g, true);
@@ -1134,13 +1141,13 @@ class GuidedRunner extends RuleRunner {
     let boards = 0;
     let why = '';
     for (let k = 0; k < tries; k++) {
-      const seed = rng.int(0x7fffffff);
+      const seed = rng.seed();
       const out = search(new Uint8Array(g.cells), this.future, rules, X, Y, Z, C, this.kind === 'all', {
         boards: Math.min(this.searchLimit < 0 ? Infinity : this.searchLimit, INFERENCE_LIMITS.boards),
         bytes: INFERENCE_LIMITS.boardBytes,
         children: INFERENCE_LIMITS.children,
         until,
-      }, this.depthCoefficient, seed);
+      }, this.depthCoefficient, rng.spawn(seed));
       boards += out.boards;
       if (out.late) {
         this.note = `ricerca interrotta dal tempo dopo ${boards} stati`;
@@ -1204,7 +1211,7 @@ class GuidedRunner extends RuleRunner {
    * Every match with a heuristic, and its key: at temperature 0 the lowest heuristic wins (a thousandth of a draw breaks ties); above,
    * u^exp((h - h₀)/T), whose largest falls on a match with probability ∝ exp(-h/T) (OneNode.RandomMatch, AllNode.Go).
    */
-  private scored(g: Grid3, rng: Rng): Array<[number, number]> {
+  private scored(g: Grid3, rng: RunRandom): Array<[number, number]> {
     const out: Array<[number, number]> = [];
     const T = this.temperature;
     let first = 0;
@@ -1222,7 +1229,7 @@ class GuidedRunner extends RuleRunner {
     return out;
   }
 
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.count >= this.limit) return false;
     const N = g.cells.length;
     if (this.observations && this.futureComputed && this.future.length !== N) this.futureComputed = false;
@@ -1361,7 +1368,7 @@ class ConvRunner extends Runner {
       return { i, input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
     });
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.count >= this.limit!) return false;
     const changes: number[] = [];
     const { X, Y, Z, cells } = g;
@@ -1445,7 +1452,7 @@ class PathRunner extends Runner {
    * Without an array per cell (T315): the same walk as before, the neighbours in the order of VON_NEUMANN and the same draws, so the
    * same grid voxel for voxel (tests/mj-path.test.ts); a maze of the site's page solved in a fraction of the time, even before the JIT.
    */
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.count >= this.limit) return false;
     const { X, Y, Z, cells } = g;
     const N = cells.length;
@@ -1715,7 +1722,7 @@ class WfcRunner extends Runner {
     if (n.tries !== undefined && !isInt(n.tries, 1, WFC_LIMITS.tries)) throw new Mj3Error(`wfc: tries va da 1 a ${WFC_LIMITS.tries}`);
   }
 
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.count >= 1) return false;
     const n = this.node;
     const tile = n.model === 'tile';
@@ -1816,7 +1823,7 @@ class ConvChainRunner extends Runner {
   rewind(): void {
     this.reset();
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.counter >= this.limit) return false;
     const total = g.X * g.Y;
     if (this.counter === 0) {
@@ -1851,7 +1858,7 @@ class ConvChainRunner extends Runner {
     return true;
   }
   /** A sweep of the layer that starts at cell `off` (ConvChain.cs): as many draws as its cells, each change kept as the sample's windows say. */
-  private sweep(g: Grid3, rng: Rng, substrate: Uint8Array, off: number): void {
+  private sweep(g: Grid3, rng: RunRandom, substrate: Uint8Array, off: number): void {
     const MX = g.X, MY = g.Y, N = this.N;
     const total = MX * MY;
     const cells = g.cells.subarray(off, off + total);
@@ -1946,7 +1953,7 @@ class PiecesRunner extends Runner {
   rewind(): void {
     this.reset();
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     if (this.count >= 1) return false;
     this.count++;
     this.total++;
@@ -1959,7 +1966,7 @@ class PiecesRunner extends Runner {
     const outer = current;
     const outerGuard = pieceGuard;
     const started = Date.now();
-    const base = rng.int(0x7fffffff);
+    const base = rng.seed();
     // `before`: every piece reads the grid as it was; the pieces write back into the grid itself, which only `written` reads.
     const source = this.halo === 'before' ? new Uint8Array(g.cells) : g.cells;
     const m = this.margin;
@@ -1999,7 +2006,7 @@ class PiecesRunner extends Runner {
         current = { ...(outer ?? {}), g: pg, census: undefined, deadline };
         pieceGuard = { g: pg, mask };
         this.root.reset();
-        const prng = new Rng(hash32(base, index));
+        const prng = rng.spawn(hash32(base, index));
         try {
           for (;;) {
             if (steps >= cap || Date.now() > deadline) {
@@ -2149,7 +2156,7 @@ class SequenceRunner extends Runner {
     this.opened = false;
     for (const c of this.children) c.rewind();
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     while (this.index < this.children.length) {
       if (this.children[this.index].go(g, rng)) {
         if (this.index === 0) this.opened = true;
@@ -2178,7 +2185,7 @@ class MarkovRunner extends Runner {
     super.rewind();
     for (const c of this.children) c.rewind();
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     // for (const c of this.children) if (c.go(g, rng)) { c.reset(); return true; };
     // for (const c of this.children) if (c.go(g, rng)) return true;
     for (let index: number = 0; index < this.children.length; index++) {
@@ -2203,7 +2210,7 @@ class WatchedRunner extends Runner {
   rewind(): void {
     this.inner.rewind();
   }
-  go(g: Grid3, rng: Rng): boolean {
+  go(g: Grid3, rng: RunRandom): boolean {
     const from = g.log.length;
     const epoch = g.epoch;
     if (!this.inner.go(g, rng)) return false;
@@ -2319,6 +2326,8 @@ export interface RunOptions {
   watch?: RunWatch;
   /** Ceilings besides the engine's (the world's, T336): past one the run throws, below them it does not change. */
   ceilings?: NodeCeilings;
+  /** The semantics of the run (T526, ADR-0263), over the program's: absent, the program's, and absent that too, ours. */
+  semantics?: Semantics;
 }
 
 /** One step of a run: the leaf node that did something. */
@@ -2350,7 +2359,7 @@ export interface Snapshot {
 
 function exec(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace = [], opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const outer = current;
-  current = { g, ...(opts.deadline ? { deadline: t0 + opts.deadline } : {}), ...(opts.ceilings ? { ceilings: opts.ceilings } : {}) };
+  current = { g, ...(opts.deadline ? { deadline: t0 + opts.deadline } : {}), ...(opts.ceilings ? { ceilings: opts.ceilings } : {}), ...(opts.semantics === 'mj' ? { semantics: 'mj' as const } : {}) };
   try {
     return execIn(root, g, seed, maxSteps, t0, trace, opts);
   } finally {
@@ -2373,7 +2382,7 @@ function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: numb
 
 function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace, opts: RunOptions): RunResult & { snapshots?: Snapshot[] } {
   root.reset();
-  const rng = new Rng(seed);
+  const rng = randomFor(opts.semantics, seed);
   let steps = 0;
   let late = false;
   const keep = opts.snapshots ?? 0;
@@ -2447,14 +2456,14 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
   const soilAt = typeof p.soil === 'string' && p.soil.length === 1 ? (p.soilAt && p.soilAt > 0 && p.soilAt < Z ? p.soilAt : 0) : -1;
   if (soilAt >= 0) g.cells.fill(alpha.index(p.soil!), soilAt * X * Y, (soilAt + 1) * X * Y);
   if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : Math.max(0, soilAt) * X * Y)] = alpha.index(p.origin);
-  return exec(root, g, seed, maxSteps, t0, trace, opts);
+  return exec(root, g, seed, maxSteps, t0, trace, { ...opts, semantics: semanticsOf(p, opts) });
 }
 
 /**
  * Runs more rules on a grid that already exists (a composed structure, say): its codes keep their
  * meaning, the palette may add new ones. The grid is changed in place and returned.
  */
-export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program'>, seed: number, maxSteps = 20000, limits: GridLimits = { side: 4096, cells: 64_000_000 }, opts: RunOptions = {}): RunResult {
+export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program' | 'semantics'>, seed: number, maxSteps = 20000, limits: GridLimits = { side: 4096, cells: 64_000_000 }, opts: RunOptions = {}): RunResult {
   const t0 = Date.now();
   const alpha = alphabetOf(p, grid.alphabet);
   const trace: Trace = [];
@@ -2462,7 +2471,7 @@ export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'pro
   grid.alphabet = alpha.codes;
   grid.log = [];
   grid.epoch++;
-  return exec(root, grid, seed, maxSteps, t0, trace, opts);
+  return exec(root, grid, seed, maxSteps, t0, trace, { ...opts, semantics: semanticsOf(p, opts) });
 }
 
 /**
@@ -2477,18 +2486,19 @@ export class Stepper {
   /** Steps made so far. */
   steps = 0;
   private root: Runner;
-  private rng: Rng;
-  private context: { g: Grid3; census?: Census };
+  private rng: RunRandom;
+  private context: { g: Grid3; census?: Census; semantics?: Semantics };
   /** Past this many writes in the log, between two ticks the log starts again and the nodes scan the grid once: memory stays bounded. */
   private logCap: number;
-  constructor(readonly grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program'>, seed: number, limits: GridLimits = { side: 4096, cells: 64_000_000 }) {
+  constructor(readonly grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program' | 'semantics'>, seed: number, limits: GridLimits = { side: 4096, cells: 64_000_000 }) {
     const alpha = alphabetOf(p, grid.alphabet);
     this.root = compile(p.program, alpha, limits);
     grid.alphabet = alpha.codes;
     grid.log = [];
     grid.epoch++;
-    this.rng = new Rng(seed);
-    this.context = { g: grid };
+    const semantics = semanticsOf(p);
+    this.rng = randomFor(semantics, seed);
+    this.context = { g: grid, ...(semantics === 'mj' ? { semantics } : {}) };
     this.logCap = Math.max(4096, grid.cells.length * 4);
     this.root.reset();
   }

@@ -6,7 +6,7 @@
 // Only text (rule 11): tiles and samples are letters, never images or .vox files. The compiler (model.ts) reads them from models/ and
 // gives them here as ordinals of the node's `values` (0 is the empty letter).
 
-import { Rng } from '../kernel/rng';
+import type { RunRandom } from './random';
 
 /**
  * The ceilings of a node (ADR-0174). They count units, not time: the same seed gives the same grid on every machine. Time is a ceiling
@@ -526,7 +526,7 @@ export class WfcSolver {
     return !this.dead;
   }
 
-  private nextUnobserved(rng: Rng): number {
+  private nextUnobserved(rng: RunRandom): number {
     const { wave } = this;
     let min = 1e4;
     let argmin = -1;
@@ -544,7 +544,7 @@ export class WfcSolver {
     return argmin;
   }
 
-  private observe(i: number, rng: Rng): void {
+  private observe(i: number, rng: RunRandom): void {
     const { P, wave, distribution } = this;
     let sum = 0;
     for (let t = 0; t < P; t++) sum += distribution[t] = wave.data[i * P + t] ? this.weights[t] : 0;
@@ -565,14 +565,14 @@ export class WfcSolver {
    * The bans so far propagated, then up to `tries` tries, each from a seed drawn from `rng` (MarkovJunior's GoodSeed): the first that
    * observes every cell without a contradiction is the outcome. The same `rng` gives the same outcome; past `until` it is late.
    */
-  solve(rng: Rng, tries: number, until: number, now: () => number = Date.now): WfcOutcome {
+  solve(rng: RunRandom, tries: number, until: number, now: () => number = Date.now): WfcOutcome {
     const first = this.propagate(until, now);
     if (first === 'late') return { tries: 0, observations: 0, late: true };
     if (!first) return { tries: 0, observations: 0, why: 'le condizioni iniziali sono contraddittorie' };
     this.start.copyFrom(this.wave);
     const deadAtStart = this.dead;
     for (let k = 0; k < tries; k++) {
-      const r = new Rng(rng.int(0x7fffffff));
+      const r = rng.spawn(rng.seed());
       this.top = 0;
       this.dead = deadAtStart;
       if (k) this.wave.copyFrom(this.start);

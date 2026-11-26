@@ -6832,12 +6832,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: i 6 modelli letti dal riferimento come `uscite.json`, test verdi.
 - Esito: portate in testo le risorse di Knots3D (per cartella), CarmaTower e DualRetraction, aggiunta la copia di ClosedSurface e il supporto a tiles con "/" nel compilatore e nel riferimento; i 6 modelli + ClosedSurface passano il confronto voxel per voxel con uscite.json sul seme 1, typecheck e suite test verdi (non provati --originale con .NET né i semi 2 e 3 in vitest).
 
-### T526 · A1-1: l'interruttore della semantica e System.Random nel motore — `da fare`
+### T526 · A1-1: l'interruttore della semantica e System.Random nel motore — `fatto` (`90fe750a`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-1 di `docs/design/markov-allineamento.md`; risposte 1-3 di T500 (A). `dossier T500`.
 - Cosa fare e test: come la riga A1-1, con l'ADR della scelta A1 e del criterio voxel per voxel (dove divergiamo apposta, la `wfc`, lo dice l'ADR). Browser: no.
 - Quando è fatto: interruttore spento e griglie di oggi invariate; ADR; test verdi.
+- Esito: `src/mj/random.ts` con l'interruttore `ours|mj` spento e System.Random di .NET, collegato a compilatore, `run`, `runOn`, `Stepper`, `wfc`, `search` e `pieces`; con `ours` le griglie di oggi invariate (impronte di ADR-0142 verdi); ADR-0262 sulla scelta A1, il criterio voxel per voxel e dove divergiamo (la `wfc`, 255 valori, `search` in 3D, le estensioni); kernel 0.10.39; `tests/mj-random.test.ts`; non provato: `path` sotto `mj` (A1-4) e l'ordine delle corrispondenze oltre la riga (A1-2); la lettura della risposta 2 sulla `wfc` è da confermare in A1-5 (T530); sicurezza: nessuna superficie nuova.
 
 ### T527 · A1-2: regole e corrispondenze dell'originale — `da fare`
 - Pipeline: claude · sforzo max · stima 8% · approvato · priorità 1
