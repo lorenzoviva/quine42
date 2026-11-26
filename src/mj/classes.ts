@@ -310,3 +310,37 @@ export function guessClass(text: string, category?: string): AssetClass {
   }
   return classOf('furniture')!;
 }
+
+/**
+ * The built landscape (T515): what stands where it was built in a place and nobody enters, a fountain, a well, a trough, a statue, a monument.
+ * The head of its name says it (the articles and a few adjectives before it, as the Forge reads a building's name): «Fontana di Piazza della
+ * Pesa» is a fountain, «la Torre della fontana» is not. Italian and English like `CLASS_WORDS` (the other languages are T239's). The small
+ * ones one walks round are a `building` (its box 2.5 tiles, no storeys asked), the tall ones on one tile a `monument`.
+ */
+const LANDMARK_LEAD = String.raw`^(?:(?:la|il|lo|una|un|uno|le|i|gli|the|an?|old|vecchi[oa]|antic[oa]|piccol[oa]|grande|gran|nuov[oa]|small|big|great|little|new)\s+|l['’]\s*)*`;
+const LANDMARK_WORDS: Array<['building' | 'monument', RegExp]> = [
+  ['building', new RegExp(String.raw`${LANDMARK_LEAD}(fontana|fontane|fontanella|fontanelle|fontanile|fontanili|pozzo|pozzi|abbeveratoio|abbeveratoi|lavatoio|lavatoi|cisterna|cisterne|edicola|edicole|tabernacolo|chiosco|chioschi|gazebo|tempietto|fountains?|wells?|wellheads?|troughs?|cisterns?|wash-?houses?|kiosks?|gazebos?|bandstands?|wayside shrines?)\b`, 'i')],
+  ['monument', new RegExp(String.raw`${LANDMARK_LEAD}(statua|statue|monumento|monumenti|obelisco|obelischi|colonna|colonne|stele|cippo|cippi|lapide|lapidi|meridiana|meridiane|menhir|totem|cenotafio|statues?|monuments?|obelisks?|columns?|pillars?|steles?|stelae|memorials?|cenotaphs?|sundials?|menhirs?|totems?)\b`, 'i')],
+];
+
+/** The class of the built landscape a name says (T515): `building` for a fountain or a well, `monument` for a statue; undefined for the rest. */
+export function landmarkClassOf(name: string): 'building' | 'monument' | undefined {
+  const t = name.trim();
+  return LANDMARK_WORDS.find(([, re]) => re.test(t))?.[0];
+}
+
+/**
+ * The class a thing of the world gets (T515): what its maker said, but never `structure`. A structure is a building one enters, with storeys
+ * the Sculptor's checks want (`reachableStoreys`): the Cartographer's lots have them, a module of the Forge is a thing that stands on the
+ * terrain («Buildings are environments»). A fountain the Narrator called a structure is the class its name says, else a small building; an
+ * unknown or missing class the same, then the guess.
+ */
+export function thingClass(said: string | undefined, name: string, guess: () => AssetClass): AssetClass {
+  const cls = classOf(said);
+  if (cls && cls.id !== 'structure') return cls;
+  const landmark = landmarkClassOf(name);
+  if (landmark) return classOf(landmark)!;
+  if (cls) return classOf('building')!;
+  const guessed = guess();
+  return guessed.id === 'structure' ? classOf('building')! : guessed;
+}

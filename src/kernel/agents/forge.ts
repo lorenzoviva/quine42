@@ -11,7 +11,7 @@ import type { Schema } from '../ai/models';
 import { hashStr } from '../rng';
 import { normName } from '../content';
 import type { Manifest } from '../types';
-import { classOf, guessClass, RARE_SIZES, sizeOf, SIZE_TIERS } from '../../mj/classes';
+import { CLASSES, classOf, guessClass, landmarkClassOf, RARE_SIZES, sizeOf, SIZE_TIERS, thingClass } from '../../mj/classes';
 import { internalComponents, internalName, internalValues } from '../internalNames';
 import { luaFor0_5, luaFor0_7 } from '../migrations';
 import { ownModelId } from '../modeldirector';
@@ -134,6 +134,21 @@ export interface ForgeResult {
 
 export type ModuleValidator = (manifest: Manifest, logic: string) => string[];
 
+/**
+ * The classes the Narrator chooses among for a thing of the Forge (T515): all but `structure`, the building one enters with its storeys, which is
+ * the Cartographer's (its lots). A fountain asked for in the run of 26/11 became a structure, and its model failed on the storeys.
+ */
+const FORGE_CLASSES: string[] = internalValues('classi').filter((id) => id !== 'structure');
+
+/**
+ * Whether a concept stands where it is built (T515): its name says the built landscape (a fountain, a well, a statue) or its class is a building
+ * or a monument. Never a tool that goes in the bag: asked as an `item` (the Referente took a fountain for one), it is an `object`.
+ */
+export function standsInPlace(concept: Pick<Concept, 'name' | 'class'>): boolean {
+  const cls = classOf(internalName('classi', String(concept.class ?? '')))?.id;
+  return landmarkClassOf(String(concept.name ?? '')) !== undefined || cls === 'structure' || cls === 'building' || cls === 'monument';
+}
+
 const CONCEPT_SCHEMA: Schema = {
   type: 'OBJECT',
   properties: {
@@ -143,7 +158,8 @@ const CONCEPT_SCHEMA: Schema = {
     lore: { type: 'STRING' },
     look: { type: 'STRING', description: 'what it is made like: shape, proportions, materials, colours (the Sculptor makes a 3D model of it)' },
     // Classes and sizes are internal since T310 (the prompts are English); the Forge still makes an Italian one of the contract 0.1 internal.
-    class: { type: 'STRING', enum: internalValues('classi'), description: 'its class of size (person, animal, furniture, object, building…)' },
+    // Never `structure` (T515): a building one enters is the Cartographer's; a fountain, a well, a statue are a building or a monument.
+    class: { type: 'STRING', enum: FORGE_CLASSES, description: `its class of size: ${CLASSES.filter((k) => FORGE_CLASSES.includes(k.id)).map((k) => `${k.id} (${k.hint})`).join('; ')}` },
     size: { type: 'STRING', enum: SIZE_TIERS.filter((t) => !RARE_SIZES.includes(t.id)).map((t) => t.id), description: 'the size of D&D, only if different from the usual one of its class (a giant: large)' },
     context: {
       type: 'OBJECT',
@@ -314,7 +330,7 @@ export function assembleManifest(id: string, concept: Concept, physics: PhysicsS
     tags: concept.tags ?? [],
     origin,
     logic: 'logic.lua',
-    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, look: concept.look, model: ownModelId(id), class: classOf(internalName('classi', concept.class ?? ''))?.id ?? guessClass(`${concept.name} ${concept.look}`, npc ? 'figure' : undefined).id, ...forgedSize(concept.size) },
+    appearance: { glyph, color: `hsl(${hue} 65% 68%)`, look: concept.look, model: ownModelId(id), class: thingClass(internalName('classi', concept.class ?? ''), concept.name, () => guessClass(`${concept.name} ${concept.look}`, npc ? 'figure' : undefined)).id, ...forgedSize(concept.size) },
     physics: {
       solid: item ? false : !!physics.solid,
       radius: clamp(physics.radius, 0.2, 0.5, 0.35),
@@ -431,8 +447,16 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
 
   // Who asked for it decided whether it can be taken (T292): the concept says what they said.
   const decided = (x: Concept): Concept => (req.takeable === undefined ? x : { ...x, takeable: req.takeable });
-  let concept = decided(await askConcept());
-  if (req.kind) concept.type = req.kind;
+  // The kind who asked for it said, but what stands where it is built is never a tool in the bag (T515): a fountain asked as an item is a thing of the world.
+  const kindOf = (x: Concept): Concept => {
+    if (!req.kind) return x;
+    if (req.kind === 'item' && standsInPlace(x)) {
+      c.say('kernel', 'corregge', `«${x.name}» sta dove è costruito: è una cosa del mondo, non uno strumento da portare`, 'narrator');
+      return { ...x, type: 'object', takeable: false };
+    }
+    return { ...x, type: req.kind };
+  };
+  let concept = kindOf(decided(await askConcept()));
   c.say('narrator', 'propone', `«${concept.name}» (${concept.type}): ${concept.description}`);
   // Inside the world nothing knows of the Council's table; nor is anything made twice.
   // The words metaBreak knows, then the four questions of `text.fourthwall` (T350): what breaks goes back to the Narrator with the reason.
@@ -443,16 +467,14 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     if (!meta && !dup) break;
     const why = meta ? `«${concept.name}» rompe la quarta parete («${meta}»): dentro il mondo nessuno sa di codice, simulazioni o del Concilio. Crea una persona o una cosa vera del mondo.` : `«${concept.name}» esiste già: crea qualcosa di diverso.`;
     c.say('kernel', 'scarta', why, 'narrator');
-    concept = decided(await askConcept(why));
-    if (req.kind) concept.type = req.kind;
+    concept = kindOf(decided(await askConcept(why)));
     if (tries === 1 && ((await breaks(concept)) || req.existingNames?.some((n) => normName(n) === normName(concept.name)))) throw new ForgeRejected(`ancora fuori dal mondo o doppione: ${concept.name}`, 'narrator');
   }
   // Buildings are environments (the Cartographer's layouts), never one-tile objects.
   if (isStructure(concept)) {
     const why = `«${concept.name}» è un edificio o una struttura: quelli sono ambienti del Cartografo, non oggetti. Crea invece qualcosa che sta dentro o fuori un edificio (un mobile, un attrezzo, una persona).`;
     c.say('kernel', 'scarta', why, 'narrator');
-    concept = decided(await askConcept(why));
-    if (req.kind) concept.type = req.kind;
+    concept = kindOf(decided(await askConcept(why)));
     if (isStructure(concept)) throw new ForgeRejected(`ancora una struttura: ${concept.name}`, 'narrator');
     c.say('narrator', 'corregge', `«${concept.name}» (${concept.type}): ${concept.description}`);
   }
@@ -460,8 +482,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
   const refused = vehicleRefusal(concept, req.media);
   if (refused) {
     c.say('kernel', 'scarta', refused, 'narrator');
-    concept = decided(await askConcept(refused));
-    if (req.kind) concept.type = req.kind;
+    concept = kindOf(decided(await askConcept(refused)));
     const still = vehicleRefusal(concept, req.media);
     if (still || isStructure(concept)) throw new ForgeRejected(still ?? `ancora una struttura: ${concept.name}`, 'narrator');
     c.say('narrator', 'corregge', `«${concept.name}» (${concept.type}): ${concept.description}`);
@@ -484,8 +505,7 @@ export async function forge(c: Council, req: ForgeRequest, validate: ModuleValid
     for (const p of review.problems.slice(0, 3)) c.say('arbiter', 'obietta', p.problem, p.agent);
     const issues = (agent: AgentId) => review.problems.filter((p) => p.agent === agent).map((p) => p.problem).join('; ');
     if (issues('narrator')) {
-      concept = decided(await askConcept(issues('narrator')));
-      if (req.kind) concept.type = req.kind;
+      concept = kindOf(decided(await askConcept(issues('narrator'))));
       // What the Arbiter's round gave back still behaves as it looks (T487): else the kernel's word, as for a name nobody gave a medium.
       if (vehicleRefusal(concept, req.media)) concept = { ...concept, vehicle: undefined };
       c.say('narrator', 'corregge', `«${concept.name}»: ${concept.description}`);

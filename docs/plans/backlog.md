@@ -6743,13 +6743,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (in un universo del Concilio e nel seme).
 - Quando è fatto: i mobili degli interni rispondono a E in ogni universo, test verdi.
 
-### T515 · Una fontana chiesta al Concilio non diventa un edificio che fallisce — `da fare`
+### T515 · Una fontana chiesta al Concilio non diventa un edificio che fallisce — `fatto` (`1f9d5b5b`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Contesto: run #2 (26/11): in `orichalcum` l'autore ha chiesto al Concilio una fontana nella mappa; il Concilio l'ha presa per un edificio e la generazione è fallita. Le copie della run in `beta-run-2`, `world/shortfalls.json`.
 - Cosa fare: dal registro della run capire chi ha classificato (Referente, Fucina, Cartografo) e perché è fallita; la classe giusta per le cose del paesaggio costruito (fontana, pozzo, statua, monumento: struttura piccola senza interno o arredo urbano), la guardia `isDwelling` che non vuole stanze da una fontana, il motivo del fallimento restituito all'agente giusto invece di arrendersi.
 - Test: offline, «metti una fontana in piazza» dà una cosa del luogo con un modello, senza fallire.
 - Browser: no (test offline); sì se cambia ciò che si vede.
 - Quando è fatto: la fontana nasce, test verdi.
+- Esito: la fontana chiesta al Referente nasce come cosa del luogo, con un modello (edificio piccolo o monumento) e senza fallire: la Fucina non dà più `structure` a una cosa del mondo né fa uno strumento di una fontana, i moduli di prima chiedono allo Scultore la classe giusta, e la cosa va nel luogo nominato o in quello del viandante (ADR-0263, kernel 0.10.39, tests/fontana.test.ts); non provato con Gemini vero, in multigiocatore (il ramo del master non posa la cosa) e per lingue diverse da italiano e inglese.
 
 ### T516 · Gemini Neon: chiudere la prova e provarlo come Scultore — `da fare`
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2

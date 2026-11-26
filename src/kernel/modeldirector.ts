@@ -7,7 +7,7 @@ import type { Kernel } from './kernel';
 import { EXAMPLE_SCORE, procedural, requestSpecialty, sculpt, shareableProgram, STRUCTURE_SEEDS, type SculptorSpecialty, type SculptRequest, type SculptResult } from './agents/sculptor';
 import { extractPart, PART_TASK, PART_TRIES } from './agents/parts';
 import { WORLD_PARTS } from './worldparts';
-import { classOf, densityFor, growsByRules, guessClass, isVessel, RARE_SIZES, sizeOf, SIZE_TIERS, TILE, type SizeTier } from '../mj/classes';
+import { classOf, densityFor, growsByRules, guessClass, isVessel, RARE_SIZES, sizeOf, SIZE_TIERS, thingClass, TILE, type SizeTier } from '../mj/classes';
 import { cellarOf, type ModelInfo } from './forms';
 import { BudgetError } from './ai/models';
 import { modelGap, sculptPlan } from './coefficients';
@@ -171,7 +171,8 @@ export class ModelDirector {
       const man = m.manifest;
       const app = man.appearance;
       if (!app || !lacks(app.model)) continue;
-      const classe = app.class ?? guessClass(`${man.name} ${man.description ?? ''} ${app.look ?? ''}`, man.persona ? 'figure' : undefined).id;
+      // A thing of the world is never a structure one enters (T515): a fountain a manifest of before calls one is the class its name says.
+      const classe = thingClass(app.class, man.name, () => guessClass(`${man.name} ${man.description ?? ''} ${app.look ?? ''}`, man.persona ? 'figure' : undefined)).id;
       const taglia = sizeOf(app.size)?.id;
       out.push({ id: app.model!, nome: man.name, aspetto: app.look ?? man.description ?? man.name, classe, ...(taglia ? { taglia } : {}), contesto: man.context });
     }

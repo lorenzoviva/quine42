@@ -51,7 +51,7 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, formDeckAreas, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
-import { boxOf, classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
+import { boxOf, classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, thingClass, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { footprint, stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
@@ -4849,6 +4849,34 @@ export class Kernel {
     return r.ok;
   }
 
+  /**
+   * A thing of the world the wanderer asked the Referente for (T515) goes in a place: the planned one they named (`target`), else the one under
+   * where they stand. In its plan as the Cartographer's things are (`objects`, `outside`), saved, so it is there at every return; and now, if the
+   * place is loaded, where the placements put it (on what is reached, never on a gate or a door). The place's name, or undefined: a person or a
+   * tool is not placed, nor in a mirror (the world's kernel does it), nor where no planned place is.
+   */
+  private placeAsked(id: string, target?: string): string | undefined {
+    const m = this.modules.get(id);
+    if (this.mirror || !m || m.manifest.kind !== 'entity' || m.manifest.persona || this.vehicleSpecFor(m.manifest)) return undefined;
+    const named = target ? normName(target) : '';
+    const planned = [...this.chunks.values()].filter((c) => c.stage === 'planned' && c.plan);
+    const here = this.chunkAt(this.wandererCarpet().x, this.wandererCarpet().y);
+    const ch = (named && planned.find((c) => normName(c.plan!.place.name) === named || normName(c.plan!.place.name).includes(named))) || (here?.stage === 'planned' && here.plan ? here : undefined);
+    if (!ch?.plan) return undefined;
+    const plan = ch.plan;
+    plan.objects.push({ module: id, where: 'outside' });
+    const i = plan.objects.length - 1;
+    void this.chunkStore.save(this.recordKey(ch), { plan }).catch(() => undefined);
+    if (this.alive(ch) && !this.uniqueTaken(m)) {
+      const S = this.config.chunkSize;
+      const { result } = this.layoutOf(ch, plan, this.pathCode(), true);
+      const cell = this.placementsOf(ch, plan, result, ch.network).objects.find((o) => o.index === i)?.cell;
+      if (cell !== undefined) this.spawnModuleEntity(m, ch.cx * S + (cell % S) + 0.5, ch.cy * S + Math.floor(cell / S) + 0.5, ch.key, `${ch.key}#o${i}`);
+    }
+    this.council.say('kernel', 'info', `«${m.manifest.name}» è a «${plan.place.name}», come ha chiesto il viandante`, 'cartographer', 'referente.coordinate');
+    return plan.place.name;
+  }
+
   /** The Cartographer asked for something that does not exist yet: the Forge makes it, then it appears. */
   private async forgeForChunk(ch: Chunk, f: { concept: string; where: Where; takeable?: boolean }, pick: (w: Where, solid?: boolean) => number | undefined, at: (c: number) => { x: number; y: number }): Promise<void> {
     const tag = `${ch.key}:${f.concept}`;
@@ -9470,7 +9498,7 @@ export class Kernel {
     if (kind === 'module' && load(this.modules.get(id)?.manifestPath)) {
       if (!man.appearance) return false;
       const r = own(man.appearance, man.name, man.id);
-      req = { ...r, nome: man.name, aspetto: man.appearance.look ?? man.description ?? man.name, classe: man.appearance.class ?? this.forms.classOf(this.forms.resolve(r.previous ?? r.id, undefined)).id };
+      req = { ...r, nome: man.name, aspetto: man.appearance.look ?? man.description ?? man.name, classe: thingClass(man.appearance.class, man.name, () => this.forms.classOf(this.forms.resolve(r.previous ?? r.id, undefined))).id };
     } else if (kind === 'item' && load(this.modules.get(this.content.itemSource.get(id) ?? '')?.manifestPath)) {
       const it = (man.items ?? []).find((x: ItemDef) => x.id === id);
       const o = it ?? man.appearance;
@@ -9973,9 +10001,13 @@ export class Kernel {
     this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' || r.task === 'automaton' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
     switch (r.task) {
       case 'item':
-        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'item', true)).summary };
-      case 'thing':
-        return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'object', true)).summary };
+      case 'thing': {
+        // A thing of the world (T515) goes in the place they said, or where they stand: «metti una fontana in piazza». What the Forge made a
+        // thing though asked as an item (a fountain stands where it is built) goes there too.
+        const f = await this.forgeModule(req, 'agente', r.task === 'item' ? 'item' : 'object', true);
+        const put = f.ok && f.id ? this.placeAsked(f.id, r.target) : undefined;
+        return { say: r.say, forged: put ? `${f.summary}, a «${put}»` : f.summary };
+      }
       case 'character':
         return { say: r.say, forged: (await this.forgeModule(req, 'agente', 'npc', true)).summary };
       case 'environment':
