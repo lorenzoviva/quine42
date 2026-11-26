@@ -6940,7 +6940,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: test verdi, impronta del seme invariata, esito con ciò che cambia negli universi dal rilievo vero.
 
 ### T542 · La coda degli abbonamenti pagata coi crediti API di Anthropic (i 100 $ di novembre) — `da fare`
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 0
 - Step: 44
 - Contesto: autore 26/11: l'abbonamento Anthropic include 100 $ di crediti API al mese, da consumare entro l'1/12 per rigenerare i modelli MJ. Oggi la rigenerazione (`npm run genera -- <u> --rigenera modelli`, ADR-0216) passa dalla coda servita dalla CLI sull'abbonamento (`tools/abbonamenti/servi.ts`), che consuma la settimana. La CLI con `ANTHROPIC_API_KEY` nell'ambiente fattura all'API.
 - Cosa fare: `npm run abbonamento -- --api` (o una variabile del `.env`): solo il processo figlio della CLI che serve la coda riceve `ANTHROPIC_API_KEY` (letta dal `.env`, mai stampata né in un log, mai nell'ambiente dei task della pipeline, del server o di un mondo; senza `--api` la chiave è tolta dall'ambiente del figlio); un tetto in dollari (`--tetto-api`, al listino `anthropicCost` sui token che la CLI dice, e il costo della CLI accanto) oltre il quale la coda smette di servire; la spesa scritta in un registro accanto alla coda; `stato` del generatore la dice. Nessun cambio al kernel.
