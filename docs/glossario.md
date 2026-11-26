@@ -815,6 +815,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «Guardia» da sola fuori dal banco (`lab/banco/scenografo/`, la guardia del banco di T259), «palcoscenico»
 - **Fermo**: nessuno (nulla su disco: un interno è una funzione dell'edificio e della sua chiave).
 
+### Stanza chiusa
+- **Inglese**: `roomsReached`, `GroundRoom`, `closedRoomErrors`, `CLOSED_ROOM`, `insideWalk`, `shutsInside`, `withSolid`
+- **Definizione**: una stanza del piano terra di una struttura (almeno `CLOSED_ROOM`, 1 casella² dove sta il centro di un corpo) in cui il cammino dalla porta non entra: i controlli dello Scultore la rifiutano col motivo; e una cosa solida del piano posata dentro una struttura non ne chiude nessuna, misurato con la collisione del mondo su un ottavo di casella (T513, ADR-0260).
+- **Dove vive**: `src/kernel/interior.ts`, `src/mj/check.ts`, `src/kernel/agents/sculptor.ts`, `src/kernel/kernel.ts`, `lab/scripts/interni-percorsi.ts`
+- **Da non usare**: «stanza murata», «stanza irraggiungibile» per il controllo
+- **Fermo**: nessuno (nulla su disco).
+
 ### Composizione
 - **Inglese**: `Composition`, `compositionOf`, `varietyError`, `MIN_PART`
 - **Definizione**: ciò che una struttura contiene a una taglia, contato in parti (i pezzi di una lettera di almeno `MIN_PART` voxel) e tipi di parti (le lettere): a una taglia più grande lo stesso programma deve contenere di più, «ciò che entra» (ADR-0179).

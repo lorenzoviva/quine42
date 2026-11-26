@@ -106,6 +106,19 @@ import { COUNCIL_ORIGINS, repairVehicleClaims, vehicleSpot, worldMedia, type Veh
 import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
+/** What a body walks in and around a structure (`Kernel.insideWalk`, T513): its cells, their groups, how a cell is walked again. */
+interface InsideWalk {
+  area: TileArea;
+  /** The side of a cell, tiles; the corner of the window, carpet space. */
+  d: number;
+  x0: number;
+  y0: number;
+  before: Walk;
+  /** Whether a body's middle stands in a cell now (the world as it is at the moment). */
+  at: (c: number, r: number) => boolean;
+  groups: Int32Array;
+}
+
 interface SolidForm extends Ground {
   id: Id;
   x: number;
@@ -519,6 +532,12 @@ export const INDOOR_R = 0.15;
 /** How far (tiles) the middle of what goes indoors stays from the cellar's stairwell (T417), and a solid thing from a door and from it (T429). */
 const WELL_KEEP = 0.75;
 const DOOR_KEEP = 1.2;
+/**
+ * The walk in and around a structure that a solid thing put inside must not shut (T513): an eighth of a tile (a door is less than a tile wide,
+ * and a body's middle passes it in a band of half a tile), and at most this many cells a side (a Gargantuan one is walked coarser).
+ */
+const INSIDE_STEP = 0.125;
+const INSIDE_CELLS = 120;
 /**
  * What `E`, the right button and the cursor find is on the storey one stands on (T431): its height from this much under the feet (tiles)
  * to less than `FLOOR_ABOVE` over them, a table's top and a high shelf with it; the storey under and the one over (a storey is
@@ -3406,7 +3425,7 @@ export class Kernel {
       }
       const p = at(cell);
       const sid = inLot(cell);
-      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y), plan.objects[index].where === 'under');
+      if (sid !== undefined) void this.placeInside(ch, sid, p, (x, y) => this.spawnModuleEntity(m, x, y, ch.key, origin), this.isSolidModule(m), (x, y) => !this.spotFailure(m.manifest, this.formFor(m.manifest, origin), x, y), plan.objects[index].where === 'under', this.formFor(m.manifest, origin));
       else {
         const eid = this.spawnModuleEntity(m, p.x, p.y, ch.key, origin);
         // Sunken/underwater object (T480): rests on the seabed below the water surface, never NPCs.
@@ -3983,11 +4002,13 @@ export class Kernel {
    * no room in any structure of the place stands beside its own, outside the lots, where `beside` lets it (T407: the rule of putting down).
    * `under` (T417): in the structure's cellar, on its floor (`cellarPoints`), with its height; without room down there, inside as the rest.
    */
-  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => Id | void, solid = false, beside?: (x: number, y: number) => boolean, under = false): Promise<void> {
+  private async placeInside(ch: Chunk, sid: Id, fallback: { x: number; y: number }, spawn: (x: number, y: number) => Id | void, solid = false, beside?: (x: number, y: number) => boolean, under = false, thing?: FormComp): Promise<void> {
     const fc: FormComp | undefined = this.ecs.get(sid, 'form');
     // As long as its program runs (T281): in the browser a structure comes from a worker in tens of seconds, and what goes in
     // would otherwise go where the plan said, inside its walls.
     if (fc) await this.forms.settled(fc.model, fc.seed, fc.tint, undefined, { stratum: fc.stratum });
+    // The solid thing's own form (T513): what it stops a body with, tried where it would stand.
+    if (thing && solid) await this.forms.settled(thing.model, thing.seed, thing.tint);
     if (!this.alive(ch) || !this.ecs.alive.has(sid)) return;
     this.rebuildSolids();
     // Not where something already stands (`free`: a chest, a counter put there before, T281), and away from what is
@@ -4014,8 +4035,17 @@ export class Kernel {
     // tile from it, a thing a tile long could still close the way off the top tread.
     const keep = solid ? DOOR_KEEP : WELL_KEEP;
     const inside = this.interiorPoints(sid, keep, solid ? DOOR_KEEP : 0);
-    const roomyOf = (points: Array<{ x: number; y: number }>, near = taken) =>
-      points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > DOOR_KEEP)));
+    // A solid thing never shuts what a body reached in the structure (T513, rule 10): its door, the room behind it, the foot of a stair.
+    const shape = solid && thing ? this.forms.ready(thing.model, thing.seed, thing.tint) : undefined;
+    const ways = new Map<Id, InsideWalk | undefined>();
+    const keepsWay = (house: Id, q: { x: number; y: number }) => {
+      if (!shape?.result) return true;
+      if (!ways.has(house)) ways.set(house, this.insideWalk(house));
+      const w = ways.get(house);
+      return !w || !this.shutsInside(w, { ...thing!, yaw: Math.round(thing!.yaw / (Math.PI / 2)) * (Math.PI / 2), f: shape }, q.x, q.y);
+    };
+    const roomyOf = (points: Array<{ x: number; y: number }>, near = taken, house = sid) =>
+      points.filter((q) => this.free(q.x, q.y, INDOOR_R) && near.every((t) => Math.hypot(t.x - q.x, t.y - q.y) > 0.9) && (!solid || doorPositions.every((dp) => Math.hypot(dp.x - q.x, dp.y - q.y) > DOOR_KEEP)) && (!solid || keepsWay(house, q)));
     const open = inside.filter((q) => this.free(q.x, q.y, INDOOR_R));
     let roomy = roomyOf(inside);
     // A solid thing with no room in its structure goes into another of the place that has some (T407), never where the plan said:
@@ -4029,7 +4059,7 @@ export class Kernel {
         if (!this.ecs.alive.has(id)) continue;
         this.rebuildSolids();
         const now = this.ecs.query('pos').filter((e) => e !== id).map((e) => this.ecs.get(e, 'pos'));
-        if ((roomy = roomyOf(this.interiorPoints(id, keep, solid ? DOOR_KEEP : 0), now)).length) break;
+        if ((roomy = roomyOf(this.interiorPoints(id, keep, solid ? DOOR_KEEP : 0), now, id)).length) break;
       }
     }
     const pool = roomy.length ? roomy : solid ? [] : open.length ? open : inside;
@@ -4056,6 +4086,45 @@ export class Kernel {
    * A solid thing put inside a structure stands square to its walls (T431): its turn to the nearest quarter, as the structures' own. Turned any
    * other way its box is larger than the thing (`formsUnder`), and a counter across the room closed the way between two others.
    */
+  /**
+   * What a body walks in and around a structure (T513), on a grid finer than a tile (`INSIDE_STEP`, a door is narrower than a tile): the
+   * window of its form and a tile more each way, every cell where the world's collision lets a body's middle stand on the ground floor
+   * (`free`, `BODY_R`), in groups (`walkGroups`). Undefined while its form is not ready.
+   */
+  private insideWalk(sid: Id): InsideWalk | undefined {
+    const fc: FormComp | undefined = this.ecs.get(sid, 'form');
+    const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
+    const p = this.ecs.get(sid, 'pos');
+    if (!f?.result || !p) return undefined;
+    const half = f.reach + 1;
+    const d = Math.max(INSIDE_STEP, (2 * half) / INSIDE_CELLS);
+    const n = Math.ceil((2 * half) / d);
+    const x0 = p.x - half, y0 = p.y - half;
+    const area: TileArea = { col: 0, row: 0, cols: n, rows: n };
+    const passes = new Map<number, boolean>();
+    const at = (c: number, r: number) => this.free(x0 + (c + 0.5) * d, y0 + (r + 0.5) * d, BODY_R);
+    const before: Walk = {
+      passable: (c, r) => {
+        let v = passes.get(c + r * n);
+        if (v === undefined) passes.set(c + r * n, (v = at(c, r)));
+        return v;
+      },
+      step: () => true,
+    };
+    return { area, d, x0, y0, before, at, groups: walkGroups(area, before) };
+  }
+
+  /**
+   * Whether a solid thing standing at (x, y) shuts what a body walks in a structure (T513, rule 10): two cells of `insideWalk` a body went
+   * between, both still free with the thing there, that it goes between no more (a counter in the doorway, a locker before the only way to
+   * the stair). What the thing covers is gone; only the cells it may reach are walked again.
+   */
+  private shutsInside(w: InsideWalk, thing: FormComp & { f: Form }, x: number, y: number): boolean {
+    const reach = thing.f.reach + BODY_R + w.d;
+    const near = (c: number, r: number) => Math.abs(w.x0 + (c + 0.5) * w.d - x) <= reach && Math.abs(w.y0 + (r + 0.5) * w.d - y) <= reach;
+    return this.withSolid(thing, x, y, () => splitBetween(w.groups, walkGroups(w.area, { passable: (c, r) => (near(c, r) ? w.at(c, r) : w.before.passable(c, r)), step: () => true })));
+  }
+
   private squareIndoors(id: Id): void {
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     if (!fc || !Number.isFinite(fc.yaw)) return;
@@ -6694,7 +6763,24 @@ export class Kernel {
       step: (c, r, nc, nr) => memo(steps, `${c},${r},${nc},${nr}`, () => this.stepsBetween(c, r, nc, nr, MOVE_BODY)),
     };
     const a = walkGroups(area, before);
-    // The thing, for a moment, where it would stand: in every tile its collision may reach.
+    const reach = thing ? thing.f.reach : 0;
+    const c0 = Math.floor(x - reach), c1 = Math.floor(x + reach), r0 = Math.floor(y - reach), r1 = Math.floor(y + reach);
+    return this.withSolid(thing, x, y, () => {
+      const near = (c: number, r: number) => c >= c0 - 1 && c <= c1 + 1 && r >= r0 - 1 && r <= r1 + 1;
+      const after: Walk = {
+        passable: (c, r) => (near(c, r) ? passable(c, r) : before.passable(c, r)),
+        step: (c, r, nc, nr) => (near(c, r) || near(nc, nr) ? this.stepsBetween(c, r, nc, nr, MOVE_BODY) : before.step(c, r, nc, nr)),
+      };
+      return splitBetween(a, walkGroups(area, after));
+    });
+  }
+
+  /**
+   * Runs `fn` with a solid thing standing at (x, y) for a moment (ADR-0168, T513): its model in the index of solids, in every tile its collision
+   * may reach, or its tile while it has none; taken away after, whatever `fn` does.
+   */
+  private withSolid<T>(thing: (FormComp & { f: Form }) | undefined, x: number, y: number, fn: () => T): T {
+    const col = Math.floor(x), row = Math.floor(y);
     const reach = thing ? thing.f.reach : 0;
     const c0 = Math.floor(x - reach), c1 = Math.floor(x + reach), r0 = Math.floor(y - reach), r1 = Math.floor(y + reach);
     const added: Array<[string, SolidForm]> = [];
@@ -6710,12 +6796,7 @@ export class Kernel {
         }
     } else this.solidTiles.add(tileKey);
     try {
-      const near = (c: number, r: number) => c >= c0 - 1 && c <= c1 + 1 && r >= r0 - 1 && r <= r1 + 1;
-      const after: Walk = {
-        passable: (c, r) => (near(c, r) ? passable(c, r) : before.passable(c, r)),
-        step: (c, r, nc, nr) => (near(c, r) || near(nc, nr) ? this.stepsBetween(c, r, nc, nr, MOVE_BODY) : before.step(c, r, nc, nr)),
-      };
-      return splitBetween(a, walkGroups(area, after));
+      return fn();
     } finally {
       for (const [key, s] of added) {
         const list = this.solidForms.get(key)!;

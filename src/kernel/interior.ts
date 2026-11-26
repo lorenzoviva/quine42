@@ -711,3 +711,37 @@ function frontDoor(w: Walked, vpt: number, base: number): { x: number; y: number
     }
   return best && { x: best.x, y: best.y };
 }
+
+/** A room of the ground floor (T513): its covered floor where a body stands, in tiles², and whether the walk from the outside gets into it. */
+export interface GroundRoom {
+  area: number;
+  reached: boolean;
+  /** Its columns, `x + y·X`, and the height of the feet on each. */
+  cells: Array<[i: number, z: number]>;
+}
+
+/**
+ * The rooms of a building's ground floor and whether a body gets into each (T513): every covered floor where a body stands a step or less
+ * from the ground floor (reached or not, `standingCells`), cut into rooms at the narrow passages (`roomsOf`), the rooms of at least
+ * `SMALL_ROOM` tiles²; a room is reached when the walk (`walkIn`) stands on any of it. `reached` counts the covered cells the walk stands on,
+ * on every storey.
+ */
+export function roomsReached(w: Walked, vpt: number, base = 0): { rooms: GroundRoom[]; reached: number } {
+  const { X, Y } = w.g;
+  const step = stepOf(vpt);
+  const z0 = storeysOf(w, vpt).find((z) => z >= base - step) ?? base;
+  const { cells } = standingCells(w, vpt);
+  const floor = new Set<number>();
+  const zOf = new Map<number, number>();
+  for (const c of cells)
+    if (Math.abs(c.z - z0) <= step) {
+      floor.add(c.i);
+      zOf.set(c.i, c.z);
+    }
+  const rooms = roomsOf(floor, X, Y, Math.round(NARROW * vpt))
+    .filter((r) => r.length >= SMALL_ROOM * vpt * vpt)
+    .map((r) => ({ area: Math.round((r.length / (vpt * vpt)) * 10) / 10, reached: r.some((i) => w.reached(i % X, Math.floor(i / X), zOf.get(i)!)), cells: r.map((i): [number, number] => [i, zOf.get(i)!]) }));
+  let reached = 0;
+  for (const c of w.celle) if (headroomAbove(w.levels, c.x + c.y * X, c.z) !== undefined) reached++;
+  return { rooms, reached };
+}

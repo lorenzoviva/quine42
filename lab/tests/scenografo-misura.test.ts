@@ -87,7 +87,11 @@ describe(`lo Scenografo misurato (${task}, ${vpt} voxel per casella)`, () => {
       it(`${nome} insieme ${giro}: l'interno scritto con l'edificio si conta`, () => {
         const t = scena(fs.readFileSync(xml, 'utf8'), b(nome), 1, OPZIONI);
         const a = arredoInsieme(t);
-        expect(controlli(t, { e: t.e, m: t.m, voxel: a.voxel }).piani).toBeGreaterThanOrEqual(2);
+        // The farm of the first round at 16 (T406) reached its second storey only by a jump through what stood in its way, taller than a jump:
+        // the kernel's walk jumps as the world's since T513 (ADR-0260), and the Sculptor's checks give it one storey too.
+        const piani = controlli(t, { e: t.e, m: t.m, voxel: a.voxel }).piani;
+        if (vpt === 16 && nome === 'fattoria' && giro === 'giro1') expect(piani).toBe(1);
+        else expect(piani).toBeGreaterThanOrEqual(2);
       }, 120_000);
     }
 });

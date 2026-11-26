@@ -728,7 +728,12 @@ function doorsOf(cells: number[], X: number, Y: number): Array<{ width: number; 
   return out;
 }
 
-export function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, actions: readonly MjxClip[], seed: number): Walked {
+/**
+ * Where a body walks in a model from the outside ground in front of it (+y), the door walked open (`open`): every step a body takes, and the
+ * jumps of the world's jump (`jumps`, the default), over what is no higher than `JUMP_UP`, a tile or more away; without them, on foot only
+ * (T513: what the front door and the rooms of a house are measured on).
+ */
+export function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, vpt: number, base: number, actions: readonly MjxClip[], seed: number, opts: { jumps?: boolean } = {}): Walked {
   let g = grid;
   let opened: number[] | undefined;
   // The door opens with the action `open` (`apri` before the contract 0.5, T308b): measured open, as a body finds it.
@@ -785,16 +790,19 @@ export function walkIn(grid: VoxelGrid, palette: Record<string, PaletteEntry>, v
       queue.push(nx, ny, to);
     }
 
-    if (x >= 0 && y >= 0 && x < g.X && y < g.Y && (x % 2 === 0 && y % 2 === 0) && piatto(x, y, at)) {
+    if (opts.jumps !== false && x >= 0 && y >= 0 && x < g.X && y < g.Y && (x % 2 === 0 && y % 2 === 0) && piatto(x, y, at)) {
       const lx0 = (x + 0.5 - g.X / 2) / vpt, ly0 = (y + 0.5 - g.Y / 2) / vpt;
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        for (let k = 10; k * 0.1 <= JUMP_FAR + 1e-6; k++) {
+        // Every tenth of a tile on the way, as the world's jump (`Kernel.jump`): what is higher than a jump stops it, a wall thinner than a
+        // tile too (T513: before, only where it lands was looked at, and the walk went through the wall between two rooms).
+        for (let k = 1; k * 0.1 <= JUMP_FAR + 1e-6; k++) {
           const d = k * 0.1, lx = lx0 + dx * d, ly = ly0 + dy * d;
           const t = topUnder(f, levels, lx - BODY_R, ly - BODY_R, lx + BODY_R, ly + BODY_R, at, JUMP_UP * vpt);
           const h0 = (at - base) / vpt;
           if (t !== undefined && t - h0 > JUMP_UP) break;
           const vx = Math.floor(lx * vpt + g.X / 2), vy = Math.floor(ly * vpt + g.Y / 2);
           if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) break;
+          if (k < 10) continue;
           const i = vx + vy * g.X;
           const lim = at + JUMP_UP * vpt;
           let h = base;
