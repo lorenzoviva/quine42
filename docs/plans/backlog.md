@@ -6711,7 +6711,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: `nature.climates` per universo e per pianeta (Far West, Pirati e Futuristico senza neve; la giungla resta, il suo `j` è il folto di ogni mondo, i cactus di `mesa`); il generatore li legge e il kernel fa da rete (`n → g`, `j → t`); gli ambienti che li scrivono non si offrono ai luoghi nuovi e non si prendono nuovi; alla Genesi `n` è un altro terreno; gli universi di prima derivano i climi dal tema senza chiamate; i piani di prima tengono la loro bozza (`ChunkPlan.climates`); `lab/scripts/climi-bozze.ts`, `tests/climi.test.ts`, `tests/pirati-offline.test.ts` ritoccato; kernel 0.10.38, ADR-0261. Non fatto: bibbia, individui e luoghi gelati della run restano (non si riscrivono senza chiamate); trovato e non toccato, da fare in un task a sé: in `world.terrain/logic.lua` `type(nature) == "table"` è sempre falso (userdata), quindi il ramo del rilievo vero e l'arcipelago del generatore non girano mai.
 
 ### T511 · La primitiva «portato da»: ogni entità può ancorare il suo moto a un'altra — `da fare`
-- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 1
+- Pipeline: claude · sforzo max · stima 4% · approvato · browser · priorità 3
 - Contesto: run #2 (26/11): «qualunque cosa può essere un mezzo di trasporto»: il kernel deve poter ancorare i movimenti di un'entità a quelli di un'altra (appendersi a un drone, un NPC cavalcabile, stare nel taschino di qualcuno, i vagoni di un treno), se il Concilio è d'accordo. **Solo la primitiva**, niente casi particolari (tranne il motorino, T512). Vedi `dossier T439`, `dossier T442`, `dossier T487` (veicoli, ADR-0227, ADR-0232, ADR-0244), `src/kernel/vehicle.ts` (`carried`, `toWorld`).
 - Cosa fare: un componente scritto solo dal kernel (es. `carrier {by, lx, ly, lz, yaw}`): chi è portato segue la rototraslazione di chi porta (come il ponte di un veicolo), con i controlli della regola 10 e della collisione, lo sgancio (comando, ostacolo, chi porta sparisce), le catene (vagone dietro vagone, senza cicli, profondità a tetto); chi decide: un'azione del menu che il Concilio concede (regola, `<action>` o `on_act`) e un'API Lua validata da `Host`; in multigiocatore il server lo fa e i client lo prevedono come per `step.on`. ADR, `AGENTS.md`, voce in sicurezza se tocca il filo.
 - Test: un'entità portata segue chi la porta, si sgancia sugli ostacoli, nessun ciclo; in molti il passo del portato controllato.
@@ -6719,7 +6719,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: la primitiva nel kernel con ADR, test verdi, vista nel browser.
 
 ### T512 · Il motorino di `neapolis` si guida — `da fare`
-- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 3
 - Contesto: run #2 (26/11): i motorini di `neapolis` sono ancora mobili; «sali e metti in moto» dà solo un messaggio. ADR-0244 dice che ciò che il nome dice un mezzo si guida (`vehicleMediumIn`, `repairVehicleClaims`). `dossier T487`; le copie della run in `beta-run-2`.
 - Cosa fare: perché il motorino sfugge (le parole di `vehicleMediumIn`: motorino, scooter, moto, bicicletta…; il concetto del Narratore), la riparazione all'avvio che gli dà `vehicle` di terra, e il posto dove il viandante sta (il ponte, o la sella con la primitiva di T511); mai mobili che fingono un mezzo.
 - Test: `repairVehicleClaims` su una copia di neapolis dà `vehicle` al motorino; il veicolo si muove sul suo terreno.
@@ -6736,7 +6736,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: il cammino del kernel salta come il gioco e non passa più un tramezzo sottile; i controlli dello Scultore rifiutano una stanza a terra che non si raggiunge dalla porta; una cosa solida posata dentro una struttura non chiude più il passaggio (l'armadietto esce dall'atrio della Residenza); ADR-0260, kernel 0.10.36; `lab/scripts/interni-percorsi.ts`; manca: rifare con lo Scultore la «Residenza modulare» (cade a ogni seme) e la «Residenza ad anelli» (semi 3 e 4) con `npm run genera -- sidera --rigenera modelli --tipi struttura-residenza-ad-anelli,struttura-residenza-modulare`, non lanciato perché costa e scrive fuori dal worktree; finché non si fa, la stanza sul retro resta chiusa; non provato: il multigiocatore e il tempo di posa su una struttura gargantuesca; sicurezza: nessuna superficie nuova.
 
 ### T514 · I mobili degli interni si usano — `da fare`
-- Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 1
+- Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 3
 - Contesto: run #2 (26/11): in nessun universo i mobili dentro una casa sono interagibili. Lo Scenografo li posa come parte della forma dell'edificio (`furnishWithRules`, ADR-0214), forse senza entità. `dossier T410`, `dossier T419`.
 - Cosa fare: ogni mobile posato dall'interno diventa (o ha accanto) un'entità con le sue azioni, il suo contenitore, `takeable` dove il manifest lo dice, la posa sui ripiani (ADR-0150), senza moltiplicare il costo del disegno; lo stato salvato come per le cose del luogo; in molti come le altre entità.
 - Test: un edificio arredato offline ha i mobili con le azioni del loro manifest; aprire un baule dentro una casa.
@@ -6931,7 +6931,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: misura scritta, prova pagata col consenso dell'autore.
 
 ### T541 · Il generatore del terreno non legge la natura del mondo (`type(nature) == "table"` sempre falso) — `da fare`
-- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 3
 - Step: 45
 - Contesto: trovato da T510 (`dossier T510`, ADR-0261) e non toccato: in `universe/modules/world.terrain/logic.lua` (righe ~249-264) `type(nature) == "table"` sarebbe sempre falso perché la natura arriva da wasmoon come userdata, quindi il ramo del rilievo vero (`generate_relief`, ADR-0256) e quello dell'arcipelago del generatore non girerebbero mai. Da dimostrare prima: T475/T504/T507 hanno visto rilievo vero e arcipelago nel browser, forse perché il kernel li fa anche in TypeScript (`TrueRelief`, `islandDraft`).
 - Cosa fare: dimostrare con un test che cosa riceve il Lua (`world.nature()` e l'argomento del generatore) e se i rami girano; se no, correggere il controllo (o dare al generatore una tabella vera dal `Host`) senza cambiare la mesh dei luoghi del seme (`lab/scripts/impronta-terreno.ts` prima e dopo) né i piani di prima (idempotenti); misurare con `lab/scripts/rete-gradini.ts --vero [--arcipelago]` che cosa cambia nei luoghi nuovi; kernel salito di Z (o di Y se cambia il contratto: chiederlo nell'esito).
