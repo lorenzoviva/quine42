@@ -2056,7 +2056,7 @@ class TileNode extends WFCNode {
   load(xelem: XmlElement, parentSymmetry: boolean[], grid: Grid): boolean {
     this.periodic = getBool(xelem, 'periodic', false);
     const name = getString(xelem, 'tileset');
-    const tilesname = getString(xelem, 'tiles', name)!;
+    const tilesname = getString(xelem, 'tiles', name)!.replace(/\//g, '-');
     this.overlap = getInt(xelem, 'overlap', 0);
     this.overlapz = getInt(xelem, 'overlapz', 0);
     const text = this.ip.files[`${name}.xml`];

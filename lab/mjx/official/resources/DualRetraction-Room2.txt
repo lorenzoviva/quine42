@@ -1,0 +1,12 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/DualRetraction/Room2.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "B*RGWU" of DualRetraction3D
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+BBBBB/BBBBB/RBBBB/BBBBB/BB*BB
+BBBBB/BBBBB/BBBBB/BBBBB/BBBBB
+BBBBB/BBBBB/BB*BB/BBBBB/BBBBB
+->
+*****/*****/*****/*****/*****
+*****/*GGG*/*GGG*/*GGG*/*****
+*****/*GWG*/UWWG*/*GWG*/**R**
+*****/*GGG*/*GWG*/*GGG*/*****
+*****/*****/**R**/*****/*****

@@ -11,7 +11,7 @@ import { compileMjx, mjxIncludes, newNodesIn } from '../src/mj/model';
 import { runMjx } from '../src/mj/run';
 import { traceText } from '../src/mj/trace';
 import { WFC_LIMITS, WfcSolver } from '../src/mj/wfc';
-import { OFFICIAL } from '../lab/mjx/official';
+import { OFFICIAL, OFFICIAL_FILES } from '../lab/mjx/official';
 
 const letters = (g: Grid3, bg = 'B') => Array.from(g.cells, (c) => (c === 0 ? bg : g.alphabet[c])).join('');
 const count = (g: Grid3, bg = 'B') => {
@@ -353,5 +353,14 @@ describe('come l\'originale (MarkovJunior in C#, lab/banco/wfc/originale)', () =
     // As the original: W the stairs and the corridors, A their sides, R the two ends.
     expect(count(r.grid)).toMatchObject({ R: 2 });
     expect(count(r.grid).W).toBeGreaterThan(20);
+  });
+
+  it('tiles con la barra (Knots3D/Tubes, /3, /4) e ClosedSurface compilano nel compilatore', () => {
+    const knots = `<sequence values="BW"><all in="B" out="W"/><wfc values="BFE" tileset="Knots3D" tiles="Knots3D/Tubes"><rule in="W" out="Empty"/></wfc></sequence>`;
+    const files = mjxIncludes(knots, (f) => OFFICIAL.find((m) => m.name === 'Surface')?.files?.[f] ?? OFFICIAL_FILES[f]);
+    expect(Object.keys(files).sort()).toEqual(['Knots3D-Tubes-Empty.txt', 'Knots3D-Tubes-Line.txt', 'Knots3D-Tubes-Turn.txt', 'Knots3D.xml']);
+    expect(() => compileMjx(knots, { size: [8, 8, 8], files })).not.toThrow();
+    const closed = OFFICIAL.find((m) => m.name === 'ClosedSurface')!;
+    expect(() => compileMjx(closed.xml, { size: closed.size, files: closed.files })).not.toThrow();
   });
 });

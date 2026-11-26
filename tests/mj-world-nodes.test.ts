@@ -120,7 +120,16 @@ describe('i tetti del mondo (WORLD_NODE_LIMITS)', () => {
     expect(tilesetErrors('models/pieno.xml', own, (f) => (f === 'pieno-X.txt' ? 'X' : undefined))).toEqual([]);
     for (const f of fs.readdirSync('lab/mjx/official/resources').filter((f) => f.endsWith('.xml'))) {
       const text = fs.readFileSync(`lab/mjx/official/resources/${f}`, 'utf8');
-      expect(tilesetErrors(`models/${f}`, text, (x) => (fs.existsSync(`lab/mjx/official/resources/${x}`) ? fs.readFileSync(`lab/mjx/official/resources/${x}`, 'utf8') : undefined)), f).toEqual([]);
+      const read = (x: string) => {
+        const direct = `lab/mjx/official/resources/${x}`;
+        if (fs.existsSync(direct)) return fs.readFileSync(direct, 'utf8');
+        if (f === 'Knots3D.xml' && x.startsWith('Knots3D-')) {
+          const tube = `lab/mjx/official/resources/Knots3D-Tubes-${x.slice('Knots3D-'.length)}`;
+          if (fs.existsSync(tube)) return fs.readFileSync(tube, 'utf8');
+        }
+        return undefined;
+      };
+      expect(tilesetErrors(`models/${f}`, text, read), f).toEqual([]);
     }
     // The Validator's door: a tileset goes to tilesetErrors, not to the model's checks.
     const v = new Validator({ check: () => undefined } as never);

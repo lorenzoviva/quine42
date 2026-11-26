@@ -1,0 +1,6 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/roof_thing_1.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "DLRao*" of CarmaTower
+*******/*******/*******/*******/*******/*******/*******
+DDDDDDD/DDDDDDD/DDDDDDD/DDDDDDD/DDDDDDD/DDDDDDD/DDDDDDD
+->
+LLLLLL*/La**aL*/L****L*/L****L*/La**aL*/LLLLLL*/*******
+LLLLLLR/LaooaLR/LooooLR/LooooLR/LaooaLR/LLLLLLR/RRRRRRR

@@ -82,8 +82,8 @@ describe('il riferimento è l’originale', () => {
   });
 
   // The 3D models of the original's repository (their text in lab/banco/conformita/mxgmn/, the resources as text in lab/mjx/official/resources/)
-  // that the reference runs in a moment; all 30 it reads, on 3 seeds, are checked by lab/scripts/conformita-mj.ts -- --modelli --originale.
-  const QUICK = ['Growth', 'MazeGrowth', 'MazeTrail', 'NoDeadEnds', 'Noise', 'OddScale3D', 'ParallelGrowth', 'RegularSAW', 'RegularSAWRestart', 'River', 'StrangeDungeon', 'Counting', 'Keys', 'Hills', 'Voronoi', 'StochasticVoronoi', 'Partitioning', 'Surface', 'EscherSurface', 'Apartemazements', 'PillarsOfEternity', 'ModernHouse', 'SeaVilla', 'SoftPath', 'StairsPath'];
+  // that the reference runs in a moment; all 36 it reads, on 3 seeds, are checked by lab/scripts/conformita-mj.ts -- --modelli --originale.
+  const QUICK = ['Growth', 'MazeGrowth', 'MazeTrail', 'NoDeadEnds', 'Noise', 'OddScale3D', 'ParallelGrowth', 'RegularSAW', 'RegularSAWRestart', 'River', 'StrangeDungeon', 'Counting', 'Keys', 'Hills', 'Voronoi', 'StochasticVoronoi', 'Partitioning', 'Surface', 'ClosedSurface', 'EscherSurface', 'Apartemazements', 'PillarsOfEternity', 'ModernHouse', 'SeaVilla', 'SoftPath', 'StairsPath', 'Knots3D', 'ColoredKnots', 'SelectLongKnots', 'SubmergedKnots', 'CarmaTower', 'DualRetraction3D'];
   it(`sui modelli 3D di mxgmn (${QUICK.length}, seme 1): la stessa griglia voxel per voxel dell’originale, gli stessi passi`, { timeout: 120_000 }, () => {
     for (const name of QUICK) {
       const m = REPO_3D.find((o) => o.name === name)!;

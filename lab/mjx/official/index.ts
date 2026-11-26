@@ -56,6 +56,7 @@ export const OFFICIAL: OfficialModel[] = ([
   { name: 'CompleteSAW', size: [19, 19, 1] },
   // Tiles, samples, fractional maps and rule files (T335): the original's .vox and .png resources as text.
   { name: 'Surface', size: cube(10) },
+  { name: 'ClosedSurface', size: cube(12) },
   { name: 'Escher', size: cube(8) },
   { name: 'EscherSurface', size: cube(8) },
   { name: 'OrientedEscher', size: cube(6) },

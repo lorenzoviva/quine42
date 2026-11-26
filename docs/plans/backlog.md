@@ -6821,12 +6821,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: mappa, proposta, panoramica scritta, valutazione di graphify, catena e domande.
 
-### T525 · A1-0: le risorse di mxgmn che mancano in testo — `da fare`
+### T525 · A1-0: le risorse di mxgmn che mancano in testo — `fatto` (`9aa5de02`)
 - Pipeline: hydrogen · sforzo medium · stima 2% · approvato · priorità 2
 - Step: 44
 - Contesto: catena dell'allineamento a MarkovJunior, `docs/design/markov-allineamento.md` § 8, riga A1-0; risposte dell'autore a T500 in `docs/pipeline/domande/T500.md` (26/11). `dossier T500`.
 - Cosa fare e test: come la riga A1-0 dello studio. Browser: no.
 - Quando è fatto: i 6 modelli letti dal riferimento come `uscite.json`, test verdi.
+- Esito: portate in testo le risorse di Knots3D (per cartella), CarmaTower e DualRetraction, aggiunta la copia di ClosedSurface e il supporto a tiles con "/" nel compilatore e nel riferimento; i 6 modelli + ClosedSurface passano il confronto voxel per voxel con uscite.json sul seme 1, typecheck e suite test verdi (non provati --originale con .NET né i semi 2 e 3 in vitest).
 
 ### T526 · A1-1: l'interruttore della semantica e System.Random nel motore — `da fare`
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
