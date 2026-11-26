@@ -12,6 +12,9 @@ import { paymentsOf } from './ledger';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.dirname(here);
+// An API key of Anthropic is never in the server's environment (T542): the CLI with it bills the API, and only the queue's child gets it.
+delete process.env.ANTHROPIC_API_KEY;
+delete process.env.ANTHROPIC_AUTH_TOKEN;
 const env = process.env;
 
 let running: ProductionServer;

@@ -1823,6 +1823,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `pregenerazione`, `generazione offline` («offline» sono i modelli locali)
 - **Fermo**: il file `universes/.generation/<nome>.json` (passi, tetto, partita, consumo) e il segno `universes/.running/<nome>.json`.
 
+### Coda sui crediti API
+- **Inglese**: `apiSettings`, `childEnv`, `ApiLedger`, `recordCall`, `capReached`
+- **Definizione**: la coda degli abbonamenti servita dalla CLI di Claude che paga coi crediti API di Anthropic invece che con l'abbonamento: la chiave solo al figlio della CLI, ogni corsa che dice come paga, il registro del mese e il tetto che la ferma (ADR-0262).
+- **Dove vive**: `tools/abbonamenti/api.ts`, `tools/abbonamenti/servi.ts` (`--api`, `--tetto-api`), `tools/pipeline/generatore.mjs` (`"api": true`)
+- **Da non usare**: `coda API` (la coda è sempre quella degli abbonamenti; cambia chi la paga)
+- **Fermo**: il registro `universes/.queue/spesa-api-claude.json` (`mesi`, `ultime`, `tetto`, `servitore`, `fermo`), le variabili `QUINE_CODA_API`, `QUINE_CODA_TETTO_API`, `ANTHROPIC_WORKSPACE_ID`.
+
 ### Rigenerazione dei modelli
 - **Inglese**: `regenerationSteps`, `regenerationTargets`, `regenerationPlan`, `RegenMode`
 - **Definizione**: i tipi di modello che un universo indossa (mobili, strutture, edifici piccoli da T428, figure) riscolpiti con lo Scultore di oggi, le strutture a 16 voxel per casella e arredate dallo Scenografo, i lotti dei luoghi di prima rifatti dove non le terrebbero; passo dopo passo dalla coda degli abbonamenti, come la generazione differita; bibbia, luoghi e persone restano (ADR-0216).

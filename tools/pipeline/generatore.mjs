@@ -8,6 +8,10 @@
 // modelli`): it has its own progress (`<nome>.rigenera-modelli.json`) and its own place in the state (`<nome>:rigenera-modelli`), so a
 // universe whose generation finished is still regenerated, and the other way round.
 //
+// Paid with Anthropic's API credits (T542, ADR-0262: `"api": true` in `generatore`): the queue is served with `--api` (the key and the ceiling in
+// the `.env`, `QUINE_CODA_TETTO_API`, or `tettoApi` here), the subscription's week and 5-hour window do not hold it back, the ledger next to
+// the queue does (`spesa-api-claude.json`): at the ceiling it waits. `stato` says what the API spent this month in any case.
+//
 // No dependency on pipeline.mjs (which imports this): the decisions are pure functions of the budget, the state and the
 // universes' progress; `Generator` adds the processes and the state file (`.pipeline/generatore.json`).
 import { spawn } from 'node:child_process';
@@ -39,6 +43,15 @@ const writeJson = (file, data) => {
     try { fs.writeFileSync(file, text); } catch (e2) { console.error(`generatore: ${file} non scritto (${e2.code ?? e2.message})`); }
   }
 };
+/**
+ * The environment of whatever the pipeline starts (tasks, turns, the orchestrator, the generator, T542): never an API key of Anthropic, with
+ * which the CLI would bill the API instead of the subscription. Only the queue's own child gets one, from the `.env` (`tools/abbonamenti/api.ts`).
+ */
+export const API_KEY_VARS = ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN'];
+export function withoutApiKeys(env = process.env) {
+  return Object.fromEntries(Object.entries(env).filter(([k]) => !API_KEY_VARS.includes(k.toUpperCase())));
+}
+
 const readText = (file) => { try { return fs.readFileSync(file, 'utf8'); } catch { return ''; } };
 const round = (n) => Math.round(n * 10) / 10;
 
@@ -55,9 +68,47 @@ export function generatorConf(config = {}) {
     sessioneArresto: g.sessioneArresto ?? 15,
     comando: g.comando ?? ['npm', 'run', 'genera', '--', '{universo}', '--tema', '{ambientazione}', '--partita', '{partita}', '--tetto', '{tetto}'],
     comandoRigenera: g.comandoRigenera ?? ['npm', 'run', 'genera', '--', '{universo}', '--rigenera', '{rigenera}', '--tetto', '{tetto}'],
-    coda: g.coda ?? ['npm', 'run', 'abbonamento'],
+    coda: queueCommand(g.coda ?? ['npm', 'run', 'abbonamento'], g.api === true, g.tettoApi),
     cartellaUniversi: g.cartellaUniversi ?? 'universes',
+    api: g.api === true,
+    ...(Number.isFinite(g.tettoApi) && g.tettoApi > 0 ? { tettoApi: g.tettoApi } : {}),
   };
+}
+
+/** The queue's command, with `--api` (and the ceiling, if config.json says it) when the generator pays with the API (T542). */
+export function queueCommand(base, api, cap) {
+  if (!api || !base.length) return base;
+  const extra = [...(base.includes('--api') ? [] : ['--api']), ...(Number.isFinite(cap) && cap > 0 && !base.includes('--tetto-api') ? ['--tetto-api', String(cap)] : [])];
+  if (!extra.length) return base;
+  return base[0] === 'npm' && !base.includes('--') ? [...base, '--', ...extra] : [...base, ...extra];
+}
+
+/** The ledger of the queue paid with the API (`tools/abbonamenti/api.ts`), its file in the queue's folder. */
+export const API_LEDGER = 'spesa-api-claude.json';
+const monthOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+/** What the API spent in the month of `nowMs` and the ceiling (the queue's, else config.json's); undefined without a ledger nor `api`. */
+export function apiSpend(ledger, conf = {}, nowMs = Date.now()) {
+  if (!ledger || typeof ledger !== 'object') return conf.api ? { speso: 0, spesoCli: 0, chiamate: 0, ...(conf.tettoApi ? { tetto: conf.tettoApi } : {}) } : undefined;
+  const m = ledger.mesi?.[monthOf(new Date(nowMs))] ?? {};
+  const tetto = Number(ledger.tetto) > 0 ? Number(ledger.tetto) : conf.tettoApi;
+  return {
+    speso: Number(m.speso) || 0, spesoCli: Number(m.spesoCli) || 0, chiamate: Number(m.chiamate) || 0,
+    ...(tetto ? { tetto } : {}),
+    ...(ledger.servitore ? { servitore: ledger.servitore } : {}),
+    ...(ledger.fermo ? { fermo: ledger.fermo } : {}),
+  };
+}
+
+const usdText = (v) => `${v.toFixed(2)} $`;
+
+/** The line of `stato` for the API's spend. */
+export function apiLine(spend, nowMs = Date.now()) {
+  const month = MONTHS[new Date(nowMs).getMonth()];
+  return `  crediti API di Anthropic: speso ${usdText(spend.speso)}${spend.tetto ? ` di ${usdText(spend.tetto)}` : ''} a ${month} (la CLI dice ${usdText(spend.spesoCli)}), ${spend.chiamate} chiamate`
+    + (spend.servitore ? `, la coda servita dal processo ${spend.servitore.pid} dal ${spend.servitore.dal}` : '')
+    + (spend.fermo ? `, ferma: ${spend.fermo.motivo} (${spend.fermo.t})` : '');
 }
 
 /**
@@ -139,7 +190,8 @@ export function nextUniverse(list = [], state = {}, { reset, nowMs = Date.now(),
  * nothing (`continua`, `attende` with why). `live` are the tasks running on its account's CLI; `wanting` says that a ready
  * task of that CLI would start if the generator were not there.
  */
-export function generatorDecision({ conf, list = [], state = {}, b = {}, live = 0, ceiling = 1, wanting = false, stopping = false, running = false, nowMs = Date.now(), giorni = 3, riserva = 3, progressOf }) {
+export function generatorDecision({ conf, list = [], state = {}, b = {}, live = 0, ceiling = 1, wanting = false, stopping = false, running = false, nowMs = Date.now(), giorni = 3, riserva = 3, progressOf, api }) {
+  if (conf.api) return apiDecision({ conf, list, state, b, live, ceiling, wanting, stopping, running, nowMs, giorni, api });
   const reset = b.resetSettimana;
   const leftover = conf.esaurisci && b.residuo !== undefined ? b.residuo
     : leftoverAtReset({ residuo: b.residuo, storia: b.storia, reset, slot: b.slot, tetto: b.tetto, nowMs, giorni });
@@ -169,6 +221,26 @@ export function generatorDecision({ conf, list = [], state = {}, b = {}, live = 
 }
 
 /** The outcome the generation printed last (`finito|tetto|interrotto|errore[: motivo] — n passi`). */
+/**
+ * The decision when the queue is paid with the API (T542): the author's switch, a ready task and the ceiling of the CLI as always; the
+ * subscription's week and window do not count, the API's ceiling does. Each universe up to the whole of its run (`--tetto 100`: the week
+ * the generation measures is not what pays).
+ */
+function apiDecision({ conf, list, state, b, live, ceiling, wanting, stopping, running, nowMs, giorni, api }) {
+  const leftover = leftoverAtReset({ residuo: b.residuo, storia: b.storia, reset: b.resetSettimana, slot: b.slot, tetto: b.tetto, nowMs, giorni });
+  const over = api?.tetto && api.speso >= api.tetto ? `crediti API al tetto (${usdText(api.speso)} di ${usdText(api.tetto)})` : undefined;
+  const why = stopping ? 'la pipeline si spegne'
+    : !conf.acceso || state.spento ? 'spento dall’autore'
+    : wanting ? 'un task pronto vuole lo slot'
+    : over;
+  if (running) return why ? { azione: 'ferma', motivo: why, leftover } : { azione: 'continua', leftover };
+  const wait = why ?? (live + 1 > ceiling ? `nessun posto sotto il tetto della CLI (${live} di ${ceiling})` : undefined);
+  if (wait) return { azione: 'attende', motivo: wait, leftover };
+  const next = nextUniverse(list, state, { reset: b.resetSettimana, nowMs, progressOf: () => undefined });
+  if (!next) return { azione: 'attende', motivo: 'nessun universo da generare', leftover };
+  return { azione: 'avvia', universo: next, tetto: 100, leftover };
+}
+
 export function readOutcome(text = '') {
   const all = [...String(text).matchAll(/^(finito|tetto|interrotto|errore)(?::\s*(.*?))?\s+—\s+\d+ passi/gm)];
   const last = all.at(-1);
@@ -240,6 +312,11 @@ export class Generator {
   }
 
   get conf() { return generatorConf(this.config); }
+  /** What the queue paid with the API spent this month (T542), from its ledger. */
+  apiSpend(nowMs = Date.now()) {
+    const dir = path.resolve(this.repo, this.conf.cartellaUniversi);
+    return apiSpend(readJson(path.join(dir, '.queue', API_LEDGER), undefined), this.conf, nowMs);
+  }
   load() { return readJson(this.stateFile, {}); }
   save(s) { writeJson(this.stateFile, s); }
   isOff() { return Boolean(readJson(this.switchFile, undefined)?.spento); }
@@ -254,6 +331,7 @@ export class Generator {
     const d = generatorDecision({
       conf, list: this.config.generazione ?? [], state: { ...s, spento: this.isOff() }, b, live, ceiling, wanting, stopping,
       running: Boolean(s.corrente), nowMs, giorni: this.config.giorniPrevisione ?? 3, riserva: conf.esaurisci ? 0 : this.config.riserva ?? 3, progressOf: this.progressOf,
+      api: this.apiSpend(nowMs),
     });
     s.avanzo = d.leftover;
     s.controllo = new Date(nowMs).toISOString();
@@ -278,7 +356,8 @@ export class Generator {
     const pid = this.spawnLogged(args, log);
     if (!pid) { if (coda) this.kill(coda); return; }
     s.corrente = { universo: u.universo, ...(u.rigenera ? { rigenera: u.rigenera, chiave: entryKey(u) } : {}), tettoSettimana: u.tettoSettimana ?? 10, tetto: d.tetto, speso0: u.speso, pid, ...(coda ? { coda } : {}), dal: new Date(nowMs).toISOString(), log, avanzo: d.leftover };
-    this.say(`generatore: ${u.rigenera ? `rigenera i ${u.rigenera} di ${u.universo}` : `genera ${u.universo} (${u.ambientazione ?? 'medievale'})`} su ${conf.provider}, tetto ${d.tetto} % della settimana (speso finora ${u.speso} %, al reset avanzerebbe il ${d.leftover} %)`);
+    const what = u.rigenera ? `rigenera i ${u.rigenera} di ${u.universo}` : `genera ${u.universo} (${u.ambientazione ?? 'medievale'})`;
+    this.say(conf.api ? `generatore: ${what} sui crediti API di Anthropic` : `generatore: ${what} su ${conf.provider}, tetto ${d.tetto} % della settimana (speso finora ${u.speso} %, al reset avanzerebbe il ${d.leftover} %)`);
   }
 
   /** The process that serves the subscription's queue, if nobody serves it (its heartbeat): the pid of the one started. */
@@ -299,7 +378,7 @@ export class Generator {
     const [cmd, ...args] = directCommand(command, this.repo);
     const fd = fs.openSync(log, 'w');
     try {
-      const child = this.spawnFn(cmd, args, { cwd: this.repo, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, shell: false });
+      const child = this.spawnFn(cmd, args, { cwd: this.repo, stdio: ['ignore', fd, fd], windowsHide: true, detached: true, shell: false, env: withoutApiKeys(process.env) });
       child.on?.('error', (e) => fs.appendFileSync(log, `\n${e.message}\n`));
       child.unref?.();
       return child.pid;
@@ -342,12 +421,14 @@ export class Generator {
     const s = this.load();
     const conf = this.conf;
     const reset = budget[conf.provider]?.resetSettimana;
-    const lines = [`generatore (${conf.provider}): ${!conf.acceso ? 'spento in config.json' : this.isOff() ? 'spento dall’autore (generatore accendi)' : 'acceso'}`
+    const lines = [`generatore (${conf.provider}${conf.api ? ', crediti API' : ''}): ${!conf.acceso ? 'spento in config.json' : this.isOff() ? 'spento dall’autore (generatore accendi)' : 'acceso'}`
       + (s.avanzo !== undefined ? `, al reset avanzerebbe il ${s.avanzo} %` : '')];
     if (s.corrente && this.running(s)) {
       const speso = weekSpent(this.progressOf(s.corrente.universo, kindOf(s.corrente)), reset);
       lines.push(`  ${s.corrente.rigenera ? `rigenera i ${s.corrente.rigenera} di` : 'genera'} ${s.corrente.universo} dal ${s.corrente.dal} (processo ${s.corrente.pid}), tetto ${s.corrente.tetto} %, speso ${round(speso - (s.corrente.speso0 ?? 0))} % in questa esecuzione, log ${s.corrente.log}`);
     } else if (s.attesa) lines.push(`  fermo: ${s.attesa}`);
+    const spend = this.apiSpend();
+    if (spend) lines.push(apiLine(spend));
     if (s.ultimo) lines.push(`  ultima: ${s.ultimo.universo}${s.ultimo.rigenera ? ` (rigenera ${s.ultimo.rigenera})` : ''} ${s.ultimo.esito}${s.ultimo.motivo ? ` (${s.ultimo.motivo})` : ''} il ${s.ultimo.fine}, speso ${s.ultimo.speso} %`);
     for (const u of this.config.generazione ?? []) {
       const e = s.universi?.[entryKey(u)];
