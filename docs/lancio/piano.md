@@ -53,6 +53,8 @@ Il testo di ogni voce, con il consiglio, è nella sua sezione. Qui l'elenco come
 - **Non verificato nel piano (V1-V12):** regole di HN, Reddit, itch.io lette da fonti secondarie; obblighi del sito e GDPR in un servizio
   gratuito; AI Act; costo reale di una Genesi; il limite proposto dall'OAuth di OpenRouter; alcune fonti del § 4 bis citate senza rileggerle.
 
+**Risposte dell’autore del 26/11 (epoca 677):** D3.1 sì e D4.6 sì (confermate, già dal 14/11); D5.1 sì, già in corso da una settimana; D6.2 una chiave dell’autore con un tetto piccolo per gli universi vetrina, accanto al self-hosting (il numero del tetto da fissare, proposta 10 $/giorno); D6.4 4-8 mondi accesi, probabilmente gli universi generati ora per la prova, poi da riadattare o ricreare coi kernel nuovi (uno può sostituirli in tronco). D7.3 e il blocco dei «consiglio sì»: chiesti chiarimenti, in attesa.
+
 **Risposte dell'autore del 14/11 (epoca 410):** D3.1 sì (crea ora l'account Reddit a nome suo e cura il profilo; commenta su HN e Reddit,
 anche in r/ClaudeGameDev, che già segue); D4.6 sì; D4.9 sì: nessuna PNL di marketing, l'idea viene da Borzacchiello («Basta dirlo», «La parola
 magica»): un mezzo finto scredita il messaggio, quindi parole e mezzi autentici; D4.1 sì, e nei video il viandante del gioco può chiamarsi Boa Lodger;
