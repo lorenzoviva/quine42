@@ -21,7 +21,7 @@ if (!fs.existsSync(path.join(repo, 'resources'))) throw new Error('il primo argo
 fs.mkdirSync(out, { recursive: true });
 
 /** Each tileset with the letters of the first program that reads it: the k-th colour of its tiles is the k-th letter. */
-const TILESETS: Array<[string, string, string]> = [
+const TILESETS: Array<[string, string, string, string[]?]> = [
   ['Paths', 'BYDAWPRFUENC', 'Apartemazements'],
   ['OrientedStairs', 'BEAWDRF', 'PillarsOfEternity'],
   ['Partition', 'BCA', 'Partitioning'],
@@ -31,9 +31,10 @@ const TILESETS: Array<[string, string, string]> = [
   ['OrientedEscher', 'BODAWEU', 'OrientedEscher'],
   ['PartitionedEdges', 'BOaFXowSLsVJKkARrWhNYnxevDUZdQu', 'ModernHouse'],
   ['MarchingHills', 'BaVOoYhSAWwRrlgvPpxbUuCcKkXGEFi', 'SeaVilla'],
+  ['Knots3D', 'BFE', 'Knots3D', ['Tubes', '3', '4', '5']],
 ];
 /** The programs whose rule files (with their legends) are read from resources/rules/<folder>/. */
-const RULE_PROGRAMS = ['ModernHouse', 'SeaVilla', 'StairsPath'];
+const RULE_PROGRAMS = ['ModernHouse', 'SeaVilla', 'StairsPath', 'CarmaTower', 'DualRetraction3D'];
 /** ConvChain's samples: white pixels are the white letter, the rest the black one. */
 const SAMPLES: Array<[string, string, string, string]> = [
   ['Room', 'D', 'A', 'ChainDungeon'],
@@ -159,32 +160,63 @@ const write = (name: string, body: string) => {
   written.push(name);
 };
 
-for (const [name, letters, program] of TILESETS) {
+for (const [name, letters, program, folders] of TILESETS) {
   const dir = path.join(repo, 'resources', 'tilesets');
   const root = parseXml(fs.readFileSync(path.join(dir, `${name}.xml`), 'utf8')).find((r) => r.name === 'tileset')!;
   const tiles = root.children.find((c) => c.name === 'tiles')!.children.filter((c) => c.name === 'tile');
   const neighbors = root.children.find((c) => c.name === 'neighbors')!.children.filter((c) => c.name === 'neighbor');
-  const uniques: number[] = [];
-  const body = tiles.map((t) => {
-    const v = readVox(path.join(dir, name, `${t.attrs.name}.vox`));
-    const o = ords(v.cells, uniques);
-    if (uniques.length > letters.length) throw new Error(`${name}: più colori (${uniques.length}) delle lettere di ${program}`);
-    return `    <tile${attr(t)}>\n${text(o.map((k) => letters[k]), v.X, v.Y, v.Z, '      ')}\n    </tile>`;
-  });
-  write(
-    `${name}.xml`,
-    [
-      `<!-- ${SOURCE(`resources/tilesets/${name}.xml and ${name}/*.vox`)}; the letters are those of ${program}. -->`,
-      `<tileset values="${letters.slice(0, uniques.length)}"${root.attrs.fullSymmetry ? ` fullSymmetry="${root.attrs.fullSymmetry}"` : ''}>`,
-      '  <tiles>',
-      ...body,
-      '  </tiles>',
-      '  <neighbors>',
-      ...neighbors.map((n) => `    <neighbor${attr(n)}/>`),
-      '  </neighbors>',
-      '</tileset>',
-    ].join('\n'),
-  );
+  if (folders) {
+    let maxColors = 0;
+    for (const sub of folders) {
+      const uniques: number[] = [];
+      for (const t of tiles) {
+        const v = readVox(path.join(dir, name, sub, `${t.attrs.name}.vox`));
+        const o = ords(v.cells, uniques);
+        if (uniques.length > letters.length) throw new Error(`${name}/${sub}: più colori (${uniques.length}) delle lettere di ${program}`);
+        write(
+          `${name}-${sub}-${t.attrs.name}.txt`,
+          `# ${SOURCE(`resources/tilesets/${name}/${sub}/${t.attrs.name}.vox`)}; the letters are those of ${program}.\n${text(o.map((k) => letters[k]), v.X, v.Y, v.Z)}`,
+        );
+      }
+      if (uniques.length > maxColors) maxColors = uniques.length;
+    }
+    write(
+      `${name}.xml`,
+      [
+        `<!-- ${SOURCE(`resources/tilesets/${name}.xml and ${name}/*/*.vox`)}; the letters are those of ${program}. -->`,
+        `<tileset values="${letters.slice(0, maxColors)}"${root.attrs.fullSymmetry ? ` fullSymmetry="${root.attrs.fullSymmetry}"` : ''}>`,
+        '  <tiles>',
+        ...tiles.map((t) => `    <tile${attr(t)}/>`),
+        '  </tiles>',
+        '  <neighbors>',
+        ...neighbors.map((n) => `    <neighbor${attr(n)}/>`),
+        '  </neighbors>',
+        '</tileset>',
+      ].join('\n'),
+    );
+  } else {
+    const uniques: number[] = [];
+    const body = tiles.map((t) => {
+      const v = readVox(path.join(dir, name, `${t.attrs.name}.vox`));
+      const o = ords(v.cells, uniques);
+      if (uniques.length > letters.length) throw new Error(`${name}: più colori (${uniques.length}) delle lettere di ${program}`);
+      return `    <tile${attr(t)}>\n${text(o.map((k) => letters[k]), v.X, v.Y, v.Z, '      ')}\n    </tile>`;
+    });
+    write(
+      `${name}.xml`,
+      [
+        `<!-- ${SOURCE(`resources/tilesets/${name}.xml and ${name}/*.vox`)}; the letters are those of ${program}. -->`,
+        `<tileset values="${letters.slice(0, uniques.length)}"${root.attrs.fullSymmetry ? ` fullSymmetry="${root.attrs.fullSymmetry}"` : ''}>`,
+        '  <tiles>',
+        ...body,
+        '  </tiles>',
+        '  <neighbors>',
+        ...neighbors.map((n) => `    <neighbor${attr(n)}/>`),
+        '  </neighbors>',
+        '</tileset>',
+      ].join('\n'),
+    );
+  }
 }
 
 for (const program of RULE_PROGRAMS) {

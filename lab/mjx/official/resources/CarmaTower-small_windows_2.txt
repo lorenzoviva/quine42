@@ -1,0 +1,16 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/small_windows_2.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "o*L-Bh" of CarmaTower
+o*o*o/LLLLL
+-o-o-/LLLLL
+o*o*o/LLLLL
+-o-o-/LLLLL
+o*o*o/LLLLL
+-o-o-/LLLLL
+o*o*o/LLLLL
+->
+*****/*****
+*BBB*/*hLh*
+*BBB*/*hLh*
+*BBB*/*LLL*
+*BBB*/*hLh*
+*BBB*/*hLh*
+*****/*****

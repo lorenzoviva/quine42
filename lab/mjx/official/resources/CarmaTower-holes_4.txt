@@ -1,0 +1,12 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/holes_4.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "*oL-Bh" of CarmaTower
+*o*o*o*o*/LLLLLLLLL
+o-o-o-o-o/LLLLLLLLL
+*o*o*o*o*/LLLLLLLLL
+o-o-o-o-o/LLLLLLLLL
+*o*o*o*o*/LLLLLLLLL
+->
+*********/*********
+*BBBBBBB*/*hLhLhLh*
+*BBBBBBB*/*LLLLLLL*
+*BBBBBBB*/*hLhLhLh*
+*********/*********

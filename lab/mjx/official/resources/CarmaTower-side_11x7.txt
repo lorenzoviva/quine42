@@ -1,0 +1,20 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/side_11x7.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "*o6-W" of CarmaTower
+*o*o*o*o*o*o*/6666666666666
+o-o-o-o-o-o-o/6666666666666
+*o*o*o*o*o*o*/6666666666666
+o-o-o-o-o-o-o/6666666666666
+*o*o*o*o*o*o*/6666666666666
+o-o-o-o-o-o-o/6666666666666
+*o*o*o*o*o*o*/6666666666666
+o-o-o-o-o-o-o/6666666666666
+*o*o*o*o*o*o*/6666666666666
+->
+*************/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*WWWWWWWWWWW*/*************
+*************/*************

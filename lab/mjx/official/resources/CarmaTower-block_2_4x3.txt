@@ -1,0 +1,10 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/block_2_4x3.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "rB*LTR" of CarmaTower
+r****r/r****r/r****r
+rBBBBr/rBBBBr/rTTTTr
+rBBBBr/rBBBBr/rTTTTr
+rBBBBr/rBBBBr/rTTTTr
+->
+******/******/R****R
+*LLLL*/*LLLL*/RLLLLR
+*LLLL*/*LLLL*/RLLLLR
+*LLLL*/*LLLL*/RLLLLR

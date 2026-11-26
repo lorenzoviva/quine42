@@ -180,7 +180,8 @@ export function mjxIncludes(src: string, read: (file: string) => string | undefi
       if ((el.name === 'wfc' || el.name === 'convchain') && el.attrs.sample !== undefined) take(`${el.attrs.sample}.txt`);
       if (el.name === 'wfc' && el.attrs.tileset !== undefined) {
         const text = take(`${el.attrs.tileset}.xml`);
-        if (text !== undefined) for (const t of tilesOf(text)) if (!t.text?.trim()) take(`${t.attrs.file ?? `${el.attrs.tiles ?? el.attrs.tileset}-${t.attrs.name}`}.txt`);
+        const tilesFolder = (el.attrs.tiles ?? el.attrs.tileset).replace(/\//g, '-');
+        if (text !== undefined) for (const t of tilesOf(text)) if (!t.text?.trim()) take(`${t.attrs.file ?? `${tilesFolder}-${t.attrs.name}`}.txt`);
       }
       const inner = el.name === 'map' || el.name === 'wfc' ? el.attrs.folder : folder;
       for (const c of el.children) visit(c, inner);
@@ -960,7 +961,7 @@ class Compiler {
       if (e instanceof XmlError) this.fail(el, `models/${name}.xml: XML: ${e.message}`);
       throw e;
     }
-    const tilesFolder = el.attrs.tiles ?? name;
+    const tilesFolder = (el.attrs.tiles ?? name).replace(/\//g, '-');
     return this.inside(name, () => {
       const root = roots.find((r) => r.name === 'tileset') ?? this.fail(el, `models/${name}.xml non è un tileset (la sua radice è <tileset>)`);
       const own = root.attrs.values === undefined ? undefined : this.syms(root, root.attrs.values.replace(/\s+/g, ''), 'values');

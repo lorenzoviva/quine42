@@ -1,0 +1,16 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/side_3x5_fake.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "*oM6-K" of CarmaTower
+*o*o*/66666
+o-o-o/66666
+*o*o*/66666
+o-o-o/66666
+*o*o*/66666
+o-o-o/66666
+*o*o*/66666
+->
+*M*M*/*****
+M*M*M/*KKK*
+*M*M*/*KKK*
+M*M*M/*KKK*
+*M*M*/*KKK*
+M*M*M/*KKK*
+*M*M*/*****

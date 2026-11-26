@@ -1,0 +1,4 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/tilesets/Knots3D/3/Empty.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts; the letters are those of Knots3D.
+BBB/BBB/BBB
+BBB/BBB/BBB
+BBB/BBB/BBB

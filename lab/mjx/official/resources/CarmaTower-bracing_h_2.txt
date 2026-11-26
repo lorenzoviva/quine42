@@ -1,0 +1,8 @@
+# MarkovJunior (github.com/mxgmn/MarkovJunior, resources/rules/CarmaTower/bracing_h_2.vox, MIT, © 2022 Maxim Gumin), as text by lab/scripts/mjx-risorse.ts, with the legend "*GL" of CarmaTower
+*******/**G*G**/*LLLLL*
+*******/**G*G**/*LLLLL*
+*******/**G*G**/*LLLLL*
+->
+*******/*******/*******
+**L*L**/*L*L*L*/*******
+*******/*******/*******
