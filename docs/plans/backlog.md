@@ -6662,7 +6662,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T506`; poi l'orchestratore integra T506, e `integra T504` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: integrato `task/T504` su `3d` nel branch `task/T506` (`886712a4`), risolti i conflitti con T476 in `AGENTS.md` e `docs/architettura-dettagli.md` mantenendo entrambe le aggiunte, T476 resta su ADR-0257 e kernel 0.10.33, T504 su ADR-0258 e kernel 0.10.34 (`version.ts`, `package.json`, `universe/universe.json`, ADR 0258, `docs/adr/README.md`, `docs/architettura-dettagli.md`, `lab/banco/rilievo/README.md`); `typecheck` verde, test mirati verdi (71/71), suite intera 307/308 (`tests/site-video.test.ts` fallito solo per ENOSPC su C:, passato 73/73 con temp su H:); browser non richiesto; sicurezza: nessuna superficie nuova.
 
-### T507 · Verifica nel browser del fondale di T480 — `da fare`
+### T507 · Verifica nel browser del fondale di T480 — `fatto` (`19194256`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 1
 - Step: 45
 - Contesto: T480 (Neon, `91e8030b`, integrato `703c3925`, ADR-0259, kernel 0.10.35) ha portato il fondale (R4): letto opaco a strati sotto l'acqua nuotabile trasparente (`SEA_MAT.clear`, `waterAlpha`), `Kernel.bedAt`, strati di secche e porto, posto `underwater` del Cartografo, `ChunkView.bed` ai client; eseguito su agy senza browser. Integrato prima della verifica perché la settimana di Claude è finita fino al 26/11. `dossier T480`.
@@ -6670,6 +6670,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nuovo; un difetto trovato si scrive nell'esito come task proposto.
 - Browser: sì.
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T507`.
+- Esito: verificati nel browser offline (mondo Pirati, rilievo vero): trasparenza graduata dell'acqua sul letto, bande degli strati sulle sponde sommerse, schiuma sopra l'acqua trasparente, oggetto `underwater` posato dal kernel sul letto (`below`, iniettato a mano nel piano perché offline il Cartografo non lo chiede), nuoto senza blocchi; seme `Hills` e lava invariati; console pulita; screenshot e rapporto in `lab/banco/fondale/`. Non provati: secche e porto (la palette offline dei Pirati non ha `y` né `i`), scia (nessun veicolo offline), multigiocatore. Task proposto: nella Genesi offline dei Pirati i terreni `y` e `i` e la cassa nel catalogo, per provare secche, porto e `underwater` senza Gemini. Typecheck verde; suite dei test non rilanciata (solo documenti e immagini).
 
 ## Richieste del 26/11/2026 (testo intero: `docs/userchats/to-do-2026-11-26.md`)
 
