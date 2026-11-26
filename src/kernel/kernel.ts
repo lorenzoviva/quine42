@@ -103,7 +103,7 @@ import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, t
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
 import { COUNCIL_ORIGINS, repairVehicleClaims, vehicleSpot, worldMedia, type VehicleSpot } from './vehicleclaim';
-import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
+import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, underKeel, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
 
 /** A solid entity with a model, as collision sees it: where it is, its form, where it blocks and its floors. */
 interface SolidForm extends Ground {
@@ -6933,8 +6933,10 @@ export class Kernel {
       if (key !== ownTile && this.solidTiles.has(key)) return false;
       for (const s of this.solidForms.get(key) ?? []) {
         if (ignore.has(s.id)) continue;
-        const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
         const g = s.form.result!.grid;
+        // What stands under the surface (T540: a chest sunk on the seabed) passes under the keel: the hull goes over it, as a swimmer does.
+        if (!s.vehicle && s.stand !== undefined && underKeel(spec, s.stand + g.Z / s.form.vpt, this.groundAt(s.x, s.y))) continue;
+        const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
         const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
         if (vx < 0 || vy < 0 || vx >= g.X || vy >= g.Y) continue;
         if ((s.vehicle ? this.builtColumns(s.form) : s.foot)[vx + vy * g.X]) return false;

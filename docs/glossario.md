@@ -398,6 +398,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `scoglio` (è roccia, non si nuota), `bassofondo` (è l'acqua bassa, `shallow`), `scogliera`
 - **Fermo**: `reef` come valore di `depth`, come ruolo di un timbro e come id del terreno del seme.
 
+### Chiglia
+- **Inglese**: `KEEL`, `underKeel`
+- **Definizione**: quanto uno scafo arriva sotto la superficie su cui va: mezza casella per un pescaggio basso, una per uno profondo, niente per un carro o una capsula. Ciò che sta sotto la superficie e non arriva più su (la cassa affondata sul fondale, il barile di una cantina) passa sotto la chiglia: lo scafo gli va sopra, come chi nuota (T540).
+- **Dove vive**: `src/kernel/vehicle.ts` (`KEEL`, `underKeel`), `src/kernel/kernel.ts` (`hullFits`)
+- **Da non usare**: `pescaggio` (è `draught`, basso o profondo: dice su quale acqua lo scafo galleggia, non quanto arriva sotto)
+- **Fermo**: niente su disco né sul filo.
+
 ### Veicolo
 - **Inglese**: `vehicle`, `VehicleSpec`, `VehicleState`, `vehicleSpecOf`, `VEHICLE_LIMITS`, `VEHICLE_MEDIA`, `vehicleTick`, `MAX_VEHICLES`, `VehicleRecord`
 - **Definizione**: una cosa del mondo che porta chi sta sul suo ponte: una barca sull'acqua che si nuota, un carro su ciò che si cammina, una capsula sul vuoto (T448). Il manifest dice su che cosa sta e quanto va, entro i tetti del kernel; lo muove solo il kernel; non è di un luogo e il salvataggio lo tiene dov'è (T439, ADR-0227). Ciò che sembra un veicolo lo è: una cosa del mondo il cui nome dice un mezzo ha `vehicle`, che la Fucina scrive, il validatore dei moduli forgiati vuole e la riparazione dà ai moduli del Concilio di prima (T487, ADR-0244).

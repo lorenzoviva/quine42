@@ -286,7 +286,8 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
       'genesis.terrain',
       `Define 14-20 kinds of terrain for the maps of this universe, outdoor and indoor, of its age.\nTheme: ${theme}\nTone: ${bible.tone}\nPlaces: ${bible.places.join('; ')}\nStyle: ${style.style}; palette ${style.palette.join(', ')}\nRequired codes (one character each), adapted to the theme:\n${Object.entries(baseCodes).map(([k, v]) => `- ${k}: ${v.meaning} [layer ${v.layer}]`).join('\n')}\nAdd others (one character), what exists in the theme: in a village tilled fields, mud, stone wall, straw, fence, drawbridge; in a city asphalt, rails, concrete, glass, sheet metal, wire fence; on the frontier planks, packed dirt, corral; on islands planks (for the piers), a reef (rock just under the water), coral, rigging; on a far world regolith, ice, glass of the greenhouses; anywhere lava, carpet. Colours well apart from each other.${feedback ? `\nTo fix: ${feedback}` : ''}`,
       TERRAIN_SCHEMA,
-      { data: { ...data, bible } },
+      // The geography for the local models only (T540): the offline palette of an archipelago has the seed's pier and reef.
+      { data: { ...data, bible, geography } },
     );
 
   // A bible of the world, not of the Council's table: asked once more if it breaks the fourth wall, then cleaned.
@@ -404,7 +405,8 @@ export async function planGenesis(c: Council, theme: string, base: FileMap, chec
     'genesis.cast',
     `Choose the first inhabitants and the first things of «${bible.title}»: 5 npcs very different from each other (at least 3 people of different trades, ages and genders, and 1 animal; none the same as another), 5 objects that stand in the world (at least 3 pieces of furniture or containers, as its age has them: bed, cupboard, chest, workbench…, and 1-2 outdoor things to do something with: well, altar, bonfire, booth, vending machine…), 2 special tools ("type": npc, object, item). For each one a one-sentence request for the Forge, consistent with the bible.${brought?.cast.length ? ` These already have their look: ${listed(brought.cast, 30)}; when one fits this world, ask for it with exactly its name.` : ''}`,
     CAST_SCHEMA,
-    { data: { bible } },
+    // The geography for the local models only (T540): the offline cast of an archipelago has a chest and a boat.
+    { data: { bible, geography } },
   );
   // A kind in the Italian of the contract 0.6 (`strumento`) is still the one it means.
   const moduli: CastEntry[] = (Array.isArray(cast.modules) ? cast.modules : []).flatMap((m) => {
