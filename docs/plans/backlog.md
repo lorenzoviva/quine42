@@ -6938,3 +6938,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: un test che fallisce prima e passa dopo sul ramo del rilievo vero e dell'arcipelago; `tests/climi.test.ts`, `tests/arcipelago.test.ts`, `tests/pirati-offline.test.ts`, i test del rilievo verdi.
 - Browser: sì se i luoghi nuovi cambiano (un mondo Pirati e `mesa` offline).
 - Quando è fatto: test verdi, impronta del seme invariata, esito con ciò che cambia negli universi dal rilievo vero.
+
+### T542 · La coda degli abbonamenti pagata coi crediti API di Anthropic (i 100 $ di novembre) — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · da approvare · priorità 1
+- Step: 44
+- Contesto: autore 26/11: l'abbonamento Anthropic include 100 $ di crediti API al mese, da consumare entro l'1/12 per rigenerare i modelli MJ. Oggi la rigenerazione (`npm run genera -- <u> --rigenera modelli`, ADR-0216) passa dalla coda servita dalla CLI sull'abbonamento (`tools/abbonamenti/servi.ts`), che consuma la settimana. La CLI con `ANTHROPIC_API_KEY` nell'ambiente fattura all'API.
+- Cosa fare: `npm run abbonamento -- --api` (o una variabile del `.env`): solo il processo figlio della CLI che serve la coda riceve `ANTHROPIC_API_KEY` (letta dal `.env`, mai stampata né in un log, mai nell'ambiente dei task della pipeline, del server o di un mondo; senza `--api` la chiave è tolta dall'ambiente del figlio); un tetto in dollari (`--tetto-api`, al listino `anthropicCost` sui token che la CLI dice, e il costo della CLI accanto) oltre il quale la coda smette di servire; la spesa scritta in un registro accanto alla coda; `stato` del generatore la dice. Nessun cambio al kernel.
+- Test: offline con la CLI finta (`lab/scripts/claude-finta.mjs`): con `--api` il figlio vede la chiave, senza no; il tetto ferma; la chiave non compare in log né in `dist/`. Browser: no.
+- Quando è fatto: test verdi; una richiesta vera di prova (≤ 0,50 $) servita con la chiave dell'autore, il costo detto dalla console di Anthropic confrontato col registro.
+- Domande per l'autore: i crediti si usano con una chiave della Console (`ANTHROPIC_API_KEY` nel `.env` della radice)? Quanto tenere di margine (proposta: tetto 95 $)? Ordine degli universi.
