@@ -34,8 +34,7 @@ Aggiornato il 26/11/2026, epoca 674 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D/T500:** risposte 1-6 e 8 date il 26/11 (A; testo in `domande/T500.md`), catena A1 pianificata T525-T539; **resta la 7** (esempi interi o estratto: spiegato che 17-31 mila sono caratteri) → blocca solo T536.
-- **D35 (piano di lancio):** riscritta da T378 (integrato `2089c79b`): da decidere ora D3.1 e D4.6; tue D5.1, D6.2, D6.4, D7.3 (prima di T367); il resto approvabile in blocco (`aperte.md`).
+- Nessuna domanda aperta: D/T500 chiusa (7 = estratto, T536 approvato), D35 chiusa il 26/11 epoca 678 (D6.2 10 $/giorno, D7.3 via b, «consiglio sì» in blocco; restano D3.4 in Fase VI e V1-V12 prima del lancio).
 
 ## Regole attive
 
