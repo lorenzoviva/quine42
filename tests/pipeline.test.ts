@@ -25,6 +25,7 @@ type Pipeline = {
   demandOf(queues: Record<string, (Task & { missing?: string[] })[]>): Record<string, number>;
   updateSlots(budget: Record<string, Record<string, unknown>>, queues: Record<string, (Task & { missing?: string[] })[]>, o?: { config?: unknown; nowMs?: number }): Record<string, Record<string, unknown>>;
   computeBudget(provider: string, conf?: unknown, counters?: Counter[]): { residuo: number; sessione: number };
+  loadBudget(opts?: { read?: boolean; config?: unknown; budgetFile?: string; usageReader?: (p: string, cache: Map<string, unknown>, cfg: unknown) => { tutti: Counter[]; contatori: Counter[] } | undefined }): Record<string, any>;
   plan(tasks: Task[], runs: Record<string, any>, budget: Record<string, any>, only?: string): { inCorso: any[]; daIntegrare: any[]; pronti: any[]; daApprovare: any[]; daStimare: any[]; bloccati: any[]; inAttesa: any[] };
   isSuspended(b: unknown, nowMs?: number): boolean;
   suspendProvider(provider: string, finoA?: string, opts?: unknown): { provider: string; sospeso: string | boolean };
@@ -389,7 +390,8 @@ describe('piani e finestra delle 5 ore (ADR-0119)', () => {
     expect(c.providers.claude).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 12 });
     expect(c.providers.fable).toMatchObject({ orchestrabile: false, ratioSessioneSettimana: 8 });
     expect(c.providers.gemini).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 3.3 });
-    expect(c.providers.argon).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 1, finestra5h: false });
+    expect(c.providers.argon).toMatchObject({ orchestrabile: true, ratioSessioneSettimana: 3.3, stessoContoDi: 'gemini', contatori: '^Gemini Models$' });
+    expect(c.providers.argon.finestra5h).toBeUndefined();
     expect(c.orchestra.rotazione).toBe(0.35);
   });
 
@@ -461,7 +463,9 @@ describe('piani e finestra delle 5 ore (ADR-0119)', () => {
     expect(P.windowAdmits('claude', t, { b: low('2026-11-03T12:21:00Z'), config: c, nowMs: NOW })).toBe(false);
     expect(P.windowAdmits('claude', t, { b: low('2026-11-03T11:59:00Z'), config: c, nowMs: NOW })).toBe(false); // un reset già passato non conta
     expect(P.windowAdmits('claude', { estimate: 4, priority: 0 }, { b: low(FAR), config: c, nowMs: NOW })).toBe(true);
-    expect(P.windowAdmits('argon', t, { b: { sessione: 1 }, config: c, nowMs: NOW })).toBe(true);
+    const weeklyOnly = { ...c, providers: { ...c.providers, weekly: { ...c.providers.argon, finestra5h: false } } };
+    expect(P.windowAdmits('weekly', t, { b: { sessione: 1 }, config: weeklyOnly, nowMs: NOW })).toBe(true);
+    expect(P.windowAdmits('argon', t, { b: { sessione: 1 }, config: c, nowMs: NOW })).toBe(false);
   });
 
   it('fitsOn: la settimana è scalata, la finestra conta solo per i task nuovi, nessuna eccezione sotto la soglia', () => {
@@ -724,10 +728,12 @@ describe('capOf', () => {
     expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, provider: 'argon', resuming: true })).toBe(0);
   });
 
-  it('per Argon (senza 5h) conta solo la settimana', () => {
-    expect(P.capOf({ ...base, left: 28, session: 2, provider: 'argon' })).toBe(2);
-    expect(P.capOf({ ...base, left: 8, session: 100, provider: 'argon', resuming: true })).toBe(1);
-    expect(P.capOf({ ...base, orchestrator: 'argon', left: 8, session: 100, provider: 'argon', resuming: true })).toBe(0);
+  it('per un provider senza 5h (finestra5h: false) conta solo la settimana; Argon ha anche le 5h', () => {
+    const weeklyCfg = { providers: { weekly: { finestra5h: false } } };
+    expect(P.capOf({ ...base, left: 28, session: 2, provider: 'weekly', config: weeklyCfg } as never)).toBe(2);
+    expect(P.capOf({ ...base, left: 8, session: 100, provider: 'weekly', resuming: true, config: weeklyCfg } as never)).toBe(1);
+    expect(P.capOf({ ...base, orchestrator: 'weekly', left: 8, session: 100, provider: 'weekly', resuming: true, config: weeklyCfg } as never)).toBe(0);
+    expect(P.capOf({ ...base, left: 28, session: 2, provider: 'argon' })).toBe(0);
   });
 });
 
@@ -1428,7 +1434,7 @@ describe('interfaccia web della pipeline (T69)', () => {
     const st = W.handleApi('GET', '/api/stato', {}, opts).data;
     expect(st.budget.claude.residuo).toBe(42);
     expect(st.budget.argon.residuo).toBe(25);
-    expect(st.budget.argon.sessione).toBe(25);
+    expect(st.budget.argon.sessione).toBe(100);
     expect(st.orchestratore.provider).toBe('argon');
   });
 
@@ -2548,30 +2554,30 @@ describe('i modelli specializzati di Antigravity: Gemini 4 Hydrogen e Orchestrat
     for (const p of NUOVI) expect(P.ceilingOf(p, senza)).toBe(0);
   });
 
-  it('i contatori: Hydrogen su Gemini Models, Orchestrator su Gemini Models e su Gemini 4 Argon', () => {
+  it('i contatori: Hydrogen e Orchestrator su Gemini Models (anche senza Gemini 4 Argon)', () => {
     expect(countersOf('hydrogen').map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h']);
-    expect(countersOf('orchestrator').map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h', 'Gemini 4 Argon settimana']);
-    // La settimana più bassa decide (Argon), la finestra delle 5 ore è quella di Gemini Models.
-    expect(P.computeBudget('orchestrator', config.providers.orchestrator, countersOf('orchestrator'))).toEqual({ residuo: 71, sessione: 100 });
+    expect(countersOf('orchestrator').map((c) => `${c.nome} ${c.finestra}`)).toEqual(['Gemini Models settimana', 'Gemini Models 5h']);
+    expect(P.computeBudget('orchestrator', config.providers.orchestrator, countersOf('orchestrator'))).toEqual({ residuo: 98, sessione: 100 });
     expect(P.computeBudget('hydrogen', config.providers.hydrogen, countersOf('hydrogen'))).toEqual({ residuo: 98, sessione: 100 });
     // Il contatore di Claude e GPT non ferma nessuno dei due.
     for (const p of NUOVI) expect(new RegExp(config.providers[p].contatori).test('Claude and GPT models')).toBe(false);
   });
 
-  it('i conti condivisi: Hydrogen con Gemini, Orchestrator con Argon; su agy un task alla volta, di qualunque modello', () => {
+  it('i conti condivisi: Hydrogen, Orchestrator e Argon su Gemini; su agy un task alla volta, di qualunque modello', () => {
     expect(A().accountOf('hydrogen', config)).toBe(A().accountOf('gemini', config));
     expect(A().accountOf('orchestrator', config)).toBe(A().accountOf('argon', config));
-    expect(A().accountOf('orchestrator', config)).not.toBe(A().accountOf('hydrogen', config));
+    expect(A().accountOf('orchestrator', config)).toBe(A().accountOf('hydrogen', config));
     const small = { estimate: 1, priority: 10 };
     const budget = { hydrogen: { residuo: 90, sessione: 100, slot: 1, tetto: 1 }, orchestrator: { residuo: 70, sessione: 100, slot: 1, tetto: 1 } };
     for (const p of NUOVI) {
       expect(P.fitsOn(p, small, { budget, live: [], config })).toBe(true);
       expect(P.fitsOn(p, small, { budget, live: [{ provider: 'agy-opus', stima: 1 }], config })).toBe(false);
     }
-    // Sotto la soglia, chi ha lo stesso conto dell'orchestratore non riprende.
+    // Sotto la soglia, chi ha lo stesso conto dell'orchestratore non riprende; chi ha un altro conto sì.
     const low = { threshold: 10, orchestrator: 'argon', left: 5, session: 5, resuming: true };
     expect(P.capOf({ ...low, provider: 'orchestrator' })).toBe(0);
-    expect(P.capOf({ ...low, provider: 'hydrogen' })).toBe(1);
+    expect(P.capOf({ ...low, provider: 'hydrogen' })).toBe(0);
+    expect(P.capOf({ ...low, provider: 'agy-opus' })).toBe(1);
   });
 
   it('lo sforzo su Hydrogen: extra, xhigh e max diventano -xhigh, gli altri il loro livello', () => {
@@ -2711,7 +2717,7 @@ describe('Gemini 4 Neon nella pipeline (T465)', () => {
     expect(P.computeBudget('neon', config.providers.neon, counters())).toEqual({ residuo: 100, sessione: 98 });
     expect(A().accountOf('neon', config)).toBe(A().accountOf('gemini', config));
     expect(A().accountOf('neon', config)).toBe(A().accountOf('hydrogen', config));
-    expect(A().accountOf('neon', config)).not.toBe(A().accountOf('argon', config));
+    expect(A().accountOf('neon', config)).toBe(A().accountOf('argon', config));
     for (const nome of ['Claude and GPT models', 'Gemini 4 Argon']) expect(new RegExp(config.providers.neon.contatori).test(nome)).toBe(false);
     // Su agy un task alla volta, di qualunque modello.
     const small = { estimate: 1, priority: 10 };
@@ -2746,5 +2752,83 @@ describe('Gemini 4 Neon nella pipeline (T465)', () => {
     const url = pathToFileURL(path.resolve(__dirname, '../tools/pipeline/web.mjs')).href;
     const W = (await import(/* @vite-ignore */ url)) as { renderHtml(): string };
     expect(W.renderHtml()).toContain('<option value="neon">neon (Gemini 4 Neon)</option>');
+  });
+});
+
+describe('Argon sul contatore Gemini Models (T508)', () => {
+  const fixture = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'fixtures/pipeline-config.json'), 'utf8'));
+  const realConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../tools/pipeline/config.json'), 'utf8'));
+
+  it('argon e orchestrator su Gemini Models in config.json e nella copia dei test', () => {
+    for (const cfg of [fixture, realConfig]) {
+      for (const p of ['argon', 'orchestrator']) {
+        expect(cfg.providers[p]).toMatchObject({
+          contatori: '^Gemini Models$',
+          stessoContoDi: 'gemini',
+          ratioSessioneSettimana: 3.3,
+        });
+        expect(cfg.providers[p].finestra5h).toBeUndefined();
+      }
+    }
+  });
+
+  it('computeBudget usa settimana e 5h di Gemini Models per argon e orchestrator', () => {
+    const counters = P.parseUsage('gemini', [
+      'Gemini Models\tWeekly Limit Remaining\t96%\t2026-12-03T17:11:43Z',
+      'Gemini Models\tFive Hour Limit Remaining\t85%\t2026-11-26T22:11:43Z',
+      'Claude and GPT models\tWeekly Limit Remaining\t100%\t1970-01-01T00:00:00Z',
+    ].join('\n'))!;
+    const geminiCounters = counters.filter((c) => new RegExp(realConfig.providers.argon.contatori).test(c.nome));
+    expect(P.computeBudget('argon', realConfig.providers.argon, geminiCounters)).toEqual({ residuo: 96, sessione: 85 });
+    expect(P.computeBudget('orchestrator', realConfig.providers.orchestrator, geminiCounters)).toEqual({ residuo: 96, sessione: 85 });
+  });
+
+  it('loadBudget non si rompe e ripulisce i contatori vecchi se un gruppo sparisce da /usage', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quine-t508-'));
+    try {
+      const budgetFile = path.join(dir, 'budget.json');
+      fs.writeFileSync(budgetFile, JSON.stringify({
+        scomparso: {
+          residuo: 28,
+          sessione: 28,
+          letto: '2026-11-20T10:00:00.000Z',
+          aggiornato: '2026-11-20T10:00:00.000Z',
+          contatori: [{ nome: 'Gruppo Sparito', finestra: 'settimana', residuo: 28, reset: '2026-11-30T10:00:00.000Z' }],
+          tutti: [{ nome: 'Gruppo Sparito', finestra: 'settimana', residuo: 28, reset: '2026-11-30T10:00:00.000Z' }],
+        },
+      }));
+      const cfg = {
+        usoSecondi: 300,
+        riserva: 1,
+        providers: {
+          gemini: { cmd: 'agy', contatori: '^Gemini Models$', resetSettimanale: '' },
+          scomparso: { cmd: 'agy', contatori: '^Gruppo Sparito$', resetSettimanale: '' },
+        },
+      };
+      const all = P.parseUsage('gemini', [
+        'Gemini Models\tWeekly Limit Remaining\t100%\t2026-12-03T17:11:43Z',
+        'Gemini Models\tFive Hour Limit Remaining\t99%\t2026-11-26T22:11:43Z',
+      ].join('\n'))!;
+      const budget = P.loadBudget({
+        config: cfg,
+        budgetFile,
+        usageReader: (prov) => ({
+          tutti: all,
+          contatori: all.filter((c) => new RegExp((cfg.providers as Record<string, any>)[prov].contatori).test(c.nome)),
+        }),
+      });
+      expect(budget.gemini).toMatchObject({ residuo: 100, sessione: 99 });
+      expect(budget.scomparso.contatori).toEqual([]);
+      expect(budget.scomparso.tutti).toEqual(all);
+      expect(budget.scomparso).toMatchObject({ residuo: 100, sessione: 100 });
+      // Se la CLI non risponde (undefined), il budget precedente resta com'è.
+      fs.writeFileSync(budgetFile, JSON.stringify({
+        gemini: { residuo: 42, sessione: 55, letto: '2026-11-20T10:00:00.000Z', aggiornato: '2026-11-20T10:00:00.000Z' },
+      }));
+      const offline = P.loadBudget({ config: cfg, budgetFile, usageReader: () => undefined });
+      expect(offline.gemini).toMatchObject({ residuo: 42, sessione: 55 });
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

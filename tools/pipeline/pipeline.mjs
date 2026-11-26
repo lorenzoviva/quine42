@@ -174,7 +174,7 @@ export function windowAdmits(prov, t, { b, live = [], config = CONFIG, nowMs = D
 
 export function capOf({ left, session, provider, orchestrator: orch, slot = 1, tetto = 1, threshold, urgent = false, resuming = false, config = CONFIG }) {
   const conf = config.providers?.[provider];
-  const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
+  const isWeeklyOnly = conf?.finestra5h === false;
   const sess = isWeeklyOnly ? left : (session ?? left);
   if (left < threshold || sess < threshold) return resuming && accountOf(provider, config) !== accountOf(orch, config) ? 1 : 0;
   return Math.min(tetto, resuming ? Math.max(slot, 1) : slot + (urgent ? 1 : 0));
@@ -458,8 +458,8 @@ function localDate(text) {
  * Every counter of a provider's CLI (`tutti`: in Antigravity one per model group, also the ones the pipeline does not use)
  * and the ones that decide for it (`contatori`, matching `contatori` in config.json). One `/usage` per CLI per read.
  */
-function readUsage(provider, cache) {
-  const conf = CONFIG.providers[provider];
+function readUsage(provider, cache, config = CONFIG) {
+  const conf = config.providers[provider];
   try {
     if (!cache.has(conf.cmd)) {
       const text = execFileSync(conf.cmd, ['-p', '/usage'], { encoding: 'utf8', timeout: 120_000, env: { ...process.env, MSYS_NO_PATHCONV: '1' }, windowsHide: true });
@@ -484,27 +484,27 @@ const lowest = (counters, w) => Math.min(100, ...counters.filter((c) => c.finest
  */
 export function computeBudget(provider, conf = CONFIG.providers?.[provider], counters = []) {
   const residuo = lowest(counters, 'settimana');
-  const has5h = conf?.finestra5h !== false && provider !== 'argon' && counters.some((c) => c.finestra === '5h');
+  const has5h = conf?.finestra5h !== false && counters.some((c) => c.finestra === '5h');
   const sessione = has5h ? lowest(counters, '5h') : residuo;
   return { residuo, sessione };
 }
 
-export function loadBudget({ read = true } = {}) {
-  const budget = readJson(BUDGET, {});
+export function loadBudget({ read = true, config = CONFIG, budgetFile = BUDGET, usageReader = readUsage } = {}) {
+  const budget = readJson(budgetFile, {});
   const cache = new Map();
-  for (const [prov, conf] of Object.entries(CONFIG.providers)) {
+  for (const [prov, conf] of Object.entries(config.providers)) {
     const b = (budget[prov] ??= { residuo: 100, aggiornato: now() });
-    if (read && !(b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 1000)) {
-      const usage = readUsage(prov, cache);
-      if (usage?.contatori.length) {
+    if (read && !(b.letto && Date.now() - Date.parse(b.letto) < config.usoSecondi * 1000)) {
+      const usage = usageReader(prov, cache, config);
+      if (usage) {
         const { residuo, sessione } = computeBudget(prov, conf, usage.contatori);
         Object.assign(b, { ...usage, letto: now(), residuo, sessione });
       }
     }
-    const isWeeklyOnly = conf.finestra5h === false || prov === 'argon' || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
+    const isWeeklyOnly = conf.finestra5h === false || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
     if (isWeeklyOnly) b.sessione = b.residuo;
-    if (b.contatori && b.letto && Date.now() - Date.parse(b.letto) < CONFIG.usoSecondi * 2000) {
-      const empty = b.contatori.filter((c) => c.residuo <= (c.finestra === 'settimana' ? CONFIG.riserva : 0) && c.reset);
+    if (b.contatori && b.letto && Date.now() - Date.parse(b.letto) < config.usoSecondi * 2000) {
+      const empty = b.contatori.filter((c) => c.residuo <= (c.finestra === 'settimana' ? config.riserva : 0) && c.reset);
       b.fermoFino = empty.length ? empty.map((c) => c.reset).sort().at(-1) : b.fermoFino && new Date(b.fermoFino) > new Date() ? b.fermoFino : undefined;
       continue;
     }
@@ -1163,7 +1163,7 @@ function finish(run, { code, text, log }, runs, saveRuns) {
     budget[run.provider].fermoFino = limit.toISOString();
     const residuo = Math.min(budget[run.provider].residuo, CONFIG.sogliaUnSolo - 1);
     budget[run.provider].residuo = residuo;
-    if (CONFIG.providers?.[run.provider]?.finestra5h === false || run.provider === 'argon') {
+    if (CONFIG.providers?.[run.provider]?.finestra5h === false) {
       budget[run.provider].sessione = residuo;
     }
     say(`${run.id}: limite di ${run.provider}, riprendo dopo ${run.fermoFino}`);
@@ -1901,7 +1901,7 @@ export function setBudgetManual(provider, residuo, opts) {
   const p = pathsOf(opts);
   const b = readJson(p.budget, {});
   const conf = p.config.providers?.[provider] ?? CONFIG.providers?.[provider];
-  const isWeeklyOnly = conf?.finestra5h === false || provider === 'argon';
+  const isWeeklyOnly = conf?.finestra5h === false;
   const val = Number(residuo);
   b[provider] = {
     ...b[provider],
@@ -2179,7 +2179,7 @@ if (process.argv[1]?.endsWith('pipeline.mjs')) {
     const prov = rest[0];
     const residuo = Number(rest[1]);
     const conf = CONFIG.providers?.[prov];
-    const isWeeklyOnly = conf?.finestra5h === false || prov === 'argon';
+    const isWeeklyOnly = conf?.finestra5h === false;
     b[prov] = { ...b[prov], residuo, ...(isWeeklyOnly ? { sessione: residuo } : {}), aggiornato: now(), fermoFino: undefined };
     writeJson(BUDGET, b);
     status();
