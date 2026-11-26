@@ -6929,3 +6929,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 8 riga A1-14. Dipende da T536, T537. La prova pagata col tetto che l'autore dirà (chiederlo prima di spendere).
 - Cosa fare e test: come la riga A1-14. Browser: no.
 - Quando è fatto: misura scritta, prova pagata col consenso dell'autore.
+
+### T541 · Il generatore del terreno non legge la natura del mondo (`type(nature) == "table"` sempre falso) — `da fare`
+- Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
+- Step: 45
+- Contesto: trovato da T510 (`dossier T510`, ADR-0261) e non toccato: in `universe/modules/world.terrain/logic.lua` (righe ~249-264) `type(nature) == "table"` sarebbe sempre falso perché la natura arriva da wasmoon come userdata, quindi il ramo del rilievo vero (`generate_relief`, ADR-0256) e quello dell'arcipelago del generatore non girerebbero mai. Da dimostrare prima: T475/T504/T507 hanno visto rilievo vero e arcipelago nel browser, forse perché il kernel li fa anche in TypeScript (`TrueRelief`, `islandDraft`).
+- Cosa fare: dimostrare con un test che cosa riceve il Lua (`world.nature()` e l'argomento del generatore) e se i rami girano; se no, correggere il controllo (o dare al generatore una tabella vera dal `Host`) senza cambiare la mesh dei luoghi del seme (`lab/scripts/impronta-terreno.ts` prima e dopo) né i piani di prima (idempotenti); misurare con `lab/scripts/rete-gradini.ts --vero [--arcipelago]` che cosa cambia nei luoghi nuovi; kernel salito di Z (o di Y se cambia il contratto: chiederlo nell'esito).
+- Test: un test che fallisce prima e passa dopo sul ramo del rilievo vero e dell'arcipelago; `tests/climi.test.ts`, `tests/arcipelago.test.ts`, `tests/pirati-offline.test.ts`, i test del rilievo verdi.
+- Browser: sì se i luoghi nuovi cambiano (un mondo Pirati e `mesa` offline).
+- Quando è fatto: test verdi, impronta del seme invariata, esito con ciò che cambia negli universi dal rilievo vero.
