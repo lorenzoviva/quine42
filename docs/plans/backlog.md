@@ -6801,7 +6801,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: studio con misure, catena e domande. Dipende da T520 (i dati del debugger).
 
 ### T522 · Studio: strutture modulari e «seamless» (blocchi composti, WFC alla marian42, pianeti) — `da fare`
-- Pipeline: claude · sforzo max · stima 4% · approvato · priorità 3
+- Pipeline: claude · sforzo max · stima 4% · approvato · priorità 1
 - Contesto: l'autore il 26/11: l'architettura di `neapolis` (note brutaliste) ha villette a parallelepipedi di cemento, piccole e singole; comporre questi blocchi in strutture più grandi e complesse, applicate al mondo come sostituzioni o in sovraimpressione. Riferimenti: https://marian42.de/article/infinite-wfc/ (WFC infinito a moduli, architettura romana), https://planetsmith.world/ e un post di r/Unity3D sui pianeti con WFC. Vedi `dossier T458`, `dossier T472` (parti del mondo), ADR-0206/0208 (lotto di più luoghi), `src/mj/wfc.ts` (ADR-0174), `dossier T500` (allineamento, la `wfc` che diverge apposta).
 - Cosa fare: studio in `docs/design/strutture-modulari.md`: i moduli come parti del mondo (un set di blocchi coi bordi compatibili, scritti dallo Scultore, verificati dal kernel), la composizione a WFC sopra i lotti o sopra più luoghi (infinita a pezzi come marian42: backtracking a finestre, determinismo dal seme, i luoghi caricati), sostituzione vs sovraimpressione, la regola 10 e le porte, il costo (chiamate una volta per set, poi zero), i pianeti; un prototipo nel lab con le villette di neapolis se costa poco; catena dei task e domande col consiglio.
 - Test: nessuno (studio); prototipo in `lab/`.
@@ -6833,70 +6833,70 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: portate in testo le risorse di Knots3D (per cartella), CarmaTower e DualRetraction, aggiunta la copia di ClosedSurface e il supporto a tiles con "/" nel compilatore e nel riferimento; i 6 modelli + ClosedSurface passano il confronto voxel per voxel con uscite.json sul seme 1, typecheck e suite test verdi (non provati --originale con .NET né i semi 2 e 3 in vitest).
 
 ### T526 · A1-1: l'interruttore della semantica e System.Random nel motore — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-1 di `docs/design/markov-allineamento.md`; risposte 1-3 di T500 (A). `dossier T500`.
 - Cosa fare e test: come la riga A1-1, con l'ADR della scelta A1 e del criterio voxel per voxel (dove divergiamo apposta, la `wfc`, lo dice l'ADR). Browser: no.
 - Quando è fatto: interruttore spento e griglie di oggi invariate; ADR; test verdi.
 
 ### T527 · A1-2: regole e corrispondenze dell'originale — `da fare`
-- Pipeline: claude · sforzo max · stima 8% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 8% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-2; risposta 4 di T500 (`one` uniforme senza `p`). Dipende da T526.
 - Cosa fare e test: come la riga A1-2. Browser: no.
 - Quando è fatto: gli `it.fails` della riga diventano `it` con l'interruttore acceso; spento invariato.
 
 ### T528 · A1-3: i rami dell'originale — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 2
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-3. Dipende da T527.
 - Cosa fare e test: come la riga A1-3. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T529 · A1-4: `map`, `path`, `convolution`, `convchain` dell'originale — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 2
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-4. Dipende da T528.
 - Cosa fare e test: come la riga A1-4. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T530 · A1-5: `wfc` e inferenza dell'originale — `da fare`
-- Pipeline: claude · sforzo max · stima 7% · approvato · priorità 2
+- Pipeline: claude · sforzo max · stima 7% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-5; risposta 2 di T500 (la `wfc` come proposto). Dipende da T529.
 - Cosa fare e test: come la riga A1-5. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T531 · A1-6: il compilatore legge l'originale così com'è — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-6; risposta 8 di T500 (le estensioni restano). Dipende da T526; in parallelo ai nodi se non tocca `engine.ts`.
 - Cosa fare e test: come la riga A1-6. Browser: no.
 - Quando è fatto: i 36 modelli dal loro testo, `c8`, test verdi.
 
 ### T532 · A1-7: le prestazioni del motore allineato — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 2
+- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-7. Dipende da T530.
 - Cosa fare e test: come la riga A1-7. Browser: no.
 - Quando è fatto: misure scritte, tetti di tempo nei test delle forme.
 
 ### T533 · A1-8: la migrazione 0.10 → 0.11 (accende la semantica dell'originale) — `da fare`
-- Pipeline: claude · sforzo max · stima 9% · approvato · browser · priorità 2
+- Pipeline: claude · sforzo max · stima 9% · approvato · browser · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-8; risposte 3 (A: convertire gli universi), 4 (A: le `one` con `p` diversi riscritte in nodi separati, vedi la risposta in `domande/T500.md`), 5 (A: il forte dell'autore riscritto coi piani a segno in una **copia accanto**; il file dell'autore non si tocca finché non approva). Dipende da T530, T531, T532.
 - Cosa fare e test: come la riga A1-8. Browser: sì (il forte riscritto e un universo migrato nel lab 3D e nel gioco offline).
 - Quando è fatto: contratto 0.11.0, ADR, `AGENTS.md`, test verdi, visto nel browser.
 
 ### T534 · A1-9: il validatore e i controlli dello Scultore sul motore allineato — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-9. Dipende da T533.
 - Cosa fare e test: come la riga A1-9. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T535 · A1-10: i prompt dello Scultore con la semantica dell'originale — `da fare`
-- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 2
+- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-10; risposte 4 («`p` solo nella `prl`») e 8 (A: le forme come ancore, la crescita a regole). Dipende da T533.
 - Cosa fare e test: come la riga A1-10. Browser: no.
