@@ -1,14 +1,14 @@
-// What the kernel would read of a module set (T522): the class of every face of every cell, read from the voxels and never declared, the
+// What the kernel would read of a set of bricks (T522, the «tasselli» of the study): the class of every face of every cell, read from the voxels and never declared, the
 // patterns (every cell with its turns around z), the propagator of the solver of MarkovJunior (src/mj/wfc.ts) and the checks of the set.
 //
 // A side face is the band of the two outer layers of the cell on that side: nothing solid in it is air (A); a passage is a run of at least a
 // door's width (11 voxels) of columns with a floor and a body's height (26) of air above it, all within a step (3) of each other: open (P)
 // if the band is mostly air, a door (D) if a wall stands around it; no passage is a parapet (R) when nothing is solid above 10 voxels, else a
 // wall (W). A bottom face is a slab (F) or open (O); a top face asks for a ceiling when the cell is a room (`covered`), otherwise it is open.
-// The inner faces of a module of more cells only meet each other (a label of the module, the two cells and the turn).
+// The inner faces of a brick of more cells only meet each other (a label of the brick, the two cells and the turn).
 
-import { DX, DY, DZ } from '../../src/mj/wfc';
-import { Block, C, H, type Module } from './moduli';
+import { DX, DY } from '../../src/mj/wfc';
+import { Block, C, H, type Brick } from './tasselli';
 
 export type Face =
   | { k: 'A' }
@@ -116,11 +116,11 @@ export function stacks(belowTop: Face, aboveBottom: Face): boolean {
   return true;
 }
 
-/** A cell of a module with one of its turns: what the solver places. */
+/** A cell of a brick with one of its turns: what the solver places. */
 export interface Pattern {
   index: number;
-  module: Module;
-  /** The cell in the module, canonical. */
+  brick: Brick;
+  /** The cell in the brick, canonical. */
   cell: [number, number, number];
   rot: number;
   /** +x, +y, -x, -y, top, bottom, in the turned frame. */
@@ -150,18 +150,18 @@ const cutCell = (b: Block, cx: number, cy: number, cz: number): Block => {
 const same = (a: Block, b: Block) => a.cells.every((v, i) => v === b.cells[i]);
 
 /** The set as the solver reads it: patterns, weights, the propagator; and what the checks found. */
-export interface ModuleSet {
+export interface BrickSet {
   patterns: Pattern[];
   weights: number[];
   propagator: number[][][];
   /** The class of every face of every canonical cell, for the report. */
-  faces: Array<{ module: string; cell: string; faces: string[] }>;
+  faces: Array<{ brick: string; cell: string; faces: string[] }>;
   problems: string[];
 }
 
-export function buildSet(modules: readonly Module[]): ModuleSet {
+export function brickSet(modules: readonly Brick[]): BrickSet {
   const patterns: Pattern[] = [];
-  const faces: ModuleSet['faces'] = [];
+  const faces: BrickSet['faces'] = [];
   const problems: string[] = [];
   for (const m of modules) {
     const whole = m.build();
@@ -180,11 +180,11 @@ export function buildSet(modules: readonly Module[]): ModuleSet {
           const canon: Face[] = [0, 1, 2, 3].map((d) => (inside(cx + DX[d], cy + DY[d], cz) ? { k: 'L', label: label(cx + DX[d], cy + DY[d], cz) } : sideFace(block, d)));
           canon.push(inside(cx, cy, cz + 1) ? { k: 'L', label: label(cx, cy, cz + 1) } : m.covered ? { k: 'needs' } : { k: 'open' });
           canon.push(inside(cx, cy, cz - 1) ? { k: 'L', label: label(cx, cy, cz - 1) } : bottomFace(block));
-          faces.push({ module: m.name, cell: `${cx},${cy},${cz}`, faces: canon.map(faceText) });
+          faces.push({ brick: m.name, cell: `${cx},${cy},${cz}`, faces: canon.map(faceText) });
           const seen: Block[] = [];
           for (let rot = 0; rot < 4; rot++) {
             const voxels = turn(block, rot);
-            // A cell of one cell that turns into itself is one pattern (the solver's tiles without doubles); a cell of a larger module never.
+            // A cell of one cell that turns into itself is one pattern (the solver's tiles without doubles); a cell of a larger brick never.
             if (sx * sy * sz === 1 && seen.some((s) => same(s, voxels))) continue;
             seen.push(voxels);
             const turned: Face[] = [0, 1, 2, 3].map((D) => {
@@ -192,11 +192,10 @@ export function buildSet(modules: readonly Module[]): ModuleSet {
               return f.k === 'L' ? { k: 'L', label: `${f.label}@${rot}` } : f;
             });
             for (const v of [4, 5]) turned.push(canon[v].k === 'L' ? { k: 'L', label: `${(canon[v] as { label: string }).label}@${rot}` } : canon[v]);
-            patterns.push({ index: patterns.length, module: m, cell: [cx, cy, cz], rot, faces: turned, weight: m.weight, voxels });
+            patterns.push({ index: patterns.length, brick: m, cell: [cx, cy, cz], rot, faces: turned, weight: m.weight, voxels });
           }
         }
   }
-  const P = patterns.length;
   // The propagator as src/mj/wfc.ts wants it: per direction (+x, +y, -x, -y, +z, -z), per pattern, the patterns that may stand there.
   const propagator = [0, 1, 2, 3, 4, 5].map((d) =>
     patterns.map((p) =>
@@ -208,15 +207,14 @@ export function buildSet(modules: readonly Module[]): ModuleSet {
   // The checks of the set: every pattern has a neighbour on every side; every open side can be closed by a cell that closes the rest.
   for (const p of patterns)
     for (let d = 0; d < 6; d++)
-      if (!propagator[d][p.index].length) problems.push(`${p.module.name} ${p.cell.join(',')} girata ${p.rot}: nessun vicino in direzione ${d}`);
+      if (!propagator[d][p.index].length) problems.push(`${p.brick.name} ${p.cell.join(',')} girata ${p.rot}: nessun vicino in direzione ${d}`);
   const closes = (q: Pattern, d: number) => [0, 1, 2, 3].every((e) => e === d || ['A', 'W', 'R'].includes(q.faces[e].k));
   for (const p of patterns)
     for (let d = 0; d < 4; d++) {
       if (p.faces[d].k !== 'P' && p.faces[d].k !== 'D') continue;
       const opposite = (d + 2) % 4;
-      if (!propagator[d][p.index].some((qi) => closes(patterns[qi], opposite) && patterns[qi].module.size.every((s) => s === 1)))
-        problems.push(`${p.module.name} ${p.cell.join(',')} girata ${p.rot}: il passaggio in direzione ${d} non si chiude con una cella sola`);
+      if (!propagator[d][p.index].some((qi) => closes(patterns[qi], opposite) && patterns[qi].brick.size.every((s) => s === 1)))
+        problems.push(`${p.brick.name} ${p.cell.join(',')} girata ${p.rot}: il passaggio in direzione ${d} non si chiude con una cella sola`);
     }
-  void DZ;
   return { patterns, weights: patterns.map((p) => p.weight), propagator, faces, problems };
 }

@@ -1,9 +1,9 @@
-// The prototype of the modular structures (T522, docs/design/strutture-modulari.md): a module set in the style of Neapolis's houses,
-// written here by hand as the stand-in of what the Sculptor would write (in the game every module is a MarkovJunior program, rule 11; here
+// The prototype of the modular structures (T522, docs/design/strutture-modulari.md): a set of bricks (the study's «tasselli») in the style of Neapolis's houses,
+// written here by hand as the stand-in of what the Sculptor would write (in the game every brick is a MarkovJunior program, rule 11; here
 // a few boxes in TypeScript, so that the prototype measures the composition and not the drawing).
 //
 // A cell is 2 × 2 tiles and one storey: 32 × 32 × 32 voxels at 16 voxels a tile (`STRUCTURE_VPT`), the floor slab at z 0-1, walls 2 thick
-// inside the cell, a storey of 32 from floor to floor (the `PARTS` of the Architect). A module may be more cells (the stair: 1 × 2 × 2), cut
+// inside the cell, a storey of 32 from floor to floor (the `PARTS` of the Architect). A brick may be more cells (the stair: 1 × 2 × 2), cut
 // by the composer into cells whose inner faces only meet each other. The faces are never declared: the composer reads them from the voxels
 // (facce.ts), as the kernel would.
 
@@ -108,8 +108,8 @@ function parapet(b: Block, side: Side): void {
   for (let u = 0; u < C; u++) for (let v = 0; v < 2; v++) for (let z = 2; z < 8; z++) put(u, v, z, z === 7 ? 'C' : 'W');
 }
 
-/** A module: one cell, or more cells (`size` in cells), and how often the composer should draw it. */
-export interface Module {
+/** A brick: one cell (a bay of the fabric), or more cells (`size` in cells), and how often the weaver should draw it. */
+export interface Brick {
   name: string;
   /** Cells along x, y, z. */
   size: [number, number, number];
@@ -230,7 +230,7 @@ function core(storeys: number): () => Block {
 }
 
 /** The set: Neapolis's houses taken apart (rooms with windows, doors, loggie, roofs with parapets), the portico and the stair. */
-export const MODULES: Module[] = [
+export const BRICKS: Brick[] = [
   { name: 'strada', size: [1, 1, 1], weight: 3, where: 'ground', covered: false, build: street },
   { name: 'aria', size: [1, 1, 1], weight: 6, where: 'above', covered: false, build: cell },
   { name: 'portico', size: [1, 1, 1], weight: 0.6, where: 'ground', covered: true, build: portico },
@@ -241,6 +241,8 @@ export const MODULES: Module[] = [
   { name: 'stanza-testa', size: [1, 1, 1], weight: 0.8, where: 'any', covered: true, build: room({ [NY]: 'window', [PX]: 'window', [PY]: 'window' }) },
   { name: 'porta-muro', size: [1, 1, 1], weight: 0.8, where: 'any', covered: true, build: room({ [NY]: 'door' }) },
   { name: 'porta-angolo', size: [1, 1, 1], weight: 0.8, where: 'any', covered: true, build: room({ [NY]: 'door', [PX]: 'window' }) },
+  // Its image in a mirror: a door and a wall side by side are not the same turned (the composer turns, it does not mirror).
+  { name: 'porta-angolo-specchio', size: [1, 1, 1], weight: 0.8, where: 'any', covered: true, build: room({ [NY]: 'door', [NX]: 'window' }) },
   { name: 'porta-testa', size: [1, 1, 1], weight: 0.5, where: 'any', covered: true, build: room({ [NY]: 'door', [PX]: 'window', [PY]: 'window' }) },
   { name: 'villetta', size: [1, 1, 1], weight: 0.3, where: 'any', covered: true, build: room({ [NY]: 'door', [PX]: 'window', [PY]: 'window', [NX]: 'window' }) },
   { name: 'loggia', size: [1, 1, 1], weight: 0.8, where: 'above', covered: true, build: room({ [NY]: 'loggia' }) },
@@ -251,7 +253,7 @@ export const MODULES: Module[] = [
   { name: 'ponte', size: [1, 1, 1], weight: 0.6, where: 'above', covered: false, build: roof([NY, PY]) },
   { name: 'tetto-testa', size: [1, 1, 1], weight: 0.8, where: 'above', covered: false, build: roof([NY, PX, PY]) },
   { name: 'scala', size: [1, 2, 2], weight: 0.5, where: 'any', covered: true, build: stair },
-  // The cores: only where the massing puts them (composizione.ts), from the ground to the top of their block.
+  // The cores: only where the massing puts them (tessuto.ts), from the ground to the top of their block.
   { name: 'nucleo-2', size: [1, 2, 2], weight: 1, where: 'any', covered: true, build: core(2) },
   { name: 'nucleo-3', size: [1, 2, 3], weight: 1, where: 'any', covered: true, build: core(3) },
   { name: 'nucleo-4', size: [1, 2, 4], weight: 1, where: 'any', covered: true, build: core(4) },
