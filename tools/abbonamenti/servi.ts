@@ -5,6 +5,10 @@
 // What it runs may be dictated by whoever plays, so the CLI gets nothing to act with (ADR-0106): an empty folder, a reduced
 // environment, no tools, no MCP, no hooks, no customization, the text on stdin; and each run has to confirm it (`IsolationCheck`),
 // before the model is called, or it is killed. Antigravity cannot exclude its tools: it does not serve the queue.
+//
+// Paid with Anthropic's API credits (T542, ADR-0262: `--api --tetto-api <usd>`, or the `.env`): only the child gets ANTHROPIC_API_KEY,
+// read from the `.env` (`tools/abbonamenti/api.ts`); each run has to say it pays with the key (`apiKeySource` of its `init`) and,
+// without `--api`, that it pays with nothing but the subscription; every run is priced in the ledger, and past the ceiling the queue stops.
 
 import { execFileSync, spawn } from 'node:child_process';
 import { promises as fs } from 'node:fs';
@@ -16,6 +20,7 @@ import type { Provider, QueuedAnswer } from '../../src/kernel/ai/subscription';
 // @ts-expect-error pipeline.mjs is untyped plain JS
 import { cliSaid, usageLimit } from '../pipeline/pipeline.mjs';
 import { serverPath } from '../../server/folders';
+import { API_KEY_VAR as API_KEY_NAME, apiSettings, capReached, childEnv, CREDITS_OVER, NO_WORKSPACE, dollars, markLedger, priceRun, readLedger, recordCall, redact, spentIn, type ApiSettings } from './api';
 
 export type SubscriptionProvider = Exclude<Provider, 'api'>;
 
@@ -27,6 +32,10 @@ export interface ServeOptions {
   beatMs?: number;
   timeoutMs?: number;
   once?: boolean;
+  /** Paid with the API (T542): the key and the ceiling; undefined on the subscription. */
+  api?: ApiSettings;
+  /** What the command line asked of the API (`--api`, `--tetto-api`, `--env`), which `apiSettings` resolves with the `.env`. */
+  apiAsk?: { api: boolean; cap?: number; envFile?: string };
 }
 
 export interface CliCommand {
@@ -76,8 +85,11 @@ export interface CliRunResult {
 export interface ServeStepResult {
   served: boolean;
   id?: string;
-  /** `isolation`: the CLI did not confirm it has nothing to act with; the process stops serving. */
-  status?: 'ok' | 'error' | 'limit' | 'isolation';
+  /**
+   * `isolation`: the CLI did not confirm it has nothing to act with; `billing`: it would not pay as it was told (T542); `cap`: the API's
+   * ceiling is reached, or its credits are over. The process stops serving on each of them.
+   */
+  status?: 'ok' | 'error' | 'limit' | 'isolation' | 'billing' | 'cap';
   text?: string;
   errore?: string;
   reset?: Date;
@@ -202,9 +214,17 @@ export function isolationBreach(init: Record<string, unknown>): string | undefin
 export class IsolationCheck {
   confirmed = false;
   breach?: string;
+  /** Why the run would not pay as it was told (T542): its `init` says another source of the key; it is stopped before the model. */
+  billing?: string;
+  /** The model the `init` says. */
+  model?: string;
+
+  /** `ANTHROPIC_API_KEY` when the run pays with the API, `none` on the subscription (what the CLI's `init` says, T542). */
+  constructor(private readonly pays: 'ANTHROPIC_API_KEY' | 'none' = 'none') {}
 
   /** A line of the output; true when the run has to be stopped. */
   see(line: string): boolean {
+    if (this.billing) return true; // stopped at its init: what comes after it is not the model's
     let event: Record<string, unknown>;
     try {
       event = JSON.parse(line);
@@ -214,7 +234,12 @@ export class IsolationCheck {
     if (!event || typeof event !== 'object') return false;
     if (event.type === 'system' && event.subtype === 'init') {
       this.breach ??= isolationBreach(event);
-      this.confirmed = !this.breach;
+      if (typeof event.model === 'string') this.model = event.model;
+      // A CLI that does not say it is taken at its word only on the subscription: with the key it has to say it pays with it.
+      const source = event.apiKeySource;
+      if (source === undefined ? this.pays !== 'none' : source !== this.pays) this.billing ??= `la CLI paga con ${String(source ?? 'niente che dica')}, non con ${this.pays === 'none' ? 'l’abbonamento' : this.pays}`;
+      this.confirmed = !this.breach && !this.billing;
+      if (this.billing) return true;
     } else if (typeof event.subtype === 'string' && event.subtype.startsWith('hook')) {
       this.breach ??= 'è partito un hook';
     } else if (event.type === 'assistant') {
@@ -362,12 +387,14 @@ export function runCli(opts: { cmd: string; args: string[]; stdin?: string; cwd?
 
 /** What one isolated run gave: `raw` is the CLI's last event (the `result`, with its usage per model), for who prices it (T391). */
 export interface IsolatedRun {
-  status: 'ok' | 'error' | 'limit' | 'isolation';
+  status: 'ok' | 'error' | 'limit' | 'isolation' | 'billing';
   text?: string;
   errore?: string;
   reset?: Date;
   usage?: QueuedAnswer['usage'];
   raw?: unknown;
+  /** The model the run's `init` said (who prices a run whose request named none, T542). */
+  model?: string;
 }
 
 /**
@@ -377,15 +404,25 @@ export interface IsolatedRun {
 export async function runIsolated(
   provider: SubscriptionProvider,
   req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
-  opts: { cmd?: string; timeoutMs?: number; choice?: CliChoice } = {},
+  opts: { cmd?: string; timeoutMs?: number; choice?: CliChoice; apiKey?: string; workspace?: string } = {},
 ): Promise<IsolatedRun> {
-  const check = new IsolationCheck();
+  const run = await runChecked(provider, req, opts);
+  // The key is not in what the CLI says, but if it ever were it would not go further (T542).
+  return opts.apiKey ? { ...run, ...(run.text !== undefined ? { text: redact(run.text, opts.apiKey) } : {}), ...(run.errore ? { errore: redact(run.errore, opts.apiKey) } : {}) } : run;
+}
+
+async function runChecked(
+  provider: SubscriptionProvider,
+  req: Pick<QueuedRequest, 'system' | 'prompt' | 'schema' | 'images'> & Partial<QueuedRequest>,
+  opts: { cmd?: string; timeoutMs?: number; choice?: CliChoice; apiKey?: string; workspace?: string },
+): Promise<IsolatedRun> {
+  const check = new IsolationCheck(opts.apiKey ? 'ANTHROPIC_API_KEY' : 'none');
   const { root, empty } = await runFolders('quine-coda-');
   let run: CliRunResult;
   try {
     const command = buildCliCommand(provider, req, opts.cmd, opts.choice, root);
     await writeSystemPrompt(command);
-    run = await runCli({ cmd: command.cmd, args: command.args, stdin: command.stdin, cwd: empty, env: cliEnv(process.env), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
+    run = await runCli({ cmd: command.cmd, args: command.args, stdin: command.stdin, cwd: empty, env: childEnv(cliEnv(process.env), opts.apiKey, opts.workspace), timeoutMs: opts.timeoutMs ?? 15 * 60_000, onLine: (l) => check.see(l) });
   } finally {
     // The folders go with the system prompt, whatever happened.
     await fs.rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 }).catch(() => undefined);
@@ -393,6 +430,9 @@ export async function runIsolated(
 
   // 0. It had something to act with: no answer from that run, and no more runs.
   if (check.breach) return { status: 'isolation', errore: `isolamento della CLI non confermato: ${check.breach}` };
+  // 0b. It would not pay as told: stopped at its `init`, before the model (T542).
+  if (check.billing) return { status: 'billing', errore: check.billing };
+  const model = check.model ? { model: check.model } : {};
 
   // 1. Subscription usage limit check
   const reset = usageLimit(cliSaid(run.combined));
@@ -408,7 +448,7 @@ export async function runIsolated(
     const detail = typeof parsed.error === 'string'
       ? parsed.error
       : (said || run.stderr.trim() || run.stdout.trim() || `codice di uscita ${run.code}`);
-    return { status: 'error', errore: `errore CLI (${provider}): ${detail}`, usage: parsed.usage, raw };
+    return { status: 'error', errore: `errore CLI (${provider}): ${detail}`, usage: parsed.usage, raw, ...model };
   }
 
   // 3. Success: validate schema if required, or take raw text
@@ -417,26 +457,31 @@ export async function runIsolated(
     try {
       text = JSON.stringify(parseJson(parsed.result));
     } catch (e) {
-      return { status: 'error', errore: `la CLI non ha prodotto un JSON valido conforme allo schema: ${(e as Error).message}`, usage: parsed.usage, raw };
+      return { status: 'error', errore: `la CLI non ha prodotto un JSON valido conforme allo schema: ${(e as Error).message}`, usage: parsed.usage, raw, ...model };
     }
   } else {
     text = text.trim();
-    if (!text) return { status: 'error', errore: 'risposta vuota dalla CLI', usage: parsed.usage, raw };
+    if (!text) return { status: 'error', errore: 'risposta vuota dalla CLI', usage: parsed.usage, raw, ...model };
   }
-  return { status: 'ok', text, usage: parsed.usage, raw };
+  return { status: 'ok', text, usage: parsed.usage, raw, ...model };
 }
 
 /**
  * Takes the oldest request for this provider and serves it through the CLI. The model and the effort the request says (T411, ADR-0216: one
  * of the lists, `checkRequest` read again here, as the file on disk may not have come through the queue) and its images, as one message of
  * events (T391's way, `imageBlock`: png or jpeg data URLs only); the CLI has nothing to act with whatever the request says (ADR-0106).
+ * Paid with the API (T542), nothing is taken past the ceiling, and every run that says its tokens goes into the ledger.
  */
 export async function serveOne(
   dir: string,
   provider: SubscriptionProvider,
-  opts: { cmd?: string; timeoutMs?: number } = {},
+  opts: { cmd?: string; timeoutMs?: number; api?: ApiSettings; now?: () => Date } = {},
 ): Promise<ServeStepResult> {
   const { take, checkRequest } = await import('../../server/subscriptionQueue');
+  const now = opts.now ?? (() => new Date());
+  if (opts.api && capReached(readLedger(dir), opts.api.cap, now())) {
+    return { served: false, status: 'cap', errore: `tetto dei crediti API raggiunto: ${dollars(spentIn(readLedger(dir), now()).speso)} di ${dollars(opts.api.cap)} questo mese` };
+  }
   const req = await take(dir, provider);
   if (!req) return { served: false };
 
@@ -448,16 +493,37 @@ export async function serveOne(
   const choice: CliChoice = { ...(req.model ? { model: req.model } : {}), ...(req.effort ? { effort: req.effort } : {}), images: !!req.images?.length };
   let r: IsolatedRun;
   try {
-    r = await runIsolated(provider, req, { ...opts, choice });
+    r = await runIsolated(provider, req, { cmd: opts.cmd, timeoutMs: opts.timeoutMs, choice, ...(opts.api ? { apiKey: opts.api.key, ...(opts.api.workspace ? { workspace: opts.api.workspace } : {}) } : {}) });
   } catch (e) {
     // An image that is not one (`imageBlock`), a choice the CLI could misread: the request fails, the process goes on serving.
     r = { status: 'error', errore: `richiesta non servita: ${(e as Error).message}` };
+  }
+  let status: ServeStepResult['status'] = r.status;
+  if (opts.api) {
+    if (r.raw !== undefined) {
+      const priced = priceRun(r.raw, req.model ?? r.model ?? 'claude-opus-5-5');
+      recordCall(dir, {
+        id: req.id,
+        ...(req.task ? { task: req.task } : {}),
+        ...priced,
+        usd: priced.usd ?? priced.usdCli ?? 0,
+        esito: r.status,
+      }, now());
+    }
+    if (r.errore && NO_WORKSPACE.test(r.errore)) {
+      // A key of no workspace wants the header with the workspace's id: no request is served until the `.env` says it.
+      status = 'billing';
+      r = { ...r, errore: `la chiave API non è di un workspace: scrivi ANTHROPIC_WORKSPACE_ID nel .env (l’id del workspace nella console di Anthropic) o usa una chiave di un workspace; l’API dice: ${r.errore}` };
+    } else if (r.errore && CREDITS_OVER.test(r.errore)) {
+      status = 'cap';
+      markLedger(dir, { fermo: { motivo: 'i crediti API sono finiti (lo dice l’API)', t: now().toISOString() } });
+    }
   }
   await answer(dir, req.id, r.status === 'ok' ? { text: r.text, usage: r.usage } : { errore: r.errore, ...(r.usage ? { usage: r.usage } : {}) });
   return {
     served: true,
     id: req.id,
-    status: r.status,
+    status,
     ...(r.text !== undefined ? { text: r.text } : {}),
     ...(r.errore ? { errore: r.errore } : {}),
     ...(r.reset ? { reset: r.reset } : {}),
@@ -481,6 +547,7 @@ export function parseArgs(argv: string[]): ServeOptions {
   let beatMs = 10_000;
   let timeoutMs = 15 * 60_000;
   let once = false;
+  const apiAsk: { api: boolean; cap?: number; envFile?: string } = { api: false };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -502,10 +569,18 @@ export function parseArgs(argv: string[]): ServeOptions {
       timeoutMs = Number(argv[++i]);
     } else if (arg === '--once') {
       once = true;
+    } else if (arg === '--api') {
+      apiAsk.api = true;
+    } else if (arg === '--tetto-api' && argv[i + 1]) {
+      apiAsk.cap = Number(argv[++i]);
+    } else if (arg.startsWith('--tetto-api=')) {
+      apiAsk.cap = Number(arg.slice('--tetto-api='.length));
+    } else if (arg === '--env' && argv[i + 1]) {
+      apiAsk.envFile = argv[++i];
     }
   }
 
-  return { provider, dir, cmd, pollMs, beatMs, timeoutMs, once };
+  return { provider, dir, cmd, pollMs, beatMs, timeoutMs, once, apiAsk };
 }
 
 /** The main serving loop: beats heartbeat every 10s and serves queued requests. */
@@ -513,8 +588,10 @@ export async function serve(opts: ServeOptions): Promise<void> {
   const { provider, dir, beatMs = 10_000, pollMs = 1000, once = false } = opts;
   let running = true;
 
+  const api = opts.api;
   const cleanup = async () => {
     running = false;
+    if (api) markLedger(dir, { servitore: undefined });
     try {
       await fs.unlink(path.join(dir, `servitore-${provider}.json`));
     } catch {
@@ -526,6 +603,16 @@ export async function serve(opts: ServeOptions): Promise<void> {
   process.on('SIGTERM', () => { cleanup().then(() => process.exit(0)); });
 
   console.log(`[servi] Avvio servitore per «${provider}» su ${dir} (battito ogni ${Math.round(beatMs / 1000)}s)...`);
+  const spent = () => `speso ${dollars(spentIn(readLedger(dir)).speso)} di ${dollars(api!.cap)} questo mese (la CLI dice ${dollars(spentIn(readLedger(dir)).spesoCli)})`;
+  if (api) {
+    // Where the key comes from, never the key.
+    console.log(`[servi] Pagata coi crediti API di Anthropic (${API_KEY_NAME} da ${api.from}${api.workspace ? `, workspace ${api.workspace}` : ''}), ${spent()}`);
+    if (capReached(readLedger(dir), api.cap)) {
+      console.warn('[servi] Il tetto dei crediti API è già raggiunto: non servo.');
+      return;
+    }
+    markLedger(dir, { tetto: api.cap, servitore: { pid: process.pid, dal: new Date().toISOString() }, fermo: undefined });
+  }
   await beat(dir, provider);
   let lastBeat = Date.now();
 
@@ -535,13 +622,24 @@ export async function serve(opts: ServeOptions): Promise<void> {
       lastBeat = Date.now();
     }
 
-    const step = await serveOne(dir, provider, { cmd: opts.cmd, timeoutMs: opts.timeoutMs });
+    const step = await serveOne(dir, provider, { cmd: opts.cmd, timeoutMs: opts.timeoutMs, ...(api ? { api } : {}) });
 
+    if (step.status === 'cap') {
+      // Past the ceiling, or the credits are over: the queue stops serving, and whoever waits on it sees nobody serves it.
+      console.warn(`[servi] Mi fermo: ${step.errore ?? 'i crediti API sono finiti'}${api ? `, ${spent()}` : ''}.`);
+      if (api && !readLedger(dir).fermo) markLedger(dir, { fermo: { motivo: step.errore ?? 'tetto raggiunto', t: new Date().toISOString() } });
+      await cleanup();
+      return;
+    }
     if (step.served) {
-      console.log(`[servi] Richiesta ${step.id}: ${step.status}${step.errore ? ` (${step.errore})` : ''}`);
+      console.log(`[servi] Richiesta ${step.id}: ${step.status}${step.errore ? ` (${step.errore})` : ''}${api ? `, ${spent()}` : ''}`);
       if (step.status === 'isolation') {
         await cleanup();
         throw new Error(`mi fermo, non servo una CLI che può agire: ${step.errore}`);
+      }
+      if (step.status === 'billing') {
+        await cleanup();
+        throw new Error(`mi fermo, la CLI non paga come le è detto: ${step.errore}`);
       }
       if (step.status === 'limit' && step.reset) {
         const pauseUntil = step.reset.getTime();
@@ -568,10 +666,12 @@ export async function serve(opts: ServeOptions): Promise<void> {
 }
 
 // When executed directly as entrypoint script via vite-node
-// When executed directly as entrypoint script via vite-node
 if (!process.env.VITEST && process.argv[1] && (process.argv[1].endsWith('servi.ts') || process.argv[1].endsWith('servi.mjs'))) {
   try {
     const opts = parseArgs(process.argv.slice(2));
+    const api = apiSettings(opts.apiAsk ?? { api: false });
+    if (typeof api === 'string') throw new Error(api);
+    if (api) opts.api = api;
     serve(opts).catch((err) => {
       console.error('[servi] Errore fatale:', err);
       process.exit(1);

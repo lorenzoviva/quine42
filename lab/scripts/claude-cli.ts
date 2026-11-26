@@ -7,7 +7,7 @@
 
 import { execFileSync } from 'node:child_process';
 import type { AiModels, TextCall } from '../../src/kernel/ai/models';
-import { ANTHROPIC_PRICES, anthropicCost } from '../../src/kernel/ai/prices';
+import { listedModel as listed, priceRun } from '../../tools/abbonamenti/api';
 import type { CallRecord } from '../../src/kernel/ai/usage';
 import { runIsolated, type IsolatedRun } from '../../tools/abbonamenti/servi';
 // @ts-expect-error pipeline.mjs is untyped plain JS
@@ -29,41 +29,7 @@ export interface ClaudeCall {
   errore?: string;
 }
 
-const num = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
-
-/** A model id as the CLI writes it in `modelUsage` («claude-sonnet-5-5[1m]», with a date): the one of the list it begins with. */
-const listed = (id: string): string | undefined => Object.keys(ANTHROPIC_PRICES).find((k) => id === k || id.startsWith(`${k}-`) || id.startsWith(`${k}[`));
-
-/**
- * The tokens and the dollars of one run, from its `result` event: per model of `modelUsage` (the CLI may ask a small model too), the
- * writes split between 5 minutes and an hour as `usage.cache_creation` says; a model off the list is taken at the CLI's own cost.
- */
-export function priceRun(raw: unknown, chosen: string): Omit<ClaudeCall, 'task' | 'seconds' | 'errore'> {
-  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
-  const usage = (r.usage && typeof r.usage === 'object' ? r.usage : {}) as Record<string, unknown>;
-  const creation = (usage.cache_creation && typeof usage.cache_creation === 'object' ? usage.cache_creation : {}) as Record<string, unknown>;
-  const w1 = num(creation.ephemeral_1h_input_tokens);
-  const w5 = num(creation.ephemeral_5m_input_tokens);
-  const hourShare = w1 + w5 > 0 ? w1 / (w1 + w5) : 0;
-  const perModel = (r.modelUsage && typeof r.modelUsage === 'object' ? r.modelUsage : undefined) as Record<string, Record<string, unknown>> | undefined;
-  const rows: Array<{ id: string; input: number; written: number; read: number; output: number; cost?: number }> = perModel
-    ? Object.entries(perModel).map(([id, u]) => ({ id, input: num(u.inputTokens), written: num(u.cacheCreationInputTokens), read: num(u.cacheReadInputTokens), output: num(u.outputTokens), cost: typeof u.costUSD === 'number' ? u.costUSD : undefined }))
-    : [{ id: chosen, input: num(usage.input_tokens), written: num(usage.cache_creation_input_tokens), read: num(usage.cache_read_input_tokens), output: num(usage.output_tokens) }];
-  const out = { model: chosen, input: 0, written5m: 0, written1h: 0, read: 0, output: 0, usd: 0 as number | undefined };
-  for (const row of rows) {
-    const written1h = Math.round(row.written * hourShare);
-    const t = { input: row.input, written5m: row.written - written1h, written1h, read: row.read, output: row.output };
-    const id = listed(row.id);
-    const cost = id ? anthropicCost(id, t) : row.cost;
-    out.input += t.input;
-    out.written5m += t.written5m;
-    out.written1h += t.written1h;
-    out.read += t.read;
-    out.output += t.output;
-    out.usd = out.usd === undefined || cost === undefined ? undefined : out.usd + cost;
-  }
-  return { ...out, ...(typeof r.total_cost_usd === 'number' ? { usdCli: r.total_cost_usd } : {}) };
-}
+export { priceRun } from '../../tools/abbonamenti/api';
 
 /** The counters of Claude's `/usage`: how much of the 5-hour window and of the week is used, in per cent. */
 export interface ClaudeWindow {

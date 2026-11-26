@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
+import { withoutApiKeys } from './generatore.mjs';
 import { bus, BUDGET, canOrchestrate, CONFIG, execute, loadBudget, now, readJson, readOutput, refreshConfig, REPO, requestStop, resumeProvider, say, setOrchestrator, SHUTDOWN, shutdownRecord, shutdownSummary, STATE_DIR, suspendProvider, usageLimit, cliSaid, writeJson } from './pipeline.mjs';
 
 const DIR = path.join(STATE_DIR, 'orchestra');
@@ -220,7 +221,7 @@ function runTurn(provider, sessione, prompt) {
   const args = [...conf.args.filter((a) => a !== '--chrome'), ...(sessione ? conf.resume.map((a) => a.replace('{sessione}', sessione)) : []), '-p', prompt];
   return new Promise((resolve) => {
     let text = '';
-    const child = spawn(conf.cmd, args, { cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    const child = spawn(conf.cmd, args, { cwd: REPO, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, env: withoutApiKeys(process.env) });
     turn = child;
     child.stdout.on('data', (d) => { text += d; });
     child.stderr.on('data', (d) => { text += d; });

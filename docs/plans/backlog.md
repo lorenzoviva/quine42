@@ -6939,7 +6939,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì se i luoghi nuovi cambiano (un mondo Pirati e `mesa` offline).
 - Quando è fatto: test verdi, impronta del seme invariata, esito con ciò che cambia negli universi dal rilievo vero.
 
-### T542 · La coda degli abbonamenti pagata coi crediti API di Anthropic (i 100 $ di novembre) — `da fare`
+### T542 · La coda degli abbonamenti pagata coi crediti API di Anthropic (i 100 $ di novembre) — `in attesa`
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 0
 - Step: 44
 - Contesto: autore 26/11: l'abbonamento Anthropic include 100 $ di crediti API al mese, da consumare entro l'1/12 per rigenerare i modelli MJ. Oggi la rigenerazione (`npm run genera -- <u> --rigenera modelli`, ADR-0216) passa dalla coda servita dalla CLI sull'abbonamento (`tools/abbonamenti/servi.ts`), che consuma la settimana. La CLI con `ANTHROPIC_API_KEY` nell'ambiente fattura all'API.
@@ -6947,3 +6947,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: offline con la CLI finta (`lab/scripts/claude-finta.mjs`): con `--api` il figlio vede la chiave, senza no; il tetto ferma; la chiave non compare in log né in `dist/`. Browser: no.
 - Quando è fatto: test verdi; una richiesta vera di prova (≤ 0,50 $) servita con la chiave dell'autore, il costo detto dalla console di Anthropic confrontato col registro.
 - Risposte dell'autore (26/11, epoca 687): sì, la chiave è `ANTHROPIC_API_KEY` nel `.env` della radice `rune`; tetto 100 $, nessun margine; ordine degli universi come proposto.
+- Esito: fatta la coda pagata coi crediti API (`--api`/`--tetto-api` o `.env`, chiave solo al processo della CLI, la fonte di pagamento controllata a ogni esecuzione, registro mensile al listino con il costo della CLI accanto, il tetto e i crediti finiti fermano la coda, `ANTHROPIC_WORKSPACE_ID` per una chiave di organizzazione); nessuna chiave in ciò che la pipeline lancia né nel server di produzione; generatore con `"api": true` e la spesa del mese in `stato`; ADR-0262; test e typecheck verdi, nessuna chiave in `dist/`. Manca la prova vera: la chiave dell'autore non è di un workspace e l'API la rifiuta senza costi, serve l'id del workspace (domanda in `docs/pipeline/domande/T542.md`); il confronto con la console non è fatto. Sicurezza: nessuna superficie nuova (un segreto nuovo trattato dal processo della coda, tolto da server e pipeline).
