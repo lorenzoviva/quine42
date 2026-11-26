@@ -6758,13 +6758,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no.
 - Quando è fatto: rapporto con la proposta di uscita dalla prova e i voti di Neon come Architetto; kernel invariato.
 
-### T517 · Editor MJ: il testo sfasato in orizzontale — `da fare`
+### T517 · Editor MJ: il testo sfasato in orizzontale — `fatto` (`78d14f09`)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2
 - Contesto: l'autore il 26/11: nell'editor dei modelli (`/lab/editor/`) il testo a volte è sfasato orizzontalmente rispetto a dove appare quando lo si seleziona (lo sfasamento verticale era stato corretto in un task precedente, cercalo con `indice`). Rende difficile scrivere.
 - Cosa fare: riprodurre (tab, caratteri larghi, font, zoom, scorrimento orizzontale, righe lunghe) e correggere l'allineamento tra lo strato colorato e l'area di testo.
 - Test: un test del DOM se possibile; altrimenti la prova nel browser con le righe del forte.
 - Browser: sì.
 - Quando è fatto: testo e selezione allineati in orizzontale e in verticale sul forte dell'autore.
+- Esito: editor MJ: i token dello strato colorato hanno la larghezza delle loro lettere, il ▦ e il colore esadecimale non occupano spazio, il testo colorato è il sorgente lettera per lettera, lo strato segue lo scorrimento con una traslazione, il clic cerca il chip prima che la barra degli attributi sposti l'editor; test nuovo `tests/editor-allineamento.test.ts`; non provati altri font, lo zoom del browser e lo scorrimento del SoundLab
 
 ### T518 · Editor MJ: pulsante «Render», interruttore dell'auto-render, la corsa che non blocca e prende l'ultima modifica — `da fare`
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2

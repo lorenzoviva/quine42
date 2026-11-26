@@ -424,6 +424,11 @@ button.btn-primary:hover {
   line-height: 20px !important;
   letter-spacing: 2.5px;
   tab-size: 2;
+  /* The same advance for every letter in both layers (T517): no ligatures, kerning or contextual forms that one layer could shape
+     and the other not where a span cuts the text. */
+  font-variant-ligatures: none;
+  font-kerning: none;
+  font-feature-settings: 'liga' 0, 'calt' 0;
   white-space: pre;
   word-wrap: normal;
   border: none;
@@ -723,30 +728,29 @@ button.btn-primary:hover {
 }
 
 /* Color Chips in XML Editor (voxel color on letters) */
+/* Every token below is as wide as the letters it shows, at the size and spacing of the textarea (T517): no width, horizontal padding,
+   border, margin, gap or letter spacing of its own, or the text after it slides away from where the caret and the selection are. */
 .tok-color-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
+  display: inline-block;
   height: 14px;
   max-height: 14px;
   line-height: 14px;
-  text-align: center;
   background-color: var(--chip-bg, rgba(56, 189, 248, 0.2));
   color: var(--chip-text, #ffffff);
   font-weight: 700;
   font-family: inherit;
-  font-size: 11px;
+  font-size: inherit;
   border-radius: 3px;
   cursor: pointer;
   position: relative;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
   transition: filter 0.12s, transform 0.1s;
-  vertical-align: -1px;
+  /* On the baseline and at the left of its box, as the textarea has the letter: the letter spacing is the free part on the right. */
+  vertical-align: baseline;
   margin: 0;
   padding: 0;
-  letter-spacing: 0;
-  box-sizing: border-box;
+  letter-spacing: inherit;
+  box-sizing: content-box;
   pointer-events: auto;
 }
 
@@ -777,14 +781,25 @@ button.btn-primary:hover {
 }
 
 /* Inline 3D Filter Button next to in/out/from/to */
+.tok-filter-anchor {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+
 .tok-filter-btn {
+  position: absolute;
+  right: 1px;
+  bottom: -3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  max-height: 14px;
-  margin: 0 2px;
+  width: 8px;
+  height: 13px;
+  max-height: 13px;
+  margin: 0;
   padding: 0;
   font-size: 9px;
   line-height: 14px;
@@ -793,12 +808,15 @@ button.btn-primary:hover {
   border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 3px;
   cursor: pointer;
-  vertical-align: -1px;
   letter-spacing: 0;
   transition: all 0.12s ease;
   pointer-events: auto;
   user-select: none;
   box-sizing: border-box;
+}
+
+.tok-filter-btn::before {
+  content: '▦';
 }
 
 .tok-filter-btn:hover {
@@ -812,40 +830,25 @@ button.btn-primary:hover {
 
 /* Hex Color Chip & Swatch for Symbol Definitions */
 .tok-hex-code {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  display: inline-block;
   height: 14px;
   max-height: 14px;
   line-height: 14px;
   cursor: pointer;
-  border-radius: 3px;
-  padding: 0 3px;
-  letter-spacing: 0.5px;
+  border-radius: 2px;
+  padding: 0;
+  letter-spacing: inherit;
+  box-shadow: 0 2px 0 var(--swatch-hex, #ffffff);
   transition: background 0.12s, box-shadow 0.12s;
   pointer-events: auto;
   user-select: none;
-  vertical-align: -1px;
+  vertical-align: baseline;
   box-sizing: border-box;
 }
 
 .tok-hex-code:hover {
   background: rgba(56, 189, 248, 0.2);
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
-}
-
-.tok-hex-swatch {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  max-height: 10px;
-  border-radius: 2px;
-  background-color: var(--swatch-hex, #ffffff);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
-  vertical-align: 0px;
-  margin-right: 2px;
-  box-sizing: border-box;
+  box-shadow: 0 2px 0 var(--swatch-hex, #ffffff), 0 0 0 1px rgba(56, 189, 248, 0.5);
 }
 
 /* ================================================================== CAD Voxel Tools (T59b) */
