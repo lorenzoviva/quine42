@@ -415,7 +415,7 @@
       "resetSettimanale": "",
       "contatori": "^Gemini Models$",
       "browser": false,
-      "orchestrabile": false,
+      "orchestrabile": true,
       "stessoContoDi": "gemini",
       "abbonamento": "google",
       "ratioSessioneSettimana": 3.3
