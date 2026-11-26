@@ -121,6 +121,18 @@ export function carries(spec: Pick<VehicleSpec, 'medium' | 'draught'>, t: Terrai
   return depth === 'deep' || (spec.draught === 'shallow' && depth !== 'reef');
 }
 
+/** How far a hull reaches under the surface it goes on (tiles, T540): a shallow keel, a deep one; a cart and a capsule nothing. */
+export const KEEL: Readonly<Record<Draught, number>> = { shallow: 0.5, deep: 1 };
+
+/**
+ * Whether a thing that stands under the surface (T540: a chest sunk on the seabed, T480; a barrel in a cellar, T417) passes under a hull: its
+ * top (`top`, tiles) no higher than the hull's keel under the surface there (`surface`). The hull goes over it, as a swimmer does.
+ */
+export function underKeel(spec: Pick<VehicleSpec, 'medium' | 'draught'>, top: number, surface: number): boolean {
+  if (!Number.isFinite(top) || !Number.isFinite(surface)) return false;
+  return top <= surface - (spec.medium === 'water' ? KEEL[spec.draught] : 0);
+}
+
 // --- Its state: the component `vehicle` --------------------------------------------------------------------------------------------
 
 /**

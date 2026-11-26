@@ -184,6 +184,19 @@ function worldStructures(ctx: PlanContext, own: Array<{ concept: string; cellar?
   });
 }
 export const CELLAR_THING = 'obj.chest';
+/**
+ * The seed's pier and reef (T443) as the offline Cartographer writes them for an archipelago (T540): with them the stamp `harbour` lays its pier
+ * of `i` and its reefs of `y`, and the offline Pirates have shoals and quays without Gemini. Every other world keeps the palette it had.
+ */
+const REEF = { code: 'y', name: 'secca', description: "scogli appena sotto il pelo dell'acqua, dove le chiglie si incagliano", color: '#3f8f8c', layer: 'liquid', solid: true, speed: 0.4 };
+const ISLAND_TERRAINS = [{ code: 'i', name: 'molo', description: "tavole di legno su pali, sopra l'acqua", color: '#9c7a4e', layer: 'floor', solid: false, speed: 1 }, REEF];
+/** What the offline Narrator adds to the first things of an archipelago (T540): a ship's chest (the sunken one of the seabed) and a rowing boat. */
+const ISLAND_CAST = [
+  { type: 'object', request: 'un forziere da nave cerchiato di ferro' },
+  { type: 'object', request: 'una barca a remi dei pescatori' },
+];
+/** The chest of a world's catalogue (T540): the seed's, or one the Forge made and named so (the Pirates' ship's chest). */
+const CHEST_RE = /^(cassa|forziere|baule)\b/i;
 /** The seed's harbour (T443): the offline plans choose it on the shore of an island, never elsewhere. */
 export const HARBOUR = 'harbour';
 /** What the local models put in a cellar (T419): the seed's shelf and rack, and a barrel. */
@@ -302,11 +315,14 @@ export class MockAiModels implements AiModels, DecisionModels {
             { code: 'b', name: 'muro di pietra', description: 'grosse pietre squadrate', color: '#8a8580', layer: 'wall', solid: true, speed: 1 },
             { code: 'l', name: 'lastricato', description: 'pietre lisce', color: '#9c958c', layer: 'floor', solid: false, speed: 1 },
             { code: 'z', name: 'ponte levatoio', description: 'assi sul fossato', color: '#8b6a42', layer: 'floor', solid: false, speed: 1 },
+            // An archipelago (T540): the seed's pier and reef, so that harbours, piers and reefs are seen and tried offline.
+            ...(d.geography === 'archipelago' ? ISLAND_TERRAINS : []),
           ],
           roof: '#8a3a2a',
         };
       case 'genesis.physics':
-        return { terrains: [] };
+        // The reef of an archipelago (T540) is rock just under the water: swum over, where hulls run aground; the rest as the kernel says.
+        return { terrains: (Array.isArray(d.terrains) ? d.terrains : []).filter((t: { code?: string }) => t.code === REEF.code).map((t: { code: string }) => ({ code: t.code, cross: 'swim', depth: 'reef', speed: REEF.speed })) };
       case 'physics.reshape': {
         // The Physicist with the world on (T452): the terrain the request names, by its name, and what the words say of it.
         const t = String(d.request ?? '');
@@ -426,6 +442,8 @@ export class MockAiModels implements AiModels, DecisionModels {
             { type: 'npc', request: 'un vecchio pastore che conta le pecore e perde il conto' },
             { type: 'object', request: 'una madia di legno per il pane' },
             { type: 'item', request: 'un bastone da pastore' },
+            // An archipelago (T540): a chest that sinks to the seabed, and a boat that moors by the shore.
+            ...(d.geography === 'archipelago' ? ISLAND_CAST : []),
           ],
         };
       case 'content.items':
@@ -824,11 +842,13 @@ export class MockAiModels implements AiModels, DecisionModels {
     // Where the place keeps an enclave (T474: only with a relief that has cliffs, never in a place of today), a chest up there.
     const ledge = !!ctx.relief?.enclaves && ctx.catalog.some((m) => m.id === CELLAR_THING);
     // Where the place has a seabed (T480: only in true-relief worlds with swimmable water), a sunken chest on the bed, drawn apart.
-    const sunken = !!ctx.seabed?.tiles && ctx.catalog.some((m) => m.id === CELLAR_THING) && new Rng(hashStr(`seabed|${ctx.cx}|${ctx.cy}`)).chance(0.5);
+    // The chest is the seed's or, in a world of its own, a chest the Forge made (T540: the Pirates' ship's chest).
+    const chest = ctx.catalog.find((m) => m.id === CELLAR_THING) ?? ctx.catalog.find((m) => m.kind === 'furniture' && CHEST_RE.test(m.name));
+    const sunken = !!ctx.seabed?.tiles && !!chest && new Rng(hashStr(`seabed|${ctx.cx}|${ctx.cy}`)).chance(0.5);
     return {
       place: { name: `${rng.pick(lex.nouns)} ${rng.pick(SUFFIX)}`, description: rng.pick(lex.descr) },
       environment: ambiente,
-      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ledge ? [{ module: CELLAR_THING, where: 'enclave' }] : []), ...(sunken ? [{ module: CELLAR_THING, where: 'underwater' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
+      objects: [...objects, ...(cellar ? [{ module: CELLAR_THING, where: 'under' }] : []), ...(ledge ? [{ module: CELLAR_THING, where: 'enclave' }] : []), ...(sunken ? [{ module: chest!.id, where: 'underwater' }] : []), ...(ride ? [{ module: ride.id, where: 'outside' }] : [])],
       ground: ctx.wanted.length && rng.chance(0.5) ? [rng.pick(ctx.wanted)] : [],
       fresh: [],
       runes,
@@ -865,7 +885,7 @@ export class MockAiModels implements AiModels, DecisionModels {
       persona: type === 'npc' ? `Sei ${nome}, ${req.prompt}. Parli poco, con frasi semplici. Conosci bene i sentieri attorno al borgo.` : undefined,
       tags: type === 'object' ? ['tagliabile'] : [],
       actions: type === 'object' ? [{ id: 'tocca', label: `Tocca ${nome.toLowerCase()}` }] : [],
-      container: type === 'object' && /madia|cassa|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capacity: 6, loot: 'cucina' } : undefined,
+      container: type === 'object' && /madia|cassa|forziere|credenza|armadio|baule|cesta|scaffale/.test(req.prompt) ? { capacity: 6, loot: 'cucina' } : undefined,
       carries: type === 'npc' ? ['Pagnotta', 'Fune di canapa'] : undefined,
       // A careful narrator (T487): what one rides says what it moves on, the rest none.
       ...(type === 'object' ? { vehicle: vehicleMediumIn(nome, [], req.media) ?? vehicleMediumIn(req.prompt, [], req.media) ?? 'none' } : {}),

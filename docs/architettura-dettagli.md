@@ -1540,6 +1540,12 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   regione dell'atlante. **Il Cartografo**: alla Genesi di un arcipelago gli ambienti delle rive (`ARCHIPELAGO_ENVIRONMENTS`), nel prompt delle
   terre le tavole dei moli e una secca, nel piano di un luogo d'isola che un porto va solo dove c'è il mare (`SHORE_LINE`); i modelli locali
   scelgono il porto solo sulla riva di un'isola, a parte (`HARBOUR` in `mock.ts`). `tests/porti.test.ts`.
+  **La Genesi offline dei Pirati** (T540, kernel 0.10.36): con i modelli locali un arcipelago ha nella palette il molo `i` e la secca `y` del
+  seme (`ISLAND_TERRAINS`, il Fisico locale dà alla secca `depth: reef`) e tra le prime cose un forziere da nave e una barca a remi
+  (`ISLAND_CAST`, la barca con `vehicle` sull'acqua); il piano di un luogo col fondale vi affonda la cassa del catalogo (quella del seme o una
+  che si chiama cassa, forziere, baule: `CHEST_RE`; offline un forziere, `obj.forziere`, perché `obj.cassa` era la cassa del seme prima di
+  T307b e la migrazione dei piani la riscriverebbe in `obj.chest`) con `where: 'underwater'`, e la barca le passa sopra (`underKeel`); la geografia arriva ai modelli locali nei dati della Genesi
+  (`data.geography`, mai nel prompt). Gli altri temi e il seme restano come erano. `tests/pirati-offline.test.ts`.
 - **Il vuoto, il cielo, il giorno** (ADR-0233, T445, kernel 0.10.9). **Il vuoto** è un terreno del kernel: il codice `~` (`VOID_CODE`), lo
   strato `void` (`voidTerrain` nella lingua del mondo, `isVoid`), che il kernel aggiunge alla palette solo in un mondo con
   `nature.geography: 'void'` (`paletteOf`, anche in `chooseNature`), sopra un terreno del generatore con lo stesso codice; la Genesi rifiuta `~`
@@ -1606,7 +1612,9 @@ ADR-0123. Un programma sonoro è un programma MarkovJunior con `<sound>` sulla r
   (`helmOrders`: su e giù spingono, sinistra gira la prua alla sua sinistra) o li ha dati Lua; `vehicleStep` integra l'abbrivio entro
   l'accelerazione (indietro a metà, l'ancora frena tre volte più in fretta) e il giro (a riposo un terzo, `TURN_AT_REST`); lo scafo prova la
   posa nuova, poi solo il giro, poi solo l'andare (`hullFits`: ogni punto dello scafo, `hullPoints` sulle colonne della forma ogni quarto di
-  casella e i bordi o `discPoints`, su ciò che lo porta e fuori dal piede dei solidi e dallo scafo intero degli altri veicoli). Fermato perde
+  casella e i bordi o `discPoints`, su ciò che lo porta e fuori dal piede dei solidi e dallo scafo intero degli altri veicoli; ciò che sta sotto la
+  superficie, la cassa affondata sul fondale o il barile in una cantina, passa sotto la chiglia se la sua cima non arriva più su di lei: sotto
+  il pelo dell'acqua `KEEL` mezza casella per uno scafo basso, una per uno profondo, a terra nulla, `underKeel`, T540). Fermato perde
   l'abbrivio e dice `bumped`; chi tiene il timone sente «Lo scafo urta e si ferma.» una volta finché preme lì (`BUMP_EVERY`), e il bus dice
   `vehicle:bumped`. Poi i solidi si rifanno e **chi era sul ponte va con lui** (`carryAboard`): i viandanti (`wanderersAboard`; da T442 anche chi gioca da
   un suo client, spostato sul suo tappeto, `shiftWanderer`) con la stessa rototraslazione (`carried`) se il corpo può stare lì, il salto in corso con loro; le cose che vi giacciono (`thingsAboard`: non

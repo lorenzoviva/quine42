@@ -6672,7 +6672,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: esito con ciò che si vede, gli screenshot committati su `task/T507`.
 - Esito: verificati nel browser offline (mondo Pirati, rilievo vero): trasparenza graduata dell'acqua sul letto, bande degli strati sulle sponde sommerse, schiuma sopra l'acqua trasparente, oggetto `underwater` posato dal kernel sul letto (`below`, iniettato a mano nel piano perché offline il Cartografo non lo chiede), nuoto senza blocchi; seme `Hills` e lava invariati; console pulita; screenshot e rapporto in `lab/banco/fondale/`. Non provati: secche e porto (la palette offline dei Pirati non ha `y` né `i`), scia (nessun veicolo offline), multigiocatore. Task proposto: nella Genesi offline dei Pirati i terreni `y` e `i` e la cassa nel catalogo, per provare secche, porto e `underwater` senza Gemini. Typecheck verde; suite dei test non rilanciata (solo documenti e immagini).
 
-### T540 · La Genesi offline dei Pirati con secche, molo e una cosa sul fondale — `da fare`
+### T540 · La Genesi offline dei Pirati con secche, molo e una cosa sul fondale — `fatto` (`27022bfa`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · browser · priorità 1
 - Step: 45
 - Contesto: proposto da T507 (`dossier T507`, rapporto in `lab/banco/fondale/`), confermato dall'autore il 26/11: offline la palette dei Pirati non ha `y` (secca) né `i` (molo) e il Cartografo locale non chiede cose `underwater`, quindi secche, porto e oggetti sul letto si provano solo con Gemini. Vedi `dossier T443` (porti, ADR-0230), `dossier T480` (fondale, ADR-0259), `dossier T487` (veicoli nel catalogo).
@@ -6680,6 +6680,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: una Genesi offline Pirati ha `y` e `i` nella palette, almeno un luogo col molo che tocca l'acqua profonda (`pierTouches`) e una cosa posata sul letto (`below`); i test dei porti, del fondale e dei luoghi campione verdi.
 - Browser: sì (Genesi offline Pirati: secche, molo, la cassa sul fondale, nuotarci sopra, la barca se c'è; screenshot in `lab/banco/fondale/`).
 - Quando è fatto: test verdi, visto nel browser, kernel salito di Z se tocca `src/kernel/`.
+- Esito: Genesi offline Pirati con molo `i` e secca `y` nella palette (la geografia nei dati della Genesi, solo per i modelli locali), un forziere da nave e una barca a remi tra le prime cose, il forziere affondato sul fondale nei luoghi con acqua; corretti due difetti trovati nel browser: lo scafo si fermava contro ciò che sta sul fondale (`KEEL`, `underKeel` in `hullFits`) e `obj.cassa` spariva alla ricarica perché la migrazione dei piani la riscrive in `obj.chest` (offline ora `obj.forziere`); kernel 0.10.36, `tests/pirati-offline.test.ts`, AGENTS.md, architettura, glossario, rapporto e screenshot in `lab/banco/fondale/`; suite e typecheck verdi; non provati: salire a bordo dal molo col menu (`boardingSpot` non trova posto sul `vessel` generico), il multigiocatore, la Fucina vera con un nome uguale a un vecchio id del seme (lo stesso rischio di `obj.cassa`).
 
 ## Richieste del 26/11/2026 (testo intero: `docs/userchats/to-do-2026-11-26.md`)
 
