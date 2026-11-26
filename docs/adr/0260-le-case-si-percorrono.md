@@ -50,4 +50,4 @@ Nella run #2 (26/11) l'autore ha trovato in `sidera` due case che non si percorr
   volta, e un cammino locale per ogni punto provato.
 - I piani, le stanze e le parti che i controlli misurano non vedono più le stanze dietro un muro sottile: un modello di prima che passava
   così ora torna allo Scultore col motivo. La guardia degli interni (ADR-0212) camminava già senza salti e non cambia.
-- Kernel 0.10.36: gli universi della stessa `X.Y` restano buoni (nessun formato cambia).
+- Kernel 0.10.37: gli universi della stessa `X.Y` restano buoni (nessun formato cambia).
