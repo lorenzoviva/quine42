@@ -4,7 +4,8 @@
 import type { AiConfig, AiMinimums, AiSettings, FileMap, ModuleEntry, UniverseConfig } from './types';
 import { repairActor, repairCoefficients, repairGameSetup, type Validator } from './validator';
 import { DEFAULT_GAME_SETUP } from './gameSetup';
-import { DEFAULT_NATURE, repairNature } from './nature';
+import { DEFAULT_NATURE, repairClimates, repairNature, type WorldNature } from './nature';
+import { themeClimates } from './themes';
 import { COEFFICIENT_KEYS, pricedAiModels, type Coefficients } from './coefficients';
 import { DEFAULT_SCULPTORS, repairSculptorTier, SCULPTOR_TIERS, type SculptorAiModels } from './agents/sculptor';
 import { priceOf } from './ai/prices';
@@ -149,6 +150,19 @@ export function repairAiSettings(raw: unknown): { settings: AiSettings; riparati
   return { settings, riparati };
 }
 
+/**
+ * The nature a universe.json says, repaired (`repairNature`), with the climates of its theme where it does not say any (T510, ADR-0261): a
+ * universe of the Far West born before has no snow in its new places, without a call. A nature that says its climates keeps them.
+ */
+export function natureOfUniverse(raw: unknown, theme: string | undefined): WorldNature {
+  const nature = repairNature(raw);
+  const said = raw && typeof raw === 'object' && (raw as { climates?: unknown }).climates !== undefined;
+  if (said || nature.climates) return nature;
+  const climates = themeClimates(theme);
+  const kept = repairClimates(climates);
+  return kept ? { ...nature, climates: kept } : nature;
+}
+
 export function readConfig(files: FileMap): { config: UniverseConfig; error?: string } {
   const src = files['universe.json'];
   if (!src) return { config: DEFAULT_CONFIG, error: 'universe.json mancante' };
@@ -170,7 +184,8 @@ export function readConfig(files: FileMap): { config: UniverseConfig; error?: st
         }),
         game: repairGameSetup(parsed.game),
         // The nature of the world (T437, ADR-0224): what this kernel can make true, the rest the world of today.
-        nature: repairNature(parsed.nature),
+        // A universe of before that does not say its climates takes its theme's (T510, ADR-0261): derived, never written.
+        nature: natureOfUniverse(parsed.nature, files[typeof parsed.theme === 'string' ? parsed.theme : DEFAULT_CONFIG.theme]),
         // Only what the store writes opens the choice of the cards (T295): anything else is closed.
         cardChoice: parsed.cardChoice === 'seed' || parsed.cardChoice === 'clone' ? parsed.cardChoice : undefined,
       },

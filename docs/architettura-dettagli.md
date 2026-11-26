@@ -783,6 +783,19 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
 
 - **Geografia** (ADR-0023): biomi nel generatore (`s j o k n`), 21 ambienti nel seme (il porto da T443), nodo `stamp` di
   MarkovJunior, atlante di regioni (`world/atlas.json`), direzioni note a NPC e Cartografo.
+- **I climi della bozza** (ADR-0261, T510, kernel 0.10.38): il generatore disegna quattro climi su grande scala (`CLIMATES`: `temperate`,
+  `desert`, `jungle`, `frozen`, la neve `n` e la neve sulle cime); `universe.json → nature.climates` dice quelli che il mondo ammette
+  (assente, tutti: il seme e un tema scritto a mano non cambiano), dalla sua ambientazione alla Genesi (il Far West, i Pirati e il
+  Futuristico senza la neve; la giungla, il folto di ogni mondo, sempre), un pianeta i suoi (`Planet.climates`, `natureOfBand`: un pianeta
+  ghiacciato `['frozen']`, il quadrato del suo centro di neve). Il generatore legge `world.nature().climates` (una vista, `userdata`) e
+  fa di un clima non ammesso il temperato o il primo ammesso; il kernel ha il pavimento (`offClimate`, `CLIMATE_CODES`: `n → g`,
+  `j → t`) in `genDraft` e in `planetTile`. Un ambiente che scrive un codice di un clima non ammesso non si offre ai luoghi nuovi, la sua
+  regione compresa (`offClimateWrites`, `environmentsFor`), e uno nuovo così torna al Cartografo col motivo (`climateErrors`: la Genesi,
+  `createEnvironment`); alla Genesi `n` e `j` di un clima che non c'è sono «un altro terreno di questo mondo» (`baseCodesFor`). Gli
+  universi di prima prendono i climi del loro tema senza chiamate né commit (`natureOfUniverse` in `readConfig`, `themeClimates`); ogni
+  piano nuovo dice `climates: true` e uno che non lo dice si posa sulla bozza su cui è stato fatto, con tutti i climi (`genDraft(cx, cy,
+  plan)`, `draftBefore`), così solo i luoghi nuovi cambiano. `lab/scripts/climi-bozze.ts` lo misura su un universo del disco.
+  `tests/climi.test.ts`.
 - **I timbri e gli ambienti per le strutture a 16** (ADR-0211, T407, kernel 0.9.1): ogni edificio che un timbro o un ambiente del seme
   disegna tiene la struttura per cui è tagliato, nei due versi, senza scendere né sporgere (`STAMP_SIZES` in `stamps.ts`: il tempio
   di 10 × 10 un'Enorme; casa (7-8), mastio del castello, caserma della fortezza (14 di lato), torre, piramide (7 × 9), sotterraneo (le

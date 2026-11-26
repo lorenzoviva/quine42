@@ -118,6 +118,11 @@ export interface ChunkPlan {
    */
   swim?: boolean;
   /**
+   * The mark of the climates (T510, ADR-0261): true, written by the kernel on every plan it makes, its draft has only the climates its world
+   * (or its planet) admits; absent, a plan of before, laid again on the draft it was planned on, every climate of the generator.
+   */
+  climates?: boolean;
+  /**
    * How rough the place is for the rule 10 of the steps (T474, ADR-0250): written by the kernel when the plan is made in a region of the master
    * that says it (`Region.roughness`); absent, the roughness its relief measures. A region changed later does not move the places it had.
    */

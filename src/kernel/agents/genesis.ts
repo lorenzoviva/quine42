@@ -12,7 +12,7 @@ import { bibleBreaks, cleanBible, metaBreak } from '../fourthwall';
 import { internalFields, internalName } from '../internalNames';
 import { FORGE_KINDS, type ForgeKind } from './forge';
 import { TIMELESS_LAYOUTS } from '../themes';
-import { DEPTHS, physicsOf, TERRAIN_LIMITS, WATER_CODES, type Crossing, type Geography } from '../nature';
+import { CLIMATES, DEPTHS, physicsOf, TERRAIN_LIMITS, WATER_CODES, type Climate, type Crossing, type Geography } from '../nature';
 import { SEED_STRATA, STRATA_DEPTH, STRATA_EXAMPLE, strataErrors, strataPalette, STRATUM_ROLES } from '../strata';
 
 /**
@@ -37,13 +37,28 @@ export const BASE_CODES: Record<string, { meaning: string; layer: TerrainLayer; 
 };
 
 /**
+ * What the codes of a climate the world does not admit mean (T510, ADR-0261): the draft never draws them there, but every palette has them
+ * (the environments and the kernel rely on them), so they are another ground and another thicket of this world, never snow nor a jungle.
+ */
+const OUT_OF_CLIMATE: Partial<Record<Climate, { code: string; meaning: string }>> = {
+  frozen: { code: 'n', meaning: 'another slow walkable ground of this world (mud, scree, a salt flat…): this world has no snow nor frost' },
+  jungle: { code: 'j', meaning: 'another very thick, uncrossable vegetation of this world (a thorn thicket, a cane brake…): this world has no jungle' },
+};
+
+/**
  * Base codes for a world: in a true-relief world (T475, ADR-0256), mountains are relief (terraces and cliffs) rather than solid blocks, so
  * `k` is walkable bare mountain rock (`layer: 'ground', solid: false, cross: 'walk'`, no boulder model) while `r` stays the solid boulder.
+ * `climates` (T510), those the world admits: the codes of the others say another ground of this world, the same layer and crossing.
  */
-export function baseCodesFor(trueRelief = false): typeof BASE_CODES {
-  return trueRelief
+export function baseCodesFor(trueRelief = false, climates: readonly Climate[] = CLIMATES): typeof BASE_CODES {
+  const codes: typeof BASE_CODES = trueRelief
     ? { ...BASE_CODES, k: { meaning: 'mountain bare rock, walkable with terraces and cliffs', layer: 'ground', solid: false, cross: 'walk' } }
-    : BASE_CODES;
+    : { ...BASE_CODES };
+  for (const c of CLIMATES) {
+    const out = OUT_OF_CLIMATE[c];
+    if (out && !climates.includes(c)) codes[out.code] = { ...codes[out.code], meaning: out.meaning };
+  }
+  return codes;
 }
 
 /** What the Narrator asks the Forge for at the Genesis: a kind of what it creates (T310b, `tipi-fucina`) and the request. */
@@ -260,9 +275,9 @@ export interface GenesisBrought {
 
 const listed = (xs: Array<{ name: string; class: string }>, n = 40) => xs.slice(0, n).map((x) => `«${x.name}» (${x.class})`).join(', ');
 
-export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography, breath = false, trueRelief = false): Promise<GenesisPlan> {
+export async function planGenesis(c: Council, theme: string, base: FileMap, checkLayout: LayoutCheck, brought?: GenesisBrought, geography?: Geography, breath = false, trueRelief = false, climates: readonly Climate[] = CLIMATES): Promise<GenesisPlan> {
   const data = { theme };
-  const baseCodes = baseCodesFor(trueRelief);
+  const baseCodes = baseCodesFor(trueRelief, climates);
   // The fields of the bible are those of the file (English since T310b); `storia` of an answer of before is `history` here, not in internalAnswer.
   const askBible = async (feedback = ''): Promise<Bible> =>
     internalFields('bible', await c.ask<Bible>(
