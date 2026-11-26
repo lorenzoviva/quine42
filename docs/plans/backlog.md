@@ -6750,7 +6750,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: offline, «metti una fontana in piazza» dà una cosa del luogo con un modello, senza fallire.
 - Browser: no (test offline); sì se cambia ciò che si vede.
 - Quando è fatto: la fontana nasce, test verdi.
-- Esito: la fontana chiesta al Referente nasce come cosa del luogo, con un modello (edificio piccolo o monumento) e senza fallire: la Fucina non dà più `structure` a una cosa del mondo né fa uno strumento di una fontana, i moduli di prima chiedono allo Scultore la classe giusta, e la cosa va nel luogo nominato o in quello del viandante (ADR-0263, kernel 0.10.39, tests/fontana.test.ts); non provato con Gemini vero, in multigiocatore (il ramo del master non posa la cosa) e per lingue diverse da italiano e inglese.
+- Esito: la fontana chiesta al Referente nasce come cosa del luogo, con un modello (edificio piccolo o monumento) e senza fallire: la Fucina non dà più `structure` a una cosa del mondo né fa uno strumento di una fontana, i moduli di prima chiedono allo Scultore la classe giusta, e la cosa va nel luogo nominato o in quello del viandante (ADR-0264, kernel 0.10.40, tests/fontana.test.ts); non provato con Gemini vero, in multigiocatore (il ramo del master non posa la cosa) e per lingue diverse da italiano e inglese.
 
 ### T516 · Gemini Neon: chiudere la prova e provarlo come Scultore — `da fare`
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2

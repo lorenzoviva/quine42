@@ -48,4 +48,4 @@ Fucina sta sul terreno, nessuno ci entra.
 - Il Narratore non può più chiedere una struttura alla Fucina: un edificio in cui si entra resta un ambiente o un lotto del Cartografo.
 - La prova offline: `tests/fontana.test.ts` («metti una fontana in piazza» con i modelli locali, e con le risposte del Referente e del
   Narratore della run).
-- Kernel 0.10.39: niente cambia nel contratto; i manifest di prima si leggono come prima.
+- Kernel 0.10.40 (0.10.39 era già di T526): niente cambia nel contratto; i manifest di prima si leggono come prima.
