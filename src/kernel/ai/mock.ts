@@ -12,7 +12,7 @@ import type { NpcContext } from '../agents/minds';
 import { fallbackDeath } from '../gameSetup';
 import { italianName } from '../internalNames';
 import { symbolTokens } from '../../mj/symbols';
-import { boxOf, classOf } from '../../mj/classes';
+import { boxOf, classOf, landmarkClassOf } from '../../mj/classes';
 import { parseXml, type XmlElement } from '../../mj/xml';
 import { RESERVED_PART_SYMBOLS } from '../worldparts';
 import { mockVesselProgram } from './mockVessel';
@@ -71,7 +71,7 @@ const CAT = ['Miao.', 'Il gatto ti fissa, poi si lecca una zampa con aria di sup
 const NPC_WORDS = ['fabbro', 'mercante', 'vecchio', 'vecchia', 'donna', 'uomo', 'bambino', 'bambina', 'guardia', 'mago', 'strega', 'monaco', 'pastore', 'cacciatore', 'eremita', 'oste', 'contadino', 'contadina', 'bardo', 'cavaliere'];
 const ITEM_WORDS = ['forbici', 'chiave', 'mela', 'pane', 'lanterna', 'corda', 'spada', 'pozione', 'moneta', 'libro', 'pergamena', 'fiasco', 'ascia', 'martello', 'bacche', 'fungo', 'erba', 'pietra', 'piuma', 'anello'];
 const EDIBLE = ['mela', 'pane', 'pozione', 'bacche', 'fungo', 'erba', 'fiasco'];
-const STOP = new Set(['un', 'una', 'uno', 'il', 'lo', 'la', 'i', 'gli', 'le', 'che', 'di', 'del', 'della', 'con', 'e', 'a', 'in', 'per', 'crea', 'aggiungi', 'voglio', 'fammi', 'genera', 'nuovo', 'nuova', 'personaggio', 'npc', 'oggetto', 'strumento', 'risultato', 'combinazione']);
+const STOP = new Set(['un', 'una', 'uno', 'il', 'lo', 'la', 'i', 'gli', 'le', 'che', 'di', 'del', 'della', 'con', 'e', 'a', 'in', 'per', 'crea', 'aggiungi', 'metti', 'voglio', 'fammi', 'genera', 'nuovo', 'nuova', 'personaggio', 'npc', 'oggetto', 'strumento', 'risultato', 'combinazione']);
 
 const NAMES = ['Berta', 'Gualtiero', 'Ilde', 'Ottone', 'Mirella', 'Tancredi', 'Gemma', 'Ugolino', 'Fiora', 'Corrado', 'Agnese', 'Bastiano'];
 const STOCK: Array<[string, string, string, number, number, string[], Record<string, number>?]> = [
@@ -592,6 +592,11 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (/gravit|si nuot|nuotar|non si attravers|invalicabil|calpestabil|più lent|più fatic|più profond/i.test(t)) return { reply: 'Lo porto al Fisico.', task: 'physics', request: t };
         if (/regola/i.test(t)) return { reply: 'Sarà una regola del mondo.', task: 'rule', request: t.replace(/.*regola:?\s*/i, '') };
         if (/bosco|luogo|regione|castello|deserto/i.test(t)) return { reply: 'Il Cartografo ci pensa.', task: 'environment', request: t };
+        // A thing that stands in a place (T515): «metti una fontana in piazza», the place it goes in «target».
+        if (/\b(metti|introduci|fontana|fontanella|pozzo|statua|monumento|obelisco|abbeveratoio|panchina|lampione)\b/i.test(t)) {
+          const target = /\b(?:in|nella|nel|nello|alla|al|a)\s+([^,.;]+?)\s*$/iu.exec(t)?.[1];
+          return { reply: 'Alla Fucina: la metto lì.', task: 'thing', request: t.replace(/^\s*(metti|introduci)\s+/i, ''), ...(target ? { target } : {}) };
+        }
         if (/personaggio|abitante|persona/i.test(t)) return { reply: 'La Fucina lo farà nascere.', task: 'character', request: t };
         if (/spada|oggetto|strumento|crea/i.test(t)) return { reply: 'Alla Fucina.', task: 'item', request: t };
         return { reply: 'Benvenuto nello studio. Chiedi pure: qui si fa il mondo.', task: 'none' };
@@ -877,7 +882,7 @@ export class MockAiModels implements AiModels, DecisionModels {
       description: req.prompt,
       lore: `Nessuno ricorda da quando ${type === 'npc' ? 'vive' : 'si trova'} qui.`,
       look: req.prompt,
-      class: type === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animal' : 'person') : type === 'item' ? 'object' : 'furniture',
+      class: type === 'npc' ? (/gatto|cane|pecora|uccello|corvo|volpe/.test(req.prompt.toLowerCase()) ? 'animal' : 'person') : type === 'item' ? 'object' : (landmarkClassOf(nome) ?? 'furniture'),
       context: { terrains: (req.paletteCodes ?? ['g', 'p']).filter((c) => c === 'g' || c === 'p'), places: 'prati e sentieri', rarity: 0.2 },
       interaction: type === 'npc' ? 'talk' : type === 'object' ? 'use' : 'none',
       controls: type === 'item' ? [edible ? { action: 'use', description: 'mangialo' } : { action: 'action', description: 'usalo su ciò che hai davanti' }] : [],

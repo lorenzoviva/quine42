@@ -1803,6 +1803,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `sessione` (da sola)
 - **Fermo**: il compito `council.session`.
 
+### Paesaggio costruito
+- **Inglese**: `landmarkClassOf`, `thingClass`, `standsInPlace`, `FORGE_CLASSES`
+- **Definizione**: ciò che sta in un luogo dove è stato costruito e in cui nessuno entra: una fontana, un pozzo, un abbeveratoio, un'edicola (classe `building`), una statua, un monumento, un obelisco, una colonna (classe `monument`). Lo dice la testa del nome. Una cosa della Fucina non è mai della classe `structure`, l'edificio coi piani dei lotti del Cartografo, né uno strumento da borsa; chiesta al Referente va nel luogo (T515, ADR-0263).
+- **Dove vive**: `src/mj/classes.ts`, `src/kernel/agents/forge.ts`, `src/kernel/modeldirector.ts`, `src/kernel/kernel.ts` (`placeAsked`)
+- **Da non usare**: `arredo urbano`
+- **Fermo**: niente su disco né sul filo; le classi `building` e `monument` sono quelle di sempre.
+
 ### Fucina
 - **Inglese**: `forge`, `forgeModule`, `ForgeRequest`
 - **Definizione**: la catena che crea un modulo: concetto, fisica, codice, Arbitro, validatore, commit.
