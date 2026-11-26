@@ -128,7 +128,7 @@ export function pickOrchestrator(order, budget, threshold, at = new Date()) {
     if (!b || !canOrchestrate(p)) return false;
     if (b.fermoFino && new Date(b.fermoFino) > at) return false;
     const conf = CONFIG.providers?.[p];
-    const isWeeklyOnly = conf?.finestra5h === false || p === 'argon' || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
+    const isWeeklyOnly = conf?.finestra5h === false || (b.contatori && !b.contatori.some((c) => c.finestra === '5h'));
     const session = isWeeklyOnly ? (b.residuo ?? 100) : (b.sessione ?? b.residuo ?? 100);
     return (b.residuo ?? 100) >= threshold && session >= threshold;
   };

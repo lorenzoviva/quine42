@@ -6683,13 +6683,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ## Richieste del 26/11/2026 (testo intero: `docs/userchats/to-do-2026-11-26.md`)
 
-### T508 · Argon sul contatore `Gemini Models`: config e `modelli.md` — `da fare`
+### T508 · Argon sul contatore `Gemini Models`: config e `modelli.md` — `fatto` (`bc7ad40e`)
 - Pipeline: hydrogen · sforzo medium · stima 1% · approvato · priorità 1
 - Contesto: l'autore il 26/11 «credo che argon non sia più su un contatore separato». Verificato dall'orchestratore: `agy -p /usage` mostra solo `Gemini Models` e `Claude and GPT models`; il gruppo `Gemini 4 Argon` non c'è più, ma `stato` legge ancora un conto `argon` suo (reset 30/11). `docs/pipeline/modelli.md` § 1 (righe 28-36) lo dice separato.
 - Cosa fare: in `tools/pipeline/config.json` il provider `argon` (e l'`orchestrator`) sul conto di `Gemini Models` (5 ore e settimana, come `gemini`/`hydrogen`/`neon`), la copia dei test allineata; `modelli.md` § 1 e 1.3 aggiornati con la data; il lettore di `/usage` che non si rompe se un gruppo sparisce. Solo la pipeline, niente kernel.
 - Test: i test della pipeline; `stato` mostra argon sul conto comune.
 - Browser: no.
 - Quando è fatto: `stato` coerente con `agy -p /usage`, commit.
+- Esito: spostati `argon` e `orchestrator` su `^Gemini Models$` (`stessoContoDi: "gemini"`, `ratioSessioneSettimana: 3.3`, 5h+settimana) in `tools/pipeline/config.json` e `tests/fixtures/pipeline-config.json`, rimossi i casi speciali `=== 'argon'` in `pipeline.mjs` e `orchestra.mjs`, aggiornato `loadBudget` per ripulire i contatori se un gruppo sparisce da `/usage`, aggiornato `docs/pipeline/modelli.md` (§ 1 e § 1.3) al 26/11/2026, verificato `stato` contro `agy -p /usage`, passati `npm run typecheck` e `npm test` (309 file, 4099 test).
 
 ### T509 · Studio: il terreno ricco del Paesaggista (sottobosco, scavi, strade, ferrovie, modelli riusati a semi) — `da fare`
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
