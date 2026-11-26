@@ -1,4 +1,4 @@
-# ADR-0263 — Il paesaggio costruito: una fontana chiesta al Concilio è una cosa del luogo
+# ADR-0264 — Il paesaggio costruito: una fontana chiesta al Concilio è una cosa del luogo
 
 - **Stato**: accettato
 - **Data**: 2026-11-27
