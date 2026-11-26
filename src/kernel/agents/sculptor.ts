@@ -9,7 +9,7 @@
 
 import type { Schema } from '../ai/models';
 import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
-import { analyse, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
+import { analyse, closedRoomErrors, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
 import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, isFortified, isVessel, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
@@ -22,7 +22,7 @@ import { traceText } from '../../mj/trace';
 import { planDistance, planView, sectionHeights, sideBySide, viewsText } from '../../mj/views';
 import { cellarVoxels, groundOfForm, habitablePartsOf, holesOf, vptOf, walkIn, waterlineOf, type ModelInfo } from '../forms';
 import { measureVessel, vesselErrors, VESSEL_LEAST } from '../../mj/vessel';
-import { storeyFloors } from '../interior';
+import { roomsReached, storeyFloors } from '../interior';
 import type { FileMap } from '../types';
 import { internalFields } from '../internalNames';
 import { isTileset, WORLD_NODE_LIMITS, worldNodeErrors } from '../validator';
@@ -750,6 +750,8 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
       const parts = habitablePartsOf(walk, vpt, partVoxels(vpt).storey.clear, base);
       if (parts.storeys.length < 2) notes.push(`piani: ${parts.storeys.length} (serve ≥ 2)`);
       notes.push(...partErrors(parts, vpt));
+      // Every room of the ground floor is reached from the door (T513): a room behind a wall with no door, with the stair in it, is not.
+      notes.push(...closedRoomErrors(roomsReached(walk, vpt, base).rooms));
       // A dwelling gives the house the floor of its size (T413, ADR-0213): measured as the Scenografo's bench does; a cellar is not a storey (T417).
       if (opts.dwelling && parts.storeys.length >= 2) notes.push(...dwellingErrors(storeyFloors(walk, vpt, base)));
       const down = base ? cellarError(result, model.program.palette, vpt, base, parts.cellar) : undefined;

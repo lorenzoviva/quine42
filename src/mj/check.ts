@@ -169,6 +169,22 @@ export function partErrors(m: PartsMeasured, vpt: number): string[] {
   return out;
 }
 
+/** A room of the ground floor smaller than this, tiles² where a body's middle stands, is not one a way must reach (a closet, a gap between walls; T513). */
+export const CLOSED_ROOM = 1;
+
+/**
+ * A room of the ground floor nobody gets into (T513): every room of at least `CLOSED_ROOM` tiles² must be reached on foot from the door
+ * (`roomsReached` in src/kernel/interior.ts, the walk the storeys are measured on); a room behind a wall with no door in it, the stair in
+ * it, is said with its size and what to do.
+ */
+export function closedRoomErrors(rooms: ReadonlyArray<{ area: number; reached: boolean }>): string[] {
+  const shut = rooms.filter((r) => !r.reached && r.area >= CLOSED_ROOM);
+  if (!shut.length) return [];
+  return [
+    `stanze: ${shut.length === 1 ? `una stanza a terra di ${sq(shut[0].area)} caselle² non si raggiunge` : `${shut.length} stanze a terra (${shut.map((r) => sq(r.area)).join(', ')} caselle²) non si raggiungono`} a piedi dalla porta: apri una porta (part-door) nella parete che la separa dalle altre`,
+  ];
+}
+
 /** The covered floor of a storey as rooms, in tiles² (`storeyFloors` in src/kernel/interior.ts), as the dwelling's check reads it. */
 export interface FloorMeasured {
   cellar: boolean;

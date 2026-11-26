@@ -6725,13 +6725,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (neapolis, salire e guidare).
 - Quando è fatto: il motorino si guida in neapolis, test verdi. Dipende da T511.
 
-### T513 · Gli interni di `sidera`: un mobile davanti all'ingresso e una stanza senza porta — `da fare`
+### T513 · Gli interni di `sidera`: un mobile davanti all'ingresso e una stanza senza porta — `fatto` (`c8e3e3cb`)
 - Pipeline: claude · sforzo high · stima 3% · approvato · priorità 1
 - Contesto: run #2 (26/11): in `sidera` una casa non era accessibile (un mobile bloccava l'ingresso) e un'altra non aveva accesso alla stanza sul retro con le scale (nessuna porta nella parete di mezzo). La guardia degli interni (ADR-0212, `InteriorGuard`) dovrebbe tenere il cammino dalla porta; i controlli dello Scultore (`reachableStoreys`) i piani raggiungibili. `dossier T409`, `dossier T410`, `dossier T413`; le copie della run in `beta-run-2`.
 - Cosa fare: ritrovare le due case (log della run, `models/index.json`), riprodurle offline; correggere la guardia (il cammino dalla porta esterna) e i controlli dello Scultore (ogni stanza a terra raggiungibile dalla porta, la scala raggiungibile), riparando i modelli guasti di sidera senza chiamate dove si può o rimettendoli nella coda dello Scultore.
 - Test: le due case riprodotte: ingresso libero, la stanza sul retro raggiunta, o il modello rifiutato col motivo.
 - Browser: sì.
 - Quando è fatto: le due case si percorrono in sidera, test verdi.
+- Esito: il cammino del kernel salta come il gioco e non passa più un tramezzo sottile; i controlli dello Scultore rifiutano una stanza a terra che non si raggiunge dalla porta; una cosa solida posata dentro una struttura non chiude più il passaggio (l'armadietto esce dall'atrio della Residenza); ADR-0260, kernel 0.10.36; `lab/scripts/interni-percorsi.ts`; manca: rifare con lo Scultore la «Residenza modulare» (cade a ogni seme) e la «Residenza ad anelli» (semi 3 e 4) con `npm run genera -- sidera --rigenera modelli --tipi struttura-residenza-ad-anelli,struttura-residenza-modulare`, non lanciato perché costa e scrive fuori dal worktree; finché non si fa, la stanza sul retro resta chiusa; non provato: il multigiocatore e il tempo di posa su una struttura gargantuesca; sicurezza: nessuna superficie nuova.
 
 ### T514 · I mobili degli interni si usano — `da fare`
 - Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 1
