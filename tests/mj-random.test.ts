@@ -1,4 +1,4 @@
-// The switch of the semantics and System.Random in the engine (T526, A1-1, ADR-0262; docs/design/markov-allineamento.md § 2, § 7).
+// The switch of the semantics and System.Random in the engine (T526, A1-1, ADR-0263; docs/design/markov-allineamento.md § 2, § 7).
 //
 // - System.Random of .NET in src/mj/random.ts draws what .NET printed (lab/banco/conformita/uscite.json, caso/Program.cs) and what the
 //   reference's own copy draws (lab/banco/conformita/dotnet-random.ts, kept apart: the oracle does not lean on the engine).

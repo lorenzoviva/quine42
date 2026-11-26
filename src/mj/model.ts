@@ -1193,7 +1193,7 @@ export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel,
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
  * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there; `colors` the colours
  * of symbols the caller knows and the palette of MarkovJunior lacks (the strata of the world, T478: `#1` is the seed's earth), under the
- * program's own `<color>`; `semantics` the semantics its runs follow (T526, ADR-0262: `mj` the switch of the chain A1, absent ours). Throws
+ * program's own `<color>`; `semantics` the semantics its runs follow (T526, ADR-0263: `mj` the switch of the chain A1, absent ours). Throws
  * Mj3Error with the line.
  */
 export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string; colors?: Readonly<Record<string, string>>; semantics?: Semantics } = {}): MjxModel {

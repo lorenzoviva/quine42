@@ -226,7 +226,7 @@ export interface Program3 {
   /** Symbol → codes it stands for in rule inputs (MarkovJunior "union"). */
   unions?: Record<string, string>;
   program: Node3;
-  /** The semantics it was compiled for (T526, ADR-0262): `mj` only when the compiler was told so; absent, ours. */
+  /** The semantics it was compiled for (T526, ADR-0263): `mj` only when the compiler was told so; absent, ours. */
   semantics?: Semantics;
 }
 
@@ -330,7 +330,7 @@ class Census {
 /** The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. */
 let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics } | undefined;
 
-/** The semantics of the run in progress (T526, ADR-0262): ours unless the run was told `mj`. */
+/** The semantics of the run in progress (T526, ADR-0263): ours unless the run was told `mj`. */
 export const runSemantics = (): Semantics => current?.semantics ?? 'ours';
 
 /**
@@ -2326,7 +2326,7 @@ export interface RunOptions {
   watch?: RunWatch;
   /** Ceilings besides the engine's (the world's, T336): past one the run throws, below them it does not change. */
   ceilings?: NodeCeilings;
-  /** The semantics of the run (T526, ADR-0262), over the program's: absent, the program's, and absent that too, ours. */
+  /** The semantics of the run (T526, ADR-0263), over the program's: absent, the program's, and absent that too, ours. */
   semantics?: Semantics;
 }
 

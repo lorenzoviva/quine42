@@ -1008,7 +1008,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Semantica dell'originale
 - **Inglese**: `Semantics`, `semantics`, `semanticsOf`, `runSemantics`, `RunRandom`, `SystemRandom`, `randomFor`
-- **Definizione**: quale senso segue la corsa di un programma MarkovJunior: `ours`, il motore di sempre col suo generatore (mulberry32), o `mj`, il senso di MarkovJunior di mxgmn con `System.Random` di .NET e lo stesso ordine di ogni estrazione, che la catena A1 allinea nodo per nodo dietro l'interruttore, spento per ogni programma di oggi fino al contratto 0.11 (ADR-0262).
+- **Definizione**: quale senso segue la corsa di un programma MarkovJunior: `ours`, il motore di sempre col suo generatore (mulberry32), o `mj`, il senso di MarkovJunior di mxgmn con `System.Random` di .NET e lo stesso ordine di ogni estrazione, che la catena A1 allinea nodo per nodo dietro l'interruttore, spento per ogni programma di oggi fino al contratto 0.11 (ADR-0263).
 - **Dove vive**: `src/mj/random.ts`, `src/mj/engine.ts`, `src/mj/model.ts`
 - **Da non usare**: `modalità`, `flusso` (per l'interruttore; «il flusso di prima» nello studio è `ours`)
 - **Fermo**: i valori `ours` e `mj`.

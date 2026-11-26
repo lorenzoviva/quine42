@@ -1,4 +1,4 @@
-# ADR-0262 — La semantica di MarkovJunior di mxgmn: l'interruttore, System.Random, il criterio voxel per voxel
+# ADR-0263 — La semantica di MarkovJunior di mxgmn: l'interruttore, System.Random, il criterio voxel per voxel
 
 - **Stato**: accettato
 - **Data**: 2026-11-26

@@ -1,4 +1,4 @@
-// The random generator of a run and the switch of the semantics (T526, A1-1, ADR-0262; docs/design/markov-allineamento.md § 2, § 7).
+// The random generator of a run and the switch of the semantics (T526, A1-1, ADR-0263; docs/design/markov-allineamento.md § 2, § 7).
 // - `ours`: the engine as it has always been, mulberry32 (`Rng` of src/kernel/rng.ts): every grid of today, voxel for voxel (ADR-0142).
 // - `mj`: the semantics of MarkovJunior of mxgmn, which the chain A1-1…A1-8 aligns node by node; for now System.Random of .NET with the
 //   run's seed (`new Random(seed)` in Interpreter.Run) and every generator of its own seeded by one `Next()` of the run's, as the original
