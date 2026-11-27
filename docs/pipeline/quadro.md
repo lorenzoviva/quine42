@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 722 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 723 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 722 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **723 (claude):** T528 (A1-3, i rami dell'originale, ADR-0273, 19/36 modelli voxel per voxel) fatto; `integra` in conflitto su `universe.json` → **T558** (claude medium, p0). In corso T557.
 - **722 (claude):** D/T543 chiusa → T557 (terza prova, p1); catena A1 T528-T535 a p0 (scadenza 29/11). In corso T528.
-- **719 (claude):** T556 integrato (`362e3cac`, kernel 0.10.46, ADR-0272): T514 (mobili degli interni usabili) chiuso via T556. In corso T528.
