@@ -66,6 +66,11 @@ export interface Support {
   vpt: number;
   /** Voxels of its model under the ground (a cellar): no floor down there is a shelf. */
   base: number;
+  /**
+   * The highest floor that is a shelf (voxels), for a piece of a building's interior (T514): the storey over it is not one of its shelves,
+   * though its floors know it (they say how much room a shelf has).
+   */
+  top?: number;
 }
 
 /** Where an item lies on a support. */
@@ -174,7 +179,7 @@ export function shelvesOf(s: Support): Map<number, Float64Array> {
   const XY = s.X * s.Y;
   for (let i = 0; i < XY; i++)
     for (let l = start[i]; l < start[i + 1]; l++) {
-      if (z[l] <= s.base) continue;
+      if (z[l] <= s.base || (s.top !== undefined && z[l] > s.top)) continue;
       let room = out.get(z[l]);
       if (!room) out.set(z[l], (room = new Float64Array(XY)));
       room[i] = l + 1 < start[i + 1] ? base[l + 1] - z[l] : Infinity;

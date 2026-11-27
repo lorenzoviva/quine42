@@ -520,7 +520,7 @@ export interface Furnished {
   /** Pieces the guard took away, by reason. */
   refused: Record<Refusal, number>;
   /** The way of data (`furnishWithRules`, T419): every piece kept, which furniture, in which kind of room, on which storey (-1 the cellar). */
-  items?: Array<{ id: string; room: string; storey: number; voxels: number; box: PieceBox }>;
+  items?: Array<{ id: string; room: string; storey: number; voxels: number; box: PieceBox; cells?: number[] }>;
 }
 
 /** The box of a piece of furniture in its building's grid, voxels, both ends inside (T431): what the cursor finds it by. */

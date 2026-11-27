@@ -131,13 +131,13 @@ export function geometryCount(): { count: number; bytes: number } {
   return { count: cache.size, bytes };
 }
 
-/** Instances whose model was changed by an action (an open door) have a body of their own. */
+/** Instances whose model was changed by an action (an open door) or lost pieces of its interior (T514) have a body of their own. */
 const changed = new Map<string, THREE.BufferGeometry>();
-export function changedBody(k: Kernel, f: Form, done: string[]): THREE.BufferGeometry {
-  const key = `${f.key}|${done.join(',')}`;
+export function changedBody(k: Kernel, f: Form, done: string[], out?: readonly string[]): THREE.BufferGeometry {
+  const key = `${f.key}|${done.join(',')}|${out?.join(',') ?? ''}`;
   let g = changed.get(key);
   if (!g) {
-    const grid = instanceGrid(k.forms, f, done);
+    const grid = instanceGrid(k.forms, f, done, out);
     changed.set(key, (g = geometry(meshVoxels(grid, f.result!.palette, { vpt: f.vpt, underside: false }))));
     shared.add(g);
   }
@@ -198,7 +198,8 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
   const root = new THREE.Group();
   const rising = !dressed && typeof stadio === 'number' && Number.isFinite(stadio) && stadio < 1;
   // A dressed body was made from the instance's grid, its actions done.
-  const bodyMesh = mesh(dressed ? g.body : rising ? stagedBody(k, f, fc?.done ?? [], stadio) : fc?.done?.length ? changedBody(k, f, fc.done) : g.body);
+  const changedNow = !!(fc?.done?.length || fc?.out?.length);
+  const bodyMesh = mesh(dressed ? g.body : rising ? stagedBody(k, f, fc?.done ?? [], stadio) : changedNow ? changedBody(k, f, fc?.done ?? [], fc?.out) : g.body);
   const body = new THREE.Group();
   body.add(bodyMesh);
   root.add(body);
@@ -211,7 +212,7 @@ export function modelObject(k: Kernel, f: Form, fc: FormComp | undefined, materi
     return { pivot, part: l.part, phase: l.phase, ...(hand ? { hand } : {}) };
   });
   // An animated model shows one frame at a time instead of its body (the action's body has none).
-  const frames = fc?.done?.length || rising ? [] : g.frames.map((geo) => {
+  const frames = changedNow || rising ? [] : g.frames.map((geo) => {
     const m = mesh(geo);
     m.visible = false;
     root.add(m);

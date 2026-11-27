@@ -1806,6 +1806,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: «arredo della cantina» per le regole (l'arredo è ciò che il kernel posa), «seminterrato»
 - **Fermo**: il valore `cellar` di `rules[].room`; gli id dei modelli `cellar-shelf` e `cellar-rack`.
 
+### Mobile dell'interno
+- **Inglese**: `fitted` (il componente), `FittedComp`, `syncFitted`, `pieceModule`, `storeNamed`, `PIECE_STORE`, `pieceKeys`, `pieceOrigin`, `pieceAt`, `pieceSupport`, `pieceLevels`, `withoutPieces`, `PIECE_SEED`, `FormComp.out`, `shownFitted`, `readFitted`
+- **Definizione**: un mobile che lo Scenografo ha messo in un edificio, voxel della sua griglia, e la cosa del mondo che il kernel gli fa accanto: del modulo che indossa il suo modello (le sue azioni, il suo contenitore, «Prendi» se il manifest lo dice) o col menu di ogni cosa (e un contenitore del kernel se il nome dice che contiene); non si disegna e non ferma nessuno, sta sul pavimento del suo piano, si trova per la sua scatola; la sua origine è quella dell'edificio e la chiave del mobile. Preso o rotto lascia l'edificio: l'istanza dice le chiavi dei mobili tolti (`out`) e la sua griglia è senza i loro voxel (T514, ADR-0270).
+- **Dove vive**: `src/kernel/fitted.ts`, `src/kernel/kernel.ts` (`syncFitted`, `spawnPiece`, `takeOut`), `src/kernel/forms.ts` (`instanceGrid`)
+- **Da non usare**: «arredo» per la cosa (l'arredo è ciò che il kernel posa), `furnishing` (è lo Scenografo al lavoro, `Kernel.furnishing`), «pezzo» (è della griglia a pezzi, `<pieces>`)
+- **Fermo**: il componente `fitted` sul filo (`model`, `name`, `yaw`, `hx`, `hy`, `z`, `top`), `out` di una forma e di `FormView`, `seed` di un `moved`, l'origine `<edificio>~<chiave>`.
+
 ### Piano del viandante
 - **Inglese**: `onFloor`, `feetNow`, `FLOOR_UNDER`, `FLOOR_ABOVE`, `furnitureAt`, `PieceBox`, `FURNISHING`
 - **Definizione**: il piano su cui stanno i piedi del viandante, da cui `E`, il tasto destro e il cursore scelgono ciò che trovano: una cosa la cui altezza sta da mezza casella sotto i piedi a meno di 1,5 sopra (il piano di sotto e quello di sopra no), una struttura su ogni suo piano; i mobili che il kernel ha posato in un edificio si trovano dalla loro scatola nella griglia (T431).

@@ -133,9 +133,9 @@ export const furnitureOf = (rules: readonly InteriorRule[]): string[] => [...new
 
 /**
  * What a furnishing gives, as a number: raised when it changes, so a furnished form kept before (the page's cache on disk) is made again.
- * 2 (T431): the box of every piece (`FormResult.furniture`).
+ * 2 (T431): the box of every piece (`FormResult.furniture`); 3 (T514): its voxels too, which leave the building when it is taken away.
  */
-export const FURNISHING = 2;
+export const FURNISHING = 3;
 
 /** What an interior is for the key of its form (`interiorKey`): the rules, the base, each piece by the key of its program, the furnishing's number. */
 export function interiorText(i: InteriorData): string {
@@ -642,7 +642,7 @@ export function furnishWithRules(plan: InteriorPlan, rules: readonly InteriorRul
           voxels.add(at);
         });
         kept.push(vox);
-        items.push({ id: piece.id, room: room.kind, storey: room.storey, voxels: vox.length, box: boxOf(vox, X, Y) });
+        items.push({ id: piece.id, room: room.kind, storey: room.storey, voxels: vox.length, box: boxOf(vox, X, Y), cells: vox });
         for (const i of lost) inRoom.delete(i);
         for (const i of gone) live.delete(i);
         parts.set(p, piecesOf(live, X));

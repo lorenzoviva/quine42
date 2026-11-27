@@ -1,6 +1,7 @@
 // The interiors by storey (T431): the guard keeps the way when two pieces stand corner to corner (a body does not pass between them), a
 // solid thing put indoors stays off the foot of the stairs and square to the walls, and `E`, the right button and the cursor find only what
-// is on the storey the wanderer stands on, the furniture the kernel placed in a building too (voxels of the building, found by its box).
+// is on the storey the wanderer stands on, the furniture the kernel placed in a building too (voxels of the building, found by its box;
+// since T514 the thing beside it says what it is, `tests/mobili-interni.test.ts`).
 
 import { describe, expect, it } from 'vitest';
 import { MockAiModels } from '../src/kernel/ai/mock';
@@ -133,24 +134,29 @@ describe('E, il tasto destro e il cursore sul piano del viandante (T431)', () =>
       expect(x1).toBeLessThan(g.X);
       expect(z1).toBeLessThan(g.Z);
     }
-    const piece = pieces[0];
-    const [x0, y0, z0, x1, y1] = piece.box;
-    // The middle of its box in the simulation (yaw 0), and the height of its storey's floor.
-    const px = x + ((x0 + x1 + 1) / 2 - g.X / 2) / form.vpt, py = y + ((y0 + y1 + 1) / 2 - g.Y / 2) / form.vpt;
-    const floor = k.groundAt(x, y) + (z0 - form.base) / form.vpt;
-    const name = k.forms.info(piece.id)!.name!;
-    const stand = (feet: number) => {
+    // A piece a module wears (the sideboard) says what its thing is (T514); one no module wears (the barrel), its name in the library.
+    const barrel = pieces.find((p) => p.id === 'barile')!;
+    expect(barrel).toBeDefined();
+    for (const piece of [pieces[0], barrel]) {
+      const [x0, y0, z0, x1, y1] = piece.box;
+      // The middle of its box in the simulation (yaw 0), and the height of its storey's floor.
+      const px = x + ((x0 + x1 + 1) / 2 - g.X / 2) / form.vpt, py = y + ((y0 + y1 + 1) / 2 - g.Y / 2) / form.vpt;
+      const floor = k.groundAt(x, y) + (z0 - form.base) / form.vpt;
+      const module = [...k.modules.values()].map((m) => m.manifest).find((m) => m.appearance?.model === piece.id && m.kind === 'entity');
+      const name = module?.name ?? k.forms.info(piece.id)!.name!;
+      const stand = (feet: number) => {
+        const { ox, oy } = k.offset();
+        Object.assign(k.wandererPos(), { x: x - ox, y: y - oy, z: feet });
+      };
       const { ox, oy } = k.offset();
-      Object.assign(k.wandererPos(), { x: x - ox, y: y - oy, z: feet });
-    };
-    const { ox, oy } = k.offset();
-    stand(floor);
-    expect(k.hoverAt(px - ox, py - oy)).toMatchObject({ kind: 'entity', name, description: 'Arredo — la casa di prova' });
-    // From a storey 2.4 tiles over or under it, not.
-    stand(floor + 2.4);
-    expect(k.hoverAt(px - ox, py - oy)).not.toMatchObject({ name });
-    stand(floor - 2.4);
-    expect(k.hoverAt(px - ox, py - oy)).not.toMatchObject({ name });
+      stand(floor);
+      expect(k.hoverAt(px - ox, py - oy)).toMatchObject({ kind: 'entity', name, description: module?.description ?? 'Arredo — la casa di prova', ...(module?.container ? { extra: 'E per aprire' } : {}) });
+      // From a storey 2.4 tiles over or under it, not.
+      stand(floor + 2.4);
+      expect(k.hoverAt(px - ox, py - oy)).not.toMatchObject({ name });
+      stand(floor - 2.4);
+      expect(k.hoverAt(px - ox, py - oy)).not.toMatchObject({ name });
+    }
   }, 240_000);
 
   it('una cosa solida messa dentro sta lontana dal piede della scala e in squadra con i muri', async () => {
