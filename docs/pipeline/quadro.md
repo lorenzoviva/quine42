@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 707 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 708 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -35,6 +35,7 @@ Aggiornato il 27/11/2026, epoca 707 (claude). Crediti: vedi `stato`.
 ## Attese dall'autore
 
 - **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Da chiedere all'autore alle 13:00 CET.
+- **D/T516** (Neon esce dalla prova? 3 opzioni, consiglio 1: tetto 2, moltiplicatore 1,25): T516 integrato (`43644a93`, solo lab/ e docs) il 27/11 05:48Z. Da chiedere alle 13:00 CET insieme a D/T543.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
@@ -55,5 +56,5 @@ Aggiornato il 27/11/2026, epoca 707 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **705 (claude):** D/T509 chiusa (tutte A; cover aperta a mondo acceso, strade larghe, primitiva di ciò che il vento porta: foglie, polline, spruzzi, rotolanti) → catena **T545-T553** (C1-C9, ~33 %, priorità 2, approvata).
+- **708 (claude):** T516 integrato (`43644a93`): Neon 42 punti contro 95 previsti, Scultore Architetto su agy 10/12; D/T516 aperta.
 - **707 (claude):** T543 integrato (`1145a43b`): via A provata, 151 tasselli, ricucitura; D/T543 aperta. Il node_modules del base è vuoto (segnalato da T543).
