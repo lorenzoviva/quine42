@@ -17,8 +17,8 @@ export const WATER_Y = -0.18;
 const BED_STEP = 0.25;
 /** How thick the edge of a land over the void is drawn (tiles, T445): a slab, not a cliff down to nothing. */
 export const VOID_SLAB = 0.9;
-/** How many seeds of a terrain's model stand on its tiles. */
-export const TILE_SEEDS = 3;
+/** Default number of seeds of a terrain's model on its tiles when a source does not say per class (`tileSeeds`, T552). */
+export const TILE_SEEDS = 4;
 
 /**
  * Opacity of translucent swimmable water over a visible seabed as a function of depth in tiles (T480, ADR-0259):
@@ -218,6 +218,8 @@ export interface ChunkSource extends GroundReads {
   holeAt(x: number, z: number): TileHole | undefined;
   /** Whether the models of what stands on a terrain are ready (`tileForms`): asked once a code. */
   ready(code: string): boolean;
+  /** How many seeds a terrain's model has once all of them are ready (`Forms.seedsOf`, T552); 0 while they are not. */
+  tileSeeds?(code: string): number;
   /** A colour lit as the renderer lights it (`rgbOf`, at full). */
   rgb(color: string | undefined): readonly number[];
   /** Whether swimmable water renders translucent over a visible seabed column (T480, ADR-0259: true-relief worlds). */
@@ -355,7 +357,7 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   const lit = (c: string | undefined, k = 1) => src.rgb(c).map((v) => v * k);
   // Instances of the terrains' models: where, how turned, how big.
   const instances: TileInstance[] = [];
-  const ready = new Map<string, boolean>();
+  const ready = new Map<string, number>();
   // The cover (T545, ADR-0269): each terrain's kinds whose programs are ready, asked once a code; the instances by form, as they come.
   const coverKinds = new Map<string, readonly CoverKind[] | undefined>();
   const coverSeeds = new Map<string, number>();
@@ -474,15 +476,15 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   // A terrain is a part (its code), so the ink follows where one meets another and never the tiles of one.
   const terrainPart = new Map(src.codes.map((code, i) => [code, 1 + (i % (SIDE_PART - 1))]));
   const place = (code: string, x: number, y: number, z: number, h: number, every: number): boolean => {
-    let ok = ready.get(code);
-    if (ok === undefined) ready.set(code, (ok = src.ready(code)));
-    if (!ok) return false;
+    let seeds = ready.get(code);
+    if (seeds === undefined) ready.set(code, (seeds = src.tileSeeds ? src.tileSeeds(code) : src.ready(code) ? TILE_SEEDS : 0));
+    if (!seeds) return false;
     // Trees are two tiles wide: one every other tile is a wood; rocks one a tile.
     if (every > 1 && (x + z) % every !== 0) return true;
     const jitter = every > 1 ? 0.35 : 0.12;
     instances.push({
       code,
-      seed: h % TILE_SEEDS,
+      seed: h % seeds,
       x: x + 0.5 + (((h >> 4) % 100) / 100 - 0.5) * jitter,
       y,
       z: z + 0.5 + (((h >> 11) % 100) / 100 - 0.5) * jitter,
@@ -663,8 +665,9 @@ export interface ChunkInput {
   ground: Float64Array;
   /** The holes over cellars in the window, of the place and of the four beside it: the tile of the window, how deep, the sub-cells. */
   holes: Array<[at: number, depth: number, cover: Uint8Array | undefined]>;
-  /** The terrains whose models are ready (`tileForms`). */
+  /** The terrains whose models are ready (`tileForms`), and how many seeds each has (`Forms.seedsOf`, T552). */
   ready: string[];
+  tileSeeds?: Array<[code: string, seeds: number]>;
   /** The programs of the covers whose seeds are all ready, with how many (T545). */
   coverSeeds?: Array<[model: string, seeds: number]>;
   /** The tiles of the place where no cover grows (`Kernel.coverMask`), 1 a tile; and the instances that became things (`uncoveredKey`). */
@@ -693,6 +696,7 @@ export function inputSource(input: ChunkInput): ChunkSource {
   const bare = input.bare;
   const holes = new Map<number, TileHole>(input.holes.map(([i, depth, cover]) => [i, cover ? { depth, cover } : { depth }]));
   const ready = new Set(input.ready);
+  const tileSeeds = new Map(input.tileSeeds ?? []);
   const clearSet = input.clear ? new Set(input.clear) : undefined;
   const none = [NaN, NaN, NaN];
   return {
@@ -716,6 +720,7 @@ export function inputSource(input: ChunkInput): ChunkSource {
       return i < 0 ? undefined : holes.get(i);
     },
     ready: (code) => ready.has(code),
+    ...(input.tileSeeds ? { tileSeeds: (code: string) => tileSeeds.get(code) ?? 0 } : {}),
     rgb: (color) => input.rgb[color || ''] ?? none,
     ...(grains.size ? { grain: (code: string) => grains.get(code) } : {}),
     ...(covers.size

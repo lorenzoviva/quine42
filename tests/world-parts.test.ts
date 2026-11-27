@@ -300,7 +300,7 @@ describe('the Sculptor asked for a part (T472)', () => {
     expect(part.id).toMatch(/^part-finitura-[0-9a-f]{8}$/);
     expect(JSON.parse(k.files['models/index.json'])[part.id]).toMatchObject({ class: 'tree', specialty: 'landscaper', part: true, from: 'quercia-di-prova', score: 7, card: { author: 'sculptor', payer: 'comune' } });
     expect(importsOf(k.files['models/quercia-di-prova.xml'])).toEqual([part.id]);
-    expect(k.feed().some((e) => e.task === PART_TASK && e.kind === 'approva' && /la stessa griglia su 3 semi/.test(e.text))).toBe(true);
+    expect(k.feed().some((e) => e.task === PART_TASK && e.kind === 'approva' && /la stessa griglia su 4 semi/.test(e.text))).toBe(true);
     // The next tree: its request lists the part of the world, and so does the next request of a part, so that it takes no second of the same.
     ai.calls = [];
     expect(await k.sculpting.make({ ...tree, id: 'pino-di-prova', nome: 'Pino di prova' })).toBe(true);

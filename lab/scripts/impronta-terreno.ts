@@ -16,6 +16,10 @@
 // terrains' models are; "senza" takes the covers away with the models, and a place without cover prints as before T545. Before T545:
 // 82270038653e2e56 (95 places, kernel 0.10.42); every "senza" of then is the same now: the meshes of the places, byte for byte. After
 // T545: 9afb6ebffa73d7f7 (8562 instances of cover; 44 places with the models as before, 51 with their cover).
+// The per-class seed counts (T552, C8) changed it on purpose: trees and rocks now have 4 seeds instead of 3, and cover 8 instead of 4
+// (`SEEDS` in src/kernel/forms.ts, `tileSeeds` in terrain.ts/terrainmesh.ts), so every place with trees, rocks or cover uses the new
+// seeds while every "senza" and every bare place stays the same byte for byte. After T552: c7fa6196dd6de0c8 (95 places, 75 with models
+// of trees/rocks, 8562 instances of cover, kernel 0.10.44).
 
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
@@ -76,9 +80,9 @@ async function settle(): Promise<void> {
   }
 }
 
-/** Every terrain's model ready, its three seeds (the instances on its tiles); and every seed of the covers' programs (T545). */
+/** Every terrain's model ready, all of its seeds (`Forms.seedsOf`, 4 for trees and rocks since T552); and every seed of the covers' programs (8 since T552). */
 async function modelsReady(): Promise<void> {
-  for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= 3; s++) await k.forms.wait(t.model, s);
+  for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= k.forms.seedsOf(t.model); s++) await k.forms.wait(t.model, s);
   for (const m of coverModels) for (let s = 1; s <= k.forms.seedsOf(m); s++) await k.forms.wait(m, s);
   k.tick(1 / 60);
 }

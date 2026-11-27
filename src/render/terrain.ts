@@ -27,7 +27,6 @@ import {
   MeshBuilder,
   sideQuad,
   terrainTops,
-  TILE_SEEDS,
   TRUNK,
   type ChunkArrays,
   type ChunkInput,
@@ -100,14 +99,16 @@ type TileForms = Array<{ form: Form; geo: ModelGeo }>;
 export function tileForms(k: Kernel, code: string): TileForms | undefined {
   const t = k.palette[code];
   if (!t?.model || !k.forms.usable(t.model)) return undefined;
+  const n = k.forms.seedsOf(t.model);
   const out: TileForms = [];
-  for (let s = 1; s <= TILE_SEEDS; s++) {
+  let ready = true;
+  for (let s = 1; s <= n; s++) {
     const f = k.forms.ready(t.model, s);
     const geo = f && geoOf(f);
-    if (!f || !geo) return undefined;
-    out.push({ form: f, geo });
+    if (!f || !geo) ready = false;
+    else out.push({ form: f, geo });
   }
-  return out;
+  return ready ? out : undefined;
 }
 
 /**
@@ -116,13 +117,15 @@ export function tileForms(k: Kernel, code: string): TileForms | undefined {
  */
 export function coverForms(k: Kernel, model: string): Form[] | undefined {
   if (!k.forms.usable(model)) return undefined;
+  const n = k.forms.seedsOf(model);
   const out: Form[] = [];
-  for (let s = 1; s <= k.forms.seedsOf(model); s++) {
+  let ready = true;
+  for (let s = 1; s <= n; s++) {
     const f = k.forms.ready(model, s);
-    if (!f || !geoOf(f)) return undefined;
-    out.push(f);
+    if (!f || !geoOf(f)) ready = false;
+    else out.push(f);
   }
-  return out;
+  return ready ? out : undefined;
 }
 
 /** The programs the palette's covers name (T545), once each. */
@@ -142,7 +145,7 @@ export function coverReadiness(k: Kernel): string {
  * covers (T545). A place made before theirs arrived is made again with them.
  */
 export function modelsSig(k: Kernel): string {
-  return `${Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('')}|${coverReadiness(k)}`;
+  return `${Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code)?.length ?? 0}`).join('')}|${coverReadiness(k)}`;
 }
 
 /** A hole's sub-cells (T415) as a short string, for the key. */
@@ -211,6 +214,10 @@ function kernelSource(k: Kernel, ch: Chunk): ChunkSource & { forms: Map<string, 
       if (!forms.has(code)) forms.set(code, tileForms(k, code));
       return !!forms.get(code);
     },
+    tileSeeds: (code) => {
+      if (!forms.has(code)) forms.set(code, tileForms(k, code));
+      return forms.get(code)?.length ?? 0;
+    },
     rgb: (color) => rgbOf(color),
     grain: (code) => grainLook(k.palette[code], (c) => rgbOf(c)),
     ...(hasBed
@@ -246,6 +253,7 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   const rgb: ChunkInput['rgb'] = { '': rgbOf(undefined), [BANK]: rgbOf(BANK), [TRUNK]: rgbOf(TRUNK) };
   if (hasBed) rgb[CUT_EARTH] = rgbOf(CUT_EARTH);
   const ready: string[] = [];
+  const tileSeeds: Array<[string, number]> = [];
   const clear: string[] = [];
   const covered = new Set<string>();
   for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
@@ -255,7 +263,11 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
     if (cover) for (const c of cover) covered.add(c.model);
     palette.push(cover ? [code, t.layer, t.color, grain, cover] : grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color]);
     rgb[t.color || ''] ??= rgbOf(t.color);
-    if (t.model && tileForms(k, code)) ready.push(code);
+    const tf = t.model ? tileForms(k, code) : undefined;
+    if (tf) {
+      ready.push(code);
+      tileSeeds.push([code, tf.length]);
+    }
     if (hasBed && k.isClearWater(code)) clear.push(code);
   }
   for (let r = 0; r < w; r++)
@@ -288,6 +300,7 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   const uncovered = covered.size ? [...k.uncoveredIn(ch)] : [];
   return {
     S, cx: ch.cx, cy: ch.cy, tiles: ch.tiles, cells: HOLE_CELLS, palette, rgb, x0, z0, w, codes, ground, holes, ready,
+    ...(tileSeeds.length ? { tileSeeds } : {}),
     ...(covered.size ? { coverSeeds, bare: k.coverMask(ch), ...(uncovered.length ? { uncovered } : {}) } : {}),
     ...(hasBed ? { hasBed: true, clear, bed, bedTop, strataRows, strataHex } : {}),
   };
@@ -307,7 +320,7 @@ export function chunkView(k: Kernel, ch: Chunk, a: ChunkArrays, sig: string, kno
   for (const i of a.instances) {
     if (!forms.has(i.code)) forms.set(i.code, tileForms(k, i.code));
     const fs = forms.get(i.code);
-    if (!fs) return undefined;
+    if (!fs || i.seed >= fs.length) return undefined;
     const { form, geo } = fs[i.seed]!;
     const m = new THREE.Matrix4().compose(
       new THREE.Vector3(i.x, i.y, i.z),

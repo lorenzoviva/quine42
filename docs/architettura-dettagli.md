@@ -1207,8 +1207,8 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
 - **La copertura dei terreni** (ADR-0269, T545, C1 di `docs/design/terreno-ricco.md`, kernel 0.10.43): ciò che cresce o giace sulla terra
   che si cammina, ciuffi d'erba, sassolini, arbusti bassi, spighe. Un campo del terreno, `cover: [{ model, density }]` (al più tre tipi, 0-4
   istanze a casella in media, a passi di 0,05), letto senza fidarsi (`readCover`, `coverOf`, `src/kernel/cover.ts`, puro, lo importa il
-  worker), voluto dal validatore (`coverErrors`); i programmi sono della classe `cover` (la scatola del sasso, piegata dal vento, quattro
-  semi, del Paesaggista; la Fucina non la offre). Il seme ne ha quattro (`cover-tuft`, `cover-shrub`, `cover-wheat`, `cover-stones`, dal
+  worker), voluto dal validatore (`coverErrors`); i programmi sono della classe `cover` (la scatola del sasso, piegata dal vento, otto
+  semi da T552, del Paesaggista; la Fucina non la offre). Il seme ne ha quattro (`cover-tuft`, `cover-shrub`, `cover-wheat`, `cover-stones`, dal
   laboratorio di T509) e li dà al prato, alla sabbia, ai campi e alla ceppaia. Nel worker del terreno `chunkArrays` sparge le istanze con
   l'hash (`coverOnTile`, `coverCount`, `coverInstance`: punto, verso, scala e seme dalla casella, dal nome del programma e dal numero, così
   un tipo in più non sposta gli altri) solo dove `Kernel.coverMask` lo lascia (non sentieri e varchi, lotti e il lotto del blocco, buche
