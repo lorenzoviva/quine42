@@ -74,4 +74,8 @@ Le risorse dei modelli (tileset, regole da file, campioni) il riferimento le leg
   un ramo che finisce, il `markov` dal primo figlio coi passi dei figli per tutto il ciclo, la `map` e la `wfc` che chiudono la corsa):
   **19 modelli su 36** (in più RegularSAWRestart, Keys, OddScale3D), `c2`, tutti i `d*` di T498 e i quattro cicli del forte dell'autore
   (`l1`-`l4`) sui 400 semi che l'originale ha fatto girare. StrangeDungeon, tolti i `d` (A1-4), è già l'originale.
+- Dal T529 (A1-4, ADR-0274), con l'interruttore acceso, `path`, `convolution` e `convchain` sono quelli dell'originale e `d` si ignora:
+  tutti gli 11 `c*` (con `strict` anche gli errori di `c6` e `c8`), **21 modelli su 36** (in più StrangeDungeon e CarmaTower) e la griglia
+  dell'originale, i passi a parte, di altri 14, quelli con la `wfc` (A1-5: la `wfc` a un'osservazione per passo); solo SubmergedKnots, che
+  si ferma ai 50 000 passi, no. ChainDungeon e ChainDungeonMaze del repository (2D, `path` e `convchain`) sono quelli del riferimento.
 - Le tabelle intere in [`misure.md`](misure.md).

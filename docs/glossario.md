@@ -1061,6 +1061,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `ramo corrente`, `nodo attivo`
 - **Fermo**: il segno `grid` sulla sequenza compilata di una `map`.
 
+### Cambi che la lista non vede
+- **Inglese**: `unseen`, `unseenFrom`
+- **Definizione**: con la semantica dell'originale (`mj`), i tratti del registro della griglia che la lista di un nodo di regole salta: ciò che una `convolution` e un `convchain` scrivono, che MarkovJunior di mxgmn non mette nella sua lista dei cambi (`ip.changes`). Il registro li tiene (la traccia li vede); un nodo che ha già cercato li vede solo se qualcos'altro cambia lì o se cerca di nuovo da capo (ADR-0274).
+- **Dove vive**: `src/mj/engine.ts`
+- **Da non usare**: `cambi nascosti`, `scritture silenziose`
+
 ### Testo dell'originale
 - **Inglese**: `original`, `originalProgram`, `originalPort`, `originalText`, `ORIGINAL_FILE_RE`
 - **Definizione**: un programma MarkovJunior scritto come lo scrive mxgmn, dove ogni carattere è un simbolo (cifre, `#`, segni), che il compilatore legge così com'è con `compileMjx(…, { original: true })`: traslitterato all'ingresso nei nostri simboli (una cifra `#` e la cifra, un'unione `#` un segno libero, un altro valore che non è una lettera un simbolo numerato da `#10`), anche nei file di testo che legge, con le unioni, i nomi delle simmetrie e gli errori dell'originale (con `strict`). Non è la semantica della corsa (ADR-0265).

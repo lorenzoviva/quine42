@@ -141,8 +141,8 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
   };
   // What our engine with the switch on already does as the original, case by case, on every seed the original was run with: the compiler
   // reads the original's text (T531, A1-6: c8); the rules and their matches (T527, A1-2: c10); the branches (T528, A1-3: c2, the map that
-  // ends the run). The rest is A1-4's.
-  const ALIGNED = new Set(['c2-la-map-chiude', 'c8-unione-nel-nodo', 'c10-prl-sovrapposte']);
+  // ends the run); `d`, path, the convolution (T529, A1-4: c1, c3-c7, c9, c11). Every case of the differences.
+  const ALIGNED = new Set(CASES.map((c) => c.name));
   for (const c of CASES) {
     const { xml, start } = program(c.name);
     it(`${c.name}, il nostro motore oggi`, () => {
@@ -186,13 +186,26 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     for (const name of BRANCHES) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
   });
 
-  // StrangeDungeon, in A1-3's row too, has two nodes with d="2" and d="3", which the original ignores and we skip (c1): A1-4's. Without
-  // them (what the original runs), the switch on is already the original's, voxel by voxel.
-  it('StrangeDungeon senza d (che l’originale ignora) come l’originale, voxel per voxel (l’interruttore acceso, tre semi)', { timeout: 60_000 }, () => {
-    for (const seed of [1, 2, 3]) expect(model('StrangeDungeon', seed, (x) => x.replace(/ d="\d"/g, '')), `StrangeDungeon ${seed}`).toEqual(recorded.modelli.StrangeDungeon.seeds[String(seed)]);
+  // A1-4's row (T529): `d` ignored (StrangeDungeon, two nodes with d="2" and d="3", c1), path (from the nearest start with its own
+  // generator, the original's directions, a success even without drawing: CarmaTower's five paths, c3, c4, c11) and the convolution (the
+  // steps it says, the kernels of its grid, the chance, what it writes out of the list of changes: CarmaTower's two, c5-c7, c9).
+  const NODES = ['StrangeDungeon', 'CarmaTower'];
+  it(`${NODES.join(', ')} come l’originale, voxel per voxel (l’interruttore acceso, tre semi: d ignorato, path e convolution dell’originale)`, { timeout: 120_000 }, () => {
+    for (const name of NODES) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
   });
-  it.fails('StrangeDungeon come l’originale (l’interruttore acceso): i nodi con d da noi si saltano ancora (c1, A1-4)', { timeout: 60_000 }, () => {
-    expect(model('StrangeDungeon', 1)).toEqual(recorded.modelli.StrangeDungeon.seeds['1']);
+
+  // After A1-4 the models with a wfc have the original's grid, voxel by voxel, but not its steps: the original's wfc observes one cell per
+  // step (A1-5, the it.fails of Surface below). SeaVilla and ModernHouse too, with their paths, fields and maps. SubmergedKnots stops at the
+  // 50 000 steps of the run, so another count of steps is another grid (A1-5).
+  const GRIDS = ['Apartemazements', 'ClosedSurface', 'ColoredKnots', 'Escher', 'EscherSurface', 'Knots3D', 'OrientedEscher', 'Partitioning', 'PeriodicEscher', 'PillarsOfEternity', 'SelectLongKnots', 'Surface', 'SeaVilla', 'ModernHouse'];
+  it(`${GRIDS.length} modelli con la wfc hanno già la griglia dell’originale, voxel per voxel su tre semi (i passi della wfc sono di A1-5)`, { timeout: 180_000 }, () => {
+    for (const name of GRIDS)
+      for (const seed of [1, 2, 3]) {
+        const r = recorded.modelli[name].seeds[String(seed)];
+        const o = model(name, seed);
+        expect({ hash: o.hash, finished: o.finished }, `${name} ${seed}`).toEqual({ hash: r.hash, finished: r.finished });
+        expect(o.steps, `${name} ${seed}: i passi`).toBeLessThan(r.steps);
+      }
   });
 
   // What else the switch on already gives as the original after A1-2 (their own rows are later: the convolution, path's neighbours, the
