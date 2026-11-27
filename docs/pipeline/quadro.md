@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 703 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 704 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -55,5 +55,5 @@ Aggiornato il 27/11/2026, epoca 703 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **702 (claude):** integrato T531 (`compileMjx(…, { original: true })`, ADR-0265, kernel 0.10.41; suite intera non rilanciata dall'agente). In corso T509.
 - **703 (claude):** T509 fatto (studio `docs/design/terreno-ricco.md`, 7 domande in `domande/T509.md`, catena C1-C9 ~31 %); `integra T509` in conflitto su `universe.json` (0.10.40 contro 0.10.41) → **T544** (claude medium, 1 %).
+- **704 (claude):** T544 integrato (`f9bfe4e0`): T509 nel base, seme a 0.10.41; T509 segnato fatto. D/T509 resta aperta.
