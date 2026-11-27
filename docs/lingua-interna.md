@@ -290,6 +290,7 @@ posto di un pannello sul filo).
 | `edificio` | `building` |
 | `grande` | `structure` |
 | `nave` | `vessel` |
+| `copertura` | `cover` |
 
 <a id="animazioni"></a>
 ### Animazioni delle classi (`animazioni`)

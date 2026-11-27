@@ -345,6 +345,23 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (d.sentBack && change.cross !== undefined) delete change.cross;
         return { terrains: Object.keys(change).length > 1 ? [change] : [], ...(gravity !== undefined ? { gravity } : {}), note: 'Chi passa di lì se ne accorgerà.' };
       }
+      case 'terrain.cover': {
+        // The cover with the world on (T545): the terrain the request names, the cover of the library its words say, the density its number.
+        const t = String(d.request ?? '');
+        const n = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const terrains: Array<{ code: string; name: string; cover: Array<{ model: string; density: number }> }> = Array.isArray(d.terrains) ? d.terrains : [];
+        const library: Array<{ id: string; name: string }> = Array.isArray(d.library) ? d.library : [];
+        const hit = terrains.filter((x) => x.name && n(t).includes(n(x.name))).sort((a, b) => b.name.length - a.name.length)[0];
+        const stem = (s: string) => n(s).split(/[^a-z]+/).filter((w) => w.length > 3).map((w) => w.slice(0, 5));
+        const model = library.find((m) => stem(m.name).some((w) => n(t).includes(w)) || n(t).includes(n(m.id)));
+        if (!hit || !model) return { code: '', cover: [], refusal: !hit ? 'non so di quale terreno si parla' : 'il mondo non ha quella copertura' };
+        const num = /(\d+(?:[.,]\d+)?)/.exec(t)?.[1];
+        const density = /\b(togli|via|niente)\b/i.test(t) ? 0 : num ? Number(num.replace(',', '.')) : 1;
+        const kept = hit.cover.filter((k) => k.model !== model.id);
+        // Sent back: the kinds it had and the new one, never past the limit.
+        const cover = density > 0 ? [...kept.slice(0, d.sentBack ? 2 : 3), { model: model.id, density: d.sentBack ? Math.min(4, density) : density }] : kept;
+        return { code: hit.code, cover, note: 'Chi passa di lì lo vedrà.' };
+      }
       case 'physics.automaton': {
         // The Physicist declares, tunes or removes a cellular automaton (T482, ADR-0254).
         const t = String(d.request ?? '');
@@ -586,6 +603,8 @@ export class MockAiModels implements AiModels, DecisionModels {
         if (/\brun[ae]\b/i.test(t)) return { reply: 'Eccole.', task: 'rune', runes: [t.replace(/.*\brun[ae]\s+/i, '')] };
         if (/musica|brano|canzone|melodia/i.test(t)) return { reply: 'Lo porto al Musicista.', task: 'music', request: t };
         if (/\bcredit[io]\b/i.test(t)) return { reply: 'I crediti non passano dal Concilio.', task: 'none' };
+        // The cover of a terrain (T545): what grows or lies on it; before the places («sottobosco» has a «bosco» in it).
+        if (/\b(copertura|ciuff[oi]|sassolin[io]|arbust[oi]|sottobosco|spighe|muschio)\b/i.test(t)) return { reply: 'Lo dico al Cartografo.', task: 'cover', request: t };
         // Cellular automata (T482): physical or discrete fields moving across loaded places.
         if (/\bautoma\b|campo di (vento|fumo|calore|fuoco|acqua|lava|muffa)|vento che soffia|fumo che si spande|flusso d'acqua/i.test(t)) return { reply: 'Lo porto al Fisico.', task: 'automaton', request: t };
         // The physics with the world on (T452): how bodies go over a terrain, or the weight of every body.

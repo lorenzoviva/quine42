@@ -138,7 +138,8 @@ export type ModuleValidator = (manifest: Manifest, logic: string) => string[];
  * The classes the Narrator chooses among for a thing of the Forge (T515): all but `structure`, the building one enters with its storeys, which is
  * the Cartographer's (its lots). A fountain asked for in the run of 26/11 became a structure, and its model failed on the storeys.
  */
-const FORGE_CLASSES: string[] = internalValues('classi').filter((id) => id !== 'structure');
+// A cover (T545) is the terrain's, never a thing the Forge makes: a thing of the world it becomes keeps the instance's look (`Kernel.uncover`).
+export const FORGE_CLASSES: string[] = internalValues('classi').filter((id) => id !== 'structure' && id !== 'cover');
 
 /**
  * Whether a concept stands where it is built (T515): its name says the built landscape (a fountain, a well, a statue) or its class is a building

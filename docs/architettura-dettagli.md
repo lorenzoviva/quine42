@@ -1204,6 +1204,28 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   milione di caselle) e del sale, ogni macchia un po' più chiara o più scura, e dove la cella è più piccola di un pixel la media, così lo
   scorrimento del tappeto non sfarfalla. Solo aspetto: niente nello stato, nei piani né sul filo. `tests/grana.test.ts`; le foto in
   `docs/catture/T547/`.
+- **La copertura dei terreni** (ADR-0269, T545, C1 di `docs/design/terreno-ricco.md`, kernel 0.10.43): ciò che cresce o giace sulla terra
+  che si cammina, ciuffi d'erba, sassolini, arbusti bassi, spighe. Un campo del terreno, `cover: [{ model, density }]` (al più tre tipi, 0-4
+  istanze a casella in media, a passi di 0,05), letto senza fidarsi (`readCover`, `coverOf`, `src/kernel/cover.ts`, puro, lo importa il
+  worker), voluto dal validatore (`coverErrors`); i programmi sono della classe `cover` (la scatola del sasso, piegata dal vento, quattro
+  semi, del Paesaggista; la Fucina non la offre). Il seme ne ha quattro (`cover-tuft`, `cover-shrub`, `cover-wheat`, `cover-stones`, dal
+  laboratorio di T509) e li dà al prato, alla sabbia, ai campi e alla ceppaia. Nel worker del terreno `chunkArrays` sparge le istanze con
+  l'hash (`coverOnTile`, `coverCount`, `coverInstance`: punto, verso, scala e seme dalla casella, dal nome del programma e dal numero, così
+  un tipo in più non sposta gli altri) solo dove `Kernel.coverMask` lo lascia (non sentieri e varchi, lotti e il lotto del blocco, buche
+  sopra una cantina, rune nel terreno, cose solide ferme: `stillSolidAt` sull'impronta) e solo per i programmi i cui semi sono pronti; la maschera e le
+  istanze promosse viaggiano nella copia (`ChunkInput.bare`, `uncovered`, i tipi come quinto elemento della tavolozza), la firma del luogo
+  ha `coverStamp` (le cose solide ferme e le rune, fatto con i solidi a ogni tick) e quali programmi sono pronti (`coverReadiness`). Gli array
+  (`ChunkArrays.cover`) non vanno nel gruppo del luogo: `CoverLayer` (`src/render/cover.ts`) li raccoglie in una InstancedMesh per forma su
+  tutta la finestra, senza ombre, col materiale che il vento piega, al più `COVER_CAP` (20 000) istanze (i luoghi più vicini interi, quello
+  che passerebbe il tetto diradato, i più lontani nudi: `coverBudget`, `keptOf`), rifatto solo quando la copertura dei luoghi cambia.
+  **Aperta a mondo acceso**: `Kernel.setCover(code, kinds)` cambia la copertura di un terreno entro i tetti, coi soli programmi della classe
+  `cover` della libreria, con un commit del Concilio (solo il master in molti, mai da Lua); il Referente lo chiede al Cartografo con
+  l'incarico `cover` (`terrain.cover`, `askCover`, `coverTerrain`: rimandato una volta col motivo, poi una mancanza). Una singola istanza
+  diventa una cosa del mondo con `Kernel.uncover(x, y, module, which?)` (la più vicina o quella detta): un'entità del modulo posata nel punto
+  dell'istanza col suo aspetto (programma, seme, verso) e il componente `cover`, scritta nel piano (`ChunkPlan.uncovered`, al più
+  `MAX_UNCOVERED` a luogo, rimessa a ogni caricamento con l'origine `<luogo>#u…`), mai più disegnata come copertura; ai client sottili solo le
+  chiavi (`ChunkView.uncovered`, `readUncoveredKeys`). Da Lua `world.cover_at` e `world.uncover`. `tests/copertura.test.ts`; le foto e le
+  misure del frame in `docs/catture/T545/`, `node lab/scripts/misura-frame.mjs <porta> --sottobosco --gioco`.
 - **Nessun fotogramma senza terreno** (T492): la mesh di un luogo caricato resta in scena finché quella nuova non la sostituisce nello stesso
   fotogramma (`showChunk`); si toglie solo quando il luogo non è più caricato. Al ricaricare dei file (`universe:reloaded`, a ogni commit del
   Concilio: un pacchetto, un modello, un luogo pianificato) le mesh non si tolgono: diventano vecchie (`staleChunks`, la firma `STALE_SIG` che

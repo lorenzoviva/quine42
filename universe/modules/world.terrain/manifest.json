@@ -14,7 +14,21 @@
       "solid": false,
       "cross": "walk",
       "layer": "ground",
-      "speed": 1
+      "speed": 1,
+      "cover": [
+        {
+          "model": "cover-tuft",
+          "density": 1.5
+        },
+        {
+          "model": "cover-shrub",
+          "density": 0.2
+        },
+        {
+          "model": "cover-stones",
+          "density": 0.15
+        }
+      ]
     },
     "p": {
       "id": "path",
@@ -103,7 +117,13 @@
       "cross": "walk",
       "speed": 0.85,
       "layer": "ground",
-      "description": "sabbia fine e calda, di deserto o di spiaggia"
+      "description": "sabbia fine e calda, di deserto o di spiaggia",
+      "cover": [
+        {
+          "model": "cover-stones",
+          "density": 0.3
+        }
+      ]
     },
     "j": {
       "id": "jungle",
@@ -222,7 +242,13 @@
       "ripens": {
         "after": 1,
         "in": "u"
-      }
+      },
+      "cover": [
+        {
+          "model": "cover-tuft",
+          "density": 0.6
+        }
+      ]
     },
     "u": {
       "id": "ripe_wheat",
@@ -232,7 +258,13 @@
       "cross": "walk",
       "layer": "ground",
       "speed": 0.7,
-      "description": "Spighe alte e gialle, pronte per la falce."
+      "description": "Spighe alte e gialle, pronte per la falce.",
+      "cover": [
+        {
+          "model": "cover-wheat",
+          "density": 2.5
+        }
+      ]
     },
     "x": {
       "id": "stump",
@@ -246,7 +278,17 @@
       "ripens": {
         "after": 3,
         "in": "t"
-      }
+      },
+      "cover": [
+        {
+          "model": "cover-shrub",
+          "density": 0.5
+        },
+        {
+          "model": "cover-tuft",
+          "density": 0.8
+        }
+      ]
     },
     "i": {
       "id": "pier",

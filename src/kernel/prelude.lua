@@ -830,6 +830,17 @@ local function make_api()
       if depth ~= nil and type(depth) ~= "number" then return nil end
       return host.stratum_at(x, y, depth or 0)
     end,
+    -- The cover of the terrains (T545, ADR-0269): the instances of a tile (copies), read only; and one of them made a thing of the world.
+    cover_at = function(x, y)
+      if type(x) ~= "number" or type(y) ~= "number" then return {} end
+      return host.cover_at(x, y)
+    end,
+    uncover = function(x, y, module, model, n)
+      if type(x) ~= "number" or type(y) ~= "number" or type(module) ~= "string" then return nil end
+      if model ~= nil and type(model) ~= "string" then return nil end
+      if n ~= nil and type(n) ~= "number" then return nil end
+      return host.uncover(x, y, module, model, n)
+    end,
     -- Cellular automata fields (T482, V-048): read a sample (copy) or add a bounded source/sink; never step a field in Lua.
     field = function(id, x, y)
       if type(id) ~= "string" or type(x) ~= "number" or type(y) ~= "number" then return nil end

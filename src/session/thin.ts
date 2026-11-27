@@ -19,6 +19,7 @@ import type { FileMap } from '../kernel/types';
 import type { Profile } from '../kernel/wanderers';
 import { hashStr, hex } from '../kernel/rng';
 import { takeFromSlot } from '../kernel/inventory';
+import { readUncoveredKeys } from '../kernel/cover';
 import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS, isMove, type OnDeck } from './protocol';
@@ -462,6 +463,11 @@ export class ThinClient {
         })(),
         ...(relief ? { relief } : {}),
         ...(bed ? { bed } : {}),
+        // The instances of cover that are things of the world (T545): read without trusting, at most what a place may have.
+        ...(() => {
+          const uncovered = readUncoveredKeys(v.uncovered, this.k.config.chunkSize);
+          return uncovered.length ? { uncovered } : {};
+        })(),
       });
     }
   }

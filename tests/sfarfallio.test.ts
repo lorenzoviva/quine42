@@ -12,7 +12,7 @@ import { Kernel } from '../src/kernel/kernel';
 import { memoryStore } from '../src/kernel/repo';
 import { ChunkMesher } from '../src/render/chunkmesher';
 import { Renderer } from '../src/render/renderer';
-import { STALE_SIG, chunkSig, tileForms, type TerrainView } from '../src/render/terrain';
+import { STALE_SIG, chunkSig, modelsSig, type TerrainView } from '../src/render/terrain';
 import { answerChunk, type ChunkAnswer, type ChunkInput } from '../src/render/terrainmesh';
 
 const DT = 1 / 60;
@@ -67,8 +67,8 @@ function places(k: Kernel, worker: boolean) {
     }
     throw new Error('i luoghi non arrivano a schermo');
   };
-  // The renderer's signature of the terrains' models, as syncChunks makes it.
-  const models = () => Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('');
+  // The renderer's signature of the terrains' models and of the covers' programs (T545), as syncChunks makes it.
+  const models = () => modelsSig(k);
   return { r: inner, world, shown, frame, settle, lost };
 }
 

@@ -7053,7 +7053,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la Genesi di un mondo nuovo e la riparazione di `mesa` e `neapolis` col Paesaggista vero (copertura, braccio dei binari, ciò che il vento porta), su copie, tetto ~1,5 $ sul registro; foto e costo.
 - Browser: sì. Quando è fatto: rapporto con foto e costo.
 
-### T554 · Integrare T545 nel base (conflitto in AGENTS.md) — `da fare`
+### T554 · Integrare T545 nel base (conflitto in AGENTS.md) — `fatto` (`9bb3fa2a`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 0
 - Step: 45
 - Contesto: `integra T545` (la copertura dei terreni, C1, kernel 0.10.43) si è fermato su un conflitto in `AGENTS.md`: nel frattempo T527 è entrato nel base con ADR-0268 (le regole e le corrispondenze dell'originale). Lo script ha già rinumerato l'ADR di T545 a ADR-0269 (`631f0ac5`); il kernel del base è 0.10.42, T545 resta 0.10.43. Nasce da T545 e T527: `dossier T545`, `dossier T527`.
@@ -7061,3 +7061,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/documenti.test.ts` e i test della copertura di T545 verdi.
 - Browser: no (T545 l'ha già verificato).
 - Quando è fatto: commit su `task/T554`; poi l'orchestratore integra T554, e `integra T545` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: T545 fuso nel base dopo T527: in `AGENTS.md` restano sia la riga del mondo in 3D di T545 (copertura, ADR-0269) sia quella di MarkovJunior di T527 (ADR-0268); nessun rimando di T545 ad ADR-0268; kernel 0.10.43; censimento del glossario rigenerato con lo script; typecheck e suite intera verdi coi turni; browser non richiesto (T545 l'aveva già verificato); sicurezza: nessuna superficie nuova.

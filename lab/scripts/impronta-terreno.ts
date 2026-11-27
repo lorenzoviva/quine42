@@ -9,6 +9,13 @@
 //   npx vite-node lab/scripts/impronta-terreno.ts -- [--json f.json] [--luoghi]
 //
 // `--luoghi` prints the fingerprint of every place, not only the whole.
+//
+// The cover of the terrains (T545, ADR-0269) changed it on purpose: the seed's meadow, sand, fields and stumps have their cover now (the
+// seed changes how it looks, and with it every universe with the seed's palette), so a place's fingerprint has its cover's instances too
+// (`TerrainView.cover`, drawn by the window's layer and not by the place's group), with the covers' programs made with their meshes as the
+// terrains' models are; "senza" takes the covers away with the models, and a place without cover prints as before T545. Before T545:
+// 82270038653e2e56 (95 places, kernel 0.10.42); every "senza" of then is the same now: the meshes of the places, byte for byte. After
+// T545: 9afb6ebffa73d7f7 (8562 instances of cover; 44 places with the models as before, 51 with their cover).
 
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
@@ -38,10 +45,10 @@ const index = JSON.parse(bundledFiles['models/index.json']!);
 index['cantina-impronta'] = { class: 'structure', name: 'casa con cantina', sotto: 1 };
 const files = { ...bundledFiles, 'models/cantina-impronta.xml': HOUSE, 'models/index.json': JSON.stringify(index) };
 
-/** The models of the terrains (trees, rocks) with their meshes, as the browser's worker makes them: in Node the forms have only their grid. */
-const terrainModels = new Set<string>(
-  Object.values(JSON.parse(bundledFiles['modules/world.terrain/manifest.json']!).tiles as Record<string, { model?: string }>).flatMap((t) => (t.model ? [t.model] : [])),
-);
+/** The models of the terrains (trees, rocks) and of their covers (T545), with their meshes, as the browser's worker makes them: in Node the forms have only their grid. */
+const terrainTiles = Object.values(JSON.parse(bundledFiles['modules/world.terrain/manifest.json']!).tiles as Record<string, { model?: string; cover?: Array<{ model: string }> }>);
+const coverModels = new Set<string>(terrainTiles.flatMap((t) => (t.cover ?? []).map((c) => c.model)));
+const terrainModels = new Set<string>([...terrainTiles.flatMap((t) => (t.model ? [t.model] : [])), ...coverModels]);
 class Meshing implements FormRunner {
   private inline = new InlineRunner();
   async run(q: FormRequest): Promise<FormResult> {
@@ -69,9 +76,10 @@ async function settle(): Promise<void> {
   }
 }
 
-/** Every terrain's model ready, its three seeds (the instances on its tiles). */
+/** Every terrain's model ready, its three seeds (the instances on its tiles); and every seed of the covers' programs (T545). */
 async function modelsReady(): Promise<void> {
   for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= 3; s++) await k.forms.wait(t.model, s);
+  for (const m of coverModels) for (let s = 1; s <= k.forms.seedsOf(m); s++) await k.forms.wait(m, s);
   k.tick(1 / 60);
 }
 
@@ -105,6 +113,10 @@ function groupPrint(group: THREE.Group): string {
   return lines.join('\n');
 }
 
+/** A place's cover (T545): its forms, which form each instance is and their numbers, byte by byte; '-' without. */
+const coverPrint = (c: ReturnType<typeof buildChunk>['cover']) => (c ? `\ncover ${c.forms.join(',')} ${sha(c.form)} ${sha(c.data)}` : '');
+let covered = 0;
+
 const prints = new Map<string, string>();
 const times: number[] = [];
 /** Every loaded place, with the terrains' models (as they are now) and without them (the stand-ins). */
@@ -113,14 +125,19 @@ function printAll(stage: string): void {
     const t0 = performance.now();
     const view = buildChunk(k, ch);
     times.push(performance.now() - t0);
-    prints.set(`${stage} ${ch.key} modelli`, sha(groupPrint(view.group)));
-    // Without the models: the stand-ins of trees and rocks (the palette's entries for a moment as if they had none).
+    prints.set(`${stage} ${ch.key} modelli`, sha(`${groupPrint(view.group)}${coverPrint(view.cover)}`));
+    covered += view.cover?.form.length ?? 0;
+    // Without the models: the stand-ins of trees and rocks (the palette's entries for a moment as if they had none), and no cover.
     const kept = Object.entries(k.palette).filter(([, t]) => t.model).map(([code, t]) => [code, t.model] as const);
+    const covers = Object.entries(k.palette).filter(([, t]) => t.cover).map(([code, t]) => [code, t.cover] as const);
     for (const [code] of kept) delete k.palette[code]!.model;
+    for (const [code] of covers) delete k.palette[code]!.cover;
     try {
-      prints.set(`${stage} ${ch.key} senza`, sha(groupPrint(buildChunk(k, ch).group)));
+      const bare = buildChunk(k, ch);
+      prints.set(`${stage} ${ch.key} senza`, sha(`${groupPrint(bare.group)}${coverPrint(bare.cover)}`));
     } finally {
       for (const [code, model] of kept) k.palette[code]!.model = model;
+      for (const [code, cover] of covers) k.palette[code]!.cover = cover;
     }
   }
 }
@@ -181,8 +198,8 @@ const whole = sha([...prints].map(([key, p]) => `${key} ${p}`).join('\n'));
 const median = [...times].sort((x, y) => x - y)[Math.floor(times.length / 2)] ?? 0;
 console.log(`impronta delle mesh dei luoghi: ${whole}`);
 const differ = [...prints].filter(([key, p]) => key.endsWith(' modelli') && prints.get(key.replace(/ modelli$/, ' senza')) !== p).length;
-console.log(`${prints.size} mesh (${prints.size / 2} luoghi con e senza i modelli dei terreni, ${differ} con alberi e rocce dei modelli), ${holes} caselle sopra una cantina, buildChunk mediana ${median.toFixed(2)} ms`);
+console.log(`${prints.size} mesh (${prints.size / 2} luoghi con e senza i modelli dei terreni, ${differ} con alberi e rocce dei modelli), ${holes} caselle sopra una cantina, ${covered} istanze di copertura, buildChunk mediana ${median.toFixed(2)} ms`);
 if (argv.includes('--luoghi')) for (const [key, p] of prints) console.log(`${p}  ${key}`);
 const out = opt('json');
-if (out) writeFileSync(out, JSON.stringify({ whole, places: Object.fromEntries(prints), holes, medianMs: median }, null, 1));
+if (out) writeFileSync(out, JSON.stringify({ whole, places: Object.fromEntries(prints), holes, covered, medianMs: median }, null, 1));
 process.exit(0);

@@ -9,6 +9,8 @@ import { Sandbox, type Host } from './sandbox';
 import { apiErrors, describeEffect, repairGameSetup, validateEffects, Validator } from './validator';
 import { deathLevel, deathRule, fallbackDeath, type DeathVerdict } from './gameSetup';
 import { keptNature, crossingChanged, reshapedGravity, reshapedTerrain, reshapedWords, MAX_RESHAPED } from './reshape';
+import { askCover, COVER_TASK } from './agents/cover';
+import { coverErrors, coverInstance, coverOf, coverOnTile, coversGround, MAX_UNCOVERED, readCover, readUncovered, uncoveredKey, type CoverInstance, type CoverKind, type Uncovered } from './cover';
 import { askAutomaton, askReshape, AUTOMATON_TASK, RESHAPE_TASK } from './agents/physicist';
 import { AutomataEngine, automatonWords, cloneAutomata, validateAutomaton, type AutomatonSpec, type FieldSample } from './automata';
 import { readWindView, relativeWind, sailPush, viewBytes, viewCorner, WIND_VIEW, windHere, windInView, windSpecOf, windViewOf, type WindHere, type WindView } from './wind';
@@ -51,7 +53,7 @@ import { SHORTFALLS_FILE, ShortfallLog, type ShortfallNote } from './shortfalls'
 import { addBudgetFromCap, costWithFee, DEFAULT_GRANT_CAP, DEFAULT_PLATFORM_FEE, MemoryLedger, splitCost, type KeyHolders, type KeyPolicy, type Ledger, type PaymentRecord } from './credits';
 import { MemoryChunks, SealedChunks, type ChunkStore } from './chunks';
 import { anyVisible, BODY_R, bodyFoot, bodyGround, formDeckAreas, Forms, holeCover, holesOf, InlineRunner, instanceGrid, JUMP_FAR, JUMP_UP, levelAt, rampBlocks, solidAtGround, stepOf, toLocal, topUnder, type Form, type FormComp, type FormRunner, type Ground, type TileHole } from './forms';
-import { boxOf, classOf, growsByRules, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, thingClass, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
+import { boxOf, classOf, groundJoined, guessClass, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, STRUCTURE_VPT, thingClass, TILE, tilesOf, type AssetClass, type SizeTier } from '../mj/classes';
 import { footprint, stageGrid } from '../mj/mesh';
 import { cellarFor, commonHouseModel, GENERIC, hasCellar, ModelDirector, ownModelId, structureModel } from './modeldirector';
 import { ScoreDirector } from './scoredirector';
@@ -255,6 +257,8 @@ export interface Chunk {
   relief?: Int16Array;
   /** In a thin client of a true-relief world (T480): seabed levels as the server computed them (`ChunkView.bed`). */
   bed?: Int16Array;
+  /** In a thin client (T545): the instances of cover of the place that are things of the world, as the server's plan has them (`uncoveredKey`). */
+  uncovered?: string[];
 }
 
 export interface LineState {
@@ -958,7 +962,7 @@ export class Kernel {
     k.validator = new Validator(k.sandbox);
     k.validator.modelTime = (id) => k.forms.info(id)?.time;
     k.validator.modelBox = (id) => k.forms.structureBox(id);
-    k.validator.modelGrows = (id) => !!k.forms.info(id) && growsByRules(k.forms.classOf(id), k.forms.info(id)?.size);
+    k.validator.modelGrows = (id) => !!k.forms.info(id) && groundJoined(k.forms.classOf(id), k.forms.info(id)?.size);
     k.validator.modelBase = (id) => k.forms.cellarVoxelsOf(id);
     k.validator.modelFile = (name) => k.forms.file(name);
     k.validator.modelPart = (id) => isWorldPart(id, k.forms.info(id));
@@ -1123,6 +1127,9 @@ export class Kernel {
       air_at: (x, y) => (typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y) ? this.airAt(x, y) : true),
       // The strata under the ground (T479, ADR-0253): read only, fresh copy per call.
       stratum_at: (x, y, depth) => this.stratumInfoAt(x, y, depth),
+      // The cover of the terrains (T545, ADR-0269): the instances of a tile (copies), and one of them made a thing of the world.
+      cover_at: (x, y) => this.coverSeen(x, y),
+      uncover: (x, y, module, model, n) => this.uncover(x, y, module, model === undefined ? undefined : { model, n }),
       // Cellular automata fields (T482, ADR-0254, V-048): read a sample copy or add a bounded source/sink.
       field: (id, x, y) => this.automatonField(id, x, y),
       field_add: (id, x, y, amount, amountY) => this.fieldAdd(id, x, y, amount, amountY),
@@ -3504,6 +3511,8 @@ export class Kernel {
       if (sid !== undefined) void this.placeInside(ch, sid, at(l.cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
+    // The instances of cover that became things of the world (T545, ADR-0269): at their point, with their look.
+    for (const u of readUncovered(plan.uncovered, S)) this.spawnUncovered(ch, u);
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
     this.runesDirty = true;
     if (away !== undefined) this.npc.onReturn(ch.key, away);
@@ -4462,6 +4471,256 @@ export class Kernel {
     ch.version++;
     this.saveChunkSoon(ch);
     return true;
+  }
+
+  // --- The cover of the terrains (T545, ADR-0269) ----------------------------------------------------------------------------------
+
+  /** What the cover of each place depends on of the solid things and the runes on it (T545): a sum of a hash of each, made with the solids. */
+  private solidStamps = new Map<string, number>();
+
+  /** A solid thing that does not walk about (T545): not a person, an animal, a vehicle nor another wanderer; what the cover keeps away from. */
+  private stillThing(id: Id): boolean {
+    return !this.ecs.has(id, 'mind') && !this.ecs.has(id, 'vehicle') && !this.ecs.has(id, 'remote') && !this.ecs.has(id, 'wander') && !this.ecs.has(id, 'vel');
+  }
+
+  /** A still solid thing in the stamps of the places its footprint may reach (`rebuildSolids`). */
+  private stampSolid(id: Id, p: { x: number; y: number }, f: Form | undefined): void {
+    const S = this.config.chunkSize;
+    const reach = f?.reach ?? 0.5;
+    const h = hash32(id, Math.round(p.x * 8), Math.round(p.y * 8), f ? hashStr(f.key) : 0);
+    for (let cy = Math.floor((p.y - reach) / S); cy <= Math.floor((p.y + reach) / S); cy++)
+      for (let cx = Math.floor((p.x - reach) / S); cx <= Math.floor((p.x + reach) / S); cx++) {
+        const key = this.chunkKey(cx, cy);
+        this.solidStamps.set(key, ((this.solidStamps.get(key) ?? 0) + h) >>> 0);
+      }
+  }
+
+  /**
+   * What a place's cover depends on besides its tiles, its lots and its plan (T545): the still solid things on it, where they stand and
+   * whether their forms are ready. In the signature of its mesh (`chunkSig`), cheap: made with the solids at every tick.
+   */
+  coverStamp(ch: Pick<Chunk, 'key'>): number {
+    return this.solidStamps.get(ch.key) ?? 0;
+  }
+
+  /** Whether a still solid thing stands on a point (T545): its tile without a form, or its footprint's column there. */
+  private stillSolidAt(x: number, y: number): boolean {
+    const key = `${Math.floor(x)},${Math.floor(y)}`;
+    if (this.solidTiles.has(key)) return true;
+    for (const s of this.solidForms.get(key) ?? []) {
+      if (s.vehicle || !this.stillThing(s.id)) continue;
+      const [lx, lz] = toLocal(x - s.x, y - s.y, s.yaw);
+      const g = s.form.result!.grid;
+      const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
+      if (vx >= 0 && vy >= 0 && vx < g.X && vy < g.Y && s.foot[vx + vy * g.X]) return true;
+    }
+    return false;
+  }
+
+  /**
+   * The tiles of a place where no cover grows (T545, ADR-0269), 1 a tile: what is not ground one walks, the paths the kernel digs (and the
+   * gates, which are paths), the lots of its structures and of its block (their doors, their floors), the holes over a cellar, a rune on the
+   * ground, and where a still solid thing stands (the middle of the tile or one of its quarters under its footprint). The renderer scatters the cover elsewhere;
+   * `coverAt` says the same.
+   */
+  coverMask(ch: Chunk): Uint8Array {
+    const S = this.config.chunkSize;
+    const out = new Uint8Array(S * S);
+    const path = this.pathCode();
+    const holes = this.holesIn(ch);
+    for (let i = 0; i < S * S; i++) if (this.coverBare(ch, i, path, holes)) out[i] = 1;
+    return out;
+  }
+
+  /** Whether no cover grows on a tile of a place (`coverMask`, one tile: what `coverAt` asks). */
+  private coverBare(ch: Chunk, i: number, path = this.pathCode(), holes = this.holesIn(ch)): boolean {
+    const S = this.config.chunkSize;
+    if (ch.tiles[i] === path || !coversGround(this.palette[ch.tiles[i]!]) || holes.has(i)) return true;
+    const c = i % S, r = Math.floor(i / S);
+    const inBox = (b: { x0: number; y0: number; x1: number; y1: number }) => c >= b.x0 && c <= b.x1 && r >= b.y0 && r <= b.y1;
+    if (ch.lots.some(inBox) || (ch.blockLot && inBox(ch.blockLot))) return true;
+    const x = ch.cx * S + c, y = ch.cy * S + r;
+    // A rune on the ground is read, never hidden.
+    if (this.runeTiles.has(`${x},${y}`)) return true;
+    if (!this.solidForms.has(`${x},${y}`) && !this.solidTiles.has(`${x},${y}`)) return false;
+    for (const [dx, dy] of [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]] as const) if (this.stillSolidAt(x + dx, y + dy)) return true;
+    return false;
+  }
+
+  /** The instances of cover of a place that are things of the world (T545): its plan's, or the server's in a thin client, as keys. */
+  uncoveredIn(ch: Chunk): Set<string> {
+    if (ch.uncovered) return new Set(ch.uncovered);
+    return new Set(readUncovered(ch.plan?.uncovered, this.config.chunkSize).map((u) => uncoveredKey(u.tile, u.model, u.n)));
+  }
+
+  /** The cover of a terrain as the kernel reads it (T545): its kinds, only on the ground one walks. */
+  coverKinds(code: string): CoverKind[] | undefined {
+    return coverOf(this.palette[code]);
+  }
+
+  /**
+   * The instances of cover on a tile (T545, ADR-0269), as the renderer scatters them: the kinds of its terrain whose programs the library
+   * has, never where `coverMask` says none, without those that became things of the world. Fresh copies; none off the loaded places.
+   */
+  coverAt(col: number, row: number): CoverInstance[] {
+    if (!Number.isFinite(col) || !Number.isFinite(row)) return [];
+    const c = Math.floor(col), r = Math.floor(row);
+    const at = this.tileOf(c, r);
+    if (!at) return [];
+    const kinds = this.coverKinds(at.ch.tiles[at.tile] ?? '')?.filter((k) => this.forms.usable(k.model));
+    if (!kinds?.length || this.coverBare(at.ch, at.tile)) return [];
+    const taken = this.uncoveredIn(at.ch);
+    return coverOnTile(kinds, c, r, (m) => this.forms.seedsOf(m)).filter((i) => !taken.has(uncoveredKey(at.tile, i.model, i.n)));
+  }
+
+  /** The cover of a tile for Lua (`world.cover_at`, T545): `{model, n, x, y}` of each instance, copies. */
+  coverSeen(x: unknown, y: unknown): Array<{ model: string; n: number; x: number; y: number }> {
+    if (typeof x !== 'number' || typeof y !== 'number') return [];
+    return this.coverAt(x, y).map((i) => ({ model: i.model, n: i.n, x: i.x, y: i.y }));
+  }
+
+  /**
+   * An instance of cover becomes a thing of the world (T545, ADR-0269, D1 of T509): the stone the key lies under. Of the instances of the tile
+   * at (x, y) (`coverAt`), the one said (`which`: its program and number) or the nearest to the point; the thing is `module`, an entity of
+   * the library, put by the kernel at the instance's point with its look (the program, the seed and the turn the cover had there), and written
+   * in its place's plan (`ChunkPlan.uncovered`), so that it is there at every load and the instance is never drawn as cover again. The id of
+   * the thing, or undefined: no such instance, a place not planned, a module that is not a thing, `MAX_UNCOVERED` already, a mirror.
+   */
+  uncover(x: unknown, y: unknown, module: unknown, which?: { model?: unknown; n?: unknown }): Id | undefined {
+    if (this.mirror || typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y) || typeof module !== 'string') return undefined;
+    const at = this.tileOf(x, y);
+    if (!at || at.ch.stage !== 'planned' || !at.ch.plan) return undefined;
+    const m = this.modules.get(module);
+    if (!this.coverThing(m)) return undefined;
+    const list = this.coverAt(x, y);
+    // From Lua a nil is null: only a program's name says which.
+    const model = typeof which?.model === 'string' ? which.model : undefined;
+    const pick = model !== undefined
+      ? list.find((i) => i.model === model && i.n === which!.n)
+      : which?.model == null
+        ? [...list].sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0]
+        : undefined;
+    if (!pick) return undefined;
+    const { ch, tile } = at;
+    const S = this.config.chunkSize;
+    const kept = readUncovered(ch.plan!.uncovered, S);
+    if (kept.length >= MAX_UNCOVERED) return undefined;
+    const u: Uncovered = { tile, model: pick.model, n: pick.n, module, seed: pick.seed };
+    ch.plan!.uncovered = [...kept, u];
+    const id = this.spawnUncovered(ch, u);
+    ch.version++;
+    this.saveChunkSoon(ch);
+    return id;
+  }
+
+  /** What an instance of cover may become (T545): a thing of the world, an entity that is neither a person nor a vehicle. */
+  private coverThing(m: ModuleEntry | undefined): m is ModuleEntry {
+    return !!m && m.manifest.kind === 'entity' && !m.manifest.persona && !this.vehicleSpecFor(m.manifest);
+  }
+
+  /** The thing an instance of cover became (T545), at the instance's point with its look; undefined if its module is not a thing any more. */
+  private spawnUncovered(ch: Chunk, u: Uncovered): Id | undefined {
+    const m = this.modules.get(u.module);
+    if (!this.coverThing(m)) return undefined;
+    const S = this.config.chunkSize;
+    const origin = `${ch.key}#u${u.tile}.${u.model}.${u.n}`;
+    if (this.consumed.has(origin)) return undefined;
+    // Where it stood and how it was turned depend on the tile, the program and the number only, never on the seeds the program has.
+    const i = coverInstance(u.model, ch.cx * S + (u.tile % S), ch.cy * S + Math.floor(u.tile / S), u.n, 1);
+    const id = this.spawnModuleEntity(m, i.x, i.y, ch.key, origin);
+    const form: FormComp | undefined = this.ecs.get(id, 'form');
+    // It wears the instance's look: never the model of its module, which would show another thing where the stone was.
+    if (form) {
+      Object.assign(form, { model: u.model, seed: u.seed, yaw: i.yaw });
+      delete form.wanted;
+      delete form.classe;
+    }
+    this.ecs.set(id, 'cover', { model: u.model, n: u.n });
+    return id;
+  }
+
+  /**
+   * The cover of a terrain changed with the world on (T545, ADR-0269, D1 of T509): a kind more, another density, one less, within the kernel's
+   * limits (`COVER_LIMITS`, `coverErrors`): only on the ground one walks, every program one the library has, of the class `cover`. One commit
+   * of the Council on the terrains' manifest (`councilMayWrite`): every place is drawn again with it. Only the master in a game of many, never
+   * from Lua (the cover is not in the state: it is how the terrain looks). The line of what changed, or why nothing did.
+   */
+  setCover(code: unknown, kinds: unknown, agent: AgentId = 'cartographer'): { ok: true; text: string } | { ok: false; reason: string } {
+    if (this.mirror) return { ok: false, reason: 'solo il mondo cambia i suoi terreni' };
+    if (this.readOnly() !== undefined) return { ok: false, reason: 'questo universo si legge soltanto' };
+    if (this.manyPlayers() && !this.isMaster()) return { ok: false, reason: 'solo il master cambia la copertura dei terreni' };
+    const path = this.terrain?.manifestPath;
+    if (!path || !this.repo.working[path]) return { ok: false, reason: 'il mondo non ha i suoi terreni' };
+    let man: { tiles?: Record<string, TerrainDef> };
+    try {
+      man = JSON.parse(this.repo.working[path]!);
+    } catch {
+      return { ok: false, reason: 'i terreni del mondo non si leggono' };
+    }
+    const tile = typeof code === 'string' && man.tiles && Object.hasOwn(man.tiles, code) ? man.tiles[code] : undefined;
+    if (!tile || typeof tile !== 'object') return { ok: false, reason: `nessun terreno «${String(code)}»` };
+    if (!coversGround(tile)) return { ok: false, reason: `su «${tile.name}» non cresce niente: non è terra che si cammina` };
+    const errors = coverErrors(code as string, kinds);
+    if (errors.length) return { ok: false, reason: errors.join('; ') };
+    const next = readCover(kinds) ?? [];
+    for (const k of next) {
+      if (!this.forms.info(k.model)) return { ok: false, reason: `la libreria non ha «${k.model}»` };
+      if (this.forms.classOf(k.model).id !== 'cover') return { ok: false, reason: `«${k.model}» non è della classe cover` };
+    }
+    const before = coverOf(tile) ?? [];
+    if (JSON.stringify(before) === JSON.stringify(next)) return { ok: false, reason: 'niente cambia' };
+    // None is said as an empty list.
+    tile.cover = next;
+    const text = JSON.stringify(man, null, 2) + '\n';
+    const invalid = this.validator.validateFile(path, text);
+    if (invalid.length) return { ok: false, reason: invalid.join(' · ') };
+    const prev = this.repo.working[path] ?? null;
+    this.repo.write(path, text);
+    this.applyFiles({ ...this.repo.working });
+    if (this.faults.list().some((f) => f.key === `manifest:${path}`)) {
+      this.repo.write(path, prev);
+      this.applyFiles({ ...this.repo.working });
+      return { ok: false, reason: 'il mondo si romperebbe' };
+    }
+    const said = next.length ? next.map((k) => `${this.forms.info(k.model)?.name ?? k.model} ${String(k.density).replace('.', ',')} a casella`).join(', ') : 'nessuna';
+    const c = this.repo.commit(`copertura di «${tile.name}»: ${said}`, 'agent');
+    this.council.say(agent, 'propone', `la copertura di «${tile.name}»: ${said} (commit ${c.id})`);
+    return { ok: true, text: `Su «${tile.name}» ora: ${said}.` };
+  }
+
+  /**
+   * The cover of a terrain on the Referente's request (T545, ADR-0269): the Cartographer chooses it among the programs of the class `cover`
+   * the library has (`askCover`), the kernel writes it within its limits (`setCover`, one commit); what it refuses goes back once with the
+   * reason, and what is still refused does not go in (a shortfall).
+   */
+  async coverTerrain(request: string, chi: string = this.payerNow()): Promise<{ ok: true; text: string } | { ok: false; reason: string }> {
+    const lacking = (outcome: 'refusal' | 'invalid' | 'error', reason: string) => {
+      this.noteShortfall({ request, who: chi, agent: 'cartographer', task: COVER_TASK, outcome, reason });
+      return { ok: false as const, reason };
+    };
+    if (this.readOnly() !== undefined) return { ok: false, reason: 'questo universo si legge soltanto' };
+    if (this.manyPlayers() && !this.isMaster()) return { ok: false, reason: 'solo il master cambia la copertura dei terreni' };
+    const library = Object.entries(this.forms.models())
+      .filter(([id]) => this.forms.classOf(id).id === 'cover' && this.forms.usable(id))
+      .map(([id, info]) => ({ id, name: info.name ?? id }));
+    if (!library.length) return lacking('invalid', 'il mondo non ha ancora coperture da dare ai terreni');
+    let sentBack: string | undefined;
+    const refused: string[] = [];
+    for (let round = 0; round < 2; round++) {
+      let a;
+      try {
+        a = await askCover(this.council, request, this.palette, library, { chi, sentBack });
+      } catch (e) {
+        return lacking('error', `il Cartografo non risponde: ${(e as Error).message}`);
+      }
+      if (a.refusal && !a.code) return lacking('refusal', [...refused, a.refusal].join('; '));
+      const r = this.setCover(a.code, a.cover, 'cartographer');
+      if (r.ok) return r;
+      sentBack = r.reason;
+      if (!refused.includes(r.reason)) refused.push(r.reason);
+      this.council.say('kernel', 'scarta', sentBack, 'cartographer', COVER_TASK);
+    }
+    return lacking('invalid', refused.join('; ') || 'niente cambia');
   }
 
   /** The water's steps (T51b): `WATER_STEPS` every `WATER_EVERY` ticks while it moves; what one sees changes in the plans. */
@@ -9633,7 +9892,7 @@ export class Kernel {
     // Its own time and whether it grows by rules are its entry's, which is not in the library yet (T370).
     const cls = classOf(info.class);
     // With its cellar (T417): tried as deep as the library will run it.
-    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, xml)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && growsByRules(cls, info.size), base: cellarVoxels(info, xml) });
+    const errors = this.validator.validateFile(path, xml, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, xml)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: !!cls && groundJoined(cls, info.size), base: cellarVoxels(info, xml) });
     if (errors.length) {
       this.council.say('kernel', 'scarta', errors.join('; '), card?.author === 'musician' ? 'musician' : 'sculptor', card?.task ?? 'model.sculpt');
       return false;
@@ -9690,7 +9949,7 @@ export class Kernel {
     const cls = classOf(info.class) ?? classOf('object')!;
     const partErrors = this.validator.validateFile(partPath, made.part, boxOf(cls), { part: true });
     if (partErrors.length) return no(partErrors.join('; '));
-    const modelErrors = this.validator.validateFile(sourcePath, made.rewritten, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, made.rewritten)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: growsByRules(cls, info.size), base: cellarVoxels(info, made.rewritten), files: { [`${made.id}.xml`]: made.part } });
+    const modelErrors = this.validator.validateFile(sourcePath, made.rewritten, info.class === 'structure' ? entryBox(classOf('structure')!, withRoot(info, made.rewritten)) : undefined, { ...(typeof info.time === 'number' ? { time: info.time } : {}), grows: groundJoined(cls, info.size), base: cellarVoxels(info, made.rewritten), files: { [`${made.id}.xml`]: made.part } });
     if (modelErrors.length) return no(modelErrors.join('; '));
     // The same grid on every seed the world gives it; the runs yield between them, so a world of many does not fall silent (ADR-0110).
     const seeds = Math.max(PART_SEEDS, this.forms.seedsOf(source));
@@ -9998,7 +10257,7 @@ export class Kernel {
       return { say: r.say, forged: `Il Concilio rifiuta: ${r.refusal}` };
     }
     const req = r.request ?? text;
-    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' || r.task === 'automaton' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
+    this.council.say('liaison', 'info', `il viandante chiede: «${text}» → ${r.task}`, r.task === 'environment' || r.task === 'cover' ? 'cartographer' : r.task === 'resculpt' ? 'artist' : r.task === 'music' ? 'musician' : r.task === 'rule' ? 'arbiter' : r.task === 'physics' || r.task === 'automaton' ? 'physicist' : r.task === 'none' ? undefined : 'narrator', 'referente.coordinate');
     switch (r.task) {
       case 'item':
       case 'thing': {
@@ -10038,6 +10297,12 @@ export class Kernel {
         // The Physicist reshapes the physics with the world on (T452, ADR-0235): a terrain, or the gravity of the world.
         const made = await this.reshapePhysics(req, chi);
         if (!made.ok) return { say: r.say, forged: `Il Fisico non lo fa: ${made.reason}` };
+        return { say: r.say, forged: made.text };
+      }
+      case 'cover': {
+        // The cover of a terrain with the world on (T545, ADR-0269): the Cartographer chooses among the covers the library has.
+        const made = await this.coverTerrain(req, chi);
+        if (!made.ok) return { say: r.say, forged: `Il Cartografo non lo fa: ${made.reason}` };
         return { say: r.say, forged: made.text };
       }
       case 'automaton': {
@@ -13835,6 +14100,7 @@ export class Kernel {
   private rebuildSolids(): void {
     this.solidTiles.clear();
     this.solidForms.clear();
+    this.solidStamps.clear();
     this.cellars = [];
     const decks = new Map<Id, SolidForm>();
     for (const id of this.ecs.query('body', 'pos')) {
@@ -13846,6 +14112,8 @@ export class Kernel {
       const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
       // A thing that stands in a cellar (T417) or on the seabed (T480) stands at its height, not on the ground/water over it.
       const stand = this.cellarHeight(id, p);
+      // What the cover of the places under it depends on (T545): where a still thing stands and whether its form is ready.
+      if (this.stillThing(id)) this.stampSolid(id, p, f);
       // A solid thing whose brought model stops nobody (T296, rule 10): the card is isolated, the thing blocks its tile until the generic is ready.
       if (!fc || !f?.foot || (f.footless && this.isBrought(fc.model) && this.cardBroke(fc.model, 'footless', breakReason('footless', { seed: f.seed })))) {
         if (stand === undefined) this.solidTiles.add(`${Math.floor(p.x)},${Math.floor(p.y)}`);
@@ -13860,6 +14128,14 @@ export class Kernel {
           const key = `${cx},${cy}`;
           (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s);
         }
+    }
+    // The runes on the ground (T545): the cover never hides one (`runeTiles`); their tiles in the stamps of their places.
+    const S = this.config.chunkSize;
+    for (const id of this.ecs.query('rune')) {
+      const r = this.ecs.get(id, 'rune');
+      if (!Number.isFinite(r?.col) || !Number.isFinite(r?.row)) continue;
+      const key = this.chunkKey(Math.floor(r.col / S), Math.floor(r.row / S));
+      this.solidStamps.set(key, ((this.solidStamps.get(key) ?? 0) + hash32(r.col, r.row, 0x7e5)) >>> 0);
     }
     // The decks (T439): of every vehicle a module still makes one, its form's floors if it is a solid with a form, else its disc.
     this.decks = [];
