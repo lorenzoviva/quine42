@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 27/11/2026 18:34 CET, epoca 731 (neon). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026 18:54 CET, epoca 732 (neon). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -15,8 +15,8 @@ Aggiornato il 27/11/2026 18:34 CET, epoca 731 (neon). Crediti: vedi `stato`.
 
 ## Pronti e priorità
 
-- **Spegnimento e ripresa (27/11 17:13Z `ferma --ora`):** `daIntegrare`: nessuno. **Fermi per limite 5h Claude:** **T530** (p0, A1-5) e **T557** (p1, strutture modulari) — riprendono in automatico al reset delle **18:59-19:01 CET** (17:59-18:01Z); appena T557 è integrato parte **T559** (p1).
-- **Crediti al 27/11 18:34 CET (residuo):** `claude` settimana 65 % (reset 3/12 16:00Z), **5h 0 % fino alle 19:00 CET** (tetto 3); `fable` sospeso; `agy` (`neon`/`hydrogen`/`gemini`/`argon`/`orchestrator`) Gemini Models settimana 87 %, 5h 98 % (reset 23:14 CET, tetto 1). `generatore` acceso ma fermo finché Claude è fermo.
+- **Ripresa dopo spegnimento (27/11 18:49 CET `ferma --ora`):** `daIntegrare`: nessuno. **In corso (fermi per limite 5h Claude fino alle 19:00 CET / 18:00Z):** **T530** (p0, A1-5) e **T557** (p1, strutture modulari) — riprendono in automatico tra ~6 min; appena T557 è integrato parte **T559** (p1).
+- **Crediti al 27/11 18:54 CET (residuo):** `claude` settimana 65 % (reset 3/12 16:00Z), **5h 0 % fino alle 19:00 CET** (tetto 3); `fable` sospeso; `agy` (`neon`/`hydrogen`/`gemini`/`argon`/`orchestrator`) Gemini Models settimana 86 %, 5h 96 % (reset 23:14 CET, tetto 1). `generatore` acceso ma fermo finché Claude è fermo.
 - **Pronti in coda (tutti su `claude`):** p1 `T511` (più `T559` bloccato su `T557`); p2 `T546`, `T549`, `T550`, `T551`, `T519`, `T520`, `T523`, `T481`, `T483`; p3 `T541`. `daApprovare`: `T369`.
 
 ## Attese dall'autore
@@ -35,5 +35,5 @@ Aggiornato il 27/11/2026 18:34 CET, epoca 731 (neon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **732 (neon):** ripresa dopo spegnimento `ferma --ora` (18:49 CET); `daIntegrare` vuoto, T530 e T557 fermi per limite 5h Claude fino al reset delle 19:00 CET.
 - **731 (neon):** autore conferma piano A, tiene validi i quartieri di T543 e sceglie la terna `moderna` + `steampunk` + `locanda`; pianificato e approvato **T559** (claude high, 4 %, p1, dipende da T557, step 44).
-- **730 (neon):** ripresa dopo spegnimento `ferma --ora` (17:13Z) con Claude a 0 % (5h, reset 18:59 CET). Quadro riscritto con regime incrementato, scadenza 100 $ Anthropic (1/12, ripiego 27-28 sera), presenza autore e chiarimento T557 (`lab/banco/conferma/`). Proposta T559 all'autore; nessuna integrazione pendente.
