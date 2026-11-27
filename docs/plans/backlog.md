@@ -7052,3 +7052,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Contesto: § 7 (C9); D6 B per una copertura propria, D7 A (`mesa` resta collinare).
 - Cosa fare: la Genesi di un mondo nuovo e la riparazione di `mesa` e `neapolis` col Paesaggista vero (copertura, braccio dei binari, ciò che il vento porta), su copie, tetto ~1,5 $ sul registro; foto e costo.
 - Browser: sì. Quando è fatto: rapporto con foto e costo.
+
+### T554 · Integrare T545 nel base (conflitto in AGENTS.md) — `da fare`
+- Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 0
+- Step: 45
+- Contesto: `integra T545` (la copertura dei terreni, C1, kernel 0.10.43) si è fermato su un conflitto in `AGENTS.md`: nel frattempo T527 è entrato nel base con ADR-0268 (le regole e le corrispondenze dell'originale). Lo script ha già rinumerato l'ADR di T545 a ADR-0269 (`631f0ac5`); il kernel del base è 0.10.42, T545 resta 0.10.43. Nasce da T545 e T527: `dossier T545`, `dossier T527`.
+- Cosa fare: nel worktree `git merge task/T545`; in `AGENTS.md` due aggiunte nello stesso punto restano entrambe (T527 con ADR-0268, T545 con ADR-0269); controllare che non restino rimandi di T545 a ADR-0268 (AGENTS.md, `docs/architettura-dettagli.md`, glossario, codice, test, indice degli ADR); se il censimento del glossario va in conflitto, rigenerarlo con `node tools/glossario/glossario.mjs`, mai a mano; `KERNEL_VERSION`, `package.json` e `universe/universe.json` a 0.10.43; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/documenti.test.ts` e i test della copertura di T545 verdi.
+- Browser: no (T545 l'ha già verificato).
+- Quando è fatto: commit su `task/T554`; poi l'orchestratore integra T554, e `integra T545` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
