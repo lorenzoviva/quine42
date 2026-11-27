@@ -2622,6 +2622,8 @@ export class Kernel {
       plan.swim = true;
       // And its climates (T510): its draft has only those its world admits; a plan of before does not say it, and keeps its draft.
       plan.climates = true;
+      // And its streets (T548): where the world's path is a road, it is wide with its sidewalk; a plan of before does not say it, and keeps its roads.
+      plan.streets = true;
       // And its strata (T418), by its environment's program over the draft (T478): the plan keeps them, and says how they are made.
       plan.strataDepth = STRATA_DEPTH;
       // And how rough it is, where a region of the master says it (T474): a region changed later does not move the place.
@@ -2674,7 +2676,7 @@ export class Kernel {
    * else of its own (no thing, rune or structure asked: it is the ring of the structure), the block's mark. The kernel's, without a call.
    */
   private blockPlan(b: BlockMark, anchor: ChunkPlan): ChunkPlan {
-    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH };
+    return { place: { name: anchor.place.name, description: anchor.place.description }, layout: anchor.layout, objects: [], ground: [], fresh: [], runes: [], block: markOf(b), vpt: STRUCTURE_VPT, swim: true, climates: true, streets: true, strataDepth: STRATA_DEPTH };
   }
 
   /**
@@ -2794,7 +2796,7 @@ export class Kernel {
     const description = region.description || this.content.layouts[region.environment]?.description || '';
     // The roughness the master said for the region (T474) is the plan's, as for a place the Cartographer plans there.
     const roughness = regionRoughness(region);
-    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH, ...(roughness ? { roughness } : {}) };
+    return { place: { name: region.name, description }, layout: region.environment, objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, streets: true, strataDepth: STRATA_DEPTH, ...(roughness ? { roughness } : {}) };
   }
 
   /** Whether a draft is all open sea (T441): every tile deep water one swims. */
@@ -2814,7 +2816,7 @@ export class Kernel {
 
   /** The plan of a place of open sea (T441), or of the void (T445): its name in the language of the world, no environment, nothing in it; the kernel's. */
   private seaPlan(empty = false): ChunkPlan {
-    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, strataDepth: STRATA_DEPTH };
+    return { place: { ...(empty ? OPEN_VOID : OPEN_SEA)[languageOf(this.files)] }, layout: '', objects: [], ground: [], fresh: [], runes: [], vpt: STRUCTURE_VPT, swim: true, climates: true, streets: true, strataDepth: STRATA_DEPTH };
   }
 
   /** The island a place stands on in an archipelago (T441), or its station or asteroid in the void (T445), with its region of the atlas if the Cartographer has named it. */
@@ -3244,7 +3246,7 @@ export class Kernel {
     const trueLv = relief.hasCliffs(ch.cx * S)
       ? { levels: worldLevels([{ cx: ch.cx, cy: ch.cy, tiles: ch.draft, draft: ch.draft }], S, (code) => this.palette[code]?.layer === 'liquid', (c, r) => relief.level(c, r), this.seaLevel, undefined, true)[0] }
       : {};
-    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...voidAt, ...(blockAt ?? {}), ...apron, ...trueLv };
+    const opts = { cx: ch.cx, cy: ch.cy, seed: this.config.seed, pathCode, stages: quiet, vpt: plan.vpt === STRUCTURE_VPT ? STRUCTURE_VPT : TILE, swim: plan.swim === true, ...(plan.streets === true ? { street: this.content.layouts[plan.layout] ?? {} } : {}), ...voidAt, ...(blockAt ?? {}), ...apron, ...trueLv };
     try {
       result = layout(this.rows(ch.draft), this.palette, { ...opts, program });
     } catch (e) {
@@ -4606,7 +4608,8 @@ export class Kernel {
     for (let r = 1; r < S - 1; r++)
       for (let c = 1; c < S - 1; c++) {
         const i = r * S + c;
-        if (tiles[i] === codes.road || tiles[i] === codes.pier) ways.push(i);
+        // The wide streets (T548) are no ways of their own: the network joins the roads as they were laid (`LayoutResult.widened` are not ways), and is the same.
+        if ((tiles[i] === codes.road || tiles[i] === codes.pier) && !result.widened?.has(i)) ways.push(i);
       }
     // The start of the world (0, 0) is the corner of the four places around it.
     const corner = ch.cx === 0 && ch.cy === 0 ? 0 : ch.cx === -1 && ch.cy === 0 ? S - 1 : ch.cx === 0 && ch.cy === -1 ? (S - 1) * S : ch.cx === -1 && ch.cy === -1 ? S * S - 1 : -1;

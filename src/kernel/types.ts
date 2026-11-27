@@ -111,6 +111,12 @@ export interface TerrainDef {
    * (0-0.75; 0 none), drawn by the shader, only how it looks. Unsaid, the one its name says (gravel, ballast, dry leaves) or none.
    */
   grain?: import('./grain').Grain;
+  /**
+   * The inset of its top (T548, ADR-0269; `src/kernel/inset.ts`): how much lower (negative) or higher its tiles are drawn, in tiles, within
+   * -0.2..0.2 (under a level), with what stands on them; where it meets a higher terrain, the curb. Only how it looks: the kernel never reads
+   * it. Unsaid, the one its name says (a road -0.12, a ditch -0.18, the ballast of a railway +0.06) or none; never of the base ground `g`.
+   */
+  inset?: number;
 }
 
 export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;
@@ -217,6 +223,12 @@ export interface EnvironmentDef {
    * the world counts the breath (`nature.oxygen`); a terrain without air, a vehicle's deck and the master's region say before it.
    */
   air?: false;
+  /**
+   * Its streets (T548, ADR-0269; `src/kernel/streets.ts`), read without trusting: how wide its roads are in its new places (`width`, 1-4
+   * tiles; 3 if not said, 1 as before) and the code of the sidewalk at their sides (the terrain named so if not said). Only where the code
+   * the layout digs with is a road by its name, only on the plans with the mark (`ChunkPlan.streets`).
+   */
+  street?: { width?: number; sidewalk?: string };
 }
 
 /**
