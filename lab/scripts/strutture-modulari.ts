@@ -62,8 +62,8 @@ const order = (shuffle: boolean, seed: number) => {
 type Mode = 'libera' | 'massa, margine libero' | 'massa' | 'massa e regola 10';
 const MODES: Mode[] = ['libera', 'massa, margine libero', 'massa', 'massa e regola 10'];
 const district = (seed: number, shuffle: boolean, mode: Mode, extra: Partial<Options> = {}) => {
-  const ms = mode === 'libera' ? undefined : massing(seed);
-  const background = mode === 'massa, margine libero' ? undefined : baseFabric(set, ms);
+  const ms = mode === 'libera' ? undefined : (extra.massing ?? massing(seed));
+  const background = mode === 'massa, margine libero' ? undefined : baseFabric(set, ms, extra.standing);
   const comp = new Weaver(set, { seed, storeys, ...(ms ? { massing: ms } : {}), ...(background ? { background } : {}), ...(mode === 'massa e regola 10' ? { rule10: true } : {}), ...extra });
   for (const [i, j] of order(shuffle, seed)) comp.place(i, j);
   return comp;
@@ -156,18 +156,24 @@ const standing = (gx: number, gy: number): number | undefined => {
   if (towards === undefined) return undefined;
   return villetta.find((p) => p.faces[towards].k === 'D')?.index;
 };
-const over = district(1, false, 'libera', { standing });
+/** On the massing: not on a core; the column of a house that stands keeps at least its storey. */
+const standsOn = (seed: number) => (gx: number, gy: number) => (massing(seed)(gx, gy).core ? undefined : standing(gx, gy));
+const massingOver = (seed: number) => (gx: number, gy: number): Massing => {
+  const m = massing(seed)(gx, gy);
+  return standsOn(seed)(gx, gy) !== undefined ? { ...m, h: Math.max(1, m.h) } : m;
+};
+const over = district(1, false, 'massa e regola 10', { standing: standsOn(1), massing: massingOver(1) });
 let kept = 0, raised = 0, houses = 0;
 for (let gy = 0; gy <= W; gy++)
   for (let gx = 0; gx <= W; gx++) {
     const lx = mod(gx, PLACE), ly = mod(gy, PLACE);
-    if (standing(gx, gy) === undefined || lx === 0 || ly === 0 || lx === PLACE - 1 || ly === PLACE - 1) continue;
+    if (standsOn(1)(gx, gy) === undefined || lx === 0 || ly === 0 || lx === PLACE - 1 || ly === PLACE - 1) continue;
     houses++;
     if (over.pattern(gx, gy, 0)!.brick.name === 'villetta') kept++;
     if (over.pattern(gx, gy, 1)!.faces[4].k === 'needs') raised++;
   }
 const overReach = reachOf(over, reached(over, 0, 0, W, W), 0, 0, W, W);
-console.log(`sovraimpressione: ${houses} villette in piedi, ${kept} tenute, ${raised} con una stanza sopra; senza soluzione ${over.log.filter((l) => l.failed).length}; raggiunte: stanze a terra ${pct(overReach.rooms0)}, sopra ${pct(overReach.roomsUp)}, tetti ${pct(overReach.roofs)}`);
+console.log(`sovraimpressione (massa, tessuto di base e collaudo, seme 1): ${houses} villette in piedi, ${kept} tenute, ${raised} con una stanza sopra; senza soluzione ${over.log.filter((l) => l.failed).length}; raggiunte: stanze a terra ${pct(overReach.rooms0)}, sopra ${pct(overReach.roomsUp)}, tetti ${pct(overReach.roofs)}`);
 
 // ---------------------------------------------------------------- rule 10 with the kernel's walk, on the middle place
 

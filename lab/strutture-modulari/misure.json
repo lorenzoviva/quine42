@@ -1,6 +1,6 @@
 {
- "patterns": 149,
- "props": 70918,
+ "patterns": 153,
+ "props": 76118,
  "faces": [
   {
    "brick": "strada",
@@ -237,6 +237,18 @@
     "R",
     "R",
     "P2",
+    "R",
+    "open",
+    "F"
+   ]
+  },
+  {
+   "brick": "tetto-isola",
+   "cell": "0,0,0",
+   "faces": [
+    "R",
+    "R",
+    "R",
     "R",
     "open",
     "F"
@@ -512,35 +524,7 @@
   {
    "mode": "libera",
    "seed": 1,
-   "ms": 4786.5967,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 0,
-   "attempts": 49,
-   "reach": {
-    "rooms0": [
-     360,
-     422
-    ],
-    "roomsUp": [
-     5,
-     940
-    ],
-    "roofs": [
-     2,
-     1295
-    ],
-    "stairs": [
-     18,
-     126
-    ]
-   },
-   "invalid": 0
-  },
-  {
-   "mode": "libera",
-   "seed": 2,
-   "ms": 4699.3102,
+   "ms": 2931.216199999999,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
@@ -548,19 +532,47 @@
    "reach": {
     "rooms0": [
      372,
-     419
+     422
     ],
     "roomsUp": [
-     23,
-     948
+     10,
+     958
     ],
     "roofs": [
-     10,
-     1315
+     11,
+     1325
     ],
     "stairs": [
-     54,
-     159
+     42,
+     144
+    ]
+   },
+   "invalid": 0
+  },
+  {
+   "mode": "libera",
+   "seed": 2,
+   "ms": 3376.1910000000007,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "reach": {
+    "rooms0": [
+     352,
+     450
+    ],
+    "roomsUp": [
+     20,
+     901
+    ],
+    "roofs": [
+     11,
+     1335
+    ],
+    "stairs": [
+     30,
+     129
     ]
    },
    "invalid": 0
@@ -568,27 +580,27 @@
   {
    "mode": "libera",
    "seed": 3,
-   "ms": 4876.8164,
+   "ms": 2911.3824999999997,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     339,
-     403
+     379,
+     448
     ],
     "roomsUp": [
-     0,
-     935
+     1,
+     911
     ],
     "roofs": [
-     1,
-     1294
+     3,
+     1354
     ],
     "stairs": [
-     15,
-     129
+     24,
+     105
     ]
    },
    "invalid": 0
@@ -596,27 +608,27 @@
   {
    "mode": "libera",
    "seed": 4,
-   "ms": 4951.633099999999,
+   "ms": 2820.225000000002,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     374,
-     436
+     377,
+     444
     ],
     "roomsUp": [
      1,
-     927
+     910
     ],
     "roofs": [
      1,
-     1294
+     1345
     ],
     "stairs": [
-     12,
-     141
+     15,
+     117
     ]
    },
    "invalid": 0
@@ -624,27 +636,27 @@
   {
    "mode": "libera",
    "seed": 5,
-   "ms": 4661.763200000001,
+   "ms": 2782.7863000000034,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     342,
-     400
+     358,
+     426
     ],
     "roomsUp": [
-     4,
-     989
+     26,
+     930
     ],
     "roofs": [
-     3,
-     1258
+     13,
+     1301
     ],
     "stairs": [
-     36,
-     129
+     45,
+     150
     ]
    },
    "invalid": 0
@@ -652,27 +664,27 @@
   {
    "mode": "libera",
    "seed": 6,
-   "ms": 4697.241999999998,
+   "ms": 2796.8574999999983,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     373,
-     410
+     363,
+     437
     ],
     "roomsUp": [
-     6,
-     917
+     21,
+     999
     ],
     "roofs": [
-     5,
-     1250
+     11,
+     1357
     ],
     "stairs": [
-     18,
-     141
+     33,
+     132
     ]
    },
    "invalid": 0
@@ -680,195 +692,195 @@
   {
    "mode": "massa, margine libero",
    "seed": 1,
-   "ms": 10269.292400000006,
+   "ms": 7308.7526,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 5,
+   "attempts": 89,
+   "reach": {
+    "rooms0": [
+     161,
+     211
+    ],
+    "roomsUp": [
+     241,
+     370
+    ],
+    "roofs": [
+     106,
+     492
+    ],
+    "stairs": [
+     441,
+     581
+    ]
+   },
+   "invalid": 368
+  },
+  {
+   "mode": "massa, margine libero",
+   "seed": 2,
+   "ms": 9336.112299999993,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 7,
+   "attempts": 105,
+   "reach": {
+    "rooms0": [
+     122,
+     168
+    ],
+    "roomsUp": [
+     262,
+     380
+    ],
+    "roofs": [
+     163,
+     500
+    ],
+    "stairs": [
+     488,
+     589
+    ]
+   },
+   "invalid": 534
+  },
+  {
+   "mode": "massa, margine libero",
+   "seed": 3,
+   "ms": 10297.472399999999,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 8,
+   "attempts": 113,
+   "reach": {
+    "rooms0": [
+     116,
+     156
+    ],
+    "roomsUp": [
+     326,
+     450
+    ],
+    "roofs": [
+     167,
+     504
+    ],
+    "stairs": [
+     551,
+     664
+    ]
+   },
+   "invalid": 692
+  },
+  {
+   "mode": "massa, margine libero",
+   "seed": 4,
+   "ms": 9810.7304,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 8,
+   "attempts": 113,
+   "reach": {
+    "rooms0": [
+     119,
+     153
+    ],
+    "roomsUp": [
+     290,
+     376
+    ],
+    "roofs": [
+     122,
+     452
+    ],
+    "stairs": [
+     539,
+     572
+    ]
+   },
+   "invalid": 579
+  },
+  {
+   "mode": "massa, margine libero",
+   "seed": 5,
+   "ms": 9784.088999999993,
+   "sameInOtherOrder": true,
+   "regions": 49,
+   "failed": 8,
+   "attempts": 113,
+   "reach": {
+    "rooms0": [
+     113,
+     161
+    ],
+    "roomsUp": [
+     289,
+     415
+    ],
+    "roofs": [
+     156,
+     500
+    ],
+    "stairs": [
+     523,
+     664
+    ]
+   },
+   "invalid": 639
+  },
+  {
+   "mode": "massa, margine libero",
+   "seed": 6,
+   "ms": 6278.949500000017,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 4,
    "attempts": 81,
    "reach": {
     "rooms0": [
-     156,
-     230
+     142,
+     236
     ],
     "roomsUp": [
-     215,
-     372
-    ],
-    "roofs": [
-     89,
-     492
-    ],
-    "stairs": [
-     414,
-     580
-    ]
-   },
-   "invalid": 279
-  },
-  {
-   "mode": "massa, margine libero",
-   "seed": 2,
-   "ms": 14891.237200000003,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 7,
-   "attempts": 105,
-   "reach": {
-    "rooms0": [
-     95,
-     167
-    ],
-    "roomsUp": [
-     221,
+     198,
      382
     ],
     "roofs": [
-     155,
-     500
-    ],
-    "stairs": [
-     416,
-     586
-    ]
-   },
-   "invalid": 531
-  },
-  {
-   "mode": "massa, margine libero",
-   "seed": 3,
-   "ms": 12128.009900000005,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 5,
-   "attempts": 89,
-   "reach": {
-    "rooms0": [
-     112,
-     196
-    ],
-    "roomsUp": [
-     224,
-     446
-    ],
-    "roofs": [
-     104,
-     504
-    ],
-    "stairs": [
-     389,
-     668
-    ]
-   },
-   "invalid": 408
-  },
-  {
-   "mode": "massa, margine libero",
-   "seed": 4,
-   "ms": 13621.651100000017,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 7,
-   "attempts": 105,
-   "reach": {
-    "rooms0": [
      109,
-     172
-    ],
-    "roomsUp": [
-     216,
-     379
-    ],
-    "roofs": [
-     112,
-     452
-    ],
-    "stairs": [
-     413,
-     568
-    ]
-   },
-   "invalid": 476
-  },
-  {
-   "mode": "massa, margine libero",
-   "seed": 5,
-   "ms": 13243.02780000001,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 6,
-   "attempts": 97,
-   "reach": {
-    "rooms0": [
-     125,
-     187
-    ],
-    "roomsUp": [
-     284,
-     419
-    ],
-    "roofs": [
-     134,
-     500
-    ],
-    "stairs": [
-     532,
-     661
-    ]
-   },
-   "invalid": 503
-  },
-  {
-   "mode": "massa, margine libero",
-   "seed": 6,
-   "ms": 12014.036600000021,
-   "sameInOtherOrder": true,
-   "regions": 49,
-   "failed": 5,
-   "attempts": 89,
-   "reach": {
-    "rooms0": [
-     129,
-     216
-    ],
-    "roomsUp": [
-     208,
-     380
-    ],
-    "roofs": [
-     120,
      508
     ],
     "stairs": [
-     400,
-     598
+     383,
+     593
     ]
    },
-   "invalid": 368
+   "invalid": 290
   },
   {
    "mode": "massa",
    "seed": 1,
-   "ms": 4837.847100000014,
+   "ms": 2812.477499999979,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     163,
-     288
+     185,
+     293
     ],
     "roomsUp": [
-     147,
-     372
+     164,
+     376
     ],
     "roofs": [
-     37,
+     33,
      492
     ],
     "stairs": [
-     286,
-     577
+     332,
+     574
     ]
    },
    "invalid": 0
@@ -876,26 +888,26 @@
   {
    "mode": "massa",
    "seed": 2,
-   "ms": 4845.506800000003,
+   "ms": 2766.9198000000033,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     169,
-     284
+     180,
+     289
     ],
     "roomsUp": [
-     180,
+     185,
      378
     ],
     "roofs": [
-     50,
+     32,
      500
     ],
     "stairs": [
-     368,
+     357,
      592
     ]
    },
@@ -904,27 +916,27 @@
   {
    "mode": "massa",
    "seed": 3,
-   "ms": 4302.641800000012,
+   "ms": 2779.5603999999876,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     180,
-     283
+     149,
+     279
     ],
     "roomsUp": [
-     210,
-     446
+     189,
+     448
     ],
     "roofs": [
-     21,
+     18,
      504
     ],
     "stairs": [
-     404,
-     670
+     342,
+     667
     ]
    },
    "invalid": 0
@@ -932,27 +944,27 @@
   {
    "mode": "massa",
    "seed": 4,
-   "ms": 4625.002099999983,
+   "ms": 2809.4377000000095,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     166,
-     260
+     159,
+     257
     ],
     "roomsUp": [
-     175,
-     376
+     134,
+     380
     ],
     "roofs": [
-     16,
+     29,
      452
     ],
     "stairs": [
-     355,
-     569
+     272,
+     566
     ]
    },
    "invalid": 0
@@ -960,26 +972,26 @@
   {
    "mode": "massa",
    "seed": 5,
-   "ms": 4626.492100000003,
+   "ms": 2767.324800000002,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     166,
-     270
+     150,
+     271
     ],
     "roomsUp": [
-     207,
+     202,
      428
     ],
     "roofs": [
-     34,
+     37,
      500
     ],
     "stairs": [
-     404,
+     370,
      650
     ]
    },
@@ -988,26 +1000,26 @@
   {
    "mode": "massa",
    "seed": 6,
-   "ms": 4158.003200000036,
+   "ms": 2764.5886000000173,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 0,
    "attempts": 49,
    "reach": {
     "rooms0": [
-     164,
+     165,
      293
     ],
     "roomsUp": [
-     159,
+     130,
      382
     ],
     "roofs": [
-     38,
+     17,
      508
     ],
     "stairs": [
-     339,
+     271,
      595
     ]
    },
@@ -1016,26 +1028,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 1,
-   "ms": 25255.2978,
+   "ms": 15789.064700000017,
    "sameInOtherOrder": true,
    "regions": 49,
-   "failed": 11,
-   "attempts": 187,
+   "failed": 12,
+   "attempts": 195,
    "reach": {
     "rooms0": [
-     264,
-     291
+     268,
+     293
     ],
     "roomsUp": [
-     327,
+     308,
      376
     ],
     "roofs": [
-     47,
+     24,
      492
     ],
     "stairs": [
-     518,
+     490,
      574
     ]
    },
@@ -1044,26 +1056,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 2,
-   "ms": 25640.181099999987,
+   "ms": 15473.872400000022,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 11,
-   "attempts": 188,
+   "attempts": 186,
    "reach": {
     "rooms0": [
-     269,
-     288
+     266,
+     290
     ],
     "roomsUp": [
-     304,
+     316,
      382
     ],
     "roofs": [
-     43,
+     44,
      500
     ],
     "stairs": [
-     526,
+     514,
      586
     ]
    },
@@ -1072,26 +1084,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 3,
-   "ms": 28983.98960000003,
+   "ms": 15980.806299999997,
    "sameInOtherOrder": true,
    "regions": 49,
-   "failed": 14,
-   "attempts": 207,
+   "failed": 15,
+   "attempts": 199,
    "reach": {
     "rooms0": [
-     273,
-     289
+     276,
+     287
     ],
     "roomsUp": [
-     398,
+     393,
      450
     ],
     "roofs": [
-     22,
+     48,
      504
     ],
     "stairs": [
-     606,
+     604,
      664
     ]
    },
@@ -1100,26 +1112,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 4,
-   "ms": 27155.21649999998,
+   "ms": 14510.7843,
    "sameInOtherOrder": true,
    "regions": 49,
    "failed": 11,
-   "attempts": 192,
+   "attempts": 177,
    "reach": {
     "rooms0": [
-     242,
+     239,
      261
     ],
     "roomsUp": [
-     321,
+     306,
      380
     ],
     "roofs": [
-     11,
+     30,
      452
     ],
     "stairs": [
-     502,
+     486,
      566
     ]
    },
@@ -1128,26 +1140,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 5,
-   "ms": 15720.888299999991,
+   "ms": 15218.41009999998,
    "sameInOtherOrder": true,
    "regions": 49,
-   "failed": 13,
-   "attempts": 196,
+   "failed": 12,
+   "attempts": 190,
    "reach": {
     "rooms0": [
-     260,
-     272
+     242,
+     275
     ],
     "roomsUp": [
-     362,
+     339,
      428
     ],
     "roofs": [
-     55,
+     37,
      500
     ],
     "stairs": [
-     588,
+     516,
      650
     ]
    },
@@ -1156,26 +1168,26 @@
   {
    "mode": "massa e regola 10",
    "seed": 6,
-   "ms": 15827.037199999962,
+   "ms": 15980.701699999976,
    "sameInOtherOrder": true,
    "regions": 49,
-   "failed": 15,
-   "attempts": 211,
+   "failed": 13,
+   "attempts": 207,
    "reach": {
     "rooms0": [
-     282,
-     298
+     276,
+     296
     ],
     "roomsUp": [
-     349,
+     341,
      384
     ],
     "roofs": [
-     20,
+     22,
      508
     ],
     "stairs": [
-     536,
+     524,
      592
     ]
    },
@@ -1183,49 +1195,43 @@
   }
  ],
  "overlay": {
-  "houses": 56,
-  "kept": 56,
-  "raised": 27,
+  "houses": 37,
+  "kept": 37,
+  "raised": 21,
   "reach": {
    "rooms0": [
-    367,
-    430
+    279,
+    302
    ],
    "roomsUp": [
-    10,
-    918
+    282,
+    376
    ],
    "roofs": [
-    5,
-    1310
+    14,
+    502
    ],
    "stairs": [
-    21,
-    123
+    444,
+    574
    ]
   }
  },
  "walks": {
-  "libera": {
-   "ms": 1775,
-   "voxels": 19824640,
-   "both": 71,
-   "onlyGraph": [],
-   "onlyWalk": []
-  },
   "massa e regola 10": {
-   "ms": 2962,
+   "ms": 1351,
    "voxels": 19824640,
-   "both": 152,
+   "both": 139,
    "onlyGraph": [
+    "9,9,0 nucleo-2",
+    "9,10,0 nucleo-2",
+    "9,9,1 nucleo-2",
+    "10,9,1 stanza-corridoio",
     "9,10,1 nucleo-2",
     "11,10,1 nucleo-2",
+    "17,14,1 porta-testa",
     "16,15,1 nucleo-2",
-    "11,16,1 tetto-angolo",
-    "12,16,1 tetto-angolo",
-    "11,17,1 tetto-angolo",
-    "12,17,1 tetto-angolo",
-    "9,12,2 nucleo-3",
+    "17,15,1 villetta",
     "11,12,2 nucleo-3",
     "11,15,2 nucleo-3",
     "14,10,3 nucleo-4",
@@ -1233,10 +1239,23 @@
     "9,15,3 nucleo-4",
     "14,15,3 nucleo-4"
    ],
+   "onlyWalk": [
+    "9,11,0 nucleo-3",
+    "9,12,0 nucleo-3",
+    "9,11,1 nucleo-3",
+    "9,12,1 nucleo-3",
+    "9,12,2 nucleo-3"
+   ]
+  },
+  "libera": {
+   "ms": 1486,
+   "voxels": 19824640,
+   "both": 79,
+   "onlyGraph": [],
    "onlyWalk": []
   }
  },
  "instances": 221,
- "distinct": 51,
- "nota": "6 semi, 3 × 3 luoghi, 5 piani (lab/scripts/strutture-modulari.ts -- --semi 6 --foto --json); walks e instances sul tessuto «massa e regola 10» del seme 1; tempi di una macchina carica"
+ "distinct": 61,
+ "nota": "6 semi, 3 × 3 luoghi, 5 piani, 25 tasselli (lab/scripts/strutture-modulari.ts -- --semi 6 --foto --json); walks, overlay e instances sul seme 1; tempi di una macchina carica"
 }

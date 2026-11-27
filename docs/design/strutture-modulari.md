@@ -22,7 +22,7 @@ nel codice: `Brick`, `BrickSet`, `Bay`, `Fabric`, `Massing`, `baseFabric` (§ 12
 
 1. **Si può fare, e il risolutore c'è già.** Quello della `wfc` di MarkovJunior (`WfcSolver` in `src/mj/wfc.ts`, ADR-0174) prende così com'è un
    set di tasselli: i motivi (ogni vano di un tassello con le sue rotazioni), i pesi, il propagatore, i divieti iniziali, i tentativi da un
-   seme. Il prototipo tesse 3 × 3 luoghi di `neapolis` (27 × 27 vani, 5 piani) in 3-5 s in Node (23 s col collaudo della regola 10), **senza
+   seme. Il prototipo tesse 3 × 3 luoghi di `neapolis` (27 × 27 vani, 5 piani) in circa 3 s in Node (15 s col collaudo della regola 10), **senza
    mai un bordo che non combacia fra due luoghi e con lo stesso risultato in qualunque ordine i luoghi entrino nel mondo** (su ogni seme).
 2. **Le facce non si dichiarano: il kernel le legge dai voxel.** Una faccia di un vano è aria, muro, parapetto, passaggio (alla sua quota) o
    porta; due vani possono stare accanto secondo una tabella del kernel che è la regola 10 in piccolo (una porta non dà mai sul vuoto né su un
@@ -36,10 +36,10 @@ nel codice: `Brick`, `BrickSet`, `Bay`, `Fabric`, `Massing`, `baseFabric` (§ 12
    modifica del tessuto di base** — angoli, poi bordi, poi interni dei luoghi, ognuno coi margini fissati al tessuto di base e accettato solo se
    tutte le sue stanze restano raggiungibili, altrimenti resta il tessuto di base. È il metodo di Boris the Brave («modifying in blocks») e di
    marian42 2023, posato sulla griglia dei luoghi come oggi i varchi. Risultato: **0 coppie di vani incompatibili, 0 regioni perse, stesso
-   risultato in ogni ordine; stanze raggiunte il 94 % a terra e l'86 % in alto** (il tessuto di base da solo il 99 %).
+   risultato in ogni ordine; stanze raggiunte il 92 % a terra e l'83 % in alto** (il tessuto di base da solo il 99 %).
 5. **Le trappole trovate**: un tassello con due capi che vogliono un seguito (il ponte) fa catene senza fine su una fila di vani bassi — il
    «tunnel infinito» di marian42: i ponti li deve dichiarare la massa; due bordi che immaginano in due modi lo stesso vano dell'interno rompono
-   l'interno (coi margini liberi il 12 % delle regioni resta senza soluzione e un quartiere ha centinaia di coppie incompatibili): i margini
+   l'interno (coi margini liberi il 14 % delle regioni resta senza soluzione e un quartiere ha centinaia di coppie incompatibili): i margini
    vanno fissati al tessuto di base; una porta d'angolo è chirale (le sole rotazioni non bastano); una scala si prova col cammino del kernel,
    non con le facce (la chiocciola in 2 × 2 caselle non si sale; il pianerottolo dev'essere più profondo dell'impronta del corpo; sotto la prima
    rampa ci vuole pieno).
@@ -163,7 +163,7 @@ porta-angolo-sp.   P2 P2 W D2 needs F        nucleo-2 0,1,0     W W W L L O
 porta-testa        W W P2 D2 needs F         nucleo-2 0,0,1     D2 L W W needs L
 villetta           W W W D2 needs F          nucleo-2 0,1,1     W W W L needs L
 loggia             P2 P2 P2 R needs F        (nucleo-3 e nucleo-4 uguali, con un piano o due in più)
-cemento-muro       P2 P2 P2 W needs F
+cemento-muro       P2 P2 P2 W needs F        tetto-isola        R R R R open F
 ```
 
 ### 4.3 I controlli di un set
@@ -176,7 +176,8 @@ Ciò che il kernel chiede a un set prima di prenderlo (nel prototipo i primi tre
    d'angolo) vuole la sua immagine allo specchio nel set, o il kernel la genera (MarkovJunior genera le otto simmetrie di una tessera,
    `squareSymmetries`); il prototipo ha dovuto aggiungere `porta-angolo-specchio`;
 4. **il tessuto di base esiste**: per una massa di prova il kernel sa vestirla senza onda (§ 5.2); se il set non ha i vani che servono (una
-   stanza con un muro, con due, la porta su una strada…) non passa;
+   stanza con un muro, con due, la porta su una strada…) non passa; nel prototipo l'ha trovato la sovraimpressione: una villetta in piedi in un
+   cortile alza da sola la sua colonna, e il suo tetto vuole il parapetto su quattro lati (`tetto-isola`, aggiunto);
 5. **le scale si salgono col cammino del kernel** (`walkIn`), da sole e nel tessuto: le facce dicono dove si entra, non se si sale. Il prototipo
    ha trovato tre modi di sbagliare una scala che le facce non vedono (§ 7.3).
 
@@ -246,7 +247,7 @@ calcolano una volta e si tengono finché un luogo che li usa è caricato. Il ris
 | che cosa resta | niente di ciò che c'era: il tessuto prende i lotti (o il lotto di un blocco di luoghi) | le strutture che ci sono, come vani fissi |
 | i vincoli | la massa, le strade e i varchi del luogo | in più le case in piedi (vani fissi coi loro muri e il tetto), le loro porte mai chiuse, le strade a terra solo strada o portico |
 | che cosa aggiunge | un complesso al posto delle villette | piani sopra (le sopraelevazioni), portici e ponti sulle strade, logge, terrazze |
-| nel prototipo | i 3 × 3 luoghi con la massa | 56 villette in piedi, tenute tutte, 27 con una stanza sopra (seme 1, senza massa) |
+| nel prototipo | i 3 × 3 luoghi con la massa | sulla massa, col tessuto di base e il collaudo: 37 villette in piedi (una ogni tanto sui lotti lungo le strade), tenute tutte, 21 con una stanza sopra; stanze raggiunte il 92 % a terra e il 75 % in alto (seme 1) |
 | dove prima | sul lotto di un blocco di luoghi (ADR-0206/0208): luoghi ancora bozze, il piano del kernel, niente da rompere | su luoghi già pianificati, dopo la sostituzione |
 
 **Le tre scale del tessuto** (la stessa macchina):
@@ -265,15 +266,15 @@ delle forme (una per motivo e per seme). Il renderer disegna una `InstancedMesh`
 
 ### 7.1 Che cosa ha misurato il prototipo
 
-Sul quartiere di 3 × 3 luoghi (27 × 27 vani, 5 piani, 6 semi), i vani «coperti» (stanze, scale, nuclei) raggiunti dalle strade sul grafo dei
+Sul quartiere di 3 × 3 luoghi (27 × 27 vani, 5 piani, 6 semi, i 25 tasselli del prototipo), i vani «coperti» (stanze, scale, nuclei) raggiunti dalle strade sul grafo dei
 tasselli:
 
 | | stanze a terra | stanze sopra | scale e nuclei | regioni senza soluzione | coppie incompatibili | s per 3 × 3 luoghi |
 |---|---|---|---|---|---|---|
-| WFC libero | 87 % | 1 % | 19 % | 0 su 294 | 0 | 4,8 |
-| massa e nuclei, margini liberi | 62 % | 58 % | 70 % | 34 su 294 | 2 565 | 12,7 |
-| massa, nuclei e tessuto di base | 60 % | 45 % | 59 % | 0 su 294 | 0 | 4,6 |
-| **massa, nuclei, tessuto di base e collaudo della regola 10** | **94 %** | **86 %** | **90 %** | 75 su 294 (resta la base) | **0** | 23,1 |
+| WFC libero | 84 % | 1 % | 24 % | 0 su 294 | 0 | 2,9 |
+| massa e nuclei, margini liberi | 71 % | 68 % | 80 % | 40 su 294 | 3 102 | 8,8 |
+| massa, nuclei e tessuto di base | 59 % | 42 % | 53 % | 0 su 294 | 0 | 2,8 |
+| **massa, nuclei, tessuto di base e collaudo della regola 10** | **92 %** | **83 %** | **86 %** | 74 su 294 (resta la base) | **0** | 15,5 |
 | il tessuto di base da solo (seme 1) | 99 % | 99 % | 99 % | — | 0 | — |
 
 (I numeri di ogni seme nel [README del prototipo](../../lab/strutture-modulari/README.md); i tempi sono di una macchina carica di altri agenti.)
@@ -281,9 +282,11 @@ Ciò che resta irraggiungibile col collaudo viene dalla finestra: una regione ac
 bordo non sempre porta fuori.
 
 **Il grafo dei tasselli contro il cammino del kernel** (`walkIn` sui voxel del luogo di mezzo e di un vano attorno, 352 × 352 × 160 voxel, 1-3
-s): sul tessuto col collaudo i due concordano su 152 vani, il grafo ne dà 14 in più (il vano della tromba delle scale in cima a un nucleo, che a
-quel piano non ha pavimento, e tetti raggiunti per vie fuori dalla finestra del cammino), il cammino nessuno. Il grafo è il controllo veloce, il
-cammino quello vero, come oggi nei controlli dello Scultore.
+s): sul tessuto col collaudo i due concordano su 139 vani, il grafo ne dà 15 in più e il cammino 5. Le differenze stanno sul bordo della finestra
+del cammino (vie che passano fuori dalla finestra, che il grafo vede e il cammino no; la terra fuori dalla finestra, che il cammino prende per
+aperta e da cui entra in un nucleo che nel quartiere dà su un cortile chiuso) e nel vano in cima alla tromba di un nucleo, che a quel piano non
+ha pavimento. Il grafo è il controllo veloce, il cammino quello vero, come oggi nei controlli dello Scultore: nel gioco il cammino girerebbe sul
+luogo intero coi vicini caricati.
 
 ### 7.2 Le porte e le catene
 
@@ -320,17 +323,17 @@ ADR-0247); un quartiere tessuto, nessuno.
 
 | | tempo | note |
 |---|---|---|
-| leggere le facce di 24 tasselli (149 motivi, 70 918 coppie nel propagatore) | 0,2-0,3 s | una volta per set |
-| un angolo / un bordo / un interno | 3 / 15 / 70 ms col WFC libero; 45 / 230-340 / 1 800 ms con la massa e il collaudo | un luogo = un interno, più metà dei suoi bordi e un quarto dei suoi angoli |
-| 3 × 3 luoghi col tessuto di base | 2,7-4,8 s | 49 regioni |
-| 3 × 3 luoghi col collaudo della regola 10 | 23 s in media | il collaudo scarta semi: da ridurre (M2) |
+| leggere le facce di 25 tasselli (153 motivi, 76 118 coppie nel propagatore) | 0,2-0,3 s | una volta per set |
+| un angolo / un bordo / un interno | 3 / 15 / 70 ms col WFC libero; 30 / 160-250 / 1 150 ms con la massa e il collaudo | un luogo = un interno, più metà dei suoi bordi e un quarto dei suoi angoli |
+| 3 × 3 luoghi col tessuto di base | 2,8-4,6 s | 49 regioni |
+| 3 × 3 luoghi col collaudo della regola 10 | 15-23 s (secondo il carico) | il collaudo scarta semi: da ridurre (M2) |
 | il cammino del kernel su un luogo e un vano attorno (20 milioni di voxel) | 1-3 s | il controllo finale |
 
 Un luogo tessuto costa quindi 0,3-3 s di kernel quando entra in raggio, a turni nel ciclo come oggi i programmi delle forme (`TurnRunner`) o in
 un worker. Il collaudo del prototipo è ingenuo (rifà l'onda intera a ogni seme scartato): un'onda che conosce i passaggi (il vincolo di
 connessione di DeBroglie, o il `path` di ModernHouse dopo l'onda) lo porterebbe vicino al tempo senza collaudo.
 
-**La memoria e lo schermo**: un luogo tessuto è 405 indici (810 byte); 220-395 vani non vuoti di 48-83 motivi diversi. Le forme sono una per
+**La memoria e lo schermo**: un luogo tessuto è 405 indici (810 byte); 220-395 vani non vuoti di 48-83 motivi diversi (col collaudo, seme 1: 221 di 61 motivi di 19 tasselli). Le forme sono una per
 motivo (32 768 celle, qualche decina di millisecondi), nella cache; a schermo una `InstancedMesh` per motivo: decine di draw call per luogo
 invece di una mesh di 13 milioni di voxel.
 
@@ -407,7 +410,7 @@ tessuti, raggiungibili o no; (D6) chi scrive i set e quanti per universo; (D7) i
   non misurati. I tempi sono di una macchina carica (altri agenti in parallelo).
 - **Il rilievo**: il prototipo è in piano; col rilievo vero (ADR-0256) la massa dovrebbe stare sulle terrazze (`onTerrace`) o i tasselli avere
   quote diverse (le toppe a gradini di marian42 2023).
-- **La regola 10 globale**: il collaudo guarda la finestra della regione; il 6-14 % di stanze non raggiunte viene da lì. Un collaudo sul luogo
+- **La regola 10 globale**: il collaudo guarda la finestra della regione; l'8-17 % di stanze non raggiunte viene da lì. Un collaudo sul luogo
   intero, o la connessione dopo l'onda, sono da provare in M2. I cortili chiusi (strada senza uscita in mezzo a un lotto) non sono contati.
 - **Le carte**: il set come carta, il viaggio con le carte portate, il clone: descritti, non fatti.
 - **I riferimenti**: il post di r/Unity3D non letto; PlanetSmith non dice come genera.

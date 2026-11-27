@@ -62,9 +62,9 @@ export interface Massing {
  * The background: the massing dressed without a wave, valid everywhere by construction (modifying in blocks starts from one). A column of a
  * block has corner rooms (walls towards the other blocks, open towards its own), one with a door on a street or a yard if the block touches
  * one, the core turned with its door into the block, a roof with parapets towards the others; a street or a yard the paving and the sky.
- * Without a massing, the paving and the sky.
+ * Without a massing, the paving and the sky. The houses that stand already (`standing`, the overlay) are in it as they are, on the ground.
  */
-export function baseFabric(set: BrickSet, massing?: (gx: number, gy: number) => Massing): (gx: number, gy: number, z: number) => number {
+export function baseFabric(set: BrickSet, massing?: (gx: number, gy: number) => Massing, standing?: (gx: number, gy: number) => number | undefined): (gx: number, gy: number, z: number) => number {
   const byName = new Map<string, Pattern[]>();
   for (const p of set.patterns) byName.set(p.brick.name, [...(byName.get(p.brick.name) ?? []), p]);
   const sides = (names: string[], want: string[]) => {
@@ -76,7 +76,7 @@ export function baseFabric(set: BrickSet, massing?: (gx: number, gy: number) => 
   };
   const ROOMS = ['sala', 'stanza-muro', 'stanza-angolo', 'stanza-corridoio', 'stanza-testa'];
   const DOORS = ['porta-muro', 'porta-angolo', 'porta-angolo-specchio', 'porta-testa', 'villetta'];
-  const ROOFS = ['tetto', 'tetto-bordo', 'tetto-angolo', 'ponte', 'tetto-testa'];
+  const ROOFS = ['tetto', 'tetto-bordo', 'tetto-angolo', 'ponte', 'tetto-testa', 'tetto-isola'];
   const strada = byName.get('strada')![0].index, aria = byName.get('aria')![0].index;
   const cache = new Map<string, number>();
   return (gx, gy, z) => {
@@ -85,7 +85,9 @@ export function baseFabric(set: BrickSet, massing?: (gx: number, gy: number) => 
     if (hit !== undefined) return hit;
     let out: number;
     const m = massing?.(gx, gy);
-    if (!m || m.h === 0) out = z === 0 ? strada : aria;
+    const stands = z === 0 ? standing?.(gx, gy) : undefined;
+    if (stands !== undefined) out = stands;
+    else if (!m || m.h === 0) out = z === 0 ? strada : aria;
     else if (z > m.h) out = aria;
     else if (m.core && z < m.h) out = set.patterns.find((p) => p.brick.name === m.core && p.rot === 0 && p.cell[1] === m.half && p.cell[2] === z)!.index;
     else {

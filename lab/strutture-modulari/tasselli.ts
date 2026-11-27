@@ -252,6 +252,8 @@ export const BRICKS: Brick[] = [
   { name: 'tetto-angolo', size: [1, 1, 1], weight: 1.5, where: 'above', covered: false, build: roof([NY, PX], 'antenna') },
   { name: 'ponte', size: [1, 1, 1], weight: 0.6, where: 'above', covered: false, build: roof([NY, PY]) },
   { name: 'tetto-testa', size: [1, 1, 1], weight: 0.8, where: 'above', covered: false, build: roof([NY, PX, PY]) },
+  // The roof of a column alone (a house that stands in a yard): the base fabric wants it (T522: the overlay found it missing).
+  { name: 'tetto-isola', size: [1, 1, 1], weight: 0.2, where: 'above', covered: false, build: roof([NY, PX, PY, NX], 'antenna') },
   { name: 'scala', size: [1, 2, 2], weight: 0.5, where: 'any', covered: true, build: stair },
   // The cores: only where the massing puts them (tessuto.ts), from the ground to the top of their block.
   { name: 'nucleo-2', size: [1, 2, 2], weight: 1, where: 'any', covered: true, build: core(2) },
