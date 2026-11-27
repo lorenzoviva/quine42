@@ -1,0 +1,2017 @@
+{
+ "set": "mesa/struttura-locanda",
+ "model": "struttura-locanda",
+ "universe": "mesa",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "bay": {
+  "tiles": 2,
+  "voxels": [
+   32,
+   32,
+   32
+  ],
+  "vpt": 16
+ },
+ "keys": "faces in blocks of 8 voxels along a side and 8 in height, solid or not, the floor inside or outside; top and bottom solid or not in blocks of 4",
+ "bricks": [
+  {
+   "canon": "1x1x1:1ge503pwymvf0",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "yard",
+   "weight": 102,
+   "seeds": [
+    1,
+    2,
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1cedv6i45lx3r",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:15ybrld1am3zs8",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:15k7i291tpak58",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1lube1u1pi564j",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x2:6yzo5f15n00mi",
+   "size": [
+    1,
+    1,
+    2
+   ],
+   "family": "stair",
+   "weight": 1,
+   "seeds": [
+    1
+   ],
+   "bays": 2
+  },
+  {
+   "canon": "1x1x1:15wdd521vmbpyf",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1uifgzpr84qdo",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "air",
+   "weight": 376,
+   "seeds": [
+    1,
+    2,
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1impqxd9nua4c",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1b8eob38nava",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:18b0diz1nubx86",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:11o406vj094bq",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:107elrc1jh6gpt",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:10zpblh1womqb0",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:5tg5wl1v5tfms",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1cgd3wl16hcslo",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:13jf6zj1hybtvu",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1boeft114u4pzw",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1hhmb286fpjq1",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    1
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1228ihfqdq0pm",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1ja6bvp1qjqkj0",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1bf0d9l1f8pcn4",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "yard",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16bd06nqrvzyy",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1fhpz43cjpi1",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1bk3f8l196wvkk",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1mq132lshrz8k",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x2:148d72x13bw2ww",
+   "size": [
+    1,
+    1,
+    2
+   ],
+   "family": "stair",
+   "weight": 1,
+   "seeds": [
+    2
+   ],
+   "bays": 2
+  },
+  {
+   "canon": "1x1x1:1kqg63v16rg4eu",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1g2a8bv1js94eu",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:12zp6zv8crum2",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16nxyi11bxko80",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:13bjd6g1o22a3x",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1qwmu4rqm9rqi",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1bdup46193aicz",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:68whsvn3kg1e",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16qnmjf1cczh5i",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1h15zvlzmjeg0",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:12ubg4ljtr8n8",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:152b3s29ny217",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:11ao9zx1iplnks",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:15ewx0y6si8vj",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    2
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1o7typ0ptj5il",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16l2adhc7viy8",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1elzy8s78liol",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "yard",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16v1z18viucy5",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1hshgrr1ecgg8a",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:11uvx93q754mq",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "yard",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x2:1bax3k5152dtc4",
+   "size": [
+    1,
+    1,
+    2
+   ],
+   "family": "stair",
+   "weight": 1,
+   "seeds": [
+    3
+   ],
+   "bays": 2
+  },
+  {
+   "canon": "1x1x1:14780q31ixnyaq",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1wevc05y2ilu8",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:17h0dyx1qnn4pg",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1e7k5qndjgiu2",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1vd2joflu7z0y",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1irvse5w51kbo",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:191126l1x221x4",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:15lks6yvjyaz",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:142zkz7zd2zki",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1cnpa7z1bmqe6y",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1gupeo51wx0o2o",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1bbi2v31aql7gy",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:166r8zv1evw4je",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1h2jbl38u1a7i",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:14vevp51ca73tk",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "roof",
+   "weight": 2,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1vhi1ks1rm9f1p",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:1hxmgu91q75v6g",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  },
+  {
+   "canon": "1x1x1:16n3nh261m1gb",
+   "size": [
+    1,
+    1,
+    1
+   ],
+   "family": "room",
+   "weight": 1,
+   "seeds": [
+    3
+   ],
+   "bays": 1
+  }
+ ],
+ "signatures": [
+  {
+   "roles": "SY",
+   "family": "yard",
+   "start": "r",
+   "weight": 96,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "YS",
+   "family": "yard",
+   "start": "r",
+   "weight": 4,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "qH",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "QB",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "A",
+   "family": "air",
+   "start": "x",
+   "weight": 376,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 1
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    1,
+    0,
+    1
+   ],
+   "up": 1,
+   "down": 1
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    0,
+    1
+   ],
+   "up": 0,
+   "down": 1
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "Y",
+   "family": "yard",
+   "start": "r",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    1,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "qH",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "QB",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 1
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    1
+   ],
+   "up": 1,
+   "down": 1
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    1,
+    0,
+    0
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    1,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 1
+  },
+  {
+   "roles": "S",
+   "family": "street",
+   "start": "r",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "Y",
+   "family": "yard",
+   "start": "r",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "Y",
+   "family": "yard",
+   "start": "r",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "qH",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "QB",
+   "family": "stair",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    0,
+    1
+   ],
+   "up": 1,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "up": 0,
+   "down": 1
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    1,
+    1,
+    0,
+    1
+   ],
+   "up": 0,
+   "down": 1
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "u",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "R",
+   "family": "roof",
+   "start": "x",
+   "weight": 2,
+   "bays": 1,
+   "doors": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    1,
+    0,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "H",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 0
+  },
+  {
+   "roles": "B",
+   "family": "room",
+   "start": "u",
+   "weight": 1,
+   "bays": 1,
+   "doors": [
+    0,
+    1,
+    1,
+    0
+   ],
+   "up": 0,
+   "down": 1
+  }
+ ]
+}

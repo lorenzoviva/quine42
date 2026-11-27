@@ -7,7 +7,9 @@ Nasce da T458 (le parti del mondo, [`scultori-specializzati.md`](scultori-specia
 di più luoghi), ADR-0174 e ADR-0176 (`wfc` nel motore e nel mondo), T500 ([`markov-allineamento.md`](markov-allineamento.md): la `wfc` che
 diverge apposta) · Prototipo: [`lab/strutture-modulari/`](../../lab/strutture-modulari/README.md), `npx vite-node lab/scripts/strutture-modulari.ts` ·
 **Seconda prova (T543, 27/11)**: [`lab/strutture-modulari/grande/`](../../lab/strutture-modulari/grande/README.md),
-`npx vite-node lab/scripts/strutture-modulari-grandi.ts`; il riquadro qui sotto, il § 10.2 e la catena nuova nel § 11.
+`npx vite-node lab/scripts/strutture-modulari-grandi.ts`; il riquadro qui sotto, il § 10.2 e la catena nuova nel § 11. **Terza prova (T557,
+27/11)**: [`lab/strutture-modulari/estratti/`](../../lab/strutture-modulari/estratti/README.md), `npx vite-node lab/scripts/strutture-modulari-estratte.ts`;
+il primo riquadro, il § 12 e la catena ripianificata nel § 11.
 
 Niente codice del gioco: lo studio dice che cosa servirebbe, perché, quanto costa e in che ordine; ogni fatto sul kernel di oggi (0.10.x) è
 letto nel codice, col file. Il codice nuovo sta solo in `lab/`: un set di tasselli nello stile delle palazzine di `neapolis`, la lettura delle
@@ -18,7 +20,37 @@ cambiato.
 tessuto, un programma della grandezza di uno o più **vani** (il vano: 2 × 2 caselle e un piano); il **set di tasselli** è ciò che lo Scultore
 scrive una volta per stile; il **tessuto** è ciò che il kernel compone coi tasselli sopra i luoghi; la **massa** è lo scheletro che lo precede
 (quanti piani ha ogni colonna, dove salgono le scale); il **tessuto di base** è la massa vestita senza onda, valido per costruzione. In inglese
-nel codice: `Brick`, `BrickSet`, `Bay`, `Fabric`, `Massing`, `baseFabric` (§ 12).
+nel codice: `Brick`, `BrickSet`, `Bay`, `Fabric`, `Massing`, `baseFabric` (§ 13).
+
+## Dopo la terza prova (T557, 27/11)
+
+L'autore ha risposto a D/T543 il 27/11 (A a D1, D2, D4, D5; D3 così; D6 A senza la «serie»; D7 A, ma i set crescono a mondo acceso e un pianeta
+ha più tipi di edificio) correggendo la seconda prova in sei punti: un set è **un modello, un programma MarkovJunior**; **solo la parte
+edilizia**; **una cinquantina di tasselli per edificio**; i tasselli **si estraggono dai modelli statici** che il Concilio ha scritto usando
+MarkovJunior come un CAD; **la massa è parte del modello**; **la ricucitura è in MarkovJunior**, nel modello, e cambia col seme; e in posti come
+`mesa` **taverne di al più tre piani**, con una massa e un set loro. La terza prova (§ 12, [`lab/strutture-modulari/estratti/`](../../lab/strutture-modulari/estratti/README.md))
+fa tutto questo, senza chiamate. In breve:
+
+1. **Due set estratti** da due modelli statici sul disco: la «Palazzina di tufo (grande)» di `neapolis` (Opus 5.5, 4 semi) dà **49 tasselli**, la
+   «Locanda del Cinghiale» di `mesa` (la taverna che il Far West indossa, 3 semi) **65**. L'estrattore taglia il modello nei vani di T522/T543
+   (32 voxel, il solaio in fondo a ogni vano), toglie antenne, panni, botti, panche e comignoli, legge le facce dai voxel e unisce in un tassello
+   di più vani ciò che una scala attraversa.
+2. **Ogni set è un programma solo** (`programmi/neapolis.xml`, 19 mila caratteri; `programmi/mesa.xml`, 25 mila): la **massa** (palazzine sole di
+   2 × 2 a 4 × 4 vani, da uno a tre piani; per `mesa` piccoli edifici sul fronte della strada maestra, uno-due piani e a volte tre, lotti vuoti),
+   l'**onda** sulle firme del set, la **ricucitura scritta in MarkovJunior** (porte, rampe interne e **scale esterne** aperte una alla volta a caso,
+   finché niente si raggiunge più), la **vestizione** (una `map`) e i **voxel**. Gira sul motore del gioco **dentro i tetti del mondo**, su un lotto
+   e sul lotto di un blocco (480 voxel di lato) in **0,35-0,7 s**, la ricucitura in 2-6 ms.
+3. **La regola 10**: la ricucitura MJ porta il **pian terreno al 100 %** (l'onda sola 45-82 %) e i **piani alti all'85-93 %** (l'onda sola 0-13 %);
+   quella del kernel di T543 sulla stessa onda non apre quasi niente (con i tasselli estratti non c'è un vano diverso con un passaggio in più:
+   ricucire vuol dire scolpire). Il **cammino del kernel** sui voxel conferma il grafo in `neapolis` (142 vani su 143); in `mesa` 8 vani su 76
+   sono raggiunti solo sul grafo, oltre una rampa interna.
+4. **Quello che costa**: il taglio a vani regolari attraversa i ritmi della sorgente (le finestre ogni 10 voxel, i vani ogni 32), quindi le facce
+   reggono solo come pieno o vuoto in blocchi di 8 voxel (qualche finestra tagliata a metà); una scala in un angolo rende unica la facciata che
+   tocca (serve la copia della sorgente senza scale); 255 simboli in un programma bastano solo senza le quattro rotazioni; la locanda (pianta a
+   L, falde a più altezze) si ricompone meno della palazzina e 3 semi su 8 del suo blocco l'onda li rifiuta (da collaudare).
+5. **La catena** (§ 11) è ripianificata: l'estrattore nel kernel, il complesso dell'Architetto con la ricucitura MJ generata dal set, i set che
+   crescono a mondo acceso (uno all'arrivo su un pianeta, poi altri, più tipi di edificio per pianeta), le masse per ambientazione, niente serie
+   allo stesso seme; le domande in [`docs/pipeline/domande/T557.md`](../pipeline/domande/T557.md).
 
 ## Dopo la seconda prova (T543, 27/11)
 
@@ -546,28 +578,134 @@ lo stesso seme, a metà dei voxel), `via-a-quartiere.png` e `via-a-ricucita-quar
 `via-a-blocco.png` (il lotto di un blocco a tutti i voxel, da due lati), `via-b-luogo-di-mezzo.png`, `via-a-popolare-villa.png` e
 `via-b-popolare-villa.png` (gli altri due stili), `catalogo-<stile>.png` (i 50 tasselli di ogni stile).
 
-## 11. La catena dei task (ripianificata dopo T543, da approvare)
+## 11. La catena dei task (ripianificata dopo T557, da approvare)
 
-La catena M1-M8 di T522 era scritta per la via B (il tessitore del kernel). Dopo la seconda prova (§ 10.2) e le risposte del 27/11 (la via A, la
-massa dell'Architetto, stanze più grandi, i tetti raggiungibili, tanti set per universo e per pianeta) la sostituisce questa, con la via A prima e
-la B rimandata:
+La catena M1-M7 di T543 era scritta per tasselli che l'Architetto avrebbe scritto da zero, coi nuclei scala e la ricucitura nel kernel. Le
+risposte del 27/11 a D/T543 e la terza prova (§ 12) la cambiano: i tasselli si **estraggono** dai modelli statici della libreria (nessuna
+chiamata in più per un set), un set è **un programma** con la sua massa e la sua **ricucitura in MarkovJunior**, le masse sono **per
+ambientazione**, i set **crescono a mondo acceso** e **niente serie** allo stesso seme. La sostituisce questa:
 
 | | task | provider · sforzo · stima | dipende da |
 |---|---|---|---|
-| M1 | **Il set come dato del kernel, le facce lette dal kernel**: il formato del set (un `<tileset>` i cui tasselli sono programmi, `models/tassello-<set>-<nome>.xml`, coi pesi, le lettere della massa che ognuno accetta, `covered`, `spans`, il fusto dei nuclei: un'estensione nostra della `wfc`, come `<pieces>`, D2); la lettura delle facce dai voxel con le regole della seconda prova (dentro e fuori, dove sta il varco, la porta che incontra solo una porta o l'esterno, il pavimento letto anche dal vano sotto) e il propagatore dalle chiavi delle facce, in `src/kernel/bricks.ts` (da `lab/strutture-modulari/grande/facce.ts`); i controlli del set (un vicino per lato, i passaggi fuori che si chiudono, l'angolo di una stanza, le porte in mezzo ai lati, le scale col cammino del kernel); i tetti del validatore (D5); il glossario (§ 12); i test sulla palazzina di T543 riscritta come programmi, che è anche il set offline | claude · high · 6% | risposte D1, D2 |
-| M2 | **Il complesso dell'Architetto (la via A nel gioco)**: un modello della classe `structure` fatto di una massa (un programma MarkovJunior, D3 B) e di una `wfc` sul set, su un lotto e sul lotto di un blocco di luoghi (ADR-0206/0208); il motore che consegna, accanto alla griglia, il motivo di ogni vano della sua `wfc`; **la ricucitura dopo l'onda** nel kernel (`lab/strutture-modulari/grande/ricucitura.ts`); i semi del modello collaudati come oggi (la regola 10 sul grafo dei vani e col cammino del kernel, i tetti raggiunti misurati, non obbligatori, D4); **i tetti raggiungibili nel gioco**: il kernel tiene già in piedi un corpo sul tetto di una forma (`floorAt`, «il pavimento sopra, il tetto», T53b) e taglia ciò che sta sopra i piedi dentro una struttura, qui si prova e si sistema ciò che manca (il passo del server, il client sottile, la camera); il rendering a istanze per motivo; la verifica nel browser (entrare dal portone, salire il nucleo, uscire dal torrino sul tetto) | claude · max · 8% | M1 |
-| M3 | **L'Architetto dei set**: la sezione dei tasselli nel prompt dell'Architetto (il vano, la tabella delle facce, le misure del corpo, le tre trappole delle scale, le porte in mezzo ai lati, le stanze di nove fette, i corridoi a porte; i tetti: un torrino in cima a ogni nucleo, la scala esterna, le porte sui terrazzi, i parapetti verso l'aria; la massa come programma), la richiesta e la risposta (il set e la sua massa), i controlli (facce, chiusura, angolo, scale col cammino, una massa di prova tessuta e ricucita), il motivo che torna; il censimento e la manopola; il set come carta che viaggia con le carte portate (ADR-0243) | claude · high · 6% | M1, M2 |
-| M4 | **Tanti set a mondo acceso e le concentrazioni**: il Cartografo sceglie un complesso fra quelli del mondo (col seme del luogo, ADR-0247) o chiede un set nuovo all'Architetto, dentro le strutture nuove all'ora della lobby (`ai.newStructuresPerHour`); le concentrazioni per regione dell'atlante o del master (ADR-0201): i modelli e i loro pesi, la **serie** (lo stesso modello allo stesso seme ripetuto: le case popolari tutte uguali), mai lo stesso modello oltre una soglia attorno (D6) | claude · xhigh · 6% | M2, M3 |
-| M5 | **La prova pagata**: l'Architetto vero (Opus 5.5) scrive due o tre set (le palazzine brutaliste di `neapolis`, le case popolari, una stazione del vuoto) con le loro masse; i complessi su qualche lotto e blocco, ricuciti; il voto dell'Artista, il costo | claude · high · 3% (più la prova pagata) | M3, M4 |
-| M6 | **I set per pianeta e le stazioni del vuoto**: la libreria dei set per fascia (ADR-0236), il Cartografo che sceglie per pianeta, l'Architetto che scrive i set di un pianeta nuovo con la sua natura e la sua epoca; la stazione del vuoto (ADR-0233) di tasselli; da lontano i complessi nel globo (la massa del modello, dipinta nei livelli grossi) | claude · high · 5% | M4 |
-| M7 | **(Rimandato, D1) Il tessitore sopra i luoghi**: la via B coi set della via A, solo se serviranno quartieri senza cuciture fra i luoghi o la sovraimpressione sulle villette che ci sono: un collaudo della regola 10 meno ottimista della finestra di una regione, la ricucitura che resti uguale in ogni ordine, la sovraimpressione (M5 di T522) | claude · max · 9% | M2, risposta D1 |
+| M1 | **L'estrattore nel kernel, il set come dato**: `src/kernel/bricks.ts` da `lab/strutture-modulari/estratti/` (la sorgente eseguita come la esegue il gioco, la parte edilizia, i vani di 32 voxel a 16 per casella, la copia senza scale, il cammino, i tasselli di più vani, le facce lette dai voxel pieno o vuoto in blocchi di 8 col pavimento dentro o fuori e la stanza che vuole un soffitto, le coppie osservate, le firme, le copie per la ricucitura: la porta con la soglia, la rampa e il foro, la scala esterna); il set come dato (`models/<set>.json`: una riga a tassello, da quale modello, seme e vano, mai i voxel: il kernel li rifà dalla forma del modello in cache); i controlli del set (ogni firma ha un vicino per lato; le impronte che la massa può chiedere e che il set regge, misurate); il glossario (§ 13); i test sulla locanda del seme (offline) | claude · high · 6% | risposte D1, D2 di T557 |
+| M2 | **Il complesso nel gioco**: il programma unico (massa, `<wfc set stage="sig">`, ricucitura, vestizione, `<wfc set stage="voxels">`) compilato dal kernel, con le unioni della ricucitura e la vestizione generate dal set (l'Architetto scrive la massa, D2); il motore che esegue le due `wfc` del set; i **semi collaudati** (un seme che l'onda rifiuta passa al seguente; il cammino del kernel sui voxel conferma le scale ricucite, e la rampa interna che non regge si toglie dalle copie); il complesso su un lotto e sul lotto di un blocco (ADR-0206/0208); le mesh per vano a istanze (la vestizione dice il vano di ogni cella); la verifica nel browser (entrare dal portone, salire una scala esterna, uscire su un ballatoio) | claude · max · 8% | M1 |
+| M3 | **Le masse per ambientazione**: la massa come programma dell'Architetto per ambientazione o per regione (le palazzine di una città, le taverne del Far West, al più tre piani dove l'ambientazione lo dice), scritta sulle impronte che il set regge (M1 le misura), coi lotti vuoti e le altezze; la richiesta e la risposta, il controllo su una griglia di prova (i semi rifiutati, le stanze raggiunte), il motivo che torna | claude · high · 5% | M2 |
+| M4 | **I set che crescono a mondo acceso, le concentrazioni**: ogni struttura della libreria che regge l'estrazione diventa un set (all'arrivo su un pianeta uno, poi altri man mano che lo Scultore scolpisce modelli statici, senza chiamate in più; più tipi di edificio per pianeta); il Cartografo sceglie un complesso fra quelli del mondo per regione, coi pesi (D6 A); **mai la serie**: un complesso a ogni seme è un'altra disposizione, un'altra onda, un'altra ricucitura; il kernel non lascia lo stesso set oltre una soglia attorno | claude · xhigh · 6% | M2, M3 |
+| M5 | **La prova pagata**: lo Scultore scolpisce modelli statici fatti per essere tagliati (muri sui lati dei vani, il passo delle finestre sul vano, le scale in un vano loro, il tetto raggiungibile), per esempio le palazzine di `neapolis`, il saloon di `mesa`, una stazione del vuoto; i set estratti, i complessi misurati e fotografati, il voto dell'Artista, il costo | claude · high · 3% (più la prova pagata) | M3, M4 |
+| M6 | **I set per pianeta e le stazioni del vuoto**: la libreria dei set per fascia (ADR-0236), il Cartografo che sceglie per pianeta, la stazione del vuoto (ADR-0233) da un modello statico di stazione; da lontano i complessi nel globo (la massa del modello, dipinta nei livelli grossi) | claude · high · 5% | M4 |
+| M7 | **(Rimandato) Il tessitore sopra i luoghi**: la via B, solo se serviranno quartieri senza cuciture fra i luoghi o la sovraimpressione sulle villette che ci sono | claude · max · 9% | M2, una risposta |
 
-L'ordine: M1 → M2 → M3 → M4 → M5; M6 dopo M4; M7 solo se l'autore lo chiede. In tutto M1-M6 circa il 34 % della scala più la prova pagata
-(la catena di T522 era il 46 %): la via A non chiede il tessitore, il tessuto di base né le regioni sulla griglia dei luoghi. **L'ADR** (da
-scrivere con M1, non prima): i tasselli come programmi con le facce lette dal kernel e la loro tabella; il complesso come modello
-dell'Architetto (massa e `wfc`); la ricucitura dopo l'onda come garanzia della regola 10 dentro il complesso.
+L'ordine: M1 → M2 → M3 → M4 → M5; M6 dopo M4; M7 solo se l'autore lo chiede. In tutto M1-M6 circa il 33 % della scala più la prova pagata. **L'ADR**
+(da scrivere con M1): i set estratti dai modelli statici con le facce lette dal kernel; il complesso come un programma (massa, onda, ricucitura in
+MarkovJunior, vestizione, voxel) con le due `wfc` del set come estensione nostra; la ricucitura in MarkovJunior come garanzia della regola 10 dentro
+il complesso, collaudata dal cammino del kernel.
 
-## 12. I nomi proposti
+## 12. La terza prova (T557): i tasselli estratti dai modelli statici, la ricucitura in MarkovJunior
+
+Il laboratorio è [`lab/strutture-modulari/estratti/`](../../lab/strutture-modulari/estratti/README.md), lo script
+`lab/scripts/strutture-modulari-estratte.ts`; le misure sono la corsa di 8 semi in `misure.json`. Nessun modello è stato chiamato e nessun file del
+gioco è cambiato.
+
+### 12.1 L'estrattore
+
+- **La sorgente** è un modello statico di un universo sul disco eseguito come lo esegue il gioco (`Forms.request`, `runForm`, senza interno), a più
+  semi: la «Palazzina di tufo (grande)» di `neapolis` (Opus 5.5, voto 6, semi 1-4) e la «Locanda del Cinghiale» di `mesa` (dal seme: la taverna che
+  il Far West indossa; un saloon suo `mesa` non l'ha avuto, semi 1-3). Resta la parte edilizia: ciò che la tavolozza chiama mobile o prop (antenne,
+  panni, botti, panche, comignoli, insegne, alberi) e le lettere nascoste diventano aria; le ante delle porte restano, e il cammino le legge aperte
+  (le lettere che l'azione `open` del modello cambia).
+- **I vani** sono quelli di T522/T543: 32 × 32 × 32 voxel a 16 per casella. Il modello si posa sui vani col solaio di ogni piano in fondo al suo
+  vano (le due sorgenti hanno 32 voxel da solaio a solaio) e coi muri dentro i vani, una striscia di terra attorno; la griglia si sposta perché la
+  scala tagli meno lati; attorno un anello di strada e sopra uno strato d'aria: il modello come sta in un lotto. Tutte e due stanno in 3 × 3 vani e
+  tre strati (due piani e il tetto).
+- **La copia senza scale**: la stessa sorgente con la scala tolta sopra ogni solaio e il solaio richiuso. Senza, la scala della palazzina
+  nell'angolo nord-ovest rendeva unica la sua fila di vani («scala, scala, angolo») e nessun palazzo passava i tre vani di larghezza.
+- **I tasselli**: il cammino del corpo nella sorgente (l'impronta di 7 × 7 voxel liscia come la vuole `rampBlocks`, un gradino di 3); i vani che
+  attraversa lontano dal pavimento (una scala da un piano all'altro) sono un tassello di più vani: la palazzina ne ha di 2 × 1 × 2, la locanda di
+  1 × 1 × 2. **49 tasselli** dalla palazzina (35 di stanza, 10 di tetto, 4 scale), **65** dalla locanda (31 di stanza, 27 di tetto, 4 di cortile,
+  3 scale): le falde di una pianta a L a più altezze sono molte.
+- **Le facce lette dai voxel**: un lato è il suo strato di voxel in blocchi di 8 × 8, pieno o no, col pavimento che lo tocca dentro (coperto) o
+  fuori; sopra e sotto in blocchi di 4 × 4, e la faccia di sopra di una stanza dice che vuole qualcosa sopra. **Due facce si incontrano dove la
+  sorgente le mostra insieme** (le coppie osservate, in qualunque vano con la stessa faccia; nella palazzina 21 coppie lungo x, 7 lungo y, 31
+  in verticale), mai per classi transitive.
+- **Le firme**: vani con facce che incontrano le stesse facce, gli stessi passaggi e le stesse lettere della massa sono una firma (56 nella
+  palazzina, 71 nella locanda); l'onda va sulle firme e la scelta del vano dentro la firma viene dopo: è la stessa onda, perché le facce decidono
+  chi incontra chi.
+- **Le copie per la ricucitura**: la porta nel mezzo di ogni lato che un vano non passa (con la soglia dove fuori non c'è pavimento: un
+  ballatoio), la rampa interna dal pavimento al piano di sopra col foro nel solaio di sopra, la scala esterna in un vano di strada che sale contro
+  la facciata accanto (37 copie nella palazzina, 103 nella locanda). La faccia di una copia resta quella del suo vano: la porta non cambia chi
+  incontra chi.
+
+### 12.2 Il programma
+
+Un `<sequence>` solo, eseguito una volta: la **massa**; l'**onda sul set** (`<wfc set stage="sig" tries="100">`, una cella a vano, il motivo è la
+firma e, sopra, lo stato da cui parte la ricucitura: la griglia diventa due strati a piano); la **ricucitura in MarkovJunior** (un `<markov>`: un
+`<all>` di 73 regole sparge il raggiunto per i passaggi, le porte e le scale aperte; un `<one>` di 16 apre una porta a caso fra un vano raggiunto
+e uno da raggiungere; un `<one>` di 5 mette una scala, la rampa interna o la scala esterna; da capo, finché niente si raggiunge più); la
+**vestizione** (una `<map scale="1 1 1/2">` che dalla firma e dallo stato scrive la lettera del vano: com'è, con la porta, con la rampa, col foro,
+con la scala esterna); i **voxel** (`<wfc set stage="voxels" tries="1">`, ogni vano della sua lettera scelto a peso). La vestizione riusa i
+simboli delle firme (scrive una griglia nuova): il programma sta nei 255 simboli del motore con 123 (`neapolis`) e 208 (`mesa`). I testi sono in
+`programmi/` (19 e 26 mila caratteri). Le due `wfc` sono l'estensione D2 A; il resto compila col compilatore del gioco ed esegue nei tetti del
+mondo (`worldNodeErrors` non dice niente; `FORM_LIMITS` e `WORLD_NODE_LIMITS` nella corsa).
+
+### 12.3 Le misure (8 semi)
+
+«Senza» è l'onda sola, «MJ» la ricucitura del programma, «T543» la ricucitura del kernel della seconda prova fatta sulla stessa onda (rivestire due
+vani con firme della stessa famiglia che incontrano ancora i vicini e passano: nessuna porta scolpita). Sul grafo dei vani, dall'anello di
+strada; «sopra» sono le stanze dei piani alti.
+
+| set | terreno | semi fatti | ms (massa · onda · ricucitura · voxel) | pian terreno senza / MJ / T543 | piani alti senza / MJ / T543 | scale | tetti MJ | porte, scale dentro, fuori | tasselli usati, bit |
+|---|---|---|---|---|---|---|---|---|---|
+| neapolis | lotto | 8/8 | 345 (1 · 6 · 2 · 337) | 56 / **100** / 56 % | 13 / **93** / 13 % | 100 % | 66 % | 3, 0,5, 0,9 | 21 di 49, 4,2 |
+| neapolis | blocco | 8/8 | 424 (3 · 17 · 6 · 399) | 45 / **100** / 45 % | 12 / **85** / 12 % | 100 % | 41 % | 20, 1,6, 8,9 | 41 di 49, 5,0 |
+| mesa | lotto | 8/8 | 596 (1 · 10 · 3 · 582) | 70 / **100** / 87 % | 0 / **85** / 0 % | 100 % | — | 2,3, 0,1, 0,4 | 11 di 65, 1,6 |
+| mesa | blocco | 5/8 | 681 (4 · 47 · 5 · 624) | 82 / **100** / 92 % | 1 / **86** / 3 % | 100 % | — | 13, 1,8, 1,8 | 28 di 65, 2,8 |
+
+Accanto a T543 (la via A ricucita nel kernel, sul lotto di un blocco: pian terreno 100 %, piani alti 99 %, tetti 95 %, 46 tasselli su 50, 4,8 bit):
+la ricucitura in MarkovJunior porta il pian terreno allo stesso 100 % e i piani alti all'85-93 % con tasselli che non hanno nuclei scala né torrini
+(le scale vengono dal tassello della scala dove sta, dalla rampa interna e soprattutto dalla scala esterna); la ricucitura del kernel di T543 sulla
+stessa onda non apre quasi niente (0-1,2 vani rivestiti a corsa). I tetti: la palazzina non ha accesso al tetto, quelli raggiunti (41-66 %) lo sono
+per le porte fra un tetto e una stanza più alta accanto; le falde della locanda non si camminano. Le stanze: 24 per blocco nella palazzina (la più
+grande di 16 vani), 30 nella locanda (6 vani). **Il cammino del kernel** (`walkIn`, le ante aperte) sui voxel accanto al grafo: `neapolis` 32 vani
+sul lotto e 142 sul blocco raggiunti dai due, 1 solo dal grafo; `mesa` 68 sul blocco e 8 solo dal grafo, oltre una rampa interna. **I semi da
+collaudare**: 3 semi su 8 del blocco di `mesa` l'onda li rifiuta subito (la massa chiede vani che il set non ha accanto a quelli che ha);
+`neapolis` li prende tutti.
+
+### 12.4 La varianza
+
+Fra due semi la massa cambia il 29 % dei vani in `neapolis` e il 20 % in `mesa` (la disposizione cambia col seme: la correzione 4); a massa ferma
+l'onda cambia la firma del 13 % dei vani in `neapolis` e del 38 % in `mesa`; l'uso dei tasselli fra due semi dista 0,18-0,21 (da 0, uguali, a 1), i
+colori 0,03-0,06 (lo stesso set ha lo stesso aspetto); fra i due set i colori distano 0,87. Un set è un aspetto, la massa e l'onda sono le
+disposizioni: dove T543 concludeva che «ogni set vorrà la sua massa», qui ogni set ce l'ha.
+
+### 12.5 Le foto
+
+In `lab/strutture-modulari/estratti/foto/`: `sorgenti.png` (i modelli statici ai semi usati, allineati ai vani), `catalogo-<set>.png` (i
+tasselli), `<set>-lotto.png` e `<set>-blocco.png` (tre semi), `<set>-blocco-due-lati.png`, e `accanto-a-t543.png`: il lotto di un blocco della via A
+di T543, poi `neapolis` e `mesa` di questa prova. Le palazzine estratte hanno le facciate della sorgente (il tufo, le persiane, i balconi, il
+portone) su impronte e altezze che la sorgente non ha, con le scale esterne contro le facciate; le taverne di `mesa` il pianterreno di pietra, il
+piano d'intonaco e le falde di coppi della locanda, più frammentate (qualche pilastro del cortile della locanda resta solo in una strada).
+
+### 12.6 Che cosa ha insegnato
+
+1. **Il taglio a vani regolari attraversa i ritmi della sorgente** (le finestre della palazzina ogni 10 voxel, i vani ogni 32): con le facce lette
+   lettera per lettera un palazzo può essere solo largo quanto la sorgente; reggono le facce pieno o vuoto in blocchi di 8 voxel, e qualche
+   finestra resta tagliata a metà. Un modello statico fatto per essere tagliato (muri sui lati dei vani, il passo delle finestre sul vano, scale
+   in un vano loro) si ricomporrebbe meglio: è la richiesta della prova pagata (M5).
+2. **Le coppie osservate, non le classi**: le classi transitive fanno incontrare una stanza col vuoto attraverso un muro.
+3. **Una scala nell'angolo rende unica la facciata che tocca**: si toglie dalla sorgente (la copia senza scale) e si rimette dal tassello della
+   scala dove sta, o dalla ricucitura.
+4. **Una stanza vuole qualcosa sopra**: va detto nella faccia di sopra, o l'onda lascia stanze senza tetto.
+5. **255 simboli bastano senza le quattro rotazioni** (277 firme con le rotazioni): la sorgente ha già le facciate nelle quattro direzioni.
+6. **Ricucire vuol dire scolpire**: la ricucitura del kernel di T543 (scegliere un altro vano che incontra i vicini) coi tasselli estratti non trova
+   quasi mai un vano adatto; la ricucitura in MarkovJunior scolpisce porte, soglie e scale, e cambia col seme (la porta che apre è scelta a caso
+   fra quelle che servono).
+7. **La scala esterna è la ricucitura verticale che regge**: la rampa interna entra solo nei vani senza muri vicini e, nei vani della locanda, il
+   cammino del kernel non sempre la sale; la scala esterna sta in una strada, sale contro la facciata, e il kernel la sale. Nel Far West è anche la
+   scala dei saloon.
+8. **Una sorgente semplice si ricompone meglio**: la palazzina (un parallelepipedo) regge tutte le masse provate; la locanda (pianta a L, falde a
+   più altezze) dà 27 tasselli di tetto, la sua massa sta su impronte di 2 × 2 e 3 × 2 vani e 3 semi su 8 del suo blocco l'onda li rifiuta.
+
+## 13. I nomi proposti
 
 Verificati liberi nel glossario (ADR-0117) e nel codice; entrano nel glossario con M1, quando esistono in `src/` (il test del glossario vuole
 che i nomi inglesi ci siano):
@@ -582,17 +720,28 @@ che i nomi inglesi ci siano):
 | tessuto di base | `baseFabric` | la massa vestita senza onda, valida per costruzione | «sfondo» è già di altro (la corona) |
 | complesso | `Complex` | (T543) il modello della via A: la massa e una `wfc` su un set, un complesso per lotto o per blocco, un seme per edificio | «struttura» è la classe, «edificio» ciò che il mondo indossa |
 | ricucitura | `stitch` | (T543) ciò che il kernel fa dopo l'onda: un muro che diventa porta dove un vano non si raggiunge, coi vani rivestiti di motivi che incontrano ancora i vicini | «riparazione» è dell'Ingegnere (il codice che fallisce) |
-| concentrazione, serie | `concentration`, `series` | (T543) quali complessi il Cartografo mette in una regione e con che peso; la serie: lo stesso complesso allo stesso seme ripetuto | — |
+| concentrazione | `concentration` | (T543) quali complessi il Cartografo mette in una regione e con che peso (la «serie», lo stesso complesso allo stesso seme ripetuto, è caduta con la risposta D6 a T543) | — |
+| estrattore | `extractBricks` | (T557) ciò che taglia un modello statico della libreria in tasselli: la sorgente sui vani, la parte edilizia, il cammino, le facce, le coppie | «scultore» è l'agente che scrive i modelli |
+| sorgente | `BrickSource` | (T557) il modello statico a un seme da cui un set è estratto, posato sui vani | «origine» è dell'eredità delle carte |
+| firma | `Signature` | (T557) i vani le cui facce incontrano le stesse facce, con gli stessi passaggi e le stesse lettere della massa: il motivo della prima onda | «chiave» è la faccia sola |
+| vestizione | `dress` | (T557) la `map` del complesso che dalla firma e dallo stato scrive la lettera del vano da mettere (com'è, con la porta, con la scala) | «veste» è del sito |
+| scala esterna | `outdoorStair` | (T557) la scala della ricucitura in un vano di strada, che sale contro la facciata alla porta del piano di sopra | — |
 
-## 13. Le domande per l'autore
+## 14. Le domande per l'autore
 
-Le sette di T522 hanno avuto risposta il 27/11 ([`docs/pipeline/domande/T522.md`](../pipeline/domande/T522.md), chiusa): la seconda prova le ha
+Le sette di T543 hanno avuto risposta il 27/11 ([`docs/pipeline/domande/T543.md`](../pipeline/domande/T543.md), chiusa): la terza prova le ha
+usate tutte (§ 12). Le domande nuove sono in [`docs/pipeline/domande/T557.md`](../pipeline/domande/T557.md), ognuna col consiglio: (D1) il set nel
+kernel estratto dai modelli statici della libreria; (D2) chi scrive il programma (l'Architetto la massa, il kernel la ricucitura dal set); (D3) la
+scala esterna e la rampa interna; (D4) i semi rifiutati; (D5) i modelli statici fatti per essere tagliati; (D6) la parte edilizia detta dalla
+tavolozza; (D7) le masse per ambientazione e i set che crescono a mondo acceso.
+
+Prima: le sette di T522 hanno avuto risposta il 27/11 ([`docs/pipeline/domande/T522.md`](../pipeline/domande/T522.md), chiusa): la seconda prova le ha
 usate tutte (§ 10.2). Le domande nuove sono in [`docs/pipeline/domande/T543.md`](../pipeline/domande/T543.md), ognuna col consiglio: (D1) la via:
 la A con le tre cose del kernel, la B rimandata; (D2) il formato del set: tasselli che sono programmi e facce lette dal kernel, non il tileset di
 MarkovJunior con le sue righe di vicini; (D3) la stanza più piccola: 2 × 2 vani, 4 × 4 caselle; (D4) i tetti: misurati e ricuciti, non
 obbligatori; (D5) un set per modello; (D6) le concentrazioni del Cartografo; (D7) i set per pianeta.
 
-## 14. Che cosa non è provato
+## 15. Che cosa non è provato
 
 - **L'Architetto vero**: che sappia scrivere un set e la sua massa con le facce giuste (le legge il kernel, ma un set che non si chiude torna
   indietro, e quante volte non si sa): M5.
@@ -611,3 +760,9 @@ obbligatori; (D5) un set per modello; (D6) le concentrazioni del Cartografo; (D7
   uguale in ogni ordine; il tessuto di base nuovo (stanze e corridoi) è valido sui semi provati, non dimostrato su ogni massa.
 - **Le carte**: il set come carta, il viaggio con le carte portate, il clone: descritti, non fatti.
 - **I riferimenti**: il post di r/Unity3D non letto; PlanetSmith non dice come genera.
+- **Dopo la terza prova (T557)**: l'estrattore e il set sono nel laboratorio; le due `wfc` del set le costruisce il laboratorio (il formato del set,
+  una riga a tassello in `insiemi/*.json`, non lo legge nessuno); i tasselli non variano per seme (vengono da semi diversi della sorgente); la massa
+  non sa quali impronte il set regge e l'onda rifiuta i semi che non regge (3 su 8 nel blocco di `mesa`); la rampa interna nei vani della locanda
+  non sempre la sale il cammino del kernel (8 vani su 76 del blocco raggiunti solo sul grafo); i tetti della palazzina si raggiungono solo per
+  caso; due sorgenti sole, a 16 voxel per casella e con 32 voxel da solaio a solaio (una sorgente con un altro passo andrebbe scalata in altezza,
+  non provato); il terreno in piano; niente è nel kernel, nel renderer o sul filo.

@@ -1,0 +1,3393 @@
+{
+ "sets": {
+  "neapolis": {
+   "universe": "neapolis",
+   "model": "casa-comune-structure-f2e1f8de",
+   "name": "Palazzina di tufo (grande)",
+   "seeds": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "sources": [
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 1,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 482,
+     "removed": {
+      "p": 8,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      18,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 1,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 337,
+     "removed": {
+      "p": 8,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      9,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 2,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 327,
+     "removed": {
+      "p": 10,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      18,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 2,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 324,
+     "removed": {
+      "p": 10,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      9,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 3,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 302,
+     "removed": {
+      "p": 10,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      18,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 3,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 301,
+     "removed": {
+      "p": 10,
+      "A": 39,
+      "K": 9
+     },
+     "reached": [
+      9,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 4,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 324,
+     "removed": {
+      "p": 10,
+      "K": 9,
+      "A": 39
+     },
+     "reached": [
+      18,
+      18
+     ]
+    },
+    {
+     "universe": "neapolis",
+     "model": "casa-comune-structure-f2e1f8de",
+     "name": "Palazzina di tufo (grande)",
+     "seed": 4,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 293,
+     "removed": {
+      "p": 10,
+      "K": 9,
+      "A": 39
+     },
+     "reached": [
+      9,
+      18
+     ]
+    }
+   ],
+   "fit": {
+    "bx0": 10,
+    "bx1": 94,
+    "by0": 10,
+    "by1": 89,
+    "sx": 1,
+    "sy": 1,
+    "ox": 2,
+    "oy": 8,
+    "z0": 0
+   },
+   "bays": "3×3×3",
+   "removed": {
+    "p": 8,
+    "A": 39,
+    "K": 9
+   },
+   "bricks": 49,
+   "families": {
+    "stair": 4,
+    "room": 35,
+    "roof": 10
+   },
+   "multiBay": [
+    "2×1×2",
+    "2×1×2",
+    "2×1×2",
+    "2×1×2"
+   ],
+   "dropped": 0,
+   "motifs": 102,
+   "natural": 65,
+   "copies": {
+    "doors": 28,
+    "up": 1,
+    "down": 4
+   },
+   "signatures": 56,
+   "dressed": 89,
+   "symbols": 123,
+   "pairs": [
+    17,
+    7,
+    33
+   ],
+   "propagator": 2514,
+   "xmlChars": 18647,
+   "worldErrors": [],
+   "ms": {
+    "read": 3373,
+    "build": 1048,
+    "total": 8348
+   }
+  },
+  "mesa": {
+   "universe": "mesa",
+   "model": "struttura-locanda",
+   "name": "Locanda del Cinghiale, con la cantina delle botti",
+   "seeds": [
+    1,
+    2,
+    3
+   ],
+   "sources": [
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 1,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 261,
+     "removed": {
+      "L": 1026,
+      "x": 768,
+      "c": 49,
+      "n": 3
+     },
+     "reached": [
+      10,
+      10
+     ]
+    },
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 1,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 247,
+     "removed": {
+      "L": 1026,
+      "x": 768,
+      "c": 49,
+      "n": 3
+     },
+     "reached": [
+      7,
+      10
+     ]
+    },
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 2,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 235,
+     "removed": {
+      "L": 891,
+      "x": 768,
+      "c": 25
+     },
+     "reached": [
+      10,
+      10
+     ]
+    },
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 2,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 343,
+     "removed": {
+      "L": 891,
+      "x": 768,
+      "c": 25
+     },
+     "reached": [
+      7,
+      10
+     ]
+    },
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 3,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 238,
+     "removed": {
+      "x": 768,
+      "L": 972,
+      "c": 78,
+      "n": 6
+     },
+     "reached": [
+      10,
+      10
+     ]
+    },
+    {
+     "universe": "mesa",
+     "model": "struttura-locanda",
+     "name": "Locanda del Cinghiale, con la cantina delle botti",
+     "seed": 3,
+     "nx": 3,
+     "ny": 3,
+     "nz": 3,
+     "ms": 329,
+     "removed": {
+      "x": 768,
+      "L": 972,
+      "c": 78,
+      "n": 6
+     },
+     "reached": [
+      7,
+      10
+     ]
+    }
+   ],
+   "fit": {
+    "bx0": 3,
+    "bx1": 97,
+    "by0": 3,
+    "by1": 95,
+    "sx": 0.968421052631579,
+    "sy": 0.989247311827957,
+    "ox": 2,
+    "oy": 2,
+    "z0": 20
+   },
+   "bays": "3×3×3",
+   "removed": {
+    "L": 1026,
+    "x": 768,
+    "c": 49,
+    "n": 3
+   },
+   "bricks": 65,
+   "families": {
+    "yard": 4,
+    "room": 31,
+    "stair": 3,
+    "roof": 27
+   },
+   "multiBay": [
+    "1×1×2",
+    "1×1×2",
+    "1×1×2"
+   ],
+   "dropped": 2,
+   "motifs": 174,
+   "natural": 71,
+   "copies": {
+    "doors": 74,
+    "up": 16,
+    "down": 9
+   },
+   "signatures": 71,
+   "dressed": 174,
+   "symbols": 208,
+   "pairs": [
+    24,
+    26,
+    21
+   ],
+   "propagator": 10980,
+   "xmlChars": 25750,
+   "worldErrors": [],
+   "ms": {
+    "read": 1922,
+    "build": 1099,
+    "total": 5881
+   }
+  }
+ },
+ "runs": [
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 1,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 23,
+    "stitch": 0,
+    "voxels": 416,
+    "total": 429
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     16
+    ],
+    "above": [
+     0,
+     16
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "mj": {
+    "ground": [
+     16,
+     16
+    ],
+    "above": [
+     16,
+     16
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "kernel": {
+    "ground": [
+     0,
+     16
+    ],
+    "above": [
+     0,
+     16
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 11,
+   "stairs": 0,
+   "outside": 2,
+   "rooms": {
+    "rooms": 8,
+    "bays": 32,
+    "largest": 4,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 8,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 17,
+   "of": 49,
+   "entropy": 3.91
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 2,
+   "ok": true,
+   "ms": {
+    "massing": 2,
+    "wave": 3,
+    "stitch": 3,
+    "voxels": 324,
+    "total": 331
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     9,
+     9
+    ],
+    "above": [
+     0,
+     18
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     9
+    ]
+   },
+   "mj": {
+    "ground": [
+     9,
+     9
+    ],
+    "above": [
+     18,
+     18
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     9
+    ]
+   },
+   "kernel": {
+    "ground": [
+     9,
+     9
+    ],
+    "above": [
+     0,
+     18
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     9
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 1,
+   "stairs": 1,
+   "outside": 1,
+   "rooms": {
+    "rooms": 3,
+    "bays": 27,
+    "largest": 9,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 3,
+     "10+": 0
+    }
+   },
+   "used": 30,
+   "of": 49,
+   "entropy": 4.84
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 3,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 4,
+    "stitch": 3,
+    "voxels": 332,
+    "total": 339
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     16
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "mj": {
+    "ground": [
+     16,
+     16
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     16,
+     16
+    ]
+   },
+   "kernel": {
+    "ground": [
+     0,
+     16
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 8,
+   "stairs": 0,
+   "outside": 1,
+   "rooms": {
+    "rooms": 3,
+    "bays": 16,
+    "largest": 8,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 2,
+     "5-9": 1,
+     "10+": 0
+    }
+   },
+   "used": 12,
+   "of": 49,
+   "entropy": 3.52
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 4,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 4,
+    "stitch": 2,
+    "voxels": 320,
+    "total": 327
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     7,
+     7
+    ],
+    "above": [
+     7,
+     7
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     9
+    ]
+   },
+   "mj": {
+    "ground": [
+     7,
+     7
+    ],
+    "above": [
+     7,
+     7
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     9,
+     9
+    ]
+   },
+   "kernel": {
+    "ground": [
+     7,
+     7
+    ],
+    "above": [
+     7,
+     7
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     9
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 0,
+   "stairs": 1,
+   "outside": 0,
+   "rooms": {
+    "rooms": 2,
+    "bays": 14,
+    "largest": 7,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 2,
+     "10+": 0
+    }
+   },
+   "used": 24,
+   "of": 49,
+   "entropy": 4.53
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 5,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 3,
+    "stitch": 2,
+    "voxels": 325,
+    "total": 332
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     6
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     6
+    ]
+   },
+   "mj": {
+    "ground": [
+     6,
+     6
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     6,
+     6
+    ]
+   },
+   "kernel": {
+    "ground": [
+     0,
+     6
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     6
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 2,
+   "stairs": 0,
+   "outside": 1,
+   "rooms": {
+    "rooms": 1,
+    "bays": 6,
+    "largest": 6,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 1,
+     "10+": 0
+    }
+   },
+   "used": 12,
+   "of": 49,
+   "entropy": 3.58
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 6,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 4,
+    "stitch": 3,
+    "voxels": 328,
+    "total": 336
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     16,
+     16
+    ],
+    "above": [
+     0,
+     32
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "mj": {
+    "ground": [
+     16,
+     16
+    ],
+    "above": [
+     32,
+     32
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     16,
+     16
+    ]
+   },
+   "kernel": {
+    "ground": [
+     16,
+     16
+    ],
+    "above": [
+     0,
+     32
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     16
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 1,
+   "stairs": 2,
+   "outside": 1,
+   "rooms": {
+    "rooms": 3,
+    "bays": 48,
+    "largest": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 0,
+     "10+": 3
+    }
+   },
+   "used": 34,
+   "of": 49,
+   "entropy": 4.76
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 7,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 4,
+    "stitch": 2,
+    "voxels": 327,
+    "total": 334
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     12,
+     12
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     12
+    ]
+   },
+   "mj": {
+    "ground": [
+     12,
+     12
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     12,
+     12
+    ]
+   },
+   "kernel": {
+    "ground": [
+     12,
+     12
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     12
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 1,
+   "stairs": 0,
+   "outside": 1,
+   "rooms": {
+    "rooms": 1,
+    "bays": 12,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 0,
+     "10+": 1
+    }
+   },
+   "used": 18,
+   "of": 49,
+   "entropy": 4.08
+  },
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seed": 8,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 4,
+    "stitch": 2,
+    "voxels": 325,
+    "total": 332
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     4,
+     10
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     6
+    ]
+   },
+   "mj": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     4,
+     10
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     6
+    ]
+   },
+   "kernel": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     4,
+     10
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     6
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 0,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 3,
+    "bays": 14,
+    "largest": 6,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 2,
+     "5-9": 1,
+     "10+": 0
+    }
+   },
+   "used": 20,
+   "of": 49,
+   "entropy": 4.25
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 1,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 16,
+    "stitch": 9,
+    "voxels": 389,
+    "total": 416
+   },
+   "buildings": 9,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     31,
+     65
+    ],
+    "above": [
+     7,
+     52
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     67
+    ]
+   },
+   "mj": {
+    "ground": [
+     65,
+     65
+    ],
+    "above": [
+     52,
+     52
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     22,
+     67
+    ]
+   },
+   "kernel": {
+    "ground": [
+     31,
+     65
+    ],
+    "above": [
+     7,
+     52
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     67
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 21,
+   "stairs": 1,
+   "outside": 9,
+   "rooms": {
+    "rooms": 22,
+    "bays": 117,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 13,
+     "5-9": 8,
+     "10+": 1
+    }
+   },
+   "used": 41,
+   "of": 49,
+   "entropy": 4.96
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 2,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 16,
+    "stitch": 6,
+    "voxels": 419,
+    "total": 443
+   },
+   "buildings": 11,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     23,
+     61
+    ],
+    "above": [
+     14,
+     70
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     0,
+     65
+    ]
+   },
+   "mj": {
+    "ground": [
+     61,
+     61
+    ],
+    "above": [
+     52,
+     70
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     21,
+     65
+    ]
+   },
+   "kernel": {
+    "ground": [
+     23,
+     61
+    ],
+    "above": [
+     14,
+     70
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     0,
+     65
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 18,
+   "stairs": 1,
+   "outside": 9,
+   "rooms": {
+    "rooms": 26,
+    "bays": 131,
+    "largest": 10,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3-4": 16,
+     "5-9": 7,
+     "10+": 2
+    }
+   },
+   "used": 44,
+   "of": 49,
+   "entropy": 5.12
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 3,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 17,
+    "stitch": 6,
+    "voxels": 399,
+    "total": 424
+   },
+   "buildings": 8,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     25,
+     63
+    ],
+    "above": [
+     0,
+     61
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     63
+    ]
+   },
+   "mj": {
+    "ground": [
+     63,
+     63
+    ],
+    "above": [
+     57,
+     61
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     31,
+     63
+    ]
+   },
+   "kernel": {
+    "ground": [
+     25,
+     63
+    ],
+    "above": [
+     0,
+     61
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     63
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 23,
+   "stairs": 2,
+   "outside": 9,
+   "rooms": {
+    "rooms": 22,
+    "bays": 124,
+    "largest": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 17,
+     "5-9": 3,
+     "10+": 2
+    }
+   },
+   "used": 40,
+   "of": 49,
+   "entropy": 4.96
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 4,
+   "ok": true,
+   "ms": {
+    "massing": 2,
+    "wave": 16,
+    "stitch": 6,
+    "voxels": 393,
+    "total": 418
+   },
+   "buildings": 10,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     28,
+     68
+    ],
+    "above": [
+     7,
+     78
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     70
+    ]
+   },
+   "mj": {
+    "ground": [
+     68,
+     68
+    ],
+    "above": [
+     58,
+     78
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     19,
+     70
+    ]
+   },
+   "kernel": {
+    "ground": [
+     28,
+     68
+    ],
+    "above": [
+     7,
+     78
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     70
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 23,
+   "stairs": 1,
+   "outside": 10,
+   "rooms": {
+    "rooms": 28,
+    "bays": 146,
+    "largest": 9,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 15,
+     "5-9": 13,
+     "10+": 0
+    }
+   },
+   "used": 43,
+   "of": 49,
+   "entropy": 5.01
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 5,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 16,
+    "stitch": 6,
+    "voxels": 395,
+    "total": 419
+   },
+   "buildings": 10,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     18,
+     64
+    ],
+    "above": [
+     0,
+     32
+    ],
+    "stairs": [
+     0,
+     4
+    ],
+    "roofs": [
+     0,
+     66
+    ]
+   },
+   "mj": {
+    "ground": [
+     64,
+     64
+    ],
+    "above": [
+     32,
+     32
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     32,
+     66
+    ]
+   },
+   "kernel": {
+    "ground": [
+     18,
+     64
+    ],
+    "above": [
+     0,
+     32
+    ],
+    "stairs": [
+     0,
+     4
+    ],
+    "roofs": [
+     0,
+     66
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 22,
+   "stairs": 0,
+   "outside": 9,
+   "rooms": {
+    "rooms": 18,
+    "bays": 96,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3-4": 7,
+     "5-9": 9,
+     "10+": 1
+    }
+   },
+   "used": 35,
+   "of": 49,
+   "entropy": 4.77
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 6,
+   "ok": true,
+   "ms": {
+    "massing": 2,
+    "wave": 17,
+    "stitch": 5,
+    "voxels": 402,
+    "total": 426
+   },
+   "buildings": 9,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     30,
+     66
+    ],
+    "above": [
+     6,
+     56
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     68
+    ]
+   },
+   "mj": {
+    "ground": [
+     66,
+     66
+    ],
+    "above": [
+     48,
+     56
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     30,
+     68
+    ]
+   },
+   "kernel": {
+    "ground": [
+     30,
+     66
+    ],
+    "above": [
+     6,
+     56
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     68
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 23,
+   "stairs": 1,
+   "outside": 9,
+   "rooms": {
+    "rooms": 24,
+    "bays": 122,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3-4": 15,
+     "5-9": 6,
+     "10+": 2
+    }
+   },
+   "used": 39,
+   "of": 49,
+   "entropy": 4.89
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 7,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 17,
+    "stitch": 7,
+    "voxels": 403,
+    "total": 429
+   },
+   "buildings": 10,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     37,
+     63
+    ],
+    "above": [
+     10,
+     97
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     65
+    ]
+   },
+   "mj": {
+    "ground": [
+     63,
+     63
+    ],
+    "above": [
+     83,
+     97
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     37,
+     65
+    ]
+   },
+   "kernel": {
+    "ground": [
+     37,
+     63
+    ],
+    "above": [
+     10,
+     97
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     65
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 16,
+   "stairs": 5,
+   "outside": 9,
+   "rooms": {
+    "rooms": 25,
+    "bays": 160,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3-4": 12,
+     "5-9": 6,
+     "10+": 6
+    }
+   },
+   "used": 42,
+   "of": 49,
+   "entropy": 5.15
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seed": 8,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 17,
+    "stitch": 5,
+    "voxels": 392,
+    "total": 417
+   },
+   "buildings": 10,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     39,
+     67
+    ],
+    "above": [
+     18,
+     73
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     0,
+     75
+    ]
+   },
+   "mj": {
+    "ground": [
+     67,
+     67
+    ],
+    "above": [
+     57,
+     73
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     31,
+     75
+    ]
+   },
+   "kernel": {
+    "ground": [
+     39,
+     67
+    ],
+    "above": [
+     18,
+     73
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     0,
+     75
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 1,
+   "doors": 17,
+   "stairs": 2,
+   "outside": 7,
+   "rooms": {
+    "rooms": 26,
+    "bays": 140,
+    "largest": 12,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3-4": 15,
+     "5-9": 8,
+     "10+": 2
+    }
+   },
+   "used": 40,
+   "of": 49,
+   "entropy": 4.99
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 1,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 11,
+    "stitch": 2,
+    "voxels": 845,
+    "total": 858
+   },
+   "buildings": 0,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "mj": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "kernel": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 0,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 0,
+    "bays": 0,
+    "largest": 0,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 2,
+   "of": 65,
+   "entropy": 0.14
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 2,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 2,
+    "voxels": 534,
+    "total": 548
+   },
+   "buildings": 1,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     4
+    ]
+   },
+   "mj": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     4
+    ]
+   },
+   "kernel": {
+    "ground": [
+     4,
+     4
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     4
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 0,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 2,
+    "bays": 4,
+    "largest": 2,
+    "sizes": {
+     "1": 0,
+     "2": 2,
+     "3-4": 0,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 7,
+   "of": 65,
+   "entropy": 1.23
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 3,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 3,
+    "voxels": 535,
+    "total": 550
+   },
+   "buildings": 3,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     8,
+     12
+    ],
+    "above": [
+     0,
+     8
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     12
+    ]
+   },
+   "mj": {
+    "ground": [
+     12,
+     12
+    ],
+    "above": [
+     8,
+     8
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     12
+    ]
+   },
+   "kernel": {
+    "ground": [
+     12,
+     12
+    ],
+    "above": [
+     0,
+     8
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     12
+    ]
+   },
+   "kernelOpened": 1,
+   "kernelMs": 0,
+   "doors": 7,
+   "stairs": 0,
+   "outside": 2,
+   "rooms": {
+    "rooms": 9,
+    "bays": 20,
+    "largest": 4,
+    "sizes": {
+     "1": 0,
+     "2": 8,
+     "3-4": 1,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 16,
+   "of": 65,
+   "entropy": 2.78
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 4,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 2,
+    "voxels": 569,
+    "total": 583
+   },
+   "buildings": 2,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     4,
+     7
+    ],
+    "above": [
+     0,
+     3
+    ],
+    "stairs": [
+     0,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "mj": {
+    "ground": [
+     7,
+     7
+    ],
+    "above": [
+     3,
+     3
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernel": {
+    "ground": [
+     4,
+     7
+    ],
+    "above": [
+     0,
+     3
+    ],
+    "stairs": [
+     0,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 3,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 5,
+    "bays": 10,
+    "largest": 4,
+    "sizes": {
+     "1": 2,
+     "2": 2,
+     "3-4": 1,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 16,
+   "of": 65,
+   "entropy": 2.21
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 5,
+   "ok": true,
+   "ms": {
+    "massing": 2,
+    "wave": 10,
+    "stitch": 1,
+    "voxels": 547,
+    "total": 560
+   },
+   "buildings": 0,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "mj": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "kernel": {
+    "ground": [
+     0,
+     0
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     0
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 10,
+   "doors": 0,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 0,
+    "bays": 0,
+    "largest": 0,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3-4": 0,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 2,
+   "of": 65,
+   "entropy": 0.14
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 6,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 6,
+    "voxels": 560,
+    "total": 578
+   },
+   "buildings": 2,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     0,
+     12
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "mj": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     8,
+     12
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernel": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     0,
+     12
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 3,
+   "stairs": 1,
+   "outside": 1,
+   "rooms": {
+    "rooms": 8,
+    "bays": 20,
+    "largest": 4,
+    "sizes": {
+     "1": 0,
+     "2": 6,
+     "3-4": 2,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 19,
+   "of": 65,
+   "entropy": 2.79
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 7,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 2,
+    "voxels": 532,
+    "total": 546
+   },
+   "buildings": 2,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "mj": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernel": {
+    "ground": [
+     8,
+     8
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 0,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 3,
+    "bays": 8,
+    "largest": 4,
+    "sizes": {
+     "1": 0,
+     "2": 2,
+     "3-4": 1,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 12,
+   "of": 65,
+   "entropy": 1.8
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seed": 8,
+   "ok": true,
+   "ms": {
+    "massing": 1,
+    "wave": 10,
+    "stitch": 2,
+    "voxels": 533,
+    "total": 547
+   },
+   "buildings": 2,
+   "voxels": 6422528,
+   "none": {
+    "ground": [
+     0,
+     7
+    ],
+    "above": [
+     0,
+     3
+    ],
+    "stairs": [
+     0,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "mj": {
+    "ground": [
+     7,
+     7
+    ],
+    "above": [
+     3,
+     3
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernel": {
+    "ground": [
+     4,
+     7
+    ],
+    "above": [
+     0,
+     3
+    ],
+    "stairs": [
+     0,
+     2
+    ],
+    "roofs": [
+     0,
+     8
+    ]
+   },
+   "kernelOpened": 1,
+   "kernelMs": 0,
+   "doors": 5,
+   "stairs": 0,
+   "outside": 0,
+   "rooms": {
+    "rooms": 5,
+    "bays": 10,
+    "largest": 4,
+    "sizes": {
+     "1": 2,
+     "2": 2,
+     "3-4": 1,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 13,
+   "of": 65,
+   "entropy": 2.07
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 1,
+   "ok": false,
+   "ms": {
+    "massing": 3,
+    "wave": 55,
+    "stitch": 3,
+    "voxels": 561,
+    "total": 621
+   },
+   "why": "wfc a tessere (71 motivi) — wfc senza soluzione: le condizioni iniziali sono contraddittorie; all \" u\" → \"** *r\" (e altre 72 regole) — in quel momento nella griglia non c'erano celle \"\", \"\", \"u\", \"E\", \"e\", \"s\", \"w\", \"n\", \"d\", \"\", \"\", \"W\", \"N\", \"\", \"\", \"U\", \"F\", \"G\", \"J\", \"K\"; one \" u\" → ",
+   "buildings": 7
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 2,
+   "ok": true,
+   "ms": {
+    "massing": 10,
+    "wave": 41,
+    "stitch": 4,
+    "voxels": 625,
+    "total": 681
+   },
+   "buildings": 12,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     32,
+     42
+    ],
+    "above": [
+     0,
+     22
+    ],
+    "stairs": [
+     0,
+     12
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "mj": {
+    "ground": [
+     42,
+     42
+    ],
+    "above": [
+     22,
+     22
+    ],
+    "stairs": [
+     12,
+     12
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "kernel": {
+    "ground": [
+     32,
+     42
+    ],
+    "above": [
+     0,
+     22
+    ],
+    "stairs": [
+     0,
+     12
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 14,
+   "stairs": 2,
+   "outside": 1,
+   "rooms": {
+    "rooms": 37,
+    "bays": 64,
+    "largest": 4,
+    "sizes": {
+     "1": 12,
+     "2": 24,
+     "3-4": 1,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 23,
+   "of": 65,
+   "entropy": 2.8
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 3,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 51,
+    "stitch": 8,
+    "voxels": 627,
+    "total": 688
+   },
+   "buildings": 9,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     24,
+     36
+    ],
+    "above": [
+     0,
+     28
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     36
+    ]
+   },
+   "mj": {
+    "ground": [
+     36,
+     36
+    ],
+    "above": [
+     16,
+     28
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     36
+    ]
+   },
+   "kernel": {
+    "ground": [
+     36,
+     36
+    ],
+    "above": [
+     0,
+     28
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     0,
+     36
+    ]
+   },
+   "kernelOpened": 3,
+   "kernelMs": 1,
+   "doors": 16,
+   "stairs": 0,
+   "outside": 4,
+   "rooms": {
+    "rooms": 28,
+    "bays": 64,
+    "largest": 4,
+    "sizes": {
+     "1": 0,
+     "2": 24,
+     "3-4": 4,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 26,
+   "of": 65,
+   "entropy": 2.55
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 4,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 48,
+    "stitch": 7,
+    "voxels": 605,
+    "total": 663
+   },
+   "buildings": 11,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     43,
+     43
+    ],
+    "above": [
+     1,
+     23
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     44
+    ]
+   },
+   "mj": {
+    "ground": [
+     43,
+     43
+    ],
+    "above": [
+     23,
+     23
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     44
+    ]
+   },
+   "kernel": {
+    "ground": [
+     43,
+     43
+    ],
+    "above": [
+     1,
+     23
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     44
+    ]
+   },
+   "kernelOpened": 0,
+   "kernelMs": 0,
+   "doors": 10,
+   "stairs": 5,
+   "outside": 0,
+   "rooms": {
+    "rooms": 30,
+    "bays": 66,
+    "largest": 4,
+    "sizes": {
+     "1": 2,
+     "2": 24,
+     "3-4": 4,
+     "5-9": 0,
+     "10+": 0
+    }
+   },
+   "used": 31,
+   "of": 65,
+   "entropy": 2.8
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 5,
+   "ok": false,
+   "ms": {
+    "massing": 3,
+    "wave": 49,
+    "stitch": 2,
+    "voxels": 559,
+    "total": 613
+   },
+   "why": "wfc a tessere (71 motivi) — wfc senza soluzione: le condizioni iniziali sono contraddittorie; all \" u\" → \"** *r\" (e altre 72 regole) — in quel momento nella griglia non c'erano celle \"\", \"\", \"u\", \"E\", \"e\", \"s\", \"w\", \"n\", \"d\", \"\", \"\", \"W\", \"N\", \"\", \"\", \"U\", \"F\", \"G\", \"J\", \"K\"; one \" u\" → ",
+   "buildings": 11
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 6,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 47,
+    "stitch": 2,
+    "voxels": 616,
+    "total": 669
+   },
+   "buildings": 10,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     34,
+     41
+    ],
+    "above": [
+     0,
+     7
+    ],
+    "stairs": [
+     0,
+     2
+    ],
+    "roofs": [
+     0,
+     42
+    ]
+   },
+   "mj": {
+    "ground": [
+     41,
+     41
+    ],
+    "above": [
+     7,
+     7
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     42
+    ]
+   },
+   "kernel": {
+    "ground": [
+     41,
+     41
+    ],
+    "above": [
+     1,
+     7
+    ],
+    "stairs": [
+     2,
+     2
+    ],
+    "roofs": [
+     0,
+     42
+    ]
+   },
+   "kernelOpened": 2,
+   "kernelMs": 1,
+   "doors": 6,
+   "stairs": 1,
+   "outside": 0,
+   "rooms": {
+    "rooms": 19,
+    "bays": 48,
+    "largest": 6,
+    "sizes": {
+     "1": 2,
+     "2": 12,
+     "3-4": 4,
+     "5-9": 1,
+     "10+": 0
+    }
+   },
+   "used": 32,
+   "of": 65,
+   "entropy": 2.64
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 7,
+   "ok": true,
+   "ms": {
+    "massing": 3,
+    "wave": 50,
+    "stitch": 6,
+    "voxels": 647,
+    "total": 706
+   },
+   "buildings": 12,
+   "voxels": 29491200,
+   "none": {
+    "ground": [
+     38,
+     47
+    ],
+    "above": [
+     0,
+     33
+    ],
+    "stairs": [
+     0,
+     6
+    ],
+    "roofs": [
+     0,
+     50
+    ]
+   },
+   "mj": {
+    "ground": [
+     47,
+     47
+    ],
+    "above": [
+     29,
+     33
+    ],
+    "stairs": [
+     6,
+     6
+    ],
+    "roofs": [
+     0,
+     50
+    ]
+   },
+   "kernel": {
+    "ground": [
+     41,
+     47
+    ],
+    "above": [
+     1,
+     33
+    ],
+    "stairs": [
+     2,
+     6
+    ],
+    "roofs": [
+     0,
+     50
+    ]
+   },
+   "kernelOpened": 1,
+   "kernelMs": 1,
+   "doors": 19,
+   "stairs": 1,
+   "outside": 4,
+   "rooms": {
+    "rooms": 38,
+    "bays": 80,
+    "largest": 6,
+    "sizes": {
+     "1": 6,
+     "2": 28,
+     "3-4": 3,
+     "5-9": 1,
+     "10+": 0
+    }
+   },
+   "used": 29,
+   "of": 65,
+   "entropy": 2.96
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seed": 8,
+   "ok": false,
+   "ms": {
+    "massing": 3,
+    "wave": 55,
+    "stitch": 0,
+    "voxels": 616,
+    "total": 671
+   },
+   "why": "wfc a tessere (71 motivi) — wfc senza soluzione: le condizioni iniziali sono contraddittorie; all \" u\" → \"** *r\" (e altre 72 regole) — in quel momento nella griglia non c'erano celle \"\", \"\", \"u\", \"E\", \"e\", \"s\", \"w\", \"n\", \"d\", \"\", \"\", \"W\", \"N\", \"\", \"\", \"U\", \"F\", \"G\", \"J\", \"K\"; one \" u\" → ",
+   "buildings": 11
+  }
+ ],
+ "summary": [
+  {
+   "set": "neapolis",
+   "ground": "lotto",
+   "seeds": 8,
+   "ok": 8,
+   "ms": {
+    "total": 345,
+    "massing": 1.4,
+    "wave": 6.1,
+    "stitch": 2.1,
+    "voxels": 337.1,
+    "max": 429
+   },
+   "none": {
+    "ground": [
+     48,
+     86
+    ],
+    "above": [
+     11,
+     83
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     0,
+     90
+    ]
+   },
+   "mj": {
+    "ground": [
+     86,
+     86
+    ],
+    "above": [
+     77,
+     83
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     59,
+     90
+    ]
+   },
+   "kernel": {
+    "ground": [
+     48,
+     86
+    ],
+    "above": [
+     11,
+     83
+    ],
+    "stairs": [
+     8,
+     8
+    ],
+    "roofs": [
+     0,
+     90
+    ]
+   },
+   "doors": 3,
+   "stairs": 0.5,
+   "outside": 0.9,
+   "kernelOpened": 0,
+   "rooms": 3,
+   "largest": 16,
+   "used": 20.9,
+   "of": 49,
+   "entropy": 4.2,
+   "buildings": 1
+  },
+  {
+   "set": "neapolis",
+   "ground": "blocco",
+   "seeds": 8,
+   "ok": 8,
+   "ms": {
+    "total": 424,
+    "massing": 2.8,
+    "wave": 16.5,
+    "stitch": 6.3,
+    "voxels": 399,
+    "max": 443
+   },
+   "none": {
+    "ground": [
+     231,
+     517
+    ],
+    "above": [
+     62,
+     519
+    ],
+    "stairs": [
+     40,
+     44
+    ],
+    "roofs": [
+     0,
+     539
+    ]
+   },
+   "mj": {
+    "ground": [
+     517,
+     517
+    ],
+    "above": [
+     439,
+     519
+    ],
+    "stairs": [
+     44,
+     44
+    ],
+    "roofs": [
+     223,
+     539
+    ]
+   },
+   "kernel": {
+    "ground": [
+     231,
+     517
+    ],
+    "above": [
+     62,
+     519
+    ],
+    "stairs": [
+     40,
+     44
+    ],
+    "roofs": [
+     0,
+     539
+    ]
+   },
+   "doors": 20.4,
+   "stairs": 1.6,
+   "outside": 8.9,
+   "kernelOpened": 0,
+   "rooms": 23.9,
+   "largest": 16,
+   "used": 40.5,
+   "of": 49,
+   "entropy": 5,
+   "buildings": 9.6
+  },
+  {
+   "set": "mesa",
+   "ground": "lotto",
+   "seeds": 8,
+   "ok": 8,
+   "ms": {
+    "total": 596.3,
+    "massing": 1.1,
+    "wave": 10.1,
+    "stitch": 2.5,
+    "voxels": 581.9,
+    "max": 858
+   },
+   "none": {
+    "ground": [
+     32,
+     46
+    ],
+    "above": [
+     0,
+     26
+    ],
+    "stairs": [
+     0,
+     4
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "mj": {
+    "ground": [
+     46,
+     46
+    ],
+    "above": [
+     22,
+     26
+    ],
+    "stairs": [
+     4,
+     4
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "kernel": {
+    "ground": [
+     40,
+     46
+    ],
+    "above": [
+     0,
+     26
+    ],
+    "stairs": [
+     0,
+     4
+    ],
+    "roofs": [
+     0,
+     48
+    ]
+   },
+   "doors": 2.3,
+   "stairs": 0.1,
+   "outside": 0.4,
+   "kernelOpened": 0.3,
+   "rooms": 4,
+   "largest": 4,
+   "used": 10.9,
+   "of": 65,
+   "entropy": 1.6,
+   "buildings": 1.5
+  },
+  {
+   "set": "mesa",
+   "ground": "blocco",
+   "seeds": 8,
+   "ok": 5,
+   "ms": {
+    "total": 681.4,
+    "massing": 4.4,
+    "wave": 47.4,
+    "stitch": 5.4,
+    "voxels": 624,
+    "max": 706
+   },
+   "none": {
+    "ground": [
+     171,
+     209
+    ],
+    "above": [
+     1,
+     113
+    ],
+    "stairs": [
+     2,
+     22
+    ],
+    "roofs": [
+     0,
+     220
+    ]
+   },
+   "mj": {
+    "ground": [
+     209,
+     209
+    ],
+    "above": [
+     97,
+     113
+    ],
+    "stairs": [
+     22,
+     22
+    ],
+    "roofs": [
+     0,
+     220
+    ]
+   },
+   "kernel": {
+    "ground": [
+     193,
+     209
+    ],
+    "above": [
+     3,
+     113
+    ],
+    "stairs": [
+     6,
+     22
+    ],
+    "roofs": [
+     0,
+     220
+    ]
+   },
+   "doors": 13,
+   "stairs": 1.8,
+   "outside": 1.8,
+   "kernelOpened": 1.2,
+   "rooms": 30.4,
+   "largest": 6,
+   "used": 28.2,
+   "of": 65,
+   "entropy": 2.8,
+   "buildings": 10.8
+  }
+ ],
+ "variance": {
+  "neapolis": {
+   "massing": 0.286,
+   "wave": 0.128,
+   "wavesFound": 6,
+   "bricks": 0.181,
+   "looks": 0.026
+  },
+  "mesa": {
+   "massing": 0.201,
+   "wave": 0.384,
+   "wavesFound": 6,
+   "bricks": 0.211,
+   "looks": 0.06
+  },
+  "betweenSets": {
+   "looks": 0.866
+  }
+ },
+ "walks": {
+  "neapolis|lotto|1": {
+   "ms": 496,
+   "both": 32,
+   "onlyGraph": 0,
+   "onlyWalk": 0
+  },
+  "neapolis|blocco|1": {
+   "ms": 2412,
+   "both": 142,
+   "onlyGraph": 1,
+   "onlyWalk": 0
+  },
+  "mesa|lotto|1": {
+   "ms": 602,
+   "both": 0,
+   "onlyGraph": 0,
+   "onlyWalk": 0
+  },
+  "mesa|blocco|2": {
+   "ms": 2414,
+   "both": 68,
+   "onlyGraph": 8,
+   "onlyWalk": 0
+  }
+ }
+}
