@@ -217,7 +217,7 @@ interface RawTerrain {
   speed: number;
   /** The specks of its ground (T547, ADR-0267), if the Cartographer said them: read without trusting (`readGrain`). */
   grain?: unknown;
-  /** How much lower or higher its top is drawn (T548, ADR-0270), if the Cartographer said it: read without trusting (`readInset`). */
+  /** How much lower or higher its top is drawn (T548, ADR-0271), if the Cartographer said it: read without trusting (`readInset`). */
   inset?: unknown;
   /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep; whether one breathes on it (T446). */
   cross?: Crossing;
@@ -262,7 +262,7 @@ function grainField(layer: TerrainLayer, raw: unknown): { grain?: Grain } {
 }
 
 /**
- * The inset the Cartographer said of a terrain (T548, ADR-0270), read without trusting: only of the ground one walks and never of the base
+ * The inset the Cartographer said of a terrain (T548, ADR-0271), read without trusting: only of the ground one walks and never of the base
  * ground (the level of the world). Unsaid, the terrain takes the one its name says when it is drawn (`insetOf`): nothing is written for it.
  */
 function insetField(code: string, layer: TerrainLayer, raw: unknown): { inset?: number } {

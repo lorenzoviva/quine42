@@ -1,4 +1,4 @@
-// The inset of the terrains, the curb and the wide streets (T548, C4 of docs/design/terreno-ricco.md, ADR-0270). The inset: how much lower
+// The inset of the terrains, the curb and the wide streets (T548, C4 of docs/design/terreno-ricco.md, ADR-0271). The inset: how much lower
 // or higher a terrain's top is drawn (a road under its sidewalk, the ballast of a railway), said by `TerrainDef.inset` or by its name (the
 // repair of the universes of before), read without trusting, drawn by the place's mesh with its curb and the same in the worker; the kernel
 // never reads it: its levels, its collision and its network are the same. The wide streets: where the layout's path is a road by its name,

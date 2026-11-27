@@ -1,4 +1,4 @@
-# ADR-0270 — Il rientro dei terreni, il cordolo e le strade larghe
+# ADR-0271 — Il rientro dei terreni, il cordolo e le strade larghe
 
 - **Stato**: accettato
 - **Data**: 2026-11-27

@@ -148,7 +148,7 @@ export const swimFloor = (k: Kernel, x: number, y: number): number => k.groundAt
 /** The insets of a palette's terrains (T548), once a code: the palette object is the key, a new one (the Physicist's) asks again. */
 const insets = new WeakMap<object, Map<string, number>>();
 
-/** How much lower or higher the top of the tile under (x, y) is drawn (T548, ADR-0270): its terrain's inset, 0 off the loaded places. */
+/** How much lower or higher the top of the tile under (x, y) is drawn (T548, ADR-0271): its terrain's inset, 0 off the loaded places. */
 export function insetUnder(k: Kernel, x: number, y: number): number {
   const code = k.tileAt(Math.floor(x), Math.floor(y));
   if (code === undefined) return 0;

@@ -431,7 +431,7 @@ export class Validator {
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
         // Its cover (T545, ADR-0269): only how it looks, but at most three kinds, each a program's id and a density within the range.
         if (t && typeof t === 'object') for (const e of coverErrors(code, t.cover)) errors.push(`${path}: ${e}`);
-        // The inset of its top (T548, ADR-0270): only how it looks, but under a level of the relief.
+        // The inset of its top (T548, ADR-0271): only how it looks, but under a level of the relief.
         if (t && typeof t === 'object') for (const e of insetErrors(code, t.inset)) errors.push(`${path}: ${e}`);
       }
     }

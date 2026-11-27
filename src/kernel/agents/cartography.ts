@@ -124,7 +124,7 @@ export interface ChunkPlan {
    */
   climates?: boolean;
   /**
-   * The mark of the wide streets (T548, ADR-0270): true, written by the kernel on every plan it makes, its roads (where the code the layout
+   * The mark of the wide streets (T548, ADR-0271): true, written by the kernel on every plan it makes, its roads (where the code the layout
    * digs with is a road by its name) are 2-4 tiles wide with the sidewalk at their sides (`widenStreets`); absent, a plan of before, whose
    * roads stay as they were laid (its things and its edits are per tile).
    */
@@ -427,7 +427,7 @@ const LAYOUTS_SCHEMA_BREATH: Schema = (() => {
 /** What the Cartographer is told of the air in a world that counts the breath (T446). */
 const BREATH_ENVIRONMENTS = 'In this world bodies count their breath: where there is no air it runs out. Say "air": false of an environment whose places have none (the open rock of an airless body, a flooded shaft); a station, a dome, a ship hold the air. Most places have air.';
 
-/** How wide the Cartographer said the streets of an environment are (T548, ADR-0270), read without trusting; nothing if it did not say. */
+/** How wide the Cartographer said the streets of an environment are (T548, ADR-0271), read without trusting; nothing if it did not say. */
 function streetField(width: unknown): { street?: { width: number } } {
   const w = readStreet({ width }).width;
   return w !== undefined ? { street: { width: w } } : {};
