@@ -39,6 +39,7 @@ Aggiornato il 27/11/2026, epoca 705 (claude). Crediti: vedi `stato`.
 
 ## Regole attive
 
+- **27/11 02:3x (epoca 706, autore):** T543 a priorità 0, prima di T527: l'autore vuole il risultato per la pausa pranzo (13:00-14:00 CET). Autonomia fino alle 13:00 e 14:00-18:00 CET: tutto pianificato, lanciare e integrare.
 - **26/11 (epoca 674, autore): regime incrementato fino al reset di Claude (3/12 16:00Z):** consumare aggressivamente la settimana, slot pieni, sforzi alti; richieste del 26/11 pianificate T508-T539 (`docs/userchats/to-do-2026-11-26.md`), tutte approvate tranne T536. Argon non ha più un contatore suo (`agy /usage`) → T508.
 - **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237): primo task vero **T479** integrato al primo colpo (epoca 660: 43 min, −9 % sett., −31 % 5h, stima 4 %: costa più del doppio della stima); seconda misura **T482** integrata al primo colpo (54 min, −6 % sett., stima 12 %): due task senza rifacimenti, l’uscita dalla prova la decide l’autore; intanto al prossimo task adatto assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
 - **19/11 17:05 (epoca 567):** autore ha chiuso D64 e D65 (fuori per 1-2 ore): T437-T451 pianificati e approvati, `mesa` nel generatore. Autonomia: lanciare e integrare la catena T437→.
