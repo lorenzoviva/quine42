@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 705 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 707 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,7 +34,7 @@ Aggiornato il 27/11/2026, epoca 705 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D/T522** risposta il 27/11 (epoca 701): riprova con un set grande, via A attesa migliore, stanze > 2 × 2, massa B, tetti raggiungibili, tanti set → **T543** (claude max, 6 %, priorità 1), poi la catena M ripianificata.
+- **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Da chiedere all'autore alle 13:00 CET.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
@@ -55,5 +55,5 @@ Aggiornato il 27/11/2026, epoca 705 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **704 (claude):** T544 integrato (`f9bfe4e0`): T509 nel base, seme a 0.10.41; T509 segnato fatto. D/T509 resta aperta.
 - **705 (claude):** D/T509 chiusa (tutte A; cover aperta a mondo acceso, strade larghe, primitiva di ciò che il vento porta: foglie, polline, spruzzi, rotolanti) → catena **T545-T553** (C1-C9, ~33 %, priorità 2, approvata).
+- **707 (claude):** T543 integrato (`1145a43b`): via A provata, 151 tasselli, ricucitura; D/T543 aperta. Il node_modules del base è vuoto (segnalato da T543).
