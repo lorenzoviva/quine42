@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 700 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 702 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -54,5 +54,5 @@ Aggiornato il 27/11/2026, epoca 700 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **673 (claude):** riaccesa il 26/11 dopo lo spegnimento del 23/11 17:02Z (nessun task in corso allora). Lanciato T507 su claude; T483 e T481 in coda sugli slot di claude.
-- **674 (claude):** pianificate le richieste del 26/11 (T508-T539: run #2, primitiva «portato da», editor MJ, Neon, studi terreno/moduli/mesh/documenti, catena A1); regime incrementato fino al 3/12.
+- **701 (claude):** D/T522 chiusa con le risposte dell'autore → T543 (claude max, priorità 1).
+- **702 (claude):** integrato T531 (`compileMjx(…, { original: true })`, ADR-0265, kernel 0.10.41; suite intera non rilanciata dall'agente). In corso T509.
