@@ -1,0 +1,26 @@
+<!-- Low shrub (T509, lab/terreno-ricco): the seed's bush in half its box, for the undergrowth; twigs from one foot, leaves round them. -->
+<sequence values="BLHDTVr" size="10 10 8" name="Arbusto basso">
+  <color symbol="L" value="4f7f38" name="foglie"/>
+  <color symbol="H" value="74a64e" name="foglie chiare"/>
+  <color symbol="D" value="33582a" name="foglie scure"/>
+  <color symbol="T" value="5a4128" name="rametti"/>
+  <color symbol="V" hidden="True" name="lo spazio dell'arbusto"/>
+  <color symbol="r" hidden="True" name="punta di un rametto"/>
+  <ellipsoid at="5 5 0" size="9 9 7" color="V"/>
+  <box at="5 5 0" size="1 1 1" color="T"/>
+  <one steps="3" in="V T" out="r T"/>
+  <one steps="12">
+    <rule in="V r" out="r T"/>
+    <rule in="V* *r" out="r* *T"/>
+  </one>
+  <all in="r" out="T"/>
+  <one steps="110" symmetry="(xyz)">
+    <rule in="TV" out="TL"/>
+    <rule in="LV" out="LL"/>
+  </one>
+  <all in="V" out="B"/>
+  <prl steps="1">
+    <rule in="B L" out="B H" p="0.6"/>
+    <rule in="L" out="D" p="0.2"/>
+  </prl>
+</sequence>
