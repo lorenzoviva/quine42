@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 708 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 709 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -56,5 +56,5 @@ Aggiornato il 27/11/2026, epoca 708 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **709 (claude):** T518 integrato (`e283c948`): editor MJ con corsa annullabile, «Render»/«Auto»/«Ferma», forte da >30 s a ~14 s; resta la colorazione del codice lenta (200-400 ms a battuta sul forte).
 - **708 (claude):** T516 integrato (`43644a93`): Neon 42 punti contro 95 previsti, Scultore Architetto su agy 10/12; D/T516 aperta.
-- **707 (claude):** T543 integrato (`1145a43b`): via A provata, 151 tasselli, ricucitura; D/T543 aperta. Il node_modules del base è vuoto (segnalato da T543).
