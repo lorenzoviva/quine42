@@ -1,4 +1,4 @@
-<!-- Low shrub (T545, ADR-0268: a cover of the seed, written by hand for the lab of T509): the seed's bush in half its box, for the undergrowth; twigs from one foot, leaves round them. -->
+<!-- Low shrub (T545, ADR-0269: a cover of the seed, written by hand for the lab of T509): the seed's bush in half its box, for the undergrowth; twigs from one foot, leaves round them. -->
 <sequence values="BLHDTVr" size="10 10 8" name="Arbusto basso">
   <color symbol="L" value="4f7f38" name="foglie"/>
   <color symbol="H" value="74a64e" name="foglie chiare"/>

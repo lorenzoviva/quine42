@@ -1,4 +1,4 @@
-# ADR-0268 — La copertura dei terreni, aperta a mondo acceso
+# ADR-0269 — La copertura dei terreni, aperta a mondo acceso
 
 - **Stato**: accettato
 - **Data**: 2026-11-27

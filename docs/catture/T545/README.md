@@ -1,4 +1,4 @@
-# T545 — La copertura dei terreni (ADR-0268)
+# T545 — La copertura dei terreni (ADR-0269)
 
 `node lab/scripts/misura-frame.mjs <porta> --sottobosco --gioco --foto docs/catture/T545 --json docs/catture/T545/frame.json` su una
 preview della build (kernel 0.10.43), il seme offline, la partenza («Campagna del Primo Passo»), il tappeto fermo, la stessa ora del mondo

@@ -33,7 +33,7 @@
 // programs as text) as instances on the loaded places at the start: the frames with the ground of today, then one InstancedMesh per form
 // and place, one per form for the window, one mesh baked per place, at 1, 2 and 4 instances a tile, with and without shadows, the ink of
 // a thing or of the ground; with `--foto` the screenshots (far and near). Only that, as `--blocco`.
-// `--sottobosco --gioco [--foto <cartella>]` (T545, ADR-0268): the game's own cover (the seed's terrains say it, `CoverLayer` draws it),
+// `--sottobosco --gioco [--foto <cartella>]` (T545, ADR-0269): the game's own cover (the seed's terrains say it, `CoverLayer` draws it),
 // not the lab's: at the start with the camera at its farthest, the frames with the layer hidden and shown, at the same hour, in the same
 // session; the instances, forms and triangles the layer draws, how long it took to make; with `--foto` before and after, far and near.
 // Then the opening with the world on: the instance nearest the wanderer made a thing of the world (`uncover`: the layer draws one less, the

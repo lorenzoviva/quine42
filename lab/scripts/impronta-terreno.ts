@@ -10,7 +10,7 @@
 //
 // `--luoghi` prints the fingerprint of every place, not only the whole.
 //
-// The cover of the terrains (T545, ADR-0268) changed it on purpose: the seed's meadow, sand, fields and stumps have their cover now (the
+// The cover of the terrains (T545, ADR-0269) changed it on purpose: the seed's meadow, sand, fields and stumps have their cover now (the
 // seed changes how it looks, and with it every universe with the seed's palette), so a place's fingerprint has its cover's instances too
 // (`TerrainView.cover`, drawn by the window's layer and not by the place's group), with the covers' programs made with their meshes as the
 // terrains' models are; "senza" takes the covers away with the models, and a place without cover prints as before T545. Before T545:

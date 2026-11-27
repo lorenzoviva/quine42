@@ -1,4 +1,4 @@
-// The cover of the terrains on screen (T545, C1 of docs/design/terreno-ricco.md, ADR-0268): the instances every loaded place scattered in
+// The cover of the terrains on screen (T545, C1 of docs/design/terreno-ricco.md, ADR-0269): the instances every loaded place scattered in
 // its worker (`ChunkArrays.cover`) gathered in one InstancedMesh a form for the whole window, not one a place (the draw calls would double,
 // § 2.4 of the study), without shadows (a tuft does not cast one that reads from above, and the shadows' pass would draw every instance
 // again), with the trees' swaying material (the wind bends it) and their ink. At most `COVER_CAP` instances: the places nearest the

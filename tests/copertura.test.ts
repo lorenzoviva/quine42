@@ -1,4 +1,4 @@
-// The cover of the terrains (T545, C1 of docs/design/terreno-ricco.md, ADR-0268): what grows or lies on the ground of a terrain, said by
+// The cover of the terrains (T545, C1 of docs/design/terreno-ricco.md, ADR-0269): what grows or lies on the ground of a terrain, said by
 // `TerrainDef.cover` (at most three kinds, 0-4 a tile) and read without trusting, scattered by a hash in the worker of the ground (never on
 // paths, lots, doors, gates, under solid things or over a cellar), drawn as one InstancedMesh a form on the window under a cap; and open
 // with the world on: the Council changes a terrain's cover with a commit, and one instance becomes a thing of the world (the stone the key

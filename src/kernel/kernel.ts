@@ -1127,7 +1127,7 @@ export class Kernel {
       air_at: (x, y) => (typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y) ? this.airAt(x, y) : true),
       // The strata under the ground (T479, ADR-0253): read only, fresh copy per call.
       stratum_at: (x, y, depth) => this.stratumInfoAt(x, y, depth),
-      // The cover of the terrains (T545, ADR-0268): the instances of a tile (copies), and one of them made a thing of the world.
+      // The cover of the terrains (T545, ADR-0269): the instances of a tile (copies), and one of them made a thing of the world.
       cover_at: (x, y) => this.coverSeen(x, y),
       uncover: (x, y, module, model, n) => this.uncover(x, y, module, model === undefined ? undefined : { model, n }),
       // Cellular automata fields (T482, ADR-0254, V-048): read a sample copy or add a bounded source/sink.
@@ -3511,7 +3511,7 @@ export class Kernel {
       if (sid !== undefined) void this.placeInside(ch, sid, at(l.cell), (x, y) => this.spawnItem(l.item, x, y, l.count, ch.key, origin));
       else this.spawnItem(l.item, at(l.cell).x, at(l.cell).y, l.count, ch.key, origin);
     }
-    // The instances of cover that became things of the world (T545, ADR-0268): at their point, with their look.
+    // The instances of cover that became things of the world (T545, ADR-0269): at their point, with their look.
     for (const u of readUncovered(plan.uncovered, S)) this.spawnUncovered(ch, u);
     const unknown = place.ground.filter((g) => !g.item && this.kept(`${ch.key}#g${g.index}`, coef.entities)).map((g) => plan.ground[g.index]);
     this.runesDirty = true;
@@ -4473,7 +4473,7 @@ export class Kernel {
     return true;
   }
 
-  // --- The cover of the terrains (T545, ADR-0268) ----------------------------------------------------------------------------------
+  // --- The cover of the terrains (T545, ADR-0269) ----------------------------------------------------------------------------------
 
   /** What the cover of each place depends on of the solid things and the runes on it (T545): a sum of a hash of each, made with the solids. */
   private solidStamps = new Map<string, number>();
@@ -4518,7 +4518,7 @@ export class Kernel {
   }
 
   /**
-   * The tiles of a place where no cover grows (T545, ADR-0268), 1 a tile: what is not ground one walks, the paths the kernel digs (and the
+   * The tiles of a place where no cover grows (T545, ADR-0269), 1 a tile: what is not ground one walks, the paths the kernel digs (and the
    * gates, which are paths), the lots of its structures and of its block (their doors, their floors), the holes over a cellar, a rune on the
    * ground, and where a still solid thing stands (the middle of the tile or one of its quarters under its footprint). The renderer scatters the cover elsewhere;
    * `coverAt` says the same.
@@ -4559,7 +4559,7 @@ export class Kernel {
   }
 
   /**
-   * The instances of cover on a tile (T545, ADR-0268), as the renderer scatters them: the kinds of its terrain whose programs the library
+   * The instances of cover on a tile (T545, ADR-0269), as the renderer scatters them: the kinds of its terrain whose programs the library
    * has, never where `coverMask` says none, without those that became things of the world. Fresh copies; none off the loaded places.
    */
   coverAt(col: number, row: number): CoverInstance[] {
@@ -4580,7 +4580,7 @@ export class Kernel {
   }
 
   /**
-   * An instance of cover becomes a thing of the world (T545, ADR-0268, D1 of T509): the stone the key lies under. Of the instances of the tile
+   * An instance of cover becomes a thing of the world (T545, ADR-0269, D1 of T509): the stone the key lies under. Of the instances of the tile
    * at (x, y) (`coverAt`), the one said (`which`: its program and number) or the nearest to the point; the thing is `module`, an entity of
    * the library, put by the kernel at the instance's point with its look (the program, the seed and the turn the cover had there), and written
    * in its place's plan (`ChunkPlan.uncovered`), so that it is there at every load and the instance is never drawn as cover again. The id of
@@ -4640,7 +4640,7 @@ export class Kernel {
   }
 
   /**
-   * The cover of a terrain changed with the world on (T545, ADR-0268, D1 of T509): a kind more, another density, one less, within the kernel's
+   * The cover of a terrain changed with the world on (T545, ADR-0269, D1 of T509): a kind more, another density, one less, within the kernel's
    * limits (`COVER_LIMITS`, `coverErrors`): only on the ground one walks, every program one the library has, of the class `cover`. One commit
    * of the Council on the terrains' manifest (`councilMayWrite`): every place is drawn again with it. Only the master in a game of many, never
    * from Lua (the cover is not in the state: it is how the terrain looks). The line of what changed, or why nothing did.
@@ -4689,7 +4689,7 @@ export class Kernel {
   }
 
   /**
-   * The cover of a terrain on the Referente's request (T545, ADR-0268): the Cartographer chooses it among the programs of the class `cover`
+   * The cover of a terrain on the Referente's request (T545, ADR-0269): the Cartographer chooses it among the programs of the class `cover`
    * the library has (`askCover`), the kernel writes it within its limits (`setCover`, one commit); what it refuses goes back once with the
    * reason, and what is still refused does not go in (a shortfall).
    */
@@ -10300,7 +10300,7 @@ export class Kernel {
         return { say: r.say, forged: made.text };
       }
       case 'cover': {
-        // The cover of a terrain with the world on (T545, ADR-0268): the Cartographer chooses among the covers the library has.
+        // The cover of a terrain with the world on (T545, ADR-0269): the Cartographer chooses among the covers the library has.
         const made = await this.coverTerrain(req, chi);
         if (!made.ok) return { say: r.say, forged: `Il Cartografo non lo fa: ${made.reason}` };
         return { say: r.say, forged: made.text };

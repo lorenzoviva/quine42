@@ -230,7 +230,7 @@ export interface ChunkSource extends GroundReads {
   bedTopRgb?(x: number, z: number): readonly number[];
   /** The grain of a terrain's tops (T547, ADR-0267), if it has one. */
   grain?(code: string): GrainLook | undefined;
-  /** The cover of a terrain (T545, ADR-0268): its kinds as it says them (`coverOf`); none where it has none. */
+  /** The cover of a terrain (T545, ADR-0269): its kinds as it says them (`coverOf`); none where it has none. */
   cover?(code: string): readonly CoverKind[] | undefined;
   /** How many seeds of a cover's program there are once all of them are ready (`Forms.seedsOf`); 0 while they are not. */
   coverSeeds?(model: string): number;
@@ -305,7 +305,7 @@ export interface TileInstance {
 }
 
 /**
- * The cover of a place as arrays (T545, ADR-0268): its forms (`model#seed`), which one each instance is, and five numbers an instance: x, the
+ * The cover of a place as arrays (T545, ADR-0269): its forms (`model#seed`), which one each instance is, and five numbers an instance: x, the
  * height, z (relative to the place's corner, as its mesh), the turn and the scale. Not drawn by the place: the renderer gathers the cover of
  * every place loaded in one InstancedMesh a form (`src/render/cover.ts`).
  */
@@ -356,7 +356,7 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   // Instances of the terrains' models: where, how turned, how big.
   const instances: TileInstance[] = [];
   const ready = new Map<string, boolean>();
-  // The cover (T545, ADR-0268): each terrain's kinds whose programs are ready, asked once a code; the instances by form, as they come.
+  // The cover (T545, ADR-0269): each terrain's kinds whose programs are ready, asked once a code; the instances by form, as they come.
   const coverKinds = new Map<string, readonly CoverKind[] | undefined>();
   const coverSeeds = new Map<string, number>();
   const seedsOf = (model: string) => {

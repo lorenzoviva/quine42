@@ -159,14 +159,14 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Copertura del terreno
 - **Inglese**: `cover`, `CoverKind`, `TerrainDef.cover`, `readCover`, `coverOf`, `coverErrors`, `coverOnTile`, `COVER_LIMITS`, `COVER_CAP`, la classe `cover`, `CoverLayer`, `Kernel.setCover`, `coverAt`, `Kernel.coverMask`
-- **Definizione**: ciò che cresce o giace sulla terra che si cammina di un terreno (ciuffi d'erba, sassolini, arbusti bassi, spighe): al più tre programmi della classe `cover`, ognuno 0-4 istanze a casella, sparsi con un hash fuori da sentieri, lotti, porte, varchi, cantine, rune e cose solide ferme, disegnati a istanze sulla finestra senza ombre; solo aspetto, si cambia a mondo acceso con un commit del Concilio (ADR-0268).
+- **Definizione**: ciò che cresce o giace sulla terra che si cammina di un terreno (ciuffi d'erba, sassolini, arbusti bassi, spighe): al più tre programmi della classe `cover`, ognuno 0-4 istanze a casella, sparsi con un hash fuori da sentieri, lotti, porte, varchi, cantine, rune e cose solide ferme, disegnati a istanze sulla finestra senza ombre; solo aspetto, si cambia a mondo acceso con un commit del Concilio (ADR-0269).
 - **Dove vive**: `src/kernel/cover.ts`, `src/render/terrainmesh.ts` (lo spargimento), `src/render/cover.ts` (lo strato), `src/kernel/agents/cover.ts` (il Cartografo a mondo acceso)
 - **Da non usare**: `sottobosco` per il campo (il sottobosco è una copertura), `vegetazione` (è lo strato dei boschi), `decorazione`, `grana` (la grana sono macchie nello shader, ADR-0267)
 - **Fermo**: `cover` nei manifest (`model`, `density`), la classe `cover`.
 
 ### Istanza promossa
 - **Inglese**: `uncover`, `Uncovered`, `ChunkPlan.uncovered`, `ChunkView.uncovered`, `uncoveredKey`, `readUncovered`
-- **Definizione**: un'istanza di copertura diventata una cosa del mondo (il sasso sotto cui sta la chiave): un'entità di un modulo posata dal kernel nel suo punto col suo aspetto, scritta nel piano del luogo, mai più disegnata come copertura (ADR-0268).
+- **Definizione**: un'istanza di copertura diventata una cosa del mondo (il sasso sotto cui sta la chiave): un'entità di un modulo posata dal kernel nel suo punto col suo aspetto, scritta nel piano del luogo, mai più disegnata come copertura (ADR-0269).
 - **Dove vive**: `src/kernel/cover.ts`, `Kernel.uncover`, `src/kernel/agents/cartography.ts` (`ChunkPlan.uncovered`)
 - **Da non usare**: `raccolta` (non si raccoglie la copertura), `spawn` (la posa il kernel, dal punto dell'istanza)
 - **Fermo**: `uncovered` nei piani (`tile`, `model`, `n`, `module`, `seed`) e sul filo (`tile|model|n`).

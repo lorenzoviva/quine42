@@ -1,4 +1,4 @@
-<!-- Grass tuft (T545, ADR-0268: a cover of the seed, written by hand for the lab of T509): a cover model, one program and many seeds. The seed picks four to seven blades on a hidden
+<!-- Grass tuft (T545, ADR-0269: a cover of the seed, written by hand for the lab of T509): a cover model, one program and many seeds. The seed picks four to seven blades on a hidden
      disc at the ground; each rises straight and now and then leans out by a voxel; the tips are light, the feet dark. -->
 <sequence values="BVrGHD" size="10 10 8" name="Ciuffo d'erba">
   <color symbol="G" value="5f9a3c" name="erba"/>

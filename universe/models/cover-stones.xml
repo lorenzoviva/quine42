@@ -1,4 +1,4 @@
-<!-- Small stones (T545, ADR-0268: a cover of the seed, written by hand for the lab of T509): two to four stones from points on the ground, a little wider than tall, the top light. -->
+<!-- Small stones (T545, ADR-0269: a cover of the seed, written by hand for the lab of T509): two to four stones from points on the ground, a little wider than tall, the top light. -->
 <sequence values="BVsGLD" size="10 10 4" name="Sassolini">
   <color symbol="G" value="8a8a86" name="pietra"/>
   <color symbol="L" value="b3b2ab" name="pietra chiara"/>

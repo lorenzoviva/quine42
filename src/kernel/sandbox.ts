@@ -60,12 +60,12 @@ export interface Host {
    */
   stratum_at(x: number, y: number, depth?: number): unknown;
   /**
-   * The cover of a tile (T545, ADR-0268): `{model, n, x, y}` of each instance drawn there, fresh copies, in the order of its terrain's
+   * The cover of a tile (T545, ADR-0269): `{model, n, x, y}` of each instance drawn there, fresh copies, in the order of its terrain's
    * kinds; an empty list where there is none. Read only: the cover is how a terrain looks, never state.
    */
   cover_at(x: number, y: number): unknown;
   /**
-   * An instance of cover becomes a thing of the world (T545, ADR-0268): of the tile at (x, y), the one said (`model` and `n`) or the
+   * An instance of cover becomes a thing of the world (T545, ADR-0269): of the tile at (x, y), the one said (`model` and `n`) or the
    * nearest to the point, as the module `module` (an entity), put by the kernel at its point with its look and written in its place's
    * plan. The new thing's id, or undefined (none there, not a thing, too many in the place, on a mirror).
    */

@@ -112,7 +112,7 @@ export interface TerrainDef {
    */
   grain?: import('./grain').Grain;
   /**
-   * Its cover (T545, ADR-0268; `src/kernel/cover.ts`): what grows or lies on its tiles, at most three programs of the class `cover`, each
+   * Its cover (T545, ADR-0269; `src/kernel/cover.ts`): what grows or lies on its tiles, at most three programs of the class `cover`, each
    * `density` instances a tile (0-4), scattered by a hash; only on the ground one walks, only how it looks. The Council changes it with the
    * world on (`Kernel.setCover`, one commit).
    */

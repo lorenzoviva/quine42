@@ -75,7 +75,7 @@ export interface TerrainView {
   key: string;
   sig: string;
   group: THREE.Group;
-  /** Its cover (T545, ADR-0268): not in its group; the renderer draws the cover of every place in one InstancedMesh a form (`CoverLayer`). */
+  /** Its cover (T545, ADR-0269): not in its group; the renderer draws the cover of every place in one InstancedMesh a form (`CoverLayer`). */
   cover?: CoverArrays;
 }
 

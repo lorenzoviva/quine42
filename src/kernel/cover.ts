@@ -1,4 +1,4 @@
-// The cover of the terrains (T545, C1 of docs/design/terreno-ricco.md, ADR-0268): what grows or lies on the ground of a terrain, tufts of
+// The cover of the terrains (T545, C1 of docs/design/terreno-ricco.md, ADR-0269): what grows or lies on the ground of a terrain, tufts of
 // grass on the meadow, wheat on the ripe field, small stones on the sand, a low shrub here and there. Small models of the class `cover`, one
 // program a kind and many seeds, scattered by a hash on the tiles of every terrain that says them (`coverOnTile`): every client sees the
 // same, nothing goes on the wire, nothing is in the state or in the plans. Only how a terrain looks.

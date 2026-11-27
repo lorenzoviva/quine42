@@ -427,7 +427,7 @@ export class Validator {
         if (t && typeof t === 'object') for (const e of terrainPhysicsErrors(code, t)) errors.push(`${path}: ${e}`);
         // The grain of its ground (T547, ADR-0267): only how it looks, but a colour and a density within the range.
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
-        // Its cover (T545, ADR-0268): only how it looks, but at most three kinds, each a program's id and a density within the range.
+        // Its cover (T545, ADR-0269): only how it looks, but at most three kinds, each a program's id and a density within the range.
         if (t && typeof t === 'object') for (const e of coverErrors(code, t.cover)) errors.push(`${path}: ${e}`);
       }
     }

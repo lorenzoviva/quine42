@@ -830,7 +830,7 @@ local function make_api()
       if depth ~= nil and type(depth) ~= "number" then return nil end
       return host.stratum_at(x, y, depth or 0)
     end,
-    -- The cover of the terrains (T545, ADR-0268): the instances of a tile (copies), read only; and one of them made a thing of the world.
+    -- The cover of the terrains (T545, ADR-0269): the instances of a tile (copies), read only; and one of them made a thing of the world.
     cover_at = function(x, y)
       if type(x) ~= "number" or type(y) ~= "number" then return {} end
       return host.cover_at(x, y)

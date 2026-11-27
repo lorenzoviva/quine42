@@ -1,4 +1,4 @@
-// The cover of a terrain with the world on (T545, ADR-0268, D1 of T509): a request (the Referente's: «more grass on the meadow», «small
+// The cover of a terrain with the world on (T545, ADR-0269, D1 of T509): a request (the Referente's: «more grass on the meadow», «small
 // stones on the sand») becomes the whole cover of one terrain, chosen by the Cartographer among the programs of the class `cover` the
 // library has. The kernel reads it within its limits (`Kernel.setCover`, `COVER_LIMITS`) and commits it; what it refuses comes back here
 // once, with the reason. A cover the library does not have is not invented here: it is a refusal, and the Landscaper sculpts new ones

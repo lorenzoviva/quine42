@@ -26,7 +26,7 @@ export interface AssetClass {
 
 export const CLASSES: AssetClass[] = [
   { id: 'pebble', taglia: 'tiny', name: 'sasso', tiles: [0.5, 0.5, 0.4], hint: 'a thing that fits in a hand or little more' },
-  // The cover of a terrain (T545, ADR-0268): a tuft, a few stones, a low shrub, scattered by thousands; the box of the pebble, bent by the wind.
+  // The cover of a terrain (T545, ADR-0269): a tuft, a few stones, a low shrub, scattered by thousands; the box of the pebble, bent by the wind.
   { id: 'cover', taglia: 'tiny', name: 'copertura del terreno', tiles: [0.5, 0.5, 0.4], animation: 'wind', hint: 'a tuft, small stones, a low shrub, wheat: scattered by thousands over a terrain, few voxels' },
   { id: 'rock', taglia: 'small', name: 'roccia o masso', tiles: [1, 1, 0.8], minHeight: 0.5, hint: 'takes one tile; wider than tall' },
   { id: 'bush', taglia: 'small', name: 'cespuglio o pianta bassa', tiles: [1, 1, 0.8], minHeight: 0.5, animation: 'wind', hint: 'takes one tile' },
@@ -161,7 +161,7 @@ export const growsByRules = (c: AssetClass, taglia?: string): boolean => c.id ==
 
 /**
  * Whether what rests on the bottom of a model's grid is one body, joined by the ground it stands on (`groundJoins` of `analyse`, ADR-0206):
- * a structure that grows by rules (its parts on the ground), and a cover (T545, ADR-0268: stones, blades, ears scattered on the ground, each
+ * a structure that grows by rules (its parts on the ground), and a cover (T545, ADR-0269: stones, blades, ears scattered on the ground, each
  * its own). What floats is still a piece apart.
  */
 export const groundJoined = (c: AssetClass, taglia?: string): boolean => growsByRules(c, taglia) || c.id === 'cover';

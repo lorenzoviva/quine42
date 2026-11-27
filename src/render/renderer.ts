@@ -64,7 +64,7 @@ export class Renderer {
   private chunks = new Map<string, TerrainView>();
   /** The places' meshes made off the page's thread (T486); without a worker, or once it stops, here. */
   private mesher = new ChunkMesher();
-  /** The cover of the terrains on the loaded window (T545, ADR-0268): one InstancedMesh a form, without shadows, under its cap. */
+  /** The cover of the terrains on the loaded window (T545, ADR-0269): one InstancedMesh a form, without shadows, under its cap. */
   readonly cover = new CoverLayer();
   /** The caps of the cut under the ground (T416): built again when one changes tile or floor down there, or the camera turns. */
   private cut?: { sig: string; mesh?: THREE.Mesh };

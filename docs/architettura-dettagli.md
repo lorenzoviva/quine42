@@ -1204,7 +1204,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   milione di caselle) e del sale, ogni macchia un po' più chiara o più scura, e dove la cella è più piccola di un pixel la media, così lo
   scorrimento del tappeto non sfarfalla. Solo aspetto: niente nello stato, nei piani né sul filo. `tests/grana.test.ts`; le foto in
   `docs/catture/T547/`.
-- **La copertura dei terreni** (ADR-0268, T545, C1 di `docs/design/terreno-ricco.md`, kernel 0.10.43): ciò che cresce o giace sulla terra
+- **La copertura dei terreni** (ADR-0269, T545, C1 di `docs/design/terreno-ricco.md`, kernel 0.10.43): ciò che cresce o giace sulla terra
   che si cammina, ciuffi d'erba, sassolini, arbusti bassi, spighe. Un campo del terreno, `cover: [{ model, density }]` (al più tre tipi, 0-4
   istanze a casella in media, a passi di 0,05), letto senza fidarsi (`readCover`, `coverOf`, `src/kernel/cover.ts`, puro, lo importa il
   worker), voluto dal validatore (`coverErrors`); i programmi sono della classe `cover` (la scatola del sasso, piegata dal vento, quattro

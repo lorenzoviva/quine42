@@ -128,7 +128,7 @@ export interface ChunkPlan {
    */
   roughness?: Roughness;
   /**
-   * The instances of cover that became things of the world (T545, ADR-0268; `Kernel.uncover`, `readUncovered`): the tile, the program and
+   * The instances of cover that became things of the world (T545, ADR-0269; `Kernel.uncover`, `readUncovered`): the tile, the program and
    * which instance of it, the module of the thing and its seed. The kernel puts the thing at the instance's point when the place is laid out,
    * and the instance is not drawn as cover any more. Written only by the kernel, at most `MAX_UNCOVERED`.
    */
