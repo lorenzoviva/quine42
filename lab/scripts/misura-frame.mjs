@@ -29,6 +29,14 @@
 // how long each place took to make, the triangles, the buffers, the JS heap before and after), then today's ground with the automata
 // on (the water as virtual pipes every tick, the wind at 10 Hz, the water's surface following them). Only that, as `--blocco`.
 //
+// `--sottobosco [--foto <cartella>]` (T509, docs/design/terreno-ricco.md): the undergrowth of lab/terreno-ricco/ (`pagina.ts`, its cover
+// programs as text) as instances on the loaded places at the start: the frames with the ground of today, then one InstancedMesh per form
+// and place, one per form for the window, one mesh baked per place, at 1, 2 and 4 instances a tile, with and without shadows, the ink of
+// a thing or of the ground; with `--foto` the screenshots (far and near). Only that, as `--blocco`.
+//
+// `--strade <universo> [--foto <cartella>]` (T509): roads, sidewalks and rails of a universe of `universes/` near its start, as drawn
+// today and with the curb and the aligned rails of lab/terreno-ricco/strade.ts (photos only).
+//
 // The meshes of the places (T486): their worker's jobs are counted apart ('terreno', from a copy sent to the arrays back), and each part of
 // the drawing says its worst frames too (p99, the worst, how many over 4 ms), where a place's mesh made on the page's thread shows.
 //
@@ -346,7 +354,7 @@ try {
   await page.send('Runtime.enable');
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: PROBE });
   const t0 = Date.now();
-  await page.send('Page.navigate', { url: `http://localhost:${port}/?skip&offline${opt('viaggio') ? `&universo=${opt('viaggio')}` : ''}` });
+  await page.send('Page.navigate', { url: `http://localhost:${port}/?skip&offline${opt('viaggio') ? `&universo=${opt('viaggio')}` : opt('strade') ? `&universo=${opt('strade')}` : ''}` });
   await page.eval(`(async () => { for (let i = 0; i < 240 && !(window.quine?.corona && window.view); i++) await new Promise((r) => setTimeout(r, 250)); if (!window.quine?.corona) throw new Error('niente kernel'); })()`);
   const kernelAt = (Date.now() - t0) / 1000;
   const env = await page.eval(`(() => { const m = window.__misura, g = m.gl; const e = g.getExtension('WEBGL_debug_renderer_info'); return { gpu: e ? g.getParameter(e.UNMASKED_RENDERER_WEBGL) : '?', size: [g.drawingBufferWidth, g.drawingBufferHeight], timer: !!m.timer, cores: navigator.hardwareConcurrency, ua: navigator.userAgent, webgpu: !!navigator.gpu }; })()`);
@@ -360,7 +368,7 @@ try {
   await page.eval(RESET);
   const settled = await settle(page);
   rows.push({ ...summary(`caricamento a freddo (fino a ${settled} s dopo il kernel)`, await page.eval(TAKE)), settled, kernelAt });
-  for (const [scene, go] of Object.entries(opt('blocco') || opt('viaggio') || argv.includes('--terreno') ? {} : SCENES)) {
+  for (const [scene, go] of Object.entries(opt('blocco') || opt('viaggio') || opt('strade') || argv.includes('--terreno') || argv.includes('--sottobosco') ? {} : SCENES)) {
     await page.eval(go);
     await settle(page, 60);
     await page.eval(RESET);
@@ -490,6 +498,127 @@ automi: ${JSON.stringify(auto)}`);
     await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
     ws.close();
     if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+  } else if (argv.includes('--sottobosco')) {
+    // The undergrowth (T509): the cover programs of lab/terreno-ricco/ as instances on the loaded places, in three ways and at densities.
+    const { build } = await import('esbuild');
+    const raw = { name: 'raw', setup(b) {
+      b.onResolve({ filter: /\?raw$/ }, (a) => ({ path: path.resolve(a.resolveDir, a.path.replace(/\?raw$/, '')), namespace: 'raw' }));
+      b.onLoad({ filter: /.*/, namespace: 'raw' }, (a) => ({ contents: fs.readFileSync(a.path, 'utf8'), loader: 'text' }));
+    } };
+    const bundle = await build({ entryPoints: ['lab/terreno-ricco/pagina.ts'], bundle: true, format: 'iife', platform: 'browser', target: 'es2022', write: false, logLevel: 'error', plugins: [raw] });
+    await page.eval(bundle.outputFiles[0].text + ';true');
+    await page.send('Performance.enable');
+    const heap = async () => {
+      await page.send('HeapProfiler.collectGarbage').catch(() => {});
+      const m = await page.send('Performance.getMetrics');
+      const get = (n) => m.metrics.find((x) => x.name === n)?.value ?? 0;
+      const u = await page.send('Runtime.getHeapUsage').catch(() => ({}));
+      return { heapMB: get('JSHeapUsedSize') / 2 ** 20, buffersMB: (u.backingStorageSize ?? NaN) / 2 ** 20 };
+    };
+    const photos = opt('foto');
+    if (photos) fs.mkdirSync(photos, { recursive: true });
+    const shot = async (name, zoom) => {
+      if (!photos) return;
+      if (zoom) await page.eval(`window.view.zoomTo(${zoom})`);
+      await sleep(1500);
+      const { data } = await page.send('Page.captureScreenshot', { format: 'jpeg', quality: 82 });
+      fs.writeFileSync(path.join(photos, `${name}.jpg`), Buffer.from(data, 'base64'));
+      if (zoom) await page.eval('window.view.zoomTo(15)');
+      if (zoom) await settle(page, 10);
+      await sleep(800);
+    };
+    await page.eval(`(() => { const k = window.quine; k.carpet().active = false; })()`);
+    await settle(page, 60);
+    await shot('00-oggi', 0);
+    await shot('00-oggi-vicino', 5);
+    // The farthest the simulation's camera goes (ZOOM.max): the most places on screen, the worst case.
+    await page.eval('window.view.zoomTo(15)');
+    await settle(page, 30);
+    const prep = await page.eval('window.__t509.prepare()');
+    console.log(`
+sottobosco: ${prep.forms} forme fatte nella pagina in ${prep.ms} ms, ${prep.meanTris} triangoli in media`);
+    // `--solo-foto`: the two inks side by side at the same hour of the world (the day turns in ten minutes), no measures.
+    if (argv.includes('--solo-foto')) await page.eval('window.quine.daylight = () => 1');
+    const configsOnly = argv.includes('--solo-foto') ? [
+      ['10-inchiostro-degli-alberi', { way: 'window', perTile: 2 }],
+      ['11-inchiostro-del-suolo', { way: 'window', perTile: 2, ink: 'ground' }],
+    ] : [];
+    for (const [name, c] of configsOnly) {
+      await page.eval(`window.__t509.cover(${JSON.stringify(c)})`);
+      await shot(`${name}-vicino`, 5);
+    }
+    if (configsOnly.length) await page.eval('window.__t509.restore()');
+    const h0 = await heap();
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary('oggi, il luogo della partenza, la camera più lontana', await page.eval(TAKE)), heap: h0 });
+    await shot('00-oggi-lontano', 0);
+    const configs = argv.includes('--solo-foto') ? [] : [
+      ['01-luogo-1-ombre', { way: 'chunk', perTile: 1, shadow: true }],
+      ['02-finestra-1-ombre', { way: 'window', perTile: 1, shadow: true }],
+      ['03-finestra-1', { way: 'window', perTile: 1 }],
+      ['04-finestra-2', { way: 'window', perTile: 2 }],
+      ['05-finestra-4', { way: 'window', perTile: 4 }],
+      ['06-fusa-1', { way: 'merged', perTile: 1 }],
+      ['07-finestra-2-inchiostro-del-suolo', { way: 'window', perTile: 2, ink: 'ground' }],
+      ['08-luogo-2', { way: 'chunk', perTile: 2 }],
+      ['09-finestra-8', { way: 'window', perTile: 8 }],
+    ];
+    for (const [name, c] of configs) {
+      const made = await page.eval(`window.__t509.cover(${JSON.stringify(c)})`);
+      await sleep(2000);
+      const h1 = await heap();
+      console.log(`
+${name}: ${made.instances} istanze, ${Math.round(made.tris / 1000)}k triangoli, ${made.objects} oggetti, ${(made.bytes / 2 ** 20).toFixed(2)} MB, ${made.ms} ms; heap ${h1.heapMB.toFixed(0)} MB, buffer ${h1.buffersMB.toFixed(0)} MB`);
+      await page.eval(RESET);
+      await sleep(seconds * 1000);
+      rows.push({ ...summary(`${name} (${made.instances} istanze, ${Math.round(made.tris / 1000)}k triangoli, ${made.objects} oggetti)`, await page.eval(TAKE)), made, heap: h1 });
+      if (name.startsWith('05') || name.startsWith('07') || name.startsWith('04')) await shot(`${name}-vicino`, 5);
+      if (name.startsWith('04')) await shot(`${name}-lontano`, 0);
+      if (name.startsWith('04')) await shot(name, 10);
+    }
+    await page.eval('window.__t509.restore()');
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+  } else if (opt('strade')) {
+    // Roads, sidewalks and rails (T509, docs/design/terreno-ricco.md § 3): the place of the universe with the most of them near the start,
+    // a photo as the game draws it, then with the curb and the rails of lab/terreno-ricco/strade.ts.
+    const { build } = await import('esbuild');
+    const bundle = await build({ entryPoints: ['lab/terreno-ricco/strade.ts'], bundle: true, format: 'iife', platform: 'browser', target: 'es2022', write: false, logLevel: 'error' });
+    await page.eval(bundle.outputFiles[0].text + ';true');
+    const photos = opt('foto') ?? 'lab/terreno-ricco/foto';
+    fs.mkdirSync(photos, { recursive: true });
+    const name = opt('strade');
+    const snap = async (file) => {
+      await sleep(1500);
+      const { data } = await page.send('Page.captureScreenshot', { format: 'jpeg', quality: 82 });
+      fs.writeFileSync(path.join(photos, `${file}.jpg`), Buffer.from(data, 'base64'));
+    };
+    const start = await page.eval(`(() => { const k = window.quine; const S = k.config.chunkSize; const c = k.carpet(); c.active = false; const p = k.wandererCarpet(); return [Math.floor(p.x / S), Math.floor(p.y / S)]; })()`);
+    let best;
+    for (const [dx, dy] of [[0, 0], [3, 0], [0, 3], [-3, -3], [3, 3], [-3, 0]]) {
+      await page.eval(`(() => { const k = window.quine, S = k.config.chunkSize, c = k.carpet(); Object.assign(k.wandererPos(), { x: 0, y: 0 }); c.ox = ${start[0] + dx} * S + S / 2; c.oy = ${start[1] + dy} * S + S / 2; })()`);
+      await settle(page, 30);
+      const top = (await page.eval('window.__t509s.score()'))[0];
+      if (top && (!best || top.rails * 4 + top.edges > best.rails * 4 + best.edges)) best = top;
+    }
+    console.log(`
+${name}: il luogo con più strade e binari ${JSON.stringify(best)}`);
+    const [bx, by] = best.key.split(',').map(Number);
+    // The middle of its rails (or of its curbs); the light of noon for the photos (the day turns in ten minutes).
+    await page.eval(`(() => { const k = window.quine, S = k.config.chunkSize, c = k.carpet(); const f = window.__t509s.focus('${best.key}') ?? { x: ${bx} * S + S / 2, y: ${by} * S + S / 2 }; Object.assign(k.wandererPos(), { x: 0, y: 0 }); c.ox = Math.round(f.x) + 1.5; c.oy = Math.round(f.y) + 1.5; k.daylight = () => 1; window.view.zoomTo(9); })()`);
+    await settle(page, 60);
+    await snap(`strade-${name}-oggi`);
+    const made = await page.eval('window.__t509s.street({ curb: 0.12 })');
+    console.log(`${name}: ${made.slabs} caselle di marciapiede rialzate, ${made.rails} di binari, ${made.tris} triangoli`);
+    await snap(`strade-${name}-proposta`);
+    await page.eval('window.view.zoomTo(5)');
+    await snap(`strade-${name}-proposta-vicino`);
+    await page.eval('window.__t509s.restore()');
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, best, made }, null, 2));
   } else if (blockFile) {
     const vpt = Number(opt('vpt', '10'));
     const [bx, by] = (opt('luogo') ?? '20,24').split(',').map(Number);

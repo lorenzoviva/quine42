@@ -1,0 +1,1944 @@
+{
+ "date": "2026-11-27",
+ "universes": [
+  {
+   "name": "seme",
+   "theme": "aurora",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 7,
+    "spots": 4
+   },
+   "start": {
+    "key": "0,0",
+    "name": "Campagna del Primo Passo",
+    "layout": "village",
+    "stage": "planned",
+    "layers": {
+     "ground": 308,
+     "liquid": 16
+    },
+    "codes": {
+     "g": 228,
+     "p": 67,
+     "w": 16,
+     "m": 12,
+     "n": 1
+    },
+    "instances": 0,
+    "instancesByModel": {},
+    "entities": {
+     "struttura": 2,
+     "runa": 5,
+     "bush": 1,
+     "furniture": 4
+    },
+    "landscaperEntities": 1,
+    "planObjects": 5,
+    "planGround": 0,
+    "planStructures": 1,
+    "walkableGround": 308,
+    "bareGround": 301,
+    "coverable": 241
+   },
+   "totals": {
+    "tiles": 2268,
+    "layers": {
+     "ground": 2023,
+     "liquid": 29,
+     "rock": 96,
+     "vegetation": 120
+    },
+    "instances": 150,
+    "entities": {
+     "struttura": 5,
+     "runa": 14,
+     "bush": 3,
+     "furniture": 15,
+     "persona o animale": 4,
+     "oggetto a terra": 4,
+     "building": 1
+    },
+    "landscaperEntities": 3,
+    "planObjects": 23,
+    "planGround": 0,
+    "walkableGround": 2023,
+    "bareGround": 2004,
+    "coverable": 1745
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "bosco",
+     "layer": "vegetation",
+     "model": "tree"
+    },
+    {
+     "code": "r",
+     "name": "roccia",
+     "layer": "rock",
+     "model": "rock"
+    },
+    {
+     "code": "j",
+     "name": "giungla",
+     "layer": "vegetation",
+     "model": "palma"
+    },
+    {
+     "code": "k",
+     "name": "montagna",
+     "layer": "rock",
+     "model": "masso-muschioso"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "t",
+     "ms": 35.16909999999916,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "quercia",
+     "class": "tree",
+     "terrain": "",
+     "ms": 70.7035999999971,
+     "voxels": 12291,
+     "tris": 12134,
+     "greedy": 8128,
+     "bytes": 1019256,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "betulla",
+     "class": "tree",
+     "terrain": "",
+     "ms": 35.4532999999974,
+     "voxels": 4097,
+     "tris": 8484,
+     "greedy": 6480,
+     "bytes": 712656,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "palma",
+     "class": "tree",
+     "terrain": "j",
+     "ms": 8.655099999999948,
+     "voxels": 586,
+     "tris": 3890,
+     "greedy": 2842,
+     "bytes": 326760,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.984199999998964,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "cespuglio-con-bacche",
+     "class": "bush",
+     "terrain": "",
+     "ms": 4.934799999999086,
+     "voxels": 889,
+     "tris": 1630,
+     "greedy": 1302,
+     "bytes": 136920,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "r",
+     "ms": 6.959800000000541,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "masso-muschioso",
+     "class": "rock",
+     "terrain": "k",
+     "ms": 9.436100000002625,
+     "voxels": 979,
+     "tris": 1326,
+     "greedy": 998,
+     "bytes": 111384,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 1.991199999996752,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [],
+    "edges": [],
+    "rails": {},
+    "tilesInWindow": 2268
+   },
+   "ms": 8041
+  },
+  {
+   "name": "aurora",
+   "theme": "aurora",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 76,
+    "spots": 4
+   },
+   "start": {
+    "key": "0,0",
+    "name": "Campagna del Primo Passo",
+    "layout": "village",
+    "stage": "planned",
+    "layers": {
+     "ground": 308,
+     "liquid": 16
+    },
+    "codes": {
+     "g": 216,
+     "p": 79,
+     "w": 16,
+     "m": 12,
+     "n": 1
+    },
+    "instances": 0,
+    "instancesByModel": {},
+    "entities": {
+     "struttura": 2,
+     "runa": 4,
+     "bush": 1,
+     "furniture": 4
+    },
+    "landscaperEntities": 1,
+    "planObjects": 5,
+    "planGround": 0,
+    "planStructures": 0,
+    "walkableGround": 308,
+    "bareGround": 301,
+    "coverable": 229
+   },
+   "totals": {
+    "tiles": 24624,
+    "layers": {
+     "ground": 19255,
+     "liquid": 2829,
+     "rock": 1069,
+     "vegetation": 1326,
+     "wall": 141,
+     "door": 2,
+     "floor": 2
+    },
+    "instances": 1712,
+    "entities": {
+     "struttura": 13,
+     "runa": 93,
+     "bush": 18,
+     "furniture": 151,
+     "persona o animale": 7,
+     "oggetto a terra": 68,
+     "building": 16
+    },
+    "landscaperEntities": 18,
+    "planObjects": 248,
+    "planGround": 0,
+    "walkableGround": 19255,
+    "bareGround": 19192,
+    "coverable": 17050
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "bosco",
+     "layer": "vegetation",
+     "model": "tree"
+    },
+    {
+     "code": "r",
+     "name": "roccia",
+     "layer": "rock",
+     "model": "rock"
+    },
+    {
+     "code": "j",
+     "name": "giungla",
+     "layer": "vegetation",
+     "model": "palma"
+    },
+    {
+     "code": "k",
+     "name": "montagna",
+     "layer": "rock",
+     "model": "masso-muschioso"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "t",
+     "ms": 35.457000000002154,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "quercia",
+     "class": "tree",
+     "terrain": "",
+     "ms": 66.44189999999799,
+     "voxels": 12291,
+     "tris": 12134,
+     "greedy": 8128,
+     "bytes": 1019256,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "betulla",
+     "class": "tree",
+     "terrain": "",
+     "ms": 36.453999999997905,
+     "voxels": 4097,
+     "tris": 8484,
+     "greedy": 6480,
+     "bytes": 712656,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "palma",
+     "class": "tree",
+     "terrain": "j",
+     "ms": 8.684700000001612,
+     "voxels": 586,
+     "tris": 3890,
+     "greedy": 2842,
+     "bytes": 326760,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.552499999997963,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "cespuglio-con-bacche",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.075300000000425,
+     "voxels": 889,
+     "tris": 1630,
+     "greedy": 1302,
+     "bytes": 136920,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "r",
+     "ms": 6.637600000001839,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "masso-muschioso",
+     "class": "rock",
+     "terrain": "k",
+     "ms": 6.119800000000396,
+     "voxels": 979,
+     "tris": 1326,
+     "greedy": 998,
+     "bytes": 111384,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 1.5230000000010477,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [],
+    "edges": [],
+    "rails": {},
+    "tilesInWindow": 24624
+   },
+   "ms": 8461
+  },
+  {
+   "name": "mesa",
+   "theme": "aurora",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 29,
+    "spots": 4
+   },
+   "start": {
+    "key": "2,-2",
+    "name": "Riva della Chiatta Ghiacciata",
+    "layout": "lake",
+    "stage": "planned",
+    "layers": {
+     "ground": 287,
+     "vegetation": 16,
+     "liquid": 21
+    },
+    "codes": {
+     "n": 285,
+     "t": 16,
+     "w": 21,
+     "p": 2
+    },
+    "instances": 9,
+    "instancesByModel": {
+     "terreno-macchia-di-pioppi-e-arbusti": 9
+    },
+    "entities": {
+     "runa": 3,
+     "persona o animale": 1,
+     "furniture": 1,
+     "structure": 1,
+     "oggetto a terra": 6
+    },
+    "landscaperEntities": 0,
+    "planObjects": 3,
+    "planGround": 4,
+    "planStructures": 1,
+    "walkableGround": 287,
+    "bareGround": 287,
+    "coverable": 285
+   },
+   "totals": {
+    "tiles": 9396,
+    "layers": {
+     "ground": 7406,
+     "vegetation": 454,
+     "liquid": 903,
+     "rock": 633
+    },
+    "instances": 853,
+    "entities": {
+     "runa": 86,
+     "persona o animale": 19,
+     "furniture": 58,
+     "structure": 26,
+     "oggetto a terra": 136,
+     "struttura": 6
+    },
+    "landscaperEntities": 0,
+    "planObjects": 119,
+    "planGround": 103,
+    "walkableGround": 7406,
+    "bareGround": 7406,
+    "coverable": 6709
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "macchia di pioppi e arbusti",
+     "layer": "vegetation",
+     "model": "terreno-macchia-di-pioppi-e-arbusti"
+    },
+    {
+     "code": "r",
+     "name": "rocce rosse",
+     "layer": "rock",
+     "model": "terreno-rocce-rosse"
+    },
+    {
+     "code": "j",
+     "name": "cactus fitti",
+     "layer": "vegetation",
+     "model": "terreno-cactus-fitti"
+    },
+    {
+     "code": "k",
+     "name": "parete di canyon",
+     "layer": "rock",
+     "model": "terreno-parete-di-canyon"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "",
+     "ms": 84.95330000000104,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "quercia",
+     "class": "tree",
+     "terrain": "",
+     "ms": 124.3689000000013,
+     "voxels": 12291,
+     "tris": 12134,
+     "greedy": 8128,
+     "bytes": 1019256,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "betulla",
+     "class": "tree",
+     "terrain": "",
+     "ms": 84.17229999999836,
+     "voxels": 4097,
+     "tris": 8484,
+     "greedy": 6480,
+     "bytes": 712656,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "palma",
+     "class": "tree",
+     "terrain": "",
+     "ms": 18.650199999996403,
+     "voxels": 586,
+     "tris": 3890,
+     "greedy": 2842,
+     "bytes": 326760,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "",
+     "ms": 14.774700000001758,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "cespuglio-con-bacche",
+     "class": "bush",
+     "terrain": "",
+     "ms": 7.150199999996403,
+     "voxels": 889,
+     "tris": 1630,
+     "greedy": 1302,
+     "bytes": 136920,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "",
+     "ms": 16.40009999999893,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "masso-muschioso",
+     "class": "rock",
+     "terrain": "",
+     "ms": 9.854200000001583,
+     "voxels": 979,
+     "tris": 1326,
+     "greedy": 998,
+     "bytes": 111384,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 5.241600000001199,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    },
+    {
+     "id": "terreno-macchia-di-pioppi-e-arbusti",
+     "class": "tree",
+     "score": 6,
+     "terrain": "t",
+     "ms": 127.01610000000073,
+     "voxels": 13757,
+     "tris": 17858,
+     "greedy": 10682,
+     "bytes": 1500072,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "terreno-rocce-rosse",
+     "class": "rock",
+     "score": 4,
+     "terrain": "r",
+     "ms": 6.1437000000005355,
+     "voxels": 1051,
+     "tris": 1550,
+     "greedy": 920,
+     "bytes": 130200,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "terreno-cactus-fitti",
+     "class": "tree",
+     "score": 6,
+     "terrain": "j",
+     "ms": 89.20120000000315,
+     "voxels": 5038,
+     "tris": 16422,
+     "greedy": 4014,
+     "bytes": 1379448,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "terreno-parete-di-canyon",
+     "class": "rock",
+     "score": 5,
+     "terrain": "k",
+     "ms": 7.132200000000012,
+     "voxels": 5113,
+     "tris": 3266,
+     "greedy": 240,
+     "bytes": 274344,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [
+     {
+      "code": "p",
+      "name": "pista battuta",
+      "layer": "ground",
+      "color": "#d9a86a",
+      "speed": 1.15,
+      "tiles": 697
+     },
+     {
+      "code": "l",
+      "name": "binari",
+      "layer": "ground",
+      "color": "#4a4440",
+      "speed": 1.1,
+      "tiles": 0
+     },
+     {
+      "code": "z",
+      "name": "marciapiede di assi",
+      "layer": "floor",
+      "color": "#94683c",
+      "speed": 1.1,
+      "tiles": 0
+     }
+    ],
+    "edges": [
+     [
+      "n brina d'altura | p pista battuta",
+      382
+     ],
+     [
+      "g prateria | p pista battuta",
+      192
+     ],
+     [
+      "p pista battuta | r rocce rosse",
+      52
+     ],
+     [
+      "p pista battuta | t macchia di pioppi e arbusti",
+      49
+     ],
+     [
+      "p pista battuta | w fiume torbido",
+      29
+     ],
+     [
+      "k parete di canyon | p pista battuta",
+      28
+     ],
+     [
+      "m fango del guado | p pista battuta",
+      22
+     ]
+    ],
+    "rails": {},
+    "tilesInWindow": 9396
+   },
+   "ms": 12048
+  },
+  {
+   "name": "neapolis",
+   "theme": "neapolis",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 60,
+    "spots": 4
+   },
+   "start": {
+    "key": "2,1",
+    "name": "Officine dei Granili",
+    "layout": "officine",
+    "stage": "planned",
+    "layers": {
+     "ground": 316,
+     "wall": 8
+    },
+    "codes": {
+     "p": 70,
+     "g": 222,
+     "e": 24,
+     "c": 8
+    },
+    "instances": 0,
+    "instancesByModel": {},
+    "entities": {
+     "struttura": 1,
+     "runa": 1,
+     "persona o animale": 2,
+     "furniture": 4,
+     "oggetto a terra": 4
+    },
+    "landscaperEntities": 0,
+    "planObjects": 6,
+    "planGround": 3,
+    "planStructures": 1,
+    "walkableGround": 316,
+    "bareGround": 316,
+    "coverable": 0
+   },
+   "totals": {
+    "tiles": 19440,
+    "layers": {
+     "ground": 11734,
+     "wall": 12,
+     "vegetation": 600,
+     "liquid": 6814,
+     "rock": 202,
+     "floor": 78
+    },
+    "instances": 498,
+    "entities": {
+     "struttura": 53,
+     "runa": 110,
+     "persona o animale": 36,
+     "furniture": 81,
+     "oggetto a terra": 189,
+     "monument": 49,
+     "building": 5,
+     "object": 1,
+     "structure": 4
+    },
+    "landscaperEntities": 0,
+    "planObjects": 222,
+    "planGround": 130,
+    "walkableGround": 11734,
+    "bareGround": 11734,
+    "coverable": 883
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "platani",
+     "layer": "vegetation",
+     "model": "tree"
+    },
+    {
+     "code": "r",
+     "name": "scogli",
+     "layer": "rock",
+     "model": "rock"
+    },
+    {
+     "code": "j",
+     "name": "siepe",
+     "layer": "vegetation",
+     "model": "bush"
+    },
+    {
+     "code": "k",
+     "name": "tufo",
+     "layer": "rock",
+     "model": "masso-muschioso"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "t",
+     "ms": 34.34240000000136,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "quercia",
+     "class": "tree",
+     "terrain": "",
+     "ms": 66.91900000000169,
+     "voxels": 12291,
+     "tris": 12134,
+     "greedy": 8128,
+     "bytes": 1019256,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "betulla",
+     "class": "tree",
+     "terrain": "",
+     "ms": 34.461300000002666,
+     "voxels": 4097,
+     "tris": 8484,
+     "greedy": 6480,
+     "bytes": 712656,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "palma",
+     "class": "tree",
+     "terrain": "",
+     "ms": 7.9474000000045635,
+     "voxels": 586,
+     "tris": 3890,
+     "greedy": 2842,
+     "bytes": 326760,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "j",
+     "ms": 4.915899999999965,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "cespuglio-con-bacche",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.168599999997241,
+     "voxels": 889,
+     "tris": 1630,
+     "greedy": 1302,
+     "bytes": 136920,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "r",
+     "ms": 6.452499999999418,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "masso-muschioso",
+     "class": "rock",
+     "terrain": "k",
+     "ms": 6.288200000002689,
+     "voxels": 979,
+     "tris": 1326,
+     "greedy": 998,
+     "bytes": 111384,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 1.8563999999969383,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [
+     {
+      "code": "g",
+      "name": "marciapiede",
+      "layer": "ground",
+      "color": "#b8b0a2",
+      "tiles": 8205
+     },
+     {
+      "code": "p",
+      "name": "strada",
+      "layer": "ground",
+      "color": "#5e5e64",
+      "speed": 1.15,
+      "tiles": 2513
+     },
+     {
+      "code": "z",
+      "name": "banchina",
+      "layer": "floor",
+      "color": "#8a7a64",
+      "tiles": 78
+     },
+     {
+      "code": "a",
+      "name": "binari",
+      "layer": "ground",
+      "color": "#6a5a4a",
+      "speed": 0.85,
+      "tiles": 28
+     },
+     {
+      "code": "e",
+      "name": "parcheggio",
+      "layer": "ground",
+      "color": "#6e6e74",
+      "speed": 1.1,
+      "tiles": 105
+     }
+    ],
+    "edges": [
+     [
+      "g marciapiede | p strada",
+      4089
+     ],
+     [
+      "g marciapiede | m aiuola",
+      555
+     ],
+     [
+      "g marciapiede | n brecciolino",
+      439
+     ],
+     [
+      "g marciapiede | t platani",
+      383
+     ],
+     [
+      "p strada | t platani",
+      233
+     ],
+     [
+      "g marciapiede | w acqua",
+      210
+     ],
+     [
+      "g marciapiede | s spiaggia",
+      109
+     ],
+     [
+      "g marciapiede | j siepe",
+      107
+     ],
+     [
+      "m aiuola | p strada",
+      91
+     ],
+     [
+      "e parcheggio | g marciapiede",
+      88
+     ]
+    ],
+    "rails": {
+     "a": {
+      "fine": 8,
+      "dritto": 20
+     }
+    },
+    "tilesInWindow": 19440
+   },
+   "ms": 9722
+  },
+  {
+   "name": "orichalcum",
+   "theme": "orichalcum",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 52,
+    "spots": 4
+   },
+   "start": {
+    "key": "1,0",
+    "name": "Bottega Vitti",
+    "layout": "quartiere_telai",
+    "stage": "planned",
+    "layers": {
+     "vegetation": 15,
+     "ground": 214,
+     "liquid": 95
+    },
+    "codes": {
+     "t": 15,
+     "g": 33,
+     "s": 103,
+     "o": 92,
+     "p": 55,
+     "e": 23,
+     "w": 3
+    },
+    "instances": 9,
+    "instancesByModel": {
+     "tree": 9
+    },
+    "entities": {
+     "struttura": 1,
+     "runa": 1,
+     "persona o animale": 1,
+     "furniture": 2,
+     "monument": 1,
+     "oggetto a terra": 5
+    },
+    "landscaperEntities": 0,
+    "planObjects": 4,
+    "planGround": 4,
+    "planStructures": 1,
+    "walkableGround": 214,
+    "bareGround": 214,
+    "coverable": 136
+   },
+   "totals": {
+    "tiles": 16848,
+    "layers": {
+     "vegetation": 140,
+     "ground": 7464,
+     "liquid": 7858,
+     "rock": 973,
+     "wall": 399,
+     "door": 6,
+     "floor": 8
+    },
+    "instances": 1049,
+    "entities": {
+     "struttura": 36,
+     "runa": 92,
+     "persona o animale": 32,
+     "furniture": 47,
+     "monument": 44,
+     "oggetto a terra": 176,
+     "building": 17,
+     "person": 5,
+     "structure": 2,
+     "object": 6
+    },
+    "landscaperEntities": 0,
+    "planObjects": 200,
+    "planGround": 125,
+    "walkableGround": 7464,
+    "bareGround": 7464,
+    "coverable": 5489
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "boschetto di platani",
+     "layer": "vegetation",
+     "model": "tree"
+    },
+    {
+     "code": "r",
+     "name": "roccia",
+     "layer": "rock",
+     "model": "rock"
+    },
+    {
+     "code": "j",
+     "name": "serra",
+     "layer": "vegetation",
+     "model": "palma"
+    },
+    {
+     "code": "k",
+     "name": "montagna",
+     "layer": "rock",
+     "model": "masso-muschioso"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "t",
+     "ms": 30.088400000000547,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "quercia",
+     "class": "tree",
+     "terrain": "",
+     "ms": 66.79529999999795,
+     "voxels": 12291,
+     "tris": 12134,
+     "greedy": 8128,
+     "bytes": 1019256,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "betulla",
+     "class": "tree",
+     "terrain": "",
+     "ms": 35.20190000000002,
+     "voxels": 4097,
+     "tris": 8484,
+     "greedy": 6480,
+     "bytes": 712656,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "palma",
+     "class": "tree",
+     "terrain": "j",
+     "ms": 10.05569999999716,
+     "voxels": 586,
+     "tris": 3890,
+     "greedy": 2842,
+     "bytes": 326760,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.384400000002643,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "cespuglio-con-bacche",
+     "class": "bush",
+     "terrain": "",
+     "ms": 5.110999999997148,
+     "voxels": 889,
+     "tris": 1630,
+     "greedy": 1302,
+     "bytes": 136920,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "r",
+     "ms": 5.92949999999837,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "masso-muschioso",
+     "class": "rock",
+     "terrain": "k",
+     "ms": 5.842400000001362,
+     "voxels": 979,
+     "tris": 1326,
+     "greedy": 998,
+     "bytes": 111384,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 1.8498000000035972,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [
+     {
+      "code": "p",
+      "name": "strada lastricata",
+      "layer": "ground",
+      "color": "#a89878",
+      "speed": 1.15,
+      "tiles": 1562
+     },
+     {
+      "code": "x",
+      "name": "binari",
+      "layer": "ground",
+      "color": "#5c544c",
+      "speed": 1.05,
+      "tiles": 188
+     },
+     {
+      "code": "e",
+      "name": "selciato",
+      "layer": "ground",
+      "color": "#8a7a70",
+      "speed": 1.1,
+      "tiles": 225
+     }
+    ],
+    "edges": [
+     [
+      "o mare | p strada lastricata",
+      658
+     ],
+     [
+      "g terra battuta | p strada lastricata",
+      494
+     ],
+     [
+      "e selciato | g terra battuta",
+      430
+     ],
+     [
+      "g terra battuta | x binari",
+      297
+     ],
+     [
+      "p strada lastricata | r roccia",
+      292
+     ],
+     [
+      "p strada lastricata | s sabbia",
+      137
+     ],
+     [
+      "p strada lastricata | w acqua del canale",
+      127
+     ],
+     [
+      "x binari | y scorie",
+      69
+     ],
+     [
+      "p strada lastricata | y scorie",
+      56
+     ],
+     [
+      "e selciato | p strada lastricata",
+      31
+     ]
+    ],
+    "rails": {
+     "x": {
+      "fine": 47,
+      "dritto": 113,
+      "a T": 23,
+      "curva": 5
+     }
+    },
+    "tilesInWindow": 16848
+   },
+   "ms": 11421
+  },
+  {
+   "name": "sidera",
+   "theme": "sidera",
+   "relief": "hills",
+   "window": {
+    "places": 25,
+    "planned": 39,
+    "spots": 4
+   },
+   "start": {
+    "key": "-5,-8",
+    "name": "Piazza dei Rottami",
+    "layout": "mercato_viadotti",
+    "stage": "planned",
+    "layers": {
+     "vegetation": 4,
+     "ground": 312,
+     "wall": 5,
+     "rock": 3
+    },
+    "codes": {
+     "j": 4,
+     "p": 69,
+     "g": 116,
+     "s": 127,
+     "b": 5,
+     "r": 3
+    },
+    "instances": 5,
+    "instancesByModel": {
+     "sidera-felce-spirale": 2,
+     "sidera-cristallo": 3
+    },
+    "entities": {
+     "struttura": 4,
+     "runa": 3,
+     "persona o animale": 3,
+     "object": 1,
+     "oggetto a terra": 3,
+     "furniture": 2
+    },
+    "landscaperEntities": 0,
+    "planObjects": 6,
+    "planGround": 3,
+    "planStructures": 1,
+    "walkableGround": 312,
+    "bareGround": 312,
+    "coverable": 127
+   },
+   "totals": {
+    "tiles": 12636,
+    "layers": {
+     "vegetation": 345,
+     "ground": 11505,
+     "wall": 141,
+     "rock": 334,
+     "liquid": 311
+    },
+    "instances": 447,
+    "entities": {
+     "struttura": 136,
+     "runa": 125,
+     "persona o animale": 24,
+     "object": 33,
+     "oggetto a terra": 122,
+     "furniture": 76,
+     "monument": 1
+    },
+    "landscaperEntities": 0,
+    "planObjects": 196,
+    "planGround": 128,
+    "walkableGround": 11505,
+    "bareGround": 11505,
+    "coverable": 1558
+   },
+   "terrainModels": [
+    {
+     "code": "t",
+     "name": "boschetto di vetro",
+     "layer": "vegetation",
+     "model": "sidera-albero-vetro"
+    },
+    {
+     "code": "r",
+     "name": "speroni di cristallo",
+     "layer": "rock",
+     "model": "sidera-cristallo"
+    },
+    {
+     "code": "j",
+     "name": "felceto",
+     "layer": "vegetation",
+     "model": "sidera-felce-spirale"
+    }
+   ],
+   "models": [
+    {
+     "id": "tree",
+     "class": "tree",
+     "terrain": "",
+     "ms": 29.08079999999609,
+     "voxels": 5153,
+     "tris": 6802,
+     "greedy": 4848,
+     "bytes": 571368,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "bush",
+     "class": "bush",
+     "terrain": "",
+     "ms": 6.423699999999371,
+     "voxels": 776,
+     "tris": 1584,
+     "greedy": 1166,
+     "bytes": 133056,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "rock",
+     "class": "rock",
+     "terrain": "",
+     "ms": 7.526400000002468,
+     "voxels": 1004,
+     "tris": 1446,
+     "greedy": 900,
+     "bytes": 121464,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "pebble",
+     "class": "pebble",
+     "terrain": "",
+     "ms": 1.887700000006589,
+     "voxels": 131,
+     "tris": 342,
+     "greedy": 256,
+     "bytes": 28728,
+     "box": [
+      10,
+      10,
+      8
+     ]
+    },
+    {
+     "id": "sidera-albero-vetro",
+     "class": "tree",
+     "terrain": "t",
+     "ms": 9.076499999995576,
+     "voxels": 3924,
+     "tris": 15422,
+     "greedy": 7968,
+     "bytes": 1295448,
+     "box": [
+      40,
+      40,
+      60
+     ]
+    },
+    {
+     "id": "sidera-cristallo",
+     "class": "rock",
+     "terrain": "r",
+     "ms": 3.605200000005425,
+     "voxels": 1082,
+     "tris": 5268,
+     "greedy": 1452,
+     "bytes": 442512,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    },
+    {
+     "id": "sidera-felce-spirale",
+     "class": "bush",
+     "terrain": "j",
+     "ms": 1.5213999999978114,
+     "voxels": 523,
+     "tris": 2478,
+     "greedy": 1832,
+     "bytes": 208152,
+     "box": [
+      20,
+      20,
+      16
+     ]
+    }
+   ],
+   "roads": {
+    "codes": [
+     {
+      "code": "g",
+      "name": "asfalto bagnato",
+      "layer": "ground",
+      "color": "#3b4250",
+      "speed": 1,
+      "tiles": 6348
+     },
+     {
+      "code": "e",
+      "name": "pista",
+      "layer": "ground",
+      "color": "#5d6470",
+      "speed": 1.1,
+      "tiles": 0
+     }
+    ],
+    "edges": [
+     [
+      "g asfalto bagnato | p passerella",
+      4596
+     ],
+     [
+      "g asfalto bagnato | s sabbia vitrea",
+      757
+     ],
+     [
+      "g asfalto bagnato | j felceto",
+      608
+     ],
+     [
+      "g asfalto bagnato | r speroni di cristallo",
+      289
+     ],
+     [
+      "b muro di cemento | g asfalto bagnato",
+      186
+     ],
+     [
+      "g asfalto bagnato | w canale",
+      152
+     ],
+     [
+      "g asfalto bagnato | n brina",
+      27
+     ],
+     [
+      "c recinzione di rete | g asfalto bagnato",
+      16
+     ],
+     [
+      "g asfalto bagnato | k rupe di basalto",
+      11
+     ],
+     [
+      "g asfalto bagnato | v canale di plasma",
+      6
+     ]
+    ],
+    "rails": {},
+    "tilesInWindow": 12636
+   },
+   "ms": 10832
+  }
+ ],
+ "covers": [
+  {
+   "id": "arbusto",
+   "ms": 2.2348000000056345,
+   "voxels": 126,
+   "tris": 484,
+   "greedy": 388,
+   "bytes": 40656,
+   "box": [
+    10,
+    10,
+    8
+   ]
+  },
+  {
+   "id": "brecciolino",
+   "ms": 0.5307000000029802,
+   "voxels": 24,
+   "tris": 198,
+   "greedy": 182,
+   "bytes": 16632,
+   "box": [
+    10,
+    10,
+    2
+   ]
+  },
+  {
+   "id": "cespuglio-rotolante",
+   "ms": 1.7731999999959953,
+   "voxels": 147,
+   "tris": 1080,
+   "greedy": 890,
+   "bytes": 90720,
+   "box": [
+    12,
+    12,
+    12
+   ]
+  },
+  {
+   "id": "ciuffo-erba",
+   "ms": 1.7866999999969266,
+   "voxels": 35,
+   "tris": 246,
+   "greedy": 170,
+   "bytes": 20664,
+   "box": [
+    10,
+    10,
+    8
+   ]
+  },
+  {
+   "id": "foglie-secche",
+   "ms": 1.0190000000002328,
+   "voxels": 36,
+   "tris": 200,
+   "greedy": 152,
+   "bytes": 16800,
+   "box": [
+    10,
+    10,
+    2
+   ]
+  },
+  {
+   "id": "sassolini",
+   "ms": 1.562999999994645,
+   "voxels": 22,
+   "tris": 144,
+   "greedy": 92,
+   "bytes": 12096,
+   "box": [
+    10,
+    10,
+    4
+   ]
+  },
+  {
+   "id": "spighe",
+   "ms": 1.526800000006915,
+   "voxels": 92,
+   "tris": 540,
+   "greedy": 388,
+   "bytes": 45360,
+   "box": [
+    10,
+    10,
+    14
+   ]
+  }
+ ],
+ "scenarios": [
+  {
+   "perTile": 0.25,
+   "instances": 1112,
+   "tris": 298572,
+   "greedyTris": 222956,
+   "matrixBytes": 71168
+  },
+  {
+   "perTile": 0.5,
+   "instances": 2225,
+   "tris": 597413,
+   "greedyTris": 446113,
+   "matrixBytes": 142400
+  },
+  {
+   "perTile": 1,
+   "instances": 4449,
+   "tris": 1194557,
+   "greedyTris": 892025,
+   "matrixBytes": 284736
+  },
+  {
+   "perTile": 2,
+   "instances": 8898,
+   "tris": 2389113,
+   "greedyTris": 1784049,
+   "matrixBytes": 569472
+  },
+  {
+   "perTile": 4,
+   "instances": 17796,
+   "tris": 4778226,
+   "greedyTris": 3568098,
+   "matrixBytes": 1138944
+  }
+ ],
+ "scatterMs": [
+  {
+   "perTile": 0.25,
+   "ms": 0.061899999986053444
+  },
+  {
+   "perTile": 0.5,
+   "ms": 0.033699999999953434
+  },
+  {
+   "perTile": 1,
+   "ms": 0.04760000000533182
+  },
+  {
+   "perTile": 2,
+   "ms": 0.09570000000530854
+  },
+  {
+   "perTile": 4,
+   "ms": 0.3929000000061933
+  }
+ ],
+ "tumbleweeds": {
+  "roll": [
+   {
+    "n": 8,
+    "msPerTick": 4.157269499999941,
+    "without": 2.123677166666724,
+    "extra": 2.0335923333332175,
+    "moved": 24.001593451507645,
+    "ts": 0.06633466666695313
+   },
+   {
+    "n": 32,
+    "msPerTick": 10.003382000000396,
+    "without": 2.02569433333294,
+    "extra": 7.977687666667457,
+    "moved": 24.25263888359348,
+    "ts": 0.19964816666632637
+   },
+   {
+    "n": 128,
+    "msPerTick": 32.57412666666707,
+    "without": 2.0416366666664545,
+    "extra": 30.532490000000614,
+    "moved": 23.984672759108637,
+    "ts": 0.724177666666316
+   },
+   {
+    "n": 256,
+    "msPerTick": 66.49773216666664,
+    "without": 2.136018166666569,
+    "extra": 64.36171400000006,
+    "moved": 23.907217722598368,
+    "ts": 1.4822508333337465
+   }
+  ]
+ }
+}

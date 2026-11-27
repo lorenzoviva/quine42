@@ -6963,7 +6963,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (foto dal lab).
 - Quando è fatto: set grande, via A e via B misurate con le foto, studio e catena aggiornati, domande.
 
-### T544 · Integrare T509 nel base (conflitto sulla versione del kernel in `universe/universe.json`) — `da fare`
+### T544 · Integrare T509 nel base (conflitto sulla versione del kernel in `universe/universe.json`) — `fatto` (`f9bfe4e0`)
 - Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
 - Step: 45
 - Contesto: `integra T509` (lo studio del terreno ricco, `docs/design/terreno-ricco.md`, `lab/terreno-ricco/`, kernel invariato) si è fermato su un solo conflitto in `universe/universe.json`: T509 ha allineato il seme a `0.10.40`, nel frattempo T531 ha portato il base a `0.10.41`. Vedi `dossier T509`.
@@ -6971,3 +6971,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni.
 - Browser: no (solo docs, lab e uno script di misura).
 - Quando è fatto: commit su `task/T544`; poi l'orchestratore integra T544, e `integra T509` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: `task/T509` fuso in `task/T544`, conflitto in `universe/universe.json` risolto tenendo `0.10.41`; nient'altro riporta la versione a 0.10.40; typecheck e suite intera verdi; sicurezza: nessuna superficie nuova.

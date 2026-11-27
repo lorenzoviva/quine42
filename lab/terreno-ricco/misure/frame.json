@@ -1,0 +1,2000 @@
+{
+  "env": {
+    "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2070 (0x00001F07) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "size": [
+      1904,
+      985
+    ],
+    "timer": true,
+    "cores": 12,
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
+    "webgpu": true
+  },
+  "rows": [
+    {
+      "label": "avvio, fino al kernel pronto (4.4 s)",
+      "seconds": 5.754900000000372,
+      "fps": 0.8688248275382155,
+      "frameJs": {
+        "median": 370,
+        "p95": 1153.5,
+        "mean": 467.59999999962747
+      },
+      "tickMs": 6.0125000001862645,
+      "tickP95": 9.875,
+      "ticksPerSecond": 1.390119724061145,
+      "renderMs": {
+        "median": 0,
+        "mean": 146.139999999851,
+        "p95": 613.1999999992549
+      },
+      "otherMs": 311.83999999947844,
+      "gpuMs": {
+        "median": 3.4504,
+        "mean": 214.8367253333333,
+        "p95": 639.245248,
+        "n": 3
+      },
+      "calls": 36,
+      "triangles": 225,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 113.88555839377402,
+        "disegno: rune": 6.168656275521331,
+        "disegno: luoghi (mesh del terreno)": 5.056560496207681,
+        "kernel: Lua (sistemi, hook)": 3.579558289392715,
+        "kernel: resto del tick": 1.9461676145271252,
+        "kernel: sviluppo dei luoghi": 1.8071556410205583,
+        "disegno: entità": 1.4422492138429026,
+        "kernel: syncRunes": 0.31277693804322254,
+        "kernel: rune": 0.31277693804322254,
+        "kernel: solidi": 0.26064744826146463,
+        "disegno: resto di render": 0.1563884686979488,
+        "kernel: luoghi (updateChunks)": 0.1216354754022227,
+        "disegno: testi 2D": 0.10425897923985336,
+        "disegno: corona": 0.08688248243015909,
+        "disegno: luci": 0.03475299361938857,
+        "disegno: viandante": 0.034752992972063634,
+        "kernel: acqua": 0.017376496486031817,
+        "kernel: altezze": 0.017376496486031817,
+        "kernel: studio (archive)": 0,
+        "kernel: società (npc.tick)": 0,
+        "disegno: carico dell anello": 0
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 2.574999999953434,
+        "kernel: resto del tick": 1.4000000006053597,
+        "kernel: sviluppo dei luoghi": 1.2999999998137355,
+        "kernel: syncRunes": 0.22500000009313226,
+        "kernel: rune": 0.22500000009313226,
+        "kernel: solidi": 0.1875,
+        "kernel: luoghi (updateChunks)": 0.0874999996740371,
+        "kernel: acqua": 0.012499999953433871,
+        "kernel: altezze": 0.012499999953433871,
+        "kernel: studio (archive)": 0,
+        "kernel: società (npc.tick)": 0
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 131.0800000000745,
+        "disegno: rune": 7.1,
+        "disegno: luoghi (mesh del terreno)": 5.8199999999254945,
+        "disegno: entità": 1.6600000001490116,
+        "disegno: resto di render": 0.17999999970197678,
+        "disegno: testi 2D": 0.11999999992549419,
+        "disegno: corona": 0.09999999962747097,
+        "disegno: luci": 0.04000000059604645,
+        "disegno: viandante": 0.039999999850988385,
+        "disegno: carico dell anello": 0
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 22.90000000037253,
+          "max": 22.90000000037253,
+          "over4": 2
+        },
+        "disegno: entità": {
+          "p99": 8.199999999254942,
+          "max": 8.199999999254942,
+          "over4": 1
+        },
+        "disegno: rune": {
+          "p99": 35.5,
+          "max": 35.5,
+          "over4": 1
+        },
+        "disegno: viandante": {
+          "p99": 0.09999999962747097,
+          "max": 0.09999999962747097,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.2999999988824129,
+          "max": 0.2999999988824129,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.10000000149011612,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 606,
+          "max": 606,
+          "over4": 2
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.5,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.5,
+          "max": 0.5,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 3,
+        "median": 707.5999999996275,
+        "p95": 730.6999999992549,
+        "max": 730.6999999992549
+      },
+      "workers": {
+        "workers": 4,
+        "jobs": 6,
+        "forms": 3,
+        "formMs": {
+          "median": 2411.5999999996275,
+          "p95": 2616.4000000003725,
+          "max": 2616.4000000003725
+        },
+        "busyShare": 0.3548454360630932,
+        "stillOpen": 5
+      },
+      "long": {
+        "n": 5,
+        "ms": 2378,
+        "max": 1160
+      },
+      "slowest": [
+        {
+          "model": "corona-nucleo",
+          "ms": 2616.4000000003725
+        },
+        {
+          "model": "corona-universo",
+          "ms": 2411.5999999996275
+        },
+        {
+          "model": "corona-mondo",
+          "ms": 1619.800000000745
+        }
+      ],
+      "kernelAt": 4.364
+    },
+    {
+      "label": "caricamento a freddo (fino a 13 s dopo il kernel)",
+      "seconds": 13.400799999998883,
+      "fps": 230.88173840369663,
+      "frameJs": {
+        "median": 2.900000000372529,
+        "p95": 7,
+        "mean": 3.689592760179671
+      },
+      "tickMs": 2.609987195907936,
+      "tickP95": 4.099999999627471,
+      "ticksPerSecond": 58.28010268044185,
+      "renderMs": {
+        "median": 2.400000000372529,
+        "mean": 2.950226244325831,
+        "p95": 5.5
+      },
+      "otherMs": 0.08054298644075104,
+      "gpuMs": {
+        "median": 2.460256,
+        "mean": 3.0333764128349268,
+        "p95": 4.753376,
+        "n": 3023
+      },
+      "calls": 181,
+      "triangles": 4328363,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 479.32213001495603,
+        "kernel: Lua (sistemi, hook)": 95.03910214327475,
+        "disegno: entità": 62.97385230763598,
+        "disegno: luoghi (mesh del terreno)": 37.467912360358426,
+        "disegno: corona": 33.54277356687203,
+        "disegno: testi 2D": 27.72968778328343,
+        "disegno: resto di render": 24.782102561988367,
+        "kernel: resto del tick": 21.983762162454,
+        "kernel: rune": 12.588800669396221,
+        "kernel: solidi": 10.77547609267628,
+        "disegno: rune": 7.387618650189454,
+        "disegno: viandante": 6.387678347395078,
+        "kernel: altezze": 4.223628440204677,
+        "kernel: sviluppo dei luoghi": 3.2983105478736645,
+        "kernel: luoghi (updateChunks)": 2.8729628080518,
+        "disegno: luci": 1.0074025431318374,
+        "kernel: società (npc.tick)": 0.9626290965202312,
+        "disegno: carico dell anello": 0.5522058383462556,
+        "kernel: studio (archive)": 0.22386723194607003,
+        "kernel: acqua": 0.13432033900084792,
+        "kernel: syncRunes": 0.1268580979684111
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.6307298335486429,
+        "kernel: resto del tick": 0.3772087067689999,
+        "kernel: rune": 0.21600512165228017,
+        "kernel: solidi": 0.1848911652019517,
+        "kernel: altezze": 0.0724711907829579,
+        "kernel: sviluppo dei luoghi": 0.05659411010235815,
+        "kernel: luoghi (updateChunks)": 0.049295774645502374,
+        "kernel: società (npc.tick)": 0.01651728552707713,
+        "kernel: studio (archive)": 0.0038412291957268183,
+        "kernel: acqua": 0.0023047375145741522,
+        "kernel: syncRunes": 0.0021766965419397462
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.076050420137003,
+        "disegno: entità": 0.27275371687268835,
+        "disegno: luoghi (mesh del terreno)": 0.16228183579788277,
+        "disegno: corona": 0.14528118940365262,
+        "disegno: testi 2D": 0.12010342600070899,
+        "disegno: resto di render": 0.10733678087028635,
+        "disegno: rune": 0.0319974143527636,
+        "disegno: viandante": 0.027666451195140537,
+        "disegno: luci": 0.004363283775048481,
+        "disegno: carico dell anello": 0.0023917259206560713
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 1.199999999254942,
+          "max": 5.900000000372529,
+          "over4": 3
+        },
+        "disegno: entità": {
+          "p99": 0.7999999988824129,
+          "max": 4.5,
+          "over4": 1
+        },
+        "disegno: rune": {
+          "p99": 0.19999999925494194,
+          "max": 0.599999999627471,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 2.899999998509884,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.40000000037252903,
+          "max": 18.799999998882413,
+          "over4": 11
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 5.800000000745058,
+          "max": 169.5,
+          "over4": 132
+        },
+        "disegno: carico dell anello": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.40000000037252903,
+          "max": 1.8999999985098839,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.40000000037252903,
+          "max": 3.099999999627471,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 52,
+        "median": 73.79999999888241,
+        "p95": 182.2999999988824,
+        "max": 326.1000000014901
+      },
+      "workers": {
+        "workers": 5,
+        "jobs": 209,
+        "forms": 157,
+        "formMs": {
+          "median": 36.40000000037253,
+          "p95": 1400.4000000003725,
+          "max": 4785.4000000003725
+        },
+        "busyShare": 0.4742045251030963,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 6,
+        "ms": 747,
+        "max": 180
+      },
+      "slowest": [
+        {
+          "model": "corona-magia",
+          "ms": 4785.4000000003725
+        },
+        {
+          "model": "corona-concilio",
+          "ms": 3056.800000000745
+        },
+        {
+          "model": "corona-oggetti",
+          "ms": 2140.0999999996275
+        },
+        {
+          "model": "corona-persone",
+          "ms": 2069.5
+        },
+        {
+          "model": "corona-luoghi",
+          "ms": 1767.2000000011176
+        },
+        {
+          "model": "corona-sistemi",
+          "ms": 1752.1000000014901
+        },
+        {
+          "model": "corona-cose",
+          "ms": 1735.0999999996275
+        },
+        {
+          "model": "corona-galleria",
+          "ms": 1400.4000000003725
+        }
+      ],
+      "settled": 13,
+      "kernelAt": 4.364
+    },
+    {
+      "label": "oggi, il luogo della partenza, la camera più lontana",
+      "seconds": 8.023700000001117,
+      "fps": 221.84279073242422,
+      "frameJs": {
+        "median": 3.699999999254942,
+        "p95": 8.900000000372529,
+        "mean": 4.131516853936561
+      },
+      "tickMs": 2.692116182587299,
+      "tickP95": 4.300000000745058,
+      "ticksPerSecond": 60.072036591589026,
+      "renderMs": {
+        "median": 2.700000001117587,
+        "mean": 3.3526404494273194,
+        "p95": 6.300000000745058
+      },
+      "otherMs": 0.04988764046032107,
+      "gpuMs": {
+        "median": 3.162016,
+        "mean": 3.263640017977524,
+        "p95": 5.255968,
+        "n": 1780
+      },
+      "calls": 181,
+      "triangles": 4329715,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 549.5469671096746,
+        "kernel: Lua (sistemi, hook)": 108.15459201982232,
+        "disegno: entità": 75.65088425677571,
+        "disegno: luoghi (mesh del terreno)": 34.323317165952716,
+        "disegno: corona": 26.43418871425395,
+        "disegno: testi 2D": 26.047833294095433,
+        "disegno: resto di render": 19.09343570106358,
+        "kernel: solidi": 18.10885252123681,
+        "kernel: rune": 11.117065692558281,
+        "kernel: resto del tick": 9.559180928268184,
+        "kernel: altezze": 8.28794695876332,
+        "disegno: rune": 6.019666738311367,
+        "disegno: viandante": 5.658237471536349,
+        "kernel: luoghi (updateChunks)": 3.0285279866308077,
+        "kernel: sviluppo dei luoghi": 2.417837159324375,
+        "disegno: luci": 0.7602477652502818,
+        "kernel: società (npc.tick)": 0.5982277501503975,
+        "disegno: carico dell anello": 0.2243354064514884,
+        "kernel: studio (archive)": 0.19940925028227544,
+        "kernel: syncRunes": 0.12463078131035067,
+        "kernel: acqua": 0.12463078084606484
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.8004149377376955,
+        "kernel: solidi": 0.3014522821051204,
+        "kernel: rune": 0.18506224065849025,
+        "kernel: resto del tick": 0.1591286307347637,
+        "kernel: altezze": 0.13796680500630398,
+        "kernel: luoghi (updateChunks)": 0.05041493777247509,
+        "kernel: sviluppo dei luoghi": 0.040248962687289815,
+        "kernel: società (npc.tick)": 0.009958506221747744,
+        "kernel: studio (archive)": 0.003319502077780324,
+        "kernel: syncRunes": 0.002074688796680498,
+        "kernel: acqua": 0.00207468878895168
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.477191011235118,
+        "disegno: entità": 0.34101123596133476,
+        "disegno: luoghi (mesh del terreno)": 0.1547191010924119,
+        "disegno: corona": 0.11915730336325223,
+        "disegno: testi 2D": 0.11741573033812508,
+        "disegno: resto di render": 0.08606741574980067,
+        "disegno: rune": 0.02713483146527845,
+        "disegno: viandante": 0.025505617977737375,
+        "disegno: luci": 0.003426966288786256,
+        "disegno: carico dell anello": 0.0010112359554747517
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.5,
+          "max": 2.600000001490116,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.900000000372529,
+          "max": 4.400000000372529,
+          "over4": 1
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.7999999988824129,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 3,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.19999999925494194,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 7.299999998882413,
+          "max": 10.299999998882413,
+          "over4": 196
+        },
+        "disegno: carico dell anello": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.30000000074505806,
+          "max": 2.400000000372529,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.3999999985098839,
+          "max": 1.699999999254942,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "heap": {
+        "heapMB": 34.80892562866211,
+        "buffersMB": 122.20357608795166
+      }
+    },
+    {
+      "label": "01-luogo-1-ombre (4472 istanze, 729k triangoli, 209 oggetti)",
+      "seconds": 8.018,
+      "fps": 147.5430281865802,
+      "frameJs": {
+        "median": 5.799999998882413,
+        "p95": 11.800000000745058,
+        "mean": 6.392814877401291
+      },
+      "tickMs": 3.016804979287119,
+      "tickP95": 4.900000000372529,
+      "ticksPerSecond": 60.11474183088051,
+      "renderMs": {
+        "median": 4.599999999627471,
+        "mean": 5.110735418391513,
+        "p95": 8.599999999627471
+      },
+      "otherMs": 0.052916314448163054,
+      "gpuMs": {
+        "median": 4.843552,
+        "mean": 5.079467496196105,
+        "p95": 8.03264,
+        "n": 1183
+      },
+      "calls": 528,
+      "triangles": 5620335,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 627.076577700221,
+        "kernel: Lua (sistemi, hook)": 126.80219505939341,
+        "disegno: entità": 48.88999750096621,
+        "disegno: luoghi (mesh del terreno)": 21.95061111730266,
+        "kernel: solidi": 18.9698179124444,
+        "disegno: testi 2D": 17.847343475736043,
+        "disegno: corona": 17.809927665407105,
+        "disegno: resto di render": 12.035420310122989,
+        "kernel: rune": 10.975305562949025,
+        "kernel: altezze": 8.867548020167686,
+        "kernel: resto del tick": 8.680468944130647,
+        "disegno: rune": 4.4649538555479635,
+        "disegno: viandante": 3.3549513573969474,
+        "kernel: sviluppo dei luoghi": 3.2177600381446614,
+        "kernel: luoghi (updateChunks)": 2.993265152940223,
+        "kernel: società (npc.tick)": 0.5612372162634074,
+        "disegno: luci": 0.436517834871539,
+        "disegno: carico dell anello": 0.1870790723201104,
+        "kernel: studio (archive)": 0.14966325804193467,
+        "kernel: syncRunes": 0.0748316287886594,
+        "kernel: acqua": 0.06235969069593415
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 2.1093360995564656,
+        "kernel: solidi": 0.31556016602070375,
+        "kernel: rune": 0.18257261411561262,
+        "kernel: altezze": 0.14751037349731225,
+        "kernel: resto del tick": 0.14439834023659653,
+        "kernel: sviluppo dei luoghi": 0.05352697092498734,
+        "kernel: luoghi (updateChunks)": 0.04979253111260313,
+        "kernel: società (npc.tick)": 0.00933609958506224,
+        "kernel: studio (archive)": 0.002489626562199652,
+        "kernel: syncRunes": 0.001244813277235417,
+        "kernel: acqua": 0.001037344398340249
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 4.2501267962809575,
+        "disegno: entità": 0.33136094671407196,
+        "disegno: luoghi (mesh del terreno)": 0.14877430256849764,
+        "disegno: testi 2D": 0.12096365172312054,
+        "disegno: corona": 0.12071005918954704,
+        "disegno: resto di render": 0.08157227391932893,
+        "disegno: rune": 0.030262045658312402,
+        "disegno: viandante": 0.022738799648020898,
+        "disegno: luci": 0.0029585798816568047,
+        "disegno: carico dell anello": 0.0012679628079988548
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.599999999627471,
+          "max": 1.5,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.900000000372529,
+          "max": 3,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.7000000011175871,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.2000000011175871,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 0.900000000372529,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 9.399999998509884,
+          "max": 13.299999998882413,
+          "over4": 547
+        },
+        "disegno: carico dell anello": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.30000000074505806,
+          "max": 7.600000001490116,
+          "over4": 1
+        },
+        "disegno: resto di render": {
+          "p99": 0.3000000026077032,
+          "max": 0.6000000014901161,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "chunk",
+        "perTile": 1,
+        "shadow": true,
+        "instances": 4472,
+        "tris": 728660,
+        "objects": 209,
+        "bytes": 286208,
+        "ms": 12
+      },
+      "heap": {
+        "heapMB": 31.069374084472656,
+        "buffersMB": 122.5706090927124
+      }
+    },
+    {
+      "label": "02-finestra-1-ombre (4472 istanze, 729k triangoli, 16 oggetti)",
+      "seconds": 8.01189999999851,
+      "fps": 230.15764050978456,
+      "frameJs": {
+        "median": 3.599999999627471,
+        "p95": 7.699999999254942,
+        "mean": 4.009273318845552
+      },
+      "tickMs": 2.637214137167668,
+      "tickP95": 4.399999998509884,
+      "ticksPerSecond": 60.03569690087113,
+      "renderMs": {
+        "median": 2.799999998882413,
+        "mean": 3.2729934924029607,
+        "p95": 5.800000000745058
+      },
+      "otherMs": 0.04837310194278261,
+      "gpuMs": {
+        "median": 3.382688,
+        "mean": 3.6226035921908912,
+        "p95": 5.707488,
+        "n": 1844
+      },
+      "calls": 229,
+      "triangles": 6515695,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 572.5483343540589,
+        "kernel: Lua (sistemi, hook)": 103.15905090899811,
+        "disegno: entità": 69.48414233400703,
+        "disegno: luoghi (mesh del terreno)": 30.891548820436864,
+        "disegno: corona": 24.213981703384878,
+        "disegno: testi 2D": 23.252911295476764,
+        "disegno: resto di render": 20.469551540922538,
+        "kernel: solidi": 19.595851167898942,
+        "kernel: rune": 12.344138096957947,
+        "kernel: resto del tick": 8.07548771402923,
+        "kernel: altezze": 7.875784771039302,
+        "disegno: rune": 6.3031241040605375,
+        "disegno: viandante": 5.304609393760599,
+        "kernel: luoghi (updateChunks)": 3.5572086498057702,
+        "kernel: sviluppo dei luoghi": 2.646063979969986,
+        "kernel: società (npc.tick)": 0.5741459580737367,
+        "disegno: luci": 0.5367016566118528,
+        "disegno: carico dell anello": 0.2995544126250116,
+        "kernel: studio (archive)": 0.2621101106981579,
+        "kernel: syncRunes": 0.16225864059810347,
+        "kernel: acqua": 0.07488860362122254
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.718295218248749,
+        "kernel: solidi": 0.3264033263452398,
+        "kernel: rune": 0.20561330565280453,
+        "kernel: resto del tick": 0.13451143454473752,
+        "kernel: altezze": 0.13118503119974648,
+        "kernel: luoghi (updateChunks)": 0.05925155921283482,
+        "kernel: sviluppo dei luoghi": 0.04407484407716754,
+        "kernel: società (npc.tick)": 0.009563409566507518,
+        "kernel: studio (archive)": 0.004365904357384991,
+        "kernel: syncRunes": 0.002702702708124123,
+        "kernel: acqua": 0.001247401254371645
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.4876355748429666,
+        "disegno: entità": 0.30189804770375667,
+        "disegno: luoghi (mesh del terreno)": 0.13421908893406295,
+        "disegno: corona": 0.10520607375776206,
+        "disegno: testi 2D": 0.10103036876800198,
+        "disegno: resto di render": 0.08893709327043751,
+        "disegno: rune": 0.027386117141709992,
+        "disegno: viandante": 0.0230477223437433,
+        "disegno: luci": 0.0023318872031495136,
+        "disegno: carico dell anello": 0.0013015184373697851
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.3999999985098839,
+          "max": 1.200000001117587,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.8000000007450581,
+          "max": 3.199999999254942,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.2000000011175871,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.3999999985098839,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 6.200000001117587,
+          "max": 9.400000000372529,
+          "over4": 163
+        },
+        "disegno: carico dell anello": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.30000000074505806,
+          "max": 1.699999999254942,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.3999999985098839,
+          "max": 2.999999998137355,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 1,
+        "shadow": true,
+        "instances": 4472,
+        "tris": 728660,
+        "objects": 16,
+        "bytes": 286208,
+        "ms": 7
+      },
+      "heap": {
+        "heapMB": 30.299381256103516,
+        "buffersMB": 122.54128646850586
+      }
+    },
+    {
+      "label": "03-finestra-1 (4472 istanze, 729k triangoli, 16 oggetti)",
+      "seconds": 8.012099999999627,
+      "fps": 273.8358233172454,
+      "frameJs": {
+        "median": 2.599999999627471,
+        "p95": 6.800000000745058,
+        "mean": 3.351823154049896
+      },
+      "tickMs": 2.3251037343803223,
+      "tickP95": 3.900000000372529,
+      "ticksPerSecond": 60.159009498136875,
+      "renderMs": {
+        "median": 2.400000000372529,
+        "mean": 2.798222424818157,
+        "p95": 5.100000001490116
+      },
+      "otherMs": 0.04279854145994513,
+      "gpuMs": {
+        "median": 2.59456,
+        "mean": 3.02749883682771,
+        "p95": 4.98032,
+        "n": 2194
+      },
+      "calls": 213,
+      "triangles": 5786891,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 572.3093820585456,
+        "kernel: Lua (sistemi, hook)": 91.0997116877529,
+        "disegno: entità": 75.61063890897965,
+        "disegno: luoghi (mesh del terreno)": 35.28413275028785,
+        "disegno: corona": 28.207336401598422,
+        "disegno: testi 2D": 24.051122680578903,
+        "disegno: resto di render": 17.57342020413068,
+        "kernel: solidi": 17.498533466409924,
+        "kernel: rune": 10.209558045877525,
+        "kernel: altezze": 7.7507769474924055,
+        "kernel: resto del tick": 7.251532056321602,
+        "disegno: rune": 6.9894284935947155,
+        "disegno: viandante": 5.316958099663787,
+        "kernel: luoghi (updateChunks)": 2.795771394880617,
+        "kernel: sviluppo dei luoghi": 2.4338188480610983,
+        "disegno: luci": 0.6490183594054666,
+        "kernel: società (npc.tick)": 0.48676377007717775,
+        "disegno: carico dell anello": 0.2621035680739036,
+        "kernel: studio (archive)": 0.2371413233293802,
+        "kernel: syncRunes": 0.08736785579215553,
+        "kernel: acqua": 0.024962244744523458
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.5143153527249191,
+        "kernel: solidi": 0.2908713692660092,
+        "kernel: rune": 0.1697095436086546,
+        "kernel: altezze": 0.12883817423444194,
+        "kernel: resto del tick": 0.1205394190631776,
+        "kernel: luoghi (updateChunks)": 0.0464730290309584,
+        "kernel: sviluppo dei luoghi": 0.040456431519812076,
+        "kernel: società (npc.tick)": 0.008091286311691233,
+        "kernel: studio (archive)": 0.00394190870673701,
+        "kernel: syncRunes": 0.0014522821522661758,
+        "kernel: acqua": 0.000414937761654745
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.089972652685077,
+        "disegno: entità": 0.2761166818608057,
+        "disegno: luoghi (mesh del terreno)": 0.12885141294829908,
+        "disegno: corona": 0.10300820418561359,
+        "disegno: testi 2D": 0.08783044668598781,
+        "disegno: resto di render": 0.06417502279740604,
+        "disegno: rune": 0.025524156806530363,
+        "disegno: viandante": 0.019416590697499656,
+        "disegno: luci": 0.0023701002722845473,
+        "disegno: carico dell anello": 0.0009571558786530656
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.5,
+          "max": 1.400000000372529,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.8000000007450581,
+          "max": 1.5,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.30000000074505806,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 0.6999999992549419,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 5.799999998882413,
+          "max": 8.800000000745058,
+          "over4": 104
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2000000011175871,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.30000000074505806,
+          "max": 0.5,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 1,
+        "instances": 4472,
+        "tris": 728660,
+        "objects": 16,
+        "bytes": 286208,
+        "ms": 8
+      },
+      "heap": {
+        "heapMB": 30.918987274169922,
+        "buffersMB": 122.54128646850586
+      }
+    },
+    {
+      "label": "04-finestra-2 (8944 istanze, 1450k triangoli, 16 oggetti)",
+      "seconds": 8.011099999999628,
+      "fps": 282.6078815643426,
+      "frameJs": {
+        "median": 2.800000000745058,
+        "p95": 5.599999999627471,
+        "mean": 3.2288427562033264
+      },
+      "tickMs": 2.0480249479970665,
+      "tickP95": 3,
+      "ticksPerSecond": 60.0416921521417,
+      "renderMs": {
+        "median": 2.400000000372529,
+        "mean": 2.751810954073312,
+        "p95": 4.800000000745058
+      },
+      "otherMs": 0.04191696114653833,
+      "gpuMs": {
+        "median": 2.775648,
+        "mean": 3.107278698496901,
+        "p95": 4.817984,
+        "n": 2262
+      },
+      "calls": 213,
+      "triangles": 7230439,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 581.4307648129643,
+        "kernel: Lua (sistemi, hook)": 82.09858820970105,
+        "disegno: entità": 76.81841445325588,
+        "disegno: luoghi (mesh del terreno)": 35.60060415977419,
+        "disegno: corona": 28.298236199277166,
+        "disegno: testi 2D": 24.528466749127098,
+        "disegno: resto di render": 17.51320043565363,
+        "kernel: solidi": 14.704597370078679,
+        "kernel: rune": 8.750358874454399,
+        "disegno: rune": 7.314850645846816,
+        "kernel: altezze": 6.32871889894242,
+        "kernel: resto del tick": 6.116513343789374,
+        "disegno: viandante": 5.405000562278883,
+        "kernel: luoghi (updateChunks)": 2.1595036880276024,
+        "kernel: sviluppo dei luoghi": 2.1470210080255017,
+        "disegno: luci": 0.5742032926520753,
+        "kernel: società (npc.tick)": 0.44937649030598587,
+        "disegno: carico dell anello": 0.1997228853812992,
+        "kernel: studio (archive)": 0.1123441221114804,
+        "kernel: acqua": 0.07489608164016164,
+        "kernel: syncRunes": 0.024965360469217865
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.3673596673736081,
+        "kernel: solidi": 0.24490644488863167,
+        "kernel: rune": 0.14573804569467438,
+        "kernel: altezze": 0.10540540534576978,
+        "kernel: resto del tick": 0.1018711019717854,
+        "kernel: luoghi (updateChunks)": 0.03596673595666761,
+        "kernel: sviluppo dei luoghi": 0.03575883575341434,
+        "kernel: società (npc.tick)": 0.007484407487505439,
+        "kernel: studio (archive)": 0.0018711018641314734,
+        "kernel: acqua": 0.0012474012466267587,
+        "kernel: syncRunes": 0.00041580041425143857
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.057376325085213,
+        "disegno: entità": 0.2718197879975484,
+        "disegno: luoghi (mesh del terreno)": 0.12597173144185236,
+        "disegno: corona": 0.10013250884099768,
+        "disegno: testi 2D": 0.08679328620756314,
+        "disegno: resto di render": 0.06196996466875366,
+        "disegno: rune": 0.02588339223009748,
+        "disegno: viandante": 0.01912544169808761,
+        "disegno: luci": 0.002031802119154075,
+        "disegno: carico dell anello": 0.0007067137840450758
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 3.300000000745058,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.7000000011175871,
+          "max": 1.8999999985098839,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.599999999627471,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 0.8000000007450581,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 5.800000000745058,
+          "max": 7.899999998509884,
+          "over4": 93
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2999999988824129,
+          "max": 0.6000000014901161,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.30000000074505806,
+          "max": 0.6999999992549419,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 2,
+        "instances": 8944,
+        "tris": 1450434,
+        "objects": 16,
+        "bytes": 572416,
+        "ms": 21
+      },
+      "heap": {
+        "heapMB": 30.74593734741211,
+        "buffersMB": 122.81423568725586
+      }
+    },
+    {
+      "label": "05-finestra-4 (17888 istanze, 2898k triangoli, 16 oggetti)",
+      "seconds": 8.019199999999255,
+      "fps": 276.71089385477427,
+      "frameJs": {
+        "median": 2.199999999254942,
+        "p95": 6.099999999627471,
+        "mean": 3.3649391617647777
+      },
+      "tickMs": 1.903118503096043,
+      "tickP95": 2.899999998509884,
+      "ticksPerSecond": 59.9810454908276,
+      "renderMs": {
+        "median": 2,
+        "mean": 2.9183866606556035,
+        "p95": 4.900000000372529
+      },
+      "otherMs": 0.034024335273573826,
+      "gpuMs": {
+        "median": 3.39968,
+        "mean": 3.6046967804878065,
+        "p95": 4.1576,
+        "n": 164
+      },
+      "calls": 213,
+      "triangles": 10125011,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 651.0499800456693,
+        "kernel: Lua (sistemi, hook)": 77.65113726814225,
+        "disegno: entità": 63.173383876095556,
+        "disegno: luoghi (mesh del terreno)": 29.00538707400532,
+        "disegno: corona": 20.662909023607238,
+        "disegno: testi 2D": 19.129090184304506,
+        "disegno: resto di render": 13.455207496236087,
+        "kernel: solidi": 12.9439345585508,
+        "kernel: rune": 8.043196330205241,
+        "disegno: rune": 6.235035916594721,
+        "kernel: altezze": 5.898343972928838,
+        "kernel: resto del tick": 5.162609738769476,
+        "disegno: viandante": 4.239824419763148,
+        "kernel: luoghi (updateChunks)": 2.1822625696003315,
+        "kernel: sviluppo dei luoghi": 1.6834596953343703,
+        "disegno: luci": 0.44892258574768124,
+        "kernel: società (npc.tick)": 0.36163208281501313,
+        "disegno: carico dell anello": 0.14964086183846936,
+        "kernel: studio (archive)": 0.09976057424928199,
+        "kernel: acqua": 0.062350359138074435,
+        "kernel: syncRunes": 0.062350358905801234
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.2945945945543211,
+        "kernel: solidi": 0.21580041582519943,
+        "kernel: rune": 0.13409563411886877,
+        "kernel: altezze": 0.09833679831124022,
+        "kernel: resto del tick": 0.08607068610631255,
+        "kernel: luoghi (updateChunks)": 0.03638253637866394,
+        "kernel: sviluppo dei luoghi": 0.028066528043293407,
+        "kernel: società (npc.tick)": 0.006029106026008074,
+        "kernel: studio (archive)": 0.0016632016570057543,
+        "kernel: acqua": 0.0010395010395010396,
+        "kernel: syncRunes": 0.0010395010356285964
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.3528165840386417,
+        "disegno: entità": 0.22830103649352787,
+        "disegno: luoghi (mesh del terreno)": 0.10482199189898236,
+        "disegno: corona": 0.07467327626953392,
+        "disegno: testi 2D": 0.06913023884901327,
+        "disegno: resto di render": 0.04862550696431113,
+        "disegno: rune": 0.022532672385016557,
+        "disegno: viandante": 0.015322217209085841,
+        "disegno: luci": 0.0016223524108280626,
+        "disegno: carico dell anello": 0.0005407841366628851
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.599999999627471,
+          "max": 1,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.2000000011175871,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.2000000011175871,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.2999999988824129,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 29.800000000745058,
+          "max": 40,
+          "over4": 108
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2000000011175871,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.20000000298023224,
+          "max": 0.4000000022351742,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 4,
+        "instances": 17888,
+        "tris": 2897648,
+        "objects": 16,
+        "bytes": 1144832,
+        "ms": 15
+      },
+      "heap": {
+        "heapMB": 34.344539642333984,
+        "buffersMB": 123.36019134521484
+      }
+    },
+    {
+      "label": "06-fusa-1 (4472 istanze, 729k triangoli, 24 oggetti)",
+      "seconds": 8.003,
+      "fps": 301.6368861676871,
+      "frameJs": {
+        "median": 2.300000000745058,
+        "p95": 5.099999999627471,
+        "mean": 3.0341342170603185
+      },
+      "tickMs": 3.353563714840854,
+      "tickP95": 3.300000000745058,
+      "ticksPerSecond": 57.853305010621014,
+      "renderMs": {
+        "median": 2.100000001490116,
+        "mean": 2.354183927116655,
+        "p95": 3.799999998882413
+      },
+      "otherMs": 0.036743993352398016,
+      "gpuMs": {
+        "median": 2.347008,
+        "mean": 2.6265992673021152,
+        "p95": 3.747616,
+        "n": 2413
+      },
+      "calls": 201,
+      "triangles": 5121751,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 529.7513432455379,
+        "kernel: Lua (sistemi, hook)": 155.59165312742294,
+        "disegno: entità": 73.52242908541425,
+        "disegno: luoghi (mesh del terreno)": 30.48856679327329,
+        "disegno: corona": 25.328002001019133,
+        "disegno: testi 2D": 21.56691241292086,
+        "disegno: resto di render": 16.968636762005872,
+        "kernel: solidi": 12.907659629827423,
+        "kernel: rune": 8.446832441513157,
+        "disegno: rune": 6.597525926939207,
+        "kernel: altezze": 6.197675869639674,
+        "kernel: resto del tick": 5.810321130507382,
+        "disegno: viandante": 5.023116330118921,
+        "kernel: sviluppo dei luoghi": 2.174184677998349,
+        "kernel: luoghi (updateChunks)": 2.074222163848023,
+        "disegno: luci": 0.6372610273010266,
+        "kernel: società (npc.tick)": 0.624765712624935,
+        "disegno: carico dell anello": 0.22491565695460494,
+        "kernel: syncRunes": 0.08746719947423426,
+        "kernel: studio (archive)": 0.0624765715185112,
+        "kernel: acqua": 0.037485942864558044
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 2.689416846606406,
+        "kernel: solidi": 0.2231101512257211,
+        "kernel: rune": 0.1460043197179909,
+        "kernel: altezze": 0.10712742977262701,
+        "kernel: resto del tick": 0.10043196545885655,
+        "kernel: sviluppo dei luoghi": 0.03758099347304706,
+        "kernel: luoghi (updateChunks)": 0.03585313170037954,
+        "kernel: società (npc.tick)": 0.01079913606509148,
+        "kernel: syncRunes": 0.0015118790440438376,
+        "kernel: studio (archive)": 0.0010799136109344387,
+        "kernel: acqua": 0.0006479481657560649
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 1.7562551781251199,
+        "disegno: entità": 0.24374482186021965,
+        "disegno: luoghi (mesh del terreno)": 0.1010770505578153,
+        "disegno: corona": 0.08396851699012266,
+        "disegno: testi 2D": 0.07149958576661378,
+        "disegno: resto di render": 0.05625517813021251,
+        "disegno: rune": 0.021872410933427705,
+        "disegno: viandante": 0.01665285832226252,
+        "disegno: luci": 0.002112676056955309,
+        "disegno: carico dell anello": 0.000745650373905428
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.6000000014901161,
+          "max": 2.900000000372529,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.2999999988824129,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.2999999988824129,
+          "max": 0.3999999985098839,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 4.600000001490116,
+          "max": 9.399999998509884,
+          "over4": 42
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2000000011175871,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.2999999988824129,
+          "max": 0.599999999627471,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 3,
+        "ms": 509,
+        "max": 297
+      },
+      "slowest": [],
+      "made": {
+        "way": "merged",
+        "perTile": 1,
+        "instances": 4472,
+        "tris": 728660,
+        "objects": 24,
+        "bytes": 68494040,
+        "ms": 86
+      },
+      "heap": {
+        "heapMB": 32.34489440917969,
+        "buffersMB": 193.63212394714355
+      }
+    },
+    {
+      "label": "07-finestra-2-inchiostro-del-suolo (8944 istanze, 1450k triangoli, 16 oggetti)",
+      "seconds": 8.014799999998882,
+      "fps": 325.77232120581476,
+      "frameJs": {
+        "median": 2.300000000745058,
+        "p95": 4.800000000745058,
+        "mean": 2.7970509383269584
+      },
+      "tickMs": 1.8622406639150997,
+      "tickP95": 2.699999999254942,
+      "ticksPerSecond": 60.138743324857415,
+      "renderMs": {
+        "median": 2.199999999254942,
+        "mean": 2.419992340093729,
+        "p95": 4.199999999254942
+      },
+      "otherMs": 0.03328226732282016,
+      "gpuMs": {
+        "median": 2.628064,
+        "mean": 2.9363267461858507,
+        "p95": 4.110368,
+        "n": 1442
+      },
+      "calls": 213,
+      "triangles": 7230583,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 590.0334381346439,
+        "disegno: entità": 79.32824275659245,
+        "kernel: Lua (sistemi, hook)": 76.42112092652943,
+        "disegno: luoghi (mesh del terreno)": 33.61281628945012,
+        "disegno: testi 2D": 27.249588262695706,
+        "disegno: corona": 26.151619506663724,
+        "disegno: resto di render": 17.991715327252457,
+        "kernel: solidi": 12.127564004637337,
+        "kernel: rune": 7.748165895143976,
+        "disegno: rune": 7.660827464581548,
+        "kernel: altezze": 6.101212759469198,
+        "disegno: viandante": 5.365074609877001,
+        "kernel: resto del tick": 5.015720915282972,
+        "kernel: luoghi (updateChunks)": 2.033737585095329,
+        "kernel: sviluppo dei luoghi": 1.9588760779986905,
+        "disegno: luci": 0.7236612268236097,
+        "kernel: società (npc.tick)": 0.37430753153237867,
+        "disegno: carico dell anello": 0.2495383540450515,
+        "kernel: studio (archive)": 0.07486150616703531,
+        "kernel: acqua": 0.07486150593463461,
+        "kernel: syncRunes": 0.06238458851126288
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.2707468879706694,
+        "kernel: solidi": 0.20165975100488337,
+        "kernel: rune": 0.12883817430786573,
+        "kernel: altezze": 0.10145228220868655,
+        "kernel: resto del tick": 0.08340248960955261,
+        "kernel: luoghi (updateChunks)": 0.03381742737970906,
+        "kernel: sviluppo dei luoghi": 0.032572614087016005,
+        "kernel: società (npc.tick)": 0.006224066397770312,
+        "kernel: studio (archive)": 0.001244813277235417,
+        "kernel: acqua": 0.001244813273371008,
+        "kernel: syncRunes": 0.001037344398340249
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 1.8111834546001089,
+        "disegno: entità": 0.24350823441035946,
+        "disegno: luoghi (mesh del terreno)": 0.10317885867355314,
+        "disegno: testi 2D": 0.0836461126035324,
+        "disegno: corona": 0.08027575642358453,
+        "disegno: resto di render": 0.05522788203938831,
+        "disegno: rune": 0.023515894279249185,
+        "disegno: viandante": 0.01646878589936277,
+        "disegno: luci": 0.0022213711224607652,
+        "disegno: carico dell anello": 0.0007659900421294523
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 1.700000001117587,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.6999999992549419,
+          "max": 1.400000000372529,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.19999999925494194,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.2999999988824129,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 5.300000000745058,
+          "max": 22,
+          "over4": 73
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2000000011175871,
+          "max": 0.599999999627471,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.2999999988824129,
+          "max": 0.599999999627471,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 2,
+        "ink": "ground",
+        "instances": 8944,
+        "tris": 1450434,
+        "objects": 16,
+        "bytes": 572416,
+        "ms": 9
+      },
+      "heap": {
+        "heapMB": 32.2226676940918,
+        "buffersMB": 122.8142671585083
+      }
+    },
+    {
+      "label": "08-luogo-2 (8944 istanze, 1450k triangoli, 222 oggetti)",
+      "seconds": 8.015099999999627,
+      "fps": 236.55350525883497,
+      "frameJs": {
+        "median": 3.400000000372529,
+        "p95": 6.5,
+        "mean": 3.9129746835246557
+      },
+      "tickMs": 1.9361746361490781,
+      "tickP95": 3,
+      "ticksPerSecond": 60.011727863660134,
+      "renderMs": {
+        "median": 3,
+        "mean": 3.38254219409322,
+        "p95": 5.900000000372529
+      },
+      "otherMs": 0.03924050631555669,
+      "gpuMs": {
+        "median": 3.457024,
+        "mean": 3.540486700421942,
+        "p95": 5.451392,
+        "n": 1896
+      },
+      "calls": 359,
+      "triangles": 5772167,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 643.2483686961067,
+        "kernel: Lua (sistemi, hook)": 77.16684757543779,
+        "disegno: entità": 61.18451422990613,
+        "disegno: luoghi (mesh del terreno)": 26.77446319764233,
+        "disegno: testi 2D": 22.49504061791279,
+        "disegno: corona": 21.135107482113924,
+        "disegno: resto di render": 14.148295093291468,
+        "kernel: solidi": 12.987985176536341,
+        "kernel: rune": 8.6960861366259,
+        "kernel: altezze": 6.2257488978380335,
+        "kernel: resto del tick": 5.926314082634963,
+        "disegno: rune": 5.651832167343197,
+        "disegno: viandante": 4.728574818569197,
+        "kernel: luoghi (updateChunks)": 2.4204314364089488,
+        "kernel: sviluppo dei luoghi": 2.0336614638473844,
+        "disegno: luci": 0.5614402826307139,
+        "kernel: società (npc.tick)": 0.3368641692530795,
+        "disegno: carico dell anello": 0.22457611314524234,
+        "kernel: studio (archive)": 0.19962321137480388,
+        "kernel: syncRunes": 0.14971740829871089,
+        "kernel: acqua": 0.04990580284370097
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.2858627858666583,
+        "kernel: solidi": 0.21642411640010728,
+        "kernel: rune": 0.1449064448932786,
+        "kernel: altezze": 0.10374220372361602,
+        "kernel: resto del tick": 0.09875259876034363,
+        "kernel: luoghi (updateChunks)": 0.04033264034503215,
+        "kernel: sviluppo dei luoghi": 0.03388773388541042,
+        "kernel: società (npc.tick)": 0.005613305619501522,
+        "kernel: studio (archive)": 0.0033264033295012808,
+        "kernel: syncRunes": 0.0024948024932535174,
+        "kernel: acqua": 0.0008316008323753202
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 2.719251054818526,
+        "disegno: entità": 0.25864978903169716,
+        "disegno: luoghi (mesh del terreno)": 0.11318565399547104,
+        "disegno: testi 2D": 0.09509493673872596,
+        "disegno: corona": 0.08934599155057144,
+        "disegno: resto di render": 0.05981012658345737,
+        "disegno: rune": 0.02389240506564892,
+        "disegno: viandante": 0.019989451491725846,
+        "disegno: luci": 0.002373417726431026,
+        "disegno: carico dell anello": 0.0009493670909653736
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 0.7999999988824129,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.7000000011175871,
+          "max": 4.200000001117587,
+          "over4": 1
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.30000000074505806,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.2000000011175871,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.30000000074505806,
+          "max": 0.599999999627471,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 7.300000000745058,
+          "max": 11.800000000745058,
+          "over4": 162
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.30000000074505806,
+          "max": 0.5,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.30000000074505806,
+          "max": 0.5,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 0,
+        "ms": 0,
+        "max": 0
+      },
+      "slowest": [],
+      "made": {
+        "way": "chunk",
+        "perTile": 2,
+        "instances": 8944,
+        "tris": 1450434,
+        "objects": 222,
+        "bytes": 572416,
+        "ms": 11
+      },
+      "heap": {
+        "heapMB": 34.35744857788086,
+        "buffersMB": 122.81371784210205
+      }
+    },
+    {
+      "label": "09-finestra-8 (35776 istanze, 5806k triangoli, 16 oggetti)",
+      "seconds": 8.011099999999628,
+      "fps": 182.4967857098361,
+      "frameJs": {
+        "median": 2.400000000372529,
+        "p95": 8.799999998882413,
+        "mean": 5.20362517098156
+      },
+      "tickMs": 1.971954022951681,
+      "tickP95": 3.300000000745058,
+      "ticksPerSecond": 54.29965922283085,
+      "renderMs": {
+        "median": 2.099999999627471,
+        "mean": 4.583584131331536,
+        "p95": 6.699999999254942
+      },
+      "otherMs": 0.033310533505029945,
+      "gpuMs": {
+        "median": 5.555008,
+        "mean": 5.587725283018869,
+        "p95": 6.232576,
+        "n": 106
+      },
+      "calls": 213,
+      "triangles": 15940807,
+      "parts": {
+        "disegno: passate three.js (bloom.render)": 725.6931008221309,
+        "kernel: Lua (sistemi, hook)": 73.49802149666691,
+        "disegno: entità": 45.22475066018405,
+        "disegno: luoghi (mesh del terreno)": 19.398085157357297,
+        "disegno: testi 2D": 15.054112418042777,
+        "disegno: corona": 14.380047686768943,
+        "kernel: solidi": 11.633858020274465,
+        "disegno: resto di render": 9.449388971777644,
+        "kernel: rune": 7.102645081160939,
+        "kernel: altezze": 6.079065294482749,
+        "kernel: resto del tick": 4.743418505426957,
+        "disegno: rune": 4.269076654651753,
+        "disegno: viandante": 2.68377625997375,
+        "kernel: luoghi (updateChunks)": 1.9597808054363999,
+        "kernel: sviluppo dei luoghi": 1.5353696737395677,
+        "kernel: società (npc.tick)": 0.32454968749488045,
+        "disegno: luci": 0.26213628585681975,
+        "kernel: studio (archive)": 0.1248268028111054,
+        "disegno: carico dell anello": 0.07489608187266968,
+        "kernel: acqua": 0.03744804116884288,
+        "kernel: syncRunes": 0.0374480407038268
+      },
+      "perTick": {
+        "kernel: Lua (sistemi, hook)": 1.353563218418209,
+        "kernel: solidi": 0.21425287353153202,
+        "kernel: rune": 0.13080459772341552,
+        "kernel: altezze": 0.11195402294397354,
+        "kernel: resto del tick": 0.0873563218133888,
+        "kernel: luoghi (updateChunks)": 0.036091954046967384,
+        "kernel: sviluppo dei luoghi": 0.028275862053550524,
+        "kernel: società (npc.tick)": 0.005977011497678428,
+        "kernel: studio (archive)": 0.0022988505747126436,
+        "kernel: acqua": 0.0006896551784085131,
+        "kernel: syncRunes": 0.0006896551698446274
+      },
+      "perFrame": {
+        "disegno: passate three.js (bloom.render)": 3.976470588232491,
+        "disegno: entità": 0.24781121751968782,
+        "disegno: luoghi (mesh del terreno)": 0.10629274966080562,
+        "disegno: testi 2D": 0.08248974007672838,
+        "disegno: corona": 0.07879616964669585,
+        "disegno: resto di render": 0.05177838576730805,
+        "disegno: rune": 0.023392612850943278,
+        "disegno: viandante": 0.014705882350393098,
+        "disegno: luci": 0.001436388508637121,
+        "disegno: carico dell anello": 0.0004103967178454967
+      },
+      "perFrameWorst": {
+        "disegno: luoghi (mesh del terreno)": {
+          "p99": 0.30000000074505806,
+          "max": 1,
+          "over4": 0
+        },
+        "disegno: entità": {
+          "p99": 0.6999999992549419,
+          "max": 0.900000000372529,
+          "over4": 0
+        },
+        "disegno: rune": {
+          "p99": 0.10000000149011612,
+          "max": 0.40000000037252903,
+          "over4": 0
+        },
+        "disegno: viandante": {
+          "p99": 0.10000000149011612,
+          "max": 0.30000000074505806,
+          "over4": 0
+        },
+        "disegno: corona": {
+          "p99": 0.2000000011175871,
+          "max": 0.599999999627471,
+          "over4": 0
+        },
+        "disegno: luci": {
+          "p99": 0.09999999962747097,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: passate three.js (bloom.render)": {
+          "p99": 87.19999999925494,
+          "max": 103.69999999925494,
+          "over4": 161
+        },
+        "disegno: carico dell anello": {
+          "p99": 0,
+          "max": 0.10000000149011612,
+          "over4": 0
+        },
+        "disegno: testi 2D": {
+          "p99": 0.2999999988824129,
+          "max": 0.7000000011175871,
+          "over4": 0
+        },
+        "disegno: resto di render": {
+          "p99": 0.2999999988824129,
+          "max": 0.4000000022351742,
+          "over4": 0
+        }
+      },
+      "terrain": {
+        "jobs": 0,
+        "median": 0,
+        "p95": 0,
+        "max": 0
+      },
+      "workers": {
+        "workers": 0,
+        "jobs": 0,
+        "forms": 0,
+        "formMs": {
+          "median": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "busyShare": 0,
+        "stillOpen": 0
+      },
+      "long": {
+        "n": 31,
+        "ms": 2626,
+        "max": 104
+      },
+      "slowest": [],
+      "made": {
+        "way": "window",
+        "perTile": 8,
+        "instances": 35776,
+        "tris": 5805546,
+        "objects": 16,
+        "bytes": 2289664,
+        "ms": 32
+      },
+      "heap": {
+        "heapMB": 32.07311248779297,
+        "buffersMB": 124.4519624710083
+      }
+    }
+  ]
+}
