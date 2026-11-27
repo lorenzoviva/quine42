@@ -34,7 +34,7 @@ Aggiornato il 27/11/2026, epoca 700 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D/T522** (27/11, epoca 700): 7 domande sulle strutture modulari (T522 integrato `037ea6c5`), tutte col consiglio in `domande/aperte.md`; la catena M1-M8 si pianifica dopo la risposta.
+- **D/T522** risposta il 27/11 (epoca 701): riprova con un set grande, via A attesa migliore, stanze > 2 × 2, massa B, tetti raggiungibili, tanti set → **T543** (claude max, 6 %, priorità 1), poi la catena M ripianificata.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
