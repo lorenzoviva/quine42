@@ -60,6 +60,7 @@ import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type Nei
 import { AREA_RE } from './areas';
 import { isNoteLine, isSymbolCode, MAX_SYMBOLS, readSymbols, showSymbols, SymbolError, symbolName, symbolTokens } from './symbols';
 import { parseXml, XmlError, type XmlElement } from './xml';
+import { originalPort, originalProgram, originalText, type OriginalPort } from './original';
 import type { Semantics } from './random';
 
 export interface MjxClip {
@@ -111,7 +112,12 @@ export function rootVptOf(xml: string | undefined): number | undefined {
   return Number.isInteger(n) && n >= ROOT_VPT_RANGE[0] && n <= ROOT_VPT_RANGE[1] ? n : undefined;
 }
 
-const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
+/** The names of the symmetries we read on every grid: MarkovJunior's of the square and of the cube, and `(y)` and `(z)` on both (T531). */
+const SYMMETRY: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all', '(x)(y)': 'mirrors', '(xy+)': 'turns' };
+/** MarkovJunior's names on a flat grid (SymmetryHelper.squareSubgroups, T531): what the original reads where its grid has one layer. */
+const SQUARE_NAMES: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(y)': 'y', '(x)(y)': 'mirrors', '(xy+)': 'turns', '(xy)': 'xy' };
+/** MarkovJunior's names on a grid of more layers (SymmetryHelper.cubeSubgroups, T531). */
+const CUBE_NAMES: Record<string, Sym> = { '()': 'none', '(x)': 'x', '(z)': 'z', '(xy)': 'xy', '(xyz+)': 'rot', '(xyz)': 'all' };
 const RULE_NODES = new Set(['one', 'all', 'prl']);
 /** Every node the engine runs, as the XML names it (`<import>` is not one: it becomes the nodes of the file it reads). */
 export const MJX_NODES: readonly string[] = ['one', 'all', 'prl', 'sequence', 'markov', 'convolution', 'path', 'map', 'wfc', 'convchain', 'pieces', ...SHAPES];
@@ -125,6 +131,11 @@ const ROOT_NODES = new Set(['one', 'all', 'prl', 'sequence', 'markov', 'map', 'c
 export type MjxFiles = Readonly<Record<string, string>>;
 /** A file a program may name: the same as a model's id. */
 export const MJX_FILE_RE = /^[a-z0-9][a-z0-9-]{0,40}$/i;
+/**
+ * A file the original's text may name (T531): its resources keep their names, with "_" (`CarmaTower-block_2_4x3`). Only where the compiler
+ * reads the original's text, from the files it is given: never a name of a universe's disk.
+ */
+export const ORIGINAL_FILE_RE = /^[a-z0-9][a-z0-9_-]{0,60}$/i;
 /** Imports one inside the other. */
 export const MJX_INCLUDE_DEPTH = 6;
 /** Imports in a program, counting each time one is used. */
@@ -149,16 +160,17 @@ export function patternText(s: string): string {
 
 /**
  * Every file a program reads, with its text (imports of imports too), from `read` (a name in models/ → its text). What is missing stays
- * out: compiling says why. A program that names no file costs no parse.
+ * out: compiling says why. A program that names no file costs no parse. `original`: the text is the original's, its files may have "_" in the name (T531).
  */
-export function mjxIncludes(src: string, read: (file: string) => string | undefined): Record<string, string> {
+export function mjxIncludes(src: string, read: (file: string) => string | undefined, opts: { original?: boolean } = {}): Record<string, string> {
+  const fileRe = opts.original ? ORIGINAL_FILE_RE : MJX_FILE_RE;
   const out: Record<string, string> = {};
   if (!/\b(?:import|fin|fout|file|tileset|sample)\b/.test(src)) return out;
   const queue = [src];
   /** Reads a file once; its text, if it is there. */
   const take = (f: string): string | undefined => {
     if (f in out) return out[f];
-    if (!MJX_FILE_RE.test(f.slice(0, -4))) return undefined;
+    if (!fileRe.test(f.slice(0, -4))) return undefined;
     const text = read(f);
     if (typeof text !== 'string') return undefined;
     return (out[f] = text);
@@ -220,6 +232,8 @@ interface Ctx {
   scopes?: readonly XmlElement[];
   /** Inside `<pieces>` (T339): no other grid, no coordinates of the whole grid, no future of the whole grid. */
   inPieces?: boolean;
+  /** The layers of the grid in scope, where the compiler knows them: the original's text reads its symmetries by them (T531). */
+  Z?: number;
 }
 
 /** The grids of a program: a union written in one belongs to it (MarkovJunior's Grid.Load). */
@@ -248,10 +262,20 @@ class Compiler {
     private files: MjxFiles = {},
     /** The program's own name in models/, if it has one: importing itself is a cycle at once. */
     self?: string,
+    /**
+     * The text is MarkovJunior's own (T531, `compileMjx(…, { original: true })`): its unions where the original finds them, its symmetries
+     * by the grid's layers; what the original refuses and ours reads (a union anywhere, `(y)` in 3D) is mended, so an error with `strict`.
+     * The port is what its characters become in ours (`originalPort`): the text files it reads pass through it too.
+     */
+    private port?: OriginalPort,
   ) {
+    this.original = port !== undefined;
     if (self) this.chain.push(self);
     this.top = this.chain.length;
   }
+
+  /** Whether the text is the original's (T531). */
+  private original: boolean;
 
   /** The imports from the program down to the one being compiled now (the program's own name first, if known). */
   chain: string[] = [];
@@ -308,13 +332,14 @@ class Compiler {
 
   /** A file of models/ by its plain name, counted. */
   fileText(el: XmlElement, name: string | undefined, ext: 'xml' | 'txt', what: string): string {
-    if (!name || !MJX_FILE_RE.test(name)) this.fail(el, `${what} vuole il nome semplice di un file di models/ (lettere, cifre e "-", niente percorsi né estensione), non "${name ?? ''}"`);
+    if (!name || !(this.original ? ORIGINAL_FILE_RE : MJX_FILE_RE).test(name)) this.fail(el, `${what} vuole il nome semplice di un file di models/ (lettere, cifre e "-", niente percorsi né estensione), non "${name ?? ''}"`);
     const key = `${name}.${ext}`;
     const text = Object.prototype.hasOwnProperty.call(this.files, key) ? this.files[key] : undefined;
     if (typeof text !== 'string') this.fail(el, `manca il file models/${key}`);
     this.read += text.length;
     if (this.read > MJX_INCLUDE_CHARS) this.fail(el, `i file letti sono troppo lunghi (al più ${MJX_INCLUDE_CHARS} caratteri in tutto)`);
-    return text;
+    // The original's text files are in its characters (T531): the program's port reads them.
+    return this.port && ext === 'txt' ? originalText(text, this.port) : text;
   }
 
   /** The program of an imported file: its one root (animations and actions beside it stay in that file). */
@@ -379,7 +404,7 @@ class Compiler {
    * the folder of the grid the rule writes (T335). Two ways for the same side is an error.
    */
   side(r: XmlElement, which: 'in' | 'out', folder?: string): string | undefined {
-    if (r.attrs.legend !== undefined && !this.legendSaid && ['fin', 'fout', 'file'].some((a) => r.attrs[a] !== undefined)) {
+    if (r.attrs.legend !== undefined && !this.legendSaid && !this.original && ['fin', 'fout', 'file'].some((a) => r.attrs[a] !== undefined)) {
       this.legendSaid = true;
       this.warnings.push(`${this.where(r)}: legend vale per le immagini dell'originale; un file di testo ha già le sue lettere (ignorato)`);
     }
@@ -437,7 +462,16 @@ class Compiler {
     const s = el.attrs.symmetry;
     if (s === undefined) return ctx.sym;
     const sym = SYMMETRY[s.replace(/\s+/g, '')];
-    if (!sym) this.fail(el, `simmetria "${s}" sconosciuta (in 3D: ${Object.keys(SYMMETRY).join(' ')})`);
+    if (this.original && ctx.Z !== undefined) {
+      // The original reads the names of the square on a flat grid, those of the cube on one of more layers, as they are written.
+      const names = ctx.Z === 1 ? SQUARE_NAMES : CUBE_NAMES;
+      if (names[s]) return names[s];
+      if (sym) {
+        this.mend(el, `simmetria "${s}": l'originale su una griglia ${ctx.Z === 1 ? 'piana' : 'di più strati'} conosce solo ${Object.keys(names).join(' ')} e non carica il programma; da noi vale com'è`);
+        return sym;
+      }
+    }
+    if (!sym) this.fail(el, `simmetria "${s}" sconosciuta (${Object.keys(SYMMETRY).join(' ')}; l'originale in 2D ${Object.keys(SQUARE_NAMES).join(' ')}, in 3D ${Object.keys(CUBE_NAMES).join(' ')})`);
     return sym;
   }
 
@@ -531,8 +565,12 @@ class Compiler {
     }
   }
 
-  /** First pass: unions and colours, wherever they are (MarkovJunior lets a union appear anywhere), each union with its grid. */
-  collect(el: XmlElement, scope: XmlElement = el): void {
+  /**
+   * First pass: unions and colours, wherever they are (ours: a union anywhere, an extension), each union with its grid. `found`: whether
+   * the original finds a union here, under its grid through `sequence` and `markov` only (MarkovJunior's Grid.Load, T531); `parent` the
+   * element it is in, for the messages.
+   */
+  collect(el: XmlElement, scope: XmlElement = el, found = true, parent?: XmlElement): void {
     // What is worn (T290, ADR-0180) runs on a body, not here: its letters, colours and unions are its own (src/mj/worn.ts).
     if (el.name === 'worn') return;
     if (el.name === 'import') {
@@ -560,6 +598,7 @@ class Compiler {
       if (sym.length !== 1 || '*/ []'.includes(sym)) this.fail(el, '"symbol" è un solo simbolo o un segno (?, !, ~…), non uno di * / [ ] né uno spazio');
       if (!el.attrs.values) this.fail(el, 'manca "values"');
       const values = this.syms(el, el.attrs.values, 'values');
+      if (this.original && !this.file) this.originalUnion(el, scope, found, parent, sym, values);
       this.unions[sym] = values;
       if (!this.file) this.unionDefs.push({ sym, values, scope });
     } else if (el.name === 'color') {
@@ -606,7 +645,29 @@ class Compiler {
       return;
     }
     const inner = GRID_TAGS.has(el.name) ? el : scope;
-    for (const c of el.children) this.collect(c, inner);
+    const below = el === inner || (found && (el.name === 'sequence' || el.name === 'markov'));
+    for (const c of el.children) this.collect(c, inner, below, el);
+  }
+
+  /**
+   * A union of the original's text as the original loads it (Grid.Load, T531): found by its grid only through `sequence` and `markov` (in
+   * a rule node it is not: `c8`), never a symbol the grid already has (a value, or a union of the same grid), only of the grid's values.
+   * What the original refuses is mended: ours reads it (a union anywhere is our extension), `strict` stops on it.
+   */
+  originalUnion(el: XmlElement, scope: XmlElement, found: boolean, parent: XmlElement | undefined, sym: string, values: string): void {
+    const where = GRID_TAGS.has(scope.name) ? `della <${scope.name}> di riga ${scope.line}` : 'della radice';
+    if (!found)
+      this.mend(el, `l'unione "${symbolName(sym)}" è dentro <${parent?.name ?? '?'}>: l'originale cerca le unioni di una griglia solo sotto di lei, in sequence e markov, e qui non la trova (non carica il programma); da noi vale come estensione`);
+    let own: string;
+    try {
+      own = readSymbols((scope.attrs.values ?? '').replace(/\s+/g, ''));
+    } catch {
+      return;
+    }
+    if (own.includes(sym)) this.mend(el, `l'unione "${symbolName(sym)}" è già un valore ${where}: l'originale non carica il programma`);
+    else if (this.unionDefs.some((d) => d.scope === scope && d.sym === sym)) this.mend(el, `l'unione "${symbolName(sym)}" è scritta due volte nella griglia ${where}: l'originale non carica il programma`);
+    const strange = [...new Set(values)].filter((ch) => !own.includes(ch));
+    if (strange.length) this.mend(el, `l'unione "${symbolName(sym)}" nomina ${strange.map((ch) => `"${symbolName(ch)}"`).join(', ')}, fuori dai values ${where}: l'originale non carica il programma`);
   }
 
   /** Animations and actions wait for the end: they run on the finished model, in its last grid's letters. */
@@ -832,7 +893,7 @@ class Compiler {
     const clear = !/^false$/i.test(el.attrs.clear ?? '');
     const fraction = den.some((d) => d !== 1);
     if (fraction && !clear) this.fail(el, 'una scala frazionaria vale solo con la griglia nuova vuota (senza clear="False")');
-    const inner: Ctx = { bg: values[0], sym, values: new Set(clear ? values : [...ctx.values, ...values]), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el] };
+    const inner: Ctx = { bg: values[0], sym, values: new Set(clear ? values : [...ctx.values, ...values]), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el], ...(ctx.Z !== undefined ? { Z: Math.trunc((ctx.Z * num[2]) / den[2]) } : {}) };
     const rules: Rule3[] = el.children
       .filter((c) => c.name === 'rule')
       .map((r) => {
@@ -871,7 +932,7 @@ class Compiler {
     const { tileset, sample } = el.attrs;
     if ((tileset === undefined) === (sample === undefined)) this.fail(el, 'vuole tileset="…" (a tessere: un file di models/) o sample="…" (a sovrapposizione: un campione di models/), uno dei due');
     const values = this.values(el, el.attrs.values);
-    const inner: Ctx = { bg: values[0], sym, values: new Set(values), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el] };
+    const inner: Ctx = { bg: values[0], sym, values: new Set(values), folder: el.attrs.folder, scopes: [...(ctx.scopes ?? []), el], ...(ctx.Z !== undefined ? { Z: ctx.Z } : {}) };
     const letterOf = (k: number) => (k === 0 ? '.' : values[k]);
     const tries = this.int(el, 'tries', 1, WFC_LIMITS.tries);
     const shannon = truthy(el.attrs.shannon);
@@ -899,6 +960,8 @@ class Compiler {
         }
         const overlap: Vec3 = [this.int(el, 'overlap', -64, tiles.S - 1) ?? 0, 0, this.int(el, 'overlapz', -64, tiles.SZ - 1) ?? 0];
         overlap[1] = overlap[0];
+        // The new grid's layers, as the original's TileNode makes it.
+        if (ctx.Z !== undefined) inner.Z = (tiles.SZ - overlap[2]) * ctx.Z + overlap[2];
         node = {
           type: 'wfc',
           model: 'tile',
@@ -1082,6 +1145,9 @@ class Compiler {
   }
 }
 
+/** The colour of a symbol of the original's text the palette of MarkovJunior does not colour (T531). */
+const ORIGINAL_UNCOLOURED = '#808080';
+
 const CLIP_TAGS = new Set(['animation', 'action']);
 /** What may stand beside the root: animations and actions, and the sections of what is worn (T290, ADR-0180), which run on a body. */
 const ASIDE_TAGS = new Set([...CLIP_TAGS, 'worn']);
@@ -1193,10 +1259,18 @@ export function newNodesIn(m: Pick<MjxModel, 'program'> & Partial<Pick<MjxModel,
  * Compiles a program; `size` (the class's box) wins over the program's own, `base` says how many voxels of it are under the ground
  * (`soil` marks that layer); `files` are the files of models/ it may read (`mjxIncludes`), `self` its own name there; `colors` the colours
  * of symbols the caller knows and the palette of MarkovJunior lacks (the strata of the world, T478: `#1` is the seed's earth), under the
- * program's own `<color>`; `semantics` the semantics its runs follow (T526, ADR-0263: `mj` the switch of the chain A1, absent ours). Throws
- * Mj3Error with the line.
+ * program's own `<color>`; `semantics` the semantics its runs follow (T526, ADR-0263: `mj` the switch of the chain A1, absent ours);
+ * `original` says the text is MarkovJunior's own, as mxgmn writes it (T531, ADR-0265): every character a symbol (`originalProgram` writes
+ * it in ours), its unions where the original finds them, its symmetries by the grid's layers (on a flat grid `(xy)` if it says none), and
+ * what the original refuses mended with a warning, or with `strict` an error (`strict` alone is our dialect's checks). Throws Mj3Error with
+ * the line.
  */
-export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string; colors?: Readonly<Record<string, string>>; semantics?: Semantics } = {}): MjxModel {
+export function compileMjx(
+  src: string,
+  opts: { size?: Vec3; strict?: boolean; base?: number; files?: MjxFiles; self?: string; colors?: Readonly<Record<string, string>>; semantics?: Semantics; original?: boolean } = {},
+): MjxModel {
+  const port = opts.original ? originalPort(src) : undefined;
+  if (port) src = originalProgram(src, port);
   let roots: XmlElement[];
   try {
     roots = parseXml(src);
@@ -1208,11 +1282,14 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   if (!mains.length) throw new Mj3Error('nessun programma: il primo elemento è il nodo radice (sequence, markov, one…) con values');
   if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni, azioni e sezioni <worn> possono stare accanto`);
   const root = mains[0];
-  const c = new Compiler(opts.strict === true, opts.files, opts.self);
+  const c = new Compiler(opts.strict === true, opts.files, opts.self, port);
   for (const r of roots) c.collect(r, r);
   c.resolveUnions();
   const values = c.values(root, root.attrs.values);
-  const ctx: Ctx = { bg: values[0], sym: 'all', values: new Set(values), folder: root.attrs.folder, scopes: [root] };
+  // The box, if the program or the caller says it (a missing one fails below, after the nodes): the original's text reads by its layers.
+  const box = opts.size ?? (root.attrs.size ? c.vec(root, root.attrs.size, 'size') : undefined);
+  // MarkovJunior's default is the whole group of its grid: the square on a flat grid, the cube otherwise.
+  const ctx: Ctx = { bg: values[0], sym: opts.original && box?.[2] === 1 ? 'xy' : 'all', values: new Set(values), folder: root.attrs.folder, scopes: [root], ...(opts.original && box ? { Z: box[2] } : {}) };
   // The root's symmetry is inherited by everything below, animations and actions included.
   const rootSym = c.symmetry(root, ctx);
   ctx.sym = rootSym;
@@ -1222,15 +1299,20 @@ export function compileMjx(src: string, opts: { size?: Vec3; strict?: boolean; b
   const last = { ...(c.final ?? ctx), sym: rootSym };
   for (const r of [...c.pending, ...roots.filter((r) => CLIP_TAGS.has(r.name))]) c.clip(r, last);
 
-  const size = opts.size ?? (root.attrs.size ? c.vec(root, root.attrs.size, 'size') : undefined);
+  const size = box;
   if (!size) throw new Mj3Error('manca la scatola: size="X Y Z" sulla radice');
 
   const palette: Record<string, PaletteEntry> = {};
   for (const ch of c.declared) {
     if (ch === values[0]) continue;
     const known = opts.colors?.[ch];
-    const base = MJ_PALETTE[ch] ?? (known ? { color: known, name: symbolName(ch) } : undefined);
+    let base = MJ_PALETTE[ch] ?? (known ? { color: known, name: symbolName(ch) } : undefined);
     const own = c.colors[ch];
+    // The original's palette.xml colours its letters only: a digit or a sign of its values has none, and the original loads it all the same.
+    if (!base && !own?.color && !own?.hidden && opts.original) {
+      c.warnings.push(`il simbolo "${symbolName(ch)}" non ha colore nella palette di MarkovJunior: grigio`);
+      base = { color: ORIGINAL_UNCOLOURED, name: symbolName(ch) };
+    }
     if (!base && !own?.color && !own?.hidden) throw new Mj3Error(`il simbolo "${symbolName(ch)}" non ha colore nella palette di MarkovJunior: dagliene uno con <color symbol="${symbolName(ch)}" value="rrggbb"/>`);
     palette[ch] = { name: own?.name ?? base?.name, ...(own?.color ?? base?.color ? { color: own?.color ?? base!.color } : {}), ...(own?.part ? { part: own.part } : {}), ...(own?.hidden ? { hidden: true } : {}), ...(own?.glow ? { glow: true } : {}), ...(typeof own?.alpha === 'number' ? { alpha: own.alpha } : {}), ...(own?.area ? { area: own.area } : {}) };
   }

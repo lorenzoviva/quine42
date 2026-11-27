@@ -49,7 +49,12 @@ export type Vec3 = [number, number, number];
  * plane: gravity stays), none = "()", x = "(x)", y = "(y)", z = "(z)" (upside down), rot = "(xyz+)" (the 24
  * turns of the cube, no mirror), all = "(xyz)" (the whole cube group, 48).
  */
-export type Sym = 'xy' | 'none' | 'x' | 'y' | 'z' | 'rot' | 'all';
+/**
+ * The symmetries a rule is also tried in: `none`, a mirror (`x`, `y`, `z`), the square of the floor (`xy`), the turns of the cube (`rot`),
+ * the cube (`all`); and MarkovJunior's two of the square (T531): `mirrors`, its `(x)(y)` (the two mirrors of the floor and the half turn),
+ * and `turns`, its `(xy+)` (the four turns about z).
+ */
+export type Sym = 'xy' | 'none' | 'x' | 'y' | 'z' | 'rot' | 'all' | 'mirrors' | 'turns';
 
 export interface Rule3 {
   in: string;
@@ -482,6 +487,16 @@ function symmetries(sym: Sym): Array<{ perm: Vec3; flip: Vec3 }> {
       return flips([0], [0, 1], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
     case 'z':
       return flips([0], [0], [0, 1]).map((flip) => ({ perm: [0, 1, 2], flip }));
+    case 'mirrors':
+      return flips([0, 1], [0, 1], [0]).map((flip) => ({ perm: [0, 1, 2], flip }));
+    case 'turns':
+      // The four turns about z: the identity, the half turn, and the quarter turns (x and y swapped, one of them mirrored).
+      return [
+        { perm: [0, 1, 2], flip: [0, 0, 0] },
+        { perm: [1, 0, 2], flip: [1, 0, 0] },
+        { perm: [0, 1, 2], flip: [1, 1, 0] },
+        { perm: [1, 0, 2], flip: [0, 1, 0] },
+      ];
     case 'all':
       return cube();
     case 'rot':

@@ -38,9 +38,12 @@ function reference(xml: string, size: [number, number, number], seed: number, st
   return { letters: flat(r.text), steps: r.steps, finished: r.finished };
 }
 
-/** Our engine from a grid written in letters (the first value is the empty cell), as the original starts from it. */
+/**
+ * Our engine from a grid written in letters (the first value is the empty cell), as the original starts from it. The program is the
+ * original's text, read as it is with the original's errors (T531: `original`, `strict`).
+ */
 function ours(xml: string, size: [number, number, number], seed: number, steps: number, start: string): Outcome {
-  const m = compileMjx(xml, { size });
+  const m = compileMjx(xml, { size, original: true, strict: true });
   const values = /values="([^"]*)"/.exec(xml)![1];
   const alphabet = ['.', ...[...values].slice(1)];
   const g: Grid3 = { X: size[0], Y: size[1], Z: size[2], cells: new Uint8Array(size[0] * size[1] * size[2]), alphabet, log: [], epoch: 0 };
@@ -116,7 +119,7 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     'c5-conv-passi': { letters: `${'R'.repeat(31)}${'B'.repeat(29)}`, steps: 30, finished: true },
     'c6-conv-moore-3d': { letters: 'RRRRRRRR', steps: 1, finished: true },
     'c7-conv-non-registra': { letters: 'BB', steps: 3, finished: true },
-    'c8-unione-nel-nodo': { letters: 'BGB', steps: 1, finished: true },
+    'c8-unione-nel-nodo': 'errore',
     'c9-conv-2d-periodica': { letters: 'BBBBBBRRRBBRRRBBRRRBBBBBB', steps: 1, finished: true },
     'c10-prl-sovrapposte': { letters: 'RBB', steps: 1, finished: false },
     'c11-path-per-spigoli': { letters: 'RWBBWBBWG', steps: 1, finished: false },
@@ -134,6 +137,8 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     'c10-prl-sovrapposte': 'una prl scrive solo dove la cella cambia rispetto a com’era: due regole sulla stessa cella non si coprono a caso',
     'c11-path-per-spigoli': 'path con edges va anche per spigoli: in diagonale, una cella invece di tre',
   };
+  // What our engine already does as the original, case by case: the compiler reads the original's text (T531, A1-6: c8).
+  const ALIGNED = new Set(['c8-unione-nel-nodo']);
   for (const c of CASES) {
     const { xml, start } = program(c.name);
     const original = recorded.programmi[c.name]['1'];
@@ -142,7 +147,7 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
       if (today === 'errore') expect(() => ours(xml, c.size, 1, c.steps, start)).toThrow();
       else expect(ours(xml, c.size, 1, c.steps, start)).toEqual(today);
     });
-    it.fails(`${c.name}, come l’originale: ${WHAT[c.name]}`, () => {
+    (ALIGNED.has(c.name) ? it : it.fails)(`${c.name}, come l’originale: ${WHAT[c.name]}`, () => {
       if (typeof original === 'string') expect(() => ours(xml, c.size, 1, c.steps, start)).toThrow();
       else expect(ours(xml, c.size, 1, c.steps, start)).toEqual(original);
     });

@@ -60,4 +60,7 @@ Le risorse dei modelli (tileset, regole da file, campioni) il riferimento le leg
 - Il nostro motore oggi diverge in tutti gli 11 `c*` (e negli 8 di T498), su nessuno dei 36 modelli dà la griglia dell'originale, ne fa
   girare 27 (ModernHouse e SeaVilla solo nella copia portata ai simboli del contratto 0.6), simili per le lettere che scrivono salvo
   StrangeDungeon.
+- Dal T531 (A1-6, ADR-0265) il compilatore legge il testo dell'originale così com'è (`compileMjx(…, { original: true })`): i 36
+  modelli si compilano da `mxgmn/` con `strict` e girano tutti nel nostro motore, e lo script fa girare quello e non la copia; `c8` è
+  allineato (con `strict` l'errore dell'originale; da noi l'unione dentro un nodo resta un'estensione).
 - Le tabelle intere in [`misure.md`](misure.md).
