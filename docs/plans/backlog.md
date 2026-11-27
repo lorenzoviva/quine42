@@ -6736,7 +6736,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: le due case si percorrono in sidera, test verdi.
 - Esito: il cammino del kernel salta come il gioco e non passa più un tramezzo sottile; i controlli dello Scultore rifiutano una stanza a terra che non si raggiunge dalla porta; una cosa solida posata dentro una struttura non chiude più il passaggio (l'armadietto esce dall'atrio della Residenza); ADR-0260, kernel 0.10.36; `lab/scripts/interni-percorsi.ts`; manca: rifare con lo Scultore la «Residenza modulare» (cade a ogni seme) e la «Residenza ad anelli» (semi 3 e 4) con `npm run genera -- sidera --rigenera modelli --tipi struttura-residenza-ad-anelli,struttura-residenza-modulare`, non lanciato perché costa e scrive fuori dal worktree; finché non si fa, la stanza sul retro resta chiusa; non provato: il multigiocatore e il tempo di posa su una struttura gargantuesca; sicurezza: nessuna superficie nuova.
 
-### T514 · I mobili degli interni si usano — `da fare`
+### T514 · I mobili degli interni si usano — `fatto` (`83b57935`, via T556)
 - Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 3
 - Contesto: run #2 (26/11): in nessun universo i mobili dentro una casa sono interagibili. Lo Scenografo li posa come parte della forma dell'edificio (`furnishWithRules`, ADR-0214), forse senza entità. `dossier T410`, `dossier T419`.
 - Cosa fare: ogni mobile posato dall'interno diventa (o ha accanto) un'entità con le sue azioni, il suo contenitore, `takeable` dove il manifest lo dice, la posa sui ripiani (ADR-0150), senza moltiplicare il costo del disegno; lo stato salvato come per le cose del luogo; in molti come le altre entità.
