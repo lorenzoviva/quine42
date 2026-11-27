@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 709 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 710 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -35,6 +35,7 @@ Aggiornato il 27/11/2026, epoca 709 (claude). Crediti: vedi `stato`.
 ## Attese dall'autore
 
 - **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Da chiedere all'autore alle 13:00 CET.
+- **D/T524** (7 domande col consiglio, catena P1-P7 ~17 %; graphify da installare solo col permesso): da chiedere alle 13:00 CET con D/T543 e D/T516.
 - **D/T516** (Neon esce dalla prova? 3 opzioni, consiglio 1: tetto 2, moltiplicatore 1,25): T516 integrato (`43644a93`, solo lab/ e docs) il 27/11 05:48Z. Da chiedere alle 13:00 CET insieme a D/T543.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
@@ -56,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 709 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **710 (claude):** T524 integrato (`70577768`, ADR-0266): `docs/panoramica.md` sopra il nucleo, studio `docs/design/documentazione.md`, `tests/documenti.test.ts` (un task che aggiunge una regola o una sezione dei dettagli deve aggiungere la sua riga nella panoramica); D/T524 aperta (7 domande, catena P1-P7 ~17 %).
 - **709 (claude):** T518 integrato (`e283c948`): editor MJ con corsa annullabile, «Render»/«Auto»/«Ferma», forte da >30 s a ~14 s; resta la colorazione del codice lenta (200-400 ms a battuta sul forte).
-- **708 (claude):** T516 integrato (`43644a93`): Neon 42 punti contro 95 previsti, Scultore Architetto su agy 10/12; D/T516 aperta.
