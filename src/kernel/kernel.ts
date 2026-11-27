@@ -103,6 +103,7 @@ import { CLIMB_ACTION, CLIMB_LOAD, CLIMB_MIN_ENERGY, CLIMB_WORDS, climbable, cli
 import { inReach, KERNEL_REACH, nearestCentre, nextPace, squareDistance, type Reach, type Walker } from './reach';
 import { NORMAL_PACE, PACE_NAME, paceGap, placesPerMinute, readPace, samePace, type PaceAnswer, type WorldPace } from './worldPace';
 import { blockShape, cellsOf, discCells, findSpot, itemShape, turnsBetween, type ItemShape, type PlacedRecord, type SpotFailure, type Support } from './placing';
+import { outList, overPiece, PIECE_SEED, PIECE_STORE, pieceFrame, pieceKeys, pieceLevels, pieceModule, pieceOrigin, storeNamed, type FittedComp, type PlacedPiece } from './fitted';
 import { bandOfPlace, bandOfTile, destinations, natureOfBand, padTiles, planetDock, planetLocal, planetPlace, planetSeed, TRAVEL_JUMP, TRAVEL_SECONDS, TRAVEL_WORDS, type Transit } from './planets';
 import { COUNCIL_ORIGINS, repairVehicleClaims, vehicleSpot, worldMedia, type VehicleSpot } from './vehicleclaim';
 import { BOARD_REACH, carried, carries, discPoints, facingOf, HELM_REACH, helmOrders, hullPoints, LEAVE_REACH, MAX_VEHICLES, newVehicle, onDeck, PUSH_REACH, PUSH_STEP, readVehicles, saneVehicle, toWorld, underKeel, VEHICLE_WORDS, vehicleSpecOf, vehicleStep, type VehicleMedium, type VehiclePose, type VehicleRecord, type VehicleSpec, type VehicleState, type VehicleView } from './vehicle';
@@ -1073,7 +1074,7 @@ export class Kernel {
       set: (id, name, data) => {
         this.touching?.add(id);
         // The floor protects what keeps the universe navigable: position, the player, the carpet.
-        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container', 'vehicle'].includes(name) || (id === this.wandererEntity && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
+        if (!this.ecs.alive.has(id) || ['pos', 'module', 'chunk', 'carpet', 'container', 'vehicle', 'fitted'].includes(name) || (id === this.wandererEntity && ['player', 'hand', 'inventory', 'needs', 'slots'].includes(name))) return false;
         if (data === null || typeof data !== 'object') return false;
         this.ecs.set(id, name, data);
         return true;
@@ -1217,9 +1218,9 @@ export class Kernel {
     const comps = c as Record<string, any>;
     if (comps.pos && !(Number.isFinite(comps.pos.x) && Number.isFinite(comps.pos.y))) return undefined;
     if (comps.rune) this.runesDirty = true;
-    // A vehicle comes only from a module that says one (T439): what Lua makes is not one.
-    if ('vehicle' in comps) {
-      const { vehicle: _, ...rest } = comps;
+    // A vehicle comes only from a module that says one (T439): what Lua makes is not one; nor a piece of an interior (T514), the kernel's.
+    if ('vehicle' in comps || 'fitted' in comps) {
+      const { vehicle: _, fitted: __, ...rest } = comps;
       return this.ecs.spawn(rest);
     }
     return this.ecs.spawn(comps);
@@ -1725,7 +1726,8 @@ export class Kernel {
     if (identity) return identity.name;
     const pk = this.ecs.get(id, 'pickup');
     if (pk) return this.itemInfo(pk.item).name;
-    return this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest.name ?? 'qualcosa';
+    // A piece of an interior no module wears (T514): its name in the library.
+    return this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest.name ?? this.ecs.get(id, 'fitted')?.name ?? 'qualcosa';
   }
 
   // --- Universe loading & hot reload ----------------------------------------------------------
@@ -1885,14 +1887,16 @@ export class Kernel {
 
   /** The actions of an entity's model that would change it now (open when closed, close when open). */
   modelActions(id: Id): Array<{ name: string; label: string }> {
+    // A piece of an interior (T514) is voxels of its building: an action on its own model would change nothing one sees.
+    if (this.ecs.has(id, 'fitted')) return [];
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const f = fc && this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     if (!fc || !f?.result?.actions.length) return [];
     const m = this.forms.compiled(fc.model);
-    const now = instanceGrid(this.forms, f, fc.done ?? []);
+    const now = instanceGrid(this.forms, f, fc.done ?? [], fc.out);
     const out: Array<{ name: string; label: string }> = [];
     for (const a of f.result.actions) {
-      const after = instanceGrid(this.forms, f, [...(fc.done ?? []), a.name]);
+      const after = instanceGrid(this.forms, f, [...(fc.done ?? []), a.name], fc.out);
       if (m && after.cells.some((c, i) => c !== now.cells[i])) out.push({ name: a.name, label: a.label ?? a.name });
     }
     return out;
@@ -1904,9 +1908,9 @@ export class Kernel {
     if (!fc || !this.modelActions(id).some((a) => a.name === name)) return false;
     const f = this.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum)!;
     const done = [...(fc.done ?? []), name];
-    // Back to how it was made: nothing to remember. A long history keeps its last steps.
-    const base = f.result!.grid.cells;
-    const g = instanceGrid(this.forms, f, done);
+    // Back to how it was made: nothing to remember. A long history keeps its last steps. Its pieces taken away (T514) stay away.
+    const base = fc.out?.length ? instanceGrid(this.forms, f, [], fc.out).cells : f.result!.grid.cells;
+    const g = instanceGrid(this.forms, f, done, fc.out);
     fc.done = g.cells.every((c, i) => c === base[i]) ? [] : done.slice(-32);
     const origin = this.ecs.get(id, 'origin')?.key;
     if (origin) this.savedForms.set(origin, [...fc.done]);
@@ -1920,6 +1924,7 @@ export class Kernel {
    * of a class, which many kinds share), and not a figure (people and animals change by other means).
    */
   shapeModel(id: Id): string | undefined {
+    if (this.ecs.has(id, 'fitted')) return undefined;
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     if (!fc || GENERIC.has(fc.model) || !this.forms.info(fc.model) || this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest.persona) return undefined;
     return categoryOf(this.forms.classOf(fc.model)) === 'figure' ? undefined : fc.model;
@@ -1968,12 +1973,14 @@ export class Kernel {
     // A building that rises (T245e): what a body meets is the grid of its stage, without the site around it.
     const st = this.ecs.get(id, 'structure')?.stage;
     const staged = typeof st === 'number' && Number.isFinite(st) && st < 1;
-    if (!fc.done?.length && !staged) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
-    const key = `${f.key}|${fc.done?.join(',') ?? ''}|${staged ? st : ''}`;
+    // The pieces of its interior taken away (T514) leave it as an action does: a grid of its own.
+    const gone = staged ? undefined : fc.out;
+    if (!fc.done?.length && !gone?.length && !staged) return { foot: f.foot!, floor: f.floor!, block: f.block!, levels: f.levels!, hole: f.hole };
+    const key = `${f.key}|${fc.done?.join(',') ?? ''}|${staged ? st : ''}|${gone?.join(',') ?? ''}`;
     const c = this.instanceFeet.get(id);
     if (c?.key === key) return c;
     const r = f.result!;
-    const acted = fc.done?.length ? instanceGrid(this.forms, f, fc.done) : r.grid;
+    const acted = fc.done?.length || gone?.length ? instanceGrid(this.forms, f, fc.done ?? [], gone) : r.grid;
     const g = staged ? stageGrid(acted, r.palette, st, { base: f.base }).grid : acted;
     // A cellar that held stays one (T52b); its hole as the actions left it. Under way there is no cellar yet.
     const cellar = f.hole && !staged;
@@ -5182,6 +5189,10 @@ export class Kernel {
     for (const id of this.ecs.query('chunk')) {
       if (this.ecs.get(id, 'chunk').key !== ch.key) continue;
       if (this.ecs.has(id, 'rune')) this.runesDirty = true;
+      // What its containers hold stays by their origin (T514): the place makes them again as they were left, a chest and a piece alike.
+      const box: Container | undefined = this.ecs.get(id, 'container');
+      const origin = this.ecs.get(id, 'origin')?.key;
+      if (box?.filled && typeof origin === 'string' && !this.mirror) this.savedContainers.set(origin, { inv: clone(box.inv), filled: true });
       this.ecs.destroy(id);
     }
     // A vehicle still at the berth its plan gave it (T487) goes with its place, which makes it again when it comes back.
@@ -5265,12 +5276,16 @@ export class Kernel {
   // --- Entities --------------------------------------------------------------------------------
 
   /** `parts`: the state a thing brings back into the world (T292), over its manifest's components and under the kernel's. */
-  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string, parts?: ThingParts): Id {
+  /**
+   * `piece` (T514): a piece of a building's interior, which the building draws and whose voxels stop who walks: the thing has no glyph (it
+   * is not drawn), its body stops nobody, it stands on its storey and its look is the piece's model at the seed it has in the building.
+   */
+  spawnModuleEntity(m: ModuleEntry, x: number, y: number, chunkKey?: string, origin?: string, parts?: ThingParts, piece?: FittedComp): Id {
     const man = m.manifest;
     if (man.kind === 'item') return this.spawnItem(man.id, x, y, 1, chunkKey, origin);
     // A vehicle (T439): of no place (its place does not make it again, nor takes it away), with an origin that says who it is; at most
     // `MAX_VEHICLES`, beyond which a place's is a thing of its place.
-    const vehicle = !!this.vehicleSpecFor(man) && this.ecs.query('vehicle').length < MAX_VEHICLES;
+    const vehicle = !piece && !!this.vehicleSpecFor(man) && this.ecs.query('vehicle').length < MAX_VEHICLES;
     if (vehicle) {
       origin ??= this.freshOrigin(man.id, { x, y });
       chunkKey = undefined;
@@ -5281,10 +5296,17 @@ export class Kernel {
       ...clone(readParts(parts) ?? {}),
       pos: { x, y },
       module: { id: man.id },
-      body: { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
+      body: piece ? this.pieceBody(piece, man) : { r: man.physics?.radius ?? 0.35, solid: !!man.physics?.solid && !man.physics?.pushable, pushable: !!man.physics?.pushable, mass: man.physics?.mass ?? 1, friction: man.physics?.friction ?? 0.6 },
     };
-    if (man.appearance) comps.glyph = this.glyphOf(man.appearance);
-    comps.form = this.formFor(man, origin ?? `${man.id}@${x.toFixed(2)},${y.toFixed(2)}`);
+    if (man.appearance && !piece) comps.glyph = this.glyphOf(man.appearance);
+    comps.form = piece ? { model: piece.model, seed: PIECE_SEED, yaw: piece.yaw } : this.formFor(man, origin ?? `${man.id}@${x.toFixed(2)},${y.toFixed(2)}`);
+    if (piece) {
+      comps.fitted = piece;
+      comps.pos.z = piece.z;
+      // A piece stays where its building has it: nothing walks it about.
+      delete comps.wander;
+      delete comps.goal;
+    }
     const done = origin ? this.savedForms.get(origin) : undefined;
     if (done?.length) comps.form.done = [...done];
     if (man.interaction) comps.interact = { type: man.interaction.type };
@@ -5298,7 +5320,7 @@ export class Kernel {
       for (const it of man.inventory) if (this.content.get(it)) addItem(inv, it, 1, this.itemSpec(it));
       comps.inventory = inv;
     }
-    if (man.physics?.pushable && !comps.vel) comps.vel = { x: 0, y: 0 };
+    if (man.physics?.pushable && !comps.vel && !piece) comps.vel = { x: 0, y: 0 };
     if (man.physics?.speed && comps.wander) comps.wander.speed = man.physics.speed;
     if (chunkKey) comps.chunk = { key: chunkKey };
     if (origin) comps.origin = { key: origin };
@@ -5332,7 +5354,7 @@ export class Kernel {
     let best: Id | undefined;
     let bestD = r;
     for (const id of this.ecs.query('pos')) {
-      if (id === this.wandererEntity || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote'))) continue;
+      if (id === this.wandererEntity || exclude.includes(id) || (!this.ecs.has(id, 'module') && !this.ecs.has(id, 'pickup') && !this.ecs.has(id, 'remote') && !this.ecs.has(id, 'fitted'))) continue;
       if (tag && !this.hasTag(id, tag)) continue;
       if (feet !== undefined && !this.onFloor(id, feet)) continue;
       const p = this.ecs.get(id, 'pos');
@@ -5404,7 +5426,10 @@ export class Kernel {
       const vx = Math.floor(lx * s.form.vpt + g.X / 2), vy = Math.floor(lz * s.form.vpt + g.Y / 2);
       const at = this.levelIn(s, feet);
       const near = 0.5 * s.form.vpt;
-      const piece = list.find(({ box: b }) => vx >= b[0] && vx <= b[3] && vy >= b[1] && vy <= b[4] && Math.abs(b[2] - at) <= near);
+      // A piece taken away from this building (T514) is not there any more.
+      const out = (this.ecs.get(s.id, 'form') as FormComp | undefined)?.out;
+      const keys = out?.length ? pieceKeys(list) : [];
+      const piece = list.find(({ box: b }, n) => vx >= b[0] && vx <= b[3] && vy >= b[1] && vy <= b[4] && Math.abs(b[2] - at) <= near && !out?.includes(keys[n]));
       if (!piece) continue;
       const concept = this.ecs.get(s.id, 'structure')?.concept;
       return { name: this.forms.info(piece.id)?.name ?? piece.id, ...(typeof concept === 'string' && concept ? { in: concept } : {}) };
@@ -5440,6 +5465,8 @@ export class Kernel {
     // A building that falls is rebuilt (T245d): its lot becomes a venture of its place, once the building is gone.
     const ruin = this.ecs.get(id, 'structure');
     const ruinForm: FormComp | undefined = this.ecs.get(id, 'form');
+    // A piece of an interior that breaks (T514) is gone from its building too.
+    this.pieceGone(id);
     this.ecs.destroy(id);
     if (ruin && origin && p) this.npc.buildingFell(origin, ruin, ruinForm, p);
     if (!p) return;
@@ -6634,10 +6661,202 @@ export class Kernel {
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
+  // --- The furniture of the interiors as things of the world (T514, ADR-0272) ----------------------
+
+  /**
+   * The pieces of every furnished building of the world (T514): by building, what its pieces were made for (`fp`: its look, the pieces it
+   * left out, its stage; `ver`: the forms then) and the thing of each piece, by key. A mirror has none: its pieces come from the world.
+   */
+  private fittings = new Map<Id, { fp: string; ver: number; pieces: Map<string, Id> }>();
+
+  /** The body of a piece (T514): it stops nobody (the building's voxels do), as wide as the narrower side of its box, for who finds it by its middle. */
+  private pieceBody(f: FittedComp, man?: Manifest): { r: number; solid: false; pushable: false; mass: number; friction: number } {
+    return { r: Math.max(0.2, Math.min(0.6, Math.min(f.hx, f.hy))), solid: false, pushable: false, mass: man?.physics?.mass ?? 1, friction: man?.physics?.friction ?? 0.6 };
+  }
+
+  /**
+   * The thing of a piece of a building's interior (T514, ADR-0272): of the module that wears its model (`pieceModule`: its actions, its
+   * container, `takeable`), or, if none does, a thing with the menu of every thing; where the piece stands, on its storey; of the building's
+   * place. Undefined when the building stands nowhere one can say.
+   */
+  private spawnPiece(sid: Id, f: Form, piece: PlacedPiece, key: string, origin: string): Id | undefined {
+    const p = this.ecs.get(sid, 'pos');
+    const sfc: FormComp | undefined = this.ecs.get(sid, 'form');
+    const building = this.ecs.get(sid, 'origin')?.key;
+    if (!p || !sfc || !f.result || typeof building !== 'string' || ![p.x, p.y, sfc.yaw].every(Number.isFinite)) return undefined;
+    const stand = this.cellarHeight(sid, p) ?? this.groundAt(p.x, p.y);
+    const at = pieceFrame(piece.box, f.result.grid, f.vpt, f.base, { x: p.x, y: p.y, yaw: sfc.yaw, stand });
+    if (![at.x, at.y, at.z, at.top, at.hx, at.hy].every(Number.isFinite)) return undefined;
+    const fitted: FittedComp = { of: building, key, model: piece.id, name: this.forms.info(piece.id)?.name ?? piece.id, yaw: sfc.yaw, hx: at.hx, hy: at.hy, z: at.z, top: at.top };
+    const chunk: string | undefined = this.ecs.get(sid, 'chunk')?.key;
+    const man = pieceModule([...this.modules.values()].map((m) => m.manifest), piece.id);
+    const entry = man && this.modules.get(man.id);
+    if (entry) return this.spawnModuleEntity(entry, at.x, at.y, chunk, origin, undefined, fitted);
+    // No module wears it: a thing with the menu of every thing, and, if its name says it holds things, a container of the kernel's (the
+    // world's common loot, what was left in it by its origin).
+    const saved = this.savedContainers.get(origin);
+    const box: Container | undefined = storeNamed(fitted.name) ? (saved ? { inv: clone(saved.inv), loot: '', filled: saved.filled } : { inv: newInventory(PIECE_STORE), loot: '', filled: false }) : undefined;
+    return this.ecs.spawn({
+      pos: { x: at.x, y: at.y, z: at.z },
+      body: this.pieceBody(fitted),
+      form: { model: piece.id, seed: PIECE_SEED, yaw: sfc.yaw } satisfies FormComp,
+      fitted,
+      origin: { key: origin },
+      ...(box ? { container: box } : {}),
+      ...(chunk ? { chunk: { key: chunk } } : {}),
+    });
+  }
+
+  /** A piece's thing leaves the world (T514): what its container holds stays by its origin, as the save keeps it. */
+  private dropPiece(id: Id): void {
+    if (!this.ecs.alive.has(id)) return;
+    const box: Container | undefined = this.ecs.get(id, 'container');
+    const origin = this.ecs.get(id, 'origin')?.key;
+    if (box?.filled && typeof origin === 'string') this.savedContainers.set(origin, { inv: clone(box.inv), filled: true });
+    this.ecs.destroy(id);
+  }
+
+  /** A piece's thing that leaves the world for good (T514: taken, broken): the piece leaves its building at once. */
+  private pieceGone(id: Id): void {
+    if (!this.ecs.has(id, 'fitted')) return;
+    for (const [sid, r] of this.fittings)
+      for (const [key, pid] of r.pieces)
+        if (pid === id) {
+          r.pieces.delete(key);
+          return this.takeOut(sid, key);
+        }
+  }
+
+  /** A piece taken away from its building (T514): its voxels leave the building's instance, for who walks, who sees it and the save. */
+  private takeOut(sid: Id, key: string): void {
+    const fc: FormComp | undefined = this.ecs.get(sid, 'form');
+    if (!fc || fc.out?.includes(key)) return;
+    fc.out = outList([...(fc.out ?? []), key], Infinity);
+    this.instanceFeet.delete(sid);
+    this.npc.forgetWays();
+    this.bus.emit('form:changed', { id: sid });
+  }
+
+  /**
+   * The things of the pieces of the furnished buildings in the world (T514, ADR-0272), every tick, cheap: a building is looked at again only
+   * when its look, its pieces left out or its stage changed, or a form got ready. A piece the world took away (taken, broken: its origin
+   * `consumed`) leaves its building (`takeOut`); one whose thing is there stays as it is (its state, what its container holds); one that is
+   * no longer in the building (another interior) leaves the world, what its container holds kept by its origin.
+   */
+  private syncFitted(): void {
+    for (const [sid, r] of this.fittings) {
+      if (this.ecs.alive.has(sid) && this.ecs.has(sid, 'structure')) continue;
+      for (const id of r.pieces.values()) this.dropPiece(id);
+      this.fittings.delete(sid);
+    }
+    for (const sid of this.ecs.query('structure', 'form', 'pos')) {
+      const fc: FormComp = this.ecs.get(sid, 'form');
+      const building = this.ecs.get(sid, 'origin')?.key;
+      if (typeof building !== 'string') continue;
+      let r = this.fittings.get(sid);
+      // A piece whose thing is gone: taken away or broken, it leaves the building; gone otherwise (Lua), it comes back with its place.
+      if (r) for (const [key, id] of [...r.pieces]) {
+        if (this.ecs.alive.has(id)) continue;
+        r.pieces.delete(key);
+        if (this.consumed.has(pieceOrigin(building, key))) this.takeOut(sid, key);
+      }
+      const stage = this.ecs.get(sid, 'structure')?.stage;
+      const fp = `${fc.model}#${fc.seed}#${fc.tint ?? ''}#${fc.stratum ?? ''}#${fc.out?.join(',') ?? ''}#${stage ?? ''}`;
+      if (r && r.fp === fp && r.ver === this.forms.version) continue;
+      const want = this.forms.get(fc.model, fc.seed, fc.tint, fc.stratum);
+      // Its form on its way: what it has stays until it is here.
+      if (want?.status === 'pending') continue;
+      if (!r) this.fittings.set(sid, (r = { fp, ver: this.forms.version, pieces: new Map() }));
+      r.fp = fp;
+      r.ver = this.forms.version;
+      // A building under way has no furniture yet; a form that failed, nor does it.
+      const list: readonly PlacedPiece[] = want?.status === 'ready' && !(typeof stage === 'number' && stage < 1) ? (want.result?.furniture ?? []) : [];
+      const keys = pieceKeys(list);
+      const wanted = new Set<string>();
+      list.forEach((piece, n) => {
+        const key = keys[n];
+        if (fc.out?.includes(key)) return;
+        const origin = pieceOrigin(building, key);
+        if (this.consumed.has(origin)) return this.takeOut(sid, key);
+        wanted.add(key);
+        const had = r!.pieces.get(key);
+        if (had !== undefined && this.ecs.alive.has(had)) return;
+        const id = this.spawnPiece(sid, want!, piece, key, origin);
+        if (id !== undefined) r!.pieces.set(key, id);
+      });
+      for (const [key, id] of [...r.pieces]) {
+        if (wanted.has(key)) continue;
+        this.dropPiece(id);
+        r.pieces.delete(key);
+      }
+    }
+  }
+
+  /**
+   * The piece of an interior over a point of the world (T514), on the storey of feet `feet` high (`onFloor`): the thing whose box, turned
+   * as its building, has the point; of two, the nearer middle. A mirror finds the pieces the world sent it, by what they are and where.
+   */
+  private pieceAt(x: number, y: number, feet?: number, slack = 0): Id | undefined {
+    let best: Id | undefined, bestD = Infinity;
+    for (const id of this.ecs.query('fitted', 'pos')) {
+      const f: FittedComp = this.ecs.get(id, 'fitted');
+      const p = this.ecs.get(id, 'pos');
+      if (!f || !overPiece(f, p, x, y, slack) || (feet !== undefined && !this.onFloor(id, feet))) continue;
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < bestD) [best, bestD] = [id, d];
+    }
+    return best;
+  }
+
+  /** A piece of furniture standing in the world as a support (T291): its own form's floors; `moves` when nothing would stay on it. */
+  private furnitureSupport(id: Id): { support: Support; x: number; y: number; yaw: number; floor: number; base: number; vpt: number; reach: number } | 'moves' | undefined {
+    const body = this.ecs.get(id, 'body');
+    if (!body?.solid || body.pushable) return 'moves';
+    const fc: FormComp = this.ecs.get(id, 'form');
+    const f = this.forms.ready(fc.model, fc.seed, fc.tint);
+    const sp = this.ecs.get(id, 'pos');
+    if (!f?.result || !sp || !Number.isFinite(sp.x) || !Number.isFinite(sp.y)) return undefined;
+    const g = f.result.grid;
+    return { support: { levels: this.groundOf(id, fc, f).levels, X: g.X, Y: g.Y, vpt: f.vpt, base: f.base }, x: sp.x, y: sp.y, yaw: fc.yaw, floor: this.groundAt(sp.x, sp.y), base: f.base, vpt: f.vpt, reach: f.reach };
+  }
+
+  /**
+   * A piece of an interior as a support for what is put down on it (T514, ADR-0150): the floors of its building over its box alone, between
+   * its bottom and its top (`pieceLevels`), in a frame whose middle is the piece's, turned as the building; heights of the building's grid.
+   */
+  private pieceSupport(id: Id): { support: Support; x: number; y: number; yaw: number; floor: number; base: number; vpt: number; reach: number } | undefined {
+    const fu: FittedComp | undefined = this.ecs.get(id, 'fitted');
+    const p = this.ecs.get(id, 'pos');
+    if (!fu || !p) return undefined;
+    for (const s of this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []) {
+      const list = s.form.result?.furniture;
+      if (!list?.length || !this.ecs.has(s.id, 'structure')) continue;
+      const fc: FormComp | undefined = this.ecs.get(s.id, 'form');
+      const keys = pieceKeys(list);
+      const n = list.findIndex((q, i) => q.id === fu.model && !fc?.out?.includes(keys[i]) && Math.abs(this.standOf(s) + (q.box[2] - s.form.base) / s.form.vpt - fu.z) < 1e-3 && overPiece(fu, p, ...this.boxMiddle(s, q.box)));
+      if (n < 0) continue;
+      const box = list[n].box;
+      const W = box[3] - box[0] + 1, H = box[4] - box[1] + 1;
+      const support: Support = { levels: pieceLevels(s.levels, s.form.result!.grid.X, box), X: W, Y: H, vpt: s.form.vpt, base: box[2], top: box[5] + 1 };
+      return { support, x: p.x, y: p.y, yaw: s.yaw, floor: this.standOf(s), base: s.form.base, vpt: s.form.vpt, reach: Math.hypot(W, H) / 2 / s.form.vpt };
+    }
+    return undefined;
+  }
+
+  /** The middle of a box of a solid's grid in the world (T514). */
+  private boxMiddle(s: SolidForm, box: readonly number[]): [number, number] {
+    const g = s.form.result!.grid;
+    const lx = ((box[0] + box[3] + 1) / 2 - g.X / 2) / s.form.vpt, lz = ((box[1] + box[4] + 1) / 2 - g.Y / 2) / s.form.vpt;
+    const c = Math.cos(s.yaw), sn = Math.sin(s.yaw);
+    return [s.x + lx * c + lz * sn, s.y - lx * sn + lz * c];
+  }
+
   // --- Putting things down on furniture (T291, ADR-0150) ------------------------------------------
 
   /** A piece of furniture (T291): a thing of the world whose model is of the class `mobile` (a chest, a table, a bed, a barrel), not someone. */
   private isFurniture(id: Id): boolean {
+    // A piece of an interior (T514) is furniture of the library, whatever module wears it (or none).
+    if (this.ecs.has(id, 'fitted')) return true;
     const fc: FormComp | undefined = this.ecs.get(id, 'form');
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     return !!fc && !!m && !m.persona && !this.ecs.has(id, 'structure') && this.forms.classOf(fc.model).id === 'furniture';
@@ -6645,7 +6864,7 @@ export class Kernel {
 
   /** Whether the menu of a thing offers to put down on it what is held (T291): something with a body that is not someone nor a building, or what lies on furniture. */
   private offersPlace(id: Id): boolean {
-    if (this.ecs.has(id, 'placed')) return true;
+    if (this.ecs.has(id, 'placed') || this.ecs.has(id, 'fitted')) return true;
     const m = this.modules.get(this.ecs.get(id, 'module')?.id)?.manifest;
     return !!m && !m.persona && this.ecs.has(id, 'form') && this.ecs.has(id, 'body') && !this.ecs.has(id, 'structure') && !this.ecs.has(id, 'pickup');
   }
@@ -6658,6 +6877,13 @@ export class Kernel {
     for (const s of this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []) {
       if (s.id === id || !this.isFurniture(s.id)) continue;
       if (this.restsOn(s, p.x, p.y, placed.z)) return s.id;
+    }
+    // On a piece of an interior (T514): the piece whose box is under it, between its bottom and its top, on a floor of its building.
+    const building = (this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []).find((s) => this.ecs.has(s.id, 'structure') && this.restsOn(s, p.x, p.y, placed.z));
+    if (!building) return undefined;
+    for (const piece of this.ecs.query('fitted', 'pos')) {
+      const fu: FittedComp = this.ecs.get(piece, 'fitted');
+      if (fu && placed.z > fu.z + 1e-6 && placed.z <= fu.top + 0.05 && overPiece(fu, this.ecs.get(piece, 'pos'), p.x, p.y)) return piece;
     }
     return undefined;
   }
@@ -6710,7 +6936,8 @@ export class Kernel {
     const held = equippedItem(this.inventory());
     const look = held ? this.itemLook(held) : undefined;
     const under = this.ecs.has(target, 'placed') ? this.supportOf(target) : target;
-    const fc: FormComp | undefined = under !== undefined && this.ecs.alive.has(under) ? this.ecs.get(under, 'form') : undefined;
+    // A piece of an interior (T514) is its building's floors, whose form is there: its own model is not waited for.
+    const fc: FormComp | undefined = under !== undefined && this.ecs.alive.has(under) && !this.ecs.has(under, 'fitted') ? this.ecs.get(under, 'form') : undefined;
     const waits: Array<Promise<unknown>> = [];
     if (look && !this.forms.ready(look.model, look.seed, look.tint)) waits.push(this.forms.wait(look.model, look.seed, look.tint));
     if (fc && !this.forms.ready(fc.model, fc.seed, fc.tint)) waits.push(this.forms.wait(fc.model, fc.seed, fc.tint));
@@ -6736,18 +6963,15 @@ export class Kernel {
     if (id === undefined) return refuse(`${this.nameOf(target)} non sta su un mobile.`);
     const name = this.nameOf(id);
     if (!this.isFurniture(id)) return refuse(`${name} non è un mobile: lì sopra non si posa niente.`);
-    const body = this.ecs.get(id, 'body');
-    if (!body?.solid || body.pushable) return refuse(`${name} si muove: lì sopra non resterebbe fermo niente.`);
-    const fc: FormComp = this.ecs.get(id, 'form');
-    const f = this.forms.ready(fc.model, fc.seed, fc.tint);
-    const sp = this.ecs.get(id, 'pos');
-    if (!f?.result || !sp || !Number.isFinite(sp.x) || !Number.isFinite(sp.y)) return refuse(`${name} non ha un piano dove stia ${what}.`);
-    const g = f.result.grid;
-    const support: Support = { levels: this.groundOf(id, fc, f).levels, X: g.X, Y: g.Y, vpt: f.vpt, base: f.base };
+    const frame = this.ecs.has(id, 'fitted') ? this.pieceSupport(id) : this.furnitureSupport(id);
+    if (frame === 'moves') return refuse(`${name} si muove: lì sopra non resterebbe fermo niente.`);
+    if (!frame) return refuse(`${name} non ha un piano dove stia ${what}.`);
+    const { support, vpt, base } = frame;
+    const sp = { x: frame.x, y: frame.y };
     // Heights of the world (tiles) as heights of its grid (voxels), points of the world in its own frame.
-    const floor = this.groundAt(sp.x, sp.y);
-    const toShelf = (z: number) => (z - floor) * f.vpt + f.base;
-    const local = (x: number, y: number) => toLocal(x - sp.x, y - sp.y, fc.yaw);
+    const floor = frame.floor;
+    const toShelf = (z: number) => (z - floor) * vpt + base;
+    const local = (x: number, y: number) => toLocal(x - sp.x, y - sp.y, frame.yaw);
     const things = new Map<number, Set<number>>();
     const bodies = new Map<number, Set<number>>();
     const take = (to: Map<number, Set<number>>, h: number, cells: number[]) => {
@@ -6757,14 +6981,14 @@ export class Kernel {
       for (const c of cells) s.add(c);
     };
     // What lies there already takes the rectangle of its footprint; who stands there, the disc of their body.
-    const near = f.reach + 1;
+    const near = frame.reach + 1;
     for (const other of this.ecs.query('placed', 'pickup', 'pos')) {
       const p = this.ecs.get(other, 'pos');
       const z = this.ecs.get(other, 'placed').z;
       if (!(Math.hypot(p.x - sp.x, p.y - sp.y) <= near) || !Number.isFinite(z)) continue;
       const ofc: FormComp | undefined = this.ecs.get(other, 'form');
       const [lx, ly] = local(p.x, p.y);
-      take(things, Math.round(toShelf(z)), cellsOf(support, this.shapeOfItem(this.ecs.get(other, 'pickup').item, ofc), lx, ly, turnsBetween(ofc?.yaw ?? 0, fc.yaw)));
+      take(things, Math.round(toShelf(z)), cellsOf(support, this.shapeOfItem(this.ecs.get(other, 'pickup').item, ofc), lx, ly, turnsBetween(ofc?.yaw ?? 0, frame.yaw)));
     }
     for (const b of this.standing()) {
       if (b.z === undefined || !Number.isFinite(b.z) || !(Math.hypot(b.x - sp.x, b.y - sp.y) <= near)) continue;
@@ -6777,10 +7001,10 @@ export class Kernel {
     const r = findSpot(support, this.shapeOfItem(held.item), { things, bodies, from: { x: fx, y: fy }, reach: PLACE_REACH, top: toShelf(feet + PLACE_UP), bottom: toShelf(feet - PLACE_DOWN) });
     if ('fail' in r) return refuse(placeRefusal(r.fail, name, what));
     const taken = takeFromSlot(inv, at, 1)!;
-    const c = Math.cos(fc.yaw), s = Math.sin(fc.yaw);
-    const z = floor + (r.spot.h - f.base) / f.vpt;
+    const c = Math.cos(frame.yaw), s = Math.sin(frame.yaw);
+    const z = floor + (r.spot.h - base) / vpt;
     const item = this.spawnItem(taken.item, sp.x + r.spot.x * c + r.spot.y * s, sp.y - r.spot.x * s + r.spot.y * c, 1);
-    const turn = fc.yaw + (r.spot.turns * Math.PI) / 2;
+    const turn = frame.yaw + (r.spot.turns * Math.PI) / 2;
     this.ecs.get(item, 'form').yaw = ((turn % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
     this.ecs.set(item, 'placed', { z });
     this.ecs.get(item, 'pos').z = z;
@@ -6851,6 +7075,9 @@ export class Kernel {
   /** Whether someone stands on a solid thing (on its top, on its shelf): a wanderer or a figure whose feet are on a floor of its form. */
   private standsOn(id: Id): boolean {
     const p = this.ecs.get(id, 'pos');
+    // On a piece of an interior (T514): someone whose feet are over its box, above its bottom and not over its top.
+    const fu: FittedComp | undefined = this.ecs.get(id, 'fitted');
+    if (fu) return this.standing().some((b) => b.z !== undefined && Number.isFinite(b.z) && b.z > fu.z + 0.1 && b.z <= fu.top + 0.1 && overPiece(fu, p, b.x, b.y, b.r));
     const s = (this.solidForms.get(`${Math.floor(p.x)},${Math.floor(p.y)}`) ?? []).find((x) => x.id === id);
     if (!s) return false;
     return this.standing().some((b) => b.z !== undefined && Number.isFinite(b.z) && b.z > this.groundAt(b.x, b.y) + 1e-6 && Math.hypot(b.x - s.x, b.y - s.y) <= s.form.reach + b.r && this.restsOn(s, b.x, b.y, b.z));
@@ -6893,6 +7120,8 @@ export class Kernel {
     const item = thingItem(m.id);
     inv.slots[at] = { item, count: 1, thing: { origin, ...(fc && Number.isInteger(fc.seed) ? { seed: fc.seed } : {}), ...(parts ? { parts } : {}) } };
     inv.equipped = at;
+    // A piece of an interior (T514) leaves its building's voxels too.
+    this.pieceGone(id);
     this.ecs.destroy(id);
     this.instanceFeet.delete(id);
     this.rebuildSolids();
@@ -6953,6 +7182,9 @@ export class Kernel {
     const origin = thing?.origin ?? this.freshOrigin(module, { x, y });
     const yaw = facingYaw(c.x - x, c.y - y);
     const fc: FormComp = { ...this.formFor(entry.manifest, origin), yaw };
+    // It looks as it did when it was taken (T514: a piece of an interior has the seed it had in its building).
+    const seed = this.carriedSeed(fc, thing?.seed);
+    if (seed !== undefined) fc.seed = seed;
     const done = this.savedForms.get(origin);
     if (done?.length) fc.done = [...done];
     const why = this.spotFailure(entry.manifest, fc, x, y);
@@ -6961,8 +7193,9 @@ export class Kernel {
     takeFromSlot(inv, slot);
     const id = this.spawnModuleEntity(entry, x, y, undefined, origin, thing?.parts);
     this.ecs.get(id, 'form').yaw = yaw;
+    if (seed !== undefined) this.ecs.get(id, 'form').seed = seed;
     this.consumed.add(origin);
-    this.moved.set(origin, { module, origin, x, y, yaw, ...(thing?.parts ? { parts: thing.parts } : {}) });
+    this.moved.set(origin, { module, origin, x, y, yaw, ...(seed !== undefined ? { seed } : {}), ...(thing?.parts ? { parts: thing.parts } : {}) });
     this.rebuildSolids();
     this.npc.forgetWays();
     this.bus.emit('item:placed', { item: s.item });
@@ -7183,7 +7416,9 @@ export class Kernel {
       const yaw = this.ecs.get(id, 'form')?.yaw ?? r.yaw;
       if (![p?.x, p?.y, yaw].every(Number.isFinite)) continue;
       const parts = readParts(this.ecs.componentsOf(id));
-      const now: MovedRecord = { module: r.module, origin: r.origin, x: r4(p.x), y: r4(p.y), yaw: r4(yaw), ...(parts ? { parts } : {}) };
+      const fc: FormComp | undefined = this.ecs.get(id, 'form');
+      const seed = fc ? this.carriedSeed(this.formFor(this.modules.get(r.module)?.manifest, r.origin), fc.seed) : undefined;
+      const now: MovedRecord = { module: r.module, origin: r.origin, x: r4(p.x), y: r4(p.y), yaw: r4(yaw), ...(seed !== undefined ? { seed } : {}), ...(parts ? { parts } : {}) };
       this.moved.set(r.origin, now);
       out.push(now);
     }
@@ -7203,8 +7438,20 @@ export class Kernel {
       if (!entry || entry.manifest.kind !== 'entity' || entry.manifest.persona) continue;
       if (this.ecs.query('origin').some((e) => this.ecs.get(e, 'origin').key === r.origin)) continue;
       const id = this.spawnModuleEntity(entry, r.x, r.y, undefined, r.origin, r.parts);
-      this.ecs.get(id, 'form').yaw = r.yaw;
+      const fc: FormComp = this.ecs.get(id, 'form');
+      fc.yaw = r.yaw;
+      const seed = this.carriedSeed(fc, r.seed);
+      if (seed !== undefined) fc.seed = seed;
     }
+  }
+
+  /**
+   * The seed a thing put down keeps (T514): the one it was carried with, if its model has it and it is not the one its origin gives anyway
+   * (a piece of an interior looks as it did in its building); undefined otherwise.
+   */
+  private carriedSeed(fc: FormComp, seed: number | undefined): number | undefined {
+    if (seed === undefined || !Number.isInteger(seed) || fc.wanted || seed === fc.seed) return undefined;
+    return seed >= 1 && seed <= this.forms.seedsOf(fc.model) ? seed : undefined;
   }
 
   /** What the wanderer acting carries of the world (T292): the places do not make it again, whatever `consumed` still remembers. */
@@ -8656,7 +8903,7 @@ export class Kernel {
     // What stands on it, else the structure whose walls or door are there (T426).
     // Only on the storey one stands on (T431): upstairs, not the chest on the floor under it.
     const feet = this.feetNow();
-    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75, undefined, [], feet) ?? this.builtAt(col + 0.5, row + 0.5, 0.5, feet);
+    const on = entity ?? this.nearest(col + 0.5, row + 0.5, 0.75, undefined, [], feet) ?? this.pieceAt(col + 0.5, row + 0.5, feet) ?? this.builtAt(col + 0.5, row + 0.5, 0.5, feet);
     const options: ActionOption[] = [];
     if (on !== undefined) for (const o of this.actionsFor(on)) options.push({ ...o, id: `e:${o.id}`, label: o.id === 'altro' ? `Altro… (${this.nameOf(on)})` : o.label });
     // A thing of the world carried goes down here (T292); the kernel says why when it does not.
@@ -8691,7 +8938,9 @@ export class Kernel {
       return false;
     }
     // What is under the pointer, as the hover says (T44c): of two wanderers side by side, the one clicked.
-    this.openTileMenu(col, row, this.nearest(rx + ox, ry + oy, 0.6, undefined, [], this.feetNow()));
+    // A piece of an interior under it (T514), by its box: its middle may be elsewhere.
+    const feet = this.feetNow();
+    this.openTileMenu(col, row, this.nearest(rx + ox, ry + oy, 0.6, undefined, [], feet) ?? this.pieceAt(rx + ox, ry + oy, feet));
     return true;
   }
 
@@ -8749,6 +8998,9 @@ export class Kernel {
     const ahead = this.nearest(pc.x + dx * 0.6, pc.y + dy * 0.6, 1.4, undefined, [], feet);
     if (ahead !== undefined) return tileOf(ahead);
     const col = Math.floor(pc.x + dx), row = Math.floor(pc.y + dy);
+    // A piece of an interior just ahead (T514), by its box: its middle may be far (a bed); it is voxels of the building found next.
+    const piece = this.pieceAt(pc.x + dx * 0.75, pc.y + dy * 0.75, feet, 0.2);
+    if (piece !== undefined) return tileOf(piece);
     // From just ahead of the body to a tile beyond: a door one stands against may be in one's own tile.
     const built = this.builtAt(pc.x + dx * 0.75, pc.y + dy * 0.75, 0.45, feet);
     if (built !== undefined) return { id: built, col, row };
@@ -8832,13 +9084,15 @@ export class Kernel {
         return;
       case 'esamina': {
         const identity: Identity | undefined = this.ecs.get(id, 'identity');
-        const key = `${modId ?? this.ecs.get(id, 'pickup')?.item}|${identity?.name ?? ''}`;
+        // A piece of an interior no module wears (T514) is seen as its furniture of the library.
+        const fu: FittedComp | undefined = modId ? undefined : this.ecs.get(id, 'fitted');
+        const key = `${modId ?? this.ecs.get(id, 'pickup')?.item ?? (fu ? `piece:${fu.model}` : '')}|${identity?.name ?? ''}`;
         let text = this.examined.get(key);
         // A thing lying there (T489): what one does with it, in the world's words, after what the Narrator sees, and to the Narrator too.
         const pk = this.ecs.get(id, 'pickup');
         const use = pk ? this.itemUseWords(pk.item) : [];
         if (!text) {
-          const what = pk ? this.itemInfo(pk.item) : { name: speaker, description: `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`, lore: m?.lore };
+          const what = pk ? this.itemInfo(pk.item) : { name: speaker, description: fu ? `un mobile: ${fu.name}` : `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`, lore: m?.lore };
           try {
             text = await examine(this.council, { name: what.name, description: what.description, lore: (what as { lore?: string }).lore, ...(use.length ? { use: use.join(' ') } : {}) }, this.worldFacts(), this.focusOn([what.name, modId && `kind:${nodeSlug(modId)}`], this.ecs.get(id, 'pos')));
             this.examined.set(key, text);
@@ -8889,13 +9143,13 @@ export class Kernel {
     return this.judgeFree(
       {
         entity: id,
-        key: pk ? pk.item : (modId ?? this.nameOf(id)),
+        key: pk ? pk.item : (modId ?? (this.ecs.has(id, 'fitted') ? `piece:${this.ecs.get(id, 'fitted').model}` : this.nameOf(id))),
         name: this.nameOf(id),
-        description: info?.description ?? `${m?.description ?? ''}${identity ? ` ${identity.look}` : ''}`,
+        description: info?.description ?? (m ? `${m.description ?? ''}${identity ? ` ${identity.look}` : ''}` : this.ecs.has(id, 'fitted') ? `un mobile: ${this.nameOf(id)}` : ''),
         tags: info?.tags ?? m?.tags ?? [],
         container: this.ecs.has(id, 'container'),
         // What the target is, for the Narrator's prompt (English since T310b; the offline Council reads it too).
-        kind: pk ? (this.ecs.has(id, 'placed') ? 'a thing placed on furniture' : 'a thing on the ground') : m?.persona ? 'person' : this.ecs.has(id, 'container') ? 'furniture' : 'thing',
+        kind: pk ? (this.ecs.has(id, 'placed') ? 'a thing placed on furniture' : 'a thing on the ground') : m?.persona ? 'person' : this.ecs.has(id, 'container') || this.ecs.has(id, 'fitted') ? 'furniture' : 'thing',
         learnModule: !pk && !m?.persona ? entry : undefined,
         learnItem: pk?.item,
       },
@@ -13051,7 +13305,7 @@ export class Kernel {
       const doing = this.npc.routineNow(identity)?.does;
       const extra = mind ? `${doing ? `${doing} · ` : ''}umore: ${mind.mood}` : this.ecs.has(eid, 'container') ? 'E per aprire' : m?.actions?.length ? `E: ${m.actions.map((a) => a.label).join(', ')}` : undefined;
       const fam = identity?.family?.length ? ` ${identity.family.map((f) => `${f.bond[0].toUpperCase()}${f.bond.slice(1)} di ${f.name}`).join(', ')}.` : '';
-      return { kind: 'entity', name: identity?.name ?? m?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
+      return { kind: 'entity', name: identity?.name ?? m?.name ?? this.ecs.get(eid, 'fitted')?.name ?? '???', description: identity ? `${identity.job ? identity.job[0].toUpperCase() + identity.job.slice(1) : m?.name}.${fam} ${identity.look}` : (m?.description ?? ''), extra };
     };
     for (const eid of this.ecs.query('pos', 'glyph')) {
       if (eid === this.wandererEntity) continue;
@@ -13062,9 +13316,13 @@ export class Kernel {
     // A thing by its model, where its middle is not under the cursor (the end of a counter, T431), on this storey.
     const built = this.builtAt(cx, cy, 0.05, feet);
     if (built !== undefined && !this.ecs.has(built, 'structure') && this.ecs.has(built, 'glyph')) return describe(built);
-    // A piece of furniture the kernel placed in a building (T410): voxels of the building, found by its box on this storey.
+    // A piece of furniture the kernel placed in a building (T410): voxels of the building, found by its box on this storey. Its thing
+    // (T514) says what it is when a module wears it; else, or while its thing is not here, its name in the library.
+    const thing = this.pieceAt(cx, cy, feet);
+    if (thing !== undefined && this.ecs.has(thing, 'module')) return describe(thing);
     const piece = this.furnitureAt(cx, cy, feet);
-    if (piece) return { kind: 'entity', name: piece.name, description: piece.in ? `Arredo — ${piece.in}` : 'Arredo' };
+    if (piece) return { kind: 'entity', name: piece.name, description: piece.in ? `Arredo — ${piece.in}` : 'Arredo', ...(thing !== undefined && this.ecs.has(thing, 'container') ? { extra: 'E per aprire' } : {}) };
+    if (thing !== undefined) return describe(thing);
     const t = this.tileAt(Math.floor(cx), Math.floor(cy));
     return t ? { kind: 'tile', name: `${this.palette[t]?.name ?? t}${this.palette[t]?.solid ? ' (invalicabile)' : ''}` } : null;
   }
@@ -13998,6 +14256,8 @@ export class Kernel {
         });
     }
     this.updateChunks();
+    // The furniture of the interiors (T514): its things where the buildings' forms have it, before the solids are made.
+    this.syncFitted();
     this.waterTick();
     // Cellular automata (T482): deterministic step on the loaded window; stopped when `pace` is `hold`.
     this.automata.tick(this.paceHeld());
@@ -14200,6 +14460,12 @@ export class Kernel {
       if (wanderers.has(id)) continue;
       const p = this.ecs.get(id, 'pos');
       if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+      // A piece of an interior (T514) stands on the floor of its storey, under its own voxels: its height is its building's to say.
+      const piece: FittedComp | undefined = this.ecs.get(id, 'fitted');
+      if (piece && Number.isFinite(piece.z)) {
+        p.z = piece.z;
+        continue;
+      }
       // What lies on furniture rests on the highest floor no higher than where it was put (T291): its shelf, or, if the furniture is
       // not there (gone, or its form still on its way), what is under it. Where it was put stays, so the shelf takes it back.
       const placed = this.ecs.get(id, 'placed');

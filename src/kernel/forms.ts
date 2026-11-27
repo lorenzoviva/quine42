@@ -23,6 +23,7 @@ import { internalFields, internalModelInfo } from './internalNames';
 import type { FileMap } from './types';
 import { furnishForm, furnitureOf, hasStratumRules, INTERIOR_LIMITS, interiorText, readInterior, type InteriorData, type InteriorSpec } from './furnish';
 import type { PieceBox } from './interior';
+import { withoutPieces } from './fitted';
 
 export const MODELS_DIR = 'models/';
 export const MODELS_INDEX = 'models/index.json';
@@ -161,6 +162,11 @@ export interface FormComp {
   classe?: string;
   /** The stratum this building's cellar is dug into (T479, ADR-0253): only affects forms whose interior has stratum rules. */
   stratum?: string;
+  /**
+   * The pieces of its interior taken away (T514, ADR-0272): their keys (`pieceKeys`), sorted. The instance's grid is its form's without
+   * their voxels (`instanceGrid`), as an open door is its form's with the door's action done; the kernel writes it from `consumed`.
+   */
+  out?: string[];
 }
 
 export interface FormRequest {
@@ -201,9 +207,9 @@ export interface FormResult {
   meshesGone?: boolean;
   /**
    * A furnished building (T410): every piece of furniture placed, its library id and its box in the grid (T431), so the cursor finds a piece
-   * that is voxels of the building and not an entity, on the storey one stands on.
+   * that is voxels of the building, on the storey one stands on; and its voxels (T514), which leave the instance's grid when it is taken away.
    */
-  furniture?: Array<{ id: string; box: PieceBox }>;
+  furniture?: Array<{ id: string; box: PieceBox; cells?: number[] }>;
 }
 
 export interface FormRunner {
@@ -883,7 +889,7 @@ function sealed(r: FormResult): FormResult {
     palette: Object.freeze(palette),
     actions: Object.freeze(r.actions.map((a) => Object.freeze({ ...a }))) as FormResult['actions'],
     animations: Object.freeze([...r.animations]) as string[],
-    ...(r.furniture ? { furniture: Object.freeze(r.furniture.map((p) => Object.freeze({ id: p.id, box: Object.freeze([...p.box]) as PieceBox }))) as FormResult['furniture'] } : {}),
+    ...(r.furniture ? { furniture: Object.freeze(r.furniture.map((p) => Object.freeze({ id: p.id, box: Object.freeze([...p.box]) as PieceBox, ...(p.cells ? { cells: Object.freeze([...p.cells]) as number[] } : {}) }))) as FormResult['furniture'] } : {}),
   });
 }
 
@@ -979,7 +985,7 @@ export function runForm(q: FormRequest): FormResult & { model: ReturnType<typeof
   };
   // Its interior (T410): placed on the building only when the building is whole; what cannot be placed leaves it as built.
   const furnished = q.interior && r.finished ? furnishForm(q.interior, out, q.vpt, m.actions) : undefined;
-  return furnished ? { ...out, grid: furnished.grid, palette: furnished.palette, furniture: (furnished.items ?? []).map((p) => ({ id: p.id, box: p.box })) } : out;
+  return furnished ? { ...out, grid: furnished.grid, palette: furnished.palette, furniture: (furnished.items ?? []).map((p) => ({ id: p.id, box: p.box, ...(p.cells ? { cells: p.cells } : {}) })) } : out;
 }
 
 export class Forms {
@@ -1406,9 +1412,11 @@ export class Forms {
 }
 
 /** A copy of a form's grid with the actions done on an instance replayed on it. */
-export function instanceGrid(forms: Forms, f: Form, done: string[]): VoxelGrid & { log: number[]; epoch: number } {
+export function instanceGrid(forms: Forms, f: Form, done: string[], out?: readonly string[]): VoxelGrid & { log: number[]; epoch: number } {
   const g = f.result!.grid;
   const grid = { ...g, cells: new Uint8Array(g.cells), alphabet: [...g.alphabet], log: [] as number[], epoch: 0 };
+  // The pieces of its interior taken away (T514) first: the actions are done on the building as it stands now.
+  withoutPieces(grid.cells, f.result!.furniture, out);
   if (!done.length) return grid;
   const m = forms.compiled(f.model);
   for (const name of done) {

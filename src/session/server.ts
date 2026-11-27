@@ -16,6 +16,7 @@ import { hashStr, hex } from '../kernel/rng';
 import { equippedItem, shownInventory } from '../kernel/inventory';
 import { wornItems } from '../kernel/wearing';
 import { isThing, PUT_DOWN, thingSeed } from '../kernel/moving';
+import { shownFitted } from '../kernel/fitted';
 import { CLIMB_ACTION } from '../kernel/climb';
 import { offDeck } from '../kernel/vehicle';
 import { shownSpend } from '../kernel/ai/usage';
@@ -1250,7 +1251,7 @@ export class SessionServer {
     for (const name of ENTITY_PARTS) {
       if (!k.ecs.has(id, name)) continue;
       const v = k.ecs.get(id, name);
-      parts[name] = name === 'mind' ? {} : name === 'identity' ? { name: v?.name } : name === 'container' ? { size: v?.size } : v;
+      parts[name] = name === 'mind' ? {} : name === 'identity' ? { name: v?.name } : name === 'container' ? { size: v?.size } : name === 'fitted' ? shownFitted(v) : v;
     }
     // A building under way (T245e): of its structure only the stage, so every client sees it rise.
     const stage = k.ecs.get(id, 'structure')?.stage;
@@ -1272,6 +1273,6 @@ export class SessionServer {
 
   private formOf(id: number | undefined): FormView | undefined {
     const f = id !== undefined ? this.kernel.ecs.get(id, 'form') : undefined;
-    return f ? { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}), ...(f.stratum ? { stratum: f.stratum } : {}) } : undefined;
+    return f ? { model: f.model, seed: f.seed, ...(f.yaw ? { yaw: f.yaw } : {}), ...(f.tint ? { tint: f.tint } : {}), ...(f.done?.length ? { done: [...f.done] } : {}), ...(f.stratum ? { stratum: f.stratum } : {}), ...(f.out?.length ? { out: [...f.out] } : {}) } : undefined;
   }
 }

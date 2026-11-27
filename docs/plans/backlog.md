@@ -7076,7 +7076,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T555`; poi l'orchestratore integra T555, e `integra T548` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T548 fuso dopo T545: `TerrainDef` con `cover` e `inset`, il validatore con i due controlli, la palette di `ChunkInput` con la copertura quinta e il rientro sesto (corretto `inputSource`, che git aveva fuso leggendo il rientro dal posto della copertura), le istanze di copertura sulla cima rientrata; AGENTS.md, dettagli, glossario e indice degli ADR con le due voci (ADR-0269 copertura, ADR-0270 rientro e strade larghe), nessun rimando di T548 ad ADR-0269, censimento rigenerato; kernel 0.10.44; impronta del seme uguale al base (`9afb6ebffa73d7f7`); suite intera 323/323 file e typecheck verdi coi turni; non provati il multigiocatore e la copertura scritta dal Cartografo vero; sicurezza: nessuna superficie nuova.
 
-### T556 · Integrare T514 nel base (conflitto di versione con T552 e T555) — `da fare`
+### T556 · Integrare T514 nel base (conflitto di versione con T552 e T555) — `fatto` (`83b57935`)
 - Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 0
 - Step: 31
 - Contesto: `integra T514` (i mobili degli interni si usano, `src/kernel/fitted.ts`) si è fermato su conflitti in `docs/glossario-censimento.md`, `package.json`, `src/kernel/version.ts`: nel frattempo T552 (ADR-0270, kernel 0.10.44) e T555 (ADR-0271, kernel 0.10.45) sono entrati nel base. Lo script ha già rinumerato l'ADR di T514 a ADR-0272 (`490ceb12`); il base è a 0.10.45, T514 diventa 0.10.46. Nasce da T514: `dossier T514`.
@@ -7084,3 +7084,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; `tests/mobili-interni.test.ts` e `tests/documenti.test.ts` verdi.
 - Browser: no (T514 è stato visto nel browser; il merge tocca solo versione, censimento e rimandi).
 - Quando è fatto: commit su `task/T556`; poi l'orchestratore integra T556, e `integra T514` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: T514 fuso in task/T556 (commit 83b57935): kernel 0.10.46 in `KERNEL_VERSION`, `package.json` e `universe/universe.json` (che nel base era ancora a 0.10.44); nessun rimando di T514 ad ADR-0270, ovunque ADR-0272; censimento del glossario rigenerato con lo script; suite intera (324 file, 4257 test) e typecheck verdi coi turni, `mobili-interni` e `documenti` compresi. Browser non richiesto. Sicurezza: nessuna superficie nuova.
