@@ -428,7 +428,7 @@ export class Validator {
         if (t && typeof t === 'object') for (const e of terrainPhysicsErrors(code, t)) errors.push(`${path}: ${e}`);
         // The grain of its ground (T547, ADR-0267): only how it looks, but a colour and a density within the range.
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
-        // The inset of its top (T548, ADR-0269): only how it looks, but under a level of the relief.
+        // The inset of its top (T548, ADR-0270): only how it looks, but under a level of the relief.
         if (t && typeof t === 'object') for (const e of insetErrors(code, t.inset)) errors.push(`${path}: ${e}`);
       }
     }

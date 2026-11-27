@@ -112,7 +112,7 @@ export interface TerrainDef {
    */
   grain?: import('./grain').Grain;
   /**
-   * The inset of its top (T548, ADR-0269; `src/kernel/inset.ts`): how much lower (negative) or higher its tiles are drawn, in tiles, within
+   * The inset of its top (T548, ADR-0270; `src/kernel/inset.ts`): how much lower (negative) or higher its tiles are drawn, in tiles, within
    * -0.2..0.2 (under a level), with what stands on them; where it meets a higher terrain, the curb. Only how it looks: the kernel never reads
    * it. Unsaid, the one its name says (a road -0.12, a ditch -0.18, the ballast of a railway +0.06) or none; never of the base ground `g`.
    */
@@ -224,7 +224,7 @@ export interface EnvironmentDef {
    */
   air?: false;
   /**
-   * Its streets (T548, ADR-0269; `src/kernel/streets.ts`), read without trusting: how wide its roads are in its new places (`width`, 1-4
+   * Its streets (T548, ADR-0270; `src/kernel/streets.ts`), read without trusting: how wide its roads are in its new places (`width`, 1-4
    * tiles; 3 if not said, 1 as before) and the code of the sidewalk at their sides (the terrain named so if not said). Only where the code
    * the layout digs with is a road by its name, only on the plans with the mark (`ChunkPlan.streets`).
    */

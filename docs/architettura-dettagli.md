@@ -1204,7 +1204,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   milione di caselle) e del sale, ogni macchia un po' più chiara o più scura, e dove la cella è più piccola di un pixel la media, così lo
   scorrimento del tappeto non sfarfalla. Solo aspetto: niente nello stato, nei piani né sul filo. `tests/grana.test.ts`; le foto in
   `docs/catture/T547/`.
-- **Il rientro dei terreni e il cordolo** (ADR-0269, T548, C4 di `docs/design/terreno-ricco.md`, kernel 0.10.43): quanto più in basso o più
+- **Il rientro dei terreni e il cordolo** (ADR-0270, T548, C4 di `docs/design/terreno-ricco.md`, kernel 0.10.43): quanto più in basso o più
   in alto la cima di un terreno del suolo si disegna, in caselle, fra −0,2 e 0,2, sempre sotto un livello (0,25): `TerrainDef.inset`, letto
   senza fidarsi (`readInset`, `src/kernel/inset.ts`), voluto dal validatore (`insetErrors`), facoltativo nello schema dei terreni della
   Genesi; mai sul suolo di base `g`, il livello del mondo. Un terreno che non lo dice prende quello del suo nome (`insetByName`: la strada,
@@ -1215,7 +1215,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   persone, le cose, le rune; dove la loro altezza è quella del suolo, non su un pavimento). Il kernel non lo legge: `groundAt`, `floorAt`,
   la collisione, la rete restano quelli (`tests/rientro.test.ts`). Nel seme nessun terreno rientra; in `neapolis` la strada, il parcheggio
   e i binari, in ogni luogo. Le foto in `docs/catture/T548/`.
-- **Le strade larghe** (ADR-0269, T548): dove la via con cui il layout scava (`pathCode`) è una strada per il suo nome (`isRoad`), il layout
+- **Le strade larghe** (ADR-0270, T548): dove la via con cui il layout scava (`pathCode`) è una strada per il suo nome (`isRoad`), il layout
   di un piano col segno `streets` (scritto dal kernel su ogni piano nuovo) allarga le strade a 3 caselle, o quanto l'ambiente dice
   (`EnvironmentDef.street.width`, 1-4, letto senza fidarsi; `street_width` del Cartografo alla Genesi), sul suolo di base e sul marciapiede,
   dopo che il luogo è unito (`widenStreets`, `src/kernel/streets.ts`): mai su muri, acqua, alberi, campi, sul lotto di un blocco né

@@ -83,7 +83,7 @@ export interface LayoutOptions {
    */
   levels?: ArrayLike<number>;
   /**
-   * The wide streets (T548, ADR-0269): only for the plans with the mark (`ChunkPlan.streets`), what the environment says of them
+   * The wide streets (T548, ADR-0270): only for the plans with the mark (`ChunkPlan.streets`), what the environment says of them
    * (`EnvironmentDef.street`, read without trusting; `{}` the defaults). Where the path code is a road by its name, the roads are widened over
    * the base ground with the sidewalk at their sides once the place is joined (`widenStreets`): only codes of the ground one walks change.
    */

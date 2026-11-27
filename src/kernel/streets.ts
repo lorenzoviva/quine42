@@ -1,4 +1,4 @@
-// The wide streets (T548, C4 of docs/design/terreno-ricco.md, ADR-0269): where the code the layout digs its paths with is a road by its
+// The wide streets (T548, C4 of docs/design/terreno-ricco.md, ADR-0270): where the code the layout digs its paths with is a road by its
 // name (a «strada», an «asfalto», a «street»; not a «sentiero» nor a «pista»), the roads of a new place (the paths the layout carves, the
 // gates, the stamps' `road`, what the environment's program writes) are widened to 2-4 tiles over the base ground, with the sidewalk at
 // their sides where the world has one (a terrain named so, or the environment's), read without trusting. Only on the plans with the mark

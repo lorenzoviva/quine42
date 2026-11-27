@@ -1,4 +1,4 @@
-// The inset of a terrain (T548, C4 of docs/design/terreno-ricco.md § 3.2 A, ADR-0269): how much lower (or higher) than the relief the top
+// The inset of a terrain (T548, C4 of docs/design/terreno-ricco.md § 3.2 A, ADR-0270): how much lower (or higher) than the relief the top
 // of its tiles is drawn, in tiles, always less than a level of the relief (0.25). Only how it looks: the renderer draws the top of the tile
 // and what stands on it with the same shift, and where a lower terrain meets a higher one the side it draws is the curb (a road under its
 // sidewalk, the ballast of a railway over the ground, a ditch with its banks). The kernel never reads it: the body's level is the relief's,

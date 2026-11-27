@@ -182,7 +182,7 @@ export class MeshBuilder {
 export interface TerrainLook {
   layer?: string;
   color?: string;
-  /** How much lower or higher its top is drawn (T548, ADR-0269): `insetOf`, read once (`terrainLook`); only of the ground one walks. */
+  /** How much lower or higher its top is drawn (T548, ADR-0270): `insetOf`, read once (`terrainLook`); only of the ground one walks. */
   inset?: number;
 }
 
