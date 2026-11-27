@@ -6870,12 +6870,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare e test: come la riga A1-5. Browser: no.
 - Quando è fatto: come la riga.
 
-### T531 · A1-6: il compilatore legge l'originale così com'è — `da fare`
+### T531 · A1-6: il compilatore legge l'originale così com'è — `fatto` (`34a2a44c`)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-6; risposta 8 di T500 (le estensioni restano). Dipende da T526; in parallelo ai nodi se non tocca `engine.ts`.
 - Cosa fare e test: come la riga A1-6. Browser: no.
 - Quando è fatto: i 36 modelli dal loro testo, `c8`, test verdi.
+- Esito: `compileMjx(…, { original: true })` legge il testo di mxgmn così com'è: traduzione dei simboli all'ingresso anche sui file (`src/mj/original.ts`, la stessa di `programFor0_6` dove si incontrano, riscrittore spostato in `src/mj/source.ts`), unioni come l'originale e le nostre ovunque come estensione, `(x)(y)`/`(xy+)` (`Sym` `mirrors`/`turns`), nomi delle simmetrie per strati e gruppo della griglia, errori dell'originale con `strict`; i 36 modelli 3D compilano dal loro testo con `strict` e girano, `c8` è un `it` (`tests/mj-original.test.ts`); `conformita-mj.ts` dal testo dell'originale; ADR-0265, kernel 0.10.41 (il seme corretto). Suite intera: 3 file caduti sul numero del kernel nel seme, ora corretto e verdi rifatti da soli, suite non rilanciata. Non fatto: gli errori dei nodi (`Moore` 3D, `path` senza `color`, `d`) restano ad A1-4; `misure.md` non rigenerato; sicurezza: nessuna superficie nuova.
 
 ### T532 · A1-7: le prestazioni del motore allineato — `da fare`
 - Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 1

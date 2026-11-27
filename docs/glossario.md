@@ -1013,6 +1013,13 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `modalità`, `flusso` (per l'interruttore; «il flusso di prima» nello studio è `ours`)
 - **Fermo**: i valori `ours` e `mj`.
 
+### Testo dell'originale
+- **Inglese**: `original`, `originalProgram`, `originalPort`, `originalText`, `ORIGINAL_FILE_RE`
+- **Definizione**: un programma MarkovJunior scritto come lo scrive mxgmn, dove ogni carattere è un simbolo (cifre, `#`, segni), che il compilatore legge così com'è con `compileMjx(…, { original: true })`: traslitterato all'ingresso nei nostri simboli (una cifra `#` e la cifra, un'unione `#` un segno libero, un altro valore che non è una lettera un simbolo numerato da `#10`), anche nei file di testo che legge, con le unioni, i nomi delle simmetrie e gli errori dell'originale (con `strict`). Non è la semantica della corsa (ADR-0265).
+- **Dove vive**: `src/mj/original.ts`, `src/mj/source.ts`, `src/mj/model.ts`
+- **Da non usare**: `dialetto mxgmn`, `formato originale`
+- **Fermo**: l'opzione `original` di `compileMjx`.
+
 ### Campo di potenziale
 - **Inglese**: `field`, `FieldSpec`, `fieldPotential`
 - **Definizione**: in un nodo di regole di un programma, per una lettera, la distanza di ogni cella dalla cella `to` più vicina passando solo per le celle `on` (con `from` è rovesciato: il nodo se ne allontana); il nodo preferisce le corrispondenze che scrivono quella lettera dove il campo scende. Il suo valore in una cella è il potenziale; -1 dove non arriva (ADR-0173).

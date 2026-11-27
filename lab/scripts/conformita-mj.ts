@@ -26,7 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CASES, CASO_SEEDS, casoLine, EXAMPLES, gridHash, REPO_3D, SEEDS_OF_CASES } from '../banco/conformita/casi';
 import { runReference } from '../banco/conformita/riferimento';
-import { OFFICIAL, OFFICIAL_FILES } from '../mjx/official/index';
+import { OFFICIAL_FILES } from '../mjx/official/index';
 import { run, runOn, type Grid3, type Program3 } from '../../src/mj/engine';
 import { compileMjx, mjxIncludes } from '../../src/mj/model';
 import { MJX_LIMITS } from '../../src/mj/run';
@@ -95,9 +95,13 @@ function runCs(xmlFile: string, size: Vec3, seeds: string, steps: number, start?
 
 // ---------------------------------------------------------------- ours
 
-/** Our engine on a model from a grid written in letters (the first value is the empty cell): its letters, steps and end. */
-function runOurs(xml: string, size: Vec3, seed: number, steps: number, start?: string, files?: Record<string, string>): Outcome & { X: number; Y: number; Z: number } {
-  const m = compileMjx(xml, { size, ...(files ? { files } : {}) });
+/**
+ * Our engine on a model from a grid written in letters (the first value is the empty cell): its letters, steps and end. `original`: the
+ * text is the original's, read as it is (T531, `compileMjx(…, { original: true })`); a program of ours (the lab's copies, an example
+ * written for both) says false.
+ */
+function runOurs(xml: string, size: Vec3, seed: number, steps: number, start?: string, files?: Record<string, string>, original = true): Outcome & { X: number; Y: number; Z: number } {
+  const m = compileMjx(xml, { size, ...(files ? { files } : {}), ...(original ? { original: true } : {}) });
   const values = /values="([^"]*)"/.exec(xml)![1].replace(/\s+/g, '');
   if (start === undefined) {
     const r = run(m.program as Program3, seed, steps, MJX_LIMITS, { deadline: 60_000 });
@@ -188,7 +192,7 @@ function programmi(report: Report): void {
       const c = typeof cs === 'string' ? undefined : cs.find((x) => x.seed === seed);
       if (c) examples[e.name][seed] = { steps: c.steps, finished: c.finished, hash: gridHash(c.text) };
       const r = runReference(xml, e.size, seed, e.steps);
-      const o = runOurs(xml, e.size, seed, e.steps);
+      const o = runOurs(xml, e.size, seed, e.steps, undefined, undefined, false);
       md.push(`| ${e.name} | ${seed} | ${c ? `${c.steps}, ${c.finished ? 'finisce' : 'non finisce'}, ${gridHash(c.text)}` : String(cs)} | ${r.steps}, ${r.finished ? 'finisce' : 'non finisce'}, ${gridHash(r.text.trim())} | ${o.steps}, ${o.finished ? 'finisce' : 'non finisce'} |`);
     }
   }
@@ -237,7 +241,6 @@ function modelli(report: Report): void {
   const seeds = (opt('semi') ?? '1,2,3').split(',').map(Number);
   const only = opt('solo')?.split(',');
   const withCs = flag('originale') && has(MJ_DLL);
-  const official = new Map(OFFICIAL.map((m) => [m.name, m]));
   const md = [
     '## I modelli 3D del repository di mxgmn\n',
     `Semi ${seeds.join(', ')}; i passi di models.xml (50 000 se non li dice). «Riferimento = C#»: la stessa griglia voxel per voxel e gli stessi passi su ogni seme. «Noi»: il nostro motore di oggi; ${'`'}TV${'`'} è la distanza fra le quote delle lettere della griglia (0 uguali, 1 niente in comune), la nostra media contro quella del riferimento, accanto a quanto si allontana dalla sua media un seme del riferimento.\n`,
@@ -276,26 +279,16 @@ function modelli(report: Report): void {
     row.csSame = csCell;
     const okRefs = refs.filter((r): r is { text: string; steps: number; finished: boolean; dims: string } => typeof r !== 'string');
     const refCell = okRefs.length ? `${okRefs.map((r) => r.steps).join(', ')}; ${okRefs.every((r) => r.finished) ? 'finisce' : `finisce ${okRefs.filter((r) => r.finished).length}/${okRefs.length}`}` : String(refs[0]);
-    // Ours, from the lab's copy (lab/mjx/official/, the same XML, the resources as text).
-    let oursCell = 'non c’è la copia (risorse da portare in testo)';
+    // Ours, from the original's text as it is (T531: `original`), the resources as text (lab/mjx/official/resources/).
+    let oursCell = '—';
     let oursRun = '—';
     let tvOurs = '—';
     let tvRef = '—';
-    const copy = official.get(m.name);
-    if (copy) {
+    {
       try {
-        const files = copy.files ?? mjxIncludes(xml, (f) => OFFICIAL_FILES[f]);
-        // The original's text first; where our symbols (contract 0.6: a digit alone, "#") refuse it, the lab's copy, ported to them.
-        let text = xml;
-        let ported = '';
-        try {
-          compileMjx(xml, { size: m.size, files });
-        } catch (e) {
-          text = copy.xml;
-          ported = ` (il testo dell’originale no: ${(e as Error).message.slice(0, 60)}; la copia portata ai simboli 0.6 sì)`;
-        }
-        const runs = seeds.map((s) => runOurs(text, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, files));
-        oursCell = (okRefs.length && runs.some((r) => [r.X, r.Y, r.Z].join('x') !== okRefs[0].dims) ? 'gira (un’altra griglia finale)' : 'gira') + ported;
+        const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
+        const runs = seeds.map((s) => runOurs(xml, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, files));
+        oursCell = okRefs.length && runs.some((r) => [r.X, r.Y, r.Z].join('x') !== okRefs[0].dims) ? 'gira (un’altra griglia finale)' : 'gira';
         oursRun = `${runs.map((r) => r.steps).join(', ')}; ${runs.every((r) => r.finished) ? 'finisce' : `finisce ${runs.filter((r) => r.finished).length}/${runs.length}`}`;
         if (okRefs.length) {
           const refH = okRefs.map((r) => histogram(flat(r.text)));
@@ -455,15 +448,13 @@ function varianza(report: Report): void {
       console.log('varianza:', u.name, rows.filter((r) => r.where === u.name).length);
     }
   }
-  // The original's 3D models, in the reference; and the same models in our engine (the lab's copy: its symbols are those of our contract).
-  const official = new Map(OFFICIAL.map((m) => [m.name, m]));
+  // The original's 3D models, in the reference; and the same models in our engine, from the same text (T531: `original`).
   for (const m of repoModels()) {
     const xml = fs.readFileSync(path.join(BENCH, 'mxgmn', `${m.name}.xml`), 'utf8');
     const values = /values="([^"]*)"/.exec(xml)![1].replace(/\s+/g, '');
     measure('mxgmn', m.name, () => seeds.map((s) => flat(runReference(xml, m.size, s, m.steps, OFFICIAL_FILES).text)), values[0], xml);
-    const copy = official.get(m.name);
-    if (copy)
-      measure('mxgmn nel nostro motore', m.name, () => seeds.map((s) => runOurs(copy.xml, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, copy.files ?? {}).letters), values[0], xml);
+    const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
+    measure('mxgmn nel nostro motore', m.name, () => seeds.map((s) => runOurs(xml, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, files).letters), values[0], xml);
   }
   report.json.varianza = rows;
   const groups = [...new Set(rows.map((r) => r.where))];
