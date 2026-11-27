@@ -2,6 +2,7 @@
 
 L'elenco unico (richiesta dell'autore, 04/11): l'orchestratore lo tiene aggiornato e lo riporta in chat. I numeri non cambiano; una risposta toglie la riga.
 
+- **D/T543 (27/11 — le strutture modulari dopo la seconda prova, `domande/T543.md`, 7 domande, consiglio A a tutte; catena M1-M6 ~34 %).**
 - **D/T516 (27/11 — Neon esce dalla prova?, `domande/T516.md`, rapporto `lab/banco/taglie/modelli/neon.md`):** 1) esce per programmazione e kernel senza browser, tetto neon e agy 1 → 2, moltiplicatore per provider (Neon 1,25) e rapporto 3,5 (consiglio); 2) prima una seconda prova di qualità (T478 rifatto, ~5 punti); 3) resta in prova, corrette solo le stime.
 - **D/T522 (risposta dell’autore il 27/11: 1 riprova con un set grande (~144 tasselli), la A attesa migliore; 2 stanze più grandi di 2 × 2; 3 B; 4 A; 5 tetti che il kernel permette di raggiungere; 6-7 tanti set per universo e per pianeta, aggiunti mentre si gioca → T543, poi la catena M ripianificata) (27/11 — le strutture modulari, `domande/T522.md`, studio `docs/design/strutture-modulari.md`, catena M1-M8 ~46 % + prova pagata):** 1) via: B tessitore del kernel (consiglio); 2) vano 2 × 2 caselle e un piano (A); 3) massa decisa dal kernel coi parametri del Cartografo/master (A); 4) prima la sostituzione sui blocchi di luoghi (A); 5) tetti non obbligatori, il torrino li apre (A); 6) set scritti dall'Architetto, neapolis a mano come prova (A + C); 7) pianeti: set per pianeta, terreno del generatore (A).
 
