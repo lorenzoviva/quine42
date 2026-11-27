@@ -276,7 +276,7 @@ export function formDeckAreas(f: Form): AreaMap {
 }
 
 /** How many different seeds a kind of entity has in the world (instances share them: fewer meshes). */
-const SEEDS: Record<string, number> = { tree: 3, bush: 3, rock: 3, pebble: 3, person: 8, animal: 4, beast: 4, building: 1, structure: 1, monument: 2 };
+const SEEDS: Record<string, number> = { tree: 3, bush: 3, rock: 3, pebble: 3, cover: 4, person: 8, animal: 4, beast: 4, building: 1, structure: 1, monument: 2 };
 
 /** The seeds a model of a class has in the world, unless its entry says otherwise (`seedsOf`): a handmade card is tried on each (ADR-0161). */
 export const classSeeds = (classId: string): number => SEEDS[classId] ?? 2;

@@ -33,6 +33,12 @@
 // programs as text) as instances on the loaded places at the start: the frames with the ground of today, then one InstancedMesh per form
 // and place, one per form for the window, one mesh baked per place, at 1, 2 and 4 instances a tile, with and without shadows, the ink of
 // a thing or of the ground; with `--foto` the screenshots (far and near). Only that, as `--blocco`.
+// `--sottobosco --gioco [--foto <cartella>]` (T545, ADR-0269): the game's own cover (the seed's terrains say it, `CoverLayer` draws it),
+// not the lab's: at the start with the camera at its farthest, the frames with the layer hidden and shown, at the same hour, in the same
+// session; the instances, forms and triangles the layer draws, how long it took to make; with `--foto` before and after, far and near.
+// Then the opening with the world on: the instance nearest the wanderer made a thing of the world (`uncover`: the layer draws one less, the
+// thing stands where it stood with its look), and the meadow made denser with a commit (`setCover`, four tufts a tile and more): the frame
+// with it and, past the cap, how many the layer leaves to the farther places.
 //
 // `--strade <universo> [--foto <cartella>]` (T509): roads, sidewalks and rails of a universe of `universes/` near its start, as drawn
 // today and with the curb and the aligned rails of lab/terreno-ricco/strade.ts (photos only).
@@ -495,6 +501,86 @@ automi: ${JSON.stringify(auto)}`);
     await sleep(seconds * 1000);
     rows.push({ ...summary(`oggi con gli automi (acqua a tubi ${auto.cells} celle ogni tick, vento ${auto.windCells} celle a 10 Hz, la superficie)`, await page.eval(TAKE)), auto });
     await page.eval('window.__t459.restore()');
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+  } else if (argv.includes('--sottobosco') && argv.includes('--gioco')) {
+    // The game's cover (T545): the layer of the window hidden, then shown, at the start with the camera at its farthest.
+    const photos = opt('foto');
+    if (photos) fs.mkdirSync(photos, { recursive: true });
+    const layer = (show) => page.eval(`(() => { const c = window.view.cover; c.hidden = !${show}; let tris = 0; for (const m of c.group.children) tris += m.count * (m.geometry.index ? m.geometry.index.count : m.geometry.getAttribute('position').count) / 3; return { drawn: c.drawn, dropped: c.dropped, forms: c.forms, ms: Math.round(c.ms * 10) / 10, tris: Math.round(tris), cap: c.cap }; })()`);
+    const shot = async (name, zoom) => {
+      if (!photos) return;
+      if (zoom) await page.eval(`window.view.zoomTo(${zoom})`);
+      await sleep(1500);
+      const { data } = await page.send('Page.captureScreenshot', { format: 'jpeg', quality: 82 });
+      fs.writeFileSync(path.join(photos, `${name}.jpg`), Buffer.from(data, 'base64'));
+      if (zoom) await page.eval('window.view.zoomTo(15)');
+      await sleep(800);
+    };
+    // The same hour for every photo and frame: the light does not turn between before and after.
+    await page.eval(`(() => { const k = window.quine; k.carpet().active = false; k.daylight = () => 1; })()`);
+    await page.eval('window.view.zoomTo(15)');
+    await settle(page, 60);
+    // Until the layer has drawn (the covers' programs come from the workers) and stopped growing.
+    let made = await layer(true);
+    for (let i = 0, last = -1; i < 120 && (made.drawn === 0 || made.drawn !== last); i++) {
+      last = made.drawn;
+      await sleep(1000);
+      made = await layer(true);
+    }
+    console.log(`
+copertura del gioco: ${made.drawn} istanze in ${made.forms} forme (${made.dropped} lasciate dal tetto di ${made.cap}), ${Math.round(made.tris / 1000)}k triangoli, lo strato fatto in ${made.ms} ms`);
+    await layer(false);
+    await shot('1-senza-copertura', 0);
+    await shot('1-senza-copertura-vicino', 5);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary('la partenza, la camera più lontana, lo strato della copertura nascosto', await page.eval(TAKE)), made });
+    await layer(true);
+    await shot('2-con-la-copertura', 0);
+    await shot('2-con-la-copertura-vicino', 5);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`la copertura del gioco (${made.drawn} istanze, ${made.forms} forme, ${Math.round(made.tris / 1000)}k triangoli)`, await page.eval(TAKE)), made });
+    // Until the layer has been made again and stays (the places are made again in the worker, a few a frame).
+    const steady = async (from) => {
+      let now = await layer(true);
+      for (let i = 0, last = -1; i < 90 && (now.drawn === from.drawn || now.drawn !== last); i++) {
+        last = now.drawn;
+        await sleep(1000);
+        now = await layer(true);
+      }
+      return now;
+    };
+    // An instance becomes a thing of the world (the stone the key lies under): the one nearest the wanderer, as a crate of the seed.
+    const promoted = await page.eval(`(() => {
+      const k = window.quine, w = k.wandererCarpet();
+      let best;
+      for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++)
+        for (const i of k.coverAt(Math.floor(w.x) + dx, Math.floor(w.y) + dy)) {
+          const d = Math.hypot(i.x - w.x, i.y - w.y);
+          if (d > 0.8 && (!best || d < best.d)) best = { ...i, d };
+        }
+      if (!best) return { ok: false };
+      const id = k.uncover(best.x, best.y, 'object.crate', { model: best.model, n: best.n });
+      const f = id !== undefined ? k.ecs.get(id, 'form') : undefined, p = id !== undefined ? k.ecs.get(id, 'pos') : undefined;
+      return { ok: id !== undefined, model: best.model, n: best.n, x: best.x, y: best.y, form: f && { model: f.model, seed: f.seed, yaw: f.yaw }, pos: p && { x: p.x, y: p.y }, still: k.coverAt(best.x, best.y).some((i) => i.model === best.model && i.n === best.n) };
+    })()`);
+    const afterUncover = await steady(made);
+    console.log(`
+un'istanza diventa una cosa: ${JSON.stringify(promoted)}; lo strato ${made.drawn} → ${afterUncover.drawn} istanze`);
+    await shot('3-istanza-promossa-vicino', 4);
+    // The meadow denser with the world on: a commit of the Council, the places made again with it.
+    const denser = await page.eval(`(() => window.quine.setCover('g', [{ model: 'cover-tuft', density: 4 }, { model: 'cover-shrub', density: 0.5 }, { model: 'cover-stones', density: 0.5 }]))()`);
+    const dense = await steady(afterUncover);
+    console.log(`
+il prato più fitto a mondo acceso: ${JSON.stringify(denser)}; ${dense.drawn} istanze in ${dense.forms} forme (${dense.dropped} lasciate dal tetto di ${dense.cap}), ${Math.round(dense.tris / 1000)}k triangoli, lo strato fatto in ${dense.ms} ms`);
+    await shot('4-prato-fitto', 0);
+    await shot('4-prato-fitto-vicino', 5);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`il prato più fitto a mondo acceso (${dense.drawn} istanze, ${dense.forms} forme, ${Math.round(dense.tris / 1000)}k triangoli, ${dense.dropped} oltre il tetto)`, await page.eval(TAKE)), made: dense, promoted, denser, afterUncover });
     await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
     ws.close();
     if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));

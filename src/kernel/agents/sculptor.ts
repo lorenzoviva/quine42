@@ -10,7 +10,7 @@
 import type { Schema } from '../ai/models';
 import { MOCK_STRUCTURE_PROGRAM } from '../ai/mockStructure';
 import { analyse, closedRoomErrors, compositionOf, dwellingErrors, partErrors, varietyError, type Composition } from '../../mj/check';
-import { boxOf, classOf, CLASSES, densityFor, DWELLING, growsByRules, isDwelling, isFortified, isVessel, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
+import { boxOf, classOf, CLASSES, densityFor, DWELLING, groundJoined, growsByRules, isDwelling, isFortified, isVessel, partVoxels, PARTS, RARE_SIZES, sizeOf, sizeRank, SIZE_TIERS, TILE, tilesOf, type AssetClass, type SizeTier } from '../../mj/classes';
 import { Mj3Error, type PaletteEntry, type RunResult, type Vec3 } from '../../mj/engine';
 import { compileMjx, hasMapIn, mapsBackToBox, mjxIncludes, type MjxFiles, type MjxModel } from '../../mj/model';
 import { MJ_PALETTE } from '../../mj/palette';
@@ -228,7 +228,7 @@ export const SPECIALTY_NAMES: Readonly<Record<SculptorSpecialty, string>> = {
 
 /** The classes each trade sculpts, whose lines its section shows (`@@CLASSES@@`): what is worn is an object; actions show none of their own. */
 export const SPECIALTY_CLASSES: Readonly<Record<SculptorSpecialty, readonly string[]>> = {
-  landscaper: ['tree', 'bush', 'rock', 'pebble'],
+  landscaper: ['tree', 'bush', 'rock', 'pebble', 'cover'],
   joiner: ['furniture', 'object'],
   tailor: ['object'],
   figurist: ['person', 'animal', 'beast'],
@@ -244,6 +244,7 @@ const CLASS_SPECIALTY: Readonly<Record<string, SculptorSpecialty>> = {
   bush: 'landscaper',
   rock: 'landscaper',
   pebble: 'landscaper',
+  cover: 'landscaper',
   furniture: 'joiner',
   object: 'joiner',
   person: 'figurist',
@@ -732,7 +733,7 @@ function checkOnce(xml: string, cls: AssetClass, taglia: string | undefined, see
     const result = runMjx(model, seed, { deadline: 8_000, ceilings: WORLD_NODE_LIMITS });
     if (!result.finished) return { xml, model, error: 'il programma non finisce in 8 secondi: ogni crescita deve avere steps' };
     // A structure that grows by rules is a whole of parts on the ground (T370, ADR-0206): what rests on the bottom is one body.
-    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia), groundJoins: procedural(cls, taglia), base });
+    const a = analyse(result, model.program.palette, { grounded: true, minHeight: leastHeight(cls, taglia), groundJoins: groundJoined(cls, taglia), base });
     const notes = [...a.errors];
     // What is worn (T290): its sections tried on the kernel's two bodies, as the validator and the world will.
     if (wornSections(xml).length) notes.push(...wornErrors(xml, { background: symbolName(model.background), palette: model.program.palette }));

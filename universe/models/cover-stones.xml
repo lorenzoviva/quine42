@@ -1,0 +1,19 @@
+<!-- Small stones (T545, ADR-0269: a cover of the seed, written by hand for the lab of T509): two to four stones from points on the ground, a little wider than tall, the top light. -->
+<sequence values="BVsGLD" size="10 10 4" name="Sassolini">
+  <color symbol="G" value="8a8a86" name="pietra"/>
+  <color symbol="L" value="b3b2ab" name="pietra chiara"/>
+  <color symbol="D" value="5b5a56" name="pietra d'ombra"/>
+  <color symbol="V" hidden="True" name="dove può stare un sasso"/>
+  <color symbol="s" hidden="True" name="il cuore di un sasso"/>
+  <ellipsoid at="5 5 0" size="8 8 1" color="V"/>
+  <one in="V" out="s" steps="2"/>
+  <prl in="V" out="s" p="0.03" steps="1"/>
+  <all in="V" out="B"/>
+  <all in="s" out="G"/>
+  <one steps="18">
+    <rule in="GB" out="GG"/>
+    <rule in="B G" out="G G" p="0.5"/>
+  </one>
+  <all in="B G" out="B L"/>
+  <prl in="G" out="D" p="0.2" steps="1"/>
+</sequence>

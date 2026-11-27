@@ -37,6 +37,8 @@ export function fakeHost() {
     region_at: () => undefined,
     air_at: () => true,
     stratum_at: () => undefined,
+    cover_at: () => [],
+    uncover: () => undefined,
     field: () => undefined,
     field_add: () => false,
     wind: () => undefined,

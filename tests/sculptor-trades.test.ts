@@ -40,7 +40,8 @@ const MARKS: Record<Trade, string[]> = {
  * The tokens of § 2.2 of the study (`docs/design/scultori-specializzati.md`): the core and the section of each trade with its new instructions.
  * Measured with countTokens in `misure-s4.md`; here at 3.3 characters a token, what the core and the sections measured (3.28-3.32).
  */
-const BUDGET: Record<Trade, number> = { landscaper: 3650, joiner: 3700, tailor: 3900, figurist: 3800, mason: 3900, coachbuilder: 4000 };
+// The landscaper 50 more since T545 (ADR-0269): the line of its new class, `cover`, in its section (`@@CLASSES@@`).
+const BUDGET: Record<Trade, number> = { landscaper: 3700, joiner: 3700, tailor: 3900, figurist: 3800, mason: 3900, coachbuilder: 4000 };
 const CHARS_PER_TOKEN = 3.3;
 
 /** A Council that keeps what it sent. */
