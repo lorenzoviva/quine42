@@ -1050,9 +1050,16 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Lista dell'originale
 - **Inglese**: `OriginalList`, `originalFor`, `originalTurns`, `scanOriginal`, `catchUp`, `turnStart`
-- **Definizione**: con la semantica dell'originale (`mj`), le corrispondenze di un nodo di regole come le tiene MarkovJunior di mxgmn: pigra, fatta al primo passo con la scansione dell'originale (ogni variante al suo passo, le varianti nell'ordine di `SymmetryHelper`), poi in coda ciò che le celle scritte dall'inizio del **turno** in cui il nodo ha combaciato l'ultima volta rendono nuovo (le marche contro i doppi), una corrispondenza ricontrollata solo quando si estrae. Il turno è una chiamata della radice (dei rami annidati con A1-3): con `mj` ogni turno è un passo della corsa, anche l'ultimo (ADR-0268).
+- **Definizione**: con la semantica dell'originale (`mj`), le corrispondenze di un nodo di regole come le tiene MarkovJunior di mxgmn: pigra, fatta al primo passo con la scansione dell'originale (ogni variante al suo passo, le varianti nell'ordine di `SymmetryHelper`), poi in coda ciò che le celle scritte dall'inizio del **turno** in cui il nodo ha combaciato l'ultima volta rendono nuovo (le marche contro i doppi), una corrispondenza ricontrollata solo quando si estrae. Il turno è una chiamata del **ramo che ha il turno** (la radice per prima, ADR-0273): con `mj` ogni turno è un passo della corsa, anche l'ultimo (ADR-0268).
 - **Dove vive**: `src/mj/engine.ts`
 - **Da non usare**: `insieme delle corrispondenze` (è il nostro, `MatchSet`, ADR-0142), `coda` (la lista non è una coda: si estrae a caso)
+
+### Ramo che ha il turno
+- **Inglese**: `OriginalBranch`, `current.branch`, `originalTurn`, `originalRoot`, `rootFor`, `grid` (il segno della sequenza di una `map`)
+- **Definizione**: con la semantica dell'originale (`mj`), un `<sequence>` o un `<markov>` come il `Branch` di MarkovJunior di mxgmn, e il ramo al lavoro (l'`ip.current` dell'originale), che la corsa chiede a ogni turno al posto della radice. Va avanti dal figlio a cui era (un `markov` dal primo), dà il turno a un figlio ramo, e quando nessun figlio fa niente lo rende al padre con un passo vuoto e ricomincia coi figli, che ripartono solo allora. La `map` e la `wfc` sono rami senza padre: quando i loro nodi finiscono, la corsa è finita (ADR-0273).
+- **Dove vive**: `src/mj/engine.ts`, `src/mj/model.ts` (il segno `grid`)
+- **Da non usare**: `ramo corrente`, `nodo attivo`
+- **Fermo**: il segno `grid` sulla sequenza compilata di una `map`.
 
 ### Testo dell'originale
 - **Inglese**: `original`, `originalProgram`, `originalPort`, `originalText`, `ORIGINAL_FILE_RE`

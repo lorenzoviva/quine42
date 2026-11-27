@@ -183,8 +183,12 @@ export interface PiecesNode {
 
 export type Node3 =
   | ({ type: 'one' | 'all' | 'prl'; rules: Rule3[]; steps?: number; symmetry?: Sym; optional?: boolean } & Inference)
-  /** `gated` (a sequence the compiler makes of a wfc and its nodes, T335): the rest runs only if the first child did something. */
-  | { type: 'sequence' | 'markov'; children: Node3[]; gated?: boolean }
+  /**
+   * `gated` (a sequence the compiler makes of a wfc and its nodes, T335): the rest runs only if the first child did something. `grid` (a
+   * sequence the compiler makes of a map and its nodes, T528): MarkovJunior's MapNode. Under the original's semantics both are a branch
+   * without a parent (MapNode, WFCNode): when their nodes are done, the run is.
+   */
+  | { type: 'sequence' | 'markov'; children: Node3[]; gated?: boolean; grid?: boolean }
   | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann' | 'nocorners'; steps?: number; periodic?: boolean }
   | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }
   /** Each factor is `scale / divide` (T335: 1/3, 5/3), fractions only with `clear`. */
@@ -335,8 +339,9 @@ class Census {
 /**
  * The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. `turn`:
  * where the grid's log was when the turn in progress began (whoever runs the turns says it), MarkovJunior's `ip.first[ip.counter]`.
+ * `branch`: under the original's semantics, the branch that has the turn (`ip.current`, T528): null when none has it, and the run is over.
  */
-let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics; turn?: number } | undefined;
+let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics; turn?: number; branch?: OriginalBranch | null } | undefined;
 
 /** The semantics of the run in progress (T526, ADR-0263): ours unless the run was told `mj`. */
 export const runSemantics = (): Semantics => current?.semantics ?? 'ours';
@@ -2661,7 +2666,9 @@ class PiecesRunner extends Runner {
   private time: number;
   private halo: 'before' | 'written';
   private edge: 'frozen' | 'grow';
-  constructor(node: PiecesNode, alpha: Alphabet, private limits: GridLimits, depth: number, trace?: Trace) {
+  /** Under the original's semantics (T528): a piece runs its nodes as the original's interpreter, a turn at a time to the branch that has it. */
+  private mj: boolean;
+  constructor(node: PiecesNode, alpha: Alphabet, private limits: GridLimits, depth: number, trace?: Trace, mj = false) {
     super(1);
     const [px, py] = Array.isArray(node.size) ? node.size : [];
     if (!isInt(px, 1, 4096) || !isInt(py, 1, 4096)) throw new Mj3Error('pieces: il lato di un pezzo ("piece") vuole due interi (x e y) da 1 a 4096');
@@ -2678,8 +2685,9 @@ class PiecesRunner extends Runner {
     this.halo = node.halo ?? 'before';
     this.edge = node.edge ?? 'grow';
     // The trace sees the node as one step; its nodes are not watched one by one (another grid, a piece at a time).
-    const kids = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, undefined, true));
-    this.root = kids.length === 1 ? kids[0] : new SequenceRunner(kids);
+    const kids = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, undefined, true, mj));
+    this.mj = mj;
+    this.root = mj ? new OriginalBranch(kids, false, false, false) : kids.length === 1 ? kids[0] : new SequenceRunner(kids);
   }
   reset(): void {
     super.reset();
@@ -2738,16 +2746,25 @@ class PiecesRunner extends Runner {
         const cap = own?.steps ?? PIECE_DEFAULTS.steps;
         let steps = 0;
         let done = true;
-        const ctx = { ...(outer ?? {}), g: pg, census: undefined, deadline, turn: 0 };
+        const ctx: NonNullable<typeof current> = { ...(outer ?? {}), g: pg, census: undefined, deadline, turn: 0 };
         current = ctx;
         pieceGuard = { g: pg, mask };
         this.root.reset();
+        // Under the original's semantics the piece's root has the turn first (T528).
+        if (this.mj) ctx.branch = this.root as OriginalBranch;
         const prng = rng.spawn(hash32(base, index));
         try {
           for (;;) {
             if (steps >= cap || Date.now() > deadline) {
               done = false;
               break;
+            }
+            if (this.mj) {
+              // Every turn is a step of the piece, the last one too, in which its nodes are done (Interpreter.Run).
+              if (!originalTurn(ctx, pg, prng)) break;
+              steps++;
+              if (!ctx.branch) break;
+              continue;
             }
             // Where the piece's turn begins in its own log (T527).
             ctx.turn = pg.log.length;
@@ -2937,6 +2954,80 @@ class MarkovRunner extends Runner {
   }
 }
 
+/**
+ * MarkovJunior's Branch under the original's semantics (T528, A1-3; Node.cs, Interpreter.cs), for a sequence, a markov and the branch
+ * of a map or a wfc. The branch at work has the turn (`current.branch`, `ip.current`): the run asks it, not the root, so a branch that has
+ * begun keeps the turn until it is done. A branch goes on from the child it was at (a markov from its first, MarkovNode.Go) and gives the
+ * turn to a child branch before asking it; one that finds nothing to do gives the turn back to its parent and starts anew, its children
+ * with it (Branch.Reset): that turn is a step in which nothing was done, and the parent, asked again, asks it again from its beginning. Its
+ * children start anew only then: a child's `steps` count for as long as the branch lasts. A map's or a wfc's branch has no parent: when
+ * its nodes are done, the run is. A wave without a solution gives the turn back without being done (WFCNode.Go: the turn stays where it
+ * was), and, asked again, tries again.
+ */
+class OriginalBranch extends Runner {
+  /** The child it is at (`Branch.n`). */
+  private n = 0;
+  /** The first child of a gated branch did something since the branch started (the wave has a solution). */
+  private opened = false;
+  /** Who gets the turn back when this branch is done: null for the root and for a branch that `closes`. */
+  parent: OriginalBranch | null = null;
+  /** `markov`: from its first child at every step. `closes`: a map's or a wfc's branch (no parent). `gated`: a wfc's (its first child the wave). */
+  constructor(private nodes: Runner[], private markov: boolean, readonly closes: boolean, private gated: boolean) {
+    super();
+    for (const c of nodes) if (c instanceof OriginalBranch) c.parent = c.closes ? null : this;
+  }
+  reset(): void {
+    super.reset();
+    this.n = 0;
+    this.opened = false;
+    for (const c of this.nodes) c.reset();
+  }
+  rewind(): void {
+    super.rewind();
+    this.n = 0;
+    this.opened = false;
+    for (const c of this.nodes) c.rewind();
+  }
+  go(g: Grid3, rng: RunRandom): boolean {
+    const ctx = current!;
+    if (this.markov) this.n = 0;
+    for (; this.n < this.nodes.length; this.n++) {
+      const node = this.nodes[this.n];
+      if (node instanceof OriginalBranch) ctx.branch = node;
+      if (node.go(g, rng)) {
+        if (this.n === 0) this.opened = true;
+        return true;
+      }
+      // A wave without a solution: the branch is not done, and the turn stays where it is.
+      if (this.gated && this.n === 0 && !this.opened) return false;
+    }
+    // `ip.current = ip.current.parent`: the turn's branch is this one, but for a wave without a solution that kept it.
+    ctx.branch = ctx.branch ? ctx.branch.parent : null;
+    if (keeping) this.rewind();
+    else this.reset();
+    return false;
+  }
+}
+
+/** What the original's interpreter runs (Interpreter.Load): a branch, or the node inside a markov; a lone map or wfc is a branch of its own. */
+function originalRoot(r: Runner, node: Node3): OriginalBranch {
+  if (r instanceof OriginalBranch) return r;
+  if (node.type === 'map' || node.type === 'wfc') return new OriginalBranch([r], false, true, node.type === 'wfc');
+  return new OriginalBranch([r], true, false, false);
+}
+
+/**
+ * One turn of the original's interpreter (Interpreter.Run, T528): the branch that has the turn goes, from where the turn begins in the log.
+ * False if no branch has it any more: the run was over before this turn.
+ */
+function originalTurn(ctx: NonNullable<typeof current>, g: Grid3, rng: RunRandom): boolean {
+  const at = ctx.branch;
+  if (!at) return false;
+  ctx.turn = g.log.length;
+  at.go(g, rng);
+  return true;
+}
+
 /** A leaf node, seen from outside: it asks nothing of the run (no random numbers, no writes), so a watched run is the same run. */
 class WatchedRunner extends Runner {
   constructor(private inner: Runner, private node: Node3, private watch: RunWatch) {
@@ -2974,8 +3065,9 @@ export function describe(node: Node3): string | undefined {
 
 type Trace = Array<{ runner: Runner; what: string }>;
 
-function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace, watch?: RunWatch, inPieces = false): Runner {
-  const r = compileNode(node, alpha, limits, depth, trace, watch, inPieces);
+/** `mj`: the runners of the original's semantics where they are another kind (its branches, T528): what a run with the switch on compiles. */
+function compile(node: Node3, alpha: Alphabet, limits: GridLimits, depth = 0, trace?: Trace, watch?: RunWatch, inPieces = false, mj = false): Runner {
+  const r = compileNode(node, alpha, limits, depth, trace, watch, inPieces, mj);
   const what = trace && node && typeof node === 'object' ? describe(node) : undefined;
   if (what) trace!.push({ runner: r, what });
   return watch && node.type !== 'sequence' && node.type !== 'markov' ? new WatchedRunner(r, node, watch) : r;
@@ -2989,7 +3081,7 @@ const NOT_IN_PIECES: Partial<Record<Node3['type'], string>> = {
   pieces: 'pieces non va dentro un altro pieces',
 };
 
-function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace, watch?: RunWatch, inPieces = false): Runner {
+function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: number, trace?: Trace, watch?: RunWatch, inPieces = false, mj = false): Runner {
   if (depth > 16) throw new Mj3Error('programma troppo annidato');
   if (!node || typeof node !== 'object') throw new Mj3Error('nodo non valido');
   if (inPieces && NOT_IN_PIECES[node.type]) throw new Mj3Error(`dentro pieces: ${NOT_IN_PIECES[node.type]}`);
@@ -3017,11 +3109,21 @@ function compileNode(node: Node3, alpha: Alphabet, limits: GridLimits, depth: nu
     case 'convchain':
       return new ConvChainRunner(node, alpha);
     case 'pieces':
-      return new PiecesRunner(node, alpha, limits, depth, trace);
+      return new PiecesRunner(node, alpha, limits, depth, trace, mj);
     case 'sequence':
     case 'markov': {
       if (!Array.isArray(node.children) || !node.children.length) throw new Mj3Error(`nodo ${node.type} senza figli`);
-      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch, inPieces));
+      const children = node.children.map((c) => compile(c, alpha, limits, depth + 1, trace, watch, inPieces, mj));
+      if (mj) {
+        // MarkovJunior's branches (T528): a map's or a wfc's sequence is their branch, its first child their step; a lone map or wfc is a
+        // branch of its own, without nodes; neither has a parent.
+        const own = node.type === 'sequence' && (node.gated === true || node.grid === true);
+        const nodes = children.map((r, i) => {
+          const c = node.children[i];
+          return (c.type === 'map' || c.type === 'wfc') && !(own && i === 0) ? new OriginalBranch([r], false, true, c.type === 'wfc') : r;
+        });
+        return new OriginalBranch(nodes, node.type === 'markov', own, node.gated === true);
+      }
       return node.type === 'sequence' ? new SequenceRunner(children, node.gated === true) : new MarkovRunner(children);
     }
     default:
@@ -3122,8 +3224,10 @@ function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: n
   root.reset();
   const rng = randomFor(opts.semantics, seed);
   // Under the original's semantics every turn is a step (Interpreter.Run), the last one too, in which the root finds nothing and the run
-  // ends (T527, ADR-0268); in ours a step is a turn in which something was done.
+  // ends (T527, ADR-0268); in ours a step is a turn in which something was done. The turn goes to the branch that has it, the root first
+  // (T528): the run ends when none has it.
   const everyTurn = opts.semantics === 'mj';
+  if (everyTurn && current) current.branch = root as OriginalBranch;
   let steps = 0;
   let late = false;
   let ended = false;
@@ -3135,11 +3239,17 @@ function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: n
   opts.watch?.start(g);
   const ctx = current;
   while (steps < maxSteps) {
-    // Where the turn begins in the log: the nodes that match in it look at the changes from here at their next step (T527).
-    if (ctx !== undefined) ctx.turn = g.log.length;
     let went: boolean;
     try {
-      went = root.go(g, rng);
+      if (everyTurn) {
+        // A turn of the original's interpreter: whatever it did, the run goes on while a branch has the turn.
+        originalTurn(ctx!, g, rng);
+        went = ctx!.branch !== null;
+      } else {
+        // Where the turn begins in the log: the nodes that match in it look at the changes from here at their next step (T527).
+        if (ctx !== undefined) ctx.turn = g.log.length;
+        went = root.go(g, rng);
+      }
     } catch (e) {
       // A search out of time: the run ends here, not finished (T334).
       if (!(e instanceof Mj3Late)) throw e;
@@ -3189,6 +3299,13 @@ export function hasPieces(node: Node3 | undefined): boolean {
   return (node.type === 'sequence' || node.type === 'markov') && Array.isArray(node.children) && node.children.some(hasPieces);
 }
 
+/** The runner of a program's root: under the original's semantics the branch the interpreter runs (T528), else the root's own. */
+function rootFor(program: Node3, alpha: Alphabet, limits: GridLimits, trace?: Trace, watch?: RunWatch, semantics?: Semantics): Runner {
+  const mj = semantics === 'mj';
+  const root = compile(program, alpha, limits, 0, trace, watch, false, mj);
+  return mj ? originalRoot(root, program) : root;
+}
+
 /** Runs a program from an empty box. Throws Mj3Error if the program does not compile. */
 export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLimits = MODEL_LIMITS, opts: RunOptions = {}): RunResult & { snapshots?: Snapshot[] } {
   const t0 = Date.now();
@@ -3197,7 +3314,8 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
   const [X, Y, Z] = checkSize(p?.size, limits);
   const alpha = alphabetOf(p);
   const trace: Trace = [];
-  const root = compile(p.program, alpha, limits, 0, trace, opts.watch);
+  const semantics = semanticsOf(p, opts);
+  const root = rootFor(p.program, alpha, limits, trace, opts.watch, semantics);
   const g: Grid3 = { X, Y, Z, cells: new Uint8Array(X * Y * Z), alphabet: alpha.codes, log: [], epoch: 0 };
   if (typeof p.ground === 'string' && p.ground.length === 1) {
     const v = alpha.index(p.ground);
@@ -3207,7 +3325,7 @@ export function run(p: Program3, seed: number, maxSteps = 20000, limits: GridLim
   const soilAt = typeof p.soil === 'string' && p.soil.length === 1 ? (p.soilAt && p.soilAt > 0 && p.soilAt < Z ? p.soilAt : 0) : -1;
   if (soilAt >= 0) g.cells.fill(alpha.index(p.soil!), soilAt * X * Y, (soilAt + 1) * X * Y);
   if (typeof p.origin === 'string' && p.origin.length === 1) g.cells[(X >> 1) + (Y >> 1) * X + (p.originAt === 'centre' ? (Z >> 1) * X * Y : Math.max(0, soilAt) * X * Y)] = alpha.index(p.origin);
-  return exec(root, g, seed, maxSteps, t0, trace, { ...opts, semantics: semanticsOf(p, opts) });
+  return exec(root, g, seed, maxSteps, t0, trace, { ...opts, semantics });
 }
 
 /**
@@ -3218,11 +3336,12 @@ export function runOn(grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'pro
   const t0 = Date.now();
   const alpha = alphabetOf(p, grid.alphabet);
   const trace: Trace = [];
-  const root = compile(p.program, alpha, limits, 0, trace, opts.watch);
+  const semantics = semanticsOf(p, opts);
+  const root = rootFor(p.program, alpha, limits, trace, opts.watch, semantics);
   grid.alphabet = alpha.codes;
   grid.log = [];
   grid.epoch++;
-  return exec(root, grid, seed, maxSteps, t0, trace, { ...opts, semantics: semanticsOf(p, opts) });
+  return exec(root, grid, seed, maxSteps, t0, trace, { ...opts, semantics });
 }
 
 /**
@@ -3238,20 +3357,22 @@ export class Stepper {
   steps = 0;
   private root: Runner;
   private rng: RunRandom;
-  private context: { g: Grid3; census?: Census; semantics?: Semantics; turn?: number };
+  private context: NonNullable<typeof current>;
   /** Past this many writes in the log, between two ticks the log starts again and the nodes scan the grid once: memory stays bounded. */
   private logCap: number;
   constructor(readonly grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program' | 'semantics'>, seed: number, limits: GridLimits = { side: 4096, cells: 64_000_000 }) {
     const alpha = alphabetOf(p, grid.alphabet);
-    this.root = compile(p.program, alpha, limits);
+    const semantics = semanticsOf(p);
+    this.root = rootFor(p.program, alpha, limits, undefined, undefined, semantics);
     grid.alphabet = alpha.codes;
     grid.log = [];
     grid.epoch++;
-    const semantics = semanticsOf(p);
     this.rng = randomFor(semantics, seed);
     this.context = { g: grid, ...(semantics === 'mj' ? { semantics } : {}) };
     this.logCap = Math.max(4096, grid.cells.length * 4);
     this.root.reset();
+    // Under the original's semantics the root has the turn first (T528).
+    if (semantics === 'mj') this.context.branch = this.root as OriginalBranch;
   }
   /** Goes on with the run for at most `maxSteps` steps: how many it made (fewer when the program has finished). */
   advance(maxSteps: number): number {
@@ -3283,8 +3404,19 @@ export class Stepper {
     keeping = again;
     let made = 0;
     try {
-      if (again) this.root.rewind();
+      const mj = this.context.semantics === 'mj';
+      if (again) {
+        this.root.rewind();
+        if (mj) this.context.branch = this.root as OriginalBranch;
+      }
       while (made < maxSteps) {
+        if (mj) {
+          // A turn of the original's interpreter (T528): a step, but for the last one, in which the run ends (as a step of ours, in which
+          // something was done: the root's last turn changes nothing).
+          if (!originalTurn(this.context, this.grid, this.rng) || !this.context.branch) break;
+          made++;
+          continue;
+        }
         // Where the turn begins in the log (T527): a step of the Stepper is a turn of the run.
         this.context.turn = this.grid.log.length;
         if (!this.root.go(this.grid, this.rng)) break;
