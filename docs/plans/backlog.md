@@ -6983,7 +6983,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 > Risposte in fondo a `docs/pipeline/domande/T509.md`. Studio: `dossier T509`, `docs/design/terreno-ricco.md`, `lab/terreno-ricco/`. Tutto nel contratto 0.10, una `Z` per task che tocca `src/kernel/`; i concetti nuovi (copertura, rientro, scavo, modello allineato, braccio, deriva, grana) con la loro voce nel glossario.
 
-### T545 · C1 La copertura dei terreni, aperta a mondo acceso — `da fare`
+### T545 · C1 La copertura dei terreni, aperta a mondo acceso — `fatto` (`631f0ac5`)
 - Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
 - Step: 45
 - Contesto: § 2 e § 7 (C1) dello studio; D1 A, D2 A. In più l'autore: il kernel resta **aperto** ad aggiungere a mondo acceso altri oggetti o tipi di copertura sul terreno («cercare la chiave sotto un sasso»: deve sempre poter esserci un oggetto o una tipologia in più).
@@ -6991,6 +6991,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: lettura difensiva, spargimento deterministico, le esclusioni, il tetto, l'aggiunta a mondo acceso, l'istanza promossa a cosa.
 - Browser: sì, foto prima e dopo, `misura-frame.mjs --sottobosco`.
 - Quando è fatto: test e typecheck verdi, ADR, foto e misure del frame nell'esito.
+- Esito: la copertura dei terreni (C1, ADR-0268, kernel 0.10.43) con l'apertura a mondo acceso: un tipo in più con un commit tramite Referente e Cartografo, un'istanza che diventa una cosa con `uncover` (anche da Lua); il seme cambia aspetto e l'impronta è aggiornata con la ragione (senza copertura le mesh sono uguali a prima); rune escluse dalla copertura dopo la prova nel browser; manca C2 (Paesaggista, Genesi, riparazione dal nome, schemi del Cartografo e del Referente per nascondere una cosa); la cosa promossa ha scala 1 invece di 0,8-1,2; multigiocatore non provato nel browser; budget di token del Paesaggista alzato di 50; sicurezza: nessuna superficie nuova (`ChunkView.uncovered` letto senza fidarsi, `world.uncover` al più 24 per luogo, niente rotte nuove).
 
 ### T546 · C2 Il Paesaggista della copertura — `da fare`
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
