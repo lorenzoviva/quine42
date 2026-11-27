@@ -1,5 +1,8 @@
 # Il prototipo delle strutture modulari (T522)
 
+> La **seconda prova** (T543, 27/11: il set grande di 151 tasselli in tre stili, la massa come programma MarkovJunior, la via A contro la B, la
+> ricucitura dopo l'onda) è in [`grande/`](grande/README.md); lo studio aggiornato nel § 10.2 e nel § 11. Qui resta la prima, com'era.
+
 Lo studio è [`docs/design/strutture-modulari.md`](../../docs/design/strutture-modulari.md). Qui un set di **tasselli** nello stile delle palazzine
 di `neapolis`, la lettura delle loro facce dai voxel come la farebbe il kernel, il **tessuto** a WFC sopra 3 × 3 luoghi (col risolutore della
 `wfc` di MarkovJunior, `WfcSolver` di `src/mj/wfc.ts`), la regola 10 sul grafo dei tasselli e col cammino del kernel (`walkIn`), le foto. Nessun
