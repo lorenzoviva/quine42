@@ -2396,6 +2396,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Dove vive**: `docs/fasi.md`
 - **Da non usare**: `tappa` (per lo step)
 
+### Panoramica
+- **Inglese**: `overview`, `OVERVIEW_LIMITS`, `overviewProblems`, `DOC_LEVELS`
+- **Definizione**: il livello 1 della documentazione (ADR-0266): `docs/panoramica.md`, il quadro del progetto in due pagine, da leggere per primo, sopra il nucleo (`AGENTS.md`, livello 2) e i dettagli (livello 3); stabile, senza versioni né task, con una riga per ogni regola inviolabile e un link per ogni sezione dei dettagli, che `tests/documenti.test.ts` controlla. I documenti che si cercano e non si leggono (ADR, backlog, diario della pipeline) sono i **registri**.
+- **Dove vive**: `docs/panoramica.md`, `tools/documenti/livelli.ts`
+- **Da non usare**: `sommario`, `riassunto` (per la panoramica)
+
 ### Scala aurea
 - **Inglese**: `scale`
 - **Definizione**: i numeri di Fibonacci e di Lucas e le potenze di φ da cui HUD e pannelli prendono spazi, corpi, interlinea e larghezze (nel CSS i token `--space-N`, `--text-N`, `--measure-N`, `--leading-*`).
@@ -2453,6 +2459,7 @@ Stessa parola, concetti diversi: il problema che confonde di più, più dei sino
 | fase / `phase` | dello sviluppo; del giorno (`DayPhase`); di un'onda (`src/audio/sfx.ts`); le F0-F8 del piano dello step 9, nell'archivio | «Fase» è la prima, con il suo numero romano |
 | ritmo / `pace` | del mondo, del master (`WorldPace`, il messaggio `pace`); per viandante, quanto spesso si può chiedere (`Pace` di `src/session/server.ts` e di `server/rates.ts`); il passo di chi cammina (`paceOf`, `paceTick` del kernel) | «Ritmo del mondo», «ritmo per viandante», «passo» |
 | step / `step` | obiettivo dello sviluppo; il passo di un calcolo nel codice (`archive.ts`); una sessione del metodo di prima, negli ADR e nei commenti («step 8.2B») | «Step» è il primo, con il suo numero |
+| nucleo | `AGENTS.md`, il livello 2 della documentazione (ADR-0120, ADR-0266); la parte comune del prompt dello Scultore (ADR-0239) | «Nucleo» è il primo; il secondo «nucleo dello Scultore» |
 | letto | mobile dove ci si riposa (`mobile`); fondo sotto l'acqua (`Relief.bed`, `ChunkReliefData`) | il contesto («il letto del mare / del fiume») |
 
 ## Le scelte fatte
