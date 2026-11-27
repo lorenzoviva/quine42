@@ -7009,12 +7009,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì. Quando è fatto: test verdi, foto.
 - Esito: campo `TerrainDef.grain` `{color, density}` letto senza fidarsi (`src/kernel/grain.ts`), voluto dal validatore e facoltativo nello schema dei terreni della Genesi; riparazione dal nome per gli universi di prima senza scrivere niente (brecciolino di neapolis, binari di mesa/neapolis/orichalcum; seme invariato); attributo `grain` di 4 byte solo sulle cime con la grana, nessun triangolo in più, uguale nel worker; shader `MAT.ground` (`addGrain`); ADR-0266, glossario, architettura, AGENTS.md, kernel 0.10.42. Suite intera: 3 fallimenti solo per la versione nel `universe.json` del seme, corretti e riprovati file per file; suite intera non rilanciata dopo; typecheck verde. Non provati: la prova pagata col Cartografo vero, lo zoom più lontano (sfumatura contro lo sfarfallio), l'impronta del terreno non rilanciata.
 
-### T548 · C4 Il rientro dei terreni, il cordolo e le strade larghe — `da fare`
+### T548 · C4 Il rientro dei terreni, il cordolo e le strade larghe — `fatto` (`0d698bf3`, via T555)
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
 - Step: 45
 - Contesto: § 3 e § 7 (C4); D3 A per strade e marciapiedi. In più l'autore: nelle foto la strada asfaltata è larga una casella, **le strade vanno ampie**.
 - Cosa fare: `TerrainDef.inset` (−0,2..+0,2), `groundY` e ciò che vi sta sopra, la Genesi che lo scrive, la riparazione dal nome; nessun effetto sul kernel (un test che lo prova sulla rete). **Le strade larghe**: dove una strada (non un sentiero) viene dal layout o dai timbri, larga 2-4 caselle col marciapiede ai lati (dal terreno o dall'ambiente, letta senza fidarsi), solo nei piani nuovi col loro segno, la regola 10 rispettata (`rete-gradini.ts` prima e dopo); l'esito dice che cosa cambia in `neapolis` e `sidera`.
 - Browser: sì (`neapolis`). Quando è fatto: test verdi, foto della strada larga col cordolo.
+- Esito: fuso nel base da T555 dopo T545: `TerrainDef.inset` col cordolo e le strade larghe 2-4 caselle (`widenStreets`, segno `streets`), ADR-0271, kernel 0.10.45 (alzato all'integrazione per il doppione con T552); visto nel browser su una copia di `neapolis` offline; non provati multigiocatore e Cartografo vero.
 
 ### T549 · C5 I modelli allineati: binari, staccionate, siepi, tubi — `da fare`
 - Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2

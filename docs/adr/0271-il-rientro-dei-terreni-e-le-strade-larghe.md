@@ -59,7 +59,7 @@ casella: **le strade vanno ampie**. In `neapolis` la via con cui il layout scava
 - `sidera`: niente. La sua via è una «passerella» (non una strada), il suo «asfalto bagnato» è il suolo di base, nessun terreno ha un nome che
   rientra.
 - Il seme non cambia: la sua via è un «sentiero»; nessuna mesh dei suoi luoghi cambia.
-- Contratto: aggiuntivo (kernel 0.10.44). Un piano senza segno resta com'era, un terreno senza rientro si disegna come prima tranne ciò che il
+- Contratto: aggiuntivo (kernel 0.10.45). Un piano senza segno resta com'era, un terreno senza rientro si disegna come prima tranne ciò che il
   nome ripara.
 - Non fatto: i modelli allineati sopra la strada (le strisce, i binari a bracci: C5), lo scavo del layout (C6), il marciapiede rialzato
   attorno alle piazze; un piano di prima non si allarga mai.

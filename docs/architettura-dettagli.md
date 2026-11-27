@@ -1226,7 +1226,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   `MAX_UNCOVERED` a luogo, rimessa a ogni caricamento con l'origine `<luogo>#u…`), mai più disegnata come copertura; ai client sottili solo le
   chiavi (`ChunkView.uncovered`, `readUncoveredKeys`). Da Lua `world.cover_at` e `world.uncover`. `tests/copertura.test.ts`; le foto e le
   misure del frame in `docs/catture/T545/`, `node lab/scripts/misura-frame.mjs <porta> --sottobosco --gioco`.
-- **Il rientro dei terreni e il cordolo** (ADR-0271, T548, C4 di `docs/design/terreno-ricco.md`, kernel 0.10.44): quanto più in basso o più
+- **Il rientro dei terreni e il cordolo** (ADR-0271, T548, C4 di `docs/design/terreno-ricco.md`, kernel 0.10.45): quanto più in basso o più
   in alto la cima di un terreno del suolo si disegna, in caselle, fra −0,2 e 0,2, sempre sotto un livello (0,25): `TerrainDef.inset`, letto
   senza fidarsi (`readInset`, `src/kernel/inset.ts`), voluto dal validatore (`insetErrors`), facoltativo nello schema dei terreni della
   Genesi; mai sul suolo di base `g`, il livello del mondo. Un terreno che non lo dice prende quello del suo nome (`insetByName`: la strada,
