@@ -6771,13 +6771,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: testo e selezione allineati in orizzontale e in verticale sul forte dell'autore.
 - Esito: editor MJ: i token dello strato colorato hanno la larghezza delle loro lettere, il ▦ e il colore esadecimale non occupano spazio, il testo colorato è il sorgente lettera per lettera, lo strato segue lo scorrimento con una traslazione, il clic cerca il chip prima che la barra degli attributi sposti l'editor; test nuovo `tests/editor-allineamento.test.ts`; non provati altri font, lo zoom del browser e lo scorrimento del SoundLab
 
-### T518 · Editor MJ: pulsante «Render», interruttore dell'auto-render, la corsa che non blocca e prende l'ultima modifica — `da fare`
+### T518 · Editor MJ: pulsante «Render», interruttore dell'auto-render, la corsa che non blocca e prende l'ultima modifica — `fatto` (`560c2800`)
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2
 - Contesto: l'autore il 26/11: il forte impiega più di 30 s a disegnarsi nell'editor; ogni lettera rifà il rendering e blocca l'interfaccia; le modifiche fatte durante una corsa vengono applicate in ritardo e sbagliate (A → corsa A mentre B → finisce A, poi C → corsa di B).
 - Cosa fare: la corsa in un worker annullabile; un pulsante «Render» e un interruttore dell'auto-render (ricordato); con l'auto-render acceso una corsa nuova annulla quella in corso e parte dal testo di **ora** (debounce); l'interfaccia resta reattiva; lo stato della corsa visibile.
 - Test: la coda delle corse come funzione pura (modifica, annulla, parte l'ultima).
 - Browser: sì (il forte dell'autore).
 - Quando è fatto: modificare il forte durante una corsa non blocca e il risultato è sempre dell'ultimo testo.
+- Esito: l'editor MJ disegna in un worker annullabile governato da una coda pura (`lab/editor/renderqueue.ts`, 10 test): «▶ Render» parte dal testo di ora, «Auto» (ricordato) dopo 350 ms senza tasti e ferma la corsa in corso, «■ Ferma», lo stato della corsa visibile, un risultato vecchio non si mostra mai; una griglia grande tiene pochi fotogrammi (`snapshotsFor`), così il forte dell'autore passa da oltre 30 s a circa 14 s; i tasti di uno stesso fotogramma sono una modifica sola. Manca: la colorazione del codice costa ancora 200-400 ms a battuta sul forte (servirebbe colorare solo le righe visibili, task a parte). npm test e typecheck verdi.
 
 ### T519 · Editor MJ: rifare solo ciò che è cambiato — `da fare`
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 3

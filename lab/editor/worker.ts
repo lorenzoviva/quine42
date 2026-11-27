@@ -4,6 +4,7 @@ import { runMjx } from '../../src/mj/run';
 import { meshVoxels, type MeshData } from '../../src/mj/mesh';
 import { extractLineFromError } from './syntax';
 import { buildPlaybackTracks, type PlaybackTrack } from './playback';
+import { snapshotsFor } from './renderqueue';
 
 export interface EditorBuildRequest {
   id: number;
@@ -67,7 +68,8 @@ self.onmessage = (ev: MessageEvent<EditorBuildRequest>) => {
     const m = compileMjx(q.xml, { ...(q.size ? { size: q.size } : {}), ...(q.files ? { files: q.files } : {}) });
     const r = runMjx(m, q.seed, {
       deadline: 20_000,
-      snapshots: 60,
+      // A large grid keeps a few frames: each is a copy of the grid with its mesh, and 79 of the fort were 81 s (T518).
+      snapshots: snapshotsFor(m.program.size[0] * m.program.size[1] * m.program.size[2]),
       ...(q.steps ? { maxSteps: q.steps } : {}),
     });
 

@@ -14,7 +14,8 @@ import {
   parseTagAtCursor,
   type ParsedTagAtCursor,
 } from './syntax';
-import type { EditorBuildRequest, EditorBuildResponse } from './worker';
+import type { EditorBuildRequest, EditorBuildResponse, EditorBuildSuccess } from './worker';
+import { renderQueue, renderStatus, renderStep, type RenderAction, type RenderEvent } from './renderqueue';
 import { Bloom } from '../../src/render/bloom';
 import { CARTOON, PHASES } from '../../src/render/cartoon';
 import { glowing } from '../../src/render/materials';
@@ -85,32 +86,44 @@ const TEMPLATE_CUBE = `<!-- Cubo elementare con gradiente di colore -->
 
 // ------------------------------------------------------------------ Worker Pool
 
+// A run cannot be interrupted inside the worker: cancelling one ends the worker, and the next run starts a new one (T518).
 class WorkerClient {
-  private worker: Worker;
-  private currentId = 0;
-  private pending: Map<number, (res: EditorBuildResponse) => void> = new Map();
+  private worker: Worker | null = null;
+  private pending: Map<number, (res: EditorBuildResponse | null) => void> = new Map();
 
-  constructor() {
-    this.worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-    this.worker.onmessage = (ev: MessageEvent<EditorBuildResponse>) => {
+  private spawn(): Worker {
+    const w = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+    w.onmessage = (ev: MessageEvent<EditorBuildResponse>) => {
       const handler = this.pending.get(ev.data.id);
       if (handler) {
         this.pending.delete(ev.data.id);
         handler(ev.data);
       }
     };
+    w.onerror = (ev) => {
+      ev.preventDefault();
+      this.cancel();
+    };
+    return w;
   }
 
-  build(req: Omit<EditorBuildRequest, 'id'>): Promise<EditorBuildResponse> {
-    const id = ++this.currentId;
+  /** The result of run `id`, or null if it was cancelled. */
+  build(id: number, req: Omit<EditorBuildRequest, 'id'>): Promise<EditorBuildResponse | null> {
+    this.worker ??= this.spawn();
+    const w = this.worker;
     return new Promise((resolve) => {
       this.pending.set(id, resolve);
-      this.worker.postMessage({ ...req, id } satisfies EditorBuildRequest);
+      w.postMessage({ ...req, id } satisfies EditorBuildRequest);
     });
   }
 
-  get latestId() {
-    return this.currentId;
+  /** Ends every run under way. */
+  cancel(): void {
+    this.worker?.terminate();
+    this.worker = null;
+    const waiting = [...this.pending.values()];
+    this.pending.clear();
+    for (const resolve of waiting) resolve(null);
   }
 }
 
@@ -484,6 +497,10 @@ const tagInspectorBar = $('tag-inspector-bar');
 const tagInspectorName = $('tag-inspector-name');
 const tagInspectorAttrs = $('tag-inspector-attrs');
 const loadingOverlay = $('loading-overlay');
+const loadingText = $('loading-text');
+const renderStatusEl = $('render-status');
+const btnRenderStop = $('btn-render-stop');
+const autoRenderInput = $<HTMLInputElement>('auto-render');
 const viewportInfo = $('viewport-info');
 const viewportCoords = $('viewport-coords');
 
@@ -536,7 +553,6 @@ const playbackFpsSelect = $<HTMLSelectElement>('playback-fps-select');
 const playbackController = new PlaybackController();
 let currentPalette: Record<string, PaletteEntry> = {};
 
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function updateGutter(lineCount: number, errorLine?: number) {
   gutter.innerHTML = '';
@@ -636,7 +652,6 @@ function insertAttrIntoCurrentTag(parsed: ParsedTagAtCursor, attrName: string, d
   codeInput.setSelectionRange(newCursor, newCursor);
 
   onCodeChange();
-  void triggerBuild();
   updateCursorPos();
 }
 
@@ -704,91 +719,152 @@ function renderDiagnostics(
   }
 }
 
-async function triggerBuild() {
-  const xml = codeInput.value;
+// ------------------------------------------------------------------ The runs (T518)
+
+// With the auto-render on, an edit runs after a pause in the typing and a new run cancels the one under way; off, only «Render» runs.
+// The queue (`renderqueue.ts`) decides; here the worker, the timers and the screen.
+const AUTO_RENDER_KEY = 'quine.editor.autoRender';
+const readAutoRender = (): boolean => {
+  try {
+    return localStorage.getItem(AUTO_RENDER_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+};
+let renders = renderQueue<string>(readAutoRender());
+let renderWake: ReturnType<typeof setTimeout> | null = null;
+let renderClock: ReturnType<typeof setInterval> | null = null;
+/** Fit the camera to the next model shown (a model just opened). */
+let fitNextRender = false;
+
+function dispatchRender(e: RenderEvent<string>): RenderAction<string>[] {
+  const { state, actions } = renderStep(renders, e);
+  renders = state;
+  for (const act of actions) {
+    if (act.kind === 'cancel') workerClient.cancel();
+    else if (act.kind === 'start') queueMicrotask(() => void runBuild(act.id, act.request));
+  }
+  if (renderWake) clearTimeout(renderWake);
+  renderWake = null;
+  if (renders.due !== null) renderWake = setTimeout(() => dispatchRender({ kind: 'tick', now: performance.now() }), Math.max(0, renders.due - performance.now()));
+  showRenderStatus();
+  return actions;
+}
+
+function showRenderStatus() {
+  const st = renderStatus(renders, performance.now());
+  renderStatusEl.textContent = st.label;
+  renderStatusEl.dataset.phase = st.phase;
+  loadingOverlay.classList.toggle('hidden', st.phase !== 'running');
+  loadingText.textContent = st.phase === 'running' ? st.label : '';
+  btnRenderStop.classList.toggle('hidden', st.phase !== 'running');
+  if (st.phase === 'running' && !renderClock) renderClock = setInterval(showRenderStatus, 200);
+  else if (st.phase !== 'running' && renderClock) {
+    clearInterval(renderClock);
+    renderClock = null;
+  }
+}
+
+/** «Render»: now, from the text of now. */
+function renderNow(opts: { fit?: boolean } = {}) {
+  if (opts.fit) fitNextRender = true;
+  dispatchRender({ kind: 'render', now: performance.now(), request: codeInput.value });
+}
+
+async function runBuild(id: number, xml: string) {
+  if (renders.running?.id !== id) return;
   const seed = parseInt(seedInput.value, 10) || 1;
   const vpt = parseInt(vptSelect.value, 10) || 20;
-  currentVpt = vpt;
 
-  // Immediate synchronous validation; what it imports comes from lab/mjx/models (T333).
+  // What it imports comes from lab/mjx/models (T333).
   const files = labIncludes(xml);
   const val = validateMjx(xml, undefined, files);
-
-  const lines = xml.split('\n');
-  updateGutter(lines.length, val.ok ? undefined : val.line);
-
-  // Sync shapes & palette
-  shapes = parseShapesFromXml(xml);
-  syncPaletteState();
-
   if (!val.ok) {
-    renderDiagnostics(val);
-    loadingOverlay.classList.add('hidden');
+    dispatchRender({ kind: 'done', id, ok: false, now: performance.now() });
+    if (codeInput.value === xml) {
+      renderDiagnostics(val);
+      updateGutter(xml.split('\n').length, val.line);
+    }
     return;
   }
 
-  loadingOverlay.classList.remove('hidden');
-
+  // A model of a universe or a card says its class, not its box: the game's box for it (T294).
+  const box = boxFor(xml, cardMeta.class, cardMeta.size);
+  let res: EditorBuildResponse | null;
   try {
-    // A model of a universe or a card says its class, not its box: the game's box for it (T294).
-    const box = boxFor(xml, cardMeta.class, cardMeta.size);
-    const res = await workerClient.build({ xml, seed, vpt, ...(box ? { size: box } : {}), ...(Object.keys(files).length ? { files } : {}) });
-    loadingOverlay.classList.add('hidden');
-
-    if (!res.ok) {
-      renderDiagnostics({ ok: false, error: res.error, line: res.errorLine });
-      updateGutter(lines.length, res.errorLine);
-      return;
-    }
-
-    renderDiagnostics(val, res);
-    gridDims = res.grid;
-    currentPalette = res.palette;
-
-    // Reset current mesh and bounding box
-    if (currentMesh) {
-      scene.remove(currentMesh);
-      currentMesh.geometry.dispose();
-      currentMesh = null;
-    }
-    if (currentBBox) {
-      scene.remove(currentBBox);
-      currentBBox.dispose();
-      currentBBox = null;
-    }
-
-    // Set playback tracks: triggers onFrameChange which creates/updates currentMesh & currentBBox
-    playbackController.setTracks(res.tracks);
-
-    // Ensure fallback mesh in case tracks were empty
-    if (!currentMesh) {
-      const geo = createBufferGeometry(res.mesh);
-      currentMesh = new THREE.Mesh(geo, meshMaterial(geo));
-      currentMesh.castShadow = true;
-      currentMesh.receiveShadow = true;
-      scene.add(currentMesh);
-    }
-    if (!currentBBox && currentMesh) {
-      const box = new THREE.Box3().setFromObject(currentMesh);
-      currentBBox = new THREE.Box3Helper(box, new THREE.Color(0x38bdf8));
-      scene.add(currentBBox);
-    }
-
-    viewportInfo.textContent = `Griglia ${res.grid.X}×${res.grid.Y}×${res.grid.Z} · ${res.grid.solidCount.toLocaleString('it')} voxel · ${res.info.triangles.toLocaleString('it')} triangoli`;
-
-    // Refresh active shape selection if any
-    if (selectedShapeIndices.size > 0) {
-      updateSelectionBoxes();
-    } else {
-      deselectAllShapes();
-    }
+    res = await workerClient.build(id, { xml, seed, vpt, ...(box ? { size: box } : {}), ...(Object.keys(files).length ? { files } : {}) });
   } catch (err: unknown) {
-    loadingOverlay.classList.add('hidden');
-    renderDiagnostics({
-      ok: false,
-      error: err instanceof Error ? err.message : String(err),
-      line: 1,
-    });
+    res = { id, ok: false, error: err instanceof Error ? err.message : String(err), errorLine: 1 };
+  }
+  // Cancelled by a newer run: nothing to show. Ended without a word (out of memory): a run that failed.
+  if (res === null) {
+    if (renders.running?.id === id) {
+      dispatchRender({ kind: 'done', id, ok: false, now: performance.now() });
+      renderDiagnostics({ ok: false, error: 'La corsa si è fermata senza una risposta (memoria esaurita?)', line: 1 });
+    }
+    return;
+  }
+  const shown = dispatchRender({ kind: 'done', id, ok: res.ok, now: performance.now() }).some((act) => act.kind === 'show');
+  if (!res.ok) {
+    if (codeInput.value === xml) {
+      renderDiagnostics({ ok: false, error: res.error, line: res.errorLine });
+      updateGutter(xml.split('\n').length, res.errorLine);
+    }
+    return;
+  }
+  if (!shown) return;
+  currentVpt = vpt;
+  // The diagnostics are of the text of now; the numbers of the model on screen.
+  const now = codeInput.value;
+  renderDiagnostics(now === xml ? val : validateMjx(now, undefined, labIncludes(now)), res);
+  applyBuild(res);
+}
+
+function applyBuild(res: EditorBuildSuccess) {
+  gridDims = res.grid;
+  currentPalette = res.palette;
+
+  // Reset current mesh and bounding box
+  if (currentMesh) {
+    scene.remove(currentMesh);
+    currentMesh.geometry.dispose();
+    currentMesh = null;
+  }
+  if (currentBBox) {
+    scene.remove(currentBBox);
+    currentBBox.dispose();
+    currentBBox = null;
+  }
+
+  // Set playback tracks: triggers onFrameChange which creates/updates currentMesh & currentBBox
+  playbackController.setTracks(res.tracks);
+
+  // Ensure fallback mesh in case tracks were empty
+  if (!currentMesh) {
+    const geo = createBufferGeometry(res.mesh);
+    currentMesh = new THREE.Mesh(geo, meshMaterial(geo));
+    currentMesh.castShadow = true;
+    currentMesh.receiveShadow = true;
+    scene.add(currentMesh);
+  }
+  if (!currentBBox && currentMesh) {
+    const box = new THREE.Box3().setFromObject(currentMesh);
+    currentBBox = new THREE.Box3Helper(box, new THREE.Color(0x38bdf8));
+    scene.add(currentBBox);
+  }
+
+  viewportInfo.textContent = `Griglia ${res.grid.X}×${res.grid.Y}×${res.grid.Z} · ${res.grid.solidCount.toLocaleString('it')} voxel · ${res.info.triangles.toLocaleString('it')} triangoli`;
+
+  // Refresh active shape selection if any
+  if (selectedShapeIndices.size > 0) {
+    updateSelectionBoxes();
+  } else {
+    deselectAllShapes();
+  }
+
+  if (fitNextRender && currentMesh) {
+    fitNextRender = false;
+    fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
   }
 }
 
@@ -807,10 +883,7 @@ function onCodeChange() {
   shapes = parseShapesFromXml(code);
   syncPaletteState();
 
-  if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    void triggerBuild();
-  }, 350);
+  dispatchRender({ kind: 'edit', request: code, now: performance.now() });
 }
 
 // ------------------------------------------------------------------ CAD Ghost & Raycasting
@@ -1511,7 +1584,16 @@ function findElementAtPoint<T extends HTMLElement>(
 
 // ------------------------------------------------------------------ Event Listeners
 
-codeInput.addEventListener('input', onCodeChange);
+// The keys typed in one frame are one change (T518): the colours of a long program (the fort: 11 000 chips) cost hundreds of
+// milliseconds, and a change per key piled them up behind the typing.
+let codeChangeFrame = 0;
+codeInput.addEventListener('input', () => {
+  if (codeChangeFrame) return;
+  codeChangeFrame = requestAnimationFrame(() => {
+    codeChangeFrame = 0;
+    onCodeChange();
+  });
+});
 codeInput.addEventListener('scroll', () => {
   syncScroll();
   if (!pickerPopup.classList.contains('hidden')) {
@@ -1621,20 +1703,30 @@ codeInput.addEventListener('keydown', (e) => {
     }
   } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
-    void triggerBuild();
+    renderNow();
   }
 });
 
 // Seed controls
-seedInput.addEventListener('change', () => void triggerBuild());
+seedInput.addEventListener('change', () => renderNow());
 
 $('btn-rand-seed').addEventListener('click', () => {
   seedInput.value = String(Math.floor(Math.random() * 99999) + 1);
-  void triggerBuild();
+  renderNow();
 });
 
-vptSelect.addEventListener('change', () => void triggerBuild());
-$('btn-run').addEventListener('click', () => void triggerBuild());
+vptSelect.addEventListener('change', () => renderNow());
+$('btn-run').addEventListener('click', () => renderNow());
+btnRenderStop.addEventListener('click', () => dispatchRender({ kind: 'stop', now: performance.now() }));
+autoRenderInput.checked = renders.auto;
+autoRenderInput.addEventListener('change', () => {
+  try {
+    localStorage.setItem(AUTO_RENDER_KEY, autoRenderInput.checked ? 'on' : 'off');
+  } catch {
+    // A page without storage keeps the choice until it closes.
+  }
+  dispatchRender({ kind: 'auto', on: autoRenderInput.checked, now: performance.now() });
+});
 
 // Format XML
 $('btn-format').addEventListener('click', () => {
@@ -2883,7 +2975,6 @@ btnRefactorApply.addEventListener('click', () => {
     codeInput.value = newXml;
     activeColorSymbol = newSym;
     onCodeChange();
-    void triggerBuild();
     syncPaletteState();
     setActiveColor(newSym);
   }
@@ -3268,7 +3359,6 @@ btnInsertRuleCursor.addEventListener('click', () => {
   filterLinkedCodeBadge.classList.add('hidden');
   btnFilterApplyToRule.textContent = '✓ Applica a Regola';
   onCodeChange();
-  void triggerBuild();
   closeRulesModal();
 });
 
@@ -3280,7 +3370,6 @@ btnInsertRuleEnd.addEventListener('click', () => {
   codeInput.value = newXml;
   codeInput.setSelectionRange(newCursor, newCursor);
   onCodeChange();
-  void triggerBuild();
   closeRulesModal();
 });
 
@@ -3472,9 +3561,7 @@ btnWfcLoadModel.addEventListener('click', () => {
   // If native MJ, reset preset select or select custom
   presetSelect.value = '';
   onCodeChange();
-  void triggerBuild().then(() => {
-    if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
-  });
+  renderNow({ fit: true });
   closeWfcModal();
 });
 
@@ -3487,7 +3574,6 @@ btnWfcInsertCursor.addEventListener('click', () => {
   codeInput.value = newXml;
   codeInput.setSelectionRange(newCursor, newCursor);
   onCodeChange();
-  void triggerBuild();
   closeWfcModal();
 });
 
@@ -3567,9 +3653,7 @@ function loadSelectedPreset() {
     vptSelect.value = '20';
     seedInput.value = '1';
     onCodeChange();
-    void triggerBuild().then(() => {
-      if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
-    });
+    renderNow({ fit: true });
     return;
   }
 
@@ -3582,9 +3666,7 @@ function loadSelectedPreset() {
   vptSelect.value = own;
   seedInput.value = '1';
   onCodeChange();
-  void triggerBuild().then(() => {
-    if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
-  });
+  renderNow({ fit: true });
 }
 
 // ------------------------------------------------------------------ The handmade cards (T294, ADR-0169)
@@ -3603,9 +3685,7 @@ function openProgram(xml: string, meta: { class?: string; size?: string; vpt?: n
   presetSelect.value = '';
   codeInput.value = xml;
   onCodeChange();
-  void triggerBuild().then(() => {
-    if (currentMesh) fitCameraToMesh(new THREE.Box3().setFromObject(currentMesh));
-  });
+  renderNow({ fit: true });
 }
 
 window.addEventListener('keydown', (e) => {
@@ -3698,7 +3778,7 @@ void startCards({
   setXml: openProgram,
   onMeta: (meta) => {
     cardMeta = meta;
-    void triggerBuild();
+    renderNow();
   },
 }).then((bar) => (cards = bar));
 
