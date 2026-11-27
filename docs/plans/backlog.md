@@ -7038,13 +7038,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: due livelli della stessa primitiva. (1) Le particelle portate, solo aspetto: ogni copertura, terreno o riva può dichiarare ciò che il vento ne stacca (foglie, polline, spruzzi dove l'onda rompe sulla riva), mosse dalla vista grossolana del vento sul client, a istanze, molte (un tetto misurato col frame, non 16), mai nello stato né sul filo. (2) Le cose portate, fisiche: `physics.drift` (quanto il vento porta la cosa), il passo nel kernel, scritto dal Fisico, poche con un tetto, in molti; i cespugli rotolanti di `mesa`. L'ADR dice come la copertura (T545) dichiara le sue particelle.
 - Browser: sì (`mesa` offline, una riva con le onde). Quando è fatto: test verdi, misura del frame con le particelle, foto.
 
-### T552 · C8 I semi per classe — `da fare`
+### T552 · C8 I semi per classe — `fatto` (`7acb566e`)
 - Pipeline: hydrogen · sforzo high · stima 1.5% · approvato · priorità 2
 - Step: 45
 - Dipende da: T545
 - Contesto: § 5 e § 7 (C8).
 - Cosa fare: `TILE_SEEDS` per classe (4 alberi e rocce, 8 copertura), la cache, l'impronta aggiornata con la ragione.
 - Browser: no. Quando è fatto: test verdi.
+- Esito: `SEEDS` porta alberi e rocce a 4 semi e copertura a 8, `tileForms`/`terrainmesh.ts` leggono `tileSeeds` per modello (`TILE_SEEDS` 4 come ripiego), `FORMS_DB_VERSION` resta 6 con test di persistenza su `IdbFormStore` finto, `impronta-terreno.ts` aggiornata con ragione (`c7fa6196dd6de0c8`), ADR-0270, kernel `0.10.44`; `npm run typecheck` e `npm test` (322/322 file) verdi; non provato in un browser reale.
 
 ### T553 · C9 La prova pagata del terreno ricco — `da fare`
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2

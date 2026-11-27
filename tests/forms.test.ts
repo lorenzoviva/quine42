@@ -333,7 +333,11 @@ describe('precalculated variants and form cache (T64)', () => {
     expect(k.forms.seedsOf('circuito-3D')).toBe(4);
     expect(k.forms.seedsOf('schermo-struttura')).toBe(4);
     expect(k.forms.seedsOf('schermo-scritte')).toBe(4);
-    expect(k.forms.seedsOf('tree')).toBe(3);
+    expect(k.forms.seedsOf('tree')).toBe(4);
+    expect(k.forms.seedsOf('rock')).toBe(4);
+    expect(k.forms.seedsOf('cover-tuft')).toBe(8);
+    expect(k.forms.seedsOf('bush')).toBe(3);
+    expect(k.forms.seedsOf('pebble')).toBe(3);
 
     const forms = k.forms.preload('circuito-3D');
     expect(forms.length).toBe(4);

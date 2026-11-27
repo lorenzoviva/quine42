@@ -87,7 +87,7 @@ describe('the mesh of the places in a worker (T486)', () => {
     // While the forms are being made, then with every model of the terrains ready (trees and rocks as instances), then without them (the stand-ins).
     for (const ch of chunks) same(k, ch, 'all’inizio');
     expect(TERRAIN_MODELS.size).toBeGreaterThan(1);
-    for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= 3; s++) await k.forms.wait(t.model, s);
+    for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= k.forms.seedsOf(t.model); s++) await k.forms.wait(t.model, s);
     k.tick(1 / 60);
     let instanced = 0;
     for (const ch of chunks) {
@@ -299,4 +299,23 @@ describe('the worker of the places (T486, ChunkMesher)', () => {
     // In Node there is no Worker: the page makes the meshes itself.
     expect(new ChunkMesher().working).toBe(false);
   }, 30_000);
+
+  it('uses per-class TILE_SEEDS (4 for trees and rocks, 3 for bush) across page and worker (T552)', async () => {
+    const k = await world();
+    expect(k.forms.seedsOf('tree')).toBe(4);
+    expect(k.forms.seedsOf('rock')).toBe(4);
+    expect(k.forms.seedsOf('bush')).toBe(3);
+    for (const t of Object.values(k.palette)) if (t.model) for (let s = 1; s <= k.forms.seedsOf(t.model); s++) await k.forms.wait(t.model, s);
+    k.tick(1 / 60);
+    const ch = [...k.chunks.values()].find((c) => c.stage === 'planned' && c.tiles.includes('t'))!;
+    const S = k.config.chunkSize;
+    ch.tiles = Array.from({ length: S * S }, (_, i) => (i < S * (S / 2) ? 't' : 'r')).join('');
+    ch.version++;
+    const a = chunkArrays(inputSource(structuredClone(chunkInput(k, ch))));
+    const treeSeeds = new Set(a.instances.filter((i) => i.code === 't').map((i) => i.seed));
+    const rockSeeds = new Set(a.instances.filter((i) => i.code === 'r').map((i) => i.seed));
+    expect([...treeSeeds].sort()).toEqual([0, 1, 2, 3]);
+    expect([...rockSeeds].sort()).toEqual([0, 1, 2, 3]);
+    expect(print(throughWorker(k, ch))).toEqual(print(buildChunk(k, ch).group));
+  }, 60_000);
 });

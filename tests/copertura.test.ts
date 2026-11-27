@@ -4,14 +4,16 @@
 // with the world on: the Council changes a terrain's cover with a commit, and one instance becomes a thing of the world (the stone the key
 // lies under), kept in the place's plan and never drawn as cover again.
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { Kernel, type Chunk } from '../src/kernel/kernel';
 import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
-import { InlineRunner, runForm, type FormComp, type FormRequest, type FormResult, type FormRunner } from '../src/kernel/forms';
+import { Forms, InlineRunner, runForm, type FormComp, type FormRequest, type FormResult, type FormRunner } from '../src/kernel/forms';
 import { formMeshes } from '../src/render/formmeshes';
+import { IdbFormStore, WorkerRunner } from '../src/render/forms';
+import type { WorkerAnswer } from '../src/render/worker';
 import {
   COVER_CAP,
   COVER_LIMITS,
@@ -31,7 +33,7 @@ import {
 import { Validator } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
 import { FORGE_CLASSES } from '../src/kernel/agents/forge';
-import { buildChunk, chunkInput, coverForms, coverModels, coverReadiness } from '../src/render/terrain';
+import { buildChunk, chunkInput, coverForms, coverModels, coverReadiness, tileForms } from '../src/render/terrain';
 import { answerChunk, chunkArrays, COVER_STRIDE, inputSource, type ChunkArrays } from '../src/render/terrainmesh';
 import { CoverLayer } from '../src/render/cover';
 
@@ -454,4 +456,119 @@ describe('la copertura aperta a mondo acceso (T545)', () => {
     expect(made).toBe(MAX_UNCOVERED);
     expect(readUncovered(ch.plan!.uncovered, S)).toHaveLength(MAX_UNCOVERED);
   });
+
+  it('i semi per classe (4 alberi e rocce, 8 copertura) restano nella cache delle forme fra caricamenti (T552)', async () => {
+    const dbs = new Map<string, { version: number; stores: Map<string, Map<string, unknown>> }>();
+    const fakeIdb = {
+      open(name: string, version: number) {
+        const req: Record<string, any> = {};
+        setTimeout(() => {
+          const d = dbs.get(name) ?? { version: 0, stores: new Map() };
+          dbs.set(name, d);
+          req.result = {
+            objectStoreNames: { contains: (s: string) => d.stores.has(s) },
+            createObjectStore: (s: string) => d.stores.set(s, new Map()),
+            deleteObjectStore: (s: string) => d.stores.delete(s),
+            close() {},
+            transaction: () => {
+              const tx: Record<string, any> = {
+                objectStore: (s: string) => {
+                  const answer = (result?: unknown) => {
+                    const r: Record<string, any> = { result };
+                    setTimeout(() => r.onsuccess?.());
+                    return r;
+                  };
+                  return {
+                    get: (k: string) => answer(d.stores.get(s)!.get(k)),
+                    put: (v: unknown, k: string) => (d.stores.get(s)!.set(k, typeof v === 'object' ? { ...(v as object) } : v), answer()),
+                    clear: () => (d.stores.get(s)!.clear(), answer()),
+                    delete: (k: string) => (d.stores.get(s)!.delete(k), answer()),
+                    getAll: () => answer([...d.stores.get(s)!.values()]),
+                    getAllKeys: () => answer([...d.stores.get(s)!.keys()]),
+                  };
+                },
+              };
+              setTimeout(() => tx.oncomplete?.(), 5);
+              return tx;
+            },
+          };
+          if (d.version < version) {
+            d.version = version;
+            req.onupgradeneeded?.();
+          }
+          req.onsuccess?.();
+        });
+        return req;
+      },
+    };
+    vi.stubGlobal('indexedDB', fakeIdb);
+    vi.stubGlobal('Worker', class {});
+    try {
+      const meshJobs: Array<{ model?: string; seed: number }> = [];
+      const makePool = (store: IdbFormStore) => {
+        let w: Worker;
+        return new WorkerRunner(
+          1,
+          store,
+          () =>
+            (w = {
+              postMessage: (m: { id: number; read?: unknown; req?: FormRequest }) => {
+                if (m.read) return void setTimeout(() => w.onmessage!({ data: { id: m.id, read: true } } as MessageEvent));
+                const req = m.req!;
+                meshJobs.push({ model: req.model, seed: req.seed });
+                const r = runForm(req);
+                const { model: _m, finished, ...rest } = r;
+                setTimeout(() => w.onmessage!({ data: { id: m.id, ok: true, result: { ...rest, meshes: formMeshes(r, req) }, finished } satisfies WorkerAnswer } as MessageEvent));
+              },
+              terminate() {},
+            } as unknown as Worker),
+        );
+      };
+      const fakeKernel = (forms: Forms) =>
+        ({
+          forms,
+          palette: {
+            t: { id: 'forest', name: 'bosco', model: 'tree', layer: 'vegetation', solid: true },
+            r: { id: 'rock', name: 'roccia', model: 'rock', layer: 'rock', solid: true },
+            g: { id: 'meadow', name: 'prato', layer: 'ground', solid: false, cover: [{ model: 'cover-tuft', density: 2 }] },
+          },
+        }) as unknown as Kernel;
+
+      // 1. First load: tileForms and coverForms ask all 4 seeds for tree/rock and 8 for cover.
+      const k1 = fakeKernel(new Forms(makePool(new IdbFormStore('t552-cache'))));
+      k1.forms.load(bundledFiles);
+      expect(k1.forms.seedsOf('tree')).toBe(4);
+      expect(k1.forms.seedsOf('rock')).toBe(4);
+      expect(k1.forms.seedsOf('cover-tuft')).toBe(8);
+      expect(tileForms(k1, 't')).toBeUndefined();
+      expect(tileForms(k1, 'r')).toBeUndefined();
+      expect(coverForms(k1, 'cover-tuft')).toBeUndefined();
+      await vi.waitFor(
+        () => {
+          expect(tileForms(k1, 't')?.length).toBe(4);
+          expect(tileForms(k1, 'r')?.length).toBe(4);
+          expect(coverForms(k1, 'cover-tuft')?.length).toBe(8);
+        },
+        { timeout: 15_000 },
+      );
+      await new Promise((r) => setTimeout(r, 30));
+      expect(meshJobs).toHaveLength(16);
+
+      // 2. Second load with the same IndexedDB store: all 16 forms come back from the cache with 0 worker jobs.
+      meshJobs.length = 0;
+      const k2 = fakeKernel(new Forms(makePool(new IdbFormStore('t552-cache'))));
+      k2.forms.load(bundledFiles);
+      await vi.waitFor(
+        () => {
+          expect(tileForms(k2, 't')?.length).toBe(4);
+          expect(tileForms(k2, 'r')?.length).toBe(4);
+          expect(coverForms(k2, 'cover-tuft')?.length).toBe(8);
+        },
+        { timeout: 15_000 },
+      );
+      expect(meshJobs).toEqual([]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  }, 60_000);
 });
