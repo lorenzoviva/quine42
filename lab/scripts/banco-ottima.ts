@@ -4,7 +4,7 @@
 // of `lab/banco/riferimento/ottima.ts`: a number out of 10 and every item beside the reference's. No model is called: cost in dollars zero.
 //
 //   npx vite-node lab/scripts/banco-ottima.ts -- --riferimento [--versione v1] [--semi 1,2,3]          # the author's fort: forte-<v>.json, .png, -viste.txt (8 s a seed)
-//   npx vite-node lab/scripts/banco-ottima.ts -- [--solo argon-giro2,rocca] [--semi 1,2,3] [--taglia gargantuan] [--json f] [--tabella f]
+//   npx vite-node lab/scripts/banco-ottima.ts -- [--solo argon-giro2,rocca] [--cartella lab/banco/taglie/modelli/gemini-4-neon] [--semi 1,2,3] [--taglia gargantuan] [--json f] [--tabella f]
 
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -103,8 +103,31 @@ const FORTS: Array<{ id: string; who: string; file?: string; xml?: string; tagli
   { id: 'villetta', who: 'la villetta, la risposta offline (T354): non un forte', xml: MOCK_STRUCTURE_PROGRAM, taglia: 'huge' },
 ];
 
+/**
+ * T516: `--cartella <dir>[,<dir>…]` adds every fort a round of the bench of the sizes kept under a folder (`<giro>/forte-<taglia>/programma.xml`,
+ * the Artist's vote from its `esito.json`), with an id of the folder's name and the round's, beside the fixed list.
+ */
+function fortsIn(dirs: string[]): typeof FORTS {
+  return dirs.flatMap((dir) => {
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir).filter((g) => /^giro\d+$/.test(g)).sort().flatMap((g) =>
+      (['large', 'huge'] as SizeTier[]).flatMap((t) => {
+        const file = path.join(dir, g, `forte-${t}`, 'programma.xml');
+        if (!fs.existsSync(file)) return [];
+        const esito = path.join(dir, g, `forte-${t}`, 'esito.json');
+        const vote = fs.existsSync(esito) ? (JSON.parse(fs.readFileSync(esito, 'utf8')) as { voto?: number }).voto : undefined;
+        // The folder under the bench of the models (`openrouter/claude-opus-5-5` apart from the CLI's), or its name.
+        const rel = path.relative('lab/banco/taglie/modelli', dir).split(path.sep).join('/');
+        const name = rel && !rel.startsWith('..') && !path.isAbsolute(rel) ? rel : path.basename(dir);
+        return [{ id: `${name}-${g}${t === 'large' ? '-grande' : ''}`, who: `${name}, ${g}${t === 'large' ? ', Grande' : ''}${vote !== undefined ? ` (voto ${vote})` : ''}`, file, taglia: t, ...(vote !== undefined ? { vote } : {}) }];
+      }),
+    );
+  });
+}
+
 function judge(): void {
   const ref = JSON.parse(fs.readFileSync(referencePath(), 'utf8')) as Reference;
+  FORTS.push(...fortsIn(opt('cartella')?.split(',').filter(Boolean) ?? []));
   if (ref.sha256 !== sha256(fs.readFileSync(REFERENCE_FILE, 'utf8'))) console.log(`attenzione: ${REFERENCE_FILE} non è più il forte di ${ref.version}: rifai il riferimento con --riferimento --versione <nuova>`);
   const solo = opt('solo')?.split(',');
   const taglia = opt('taglia') as SizeTier | undefined;

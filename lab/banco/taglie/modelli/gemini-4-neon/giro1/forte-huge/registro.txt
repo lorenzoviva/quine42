@@ -1,0 +1,3 @@
+[sculptor] propone: «forte» (struttura grande, Architetto, gemini-4-neon)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 24 voxel (1,50 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s
+[artist → sculptor] approva: «forte»: 9/10

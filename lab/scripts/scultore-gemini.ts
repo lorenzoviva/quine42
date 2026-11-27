@@ -8,6 +8,9 @@
 // reasoning, the system instructions in the cache, the cost it says), with OPENROUTER_API_KEY from <root>/.env; the Artist stays on Gemini.
 // Then --tetto counts OpenRouter's dollars as well. --offline answers with a fake OpenRouter (the offline Sculptor's program, a cost of 0).
 // T303: `--interno` asks the structure with its interior in the same program (the Scenografo's way (a), `lab/scripts/scenografo-misura.ts`).
+// T516: `--via agy` sends the Sculptor's calls of a Gemini model (`--modelli gemini-4-neon`) to the CLI of Antigravity on Google's
+// subscription (`lab/scripts/agy-cli.ts`: an empty folder, `--sandbox`, the system prompt at the head of the message, the photos as files),
+// the Artist still on Gemini through the key; agy's 5-hour window and week of `Gemini Models` read before and after (`agy-finestra.json`).
 // T473 (S7 of T458): `--specialita` is the paid trial of the Sculptor's specialties, in `lab/scripts/scultore-specialita.ts`: the same
 // concepts of every trade with the prompt of before T468 and today's, on the game's models, into lab/banco/specialita (its README).
 //
@@ -17,6 +20,7 @@
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --misura [--out lab/banco/taglie/gemini]     # no call: measures and photographs the programs kept
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --concetti                                   # no call: concepts against seeds (T337), Gemini's and the hand-written
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --tabella --out lab/banco/taglie/modelli     # no call: the table of every model (and T355's), → <out>/tabella.md
+//   npx vite-node lab/scripts/scultore-gemini.ts -- --modelli gemini-4-neon --via agy [--livello low] [--ripeti 3] [--finestra 80] [--settimana 30] [--agy-cmd "agy"] [--offline] --out lab/banco/taglie/modelli
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --specialita [--giro giro1] [--solo castagno,…] [--tetto 6] [--offline]   # T473: the two prompts, every trade
 //   npx vite-node lab/scripts/scultore-gemini.ts -- --specialita --tabella | --misura | --cache-opus                          # T473: no call, or the cache marks on Opus
 //
@@ -46,6 +50,7 @@ import { MOCK_STRUCTURE_PROGRAM } from '../../src/kernel/ai/mockStructure';
 import { runMjx } from '../../src/mj/run';
 import { direct, readKey } from './gemini';
 import { claudeCliModels, readWindow, routed, type ClaudeCall, type ClaudeWindow } from './claude-cli';
+import { agyCliModels, readAgyWindow, routedAgy, type AgyCall, type AgyWindow } from './agy-cli';
 import { OPENROUTER_API, OPENROUTER_MODELS, OpenRouterAiModels } from '../../src/kernel/ai/openrouter';
 import { png } from './png';
 import { specialita } from './scultore-specialita';
@@ -74,6 +79,14 @@ const VIA_OPENROUTER = opt('via') === 'openrouter';
 const onOpenRouter = (model?: string): boolean => VIA_OPENROUTER && !!model && Object.prototype.hasOwnProperty.call(OPENROUTER_MODELS, model);
 /** Whether a Sculptor of the round goes to the CLI of Claude's subscription. */
 const onCli = (model?: string): boolean => !!model?.startsWith('claude-') && !onOpenRouter(model);
+/** The Sculptor of the round on the CLI of Antigravity (T516), for a Gemini model: Google's subscription instead of the key. */
+const VIA_AGY = opt('via') === 'agy';
+const onAgy = (model?: string): boolean => VIA_AGY && !!model?.startsWith('gemini-');
+/** agy (a fake one for the offline proof, `lab/scripts/agy-finta.mjs`), and the level of thinking: the suffix of its id, the game's `low`. */
+const AGY_CMD = opt('agy-cmd');
+const LIVELLO = opt('livello') ?? PENSIERO;
+/** The week of agy's `Gemini Models` past which the calls on the subscription stop (per cent used; the pipeline spends it too). */
+const SETTIMANA = Number(opt('settimana') ?? 30);
 
 /** OPENROUTER_API_KEY from the environment or from <root>/.env: never printed nor written. */
 function openRouterKey(root: string): string | undefined {
@@ -139,7 +152,8 @@ function esitiIn(dir: string): string[] {
 
 /** A structure whose Sculptor on Claude never answered: every call of it failed without a token (the model is not reachable, or the window stopped it). */
 const unreachable = (e: Esito): boolean =>
-  !!e.errore?.includes('finestra delle 5 ore') || (!!e.claude?.length && e.claude.every((c) => !!c.errore && !c.output && !c.input));
+  !!e.errore?.includes('finestra delle 5 ore') || !!e.errore?.includes('di agy') ||
+  (!!e.claude?.length && e.claude.every((c) => !!c.errore && !c.output && !c.input)) || (!!e.agy?.length && e.agy.every((c) => !!c.errore && !c.output && !c.input));
 
 /** What Gemini cost in an esito (T355's had no split: they were all Gemini), and OpenRouter (T397): what the register's cap counts. */
 const geminiOf = (e: Partial<Esito>): number => (e.usdGemini ?? (e.usdClaude || e.usdOpenRouter ? 0 : (e.usd ?? 0))) + (e.usdOpenRouter ?? 0);
@@ -168,6 +182,35 @@ function claudeGate(): string | undefined {
   return windowState.stop;
 }
 
+/** agy's window and week of `Gemini Models`, read at most once a minute; why the calls on agy stop, once one is over. */
+const agyState: { last?: AgyWindow; at: number; stop?: string; reads: AgyWindow[] } = { at: 0, reads: [] };
+function agyGate(): string | undefined {
+  if (agyState.stop || OFFLINE) return agyState.stop;
+  if (Date.now() - agyState.at > 60_000) {
+    agyState.at = Date.now();
+    const w = readAgyWindow();
+    if (w) {
+      agyState.last = w;
+      agyState.reads.push(w);
+    }
+  }
+  const { session: s, week: w } = agyState.last ?? {};
+  if (s !== undefined && s > FINESTRA) agyState.stop = `finestra delle 5 ore di agy al ${s} % (oltre ${FINESTRA} %): il giro si ferma`;
+  else if (w !== undefined && w > SETTIMANA) agyState.stop = `settimana di agy al ${w} % (oltre ${SETTIMANA} %): il giro si ferma`;
+  return agyState.stop;
+}
+
+/** The tokens of a text for a Gemini model at the API (`countTokens`, free): the Sculptor's request without agy around it. */
+async function countTokens(key: string, model: string, text: string): Promise<number | undefined> {
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:countTokens`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }] }),
+  });
+  if (!r.ok) return undefined;
+  return Number((await r.json()).totalTokens) || undefined;
+}
+
 /** Every call written down as it went: the task, the model, the prompt and the answer (the system once, it is the same). */
 function logged(inner: AiModels, dir: string): AiModels {
   let n = 0;
@@ -179,7 +222,7 @@ function logged(inner: AiModels, dir: string): AiModels {
     limits: inner.limits,
     textModel: inner.textModel,
     async text(call: TextCall) {
-      const toClaude = call.agent === 'sculptor' && onCli(call.model);
+      const toClaude = call.agent === 'sculptor' && (onCli(call.model) || onAgy(call.model));
       const spent = register.spent();
       if (!toClaude && !OFFLINE && spent > TETTO) throw new Error(`tetto del registro: ${usd(spent)} di Gemini oltre ${usd(TETTO)}`);
       const i = ++n;
@@ -216,7 +259,11 @@ interface Esito {
   usdCli?: number;
   /** Of `usd`: the Sculptor's calls through OpenRouter, as it said them (T397), and the route. */
   usdOpenRouter?: number;
-  via?: 'openrouter';
+  via?: 'openrouter' | 'agy';
+  /** The Sculptor's calls on agy (T516) one by one, and at Neon's API list: agy's tokens, and the request alone (`countTokens`). */
+  agy?: AgyCall[];
+  usdAgy?: number;
+  usdAgyApi?: number;
   /** The Sculptor's calls through OpenRouter one by one: tokens, the cache read, the cost said, the seconds. */
   openrouter?: Array<{ prompt: number; cached: number; output: number; thoughts: number; usd?: number; seconds: number; failed?: string }>;
   token: { prompt: number; output: number; thoughts: number };
@@ -238,7 +285,7 @@ async function scolpisci(key: string | undefined, out: string, concept: string, 
   let orStart = Date.now();
   const record = (r: CallRecord) => {
     ledger.record(r);
-    if (r.model.startsWith('claude-')) return;
+    if (r.model.startsWith('claude-') || r.model.startsWith('agy:')) return;
     register.live.record(r);
     // OpenRouter's ids of Anthropic's models (`anthropic/…`, T397): what it said, in its own column.
     if (r.model.startsWith('anthropic/')) {
@@ -260,6 +307,11 @@ async function scolpisci(key: string | undefined, out: string, concept: string, 
   const claude: ClaudeCall[] = [];
   const cli = claudeCliModels({ cmd: CLI_CMD, effort: SFORZO, gate: claudeGate, images: !args.includes('--senza-immagini'), onCall: (c, r) => { claude.push(c); record(r); } });
   let ai = onCli(scultore) ? routed(rest, cli) : rest;
+  const agyCalls: AgyCall[] = [];
+  if (onAgy(scultore)) {
+    const agy = agyCliModels({ cmd: AGY_CMD, level: LIVELLO, gate: agyGate, images: !args.includes('--senza-immagini'), ...(key && !OFFLINE ? { count: (m: string, t: string) => countTokens(key, m, t) } : {}), onCall: (c, r) => { agyCalls.push(c); record(r); } });
+    ai = routedAgy(rest, scultore!, agy);
+  }
   if (onOpenRouter(scultore)) {
     // The game's adapter, with ten minutes of patience instead of the game's 120 s: the bench measures how long, the table says what the game would drop.
     const or = new OpenRouterAiModels({
@@ -311,6 +363,7 @@ async function scolpisci(key: string | undefined, out: string, concept: string, 
     usd: Number(tot.usd.toFixed(4)),
     usdGemini: Number(usdGemini.toFixed(4)),
     ...(claude.length ? { usdClaude: Number(usdClaude.toFixed(4)), usdCli: Number(usdCli.toFixed(4)), claude } : {}),
+    ...(onAgy(scultore) ? { via: 'agy' as const, usdAgy: Number(agyCalls.reduce((s, c) => s + c.usd, 0).toFixed(4)), usdAgyApi: Number(agyCalls.reduce((s, c) => s + (c.usdApi ?? 0), 0).toFixed(4)), agy: agyCalls } : {}),
     ...(onOpenRouter(scultore) ? { via: 'openrouter' as const, usdOpenRouter: Number(usdOpenRouter.toFixed(4)), openrouter: orCalls } : {}),
     token: { prompt: tot.prompt, output: tot.output, thoughts: tot.thoughts },
     perCompito: day.map((t) => ({ model: t.model, task: t.task, calls: t.tally.calls, usd: Number(t.tally.usd.toFixed(4)) })),
@@ -495,7 +548,7 @@ function tabella(): void {
     });
   const sculptOf = (e: Esito) => {
     const s = e.scultore ?? e.perCompito.find((t) => t.task === 'model.sculpt')?.model;
-    return s && e.via ? `${s} via OpenRouter` : s;
+    return s && e.via ? `${s} via ${e.via === 'agy' ? 'agy' : 'OpenRouter'}` : s;
   };
   // A structure whose Sculptor never answered is not an attempt of that model.
   const righe: Riga[] = leggi(BASE, (e) => (unreachable(e) ? undefined : sculptOf(e)));
@@ -598,6 +651,10 @@ if (!args.includes('--misura')) {
   const usesClaude = rounds.some((r) => onCli(r.scultore));
   const before = usesClaude && !OFFLINE ? readWindow() : undefined;
   if (usesClaude) console.log(`Claude prima: ${before ? `5 ore ${before.session ?? '?'} %, settimana ${before.week ?? '?'} %` : OFFLINE ? 'non letto (offline)' : 'la CLI non risponde a /usage'}`);
+  const usesAgy = rounds.some((r) => onAgy(r.scultore));
+  const agyBefore = usesAgy && !OFFLINE ? readAgyWindow() : undefined;
+  if (usesAgy) console.log(`agy prima (Gemini Models): ${agyBefore ? `5 ore ${agyBefore.session ?? '?'} %, settimana ${agyBefore.week ?? '?'} %` : OFFLINE ? 'non letto (offline)' : 'la CLI non risponde a /usage'}`);
+  const agyRounds: Array<Record<string, unknown>> = [];
   const settimana: Array<Record<string, unknown>> = [];
   const irraggiungibili = new Set<string>();
   for (const round of rounds) {
@@ -606,10 +663,15 @@ if (!args.includes('--misura')) {
       console.log(`${path.relative(BASE, round.out)}: non lanciato (${windowState.stop})`);
       continue;
     }
+    if (onAgy(round.scultore) && agyGate()) {
+      console.log(`${path.relative(BASE, round.out)}: non lanciato (${agyState.stop})`);
+      continue;
+    }
     const t0 = new Date().toISOString();
     const esiti = await Promise.all(giri.map(([c, t]) => scolpisci(key, round.out, c, t, round.scultore, orKey)));
     // A model the CLI does not reach: no call of it gave a token. It is said, and the others go on.
-    if (onCli(round.scultore) && !windowState.stop && esiti.every((e) => unreachable(e))) {
+    if (onAgy(round.scultore)) agyRounds.push({ giro: path.relative(BASE, round.out), da: t0, a: new Date().toISOString(), finestra: OFFLINE ? undefined : readAgyWindow() });
+    if ((onCli(round.scultore) || onAgy(round.scultore)) && !windowState.stop && !agyState.stop && esiti.every((e) => unreachable(e))) {
       irraggiungibili.add(round.scultore!);
       fs.writeFileSync(path.join(round.out, 'irraggiungibile.txt'), `${round.scultore}: ${esiti[0].errore}
 `);
@@ -619,6 +681,13 @@ if (!args.includes('--misura')) {
     const somma = esiti.reduce((s, e) => s + e.usd, 0);
     console.log(`\n${path.relative(BASE, round.out) || '.'}: ${usd(somma)} a listino, ${esiti.reduce((s, e) => s + e.chiamate, 0)} chiamate, registro di Gemini ${usd(register.spent())}`);
     if (onCli(round.scultore)) settimana.push({ giro: path.relative(BASE, round.out), da: t0, a: new Date().toISOString(), finestra: windowState.last });
+  }
+  if (usesAgy) {
+    const after = OFFLINE ? undefined : readAgyWindow();
+    console.log(`agy dopo (Gemini Models): ${after ? `5 ore ${after.session ?? '?'} %, settimana ${after.week ?? '?'} %` : 'non letto'}`);
+    const file = path.join(BASE, 'agy-finestra.json');
+    const old = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : [];
+    fs.writeFileSync(file, JSON.stringify([...old, { prima: agyBefore, dopo: after, giri: agyRounds, letture: agyState.reads, ...(agyState.stop ? { fermato: agyState.stop } : {}), offline: OFFLINE }], null, 1));
   }
   if (usesClaude) {
     const after = OFFLINE ? undefined : readWindow();

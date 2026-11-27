@@ -1,0 +1,254 @@
+<!-- fattoria: sculpted by gemini-4-neon (step 9), the Artist's vote 6/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhkwjsdmpbravcfqlyt" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Corpo principale della casa: 15x13 celle interne (75x65 voxel) -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="7"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="5"/>
+      <all in="[Hh]E" out="*h" symmetry="(x)" steps="7"/>
+      <all in="[Hh]E" out="*w"/>
+      <all in="wE/*w" out="*w/**"/>
+
+      <!-- Porta d'ingresso sul fronte, centrata sull'asse di H, larga 3 celle (15 voxel) -->
+      <all in="H/h" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/h" out="*/m" symmetry="()"/>
+      <all in="m/w" out="*/d" symmetry="()" steps="1"/>
+      <all in="dw" out="*d" symmetry="(x)" steps="1"/>
+      <prl><rule in="m" out="h"/><rule in="H" out="h"/></prl>
+
+      <!-- Portico anteriore profondo 2 celle, esteso asimmetricamente su un lato a caso, con pilastri e strada al bordo -->
+      <all in="d/E" out="*/p" symmetry="()" steps="1"/>
+      <all in="p/E" out="*/p" symmetry="()" steps="1"/>
+      <all in="pE" out="*p" symmetry="(x)" steps="1"/>
+      <one in="ppE/ppE" out="**p/**p" symmetry="(x)" steps="1"/>
+      <all in="ww/pE" out="**/*p" symmetry="(x)" steps="3"/>
+      <all in="pE/pE" out="*p/*p" symmetry="(x)" steps="3"/>
+      <all in="pE/EE" out="b*/**" symmetry="(x)" steps="1"/>
+      <all in="d/p/p/E" out="*/*/*/r" symmetry="()" steps="1"/>
+      <all in="r/E" out="*/r" symmetry="()"/>
+
+      <!-- Muro interno divisorio orizzontale: sala anteriore h (75x30 voxel) e stanza posteriore k (75x30 voxel) -->
+      <one in="w/h/h/h/h/h/h/h" out="*/*/*/*/*/*/*/j" symmetry="()" steps="1"/>
+      <all in="jh" out="*j" symmetry="(x)"/>
+      <one in="w/h/h/h/h/h/h/j" out="*/k/*/*/*/*/*/*" symmetry="()" steps="1"/>
+      <all in="kh" out="*k"/>
+
+      <!-- Vano scala nella sala lungo il muro interno: 2 celle di pianerottolo, 4 di scala, 2 di sbarco -->
+      <one in="jjjjjjjj/hhhhhhhh/hhhhhhhh" out="********/hhsssshh/hhsssshh" symmetry="()" steps="1"/>
+
+      <!-- Stalla/fienile laterale su un lato casuale, solo dove c'è spazio (Huge e Gargantuan) -->
+      <one in="EEEEEEw/EEEEEEw/EEEEEEw/EEEEEEw/EEEEEEw" out="*******/*******/**aaaa*/*******/*******" symmetry="(x)" steps="1"/>
+      <all in="E/a" out="a/*" symmetry="()" steps="3"/>
+      <all in="a/E" out="*/a" symmetry="()" steps="3"/>
+      <prl in="a/E" out="*/a" p="0.5" steps="1" symmetry="()"/>
+      <all in="aE" out="*v"/>
+      <all in="vE/*v" out="*v/**"/>
+
+      <!-- Aia intorno agli edifici dove il terreno prosegue, poi recinzione -->
+      <all in="[wvpb]EEE" out="*c**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cEEEE" out="*cc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <all in="cE" out="*f"/>
+      <all in="fE/*f" out="*f/**"/>
+
+      <!-- Pagliaio/fieno nell'aia e pozzo dove entra un quadrato 5x5 -->
+      <one in="cc/cc" out="y*/**" steps="1"/>
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**q**/*****/*****" steps="1"/>
+
+      <!-- Campi coltivati oltre la recinzione (solo dove c'è spazio aperto) e alberi sul terreno libero -->
+      <all in="fEEEEE" out="*lll**" steps="1"/>
+      <one in="EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE/EEEEEEE" out="*******/*******/*******/***t***/*******/*******/*******"/>
+    </sequence>
+
+    <map scale="5 5 1" values="BEhwjdspbavrcQuZlyXtWVfFPJRLKYTkOoNUG#90#91#92#20#21" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="h" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="k" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="w" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="j" out="jjjjj/jjjjj/jjjjj/jjjjj/jjjjj"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="p" out="ppppp/ppppp/ppppp/ppppp/ppppp"/>
+      <rule in="b" out="ppppp/pbbbp/pbbbp/pbbbp/ppppp"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="v" out="vvvvv/vvvvv/vvvvv/vvvvv/vvvvv"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="f" out="ccccc/cZZZc/cZZZc/cZZZc/ccccc"/>
+      <rule in="q" out="QQQQQ/QuuuQ/QuuuQ/QuuuQ/QQQQQ"/>
+      <rule in="y" out="yyyyy/yyyyy/yyyyy/yyyyy/yyyyy"/>
+      <rule in="l" out="lllll/lllll/lllll/lllll/lllll"/>
+      <rule in="t" out="EEEEE/EEtEE/EtXtE/EEtEE/EEEEE"/>
+
+      <sequence symmetry="(xy)">
+        <union symbol="+" values="WVP"/>
+        <union symbol="=" values="fF"/>
+
+        <!-- B. Altezze: muri esterni della casa con zoccolatura in pietra P, intonaco W, finestre U e travi in legno X -->
+        <all in="B w" out="w P" steps="6"/>
+        <all in="B w" out="w W" steps="2"/>
+        <all in="B w" out="w U" steps="10"/>
+        <all in="B w" out="w W" steps="12"/>
+        <all in="B w" out="w X" steps="2"/>
+        <all in="B w" out="w W" steps="6"/>
+        <all in="B w" out="w U" steps="10"/>
+        <all in="B w" out="w W" steps="14"/>
+        <all in="B w" out="w X" steps="2"/>
+        <prl in="w" out="R"/>
+
+        <!-- Porta d'ingresso: seme O a z=0, zoccolatura P, intonaco W, trave X, secondo piano con finestre U -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d P" steps="5"/>
+        <all in="B d" out="d W" steps="24"/>
+        <all in="B d" out="d X" steps="2"/>
+        <all in="B d" out="d W" steps="6"/>
+        <all in="B d" out="d U" steps="10"/>
+        <all in="B d" out="d W" steps="14"/>
+        <all in="B d" out="d X" steps="2"/>
+        <prl in="d" out="R"/>
+
+        <!-- Muro interno divisorio: alto 1 piano, solaio F a z=32, aria al secondo piano, poi tetto R a z=64 -->
+        <all in="B j" out="j W" steps="32"/>
+        <all in="B j" out="j F" steps="1"/>
+        <all in="B j" out="j B" steps="31"/>
+        <prl in="j" out="R"/>
+
+        <!-- Pavimenti, striscia scala T, solaio F e soffitto/tetto R della casa -->
+        <all steps="1">
+          <rule in="B h" out="h f"/>
+          <rule in="B s" out="s f"/>
+        </all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B h" out="h B" steps="31"/>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1">
+          <rule in="B h" out="h F"/>
+          <rule in="B s" out="s F"/>
+        </all>
+        <all steps="31">
+          <rule in="B h" out="h B"/>
+          <rule in="B s" out="s B"/>
+        </all>
+        <prl>
+          <rule in="h" out="R"/>
+          <rule in="s" out="R"/>
+        </prl>
+
+        <!-- Portico anteriore: pavimento P, pilastri X alti 33, tetto J a z=33 -->
+        <all in="B p" out="p P" steps="1"/>
+        <all in="B p" out="p B" steps="32"/>
+        <prl in="p" out="J"/>
+        <all in="B b" out="b X" steps="33"/>
+        <prl in="b" out="J"/>
+
+        <!-- Stalla/fienile laterale: zoccolatura P, muri V, fascia finestre U, trave X e tetto J -->
+        <all in="B v" out="v P" steps="6"/>
+        <all in="B v" out="v V" steps="4"/>
+        <all in="B v" out="v U" steps="10"/>
+        <all in="B v" out="v V" steps="14"/>
+        <all in="B v" out="v X" steps="2"/>
+        <prl in="v" out="J"/>
+        <all in="B a" out="a f" steps="1"/>
+        <all in="B a" out="a B" steps="35"/>
+        <prl in="a" out="J"/>
+
+        <!-- Recinzione, pozzo, pagliaio e alberi -->
+        <all in="B Z" out="Z X" steps="9"/>
+        <prl in="Z" out="X"/>
+        <all in="B Q" out="Q P" steps="8"/>
+        <prl in="Q" out="P"/>
+        <all in="B u" out="u u" steps="4"/>
+        <all in="B y" out="y Y" steps="10"/>
+        <prl in="y" out="Y"/>
+        <all in="B t" out="t X" steps="16"/>
+        <prl in="t" out="L"/>
+        <all in="LB" out="*L" steps="4"/>
+        <all in="B L" out="L *" steps="4"/>
+
+        <!-- C. Scala piena: porta interna larga 11 tra le due stanze al piano terra -->
+        <one in="fffffffffffff/WWWWWWWWWWWWW/WWWWWWWWWWWWW/WWWWWWWWWWWWW/WWWWWWWWWWWWW/WWWWWWWWWWWWW/fffffffffffff" out="*************/WOOOOOOOOOOOW/WOOOOOOOOOOOW/WOOOOOOOOOOOW/WOOOOOOOOOOOW/WOOOOOOOOOOOW/*************" symmetry="()" steps="1"/>
+
+        <!-- Parti incluse: porte, scala, finestre -->
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-window"/>
+        <prl in="U" out="W"/>
+
+        <!-- Tetti a padiglione con grondaia e comignolo in pietra 3x3 -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="11" symmetry="()"/>
+        <all in="JB" out="*J" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **J**/**J**/JJJJJ/**J**/**J**" out="*****/*****/**J**/*****/***** *****/*****/*****/*****/*****" steps="5" symmetry="()"/>
+        <one in="B R" out="K *" steps="1" symmetry="()"/>
+        <all in="KB" out="*K" steps="1"/>
+        <all in="KB/*K" out="*K/**" steps="1"/>
+        <all in="K B" out="* K"/>
+        <all in="B K" out="K *" steps="7"/>
+      </sequence>
+    </map>
+  </map>
+
+  <action name="open" label="Apri la porta">
+    <all>
+      <rule in="O" out="#20"/>
+      <rule in="o" out="#21"/>
+    </all>
+  </action>
+  <action name="close" label="Chiudi la porta">
+    <all>
+      <rule in="#20" out="O"/>
+      <rule in="#21" out="o"/>
+    </all>
+  </action>
+
+  <color symbol="B" value="000000" hidden="True" name="aria"/>
+  <color symbol="E" value="6E8B4E" hidden="True" name="suolo"/>
+  <color symbol="H" value="D4A76A" name="origine"/>
+  <color symbol="m" value="D4A76A" name="asse"/>
+  <color symbol="h" value="C9A87C" area="house" name="sala"/>
+  <color symbol="w" value="E8DFD1" name="muro della casa"/>
+  <color symbol="j" value="D8CEBE" name="muro interno"/>
+  <color symbol="s" value="8C6239" area="house" name="scala"/>
+  <color symbol="d" value="6B4226" name="porta"/>
+  <color symbol="p" value="A89882" area="porch" name="portico"/>
+  <color symbol="b" value="5C3A21" name="pilastro"/>
+  <color symbol="r" value="A39B8B" area="road" name="strada"/>
+  <color symbol="a" value="A68A5B" area="barn" name="stalla"/>
+  <color symbol="v" value="9E5A40" name="muro della stalla"/>
+  <color symbol="c" value="C7B889" area="yard" name="aia"/>
+  <color symbol="q" value="4F86A8" name="pozzo"/>
+  <color symbol="y" value="D6B152" area="yard" name="fieno"/>
+  <color symbol="l" value="7D6D42" area="field" name="campo"/>
+  <color symbol="t" value="4A7A42" name="albero"/>
+
+  <color symbol="W" value="EADFC9" name="intonaco caldo"/>
+  <color symbol="V" value="A65E42" name="muro della stalla"/>
+  <color symbol="f" value="C9A87C" area="house" name="pavimento in legno"/>
+  <color symbol="F" value="B8956A" name="solaio in legno"/>
+  <color symbol="P" value="969086" area="porch" name="pietra"/>
+  <color symbol="X" value="5C3A21" name="legno scuro"/>
+  <color symbol="R" value="B84A39" name="tegole della casa"/>
+  <color symbol="J" value="8F563B" name="tetto in legno e tegole"/>
+  <color symbol="L" value="4A7A42" name="chioma"/>
+  <color symbol="K" value="8C857B" name="comignolo in pietra"/>
+  <color symbol="Y" value="D6B152" name="pagliaio"/>
+  <color symbol="Q" value="969086" name="bordo del pozzo"/>
+  <color symbol="u" value="4F86A8" name="acqua"/>
+  <color symbol="Z" value="5C3A21" name="recinzione"/>
+
+  <color symbol="T" value="8C6239" name="striscia scala"/>
+  <color symbol="k" value="A67C52" name="gradino"/>
+  <color symbol="O" value="7A4B2A" name="porta di legno"/>
+  <color symbol="o" value="4A2C16" name="assi della porta"/>
+  <color symbol="N" value="5C3820" name="infisso in legno"/>
+  <color symbol="U" value="EADFC9" name="fascia finestre"/>
+  <color symbol="G" value="6B9EC2" name="vetro"/>
+  <color symbol="#20" value="7A4B2A" hidden="True" name="porta aperta"/>
+  <color symbol="#21" value="4A2C16" hidden="True" name="assi aperte"/>
+  <color symbol="#90" value="000000" hidden="True" name="segno"/>
+  <color symbol="#91" value="000000" hidden="True" name="segno"/>
+  <color symbol="#92" value="000000" hidden="True" name="segno"/>
+</sequence>

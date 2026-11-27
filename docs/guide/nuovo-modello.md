@@ -254,6 +254,11 @@ La sola misura che dice se il modello vale (T465, `modelli.md` 1.5):
 - [ ] La patch in `docs/pipeline/prove/<Txx>-<modello>-<task>.patch`, il verdetto in una riga onesta («pari sul risultato, peggiore sulla
   misura del diff»), su una prova sola.
 - Tetto: un task di stima ~3 % sul conto del modello nuovo; niente prova durante un task vero dello stesso conto.
+- **Il criterio, scritto prima della prova** (T516): passa se (a) i test di Opus passano sul suo codice, (b) i suoi passano su quello di
+  Opus, (c) il typecheck è verde, (d) il diff non supera due volte quello di Opus in righe, (e) i punti di contatore spesi stanno entro ciò che
+  la pipeline gli attribuisce (`stima` × moltiplicatore). Neon su T423 (T465) ha passato (a), (b), (c), non (d); (e) non era misurato.
+- **Le stime dai task veri**: dopo i primi task in prova si confrontano i punti spesi con quelli previsti (`consumi.jsonl`, `prima` e `dopo`);
+  per Neon (T516) erano 42 contro 95, un moltiplicatore di 1,1 contro il 2,5 del piano.
 
 ### B.6 Il periodo «in prova» e quando uscirne
 

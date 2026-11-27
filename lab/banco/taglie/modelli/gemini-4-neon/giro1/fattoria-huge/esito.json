@@ -1,0 +1,63 @@
+{
+ "concetto": "fattoria",
+ "taglia": "huge",
+ "scultore": "gemini-4-neon",
+ "modello": "gemini-4-neon",
+ "voto": 9,
+ "chiamate": 3,
+ "secondi": 176,
+ "usd": 0.4264,
+ "usdGemini": 0.0084,
+ "via": "agy",
+ "usdAgy": 0.418,
+ "usdAgyApi": 0.326,
+ "agy": [
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 62,
+   "input": 24029,
+   "read": 0,
+   "output": 7316,
+   "thinking": 4953,
+   "turns": 1,
+   "tools": [],
+   "request": 8688,
+   "usdApi": 0.135804,
+   "usd": 0.181827
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 86,
+   "input": 28530,
+   "read": 0,
+   "output": 10040,
+   "thinking": 5318,
+   "turns": 1,
+   "tools": [],
+   "request": 13197,
+   "usdApi": 0.190191,
+   "usd": 0.23619
+  }
+ ],
+ "token": {
+  "prompt": 55758,
+  "output": 17437,
+  "thoughts": 10589
+ },
+ "perCompito": [
+  {
+   "model": "agy:gemini-4-neon-low",
+   "task": "model.sculpt",
+   "calls": 2,
+   "usd": 0.418
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0084
+  }
+ ]
+}

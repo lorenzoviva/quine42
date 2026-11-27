@@ -6753,13 +6753,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: la fontana nasce, test verdi.
 - Esito: la fontana chiesta al Referente nasce come cosa del luogo, con un modello (edificio piccolo o monumento) e senza fallire: la Fucina non dà più `structure` a una cosa del mondo né fa uno strumento di una fontana, i moduli di prima chiedono allo Scultore la classe giusta, e la cosa va nel luogo nominato o in quello del viandante (ADR-0264, kernel 0.10.40, tests/fontana.test.ts); non provato con Gemini vero, in multigiocatore (il ramo del master non posa la cosa) e per lingue diverse da italiano e inglese.
 
-### T516 · Gemini Neon: chiudere la prova e provarlo come Scultore — `da fare`
+### T516 · Gemini Neon: chiudere la prova e provarlo come Scultore — `fatto` (`28c5b528`)
 - Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2
 - Contesto: l'autore il 26/11: le verifiche per far uscire Neon dalla prova non sono mai state completate; si era parlato di provarlo come Scultore (Architetto) e di valutare la qualità del codice MarkovJunior che scrive. Neon ha fatto T479, T482, T505, T506, T480 al primo colpo. Guida: `docs/guide/nuovo-modello.md` B.6; `docs/pipeline/modelli.md` 1.4-1.5; `dossier T465`.
 - Cosa fare: (1) il rapporto della prova di pipeline: i cinque task, consumi (`consumi.jsonl`), rifacimenti, cosa manca per B.6 (la prova di qualità su un task già fatto da Opus, col criterio scritto) e la proposta per l'autore; (2) Neon come Scultore Architetto: con la CLI `agy` (abbonamento, non API) sulle stesse richieste di `lab/scripts/scultore-gemini.ts` (`--specialita` / `--modelli`: forte e fattoria alle taglie del banco), voti con la scala di `lab/banco/riferimento/ottima.ts` e i controlli dello Scultore, accanto ad Argon, Opus e Fable già misurati; se Neon è raggiungibile anche via API, il costo. Rapporto in `lab/banco/taglie/modelli/neon.md`.
 - Test: nessuno nuovo (banco).
 - Browser: no.
 - Quando è fatto: rapporto con la proposta di uscita dalla prova e i voti di Neon come Architetto; kernel invariato.
+- Esito: rapporto in `lab/banco/taglie/modelli/neon.md`. Pipeline: sei task di Neon (T475 compreso), 42 punti di settimana spesi contro 95 previsti (moltiplicatore 1,1, rapporto 5h/settimana 3,5), nessun rifacimento ma due difetti di T475 riparati da T504 e T505; proposta di uscita dalla prova in `docs/pipeline/domande/T516.md` (aperta), criterio della prova di qualità in B.5 della guida, `modelli.md` 1.6. Scultore Architetto su `agy`: 10 su 12, 0,70 $ a riuscita alla richiesta all'API, nessuna chiamata oltre i 120 s, voti 6-9, fattorie senza merli, ottima 5,4 a Grande e 4,8 a Enorme, varietà col seme quasi nulla, 26 punti delle 5 ore e 7 della settimana. Nuovi `lab/scripts/agy-cli.ts`, `agy-finta.mjs`, `scultore-gemini.ts --via agy`, `banco-ottima.ts --cartella`; kernel invariato; typecheck e suite verdi. Non provati: Neon via API, gli altri livelli, gli altri mestieri, il confronto a prompt uguale.
 
 ### T517 · Editor MJ: il testo sfasato in orizzontale — `fatto` (`78d14f09`)
 - Pipeline: claude · sforzo high · stima 1.5% · approvato · priorità 2

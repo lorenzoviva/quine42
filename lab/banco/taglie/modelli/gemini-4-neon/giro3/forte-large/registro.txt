@@ -1,0 +1,4 @@
+[sculptor] propone: «forte» (struttura grande, Architetto, gemini-4-neon)
+[kernel → sculptor] scarta: «forte»: taglia Grande, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 19 voxel (1,19 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: pezzi staccati: 48% dei voxel non poggia a terra né su ciò che vi poggia (6 pezzi)
+[artist → sculptor] approva: «forte»: 8/10 — Le finestre della torre centrale sembrano vetrate moderne azzurre anziché feritoie o aperture medievali incassate.

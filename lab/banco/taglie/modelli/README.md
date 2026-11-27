@@ -242,3 +242,11 @@ Carbon e Hydrogen, costa la metà per riuscita oggi e, dopo l'1/12, quanto Hydro
 volte e un terzo delle richieste non riceve risposta entro il tempo del gioco. **Hydrogen** è il candidato da riprovare dopo il task che ripara
 il ritorno di piani e porta (T355): è il più veloce, il solo che lascia la fattoria una fattoria, e dopo l'1/12 costa per riuscita quanto Argon;
 oggi cade sui piani. La domanda all'autore è in [`docs/pipeline/domande/T391.md`](../../../../docs/pipeline/domande/T391.md).
+
+## Gemini 4 Neon come Scultore Architetto (T516, 27/11)
+
+Neon dalla CLI di Antigravity (`--modelli gemini-4-neon --via agy`, l'abbonamento Google AI Pro, `lab/scripts/agy-cli.ts`), lo stesso giro
+di 12 strutture col prompt di oggi: **10 su 12** (6 su 6 a Grande, 4 su 6 a Enorme: il forte a Enorme cade sulle stanze troppo piccole),
+**0,70 $ per riuscita** alla sola richiesta sulla via di Google (Argon 0,74 $ dall'1/12, Opus 0,61-0,75 $), **nessuna delle 49 chiamate oltre
+i 120 s** (la più lunga 106 s), voti 6-9, nessuna fattoria fortificata, tutti i forti merlati; i programmi cambiano pochissimo col seme (0,01).
+Rapporto, scala dell'ottima, quota dell'abbonamento e proposta in [`neon.md`](neon.md).

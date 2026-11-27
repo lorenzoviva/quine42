@@ -1,0 +1,5 @@
+[sculptor] propone: «forte» (struttura grande, Architetto, gemini-4-neon)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2)
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: stanza: la più grande in cui si sta in piedi ha il lato di 19 voxel (1,19 caselle), una stanza ne vuole almeno 28 (1,75) a ogni taglia: s
+[kernel → sculptor] scarta: «forte»: taglia Enorme, seme 1: piani: 1 (serve ≥ 2)
+[sculptor] errore: «forte»: nessun programma valido
