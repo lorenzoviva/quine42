@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 717 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 718 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 717 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **718 (claude):** T514 fatto (mobili degli interni usabili, visto nel browser) ma `integra` in conflitto su versione e censimento → **T556** (merge, claude medium, in corso; ADR-0272, kernel 0.10.46). `node_modules` del base trovati vuoti alle 13:10 CET (causa ignota, forse una junction tolta male): reinstallati con `npm ci`.
 - **717 (claude):** T555 integrato (`6d9f64db`, ADR-0271 rientro e strade larghe, T548 chiuso via T555); kernel alzato a 0.10.45 per il doppione con T552 (`91fe453c`). Chieste D/T543, D/T524, D/T516. In corso T514.
-- **716 (claude):** T552 integrato (`24a792c6`: semi per modello `tileSeeds`, ADR-0270, kernel 0.10.44; non visto nel browser). T555 (merge di T548) prenderà ADR e kernel successivi. In corso T514, T555.
