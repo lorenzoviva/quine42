@@ -1,4 +1,4 @@
-// The furniture of the interiors is used (T514, ADR-0270): every piece the Scenografo's rules place in a building (voxels of the building,
+// The furniture of the interiors is used (T514, ADR-0272): every piece the Scenografo's rules place in a building (voxels of the building,
 // ADR-0214) has beside it a thing of the world the kernel makes and does not draw: of the module that wears the piece's model (its actions,
 // its container, `takeable`), or a thing with the menu of every thing; found by its box on its storey (E, the right button, the cursor);
 // a chest opens, what is put in it is saved by the piece's origin; a piece taken leaves the building's voxels (`FormComp.out`) and comes out

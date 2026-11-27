@@ -6658,7 +6658,7 @@ export class Kernel {
     this.message(`Posi: ${this.itemInfo(taken.item).name}${taken.count > 1 ? ` ×${taken.count}` : ''}`);
   }
 
-  // --- The furniture of the interiors as things of the world (T514, ADR-0270) ----------------------
+  // --- The furniture of the interiors as things of the world (T514, ADR-0272) ----------------------
 
   /**
    * The pieces of every furnished building of the world (T514): by building, what its pieces were made for (`fp`: its look, the pieces it
@@ -6672,7 +6672,7 @@ export class Kernel {
   }
 
   /**
-   * The thing of a piece of a building's interior (T514, ADR-0270): of the module that wears its model (`pieceModule`: its actions, its
+   * The thing of a piece of a building's interior (T514, ADR-0272): of the module that wears its model (`pieceModule`: its actions, its
    * container, `takeable`), or, if none does, a thing with the menu of every thing; where the piece stands, on its storey; of the building's
    * place. Undefined when the building stands nowhere one can say.
    */
@@ -6735,7 +6735,7 @@ export class Kernel {
   }
 
   /**
-   * The things of the pieces of the furnished buildings in the world (T514, ADR-0270), every tick, cheap: a building is looked at again only
+   * The things of the pieces of the furnished buildings in the world (T514, ADR-0272), every tick, cheap: a building is looked at again only
    * when its look, its pieces left out or its stage changed, or a form got ready. A piece the world took away (taken, broken: its origin
    * `consumed`) leaves its building (`takeOut`); one whose thing is there stays as it is (its state, what its container holds); one that is
    * no longer in the building (another interior) leaves the world, what its container holds kept by its origin.

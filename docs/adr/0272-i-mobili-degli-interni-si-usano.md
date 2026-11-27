@@ -1,4 +1,4 @@
-# ADR-0270 — I mobili degli interni si usano
+# ADR-0272 — I mobili degli interni si usano
 
 - **Stato**: accettato
 - **Data**: 2026-11-27

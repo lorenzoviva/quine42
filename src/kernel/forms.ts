@@ -163,7 +163,7 @@ export interface FormComp {
   /** The stratum this building's cellar is dug into (T479, ADR-0253): only affects forms whose interior has stratum rules. */
   stratum?: string;
   /**
-   * The pieces of its interior taken away (T514, ADR-0270): their keys (`pieceKeys`), sorted. The instance's grid is its form's without
+   * The pieces of its interior taken away (T514, ADR-0272): their keys (`pieceKeys`), sorted. The instance's grid is its form's without
    * their voxels (`instanceGrid`), as an open door is its form's with the door's action done; the kernel writes it from `consumed`.
    */
   out?: string[];

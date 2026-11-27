@@ -1,4 +1,4 @@
-// The furniture of the interiors as things of the world (T514, ADR-0270). The Scenografo's pieces are voxels of their building
+// The furniture of the interiors as things of the world (T514, ADR-0272). The Scenografo's pieces are voxels of their building
 // (`furnishWithRules`, ADR-0214): drawn with it, one mesh, and its walls and floors for whoever walks. So that they are used too, the
 // kernel puts beside every piece placed a thing of the world that is not drawn (a «piece», component `fitted`): of the module that
 // wears the piece's model (`pieceModule`: its actions, its container, `takeable`), standing where the piece stands, on its storey; a

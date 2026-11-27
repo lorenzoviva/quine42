@@ -87,7 +87,7 @@ export interface FormView {
   done?: string[];
   /** The stratum this building's cellar is dug into (T479, ADR-0253), when it has a cellar. */
   stratum?: string;
-  /** The pieces of its interior taken away (T514, ADR-0270): their keys, which the client's form of the building draws without. */
+  /** The pieces of its interior taken away (T514, ADR-0272): their keys, which the client's form of the building draws without. */
   out?: string[];
 }
 

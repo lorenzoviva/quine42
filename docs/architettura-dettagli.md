@@ -2279,7 +2279,7 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   locali (`author: offline`) si richiede quando non lo sono. Compito comune, lento quanto basta per la coda degli abbonamenti, con il passo
   `interno:<modello>` della generazione differita. Le case del borgo del seme portano la casa generica `structure` (1,7 caselle² a terra):
   restano nude.
-- **I mobili degli interni si usano** (ADR-0270, T514): i mobili posati restano voxel dell'edificio (una mesh, i suoi pavimenti), e accanto a
+- **I mobili degli interni si usano** (ADR-0272, T514): i mobili posati restano voxel dell'edificio (una mesh, i suoi pavimenti), e accanto a
   ognuno il kernel fa una cosa del mondo che **non si disegna** (il componente `fitted`, `src/kernel/fitted.ts`): del modulo che indossa il
   modello del mobile (`pieceModule`: un'entità non qualcuno, non un veicolo, non unica; prima quella ferma che fa qualcosa, poi per id), con
   le sue azioni, il suo contenitore e `takeable`, o, se nessun modulo lo indossa, una cosa col menu di ogni cosa (Esamina, Altro…, Posa),
