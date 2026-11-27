@@ -1,0 +1,84 @@
+{
+ "concetto": "forte",
+ "taglia": "huge",
+ "scultore": "gemini-4-neon",
+ "chiamate": 4,
+ "secondi": 319,
+ "usd": 0.854,
+ "usdGemini": 0,
+ "via": "agy",
+ "usdAgy": 0.854,
+ "usdAgyApi": 0.7533,
+ "agy": [
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 68,
+   "input": 24174,
+   "read": 0,
+   "output": 7401,
+   "thinking": 5155,
+   "turns": 1,
+   "tools": [],
+   "request": 8833,
+   "usdApi": 0.137514,
+   "usd": 0.183537
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 84,
+   "input": 28465,
+   "read": 0,
+   "output": 9817,
+   "thinking": 5853,
+   "turns": 1,
+   "tools": [],
+   "request": 13126,
+   "usdApi": 0.186633,
+   "usd": 0.23265
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 48,
+   "input": 26056,
+   "read": 14619,
+   "output": 6055,
+   "thinking": 2096,
+   "turns": 1,
+   "tools": [],
+   "request": 25336,
+   "usdApi": 0.166833,
+   "usd": 0.171186
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 102,
+   "input": 25851,
+   "read": 14619,
+   "output": 12461,
+   "thinking": 8497,
+   "turns": 1,
+   "tools": [],
+   "request": 25136,
+   "usdApi": 0.262323,
+   "usd": 0.266661
+  }
+ ],
+ "token": {
+  "prompt": 133784,
+  "output": 35734,
+  "thoughts": 21601
+ },
+ "perCompito": [
+  {
+   "model": "agy:gemini-4-neon-low",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.854
+  }
+ ],
+ "errore": "nessun programma valido"
+}

@@ -1,0 +1,206 @@
+<!-- forte: sculpted by gemini-4-neon (step 9), the Artist's vote 8/10 -->
+<sequence values="BHE" symmetry="(xy)" soil="E" origin="bottom">
+  <map scale="1/5 1/5 1" values="BHEhiKscWlGmdnrbtvQa" symmetry="()">
+    <rule in="E" out="E"/>
+    <rule in="H" out="H"/>
+    <sequence symmetry="(xy)">
+      <!-- Spostamento casuale del centro del mastio per variare la sagoma tra i semi -->
+      <one in="HE" out="EH" symmetry="(x)" steps="2"/>
+      <prl in="E/H" out="H/E" p="0.5" steps="1" symmetry="()"/>
+
+      <!-- Mastio: almeno 7x8 celle interne (35x40 voxel) per avere >=30 voxel liberi davanti alla scala -->
+      <all in="E/[Hh]" out="h/*" symmetry="()" steps="4"/>
+      <all in="[Hh]/E" out="*/h" symmetry="()" steps="3"/>
+      <prl in="E/h" out="h/*" p="0.5" steps="1" symmetry="()"/>
+      <all in="[Hhi]E" out="*i" symmetry="(x)" steps="3"/>
+      <prl in="h" out="i"/>
+      <all in="[Hi]E" out="*K"/>
+      <all in="KE/*K" out="*K/**"/>
+
+      <!-- Zona della scala del mastio lungo il muro posteriore (2 celle pianerottolo + 4 scala + 1 sbarco) -->
+      <one in="KKKKKKK/iiiiiii/iiiiiii" out="*******/**ssss*/**ssss*" symmetry="()" steps="1"/>
+
+      <!-- Cortile base attorno al mastio e braccio asimmetrico casuale (anche a Large) -->
+      <all in="KE" out="*c" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <one in="cEEEE/cEEEE/cEEEE/cEEEE" out="*cc**/*cc**/*cc**/*cc**" steps="1"/>
+
+      <!-- Espansione del cortile dove c'è spazio (Huge e Gargantuan) e bracci casuali per sagome spezzate -->
+      <all in="cEEEEEE" out="*cccc**" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+      <one in="cEEEEEE/cEEEEEE/cEEEEEE/cEEEEEE/cEEEEEE" out="*ccc***/*ccc***/*ccc***/*ccc***/*ccc***" steps="2"/>
+      <all in="cEEEEEEEE" out="*cccc****" steps="1"/>
+      <all in="cE/*c" out="*c/**"/>
+
+      <!-- Cinta muraria attorno al cortile (spessa 2 celle dove resta ampio spazio) -->
+      <all in="cE" out="*W"/>
+      <all in="WE/*W" out="*W/**"/>
+      <all in="WEEEEEE" out="*W*****" steps="1"/>
+      <all in="WE/*W" out="*W/**"/>
+
+      <!-- Torri d'angolo 3x3 su ogni spigolo convesso esterno della cinta -->
+      <all in="EE/EW" out="**/*t"/>
+      <all steps="1">
+        <rule in="t[EW]" out="*t"/>
+        <rule in="t*/*[EW]" out="**/*t"/>
+      </all>
+
+      <!-- Via d'uscita dal centro al fronte: portone del mastio (d), via nel cortile (n), corpo di guardia (G), strada (r) -->
+      <all in="H/i" out="*/m" symmetry="()" steps="1"/>
+      <all in="m/i" out="*/m" symmetry="()"/>
+      <all in="m/K" out="*/d" symmetry="()" steps="1"/>
+      <all in="[dn]/c" out="*/n" symmetry="()"/>
+      <all in="[nG]/W" out="*/G" symmetry="()"/>
+      <all in="[Gr]/E" out="*/r" symmetry="()"/>
+      <all in="dK" out="*d" symmetry="(x)" steps="1"/>
+      <all in="nc" out="*n" symmetry="(x)" steps="1"/>
+      <all in="GW" out="*G" symmetry="(x)" steps="1"/>
+      <all in="rE" out="*r" symmetry="(x)" steps="1"/>
+      <prl>
+        <rule in="m" out="i"/>
+        <rule in="H" out="i"/>
+      </prl>
+
+      <!-- Caserma coperta (6x4 celle) addossata alla cinta con 2 celle (10 voxel) di cortile libero davanti, e pozzo -->
+      <one in="WWWWWWWW/cccccccc/cccccccc/cccccccc/cccccccc/cccccccc/cccccccc" out="********/vbbbbbbv/vbbbbbbv/vbbbbbbv/vbbbbbbv/********/********" steps="1"/>
+      <one in="ccccc/ccccc/ccccc/ccccc/ccccc" out="*****/*****/**Q**/*****/*****" steps="1"/>
+
+      <!-- Fossato esterno dove resta terreno libero oltre la cinta (Gargantuan) -->
+      <all in="cWWEEEEE" out="***aa***" steps="1"/>
+      <all in="[Wt]E/*a" out="**/*a"/>
+      <all in="aE/*a" out="*a/**"/>
+
+      <!-- Lastricato sparso nel cortile -->
+      <convchain on="c" black="c" white="l" n="3" steps="6"><sample>cccllll/cccllll/ccclllc/llccccc/llcccll/lllccll/cllllcc</sample></convchain>
+    </sequence>
+
+    <map scale="5 5 1" values="BEfFgKWtvRclnrQaisdhwpmbq xOoNTkGMU#20#21#90#91#92#94" symmetry="()">
+      <rule in="E" out="EEEEE/EEEEE/EEEEE/EEEEE/EEEEE"/>
+      <rule in="c" out="ccccc/ccccc/ccccc/ccccc/ccccc"/>
+      <rule in="l" out="lllll/lllll/lllll/lllll/lllll"/>
+      <rule in="n" out="nnnnn/nnnnn/nnnnn/nnnnn/nnnnn"/>
+      <rule in="r" out="rrrrr/rrrrr/rrrrr/rrrrr/rrrrr"/>
+      <rule in="a" out="aaaaa/aaaaa/aaaaa/aaaaa/aaaaa"/>
+      <rule in="i" out="iiiii/iiiii/iiiii/iiiii/iiiii"/>
+      <rule in="s" out="sssss/sssss/sssss/sssss/sssss"/>
+      <rule in="K" out="hhhhh/hhhhh/hhhhh/hhhhh/hhhhh"/>
+      <rule in="d" out="ddddd/ddddd/ddddd/ddddd/ddddd"/>
+      <rule in="W" out="wwwww/wwwww/wwwww/wwwww/wwwww"/>
+      <rule in="G" out="xxxxx/xxxxx/xxxxx/xxxxx/xxxxx"/>
+      <rule in="t" out="ppppp/ppppp/ppppp/ppppp/ppppp"/>
+      <rule in="b" out="bbbbb/bbbbb/bbbbb/bbbbb/bbbbb"/>
+      <rule in="v" out="mmmmm/mmmmm/mmmmm/mmmmm/mmmmm"/>
+      <rule in="Q" out="qqqqq/qaaaq/qaaaq/qaaaq/qqqqq"/>
+
+      <sequence symmetry="(xy)">
+        <union symbol="+" values="KWtv"/>
+        <union symbol="=" values="fFg"/>
+        <union symbol="%" values="KWt"/>
+
+        <!-- B. Altezze: mura del mastio (65 voxel con due fasce finestre U) -->
+        <all in="B h" out="h K" steps="6"/>
+        <all in="B h" out="h U" steps="12"/>
+        <all in="B h" out="h K" steps="20"/>
+        <all in="B h" out="h U" steps="12"/>
+        <all in="B h" out="h K" steps="14"/>
+        <prl in="h" out="K"/>
+
+        <!-- Portone del mastio: seme O sul pavimento, poi muro K fino in cima -->
+        <all in="B d" out="d O" steps="1"/>
+        <all in="B d" out="d K" steps="63"/>
+        <prl in="d" out="K"/>
+
+        <!-- Sala del mastio e scala: 2 piani coperti (pavimento z=0, scala z=1, solaio z=32, terrazza z=64) -->
+        <all steps="1">
+          <rule in="B i" out="i f"/>
+          <rule in="B s" out="s f"/>
+        </all>
+        <all in="B s" out="s T" steps="1"/>
+        <all in="B i" out="i B" steps="31"/>
+        <all in="B s" out="s B" steps="30"/>
+        <all steps="1">
+          <rule in="B i" out="i F"/>
+          <rule in="B s" out="s F"/>
+        </all>
+        <all steps="31">
+          <rule in="B i" out="i B"/>
+          <rule in="B s" out="s B"/>
+        </all>
+        <prl>
+          <rule in="i" out="F"/>
+          <rule in="s" out="F"/>
+        </prl>
+
+        <!-- Cinta muraria (24 voxel) e corpo di guardia (38 voxel con seme O) -->
+        <all in="B w" out="w W" steps="23"/>
+        <prl in="w" out="W"/>
+        <all in="B x" out="x O" steps="1"/>
+        <all in="B x" out="x W" steps="36"/>
+        <prl in="x" out="W"/>
+
+        <!-- Torri d'angolo (44 voxel) -->
+        <all in="B p" out="p t" steps="43"/>
+        <prl in="p" out="t"/>
+
+        <!-- Caserma coperta (32 voxel + tetto R) e pozzo (4 voxel) -->
+        <all in="B m" out="m v" steps="31"/>
+        <prl in="m" out="R"/>
+        <all in="B b" out="b g" steps="1"/>
+        <all in="B b" out="b B" steps="31"/>
+        <prl in="b" out="R"/>
+        <all in="B q" out="q Q" steps="3"/>
+        <prl in="q" out="Q"/>
+
+        <!-- C. Scala piena: porte, scale, finestre, merli, feritoie, tetto della caserma -->
+        <import file="part-door"/>
+        <import file="part-stair"/>
+        <import file="part-window"/>
+        <prl in="U" out="K"/>
+        <import file="part-battlements"/>
+        <import file="part-slits"/>
+
+        <!-- Tetto a padiglione della caserma -->
+        <all in="RB" out="*R" steps="1"/>
+        <all in="*****/*****/**B**/*****/***** **R**/**R**/RRRRR/**R**/**R**" out="*****/*****/**R**/*****/***** *****/*****/*****/*****/*****" steps="7" symmetry="()"/>
+      </sequence>
+    </map>
+  </map>
+
+  <color symbol="E" value="6A8E4E" hidden="True" name="Terreno"/>
+  <color symbol="f" value="C8A878" area="keep" name="Pavimento del mastio"/>
+  <color symbol="F" value="B09468" area="keep" name="Solaio del mastio"/>
+  <color symbol="g" value="B8986A" area="barracks" name="Pavimento della caserma"/>
+  <color symbol="K" value="6E6A63" area="keep" name="Mura del mastio"/>
+  <color symbol="W" value="7E7A72" area="wall" name="Cinta muraria"/>
+  <color symbol="t" value="5E5A54" area="tower" name="Torre d'angolo"/>
+  <color symbol="v" value="8A7F70" area="barracks" name="Muro della caserma"/>
+  <color symbol="R" value="A64B3C" area="barracks" name="Tetto della caserma"/>
+  <color symbol="M" value="8C877E" name="Merli"/>
+  <color symbol="O" value="5C3A21" name="Portone"/>
+  <color symbol="o" value="3E2514" name="Assi del portone"/>
+  <color symbol="N" value="4A443C" name="Cornice in pietra"/>
+  <color symbol="G" value="7CA6B8" name="Vetro"/>
+  <color symbol="k" value="9C7A54" name="Gradini"/>
+  <color symbol="U" value="2B2825" name="Feritoia"/>
+  <color symbol="c" value="9E8F6E" area="courtyard" name="Cortile"/>
+  <color symbol="l" value="ABA396" area="courtyard" name="Lastricato del cortile"/>
+  <color symbol="n" value="B5ADA0" area="courtyard" name="Via del cortile"/>
+  <color symbol="r" value="C2B28F" area="road" name="Strada"/>
+  <color symbol="Q" value="68645D" area="courtyard" name="Pozzo"/>
+  <color symbol="a" value="4A7C9B" area="moat" name="Acqua"/>
+  <color symbol="#20" value="5C3A21" hidden="True" name="Portone aperto"/>
+  <color symbol="#21" value="3E2514" hidden="True" name="Assi aperte"/>
+
+  <action name="open" label="Apri il portone">
+    <all>
+      <rule in="O" out="#20"/>
+      <rule in="o" out="#21"/>
+    </all>
+  </action>
+  <action name="close" label="Chiudi il portone">
+    <all>
+      <rule in="#20" out="O"/>
+      <rule in="#21" out="o"/>
+    </all>
+  </action>
+</sequence>

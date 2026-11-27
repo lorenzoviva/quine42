@@ -129,7 +129,22 @@
 
 - **Il prezzo**: Neon costa a token 3/15 $ (cache 0,15), Argon 2/10 $ fino al 30/11 e **4/20 $ dall'1/12** (`src/kernel/ai/prices.ts`), 3.8 Flash 0,75/3,75 $ fino al 31/12. Dall'1/12 Neon costa **un quarto meno di Argon** a token; resta **quattro volte** 3.8 Flash.
 - **Dove sì, da provare**: lo **Scultore delle strutture sulla via di Google** (`DEFAULT_SCULPTORS.structure`, oggi Argon, che dall'1/12 raddoppia; su OpenRouter le strutture vanno già a Opus 5.5). Il banco c'è (`lab/scripts/scultore-gemini.ts --modelli gemini-4-neon`, T391): Argon riusciva 6 su 8 a 0,37 $ per riuscita (0,74 $ dall'1/12), Carbon 4 su 12, Hydrogen 4 su 12. Se Neon riuscisse almeno come Argon, a parità di token costerebbe circa **0,55 $** per riuscita dall'1/12. Stima del giro (12 strutture, Grande ed Enorme, come T391): **3-5 $** sulla chiave di Google, un task `claude` da ~3 %. Da sapere prima: se la Gemini API dà `gemini-4-neon` con lo schema JSON (l'annuncio non lo dice; lo Scultore delle strutture scrive XML e non ne ha bisogno, il resto del Concilio sì) e la latenza contro i 120 s di `ai.timeout` (Carbon li passava una chiamata su nove).
+- **Misurato poi (T516, 27/11)**: lo Scultore delle strutture su Neon dalla CLI `agy`, 10 su 12, 0,70 $ a riuscita alla richiesta sulla via di
+  Google, nessuna chiamata oltre i 120 s; vedi 1.6.
 - **Dove no**: Narratore, Cartografo, Attore e le cose semplici restano su 3.8 Flash e 3.1 Flash-Lite (quattro volte meno, e lì non serve un modello da agente di programmazione); l'Artista resta su 3.5 Flash finché non si sa se Neon prende immagini via API (l'annuncio non lo dice); le figure restano su 3.8 Flash. Neon non è nell'elenco di OpenRouter (`src/kernel/ai/openrouter.ts`): sulla via di OpenRouter non cambierebbe niente finché non c'è il suo id.
+
+### 1.6 I sei task di Neon nella pipeline e lo Scultore (T516, 27/11/2026)
+
+Il rapporto intero è [`lab/banco/taglie/modelli/neon.md`](../../lab/banco/taglie/modelli/neon.md); la decisione sull'uscita dalla prova è
+[`domande/T516.md`](domande/T516.md).
+
+- **Sei task il 23/11** (T479, T482, T475, T505, T506, T480; quattro di kernel, con `orchestrabile` acceso dall'autore il 22/11): tutti al
+  primo tentativo e integrati; T475 ha avuto due difetti trovati nel browser da Opus (T503) e riparati da T504 e T505.
+- **Le stime sono il doppio del vero**: 42 punti della settimana di `Gemini Models` spesi contro 95 previsti (`stima` × 2,5 del piano Pro);
+  per Neon il moltiplicatore misurato è **1,1**. Il rapporto 5 ore / settimana è **3,5** (provvisorio 3,3).
+- **Come Scultore Architetto** (dalla CLI `agy`, `-low`): 10 strutture su 12, voti 6-9, nessuna fattoria fortificata, nessuna chiamata oltre
+  i 120 s del gioco, 0,70 $ per riuscita alla sola richiesta all'API (Argon 0,74 $ dall'1/12); i programmi cambiano poco col seme. Tre giri
+  hanno preso 26 punti delle 5 ore e 7 della settimana di `Gemini Models`.
 
 ---
 

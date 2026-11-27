@@ -1,0 +1,91 @@
+{
+ "concetto": "forte",
+ "taglia": "large",
+ "scultore": "gemini-4-neon",
+ "modello": "gemini-4-neon",
+ "voto": 8,
+ "chiamate": 5,
+ "secondi": 306,
+ "usd": 0.7975,
+ "usdGemini": 0.0085,
+ "via": "agy",
+ "usdAgy": 0.7889,
+ "usdAgyApi": 0.6882,
+ "agy": [
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 68,
+   "input": 24133,
+   "read": 0,
+   "output": 6698,
+   "thinking": 4766,
+   "turns": 1,
+   "tools": [],
+   "request": 8799,
+   "usdApi": 0.126867,
+   "usd": 0.172869
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 104,
+   "input": 12767,
+   "read": 14619,
+   "output": 10693,
+   "thinking": 6674,
+   "turns": 1,
+   "tools": [],
+   "request": 12039,
+   "usdApi": 0.196512,
+   "usd": 0.200889
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 66,
+   "input": 39815,
+   "read": 0,
+   "output": 8079,
+   "thinking": 4179,
+   "turns": 1,
+   "tools": [],
+   "request": 24468,
+   "usdApi": 0.194589,
+   "usd": 0.24063
+  },
+  {
+   "model": "gemini-4-neon-low",
+   "task": "model.sculpt",
+   "seconds": 50,
+   "input": 25207,
+   "read": 14619,
+   "output": 6449,
+   "thinking": 2547,
+   "turns": 1,
+   "tools": [],
+   "request": 24487,
+   "usdApi": 0.170196,
+   "usd": 0.174549
+  }
+ ],
+ "token": {
+  "prompt": 134222,
+  "output": 32003,
+  "thoughts": 18520
+ },
+ "perCompito": [
+  {
+   "model": "agy:gemini-4-neon-low",
+   "task": "model.sculpt",
+   "calls": 4,
+   "usd": 0.7889
+  },
+  {
+   "model": "gemini-3.5-flash",
+   "task": "model.judge",
+   "calls": 1,
+   "usd": 0.0085
+  }
+ ]
+}

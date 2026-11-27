@@ -1,0 +1,3 @@
+[sculptor] propone: «fattoria» (struttura grande, Architetto, gemini-4-neon)
+[kernel → sculptor] scarta: «fattoria»: taglia Enorme, seme 1: porta: 6 × 30 voxel (0,38 × 1,88 caselle), una porta è almeno 11 × 30 a ogni taglia; stanze: una stanza a terra di 5,8 caselle² non si ra
+[artist → sculptor] obietta: «fattoria»: 6/10 — Il tetto spiovente rosso è troppo alto ed imponente rispetto al corpo dell'edificio, occupando oltre la metà dell'altezza totale.
