@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 714 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 715 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 714 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **715 (claude):** T548 fatto (rientro, cordolo, strade larghe, visto nel browser) ma in conflitto con T545 in 7 file → **T555** (claude high, priorità 0; ADR-0270, kernel 0.10.44). In corso T514, T552 (hydrogen).
 - **714 (claude):** T554 integrato (`6f4560cc`) e con lui T545 (`18d6f897`: copertura dei terreni C1, ADR-0269, kernel 0.10.43, visto nel browser). In corso T548; sbloccati T546, T552.
-- **713 (claude):** T545 fatto ma in conflitto in AGENTS.md con T527 → T554.
