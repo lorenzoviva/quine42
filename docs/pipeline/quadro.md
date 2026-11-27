@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 715 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **715 (claude):** T548 fatto (rientro, cordolo, strade larghe, visto nel browser) ma in conflitto con T545 in 7 file → **T555** (claude high, priorità 0; ADR-0270, kernel 0.10.44). In corso T514, T552 (hydrogen).
-- **714 (claude):** T554 integrato (`6f4560cc`) e con lui T545 (`18d6f897`: copertura dei terreni C1, ADR-0269, kernel 0.10.43, visto nel browser). In corso T548; sbloccati T546, T552.
+- **716 (claude):** T552 integrato (`24a792c6`: semi per modello `tileSeeds`, ADR-0270, kernel 0.10.44; non visto nel browser). T555 (merge di T548) prenderà ADR e kernel successivi. In corso T514, T555.
+- **715 (claude):** T548 fatto ma in conflitto con T545 in 7 file → **T555** (claude high, priorità 0).
