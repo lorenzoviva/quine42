@@ -3,20 +3,20 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md).
 
-Aggiornato il 27/11/2026 18:54 CET, epoca 732 (neon). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026 19:03 CET, epoca 733 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
 - **Obiettivo imminente (scadenza 1/12):** arrivare al **28-29/11** col nuovo motore MarkovJunior allineato (catena **A1**, T525-T535) e le prove sulle strutture modulari chiuse, per lanciare la generazione degli universi coi **100 $ di crediti API Anthropic** (scadono l'1/12; generatore già predisposto con **T542** integrato). **Soglia concordata:** aspettare al massimo il **27 o 28 sera**; se catena/ecosistema non sono pronti, partire comunque con la generazione per non sprecare i 100 $.
 - **Catena A1 (allineamento MJ, step 44, p0):** integrati T525, T526, T527, T528 (via T558, `c2ae1a05`, ADR-0273, kernel `0.10.46`), T529 (`93fb97da`, ADR-0274: `path`/`convolution`/`convchain`/`d`, 21/36 modelli voxel per voxel), T531. **In corso (sospeso per limite 5h):** **T530** (A1-5 `wfc` e inferenza, claude max). Seguono a p0: T532 → T533 (migrazione 0.10→0.11) → T534, T535; poi a p2 T536-T539.
-- **Strutture modulari (step 44):** **i quartieri di T543 restano validi** (l'autore li preferisce alle foto degli estratti di T557). **T557** (terza prova, claude max, solo `lab/` e `docs/`) è **sospeso per limite 5h** praticamente finito e si chiude/integra alle 19:01. **T559** (quarta prova, claude high, 4 %, p1, approvato, dipende da T557) già in coda su `lab/banco/conferma/` per **`moderna`** (confronto diretto con `villa` di T543), **`steampunk`** e **`locanda`**.
+- **Strutture modulari (step 44):** **i quartieri di T543 restano validi** (l'autore li preferisce alle foto degli estratti di T557). **T557** (terza prova) **integrato** (`7f3ebf7a`): due set estratti (palazzina `neapolis` 49 tasselli, locanda `mesa` 65), programmi MJ completi, 7 domande D1-D7 in `domande/T557.md` (consiglio A a tutte, catena M1-M6 ~33 %). **T559** (quarta prova, claude high, 4 %, p1) sbloccato, parte al prossimo slot Claude.
 - **Terreno 3D e copertura (step 45):** rilievo vero, fondale, cascate, strati e regola 10 integrati (T474-T480, T482, T509); copertura C1 (`T545`), grana C3 (`T547`), rientro C4 (`T548`), semi C8 (`T552`) integrati; pronti C2 (`T546`), C5 (`T549`), C6 (`T550`), C7 (`T551`), poi C9 (`T553`).
 - **Fasi e piattaforma:** Fase I/II in corso (run #2: T510, T513, T514 integrati; pronto T511→T512); Fase IV open beta preparata (T361-T368 integrati: OpenRouter PKCE + ZDR, `QUINE_PAGAMENTI=spenti`, inviti, Dockerfile/compose, `site/ia.html`; da provare su VM con T45f). Acqua/spazio (step 37): integrati T437-T449 (nuoto, veicoli, arcipelago, porti, vuoto, capsule, pianeti, aria); restano T444, T450.
 
 ## Pronti e priorità
 
-- **Ripresa dopo spegnimento (27/11 18:49 CET `ferma --ora`):** `daIntegrare`: nessuno. **In corso (fermi per limite 5h Claude fino alle 19:00 CET / 18:00Z):** **T530** (p0, A1-5) e **T557** (p1, strutture modulari) — riprendono in automatico tra ~6 min; appena T557 è integrato parte **T559** (p1).
-- **Crediti al 27/11 18:54 CET (residuo):** `claude` settimana 65 % (reset 3/12 16:00Z), **5h 0 % fino alle 19:00 CET** (tetto 3); `fable` sospeso; `agy` (`neon`/`hydrogen`/`gemini`/`argon`/`orchestrator`) Gemini Models settimana 86 %, 5h 96 % (reset 23:14 CET, tetto 1). `generatore` acceso ma fermo finché Claude è fermo.
+- **In corso:** **T530** (p0, A1-5, max) e **T546** (p2, C2, extra); T557 integrato; prossimo slot → **T559**.
+- **Crediti al 27/11 19:03 CET (residuo):** `claude` settimana 64 %, 5h 83 % (reset 23:00Z+1 = 00:00 CET); `agy` settimana 86 %, 5h 95 % (reset 23:14 CET); `fable` sospeso; generatore acceso, nessun universo da generare.
 - **Pronti in coda (tutti su `claude`):** p1 `T511` (più `T559` bloccato su `T557`); p2 `T546`, `T549`, `T550`, `T551`, `T519`, `T520`, `T523`, `T481`, `T483`; p3 `T541`. `daApprovare`: `T369`.
 
 ## Attese dall'autore
@@ -35,5 +35,5 @@ Aggiornato il 27/11/2026 18:54 CET, epoca 732 (neon). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **733 (claude):** integrato T557; T559 sbloccato; domande T557 tenute per il blocco unico dopo T559.
 - **732 (neon):** ripresa dopo spegnimento `ferma --ora` (18:49 CET); `daIntegrare` vuoto, T530 e T557 fermi per limite 5h Claude fino al reset delle 19:00 CET.
-- **731 (neon):** autore conferma piano A, tiene validi i quartieri di T543 e sceglie la terna `moderna` + `steampunk` + `locanda`; pianificato e approvato **T559** (claude high, 4 %, p1, dipende da T557, step 44).
