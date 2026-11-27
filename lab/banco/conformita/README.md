@@ -29,9 +29,11 @@ nostro motore all'originale (la scelta A1 dell'autore del 22/11). Qui tre motori
 ```bash
 npx vite-node lab/scripts/conformita-mj.ts -- --caso [--registra]           # System.Random: la copia contro .NET (serve caso/ costruito)
 npx vite-node lab/scripts/conformita-mj.ts -- --programmi [--registra]      # c1-c11 e l'esempio: l'originale, il riferimento, il nostro motore
-npx vite-node lab/scripts/conformita-mj.ts -- --modelli [--semi 1,2,3] [--solo Growth,Keys] [--originale] [--registra]
+npx vite-node lab/scripts/conformita-mj.ts -- --modelli [--semi 1,2,3] [--solo Growth,Keys] [--originale] [--registra] [--mj]
                                                                             # i 36 modelli 3D: con --originale il C# contro il riferimento,
-                                                                            # voxel per voxel; poi il nostro motore, per le lettere che scrive
+                                                                            # voxel per voxel; poi il nostro motore, per le lettere che scrive;
+                                                                            # con --mj il nostro motore con l'interruttore della semantica acceso,
+                                                                            # contro il riferimento voxel per voxel (anche con --programmi)
 npx vite-node lab/scripts/conformita-mj.ts -- --varianza [--semi 6] [--universi <cartella>] [--solo-concilio] [--solo-mxgmn]
                                                                             # quanto variano fra i semi i programmi del seme, del forte, degli
                                                                             # universi e di mxgmn (nel riferimento e nel nostro motore)
@@ -63,4 +65,9 @@ Le risorse dei modelli (tileset, regole da file, campioni) il riferimento le leg
 - Dal T531 (A1-6, ADR-0265) il compilatore legge il testo dell'originale così com'è (`compileMjx(…, { original: true })`): i 36
   modelli si compilano da `mxgmn/` con `strict` e girano tutti nel nostro motore, e lo script fa girare quello e non la copia; `c8` è
   allineato (con `strict` l'errore dell'originale; da noi l'unione dentro un nodo resta un'estensione).
+- Dal T527 (A1-2, ADR-0268), con l'interruttore della semantica acceso (`--mj`), i nodi di regola sono quelli dell'originale (le varianti
+  di `SymmetryHelper`, la lista pigra, `one` senza `p`, `all` e `prl`, ogni turno un passo): **16 modelli su 36** danno la griglia
+  dell'originale voxel per voxel coi passi e la fine (Growth, MazeGrowth, RegularSAW, ParallelGrowth della riga, e Counting,
+  DualRetraction3D, Hills, MazeTrail, NoDeadEnds, Noise, OpenCave3D, River, SoftPath, StairsPath, StochasticVoronoi, Voronoi), e così
+  `c10` e i `d6`-`d10` di T498 tranne `d6b` (i rami, A1-3).
 - Le tabelle intere in [`misure.md`](misure.md).

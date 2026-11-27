@@ -1,8 +1,9 @@
 // `<markov>` and `<sequence>` in our engine against MarkovJunior of mxgmn (T498, docs/design/markov.md, lab/banco/markov/README.md).
 // Each case is a small program on a row of cells whose run does not depend on the random numbers (one match at a time): `it` fixes what our
-// engine does, `it.fails` says what the original does with the same program and the same start (what it printed, built from
-// github.com/mxgmn/MarkovJunior at 42aaf24 with lab/banco/markov/originale/, recorded in lab/banco/markov/originale.json). Nothing here
-// changes the engine: the day the engine runs a case as the original, its `it.fails` passes and fails the suite.
+// engine does, and «come l'originale» what the original does with the same program and the same start (what it printed, built from
+// github.com/mxgmn/MarkovJunior at 42aaf24 with lab/banco/markov/originale/, recorded in lab/banco/markov/originale.json), with the switch
+// of the semantics on (T526, ADR-0263): an `it` where the chain A1 has aligned the case (T527, A1-2: the rule nodes and their matches,
+// d6-d10), an `it.fails` where it has not yet (the branches, A1-3): the day it does, its `it.fails` passes and fails the suite.
 //
 // The original, in short (Node.cs, Interpreter.cs): the branch at work has the turn; a branch that finishes gives it back to its parent
 // with a step that does nothing and starts anew (its children's steps from zero); its parent asks it again, so a sequence or a markov that
@@ -138,20 +139,31 @@ function rowOf(start: string, empty: string): Grid3 {
   });
   return { X: start.length, Y: 1, Z: 1, cells, alphabet, log: [], epoch: 0 };
 }
-function go(c: Pick<Case, 'xml' | 'start'>, seed = 1, maxSteps = 200): Outcome {
+/** Our engine on a case: with `semantics` the switch of the original's semantics (T526, ADR-0263), on for the run and the program. */
+function go(c: Pick<Case, 'xml' | 'start'>, seed = 1, maxSteps = 200, semantics?: 'mj'): Outcome {
   const empty = /values="(.)/.exec(c.xml)![1];
-  const p = compileMjx(c.xml, { size: [c.start.length, 1, 1] }).program;
+  const p = compileMjx(c.xml, { size: [c.start.length, 1, 1], ...(semantics ? { semantics } : {}) }).program;
   const r = runOn(rowOf(c.start, empty), p, seed, maxSteps);
   return { letters: Array.from(r.grid.cells, (v) => (v === 0 ? empty : r.grid.alphabet[v])).join(''), steps: r.steps, finished: r.finished };
 }
+
+/** What the original printed for every case and seed (lab/banco/markov/originale.json). */
+const printed = JSON.parse(fs.readFileSync('lab/banco/markov/originale.json', 'utf8')) as Record<string, Record<string, Outcome>>;
+
+/**
+ * The cases the switch on already runs as the original (T527, A1-2: a match wherever the input fits, the list of the original, `prl`
+ * counting its empty turns, `p="0"`, every turn a step). The others need the original's branches (A1-3): the turn, the empty step of a
+ * branch that finishes, a branch asked again.
+ */
+const ALIGNED = new Set(['d6-prl-conta-i-giri-vuoti', 'd7-one-che-non-cambia', 'd10-prl-p-zero']);
 
 describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (T498)', () => {
   for (const c of CASES) {
     it(`${c.name}, il nostro motore: ${c.what}`, () => {
       expect(go(c)).toEqual(c.ours);
     });
-    it.fails(`${c.name}, come l’originale`, () => {
-      expect(go(c)).toEqual(c.original);
+    (ALIGNED.has(c.name) ? it : it.fails)(`${c.name}, come l’originale (l’interruttore acceso)`, () => {
+      expect(go(c, 1, 200, 'mj')).toEqual(c.original);
     });
   }
 
@@ -160,8 +172,8 @@ describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (
   it('d8-prl-che-non-cambia, il nostro motore: una prl che non cambia niente non trova niente, e si va avanti', () => {
     expect(go(noop)).toEqual({ letters: 'RGBB', steps: 1, finished: true });
   });
-  it.fails('d8-prl-che-non-cambia, come l’originale: la prl trova R a ogni giro e la corsa non finisce', () => {
-    expect(go(noop)).toEqual({ letters: 'RBBB', steps: 200, finished: false });
+  it('d8-prl-che-non-cambia, come l’originale (l’interruttore acceso): la prl trova R a ogni giro e la corsa non finisce', () => {
+    expect(go(noop, 1, 200, 'mj')).toEqual({ letters: 'RBBB', steps: 200, finished: false });
   });
 
   // `p` on the rules of a one: the original does not read it (OneNode.RandomMatch), we weigh the matches by it.
@@ -170,9 +182,10 @@ describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (
   it('d9-one-e-p, il nostro motore: la regola di R, con p 0,001, non tocca mai', () => {
     expect(seeds.map((s) => go(weighed, s).letters)).toEqual(seeds.map(() => 'RBBBBGGGGGGG'));
   });
-  it.fails('d9-one-e-p, come l’originale: p non conta nella one, R e G crescono a caso', () => {
-    // What the original printed for seeds 1-5: R grows by 2-4 cells.
-    expect(seeds.some((s) => go(weighed, s).letters.startsWith('RR'))).toBe(true);
+  it('d9-one-e-p, come l’originale (l’interruttore acceso): p non conta nella one, R e G crescono a caso, seme per seme', () => {
+    // What the original printed for seeds 1-5 (R grows by 2-4 cells), voxel by voxel, steps and end included.
+    expect(seeds.map((s) => go(weighed, s, 1000, 'mj'))).toEqual(seeds.map((s) => printed['d9-one-e-p'][String(s)]));
+    expect(seeds.some((s) => go(weighed, s, 1000, 'mj').letters.startsWith('RR'))).toBe(true);
   });
 
   // The storeys of the author's fort (lines 197-261 of docs/userchats/forte-handmade-2026-11-22.xml, reduced as in mj-markov.test.ts):

@@ -8,10 +8,12 @@
 //   npx vite-node lab/scripts/conformita-mj.ts -- --caso [--registra]          System.Random: the copy against .NET (lab/banco/conformita/caso/)
 //   npx vite-node lab/scripts/conformita-mj.ts -- --programmi [--registra]     the programs of the differences (c*, and T498's d*): the original,
 //                                                                              the reference, ours
-//   npx vite-node lab/scripts/conformita-mj.ts -- --modelli [--semi 1,2,3] [--solo A,B] [--originale] [--registra]
+//   npx vite-node lab/scripts/conformita-mj.ts -- --modelli [--semi 1,2,3] [--solo A,B] [--originale] [--registra] [--mj]
 //                                                                              the 3D models of the original's repository: with --originale the
 //                                                                              C# against the reference voxel by voxel, then ours today, compared
-//                                                                              by the letters they write (our random numbers are others)
+//                                                                              by the letters they write (our random numbers are others); with --mj
+//                                                                              ours with the switch of the semantics on (T526, T527), against the
+//                                                                              reference voxel by voxel, steps and end included (--programmi too)
 //   npx vite-node lab/scripts/conformita-mj.ts -- --varianza [--semi 6] [--universi <cartella>] [--solo-concilio]
 //                                                                              how much the programs change between seeds: the seed's, the
 //                                                                              universes', the author's fort, the original's (in the reference)
@@ -29,7 +31,9 @@ import { runReference } from '../banco/conformita/riferimento';
 import { OFFICIAL_FILES } from '../mjx/official/index';
 import { run, runOn, type Grid3, type Program3 } from '../../src/mj/engine';
 import { compileMjx, mjxIncludes } from '../../src/mj/model';
+import { originalPort } from '../../src/mj/original';
 import { MJX_LIMITS } from '../../src/mj/run';
+import { symbolName } from '../../src/mj/symbols';
 import { parseXml, type XmlElement } from '../../src/mj/xml';
 import { CLASSES } from '../../src/mj/classes';
 import { cellarVoxels, entryBox, rootTag, type ModelInfo } from '../../src/kernel/forms';
@@ -58,6 +62,8 @@ export interface Outcome {
 
 const flat = (t: string) => t.replace(/\s+/g, '');
 const has = (file: string) => fs.existsSync(file);
+/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268). */
+const MJ = flag('mj');
 
 // ---------------------------------------------------------------- the original (C#)
 
@@ -97,15 +103,18 @@ function runCs(xmlFile: string, size: Vec3, seeds: string, steps: number, start?
 
 /**
  * Our engine on a model from a grid written in letters (the first value is the empty cell): its letters, steps and end. `original`: the
- * text is the original's, read as it is (T531, `compileMjx(…, { original: true })`); a program of ours (the lab's copies, an example
- * written for both) says false.
+ * text is the original's, read as it is (T531, `compileMjx(…, { original: true })`), and its grid is written back in the original's
+ * characters; a program of ours (the lab's copies, an example written for both) says false. With --mj the switch is on.
  */
 function runOurs(xml: string, size: Vec3, seed: number, steps: number, start?: string, files?: Record<string, string>, original = true): Outcome & { X: number; Y: number; Z: number } {
-  const m = compileMjx(xml, { size, ...(files ? { files } : {}), ...(original ? { original: true } : {}) });
+  const m = compileMjx(xml, { size, ...(files ? { files } : {}), ...(original ? { original: true } : {}), ...(MJ ? { semantics: 'mj' as const } : {}) });
   const values = /values="([^"]*)"/.exec(xml)![1].replace(/\s+/g, '');
   if (start === undefined) {
     const r = run(m.program as Program3, seed, steps, MJX_LIMITS, { deadline: 60_000 });
-    return { letters: Array.from(r.grid.cells, (c) => (c === 0 ? m.background : r.grid.alphabet[c])).join(''), steps: r.steps, finished: r.finished, X: r.grid.X, Y: r.grid.Y, Z: r.grid.Z };
+    // A symbol of ours back to the original's character (`#8` is "8", `#10` the first value that is not a letter: src/mj/original.ts).
+    const back = new Map([...(original ? originalPort(xml) : new Map<string, string>())].map(([o, ours]) => [ours, o]));
+    const shown = (ch: string) => back.get(symbolName(ch)) ?? symbolName(ch);
+    return { letters: Array.from(r.grid.cells, (c) => shown(c === 0 ? m.background : r.grid.alphabet[c])).join(''), steps: r.steps, finished: r.finished, X: r.grid.X, Y: r.grid.Y, Z: r.grid.Z };
   }
   const alpha = ['.', ...[...values].slice(1)];
   const g: Grid3 = { X: size[0], Y: size[1], Z: size[2], cells: new Uint8Array(size[0] * size[1] * size[2]), alphabet: alpha, log: [], epoch: 0 };
@@ -147,7 +156,7 @@ function record(f: (r: Recorded) => void): void {
 }
 
 function programmi(report: Report): void {
-  const md = ['## I programmi delle differenze\n', '| programma | semi | l’originale (C#) | il riferimento | il nostro motore |', '|---|---|---|---|---|'];
+  const md = ['## I programmi delle differenze\n', `| programma | semi | l’originale (C#) | il riferimento | il nostro motore${MJ ? ' (l’interruttore acceso)' : ''} |`, '|---|---|---|---|---|'];
   const rec: Record<string, Record<string, Outcome | string>> = {};
   const csThere = has(MJ_DLL);
   for (const c of CASES) {
@@ -244,8 +253,9 @@ function modelli(report: Report): void {
   const md = [
     '## I modelli 3D del repository di mxgmn\n',
     `Semi ${seeds.join(', ')}; i passi di models.xml (50 000 se non li dice). «Riferimento = C#»: la stessa griglia voxel per voxel e gli stessi passi su ogni seme. «Noi»: il nostro motore di oggi; ${'`'}TV${'`'} è la distanza fra le quote delle lettere della griglia (0 uguali, 1 niente in comune), la nostra media contro quella del riferimento, accanto a quanto si allontana dalla sua media un seme del riferimento.\n`,
-    '| modello | scatola | riferimento = C# | il riferimento: passi, fine | noi: gira? | noi: passi, fine | TV noi/originale | TV fra semi dell’originale |',
-    '|---|---|---|---|---|---|---|---|',
+    ...(MJ ? ['Noi con l’interruttore della semantica acceso (`--mj`): «noi = riferimento» è la stessa griglia voxel per voxel, gli stessi passi e la stessa fine, seme per seme.\n'] : []),
+    `| modello | scatola | riferimento = C# | il riferimento: passi, fine | noi: gira? | noi: passi, fine |${MJ ? ' noi = riferimento |' : ''} TV noi/originale | TV fra semi dell’originale |`,
+    `|---|---|---|---|---|---|${MJ ? '---|' : ''}---|---|`,
   ];
   const rows: Record<string, unknown>[] = [];
   const rec: NonNullable<Recorded['modelli']> = {};
@@ -284,12 +294,20 @@ function modelli(report: Report): void {
     let oursRun = '—';
     let tvOurs = '—';
     let tvRef = '—';
+    let sameCell = '—';
     {
       try {
         const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
         const runs = seeds.map((s) => runOurs(xml, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, files));
         oursCell = okRefs.length && runs.some((r) => [r.X, r.Y, r.Z].join('x') !== okRefs[0].dims) ? 'gira (un’altra griglia finale)' : 'gira';
         oursRun = `${runs.map((r) => r.steps).join(', ')}; ${runs.every((r) => r.finished) ? 'finisce' : `finisce ${runs.filter((r) => r.finished).length}/${runs.length}`}`;
+        if (MJ) {
+          const same = runs.map((r, i) => {
+            const ref = refs[i];
+            return typeof ref !== 'string' && r.letters === flat(ref.text) && r.steps === ref.steps && r.finished === ref.finished;
+          });
+          sameCell = same.every(Boolean) ? `**sì** (${same.length} semi)` : `no: ${same.map((v, i) => `${seeds[i]} ${v ? 'sì' : 'no'}`).join(', ')}`;
+        }
         if (okRefs.length) {
           const refH = okRefs.map((r) => histogram(flat(r.text)));
           const refMean = meanHistogram(refH);
@@ -301,10 +319,10 @@ function modelli(report: Report): void {
         oursCell = `non gira: ${(e as Error).message.slice(0, 90)}`;
       }
     }
-    Object.assign(row, { reference: refCell, ours: oursCell, oursRun, tvOurs, tvRef });
+    Object.assign(row, { reference: refCell, ours: oursCell, oursRun, tvOurs, tvRef, ...(MJ ? { same: sameCell } : {}) });
     rows.push(row);
-    md.push(`| ${m.name} | ${m.size.join('×')} | ${csCell} | ${refCell} | ${oursCell} | ${oursRun} | ${tvOurs} | ${tvRef} |`);
-    console.log(m.name, csCell, '|', refCell, '|', oursCell, oursRun, tvOurs, tvRef);
+    md.push(`| ${m.name} | ${m.size.join('×')} | ${csCell} | ${refCell} | ${oursCell} | ${oursRun} |${MJ ? ` ${sameCell} |` : ''} ${tvOurs} | ${tvRef} |`);
+    console.log(m.name, csCell, '|', refCell, '|', oursCell, oursRun, MJ ? sameCell : '', tvOurs, tvRef);
   }
   report.md.push(md.join('\n'), '');
   report.json.modelli = rows;

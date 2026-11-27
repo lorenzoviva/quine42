@@ -3,17 +3,19 @@
 // The reference (lab/banco/conformita/riferimento.ts) is the original line by line in TypeScript, with System.Random of .NET
 // (dotnet-random.ts). What the original printed, built from github.com/mxgmn/MarkovJunior at 42aaf24 (lab/banco/markov/README.md) and run
 // by lab/scripts/conformita-mj.ts, is in lab/banco/conformita/uscite.json and lab/banco/markov/originale.json (T498): here the reference
-// is held to it, voxel by voxel, steps and end included. Then our engine: an `it` fixes what it does today, an `it.fails` says what the
-// original does with the same program, the same start and the same seed. Nothing here changes the engine: the day the engine runs a case
-// as the original (the alignment, T500's chain), its `it.fails` passes and fails the suite, and the pair becomes one `it`.
+// is held to it, voxel by voxel, steps and end included. Then our engine: an `it` fixes what it does today (the switch of the semantics
+// off, every program of today), and «come l'originale» what the original does with the same program, the same start and the same seeds,
+// with the switch on (T526, ADR-0263): an `it` where T500's chain has aligned the case, an `it.fails` where it has not yet. The day a
+// task of the chain runs a case as the original, its `it.fails` passes and fails the suite, and becomes an `it`.
 
 import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { CASES, casoLine, EXAMPLES, gridHash, REPO_3D } from '../lab/banco/conformita/casi';
+import { CASES, casoLine, EXAMPLES, gridHash, REPO_3D, SEEDS_OF_CASES } from '../lab/banco/conformita/casi';
 import { runReference } from '../lab/banco/conformita/riferimento';
 import { OFFICIAL_FILES } from '../lab/mjx/official/index';
 import { run, runOn, type Grid3, type Program3 } from '../src/mj/engine';
-import { compileMjx } from '../src/mj/model';
+import { compileMjx, mjxIncludes } from '../src/mj/model';
+import { MJX_LIMITS } from '../src/mj/run';
 
 interface Outcome {
   letters: string;
@@ -40,10 +42,10 @@ function reference(xml: string, size: [number, number, number], seed: number, st
 
 /**
  * Our engine from a grid written in letters (the first value is the empty cell), as the original starts from it. The program is the
- * original's text, read as it is with the original's errors (T531: `original`, `strict`).
+ * original's text, read as it is with the original's errors (T531: `original`, `strict`); `semantics` the switch (T526).
  */
-function ours(xml: string, size: [number, number, number], seed: number, steps: number, start: string): Outcome {
-  const m = compileMjx(xml, { size, original: true, strict: true });
+function ours(xml: string, size: [number, number, number], seed: number, steps: number, start: string, semantics?: 'mj'): Outcome {
+  const m = compileMjx(xml, { size, original: true, strict: true, ...(semantics ? { semantics } : {}) });
   const values = /values="([^"]*)"/.exec(xml)![1];
   const alphabet = ['.', ...[...values].slice(1)];
   const g: Grid3 = { X: size[0], Y: size[1], Z: size[2], cells: new Uint8Array(size[0] * size[1] * size[2]), alphabet, log: [], epoch: 0 };
@@ -137,37 +139,52 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     'c10-prl-sovrapposte': 'una prl scrive solo dove la cella cambia rispetto a com’era: due regole sulla stessa cella non si coprono a caso',
     'c11-path-per-spigoli': 'path con edges va anche per spigoli: in diagonale, una cella invece di tre',
   };
-  // What our engine already does as the original, case by case: the compiler reads the original's text (T531, A1-6: c8).
-  const ALIGNED = new Set(['c8-unione-nel-nodo']);
+  // What our engine with the switch on already does as the original, case by case, on every seed the original was run with: the compiler
+  // reads the original's text (T531, A1-6: c8); the rules and their matches (T527, A1-2: c10). The rest is A1-4's.
+  const ALIGNED = new Set(['c8-unione-nel-nodo', 'c10-prl-sovrapposte']);
   for (const c of CASES) {
     const { xml, start } = program(c.name);
-    const original = recorded.programmi[c.name]['1'];
     it(`${c.name}, il nostro motore oggi`, () => {
       const today = TODAY[c.name];
       if (today === 'errore') expect(() => ours(xml, c.size, 1, c.steps, start)).toThrow();
       else expect(ours(xml, c.size, 1, c.steps, start)).toEqual(today);
     });
-    (ALIGNED.has(c.name) ? it : it.fails)(`${c.name}, come l’originale: ${WHAT[c.name]}`, () => {
-      if (typeof original === 'string') expect(() => ours(xml, c.size, 1, c.steps, start)).toThrow();
-      else expect(ours(xml, c.size, 1, c.steps, start)).toEqual(original);
+    (ALIGNED.has(c.name) ? it : it.fails)(`${c.name}, come l’originale (l’interruttore acceso, ${SEEDS_OF_CASES.length} semi): ${WHAT[c.name]}`, () => {
+      for (const [seed, original] of Object.entries(recorded.programmi[c.name])) {
+        if (typeof original === 'string') expect(() => ours(xml, c.size, Number(seed), c.steps, start, 'mj'), `${c.name} ${seed}`).toThrow();
+        else expect(ours(xml, c.size, Number(seed), c.steps, start, 'mj'), `${c.name} ${seed}`).toEqual(original);
+      }
     });
   }
 
-  it.fails('Growth come l’originale, voxel per voxel (lo stesso caso, lo stesso ordine delle corrispondenze)', () => {
-    const m = REPO_3D.find((o) => o.name === 'Growth')!;
-    const p = compileMjx(fs.readFileSync(`${BENCH}/mxgmn/Growth.xml`, 'utf8'), { size: m.size }).program as Program3;
-    const r = run(p, 1, recorded.modelli.Growth.steps);
-    const text = Array.from({ length: r.grid.Z }, (_, z) => Array.from({ length: r.grid.Y }, (_, y) => Array.from({ length: r.grid.X }, (_, x) => { const c = r.grid.cells[x + y * r.grid.X + z * r.grid.X * r.grid.Y]; return c === 0 ? 'B' : r.grid.alphabet[c]; }).join('')).join('\n')).join('\n\n');
-    expect({ steps: r.steps, finished: r.finished, hash: gridHash(text) }).toEqual(recorded.modelli.Growth.seeds['1']);
+  /** A model of mxgmn's repository from its text, run by our engine with the switch on: what uscite.json keeps of the C#'s run. */
+  const model = (name: string, seed: number) => {
+    const m = REPO_3D.find((o) => o.name === name)!;
+    const xml = fs.readFileSync(`${BENCH}/mxgmn/${name}.xml`, 'utf8');
+    const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
+    const p = compileMjx(xml, { size: m.size, files, original: true, semantics: 'mj' }).program as Program3;
+    // The original's -1 is no limit (StochasticVoronoi): a run of ours always has one.
+    const r = run(p, seed, m.steps > 0 ? m.steps : 5_000_000, MJX_LIMITS);
+    const bg = /values="\s*(.)/.exec(xml)![1];
+    const text = Array.from({ length: r.grid.Z }, (_, z) => Array.from({ length: r.grid.Y }, (_, y) => Array.from({ length: r.grid.X }, (_, x) => { const c = r.grid.cells[x + y * r.grid.X + z * r.grid.X * r.grid.Y]; return c === 0 ? bg : r.grid.alphabet[c]; }).join('')).join('\n')).join('\n\n');
+    return { steps: r.steps, finished: r.finished, hash: gridHash(text) };
+  };
+
+  // A1-2's row (T527): the original's symmetries, matches, one, all and their steps, voxel by voxel on the three seeds of uscite.json.
+  const ROW = ['Growth', 'MazeGrowth', 'RegularSAW', 'ParallelGrowth'];
+  it(`${ROW.join(', ')} come l’originale, voxel per voxel (l’interruttore acceso, tre semi: lo stesso caso, le stesse simmetrie, lo stesso ordine delle corrispondenze, gli stessi passi)`, () => {
+    for (const name of ROW) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
   });
 
-  it.fails('Surface come l’originale: la wfc osserva una cella per passo (509 passi col seme 1, da noi 1)', () => {
-    const m = REPO_3D.find((o) => o.name === 'Surface')!;
-    const copy = OFFICIAL_FILES;
-    const xml = fs.readFileSync(`${BENCH}/mxgmn/Surface.xml`, 'utf8');
-    const p = compileMjx(xml, { size: m.size, files: copy }).program as Program3;
-    const r = run(p, 1, 50_000);
-    expect(r.steps).toBe(recorded.modelli.Surface.seeds['1'].steps);
+  // What else the switch on already gives as the original after A1-2 (their own rows are later: the convolution, path's neighbours, the
+  // fields, the observations): kept so that no task of the chain loses them. Measured with lab/scripts/conformita-mj.ts -- --modelli --mj.
+  const ALREADY = ['Counting', 'DualRetraction3D', 'Hills', 'MazeTrail', 'NoDeadEnds', 'Noise', 'OpenCave3D', 'River', 'SoftPath', 'StairsPath', 'StochasticVoronoi', 'Voronoi'];
+  it(`anche ${ALREADY.length} altri modelli 3D di mxgmn con l’interruttore acceso, voxel per voxel su tre semi`, { timeout: 180_000 }, () => {
+    for (const name of ALREADY) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
+  });
+
+  it.fails('Surface come l’originale (l’interruttore acceso): la wfc osserva una cella per passo (509 passi col seme 1, da noi 2)', () => {
+    expect(model('Surface', 1).steps).toBe(recorded.modelli.Surface.seeds['1'].steps);
   });
 
   it('il borgo coi sentieri gira anche da noi: ogni porta collegata alla rete (con un altro caso)', () => {
