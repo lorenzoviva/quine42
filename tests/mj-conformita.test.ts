@@ -140,8 +140,9 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     'c11-path-per-spigoli': 'path con edges va anche per spigoli: in diagonale, una cella invece di tre',
   };
   // What our engine with the switch on already does as the original, case by case, on every seed the original was run with: the compiler
-  // reads the original's text (T531, A1-6: c8); the rules and their matches (T527, A1-2: c10). The rest is A1-4's.
-  const ALIGNED = new Set(['c8-unione-nel-nodo', 'c10-prl-sovrapposte']);
+  // reads the original's text (T531, A1-6: c8); the rules and their matches (T527, A1-2: c10); the branches (T528, A1-3: c2, the map that
+  // ends the run). The rest is A1-4's.
+  const ALIGNED = new Set(['c2-la-map-chiude', 'c8-unione-nel-nodo', 'c10-prl-sovrapposte']);
   for (const c of CASES) {
     const { xml, start } = program(c.name);
     it(`${c.name}, il nostro motore oggi`, () => {
@@ -158,9 +159,9 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
   }
 
   /** A model of mxgmn's repository from its text, run by our engine with the switch on: what uscite.json keeps of the C#'s run. */
-  const model = (name: string, seed: number) => {
+  const model = (name: string, seed: number, edit: (xml: string) => string = (x) => x) => {
     const m = REPO_3D.find((o) => o.name === name)!;
-    const xml = fs.readFileSync(`${BENCH}/mxgmn/${name}.xml`, 'utf8');
+    const xml = edit(fs.readFileSync(`${BENCH}/mxgmn/${name}.xml`, 'utf8'));
     const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
     const p = compileMjx(xml, { size: m.size, files, original: true, semantics: 'mj' }).program as Program3;
     // The original's -1 is no limit (StochasticVoronoi): a run of ours always has one.
@@ -176,9 +177,27 @@ describe('il nostro motore contro l’originale, una differenza alla volta', () 
     for (const name of ROW) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
   });
 
+  // A1-3's row (T528): the original's branches, the turn, the empty step of a branch that finishes, a markov from its first child with
+  // its children's steps for the whole loop, the map that ends the run. RegularSAWRestart (a root markov whose last child works), Keys (a
+  // markov inside a sequence), OddScale3D (a sequence and a markov inside a map: the same grid as before A1-3, now with the original's
+  // steps); NoDeadEnds, Noise and River were already the original's after A1-2.
+  const BRANCHES = ['RegularSAWRestart', 'Keys', 'OddScale3D', 'NoDeadEnds', 'Noise', 'River'];
+  it(`${BRANCHES.join(', ')} come l’originale, voxel per voxel (l’interruttore acceso, tre semi: i rami dell’originale, i loro passi e la fine)`, { timeout: 120_000 }, () => {
+    for (const name of BRANCHES) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
+  });
+
+  // StrangeDungeon, in A1-3's row too, has two nodes with d="2" and d="3", which the original ignores and we skip (c1): A1-4's. Without
+  // them (what the original runs), the switch on is already the original's, voxel by voxel.
+  it('StrangeDungeon senza d (che l’originale ignora) come l’originale, voxel per voxel (l’interruttore acceso, tre semi)', { timeout: 60_000 }, () => {
+    for (const seed of [1, 2, 3]) expect(model('StrangeDungeon', seed, (x) => x.replace(/ d="\d"/g, '')), `StrangeDungeon ${seed}`).toEqual(recorded.modelli.StrangeDungeon.seeds[String(seed)]);
+  });
+  it.fails('StrangeDungeon come l’originale (l’interruttore acceso): i nodi con d da noi si saltano ancora (c1, A1-4)', { timeout: 60_000 }, () => {
+    expect(model('StrangeDungeon', 1)).toEqual(recorded.modelli.StrangeDungeon.seeds['1']);
+  });
+
   // What else the switch on already gives as the original after A1-2 (their own rows are later: the convolution, path's neighbours, the
   // fields, the observations): kept so that no task of the chain loses them. Measured with lab/scripts/conformita-mj.ts -- --modelli --mj.
-  const ALREADY = ['Counting', 'DualRetraction3D', 'Hills', 'MazeTrail', 'NoDeadEnds', 'Noise', 'OpenCave3D', 'River', 'SoftPath', 'StairsPath', 'StochasticVoronoi', 'Voronoi'];
+  const ALREADY = ['Counting', 'DualRetraction3D', 'Hills', 'MazeTrail', 'OpenCave3D', 'SoftPath', 'StairsPath', 'StochasticVoronoi', 'Voronoi'];
   it(`anche ${ALREADY.length} altri modelli 3D di mxgmn con l’interruttore acceso, voxel per voxel su tre semi`, { timeout: 180_000 }, () => {
     for (const name of ALREADY) for (const seed of [1, 2, 3]) expect(model(name, seed), `${name} ${seed}`).toEqual(recorded.modelli[name].seeds[String(seed)]);
   });
