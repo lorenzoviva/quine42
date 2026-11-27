@@ -1,0 +1,394 @@
+<!-- T557: «neapolis/casa-comune-structure-f2e1f8de» as one program: the massing (palazzine), the wave over the set's 56 signatures, the stitching,
+     the dressing, the voxels of its 102 bays (52 bricks). Written by the lab (lab/strutture-modulari/estratti/). -->
+<sequence values="ZSUOYhzabcHBRruxEWNeswndDFGJKfLkoCQ#100#101#102#103#104#105#106#107#108#109#110#111#112#113#114#115#116#117#118#119#120#121#122#123#124#125#126#127#128#129#130#131#132#133#134#135#136#137#138#139#140#141#142#143#144#145#146#147#148#149#150#151#152#153#154#155#156#157#158#159#160#161#162#163#164#165#166#167#168#169#170#171#172#173#174#175#176#177#178#179#180#181#182#183#184#185#186#187#188#1990#1991" symmetry="(xy)">
+  <color symbol="s" value="#7a5a3a" name="vano scala"/>
+  <color symbol="r" value="#9a9690" name="basolato"/>
+  <color symbol="b" value="#8a8680" name="selciato sotto il balcone"/>
+  <color symbol="f" value="#b8875a" name="pavimento in cotto"/>
+  <color symbol="F" value="#a89880" name="solaio"/>
+  <color symbol="W" value="#d9a54a" name="intonaco ocra"/>
+  <color symbol="L" value="#4f7fa8" name="vetro"/>
+  <color symbol="R" value="#cbbfae" name="tetto piano"/>
+  <color symbol="k" value="#8c7a5e" name="gradino di tufo"/>
+  <color symbol="O" value="#4a2e1c" name="portone"/>
+  <color symbol="o" value="#3a2414" name="assi del portone"/>
+  <color symbol="N" value="#2e2a26" name="stipite"/>
+  <color symbol="C" value="#e6cf96" name="cornicione di tufo"/>
+  <color symbol="Q" value="#4a4a4a" name="balcone di ferro"/>
+  <color symbol="Y" value="#2a2a2a" name="ringhiera del balcone"/>
+  <color symbol="G" value="#2a6b34" name="persiana verde"/>
+  <color symbol="S" hidden="True"/>
+  <color symbol="U" hidden="True"/>
+  <color symbol="h" hidden="True"/>
+  <color symbol="z" hidden="True"/>
+  <color symbol="a" hidden="True"/>
+  <color symbol="c" hidden="True"/>
+  <color symbol="H" hidden="True"/>
+  <color symbol="B" hidden="True"/>
+  <color symbol="u" hidden="True"/>
+  <color symbol="x" hidden="True"/>
+  <color symbol="E" hidden="True"/>
+  <color symbol="e" hidden="True"/>
+  <color symbol="w" hidden="True"/>
+  <color symbol="n" hidden="True"/>
+  <color symbol="d" hidden="True"/>
+  <color symbol="D" hidden="True"/>
+  <color symbol="J" hidden="True"/>
+  <color symbol="K" hidden="True"/>
+  <color symbol="#100" hidden="True"/>
+  <color symbol="#101" hidden="True"/>
+  <color symbol="#102" hidden="True"/>
+  <color symbol="#103" hidden="True"/>
+  <color symbol="#104" hidden="True"/>
+  <color symbol="#105" hidden="True"/>
+  <color symbol="#106" hidden="True"/>
+  <color symbol="#107" hidden="True"/>
+  <color symbol="#108" hidden="True"/>
+  <color symbol="#109" hidden="True"/>
+  <color symbol="#110" hidden="True"/>
+  <color symbol="#111" hidden="True"/>
+  <color symbol="#112" hidden="True"/>
+  <color symbol="#113" hidden="True"/>
+  <color symbol="#114" hidden="True"/>
+  <color symbol="#115" hidden="True"/>
+  <color symbol="#116" hidden="True"/>
+  <color symbol="#117" hidden="True"/>
+  <color symbol="#118" hidden="True"/>
+  <color symbol="#119" hidden="True"/>
+  <color symbol="#120" hidden="True"/>
+  <color symbol="#121" hidden="True"/>
+  <color symbol="#122" hidden="True"/>
+  <color symbol="#123" hidden="True"/>
+  <color symbol="#124" hidden="True"/>
+  <color symbol="#125" hidden="True"/>
+  <color symbol="#126" hidden="True"/>
+  <color symbol="#127" hidden="True"/>
+  <color symbol="#128" hidden="True"/>
+  <color symbol="#129" hidden="True"/>
+  <color symbol="#130" hidden="True"/>
+  <color symbol="#131" hidden="True"/>
+  <color symbol="#132" hidden="True"/>
+  <color symbol="#133" hidden="True"/>
+  <color symbol="#134" hidden="True"/>
+  <color symbol="#135" hidden="True"/>
+  <color symbol="#136" hidden="True"/>
+  <color symbol="#137" hidden="True"/>
+  <color symbol="#138" hidden="True"/>
+  <color symbol="#139" hidden="True"/>
+  <color symbol="#140" hidden="True"/>
+  <color symbol="#141" hidden="True"/>
+  <color symbol="#142" hidden="True"/>
+  <color symbol="#143" hidden="True"/>
+  <color symbol="#144" hidden="True"/>
+  <color symbol="#145" hidden="True"/>
+  <color symbol="#146" hidden="True"/>
+  <color symbol="#147" hidden="True"/>
+  <color symbol="#148" hidden="True"/>
+  <color symbol="#149" hidden="True"/>
+  <color symbol="#150" hidden="True"/>
+  <color symbol="#151" hidden="True"/>
+  <color symbol="#152" hidden="True"/>
+  <color symbol="#153" hidden="True"/>
+  <color symbol="#154" hidden="True"/>
+  <color symbol="#155" hidden="True"/>
+  <color symbol="#156" hidden="True"/>
+  <color symbol="#157" hidden="True"/>
+  <color symbol="#158" hidden="True"/>
+  <color symbol="#159" hidden="True"/>
+  <color symbol="#160" hidden="True"/>
+  <color symbol="#161" hidden="True"/>
+  <color symbol="#162" hidden="True"/>
+  <color symbol="#163" hidden="True"/>
+  <color symbol="#164" hidden="True"/>
+  <color symbol="#165" hidden="True"/>
+  <color symbol="#166" hidden="True"/>
+  <color symbol="#167" hidden="True"/>
+  <color symbol="#168" hidden="True"/>
+  <color symbol="#169" hidden="True"/>
+  <color symbol="#170" hidden="True"/>
+  <color symbol="#171" hidden="True"/>
+  <color symbol="#172" hidden="True"/>
+  <color symbol="#173" hidden="True"/>
+  <color symbol="#174" hidden="True"/>
+  <color symbol="#175" hidden="True"/>
+  <color symbol="#176" hidden="True"/>
+  <color symbol="#177" hidden="True"/>
+  <color symbol="#178" hidden="True"/>
+  <color symbol="#179" hidden="True"/>
+  <color symbol="#180" hidden="True"/>
+  <color symbol="#181" hidden="True"/>
+  <color symbol="#182" hidden="True"/>
+  <color symbol="#183" hidden="True"/>
+  <color symbol="#184" hidden="True"/>
+  <color symbol="#185" hidden="True"/>
+  <color symbol="#186" hidden="True"/>
+  <color symbol="#187" hidden="True"/>
+  <color symbol="#188" hidden="True"/>
+  <color symbol="#1990" hidden="True"/>
+  <color symbol="#1991" hidden="True"/>
+  <union symbol="#1900" values="#100#101#102#103#104#107#108#110#111#115#116#118#119#121#122#124#125#127#128#130#131#132#133#134#135#136#137#138#139#140#141#142#143#144#145#146#149#150#151#152#153#154"/><!-- the signatures a body leaves through +x -->
+  <union symbol="#1901" values="#100#101#102#103#104#105#106#107#111#114#115#116#117#121#122#123#124#125#126#130#131#132#133#134#135#136#137#139#141#142#143#144#145#146#147#148#149#150#151#152#153"/><!-- the signatures a body leaves through +y -->
+  <union symbol="#1902" values="#100#102#104#105#106#108#109#111#112#114#116#117#119#120#122#123#125#126#128#129#131#133#135#137#139#142#144#146#147#148#150#152#154#155"/><!-- the signatures a body leaves through -x -->
+  <union symbol="#1903" values="#100#106#107#108#109#110#111#112#115#116#117#118#119#120#124#125#126#127#128#129#138#139#140#147#148#153#154#155"/><!-- the signatures a body leaves through -y -->
+  <union symbol="#1904" values="#101#102#134#135#143#144#149#150"/><!-- the signatures a body leaves through the top -->
+  <union symbol="#1905" values="#103#104#136#137#145#146#151#152"/><!-- the signatures a body leaves through the bottom -->
+  <union symbol="#1906" values="#117#126#148#155"/><!-- a door can be opened on +x -->
+  <union symbol="#1907" values="#108#110#118#119#127#128#138#140#154"/><!-- a door can be opened on +y -->
+  <union symbol="#1908" values="#115#124#153"/><!-- a door can be opened on -x -->
+  <union symbol="#1909" values="#121#122#130#131#132#133#141#142"/><!-- a door can be opened on -y -->
+  <union symbol="#1910" values="#116"/><!-- a stair can start here -->
+  <union symbol="#1911" values="#115#116#124#125"/><!-- a stair can arrive here -->
+  <union symbol="#1912" values="#100"/><!-- a stair outside can rise toward +x -->
+  <union symbol="#1913" values="#100"/><!-- a stair outside can rise toward +y -->
+  <union symbol="#1914" values="#100"/><!-- a stair outside can rise toward -x -->
+  <union symbol="#1915" values="#100"/><!-- a stair outside can rise toward -y -->
+  <union symbol="#1916" values="#113"/><!-- the air -->
+  <union symbol="#1917" values="rESWNUDFGJK"/><!-- reached -->
+  <union symbol="#1918" values="Ee"/><!-- a door on +x -->
+  <union symbol="#1919" values="Ss"/><!-- a door on +y -->
+  <union symbol="#1920" values="Ww"/><!-- a door on -x -->
+  <union symbol="#1921" values="Nn"/><!-- a door on -y -->
+  <union symbol="#1922" values="dD"/><!-- the hole of a stair -->
+  <!-- 1. the massing -->
+  <sequence>
+  <union symbol="~" values="SOUY"/>
+  <!-- the footprints: rectangles of 2-4 × 2-4 bays of free ground, one at a time at random, with a margin of ground all around; the margin
+       of a footprint is a yard at once, so that the next one does not touch it -->
+  <markov>
+    <all>
+      <rule in="hU" out="*Y"/>
+      <rule in="h*/*U" out="**/*Y"/>
+    </all>
+    <one>
+      <rule in="~~~~~~/~UUUU~/~UUUU~/~UUUU~/~UUUU~/~~~~~~" out="******/*hhhh*/*hhhh*/*hhhh*/*hhhh*/******" p="0.5"/>
+      <rule in="~~~~~~/~UUUU~/~UUUU~/~UUUU~/~~~~~~" out="******/*hhhh*/*hhhh*/*hhhh*/******" p="1"/>
+      <rule in="~~~~~/~UUU~/~UUU~/~UUU~/~~~~~" out="*****/*hhh*/*hhh*/*hhh*/*****" p="1.2"/>
+      <rule in="~~~~~/~UUU~/~UUU~/~~~~~" out="*****/*hhh*/*hhh*/*****" p="0.8"/>
+      <rule in="~~~~/~UU~/~UU~/~~~~" out="****/*hh*/*hh*/****" p="0.4"/>
+    </one>
+  </markov>
+  <!-- the height of every palazzo: one cell of it at random, then the whole footprint -->
+  <markov>
+    <all>
+      <rule in="ah" out="aa"/>
+      <rule in="bh" out="bb"/>
+      <rule in="ch" out="cc"/>
+    </all>
+    <one>
+      <rule in="h" out="a" p="0.25"/>
+      <rule in="h" out="b" p="0.5"/>
+      <rule in="h" out="c" p="0.25"/>
+    </one>
+  </markov>
+  <!-- up: the storeys and the roof over them -->
+  <prl>
+    <rule in="Z a" out="R H"/>
+    <rule in="Z Z b" out="R B H"/>
+    <rule in="Z Z Z c" out="R B B H"/>
+  </prl>
+  <prl>
+    <rule in="U" out="S"/>
+    <rule in="O" out="S"/>
+    <rule in="Y" out="S"/>
+  </prl>
+  </sequence>
+  <!-- 2. the wave over the set: a bay a cell, its signature and, above it, the state the stitching starts from -->
+  <wfc set="neapolis/casa-comune-structure-f2e1f8de" stage="sig" tries="100"/>
+  <!-- 3. the stitching: reach, then a door, then a stair, again and again -->
+  <markov symmetry="()">
+    <all>
+      <rule in="#1917u #1900#1902" out="*r **"/>
+      <rule in="Eu *#1902" out="*r **"/>
+      <rule in="#1917e #1900#1902" out="*E **"/>
+      <rule in="Ee *#1902" out="*E **"/>
+      <rule in="#1917s #1900#1902" out="*S **"/>
+      <rule in="Es *#1902" out="*S **"/>
+      <rule in="#1917w #1900#1902" out="*W **"/>
+      <rule in="Ew *#1902" out="*W **"/>
+      <rule in="#1917n #1900#1902" out="*N **"/>
+      <rule in="En *#1902" out="*N **"/>
+      <rule in="#1917d #1900#1902" out="*D **"/>
+      <rule in="Ed *#1902" out="*D **"/>
+      <rule in="#1917w #1900*" out="*W **"/>
+      <rule in="Ew **" out="*W **"/>
+      <rule in="#1917/u #1901/#1903" out="*/r */*"/>
+      <rule in="S/u */#1903" out="*/r */*"/>
+      <rule in="#1917/e #1901/#1903" out="*/E */*"/>
+      <rule in="S/e */#1903" out="*/E */*"/>
+      <rule in="#1917/s #1901/#1903" out="*/S */*"/>
+      <rule in="S/s */#1903" out="*/S */*"/>
+      <rule in="#1917/w #1901/#1903" out="*/W */*"/>
+      <rule in="S/w */#1903" out="*/W */*"/>
+      <rule in="#1917/n #1901/#1903" out="*/N */*"/>
+      <rule in="S/n */#1903" out="*/N */*"/>
+      <rule in="#1917/d #1901/#1903" out="*/D */*"/>
+      <rule in="S/d */#1903" out="*/D */*"/>
+      <rule in="#1917/n #1901/*" out="*/N */*"/>
+      <rule in="S/n */*" out="*/N */*"/>
+      <rule in="u#1917 #1900#1902" out="r* **"/>
+      <rule in="uW #1900*" out="r* **"/>
+      <rule in="e#1917 #1900#1902" out="E* **"/>
+      <rule in="eW #1900*" out="E* **"/>
+      <rule in="s#1917 #1900#1902" out="S* **"/>
+      <rule in="sW #1900*" out="S* **"/>
+      <rule in="w#1917 #1900#1902" out="W* **"/>
+      <rule in="wW #1900*" out="W* **"/>
+      <rule in="n#1917 #1900#1902" out="N* **"/>
+      <rule in="nW #1900*" out="N* **"/>
+      <rule in="d#1917 #1900#1902" out="D* **"/>
+      <rule in="dW #1900*" out="D* **"/>
+      <rule in="e#1917 *#1902" out="E* **"/>
+      <rule in="eW **" out="E* **"/>
+      <rule in="u/#1917 #1901/#1903" out="r/* */*"/>
+      <rule in="u/N #1901/*" out="r/* */*"/>
+      <rule in="e/#1917 #1901/#1903" out="E/* */*"/>
+      <rule in="e/N #1901/*" out="E/* */*"/>
+      <rule in="s/#1917 #1901/#1903" out="S/* */*"/>
+      <rule in="s/N #1901/*" out="S/* */*"/>
+      <rule in="w/#1917 #1901/#1903" out="W/* */*"/>
+      <rule in="w/N #1901/*" out="W/* */*"/>
+      <rule in="n/#1917 #1901/#1903" out="N/* */*"/>
+      <rule in="n/N #1901/*" out="N/* */*"/>
+      <rule in="d/#1917 #1901/#1903" out="D/* */*"/>
+      <rule in="d/N #1901/*" out="D/* */*"/>
+      <rule in="s/#1917 */#1903" out="S/* */*"/>
+      <rule in="s/N */*" out="S/* */*"/>
+      <rule in="u #1905 #1917 #1904" out="r * * *"/>
+      <rule in="#1917 #1905 u #1904" out="* * r *"/>
+      <rule in="e #1905 #1917 #1904" out="E * * *"/>
+      <rule in="#1917 #1905 e #1904" out="* * E *"/>
+      <rule in="s #1905 #1917 #1904" out="S * * *"/>
+      <rule in="#1917 #1905 s #1904" out="* * S *"/>
+      <rule in="w #1905 #1917 #1904" out="W * * *"/>
+      <rule in="#1917 #1905 w #1904" out="* * W *"/>
+      <rule in="n #1905 #1917 #1904" out="N * * *"/>
+      <rule in="#1917 #1905 n #1904" out="* * N *"/>
+      <rule in="d #1905 #1917 #1904" out="D * * *"/>
+      <rule in="#1917 #1905 d #1904" out="* * D *"/>
+      <rule in="d * U *" out="D * * *"/>
+      <rule in="*w ** F* **" out="*W ** ** **"/>
+      <rule in="*/n */* G/* */*" out="*/N */* */* */*"/>
+      <rule in="e* ** *J **" out="E* ** ** **"/>
+      <rule in="s/* */* */K */*" out="S/* */* */* */*"/>
+    </all>
+    <one>
+      <rule in="#1917u #1900#1908" out="*w **"/>
+      <rule in="Eu *#1908" out="*w **"/>
+      <rule in="ru #1906#1902" out="E* **"/>
+      <rule in="ru #1906#1908" out="Ew **"/>
+      <rule in="#1917/u #1901/#1909" out="*/n */*"/>
+      <rule in="S/u */#1909" out="*/n */*"/>
+      <rule in="r/u #1907/#1903" out="S/* */*"/>
+      <rule in="r/u #1907/#1909" out="S/n */*"/>
+      <rule in="u#1917 #1906#1902" out="e* **"/>
+      <rule in="uW #1906*" out="e* **"/>
+      <rule in="ur #1900#1908" out="*W **"/>
+      <rule in="ur #1906#1908" out="eW **"/>
+      <rule in="u/#1917 #1907/#1903" out="s/* */*"/>
+      <rule in="u/N #1907/*" out="s/* */*"/>
+      <rule in="u/r #1901/#1909" out="*/N */*"/>
+      <rule in="u/r #1907/#1909" out="s/N */*"/>
+    </one>
+    <one>
+      <rule in="u #1911 r #1910" out="d * U *"/>
+      <rule in="*u #1916#1908 r* #1912*" out="*w ** F* **"/>
+      <rule in="*/u #1916/#1909 r/* #1913/*" out="*/n */* G/* */*"/>
+      <rule in="u* #1906#1916 *r *#1914" out="e* ** *J **"/>
+      <rule in="u/* #1907/#1916 */r */#1915" out="s/* */* */K */*"/>
+    </one>
+  </markov>
+  <!-- 4. the dressing: a signature and its state, the letter of the bay to write -->
+  <map scale="1 1 1/2" values="Z#100#101#102#103#104#105#106#107#108#109#110#111#112#113#114#115#116#117#118#119#120#121#122#123#124#125#126#127#128#129#130#131#132#133#134#135#136#137#138#139#140#141#142#143#144#145#146#147#148#149#150#151#152#153#154#155#156#157#158#159#160#161#162#163#164#165#166#167#168#169#170#171#172#173#174#175#176#177#178#179#180#181#182#183#184#185#186#187#188#1992#1993" symmetry="()">
+    <rule in="* #100" out="#100"/>
+    <rule in="F #100" out="#101"/>
+    <rule in="G #100" out="#102"/>
+    <rule in="J #100" out="#103"/>
+    <rule in="K #100" out="#104"/>
+    <rule in="* #101" out="#105"/>
+    <rule in="* #102" out="#106"/>
+    <rule in="* #103" out="#107"/>
+    <rule in="* #104" out="#108"/>
+    <rule in="* #105" out="#109"/>
+    <rule in="* #106" out="#110"/>
+    <rule in="* #107" out="#111"/>
+    <rule in="* #108" out="#112"/>
+    <rule in="#1919 #108" out="#113"/>
+    <rule in="* #109" out="#114"/>
+    <rule in="* #110" out="#115"/>
+    <rule in="#1919 #110" out="#116"/>
+    <rule in="* #111" out="#117"/>
+    <rule in="* #112" out="#118"/>
+    <rule in="* #113" out="#119"/>
+    <rule in="* #114" out="#120"/>
+    <rule in="* #115" out="#121"/>
+    <rule in="#1920 #115" out="#122"/>
+    <rule in="#1922 #115" out="#123"/>
+    <rule in="* #116" out="#124"/>
+    <rule in="U #116" out="#125"/>
+    <rule in="#1922 #116" out="#126"/>
+    <rule in="* #117" out="#127"/>
+    <rule in="#1918 #117" out="#128"/>
+    <rule in="* #118" out="#129"/>
+    <rule in="#1919 #118" out="#130"/>
+    <rule in="* #119" out="#131"/>
+    <rule in="#1919 #119" out="#132"/>
+    <rule in="* #120" out="#133"/>
+    <rule in="* #121" out="#134"/>
+    <rule in="#1921 #121" out="#135"/>
+    <rule in="* #122" out="#136"/>
+    <rule in="#1921 #122" out="#137"/>
+    <rule in="* #123" out="#138"/>
+    <rule in="* #124" out="#139"/>
+    <rule in="#1920 #124" out="#140"/>
+    <rule in="#1922 #124" out="#141"/>
+    <rule in="* #125" out="#142"/>
+    <rule in="#1922 #125" out="#143"/>
+    <rule in="* #126" out="#144"/>
+    <rule in="#1918 #126" out="#145"/>
+    <rule in="* #127" out="#146"/>
+    <rule in="#1919 #127" out="#147"/>
+    <rule in="* #128" out="#148"/>
+    <rule in="#1919 #128" out="#149"/>
+    <rule in="* #129" out="#150"/>
+    <rule in="* #130" out="#151"/>
+    <rule in="#1921 #130" out="#152"/>
+    <rule in="* #131" out="#153"/>
+    <rule in="#1921 #131" out="#154"/>
+    <rule in="* #132" out="#155"/>
+    <rule in="#1921 #132" out="#156"/>
+    <rule in="* #133" out="#157"/>
+    <rule in="#1921 #133" out="#158"/>
+    <rule in="* #134" out="#159"/>
+    <rule in="* #135" out="#160"/>
+    <rule in="* #136" out="#161"/>
+    <rule in="* #137" out="#162"/>
+    <rule in="* #138" out="#163"/>
+    <rule in="#1919 #138" out="#164"/>
+    <rule in="* #139" out="#165"/>
+    <rule in="* #140" out="#166"/>
+    <rule in="#1919 #140" out="#167"/>
+    <rule in="* #141" out="#168"/>
+    <rule in="#1921 #141" out="#169"/>
+    <rule in="* #142" out="#170"/>
+    <rule in="#1921 #142" out="#171"/>
+    <rule in="* #143" out="#172"/>
+    <rule in="* #144" out="#173"/>
+    <rule in="* #145" out="#174"/>
+    <rule in="* #146" out="#175"/>
+    <rule in="* #147" out="#176"/>
+    <rule in="* #148" out="#177"/>
+    <rule in="#1918 #148" out="#178"/>
+    <rule in="* #149" out="#179"/>
+    <rule in="* #150" out="#180"/>
+    <rule in="* #151" out="#181"/>
+    <rule in="* #152" out="#182"/>
+    <rule in="* #153" out="#183"/>
+    <rule in="#1920 #153" out="#184"/>
+    <rule in="* #154" out="#185"/>
+    <rule in="#1919 #154" out="#186"/>
+    <rule in="* #155" out="#187"/>
+    <rule in="#1918 #155" out="#188"/>
+    <!-- 5. the voxels: every bay of its letter -->
+    <wfc set="neapolis/casa-comune-structure-f2e1f8de" stage="voxels" tries="1"/>
+  </map>
+</sequence>
