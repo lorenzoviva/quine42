@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 702 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 703 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,6 +34,7 @@ Aggiornato il 27/11/2026, epoca 702 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
+- **D/T509** (terreno ricco, 7 domande, aperta il 27/11): copertura `cover` A, densità 0-4 senza ombre, rientro + scavo, binari allineati, `physics.drift`, universi di prima dal nome, `mesa` collinare.
 - **D/T522** risposta il 27/11 (epoca 701): riprova con un set grande, via A attesa migliore, stanze > 2 × 2, massa B, tetti raggiungibili, tanti set → **T543** (claude max, 6 %, priorità 1), poi la catena M ripianificata.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
@@ -54,5 +55,5 @@ Aggiornato il 27/11/2026, epoca 702 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
-- **701 (claude):** D/T522 chiusa con le risposte dell'autore → T543 (claude max, priorità 1).
 - **702 (claude):** integrato T531 (`compileMjx(…, { original: true })`, ADR-0265, kernel 0.10.41; suite intera non rilanciata dall'agente). In corso T509.
+- **703 (claude):** T509 fatto (studio `docs/design/terreno-ricco.md`, 7 domande in `domande/T509.md`, catena C1-C9 ~31 %); `integra T509` in conflitto su `universe.json` (0.10.40 contro 0.10.41) → **T544** (claude medium, 1 %).
