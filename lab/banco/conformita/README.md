@@ -70,7 +70,7 @@ Le risorse dei modelli (tileset, regole da file, campioni) il riferimento le leg
   dell'originale voxel per voxel coi passi e la fine (Growth, MazeGrowth, RegularSAW, ParallelGrowth della riga, e Counting,
   DualRetraction3D, Hills, MazeTrail, NoDeadEnds, Noise, OpenCave3D, River, SoftPath, StairsPath, StochasticVoronoi, Voronoi), e così
   `c10` e i `d6`-`d10` di T498 tranne `d6b` (i rami, A1-3).
-- Dal T528 (A1-3, ADR-0272), con l'interruttore acceso, i rami sono quelli dell'originale (il ramo al lavoro ha il turno, il passo vuoto di
+- Dal T528 (A1-3, ADR-0273), con l'interruttore acceso, i rami sono quelli dell'originale (il ramo al lavoro ha il turno, il passo vuoto di
   un ramo che finisce, il `markov` dal primo figlio coi passi dei figli per tutto il ciclo, la `map` e la `wfc` che chiudono la corsa):
   **19 modelli su 36** (in più RegularSAWRestart, Keys, OddScale3D), `c2`, tutti i `d*` di T498 e i quattro cicli del forte dell'autore
   (`l1`-`l4`) sui 400 semi che l'originale ha fatto girare. StrangeDungeon, tolti i `d` (A1-4), è già l'originale.

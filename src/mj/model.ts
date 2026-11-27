@@ -905,7 +905,7 @@ class Compiler {
     this.final = inner;
     const rest = this.children({ ...el, children: el.children.filter((c) => c.name !== 'rule') }, inner);
     // Its nodes run on the new grid. `grid`: MarkovJunior's MapNode, a branch without a parent: under the original's semantics, when its
-    // nodes are done the run is (T528, ADR-0272); ours goes on with what follows.
+    // nodes are done the run is (T528, ADR-0273); ours goes on with what follows.
     return rest.length ? { type: 'sequence', children: [step, ...rest], grid: true } : step;
   }
 

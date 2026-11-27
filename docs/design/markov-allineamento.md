@@ -121,7 +121,7 @@ stampa e un test (`d*`: [`markov.md`](markov.md) e `tests/mj-markov-originale.te
 | `d="2"`, `d="3"` sui nodi | ignorato: il nodo gira | un nodo `d="2"` si salta | **diverso** (`c1`; StrangeDungeon di mxgmn ne ha due, e da noi si distingue anche per le lettere, § 4) |
 | `folder` | le regole da file della griglia in `resources/rules/<folder>/` | `models/<folder>-<nome>.txt` | uguale (testo invece di immagini, regola 11) |
 | `transparent` | solo per disegnare | ignorato | uguale |
-| i passi della corsa | `models.xml → steps` (50 000 se non lo dice, ≤ 0 senza limite); **ogni** chiamata del ramo di turno è un passo, anche quella in cui un ramo finisce senza fare niente, e il passo della `map` e ogni osservazione della `wfc` | `run(…, maxSteps)`; un passo è un passo della radice che cambia qualcosa | **diverso**: i passi dei `d*` di T498 e dei modelli (un modello di sola `wfc`: 75-540 passi nell'originale, 1-4 da noi). Dal T527, con l'interruttore acceso, ogni turno è un passo, anche l'ultimo della radice; dal T528 anche i turni dei rami annidati e il passo vuoto di un ramo che finisce (ADR-0272) |
+| i passi della corsa | `models.xml → steps` (50 000 se non lo dice, ≤ 0 senza limite); **ogni** chiamata del ramo di turno è un passo, anche quella in cui un ramo finisce senza fare niente, e il passo della `map` e ogni osservazione della `wfc` | `run(…, maxSteps)`; un passo è un passo della radice che cambia qualcosa | **diverso**: i passi dei `d*` di T498 e dei modelli (un modello di sola `wfc`: 75-540 passi nell'originale, 1-4 da noi). Dal T527, con l'interruttore acceso, ogni turno è un passo, anche l'ultimo della radice; dal T528 anche i turni dei rami annidati e il passo vuoto di un ramo che finisce (ADR-0273) |
 | le griglie | senza limiti | `MODEL_LIMITS`, `FORM_LIMITS`, i tetti del mondo (`WORLD_NODE_LIMITS`, `NodeCeilings`) | nostro (il mondo ne ha bisogno; sotto i tetti la corsa non cambia) |
 | gli errori | un programma che non regge non si carica | come l'originale con `strict`; senza (lo Scultore) ripara ciò che è chiaro: `values` con spazi o doppi, lettere non dichiarate, pattern irregolari completati con `*` | nostro (per i modelli dell'IA) |
 
@@ -131,7 +131,7 @@ Le otto differenze di T498, che il riferimento riproduce tutte (§ 2.3): il ramo
 rende il turno con un passo vuoto e ricomincia da capo, e chi l'ha chiamato gli chiede di nuovo, quindi ogni `sequence` o `markov` che non è
 la radice si ripete finché, dal suo inizio, trova da fare (`d3`, `d5`); un `markov` riparte dal primo figlio a ogni passo e i passi dei figli
 valgono per tutto il ciclo (`d1`, `d1b`); `<markov><sequence>` è «rifai il corpo finché un giro intero non trova niente» (`d2`). **Allineate**
-dal T528 con l'interruttore acceso ([ADR-0272](../adr/0272-i-rami-dell-originale.md): `OriginalBranch`, il turno in `current.branch`). In più:
+dal T528 con l'interruttore acceso ([ADR-0273](../adr/0273-i-rami-dell-originale.md): `OriginalBranch`, il turno in `current.branch`). In più:
 
 | | l'originale | il nostro | stato |
 |---|---|---|---|
@@ -410,7 +410,7 @@ suoi test di conformità girati da `it.fails` a `it`. Le stime sono nella scala 
 | A1-13 | **L'esportazione**: `src/mj/export.ts` (la tabella del § 3.8), il testo, le risorse e la riga di `models.xml`; dove si offre (laboratorio, editor, sito) | claude · high · 6% | A1-8 | ogni programma esportabile del seme e dei test: l'esportato nel riferimento = il nostro motore |
 | A1-14 | **La varianza, dopo**: la stessa misura di questo task sul motore allineato e, con l'autore, una prova pagata degli Scultori coi prompt nuovi | claude · high · 3% (più la prova pagata) | A1-11, A1-12 | — |
 
-**A1-3 è fatto** (T528, [ADR-0272](../adr/0272-i-rami-dell-originale.md)): con l'interruttore acceso sequenze e `markov` sono il `Branch`
+**A1-3 è fatto** (T528, [ADR-0273](../adr/0273-i-rami-dell-originale.md)): con l'interruttore acceso sequenze e `markov` sono il `Branch`
 dell'originale (`OriginalBranch` in `src/mj/engine.ts`): il ramo al lavoro ha il turno (`current.branch`, `ip.current`) e la corsa chiede lui,
 non la radice; un ramo che non trova niente rende il turno al padre con un passo vuoto e ricomincia coi figli, che ripartono solo allora
 (i loro `steps` valgono finché il ramo dura); un `markov` chiede dal primo figlio a ogni passo; la sequenza di una `map` (il segno `grid` del

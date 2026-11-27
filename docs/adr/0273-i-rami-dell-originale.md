@@ -1,4 +1,4 @@
-# ADR-0272 — I rami di MarkovJunior di mxgmn: il turno, il passo vuoto, il ricominciare, il `markov` dal primo figlio, la `map` e la `wfc` che chiudono la corsa
+# ADR-0273 — I rami di MarkovJunior di mxgmn: il turno, il passo vuoto, il ricominciare, il `markov` dal primo figlio, la `map` e la `wfc` che chiudono la corsa
 
 - **Stato**: accettato
 - **Data**: 2026-11-27

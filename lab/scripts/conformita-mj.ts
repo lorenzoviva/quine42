@@ -62,7 +62,7 @@ export interface Outcome {
 
 const flat = (t: string) => t.replace(/\s+/g, '');
 const has = (file: string) => fs.existsSync(file);
-/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268; the branches since T528, ADR-0272). */
+/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268; the branches since T528, ADR-0273). */
 const MJ = flag('mj');
 
 // ---------------------------------------------------------------- the original (C#)

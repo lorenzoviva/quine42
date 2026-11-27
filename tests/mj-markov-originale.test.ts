@@ -3,7 +3,7 @@
 // engine does, and «come l'originale» what the original does with the same program and the same start (what it printed, built from
 // github.com/mxgmn/MarkovJunior at 42aaf24 with lab/banco/markov/originale/, recorded in lab/banco/markov/originale.json), with the switch
 // of the semantics on (T526, ADR-0263): the rule nodes and their matches since T527 (A1-2, ADR-0268: d6-d10), the branches since T528
-// (A1-3, ADR-0272: d1-d5, d6b, the loops of the author's fort).
+// (A1-3, ADR-0273: d1-d5, d6b, the loops of the author's fort).
 //
 // The original, in short (Node.cs, Interpreter.cs): the branch at work has the turn; a branch that finishes gives it back to its parent
 // with a step that does nothing and starts anew (its children's steps from zero); its parent asks it again, so a sequence or a markov that
@@ -250,7 +250,7 @@ describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (
 
   // The four loops of the author's fort as small programs (lab/banco/markov/programmi/l*, T498): what the original decided on every seed
   // it was run with (the courtyard's cells, the keep's, the storeys), its steps and its end, in lab/banco/markov/originale.json: here the
-  // first 100 seeds of each (all 400 match too, ADR-0272).
+  // first 100 seeds of each (all 400 match too, ADR-0273).
   const LOOPS = ['l1-braccia', 'l2-braccia-dagli-estremi', 'l3-mastio', 'l3b-mastio-probabile', 'l4-piani'];
   const outcomeOf = (name: string, letters: string) => {
     const n = (ch: string) => [...letters].filter((c) => c === ch).length;

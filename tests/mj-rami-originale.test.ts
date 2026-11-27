@@ -1,4 +1,4 @@
-// The branches of MarkovJunior of mxgmn in our engine (T528, A1-3, ADR-0272; docs/design/markov-allineamento.md § 3.2, § 8).
+// The branches of MarkovJunior of mxgmn in our engine (T528, A1-3, ADR-0273; docs/design/markov-allineamento.md § 3.2, § 8).
 //
 // With the switch of the semantics on (`semantics: 'mj'`, T526, ADR-0263) sequences and markovs are the original's Branch (Node.cs,
 // Interpreter.cs; `OriginalBranch` in src/mj/engine.ts): the branch at work has the turn (`ip.current`), a branch that finishes gives it
