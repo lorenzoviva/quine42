@@ -22,6 +22,7 @@ import {
   BANK,
   CHUNK_MARGIN,
   chunkArrays,
+  grainLook,
   MeshBuilder,
   sideQuad,
   terrainTops,
@@ -30,6 +31,7 @@ import {
   type ChunkArrays,
   type ChunkInput,
   type ChunkSource,
+  type GrainLook,
   type GroundReads,
   type MeshArrays,
 } from './terrainmesh';
@@ -55,6 +57,8 @@ export function meshGeometry(a: MeshArrays): THREE.BufferGeometry {
   g.setAttribute('normal', new THREE.BufferAttribute(a.normal, 3));
   g.setAttribute('color', new THREE.BufferAttribute(a.color, 3));
   g.setAttribute('part', new THREE.BufferAttribute(a.part, 1));
+  // The grain of the tops (T547): read by the ground's material only (`MAT.ground`), as whole numbers.
+  if (a.grain) g.setAttribute('grain', new THREE.BufferAttribute(a.grain, 4));
   g.computeBoundingSphere();
   return g;
 }
@@ -157,6 +161,7 @@ function kernelSource(k: Kernel, ch: Chunk): ChunkSource & { forms: Map<string, 
       return !!forms.get(code);
     },
     rgb: (color) => rgbOf(color),
+    grain: (code) => grainLook(k.palette[code], (c) => rgbOf(c)),
     ...(hasBed
       ? {
           hasBed: true,
@@ -192,7 +197,8 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   const ready: string[] = [];
   const clear: string[] = [];
   for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
-    palette.push([code, t.layer, t.color]);
+    const grain: GrainLook | undefined = grainLook(t, (c) => rgbOf(c));
+    palette.push(grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color]);
     rgb[t.color || ''] ??= rgbOf(t.color);
     if (t.model && tileForms(k, code)) ready.push(code);
     if (hasBed && k.isClearWater(code)) clear.push(code);
@@ -254,7 +260,8 @@ export function chunkView(k: Kernel, ch: Chunk, a: ChunkArrays, sig: string, kno
     slot.mats.push(m);
   }
   const group = new THREE.Group();
-  const g = new THREE.Mesh(meshGeometry(a.ground), MAT.world);
+  // A ground with grain (T547) is drawn by the material that reads it; one without, as before.
+  const g = new THREE.Mesh(meshGeometry(a.ground), a.ground.grain ? MAT.ground : MAT.world);
   g.receiveShadow = true;
   // One thing across the chunks, or the ink would draw their edges.
   g.userData.inkThing = TERRAIN_THING;

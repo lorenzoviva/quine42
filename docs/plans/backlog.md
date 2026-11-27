@@ -6999,12 +6999,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare: la sezione del prompt (`landscaper.md`: un ciuffo, pochi voxel, chiaro in cima, niente che galleggi), i controlli (al più 600 triangoli a seme, la varianza fra semi), la Genesi che sceglie la copertura per terreno dal nome e dalla descrizione e la chiede, il `ModelDirector` che la mette in fila, `MockAiModels`, la riparazione senza chiamate per gli universi di prima (i modelli di copertura del seme per i terreni che il nome dice prato, bosco, grano, sabbia), spegnibile dal master; anche le coperture aggiunte a mondo acceso di T545 passano da qui.
 - Browser: sì. Quando è fatto: test verdi, una Genesi offline con la copertura vista.
 
-### T547 · C3 La grana del suolo — `da fare`
+### T547 · C3 La grana del suolo — `fatto` (`5909519d`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
 - Step: 45
 - Contesto: § 7 (C3).
 - Cosa fare: le macchie di un voxel nel materiale del terreno (brecciolino, foglie secche, ghiaia della massicciata), un campo `grain` del terreno, nessun triangolo in più; la riparazione dal nome per gli universi di prima.
 - Browser: sì. Quando è fatto: test verdi, foto.
+- Esito: campo `TerrainDef.grain` `{color, density}` letto senza fidarsi (`src/kernel/grain.ts`), voluto dal validatore e facoltativo nello schema dei terreni della Genesi; riparazione dal nome per gli universi di prima senza scrivere niente (brecciolino di neapolis, binari di mesa/neapolis/orichalcum; seme invariato); attributo `grain` di 4 byte solo sulle cime con la grana, nessun triangolo in più, uguale nel worker; shader `MAT.ground` (`addGrain`); ADR-0266, glossario, architettura, AGENTS.md, kernel 0.10.42. Suite intera: 3 fallimenti solo per la versione nel `universe.json` del seme, corretti e riprovati file per file; suite intera non rilanciata dopo; typecheck verde. Non provati: la prova pagata col Cartografo vero, lo zoom più lontano (sfumatura contro lo sfarfallio), l'impronta del terreno non rilanciata.
 
 ### T548 · C4 Il rientro dei terreni, il cordolo e le strade larghe — `da fare`
 - Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2

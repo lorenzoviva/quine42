@@ -106,6 +106,11 @@ export interface TerrainDef {
   fatigue?: number;
   /** Whether a body breathes on it (true if not said; read from T446). */
   air?: boolean;
+  /**
+   * The grain of its ground (T547, ADR-0267; `src/kernel/grain.ts`): specks of one voxel of `color` on `density` of the cells of its top
+   * (0-0.75; 0 none), drawn by the shader, only how it looks. Unsaid, the one its name says (gravel, ballast, dry leaves) or none.
+   */
+  grain?: import('./grain').Grain;
 }
 
 export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;

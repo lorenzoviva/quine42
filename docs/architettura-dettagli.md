@@ -1190,6 +1190,20 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   ricaricare dei file ciò che è fuori si dimentica; un worker che si ferma o con luoghi fuori tace 20 s si abbandona e la pagina fa da sé.
   La stessa mesh byte per byte: `tests/terreno-worker.test.ts` (ogni lettura della mesh nella finestra, il worker uguale alla pagina) e
   l'impronta di `lab/scripts/impronta-terreno.ts`. Una lettura nuova della mesh va in `ChunkSource`, `kernelSource`, `ChunkInput`, `inputSource`.
+- **La grana del suolo** (ADR-0267, T547, C3 di `docs/design/terreno-ricco.md`, kernel 0.10.42): le macchie di un voxel (1/20 di casella)
+  che il materiale di un terreno mostra sopra il suo colore, il brecciolino, la ghiaia della massicciata, le foglie secche. Un campo del
+  terreno, `grain: { color, density }` (densità 0-0,75 delle celle della cima, a passi di 0,05; 0 nessuna), letto senza fidarsi (`readGrain`,
+  `src/kernel/grain.ts`), voluto dal validatore dei manifest (`grainErrors`) e, alla Genesi, facoltativo nello schema dei terreni del
+  Cartografo, solo per il suolo che si cammina (`toPalette`). Un terreno che non lo dice prende quello del suo nome o del suo id
+  (`grainByName`, `grainKind`: brecciolino, ghiaia, pietrisco; binari, massicciata, ferrovia; foglie secche, fogliame, lettiera; in italiano
+  e in inglese; solo `layer: ground`): la riparazione degli universi di prima, senza chiamate e senza scrivere niente (oggi il brecciolino
+  di `neapolis` e i binari di `mesa`, `neapolis` e `orichalcum`; nel seme nessuno). Nella mesh è un attributo di quattro byte per vertice
+  (`MeshArrays.grain`: il colore delle macchie acceso, la densità e il sale della casella, `grainByte`) solo sulle cime di quei terreni, nelle
+  sole mesh dei luoghi che ne hanno: gli altri sono quelli di prima byte per byte e col materiale di prima; nessun triangolo in più. Lo
+  disegna `MAT.ground` (`addGrain` in `src/render/materials.ts`): un hash della cella nelle coordinate del luogo (numeri piccoli anche a un
+  milione di caselle) e del sale, ogni macchia un po' più chiara o più scura, e dove la cella è più piccola di un pixel la media, così lo
+  scorrimento del tappeto non sfarfalla. Solo aspetto: niente nello stato, nei piani né sul filo. `tests/grana.test.ts`; le foto in
+  `docs/catture/T547/`.
 - **Nessun fotogramma senza terreno** (T492): la mesh di un luogo caricato resta in scena finché quella nuova non la sostituisce nello stesso
   fotogramma (`showChunk`); si toglie solo quando il luogo non è più caricato. Al ricaricare dei file (`universe:reloaded`, a ogni commit del
   Concilio: un pacchetto, un modello, un luogo pianificato) le mesh non si tolgono: diventano vecchie (`staleChunks`, la firma `STALE_SIG` che
