@@ -7086,6 +7086,15 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T556`; poi l'orchestratore integra T556, e `integra T514` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T514 fuso in task/T556 (commit 83b57935): kernel 0.10.46 in `KERNEL_VERSION`, `package.json` e `universe/universe.json` (che nel base era ancora a 0.10.44); nessun rimando di T514 ad ADR-0270, ovunque ADR-0272; censimento del glossario rigenerato con lo script; suite intera (324 file, 4257 test) e typecheck verdi coi turni, `mobili-interni` e `documenti` compresi. Browser non richiesto. Sicurezza: nessuna superficie nuova.
 
+### T558 · Integrare T528 nel base (conflitto di versione in `universe/universe.json`) — `da fare`
+- Pipeline: claude · sforzo medium · stima 2% · approvato · priorità 0
+- Step: 30
+- Contesto: `integra T528` (A1-3, i rami dell'originale sotto l'interruttore `mj`, ADR già rinumerato a ADR-0273 in `a8219b7d`) si è fermato su un conflitto in `universe/universe.json`: T528 l'ha portato a 0.10.45 (`22e8eac0`), il base è già a 0.10.46 (T556). T528 non cambia il kernel. Nasce da T528: `dossier T528`.
+- Cosa fare: nel worktree `git merge task/T528`; `universe/universe.json` resta a 0.10.46 come `KERNEL_VERSION` e `package.json`; nessun rimando di T528 ad ADR-0272 (che è dei mobili di T514): ovunque ADR-0273 (AGENTS.md, dettagli, glossario, studio, codice, test, indice degli ADR); dove T528 e T514/T555 aggiungono nello stesso punto restano entrambe; censimento del glossario rigenerato con `node tools/glossario/glossario.mjs`, mai a mano; se i `node_modules` mancano, `npm ci` nel worktree; typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni; `tests/mj-rami-originale.test.ts`, `tests/mj-engine-determinism.test.ts` e `tests/documenti.test.ts` verdi.
+- Browser: no (il merge tocca solo versione e rimandi; motore spento invariato).
+- Quando è fatto: commit su `task/T558`; poi l'orchestratore integra T558, e `integra T528` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+
 ### T557 · Terza prova delle strutture modulari: un set per modello estratto dai modelli statici, la massa e la ricucitura in MarkovJunior, le taverne di `mesa` — `da fare`
 - Pipeline: claude · sforzo max · stima 6% · approvato · priorità 1
 - Step: 44
