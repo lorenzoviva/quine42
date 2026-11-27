@@ -48,7 +48,12 @@
           </div>
           </div>
 
-          <button id="btn-run" class="btn-primary" title="Esegui il programma (Ctrl+Enter)">▶ Esegui</button>
+          <button id="btn-run" class="btn-primary" title="Disegna il modello dal testo di ora (Ctrl+Enter)">▶ Render</button>
+          <label class="auto-render" title="Disegna da solo dopo una pausa nella scrittura; una modifica durante un render lo ferma e riparte dal testo nuovo">
+            <input id="auto-render" type="checkbox" checked /> Auto
+          </label>
+          <button id="btn-render-stop" class="hidden" title="Ferma il render in corso">■ Ferma</button>
+          <span id="render-status" class="render-status" aria-live="polite"></span>
 
           <div id="status-pill" class="status-pill valid">
             <span class="dot"></span>
@@ -321,7 +326,7 @@
 
           <div id="loading-overlay" class="hidden">
             <div class="spinner"></div>
-            <span>Generazione mesh MarkovJunior…</span>
+            <span id="loading-text">Render in corso…</span>
           </div>
         </section>
       </main>
