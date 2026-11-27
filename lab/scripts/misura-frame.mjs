@@ -33,6 +33,9 @@
 // programs as text) as instances on the loaded places at the start: the frames with the ground of today, then one InstancedMesh per form
 // and place, one per form for the window, one mesh baked per place, at 1, 2 and 4 instances a tile, with and without shadows, the ink of
 // a thing or of the ground; with `--foto` the screenshots (far and near). Only that, as `--blocco`.
+// `--sottobosco --gioco [--foto <cartella>]` (T545, ADR-0268): the game's own cover (the seed's terrains say it, `CoverLayer` draws it),
+// not the lab's: at the start with the camera at its farthest, the frames with the layer hidden and shown, at the same hour, in the same
+// session; the instances, forms and triangles the layer draws, how long it took to make; with `--foto` before and after, far and near.
 //
 // `--strade <universo> [--foto <cartella>]` (T509): roads, sidewalks and rails of a universe of `universes/` near its start, as drawn
 // today and with the curb and the aligned rails of lab/terreno-ricco/strade.ts (photos only).
@@ -495,6 +498,48 @@ automi: ${JSON.stringify(auto)}`);
     await sleep(seconds * 1000);
     rows.push({ ...summary(`oggi con gli automi (acqua a tubi ${auto.cells} celle ogni tick, vento ${auto.windCells} celle a 10 Hz, la superficie)`, await page.eval(TAKE)), auto });
     await page.eval('window.__t459.restore()');
+    await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
+    ws.close();
+    if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));
+  } else if (argv.includes('--sottobosco') && argv.includes('--gioco')) {
+    // The game's cover (T545): the layer of the window hidden, then shown, at the start with the camera at its farthest.
+    const photos = opt('foto');
+    if (photos) fs.mkdirSync(photos, { recursive: true });
+    const layer = (show) => page.eval(`(() => { const c = window.view.cover; c.group.visible = ${show}; let tris = 0; for (const m of c.group.children) tris += m.count * (m.geometry.index ? m.geometry.index.count : m.geometry.getAttribute('position').count) / 3; return { drawn: c.drawn, dropped: c.dropped, forms: c.forms, ms: Math.round(c.ms * 10) / 10, tris: Math.round(tris), cap: c.cap }; })()`);
+    const shot = async (name, zoom) => {
+      if (!photos) return;
+      if (zoom) await page.eval(`window.view.zoomTo(${zoom})`);
+      await sleep(1500);
+      const { data } = await page.send('Page.captureScreenshot', { format: 'jpeg', quality: 82 });
+      fs.writeFileSync(path.join(photos, `${name}.jpg`), Buffer.from(data, 'base64'));
+      if (zoom) await page.eval('window.view.zoomTo(15)');
+      await sleep(800);
+    };
+    // The same hour for every photo and frame: the light does not turn between before and after.
+    await page.eval(`(() => { const k = window.quine; k.carpet().active = false; k.daylight = () => 1; })()`);
+    await page.eval('window.view.zoomTo(15)');
+    await settle(page, 60);
+    // Until the layer has drawn (the covers' programs come from the workers) and stopped growing.
+    let made = await layer(true);
+    for (let i = 0, last = -1; i < 120 && (made.drawn === 0 || made.drawn !== last); i++) {
+      last = made.drawn;
+      await sleep(1000);
+      made = await layer(true);
+    }
+    console.log(`
+copertura del gioco: ${made.drawn} istanze in ${made.forms} forme (${made.dropped} lasciate dal tetto di ${made.cap}), ${Math.round(made.tris / 1000)}k triangoli, lo strato fatto in ${made.ms} ms`);
+    await layer(false);
+    await shot('1-senza-copertura', 0);
+    await shot('1-senza-copertura-vicino', 5);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary('la partenza, la camera più lontana, lo strato della copertura nascosto', await page.eval(TAKE)), made });
+    await layer(true);
+    await shot('2-con-la-copertura', 0);
+    await shot('2-con-la-copertura-vicino', 5);
+    await page.eval(RESET);
+    await sleep(seconds * 1000);
+    rows.push({ ...summary(`la copertura del gioco (${made.drawn} istanze, ${made.forms} forme, ${Math.round(made.tris / 1000)}k triangoli)`, await page.eval(TAKE)), made });
     await json(`http://127.0.0.1:${debugPort}/json/close/${target.id}`).catch(() => {});
     ws.close();
     if (out) fs.writeFileSync(out, JSON.stringify({ env, rows }, null, 2));

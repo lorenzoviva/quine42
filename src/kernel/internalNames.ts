@@ -49,6 +49,8 @@ export const INTERNAL_NAMES: readonly NameDomain[] = [
       animale: 'animal', bestia: 'beast', monumento: 'monument', edificio: 'building', grande: 'structure',
       // Born English with T440 (ADR-0228): the Italian word only says what it is.
       nave: 'vessel',
+      // Born English with T545 (ADR-0268).
+      copertura: 'cover',
     },
     note: 'il modello generico di una classe ha il suo id (`models/persona.xml`): si rinomina con la classe',
   }),

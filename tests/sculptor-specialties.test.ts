@@ -67,7 +67,7 @@ const REQUESTS: Array<{ req: SculptRequest; spec: SculptorSpecialty }> = [
 
 describe('le specialità dello Scultore (T468)', () => {
   it('ogni classe ha la sua: la taglia fa l’Architetto, ciò che si indossa il Sarto', () => {
-    const expected: Record<string, SculptorSpecialty> = { pebble: 'landscaper', rock: 'landscaper', bush: 'landscaper', tree: 'landscaper', object: 'joiner', furniture: 'joiner', person: 'figurist', animal: 'figurist', beast: 'figurist', monument: 'mason', building: 'mason', structure: 'architect', vessel: 'coachbuilder' };
+    const expected: Record<string, SculptorSpecialty> = { pebble: 'landscaper', cover: 'landscaper', rock: 'landscaper', bush: 'landscaper', tree: 'landscaper', object: 'joiner', furniture: 'joiner', person: 'figurist', animal: 'figurist', beast: 'figurist', monument: 'mason', building: 'mason', structure: 'architect', vessel: 'coachbuilder' };
     for (const c of CLASSES) expect(specialtyOf(c), c.id).toBe(expected[c.id]);
     // The structures grow by rules from Large up: below it they are built in one box, the mason's.
     for (const taglia of ['tiny', 'small', 'medium'] as const) expect(specialtyOf(cls('structure'), { taglia })).toBe('mason');

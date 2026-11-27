@@ -70,6 +70,11 @@ export interface ChunkView {
   relief?: number[];
   /** Seabed levels of a place in a true-relief world (T480, ADR-0259): S×S whole levels, sent when the client has not had them yet. */
   bed?: number[];
+  /**
+   * The instances of its cover that are things of the world (T545, ADR-0268): `tile|model|n` (`uncoveredKey`), so the client does not draw
+   * them as cover; the cover itself never travels (every client scatters it from the terrain).
+   */
+  uncovered?: string[];
   version: number;
 }
 

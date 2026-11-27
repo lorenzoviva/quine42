@@ -7,7 +7,7 @@ import { bundledFiles } from '../src/kernel/bundle';
 import { memoryStore } from '../src/kernel/repo';
 import { MockAiModels } from '../src/kernel/ai/mock';
 import { modelErrors } from '../src/kernel/validator';
-import { boxOf, classOf } from '../src/mj/classes';
+import { boxOf, classOf, groundJoined } from '../src/mj/classes';
 import { withSize } from '../src/kernel/agents/sculptor';
 import { SOUND_CLASS } from '../src/mj/sound';
 import { expectedModelErrors } from './helpers';
@@ -30,7 +30,8 @@ describe('the library of models', () => {
       const xml = bundledFiles[p];
       const cls = classOf(index[id].class);
       const boxed = index[id].class === SOUND_CLASS || !cls || /\ssize="/.test(rootTag(xml)) ? xml : withSize(xml, boxOf(cls, index[id].size).map((n, i) => (i === 2 ? n + cellarVoxels(index[id]) : n)) as [number, number, number]);
-      const errors = modelErrors(p, boxed, index[id].time);
+      // What rests on the ground is one body where the world says so (a structure that grows by rules, a cover: T545), as the kernel validates it.
+      const errors = modelErrors(p, boxed, index[id].time, undefined, undefined, { groundJoins: !!cls && groundJoined(cls, index[id].size) });
       const expected = expectedModelErrors(id);
       expect(errors, id).toHaveLength(expected.length);
       expected.forEach((e, i) => expect(errors[i]).toMatch(e));

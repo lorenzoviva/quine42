@@ -1,0 +1,19 @@
+<!-- Wheat (T545, ADR-0268: a cover of the seed, written by hand for the lab of T509): a cover model of the ripe field. Six to ten stalks from the ground, straight with a small lean, a
+     golden ear on top. -->
+<sequence values="BVrSEe" size="10 10 14" name="Spighe di grano">
+  <color symbol="S" value="b9a24a" name="stelo"/>
+  <color symbol="E" value="e0c35a" name="spiga"/>
+  <color symbol="e" value="c9a43d" name="spiga in ombra"/>
+  <color symbol="V" hidden="True" name="dove nasce uno stelo"/>
+  <color symbol="r" hidden="True" name="la punta di uno stelo"/>
+  <ellipsoid at="5 5 0" size="9 9 1" color="V"/>
+  <one in="V" out="r" steps="6"/>
+  <prl in="V" out="r" p="0.06" steps="1"/>
+  <all in="V" out="B"/>
+  <one in="B r" out="r S" steps="60"/>
+  <one in="B* *r" out="r* *S" steps="2"/>
+  <one in="B r" out="r S" steps="20"/>
+  <all in="r" out="E"/>
+  <prl in="E S" out="E E" steps="2"/>
+  <prl in="E" out="e" p="0.3" steps="1"/>
+</sequence>

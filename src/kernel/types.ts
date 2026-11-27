@@ -111,6 +111,12 @@ export interface TerrainDef {
    * (0-0.75; 0 none), drawn by the shader, only how it looks. Unsaid, the one its name says (gravel, ballast, dry leaves) or none.
    */
   grain?: import('./grain').Grain;
+  /**
+   * Its cover (T545, ADR-0268; `src/kernel/cover.ts`): what grows or lies on its tiles, at most three programs of the class `cover`, each
+   * `density` instances a tile (0-4), scattered by a hash; only on the ground one walks, only how it looks. The Council changes it with the
+   * world on (`Kernel.setCover`, one commit).
+   */
+  cover?: import('./cover').CoverKind[];
 }
 
 export const ITEM_CATEGORIES = ['food', 'drink', 'medicine', 'tool', 'weapon', 'material', 'light', 'clothing', 'container', 'magic', 'misc'] as const;

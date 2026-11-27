@@ -19,6 +19,7 @@ import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
 import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, staleChunks, tileForms, type TerrainView } from './terrain';
 import { ChunkMesher } from './chunkmesher';
+import { CoverLayer } from './cover';
 import { CAMERA_AIM, dimAt, towardsCamera, type CameraLine, type Cut, type Underground } from '../kernel/underground';
 import { trimGeometries } from './models';
 import { Lights, Runes, Entities, Wanderer } from './entities';
@@ -63,6 +64,8 @@ export class Renderer {
   private chunks = new Map<string, TerrainView>();
   /** The places' meshes made off the page's thread (T486); without a worker, or once it stops, here. */
   private mesher = new ChunkMesher();
+  /** The cover of the terrains on the loaded window (T545, ADR-0268): one InstancedMesh a form, without shadows, under its cap. */
+  readonly cover = new CoverLayer();
   /** The caps of the cut under the ground (T416): built again when one changes tile or floor down there, or the camera turns. */
   private cut?: { sig: string; mesh?: THREE.Mesh };
   /** How much of the sun and the sky is left (T416): less the deeper one is under the ground, eased. */
@@ -132,6 +135,7 @@ export class Renderer {
     }
     this.scene.fog = this.fog;
     this.scene.add(this.hemi, this.sun, this.sun.target, this.world, this.flash, this.loader.group, this.stars.root);
+    this.world.add(this.cover.group);
     this.entities = new Entities(kernel, this.world);
     this.runes = new Runes(kernel, this.world);
     this.wanderer = new Wanderer(this.scene);
@@ -398,6 +402,7 @@ export class Renderer {
     this.wanderer.aloft = voyage?.altitude ?? 0;
     this.entities.aloft = voyage ? { ids: voyage.ids, dy: voyage.altitude, alone } : undefined;
     for (const v of this.chunks.values()) v.group.visible = !alone;
+    this.cover.group.visible = !alone;
 
     // The simulation.
     this.world.visible = !interior;
@@ -406,6 +411,8 @@ export class Renderer {
     let under: Underground | undefined;
     if (!interior) {
       this.syncChunks();
+      // The cover of the places (T545): made again only when theirs changed.
+      this.cover.sync(k, this.chunks.values(), watch ?? k.wandererCarpet());
       // Inside a structure what is above the floor one is on is cut away, so the wanderer is seen (T53b).
       const pc = watch ?? { ...k.wandererCarpet(), z: k.wandererPos().z };
       const inside = k.structureAt(pc.x, pc.y);

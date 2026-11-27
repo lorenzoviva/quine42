@@ -1,0 +1,19 @@
+<!-- Grass tuft (T545, ADR-0268: a cover of the seed, written by hand for the lab of T509): a cover model, one program and many seeds. The seed picks four to seven blades on a hidden
+     disc at the ground; each rises straight and now and then leans out by a voxel; the tips are light, the feet dark. -->
+<sequence values="BVrGHD" size="10 10 8" name="Ciuffo d'erba">
+  <color symbol="G" value="5f9a3c" name="erba"/>
+  <color symbol="H" value="9bc867" name="punte"/>
+  <color symbol="D" value="40702c" name="piede scuro"/>
+  <color symbol="V" hidden="True" name="dove nasce un filo"/>
+  <color symbol="r" hidden="True" name="la punta di un filo"/>
+  <ellipsoid at="5 5 0" size="7 7 1" color="V"/>
+  <one in="V" out="r" steps="4"/>
+  <prl in="V" out="r" p="0.08" steps="1"/>
+  <all in="V" out="B"/>
+  <one in="B r" out="r D" steps="10"/>
+  <one in="B* *r" out="r* *G" steps="2"/>
+  <one in="B r" out="r G" steps="14"/>
+  <one in="B* *r" out="r* *G" steps="2"/>
+  <all in="r" out="H"/>
+  <prl in="H G" out="H H" steps="1"/>
+</sequence>

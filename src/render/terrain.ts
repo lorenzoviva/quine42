@@ -17,6 +17,7 @@ import { geoOf, modelMaterials, type ModelGeo } from './models';
 import { HOLE_CELLS, type Form, type TileHole } from '../kernel/forms';
 import { CUT_REACH, cutDisc, inCutDisc, type Cut, type Towards } from '../kernel/underground';
 import { stratumRow } from '../kernel/strata';
+import { coverOf } from '../kernel/cover';
 import { foamGeometry, SEA_MAT } from './sea';
 import {
   BANK,
@@ -30,6 +31,7 @@ import {
   TRUNK,
   type ChunkArrays,
   type ChunkInput,
+  type CoverArrays,
   type ChunkSource,
   type GrainLook,
   type GroundReads,
@@ -73,6 +75,8 @@ export interface TerrainView {
   key: string;
   sig: string;
   group: THREE.Group;
+  /** Its cover (T545, ADR-0268): not in its group; the renderer draws the cover of every place in one InstancedMesh a form (`CoverLayer`). */
+  cover?: CoverArrays;
 }
 
 /** The signature of a place's mesh made of files that are no more (T492): no place has it, so the place is made again. */
@@ -106,6 +110,33 @@ export function tileForms(k: Kernel, code: string): TileForms | undefined {
   return out;
 }
 
+/**
+ * The ready forms (with meshes) of a cover's program (T545), every seed it has (`Forms.seedsOf`), or undefined while they are not all ready.
+ * A program the library does not have, or isolated, is not drawn.
+ */
+export function coverForms(k: Kernel, model: string): Form[] | undefined {
+  if (!k.forms.usable(model)) return undefined;
+  const out: Form[] = [];
+  for (let s = 1; s <= k.forms.seedsOf(model); s++) {
+    const f = k.forms.ready(model, s);
+    if (!f || !geoOf(f)) return undefined;
+    out.push(f);
+  }
+  return out;
+}
+
+/** The programs the palette's covers name (T545), once each. */
+export function coverModels(k: Kernel): string[] {
+  const out = new Set<string>();
+  for (const t of Object.values(k.palette)) for (const c of coverOf(t) ?? []) out.add(c.model);
+  return [...out];
+}
+
+/** Which of the covers' programs are ready, as a short string: the places are made again when theirs arrive (as the terrains' models). */
+export function coverReadiness(k: Kernel): string {
+  return coverModels(k).map((m) => `${m}${coverForms(k, m) ? 1 : 0}`).join(',');
+}
+
 /** A hole's sub-cells (T415) as a short string, for the key. */
 const coverHash = (c: Uint8Array) => {
   let h = 2166136261;
@@ -127,7 +158,8 @@ export function chunkSig(k: Kernel, ch: Chunk, models = ''): string {
     const o = k.chunks.get(`${ch.cx + dx},${ch.cy + dy}`);
     return o ? holesKey(k, o) : '';
   };
-  return `${ch.version}.${ch.levels ?? 0}${ch.bed ? '.b' : ''}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}`;
+  // The still solid things on it (T545): where the cover does not grow.
+  return `${ch.version}.${ch.levels ?? 0}${ch.bed ? '.b' : ''}|${v(1, 0)}|${v(-1, 0)}|${v(0, 1)}|${v(0, -1)}|${models}|${holesKey(k, ch)}|${n(1, 0)}|${n(-1, 0)}|${n(0, 1)}|${n(0, -1)}|${k.coverStamp(ch)}`;
 }
 
 /** The holes over cellars of a place and of the four beside it, by tile of the carpet: what its mesh lowers (T52b, T415). */
@@ -147,8 +179,19 @@ function kernelSource(k: Kernel, ch: Chunk): ChunkSource & { forms: Map<string, 
   const forms = new Map<string, TileForms | undefined>();
   const S = k.config.chunkSize;
   const hasBed = k.hasBedAt(ch.cx * S);
+  // The cover (T545): the seeds of a program once all of them are ready; no cover where the kernel says none.
+  const seeds = new Map<string, number>();
+  const bare = k.coverMask(ch);
+  const uncovered = k.uncoveredIn(ch);
   return {
     ...kernelReads(k),
+    cover: (code) => coverOf(k.palette[code]),
+    coverSeeds: (model) => {
+      if (!seeds.has(model)) seeds.set(model, coverForms(k, model) ? k.forms.seedsOf(model) : 0);
+      return seeds.get(model)!;
+    },
+    bare: (i) => bare[i] === 1,
+    ...(uncovered.size ? { uncovered } : {}),
     S,
     cx: ch.cx,
     cy: ch.cy,
@@ -196,9 +239,13 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   if (hasBed) rgb[CUT_EARTH] = rgbOf(CUT_EARTH);
   const ready: string[] = [];
   const clear: string[] = [];
+  const covered = new Set<string>();
   for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
     const grain: GrainLook | undefined = grainLook(t, (c) => rgbOf(c));
-    palette.push(grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color]);
+    // Its cover (T545), the fifth: a palette without one is the one of before, byte for byte.
+    const cover = coverOf(t);
+    if (cover) for (const c of cover) covered.add(c.model);
+    palette.push(cover ? [code, t.layer, t.color, grain, cover] : grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color]);
     rgb[t.color || ''] ??= rgbOf(t.color);
     if (t.model && tileForms(k, code)) ready.push(code);
     if (hasBed && k.isClearWater(code)) clear.push(code);
@@ -229,8 +276,11 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
     const [x, z] = at.split(',').map(Number) as [number, number];
     if (x >= x0 && z >= z0 && x < x0 + w && z < z0 + w) holes.push([(z - z0) * w + (x - x0), h.depth, h.cover ? new Uint8Array(h.cover) : undefined]);
   }
+  const coverSeeds = [...covered].flatMap((m): Array<[string, number]> => (coverForms(k, m) ? [[m, k.forms.seedsOf(m)]] : []));
+  const uncovered = covered.size ? [...k.uncoveredIn(ch)] : [];
   return {
     S, cx: ch.cx, cy: ch.cy, tiles: ch.tiles, cells: HOLE_CELLS, palette, rgb, x0, z0, w, codes, ground, holes, ready,
+    ...(covered.size ? { coverSeeds, bare: k.coverMask(ch), ...(uncovered.length ? { uncovered } : {}) } : {}),
     ...(hasBed ? { hasBed: true, clear, bed, bedTop, strataRows, strataHex } : {}),
   };
 }
@@ -306,7 +356,7 @@ export function chunkView(k: Kernel, ch: Chunk, a: ChunkArrays, sig: string, kno
   }
   // Everything of the place relative to its corner (T449): the group stands there, in double precision.
   group.position.set(X0, 0, Z0);
-  return { key: ch.key, sig, group };
+  return { key: ch.key, sig, group, ...(a.cover ? { cover: a.cover } : {}) };
 }
 
 /** The meshes of a place's ground made here, on the page's thread (`chunkArrays` from the kernel); the renderer has them made in a worker (T486). */

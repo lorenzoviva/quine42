@@ -1067,5 +1067,25 @@
   "size": "large",
   "name": "Rastrelliera delle botti",
   "author": "gemini-3.8-flash, lo Scultore del gioco (T419, voto dell'Artista 5/10)"
+ },
+ "cover-tuft": {
+  "class": "cover",
+  "name": "Ciuffo d'erba",
+  "author": "procedurale, a mano (T509, copertura del seme T545)"
+ },
+ "cover-shrub": {
+  "class": "cover",
+  "name": "Arbusto basso",
+  "author": "procedurale, a mano (T509, copertura del seme T545)"
+ },
+ "cover-wheat": {
+  "class": "cover",
+  "name": "Spighe di grano",
+  "author": "procedurale, a mano (T509, copertura del seme T545)"
+ },
+ "cover-stones": {
+  "class": "cover",
+  "name": "Sassolini",
+  "author": "procedurale, a mano (T509, copertura del seme T545)"
  }
 }

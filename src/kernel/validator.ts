@@ -29,6 +29,7 @@ import { internalCardsIn, internalEffect, internalFields, internalManifest, inte
 import { strataErrors, strataPalette, strataProgramErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
 import { grainErrors } from './grain';
+import { coverErrors } from './cover';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
@@ -314,7 +315,7 @@ const HEX_RE = /^#[0-9a-f]{6}$/i;
 /** The Lua API (prelude.lua): generated code may only call these. */
 export const LUA_API: Record<string, string[]> = {
   ecs: ['each', 'get', 'set', 'spawn', 'destroy', 'first'],
-  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature', 'vehicle', 'vehicle_set', 'vehicle_of', 'region_at', 'air_at', 'stratum_at', 'field', 'field_add', 'wind', 'islands'],
+  world: ['free', 'free_real', 'tile', 'speed_at', 'spawn', 'player', 'player_pos', 'nearest', 'has_tag', 'break_entity', 'say', 'speak', 'set_tile', 'open', 'make_container', 'store_get', 'store_set', 'wanderers', 'path', 'find_tile', 'act', 'venture', 'venture_bring', 'nature', 'vehicle', 'vehicle_set', 'vehicle_of', 'region_at', 'air_at', 'stratum_at', 'cover_at', 'uncover', 'field', 'field_add', 'wind', 'islands'],
   inventory: ['add', 'remove', 'count', 'equipped'],
   input: ['held'],
   bus: ['emit'],
@@ -426,6 +427,8 @@ export class Validator {
         if (t && typeof t === 'object') for (const e of terrainPhysicsErrors(code, t)) errors.push(`${path}: ${e}`);
         // The grain of its ground (T547, ADR-0267): only how it looks, but a colour and a density within the range.
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
+        // Its cover (T545, ADR-0268): only how it looks, but at most three kinds, each a program's id and a density within the range.
+        if (t && typeof t === 'object') for (const e of coverErrors(code, t.cover)) errors.push(`${path}: ${e}`);
       }
     }
     if (m.strata !== undefined) for (const e of strataErrors(m.strata)) err(e);

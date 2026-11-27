@@ -21,6 +21,7 @@ import { offDeck } from '../kernel/vehicle';
 import { shownSpend } from '../kernel/ai/usage';
 import { ENTITY_PARTS, type OnDeck, type ClientMsg, type FileChanges, type ItemOp, type Dialog, type FormView, type Me, type MyState, type Notice, type OtherView, type ChunkView, type ServerLink, type ServerMsg, type EntityView } from './protocol';
 import { WIND_VIEW } from '../kernel/wind';
+import { readUncovered, uncoveredKey } from '../kernel/cover';
 
 export interface SessionOptions {
   /** Updates per second to every client. */
@@ -1183,6 +1184,7 @@ export class SessionServer {
         ...(ch.ramps ? { ramps: { ...ch.ramps } } : {}),
         ...(newRelief ? { relief: [...relief!] } : {}),
         ...(newBed ? { bed: [...bed!] } : {}),
+        ...(ch.plan?.uncovered?.length ? { uncovered: readUncovered(ch.plan.uncovered, k.config.chunkSize).map((u) => uncoveredKey(u.tile, u.model, u.n)) } : {}),
       });
     }
     if (chunks.length) out.chunks = chunks;

@@ -7,6 +7,7 @@
 import type { TileHole } from '../kernel/forms';
 import { hash32 } from '../kernel/rng';
 import { grainByte, grainOf } from '../kernel/grain';
+import { coverOnTile, uncoveredKey, type CoverInstance, type CoverKind } from '../kernel/cover';
 import { FoamStrips, phaseAttribute, waveAttribute, type FoamArrays } from './seawave';
 
 export const WALL_H = 1.6;
@@ -229,6 +230,14 @@ export interface ChunkSource extends GroundReads {
   bedTopRgb?(x: number, z: number): readonly number[];
   /** The grain of a terrain's tops (T547, ADR-0267), if it has one. */
   grain?(code: string): GrainLook | undefined;
+  /** The cover of a terrain (T545, ADR-0268): its kinds as it says them (`coverOf`); none where it has none. */
+  cover?(code: string): readonly CoverKind[] | undefined;
+  /** How many seeds of a cover's program there are once all of them are ready (`Forms.seedsOf`); 0 while they are not. */
+  coverSeeds?(model: string): number;
+  /** Whether no cover grows on a tile of the place, by its index there (a lot, a path, a solid thing on it: `Kernel.coverMask`). */
+  bare?(i: number): boolean;
+  /** The instances of the place that became things of the world (`ChunkPlan.uncovered`), by `uncoveredKey`: not drawn as cover. */
+  uncovered?: ReadonlySet<string>;
   /** Number of strata rows at (x, z) (`Kernel.strataRowsAt`). */
   strataRowsAt?(x: number, z: number): number;
   /** Lit RGB of stratum row `row` (0-based from ground down) at (x, z). */
@@ -295,6 +304,20 @@ export interface TileInstance {
   scale: number;
 }
 
+/**
+ * The cover of a place as arrays (T545, ADR-0268): its forms (`model#seed`), which one each instance is, and five numbers an instance: x, the
+ * height, z (relative to the place's corner, as its mesh), the turn and the scale. Not drawn by the place: the renderer gathers the cover of
+ * every place loaded in one InstancedMesh a form (`src/render/cover.ts`).
+ */
+export interface CoverArrays {
+  forms: string[];
+  form: Uint16Array;
+  data: Float32Array;
+}
+
+/** The numbers of an instance in `CoverArrays.data`. */
+export const COVER_STRIDE = 5;
+
 /** A place's ground as arrays: the terrain, the solid things (walls, stand-ins), the water with its swell, the foam, the models on its tiles. */
 export interface ChunkArrays {
   ground: MeshArrays;
@@ -305,6 +328,8 @@ export interface ChunkArrays {
   foam?: FoamArrays;
   /** In the order they were placed (terrain.ts groups them by form in that order). */
   instances: TileInstance[];
+  /** Its cover (T545), if any of its tiles has one. */
+  cover?: CoverArrays;
 }
 
 /**
@@ -331,6 +356,26 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   // Instances of the terrains' models: where, how turned, how big.
   const instances: TileInstance[] = [];
   const ready = new Map<string, boolean>();
+  // The cover (T545, ADR-0268): each terrain's kinds whose programs are ready, asked once a code; the instances by form, as they come.
+  const coverKinds = new Map<string, readonly CoverKind[] | undefined>();
+  const coverSeeds = new Map<string, number>();
+  const seedsOf = (model: string) => {
+    let n = coverSeeds.get(model);
+    if (n === undefined) coverSeeds.set(model, (n = Math.max(0, Math.floor(src.coverSeeds?.(model) ?? 0))));
+    return n;
+  };
+  const kindsOf = (code: string) => {
+    if (!coverKinds.has(code)) {
+      const said = src.cover?.(code)?.filter((k) => seedsOf(k.model) > 0);
+      coverKinds.set(code, said?.length ? said : undefined);
+    }
+    return coverKinds.get(code);
+  };
+  const coverForms: string[] = [];
+  const coverIndex = new Map<string, number>();
+  const coverForm: number[] = [];
+  const coverData: number[] = [];
+  const onTile: CoverInstance[] = [];
   // The grain of each terrain's tops (T547), asked once a code.
   const grains = new Map<string, GrainLook | undefined>();
   const grainAt = (code: string, h: number): readonly number[] | undefined => {
@@ -538,6 +583,22 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
           else side(dx, dz, p, a, b, myTop, ny, earth);
         }
       }
+      // What grows on it (T545): never over a cellar, on a lot, a path or under a solid thing (`bare`), nor what became a thing of the world.
+      const kinds = !holed ? kindsOf(code) : undefined;
+      if (kinds && !src.bare?.(r * S + c)) {
+        onTile.length = 0;
+        for (const i of coverOnTile(kinds, x, z, seedsOf, onTile)) {
+          if (src.uncovered?.has(uncoveredKey(r * S + c, i.model, i.n))) continue;
+          const key = `${i.model}#${i.seed}`;
+          let f = coverIndex.get(key);
+          if (f === undefined) {
+            coverIndex.set(key, (f = coverForms.length));
+            coverForms.push(key);
+          }
+          coverForm.push(f);
+          coverData.push(i.x - X0, y, i.y - Z0, i.yaw, i.scale);
+        }
+      }
       switch (t?.layer) {
         case 'wall':
           solid.fixedPart = ground.fixedPart;
@@ -560,6 +621,7 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   // Everything of the place relative to its corner (T449): the group stands there, in double precision.
   const origin = [X0, Z0] as const;
   const out: ChunkArrays = { ground: ground.arrays(origin), instances };
+  if (coverForm.length) out.cover = { forms: coverForms, form: new Uint16Array(coverForm), data: new Float32Array(coverData) };
   if (!solid.empty) out.solid = solid.arrays(origin);
   if (!water.empty) {
     const w = water.arrays(origin);
@@ -589,8 +651,8 @@ export interface ChunkInput {
   cy: number;
   tiles: string;
   cells: number;
-  /** The palette in its order: each code with what the mesh reads of its terrain. */
-  palette: Array<[code: string, layer: string | undefined, color: string | undefined, grain?: GrainLook]>;
+  /** The palette in its order: each code with what the mesh reads of its terrain (its grain, T547; its cover, T545). */
+  palette: Array<[code: string, layer: string | undefined, color: string | undefined, grain?: GrainLook, cover?: CoverKind[]]>;
   /** The colours lit (`rgbOf`), by colour; '' for a terrain without one. */
   rgb: Record<string, number[]>;
   /** The window of tiles around the place (`CHUNK_MARGIN` beyond its edges): its corner, its side, the codes ('' where nothing is loaded) and the ground. */
@@ -603,6 +665,11 @@ export interface ChunkInput {
   holes: Array<[at: number, depth: number, cover: Uint8Array | undefined]>;
   /** The terrains whose models are ready (`tileForms`). */
   ready: string[];
+  /** The programs of the covers whose seeds are all ready, with how many (T545). */
+  coverSeeds?: Array<[model: string, seeds: number]>;
+  /** The tiles of the place where no cover grows (`Kernel.coverMask`), 1 a tile; and the instances that became things (`uncoveredKey`). */
+  bare?: Uint8Array;
+  uncovered?: string[];
   /** Seabed data for true-relief worlds (T480, ADR-0259); omitted when `!hasBed`. */
   hasBed?: boolean;
   clear?: string[];
@@ -621,6 +688,9 @@ export function inputSource(input: ChunkInput): ChunkSource {
   const at = (x: number, z: number) => (x >= x0 && z >= z0 && x < x0 + w && z < z0 + w ? (z - z0) * w + (x - x0) : -1);
   const terrains = new Map<string, TerrainLook>(input.palette.map(([code, layer, color]) => [code, { layer, color }]));
   const grains = new Map(input.palette.flatMap(([code, , , grain]) => (grain ? [[code, grain] as const] : [])));
+  const covers = new Map(input.palette.flatMap(([code, , , , cover]) => (cover?.length ? [[code, cover] as const] : [])));
+  const coverSeeds = new Map(input.coverSeeds ?? []);
+  const bare = input.bare;
   const holes = new Map<number, TileHole>(input.holes.map(([i, depth, cover]) => [i, cover ? { depth, cover } : { depth }]));
   const ready = new Set(input.ready);
   const clearSet = input.clear ? new Set(input.clear) : undefined;
@@ -648,6 +718,14 @@ export function inputSource(input: ChunkInput): ChunkSource {
     ready: (code) => ready.has(code),
     rgb: (color) => input.rgb[color || ''] ?? none,
     ...(grains.size ? { grain: (code: string) => grains.get(code) } : {}),
+    ...(covers.size
+      ? {
+          cover: (code: string) => covers.get(code),
+          coverSeeds: (model: string) => coverSeeds.get(model) ?? 0,
+          ...(bare ? { bare: (i: number) => bare[i] === 1 } : {}),
+          ...(input.uncovered?.length ? { uncovered: new Set(input.uncovered) } : {}),
+        }
+      : {}),
     ...(input.hasBed
       ? {
           hasBed: true,
@@ -680,12 +758,13 @@ export type ChunkAnswer = { id: number; ok: true; arrays: ChunkArrays } | { id: 
 /** The buffers of a place's arrays, to give them to the page without copying them. */
 export function chunkBuffers(a: ChunkArrays): ArrayBuffer[] {
   const out: ArrayBuffer[] = [];
-  const add = (...xs: Array<Float32Array | Uint8Array>) => {
+  const add = (...xs: Array<Float32Array | Uint8Array | Uint16Array>) => {
     for (const x of xs) out.push(x.buffer as ArrayBuffer);
   };
   for (const m of [a.ground, a.solid, a.water, a.clearWater]) if (m) add(m.position, m.normal, m.color, m.part, ...(m.grain ? [m.grain] : []));
   if (a.water) add(a.water.wave, a.water.seaPhase);
   if (a.clearWater) add(a.clearWater.wave, a.clearWater.seaPhase, a.clearWater.alpha);
+  if (a.cover) add(a.cover.form, a.cover.data);
   if (a.foam) add(a.foam.position, a.foam.normal, a.foam.seaPhase, a.foam.foamPhase, a.foam.foam, a.foam.wave, a.foam.glow, a.foam.alpha);
   return out;
 }
