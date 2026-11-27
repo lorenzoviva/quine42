@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 712 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 713 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 712 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **713 (claude):** T545 fatto (copertura dei terreni C1, ADR-0269 dopo la rinumerazione, kernel 0.10.43, visto nel browser) ma `integra T545` in conflitto in AGENTS.md con T527 → **T554** (claude medium, priorità 0). In corso T548.
 - **712 (claude):** T527 integrato (`53cbf81e`, ADR-0268, A1-2: regole e corrispondenze dell'originale sotto l'interruttore `mj`, 16/36 modelli di mxgmn voxel per voxel, spento invariato; kernel 0.10.42 invariato); restano d6b, d1-d5, il `markov` che fa ripartire i figli, prestazioni sotto `mj` (A1-7).
-- **711 (claude):** T547 integrato (`c1651f24`, ADR-0267 rinumerato da 0266, kernel 0.10.42): grana del suolo `TerrainDef.grain`, macchie a voxel nello shader del terreno, visto nel browser offline; non provati Cartografo vero, zoom lontano, impronta del terreno.
