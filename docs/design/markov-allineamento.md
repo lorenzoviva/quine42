@@ -121,7 +121,7 @@ stampa e un test (`d*`: [`markov.md`](markov.md) e `tests/mj-markov-originale.te
 | `d="2"`, `d="3"` sui nodi | ignorato: il nodo gira | un nodo `d="2"` si salta | **diverso** (`c1`; StrangeDungeon di mxgmn ne ha due, e da noi si distingue anche per le lettere, § 4) |
 | `folder` | le regole da file della griglia in `resources/rules/<folder>/` | `models/<folder>-<nome>.txt` | uguale (testo invece di immagini, regola 11) |
 | `transparent` | solo per disegnare | ignorato | uguale |
-| i passi della corsa | `models.xml → steps` (50 000 se non lo dice, ≤ 0 senza limite); **ogni** chiamata del ramo di turno è un passo, anche quella in cui un ramo finisce senza fare niente, e il passo della `map` e ogni osservazione della `wfc` | `run(…, maxSteps)`; un passo è un passo della radice che cambia qualcosa | **diverso**: i passi dei `d*` di T498 e dei modelli (un modello di sola `wfc`: 75-540 passi nell'originale, 1-4 da noi). Dal T527, con l'interruttore acceso, ogni turno è un passo, anche l'ultimo della radice; il turno dei rami annidati è di A1-3 |
+| i passi della corsa | `models.xml → steps` (50 000 se non lo dice, ≤ 0 senza limite); **ogni** chiamata del ramo di turno è un passo, anche quella in cui un ramo finisce senza fare niente, e il passo della `map` e ogni osservazione della `wfc` | `run(…, maxSteps)`; un passo è un passo della radice che cambia qualcosa | **diverso**: i passi dei `d*` di T498 e dei modelli (un modello di sola `wfc`: 75-540 passi nell'originale, 1-4 da noi). Dal T527, con l'interruttore acceso, ogni turno è un passo, anche l'ultimo della radice; dal T528 anche i turni dei rami annidati e il passo vuoto di un ramo che finisce (ADR-0272) |
 | le griglie | senza limiti | `MODEL_LIMITS`, `FORM_LIMITS`, i tetti del mondo (`WORLD_NODE_LIMITS`, `NodeCeilings`) | nostro (il mondo ne ha bisogno; sotto i tetti la corsa non cambia) |
 | gli errori | un programma che non regge non si carica | come l'originale con `strict`; senza (lo Scultore) ripara ciò che è chiaro: `values` con spazi o doppi, lettere non dichiarate, pattern irregolari completati con `*` | nostro (per i modelli dell'IA) |
 
@@ -130,11 +130,12 @@ stampa e un test (`d*`: [`markov.md`](markov.md) e `tests/mj-markov-originale.te
 Le otto differenze di T498, che il riferimento riproduce tutte (§ 2.3): il ramo che comincia tiene il turno (`d4`); un ramo che finisce
 rende il turno con un passo vuoto e ricomincia da capo, e chi l'ha chiamato gli chiede di nuovo, quindi ogni `sequence` o `markov` che non è
 la radice si ripete finché, dal suo inizio, trova da fare (`d3`, `d5`); un `markov` riparte dal primo figlio a ogni passo e i passi dei figli
-valgono per tutto il ciclo (`d1`, `d1b`); `<markov><sequence>` è «rifai il corpo finché un giro intero non trova niente» (`d2`). In più:
+valgono per tutto il ciclo (`d1`, `d1b`); `<markov><sequence>` è «rifai il corpo finché un giro intero non trova niente» (`d2`). **Allineate**
+dal T528 con l'interruttore acceso ([ADR-0272](../adr/0272-i-rami-dell-originale.md): `OriginalBranch`, il turno in `current.branch`). In più:
 
 | | l'originale | il nostro | stato |
 |---|---|---|---|
-| la fine della corsa dopo una `map` o una `wfc` | la `map` e la `wfc` non hanno genitore: quando i loro nodi finiscono, la corsa è finita, e ciò che viene dopo nel ramo non gira | la `map` è il primo figlio di una sequenza col suo resto, e dopo si va avanti | **diverso** (`c2`; 1 programma del seme, 1 del laboratorio e 49 degli universi hanno nodi dopo una `map`) |
+| la fine della corsa dopo una `map` o una `wfc` | la `map` e la `wfc` non hanno genitore: quando i loro nodi finiscono, la corsa è finita, e ciò che viene dopo nel ramo non gira | la `map` è il primo figlio di una sequenza col suo resto, e dopo si va avanti | **diverso** (`c2`; 1 programma del seme, 1 del laboratorio e 49 degli universi hanno nodi dopo una `map`). **Allineato** dal T528 con l'interruttore acceso: la sequenza di una `map` col segno `grid`, quella di una `wfc` col suo `gated`, una `map` o una `wfc` senza nodi un ramo a sé; un'onda senza soluzione tiene il turno, come nell'originale |
 | il passo della `map` | uno | uno | uguale |
 | la radice che non è un ramo | un `markov` con lei dentro | lei | uguale nel risultato |
 
@@ -147,9 +148,9 @@ valgono per tutto il ciclo (`d1`, `d1b`); `<markov><sequence>` è «rifai il cor
 | `one` | una corrispondenza a caso, uniforme; `p` non conta | uniforme, o pesata da `p` se le regole hanno `p` diversi | **diverso** (`d9`; `p` nelle regole di una `one`: 12 programmi del seme, 7 del laboratorio, 24 degli universi). **Allineato** dal T527 con l'interruttore acceso (risposta 4: `p` non si legge) |
 | `all` | le corrispondenze in un ordine a caso, ognuna se le celle che scrive non sono già state scritte in questo passo; l'ingresso non si ricontrolla; ogni cella scritta va nella lista dei cambi, anche se non cambia | lo stesso, col nostro mescolamento | uguale nel senso, diverso nel caso. **Allineato** dal T527 con l'interruttore acceso (il mescolamento «dall'interno») |
 | `prl` | ogni corrispondenza con probabilità `p` (`NextDouble() > p` la salta), sulla griglia di prima; scrive solo dove il valore cambia rispetto a com'era, quindi una regola che scriverebbe il valore di prima non copre quella che lo cambia | decide prima e scrive dopo, una sopra l'altra nell'ordine delle corrispondenze | **diverso** (`c10`). **Allineato** dal T527 con l'interruttore acceso |
-| `prl` e i passi | un giro in cui non applica niente conta fra i suoi `steps` | non conta | **diverso** (`d6`, `d6b`). **Allineato** dal T527 con l'interruttore acceso (`d6`; `d6b` vuole i rami, A1-3) |
+| `prl` e i passi | un giro in cui non applica niente conta fra i suoi `steps` | non conta | **diverso** (`d6`, `d6b`). **Allineato** dal T527 con l'interruttore acceso (`d6`; `d6b` dal T528, coi rami) |
 | `p="0"` | non applica mai | vale 1 | **diverso** (`d10`; 4 programmi di sidera). **Allineato** dal T527 con l'interruttore acceso |
-| `steps` | al più tanti passi, contati dall'ultimo `Reset` (che i rami dell'originale fanno a ogni fine) | contati dall'ultima volta che il ramo riparte (i nostri rami) | diverso con i rami (§ 3.2) |
+| `steps` | al più tanti passi, contati dall'ultimo `Reset` (che i rami dell'originale fanno a ogni fine) | contati dall'ultima volta che il ramo riparte (i nostri rami) | diverso con i rami (§ 3.2). **Allineato** dal T528 con l'interruttore acceso: i figli ripartono solo quando il loro ramo finisce |
 | `<rule symmetry>`, `in`/`out` della stessa misura | come da noi | come da noi | uguale |
 | `fin`, `fout`, `file`, `legend` | un'immagine o un `.vox` con la sua legenda | un file di testo di `models/` con le lettere | uguale (testo, regola 11; `legend` ignorata con un avviso) |
 | `[AB]` negli ingressi, `#12`, `<in>`/`<out>` figli | — | sì | nostri |
@@ -409,6 +410,17 @@ suoi test di conformità girati da `it.fails` a `it`. Le stime sono nella scala 
 | A1-13 | **L'esportazione**: `src/mj/export.ts` (la tabella del § 3.8), il testo, le risorse e la riga di `models.xml`; dove si offre (laboratorio, editor, sito) | claude · high · 6% | A1-8 | ogni programma esportabile del seme e dei test: l'esportato nel riferimento = il nostro motore |
 | A1-14 | **La varianza, dopo**: la stessa misura di questo task sul motore allineato e, con l'autore, una prova pagata degli Scultori coi prompt nuovi | claude · high · 3% (più la prova pagata) | A1-11, A1-12 | — |
 
+**A1-3 è fatto** (T528, [ADR-0272](../adr/0272-i-rami-dell-originale.md)): con l'interruttore acceso sequenze e `markov` sono il `Branch`
+dell'originale (`OriginalBranch` in `src/mj/engine.ts`): il ramo al lavoro ha il turno (`current.branch`, `ip.current`) e la corsa chiede lui,
+non la radice; un ramo che non trova niente rende il turno al padre con un passo vuoto e ricomincia coi figli, che ripartono solo allora
+(i loro `steps` valgono finché il ramo dura); un `markov` chiede dal primo figlio a ogni passo; la sequenza di una `map` (il segno `grid` del
+compilatore) e quella di una `wfc` sono rami senza padre, e così una `map` o una `wfc` senza nodi: quando i loro nodi finiscono la corsa è
+finita (`c2`); un'onda senza soluzione tiene il turno e, chiesta di nuovo, riprova (`WFCNode.Go`). Lo `Stepper` e i pezzi fanno i turni dei rami.
+`d1`-`d5`, `d6b`, `c2` e RegularSAWRestart, Keys, OddScale3D sono voxel per voxel l'originale (`it`), e così i quattro cicli del forte dell'autore
+come piccoli programmi (`l1`-`l4`, i 400 semi di `originale.json`) e i piani del forte: **19 modelli su 36**. StrangeDungeon tolti i `d` (A1-4)
+è già l'originale; CarmaTower col seme 1. Restano ad A1-4 `d` e `path` (un nostro `path` dentro un `markov` che riesce sempre allunga la
+corsa: SeaVilla col seme 3), ad A1-5 la `wfc` a passi.
+
 **A1-2 è fatto** (T527, [ADR-0268](../adr/0268-le-regole-e-le-corrispondenze-dell-originale.md)): con l'interruttore acceso i nodi di regola sono
 quelli dell'originale (`RuleRunner` e `GuidedRunner` sotto `mj`): le varianti nell'ordine di `SymmetryHelper` coi sottogruppi del quadrato
 sulla griglia piana e del cubo sulle altre (`originalTurns`, anche per le regole di una `map`), la corrispondenza dove l'ingresso combacia, la
@@ -453,3 +465,6 @@ modelli di mxgmn come esempi; (8) le nostre estensioni che l'originale non ha (l
   arriva. Le prestazioni con l'interruttore acceso sui programmi del gioco sono di A1-7 (sui modelli di mxgmn: come il motore di sempre,
   CarmaTower 3-6 s contro 3,2-3,7 s ma con più passi). Un'unione che vale tutti i valori della griglia e un `*` nella stessa regola sono per
   `Rule.Same` la stessa cella, per noi due (nessun modello misurato li ha).
+- Dal T528: che un'onda senza soluzione tenga il turno e, chiesta di nuovo sulla griglia cambiata, riprovi (`WFCNode.Go`) segue la lettura
+  del sorgente e del riferimento, ma non è stato fatto girare né nel C# né nel riferimento (che non legge i nostri tileset): nessun modello
+  del repository misurato vi passa.

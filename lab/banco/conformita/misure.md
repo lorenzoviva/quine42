@@ -209,6 +209,49 @@ Forma / lettere, la mediana delle coppie di 6 semi; nel nostro motore dalla copi
 | Voronoi | 0.000 / 0.518 | 0.000 / 0.486 | one, all |
 
 
+## Il nostro motore con l’interruttore acceso, dopo A1-3 (`--modelli --mj`, T528)
+
+Fatte il 2026-11-27 dopo T528 (A1-3: i rami dell’originale, [ADR-0272](../../../docs/adr/0272-i-rami-dell-originale.md)), come sotto. **19 su 36**: in più RegularSAWRestart (il `markov` radice non fa più ripartire i figli quando lavora l’ultimo), Keys (il passo vuoto del `markov` dentro la sequenza) e OddScale3D (i passi vuoti della sequenza e del `markov` dentro la `map`, la `map` che chiude la corsa); CarmaTower col seme 1. Gli altri: `d` (A1-4: StrangeDungeon, che senza i suoi due `d` è già l’originale sui tre semi, `tests/mj-conformita.test.ts`), `path` (A1-4: un nostro `path` dentro un `markov` dell’originale che riesce sempre allunga la corsa, SeaVilla col seme 3 a 36 405 passi), la `wfc` a passi (A1-5). Il giro intero in 69 s (81 s dopo A1-2). I quattro cicli del forte come piccoli programmi (`lab/banco/markov/programmi/l*`): la misura, i passi e la fine dell’originale su tutti i 400 semi di `originale.json` (`l1`, `l2`, `l3`, `l3b`, `l4`: 400 su 400 ciascuno).
+
+| modello | scatola | il riferimento: passi, fine | noi con l’interruttore acceso: passi, fine | noi = riferimento |
+|---|---|---|---|---|
+| Apartemazements | 8×8×8 | 275, 244, 298; finisce | 120, 96, 151; finisce | no: 1 no, 2 no, 3 no |
+| CarmaTower | 12×12×18 | 3786, 3243, 2724; finisce | 3786, 2964, 2769; finisce | no: 1 sì, 2 no, 3 no |
+| ClosedSurface | 12×12×12 | 324, 305, 326; finisce | 4, 4, 4; finisce | no: 1 no, 2 no, 3 no |
+| ColoredKnots | 12×12×12 | 2134, 2138, 2135; finisce | 1321, 1335, 1330; finisce | no: 1 no, 2 no, 3 no |
+| Counting | 8×8×8 | 2, 2, 2; finisce | 2, 2, 2; finisce | **sì** (3 semi) |
+| DualRetraction3D | 27×27×27 | 107, 136, 115; finisce | 107, 136, 115; finisce | **sì** (3 semi) |
+| Escher | 8×8×8 | 79, 75, 96; finisce | 4, 4, 4; finisce | no: 1 no, 2 no, 3 no |
+| EscherSurface | 8×8×8 | 123, 116, 118; finisce | 4, 4, 4; finisce | no: 1 no, 2 no, 3 no |
+| Growth | 29×29×29 | 3000, 3000, 3000; finisce 0/3 | 3000, 3000, 3000; finisce 0/3 | **sì** (3 semi) |
+| Hills | 40×40×12 | 8018, 8019, 8014; finisce | 8018, 8019, 8014; finisce | **sì** (3 semi) |
+| Keys | 23×23×23 | 356, 356, 356; finisce | 356, 356, 356; finisce | **sì** (3 semi) |
+| Knots3D | 8×8×8 | 175, 172, 173; finisce | 4, 4, 4; finisce | no: 1 no, 2 no, 3 no |
+| MazeGrowth | 27×27×27 | 2197, 2197, 2197; finisce | 2197, 2197, 2197; finisce | **sì** (3 semi) |
+| MazeTrail | 27×27×27 | 1000, 1000, 1000; finisce 0/3 | 1000, 1000, 1000; finisce 0/3 | **sì** (3 semi) |
+| ModernHouse | 9×9×4 | 112, 764, 140; finisce | 32, 591, 31; finisce | no: 1 no, 2 no, 3 no |
+| NoDeadEnds | 19×19×19 | 730, 730, 730; finisce | 730, 730, 730; finisce | **sì** (3 semi) |
+| Noise | 24×24×24 | 12675, 12675, 12675; finisce | 12675, 12675, 12675; finisce | **sì** (3 semi) |
+| OddScale3D | 8×8×8 | 3166, 3447, 3252; finisce | 3166, 3447, 3252; finisce | **sì** (3 semi) |
+| OpenCave3D | 40×40×40 | 116, 120, 55; finisce | 116, 120, 55; finisce | **sì** (3 semi) |
+| OrientedEscher | 6×6×6 | 23, 26, 14; finisce | 5, 5, 5; finisce | no: 1 no, 2 no, 3 no |
+| ParallelGrowth | 29×29×29 | 24, 24, 24; finisce 0/3 | 24, 24, 24; finisce 0/3 | **sì** (3 semi) |
+| Partitioning | 11×11×3 | 119, 113, 121; finisce | 6, 6, 6; finisce | no: 1 no, 2 no, 3 no |
+| PeriodicEscher | 8×8×8 | 95, 104, 85; finisce | 4, 4, 4; finisce | no: 1 no, 2 no, 3 no |
+| PillarsOfEternity | 9×9×9 | 84, 119, 105; finisce | 56, 82, 76; finisce | no: 1 no, 2 no, 3 no |
+| RegularSAW | 19×19×19 | 144, 316, 212; finisce | 144, 316, 212; finisce | **sì** (3 semi) |
+| RegularSAWRestart | 19×19×19 | 729, 729, 729; finisce | 729, 729, 729; finisce | **sì** (3 semi) |
+| River | 20×20×20 | 13690, 13210, 14320; finisce | 13690, 13210, 14320; finisce | **sì** (3 semi) |
+| SeaVilla | 10×10×4 | 1247, 1294, 1080; finisce | 1299, 1361, 36405; finisce | no: 1 no, 2 no, 3 no |
+| SelectLongKnots | 10×10×10 | 1114, 1079, 1180; finisce | 714, 670, 773; finisce | no: 1 no, 2 no, 3 no |
+| SoftPath | 80×80×80 | 178, 203, 186; finisce | 178, 203, 186; finisce | **sì** (3 semi) |
+| StairsPath | 33×33×33 | 29, 28, 23; finisce | 29, 28, 23; finisce | **sì** (3 semi) |
+| StochasticVoronoi | 50×50×50 | 125001, 125001, 125001; finisce | 125001, 125001, 125001; finisce | **sì** (3 semi) |
+| StrangeDungeon | 29×29×29 | 148, 161, 152; finisce | 145, 141, 136; finisce | no: 1 no, 2 no, 3 no |
+| SubmergedKnots | 12×12×12 | 50000, 50000, 50000; finisce 0/3 | 50000, 50000, 50000; finisce 0/3 | no: 1 no, 2 no, 3 no |
+| Surface | 10×10×10 | 509, 507, 539; finisce | 2, 2, 2; finisce | no: 1 no, 2 no, 3 no |
+| Voronoi | 60×60×60 | 66, 70, 77; finisce | 66, 70, 77; finisce | **sì** (3 semi) |
+
 ## Il nostro motore con l’interruttore acceso, dopo A1-2 (`--modelli --mj`, T527)
 
 Fatte il 2026-11-27 dopo T527 (A1-2: le regole e le corrispondenze dell’originale, [ADR-0268](../../../docs/adr/0268-le-regole-e-le-corrispondenze-dell-originale.md)), dal testo dell’originale (`original`) con `semantics: 'mj'`, semi 1, 2, 3. «Noi = riferimento»: la stessa griglia voxel per voxel, gli stessi passi e la stessa fine, seme per seme. **16 su 36.** Gli altri: i rami (A1-3: il nostro `markov` fa ripartire i figli quando lavora l’ultimo, e il turno vuoto di un ramo annidato: Keys, RegularSAWRestart, OddScale3D, che ha già la griglia e due passi in meno), `d` (A1-4: StrangeDungeon), la `wfc` a passi (A1-5: gli altri).

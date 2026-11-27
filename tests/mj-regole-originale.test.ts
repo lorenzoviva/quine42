@@ -98,8 +98,8 @@ describe('i nodi di regola dell’originale', () => {
   });
 
   // Our markov starts all its children again when the last one works, and their lists from a scan of the grid: the original's markov
-  // never does (A1-3, T528, `d1` of T498).
-  it.fails('markov: quando lavora l’ultimo figlio, come l’originale (A1-3)', () => {
+  // never does, and with the switch on neither does ours (T528, A1-3, ADR-0272; `d1` of T498).
+  it('markov: quando lavora l’ultimo figlio, come l’originale (i rami, A1-3)', () => {
     asTheOriginal([{ name: 'markov di all e one', xml: '<markov values="BWRA" origin="True"><all in="RBW" out="RAW"/><one in="WBB" out="WAR"/><one in="RBB" out="RAR"/></markov>', size: [15, 15, 1], steps: 2000 }]);
   });
 });

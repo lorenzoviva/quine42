@@ -2,14 +2,14 @@
 // Each case is a small program on a row of cells whose run does not depend on the random numbers (one match at a time): `it` fixes what our
 // engine does, and «come l'originale» what the original does with the same program and the same start (what it printed, built from
 // github.com/mxgmn/MarkovJunior at 42aaf24 with lab/banco/markov/originale/, recorded in lab/banco/markov/originale.json), with the switch
-// of the semantics on (T526, ADR-0263): an `it` where the chain A1 has aligned the case (T527, A1-2: the rule nodes and their matches,
-// d6-d10), an `it.fails` where it has not yet (the branches, A1-3): the day it does, its `it.fails` passes and fails the suite.
+// of the semantics on (T526, ADR-0263): the rule nodes and their matches since T527 (A1-2, ADR-0268: d6-d10), the branches since T528
+// (A1-3, ADR-0272: d1-d5, d6b, the loops of the author's fort).
 //
 // The original, in short (Node.cs, Interpreter.cs): the branch at work has the turn; a branch that finishes gives it back to its parent
 // with a step that does nothing and starts anew (its children's steps from zero); its parent asks it again, so a sequence or a markov that
 // is not the root runs again as long as, from its beginning, it finds something to do; a markov asks from its first child at every step and
 // counts its children's steps until it finishes. Ours (MarkovRunner, SequenceRunner): a markov gives one step to the first child that can,
-// and all its children start again when the last one works; a branch runs once.
+// and all its children start again when the last one works; a branch runs once. With the switch on, ours is the original's (OriginalBranch).
 
 import fs from 'node:fs';
 import { describe, expect, it } from 'vitest';
@@ -150,19 +150,15 @@ function go(c: Pick<Case, 'xml' | 'start'>, seed = 1, maxSteps = 200, semantics?
 /** What the original printed for every case and seed (lab/banco/markov/originale.json). */
 const printed = JSON.parse(fs.readFileSync('lab/banco/markov/originale.json', 'utf8')) as Record<string, Record<string, Outcome>>;
 
-/**
- * The cases the switch on already runs as the original (T527, A1-2: a match wherever the input fits, the list of the original, `prl`
- * counting its empty turns, `p="0"`, every turn a step). The others need the original's branches (A1-3): the turn, the empty step of a
- * branch that finishes, a branch asked again.
- */
-const ALIGNED = new Set(['d6-prl-conta-i-giri-vuoti', 'd7-one-che-non-cambia', 'd10-prl-p-zero']);
-
 describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (T498)', () => {
+  // With the switch on every case is the original's: the rule nodes (T527, A1-2: a match wherever the input fits, the list of the
+  // original, `prl` counting its empty turns, `p="0"`, every turn a step) and the branches (T528, A1-3: the turn, the empty step of a
+  // branch that finishes, a branch asked again, a markov from its first child with its children's steps for the whole loop).
   for (const c of CASES) {
     it(`${c.name}, il nostro motore: ${c.what}`, () => {
       expect(go(c)).toEqual(c.ours);
     });
-    (ALIGNED.has(c.name) ? it : it.fails)(`${c.name}, come l’originale (l’interruttore acceso)`, () => {
+    it(`${c.name}, come l’originale (l’interruttore acceso)`, () => {
       expect(go(c, 1, 200, 'mj')).toEqual(c.original);
     });
   }
@@ -203,14 +199,17 @@ describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (
       <all in="N" out="M" steps="1"/>
     </markov>
   </sequence>`;
-  const tower = (seed: number, xml = storeys) => {
-    const p = compileMjx(xml, { size: [2, 2, 64] }).program;
+  const tower = (seed: number, xml = storeys, semantics?: 'mj') => {
+    const p = compileMjx(xml, { size: [2, 2, 64], ...(semantics ? { semantics } : {}) }).program;
     const r = run(p, seed, 20_000);
     const F = r.grid.alphabet.indexOf('F');
     return { storeys: Array.from(r.grid.cells).filter((c) => c === F).length / 3, finished: r.finished };
   };
-  it.fails('i piani del forte come l’originale: sempre fino in cima (15 su una torre di 64), e il ciclo non finisce', () => {
-    expect([1, 2, 3, 4, 5, 6, 7, 8].map((s) => tower(s))).toEqual([1, 2, 3, 4, 5, 6, 7, 8].map(() => ({ storeys: 15, finished: false })));
+  it('i piani del forte come l’originale (l’interruttore acceso): sempre fino in cima (15 su una torre di 64), e il ciclo non finisce', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 8].map((s) => tower(s, storeys, 'mj'))).toEqual([1, 2, 3, 4, 5, 6, 7, 8].map(() => ({ storeys: 15, finished: false })));
+  });
+  it('i piani del forte, il nostro motore: la sequenza non trova la cima a ogni giro, la moneta decide', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 8].map((s) => tower(s)).some((t) => t.storeys < 15)).toBe(true);
   });
   it('il nostro motore: la moneta da sola come ultimo figlio basta a uscire (testa un piano in più, croce il ciclo finisce)', () => {
     // The author's belief (22/11) is that a final prl does not stop a loop: here what stops it is a step in which no child changes
@@ -247,5 +246,35 @@ describe('<markov> e <sequence> nel nostro motore contro MarkovJunior di mxgmn (
     expect(Object.values(recorded['d9-one-e-p']).every((o) => /^RR/.test(o.letters))).toBe(true);
     // The tower of the storeys: at every seed the original reached 15 storeys and did not finish.
     expect(Object.values(recorded['l4-piani']).every((o) => (o as unknown as { outcome: number }).outcome === 15 && !o.finished)).toBe(true);
+  });
+
+  // The four loops of the author's fort as small programs (lab/banco/markov/programmi/l*, T498): what the original decided on every seed
+  // it was run with (the courtyard's cells, the keep's, the storeys), its steps and its end, in lab/banco/markov/originale.json: here the
+  // first 100 seeds of each (all 400 match too, ADR-0272).
+  const LOOPS = ['l1-braccia', 'l2-braccia-dagli-estremi', 'l3-mastio', 'l3b-mastio-probabile', 'l4-piani'];
+  const outcomeOf = (name: string, letters: string) => {
+    const n = (ch: string) => [...letters].filter((c) => c === ch).length;
+    return name.startsWith('l4') ? n('F') / 3 : name.startsWith('l3') ? n('k') + n('K') : n('x');
+  };
+  it(`i cicli del forte come l’originale (l’interruttore acceso): ${LOOPS.length} programmi, 100 semi ciascuno, passi e fine compresi`, { timeout: 120_000 }, () => {
+    const dir = 'lab/banco/markov/programmi';
+    let n = 0;
+    for (const name of LOOPS) {
+      const xml = fs.readFileSync(`${dir}/${name}.xml`, 'utf8');
+      const layers = fs.readFileSync(`${dir}/${name}.txt`, 'utf8').trim().split(/\n\s*\n/).map((l) => l.trim().split('\n').map((r) => r.trim()));
+      const size: [number, number, number] = [layers[0][0].length, layers[0].length, layers.length];
+      const empty = /values="(.)/.exec(xml)![1];
+      const p = compileMjx(xml, { size, semantics: 'mj' }).program;
+      const runs = printed[name] as unknown as Record<string, { outcome: number; steps: number; finished: boolean }>;
+      for (const [seed, o] of Object.entries(runs).slice(0, 100)) {
+        const g = rowOf(layers.flat().join(''), empty);
+        Object.assign(g, { X: size[0], Y: size[1], Z: size[2] });
+        const r = runOn(g, p, Number(seed), name.startsWith('l4') ? 20_000 : 100_000);
+        const letters = Array.from(r.grid.cells, (v) => (v === 0 ? empty : r.grid.alphabet[v])).join('');
+        expect({ outcome: outcomeOf(name, letters), steps: r.steps, finished: r.finished }, `${name} ${seed}`).toEqual(o);
+        n++;
+      }
+    }
+    expect(n).toBe(500);
   });
 });

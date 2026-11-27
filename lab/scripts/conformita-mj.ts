@@ -12,7 +12,7 @@
 //                                                                              the 3D models of the original's repository: with --originale the
 //                                                                              C# against the reference voxel by voxel, then ours today, compared
 //                                                                              by the letters they write (our random numbers are others); with --mj
-//                                                                              ours with the switch of the semantics on (T526, T527), against the
+//                                                                              ours with the switch of the semantics on (T526-T528), against the
 //                                                                              reference voxel by voxel, steps and end included (--programmi too)
 //   npx vite-node lab/scripts/conformita-mj.ts -- --varianza [--semi 6] [--universi <cartella>] [--solo-concilio]
 //                                                                              how much the programs change between seeds: the seed's, the
@@ -62,7 +62,7 @@ export interface Outcome {
 
 const flat = (t: string) => t.replace(/\s+/g, '');
 const has = (file: string) => fs.existsSync(file);
-/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268). */
+/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268; the branches since T528, ADR-0272). */
 const MJ = flag('mj');
 
 // ---------------------------------------------------------------- the original (C#)
