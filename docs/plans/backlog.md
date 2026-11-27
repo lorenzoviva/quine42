@@ -6695,6 +6695,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 
 ### T509 · Studio: il terreno ricco del Paesaggista (sottobosco, scavi, strade, ferrovie, modelli riusati a semi) — `fatto` (`e392b3a4`) via T544
 - Pipeline: claude · sforzo extra · stima 3% · approvato · priorità 2
+- Step: 45
 - Contesto: l'autore il 26/11: il Paesaggista non fa vegetazione folta (arbusti, cespugli, foglie secche, erba, brecciolino, pietre, grano, balle di fieno rotolanti col vento in `mesa`); deve poter **togliere** terreno (strada e marciapiedi a `neapolis`, ferrovia a `mesa`); «si può creare una strada asfaltata?»; più tridimensionalità; modelli variabili riusati cambiando il seme. Vedi `dossier T459` (studio del terreno 3D, `docs/design/terreno-3d.md`), `dossier T475` (rilievo vero), `dossier T484` (vento), `dossier T495` (riuso col seme), `dossier T467` (Scultore Paesaggista).
 - Cosa fare: lo studio in `docs/design/terreno-ricco.md`: (1) cosa sa fare oggi il Paesaggista e perché la vegetazione è rada (densità del Cartografo, tetti dei modelli per luogo, costo delle forme), con misure su un luogo di ogni universo; (2) il sottobosco come modelli piccoli riusati a semi (un programma per tipo, migliaia di istanze: instancing, LOD, memoria e draw call, misurato); le cose mosse dal vento (balle) sul vento di T484; (3) lo scavo: un terreno che sottrae (strada, marciapiede, binari, fossi) come terreno del generatore, come scavo del layout o come programma del Cartografo, con la regola 10 e la rete; la risposta sulla strada asfaltata oggi; (4) la tridimensionalità del terreno rispetto a T459; (5) la catena dei task (provider, sforzo, stima) e le domande col consiglio.
 - Test: nessuno (studio); eventuali misure in `lab/`.
@@ -6972,3 +6973,76 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (solo docs, lab e uno script di misura).
 - Quando è fatto: commit su `task/T544`; poi l'orchestratore integra T544, e `integra T509` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: `task/T509` fuso in `task/T544`, conflitto in `universe/universe.json` risolto tenendo `0.10.41`; nient'altro riporta la versione a 0.10.40; typecheck e suite intera verdi; sicurezza: nessuna superficie nuova.
+
+## Il terreno ricco (D/T509 chiusa dall'autore il 27/11: tutte A; catena C1-C9 di `docs/design/terreno-ricco.md` § 7)
+
+> Risposte in fondo a `docs/pipeline/domande/T509.md`. Studio: `dossier T509`, `docs/design/terreno-ricco.md`, `lab/terreno-ricco/`. Tutto nel contratto 0.10, una `Z` per task che tocca `src/kernel/`; i concetti nuovi (copertura, rientro, scavo, modello allineato, braccio, deriva, grana) con la loro voce nel glossario.
+
+### T545 · C1 La copertura dei terreni, aperta a mondo acceso — `da fare`
+- Pipeline: claude · sforzo extra · stima 6% · approvato · priorità 2
+- Step: 45
+- Contesto: § 2 e § 7 (C1) dello studio; D1 A, D2 A. In più l'autore: il kernel resta **aperto** ad aggiungere a mondo acceso altri oggetti o tipi di copertura sul terreno («cercare la chiave sotto un sasso»: deve sempre poter esserci un oggetto o una tipologia in più).
+- Cosa fare: `TerrainDef.cover` (al più tre tipi, densità 0-4) letto senza fidarsi; la classe `cover` (`src/mj/classes.ts`); lo spargimento con l'hash nel worker del terreno (`terrainmesh.ts`: mai su sentieri, lotti, porte, varchi, sotto cose solide); una InstancedMesh per forma sulla finestra, senza ombre, tetto di 20 000 istanze; i modelli del laboratorio come copertura del seme per i test. **L'apertura**: la copertura di un terreno si cambia a mondo acceso (un tipo in più, un'altra densità: dal Concilio, con un commit, entro i tetti) e una singola istanza di copertura può diventare una cosa del mondo dove serve (il sasso sotto cui sta la chiave: un'entità posata dal kernel nel punto dell'istanza, che da lì in poi non si disegna più come copertura); l'ADR dice come lo fanno Referente, Cartografo e Lua, senza mettere la copertura nello stato né sul filo. `lab/scripts/impronta-terreno.ts` aggiornata con la ragione (il seme cambia aspetto).
+- Test: lettura difensiva, spargimento deterministico, le esclusioni, il tetto, l'aggiunta a mondo acceso, l'istanza promossa a cosa.
+- Browser: sì, foto prima e dopo, `misura-frame.mjs --sottobosco`.
+- Quando è fatto: test e typecheck verdi, ADR, foto e misure del frame nell'esito.
+
+### T546 · C2 Il Paesaggista della copertura — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
+- Step: 45
+- Dipende da: T545
+- Contesto: § 7 (C2); D6 A.
+- Cosa fare: la sezione del prompt (`landscaper.md`: un ciuffo, pochi voxel, chiaro in cima, niente che galleggi), i controlli (al più 600 triangoli a seme, la varianza fra semi), la Genesi che sceglie la copertura per terreno dal nome e dalla descrizione e la chiede, il `ModelDirector` che la mette in fila, `MockAiModels`, la riparazione senza chiamate per gli universi di prima (i modelli di copertura del seme per i terreni che il nome dice prato, bosco, grano, sabbia), spegnibile dal master; anche le coperture aggiunte a mondo acceso di T545 passano da qui.
+- Browser: sì. Quando è fatto: test verdi, una Genesi offline con la copertura vista.
+
+### T547 · C3 La grana del suolo — `da fare`
+- Pipeline: claude · sforzo high · stima 2% · approvato · priorità 2
+- Step: 45
+- Contesto: § 7 (C3).
+- Cosa fare: le macchie di un voxel nel materiale del terreno (brecciolino, foglie secche, ghiaia della massicciata), un campo `grain` del terreno, nessun triangolo in più; la riparazione dal nome per gli universi di prima.
+- Browser: sì. Quando è fatto: test verdi, foto.
+
+### T548 · C4 Il rientro dei terreni, il cordolo e le strade larghe — `da fare`
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 2
+- Step: 45
+- Contesto: § 3 e § 7 (C4); D3 A per strade e marciapiedi. In più l'autore: nelle foto la strada asfaltata è larga una casella, **le strade vanno ampie**.
+- Cosa fare: `TerrainDef.inset` (−0,2..+0,2), `groundY` e ciò che vi sta sopra, la Genesi che lo scrive, la riparazione dal nome; nessun effetto sul kernel (un test che lo prova sulla rete). **Le strade larghe**: dove una strada (non un sentiero) viene dal layout o dai timbri, larga 2-4 caselle col marciapiede ai lati (dal terreno o dall'ambiente, letta senza fidarsi), solo nei piani nuovi col loro segno, la regola 10 rispettata (`rete-gradini.ts` prima e dopo); l'esito dice che cosa cambia in `neapolis` e `sidera`.
+- Browser: sì (`neapolis`). Quando è fatto: test verdi, foto della strada larga col cordolo.
+
+### T549 · C5 I modelli allineati: binari, staccionate, siepi, tubi — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
+- Step: 45
+- Dipende da: T548
+- Contesto: § 3.3 e § 7 (C5); D4 sì.
+- Cosa fare: `TerrainDef.align: 'line'`, i bracci per vicino nel worker del terreno (dritto, curva, scambio, fine), il Paesaggista (o il Mobiliere) che scolpisce il braccio, i binari di `orichalcum`, `neapolis` e `mesa`, la staccionata come braccio invece del muro alto (resta solida).
+- Browser: sì. Quando è fatto: test verdi, foto dei binari e della staccionata.
+
+### T550 · C6 Lo scavo del layout (fossi e trincee) — `da fare`
+- Pipeline: claude · sforzo extra · stima 4% · approvato · priorità 2
+- Step: 45
+- Contesto: § 3.2 e § 7 (C6); D3 B per fossi e trincee, niente programma del Cartografo.
+- Cosa fare: `TerrainDef.cut` (1-2 livelli), la terra mossa come le rampe, il segno nei piani nuovi (quelli di prima restano), l'acqua che riempie, la rete; `rete-gradini.ts` prima e dopo.
+- Browser: sì. Quando è fatto: test verdi, regola 10 misurata, foto.
+
+### T551 · C7 Ciò che il vento porta: la primitiva del kernel (foglie, polline, schiuma, cespugli rotolanti) — `da fare`
+- Pipeline: claude · sforzo extra · stima 5% · approvato · priorità 2
+- Step: 45
+- Contesto: § 2.5 e § 7 (C7); D5 A, ma l'autore: 16 sono tante e non solo i cespugli: foglie portate dal vento, polline, l'acqua delle onde che si infrangono. Una **primitiva del kernel di ciò che il vento porta**, su cui poi si creano le coperture. Il vento è ADR-0255 (`src/kernel/wind.ts`, `WindView`).
+- Cosa fare: due livelli della stessa primitiva. (1) Le particelle portate, solo aspetto: ogni copertura, terreno o riva può dichiarare ciò che il vento ne stacca (foglie, polline, spruzzi dove l'onda rompe sulla riva), mosse dalla vista grossolana del vento sul client, a istanze, molte (un tetto misurato col frame, non 16), mai nello stato né sul filo. (2) Le cose portate, fisiche: `physics.drift` (quanto il vento porta la cosa), il passo nel kernel, scritto dal Fisico, poche con un tetto, in molti; i cespugli rotolanti di `mesa`. L'ADR dice come la copertura (T545) dichiara le sue particelle.
+- Browser: sì (`mesa` offline, una riva con le onde). Quando è fatto: test verdi, misura del frame con le particelle, foto.
+
+### T552 · C8 I semi per classe — `da fare`
+- Pipeline: hydrogen · sforzo high · stima 1.5% · approvato · priorità 2
+- Step: 45
+- Dipende da: T545
+- Contesto: § 5 e § 7 (C8).
+- Cosa fare: `TILE_SEEDS` per classe (4 alberi e rocce, 8 copertura), la cache, l'impronta aggiornata con la ragione.
+- Browser: no. Quando è fatto: test verdi.
+
+### T553 · C9 La prova pagata del terreno ricco — `da fare`
+- Pipeline: claude · sforzo high · stima 2.5% · approvato · priorità 2
+- Step: 45
+- Dipende da: T546, T549, T551
+- Contesto: § 7 (C9); D6 B per una copertura propria, D7 A (`mesa` resta collinare).
+- Cosa fare: la Genesi di un mondo nuovo e la riparazione di `mesa` e `neapolis` col Paesaggista vero (copertura, braccio dei binari, ciò che il vento porta), su copie, tetto ~1,5 $ sul registro; foto e costo.
+- Browser: sì. Quando è fatto: rapporto con foto e costo.

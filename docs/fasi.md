@@ -111,7 +111,7 @@ L'autore: il rilascio che monetizza, con i pagamenti Stripe e il valore delle ca
 | 42 | L'inglese è la lingua interna: chi apre il repository lo legge | I | raggiunto | T306 T307a T314 T307b T308a T308b T309 T310 T310b T318 T328 |
 | 43 | La open beta: i giocatori pagano OpenRouter e l'hosting, anche in self-hosting | IV | in corso | T345 T347 T361 T362 T363 T364 T365 T366 T367 T368 T369 T372 T373 T374 T375 T376 T377 T380 T382 T379 T381 T383 T387 T388 T389 T390 T393 |
 | 44 | Gli Scultori specializzati: prompt per classe, esempi, pezzi condivisi per universo | III | in corso | T458 T467 T468 T469 T470 T471 T472 T473 T490 T491 T497 T498 T500 T525 T526 T527 T528 T529 T530 T531 T532 T533 T534 T535 T536 T537 T538 T539 |
-| 45 | Il terreno in tre dimensioni: strati, montagne, fondali, la regola 10 rivista, automi cellulari | III | in corso | T459 T474 T475 T476 T477 T478 T479 T480 T481 T482 T483 T484 T485 T486 T503 T504 T505 T506 |
+| 45 | Il terreno in tre dimensioni: strati, montagne, fondali, la regola 10 rivista, automi cellulari | III | in corso | T459 T474 T475 T476 T477 T478 T479 T480 T481 T482 T483 T484 T485 T486 T503 T504 T505 T506 T509 T545 T546 T547 T548 T549 T550 T551 T552 T553 |
 
 La Fase II non ha ancora uno step per la beta stessa e la Fase III non ha quelli dei requisiti: uno step si apre quando ha dei task.
 
