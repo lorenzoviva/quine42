@@ -1,0 +1,12123 @@
+{
+ "sets": {
+  "palazzina": {
+   "bricks": 51,
+   "bays": 60,
+   "patterns": 274,
+   "propagator": 188436,
+   "ms": 379,
+   "problems": [],
+   "tileset": {
+    "tiles": 60,
+    "tileChars": 2031840,
+    "pairsSide": 31818,
+    "pairsTop": 30582,
+    "neighborLines": 11778,
+    "neighborChars": 565344,
+    "total": 2597184
+   }
+  },
+  "popolare": {
+   "bricks": 51,
+   "bays": 60,
+   "patterns": 287,
+   "propagator": 210198,
+   "ms": 325,
+   "problems": [],
+   "tileset": {
+    "tiles": 60,
+    "tileChars": 2031840,
+    "pairsSide": 36303,
+    "pairsTop": 32493,
+    "neighborLines": 13138,
+    "neighborChars": 630624,
+    "total": 2662464
+   }
+  },
+  "villa": {
+   "bricks": 51,
+   "bays": 60,
+   "patterns": 276,
+   "propagator": 191696,
+   "ms": 309,
+   "problems": [],
+   "tileset": {
+    "tiles": 60,
+    "tileChars": 2031840,
+    "pairsSide": 32486,
+    "pairsTop": 30876,
+    "neighborLines": 11982,
+    "neighborChars": 575136,
+    "total": 2606976
+   }
+  },
+  "unione": {
+   "bricks": 151,
+   "bays": 178,
+   "patterns": 835,
+   "propagator": 1761702,
+   "ms": 953,
+   "problems": [],
+   "tileset": {
+    "tiles": 178,
+    "tileChars": 6027792,
+    "pairsSide": 300055,
+    "pairsTop": 280741,
+    "neighborLines": 110107,
+    "neighborChars": 5285136,
+    "total": 11312928
+   }
+  }
+ },
+ "stairs": [
+  {
+   "what": "nucleo-terra + nucleo-piano + torrino",
+   "top": 66,
+   "want": 66,
+   "climbs": true,
+   "roof": true
+  },
+  {
+   "what": "nucleo-terra + nucleo-piano + nucleo-piano + nucleo-piano + torrino",
+   "top": 130,
+   "want": 130,
+   "climbs": true,
+   "roof": true
+  },
+  {
+   "what": "scala",
+   "top": 34,
+   "want": 34,
+   "climbs": true
+  },
+  {
+   "what": "scala-esterna",
+   "top": 34,
+   "want": 34,
+   "climbs": true
+  }
+ ],
+ "engine": [
+  {
+   "style": "palazzina",
+   "kind": "lotto",
+   "ceilings": "mondo",
+   "voxelSide": 224,
+   "patterns": 274,
+   "waveCells": 245,
+   "waveBytes": 0,
+   "rssGrowth": 207060992,
+   "ok": true,
+   "ms": 2070.3879000000015,
+   "voxels": 8028160,
+   "same": true
+  },
+  {
+   "style": "palazzina",
+   "kind": "blocco",
+   "ceilings": "mondo",
+   "voxelSide": 480,
+   "patterns": 274,
+   "waveCells": 1125,
+   "waveBytes": 0,
+   "rssGrowth": 77828096,
+   "ok": true,
+   "ms": 3454.822899999999,
+   "voxels": 36864000,
+   "same": true
+  },
+  {
+   "style": "popolare",
+   "kind": "blocco",
+   "ceilings": "mondo",
+   "voxelSide": 480,
+   "patterns": 287,
+   "waveCells": 1125,
+   "waveBytes": 0,
+   "rssGrowth": 113152000,
+   "ok": true,
+   "ms": 3655.9953999999852,
+   "voxels": 36864000,
+   "same": true
+  },
+  {
+   "style": "villa",
+   "kind": "blocco",
+   "ceilings": "mondo",
+   "voxelSide": 480,
+   "patterns": 276,
+   "waveCells": 1125,
+   "waveBytes": 0,
+   "rssGrowth": 132341760,
+   "ok": true,
+   "ms": 3839.3428999999887,
+   "voxels": 36864000,
+   "same": true
+  },
+  {
+   "style": "palazzina",
+   "kind": "quartiere",
+   "ceilings": "mondo",
+   "voxelSide": 928,
+   "patterns": 274,
+   "waveCells": 4205,
+   "waveBytes": 0,
+   "rssGrowth": -9125888,
+   "ok": false,
+   "ms": 2064.482699999993,
+   "error": "wfc: la griglia nuova (928×928×160) supera i limiti"
+  },
+  {
+   "style": "palazzina",
+   "kind": "quartiere",
+   "ceilings": "laboratorio",
+   "voxelSide": 928,
+   "patterns": 274,
+   "waveCells": 4205,
+   "waveBytes": 0,
+   "rssGrowth": 118128640,
+   "ok": true,
+   "ms": 7935.041200000007,
+   "voxels": 137789440,
+   "same": true
+  },
+  {
+   "style": "unione",
+   "kind": "blocco",
+   "ceilings": "mondo",
+   "voxelSide": 480,
+   "patterns": 835,
+   "waveCells": 1125,
+   "waveBytes": 31947750,
+   "labMs": 13245,
+   "labTries": 3,
+   "rssGrowth": 336883712,
+   "ok": false,
+   "ms": 16310.231,
+   "error": "non finita (wfc a tessere (835 motivi))"
+  },
+  {
+   "style": "unione",
+   "kind": "blocco",
+   "ceilings": "laboratorio",
+   "voxelSide": 480,
+   "patterns": 835,
+   "waveCells": 1125,
+   "waveBytes": 31947750,
+   "labMs": 12985,
+   "labTries": 3,
+   "rssGrowth": 45961216,
+   "ok": false,
+   "ms": 15809.395600000018,
+   "error": "non finita (wfc a tessere (835 motivi))"
+  }
+ ],
+ "ceilings": {
+  "world": {
+   "waveCells": 32768,
+   "waveBytes": 33554432,
+   "patterns": 1024,
+   "tries": 100,
+   "searchStates": 2000,
+   "potentialBytes": 33554432,
+   "convchainSteps": 50,
+   "convchainN": 3,
+   "convchainCells": 65536,
+   "files": 64,
+   "fileChars": 200000,
+   "importDepth": 3
+  },
+  "form": {
+   "side": 512,
+   "cells": 40000000
+  },
+  "structureSide": 500,
+  "engine": {
+   "patterns": 2048,
+   "waveBytes": 134217728,
+   "ms": 10000,
+   "propagator": 4000000
+  }
+ },
+ "bestOf": [
+  {
+   "style": "palazzina",
+   "shares": [
+    0.853,
+    0.799,
+    0.795,
+    0.785,
+    0.83,
+    0.979,
+    0.656,
+    0.851
+   ],
+   "best": 0.979,
+   "full": 0
+  },
+  {
+   "style": "popolare",
+   "shares": [
+    0.721,
+    0.785,
+    0.753,
+    0.751,
+    0.788,
+    0.742,
+    0.785,
+    0.817
+   ],
+   "best": 0.817,
+   "full": 0
+  },
+  {
+   "style": "villa",
+   "shares": [
+    0.802,
+    0.82,
+    0.819,
+    0.836,
+    0.837,
+    0.834,
+    0.755,
+    0.823
+   ],
+   "best": 0.837,
+   "full": 0
+  }
+ ],
+ "runs": [
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 207.95199999999932,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     44,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     7,
+     18
+    ],
+    "bridges": [
+     0,
+     2
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 48,
+    "square": 7,
+    "baysInSquare": 48,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 2,
+     "10+": 2
+    },
+    "largest": 14
+   },
+   "used": 33,
+   "of": 50,
+   "entropy": 4.39
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 209.79719999999907,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     50,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     14,
+     18
+    ],
+    "bridges": [
+     0,
+     2
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 48,
+    "square": 7,
+    "baysInSquare": 48,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 2,
+     "10+": 2
+    },
+    "largest": 14
+   },
+   "used": 33,
+   "of": 50,
+   "entropy": 4.41,
+   "opened": 5,
+   "lost": 4,
+   "stitchMs": 1.8451999999997497
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 183.54570000000058,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     15,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 2,
+    "bays": 18,
+    "square": 2,
+    "baysInSquare": 18,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 12
+   },
+   "used": 25,
+   "of": 50,
+   "entropy": 3.94
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 184.9966000000004,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     20,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 2,
+    "bays": 18,
+    "square": 2,
+    "baysInSquare": 18,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 12
+   },
+   "used": 25,
+   "of": 50,
+   "entropy": 3.94,
+   "opened": 4,
+   "lost": 0,
+   "stitchMs": 1.4508999999998196
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 174.35360000000037,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     23,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     8,
+     14
+    ],
+    "bridges": [
+     8,
+     8
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 20,
+    "square": 4,
+    "baysInSquare": 20,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 0
+    },
+    "largest": 8
+   },
+   "used": 32,
+   "of": 50,
+   "entropy": 3.98
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 175.42150000000038,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     34,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     10,
+     14
+    ],
+    "bridges": [
+     8,
+     8
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 20,
+    "square": 4,
+    "baysInSquare": 20,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 0
+    },
+    "largest": 8
+   },
+   "used": 31,
+   "of": 50,
+   "entropy": 3.96,
+   "opened": 7,
+   "lost": 4,
+   "stitchMs": 1.0679000000000087
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 171.46169999999984,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     16,
+     20
+    ],
+    "above": [
+     64,
+     66
+    ],
+    "stairs": [
+     9,
+     9
+    ],
+    "roofs": [
+     19,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 63,
+    "square": 7,
+    "baysInSquare": 63,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 2,
+     "6-9": 2,
+     "10+": 3
+    },
+    "largest": 20
+   },
+   "used": 38,
+   "of": 50,
+   "entropy": 4.84
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 172.1392999999989,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     66,
+     66
+    ],
+    "stairs": [
+     9,
+     9
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 63,
+    "square": 7,
+    "baysInSquare": 63,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 2,
+     "6-9": 2,
+     "10+": 3
+    },
+    "largest": 20
+   },
+   "used": 37,
+   "of": 50,
+   "entropy": 4.8,
+   "opened": 7,
+   "lost": 0,
+   "stitchMs": 0.6775999999990745
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 170.1795000000002,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     44,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     16,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 6,
+    "bays": 54,
+    "square": 6,
+    "baysInSquare": 54,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 2
+    },
+    "largest": 22
+   },
+   "used": 36,
+   "of": 50,
+   "entropy": 4.54
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 170.8109999999997,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     44,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 6,
+    "bays": 54,
+    "square": 6,
+    "baysInSquare": 54,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 2
+    },
+    "largest": 22
+   },
+   "used": 36,
+   "of": 50,
+   "entropy": 4.54,
+   "opened": 2,
+   "lost": 0,
+   "stitchMs": 0.6314999999995052
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 170.21049999999923,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     16,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     5,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 3,
+    "bays": 22,
+    "square": 3,
+    "baysInSquare": 22,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 1,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 12
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 170.7451000000001,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2284380,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     5,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 3,
+    "bays": 22,
+    "square": 3,
+    "baysInSquare": 22,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 1,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 12
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.1,
+   "opened": 1,
+   "lost": 7,
+   "stitchMs": 0.5346000000008644
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 818.3304000000007,
+   "massingMs": 5.379699999999502,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     106,
+     107
+    ],
+    "above": [
+     109,
+     151
+    ],
+    "stairs": [
+     22,
+     31
+    ],
+    "roofs": [
+     47,
+     108
+    ],
+    "bridges": [
+     16,
+     28
+    ],
+    "yards": [
+     4,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 28,
+    "bays": 169,
+    "square": 28,
+    "baysInSquare": 169,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 21,
+     "6-9": 2,
+     "10+": 5
+    },
+    "largest": 17
+   },
+   "used": 43,
+   "of": 50,
+   "entropy": 4.78
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 822.0256000000008,
+   "massingMs": 5.379699999999502,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     107,
+     107
+    ],
+    "above": [
+     147,
+     151
+    ],
+    "stairs": [
+     31,
+     31
+    ],
+    "roofs": [
+     106,
+     108
+    ],
+    "bridges": [
+     22,
+     28
+    ],
+    "yards": [
+     5,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 26,
+    "bays": 169,
+    "square": 26,
+    "baysInSquare": 169,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 19,
+     "6-9": 2,
+     "10+": 5
+    },
+    "largest": 24
+   },
+   "used": 42,
+   "of": 50,
+   "entropy": 4.77,
+   "opened": 28,
+   "lost": 6,
+   "stitchMs": 3.6952000000001135
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 968.8534,
+   "massingMs": 6.611899999999878,
+   "tries": 4,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     100,
+     100
+    ],
+    "above": [
+     78,
+     117
+    ],
+    "stairs": [
+     37,
+     37
+    ],
+    "roofs": [
+     82,
+     106
+    ],
+    "bridges": [
+     22,
+     22
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 16,
+    "bays": 111,
+    "square": 16,
+    "baysInSquare": 111,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 4,
+     "10+": 4
+    },
+    "largest": 16
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.75
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 970.4982,
+   "massingMs": 6.611899999999878,
+   "tries": 4,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     100,
+     100
+    ],
+    "above": [
+     117,
+     117
+    ],
+    "stairs": [
+     37,
+     37
+    ],
+    "roofs": [
+     106,
+     106
+    ],
+    "bridges": [
+     22,
+     22
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 16,
+    "bays": 111,
+    "square": 16,
+    "baysInSquare": 111,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 4,
+     "10+": 4
+    },
+    "largest": 16
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.75,
+   "opened": 29,
+   "lost": 0,
+   "stitchMs": 1.644800000000032
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 893.3444999999992,
+   "massingMs": 4.031699999999546,
+   "tries": 2,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     108,
+     108
+    ],
+    "above": [
+     57,
+     150
+    ],
+    "stairs": [
+     23,
+     23
+    ],
+    "roofs": [
+     28,
+     92
+    ],
+    "bridges": [
+     33,
+     51
+    ],
+    "yards": [
+     10,
+     10
+    ]
+   },
+   "rooms": {
+    "rooms": 25,
+    "bays": 183,
+    "square": 25,
+    "baysInSquare": 183,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 12,
+     "6-9": 8,
+     "10+": 5
+    },
+    "largest": 19
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.65
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 895.6704999999984,
+   "massingMs": 4.031699999999546,
+   "tries": 2,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     108,
+     108
+    ],
+    "above": [
+     150,
+     150
+    ],
+    "stairs": [
+     23,
+     23
+    ],
+    "roofs": [
+     84,
+     92
+    ],
+    "bridges": [
+     45,
+     51
+    ],
+    "yards": [
+     10,
+     10
+    ]
+   },
+   "rooms": {
+    "rooms": 25,
+    "bays": 183,
+    "square": 25,
+    "baysInSquare": 183,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 12,
+     "6-9": 8,
+     "10+": 5
+    },
+    "largest": 19
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.62,
+   "opened": 37,
+   "lost": 8,
+   "stitchMs": 2.3259999999991123
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 906.5277999999998,
+   "massingMs": 4.301199999999881,
+   "tries": 3,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     93,
+     97
+    ],
+    "above": [
+     97,
+     118
+    ],
+    "stairs": [
+     39,
+     39
+    ],
+    "roofs": [
+     42,
+     88
+    ],
+    "bridges": [
+     34,
+     53
+    ],
+    "yards": [
+     7,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 17,
+    "bays": 113,
+    "square": 17,
+    "baysInSquare": 113,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 6,
+     "10+": 3
+    },
+    "largest": 13
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.62
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 909.3598000000002,
+   "massingMs": 4.301199999999881,
+   "tries": 3,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     97,
+     97
+    ],
+    "above": [
+     118,
+     118
+    ],
+    "stairs": [
+     39,
+     39
+    ],
+    "roofs": [
+     87,
+     88
+    ],
+    "bridges": [
+     45,
+     53
+    ],
+    "yards": [
+     7,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 15,
+    "bays": 113,
+    "square": 15,
+    "baysInSquare": 113,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 6,
+     "10+": 4
+    },
+    "largest": 13
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.61,
+   "opened": 36,
+   "lost": 1,
+   "stitchMs": 2.8320000000003347
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 837.0626000000011,
+   "massingMs": 4.150700000000143,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     109,
+     109
+    ],
+    "above": [
+     67,
+     135
+    ],
+    "stairs": [
+     28,
+     28
+    ],
+    "roofs": [
+     52,
+     106
+    ],
+    "bridges": [
+     23,
+     39
+    ],
+    "yards": [
+     3,
+     3
+    ]
+   },
+   "rooms": {
+    "rooms": 22,
+    "bays": 145,
+    "square": 22,
+    "baysInSquare": 145,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 13,
+     "6-9": 5,
+     "10+": 4
+    },
+    "largest": 24
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.67
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 840.5922000000028,
+   "massingMs": 4.150700000000143,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     109,
+     109
+    ],
+    "above": [
+     135,
+     135
+    ],
+    "stairs": [
+     28,
+     28
+    ],
+    "roofs": [
+     95,
+     106
+    ],
+    "bridges": [
+     32,
+     39
+    ],
+    "yards": [
+     3,
+     3
+    ]
+   },
+   "rooms": {
+    "rooms": 20,
+    "bays": 145,
+    "square": 20,
+    "baysInSquare": 145,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 11,
+     "6-9": 4,
+     "10+": 5
+    },
+    "largest": 28
+   },
+   "used": 44,
+   "of": 50,
+   "entropy": 4.66,
+   "opened": 40,
+   "lost": 11,
+   "stitchMs": 3.5296000000016647
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 823.6082999999999,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     94,
+     97
+    ],
+    "above": [
+     136,
+     167
+    ],
+    "stairs": [
+     38,
+     38
+    ],
+    "roofs": [
+     70,
+     104
+    ],
+    "bridges": [
+     20,
+     38
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 27,
+    "bays": 190,
+    "square": 27,
+    "baysInSquare": 190,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 15,
+     "6-9": 7,
+     "10+": 5
+    },
+    "largest": 20
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 825.5023000000001,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10489500,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     97,
+     97
+    ],
+    "above": [
+     165,
+     167
+    ],
+    "stairs": [
+     38,
+     38
+    ],
+    "roofs": [
+     104,
+     104
+    ],
+    "bridges": [
+     26,
+     38
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 27,
+    "bays": 190,
+    "square": 27,
+    "baysInSquare": 190,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 15,
+     "6-9": 7,
+     "10+": 5
+    },
+    "largest": 20
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 28,
+   "lost": 2,
+   "stitchMs": 1.8940000000002328
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 3355.8181000000004,
+   "massingMs": 66.89309999999932,
+   "tries": 2,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     389,
+     411
+    ],
+    "above": [
+     372,
+     529
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     138,
+     412
+    ],
+    "bridges": [
+     63,
+     153
+    ],
+    "yards": [
+     18,
+     23
+    ]
+   },
+   "rooms": {
+    "rooms": 91,
+    "bays": 577,
+    "square": 90,
+    "baysInSquare": 576,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 47,
+     "6-9": 30,
+     "10+": 13
+    },
+    "largest": 27
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.04
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 3366.9874999999993,
+   "massingMs": 66.89309999999932,
+   "tries": 2,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     411,
+     411
+    ],
+    "above": [
+     526,
+     529
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     338,
+     412
+    ],
+    "bridges": [
+     118,
+     153
+    ],
+    "yards": [
+     18,
+     23
+    ]
+   },
+   "rooms": {
+    "rooms": 85,
+    "bays": 577,
+    "square": 84,
+    "baysInSquare": 576,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 37,
+     "6-9": 33,
+     "10+": 14
+    },
+    "largest": 27
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.03,
+   "opened": 137,
+   "lost": 77,
+   "stitchMs": 11.16939999999886
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 5382.096999999998,
+   "massingMs": 13.448899999999412,
+   "tries": 12,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     406,
+     406
+    ],
+    "above": [
+     539,
+     751
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     203,
+     408
+    ],
+    "bridges": [
+     61,
+     131
+    ],
+    "yards": [
+     31,
+     31
+    ]
+   },
+   "rooms": {
+    "rooms": 108,
+    "bays": 742,
+    "square": 108,
+    "baysInSquare": 742,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 54,
+     "6-9": 27,
+     "10+": 27
+    },
+    "largest": 20
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.09
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 5389.171999999999,
+   "massingMs": 13.448899999999412,
+   "tries": 12,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     406,
+     406
+    ],
+    "above": [
+     751,
+     751
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     397,
+     408
+    ],
+    "bridges": [
+     121,
+     131
+    ],
+    "yards": [
+     31,
+     31
+    ]
+   },
+   "rooms": {
+    "rooms": 98,
+    "bays": 742,
+    "square": 98,
+    "baysInSquare": 742,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 42,
+     "6-9": 26,
+     "10+": 30
+    },
+    "largest": 20
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.06,
+   "opened": 180,
+   "lost": 11,
+   "stitchMs": 7.075000000000728
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 3722.678499999998,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     395,
+     409
+    ],
+    "above": [
+     409,
+     510
+    ],
+    "stairs": [
+     161,
+     161
+    ],
+    "roofs": [
+     287,
+     420
+    ],
+    "bridges": [
+     84,
+     122
+    ],
+    "yards": [
+     30,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 82,
+    "bays": 532,
+    "square": 81,
+    "baysInSquare": 530,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3": 0,
+     "4-5": 43,
+     "6-9": 22,
+     "10+": 16
+    },
+    "largest": 21
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 3729.8683999999994,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     409,
+     409
+    ],
+    "above": [
+     490,
+     510
+    ],
+    "stairs": [
+     161,
+     161
+    ],
+    "roofs": [
+     404,
+     420
+    ],
+    "bridges": [
+     108,
+     122
+    ],
+    "yards": [
+     30,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 79,
+    "bays": 532,
+    "square": 78,
+    "baysInSquare": 530,
+    "sizes": {
+     "1": 0,
+     "2": 1,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 19,
+     "10+": 18
+    },
+    "largest": 21
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.08,
+   "opened": 119,
+   "lost": 36,
+   "stitchMs": 7.1899000000012165
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 3368.1586000000025,
+   "massingMs": 15.524000000001251,
+   "tries": 2,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     366,
+     378
+    ],
+    "above": [
+     501,
+     718
+    ],
+    "stairs": [
+     224,
+     229
+    ],
+    "roofs": [
+     204,
+     432
+    ],
+    "bridges": [
+     43,
+     89
+    ],
+    "yards": [
+     27,
+     29
+    ]
+   },
+   "rooms": {
+    "rooms": 94,
+    "bays": 678,
+    "square": 92,
+    "baysInSquare": 675,
+    "sizes": {
+     "1": 1,
+     "2": 1,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 35,
+     "10+": 16
+    },
+    "largest": 30
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 3390.3534000000072,
+   "massingMs": 15.524000000001251,
+   "tries": 2,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     378,
+     378
+    ],
+    "above": [
+     684,
+     718
+    ],
+    "stairs": [
+     229,
+     229
+    ],
+    "roofs": [
+     353,
+     432
+    ],
+    "bridges": [
+     69,
+     89
+    ],
+    "yards": [
+     29,
+     29
+    ]
+   },
+   "rooms": {
+    "rooms": 89,
+    "bays": 678,
+    "square": 87,
+    "baysInSquare": 675,
+    "sizes": {
+     "1": 1,
+     "2": 1,
+     "3": 0,
+     "4-5": 37,
+     "6-9": 33,
+     "10+": 17
+    },
+    "largest": 30
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1,
+   "opened": 118,
+   "lost": 113,
+   "stitchMs": 22.19480000000476
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 4650.925300000003,
+   "massingMs": 11.513399999996182,
+   "tries": 8,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     396,
+     413
+    ],
+    "above": [
+     422,
+     699
+    ],
+    "stairs": [
+     150,
+     153
+    ],
+    "roofs": [
+     187,
+     416
+    ],
+    "bridges": [
+     83,
+     157
+    ],
+    "yards": [
+     15,
+     17
+    ]
+   },
+   "rooms": {
+    "rooms": 106,
+    "bays": 745,
+    "square": 106,
+    "baysInSquare": 745,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 47,
+     "6-9": 28,
+     "10+": 31
+    },
+    "largest": 25
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.07
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 4670.707699999999,
+   "massingMs": 11.513399999996182,
+   "tries": 8,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     413,
+     413
+    ],
+    "above": [
+     687,
+     699
+    ],
+    "stairs": [
+     153,
+     153
+    ],
+    "roofs": [
+     359,
+     416
+    ],
+    "bridges": [
+     118,
+     157
+    ],
+    "yards": [
+     17,
+     17
+    ]
+   },
+   "rooms": {
+    "rooms": 93,
+    "bays": 745,
+    "square": 93,
+    "baysInSquare": 745,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 23,
+     "10+": 32
+    },
+    "largest": 25
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.05,
+   "opened": 158,
+   "lost": 69,
+   "stitchMs": 19.782399999996414
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 4135.012199999997,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     408,
+     412
+    ],
+    "above": [
+     419,
+     499
+    ],
+    "stairs": [
+     172,
+     172
+    ],
+    "roofs": [
+     172,
+     412
+    ],
+    "bridges": [
+     68,
+     122
+    ],
+    "yards": [
+     28,
+     28
+    ]
+   },
+   "rooms": {
+    "rooms": 80,
+    "bays": 490,
+    "square": 80,
+    "baysInSquare": 490,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 48,
+     "6-9": 19,
+     "10+": 13
+    },
+    "largest": 26
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 4.99
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 4146.7966000000015,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 39207420,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     412,
+     412
+    ],
+    "above": [
+     499,
+     499
+    ],
+    "stairs": [
+     172,
+     172
+    ],
+    "roofs": [
+     363,
+     412
+    ],
+    "bridges": [
+     115,
+     122
+    ],
+    "yards": [
+     28,
+     28
+    ]
+   },
+   "rooms": {
+    "rooms": 76,
+    "bays": 490,
+    "square": 76,
+    "baysInSquare": 490,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 22,
+     "10+": 13
+    },
+    "largest": 26
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 4.97,
+   "opened": 139,
+   "lost": 49,
+   "stitchMs": 11.784400000004098
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 188.00039999999717,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     50,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     7,
+     16
+    ],
+    "bridges": [
+     0,
+     4
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 27,
+    "square": 4,
+    "baysInSquare": 27,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 2,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 32,
+   "of": 50,
+   "entropy": 4.5
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 188.96330000000307,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     50,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     13,
+     16
+    ],
+    "bridges": [
+     0,
+     4
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 27,
+    "square": 4,
+    "baysInSquare": 27,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 2,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 32,
+   "of": 50,
+   "entropy": 4.47,
+   "opened": 2,
+   "lost": 3,
+   "stitchMs": 0.9629000000059023
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 186.07570000000123,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     20,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 1,
+    "bays": 21,
+    "square": 1,
+    "baysInSquare": 21,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 0,
+     "10+": 1
+    },
+    "largest": 21
+   },
+   "used": 28,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 186.57270000000426,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     20,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 1,
+    "bays": 21,
+    "square": 1,
+    "baysInSquare": 21,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 0,
+     "10+": 1
+    },
+    "largest": 21
+   },
+   "used": 28,
+   "of": 50,
+   "entropy": 3.8,
+   "opened": 0,
+   "lost": 0,
+   "stitchMs": 0.4970000000030268
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 188.3125,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     27,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     10,
+     14
+    ],
+    "bridges": [
+     8,
+     8
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 16,
+    "square": 4,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 0,
+     "10+": 0
+    },
+    "largest": 4
+   },
+   "used": 27,
+   "of": 50,
+   "entropy": 3.86
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 188.9077000000034,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     34,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     10,
+     14
+    ],
+    "bridges": [
+     8,
+     8
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 16,
+    "square": 4,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 0,
+     "10+": 0
+    },
+    "largest": 4
+   },
+   "used": 27,
+   "of": 50,
+   "entropy": 3.87,
+   "opened": 4,
+   "lost": 4,
+   "stitchMs": 0.5952000000033877
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 189.96880000000237,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     38,
+     66
+    ],
+    "stairs": [
+     9,
+     9
+    ],
+    "roofs": [
+     20,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 10,
+    "bays": 63,
+    "square": 10,
+    "baysInSquare": 63,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 3,
+     "10+": 2
+    },
+    "largest": 12
+   },
+   "used": 36,
+   "of": 50,
+   "entropy": 4.76
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 190.82640000000538,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     66,
+     66
+    ],
+    "stairs": [
+     9,
+     9
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 10,
+    "bays": 63,
+    "square": 10,
+    "baysInSquare": 63,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 3,
+     "10+": 2
+    },
+    "largest": 12
+   },
+   "used": 37,
+   "of": 50,
+   "entropy": 4.77,
+   "opened": 12,
+   "lost": 0,
+   "stitchMs": 0.8576000000030035
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 198.36850000000413,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     44,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     18,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 5,
+    "bays": 51,
+    "square": 5,
+    "baysInSquare": 51,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 3,
+     "10+": 2
+    },
+    "largest": 19
+   },
+   "used": 35,
+   "of": 50,
+   "entropy": 4.53
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 199.27810000000318,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     44,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 5,
+    "bays": 51,
+    "square": 5,
+    "baysInSquare": 51,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 3,
+     "10+": 2
+    },
+    "largest": 19
+   },
+   "used": 35,
+   "of": 50,
+   "entropy": 4.54,
+   "opened": 2,
+   "lost": 0,
+   "stitchMs": 0.9095999999990454
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 197.04479999999603,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     11,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 1,
+    "bays": 16,
+    "square": 1,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 0,
+     "10+": 1
+    },
+    "largest": 16
+   },
+   "used": 24,
+   "of": 50,
+   "entropy": 3.13
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 197.59879999999248,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2392670,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     12,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 1,
+    "bays": 16,
+    "square": 1,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 0,
+     "10+": 1
+    },
+    "largest": 16
+   },
+   "used": 24,
+   "of": 50,
+   "entropy": 3.14,
+   "opened": 2,
+   "lost": 0,
+   "stitchMs": 0.5539999999964493
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 913.1414999999979,
+   "massingMs": 5.379699999999502,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     105,
+     105
+    ],
+    "above": [
+     82,
+     149
+    ],
+    "stairs": [
+     34,
+     34
+    ],
+    "roofs": [
+     55,
+     100
+    ],
+    "bridges": [
+     31,
+     36
+    ],
+    "yards": [
+     9,
+     9
+    ]
+   },
+   "rooms": {
+    "rooms": 20,
+    "bays": 173,
+    "square": 20,
+    "baysInSquare": 173,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 5,
+     "10+": 8
+    },
+    "largest": 19
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.86
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 914.4558999999936,
+   "massingMs": 5.379699999999502,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     105,
+     105
+    ],
+    "above": [
+     145,
+     149
+    ],
+    "stairs": [
+     34,
+     34
+    ],
+    "roofs": [
+     97,
+     100
+    ],
+    "bridges": [
+     31,
+     36
+    ],
+    "yards": [
+     9,
+     9
+    ]
+   },
+   "rooms": {
+    "rooms": 18,
+    "bays": 173,
+    "square": 18,
+    "baysInSquare": 173,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 5,
+     "10+": 8
+    },
+    "largest": 27
+   },
+   "used": 46,
+   "of": 50,
+   "entropy": 4.83,
+   "opened": 34,
+   "lost": 7,
+   "stitchMs": 1.3143999999956577
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 958.377999999997,
+   "massingMs": 6.611899999999878,
+   "tries": 2,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     104,
+     104
+    ],
+    "above": [
+     86,
+     117
+    ],
+    "stairs": [
+     34,
+     34
+    ],
+    "roofs": [
+     52,
+     106
+    ],
+    "bridges": [
+     25,
+     28
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 17,
+    "bays": 149,
+    "square": 17,
+    "baysInSquare": 149,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 9,
+     "10+": 4
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 4.88
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 960.0184999999983,
+   "massingMs": 6.611899999999878,
+   "tries": 2,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     104,
+     104
+    ],
+    "above": [
+     117,
+     117
+    ],
+    "stairs": [
+     34,
+     34
+    ],
+    "roofs": [
+     98,
+     106
+    ],
+    "bridges": [
+     28,
+     28
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 16,
+    "bays": 149,
+    "square": 16,
+    "baysInSquare": 149,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 9,
+     "10+": 4
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 4.88,
+   "opened": 28,
+   "lost": 8,
+   "stitchMs": 1.6405000000013388
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 929.9303999999975,
+   "massingMs": 4.031699999999546,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     106,
+     108
+    ],
+    "above": [
+     45,
+     146
+    ],
+    "stairs": [
+     14,
+     26
+    ],
+    "roofs": [
+     40,
+     106
+    ],
+    "bridges": [
+     16,
+     34
+    ],
+    "yards": [
+     7,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 20,
+    "bays": 171,
+    "square": 20,
+    "baysInSquare": 171,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 6,
+     "10+": 7
+    },
+    "largest": 26
+   },
+   "used": 46,
+   "of": 50,
+   "entropy": 4.78
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 932.5677999999971,
+   "massingMs": 4.031699999999546,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     108,
+     108
+    ],
+    "above": [
+     146,
+     146
+    ],
+    "stairs": [
+     26,
+     26
+    ],
+    "roofs": [
+     106,
+     106
+    ],
+    "bridges": [
+     34,
+     34
+    ],
+    "yards": [
+     7,
+     7
+    ]
+   },
+   "rooms": {
+    "rooms": 20,
+    "bays": 171,
+    "square": 20,
+    "baysInSquare": 171,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 6,
+     "10+": 7
+    },
+    "largest": 26
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.76,
+   "opened": 34,
+   "lost": 0,
+   "stitchMs": 2.637399999999616
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 910.4396999999954,
+   "massingMs": 4.301199999999881,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     97,
+     97
+    ],
+    "above": [
+     83,
+     118
+    ],
+    "stairs": [
+     39,
+     39
+    ],
+    "roofs": [
+     59,
+     102
+    ],
+    "bridges": [
+     19,
+     27
+    ],
+    "yards": [
+     12,
+     12
+    ]
+   },
+   "rooms": {
+    "rooms": 15,
+    "bays": 112,
+    "square": 15,
+    "baysInSquare": 112,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 4,
+     "10+": 3
+    },
+    "largest": 21
+   },
+   "used": 46,
+   "of": 50,
+   "entropy": 4.85
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 912.1893999999957,
+   "massingMs": 4.301199999999881,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     97,
+     97
+    ],
+    "above": [
+     118,
+     118
+    ],
+    "stairs": [
+     39,
+     39
+    ],
+    "roofs": [
+     92,
+     102
+    ],
+    "bridges": [
+     25,
+     27
+    ],
+    "yards": [
+     12,
+     12
+    ]
+   },
+   "rooms": {
+    "rooms": 15,
+    "bays": 112,
+    "square": 15,
+    "baysInSquare": 112,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 4,
+     "10+": 3
+    },
+    "largest": 21
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.86,
+   "opened": 31,
+   "lost": 10,
+   "stitchMs": 1.7497000000003027
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 943.0772999999972,
+   "massingMs": 4.150700000000143,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     109,
+     109
+    ],
+    "above": [
+     80,
+     135
+    ],
+    "stairs": [
+     28,
+     28
+    ],
+    "roofs": [
+     38,
+     104
+    ],
+    "bridges": [
+     18,
+     35
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 22,
+    "bays": 151,
+    "square": 22,
+    "baysInSquare": 151,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 12,
+     "10+": 3
+    },
+    "largest": 15
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.85
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 947.3101999999999,
+   "massingMs": 4.150700000000143,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     109,
+     109
+    ],
+    "above": [
+     135,
+     135
+    ],
+    "stairs": [
+     28,
+     28
+    ],
+    "roofs": [
+     89,
+     104
+    ],
+    "bridges": [
+     29,
+     35
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 21,
+    "bays": 151,
+    "square": 21,
+    "baysInSquare": 151,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 6,
+     "6-9": 11,
+     "10+": 4
+    },
+    "largest": 15
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.85,
+   "opened": 40,
+   "lost": 15,
+   "stitchMs": 4.232900000002701
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 988.3341,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     90,
+     99
+    ],
+    "above": [
+     143,
+     169
+    ],
+    "stairs": [
+     35,
+     35
+    ],
+    "roofs": [
+     61,
+     106
+    ],
+    "bridges": [
+     18,
+     36
+    ],
+    "yards": [
+     5,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 31,
+    "bays": 206,
+    "square": 31,
+    "baysInSquare": 206,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 16,
+     "6-9": 9,
+     "10+": 6
+    },
+    "largest": 21
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.94
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 992.0708999999988,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10986750,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     99,
+     99
+    ],
+    "above": [
+     169,
+     169
+    ],
+    "stairs": [
+     35,
+     35
+    ],
+    "roofs": [
+     106,
+     106
+    ],
+    "bridges": [
+     26,
+     36
+    ],
+    "yards": [
+     5,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 31,
+    "bays": 206,
+    "square": 31,
+    "baysInSquare": 206,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 16,
+     "6-9": 9,
+     "10+": 6
+    },
+    "largest": 21
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.94,
+   "opened": 33,
+   "lost": 0,
+   "stitchMs": 3.736799999998766
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 4531.775300000001,
+   "massingMs": 66.89309999999932,
+   "tries": 2,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     401,
+     411
+    ],
+    "above": [
+     312,
+     529
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     138,
+     408
+    ],
+    "bridges": [
+     64,
+     157
+    ],
+    "yards": [
+     22,
+     24
+    ]
+   },
+   "rooms": {
+    "rooms": 80,
+    "bays": 574,
+    "square": 79,
+    "baysInSquare": 573,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 19,
+     "10+": 19
+    },
+    "largest": 22
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.05
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 4539.770500000006,
+   "massingMs": 66.89309999999932,
+   "tries": 2,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     411,
+     411
+    ],
+    "above": [
+     526,
+     529
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     342,
+     408
+    ],
+    "bridges": [
+     124,
+     157
+    ],
+    "yards": [
+     22,
+     24
+    ]
+   },
+   "rooms": {
+    "rooms": 78,
+    "bays": 574,
+    "square": 77,
+    "baysInSquare": 573,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 39,
+     "6-9": 19,
+     "10+": 19
+    },
+    "largest": 25
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.03,
+   "opened": 135,
+   "lost": 69,
+   "stitchMs": 7.995200000004843
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 8723.885000000002,
+   "massingMs": 13.448899999999412,
+   "tries": 12,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     391,
+     406
+    ],
+    "above": [
+     545,
+     755
+    ],
+    "stairs": [
+     159,
+     178
+    ],
+    "roofs": [
+     229,
+     408
+    ],
+    "bridges": [
+     73,
+     131
+    ],
+    "yards": [
+     39,
+     39
+    ]
+   },
+   "rooms": {
+    "rooms": 109,
+    "bays": 705,
+    "square": 107,
+    "baysInSquare": 701,
+    "sizes": {
+     "1": 0,
+     "2": 2,
+     "3": 0,
+     "4-5": 60,
+     "6-9": 29,
+     "10+": 18
+    },
+    "largest": 18
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.13
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 8745.151100000003,
+   "massingMs": 13.448899999999412,
+   "tries": 12,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     406,
+     406
+    ],
+    "above": [
+     746,
+     755
+    ],
+    "stairs": [
+     178,
+     178
+    ],
+    "roofs": [
+     389,
+     408
+    ],
+    "bridges": [
+     118,
+     131
+    ],
+    "yards": [
+     39,
+     39
+    ]
+   },
+   "rooms": {
+    "rooms": 97,
+    "bays": 705,
+    "square": 95,
+    "baysInSquare": 701,
+    "sizes": {
+     "1": 0,
+     "2": 2,
+     "3": 0,
+     "4-5": 46,
+     "6-9": 28,
+     "10+": 21
+    },
+    "largest": 21
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.12,
+   "opened": 161,
+   "lost": 28,
+   "stitchMs": 21.266100000000733
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 7106.7065,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     409,
+     409
+    ],
+    "above": [
+     386,
+     510
+    ],
+    "stairs": [
+     161,
+     161
+    ],
+    "roofs": [
+     265,
+     428
+    ],
+    "bridges": [
+     58,
+     114
+    ],
+    "yards": [
+     30,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 78,
+    "bays": 557,
+    "square": 78,
+    "baysInSquare": 557,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 28,
+     "10+": 17
+    },
+    "largest": 22
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.11
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 7132.764299999995,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     409,
+     409
+    ],
+    "above": [
+     488,
+     510
+    ],
+    "stairs": [
+     161,
+     161
+    ],
+    "roofs": [
+     412,
+     428
+    ],
+    "bridges": [
+     99,
+     114
+    ],
+    "yards": [
+     30,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 75,
+    "bays": 557,
+    "square": 75,
+    "baysInSquare": 557,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 30,
+     "6-9": 27,
+     "10+": 18
+    },
+    "largest": 22
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1,
+   "opened": 115,
+   "lost": 38,
+   "stitchMs": 26.05779999999504
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 6816.503800000006,
+   "massingMs": 15.524000000001251,
+   "tries": 2,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     369,
+     386
+    ],
+    "above": [
+     507,
+     738
+    ],
+    "stairs": [
+     203,
+     208
+    ],
+    "roofs": [
+     199,
+     424
+    ],
+    "bridges": [
+     59,
+     97
+    ],
+    "yards": [
+     26,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 100,
+    "bays": 700,
+    "square": 100,
+    "baysInSquare": 700,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 50,
+     "6-9": 32,
+     "10+": 18
+    },
+    "largest": 26
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 6840.0406000000075,
+   "massingMs": 15.524000000001251,
+   "tries": 2,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     386,
+     386
+    ],
+    "above": [
+     716,
+     738
+    ],
+    "stairs": [
+     208,
+     208
+    ],
+    "roofs": [
+     351,
+     424
+    ],
+    "bridges": [
+     86,
+     97
+    ],
+    "yards": [
+     30,
+     30
+    ]
+   },
+   "rooms": {
+    "rooms": 95,
+    "bays": 700,
+    "square": 95,
+    "baysInSquare": 700,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 47,
+     "6-9": 28,
+     "10+": 20
+    },
+    "largest": 26
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.09,
+   "opened": 147,
+   "lost": 95,
+   "stitchMs": 23.536800000001676
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 8231.98999999999,
+   "massingMs": 11.513399999996182,
+   "tries": 8,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     411,
+     417
+    ],
+    "above": [
+     397,
+     707
+    ],
+    "stairs": [
+     141,
+     144
+    ],
+    "roofs": [
+     156,
+     410
+    ],
+    "bridges": [
+     75,
+     163
+    ],
+    "yards": [
+     18,
+     19
+    ]
+   },
+   "rooms": {
+    "rooms": 103,
+    "bays": 723,
+    "square": 103,
+    "baysInSquare": 723,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 51,
+     "6-9": 30,
+     "10+": 22
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.05
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 8266.073699999994,
+   "massingMs": 11.513399999996182,
+   "tries": 8,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     695,
+     707
+    ],
+    "stairs": [
+     144,
+     144
+    ],
+    "roofs": [
+     365,
+     410
+    ],
+    "bridges": [
+     128,
+     163
+    ],
+    "yards": [
+     19,
+     19
+    ]
+   },
+   "rooms": {
+    "rooms": 89,
+    "bays": 723,
+    "square": 89,
+    "baysInSquare": 723,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 37,
+     "6-9": 25,
+     "10+": 27
+    },
+    "largest": 30
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03,
+   "opened": 168,
+   "lost": 57,
+   "stitchMs": 34.083700000002864
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 8923.065000000002,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     407,
+     412
+    ],
+    "above": [
+     361,
+     499
+    ],
+    "stairs": [
+     159,
+     172
+    ],
+    "roofs": [
+     153,
+     416
+    ],
+    "bridges": [
+     57,
+     118
+    ],
+    "yards": [
+     31,
+     31
+    ]
+   },
+   "rooms": {
+    "rooms": 80,
+    "bays": 513,
+    "square": 80,
+    "baysInSquare": 513,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 44,
+     "6-9": 24,
+     "10+": 12
+    },
+    "largest": 27
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.04
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 8941.2589,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 41066030,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     412,
+     412
+    ],
+    "above": [
+     499,
+     499
+    ],
+    "stairs": [
+     172,
+     172
+    ],
+    "roofs": [
+     370,
+     416
+    ],
+    "bridges": [
+     104,
+     118
+    ],
+    "yards": [
+     31,
+     31
+    ]
+   },
+   "rooms": {
+    "rooms": 77,
+    "bays": 513,
+    "square": 77,
+    "baysInSquare": 513,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 39,
+     "6-9": 25,
+     "10+": 13
+    },
+    "largest": 27
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.03,
+   "opened": 121,
+   "lost": 46,
+   "stitchMs": 18.193899999998393
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 316.7173000000039,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     14,
+     18
+    ],
+    "above": [
+     30,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     12,
+     18
+    ],
+    "bridges": [
+     0,
+     2
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 36,
+    "square": 7,
+    "baysInSquare": 36,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 32,
+   "of": 50,
+   "entropy": 4.41
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 1,
+   "ms": 318.3323000000091,
+   "massingMs": 7.858099999999467,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     50,
+     50
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     18,
+     18
+    ],
+    "bridges": [
+     0,
+     2
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 7,
+    "bays": 36,
+    "square": 7,
+    "baysInSquare": 36,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 32,
+   "of": 50,
+   "entropy": 4.44,
+   "opened": 11,
+   "lost": 0,
+   "stitchMs": 1.6150000000052387
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 336.2917999999918,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     10,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     15,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 18,
+    "square": 4,
+    "baysInSquare": 18,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 0
+    },
+    "largest": 6
+   },
+   "used": 29,
+   "of": 50,
+   "entropy": 4.05
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 2,
+   "ms": 337.30479999999807,
+   "massingMs": 3.9882999999990716,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     20,
+     20
+    ],
+    "bridges": [
+     6,
+     6
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 18,
+    "square": 4,
+    "baysInSquare": 18,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 3,
+     "6-9": 1,
+     "10+": 0
+    },
+    "largest": 6
+   },
+   "used": 28,
+   "of": 50,
+   "entropy": 4.04,
+   "opened": 3,
+   "lost": 0,
+   "stitchMs": 1.0130000000062864
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 322.4979000000021,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     32,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     11,
+     14
+    ],
+    "bridges": [
+     5,
+     7
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 2,
+    "bays": 16,
+    "square": 2,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 28,
+   "of": 50,
+   "entropy": 4.14
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 3,
+   "ms": 323.56140000000596,
+   "massingMs": 4.769800000000032,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     18,
+     18
+    ],
+    "above": [
+     34,
+     34
+    ],
+    "stairs": [
+     16,
+     16
+    ],
+    "roofs": [
+     13,
+     14
+    ],
+    "bridges": [
+     5,
+     7
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 2,
+    "bays": 16,
+    "square": 2,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 1,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 28,
+   "of": 50,
+   "entropy": 4.16,
+   "opened": 2,
+   "lost": 1,
+   "stitchMs": 1.0635000000038417
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 351.92489999999816,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     2,
+     20
+    ],
+    "above": [
+     0,
+     66
+    ],
+    "stairs": [
+     0,
+     9
+    ],
+    "roofs": [
+     0,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 6,
+    "bays": 40,
+    "square": 6,
+    "baysInSquare": 40,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 5,
+     "10+": 1
+    },
+    "largest": 10
+   },
+   "used": 34,
+   "of": 50,
+   "entropy": 4.2
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 4,
+   "ms": 353.715200000006,
+   "massingMs": 3.2520000000004075,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     66,
+     66
+    ],
+    "stairs": [
+     9,
+     9
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 5,
+    "bays": 40,
+    "square": 5,
+    "baysInSquare": 40,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 0,
+     "6-9": 3,
+     "10+": 2
+    },
+    "largest": 12
+   },
+   "used": 31,
+   "of": 50,
+   "entropy": 4.22,
+   "opened": 20,
+   "lost": 0,
+   "stitchMs": 1.7903000000078464
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 385.02090000000317,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     40,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     16,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 5,
+    "bays": 52,
+    "square": 5,
+    "baysInSquare": 52,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 2,
+     "6-9": 1,
+     "10+": 2
+    },
+    "largest": 18
+   },
+   "used": 34,
+   "of": 50,
+   "entropy": 4.56
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 5,
+   "ms": 386.64330000001064,
+   "massingMs": 2.932300000000396,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     20,
+     20
+    ],
+    "above": [
+     44,
+     44
+    ],
+    "stairs": [
+     7,
+     7
+    ],
+    "roofs": [
+     22,
+     22
+    ],
+    "bridges": [
+     0,
+     0
+    ],
+    "yards": [
+     0,
+     0
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 52,
+    "square": 4,
+    "baysInSquare": 52,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 1,
+     "6-9": 1,
+     "10+": 2
+    },
+    "largest": 22
+   },
+   "used": 34,
+   "of": 50,
+   "entropy": 4.57,
+   "opened": 4,
+   "lost": 0,
+   "stitchMs": 1.6224000000074739
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 418.9302999999927,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     11,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     3,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     0,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 16,
+    "square": 4,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 0,
+     "10+": 0
+    },
+    "largest": 4
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 2.78
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seed": 6,
+   "ms": 420.9832999999926,
+   "massingMs": 3.1216999999996915,
+   "tries": 1,
+   "waveBytes": 2301040,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     22,
+     22
+    ],
+    "above": [
+     0,
+     0
+    ],
+    "stairs": [
+     0,
+     0
+    ],
+    "roofs": [
+     5,
+     12
+    ],
+    "bridges": [
+     18,
+     18
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 4,
+    "bays": 16,
+    "square": 4,
+    "baysInSquare": 16,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 0,
+     "10+": 0
+    },
+    "largest": 4
+   },
+   "used": 20,
+   "of": 50,
+   "entropy": 2.76,
+   "opened": 6,
+   "lost": 7,
+   "stitchMs": 2.0529999999998836
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 1771.4067000000068,
+   "massingMs": 5.379699999999502,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     99,
+     107
+    ],
+    "above": [
+     97,
+     143
+    ],
+    "stairs": [
+     37,
+     37
+    ],
+    "roofs": [
+     72,
+     100
+    ],
+    "bridges": [
+     18,
+     43
+    ],
+    "yards": [
+     4,
+     4
+    ]
+   },
+   "rooms": {
+    "rooms": 28,
+    "bays": 166,
+    "square": 27,
+    "baysInSquare": 165,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 15,
+     "6-9": 8,
+     "10+": 4
+    },
+    "largest": 16
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 4.75
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 1,
+   "ms": 1776.9797000000108,
+   "massingMs": 5.379699999999502,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     107,
+     107
+    ],
+    "above": [
+     139,
+     143
+    ],
+    "stairs": [
+     37,
+     37
+    ],
+    "roofs": [
+     98,
+     100
+    ],
+    "bridges": [
+     39,
+     43
+    ],
+    "yards": [
+     4,
+     4
+    ]
+   },
+   "rooms": {
+    "rooms": 25,
+    "bays": 166,
+    "square": 24,
+    "baysInSquare": 165,
+    "sizes": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4-5": 12,
+     "6-9": 7,
+     "10+": 5
+    },
+    "largest": 18
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.76,
+   "opened": 33,
+   "lost": 6,
+   "stitchMs": 5.573000000003958
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 1939.4130000000005,
+   "massingMs": 6.611899999999878,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     96,
+     102
+    ],
+    "above": [
+     69,
+     115
+    ],
+    "stairs": [
+     30,
+     37
+    ],
+    "roofs": [
+     40,
+     94
+    ],
+    "bridges": [
+     12,
+     49
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 18,
+    "bays": 136,
+    "square": 18,
+    "baysInSquare": 136,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 6,
+     "6-9": 9,
+     "10+": 3
+    },
+    "largest": 25
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.7
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 2,
+   "ms": 1943.4060999999929,
+   "massingMs": 6.611899999999878,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     102,
+     102
+    ],
+    "above": [
+     115,
+     115
+    ],
+    "stairs": [
+     37,
+     37
+    ],
+    "roofs": [
+     92,
+     94
+    ],
+    "bridges": [
+     43,
+     49
+    ],
+    "yards": [
+     8,
+     8
+    ]
+   },
+   "rooms": {
+    "rooms": 16,
+    "bays": 136,
+    "square": 16,
+    "baysInSquare": 136,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 4,
+     "6-9": 7,
+     "10+": 5
+    },
+    "largest": 25
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.69,
+   "opened": 27,
+   "lost": 2,
+   "stitchMs": 3.9930999999924097
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 1698.124100000001,
+   "massingMs": 4.031699999999546,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     99,
+     108
+    ],
+    "above": [
+     123,
+     150
+    ],
+    "stairs": [
+     23,
+     23
+    ],
+    "roofs": [
+     55,
+     92
+    ],
+    "bridges": [
+     33,
+     54
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 26,
+    "bays": 179,
+    "square": 26,
+    "baysInSquare": 179,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 14,
+     "6-9": 7,
+     "10+": 5
+    },
+    "largest": 18
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.66
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 3,
+   "ms": 1702.875800000009,
+   "massingMs": 4.031699999999546,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     108,
+     108
+    ],
+    "above": [
+     150,
+     150
+    ],
+    "stairs": [
+     23,
+     23
+    ],
+    "roofs": [
+     84,
+     92
+    ],
+    "bridges": [
+     45,
+     54
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 24,
+    "bays": 179,
+    "square": 24,
+    "baysInSquare": 179,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 10,
+     "6-9": 9,
+     "10+": 5
+    },
+    "largest": 18
+   },
+   "used": 45,
+   "of": 50,
+   "entropy": 4.65,
+   "opened": 33,
+   "lost": 8,
+   "stitchMs": 4.751700000007986
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 1487.8702000000048,
+   "massingMs": 4.301199999999881,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     95,
+     99
+    ],
+    "above": [
+     60,
+     120
+    ],
+    "stairs": [
+     36,
+     36
+    ],
+    "roofs": [
+     53,
+     94
+    ],
+    "bridges": [
+     28,
+     50
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 20,
+    "bays": 125,
+    "square": 20,
+    "baysInSquare": 125,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 11,
+     "10+": 2
+    },
+    "largest": 12
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.72
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 4,
+   "ms": 1490.7042999999976,
+   "massingMs": 4.301199999999881,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     99,
+     99
+    ],
+    "above": [
+     120,
+     120
+    ],
+    "stairs": [
+     36,
+     36
+    ],
+    "roofs": [
+     86,
+     94
+    ],
+    "bridges": [
+     40,
+     50
+    ],
+    "yards": [
+     1,
+     1
+    ]
+   },
+   "rooms": {
+    "rooms": 19,
+    "bays": 125,
+    "square": 19,
+    "baysInSquare": 125,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 12,
+     "10+": 2
+    },
+    "largest": 12
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.71,
+   "opened": 35,
+   "lost": 8,
+   "stitchMs": 2.834099999992759
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 1641.774900000004,
+   "massingMs": 4.150700000000143,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     104,
+     105
+    ],
+    "above": [
+     90,
+     131
+    ],
+    "stairs": [
+     27,
+     34
+    ],
+    "roofs": [
+     54,
+     106
+    ],
+    "bridges": [
+     26,
+     33
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 18,
+    "bays": 137,
+    "square": 18,
+    "baysInSquare": 137,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 7,
+     "6-9": 6,
+     "10+": 5
+    },
+    "largest": 22
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 4.85
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 5,
+   "ms": 1645.3669000000082,
+   "massingMs": 4.150700000000143,
+   "tries": 2,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     105,
+     105
+    ],
+    "above": [
+     131,
+     131
+    ],
+    "stairs": [
+     34,
+     34
+    ],
+    "roofs": [
+     101,
+     106
+    ],
+    "bridges": [
+     29,
+     33
+    ],
+    "yards": [
+     6,
+     6
+    ]
+   },
+   "rooms": {
+    "rooms": 16,
+    "bays": 137,
+    "square": 16,
+    "baysInSquare": 137,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 5,
+     "6-9": 6,
+     "10+": 5
+    },
+    "largest": 22
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.84,
+   "opened": 29,
+   "lost": 5,
+   "stitchMs": 3.592000000004191
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 1848.267399999997,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     84,
+     95
+    ],
+    "above": [
+     134,
+     157
+    ],
+    "stairs": [
+     47,
+     47
+    ],
+    "roofs": [
+     90,
+     110
+    ],
+    "bridges": [
+     21,
+     26
+    ],
+    "yards": [
+     7,
+     9
+    ]
+   },
+   "rooms": {
+    "rooms": 25,
+    "bays": 188,
+    "square": 25,
+    "baysInSquare": 188,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 12,
+     "6-9": 6,
+     "10+": 7
+    },
+    "largest": 25
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 4.97
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seed": 6,
+   "ms": 1851.6575000000012,
+   "massingMs": 4.313099999999395,
+   "tries": 1,
+   "waveBytes": 10566000,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     95,
+     95
+    ],
+    "above": [
+     157,
+     157
+    ],
+    "stairs": [
+     47,
+     47
+    ],
+    "roofs": [
+     110,
+     110
+    ],
+    "bridges": [
+     21,
+     26
+    ],
+    "yards": [
+     7,
+     9
+    ]
+   },
+   "rooms": {
+    "rooms": 22,
+    "bays": 188,
+    "square": 22,
+    "baysInSquare": 188,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 9,
+     "6-9": 6,
+     "10+": 7
+    },
+    "largest": 25
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.97,
+   "opened": 23,
+   "lost": 0,
+   "stitchMs": 3.3901000000041677
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 6878.212200000009,
+   "massingMs": 66.89309999999932,
+   "tries": 4,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     415,
+     425
+    ],
+    "above": [
+     264,
+     539
+    ],
+    "stairs": [
+     127,
+     139
+    ],
+    "roofs": [
+     114,
+     396
+    ],
+    "bridges": [
+     56,
+     184
+    ],
+    "yards": [
+     15,
+     18
+    ]
+   },
+   "rooms": {
+    "rooms": 85,
+    "bays": 655,
+    "square": 85,
+    "baysInSquare": 655,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 39,
+     "6-9": 22,
+     "10+": 24
+    },
+    "largest": 24
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.04
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 6914.653900000005,
+   "massingMs": 66.89309999999932,
+   "tries": 4,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     425,
+     425
+    ],
+    "above": [
+     535,
+     539
+    ],
+    "stairs": [
+     139,
+     139
+    ],
+    "roofs": [
+     332,
+     396
+    ],
+    "bridges": [
+     150,
+     184
+    ],
+    "yards": [
+     18,
+     18
+    ]
+   },
+   "rooms": {
+    "rooms": 79,
+    "bays": 655,
+    "square": 79,
+    "baysInSquare": 655,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 20,
+     "10+": 26
+    },
+    "largest": 28
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.02,
+   "opened": 139,
+   "lost": 68,
+   "stitchMs": 36.44169999999576
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 19232.435400000002,
+   "massingMs": 13.448899999999412,
+   "tries": 45,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     393,
+     406
+    ],
+    "above": [
+     501,
+     751
+    ],
+    "stairs": [
+     169,
+     181
+    ],
+    "roofs": [
+     229,
+     422
+    ],
+    "bridges": [
+     80,
+     135
+    ],
+    "yards": [
+     23,
+     26
+    ]
+   },
+   "rooms": {
+    "rooms": 100,
+    "bays": 696,
+    "square": 100,
+    "baysInSquare": 696,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 47,
+     "6-9": 31,
+     "10+": 22
+    },
+    "largest": 22
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 19261.186700000006,
+   "massingMs": 13.448899999999412,
+   "tries": 45,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     406,
+     406
+    ],
+    "above": [
+     742,
+     751
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     413,
+     422
+    ],
+    "bridges": [
+     112,
+     135
+    ],
+    "yards": [
+     23,
+     26
+    ]
+   },
+   "rooms": {
+    "rooms": 93,
+    "bays": 696,
+    "square": 93,
+    "baysInSquare": 696,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 33,
+     "10+": 22
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08,
+   "opened": 178,
+   "lost": 18,
+   "stitchMs": 28.75130000000354
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 7032.217700000008,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     399,
+     413
+    ],
+    "above": [
+     364,
+     526
+    ],
+    "stairs": [
+     132,
+     146
+    ],
+    "roofs": [
+     180,
+     428
+    ],
+    "bridges": [
+     41,
+     129
+    ],
+    "yards": [
+     17,
+     21
+    ]
+   },
+   "rooms": {
+    "rooms": 83,
+    "bays": 577,
+    "square": 83,
+    "baysInSquare": 577,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 48,
+     "6-9": 18,
+     "10+": 17
+    },
+    "largest": 28
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 7054.203999999998,
+   "massingMs": 19.70850000000064,
+   "tries": 4,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     413,
+     413
+    ],
+    "above": [
+     519,
+     526
+    ],
+    "stairs": [
+     146,
+     146
+    ],
+    "roofs": [
+     412,
+     428
+    ],
+    "bridges": [
+     115,
+     129
+    ],
+    "yards": [
+     20,
+     21
+    ]
+   },
+   "rooms": {
+    "rooms": 78,
+    "bays": 577,
+    "square": 78,
+    "baysInSquare": 577,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 42,
+     "6-9": 18,
+     "10+": 18
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.05,
+   "opened": 146,
+   "lost": 23,
+   "stitchMs": 21.98629999998957
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 7126.8122999999905,
+   "massingMs": 15.524000000001251,
+   "tries": 5,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     384,
+     388
+    ],
+    "above": [
+     519,
+     744
+    ],
+    "stairs": [
+     202,
+     202
+    ],
+    "roofs": [
+     207,
+     416
+    ],
+    "bridges": [
+     43,
+     93
+    ],
+    "yards": [
+     37,
+     37
+    ]
+   },
+   "rooms": {
+    "rooms": 96,
+    "bays": 672,
+    "square": 96,
+    "baysInSquare": 672,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 43,
+     "6-9": 31,
+     "10+": 22
+    },
+    "largest": 20
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.14
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 7148.765599999984,
+   "massingMs": 15.524000000001251,
+   "tries": 5,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     388,
+     388
+    ],
+    "above": [
+     740,
+     744
+    ],
+    "stairs": [
+     202,
+     202
+    ],
+    "roofs": [
+     367,
+     416
+    ],
+    "bridges": [
+     63,
+     93
+    ],
+    "yards": [
+     37,
+     37
+    ]
+   },
+   "rooms": {
+    "rooms": 89,
+    "bays": 672,
+    "square": 89,
+    "baysInSquare": 672,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 37,
+     "6-9": 28,
+     "10+": 24
+    },
+    "largest": 24
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.12,
+   "opened": 151,
+   "lost": 53,
+   "stitchMs": 21.95329999999376
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 8405.600399999996,
+   "massingMs": 11.513399999996182,
+   "tries": 9,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     395,
+     417
+    ],
+    "above": [
+     388,
+     711
+    ],
+    "stairs": [
+     131,
+     141
+    ],
+    "roofs": [
+     254,
+     414
+    ],
+    "bridges": [
+     88,
+     144
+    ],
+    "yards": [
+     29,
+     29
+    ]
+   },
+   "rooms": {
+    "rooms": 92,
+    "bays": 701,
+    "square": 92,
+    "baysInSquare": 701,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 24,
+     "10+": 27
+    },
+    "largest": 29
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.12
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 8427.017900000006,
+   "massingMs": 11.513399999996182,
+   "tries": 9,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     700,
+     711
+    ],
+    "stairs": [
+     141,
+     141
+    ],
+    "roofs": [
+     387,
+     414
+    ],
+    "bridges": [
+     110,
+     144
+    ],
+    "yards": [
+     29,
+     29
+    ]
+   },
+   "rooms": {
+    "rooms": 79,
+    "bays": 701,
+    "square": 79,
+    "baysInSquare": 701,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 29,
+     "6-9": 18,
+     "10+": 32
+    },
+    "largest": 30
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.11,
+   "opened": 137,
+   "lost": 38,
+   "stitchMs": 21.417500000010477
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 6139.205600000016,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     409,
+     414
+    ],
+    "above": [
+     377,
+     489
+    ],
+    "stairs": [
+     169,
+     178
+    ],
+    "roofs": [
+     170,
+     414
+    ],
+    "bridges": [
+     39,
+     99
+    ],
+    "yards": [
+     39,
+     39
+    ]
+   },
+   "rooms": {
+    "rooms": 67,
+    "bays": 485,
+    "square": 66,
+    "baysInSquare": 481,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 35,
+     "6-9": 15,
+     "10+": 17
+    },
+    "largest": 34
+   },
+   "used": 50,
+   "of": 50,
+   "entropy": 5.07
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 6157.351699999999,
+   "massingMs": 12.764100000000326,
+   "tries": 7,
+   "waveBytes": 39493360,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     489,
+     489
+    ],
+    "stairs": [
+     178,
+     178
+    ],
+    "roofs": [
+     373,
+     414
+    ],
+    "bridges": [
+     88,
+     99
+    ],
+    "yards": [
+     39,
+     39
+    ]
+   },
+   "rooms": {
+    "rooms": 64,
+    "bays": 485,
+    "square": 63,
+    "baysInSquare": 481,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 31,
+     "6-9": 14,
+     "10+": 19
+    },
+    "largest": 34
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.05,
+   "opened": 115,
+   "lost": 41,
+   "stitchMs": 18.146099999983562
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 35.192900000023656,
+   "massingMs": 66.89309999999932,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     402,
+     478
+    ],
+    "bridges": [
+     8,
+     17
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 66,
+    "bays": 846,
+    "square": 66,
+    "baysInSquare": 846,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 14,
+     "6-9": 13,
+     "10+": 39
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.65
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 45.01850000000559,
+   "massingMs": 13.448899999999412,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     432,
+     470
+    ],
+    "bridges": [
+     19,
+     24
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 75,
+    "bays": 937,
+    "square": 75,
+    "baysInSquare": 937,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 16,
+     "6-9": 19,
+     "10+": 40
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.76
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 36.00180000002729,
+   "massingMs": 19.70850000000064,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     456,
+     474
+    ],
+    "bridges": [
+     13,
+     16
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 57,
+    "bays": 761,
+    "square": 57,
+    "baysInSquare": 761,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 11,
+     "6-9": 13,
+     "10+": 33
+    },
+    "largest": 32
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 49.61659999995027,
+   "massingMs": 15.524000000001251,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     401,
+     462
+    ],
+    "bridges": [
+     7,
+     12
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 69,
+    "bays": 923,
+    "square": 69,
+    "baysInSquare": 923,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 13,
+     "6-9": 21,
+     "10+": 35
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.79
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 36.96370000002207,
+   "massingMs": 11.513399999996182,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     411,
+     478
+    ],
+    "bridges": [
+     13,
+     22
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 61,
+    "bays": 968,
+    "square": 61,
+    "baysInSquare": 968,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 12,
+     "10+": 41
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.66
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 30.49500000005355,
+   "massingMs": 12.764100000000326,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     428,
+     470
+    ],
+    "bridges": [
+     5,
+     5
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 63,
+    "bays": 719,
+    "square": 63,
+    "baysInSquare": 719,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 17,
+     "6-9": 14,
+     "10+": 32
+    },
+    "largest": 41
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 9555.046399999992,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     431,
+     435
+    ],
+    "above": [
+     420,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     231,
+     464
+    ],
+    "bridges": [
+     10,
+     32
+    ],
+    "yards": [
+     44,
+     44
+    ]
+   },
+   "rooms": {
+    "rooms": 103,
+    "bays": 740,
+    "square": 103,
+    "baysInSquare": 740,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 45,
+     "6-9": 35,
+     "10+": 23
+    },
+    "largest": 26
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.09
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 9096.21179999999,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     410,
+     414
+    ],
+    "above": [
+     533,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     278,
+     450
+    ],
+    "bridges": [
+     20,
+     46
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 115,
+    "bays": 841,
+    "square": 115,
+    "baysInSquare": 841,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 52,
+     "6-9": 39,
+     "10+": 24
+    },
+    "largest": 24
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 8638.743400000036,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     381,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     335,
+     470
+    ],
+    "bridges": [
+     12,
+     20
+    ],
+    "yards": [
+     43,
+     43
+    ]
+   },
+   "rooms": {
+    "rooms": 94,
+    "bays": 673,
+    "square": 94,
+    "baysInSquare": 673,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 46,
+     "6-9": 28,
+     "10+": 20
+    },
+    "largest": 24
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.12
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 8280.493799999997,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     388,
+     394
+    ],
+    "above": [
+     581,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     257,
+     444
+    ],
+    "bridges": [
+     17,
+     31
+    ],
+    "yards": [
+     45,
+     45
+    ]
+   },
+   "rooms": {
+    "rooms": 105,
+    "bays": 844,
+    "square": 105,
+    "baysInSquare": 844,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 44,
+     "6-9": 32,
+     "10+": 29
+    },
+    "largest": 41
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.09
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 8199.021200000017,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     421,
+     421
+    ],
+    "above": [
+     532,
+     727
+    ],
+    "stairs": [
+     126,
+     126
+    ],
+    "roofs": [
+     243,
+     462
+    ],
+    "bridges": [
+     13,
+     41
+    ],
+    "yards": [
+     42,
+     42
+    ]
+   },
+   "rooms": {
+    "rooms": 99,
+    "bays": 891,
+    "square": 99,
+    "baysInSquare": 891,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 28,
+     "10+": 38
+    },
+    "largest": 28
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.13
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 9195.096299999976,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     412,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     204,
+     458
+    ],
+    "bridges": [
+     6,
+     18
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 82,
+    "bays": 630,
+    "square": 82,
+    "baysInSquare": 630,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 35,
+     "6-9": 24,
+     "10+": 23
+    },
+    "largest": 27
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.09
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 9619.472699999984,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     431,
+     435
+    ],
+    "above": [
+     430,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     239,
+     464
+    ],
+    "bridges": [
+     10,
+     32
+    ],
+    "yards": [
+     44,
+     44
+    ]
+   },
+   "rooms": {
+    "rooms": 100,
+    "bays": 740,
+    "square": 100,
+    "baysInSquare": 740,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 40,
+     "6-9": 36,
+     "10+": 24
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.09
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 10189.461100000015,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     410,
+     414
+    ],
+    "above": [
+     551,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     285,
+     450
+    ],
+    "bridges": [
+     24,
+     46
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 111,
+    "bays": 841,
+    "square": 111,
+    "baysInSquare": 841,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 45,
+     "6-9": 41,
+     "10+": 25
+    },
+    "largest": 24
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 9647.692500000005,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     395,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     349,
+     470
+    ],
+    "bridges": [
+     12,
+     20
+    ],
+    "yards": [
+     43,
+     43
+    ]
+   },
+   "rooms": {
+    "rooms": 90,
+    "bays": 673,
+    "square": 90,
+    "baysInSquare": 673,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 40,
+     "6-9": 28,
+     "10+": 22
+    },
+    "largest": 24
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 9648.08739999996,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     388,
+     394
+    ],
+    "above": [
+     600,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     276,
+     444
+    ],
+    "bridges": [
+     18,
+     31
+    ],
+    "yards": [
+     45,
+     45
+    ]
+   },
+   "rooms": {
+    "rooms": 103,
+    "bays": 844,
+    "square": 103,
+    "baysInSquare": 844,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 33,
+     "10+": 29
+    },
+    "largest": 41
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 9020.819100000022,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     421,
+     421
+    ],
+    "above": [
+     540,
+     727
+    ],
+    "stairs": [
+     126,
+     126
+    ],
+    "roofs": [
+     255,
+     462
+    ],
+    "bridges": [
+     13,
+     41
+    ],
+    "yards": [
+     42,
+     42
+    ]
+   },
+   "rooms": {
+    "rooms": 99,
+    "bays": 891,
+    "square": 99,
+    "baysInSquare": 891,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 28,
+     "10+": 38
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.12
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 8826.82799999998,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 49,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     412,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     208,
+     458
+    ],
+    "bridges": [
+     6,
+     18
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 82,
+    "bays": 630,
+    "square": 82,
+    "baysInSquare": 630,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 35,
+     "6-9": 24,
+     "10+": 23
+    },
+    "largest": 27
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.07
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 13213.1446,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 62,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     447,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     237,
+     468
+    ],
+    "bridges": [
+     12,
+     27
+    ],
+    "yards": [
+     44,
+     44
+    ]
+   },
+   "rooms": {
+    "rooms": 97,
+    "bays": 740,
+    "square": 97,
+    "baysInSquare": 740,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 40,
+     "6-9": 28,
+     "10+": 29
+    },
+    "largest": 26
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 15168.347500000033,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 1,
+   "attempts": 61,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     410,
+     414
+    ],
+    "above": [
+     586,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     273,
+     448
+    ],
+    "bridges": [
+     16,
+     50
+    ],
+    "yards": [
+     49,
+     49
+    ]
+   },
+   "rooms": {
+    "rooms": 109,
+    "bays": 852,
+    "square": 109,
+    "baysInSquare": 852,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 45,
+     "6-9": 34,
+     "10+": 30
+    },
+    "largest": 28
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 15340.484600000025,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 63,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     411,
+     417
+    ],
+    "above": [
+     398,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     337,
+     470
+    ],
+    "bridges": [
+     12,
+     21
+    ],
+    "yards": [
+     45,
+     45
+    ]
+   },
+   "rooms": {
+    "rooms": 90,
+    "bays": 664,
+    "square": 90,
+    "baysInSquare": 664,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 28,
+     "10+": 24
+    },
+    "largest": 28
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.12
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 21813.90459999995,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 79,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     562,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     287,
+     444
+    ],
+    "bridges": [
+     17,
+     31
+    ],
+    "yards": [
+     46,
+     46
+    ]
+   },
+   "rooms": {
+    "rooms": 102,
+    "bays": 862,
+    "square": 102,
+    "baysInSquare": 862,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 36,
+     "10+": 28
+    },
+    "largest": 36
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 13619.145100000023,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 58,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     486,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     253,
+     464
+    ],
+    "bridges": [
+     18,
+     37
+    ],
+    "yards": [
+     42,
+     42
+    ]
+   },
+   "rooms": {
+    "rooms": 101,
+    "bays": 885,
+    "square": 101,
+    "baysInSquare": 885,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 33,
+     "10+": 35
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.12
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 10322.995999999985,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 0,
+   "attempts": 51,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     412,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     232,
+     458
+    ],
+    "bridges": [
+     7,
+     18
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 81,
+    "bays": 625,
+    "square": 81,
+    "baysInSquare": 625,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 36,
+     "6-9": 22,
+     "10+": 23
+    },
+    "largest": 27
+   },
+   "used": 49,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 30856.660499999998,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 103,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     431,
+     435
+    ],
+    "above": [
+     420,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     257,
+     468
+    ],
+    "bridges": [
+     15,
+     29
+    ],
+    "yards": [
+     43,
+     43
+    ]
+   },
+   "rooms": {
+    "rooms": 98,
+    "bays": 769,
+    "square": 98,
+    "baysInSquare": 769,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 27,
+     "10+": 30
+    },
+    "largest": 36
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.06,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 30867.68790000002,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 103,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     394,
+     468
+    ],
+    "bridges": [
+     20,
+     29
+    ],
+    "yards": [
+     43,
+     43
+    ]
+   },
+   "rooms": {
+    "rooms": 92,
+    "bays": 769,
+    "square": 92,
+    "baysInSquare": 769,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 36,
+     "6-9": 24,
+     "10+": 32
+    },
+    "largest": 36
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.05,
+   "opened": 64,
+   "lost": 74,
+   "stitchMs": 11.027400000020862
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 31627.358800000045,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 99,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     660,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     297,
+     456
+    ],
+    "bridges": [
+     22,
+     39
+    ],
+    "yards": [
+     49,
+     49
+    ]
+   },
+   "rooms": {
+    "rooms": 103,
+    "bays": 872,
+    "square": 103,
+    "baysInSquare": 872,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 34,
+     "6-9": 38,
+     "10+": 31
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 31635.962200000067,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 99,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     445,
+     456
+    ],
+    "bridges": [
+     27,
+     39
+    ],
+    "yards": [
+     49,
+     49
+    ]
+   },
+   "rooms": {
+    "rooms": 101,
+    "bays": 872,
+    "square": 101,
+    "baysInSquare": 872,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 35,
+     "10+": 33
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 44,
+   "lost": 11,
+   "stitchMs": 8.603400000021793
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 31004.14240000001,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 101,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     413,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     359,
+     466
+    ],
+    "bridges": [
+     16,
+     24
+    ],
+    "yards": [
+     46,
+     46
+    ]
+   },
+   "rooms": {
+    "rooms": 83,
+    "bays": 676,
+    "square": 83,
+    "baysInSquare": 676,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 25,
+     "10+": 25
+    },
+    "largest": 24
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.1,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 31013.203800000018,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 101,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     439,
+     466
+    ],
+    "bridges": [
+     20,
+     24
+    ],
+    "yards": [
+     46,
+     46
+    ]
+   },
+   "rooms": {
+    "rooms": 76,
+    "bays": 676,
+    "square": 76,
+    "baysInSquare": 676,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 26,
+     "6-9": 22,
+     "10+": 28
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08,
+   "opened": 68,
+   "lost": 27,
+   "stitchMs": 9.06140000000596
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 32500.98179999995,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 5,
+   "attempts": 100,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     630,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     306,
+     452
+    ],
+    "bridges": [
+     9,
+     22
+    ],
+    "yards": [
+     49,
+     49
+    ]
+   },
+   "rooms": {
+    "rooms": 91,
+    "bays": 885,
+    "square": 91,
+    "baysInSquare": 885,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 27,
+     "6-9": 31,
+     "10+": 33
+    },
+    "largest": 36
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.94,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 32508.421100000036,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 5,
+   "attempts": 100,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     395,
+     452
+    ],
+    "bridges": [
+     17,
+     22
+    ],
+    "yards": [
+     49,
+     49
+    ]
+   },
+   "rooms": {
+    "rooms": 85,
+    "bays": 885,
+    "square": 85,
+    "baysInSquare": 885,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 22,
+     "6-9": 30,
+     "10+": 33
+    },
+    "largest": 36
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.91,
+   "opened": 43,
+   "lost": 61,
+   "stitchMs": 7.439300000085495
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 18303.472200000077,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 93,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     407,
+     423
+    ],
+    "above": [
+     592,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     332,
+     470
+    ],
+    "bridges": [
+     19,
+     30
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 95,
+    "bays": 918,
+    "square": 95,
+    "baysInSquare": 918,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 28,
+     "6-9": 27,
+     "10+": 40
+    },
+    "largest": 42
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 18310.359400000074,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 93,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     431,
+     470
+    ],
+    "bridges": [
+     22,
+     30
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 92,
+    "bays": 918,
+    "square": 92,
+    "baysInSquare": 918,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 26,
+     "6-9": 25,
+     "10+": 41
+    },
+    "largest": 42
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 48,
+   "lost": 39,
+   "stitchMs": 6.887199999997392
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 15376.323399999994,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 82,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     404,
+     418
+    ],
+    "above": [
+     420,
+     513
+    ],
+    "stairs": [
+     148,
+     157
+    ],
+    "roofs": [
+     273,
+     462
+    ],
+    "bridges": [
+     9,
+     15
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 75,
+    "bays": 657,
+    "square": 75,
+    "baysInSquare": 657,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 25,
+     "6-9": 21,
+     "10+": 29
+    },
+    "largest": 27
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08,
+   "sameInOtherOrder": true
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 15381.59460000007,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 82,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     428,
+     462
+    ],
+    "bridges": [
+     11,
+     15
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 72,
+    "bays": 657,
+    "square": 72,
+    "baysInSquare": 657,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 22,
+     "6-9": 18,
+     "10+": 32
+    },
+    "largest": 27
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.07,
+   "opened": 51,
+   "lost": 34,
+   "stitchMs": 5.271200000075623
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 14.845100000035018,
+   "massingMs": 66.89309999999932,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     402,
+     478
+    ],
+    "bridges": [
+     8,
+     17
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 66,
+    "bays": 846,
+    "square": 66,
+    "baysInSquare": 846,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 14,
+     "6-9": 13,
+     "10+": 39
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.65
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 15.915200000046752,
+   "massingMs": 13.448899999999412,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     432,
+     470
+    ],
+    "bridges": [
+     19,
+     24
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 75,
+    "bays": 937,
+    "square": 75,
+    "baysInSquare": 937,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 16,
+     "6-9": 19,
+     "10+": 40
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.76
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 12.314199999906123,
+   "massingMs": 19.70850000000064,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     456,
+     474
+    ],
+    "bridges": [
+     13,
+     16
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 57,
+    "bays": 761,
+    "square": 57,
+    "baysInSquare": 761,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 11,
+     "6-9": 13,
+     "10+": 33
+    },
+    "largest": 32
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 12.818300000042655,
+   "massingMs": 15.524000000001251,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     401,
+     462
+    ],
+    "bridges": [
+     7,
+     12
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 69,
+    "bays": 923,
+    "square": 69,
+    "baysInSquare": 923,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 13,
+     "6-9": 21,
+     "10+": 35
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.79
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 11.472300000023097,
+   "massingMs": 11.513399999996182,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     411,
+     478
+    ],
+    "bridges": [
+     13,
+     22
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 61,
+    "bays": 968,
+    "square": 61,
+    "baysInSquare": 968,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 12,
+     "10+": 41
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.66
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 10.747199999983422,
+   "massingMs": 12.764100000000326,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     428,
+     470
+    ],
+    "bridges": [
+     5,
+     5
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 63,
+    "bays": 719,
+    "square": 63,
+    "baysInSquare": 719,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 17,
+     "6-9": 14,
+     "10+": 32
+    },
+    "largest": 41
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 23714.354900000035,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 113,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     395,
+     435
+    ],
+    "above": [
+     456,
+     561
+    ],
+    "stairs": [
+     110,
+     115
+    ],
+    "roofs": [
+     225,
+     464
+    ],
+    "bridges": [
+     17,
+     33
+    ],
+    "yards": [
+     50,
+     50
+    ]
+   },
+   "rooms": {
+    "rooms": 92,
+    "bays": 778,
+    "square": 92,
+    "baysInSquare": 778,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 30,
+     "6-9": 31,
+     "10+": 31
+    },
+    "largest": 32
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 23721.48290000006,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 113,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     379,
+     464
+    ],
+    "bridges": [
+     18,
+     33
+    ],
+    "yards": [
+     50,
+     50
+    ]
+   },
+   "rooms": {
+    "rooms": 89,
+    "bays": 778,
+    "square": 89,
+    "baysInSquare": 778,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 26,
+     "6-9": 32,
+     "10+": 31
+    },
+    "largest": 32
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 53,
+   "lost": 85,
+   "stitchMs": 7.128000000026077
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 16920.735199999996,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 81,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     409,
+     414
+    ],
+    "above": [
+     576,
+     775
+    ],
+    "stairs": [
+     152,
+     157
+    ],
+    "roofs": [
+     321,
+     456
+    ],
+    "bridges": [
+     20,
+     41
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 110,
+    "bays": 861,
+    "square": 110,
+    "baysInSquare": 861,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 50,
+     "6-9": 30,
+     "10+": 30
+    },
+    "largest": 30
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 16927.76640000008,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 81,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     456,
+     456
+    ],
+    "bridges": [
+     33,
+     41
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 101,
+    "bays": 861,
+    "square": 101,
+    "baysInSquare": 861,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 41,
+     "6-9": 26,
+     "10+": 34
+    },
+    "largest": 34
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.06,
+   "opened": 81,
+   "lost": 0,
+   "stitchMs": 7.031200000084937
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 22878.91040000005,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 106,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     399,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     311,
+     460
+    ],
+    "bridges": [
+     20,
+     31
+    ],
+    "yards": [
+     52,
+     52
+    ]
+   },
+   "rooms": {
+    "rooms": 78,
+    "bays": 715,
+    "square": 78,
+    "baysInSquare": 715,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 27,
+     "6-9": 23,
+     "10+": 28
+    },
+    "largest": 26
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 22886.35340000002,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 106,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     437,
+     460
+    ],
+    "bridges": [
+     27,
+     31
+    ],
+    "yards": [
+     52,
+     52
+    ]
+   },
+   "rooms": {
+    "rooms": 71,
+    "bays": 715,
+    "square": 71,
+    "baysInSquare": 715,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 24,
+     "6-9": 19,
+     "10+": 28
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 58,
+   "lost": 23,
+   "stitchMs": 7.442999999970198
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 19668.843200000003,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 90,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     393,
+     394
+    ],
+    "above": [
+     536,
+     766
+    ],
+    "stairs": [
+     172,
+     181
+    ],
+    "roofs": [
+     297,
+     450
+    ],
+    "bridges": [
+     14,
+     26
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 90,
+    "bays": 849,
+    "square": 90,
+    "baysInSquare": 849,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 27,
+     "6-9": 33,
+     "10+": 30
+    },
+    "largest": 36
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.03
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 19675.750299999956,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 90,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     400,
+     450
+    ],
+    "bridges": [
+     22,
+     26
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 86,
+    "bays": 849,
+    "square": 86,
+    "baysInSquare": 849,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 26,
+     "6-9": 31,
+     "10+": 29
+    },
+    "largest": 44
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.01,
+   "opened": 42,
+   "lost": 54,
+   "stitchMs": 6.907099999953061
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 18592.600499999942,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 89,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     412,
+     423
+    ],
+    "above": [
+     501,
+     729
+    ],
+    "stairs": [
+     118,
+     123
+    ],
+    "roofs": [
+     277,
+     468
+    ],
+    "bridges": [
+     14,
+     33
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 107,
+    "bays": 911,
+    "square": 107,
+    "baysInSquare": 911,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 40,
+     "6-9": 32,
+     "10+": 35
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 18601.908399999957,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 89,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     427,
+     468
+    ],
+    "bridges": [
+     20,
+     33
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 95,
+    "bays": 911,
+    "square": 95,
+    "baysInSquare": 911,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 28,
+     "6-9": 27,
+     "10+": 40
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.05,
+   "opened": 82,
+   "lost": 41,
+   "stitchMs": 9.307900000014342
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 19362.929400000023,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 90,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     418
+    ],
+    "above": [
+     437,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     231,
+     462
+    ],
+    "bridges": [
+     7,
+     15
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 82,
+    "bays": 653,
+    "square": 82,
+    "baysInSquare": 653,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 37,
+     "6-9": 17,
+     "10+": 28
+    },
+    "largest": 26
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5.03
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 19370.436699999962,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 90,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     420,
+     462
+    ],
+    "bridges": [
+     10,
+     15
+    ],
+    "yards": [
+     47,
+     47
+    ]
+   },
+   "rooms": {
+    "rooms": 78,
+    "bays": 653,
+    "square": 78,
+    "baysInSquare": 653,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 31,
+     "6-9": 17,
+     "10+": 30
+    },
+    "largest": 26
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5.02,
+   "opened": 57,
+   "lost": 42,
+   "stitchMs": 7.507299999939278
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 25.322900000028312,
+   "massingMs": 66.89309999999932,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     402,
+     478
+    ],
+    "bridges": [
+     8,
+     17
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 66,
+    "bays": 846,
+    "square": 66,
+    "baysInSquare": 846,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 14,
+     "6-9": 13,
+     "10+": 39
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.65
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 14.150800000061281,
+   "massingMs": 13.448899999999412,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     432,
+     470
+    ],
+    "bridges": [
+     19,
+     24
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 75,
+    "bays": 937,
+    "square": 75,
+    "baysInSquare": 937,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 16,
+     "6-9": 19,
+     "10+": 40
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.76
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 10.318499999935739,
+   "massingMs": 19.70850000000064,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     456,
+     474
+    ],
+    "bridges": [
+     13,
+     16
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 57,
+    "bays": 761,
+    "square": 57,
+    "baysInSquare": 761,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 11,
+     "6-9": 13,
+     "10+": 33
+    },
+    "largest": 32
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 13.169299999950454,
+   "massingMs": 15.524000000001251,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     401,
+     462
+    ],
+    "bridges": [
+     7,
+     12
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 69,
+    "bays": 923,
+    "square": 69,
+    "baysInSquare": 923,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 13,
+     "6-9": 21,
+     "10+": 35
+    },
+    "largest": 44
+   },
+   "used": 22,
+   "of": 50,
+   "entropy": 3.79
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 12.462700000032783,
+   "massingMs": 11.513399999996182,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     411,
+     478
+    ],
+    "bridges": [
+     13,
+     22
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 61,
+    "bays": 968,
+    "square": 61,
+    "baysInSquare": 968,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 8,
+     "6-9": 12,
+     "10+": 41
+    },
+    "largest": 44
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.66
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 11.255100000067614,
+   "massingMs": 12.764100000000326,
+   "regions": 0,
+   "failed": 0,
+   "attempts": 0,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     428,
+     470
+    ],
+    "bridges": [
+     5,
+     5
+    ],
+    "yards": [
+     64,
+     64
+    ]
+   },
+   "rooms": {
+    "rooms": 63,
+    "bays": 719,
+    "square": 63,
+    "baysInSquare": 719,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 17,
+     "6-9": 14,
+     "10+": 32
+    },
+    "largest": 41
+   },
+   "used": 21,
+   "of": 50,
+   "entropy": 3.8
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 17120.794200000004,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 96,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     407,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     292,
+     470
+    ],
+    "bridges": [
+     11,
+     25
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 95,
+    "bays": 756,
+    "square": 95,
+    "baysInSquare": 756,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 43,
+     "6-9": 20,
+     "10+": 32
+    },
+    "largest": 30
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5.08
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 1,
+   "ms": 17126.825300000026,
+   "massingMs": 66.89309999999932,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 96,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     435,
+     435
+    ],
+    "above": [
+     561,
+     561
+    ],
+    "stairs": [
+     115,
+     115
+    ],
+    "roofs": [
+     396,
+     470
+    ],
+    "bridges": [
+     13,
+     25
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 89,
+    "bays": 756,
+    "square": 89,
+    "baysInSquare": 756,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 36,
+     "6-9": 22,
+     "10+": 31
+    },
+    "largest": 30
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5.06,
+   "opened": 55,
+   "lost": 74,
+   "stitchMs": 6.031100000021979
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 18293.839500000002,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 92,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     395,
+     414
+    ],
+    "above": [
+     605,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     384,
+     466
+    ],
+    "bridges": [
+     19,
+     29
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 111,
+    "bays": 873,
+    "square": 111,
+    "baysInSquare": 873,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 45,
+     "6-9": 37,
+     "10+": 29
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.1
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 2,
+   "ms": 18301.589299999992,
+   "massingMs": 13.448899999999412,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 92,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     414,
+     414
+    ],
+    "above": [
+     775,
+     775
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     466,
+     466
+    ],
+    "bridges": [
+     19,
+     29
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 102,
+    "bays": 873,
+    "square": 102,
+    "baysInSquare": 873,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 30,
+     "10+": 34
+    },
+    "largest": 40
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.09,
+   "opened": 60,
+   "lost": 0,
+   "stitchMs": 7.7497999999905005
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 15875.017500000075,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 87,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     405,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     388,
+     466
+    ],
+    "bridges": [
+     16,
+     25
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 80,
+    "bays": 687,
+    "square": 80,
+    "baysInSquare": 687,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 28,
+     "6-9": 26,
+     "10+": 26
+    },
+    "largest": 25
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.14
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 3,
+   "ms": 15881.411300000153,
+   "massingMs": 19.70850000000064,
+   "regions": 49,
+   "failed": 2,
+   "attempts": 87,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     417,
+     417
+    ],
+    "above": [
+     542,
+     542
+    ],
+    "stairs": [
+     131,
+     131
+    ],
+    "roofs": [
+     450,
+     466
+    ],
+    "bridges": [
+     19,
+     25
+    ],
+    "yards": [
+     51,
+     51
+    ]
+   },
+   "rooms": {
+    "rooms": 73,
+    "bays": 687,
+    "square": 73,
+    "baysInSquare": 687,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 22,
+     "6-9": 24,
+     "10+": 27
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.13,
+   "opened": 48,
+   "lost": 16,
+   "stitchMs": 6.393800000078045
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 23861.9534,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 114,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     390,
+     394
+    ],
+    "above": [
+     607,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     319,
+     450
+    ],
+    "bridges": [
+     18,
+     25
+    ],
+    "yards": [
+     44,
+     44
+    ]
+   },
+   "rooms": {
+    "rooms": 103,
+    "bays": 867,
+    "square": 103,
+    "baysInSquare": 867,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 33,
+     "6-9": 38,
+     "10+": 32
+    },
+    "largest": 24
+   },
+   "used": 46,
+   "of": 50,
+   "entropy": 5.05
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 4,
+   "ms": 23869.028300000005,
+   "massingMs": 15.524000000001251,
+   "regions": 49,
+   "failed": 4,
+   "attempts": 114,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     394,
+     394
+    ],
+    "above": [
+     762,
+     766
+    ],
+    "stairs": [
+     181,
+     181
+    ],
+    "roofs": [
+     400,
+     450
+    ],
+    "bridges": [
+     22,
+     25
+    ],
+    "yards": [
+     44,
+     44
+    ]
+   },
+   "rooms": {
+    "rooms": 97,
+    "bays": 867,
+    "square": 97,
+    "baysInSquare": 867,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 29,
+     "6-9": 37,
+     "10+": 31
+    },
+    "largest": 36
+   },
+   "used": 46,
+   "of": 50,
+   "entropy": 5.03,
+   "opened": 44,
+   "lost": 54,
+   "stitchMs": 7.074900000006892
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 19590.621900000027,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 1,
+   "attempts": 97,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     423
+    ],
+    "above": [
+     431,
+     729
+    ],
+    "stairs": [
+     116,
+     123
+    ],
+    "roofs": [
+     310,
+     468
+    ],
+    "bridges": [
+     21,
+     33
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 110,
+    "bays": 889,
+    "square": 110,
+    "baysInSquare": 889,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 47,
+     "6-9": 34,
+     "10+": 29
+    },
+    "largest": 28
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.15
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 5,
+   "ms": 19599.176600000006,
+   "massingMs": 11.513399999996182,
+   "regions": 49,
+   "failed": 1,
+   "attempts": 97,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     423,
+     423
+    ],
+    "above": [
+     729,
+     729
+    ],
+    "stairs": [
+     123,
+     123
+    ],
+    "roofs": [
+     429,
+     468
+    ],
+    "bridges": [
+     28,
+     33
+    ],
+    "yards": [
+     48,
+     48
+    ]
+   },
+   "rooms": {
+    "rooms": 101,
+    "bays": 889,
+    "square": 101,
+    "baysInSquare": 889,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 38,
+     "6-9": 29,
+     "10+": 34
+    },
+    "largest": 32
+   },
+   "used": 48,
+   "of": 50,
+   "entropy": 5.14,
+   "opened": 70,
+   "lost": 39,
+   "stitchMs": 8.554699999978766
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 18928.217599999974,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 93,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     441,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     240,
+     462
+    ],
+    "bridges": [
+     7,
+     14
+    ],
+    "yards": [
+     53,
+     53
+    ]
+   },
+   "rooms": {
+    "rooms": 77,
+    "bays": 659,
+    "square": 77,
+    "baysInSquare": 659,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 35,
+     "6-9": 14,
+     "10+": 28
+    },
+    "largest": 34
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 5
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seed": 6,
+   "ms": 18934.832299999893,
+   "massingMs": 12.764100000000326,
+   "regions": 49,
+   "failed": 3,
+   "attempts": 93,
+   "found": true,
+   "invalid": 0,
+   "reach": {
+    "ground": [
+     418,
+     418
+    ],
+    "above": [
+     513,
+     513
+    ],
+    "stairs": [
+     157,
+     157
+    ],
+    "roofs": [
+     404,
+     462
+    ],
+    "bridges": [
+     11,
+     14
+    ],
+    "yards": [
+     53,
+     53
+    ]
+   },
+   "rooms": {
+    "rooms": 74,
+    "bays": 659,
+    "square": 74,
+    "baysInSquare": 659,
+    "sizes": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4-5": 31,
+     "6-9": 14,
+     "10+": 29
+    },
+    "largest": 34
+   },
+   "used": 47,
+   "of": 50,
+   "entropy": 4.98,
+   "opened": 51,
+   "lost": 58,
+   "stitchMs": 6.61469999991823
+  }
+ ],
+ "summary": [
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 180,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    110,
+    120
+   ],
+   "above": [
+    175,
+    194
+   ],
+   "stairs": [
+    48,
+    48
+   ],
+   "roofs": [
+    70,
+    108
+   ],
+   "bridges": [
+    32,
+    34
+   ],
+   "yards": [
+    4,
+    4
+   ],
+   "rooms": 29,
+   "roomsSquare": 29,
+   "baysPerRoom": 7.8,
+   "used": 30.8,
+   "entropy": 4.13,
+   "waveMB": 2.2
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 181,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    120,
+    120
+   ],
+   "above": [
+    194,
+    194
+   ],
+   "stairs": [
+    48,
+    48
+   ],
+   "roofs": [
+    93,
+    108
+   ],
+   "bridges": [
+    32,
+    34
+   ],
+   "yards": [
+    4,
+    4
+   ],
+   "rooms": 29,
+   "roomsSquare": 29,
+   "baysPerRoom": 7.8,
+   "used": 30.5,
+   "entropy": 4.13,
+   "waveMB": 2.2,
+   "opened": 26,
+   "lost": 15,
+   "stitchMs": 1
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 875,
+   "tries": [
+    1,
+    4,
+    2,
+    3,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    610,
+    618
+   ],
+   "above": [
+    544,
+    838
+   ],
+   "stairs": [
+    187,
+    196
+   ],
+   "roofs": [
+    321,
+    604
+   ],
+   "bridges": [
+    148,
+    231
+   ],
+   "yards": [
+    38,
+    41
+   ],
+   "rooms": 135,
+   "roomsSquare": 135,
+   "baysPerRoom": 6.7,
+   "used": 44.7,
+   "entropy": 4.75,
+   "waveMB": 10
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 877,
+   "tries": [
+    1,
+    4,
+    2,
+    3,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    618,
+    618
+   ],
+   "above": [
+    832,
+    838
+   ],
+   "stairs": [
+    196,
+    196
+   ],
+   "roofs": [
+    582,
+    604
+   ],
+   "bridges": [
+    192,
+    231
+   ],
+   "yards": [
+    39,
+    41
+   ],
+   "rooms": 129,
+   "roomsSquare": 129,
+   "baysPerRoom": 7.1,
+   "used": 44.3,
+   "entropy": 4.74,
+   "waveMB": 10,
+   "opened": 198,
+   "lost": 28,
+   "stitchMs": 3
+  },
+  {
+   "via": "A",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 4102,
+   "tries": [
+    2,
+    12,
+    4,
+    2,
+    8,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2360,
+    2429
+   ],
+   "above": [
+    2662,
+    3706
+   ],
+   "stairs": [
+    1045,
+    1053
+   ],
+   "roofs": [
+    1191,
+    2500
+   ],
+   "bridges": [
+    402,
+    774
+   ],
+   "yards": [
+    149,
+    158
+   ],
+   "rooms": 561,
+   "roomsSquare": 557,
+   "baysPerRoom": 6.7,
+   "used": 49.8,
+   "entropy": 5.07,
+   "waveMB": 37.4
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 4116,
+   "tries": [
+    2,
+    12,
+    4,
+    2,
+    8,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2429,
+    2429
+   ],
+   "above": [
+    3637,
+    3706
+   ],
+   "stairs": [
+    1053,
+    1053
+   ],
+   "roofs": [
+    2214,
+    2500
+   ],
+   "bridges": [
+    649,
+    774
+   ],
+   "yards": [
+    153,
+    158
+   ],
+   "rooms": 520,
+   "roomsSquare": 516,
+   "baysPerRoom": 7.2,
+   "used": 49.5,
+   "entropy": 5.05,
+   "waveMB": 37.4,
+   "opened": 851,
+   "lost": 355,
+   "stitchMs": 13
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 191,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    120,
+    120
+   ],
+   "above": [
+    159,
+    194
+   ],
+   "stairs": [
+    48,
+    48
+   ],
+   "roofs": [
+    86,
+    106
+   ],
+   "bridges": [
+    32,
+    36
+   ],
+   "yards": [
+    2,
+    2
+   ],
+   "rooms": 25,
+   "roomsSquare": 25,
+   "baysPerRoom": 7.8,
+   "used": 30.3,
+   "entropy": 4.1,
+   "waveMB": 2.3
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 192,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    120,
+    120
+   ],
+   "above": [
+    194,
+    194
+   ],
+   "stairs": [
+    48,
+    48
+   ],
+   "roofs": [
+    99,
+    106
+   ],
+   "bridges": [
+    32,
+    36
+   ],
+   "yards": [
+    2,
+    2
+   ],
+   "rooms": 25,
+   "roomsSquare": 25,
+   "baysPerRoom": 7.8,
+   "used": 30.5,
+   "entropy": 4.1,
+   "waveMB": 2.3,
+   "opened": 22,
+   "lost": 7,
+   "stitchMs": 1
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 941,
+   "tries": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    611,
+    622
+   ],
+   "above": [
+    519,
+    834
+   ],
+   "stairs": [
+    184,
+    196
+   ],
+   "roofs": [
+    305,
+    624
+   ],
+   "bridges": [
+    127,
+    196
+   ],
+   "yards": [
+    49,
+    50
+   ],
+   "rooms": 125,
+   "roomsSquare": 125,
+   "baysPerRoom": 7.7,
+   "used": 46.2,
+   "entropy": 4.86,
+   "waveMB": 10.5
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 943,
+   "tries": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    622,
+    622
+   ],
+   "above": [
+    830,
+    834
+   ],
+   "stairs": [
+    196,
+    196
+   ],
+   "roofs": [
+    588,
+    624
+   ],
+   "bridges": [
+    173,
+    196
+   ],
+   "yards": [
+    49,
+    50
+   ],
+   "rooms": 121,
+   "roomsSquare": 121,
+   "baysPerRoom": 8,
+   "used": 46,
+   "entropy": 4.85,
+   "waveMB": 10.5,
+   "opened": 200,
+   "lost": 40,
+   "stitchMs": 3
+  },
+  {
+   "via": "A",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 7389,
+   "tries": [
+    2,
+    12,
+    4,
+    2,
+    8,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2388,
+    2441
+   ],
+   "above": [
+    2508,
+    3738
+   ],
+   "stairs": [
+    980,
+    1020
+   ],
+   "roofs": [
+    1140,
+    2494
+   ],
+   "bridges": [
+    386,
+    780
+   ],
+   "yards": [
+    166,
+    173
+   ],
+   "rooms": 550,
+   "roomsSquare": 547,
+   "baysPerRoom": 6.9,
+   "used": 49.3,
+   "entropy": 5.08,
+   "waveMB": 39.2
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 7411,
+   "tries": [
+    2,
+    12,
+    4,
+    2,
+    8,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2441,
+    2441
+   ],
+   "above": [
+    3670,
+    3738
+   ],
+   "stairs": [
+    1020,
+    1020
+   ],
+   "roofs": [
+    2229,
+    2494
+   ],
+   "bridges": [
+    659,
+    780
+   ],
+   "yards": [
+    171,
+    173
+   ],
+   "rooms": 511,
+   "roomsSquare": 508,
+   "baysPerRoom": 7.4,
+   "used": 49.2,
+   "entropy": 5.07,
+   "waveMB": 39.2,
+   "opened": 847,
+   "lost": 333,
+   "stitchMs": 22
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 355,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    75,
+    120
+   ],
+   "above": [
+    102,
+    194
+   ],
+   "stairs": [
+    39,
+    48
+   ],
+   "roofs": [
+    57,
+    108
+   ],
+   "bridges": [
+    29,
+    33
+   ],
+   "yards": [
+    2,
+    3
+   ],
+   "rooms": 28,
+   "roomsSquare": 28,
+   "baysPerRoom": 6.4,
+   "used": 29.7,
+   "entropy": 4.02,
+   "waveMB": 2.2
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "lotto",
+   "seeds": 6,
+   "found": 6,
+   "ms": 357,
+   "tries": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    120,
+    120
+   ],
+   "above": [
+    194,
+    194
+   ],
+   "stairs": [
+    48,
+    48
+   ],
+   "roofs": [
+    100,
+    108
+   ],
+   "bridges": [
+    29,
+    33
+   ],
+   "yards": [
+    3,
+    3
+   ],
+   "rooms": 26,
+   "roomsSquare": 26,
+   "baysPerRoom": 6.8,
+   "used": 28.8,
+   "entropy": 4.03,
+   "waveMB": 2.2,
+   "opened": 46,
+   "lost": 8,
+   "stitchMs": 2
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 1731,
+   "tries": [
+    2,
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    577,
+    616
+   ],
+   "above": [
+    573,
+    816
+   ],
+   "stairs": [
+    200,
+    214
+   ],
+   "roofs": [
+    364,
+    596
+   ],
+   "bridges": [
+    138,
+    255
+   ],
+   "yards": [
+    32,
+    34
+   ],
+   "rooms": 135,
+   "roomsSquare": 134,
+   "baysPerRoom": 6.9,
+   "used": 47.2,
+   "entropy": 4.78,
+   "waveMB": 10.1
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "blocco",
+   "seeds": 6,
+   "found": 6,
+   "ms": 1735,
+   "tries": [
+    2,
+    1,
+    2,
+    1,
+    2,
+    1
+   ],
+   "invalid": 0,
+   "ground": [
+    616,
+    616
+   ],
+   "above": [
+    812,
+    816
+   ],
+   "stairs": [
+    214,
+    214
+   ],
+   "roofs": [
+    571,
+    596
+   ],
+   "bridges": [
+    217,
+    255
+   ],
+   "yards": [
+    32,
+    34
+   ],
+   "rooms": 122,
+   "roomsSquare": 121,
+   "baysPerRoom": 7.6,
+   "used": 46.7,
+   "entropy": 4.77,
+   "waveMB": 10.1,
+   "opened": 180,
+   "lost": 29,
+   "stitchMs": 4
+  },
+  {
+   "via": "A",
+   "style": "villa",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 9136,
+   "tries": [
+    4,
+    45,
+    4,
+    5,
+    9,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2395,
+    2463
+   ],
+   "above": [
+    2413,
+    3760
+   ],
+   "stairs": [
+    930,
+    987
+   ],
+   "roofs": [
+    1154,
+    2490
+   ],
+   "bridges": [
+    347,
+    784
+   ],
+   "yards": [
+    160,
+    170
+   ],
+   "rooms": 523,
+   "roomsSquare": 522,
+   "baysPerRoom": 7.2,
+   "used": 49.5,
+   "entropy": 5.09,
+   "waveMB": 37.7
+  },
+  {
+   "via": "A+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 9161,
+   "tries": [
+    4,
+    45,
+    4,
+    5,
+    9,
+    7
+   ],
+   "invalid": 0,
+   "ground": [
+    2463,
+    2463
+   ],
+   "above": [
+    3725,
+    3760
+   ],
+   "stairs": [
+    987,
+    987
+   ],
+   "roofs": [
+    2284,
+    2490
+   ],
+   "bridges": [
+    638,
+    784
+   ],
+   "yards": [
+    166,
+    170
+   ],
+   "rooms": 482,
+   "roomsSquare": 481,
+   "baysPerRoom": 7.9,
+   "used": 49,
+   "entropy": 5.07,
+   "waveMB": 37.7,
+   "opened": 866,
+   "lost": 241,
+   "stitchMs": 25
+  },
+  {
+   "via": "B base",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 39,
+   "failedRegions": "0/0",
+   "attempts": 0,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2530,
+    2832
+   ],
+   "bridges": [
+    65,
+    96
+   ],
+   "yards": [
+    384,
+    384
+   ],
+   "rooms": 391,
+   "roomsSquare": 391,
+   "baysPerRoom": 13.2,
+   "used": 21.5,
+   "entropy": 3.74
+  },
+  {
+   "via": "B libera",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 8827,
+   "failedRegions": "0/294",
+   "attempts": 294,
+   "invalid": 0,
+   "ground": [
+    2485,
+    2499
+   ],
+   "above": [
+    2859,
+    3884
+   ],
+   "stairs": [
+    867,
+    867
+   ],
+   "roofs": [
+    1548,
+    2748
+   ],
+   "bridges": [
+    78,
+    188
+   ],
+   "yards": [
+    269,
+    269
+   ],
+   "rooms": 598,
+   "roomsSquare": 598,
+   "baysPerRoom": 7.7,
+   "used": 49,
+   "entropy": 5.1
+  },
+  {
+   "via": "B libera+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 9492,
+   "failedRegions": "0/294",
+   "attempts": 294,
+   "invalid": 0,
+   "ground": [
+    2485,
+    2499
+   ],
+   "above": [
+    2928,
+    3884
+   ],
+   "stairs": [
+    867,
+    867
+   ],
+   "roofs": [
+    1612,
+    2748
+   ],
+   "bridges": [
+    83,
+    188
+   ],
+   "yards": [
+    269,
+    269
+   ],
+   "rooms": 585,
+   "roomsSquare": 585,
+   "baysPerRoom": 7.9,
+   "used": 48,
+   "entropy": 5.09
+  },
+  {
+   "via": "B regola10",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 14913,
+   "failedRegions": "3/294",
+   "attempts": 374,
+   "invalid": 0,
+   "ground": [
+    2491,
+    2501
+   ],
+   "above": [
+    2891,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    1619,
+    2752
+   ],
+   "bridges": [
+    82,
+    184
+   ],
+   "yards": [
+    274,
+    274
+   ],
+   "rooms": 580,
+   "roomsSquare": 580,
+   "baysPerRoom": 8,
+   "used": 48.8,
+   "entropy": 5.1
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 26611,
+   "failedRegions": "17/294",
+   "attempts": 578,
+   "invalid": 0,
+   "ground": [
+    2467,
+    2501
+   ],
+   "above": [
+    3135,
+    3886
+   ],
+   "stairs": [
+    855,
+    864
+   ],
+   "roofs": [
+    1824,
+    2774
+   ],
+   "bridges": [
+    90,
+    159
+   ],
+   "yards": [
+    285,
+    285
+   ],
+   "rooms": 545,
+   "roomsSquare": 545,
+   "baysPerRoom": 8.8,
+   "used": 47.8,
+   "entropy": 5.04,
+   "sameInOtherOrder": "6/6"
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "palazzina",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 26620,
+   "failedRegions": "17/294",
+   "attempts": 578,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2532,
+    2774
+   ],
+   "bridges": [
+    117,
+    159
+   ],
+   "yards": [
+    285,
+    285
+   ],
+   "rooms": 518,
+   "roomsSquare": 518,
+   "baysPerRoom": 9.2,
+   "used": 47.8,
+   "entropy": 5.02,
+   "opened": 318,
+   "lost": 246,
+   "stitchMs": 8
+  },
+  {
+   "via": "B base",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 13,
+   "failedRegions": "0/0",
+   "attempts": 0,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2530,
+    2832
+   ],
+   "bridges": [
+    65,
+    96
+   ],
+   "yards": [
+    384,
+    384
+   ],
+   "rooms": 391,
+   "roomsSquare": 391,
+   "baysPerRoom": 13.2,
+   "used": 21.5,
+   "entropy": 3.74
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 20190,
+   "failedRegions": "18/294",
+   "attempts": 569,
+   "invalid": 0,
+   "ground": [
+    2440,
+    2501
+   ],
+   "above": [
+    2905,
+    3886
+   ],
+   "stairs": [
+    840,
+    864
+   ],
+   "roofs": [
+    1662,
+    2760
+   ],
+   "bridges": [
+    92,
+    179
+   ],
+   "yards": [
+    295,
+    295
+   ],
+   "rooms": 559,
+   "roomsSquare": 559,
+   "baysPerRoom": 8.5,
+   "used": 47.8,
+   "entropy": 5.05
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "popolare",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 20197,
+   "failedRegions": "18/294",
+   "attempts": 569,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2519,
+    2760
+   ],
+   "bridges": [
+    130,
+    179
+   ],
+   "yards": [
+    295,
+    295
+   ],
+   "rooms": 520,
+   "roomsSquare": 520,
+   "baysPerRoom": 9.2,
+   "used": 47.8,
+   "entropy": 5.03,
+   "opened": 373,
+   "lost": 245,
+   "stitchMs": 8
+  },
+  {
+   "via": "B base",
+   "style": "villa",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 14,
+   "failedRegions": "0/0",
+   "attempts": 0,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2530,
+    2832
+   ],
+   "bridges": [
+    65,
+    96
+   ],
+   "yards": [
+    384,
+    384
+   ],
+   "rooms": 391,
+   "roomsSquare": 391,
+   "baysPerRoom": 13.2,
+   "used": 21.5,
+   "entropy": 3.74
+  },
+  {
+   "via": "B regola10+tetti",
+   "style": "villa",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 18945,
+   "failedRegions": "16/294",
+   "attempts": 579,
+   "invalid": 0,
+   "ground": [
+    2473,
+    2501
+   ],
+   "above": [
+    2896,
+    3886
+   ],
+   "stairs": [
+    857,
+    864
+   ],
+   "roofs": [
+    1933,
+    2782
+   ],
+   "bridges": [
+    92,
+    151
+   ],
+   "yards": [
+    295,
+    295
+   ],
+   "rooms": 576,
+   "roomsSquare": 576,
+   "baysPerRoom": 8.2,
+   "used": 47.3,
+   "entropy": 5.09
+  },
+  {
+   "via": "B regola10+tetti+ricucitura",
+   "style": "villa",
+   "kind": "quartiere",
+   "seeds": 6,
+   "found": 6,
+   "ms": 18952,
+   "failedRegions": "16/294",
+   "attempts": 579,
+   "invalid": 0,
+   "ground": [
+    2501,
+    2501
+   ],
+   "above": [
+    3882,
+    3886
+   ],
+   "stairs": [
+    864,
+    864
+   ],
+   "roofs": [
+    2545,
+    2782
+   ],
+   "bridges": [
+    112,
+    151
+   ],
+   "yards": [
+    295,
+    295
+   ],
+   "rooms": 536,
+   "roomsSquare": 536,
+   "baysPerRoom": 8.8,
+   "used": 47.3,
+   "entropy": 5.07,
+   "opened": 328,
+   "lost": 241,
+   "stitchMs": 7
+  }
+ ],
+ "variance": {
+  "A|palazzina|semi": {
+   "bricks": 0.105,
+   "look": 0.034
+  },
+  "A|popolare|semi": {
+   "bricks": 0.097,
+   "look": 0.037
+  },
+  "A|villa|semi": {
+   "bricks": 0.101,
+   "look": 0.02
+  },
+  "A|stili": {
+   "bricks": 0.098,
+   "look": 0.92
+  },
+  "A+ricucitura|palazzina|semi": {
+   "bricks": 0.103,
+   "look": 0.034
+  },
+  "A+ricucitura|popolare|semi": {
+   "bricks": 0.096,
+   "look": 0.037
+  },
+  "A+ricucitura|villa|semi": {
+   "bricks": 0.099,
+   "look": 0.02
+  },
+  "A+ricucitura|stili": {
+   "bricks": 0.093,
+   "look": 0.92
+  },
+  "B regola10+tetti|palazzina|semi": {
+   "bricks": 0.106,
+   "look": 0.035
+  },
+  "B regola10+tetti|popolare|semi": {
+   "bricks": 0.106,
+   "look": 0.03
+  },
+  "B regola10+tetti|villa|semi": {
+   "bricks": 0.104,
+   "look": 0.027
+  },
+  "B regola10+tetti|stili": {
+   "bricks": 0.11,
+   "look": 0.897
+  },
+  "A|onda": 0.85,
+  "B|onda": 0.689
+ },
+ "walks": {
+  "A|palazzina|quartiere|1": {
+   "ms": 928,
+   "voxels": 19824640,
+   "both": 78,
+   "onlyGraph": [
+    "11,11,1 scala-esterna"
+   ],
+   "onlyWalk": []
+  },
+  "A+ricucitura|palazzina|quartiere|1": {
+   "ms": 1130,
+   "voxels": 19824640,
+   "both": 104,
+   "onlyGraph": [
+    "11,11,1 scala-esterna"
+   ],
+   "onlyWalk": []
+  },
+  "B regola10+tetti|palazzina|quartiere|1": {
+   "ms": 1298,
+   "voxels": 19824640,
+   "both": 103,
+   "onlyGraph": [],
+   "onlyWalk": []
+  }
+ },
+ "t522": {
+  "bricks": 25,
+  "patterns": 153,
+  "used": [
+   23,
+   23,
+   23
+  ],
+  "entropy": [
+   3.74,
+   3.8,
+   3.73
+  ]
+ }
+}
