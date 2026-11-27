@@ -38,7 +38,7 @@ export interface MeshArrays {
   color: Float32Array;
   part: Uint8Array;
   /**
-   * The grain of the tops (T547, ADR-0266), four bytes a vertex: the specks' colour lit (0-255 of linear) and `grainByte` (the density and
+   * The grain of the tops (T547, ADR-0267), four bytes a vertex: the specks' colour lit (0-255 of linear) and `grainByte` (the density and
    * the tile's salt; 0 no grain). Only where a top has one: a mesh without grain has none, as before.
    */
   grain?: Uint8Array;
@@ -227,7 +227,7 @@ export interface ChunkSource extends GroundReads {
   isClear?(code: string): boolean;
   /** Lit RGB of the top stratum of the seabed at (x, z) (`Kernel.bedStratumAt`). */
   bedTopRgb?(x: number, z: number): readonly number[];
-  /** The grain of a terrain's tops (T547, ADR-0266), if it has one. */
+  /** The grain of a terrain's tops (T547, ADR-0267), if it has one. */
   grain?(code: string): GrainLook | undefined;
   /** Number of strata rows at (x, z) (`Kernel.strataRowsAt`). */
   strataRowsAt?(x: number, z: number): number;

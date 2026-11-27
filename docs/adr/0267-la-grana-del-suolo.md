@@ -1,4 +1,4 @@
-# ADR-0266 — La grana del suolo: le macchie di un voxel nel materiale del terreno
+# ADR-0267 — La grana del suolo: le macchie di un voxel nel materiale del terreno
 
 - **Stato**: accettato
 - **Data**: 2026-11-27

@@ -424,7 +424,7 @@ export class Validator {
         if (t.layer !== undefined && !LAYERS.includes(t.layer)) err(`tile "${code}": layer deve essere uno tra ${LAYERS.join(', ')}`);
         // How a body crosses it (T437, ADR-0224): a crossing of the three, as `solid` says, swum only where it is a liquid, within the limits.
         if (t && typeof t === 'object') for (const e of terrainPhysicsErrors(code, t)) errors.push(`${path}: ${e}`);
-        // The grain of its ground (T547, ADR-0266): only how it looks, but a colour and a density within the range.
+        // The grain of its ground (T547, ADR-0267): only how it looks, but a colour and a density within the range.
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
       }
     }

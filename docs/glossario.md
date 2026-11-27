@@ -152,7 +152,7 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 
 ### Grana del suolo
 - **Inglese**: `grain`, `Grain`, `TerrainDef.grain`, `readGrain`, `grainOf`, `grainByName`, `grainKind`, `grainErrors`, `GRAIN_CELLS`, `GRAIN_LIMITS`, `MAT.ground`
-- **Definizione**: le macchie di un voxel (1/20 di casella) che il materiale di un terreno mostra sopra il suo colore, il brecciolino, la ghiaia della massicciata, le foglie secche: `{ color, density }` (0-0,75 delle celle della cima, 0 nessuna), disegnate dallo shader del suolo, nessun triangolo in più, solo aspetto; un terreno che non la dice prende quella che dice il suo nome (ADR-0266).
+- **Definizione**: le macchie di un voxel (1/20 di casella) che il materiale di un terreno mostra sopra il suo colore, il brecciolino, la ghiaia della massicciata, le foglie secche: `{ color, density }` (0-0,75 delle celle della cima, 0 nessuna), disegnate dallo shader del suolo, nessun triangolo in più, solo aspetto; un terreno che non la dice prende quella che dice il suo nome (ADR-0267).
 - **Dove vive**: `src/kernel/grain.ts`, `src/render/terrainmesh.ts` (l'attributo `grain` delle cime), `src/render/materials.ts` (`addGrain`)
 - **Da non usare**: `texture` (non è un'immagine), `copertura` (la copertura sono modelli a istanze, C1), `rumore`
 - **Fermo**: `grain` nei manifest (`color`, `density`).

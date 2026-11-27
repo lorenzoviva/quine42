@@ -1,4 +1,4 @@
-// The grain of the ground (T547, C3 of docs/design/terreno-ricco.md, ADR-0266): the specks of one voxel a terrain's material shows over its
+// The grain of the ground (T547, C3 of docs/design/terreno-ricco.md, ADR-0267): the specks of one voxel a terrain's material shows over its
 // colour (gravel, the ballast of a railway, dry leaves), drawn by the fragment shader of the ground from a hash of the position at
 // 1/`GRAIN_CELLS` of a tile: no triangle more, no entity, nothing in the state nor on the wire. Only how a terrain looks.
 //

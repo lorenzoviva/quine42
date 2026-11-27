@@ -299,7 +299,7 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
 }
 
 /**
- * The grain of the ground (T547, ADR-0266; `src/kernel/grain.ts`): the tops whose `grain` attribute says it (the specks' colour, linear in
+ * The grain of the ground (T547, ADR-0267; `src/kernel/grain.ts`): the tops whose `grain` attribute says it (the specks' colour, linear in
  * 0-255, and a byte with the density in steps and the tile's salt) get specks of one voxel, a cell of 1/`GRAIN_CELLS` of a tile, a hash of
  * the cell where the vertex stands in its place (the place's own coordinates: small numbers, so a place a million tiles out keeps its
  * specks) and of the salt. Each speck a little lighter or darker; where a cell is under a pixel the top fades to the specks' mean, so the

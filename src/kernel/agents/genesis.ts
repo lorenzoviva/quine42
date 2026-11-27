@@ -210,7 +210,7 @@ interface RawTerrain {
   layer: TerrainLayer;
   solid: boolean;
   speed: number;
-  /** The specks of its ground (T547, ADR-0266), if the Cartographer said them: read without trusting (`readGrain`). */
+  /** The specks of its ground (T547, ADR-0267), if the Cartographer said them: read without trusting (`readGrain`). */
   grain?: unknown;
   /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep; whether one breathes on it (T446). */
   cross?: Crossing;
@@ -245,7 +245,7 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
 }
 
 /**
- * The grain the Cartographer said of a terrain (T547, ADR-0266), read without trusting: only of the ground one walks, none if it is not one.
+ * The grain the Cartographer said of a terrain (T547, ADR-0267), read without trusting: only of the ground one walks, none if it is not one.
  * Unsaid, the terrain takes the one its name says when it is drawn (`grainOf`): nothing is written for it.
  */
 function grainField(layer: TerrainLayer, raw: unknown): { grain?: Grain } {

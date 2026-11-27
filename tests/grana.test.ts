@@ -1,4 +1,4 @@
-// The grain of the ground (T547, C3 of docs/design/terreno-ricco.md, ADR-0266): specks of one voxel a terrain's material shows over its
+// The grain of the ground (T547, C3 of docs/design/terreno-ricco.md, ADR-0267): specks of one voxel a terrain's material shows over its
 // colour, said by `TerrainDef.grain` or by its name (the repair of the universes of before), read without trusting, carried by the tops of
 // the place's mesh as one attribute (no triangle more), the same through the worker, drawn by the ground's material.
 

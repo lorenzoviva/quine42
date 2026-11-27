@@ -1190,7 +1190,7 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   ricaricare dei file ciò che è fuori si dimentica; un worker che si ferma o con luoghi fuori tace 20 s si abbandona e la pagina fa da sé.
   La stessa mesh byte per byte: `tests/terreno-worker.test.ts` (ogni lettura della mesh nella finestra, il worker uguale alla pagina) e
   l'impronta di `lab/scripts/impronta-terreno.ts`. Una lettura nuova della mesh va in `ChunkSource`, `kernelSource`, `ChunkInput`, `inputSource`.
-- **La grana del suolo** (ADR-0266, T547, C3 di `docs/design/terreno-ricco.md`, kernel 0.10.42): le macchie di un voxel (1/20 di casella)
+- **La grana del suolo** (ADR-0267, T547, C3 di `docs/design/terreno-ricco.md`, kernel 0.10.42): le macchie di un voxel (1/20 di casella)
   che il materiale di un terreno mostra sopra il suo colore, il brecciolino, la ghiaia della massicciata, le foglie secche. Un campo del
   terreno, `grain: { color, density }` (densità 0-0,75 delle celle della cima, a passi di 0,05; 0 nessuna), letto senza fidarsi (`readGrain`,
   `src/kernel/grain.ts`), voluto dal validatore dei manifest (`grainErrors`) e, alla Genesi, facoltativo nello schema dei terreni del
