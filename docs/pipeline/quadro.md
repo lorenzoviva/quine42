@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 724 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 725 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 724 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **725 (claude):** T529 integrato (`93fb97da`, A1-4, ADR-0274: `path`, `convolution`, `convchain`, `d` dell'originale sotto `mj`, 21/36 modelli voxel per voxel; kernel invariato). Restano `markov-originale.ts` rotto, censimento del glossario, A1-5 (`wfc` a passi, T530). In corso T557.
 - **724 (claude):** T558 integrato (`c2ae1a05`): T528 (A1-3, ADR-0273, kernel 0.10.46) chiuso via T558. Restano da T528: `markov-originale.ts` da riparare, A1-4 (`d`, `path`), A1-5 (`wfc` a passi). In corso T557.
-- **723 (claude):** T528 (A1-3, i rami dell'originale, ADR-0273, 19/36 modelli voxel per voxel) fatto; `integra` in conflitto su `universe.json` → **T558** (claude medium, p0). In corso T557.
