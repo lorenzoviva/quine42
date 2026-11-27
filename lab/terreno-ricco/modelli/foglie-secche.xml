@@ -1,0 +1,22 @@
+<!-- Dry leaves (T509, lab/terreno-ricco): a cover model lying flat. The seed scatters a few leaves on a hidden bed at the ground and lets
+     each grow by one voxel; a few lie on the others. -->
+<sequence values="BVabcd" size="10 10 2" name="Foglie secche">
+  <color symbol="a" value="a0652e" name="foglia bruna"/>
+  <color symbol="b" value="c8913a" name="foglia ocra"/>
+  <color symbol="c" value="7a4a24" name="foglia scura"/>
+  <color symbol="d" value="d9b45a" name="foglia gialla"/>
+  <color symbol="V" hidden="True" name="il letto delle foglie"/>
+  <ellipsoid at="5 5 0" size="9 9 1" color="V"/>
+  <prl in="V" out="a" p="0.08" steps="1"/>
+  <prl in="V" out="b" p="0.05" steps="1"/>
+  <prl in="V" out="c" p="0.04" steps="1"/>
+  <prl in="V" out="d" p="0.03" steps="1"/>
+  <one steps="14">
+    <rule in="aV" out="aa"/>
+    <rule in="bV" out="bb"/>
+    <rule in="cV" out="cc"/>
+    <rule in="dV" out="dd"/>
+  </one>
+  <all in="V" out="B"/>
+  <prl in="B a" out="b a" p="0.2" steps="1"/>
+</sequence>

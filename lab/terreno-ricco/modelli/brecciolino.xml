@@ -1,0 +1,14 @@
+<!-- Fine gravel (T509, lab/terreno-ricco): a cover model of grit on the ground, the worst case of a cover for triangles (every stone a
+     voxel of its own, all its sides seen). -->
+<sequence values="BVLGD" size="10 10 2" name="Brecciolino">
+  <color symbol="L" value="b9b4a8" name="graniglia chiara"/>
+  <color symbol="G" value="8d887d" name="graniglia"/>
+  <color symbol="D" value="615d55" name="graniglia scura"/>
+  <color symbol="V" hidden="True" name="il letto della ghiaia"/>
+  <ellipsoid at="5 5 0" size="10 10 1" color="V"/>
+  <prl in="V" out="G" p="0.16" steps="1"/>
+  <prl in="V" out="L" p="0.08" steps="1"/>
+  <prl in="V" out="D" p="0.08" steps="1"/>
+  <all in="V" out="B"/>
+  <prl in="B G" out="L G" p="0.05" steps="1"/>
+</sequence>

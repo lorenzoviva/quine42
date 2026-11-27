@@ -1,0 +1,18 @@
+<!-- Tumbleweed (T509, lab/terreno-ricco): a ball of dry twigs that the wind rolls. From a heart in the middle of a hidden ball, twigs walk
+     every way and fork; nothing grows on them. -->
+<sequence values="BVrTt" size="12 12 12" symmetry="(xyz)" name="Cespuglio rotolante">
+  <color symbol="T" value="9c7a4a" name="rametto secco"/>
+  <color symbol="t" value="c2a06a" name="rametto chiaro"/>
+  <color symbol="V" hidden="True" name="la palla"/>
+  <color symbol="r" hidden="True" name="punta di un rametto"/>
+  <ellipsoid at="6 6 1" size="11 11 10" color="V"/>
+  <box at="6 6 6" size="1 1 1" color="r"/>
+  <one steps="6" in="Vr" out="rr"/>
+  <one steps="140">
+    <rule in="Vr" out="rT"/>
+    <rule in="V*/*r" out="r*/*T"/>
+  </one>
+  <all in="r" out="T"/>
+  <all in="V" out="B"/>
+  <prl in="T" out="t" p="0.3" steps="1"/>
+</sequence>
