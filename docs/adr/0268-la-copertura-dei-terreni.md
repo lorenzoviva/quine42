@@ -32,9 +32,9 @@ tipo di copertura in più, e un oggetto in più sul terreno («cercare la chiave
    casella, il verso, la scala e il seme (`coverInstance`), dalla casella, dal nome del programma e dal numero soltanto: un tipo in più o una
    densità diversa non spostano le altre; ogni client vede le stesse istanze, niente va sul filo né nello stato. **Mai** dove il kernel dice
    che non cresce niente (`Kernel.coverMask`): i sentieri che il kernel scava (e i varchi, che sono sentieri), i lotti delle strutture e del
-   blocco (le porte, i pavimenti), le buche sopra una cantina, e dove sta una cosa solida ferma (il mezzo della casella o un suo quarto sotto
+   blocco (le porte, i pavimenti), le buche sopra una cantina, una runa nel terreno (si legge, non si nasconde: le foto di T545 la mostravano coperta dai ciuffi), e dove sta una cosa solida ferma (il mezzo della casella o un suo quarto sotto
    l'impronta; non le persone, gli animali, i veicoli, che si muovono). La maschera viaggia nella copia del worker (`ChunkInput.bare`), la
-   firma del luogo (`chunkSig`) tiene le cose solide ferme che vi stanno (`coverStamp`, fatto con i solidi a ogni tick) e quali programmi della
+   firma del luogo (`chunkSig`) tiene le cose solide ferme e le rune che vi stanno (`coverStamp`, fatto con i solidi a ogni tick) e quali programmi della
    copertura sono pronti. Gli array tornano col luogo (`ChunkArrays.cover`: le forme, quale forma è ogni istanza, cinque numeri a istanza).
 4. **Una InstancedMesh per forma sulla finestra**, non per luogo (`CoverLayer`, `src/render/cover.ts`): le draw call non crescono coi luoghi;
    **senza ombre** (un ciuffo non fa un'ombra che si legga dall'alto, e la passata delle ombre ridisegnerebbe ogni istanza), col materiale che
@@ -74,9 +74,11 @@ tipo di copertura in più, e un oggetto in più sul terreno («cercare la chiave
 
 - Il prato del seme è un prato; i campi di grano hanno le spighe. Gli universi del Concilio di prima non cambiano finché i loro terreni non
   dicono una copertura (la riparazione dal nome senza chiamate, D6, è di C2).
-- Costa nel worker lo spargimento (qualche decimo di ms a luogo) e sulla pagina lo strato, rifatto solo quando cambia; le draw call crescono
-  di una per forma in ogni passata, qualunque sia il numero di luoghi. Le misure del frame sono nell'esito di T545 e in
-  `docs/catture/T545/`.
+- Costa nel worker lo spargimento e sulla pagina lo strato (0,8-1,6 ms, rifatto solo quando cambia); le draw call crescono di una per forma
+  in ogni passata, qualunque sia il numero di luoghi. Misurato alla partenza del seme con la camera più lontana (RTX 2070): senza copertura
+  la GPU 2,15 ms in mediana, con quella del seme (1 810 istanze) 2,37, col prato a cinque per casella (4 896) 2,67; `docs/catture/T545/`.
+- L'impronta delle mesh del seme (`lab/scripts/impronta-terreno.ts`) cambia per la copertura: le mesh dei luoghi senza la copertura sono
+  quelle di prima byte per byte.
 - Una cosa solida ferma che si sposta rifà la mesh del suo luogo (la sua firma cambia), come un luogo il cui terreno cambia.
 - Kernel 0.10.43: il campo e la classe sono aggiuntivi; un universo di prima si apre e si disegna come prima finché i suoi terreni non dicono
   `cover` (il seme sì).

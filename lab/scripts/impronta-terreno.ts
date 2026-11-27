@@ -13,7 +13,9 @@
 // The cover of the terrains (T545, ADR-0268) changed it on purpose: the seed's meadow, sand, fields and stumps have their cover now (the
 // seed changes how it looks, and with it every universe with the seed's palette), so a place's fingerprint has its cover's instances too
 // (`TerrainView.cover`, drawn by the window's layer and not by the place's group), with the covers' programs made with their meshes as the
-// terrains' models are; "senza" takes the covers away with the models. Before T545: 82270038653e2e56 (95 places, kernel 0.10.42).
+// terrains' models are; "senza" takes the covers away with the models, and a place without cover prints as before T545. Before T545:
+// 82270038653e2e56 (95 places, kernel 0.10.42); every "senza" of then is the same now: the meshes of the places, byte for byte. After
+// T545: 9afb6ebffa73d7f7 (8562 instances of cover; 44 places with the models as before, 51 with their cover).
 
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
@@ -112,7 +114,7 @@ function groupPrint(group: THREE.Group): string {
 }
 
 /** A place's cover (T545): its forms, which form each instance is and their numbers, byte by byte; '-' without. */
-const coverPrint = (c: ReturnType<typeof buildChunk>['cover']) => (c ? `cover ${c.forms.join(',')} ${sha(c.form)} ${sha(c.data)}` : 'cover -');
+const coverPrint = (c: ReturnType<typeof buildChunk>['cover']) => (c ? `\ncover ${c.forms.join(',')} ${sha(c.form)} ${sha(c.data)}` : '');
 let covered = 0;
 
 const prints = new Map<string, string>();
@@ -123,7 +125,7 @@ function printAll(stage: string): void {
     const t0 = performance.now();
     const view = buildChunk(k, ch);
     times.push(performance.now() - t0);
-    prints.set(`${stage} ${ch.key} modelli`, sha(`${groupPrint(view.group)}\n${coverPrint(view.cover)}`));
+    prints.set(`${stage} ${ch.key} modelli`, sha(`${groupPrint(view.group)}${coverPrint(view.cover)}`));
     covered += view.cover?.form.length ?? 0;
     // Without the models: the stand-ins of trees and rocks (the palette's entries for a moment as if they had none), and no cover.
     const kept = Object.entries(k.palette).filter(([, t]) => t.model).map(([code, t]) => [code, t.model] as const);
@@ -132,7 +134,7 @@ function printAll(stage: string): void {
     for (const [code] of covers) delete k.palette[code]!.cover;
     try {
       const bare = buildChunk(k, ch);
-      prints.set(`${stage} ${ch.key} senza`, sha(`${groupPrint(bare.group)}\n${coverPrint(bare.cover)}`));
+      prints.set(`${stage} ${ch.key} senza`, sha(`${groupPrint(bare.group)}${coverPrint(bare.cover)}`));
     } finally {
       for (const [code, model] of kept) k.palette[code]!.model = model;
       for (const [code, cover] of covers) k.palette[code]!.cover = cover;

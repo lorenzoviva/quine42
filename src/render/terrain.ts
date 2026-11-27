@@ -137,6 +137,14 @@ export function coverReadiness(k: Kernel): string {
   return coverModels(k).map((m) => `${m}${coverForms(k, m) ? 1 : 0}`).join(',');
 }
 
+/**
+ * What the places' meshes depend on of the library (`chunkSig`'s `models`): which terrains' models are ready, and which programs of the
+ * covers (T545). A place made before theirs arrived is made again with them.
+ */
+export function modelsSig(k: Kernel): string {
+  return `${Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('')}|${coverReadiness(k)}`;
+}
+
 /** A hole's sub-cells (T415) as a short string, for the key. */
 const coverHash = (c: Uint8Array) => {
   let h = 2166136261;

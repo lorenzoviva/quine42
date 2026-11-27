@@ -4475,7 +4475,7 @@ export class Kernel {
 
   // --- The cover of the terrains (T545, ADR-0268) ----------------------------------------------------------------------------------
 
-  /** What the cover of each place depends on of the solid things on it (T545): a sum of a hash of each still one, made with the solids. */
+  /** What the cover of each place depends on of the solid things and the runes on it (T545): a sum of a hash of each, made with the solids. */
   private solidStamps = new Map<string, number>();
 
   /** A solid thing that does not walk about (T545): not a person, an animal, a vehicle nor another wanderer; what the cover keeps away from. */
@@ -4519,8 +4519,8 @@ export class Kernel {
 
   /**
    * The tiles of a place where no cover grows (T545, ADR-0268), 1 a tile: what is not ground one walks, the paths the kernel digs (and the
-   * gates, which are paths), the lots of its structures and of its block (their doors, their floors), the holes over a cellar, and where a
-   * still solid thing stands (the middle of the tile or one of its quarters under its footprint). The renderer scatters the cover elsewhere;
+   * gates, which are paths), the lots of its structures and of its block (their doors, their floors), the holes over a cellar, a rune on the
+   * ground, and where a still solid thing stands (the middle of the tile or one of its quarters under its footprint). The renderer scatters the cover elsewhere;
    * `coverAt` says the same.
    */
   coverMask(ch: Chunk): Uint8Array {
@@ -4540,6 +4540,8 @@ export class Kernel {
     const inBox = (b: { x0: number; y0: number; x1: number; y1: number }) => c >= b.x0 && c <= b.x1 && r >= b.y0 && r <= b.y1;
     if (ch.lots.some(inBox) || (ch.blockLot && inBox(ch.blockLot))) return true;
     const x = ch.cx * S + c, y = ch.cy * S + r;
+    // A rune on the ground is read, never hidden.
+    if (this.runeTiles.has(`${x},${y}`)) return true;
     if (!this.solidForms.has(`${x},${y}`) && !this.solidTiles.has(`${x},${y}`)) return false;
     for (const [dx, dy] of [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]] as const) if (this.stillSolidAt(x + dx, y + dy)) return true;
     return false;
@@ -14126,6 +14128,14 @@ export class Kernel {
           const key = `${cx},${cy}`;
           (this.solidForms.get(key) ?? this.solidForms.set(key, []).get(key)!).push(s);
         }
+    }
+    // The runes on the ground (T545): the cover never hides one (`runeTiles`); their tiles in the stamps of their places.
+    const S = this.config.chunkSize;
+    for (const id of this.ecs.query('rune')) {
+      const r = this.ecs.get(id, 'rune');
+      if (!Number.isFinite(r?.col) || !Number.isFinite(r?.row)) continue;
+      const key = this.chunkKey(Math.floor(r.col / S), Math.floor(r.row / S));
+      this.solidStamps.set(key, ((this.solidStamps.get(key) ?? 0) + hash32(r.col, r.row, 0x7e5)) >>> 0);
     }
     // The decks (T439): of every vehicle a module still makes one, its form's floors if it is a solid with a form, else its disc.
     this.decks = [];

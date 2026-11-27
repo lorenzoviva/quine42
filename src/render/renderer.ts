@@ -17,7 +17,7 @@ import { Smoke } from './smoke';
 import { viewBytes, type WindView } from '../kernel/wind';
 import { Overlay } from './overlay';
 import { CRACK, GLITCH_EASE, crackLevel } from './glitch';
-import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, staleChunks, tileForms, type TerrainView } from './terrain';
+import { buildChunk, buildCut, chunkInput, chunkSig, chunkView, cutSig, disposeChunk, modelsSig, staleChunks, type TerrainView } from './terrain';
 import { ChunkMesher } from './chunkmesher';
 import { CoverLayer } from './cover';
 import { CAMERA_AIM, dimAt, towardsCamera, type CameraLine, type Cut, type Underground } from '../kernel/underground';
@@ -402,7 +402,7 @@ export class Renderer {
     this.wanderer.aloft = voyage?.altitude ?? 0;
     this.entities.aloft = voyage ? { ids: voyage.ids, dy: voyage.altitude, alone } : undefined;
     for (const v of this.chunks.values()) v.group.visible = !alone;
-    this.cover.group.visible = !alone;
+    this.cover.group.visible = !alone && !this.cover.hidden;
 
     // The simulation.
     this.world.visible = !interior;
@@ -636,7 +636,8 @@ export class Renderer {
   private syncChunks(): void {
     const k = this.kernel;
     // Which terrains' models are ready: chunks are built again when theirs arrive.
-    const models = Object.entries(k.palette).filter(([, t]) => t.model).map(([code]) => `${code}${tileForms(k, code) ? 1 : 0}`).join('');
+    // And which programs of the covers are (T545): a place made before theirs arrived is made again with its cover.
+    const models = modelsSig(k);
     // What the worker made: on screen, unless its place has gone or what stands on it is no longer ready (then it goes again, its signature is old).
     for (const got of this.mesher.take()) {
       const ch = k.chunks.get(got.key);

@@ -31,7 +31,7 @@ import {
 import { Validator } from '../src/kernel/validator';
 import { classOf } from '../src/mj/classes';
 import { FORGE_CLASSES } from '../src/kernel/agents/forge';
-import { buildChunk, chunkInput, coverForms } from '../src/render/terrain';
+import { buildChunk, chunkInput, coverForms, coverModels, coverReadiness } from '../src/render/terrain';
 import { answerChunk, chunkArrays, COVER_STRIDE, inputSource, type ChunkArrays } from '../src/render/terrainmesh';
 import { CoverLayer } from '../src/render/cover';
 
@@ -239,6 +239,40 @@ describe('la copertura nei luoghi del seme (T545)', () => {
     expect(k.coverMask(ch)[i]).toBe(1);
     expect(k.coverAt(x, y)).toEqual([]);
     expect(coverTiles(k, ch, chunkArrays(inputSource(chunkInput(k, ch))))).not.toContain(i);
+  });
+
+  it('la firma dei luoghi del renderer dice quali programmi della copertura sono pronti: un luogo fatto prima si rifà con la sua', async () => {
+    const k = await Kernel.boot({ files: bundledFiles, store: memoryStore(), ai: new MockAiModels(), forms: new Meshing() });
+    const before = coverReadiness(k);
+    expect(before.split(',').sort()).toEqual(['cover-shrub0', 'cover-stones0', 'cover-tuft0', 'cover-wheat0']);
+    // Asked, they come (`coverForms` asks every seed of a program).
+    for (const m of coverModels(k)) for (let s = 1; s <= k.forms.seedsOf(m); s++) await k.forms.wait(m, s);
+    expect(coverReadiness(k)).not.toBe(before);
+    expect(coverReadiness(k).split(',').every((x) => x.endsWith('1'))).toBe(true);
+  });
+
+  it('mai sopra una runa nel terreno: si legge, non si nasconde', async () => {
+    const k = await world();
+    const S = k.config.chunkSize;
+    const runes = k.ecs.query('rune').map((id) => k.ecs.get(id, 'rune') as { col: number; row: number });
+    expect(runes.length).toBeGreaterThan(0);
+    for (const r of runes) {
+      const ch = k.chunkAt(r.col, r.row);
+      if (!ch) continue;
+      expect(k.coverMask(ch)[(r.row - ch.cy * S) * S + (r.col - ch.cx * S)], `${r.col},${r.row}`).toBe(1);
+      expect(k.coverAt(r.col, r.row)).toEqual([]);
+    }
+    // A rune written on a meadow tile: the tile loses its cover, and the place's signature says so.
+    const ch = [...k.chunks.values()].find((c) => c.stage === 'planned' && [...c.tiles].some((_, i) => !k.coverMask(c)[i] && k.coverAt(c.cx * S + (i % S), c.cy * S + Math.floor(i / S)).length))!;
+    const i = [...ch.tiles].findIndex((_, j) => !k.coverMask(ch)[j] && k.coverAt(ch.cx * S + (j % S), ch.cy * S + Math.floor(j / S)).length > 0);
+    const col = ch.cx * S + (i % S), row = ch.cy * S + Math.floor(i / S);
+    const stamp = k.coverStamp(ch);
+    k.ecs.spawn({ rune: { token: 'lux', col, row, source: 'player' } });
+    // As the kernel marks it when a rune is written (the runes are read again at the tick).
+    (k as unknown as { runesDirty: boolean }).runesDirty = true;
+    k.tick(1 / 60);
+    expect(k.coverStamp(ch)).not.toBe(stamp);
+    expect(k.coverAt(col, row)).toEqual([]);
   });
 
   it('lo strato della finestra: una InstancedMesh per forma, senza ombre, sotto il tetto coi luoghi più vicini interi', async () => {

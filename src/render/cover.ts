@@ -33,6 +33,8 @@ export class CoverLayer {
   ms = 0;
   /** The cap on the window; the measuring tools may move it. */
   cap = COVER_CAP;
+  /** Hidden by the measuring tools (`misura-frame.mjs --sottobosco --gioco`): the frame without it, the rest the same. */
+  hidden = false;
 
   constructor() {
     this.group.name = 'copertura';

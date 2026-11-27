@@ -1212,9 +1212,9 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   laboratorio di T509) e li dà al prato, alla sabbia, ai campi e alla ceppaia. Nel worker del terreno `chunkArrays` sparge le istanze con
   l'hash (`coverOnTile`, `coverCount`, `coverInstance`: punto, verso, scala e seme dalla casella, dal nome del programma e dal numero, così
   un tipo in più non sposta gli altri) solo dove `Kernel.coverMask` lo lascia (non sentieri e varchi, lotti e il lotto del blocco, buche
-  sopra una cantina, cose solide ferme: `stillSolidAt` sull'impronta) e solo per i programmi i cui semi sono pronti; la maschera e le
+  sopra una cantina, rune nel terreno, cose solide ferme: `stillSolidAt` sull'impronta) e solo per i programmi i cui semi sono pronti; la maschera e le
   istanze promosse viaggiano nella copia (`ChunkInput.bare`, `uncovered`, i tipi come quinto elemento della tavolozza), la firma del luogo
-  ha `coverStamp` (le cose solide ferme, fatto con i solidi a ogni tick) e quali programmi sono pronti (`coverReadiness`). Gli array
+  ha `coverStamp` (le cose solide ferme e le rune, fatto con i solidi a ogni tick) e quali programmi sono pronti (`coverReadiness`). Gli array
   (`ChunkArrays.cover`) non vanno nel gruppo del luogo: `CoverLayer` (`src/render/cover.ts`) li raccoglie in una InstancedMesh per forma su
   tutta la finestra, senza ombre, col materiale che il vento piega, al più `COVER_CAP` (20 000) istanze (i luoghi più vicini interi, quello
   che passerebbe il tetto diradato, i più lontani nudi: `coverBudget`, `keptOf`), rifatto solo quando la copertura dei luoghi cambia.
