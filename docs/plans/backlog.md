@@ -6855,21 +6855,21 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: con l'interruttore acceso (`mj`) i nodi di regola sono quelli dell'originale in `src/mj/engine.ts`: varianti nell'ordine di `SymmetryHelper` (anche nella `map`), corrispondenza dove l'ingresso combacia, lista pigra (`OriginalList`, il turno da `current.turn`), `one` senza `p`, `all` col mescolamento dall'interno, `prl` con un `NextDouble` per corrispondenza sulla griglia di prima, giri vuoti e `p="0"`, gli stessi passi coi campi, ogni turno un passo; `d6`, `d7`, `d8`, `d9` (5 semi), `d10`, `c10` e Growth/MazeGrowth/RegularSAW/ParallelGrowth voxel per voxel da `it.fails` a `it`, più altri 12 modelli di mxgmn tenuti nei test (16/36); spento invariato (impronte ADR-0142 verdi); ADR-0268, `conformita-mj.ts --mj`, misure, studio, `AGENTS.md`, glossario; kernel 0.10.42 invariato; manca ad A1-3: `d6b`, `d1`-`d5`, il `markov` che fa ripartire i figli (Keys, RegularSAWRestart, OddScale3D con due passi in meno); non provato: prestazioni sotto `mj` sui programmi grandi del gioco (A1-7), il tetto dei 2 milioni del registro, un'unione di tutti i valori contro `*` in `Rule.Same`; sicurezza: nessuna superficie nuova.
 
 ### T528 · A1-3: i rami dell'originale — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 1
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-3. Dipende da T527.
 - Cosa fare e test: come la riga A1-3. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T529 · A1-4: `map`, `path`, `convolution`, `convchain` dell'originale — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 1
+- Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-4. Dipende da T528.
 - Cosa fare e test: come la riga A1-4. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T530 · A1-5: `wfc` e inferenza dell'originale — `da fare`
-- Pipeline: claude · sforzo max · stima 7% · approvato · priorità 1
+- Pipeline: claude · sforzo max · stima 7% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-5; risposta 2 di T500 (la `wfc` come proposto). Dipende da T529.
 - Cosa fare e test: come la riga A1-5. Browser: no.
@@ -6884,28 +6884,28 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Esito: `compileMjx(…, { original: true })` legge il testo di mxgmn così com'è: traduzione dei simboli all'ingresso anche sui file (`src/mj/original.ts`, la stessa di `programFor0_6` dove si incontrano, riscrittore spostato in `src/mj/source.ts`), unioni come l'originale e le nostre ovunque come estensione, `(x)(y)`/`(xy+)` (`Sym` `mirrors`/`turns`), nomi delle simmetrie per strati e gruppo della griglia, errori dell'originale con `strict`; i 36 modelli 3D compilano dal loro testo con `strict` e girano, `c8` è un `it` (`tests/mj-original.test.ts`); `conformita-mj.ts` dal testo dell'originale; ADR-0265, kernel 0.10.41 (il seme corretto). Suite intera: 3 file caduti sul numero del kernel nel seme, ora corretto e verdi rifatti da soli, suite non rilanciata. Non fatto: gli errori dei nodi (`Moore` 3D, `path` senza `color`, `d`) restano ad A1-4; `misure.md` non rigenerato; sicurezza: nessuna superficie nuova.
 
 ### T532 · A1-7: le prestazioni del motore allineato — `da fare`
-- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 1
+- Pipeline: claude · sforzo xhigh · stima 5% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-7. Dipende da T530.
 - Cosa fare e test: come la riga A1-7. Browser: no.
 - Quando è fatto: misure scritte, tetti di tempo nei test delle forme.
 
 ### T533 · A1-8: la migrazione 0.10 → 0.11 (accende la semantica dell'originale) — `da fare`
-- Pipeline: claude · sforzo max · stima 9% · approvato · browser · priorità 1
+- Pipeline: claude · sforzo max · stima 9% · approvato · browser · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-8; risposte 3 (A: convertire gli universi), 4 (A: le `one` con `p` diversi riscritte in nodi separati, vedi la risposta in `domande/T500.md`), 5 (A: il forte dell'autore riscritto coi piani a segno in una **copia accanto**; il file dell'autore non si tocca finché non approva). Dipende da T530, T531, T532.
 - Cosa fare e test: come la riga A1-8. Browser: sì (il forte riscritto e un universo migrato nel lab 3D e nel gioco offline).
 - Quando è fatto: contratto 0.11.0, ADR, `AGENTS.md`, test verdi, visto nel browser.
 
 ### T534 · A1-9: il validatore e i controlli dello Scultore sul motore allineato — `da fare`
-- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 4% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-9. Dipende da T533.
 - Cosa fare e test: come la riga A1-9. Browser: no.
 - Quando è fatto: come la riga.
 
 ### T535 · A1-10: i prompt dello Scultore con la semantica dell'originale — `da fare`
-- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 1
+- Pipeline: claude · sforzo high · stima 5% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-10; risposte 4 («`p` solo nella `prl`») e 8 (A: le forme come ancore, la crescita a regole). Dipende da T533.
 - Cosa fare e test: come la riga A1-10. Browser: no.
@@ -7085,3 +7085,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: no (T514 è stato visto nel browser; il merge tocca solo versione, censimento e rimandi).
 - Quando è fatto: commit su `task/T556`; poi l'orchestratore integra T556, e `integra T514` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T514 fuso in task/T556 (commit 83b57935): kernel 0.10.46 in `KERNEL_VERSION`, `package.json` e `universe/universe.json` (che nel base era ancora a 0.10.44); nessun rimando di T514 ad ADR-0270, ovunque ADR-0272; censimento del glossario rigenerato con lo script; suite intera (324 file, 4257 test) e typecheck verdi coi turni, `mobili-interni` e `documenti` compresi. Browser non richiesto. Sicurezza: nessuna superficie nuova.
+
+### T557 · Terza prova delle strutture modulari: un set per modello estratto dai modelli statici, la massa e la ricucitura in MarkovJunior, le taverne di `mesa` — `da fare`
+- Pipeline: claude · sforzo max · stima 6% · approvato · priorità 1
+- Step: 44
+- Contesto: risposte dell'autore a D/T543 (27/11, in fondo a `docs/pipeline/domande/T543.md`): A a D1, D2, D4, D5; D3 va bene così; D6 A ma **niente serie allo stesso seme**: ogni programma (un set, una massa, la `wfc`, un ricucitore) dà più modelli; D7 A, un set solo all'arrivo su un pianeta va bene ma i set crescono mentre si gioca e su un pianeta ci sono più tipi di edificio. Correzioni alla prova di T543 (`dossier T543`, `lab/strutture-modulari/grande/`, studio `docs/design/strutture-modulari.md` § 10.2 e § 11): (1) i 151 tasselli rappresentano **un solo modello, un solo programma MJ**, non tre tileset; (2) i tasselli coprono **solo la parte edilizia**, niente mobili né props (le transenne sul tetto); circa **50 tasselli per edificio** bastano (i 24 di T522 erano pochi); (3) i tasselli si **estraggono dai modelli statici** che l'IA ha scritto all'inizio usando MJ come un CAD (belli ma poco variabili: le strutture degli universi `neapolis`, `aurora`, `orichalcum`, `sidera`, `mesa`, anche quelle di Claude Cloud, `lab/banco/universi-cloud/`); (4) la **massa fa parte del modello**: il seme cambia anche la disposizione delle palazzine; (5) la **ricucitura si fa in MarkovJunior**, dentro il modello e variabile col seme, non nel kernel; (6) in posti come `mesa` (Far West) niente edifici enormi: taverne, bar, osterie, **al più tre piani**, con una massa e un set diversi.
+- Cosa fare: in `lab/` e senza chiamate ai modelli: (1) un estrattore che taglia in tasselli (il vano di T522/T543) i modelli statici degli universi sul disco, tiene solo la parte edilizia (muri, solai, porte, finestre, scale, tetti), legge le facce dai voxel e riduce a un set di ~50 tasselli per edificio; almeno due set da due modelli diversi, uno di `neapolis` (palazzine) e uno di `mesa` (taverna/saloon ≤ 3 piani); (2) ogni set è **un programma solo** con dentro la massa (la disposizione cambia col seme), la `wfc` sul set e la **ricucitura scritta in MJ** (regole dopo l'onda che aprono porte/scale dove una stanza non si raggiunge), sul motore del gioco nei tetti del mondo, su un lotto e sul lotto di un blocco; (3) per `mesa` una massa diversa (edifici bassi e sparsi, ≤ 3 piani); (4) le misure di T543 (regola 10 con e senza ricucitura MJ, contro la ricucitura del kernel di T543; stanze; tempi; varianza fra semi della massa e dei tasselli) e le foto accanto a T543 e ai modelli statici d'origine; (5) lo studio aggiornato (§ 12) e la catena M ripianificata secondo le risposte (niente serie allo stesso seme, più set per pianeta che crescono a mondo acceso, set e massa per ambientazione), con le domande che restano.
+- Test: nessuno nel gioco (prova in `lab/`); `npm test` e `npm run typecheck` verdi.
+- Browser: no (foto dal lab).
+- Quando è fatto: due set estratti (neapolis, mesa) come programmi completi con massa e ricucitura MJ, misurati e fotografati; studio e catena M aggiornati; domande in `docs/pipeline/domande/T557.md`. Sicurezza: nessuna superficie nuova.

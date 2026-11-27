@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 719 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 722 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,13 +34,13 @@ Aggiornato il 27/11/2026, epoca 719 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Chieste all'autore alle 13:10 CET (epoca 717).
 - **D/T524** (7 domande col consiglio, catena P1-P7 ~17 %; graphify da installare solo col permesso): chieste alle 13:10 CET.
 - **D/T516** (Neon esce dalla prova? 3 opzioni, consiglio 1: tetto 2, moltiplicatore 1,25): T516 integrato (`43644a93`, solo lab/ e docs) il 27/11 05:48Z. Chieste alle 13:10 CET.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
 
+- **27/11 14:0x (epoca 722, autore):** catena **A1** (T528→T535) a **priorità 0**: il motore allineato serve prima del 29/11 per rigenerare i modelli coi crediti API di Claude (T542, scadono l'1/12). D/T543 chiusa (A quasi a tutto, con correzioni: un set ~50 tasselli = un modello, solo edilizia, estratto dai modelli statici; massa e ricucitura in MJ nel modello; niente serie allo stesso seme; mesa ≤ 3 piani) → **T557** terza prova (claude max 6 %, p1), poi catena M ripianificata.
 - **27/11 02:3x (epoca 706, autore):** T543 a priorità 0, prima di T527: l'autore vuole il risultato per la pausa pranzo (13:00-14:00 CET). Autonomia fino alle 13:00 e 14:00-18:00 CET: tutto pianificato, lanciare e integrare.
 - **26/11 (epoca 674, autore): regime incrementato fino al reset di Claude (3/12 16:00Z):** consumare aggressivamente la settimana, slot pieni, sforzi alti; richieste del 26/11 pianificate T508-T539 (`docs/userchats/to-do-2026-11-26.md`), tutte approvate tranne T536. Argon non ha più un contatore suo (`agy /usage`) → T508.
 - **23/11 00:4x (epoca 658, autore):** **Neon è in prova** (ADR-0237): primo task vero **T479** integrato al primo colpo (epoca 660: 43 min, −9 % sett., −31 % 5h, stima 4 %: costa più del doppio della stima); seconda misura **T482** integrata al primo colpo (54 min, −6 % sett., stima 12 %): due task senza rifacimenti, l’uscita dalla prova la decide l’autore; intanto al prossimo task adatto assegnalo a `neon` con `assegna` e misuralo (prima, dopo, sforzo); serve più di un task integrato senza rifacimenti per uscire dalla prova (`docs/guide/nuovo-modello.md` B.6), poi decide l’autore. Rifare un task già chiuso da Opus non basta (T465).
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 719 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **722 (claude):** D/T543 chiusa → T557 (terza prova, p1); catena A1 T528-T535 a p0 (scadenza 29/11). In corso T528.
 - **719 (claude):** T556 integrato (`362e3cac`, kernel 0.10.46, ADR-0272): T514 (mobili degli interni usabili) chiuso via T556. In corso T528.
-- **718 (claude):** T514 fatto (mobili degli interni usabili, visto nel browser) ma `integra` in conflitto su versione e censimento → **T556** (merge, claude medium, in corso; ADR-0272, kernel 0.10.46). `node_modules` del base trovati vuoti alle 13:10 CET (causa ignota, forse una junction tolta male): reinstallati con `npm ci`.
