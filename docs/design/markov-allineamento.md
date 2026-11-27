@@ -118,7 +118,7 @@ stampa e un test (`d*`: [`markov.md`](markov.md) e `tests/mj-markov-originale.te
 | `symmetry` della radice | in 3D il cubo intero (48), in 2D il quadrato (8); i nomi: in 3D `() (x) (z) (xy) (xyz+) (xyz)`, in 2D `() (x) (y) (x)(y) (xy+) (xy)` | il cubo intero anche su una griglia piana; i nomi `() (x) (y) (z) (xy) (xyz+) (xyz)` per ogni griglia; dal T531 anche `(x)(y)` e `(xy+)`, e leggendo l'originale i suoi nomi per strati e il gruppo della griglia | **diverso**: l'insieme delle varianti che possono combaciare è lo stesso, l'ordine no. **Allineato** dal T527 con l'interruttore acceso: il quadrato su una griglia piana, il cubo sulle altre (ADR-0268) |
 | l'ordine delle varianti di una regola | `SquareSymmetries`/`CubeSymmetries`: `e, r, a, ra, a², ra², …` (a e b due rotazioni, r lo specchio), senza i doppi | permutazioni degli assi per specchi (`symmetries` in `engine.ts`) | **diverso** (decide la `one`, la `all`, la `prl` col caso dell'originale). **Allineato** dal T527 con l'interruttore acceso (`originalTurns`), anche per le regole di una `map` |
 | le unioni | `<union symbol values>` trovate solo scendendo dalla griglia (radice, `map`, `wfc`) per `markov` e `sequence`; `*` ogni valore | ovunque, per griglia (T335) | **diverso**: un'unione dentro un nodo di regole, l'originale non la trova e non carica il programma (`c8`). **Allineato** dal T531 leggendo l'originale (`original`, con `strict` l'errore); le nostre restano ovunque come estensione |
-| `d="2"`, `d="3"` sui nodi | ignorato: il nodo gira | un nodo `d="2"` si salta | **diverso** (`c1`; StrangeDungeon di mxgmn ne ha due, e da noi si distingue anche per le lettere, § 4) |
+| `d="2"`, `d="3"` sui nodi | ignorato: il nodo gira | un nodo `d="2"` si salta | **diverso** (`c1`; StrangeDungeon di mxgmn ne ha due, e da noi si distingue anche per le lettere, § 4). **Allineato** dal T529 con l'interruttore acceso: il compilatore legge i nodi e le regole con `d` (ADR-0274) |
 | `folder` | le regole da file della griglia in `resources/rules/<folder>/` | `models/<folder>-<nome>.txt` | uguale (testo invece di immagini, regola 11) |
 | `transparent` | solo per disegnare | ignorato | uguale |
 | i passi della corsa | `models.xml → steps` (50 000 se non lo dice, ≤ 0 senza limite); **ogni** chiamata del ramo di turno è un passo, anche quella in cui un ramo finisce senza fare niente, e il passo della `map` e ogni osservazione della `wfc` | `run(…, maxSteps)`; un passo è un passo della radice che cambia qualcosa | **diverso**: i passi dei `d*` di T498 e dei modelli (un modello di sola `wfc`: 75-540 passi nell'originale, 1-4 da noi). Dal T527, con l'interruttore acceso, ogni turno è un passo, anche l'ultimo della radice; dal T528 anche i turni dei rami annidati e il passo vuoto di un ramo che finisce (ADR-0273) |
@@ -173,17 +173,17 @@ Le formule sono quelle dell'originale da T334 (`src/mj/infer.ts`): il potenziale
 |---|---|---|---|
 | `map scale` | tre interi o frazioni, la griglia nuova `M·N/D` | lo stesso | uguale |
 | `map` e la griglia nuova | vuota; le regole leggono la vecchia girando attorno ai bordi e scrivono a `x·N/D` | lo stesso; in più `clear="False"` tiene la vecchia, ogni cella un blocco di sé | uguale; `clear` nostro |
-| `path`: la partenza | il `from` più vicino all'arrivo (`longest`: il più lontano), con un rumore di 0,1 solo fra i pari | uno a caso fra quelli raggiunti (`longest`: uno a caso fra i più lontani) | **diverso** (`c3`) |
-| `path`: le direzioni | candidate in ordine −x, +x, −y, +y, −z, +z, una a caso fra quelle che scendono; `inertia` tiene la direzione se scende | +x, −x, +y, −y, +z, −z | diverso nel caso |
-| `path`: `edges`, `vertices` | anche per spigoli e vertici (con `inertia` il coseno più vicino, col rumore) | solo per facce, con un avviso | **manca** (`c11`; ModernHouse, CarmaTower) |
-| `path`: `color` | se manca, il primo simbolo di `from` | obbligatorio | **diverso** (`c4`) |
-| `path`: quando riesce | ogni volta che c'è una via, anche se non disegna niente (un sentiero già fatto): in una sequenza può non finire mai | solo se cambia qualcosa; `steps` (nostro) | diverso (`c4` non finisce nell'originale) |
-| `convolution`: i passi | `steps` quanti ne dice (senza: finché cambia) | al più 30, e 200 senza `steps` | **diverso** (`c5`) |
-| `convolution`: i vicinati | in 2D `VonNeumann` e `Moore`, in 3D `VonNeumann` e `NoCorners`; `Moore` in 3D è un errore | `moore`, `vonneumann`, `nocorners` sempre (in 3D `Moore` sono 26 vicini) | **diverso** (`c6`) |
-| `convolution` su una griglia piana e `periodic` | i vicini del piano | i 26 del cubo, i tre strati sullo stesso: ogni vicino contato tre volte | **diverso** (`c9`, un difetto nostro) |
-| `convolution` e la lista dei cambi | ciò che scrive non va nella lista: un nodo di regole che aveva già cercato non lo vede | lo vede | **diverso** (`c7`; sui modelli di mxgmn misurati non conta, § 2.3) |
-| `convolution`: `p` | `Next() < p · (2³¹−1)`, tirato solo se `p` ≠ 1 | `next() < p`, solo se `p` < 1 | diverso nel caso |
-| `convchain` | solo su una griglia piana (in 3D è un errore); il campione un'immagine; ciò che scrive non va nella lista dei cambi | lo stesso algoritmo e gli stessi tiri; su più strati, strato per strato (ADR-0240); il campione testo o `<sample>` | uguale in 2D salvo la lista; nostro in 3D |
+| `path`: la partenza | il `from` più vicino all'arrivo (`longest`: il più lontano), con un rumore di 0,1 solo fra i pari | uno a caso fra quelli raggiunti (`longest`: uno a caso fra i più lontani) | **diverso** (`c3`). **Allineato** dal T529 con l'interruttore acceso: il generatore suo da un `Next()` della corsa (ADR-0274) |
+| `path`: le direzioni | candidate in ordine −x, +x, −y, +y, −z, +z, una a caso fra quelle che scendono; `inertia` tiene la direzione se scende | +x, −x, +y, −y, +z, −z | diverso nel caso. **Allineato** dal T529 |
+| `path`: `edges`, `vertices` | anche per spigoli e vertici (con `inertia` il coseno più vicino, col rumore) | solo per facce, con un avviso | **manca** (`c11`; ModernHouse, CarmaTower). **Allineato** dal T529 con l'interruttore acceso (senza, l'avviso di sempre) |
+| `path`: `color` | se manca, il primo simbolo di `from` | obbligatorio | **diverso** (`c4`). **Allineato** dal T529 con l'interruttore acceso |
+| `path`: quando riesce | ogni volta che c'è una via, anche se non disegna niente (un sentiero già fatto): in una sequenza può non finire mai | solo se cambia qualcosa; `steps` (nostro) | diverso (`c4` non finisce nell'originale). **Allineato** dal T529 con l'interruttore acceso; ogni cella del sentiero nella lista dei cambi, anche se lo era già; `steps` resta nostro |
+| `convolution`: i passi | `steps` quanti ne dice (senza: finché cambia) | al più 30, e 200 senza `steps` | **diverso** (`c5`). **Allineato** dal T529 con l'interruttore acceso: ogni passo contato, anche quello che non cambia niente |
+| `convolution`: i vicinati | in 2D `VonNeumann` e `Moore`, in 3D `VonNeumann` e `NoCorners`; `Moore` in 3D è un errore | `moore`, `vonneumann`, `nocorners` sempre (in 3D `Moore` sono 26 vicini) | **diverso** (`c6`). **Allineato** dal T529 con l'interruttore acceso: i vicini dello strato su una griglia piana; Moore in 3D e NoCorners in 2D errori con `strict`, senza i nostri con un avviso |
+| `convolution` su una griglia piana e `periodic` | i vicini del piano | i 26 del cubo, i tre strati sullo stesso: ogni vicino contato tre volte | **diverso** (`c9`, un difetto nostro). **Allineato** dal T529 con l'interruttore acceso |
+| `convolution` e la lista dei cambi | ciò che scrive non va nella lista: un nodo di regole che aveva già cercato non lo vede | lo vede | **diverso** (`c7`; sui modelli di mxgmn misurati non conta, § 2.3). **Allineato** dal T529 con l'interruttore acceso: il registro lo tiene, i suoi tratti segnati (`Grid3.unseen`) e saltati dalla lista |
+| `convolution`: `p` | `Next() < p · (2³¹−1)`, tirato solo se `p` ≠ 1 | `next() < p`, solo se `p` < 1 | diverso nel caso. **Allineato** dal T529; e i valori di `values` contati quante volte sono scritti |
+| `convchain` | solo su una griglia piana (in 3D è un errore); il campione un'immagine; ciò che scrive non va nella lista dei cambi | lo stesso algoritmo e gli stessi tiri; su più strati, strato per strato (ADR-0240); il campione testo o `<sample>` | uguale in 2D salvo la lista; nostro in 3D. **Allineato** dal T529 con l'interruttore acceso: la lista, e il primo passo senza celle `on` contato coi passi vuoti dopo; su più strati con `strict` l'errore dell'originale, senza i nostri con un avviso |
 
 ### 3.6 `wfc`
 
@@ -410,6 +410,20 @@ suoi test di conformità girati da `it.fails` a `it`. Le stime sono nella scala 
 | A1-13 | **L'esportazione**: `src/mj/export.ts` (la tabella del § 3.8), il testo, le risorse e la riga di `models.xml`; dove si offre (laboratorio, editor, sito) | claude · high · 6% | A1-8 | ogni programma esportabile del seme e dei test: l'esportato nel riferimento = il nostro motore |
 | A1-14 | **La varianza, dopo**: la stessa misura di questo task sul motore allineato e, con l'autore, una prova pagata degli Scultori coi prompt nuovi | claude · high · 3% (più la prova pagata) | A1-11, A1-12 | — |
 
+**A1-4 è fatto** (T529, [ADR-0274](../adr/0274-map-path-convolution-convchain-dell-originale.md)): con l'interruttore acceso `d` si ignora
+(il compilatore legge i nodi e le regole con `d="2"`); `path` è `PathNode` (`PathRunner.goOriginal`: le distanze che toccano le partenze senza
+proseguire, un generatore suo da un `Next()` della corsa, il `from` più vicino col rumore, le direzioni dell'originale, `edges` e `vertices`,
+il colore dal primo simbolo di `from`, ogni cella nella lista dei cambi, riesce ogni volta che una partenza è raggiunta); la `convolution` è
+`ConvolutionNode` (`ConvRunner.goOriginal`: i passi che dice, ogni passo contato, i vicinati della sua griglia, la moneta `Next()`, i valori
+contati quante volte sono scritti); ciò che `convolution` e `convchain` scrivono resta nel registro ma fuori dalla lista dei cambi
+(`Grid3.unseen`); `convchain` senza celle `on` conta il primo passo e poi spazza a vuoto; i vicinati che l'originale non carica e `convchain` su
+più strati sono errori con `strict` e i nostri con un avviso senza. La `map` era già dell'originale. Tutti gli 11 `c*` sono l'originale
+(`it`), e StrangeDungeon e CarmaTower: **21 modelli su 36** voxel per voxel; i 14 con la `wfc`, SeaVilla e ModernHouse compresi, hanno già
+la griglia dell'originale, coi passi di meno (A1-5); SubmergedKnots no (si ferma ai 50 000 passi). `tests/mj-nodi-originale.test.ts` prova
+contro il riferimento `path` per facce, spigoli e vertici in 2D e in 3D, la `convolution` in 2D e in 3D con le monete e i valori ripetuti,
+ciò che `convolution` e `convchain` scrivono fuori dalla lista, ChainDungeon e ChainDungeonMaze, `d` sui nodi e sulle regole, il borgo coi
+sentieri voxel per voxel come il C#. Resta ad A1-5 la `wfc` a passi (e così SubmergedKnots).
+
 **A1-3 è fatto** (T528, [ADR-0273](../adr/0273-i-rami-dell-originale.md)): con l'interruttore acceso sequenze e `markov` sono il `Branch`
 dell'originale (`OriginalBranch` in `src/mj/engine.ts`): il ramo al lavoro ha il turno (`current.branch`, `ip.current`) e la corsa chiede lui,
 non la radice; un ramo che non trova niente rende il turno al padre con un passo vuoto e ricomincia coi figli, che ripartono solo allora
@@ -465,6 +479,10 @@ modelli di mxgmn come esempi; (8) le nostre estensioni che l'originale non ha (l
   arriva. Le prestazioni con l'interruttore acceso sui programmi del gioco sono di A1-7 (sui modelli di mxgmn: come il motore di sempre,
   CarmaTower 3-6 s contro 3,2-3,7 s ma con più passi). Un'unione che vale tutti i valori della griglia e un `*` nella stessa regola sono per
   `Rule.Same` la stessa cella, per noi due (nessun modello misurato li ha).
+- Dal T529: una partenza di `path` che è anche un arrivo fa scendere la penna fuori dalle distanze, e l'originale si ferma con un'eccezione
+  (o, per spigoli con `inertia`, va dove capita): da noi un `Mj3Error` col motivo, senza confronto col C#; una somma della `convolution` oltre
+  27 (i valori ripetuti) nell'originale è un'eccezione, da noi non scatta. Le prestazioni di `path` e della `convolution` con l'interruttore
+  acceso sui programmi grandi del gioco sono di A1-7.
 - Dal T528: che un'onda senza soluzione tenga il turno e, chiesta di nuovo sulla griglia cambiata, riprovi (`WFCNode.Go`) segue la lettura
   del sorgente e del riferimento, ma non è stato fatto girare né nel C# né nel riferimento (che non legge i nostri tileset): nessun modello
   del repository misurato vi passa.

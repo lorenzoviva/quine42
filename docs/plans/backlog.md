@@ -6861,12 +6861,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Cosa fare e test: come la riga A1-3. Browser: no.
 - Quando è fatto: come la riga.
 
-### T529 · A1-4: `map`, `path`, `convolution`, `convchain` dell'originale — `da fare`
+### T529 · A1-4: `map`, `path`, `convolution`, `convchain` dell'originale — `fatto` (`f3b2041e`)
 - Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 0
 - Step: 44
 - Contesto: § 8 riga A1-4. Dipende da T528.
 - Cosa fare e test: come la riga A1-4. Browser: no.
 - Quando è fatto: come la riga.
+- Esito: con l'interruttore `mj`, `path` (dal più vicino col suo generatore, direzioni, `edges`/`vertices`, `color` da `from`, riesce anche senza disegnare), `convolution` (passi senza tetto, vicinati per dimensione, moneta `Next()`, valori ripetuti), `convchain` (fuori dalla lista dei cambi, il primo passo senza celle `on` contato) e `d` ignorato sono quelli dell'originale; i vicinati che l'originale non carica e `convchain` su più strati sono errori con `strict`, estensioni con un avviso senza; `c1`–`c11` tutti `it`; 21 modelli su 36 voxel per voxel (in più StrangeDungeon e CarmaTower) e la griglia dell'originale, passi a parte, di altri 14 con la `wfc` (SeaVilla e ModernHouse compresi; SubmergedKnots no); `tests/mj-nodi-originale.test.ts`, ADR-0274, studio, misure, `AGENTS.md`, `architettura-dettagli`, glossario; spento invariato (ADR-0142), kernel invariato; suite intera e typecheck verdi, ma la suite col vitest 4 del progetto perché qui `npm test` prende un vitest 2.1.4 che non parte; manca: la `wfc` a passi (A1-5), `markov-originale.ts` ancora rotto, censimento del glossario non rigenerato; non provato: la partenza di `path` che è anche un arrivo e le somme oltre 27 contro il C#, le prestazioni sotto `mj` sui programmi del gioco (A1-7); sicurezza: nessuna superficie nuova.
 
 ### T530 · A1-5: `wfc` e inferenza dell'originale — `da fare`
 - Pipeline: claude · sforzo max · stima 7% · approvato · priorità 0

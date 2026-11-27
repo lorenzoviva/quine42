@@ -190,7 +190,11 @@ export type Node3 =
    */
   | { type: 'sequence' | 'markov'; children: Node3[]; gated?: boolean; grid?: boolean }
   | { type: 'conv'; rules: ConvRule[]; neighborhood?: 'moore' | 'vonneumann' | 'nocorners'; steps?: number; periodic?: boolean }
-  | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }
+  /**
+   * `edges`, `vertices`: MarkovJunior's path also by the edges (and, in 3D, the corners) of a cell, read only under the original's
+   * semantics (T529); ours goes by faces.
+   */
+  | { type: 'path'; from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean; edges?: boolean; vertices?: boolean }
   /** Each factor is `scale / divide` (T335: 1/3, 5/3), fractions only with `clear`. */
   | { type: 'map'; scale: Vec3; divide?: Vec3; rules?: Rule3[]; symmetry?: Sym; clear?: boolean }
   | WfcNode
@@ -291,6 +295,12 @@ export interface Grid3 {
   log: number[];
   /** Bumped when the log is cleared: runners must rescan. */
   epoch: number;
+  /**
+   * Under the original's semantics (T529): the stretches of `log` the original's rule nodes do not look at, `[from, to)` in pairs, for the
+   * log of `epoch`: what a convolution and a convchain write, which MarkovJunior does not put in the list of changes (`ip.changes`).
+   * The log holds them all the same (the trace reads it).
+   */
+  unseen?: { epoch: number; ranges: number[] };
 }
 
 // ---------------------------------------------------------------- where the codes are (D33, T258)
@@ -423,6 +433,20 @@ function writeLogged(g: Grid3, idx: number, v: number): void {
     g.log.length = 0;
     g.epoch++;
   }
+}
+
+/**
+ * What was written into `g`'s log from `from` (when the log was at `epoch`) is out of the list of changes of the original's rule nodes
+ * (T529): MarkovJunior's ConvolutionNode and ConvChainNode write the grid without `ip.AddChange`, so a rule node that has already looked
+ * does not see it, until something else changes there or it scans the grid again.
+ */
+function unseenFrom(g: Grid3, from: number, epoch: number): void {
+  const start = g.epoch === epoch ? from : 0;
+  if (g.log.length <= start) return;
+  if (g.unseen?.epoch !== g.epoch) g.unseen = { epoch: g.epoch, ranges: [] };
+  const r = g.unseen.ranges;
+  if (r.length && r[r.length - 1] === start) r[r.length - 1] = g.log.length;
+  else r.push(start, g.log.length);
 }
 
 /**
@@ -1082,7 +1106,16 @@ class RuleRunner extends Runner {
     const one = this.kind === 'one';
     const P = this.patterns.length;
     const probes = this.patterns.map((_, pi) => this.probe(pi, g));
+    // What a convolution or a convchain wrote is not in the original's list of changes (T529): those stretches of the log are skipped.
+    const unseen = g.unseen !== undefined && g.unseen.epoch === g.epoch ? g.unseen.ranges : undefined;
+    let u = 0;
+    if (unseen !== undefined) while (u < unseen.length && unseen[u + 1] <= from) u += 2;
     for (let l = from; l < log.length; l++) {
+      if (unseen !== undefined && u < unseen.length && l >= unseen[u]) {
+        l = unseen[u + 1] - 1;
+        u += 2;
+        continue;
+      }
       const c = log[l];
       if (stamps[c] === mark) continue;
       stamps[c] = mark;
@@ -2067,15 +2100,26 @@ const NO_CORNERS: Vec3[] = MOORE.filter(([x, y, z]) => Math.abs(x) + Math.abs(y)
 /** Unlimited steps (MarkovJunior: until nothing changes) still stop here, so a flickering automaton ends. */
 const CONV_UNLIMITED = 200;
 
+/** The neighbours of a cell on a flat grid: those of the same layer (MarkovJunior's 2D kernels, T529). */
+const inPlane = (offsets: Vec3[]): Vec3[] => offsets.filter((o) => o[2] === 0);
+
 class ConvRunner extends Runner {
-  private rules: Array<{ i: number; input: number; output: number; neighbors: number; sums: Uint8Array; p: number }>;
+  private rules: Array<{ i: number; input: number; output: number; neighbors: number; sums: Uint8Array; p: number; weights: Int32Array | null }>;
   private offsets: Vec3[];
   private sets: Uint8Array[];
   private periodic: boolean;
+  /**
+   * Under the original's semantics (T529): the steps it says (MarkovJunior's `steps`, none unlimited: until nothing changes) and its
+   * neighbours on a flat grid, those of the layer.
+   */
+  private originalSteps?: number;
+  private flatOffsets: Vec3[];
   constructor(node: { rules: ConvRule[]; neighborhood?: string; steps?: number; periodic?: boolean }, alpha: Alphabet) {
     super(node.steps === Infinity ? CONV_UNLIMITED : Math.max(1, Math.min(30, node.steps ?? 1)));
     if (!Array.isArray(node.rules) || !node.rules.length) throw new Mj3Error('nodo conv senza regole');
     this.offsets = node.neighborhood === 'vonneumann' ? VON_NEUMANN : node.neighborhood === 'nocorners' ? NO_CORNERS : MOORE;
+    this.flatOffsets = inPlane(this.offsets);
+    this.originalSteps = typeof node.steps === 'number' && Number.isInteger(node.steps) && node.steps > 0 ? node.steps : undefined;
     this.periodic = node.periodic === true;
     this.sets = alpha.sets;
     this.fired = node.rules.map(() => 0);
@@ -2090,10 +2134,19 @@ class ConvRunner extends Runner {
         const max = Number.isFinite(r.max) ? r.max! : 26;
         for (let n = Math.max(0, min); n <= Math.min(26, max); n++) sums[n] = 1;
       }
-      return { i, input: alpha.mask(r.in), output: alpha.index(r.out), neighbors: alpha.mask(r.neighbors), sums, p: typeof r.p === 'number' ? r.p : 1 };
+      const input = alpha.mask(r.in);
+      const output = alpha.index(r.out);
+      const neighbors = alpha.mask(r.neighbors);
+      // Under the original's semantics (T529) the sum counts each value as many times as it is listed (a union: each of its values); a rule
+      // every count of which fires (one without `values` and `sum`) sums nothing. Read once the codes are made, in the order ours makes them.
+      let weights: Int32Array | null = new Int32Array(MAX_CODES);
+      for (const ch of r.neighbors) for (const v of alpha.unions.get(ch) ?? ch) if (v !== '[' && v !== ']') weights[alpha.index(v)]++;
+      if (weights.every((w) => w <= 1) && sums.every((on) => on === 1)) weights = null;
+      return { i, input, output, neighbors, sums, p: typeof r.p === 'number' ? r.p : 1, weights };
     });
   }
   go(g: Grid3, rng: RunRandom): boolean {
+    if (runSemantics() === 'mj') return this.goOriginal(g, rng);
     if (this.count >= this.limit!) return false;
     const changes: number[] = [];
     const { X, Y, Z, cells } = g;
@@ -2146,6 +2199,71 @@ class ConvRunner extends Runner {
     this.total++;
     return true;
   }
+
+  /**
+   * MarkovJunior's ConvolutionNode.Go (T529, A1-4): the steps it says, or until nothing changes; every step counted, also one that changes
+   * nothing (which is false); the neighbours of the layer on a flat grid (its 2D kernels: VonNeumann 4, Moore 8), of the cube on the others
+   * (VonNeumann 6, NoCorners 18; Moore 26 and NoCorners on a flat grid, which the original does not load, are ours), wrapping round each
+   * axis once if `periodic`; for each cell in order, the first rule whose input is the cell, whose output is not, whose chance
+   * (`Next() < p·(2³¹ − 1)`, drawn only if `p` is not 1) and whose sum of the listed values agree. What it writes is not in the list of
+   * changes (`unseenFrom`).
+   */
+  private goOriginal(g: Grid3, rng: RunRandom): boolean {
+    if (this.originalSteps !== undefined && this.count >= this.originalSteps) return false;
+    this.count++;
+    const changes: number[] = [];
+    const { X, Y, Z, cells } = g;
+    const XY = X * Y;
+    const wrap = (v: number, n: number) => (v < 0 ? v + n : v >= n ? v - n : v);
+    const census = censusOf(g);
+    const inputs = [...new Set(this.rules.flatMap((r) => [...codesOf(this.sets[r.input])]))].filter((c) => census.rows[c] !== undefined && census.total[c] > 0);
+    const rowsOf = inputs.map((c) => census.rows[c]!);
+    const offs = Z === 1 ? this.flatOffsets : this.offsets;
+    const ox = Int32Array.from(offs, (o) => o[0]), oy = Int32Array.from(offs, (o) => o[1]), oz = Int32Array.from(offs, (o) => o[2]);
+    const nOff = offs.length;
+    for (let z = 0; z < Z; z++)
+      rows: for (let y = 0; y < Y; y++) {
+        const r = z * Y + y;
+        let any = false;
+        for (let t = 0; t < rowsOf.length; t++)
+          if (rowsOf[t][r] > 0) {
+            any = true;
+            break;
+          }
+        if (!any) continue rows;
+        for (let x = 0; x < X; x++) {
+          const idx = x + y * X + z * XY;
+          const c = cells[idx];
+          for (const rule of this.rules) {
+            if (!this.sets[rule.input][c] || rule.output === c) continue;
+            if (rule.p !== 1 && !(rng.seed() < rule.p * 2147483647)) continue;
+            const w = rule.weights;
+            if (w !== null) {
+              let n = 0;
+              for (let t = 0; t < nOff; t++) {
+                let nx = x + ox[t], ny = y + oy[t], nz = z + oz[t];
+                if (this.periodic) {
+                  nx = wrap(nx, X);
+                  ny = wrap(ny, Y);
+                  nz = wrap(nz, Z);
+                } else if (nx < 0 || ny < 0 || nz < 0 || nx >= X || ny >= Y || nz >= Z) continue;
+                n += w[cells[nx + ny * X + nz * XY]];
+              }
+              if (!(n < rule.sums.length && rule.sums[n])) continue;
+            }
+            changes.push(idx, rule.output);
+            this.fired[rule.i]++;
+            break;
+          }
+        }
+      }
+    if (!changes.length) return false;
+    const from = g.log.length, epoch = g.epoch;
+    for (let i = 0; i < changes.length; i += 2) write(g, changes[i], changes[i + 1]);
+    unseenFrom(g, from, epoch);
+    this.total++;
+    return true;
+  }
 }
 
 /**
@@ -2161,7 +2279,13 @@ class PathRunner extends Runner {
   private sets: Uint8Array[];
   private inertia: boolean;
   private longest: boolean;
-  constructor(node: { from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean }, alpha: Alphabet) {
+  /** MarkovJunior's `edges` and `vertices` (T529): read only under the original's semantics. */
+  private edges: boolean;
+  private vertices: boolean;
+  /** Under the original's semantics, the distances of the last step (MarkovJunior's `generations`) and the frontier, kept for the next. */
+  private generations = new Int32Array(0);
+  private frontier = new Int32Array(0);
+  constructor(node: { from: string; to: string; on: string; color: string; steps?: number; inertia?: boolean; longest?: boolean; edges?: boolean; vertices?: boolean }, alpha: Alphabet) {
     super(node.steps ?? 1);
     for (const k of ['from', 'to', 'on', 'color'] as const) if (typeof node[k] !== 'string' || !node[k]) throw new Mj3Error(`path: manca "${k}"`);
     if (node.color.length !== 1) throw new Mj3Error('path: "color" è un solo codice');
@@ -2172,6 +2296,8 @@ class PathRunner extends Runner {
     this.sets = alpha.sets;
     this.inertia = node.inertia === true;
     this.longest = node.longest === true;
+    this.edges = node.edges === true;
+    this.vertices = node.vertices === true;
   }
   /**
    * Without an array per cell (T315): the same walk as before, the neighbours in the order of VON_NEUMANN and the same draws, so the
@@ -2179,6 +2305,7 @@ class PathRunner extends Runner {
    */
   go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.count >= this.limit) return false;
+    if (runSemantics() === 'mj') return this.goOriginal(g, rng);
     const { X, Y, Z, cells } = g;
     const N = cells.length;
     const XY = X * Y;
@@ -2291,6 +2418,202 @@ class PathRunner extends Runner {
     this.count++;
     this.total++;
     return true;
+  }
+
+  /**
+   * MarkovJunior's PathNode.Go (T529, A1-4): the distances grow from every `to` cell over `on` cells, reaching `from` cells too without
+   * going on from them, by faces, and with `edges` and `vertices` by edges and (in 3D) corners; with a `from` cell reached, a generator
+   * of its own (`new Random(ip.random.Next())`) draws a noise of 0.1 for every reached start, in the grid's order, and the pen starts from
+   * the nearest (`longest`: the farthest), then walks down one distance at a time to a `to` cell, every cell on its way written `color`
+   * and put in the list of changes, also one that already was. It succeeds whenever a start is reached, even if it draws nothing.
+   */
+  private goOriginal(g: Grid3, rng: RunRandom): boolean {
+    const { X, Y, Z, cells } = g;
+    const N = cells.length;
+    const XY = X * Y;
+    const start = this.sets[this.from];
+    const finish = this.sets[this.to];
+    const on = this.sets[this.on];
+    if (this.generations.length !== N) {
+      this.generations = new Int32Array(N);
+      this.frontier = new Int32Array(N);
+    }
+    const gen = this.generations;
+    gen.fill(-1);
+    const frontier = this.frontier;
+    let tail = 0;
+    const starts: number[] = [];
+    for (let i = 0; i < N; i++) {
+      const c = cells[i];
+      if (start[c] === 1) starts.push(i);
+      if (finish[c] === 1) {
+        gen[i] = 0;
+        frontier[tail++] = i;
+      }
+    }
+    if (!starts.length || !tail) {
+      if (!this.total) this.why ??= !tail ? 'in quel momento non c\'era nessuna cella di arrivo ("to")' : 'in quel momento non c\'era nessuna cella di partenza ("from")';
+      return false;
+    }
+    const dirs = new Int32Array(78);
+    for (let head = 0; head < tail; head++) {
+      const c = frontier[head];
+      const t = gen[c] + 1;
+      const k = this.directions(c, X, Y, Z, dirs);
+      for (let d = 0; d < k; d += 3) {
+        const n = c + dirs[d] + dirs[d + 1] * X + dirs[d + 2] * XY;
+        if (gen[n] !== -1) continue;
+        const v = cells[n];
+        if (on[v] === 1) {
+          gen[n] = t;
+          frontier[tail++] = n;
+        } else if (start[v] === 1) gen[n] = t;
+      }
+    }
+    let reached = false;
+    for (const i of starts) if (gen[i] > 0) reached = true;
+    if (!reached) {
+      if (!this.total) this.why ??= 'le celle di partenza ("from") c\'erano, ma nessuna era collegata all\'arrivo da celle "on"';
+      return false;
+    }
+    const local = rng.spawn(rng.seed());
+    let min = N, max = -2, argmin = -1, argmax = -1;
+    for (const i of starts) {
+      const d = gen[i];
+      if (d === -1) continue;
+      const noise = 0.1 * local.next();
+      if (d + noise < min) {
+        min = d + noise;
+        argmin = i;
+      }
+      if (d + noise > max) {
+        max = d + noise;
+        argmax = i;
+      }
+    }
+    let pen = this.longest ? argmax : argmin;
+    let dir = this.step(pen, 0, 0, 0, g, local, dirs);
+    pen += dir[0] + dir[1] * X + dir[2] * XY;
+    while (gen[pen] !== 0) {
+      writeLogged(g, pen, this.color);
+      dir = this.step(pen, dir[0], dir[1], dir[2], g, local, dirs);
+      pen += dir[0] + dir[1] * X + dir[2] * XY;
+    }
+    this.count++;
+    this.total++;
+    return true;
+  }
+
+  /**
+   * PathNode.Directions: the neighbours of cell `c` inside the grid, (dx, dy, dz) in a row into `out`, in the original's order: the faces
+   * (−x, +x, −y, +y, then −z, +z in 3D), with `edges` the edges, with `vertices` the corners (in 3D only); how many numbers.
+   */
+  private directions(c: number, X: number, Y: number, Z: number, out: Int32Array): number {
+    const x = c % X;
+    const y = ((c / X) | 0) % Y;
+    const z = (c / (X * Y)) | 0;
+    let k = 0;
+    const put = (dx: number, dy: number, dz: number) => {
+      out[k++] = dx;
+      out[k++] = dy;
+      out[k++] = dz;
+    };
+    const xl = x > 0, xh = x < X - 1, yl = y > 0, yh = y < Y - 1, zl = z > 0, zh = z < Z - 1;
+    if (xl) put(-1, 0, 0);
+    if (xh) put(1, 0, 0);
+    if (yl) put(0, -1, 0);
+    if (yh) put(0, 1, 0);
+    if (Z === 1) {
+      if (this.edges) {
+        if (xl && yl) put(-1, -1, 0);
+        if (xl && yh) put(-1, 1, 0);
+        if (xh && yl) put(1, -1, 0);
+        if (xh && yh) put(1, 1, 0);
+      }
+      return k;
+    }
+    if (zl) put(0, 0, -1);
+    if (zh) put(0, 0, 1);
+    if (this.edges) {
+      if (xl && yl) put(-1, -1, 0);
+      if (xl && yh) put(-1, 1, 0);
+      if (xh && yl) put(1, -1, 0);
+      if (xh && yh) put(1, 1, 0);
+      if (xl && zl) put(-1, 0, -1);
+      if (xl && zh) put(-1, 0, 1);
+      if (xh && zl) put(1, 0, -1);
+      if (xh && zh) put(1, 0, 1);
+      if (yl && zl) put(0, -1, -1);
+      if (yl && zh) put(0, -1, 1);
+      if (yh && zl) put(0, 1, -1);
+      if (yh && zh) put(0, 1, 1);
+    }
+    if (this.vertices) {
+      if (xl && yl && zl) put(-1, -1, -1);
+      if (xl && yl && zh) put(-1, -1, 1);
+      if (xl && yh && zl) put(-1, 1, -1);
+      if (xl && yh && zh) put(-1, 1, 1);
+      if (xh && yl && zl) put(1, -1, -1);
+      if (xh && yl && zh) put(1, -1, 1);
+      if (xh && yh && zl) put(1, 1, -1);
+      if (xh && yh && zh) put(1, 1, 1);
+    }
+    return k;
+  }
+
+  /**
+   * PathNode.Direction: where the pen goes from cell `c`, having come by (dx, dy, dz): to a neighbour one distance nearer. By faces, with
+   * `inertia` straight on if it can, else one of them drawn (`Next(n)`); by edges or corners, with `inertia` the one most in line with
+   * where it came from, a noise of 0.1 drawn for each, else one drawn. With none (a start that is also an arrival), the original stops with
+   * an error.
+   */
+  private step(c: number, dx: number, dy: number, dz: number, g: Grid3, random: RunRandom, dirs: Int32Array): [number, number, number] {
+    const { X, Y, Z } = g;
+    const XY = X * Y;
+    const gen = this.generations;
+    const want = gen[c] - 1;
+    const x = c % X;
+    const y = ((c / X) | 0) % Y;
+    const z = (c / XY) | 0;
+    const moving = dx !== 0 || dy !== 0 || dz !== 0;
+    const candidates: number[] = [];
+    if (!this.edges && !this.vertices) {
+      if (moving && this.inertia) {
+        const cx = x + dx, cy = y + dy, cz = z + dz;
+        if (cx >= 0 && cy >= 0 && cz >= 0 && cx < X && cy < Y && cz < Z && gen[cx + cy * X + cz * XY] === want) return [dx, dy, dz];
+      }
+      const add = (ex: number, ey: number, ez: number) => {
+        if (gen[c + ex + ey * X + ez * XY] === want) candidates.push(ex, ey, ez);
+      };
+      if (x > 0) add(-1, 0, 0);
+      if (x < X - 1) add(1, 0, 0);
+      if (y > 0) add(0, -1, 0);
+      if (y < Y - 1) add(0, 1, 0);
+      if (z > 0) add(0, 0, -1);
+      if (z < Z - 1) add(0, 0, 1);
+    } else {
+      const k = this.directions(c, X, Y, Z, dirs);
+      for (let d = 0; d < k; d += 3) if (gen[c + dirs[d] + dirs[d + 1] * X + dirs[d + 2] * XY] === want) candidates.push(dirs[d], dirs[d + 1], dirs[d + 2]);
+      if (this.inertia && moving) {
+        let best = -4;
+        let pick = -1;
+        for (let t = 0; t < candidates.length; t += 3) {
+          const noise = 0.1 * random.next();
+          const ex = candidates[t], ey = candidates[t + 1], ez = candidates[t + 2];
+          const cos = (ex * dx + ey * dy + ez * dz) / Math.sqrt((ex * ex + ey * ey + ez * ez) * (dx * dx + dy * dy + dz * dz));
+          if (cos + noise > best) {
+            best = cos + noise;
+            pick = t;
+          }
+        }
+        if (pick < 0) throw new Mj3Error("path: la penna non trova una cella più vicina all'arrivo (una partenza che è anche un arrivo?): l'originale si ferma con un errore");
+        return [candidates[pick], candidates[pick + 1], candidates[pick + 2]];
+      }
+    }
+    const n = candidates.length / 3;
+    const pick = random.int(n);
+    if (!n) throw new Mj3Error("path: la penna non trova una cella più vicina all'arrivo (una partenza che è anche un arrivo?): l'originale si ferma con un errore");
+    return [candidates[3 * pick], candidates[3 * pick + 1], candidates[3 * pick + 2]];
   }
 }
 
@@ -2566,12 +2889,23 @@ class ConvChainRunner extends Runner {
   go(g: Grid3, rng: RunRandom): boolean {
     if (this.limit !== undefined && this.counter >= this.limit) return false;
     const total = g.X * g.Y;
+    const mj = runSemantics() === 'mj';
+    // Under the original's semantics (T529) what it writes is not in the list of changes (ConvChainNode writes `state` directly).
+    const from = g.log.length, epoch = g.epoch;
     if (this.counter === 0) {
       // The cells a sweep visits are those of the layers that hold `on` cells: counted before anything is drawn.
       const layers: number[] = [];
       for (let z = 0; z < g.Z; z++) if (g.cells.subarray(z * total, (z + 1) * total).includes(this.on)) layers.push(z);
-      // Without `on` cells it does nothing, now or later (the original would count empty sweeps).
-      if (!layers.length) return false;
+      // Without `on` cells it does nothing, now or later. The original's first step without them is counted all the same, and the next
+      // ones sweep a grid without cells to change, drawing and succeeding (T529): so it does, on a flat grid, under its semantics.
+      if (!layers.length) {
+        if (!mj) return false;
+        this.counter++;
+        this.count++;
+        this.substrate = new Uint8Array(g.cells.length);
+        this.layers = g.Z === 1 ? [0] : [];
+        return false;
+      }
       const visits = layers.length * total;
       if (g.Z > 1 && visits > WFC_LIMITS.convchainCells)
         throw new Mj3Error(`convchain: su una griglia di più strati lavora su al più ${WFC_LIMITS.convchainCells} celle, quelle degli strati che hanno le sue celle "on" (qui ${visits})`);
@@ -2589,12 +2923,14 @@ class ConvChainRunner extends Runner {
       this.counter++;
       this.count++;
       this.total++;
+      if (mj) unseenFrom(g, from, epoch);
       return true;
     }
     for (const z of this.layers) this.sweep(g, rng, this.substrate!, z * total);
     this.counter++;
     this.count++;
     this.total++;
+    if (mj) unseenFrom(g, from, epoch);
     return true;
   }
   /** A sweep of the layer that starts at cell `off` (ConvChain.cs): as many draws as its cells, each change kept as the sample's windows say. */

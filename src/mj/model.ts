@@ -58,7 +58,7 @@ import { MJ_PALETTE } from './palette';
 import { soundSettings, type SoundSettings } from './sound';
 import { overlapModel, squareSubgroup, tileModel, WFC_LIMITS, WfcError, type NeighborSource, type TileSource, type WfcModel } from './wfc';
 import { AREA_RE } from './areas';
-import { isNoteLine, isSymbolCode, MAX_SYMBOLS, readSymbols, showSymbols, SymbolError, symbolName, symbolTokens } from './symbols';
+import { isNoteLine, isSymbolCode, MAX_SYMBOLS, readSymbols, showSymbols, SymbolError, symbolName, symbolTexts, symbolTokens } from './symbols';
 import { parseXml, XmlError, type XmlElement } from './xml';
 import { originalPort, originalProgram, originalText, type OriginalPort } from './original';
 import type { Semantics } from './random';
@@ -276,6 +276,14 @@ class Compiler {
 
   /** Whether the text is the original's (T531). */
   private original: boolean;
+
+  /**
+   * The program runs under the original's semantics (T529, A1-4: `compileMjx(…, { semantics: 'mj' })`): what the original's nodes read is
+   * read as there. `d` is ignored (every node and rule runs, `d="2"` too); a `path` without `color` draws with the first symbol of
+   * `from` and goes by `edges` and `vertices`; a `convolution` the original does not load (Moore on a grid of more layers, NoCorners on a
+   * flat one) is mended, an error with `strict`, and a `convchain` on a grid of more layers too (ours, ADR-0240).
+   */
+  mj = false;
 
   /** The imports from the program down to the one being compiled now (the program's own name first, if known). */
   chain: string[] = [];
@@ -704,7 +712,8 @@ class Compiler {
   rules(el: XmlElement, ctx: Ctx, sym: Sym): Rule3[] {
     const out: Rule3[] = [];
     const add = (r: XmlElement, own: boolean) => {
-      if (r.attrs.d === '2') return;
+      // MarkovJunior ignores `d` (T529): under its semantics the rule is read.
+      if (r.attrs.d === '2' && !this.mj) return;
       const input = this.side(r, 'in', ctx.folder);
       const output = this.side(r, 'out', ctx.folder);
       const rs = own ? sym : this.symmetry(r, { ...ctx, sym });
@@ -736,8 +745,8 @@ class Compiler {
 
   node(el: XmlElement, ctx: Ctx): Node3 | null {
     if (el.name === 'union' || el.name === 'color' || el.name === 'sound') return null;
-    // A node meant only for 2D grids (MarkovJunior's d="2").
-    if (el.attrs.d === '2') return null;
+    // A node meant only for 2D grids (MarkovJunior's d="2"), which the original runs all the same (T529, c1): under its semantics it is read.
+    if (el.attrs.d === '2' && !this.mj) return null;
     const sym = this.symmetry(el, ctx);
     if (RULE_NODES.has(el.name)) {
       const inference = this.inference(el, ctx);
@@ -759,16 +768,21 @@ class Compiler {
     }
     if (el.name === 'convolution') return this.convolution(el, ctx);
     if (el.name === 'path') {
-      if (el.attrs.edges || el.attrs.vertices) this.warnings.push(`riga ${el.line}: path con edges/vertices: qui si muove solo per facce`);
+      if ((el.attrs.edges || el.attrs.vertices) && !this.mj) this.warnings.push(`riga ${el.line}: path con edges/vertices: qui si muove solo per facce`);
+      const from = el.attrs.from ?? this.fail(el, 'manca "from"');
+      // Under the original's semantics (T529, c4) a path without `color` draws with the first symbol of `from`.
+      const color = el.attrs.color === undefined && this.mj ? symbolTexts(from)[0] : el.attrs.color;
       return {
         type: 'path',
-        from: this.letters(el, el.attrs.from ?? this.fail(el, 'manca "from"'), ctx, 'from'),
+        from: this.letters(el, from, ctx, 'from'),
         to: this.letters(el, el.attrs.to ?? this.fail(el, 'manca "to"'), ctx, 'to'),
         on: this.letters(el, el.attrs.on ?? this.fail(el, 'manca "on"'), ctx, 'on'),
-        color: this.one(el, el.attrs.color, ctx, 'color'),
+        color: this.one(el, color, ctx, 'color'),
         steps: this.steps(el),
         ...(/^true$/i.test(el.attrs.inertia ?? '') ? { inertia: true } : {}),
         ...(/^true$/i.test(el.attrs.longest ?? '') ? { longest: true } : {}),
+        ...(this.mj && /^true$/i.test(el.attrs.edges ?? '') ? { edges: true } : {}),
+        ...(this.mj && /^true$/i.test(el.attrs.vertices ?? '') ? { vertices: true } : {}),
       };
     }
     if (ctx.inPieces && (el.name === 'map' || el.name === 'wfc' || el.name === 'pieces' || (SHAPES as readonly string[]).includes(el.name)))
@@ -826,6 +840,10 @@ class Compiler {
   convolution(el: XmlElement, ctx: Ctx): Node3 {
     const hood = (el.attrs.neighborhood ?? '').toLowerCase();
     const neighborhood = hood === 'vonneumann' ? 'vonneumann' : hood === 'nocorners' ? 'nocorners' : hood === 'moore' ? 'moore' : this.fail(el, 'neighborhood vuole VonNeumann (6 vicini), NoCorners (18) o Moore (26)');
+    // The original's kernels (T529, c6): on a flat grid VonNeumann and Moore, on one of more layers VonNeumann and NoCorners; the others
+    // it does not load, and ours reads them (Moore with the 26 of the cube, NoCorners on a flat grid with the 8 of the layer).
+    if (this.mj && ctx.Z !== undefined && (ctx.Z === 1 ? neighborhood === 'nocorners' : neighborhood === 'moore'))
+      this.mend(el, `neighborhood "${el.attrs.neighborhood}": l'originale su una griglia ${ctx.Z === 1 ? 'piana conosce VonNeumann e Moore' : 'di più strati conosce VonNeumann e NoCorners'} e non carica il programma; da noi vale ${ctx.Z === 1 ? 'con gli 8 vicini dello strato' : 'con i 26 vicini del cubo'}`);
     const xs = el.children.filter((c) => c.name === 'rule');
     const sources = xs.length ? xs : [el];
     const rules: ConvRule[] = sources.map((r) => {
@@ -1078,6 +1096,8 @@ class Compiler {
    * cells of the grid become one or the other and then change as the sample's windows say (on a grid of more layers, layer by layer).
    */
   convchain(el: XmlElement, ctx: Ctx, sym: Sym): Node3 {
+    // The original's convchain works on a flat grid only (T529); ours goes layer by layer (ADR-0240).
+    if (this.mj && ctx.Z !== undefined && ctx.Z > 1) this.mend(el, "convchain su una griglia di più strati: l'originale lavora solo su una griglia piana e non carica il programma; da noi strato per strato");
     const name = el.attrs.sample;
     const own = el.children.filter((c) => c.name === 'sample');
     if (name === undefined && !own.length) this.fail(el, 'manca il campione: sample="…" (un file piano di models/) o il figlio <sample> col campione scritto nel nodo, nei simboli black e white');
@@ -1285,6 +1305,7 @@ export function compileMjx(
   if (mains.length > 1) throw new Mj3Error(`un solo nodo radice (trovati: ${mains.map((m) => `<${m.name}>`).join(', ')}); animazioni, azioni e sezioni <worn> possono stare accanto`);
   const root = mains[0];
   const c = new Compiler(opts.strict === true, opts.files, opts.self, port);
+  c.mj = opts.semantics === 'mj';
   for (const r of roots) c.collect(r, r);
   c.resolveUnions();
   const values = c.values(root, root.attrs.values);

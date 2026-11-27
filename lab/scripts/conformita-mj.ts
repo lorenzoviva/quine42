@@ -62,7 +62,10 @@ export interface Outcome {
 
 const flat = (t: string) => t.replace(/\s+/g, '');
 const has = (file: string) => fs.existsSync(file);
-/** Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268; the branches since T528, ADR-0273). */
+/**
+ * Ours with the switch of the original's semantics on (T526, ADR-0263; the rules and the matches since T527, ADR-0268; the branches since
+ * T528, ADR-0273; map, path, convolution, convchain and `d` since T529, ADR-0274).
+ */
 const MJ = flag('mj');
 
 // ---------------------------------------------------------------- the original (C#)
@@ -253,9 +256,9 @@ function modelli(report: Report): void {
   const md = [
     '## I modelli 3D del repository di mxgmn\n',
     `Semi ${seeds.join(', ')}; i passi di models.xml (50 000 se non li dice). «Riferimento = C#»: la stessa griglia voxel per voxel e gli stessi passi su ogni seme. «Noi»: il nostro motore di oggi; ${'`'}TV${'`'} è la distanza fra le quote delle lettere della griglia (0 uguali, 1 niente in comune), la nostra media contro quella del riferimento, accanto a quanto si allontana dalla sua media un seme del riferimento.\n`,
-    ...(MJ ? ['Noi con l’interruttore della semantica acceso (`--mj`): «noi = riferimento» è la stessa griglia voxel per voxel, gli stessi passi e la stessa fine, seme per seme.\n'] : []),
-    `| modello | scatola | riferimento = C# | il riferimento: passi, fine | noi: gira? | noi: passi, fine |${MJ ? ' noi = riferimento |' : ''} TV noi/originale | TV fra semi dell’originale |`,
-    `|---|---|---|---|---|---|${MJ ? '---|' : ''}---|---|`,
+    ...(MJ ? ['Noi con l’interruttore della semantica acceso (`--mj`): «noi = riferimento» è la stessa griglia voxel per voxel, gli stessi passi e la stessa fine, seme per seme; «la griglia» la stessa griglia e la stessa fine, i passi a parte (T529: i modelli con la `wfc`, che l’originale osserva una cella per passo, A1-5).\n'] : []),
+    `| modello | scatola | riferimento = C# | il riferimento: passi, fine | noi: gira? | noi: passi, fine |${MJ ? ' noi = riferimento | la griglia |' : ''} TV noi/originale | TV fra semi dell’originale |`,
+    `|---|---|---|---|---|---|${MJ ? '---|---|' : ''}---|---|`,
   ];
   const rows: Record<string, unknown>[] = [];
   const rec: NonNullable<Recorded['modelli']> = {};
@@ -295,11 +298,13 @@ function modelli(report: Report): void {
     let tvOurs = '—';
     let tvRef = '—';
     let sameCell = '—';
+    let gridCell = '—';
     {
       try {
         const files = mjxIncludes(xml, (f) => OFFICIAL_FILES[f], { original: true });
         const runs = seeds.map((s) => runOurs(xml, m.size, s, m.steps > 0 ? m.steps : 5_000_000, undefined, files));
-        oursCell = okRefs.length && runs.some((r) => [r.X, r.Y, r.Z].join('x') !== okRefs[0].dims) ? 'gira (un’altra griglia finale)' : 'gira';
+        // Each seed against its own: the original's grid may end at another size on another seed (ModernHouse).
+        oursCell = runs.some((r, i) => { const ref = refs[i]; return typeof ref !== 'string' && [r.X, r.Y, r.Z].join('x') !== ref.dims; }) ? 'gira (un’altra griglia finale)' : 'gira';
         oursRun = `${runs.map((r) => r.steps).join(', ')}; ${runs.every((r) => r.finished) ? 'finisce' : `finisce ${runs.filter((r) => r.finished).length}/${runs.length}`}`;
         if (MJ) {
           const same = runs.map((r, i) => {
@@ -307,6 +312,11 @@ function modelli(report: Report): void {
             return typeof ref !== 'string' && r.letters === flat(ref.text) && r.steps === ref.steps && r.finished === ref.finished;
           });
           sameCell = same.every(Boolean) ? `**sì** (${same.length} semi)` : `no: ${same.map((v, i) => `${seeds[i]} ${v ? 'sì' : 'no'}`).join(', ')}`;
+          const grid = runs.map((r, i) => {
+            const ref = refs[i];
+            return typeof ref !== 'string' && r.letters === flat(ref.text) && r.finished === ref.finished;
+          });
+          gridCell = grid.every(Boolean) ? `**sì** (${grid.length} semi)` : `no: ${grid.map((v, i) => `${seeds[i]} ${v ? 'sì' : 'no'}`).join(', ')}`;
         }
         if (okRefs.length) {
           const refH = okRefs.map((r) => histogram(flat(r.text)));
@@ -319,10 +329,10 @@ function modelli(report: Report): void {
         oursCell = `non gira: ${(e as Error).message.slice(0, 90)}`;
       }
     }
-    Object.assign(row, { reference: refCell, ours: oursCell, oursRun, tvOurs, tvRef, ...(MJ ? { same: sameCell } : {}) });
+    Object.assign(row, { reference: refCell, ours: oursCell, oursRun, tvOurs, tvRef, ...(MJ ? { same: sameCell, grid: gridCell } : {}) });
     rows.push(row);
-    md.push(`| ${m.name} | ${m.size.join('×')} | ${csCell} | ${refCell} | ${oursCell} | ${oursRun} |${MJ ? ` ${sameCell} |` : ''} ${tvOurs} | ${tvRef} |`);
-    console.log(m.name, csCell, '|', refCell, '|', oursCell, oursRun, MJ ? sameCell : '', tvOurs, tvRef);
+    md.push(`| ${m.name} | ${m.size.join('×')} | ${csCell} | ${refCell} | ${oursCell} | ${oursRun} |${MJ ? ` ${sameCell} | ${gridCell} |` : ''} ${tvOurs} | ${tvRef} |`);
+    console.log(m.name, csCell, '|', refCell, '|', oursCell, oursRun, MJ ? `${sameCell} | griglia ${gridCell}` : '', tvOurs, tvRef);
   }
   report.md.push(md.join('\n'), '');
   report.json.modelli = rows;
