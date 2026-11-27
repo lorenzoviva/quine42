@@ -13,6 +13,7 @@ import { paletteSummary, type CatalogEntry, type Council } from './council';
 import type { Geography } from '../nature';
 import { REUSE_OFFERED, reuseLines } from '../reuse';
 import type { Means, Roughness } from '../network';
+import { readStreet } from '../streets';
 
 /**
  * What the Cartographer is told at the Genesis of an archipelago (T443, ADR-0230): the shores are most of its places, so among its environments
@@ -122,6 +123,12 @@ export interface ChunkPlan {
    * (or its planet) admits; absent, a plan of before, laid again on the draft it was planned on, every climate of the generator.
    */
   climates?: boolean;
+  /**
+   * The mark of the wide streets (T548, ADR-0270): true, written by the kernel on every plan it makes, its roads (where the code the layout
+   * digs with is a road by its name) are 2-4 tiles wide with the sidewalk at their sides (`widenStreets`); absent, a plan of before, whose
+   * roads stay as they were laid (its things and its edits are per tile).
+   */
+  streets?: boolean;
   /**
    * How rough the place is for the rule 10 of the steps (T474, ADR-0250): written by the kernel when the plan is made in a region of the master
    * that says it (`Region.roughness`); absent, the roughness its relief measures. A region changed later does not move the places it had.
@@ -398,6 +405,7 @@ const LAYOUTS_SCHEMA: Schema = {
           description: { type: 'STRING' },
           type: { type: 'STRING', enum: ENVIRONMENT_TYPES },
           program_json: { type: 'STRING', description: 'the MarkovJunior program as JSON' },
+          street_width: { type: 'NUMBER', description: 'only where the roads of its places are streets of a town or a city: how many tiles wide, 2-4 (a lane 1); leave it out otherwise' },
         },
         required: ['id', 'name', 'description', 'type', 'program_json'],
       },
@@ -419,9 +427,15 @@ const LAYOUTS_SCHEMA_BREATH: Schema = (() => {
 /** What the Cartographer is told of the air in a world that counts the breath (T446). */
 const BREATH_ENVIRONMENTS = 'In this world bodies count their breath: where there is no air it runs out. Say "air": false of an environment whose places have none (the open rock of an airless body, a flooded shaft); a station, a dome, a ship hold the air. Most places have air.';
 
+/** How wide the Cartographer said the streets of an environment are (T548, ADR-0270), read without trusting; nothing if it did not say. */
+function streetField(width: unknown): { street?: { width: number } } {
+  const w = readStreet({ width }).width;
+  return w !== undefined ? { street: { width: w } } : {};
+}
+
 /** Genesis: the Cartographer writes the environments of this world as rewrite programs. */
 export async function designLayouts(c: Council, palette: Record<string, TerrainDef>, feedback = '', music: Array<{ name: string; environments: string[] }> = [], geography?: Geography, breath = false): Promise<Array<{ id: string; def: EnvironmentDef } | { id: string; error: string }>> {
-  const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string; air?: unknown }> }>(
+  const raw = await c.ask<{ environments: Array<{ id: string; name: string; description: string; type: string; program_json: string; air?: unknown; street_width?: unknown }> }>(
     'cartographer',
     'genesis.layouts',
     [
@@ -445,7 +459,7 @@ export async function designLayouts(c: Council, palette: Record<string, TerrainD
     const id = String(a.id ?? '').toLowerCase().replace(/[^a-z0-9-]+/g, '-').slice(0, 24) || 'ambiente';
     try {
       const program = JSON.parse(a.program_json) as MjNode;
-      return { id, def: { name: String(a.name), description: String(a.description), environment: environmentTypeOf(a.type), program, ...(breath && a.air === false ? { air: false as const } : {}) } };
+      return { id, def: { name: String(a.name), description: String(a.description), environment: environmentTypeOf(a.type), program, ...(breath && a.air === false ? { air: false as const } : {}), ...streetField(a.street_width) } };
     } catch (e) {
       return { id, error: `${id}: program_json non è JSON valido (${(e as Error).message})` };
     }

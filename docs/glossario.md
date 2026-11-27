@@ -171,6 +171,20 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `raccolta` (non si raccoglie la copertura), `spawn` (la posa il kernel, dal punto dell'istanza)
 - **Fermo**: `uncovered` nei piani (`tile`, `model`, `n`, `module`, `seed`) e sul filo (`tile|model|n`).
 
+### Rientro
+- **Inglese**: `inset`, `TerrainDef.inset`, `readInset`, `insetOf`, `insetByName`, `insetKind`, `insetErrors`, `INSET_LIMITS`, `terrainLook`, `onTop`, `insetUnder`
+- **Definizione**: quanto più in basso (negativo) o più in alto la cima di un terreno del suolo si disegna, in caselle, fra −0,2 e 0,2, sempre sotto un livello del rilievo; con ciò che vi sta sopra. Dove tocca un terreno più alto il lato che la mesh disegna è il **cordolo**. Solo aspetto: il kernel non lo legge; mai sul suolo di base `g`; un terreno che non lo dice prende quello del suo nome (ADR-0270).
+- **Dove vive**: `src/kernel/inset.ts`, `src/render/terrainmesh.ts` (`groundY`, `terrainLook`), `src/render/entities.ts` (`onTop`)
+- **Da non usare**: `scavo` (lo scavo cambia i livelli, C6), `offset`, `dislivello` (un dislivello è del rilievo)
+- **Fermo**: `inset` nei manifest.
+
+### Strada larga
+- **Inglese**: `street`, `Street`, `streetOf`, `widenStreets`, `isRoad`, `sidewalkOf`, `EnvironmentDef.street`, `ChunkPlan.streets`, `STREET_WIDTH`, `MIN_ROAD`, `LayoutResult.widened`
+- **Definizione**: dove la via del layout è una strada per il suo nome, le strade di un piano col segno `streets` allargate a 2-4 caselle (3 se l'ambiente non lo dice) sul suolo di base, col **marciapiede** ai lati dove il mondo ne ha uno; cambiano solo codici del suolo che si cammina, la rete è quella delle strade di prima (ADR-0270).
+- **Dove vive**: `src/kernel/streets.ts`, `src/kernel/layout.ts`
+- **Da non usare**: `sentiero` (un sentiero non si allarga), `viale` per il concetto
+- **Fermo**: `streets` nei piani, `street` (`width`, `sidewalk`) negli ambienti.
+
 ### Modo di attraversare
 - **Inglese**: `cross`, `Crossing`, `CROSSINGS`, `crossingOf`; i suoi valori `walk` (camminare), `swim` (nuotare), `none` (non attraversabile)
 - **Definizione**: come un corpo passa una casella di un terreno: a piedi, a nuoto (solo un liquido: l'acqua `w` e `o` di ogni universo dal contratto 0.10), per niente. `solid` resta ciò che non si cammina; il modo di attraversare dice come si passa ciò che non si cammina (ADR-0224).

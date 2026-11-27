@@ -8,6 +8,7 @@ import type { TileHole } from '../kernel/forms';
 import { hash32 } from '../kernel/rng';
 import { grainByte, grainOf } from '../kernel/grain';
 import { coverOnTile, uncoveredKey, type CoverInstance, type CoverKind } from '../kernel/cover';
+import { insetOf } from '../kernel/inset';
 import { FoamStrips, phaseAttribute, waveAttribute, type FoamArrays } from './seawave';
 
 export const WALL_H = 1.6;
@@ -182,6 +183,14 @@ export class MeshBuilder {
 export interface TerrainLook {
   layer?: string;
   color?: string;
+  /** How much lower or higher its top is drawn (T548, ADR-0270): `insetOf`, read once (`terrainLook`); only of the ground one walks. */
+  inset?: number;
+}
+
+/** What a palette's terrain (with its code) says to the mesh: where it is drawn, its colour, its inset as `insetOf` reads it (T548). */
+export function terrainLook(t: { layer?: string; color?: string; name?: unknown; id?: unknown; solid?: unknown; inset?: unknown }, code: string): TerrainLook {
+  const inset = insetOf(t, code);
+  return { layer: t.layer, color: t.color, ...(inset ? { inset } : {}) };
 }
 
 /** A terrain's grain as the tops carry it (T547): the specks' colour lit, 0-255 of linear, and the density in steps (1-15). */
@@ -244,7 +253,8 @@ export interface ChunkSource extends GroundReads {
   stratumRgbAt?(x: number, z: number, row: number): readonly number[];
 }
 
-const groundY = (t: TerrainLook | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : 0);
+/** How far over the relief a tile's top is drawn: the water lower, a floor a little higher, the ground by its inset (T548, only how it looks). */
+export const groundY = (t: TerrainLook | undefined) => (t?.layer === 'liquid' ? WATER_Y : t?.layer === 'floor' ? 0.02 : t?.layer === 'ground' ? (t.inset ?? 0) : 0);
 
 /**
  * The tops of the terrain as the chunks draw them (T52b, T415): the relief, the water a little lower, a floor a little higher, and over a
@@ -651,8 +661,8 @@ export interface ChunkInput {
   cy: number;
   tiles: string;
   cells: number;
-  /** The palette in its order: each code with what the mesh reads of its terrain (its grain, T547; its cover, T545). */
-  palette: Array<[code: string, layer: string | undefined, color: string | undefined, grain?: GrainLook, cover?: CoverKind[]]>;
+  /** The palette in its order: each code with what the mesh reads of its terrain (its grain, T547; its cover, T545; its inset, T548). */
+  palette: Array<[code: string, layer: string | undefined, color: string | undefined, grain?: GrainLook, cover?: CoverKind[], inset?: number]>;
   /** The colours lit (`rgbOf`), by colour; '' for a terrain without one. */
   rgb: Record<string, number[]>;
   /** The window of tiles around the place (`CHUNK_MARGIN` beyond its edges): its corner, its side, the codes ('' where nothing is loaded) and the ground. */
@@ -686,7 +696,7 @@ export interface ChunkInput {
 export function inputSource(input: ChunkInput): ChunkSource {
   const { x0, z0, w } = input;
   const at = (x: number, z: number) => (x >= x0 && z >= z0 && x < x0 + w && z < z0 + w ? (z - z0) * w + (x - x0) : -1);
-  const terrains = new Map<string, TerrainLook>(input.palette.map(([code, layer, color]) => [code, { layer, color }]));
+  const terrains = new Map<string, TerrainLook>(input.palette.map(([code, layer, color, , , inset]) => [code, inset ? { layer, color, inset } : { layer, color }]));
   const grains = new Map(input.palette.flatMap(([code, , , grain]) => (grain ? [[code, grain] as const] : [])));
   const covers = new Map(input.palette.flatMap(([code, , , , cover]) => (cover?.length ? [[code, cover] as const] : [])));
   const coverSeeds = new Map(input.coverSeeds ?? []);

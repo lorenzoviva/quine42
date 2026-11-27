@@ -17,6 +17,7 @@ import { resolveStamps, run, type MjNode } from './mj';
 import { defaultCodes, stampGround } from './stamps';
 import { STRUCTURE_VPT } from '../mj/classes';
 import { crossingOf, isVoid } from './nature';
+import { streetOf, widenStreets } from './streets';
 import type { TerrainDef } from './types';
 
 export interface Lot {
@@ -40,6 +41,8 @@ export interface LayoutResult {
   /** Cells of piers and drawbridges (T505, ADR-0064, ADR-0230): no solid obstacle or building lot may sit on them, so a pier's head stays reachable on foot. */
   piers: Set<number>;
   carved: number;
+  /** The cells the wide streets changed (T548): the road widened, the sidewalk at its sides; not ways the network must join (`networkOf`). */
+  widened?: ReadonlySet<number>;
   steps: number;
   /** The tile the connectivity starts from (T474): the first gate the lot of a block does not cover, or the land nearest the middle. */
   start: number;
@@ -79,6 +82,12 @@ export interface LayoutOptions {
    * straddle a cliff. Absent in hills worlds, where no two neighbours differ by more than a step.
    */
   levels?: ArrayLike<number>;
+  /**
+   * The wide streets (T548, ADR-0270): only for the plans with the mark (`ChunkPlan.streets`), what the environment says of them
+   * (`EnvironmentDef.street`, read without trusting; `{}` the defaults). Where the path code is a road by its name, the roads are widened over
+   * the base ground with the sidewalk at their sides once the place is joined (`widenStreets`): only codes of the ground one walks change.
+   */
+  street?: { street?: unknown };
 }
 
 const DIRS: Array<[number, number]> = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -294,6 +303,10 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
     if (walked >= 4 && !pocket.has(start)) join(i);
   }
 
+  // The wide streets (T548): what is walked stays walked, so the reach is the same.
+  const street = opts.street ? streetOf(palette, opts.pathCode, codes.ground, opts.street) : undefined;
+  const widened = street ? widenStreets(cells, size, street, gateTiles, reserved, opts.levels) : undefined;
+
   const grid = rows();
   const pierCodes = new Set([codes.pier, codes.bridge].filter((c) => c && c !== opts.pathCode));
   if (pierCodes.size) {
@@ -303,7 +316,7 @@ export function layout(draft: string[], palette: Record<string, TerrainDef>, opt
   }
   // Where entities may be placed is what is walked (T438): nothing is set on the water, even where it joins the place.
   const reachable = swim ? new Set([...reach].filter((i) => palette[grid[Math.floor(i / size)][i % size]]?.solid === false)) : reach;
-  return { grid, lots: findLots(grid, size, palette, piers), gates: gateTiles, reachable, piers, carved, steps, start, mustReach, ...(stages ? { stages } : {}) };
+  return { grid, lots: findLots(grid, size, palette, piers), gates: gateTiles, reachable, piers, carved, ...(widened?.size ? { widened } : {}), steps, start, mustReach, ...(stages ? { stages } : {}) };
 }
 
 /** The walked cell nearest the middle of a place (T445: where a place of the void with no gate is joined from); 0 if none. */

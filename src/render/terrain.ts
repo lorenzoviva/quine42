@@ -26,6 +26,7 @@ import {
   grainLook,
   MeshBuilder,
   sideQuad,
+  terrainLook,
   terrainTops,
   TILE_SEEDS,
   TRUNK,
@@ -36,6 +37,7 @@ import {
   type GrainLook,
   type GroundReads,
   type MeshArrays,
+  type TerrainLook,
 } from './terrainmesh';
 
 // The numbers of the ground's mesh live with its arrays (terrainmesh.ts, T486); here as they were.
@@ -68,7 +70,13 @@ export function meshGeometry(a: MeshArrays): THREE.BufferGeometry {
 /** What the tops of the terrain read of the kernel: a tile's terrain and its ground. */
 function kernelReads(k: Kernel): GroundReads {
   const pal = k.palette;
-  return { terrain: (code) => pal[code], tileAt: (x, z) => k.tileAt(x, z), groundAt: (x, z) => k.groundAt(x, z) };
+  // Each terrain as the mesh reads it, with its inset (T548), once a code.
+  const looks = new Map<string, TerrainLook | undefined>();
+  const terrain = (code: string) => {
+    if (!looks.has(code)) looks.set(code, pal[code] && terrainLook(pal[code], code));
+    return looks.get(code);
+  };
+  return { terrain, tileAt: (x, z) => k.tileAt(x, z), groundAt: (x, z) => k.groundAt(x, z) };
 }
 
 export interface TerrainView {
@@ -250,10 +258,13 @@ export function chunkInput(k: Kernel, ch: Chunk): ChunkInput {
   const covered = new Set<string>();
   for (const [code, t] of Object.entries(k.palette) as Array<[string, TerrainDef]>) {
     const grain: GrainLook | undefined = grainLook(t, (c) => rgbOf(c));
-    // Its cover (T545), the fifth: a palette without one is the one of before, byte for byte.
+    // Its cover (T545), the fifth, and its inset (T548), the sixth: a palette without them is the one of before, byte for byte.
     const cover = coverOf(t);
     if (cover) for (const c of cover) covered.add(c.model);
-    palette.push(cover ? [code, t.layer, t.color, grain, cover] : grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color]);
+    const inset = terrainLook(t, code).inset;
+    palette.push(
+      inset ? [code, t.layer, t.color, grain, cover, inset] : cover ? [code, t.layer, t.color, grain, cover] : grain ? [code, t.layer, t.color, grain] : [code, t.layer, t.color],
+    );
     rgb[t.color || ''] ??= rgbOf(t.color);
     if (t.model && tileForms(k, code)) ready.push(code);
     if (hasBed && k.isClearWater(code)) clear.push(code);

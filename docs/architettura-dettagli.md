@@ -1226,6 +1226,28 @@ strati del mondo e programma degli strati di ogni ambiente (`genesis.strata`, pr
   `MAX_UNCOVERED` a luogo, rimessa a ogni caricamento con l'origine `<luogo>#u…`), mai più disegnata come copertura; ai client sottili solo le
   chiavi (`ChunkView.uncovered`, `readUncoveredKeys`). Da Lua `world.cover_at` e `world.uncover`. `tests/copertura.test.ts`; le foto e le
   misure del frame in `docs/catture/T545/`, `node lab/scripts/misura-frame.mjs <porta> --sottobosco --gioco`.
+- **Il rientro dei terreni e il cordolo** (ADR-0270, T548, C4 di `docs/design/terreno-ricco.md`, kernel 0.10.44): quanto più in basso o più
+  in alto la cima di un terreno del suolo si disegna, in caselle, fra −0,2 e 0,2, sempre sotto un livello (0,25): `TerrainDef.inset`, letto
+  senza fidarsi (`readInset`, `src/kernel/inset.ts`), voluto dal validatore (`insetErrors`), facoltativo nello schema dei terreni della
+  Genesi; mai sul suolo di base `g`, il livello del mondo. Un terreno che non lo dice prende quello del suo nome (`insetByName`: la strada,
+  l'asfalto, il parcheggio −0,12, il fosso −0,18, la massicciata dei binari +0,06; mai un sentiero né una pista): la riparazione degli universi
+  di prima, senza scrivere niente. La mesh legge il terreno con `terrainLook` (nel worker il sesto campo della palette di `ChunkInput`, dopo la copertura):
+  `groundY` aggiunge il rientro alla cima dello strato `ground`, e i lati che la mesh disegna dove il vicino è più basso sono il cordolo.
+  Ciò che sta sul suolo si disegna con lo stesso scostamento (`onTop`, `insetUnder` in `src/render/entities.ts`: il viandante, le
+  persone, le cose, le rune; dove la loro altezza è quella del suolo, non su un pavimento); le istanze della copertura
+  stanno sulla cima già rientrata (la stessa altezza della casella in `chunkArrays`) e scendono con lei. Il kernel non lo legge: `groundAt`, `floorAt`,
+  la collisione, la rete restano quelli (`tests/rientro.test.ts`). Nel seme nessun terreno rientra; in `neapolis` la strada, il parcheggio
+  e i binari, in ogni luogo. Le foto in `docs/catture/T548/`.
+- **Le strade larghe** (ADR-0270, T548): dove la via con cui il layout scava (`pathCode`) è una strada per il suo nome (`isRoad`), il layout
+  di un piano col segno `streets` (scritto dal kernel su ogni piano nuovo) allarga le strade a 3 caselle, o quanto l'ambiente dice
+  (`EnvironmentDef.street.width`, 1-4, letto senza fidarsi; `street_width` del Cartografo alla Genesi), sul suolo di base e sul marciapiede,
+  dopo che il luogo è unito (`widenStreets`, `src/kernel/streets.ts`): mai su muri, acqua, alberi, campi, sul lotto di un blocco né
+  sull'anello del bordo se non lungo il varco di una strada (le stesse caselle dai due lati), i pezzi sparsi (meno di `MIN_ROAD` caselle
+  che non portano a un varco) no; col rilievo vero solo al livello della casella da cui si allarga. Ai lati il marciapiede, dentro l'anello,
+  se il mondo ne ha uno diverso dal suolo di base (il terreno che il nome dice marciapiede, o `street.sidewalk`). Cambiano solo codici del
+  suolo che si cammina: ciò che si raggiunge e i lotti sono gli stessi, e la rete prende come vie solo le strade di prima (`networkOf` salta
+  `LayoutResult.widened`), così rampe, enclavi e terra mossa sono le stesse (`rete-gradini.ts --strada`). Le strutture riportano il loro
+  lotto al suolo (`lotsOf`). `lab/scripts/strade-larghe.ts -- universes/<nome>` dice che cosa cambierebbe nei luoghi di un universo.
 - **Nessun fotogramma senza terreno** (T492): la mesh di un luogo caricato resta in scena finché quella nuova non la sostituisce nello stesso
   fotogramma (`showChunk`); si toglie solo quando il luogo non è più caricato. Al ricaricare dei file (`universe:reloaded`, a ogni commit del
   Concilio: un pacchetto, un modello, un luogo pianificato) le mesh non si tolgono: diventano vecchie (`staleChunks`, la firma `STALE_SIG` che

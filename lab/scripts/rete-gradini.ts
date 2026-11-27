@@ -10,7 +10,7 @@
 // network's level is not the feet's (`netDiff`, T504: none since the true relief levels each place alone) and the falls of the water
 // between two places (`falls`: tiles of water beside each other across a border more than a step apart, swum as ever; the highest, `maxFall`):
 //
-//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18 | --griglia 6] [--rialzo 8] [--vero] [--arcipelago] [--json f]
+//   npx vite-node lab/scripts/rete-gradini.ts -- [--punti 18 | --griglia 6] [--rialzo 8] [--vero] [--arcipelago] [--strada] [--json f]
 
 import { writeFileSync } from 'node:fs';
 import { bundledFiles } from '../../src/kernel/bundle';
@@ -27,14 +27,17 @@ const POINTS = Number(opt('punti', '18'));
 const RISE = Number(opt('rialzo', '0'));
 const TRUE_RELIEF = argv.includes('--vero');
 const ARCHIPELAGO = argv.includes('--arcipelago');
+// With --strada the seed's path is called a road (T548): its new places have wide streets, which must leave the network as it was.
+const ROAD = argv.includes('--strada');
 const out = opt('json');
 const GRID = opt('griglia') === undefined ? undefined : Number(opt('griglia'));
 
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const files = (() => {
-  if (!TRUE_RELIEF && !ARCHIPELAGO) return bundledFiles;
+  if (!TRUE_RELIEF && !ARCHIPELAGO && !ROAD) return bundledFiles;
   const cfg = JSON.parse(bundledFiles['universe.json']);
   const terrain = JSON.parse(bundledFiles['modules/world.terrain/manifest.json']);
+  if (ROAD) terrain.tiles.p.name = 'strada';
   if (TRUE_RELIEF) terrain.tiles.k = { id: 'mountain', name: 'monte', description: 'roccia nuda di montagna', color: '#6e6a66', solid: false, cross: 'walk', layer: 'ground', speed: 0.9 };
   return {
     ...bundledFiles,
