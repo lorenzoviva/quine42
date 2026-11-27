@@ -42,6 +42,8 @@ export interface MovedRecord {
   x: number;
   y: number;
   yaw: number;
+  /** The seed of its look when it is not the one its origin gives (T514): a piece of an interior looks as it did in its building. */
+  seed?: number;
   parts?: ThingParts;
 }
 
@@ -49,7 +51,7 @@ export interface MovedRecord {
  * The components the kernel makes again whenever an entity of a module comes into the world (where it is, its body, its look, its
  * menu, its container, which is kept by its origin) or that say someone rather than something: never part of a thing's state.
  */
-export const KERNEL_PARTS: ReadonlySet<string> = new Set(['pos', 'module', 'body', 'glyph', 'form', 'interact', 'mind', 'container', 'inventory', 'vel', 'chunk', 'origin', 'placed', 'pickup', 'rune', 'remote', 'player', 'structure', 'identity', 'carpet', 'hand', 'needs', 'states', 'slots', 'jump', 'vehicle']);
+export const KERNEL_PARTS: ReadonlySet<string> = new Set(['pos', 'module', 'body', 'glyph', 'form', 'interact', 'mind', 'container', 'inventory', 'vel', 'chunk', 'origin', 'placed', 'pickup', 'rune', 'remote', 'player', 'structure', 'identity', 'carpet', 'hand', 'needs', 'states', 'slots', 'jump', 'vehicle', 'fitted']);
 
 /** How much state a thing takes with it (characters of JSON): beyond, it comes back as its manifest makes it. */
 export const MAX_THING_PARTS = 4096;
@@ -121,12 +123,12 @@ export function readMoved(list: unknown): MovedRecord[] {
   const byOrigin = new Map<string, MovedRecord>();
   for (const r of list.slice(-MAX_MOVED)) {
     if (!r || typeof r !== 'object' || Array.isArray(r)) continue;
-    const { module, origin, x, y, yaw, parts } = r as Record<string, unknown>;
+    const { module, origin, x, y, yaw, seed, parts } = r as Record<string, unknown>;
     if (typeof module !== 'string' || !module || module.length > MAX_MODULE || !okOrigin(origin)) continue;
     if (![x, y].every((v) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e6)) continue;
     const p = readParts(parts);
     byOrigin.delete(origin);
-    byOrigin.set(origin, { module, origin, x: x as number, y: y as number, yaw: typeof yaw === 'number' && Number.isFinite(yaw) ? yaw : 0, ...(p ? { parts: p } : {}) });
+    byOrigin.set(origin, { module, origin, x: x as number, y: y as number, yaw: typeof yaw === 'number' && Number.isFinite(yaw) ? yaw : 0, ...(okSeed(seed) ? { seed } : {}), ...(p ? { parts: p } : {}) });
   }
   return [...byOrigin.values()];
 }

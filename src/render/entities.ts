@@ -225,7 +225,7 @@ export class Entities {
     const fc: FormComp | undefined = k.ecs.get(id, 'form');
     const f = fc && k.forms.ready(fc.model, fc.seed, fc.tint, fc.stratum);
     const dressed = this.dressedOf(id, f, fc);
-    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}|${dressed?.key ?? ''}`;
+    return `${k.ecs.get(id, 'glyph')?.color}|${f && geoOf(f) ? f.key : 'stand-in'}|${fc?.done?.join(',') ?? ''}|${k.ecs.get(id, 'structure')?.stage ?? ''}|${dressed?.key ?? ''}|${fc?.out?.join(',') ?? ''}`;
   }
 
   private build(id: Id, sig: string): EntityView {

@@ -2301,6 +2301,30 @@ in tre punti: la collisione, la rete di ogni luogo quando il suo piano si stende
   locali (`author: offline`) si richiede quando non lo sono. Compito comune, lento quanto basta per la coda degli abbonamenti, con il passo
   `interno:<modello>` della generazione differita. Le case del borgo del seme portano la casa generica `structure` (1,7 caselle² a terra):
   restano nude.
+- **I mobili degli interni si usano** (ADR-0272, T514): i mobili posati restano voxel dell'edificio (una mesh, i suoi pavimenti), e accanto a
+  ognuno il kernel fa una cosa del mondo che **non si disegna** (il componente `fitted`, `src/kernel/fitted.ts`): del modulo che indossa il
+  modello del mobile (`pieceModule`: un'entità non qualcuno, non un veicolo, non unica; prima quella ferma che fa qualcosa, poi per id), con
+  le sue azioni, il suo contenitore e `takeable`, o, se nessun modulo lo indossa, una cosa col menu di ogni cosa (Esamina, Altro…, Posa),
+  con un contenitore del kernel (`PIECE_STORE` posti, il bottino comune) se il nome dice che contiene (`storeNamed`: cassa, credenza,
+  baule, armadio, archivio, barile…; negli universi del Concilio i moduli del seme non ci sono e i loro modelli sì); senza glifo, col corpo che non ferma nessuno, sul pavimento del suo piano (`fitted.z`, che `settleHeights` non
+  tocca), la forma il modello del mobile al seme dell'edificio (`PIECE_SEED`), del luogo dell'edificio. La sua origine è
+  `<origine dell'edificio>~<chiave>` (`pieceOrigin`; la chiave, `pieceKeys`, l'id e l'angolo più basso della sua scatola): il contenitore si
+  salva per origine come per le cose del luogo, e `unloadChunk` ricorda i contenitori aperti delle cose che se ne vanno col luogo. **La
+  sincronia** (`syncFitted`, a ogni tick dopo i luoghi e prima dei solidi) guarda un edificio solo quando cambia il suo aspetto, i mobili tolti
+  o lo stadio, o una forma è pronta; tiene le cose che ci sono, fa quelle che mancano, toglie quelle di un interno che non c'è più; un edificio
+  in costruzione non ne ha, un mirror non ne fa. **Trovarli**: `E`, il tasto destro e il cursore li trovano per la scatola, girata come
+  l'edificio, sul piano del viandante (`pieceAt`, prima di `builtAt`); il cursore dice il modulo (nome, descrizione, «E per aprire»), di un
+  mobile senza modulo il nome della libreria e «Arredo — …» (`furnitureAt`, T431). **Prenderli** (ADR-0168): l'origine in `consumed` e la
+  chiave in `FormComp.out` dell'edificio (`takeOut`, anche per la rottura e per ciò che Lua distrugge consumandolo); l'istanza ha la griglia
+  arredata senza i voxel dei mobili tolti (`withoutPieces` in `instanceGrid`, i voxel di ogni mobile in `FormResult.furniture[].cells`,
+  `FURNISHING` 3), per il disegno (`changedBody`), il cammino (`groundOf`) e le azioni del modello, come una porta aperta: il programma
+  dell'edificio non gira di nuovo. Preso è `thing:<modulo>` col seme che aveva nell'edificio, posato altrove resta così (`carriedSeed`,
+  `MovedRecord.seed` solo se non è quello dell'origine). **I ripiani** (ADR-0150): il supporto di un mobile dell'interno sono i pavimenti
+  dell'edificio sopra la sua scatola (`pieceSupport`, `pieceLevels`), fra il fondo e la cima (`Support.top`); `supportOf` ritrova il mobile
+  sotto ciò che vi giace per altezza; un mobile con qualcosa sopra o qualcuno in piedi sopra non si prende. **In molti** la cosa va ai client
+  come le altre (`fitted` in `ENTITY_PARTS`, `shownFitted`: mai l'origine dell'edificio né la chiave; il mirror la legge con `readFitted`), e
+  l'edificio con le chiavi dei mobili tolti (`FormView.out`, `outList`). Lua non scrive `fitted`, né con `ecs.set` né con `ecs.spawn`; le
+  azioni del modello sulla cosa di un mobile non ci sono e «Altro…» non le insegna. Test in `tests/mobili-interni.test.ts`.
 - **La casa che usa la Grande** (ADR-0213, T413): un'abitazione che cresce a regole dà alla casa il pavimento della sua taglia, non un
   corpo di 35-45 voxel in un giardino. Chi lo è lo dice la richiesta (`SculptRequest.dwelling`: le case comuni del mondo) o il concetto
   (`isDwelling` in `src/mj/classes.ts`, le parole di una casa e nessuna di un forte, una torre, un tempio, in italiano e in inglese). Il

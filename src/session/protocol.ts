@@ -87,6 +87,8 @@ export interface FormView {
   done?: string[];
   /** The stratum this building's cellar is dug into (T479, ADR-0253), when it has a cellar. */
   stratum?: string;
+  /** The pieces of its interior taken away (T514, ADR-0272): their keys, which the client's form of the building draws without. */
+  out?: string[];
 }
 
 /**
@@ -125,9 +127,10 @@ export interface EntityView extends OnDeck {
  * The components of an entity a client gets (T39): what the renderer and the menus read. Its mind, its memories and
  * what it carries stay on the server; of `identity` only the name, of `mind` only that it has one. `placed` (T291): the height of
  * the shelf a thing lies on, from which the mirror rests it on the furniture it has too. `below` (T417): the height of the cellar's floor a
- * thing stands on, from which the mirror keeps it down there.
+ * thing stands on, from which the mirror keeps it down there. `fitted` (T514): a piece of a building's interior, what it is and where
+ * (`shownFitted`: never who it is), which the mirror finds by its box on its storey and does not draw.
  */
-export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'light', 'fire', 'activity', 'wander', 'container', 'identity', 'mind', 'placed', 'below'] as const;
+export const ENTITY_PARTS = ['pickup', 'rune', 'body', 'interact', 'light', 'fire', 'activity', 'wander', 'container', 'identity', 'mind', 'placed', 'below', 'fitted'] as const;
 
 /** The fields of an `EntityView` that only say where it is (T442): a view with no other is a move, the look stays as it was. */
 export const MOVE_FIELDS: ReadonlySet<string> = new Set(['id', 'x', 'y', 'on', 'lx', 'ly', 'vehicle']);

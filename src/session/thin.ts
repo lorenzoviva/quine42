@@ -23,6 +23,7 @@ import { readUncoveredKeys } from '../kernel/cover';
 import { readWorn } from '../kernel/wearing';
 import { isThing } from '../kernel/moving';
 import { ENTITY_PARTS, isMove, type OnDeck } from './protocol';
+import { outList, readFitted } from '../kernel/fitted';
 import { coast, offDeck, onDeck, readVehicleView, turnBetween, type VehiclePose, type VehicleView } from '../kernel/vehicle';
 import { readRelief, SEA_DRAFT } from '../kernel/relief';
 import { readStrata } from '../kernel/strata';
@@ -544,8 +545,19 @@ export class ThinClient {
     const parts: Record<string, unknown> = { ...(t.c ?? {}) };
     // An item on the ground has no module: what it is, is what it would be in the hand.
     if (t.m && (t.c?.pickup as { item?: string } | undefined)?.item !== t.m) parts.module = { id: t.m };
-    // A card that does not work here is not drawn (T296): the generic of its class in its place, as the world does.
-    if (t.form) parts.form = k.worn({ ...t.form });
+    // A card that does not work here is not drawn (T296): the generic of its class in its place, as the world does. The pieces of a
+    // building's interior taken away (T514) as a list of keys, whatever came.
+    if (t.form) {
+      const { out, ...form } = t.form;
+      const gone = outList(out);
+      parts.form = k.worn({ ...form, ...(gone ? { out: gone } : {}) });
+    }
+    // A piece of an interior (T514): what it is and where, numbers and short texts, or nothing.
+    if ('fitted' in parts) {
+      const piece = readFitted(parts.fitted);
+      if (piece) parts.fitted = piece;
+      else delete parts.fitted;
+    }
     if (t.glyph) parts.glyph = t.glyph;
     for (const name of MIRRORED) {
       // An opened container keeps what it was seen to hold (the server sends only its size with the entity).
