@@ -332,11 +332,20 @@ class Census {
   }
 }
 
-/** The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. */
-let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics } | undefined;
+/**
+ * The grid of the run in progress and its census (built when a scan first needs it), and when the run must end: runs do not nest. `turn`:
+ * where the grid's log was when the turn in progress began (whoever runs the turns says it), MarkovJunior's `ip.first[ip.counter]`.
+ */
+let current: { g: Grid3; census?: Census; deadline?: number; ceilings?: NodeCeilings; semantics?: Semantics; turn?: number } | undefined;
 
 /** The semantics of the run in progress (T526, ADR-0263): ours unless the run was told `mj`. */
 export const runSemantics = (): Semantics => current?.semantics ?? 'ours';
+
+/**
+ * Where the turn in progress began in the log of `g` (T527): what the loop that runs the turns said, or, for a node run some other way,
+ * where the log is now (the same, since a node that does nothing writes nothing: the turn's first writes are the node's that acts).
+ */
+const turnStart = (g: Grid3): number => (current !== undefined && current.g === g && current.turn !== undefined && current.turn <= g.log.length ? current.turn : g.log.length);
 
 /**
  * Ceilings a run may ask for besides the engine's own (the world's, T336, ADR-0176): past one the node is an error that says so, below
@@ -396,6 +405,22 @@ function write(g: Grid3, idx: number, v: number): boolean {
 }
 
 /**
+ * MarkovJunior's `AllNode.Fit` (T527): every cell a match writes goes into the list of changes, also one that already holds the value, so
+ * that the nodes looking at the changes look around it again. Only under the original's semantics; a frozen cell of a piece stays as it is.
+ */
+function writeLogged(g: Grid3, idx: number, v: number): void {
+  if (g.cells[idx] !== v) {
+    write(g, idx, v);
+    return;
+  }
+  g.log.push(idx);
+  if (g.log.length > 2_000_000) {
+    g.log.length = 0;
+    g.epoch++;
+  }
+}
+
+/**
  * The codes of a program, and the sets of codes its rules accept. A set is a table of MAX_CODES flags,
  * referred to by its number: membership is one array read, for any number of codes (a 32-bit mask
  * would stop at 31).
@@ -441,6 +466,11 @@ interface Pattern {
   p: number;
   /** Which rule of its node it comes from: symmetry variants share the number. */
   rule: number;
+  /**
+   * Under the original's semantics (T527, ADR-0268): the chance of a `prl` as written, 0 too (never), 1 if not said; `p` (ours) makes 0 a 1.
+   * A `one` and an `all` do not read it, as there.
+   */
+  chance?: number;
 }
 
 const cellsOf = (row: string) => row.match(/\[[^\]]*\]|./g) ?? [];
@@ -536,6 +566,131 @@ function variants(p: Pattern, sym: Sym): Pattern[] {
     out.push(v);
   }
   return out;
+}
+
+// ---------------------------------------------------------------- the symmetries of the original (T527, A1-2, ADR-0268)
+
+/** A rule as MarkovJunior turns it: what it reads in its box, what it writes in its own (the same box, but in a map's rules). */
+interface Turned {
+  input: Int32Array;
+  output: Int16Array;
+  d: Vec3;
+  D: Vec3;
+}
+
+/** Rule.ZRotated of MarkovJunior on a box of cells: a quarter turn about z (x and y swap). */
+function zRotatedCells<T extends Int32Array | Int16Array>(src: T, [X, Y, Z]: Vec3): [T, Vec3] {
+  const out = new (src.constructor as new (n: number) => T)(src.length);
+  for (let z = 0; z < Z; z++) for (let y = 0; y < X; y++) for (let x = 0; x < Y; x++) out[x + y * Y + z * X * Y] = src[X - 1 - y + x * X + z * X * Y];
+  return [out, [Y, X, Z]];
+}
+/** Rule.YRotated: a quarter turn about y (x and z swap). */
+function yRotatedCells<T extends Int32Array | Int16Array>(src: T, [X, Y, Z]: Vec3): [T, Vec3] {
+  const out = new (src.constructor as new (n: number) => T)(src.length);
+  for (let z = 0; z < X; z++) for (let y = 0; y < Y; y++) for (let x = 0; x < Z; x++) out[x + y * Z + z * Z * Y] = src[X - 1 - z + y * X + x * X * Y];
+  return [out, [Z, Y, X]];
+}
+/** Rule.Reflected: the mirror of x. */
+function reflectedCells<T extends Int32Array | Int16Array>(src: T, [X, Y, Z]: Vec3): [T, Vec3] {
+  const out = new (src.constructor as new (n: number) => T)(src.length);
+  for (let z = 0; z < Z; z++) for (let y = 0; y < Y; y++) for (let x = 0; x < X; x++) out[x + y * X + z * X * Y] = src[X - 1 - x + y * X + z * X * Y];
+  return [out, [X, Y, Z]];
+}
+const turnA = (t: Turned): Turned => {
+  const [input, d] = zRotatedCells(t.input, t.d);
+  const [output, D] = zRotatedCells(t.output, t.D);
+  return { input, output, d, D };
+};
+const turnB = (t: Turned): Turned => {
+  const [input, d] = yRotatedCells(t.input, t.d);
+  const [output, D] = yRotatedCells(t.output, t.D);
+  return { input, output, d, D };
+};
+const turnR = (t: Turned): Turned => {
+  const [input, d] = reflectedCells(t.input, t.d);
+  const [output, D] = reflectedCells(t.output, t.D);
+  return { input, output, d, D };
+};
+/** Rule.Same: the same boxes, the same cells read, the same cells written. */
+function sameTurn(a: Turned, b: Turned): boolean {
+  for (let k = 0; k < 3; k++) if (a.d[k] !== b.d[k] || a.D[k] !== b.D[k]) return false;
+  for (let i = 0; i < a.input.length; i++) if (a.input[i] !== b.input[i]) return false;
+  for (let i = 0; i < a.output.length; i++) if (a.output[i] !== b.output[i]) return false;
+  return true;
+}
+
+const EVERY = (n: number) => Array.from({ length: n }, () => true);
+const ONLY = (n: number, keep: readonly number[]) => Array.from({ length: n }, (_, l) => keep.includes(l));
+/**
+ * The subgroups of SymmetryHelper by our names, as the indices of its list of transforms: of the square (8) on a flat grid, of the cube (48)
+ * on one of more layers. The original's names on a flat grid are `() (x) (y) (x)(y) (xy+) (xy)` and on the others `() (x) (z) (xy) (xyz+)
+ * (xyz)`; the rest is ours, read as what it does there: on a flat grid the mirror of z is nothing and the turns of the cube are the square,
+ * on a grid of layers the mirror of y and the two of the square are the same transforms of the floor (the first 8 of the cube are the square).
+ */
+const SQUARE_SUBGROUPS: Record<Sym, readonly boolean[]> = {
+  none: ONLY(8, [0]),
+  x: ONLY(8, [0, 1]),
+  y: ONLY(8, [0, 5]),
+  mirrors: ONLY(8, [0, 1, 4, 5]),
+  turns: ONLY(8, [0, 2, 4, 6]),
+  xy: EVERY(8),
+  z: ONLY(8, [0]),
+  rot: EVERY(8),
+  all: EVERY(8),
+};
+const CUBE_SUBGROUPS: Record<Sym, readonly boolean[]> = {
+  none: ONLY(48, [0]),
+  x: ONLY(48, [0, 1]),
+  y: ONLY(48, [0, 5]),
+  z: ONLY(48, [0, 17]),
+  mirrors: ONLY(48, [0, 1, 4, 5]),
+  turns: ONLY(48, [0, 2, 4, 6]),
+  xy: Array.from({ length: 48 }, (_, l) => l < 8),
+  rot: Array.from({ length: 48 }, (_, l) => l % 2 === 0),
+  all: EVERY(48),
+};
+
+/**
+ * SymmetryHelper.SquareSymmetries (a flat grid) or CubeSymmetries: the transforms of a rule in the original's order (`e, r, a, ra, a², …`,
+ * a the quarter turn about z, b about y, r the mirror of x), those of the subgroup, without the doubles. The order is part of the run: the
+ * list of matches is made rule by rule in it.
+ */
+function originalTurns(t: Turned, sym: Sym, flat: boolean): Turned[] {
+  const keep = (flat ? SQUARE_SUBGROUPS : CUBE_SUBGROUPS)[sym] ?? (flat ? SQUARE_SUBGROUPS : CUBE_SUBGROUPS).xy;
+  const s: Turned[] = new Array(flat ? 8 : 48);
+  s[0] = t;
+  s[1] = turnR(s[0]);
+  s[2] = turnA(s[0]);
+  s[3] = turnR(s[2]);
+  s[4] = turnA(s[2]);
+  s[5] = turnR(s[4]);
+  s[6] = turnA(s[4]);
+  s[7] = turnR(s[6]);
+  if (!flat) {
+    // s[8..31]: b of the one eight before (s[8] = b(s[0]) … s[30] = b(s[22])); s[32..39]: a of s[8..15]; s[40..47]: a of s[24..31]; each
+    // followed by its mirror.
+    for (let i = 8; i < 32; i += 2) {
+      s[i] = turnB(s[i - 8]);
+      s[i + 1] = turnR(s[i]);
+    }
+    for (let i = 32; i < 40; i += 2) {
+      s[i] = turnA(s[i - 24]);
+      s[i + 1] = turnR(s[i]);
+    }
+    for (let i = 40; i < 48; i += 2) {
+      s[i] = turnA(s[i - 16]);
+      s[i + 1] = turnR(s[i]);
+    }
+  }
+  const out: Turned[] = [];
+  for (let i = 0; i < s.length; i++) if (keep[i] && !out.some((u) => sameTurn(u, s[i]))) out.push(s[i]);
+  return out;
+}
+
+/** The variants of a rule node's pattern under the original's semantics: SymmetryHelper's order, its subgroups (`originalTurns`). */
+function originalVariants(p: Pattern, sym: Sym, flat: boolean): Pattern[] {
+  const d: Vec3 = [p.dx, p.dy, p.dz];
+  return originalTurns({ input: p.input, output: p.output, d, D: d }, sym, flat).map((t) => ({ ...p, dx: t.d[0], dy: t.d[1], dz: t.d[2], input: t.input, output: t.output }));
 }
 
 // ---------------------------------------------------------------- runners
@@ -667,6 +822,41 @@ let stamps = new Uint32Array(0);
 let stampN = 0;
 /** One buffer for `all`: the cells written in this step. Cleared after each step. */
 let writtenBuf = new Uint8Array(0);
+/** One buffer for a `prl` under the original's semantics (T527): the new grid of its step, read only where it changes. */
+let prlBuf = new Uint8Array(0);
+
+/** A cell in the log without writing it (T527): MarkovJunior's change that is a change only for whoever looks at the list. */
+function logOnly(g: Grid3, idx: number): void {
+  g.log.push(idx);
+  if (g.log.length > 2_000_000) {
+    g.log.length = 0;
+    g.epoch++;
+  }
+}
+
+/**
+ * A rule node's list of matches under the original's semantics (T527, A1-2, ADR-0268): RuleNode's `matches` and `matchMask`. Lazy as
+ * there: the first step scans the grid; from then on what the cells written since the turn the node last matched in make new goes at the
+ * end; a match is checked again only when it is drawn (`one`), and an `all` empties it at every step.
+ */
+interface OriginalList {
+  /** The grid's layers its variants were made for: one (the square's symmetries) or more (the cube's). */
+  flat: boolean;
+  /** The matches, `pattern · N + origin` each; a drawn one leaves its place to the last. */
+  keys: number[];
+  /** Per pattern, per origin: 1 if its match is in the list (`matchMask`). A full scan keeps them as they are, as there. */
+  masks: Array<Uint8Array | undefined>;
+  /** The cells of the grid the masks are for. */
+  N: number;
+  /** Where the log was when the turn the node last matched in began (`ip.first[lastMatchedTurn]`); -1 before it has matched. */
+  since: number;
+  /** The grid's epoch then: another one, and the log no longer holds the changes since (the list is found again, ADR-0268). */
+  epoch: number;
+  /** Per pattern, per code: the cells of its input that accept the code, (i, j, k) in a row, in the pattern's order (`Rule.ishifts`). */
+  shifts: Array<Array<Int32Array | undefined>>;
+  /** Per pattern: the codes some cell of its input accepts, null if one takes any (`*`); undefined until asked. */
+  accepted: Array<Int32Array | null | undefined>;
+}
 
 class RuleRunner extends Runner {
   protected patterns: Pattern[];
@@ -679,10 +869,16 @@ class RuleRunner extends Runner {
   /** The cells the rules look for (a code, or a set of codes), to explain a node that never matches. */
   private wanted: string[];
   protected alpha: Alphabet;
+  /** The rules and the symmetry the node was given: under the original's semantics its variants are made again from them (T527). */
+  private given: Rule3[];
+  private givenSym: Sym;
+  /** Under the original's semantics (T527, ADR-0268): its list of matches, made at its first step; undefined in a run of ours. */
+  protected orig?: OriginalList;
 
   /**
    * `inputOnly`: a match is wherever the input fits, as in MarkovJunior, even if it would change nothing (the guided nodes, where a
    * rule that keeps a cell competes with the others); otherwise only where it would change something, as the lab has always done.
+   * Under the original's semantics (T527) every match is where the input fits.
    */
   constructor(
     protected kind: 'one' | 'all' | 'prl',
@@ -700,11 +896,393 @@ class RuleRunner extends Runner {
     this.alpha = alpha;
     this.sets = alpha.sets;
     this.uniform = this.patterns.every((p) => p.p === this.patterns[0].p);
+    this.given = rules;
+    this.givenSym = sym;
   }
 
   reset(): void {
     super.reset();
     this.epoch = -1;
+    const o = this.orig;
+    if (o) {
+      // RuleNode.Reset: the next step scans the grid again. OneNode.Reset empties its list and the masks with it; an all and a prl keep
+      // theirs, and the scan starts the list again (the masks of an all as they are, as there).
+      o.since = -1;
+      if (this.kind === 'one' && o.keys.length) this.unlist(o);
+    }
+  }
+
+  // ------------------------------------------------ the original's semantics (T527, A1-2, ADR-0268)
+
+  /**
+   * The node's list under the original's semantics, for a grid of these layers: the first time (or if the grid's layers change) its
+   * variants are made again in SymmetryHelper's order, with the square's subgroups on a flat grid and the cube's on the others.
+   */
+  protected originalFor(g: Grid3): OriginalList {
+    const flat = g.Z === 1;
+    if (this.orig?.flat === flat) return this.orig;
+    this.patterns = this.given.flatMap((r, i) =>
+      originalVariants({ ...parsePattern(r, this.alpha), rule: i, chance: typeof r.p === 'number' && Number.isFinite(r.p) ? r.p : 1 }, r.symmetry ?? this.givenSym, flat),
+    );
+    this.probes = [];
+    this.patternsChanged();
+    return (this.orig = { flat, keys: [], masks: [], N: 0, since: -1, epoch: -1, shifts: [], accepted: [] });
+  }
+
+  /** What a node keeps of its patterns besides the probes (GuidedRunner), thrown away when they are made again. */
+  protected patternsChanged(): void { }
+
+  /** The cells of pattern `pi`'s input that accept code `c`, (i, j, k) in a row, in the pattern's order (`Rule.ishifts`). */
+  private shiftsOf(o: OriginalList, pi: number, c: number): Int32Array {
+    const per = (o.shifts[pi] ??= []);
+    let s = per[c];
+    if (s === undefined) {
+      const p = this.patterns[pi];
+      const out: number[] = [];
+      for (let k = 0, n = 0; k < p.dz; k++)
+        for (let j = 0; j < p.dy; j++)
+          for (let i = 0; i < p.dx; i++, n++) {
+            const set = p.input[n];
+            if (set === -1 || this.sets[set][c]) out.push(i, j, k);
+          }
+      s = per[c] = Int32Array.from(out);
+    }
+    return s;
+  }
+
+  /** The codes some cell of pattern `pi`'s input accepts, or null if one takes any (`*`): a row of the grid without any finds nothing. */
+  private acceptedOf(o: OriginalList, pi: number): Int32Array | null {
+    let a = o.accepted[pi];
+    if (a === undefined) {
+      const p = this.patterns[pi];
+      if (p.input.some((s) => s === -1)) a = null;
+      else {
+        const flags = new Uint8Array(MAX_CODES);
+        for (const s of p.input) {
+          const set = this.sets[s];
+          for (let c = 0; c < MAX_CODES; c++) if (set[c]) flags[c] = 1;
+        }
+        const codes: number[] = [];
+        for (let c = 0; c < MAX_CODES; c++) if (flags[c]) codes.push(c);
+        a = Int32Array.from(codes);
+      }
+      o.accepted[pi] = a;
+    }
+    return a;
+  }
+
+  /** Whether the match of pattern `pi` at `at` holds now (`Grid.Matches`), in a piece also leaving its frozen cells alone (T339). */
+  protected holds(pi: number, g: Grid3, at: number): boolean {
+    const pr = this.probe(pi, g);
+    if (!RuleRunner.fitsAt(pr, g.cells, at)) return false;
+    const mask = RuleRunner.guardOf(g);
+    return mask === undefined || RuleRunner.freeAt(pr, g.cells, at, mask, this.kind === 'one');
+  }
+
+  /** Whether any of these codes is in row `r` of the census. */
+  private static anyIn(rows: Array<Int32Array | undefined>, codes: Int32Array, r: number): boolean {
+    for (let t = 0; t < codes.length; t++) {
+      const rc = rows[codes[t]];
+      if (rc !== undefined && rc[r] > 0) return true;
+    }
+    return false;
+  }
+
+  /**
+   * RuleNode.Go's scan of the whole grid, pattern by pattern (rule by rule, each variant in its order): the cells at the pattern's own
+   * stride from its far corner, and at each the origins whose pattern takes the cell's code there, in the pattern's order. Every match
+   * found, in the original's order, goes into `out`. What finds nothing is skipped, so the order stays: a pattern a cell of which takes no
+   * code on the grid; a row of the stride without any code the pattern takes; a row of the stride whose matches would all have their
+   * rarest cell (the anchor) in rows of the grid where no code of the anchor is (as the census does for ours, ADR-0142).
+   */
+  private scanOriginal(g: Grid3, o: OriginalList, out: number[]): void {
+    const { X, Y, Z, cells } = g;
+    const N = cells.length;
+    const XY = X * Y;
+    const census = censusOf(g);
+    const rows = census.rows;
+    const guard = RuleRunner.guardOf(g);
+    const one = this.kind === 'one';
+    const C = this.alpha.codes.length;
+    for (let pi = 0; pi < this.patterns.length; pi++) {
+      const p = this.patterns[pi];
+      if (p.dx > X || p.dy > Y || p.dz > Z) continue;
+      const pr = this.probe(pi, g);
+      // The cell of the input with the fewest cells on the grid: none, and the pattern matches nowhere.
+      let anchor = -1;
+      let fewest = Infinity;
+      for (let t = 0; t < pr.inSets.length; t++) {
+        let s = 0;
+        for (const c of codesOf(pr.inSets[t])) s += census.total[c];
+        if (s < fewest) {
+          fewest = s;
+          anchor = t;
+        }
+      }
+      if (fewest === 0) continue;
+      const anchorCodes = anchor >= 0 && fewest < N ? codesOf(pr.inSets[anchor]) : undefined;
+      const aj = anchor >= 0 ? pr.inJ[anchor] : 0;
+      const ak = anchor >= 0 ? pr.inK[anchor] : 0;
+      const accepted = this.acceptedOf(o, pi);
+      // The shifts of every code, at hand: the node's own table, filled once.
+      for (let c = 0; c < C; c++) this.shiftsOf(o, pi, c);
+      const table = o.shifts[pi] as Int32Array[];
+      const base = pi * N;
+      const { dx, dy, dz } = p;
+      for (let z = dz - 1; z < Z; z += dz)
+        rows: for (let y = dy - 1; y < Y; y += dy) {
+          if (accepted !== null && !RuleRunner.anyIn(rows, accepted, z * Y + y)) continue rows;
+          if (anchorCodes !== undefined) {
+            let any = false;
+            for (let k = 0; k < dz && !any; k++) {
+              const sz = z - k;
+              if (sz < 0 || sz + dz > Z) continue;
+              for (let j = 0; j < dy && !any; j++) {
+                const sy = y - j;
+                if (sy < 0 || sy + dy > Y) continue;
+                any = RuleRunner.anyIn(rows, anchorCodes, (sz + ak) * Y + sy + aj);
+              }
+            }
+            if (!any) continue rows;
+          }
+          const row = y * X + z * XY;
+          for (let x = dx - 1; x < X; x += dx) {
+            const sh = table[cells[row + x]];
+            for (let l = 0; l < sh.length; l += 3) {
+              const sx = x - sh[l], sy = y - sh[l + 1], sz = z - sh[l + 2];
+              if (sx < 0 || sy < 0 || sz < 0 || sx + dx > X || sy + dy > Y || sz + dz > Z) continue;
+              const at = sx + sy * X + sz * XY;
+              if (RuleRunner.fitsAt(pr, cells, at) && (guard === undefined || RuleRunner.freeAt(pr, cells, at, guard, one))) out.push(base + at);
+            }
+          }
+        }
+    }
+  }
+
+  /**
+   * RuleNode.Go after the node's first match: around every cell written since `from` (each once: a cell met again finds what it found),
+   * the matches its code makes there, at the end of the list unless they are in it.
+   */
+  private catchUp(g: Grid3, o: OriginalList, from: number): void {
+    const { X, Y, Z, cells, log } = g;
+    if (from >= log.length) return;
+    const N = cells.length;
+    const XY = X * Y;
+    if (stamps.length !== N) {
+      stamps = new Uint32Array(N);
+      stampN = 0;
+    }
+    const mark = ++stampN;
+    const guard = RuleRunner.guardOf(g);
+    const one = this.kind === 'one';
+    const P = this.patterns.length;
+    const probes = this.patterns.map((_, pi) => this.probe(pi, g));
+    for (let l = from; l < log.length; l++) {
+      const c = log[l];
+      if (stamps[c] === mark) continue;
+      stamps[c] = mark;
+      const v = cells[c];
+      const cx = c % X;
+      const cy = ((c / X) | 0) % Y;
+      const cz = (c / XY) | 0;
+      for (let pi = 0; pi < P; pi++) {
+        const sh = this.shiftsOf(o, pi, v);
+        if (!sh.length) continue;
+        const p = this.patterns[pi];
+        const pr = probes[pi];
+        const mask = (o.masks[pi] ??= new Uint8Array(N));
+        const base = pi * N;
+        for (let s = 0; s < sh.length; s += 3) {
+          const sx = cx - sh[s], sy = cy - sh[s + 1], sz = cz - sh[s + 2];
+          if (sx < 0 || sy < 0 || sz < 0 || sx + p.dx > X || sy + p.dy > Y || sz + p.dz > Z) continue;
+          const at = sx + sy * X + sz * XY;
+          if (mask[at] || !RuleRunner.fitsAt(pr, cells, at) || (guard !== undefined && !RuleRunner.freeAt(pr, cells, at, guard, one))) continue;
+          mask[at] = 1;
+          o.keys.push(base + at);
+        }
+      }
+    }
+  }
+
+  /** The list emptied with its masks. */
+  private unlist(o: OriginalList): void {
+    const N = o.N;
+    for (const key of o.keys) {
+      const pi = Math.floor(key / N);
+      const m = o.masks[pi];
+      if (m) m[key - pi * N] = 0;
+    }
+    o.keys = [];
+  }
+
+  /**
+   * RuleNode.Go's list: the first time (or after a reset) a full scan, the list started again and the masks kept; then what the changes since
+   * the turn the node last matched in make new. A grid of another size starts everything again; a log that no longer holds those changes
+   * (the grid made anew, or the log past its length, ADR-0268) finds the list again from the grid.
+   */
+  protected update(g: Grid3, o: OriginalList): void {
+    const N = g.cells.length;
+    if (o.N !== N) {
+      o.masks = [];
+      o.keys = [];
+      o.N = N;
+      o.since = -1;
+    }
+    if (o.since >= 0 && (o.epoch !== g.epoch || o.since > g.log.length)) {
+      this.unlist(o);
+      o.since = -1;
+    }
+    if (o.since >= 0) {
+      this.catchUp(g, o, o.since);
+      return;
+    }
+    o.keys = [];
+    this.scanOriginal(g, o, o.keys);
+    for (const key of o.keys) {
+      const pi = Math.floor(key / N);
+      (o.masks[pi] ??= new Uint8Array(N))[key - pi * N] = 1;
+    }
+  }
+
+  /** The node has matched in this turn (`lastMatchedTurn = ip.counter`): the next update starts from where the turn began. */
+  protected matched(g: Grid3, o: OriginalList): void {
+    o.since = turnStart(g);
+    o.epoch = g.epoch;
+  }
+
+  /** A step of the node under the original's semantics: RuleNode.Go, then OneNode.Go, AllNode.Go or ParallelNode.Go. */
+  private goOriginal(g: Grid3, rng: RunRandom): boolean {
+    if (this.limit !== undefined && this.count >= this.limit) return false;
+    const o = this.originalFor(g);
+    if (this.kind === 'prl') return this.prlPut(g, this.prlScan(g, o, rng));
+    this.update(g, o);
+    this.matched(g, o);
+    return this.kind === 'one' ? this.oneOriginal(g, rng, o) : this.allOriginal(g, rng, o);
+  }
+
+  /**
+   * OneNode.RandomMatch without potentials, and OneNode.Apply: a match drawn uniformly from the list (`p` is not read), out of the list,
+   * put if it still holds; one that no longer holds is dropped and another drawn. A match that changes nothing is a step.
+   */
+  protected oneOriginal(g: Grid3, rng: RunRandom, o: OriginalList): boolean {
+    const N = g.cells.length;
+    const keys = o.keys;
+    while (keys.length > 0) {
+      const i = rng.int(keys.length);
+      const key = keys[i];
+      const pi = Math.floor(key / N);
+      const at = key - pi * N;
+      o.masks[pi]![at] = 0;
+      keys[i] = keys[keys.length - 1];
+      keys.pop();
+      if (this.holds(pi, g, at)) {
+        this.apply(g, key);
+        this.count++;
+        this.total++;
+        return true;
+      }
+    }
+    this.explain(g);
+    return false;
+  }
+
+  /**
+   * AllNode.Go without potentials: the list in the original's shuffle («inside-out», `Next(i + 1)` for i from 0), each match put unless a
+   * cell it writes was written in this step (its input is not checked again), every cell it writes in the log; then the list is empty.
+   */
+  protected allOriginal(g: Grid3, rng: RunRandom, o: OriginalList): boolean {
+    const keys = o.keys;
+    const n = keys.length;
+    if (!n) {
+      this.explain(g);
+      return false;
+    }
+    const N = g.cells.length;
+    const order = new Int32Array(n);
+    for (let i = 0; i < n; i++) {
+      const j = rng.int(i + 1);
+      order[i] = order[j];
+      order[j] = i;
+    }
+    if (writtenBuf.length !== N) writtenBuf = new Uint8Array(N);
+    const touched: number[] = [];
+    for (let k = 0; k < n; k++) {
+      const key = keys[order[k]];
+      const pi = Math.floor(key / N);
+      o.masks[pi]![key - pi * N] = 0;
+      this.fitOriginal(g, key, writtenBuf, touched);
+    }
+    for (const idx of touched) writtenBuf[idx] = 0;
+    o.keys = [];
+    this.count++;
+    this.total++;
+    return true;
+  }
+
+  /** AllNode.Fit: nothing if a cell it writes was written in this step; else every cell it writes, written and in the log. */
+  protected fitOriginal(g: Grid3, key: number, written: Uint8Array, touched: number[]): boolean {
+    const N = g.cells.length;
+    const pi = Math.floor(key / N);
+    const at = key - pi * N;
+    const { outOff, outVal } = this.probe(pi, g);
+    for (let t = 0; t < outOff.length; t++) if (written[at + outOff[t]]) return false;
+    for (let t = 0; t < outOff.length; t++) {
+      const idx = at + outOff[t];
+      written[idx] = 1;
+      touched.push(idx);
+      writeLogged(g, idx, outVal[t]);
+    }
+    this.fired[this.patterns[pi].rule]++;
+    return true;
+  }
+
+  /**
+   * ParallelNode.Add over RuleNode.Go's scan: a draw for every match found, in the scan's order (`NextDouble() > p` leaves it out, so
+   * `p="0"` never puts it), what it writes judged on the grid as it was and kept only where the cell changes (a rule that would write the
+   * value already there does not cover one that changes it), into the step's new grid.
+   */
+  protected prlScan(g: Grid3, o: OriginalList, rng: RunRandom): { changes: number[]; applied: number } {
+    const N = g.cells.length;
+    if (prlBuf.length !== N) prlBuf = new Uint8Array(N);
+    const found: number[] = [];
+    this.scanOriginal(g, o, found);
+    if (!found.length) this.explain(g);
+    const cells = g.cells;
+    const changes: number[] = [];
+    let applied = 0;
+    for (const key of found) {
+      const pi = Math.floor(key / N);
+      const p = this.patterns[pi];
+      if (rng.next() > (p.chance ?? 1)) continue;
+      applied++;
+      this.fired[p.rule]++;
+      const { outOff, outVal } = this.probe(pi, g);
+      const at = key - pi * N;
+      for (let t = 0; t < outOff.length; t++) {
+        const idx = at + outOff[t];
+        if (outVal[t] !== cells[idx]) {
+          prlBuf[idx] = outVal[t];
+          changes.push(idx);
+        }
+      }
+    }
+    return { changes, applied };
+  }
+
+  /** ParallelNode.Go: the step's new grid where it changes; a step that puts nothing is a step too, and the node goes on while it puts. */
+  protected prlPut(g: Grid3, step: { changes: number[]; applied: number }): boolean {
+    for (const idx of step.changes) write(g, idx, prlBuf[idx]);
+    this.count++;
+    if (step.applied) this.total++;
+    return step.applied > 0;
+  }
+
+  /** Why the node found nothing the first time it was asked (for a node that never does anything). */
+  protected explain(g: Grid3): void {
+    if (this.total || this.why) return;
+    const total = censusOf(g).total;
+    const absent = this.wanted.filter((w) => w !== '.' && !codesOf(this.sets[this.alpha.mask(w)]).some((c) => total[c] > 0));
+    this.why = absent.length ? `in quel momento nella griglia non c'erano celle ${absent.map((w) => `"${w}"`).join(', ')}` : 'le celle cercate c\'erano, ma mai disposte come nel pattern';
   }
 
   protected probe(pi: number, g: Grid3): Probe {
@@ -924,15 +1502,12 @@ class RuleRunner extends Runner {
   }
 
   go(g: Grid3, rng: RunRandom): boolean {
+    if (runSemantics() === 'mj') return this.goOriginal(g, rng);
     if (this.limit !== undefined && this.count >= this.limit) return false;
     this.sync(g);
     const keys = this.matches.keys;
     if (!keys.length) {
-      if (!this.total && !this.why) {
-        const total = censusOf(g).total;
-        const absent = this.wanted.filter((w) => w !== '.' && !codesOf(this.sets[this.alpha.mask(w)]).some((c) => total[c] > 0));
-        this.why = absent.length ? `in quel momento nella griglia non c'erano celle ${absent.map((w) => `"${w}"`).join(', ')}` : 'le celle cercate c\'erano, ma mai disposte come nel pattern';
-      }
+      this.explain(g);
       return false;
     }
     const N = g.cells.length;
@@ -1244,9 +1819,13 @@ class GuidedRunner extends RuleRunner {
     return out;
   }
 
-  go(g: Grid3, rng: RunRandom): boolean {
-    if (this.limit !== undefined && this.count >= this.limit) return false;
-    const N = g.cells.length;
+  protected patternsChanged(): void {
+    this.deltas = [];
+    this.prepared = undefined;
+  }
+
+  /** The observations, the first time (or on another grid): the present and the future, then the trajectory or the potentials. False if the node stops. */
+  private observeFirst(g: Grid3, rng: RunRandom, N: number): boolean {
     if (this.observations && this.futureComputed && this.future.length !== N) this.futureComputed = false;
     if (this.observations && !this.futureComputed) {
       if (!this.observe(g)) return false;
@@ -1260,7 +1839,11 @@ class GuidedRunner extends RuleRunner {
         }
       }
     }
-    this.sync(g);
+    return true;
+  }
+
+  /** The fields' potentials, at the node's first step and where they are computed again: false if the node stops (RuleNode.Go). */
+  private fieldsReady(g: Grid3, N: number): boolean {
     if (this.fields.length) {
       const fresh = this.count === 0 || this.potentialCells !== N;
       const pot = this.potentialsFor(N, this.observations !== undefined && !this.searching && this.kind !== 'prl');
@@ -1282,6 +1865,128 @@ class GuidedRunner extends RuleRunner {
         return false;
       }
     }
+    return true;
+  }
+
+  /**
+   * Under the original's semantics (T527, A1-2, ADR-0268): RuleNode.Go on the original's list (for a `prl` its scan, with the draws, comes
+   * before the fields, and if they stop the node its changes are in the log and the grid stays), then OneNode.RandomMatch and AllNode.Go
+   * with the potentials: every match in the list's order, a `one` dropping those that no longer hold, a draw for each with a heuristic;
+   * a `one` takes the largest key above -1000, an `all` puts them largest first and counts its step even if nothing fits. What the
+   * observations write and the search are as in ours: A1-5 (T530) aligns them.
+   */
+  private goGuidedOriginal(g: Grid3, rng: RunRandom): boolean {
+    if (this.limit !== undefined && this.count >= this.limit) return false;
+    const N = g.cells.length;
+    const o = this.originalFor(g);
+    if (!this.observeFirst(g, rng, N)) return false;
+    const prl = this.kind === 'prl' ? this.prlScan(g, o, rng) : undefined;
+    if (!prl) this.update(g, o);
+    if (!this.fieldsReady(g, N)) {
+      if (prl) for (const idx of prl.changes) logOnly(g, idx);
+      return false;
+    }
+    if (prl) return this.prlPut(g, prl);
+    this.matched(g, o);
+    if (this.trajectory) {
+      if (this.count >= this.trajectory.length) return false;
+      const next = this.trajectory[this.count];
+      for (let i = 0; i < N; i++) if (g.cells[i] !== next[i]) write(g, i, next[i]);
+      this.count++;
+      this.total++;
+      return true;
+    }
+    const guided = this.fields.length > 0 || (this.observations !== undefined && !this.searching);
+    const T = this.temperature;
+    const keys = o.keys;
+    if (this.kind === 'one') {
+      if (!guided) return this.oneOriginal(g, rng, o);
+      if (this.observations && goalReached(g.cells, this.future)) {
+        this.futureComputed = false;
+        return false;
+      }
+      let max = -1000;
+      let argmax = -1;
+      let first = 0;
+      let have = false;
+      for (let k = 0; k < keys.length; k++) {
+        const key = keys[k];
+        const pi = Math.floor(key / N);
+        const at = key - pi * N;
+        if (!this.holds(pi, g, at)) {
+          o.masks[pi]![at] = 0;
+          keys[k] = keys[keys.length - 1];
+          keys.pop();
+          k--;
+          continue;
+        }
+        const h = this.heuristic(g, key);
+        if (h === null) continue;
+        if (!have) {
+          first = h;
+          have = true;
+        }
+        const u = rng.next();
+        const score = T > 0 ? Math.pow(u, Math.exp((h - first) / T)) : -h + 0.001 * u;
+        if (score > max) {
+          max = score;
+          argmax = k;
+        }
+      }
+      if (argmax < 0) {
+        if (!this.total) this.why ??= keys.length ? 'le regole combaciavano, ma ogni applicazione portava dove un potenziale è -1' : 'le celle cercate non c\'erano mai disposte come nel pattern';
+        return false;
+      }
+      // The match stays in the list, as there: it is checked again when it is met.
+      this.apply(g, keys[argmax]);
+      this.count++;
+      this.total++;
+      return true;
+    }
+    if (!guided) return this.allOriginal(g, rng, o);
+    if (!keys.length) {
+      if (!this.total) this.why ??= 'le celle cercate non c\'erano mai disposte come nel pattern';
+      return false;
+    }
+    const list: Array<[number, number]> = [];
+    let first = 0;
+    let have = false;
+    for (let m = 0; m < keys.length; m++) {
+      const h = this.heuristic(g, keys[m]);
+      if (h === null) continue;
+      if (!have) {
+        first = h;
+        have = true;
+      }
+      const u = rng.next();
+      list.push([m, T > 0 ? Math.pow(u, Math.exp((h - first) / T)) : -h + 0.001 * u]);
+    }
+    // LINQ's OrderBy(-key), stable: equal keys keep the list's order. The masks of the matches without a heuristic stay (as there).
+    const ordered = list.map((e, i) => [e[0], -e[1], i] as const).sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : a[2] - b[2]));
+    if (writtenBuf.length !== N) writtenBuf = new Uint8Array(N);
+    const touched: number[] = [];
+    let any = false;
+    for (const [m] of ordered) {
+      const key = keys[m];
+      const pi = Math.floor(key / N);
+      o.masks[pi]![key - pi * N] = 0;
+      any = this.fitOriginal(g, key, writtenBuf, touched) || any;
+    }
+    for (const idx of touched) writtenBuf[idx] = 0;
+    o.keys = [];
+    this.count++;
+    if (any) this.total++;
+    else if (!this.total) this.why ??= 'le regole combaciavano, ma ogni applicazione portava dove un potenziale è -1';
+    return true;
+  }
+
+  go(g: Grid3, rng: RunRandom): boolean {
+    if (runSemantics() === 'mj') return this.goGuidedOriginal(g, rng);
+    if (this.limit !== undefined && this.count >= this.limit) return false;
+    const N = g.cells.length;
+    if (!this.observeFirst(g, rng, N)) return false;
+    this.sync(g);
+    if (!this.fieldsReady(g, N)) return false;
     if (this.kind === 'prl') return super.go(g, rng);
     if (this.trajectory) {
       if (this.count >= this.trajectory.length) return false;
@@ -1590,6 +2295,10 @@ class MapRunner extends Runner {
   /** The denominators of the factors (T335): 1 unless the scale is a fraction. */
   private divide: Vec3;
   private rules: Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }>;
+  /** The rules as written, and the symmetry: under the original's semantics their turns are SymmetryHelper's, for the old grid's layers (T527). */
+  private base: Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }>;
+  private sym: Sym;
+  private original?: { flat: boolean; rules: Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }> };
   private sets: Uint8Array[];
   /** MarkovJunior's map: the new grid starts empty and only the rules write it (wrapping round the edges). */
   private clear: boolean;
@@ -1603,7 +2312,7 @@ class MapRunner extends Runner {
     this.sets = alpha.sets;
     this.clear = node.clear === true;
     if (!this.clear && divide.some((v) => v !== 1)) throw new Mj3Error('map: una scala frazionaria vale solo con la griglia nuova vuota (clear)');
-    this.rules = (node.rules ?? []).flatMap((r) => {
+    this.base = (node.rules ?? []).map((r) => {
       const li = layersOf(String(r?.in ?? ''));
       const lo = layersOf(String(r?.out ?? ''));
       const d: Vec3 = [li[0]?.[0]?.length ?? 0, li[0]?.length ?? 0, li.length];
@@ -1617,9 +2326,13 @@ class MapRunner extends Runner {
         if (b.startsWith('[')) throw new Mj3Error(`"[..]" non è ammesso in un'uscita: ${r.out}`);
         return b === '*' ? -1 : alpha.index(b);
       });
-      // Every turn of the rule (in and out turned alike), without duplicates.
+      return { d, D, input, output };
+    });
+    this.sym = node.symmetry ?? 'xy';
+    // Every turn of the rule (in and out turned alike), without duplicates.
+    this.rules = this.base.flatMap(({ d, D, input, output }) => {
       const seen = new Set<string>();
-      return symmetries(node.symmetry ?? 'xy').flatMap(({ perm, flip }) => {
+      return symmetries(this.sym).flatMap(({ perm, flip }) => {
         const [ti, nd] = turnCells(input, d, perm, flip);
         const [to, nD] = turnCells(output, D, perm, flip);
         const key = `${nd.join(',')}|${nD.join(',')}|${ti.join(',')}|${to.join(',')}`;
@@ -1629,10 +2342,17 @@ class MapRunner extends Runner {
       });
     });
   }
+  /** MapNode.Load under the original's semantics: every rule's turns in SymmetryHelper's order, the square's on a flat old grid (T527). */
+  private originalRules(flat: boolean): Array<{ d: Vec3; D: Vec3; input: Int32Array; output: Int16Array }> {
+    if (this.original?.flat !== flat)
+      this.original = { flat, rules: this.base.flatMap((r) => originalTurns({ input: r.input, output: r.output, d: r.d, D: r.D }, this.sym, flat).map((t) => ({ d: t.d, D: t.D, input: t.input, output: t.output }))) };
+    return this.original.rules;
+  }
   go(g: Grid3): boolean {
     if (this.count >= 1) return false;
     this.count++;
     this.total++;
+    const rules = runSemantics() === 'mj' ? this.originalRules(g.Z === 1) : this.rules;
     const [sx, sy, sz] = this.scale;
     const [qx, qy, qz] = this.divide;
     // MarkovJunior's integer division: M·N/D cells, a cell x of the old grid at x·N/D.
@@ -1647,7 +2367,7 @@ class MapRunner extends Runner {
           for (let x = 0; x < X; x++) cells[x + y * X + z * X * Y] = old[Math.floor(x / sx) + Math.floor(y / sy) * g.X + Math.floor(z / sz) * g.X * g.Y];
     // Without `clear` rules stay inside the grid; with it they wrap round, as MarkovJunior's map does.
     const wrap = this.clear;
-    for (const r of this.rules) {
+    for (const r of rules) {
       const [dx, dy, dz] = r.d;
       const [DX, DY] = r.D;
       for (let oz = 0; oz + (wrap ? 1 : dz) <= g.Z; oz++)
@@ -2018,7 +2738,8 @@ class PiecesRunner extends Runner {
         const cap = own?.steps ?? PIECE_DEFAULTS.steps;
         let steps = 0;
         let done = true;
-        current = { ...(outer ?? {}), g: pg, census: undefined, deadline };
+        const ctx = { ...(outer ?? {}), g: pg, census: undefined, deadline, turn: 0 };
+        current = ctx;
         pieceGuard = { g: pg, mask };
         this.root.reset();
         const prng = rng.spawn(hash32(base, index));
@@ -2028,6 +2749,8 @@ class PiecesRunner extends Runner {
               done = false;
               break;
             }
+            // Where the piece's turn begins in its own log (T527).
+            ctx.turn = pg.log.length;
             if (!this.root.go(pg, prng)) break;
             steps++;
           }
@@ -2398,15 +3121,22 @@ function execIn(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: numb
 function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: number, trace: Trace, opts: RunOptions): RunResult & { snapshots?: Snapshot[] } {
   root.reset();
   const rng = randomFor(opts.semantics, seed);
+  // Under the original's semantics every turn is a step (Interpreter.Run), the last one too, in which the root finds nothing and the run
+  // ends (T527, ADR-0268); in ours a step is a turn in which something was done.
+  const everyTurn = opts.semantics === 'mj';
   let steps = 0;
   let late = false;
+  let ended = false;
   const keep = opts.snapshots ?? 0;
   const shots: Snapshot[] = [];
   let every = 1;
   const shoot = () => shots.push({ X: g.X, Y: g.Y, Z: g.Z, cells: new Uint8Array(g.cells), step: steps });
   if (keep) shoot();
   opts.watch?.start(g);
+  const ctx = current;
   while (steps < maxSteps) {
+    // Where the turn begins in the log: the nodes that match in it look at the changes from here at their next step (T527).
+    if (ctx !== undefined) ctx.turn = g.log.length;
     let went: boolean;
     try {
       went = root.go(g, rng);
@@ -2416,8 +3146,12 @@ function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: n
       late = true;
       break;
     }
-    if (!went) break;
-    steps++;
+    if (everyTurn) steps++;
+    if (!went) {
+      ended = true;
+      break;
+    }
+    if (!everyTurn) steps++;
     if (keep && steps % every === 0) {
       shoot();
       // Too many: keep one in two and take them half as often.
@@ -2434,11 +3168,13 @@ function execSteps(root: Runner, g: Grid3, seed: number, maxSteps: number, t0: n
       break;
     }
   }
-  if (keep && shots[shots.length - 1]?.step !== steps) shoot();
+  // The original's last turn changes nothing: the grid of the step before is already the last shot, if it was taken.
+  if (keep && shots[shots.length - 1]?.step !== (everyTurn && ended ? steps - 1 : steps)) shoot();
   return {
     grid: g,
     steps: steps + piecesSteps,
-    finished: steps < maxSteps && !late,
+    // Ours: the run stopped before its budget ran out; the original's: the root found nothing (the run's `current` is null).
+    finished: everyTurn ? ended : steps < maxSteps && !late,
     ms: Date.now() - t0,
     unused: trace.filter((t) => t.runner.total === 0).map((t) => (t.runner.why ? `${t.what} — ${t.runner.why}` : t.what)),
     ...(keep ? { snapshots: shots } : {}),
@@ -2502,7 +3238,7 @@ export class Stepper {
   steps = 0;
   private root: Runner;
   private rng: RunRandom;
-  private context: { g: Grid3; census?: Census; semantics?: Semantics };
+  private context: { g: Grid3; census?: Census; semantics?: Semantics; turn?: number };
   /** Past this many writes in the log, between two ticks the log starts again and the nodes scan the grid once: memory stays bounded. */
   private logCap: number;
   constructor(readonly grid: Grid3, p: Pick<Program3, 'palette' | 'unions' | 'program' | 'semantics'>, seed: number, limits: GridLimits = { side: 4096, cells: 64_000_000 }) {
@@ -2548,7 +3284,12 @@ export class Stepper {
     let made = 0;
     try {
       if (again) this.root.rewind();
-      while (made < maxSteps && this.root.go(this.grid, this.rng)) made++;
+      while (made < maxSteps) {
+        // Where the turn begins in the log (T527): a step of the Stepper is a turn of the run.
+        this.context.turn = this.grid.log.length;
+        if (!this.root.go(this.grid, this.rng)) break;
+        made++;
+      }
     } catch (e) {
       if (!(e instanceof Mj3Late)) throw e;
     } finally {

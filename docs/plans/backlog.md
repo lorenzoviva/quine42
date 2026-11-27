@@ -6846,12 +6846,13 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: interruttore spento e griglie di oggi invariate; ADR; test verdi.
 - Esito: `src/mj/random.ts` con l'interruttore `ours|mj` spento e System.Random di .NET, collegato a compilatore, `run`, `runOn`, `Stepper`, `wfc`, `search` e `pieces`; con `ours` le griglie di oggi invariate (impronte di ADR-0142 verdi); ADR-0262 sulla scelta A1, il criterio voxel per voxel e dove divergiamo (la `wfc`, 255 valori, `search` in 3D, le estensioni); kernel 0.10.39; `tests/mj-random.test.ts`; non provato: `path` sotto `mj` (A1-4) e l'ordine delle corrispondenze oltre la riga (A1-2); la lettura della risposta 2 sulla `wfc` è da confermare in A1-5 (T530); sicurezza: nessuna superficie nuova.
 
-### T527 · A1-2: regole e corrispondenze dell'originale — `da fare`
+### T527 · A1-2: regole e corrispondenze dell'originale — `fatto` (`1f0e2a71`)
 - Pipeline: claude · sforzo max · stima 8% · approvato · priorità 1
 - Step: 44
 - Contesto: § 8 riga A1-2; risposta 4 di T500 (`one` uniforme senza `p`). Dipende da T526.
 - Cosa fare e test: come la riga A1-2. Browser: no.
 - Quando è fatto: gli `it.fails` della riga diventano `it` con l'interruttore acceso; spento invariato.
+- Esito: con l'interruttore acceso (`mj`) i nodi di regola sono quelli dell'originale in `src/mj/engine.ts`: varianti nell'ordine di `SymmetryHelper` (anche nella `map`), corrispondenza dove l'ingresso combacia, lista pigra (`OriginalList`, il turno da `current.turn`), `one` senza `p`, `all` col mescolamento dall'interno, `prl` con un `NextDouble` per corrispondenza sulla griglia di prima, giri vuoti e `p="0"`, gli stessi passi coi campi, ogni turno un passo; `d6`, `d7`, `d8`, `d9` (5 semi), `d10`, `c10` e Growth/MazeGrowth/RegularSAW/ParallelGrowth voxel per voxel da `it.fails` a `it`, più altri 12 modelli di mxgmn tenuti nei test (16/36); spento invariato (impronte ADR-0142 verdi); ADR-0268, `conformita-mj.ts --mj`, misure, studio, `AGENTS.md`, glossario; kernel 0.10.42 invariato; manca ad A1-3: `d6b`, `d1`-`d5`, il `markov` che fa ripartire i figli (Keys, RegularSAWRestart, OddScale3D con due passi in meno); non provato: prestazioni sotto `mj` sui programmi grandi del gioco (A1-7), il tetto dei 2 milioni del registro, un'unione di tutti i valori contro `*` in `Rule.Same`; sicurezza: nessuna superficie nuova.
 
 ### T528 · A1-3: i rami dell'originale — `da fare`
 - Pipeline: claude · sforzo xhigh · stima 6% · approvato · priorità 1

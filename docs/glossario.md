@@ -1020,6 +1020,12 @@ Queste migrazioni le fa lo step 42 (ADR-0153): T307a, T307b, T308a e T308b, un c
 - **Da non usare**: `modalità`, `flusso` (per l'interruttore; «il flusso di prima» nello studio è `ours`)
 - **Fermo**: i valori `ours` e `mj`.
 
+### Lista dell'originale
+- **Inglese**: `OriginalList`, `originalFor`, `originalTurns`, `scanOriginal`, `catchUp`, `turnStart`
+- **Definizione**: con la semantica dell'originale (`mj`), le corrispondenze di un nodo di regole come le tiene MarkovJunior di mxgmn: pigra, fatta al primo passo con la scansione dell'originale (ogni variante al suo passo, le varianti nell'ordine di `SymmetryHelper`), poi in coda ciò che le celle scritte dall'inizio del **turno** in cui il nodo ha combaciato l'ultima volta rendono nuovo (le marche contro i doppi), una corrispondenza ricontrollata solo quando si estrae. Il turno è una chiamata della radice (dei rami annidati con A1-3): con `mj` ogni turno è un passo della corsa, anche l'ultimo (ADR-0268).
+- **Dove vive**: `src/mj/engine.ts`
+- **Da non usare**: `insieme delle corrispondenze` (è il nostro, `MatchSet`, ADR-0142), `coda` (la lista non è una coda: si estrae a caso)
+
 ### Testo dell'originale
 - **Inglese**: `original`, `originalProgram`, `originalPort`, `originalText`, `ORIGINAL_FILE_RE`
 - **Definizione**: un programma MarkovJunior scritto come lo scrive mxgmn, dove ogni carattere è un simbolo (cifre, `#`, segni), che il compilatore legge così com'è con `compileMjx(…, { original: true })`: traslitterato all'ingresso nei nostri simboli (una cifra `#` e la cifra, un'unione `#` un segno libero, un altro valore che non è una lettera un simbolo numerato da `#10`), anche nei file di testo che legge, con le unioni, i nomi delle simmetrie e gli errori dell'originale (con `strict`). Non è la semantica della corsa (ADR-0265).
