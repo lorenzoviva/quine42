@@ -10,6 +10,7 @@ import { runeGlyph, type RuneComp } from '../kernel/runes';
 import { hash32, hashStr } from '../kernel/rng';
 import { Builder, WATER_Y } from './terrain';
 import { SWIM_SINK } from '../kernel/swim';
+import { insetOf } from '../kernel/inset';
 import { casts, clipped, MAT, rgbOf, solid } from './materials';
 import { geoOf, isSharedGeometry, modelObject, showFrame, type ModelGeo } from './models';
 import type { Form, FormComp } from '../kernel/forms';
@@ -144,6 +145,26 @@ export function swimLimbs(v: { limbs: Limb[]; body: THREE.Object3D; phase: numbe
 /** Where the feet of a swimmer are (T438): under the water drawn on the tile, so the body is in it to the chest. */
 export const swimFloor = (k: Kernel, x: number, y: number): number => k.groundAt(x, y) + WATER_Y - SWIM_SINK;
 
+/** The insets of a palette's terrains (T548), once a code: the palette object is the key, a new one (the Physicist's) asks again. */
+const insets = new WeakMap<object, Map<string, number>>();
+
+/** How much lower or higher the top of the tile under (x, y) is drawn (T548, ADR-0271): its terrain's inset, 0 off the loaded places. */
+export function insetUnder(k: Kernel, x: number, y: number): number {
+  const code = k.tileAt(Math.floor(x), Math.floor(y));
+  if (code === undefined) return 0;
+  let m = insets.get(k.palette);
+  if (!m) insets.set(k.palette, (m = new Map()));
+  let v = m.get(code);
+  if (v === undefined) m.set(code, (v = insetOf(k.palette[code], code)));
+  return v;
+}
+
+/**
+ * Where what stands at height `h` is drawn (T548): on the top of the tile as the mesh draws it where it stands on the ground itself (a road
+ * lower than its sidewalk), as high as the kernel says on anything else (a floor, a deck, a cellar). Only how it looks.
+ */
+export const onTop = (k: Kernel, x: number, y: number, h: number): number => (Math.abs(h - k.groundAt(x, y)) < 1e-6 ? h + insetUnder(k, x, y) : h);
+
 /** Turns a view towards its heading, smoothly. */
 export function turnTowards(v: { yaw: number; root: THREE.Object3D }, goal: number, dt: number): void {
   let d = goal - v.yaw;
@@ -277,14 +298,14 @@ export class Entities {
       showFrame(v.frames, t, id * 0.37);
       if (v.kind === 'item' && k.ecs.has(id, 'placed')) {
         // Put down on furniture (T291): still on its shelf, as high as the kernel rests it, turned as it was laid.
-        v.root.position.set(p.x, (Number.isFinite(p.z) ? p.z : k.groundAt(p.x, p.y)) + (v.owned ? 0.16 : 0), p.y);
+        v.root.position.set(p.x, onTop(k, p.x, p.y, Number.isFinite(p.z) ? p.z : k.groundAt(p.x, p.y)) + (v.owned ? 0.16 : 0), p.y);
         v.root.rotation.y = k.ecs.get(id, 'form')?.yaw ?? 0;
         continue;
       }
       if (v.kind === 'item' && v.star) {
         // The star (T430): it hovers higher, turns and stretches in height and width around its middle.
         const s = starPulse(t, id * 0.61);
-        v.root.position.set(p.x, k.restsAt(id) + 0.12 + Math.sin(t * 1.8 + id) * 0.04, p.y);
+        v.root.position.set(p.x, onTop(k, p.x, p.y, k.restsAt(id)) + 0.12 + Math.sin(t * 1.8 + id) * 0.04, p.y);
         v.root.rotation.y = s.spin;
         v.body.scale.set(s.width, s.height, s.width);
         v.body.position.y = v.star.middle * (1 - s.height);
@@ -292,13 +313,13 @@ export class Entities {
       }
       if (v.kind === 'item') {
         // Things to pick up hover a little and turn, so they are seen among the grass.
-        v.root.position.set(p.x, k.restsAt(id) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);
+        v.root.position.set(p.x, onTop(k, p.x, p.y, k.restsAt(id)) + (v.owned ? 0.25 + Math.sin(t * 2.5 + id) * 0.05 : 0.04 + Math.abs(Math.sin(t * 2 + id)) * 0.04), p.y);
         v.root.rotation.y = t * 0.8 + id;
         continue;
       }
       if (v.kind !== 'figure') {
         // An entity (a structure too) stands on the ground under its middle; its cellar under it (T52b); a thing in a cellar on its floor (T417).
-        v.root.position.set(p.x, k.restsAt(id), p.y);
+        v.root.position.set(p.x, onTop(k, p.x, p.y, k.restsAt(id)), p.y);
         // Where it faces, at every frame (T439): a vehicle turns, and what lies on its deck with it.
         const yaw = k.ecs.get(id, 'form')?.yaw;
         if (Number.isFinite(yaw)) v.root.rotation.y = yaw;
@@ -320,7 +341,7 @@ export class Entities {
       }
       // People stand on what is under them: the ground, a house's floor, a step, the floor above (T53b); another wanderer in the water swims (T438).
       const swims = k.swimsAt(p.x, p.y, p.z);
-      v.root.position.set(p.x, climb(v.root, swims ? swimFloor(k, p.x, p.y) + seaLift(waterTop, p.x, p.y, t) : k.floorAt(p.x, p.y, p.z), dt), p.y);
+      v.root.position.set(p.x, climb(v.root, swims ? swimFloor(k, p.x, p.y) + seaLift(waterTop, p.x, p.y, t) : onTop(k, p.x, p.y, k.floorAt(p.x, p.y, p.z)), dt), p.y);
       // What they are doing, seen: lying down to sleep.
       const att = k.ecs.get(id, 'activity');
       v.root.rotation.z = att?.kind === 'sleep' && att.still ? Math.PI / 2.2 : 0;
@@ -420,7 +441,7 @@ export class Wanderer {
     const swims = k.zone === 'sim' && k.swimming();
     // A swimmer rides the swell (T451); the camera does not (`sunk` takes it back).
     const ride = swims ? seaLift(waterTopOf(k, WATER_Y), pcf.x, pcf.y, t) : 0;
-    const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) + ride : k.floorAt(pcf.x, pcf.y, p.z)) : 0, dt);
+    const floor = climb(this.view.root, k.zone === 'sim' ? (swims ? swimFloor(k, pcf.x, pcf.y) + ride : onTop(k, pcf.x, pcf.y, k.floorAt(pcf.x, pcf.y, p.z))) : 0, dt);
     // A jump (T56b): an arc over what it clears, and its shadow on what is under it, smaller the higher it goes.
     const jump = k.zone === 'sim' ? k.jumping() : undefined;
     // A climb (T477): the feet go up or down the face, whatever the ground under them; the camera does not follow them (`lift`).
@@ -541,7 +562,7 @@ export class Runes {
         this.slabs.set(id, (s = { mesh, key }));
       }
       const jitter = line?.error ? (Math.random() - 0.5) * 0.06 : 0;
-      s.mesh.position.set(r.col + 0.5 + jitter, k.groundAt(r.col, r.row) + 0.03, r.row + 0.5);
+      s.mesh.position.set(r.col + 0.5 + jitter, onTop(k, r.col, r.row, k.groundAt(r.col, r.row)) + 0.03, r.row + 0.5);
       (s.mesh.material as THREE.MeshBasicMaterial).opacity = pulse;
     }
     for (const [id, s] of [...this.slabs]) if (!seen.has(id)) {

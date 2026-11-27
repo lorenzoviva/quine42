@@ -7065,7 +7065,7 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Quando è fatto: commit su `task/T554`; poi l'orchestratore integra T554, e `integra T545` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
 - Esito: T545 fuso nel base dopo T527: in `AGENTS.md` restano sia la riga del mondo in 3D di T545 (copertura, ADR-0269) sia quella di MarkovJunior di T527 (ADR-0268); nessun rimando di T545 ad ADR-0268; kernel 0.10.43; censimento del glossario rigenerato con lo script; typecheck e suite intera verdi coi turni; browser non richiesto (T545 l'aveva già verificato); sicurezza: nessuna superficie nuova.
 
-### T555 · Integrare T548 nel base (conflitto con T545) — `da fare`
+### T555 · Integrare T548 nel base (conflitto con T545) — `fatto` (`0d698bf3`)
 - Pipeline: claude · sforzo high · stima 2% · approvato · priorità 0
 - Step: 45
 - Contesto: `integra T548` (il rientro dei terreni, il cordolo e le strade larghe, C4) si è fermato su conflitti in `AGENTS.md`, `docs/architettura-dettagli.md`, `docs/glossario.md`, `src/kernel/types.ts`, `src/kernel/validator.ts`, `src/render/terrain.ts`, `src/render/terrainmesh.ts`: nel frattempo T545 (la copertura dei terreni, C1, ADR-0269, kernel 0.10.43) è entrato nel base. Lo script ha già rinumerato l'ADR di T548 a ADR-0270 (`62530201`); il base è a 0.10.43, T548 diventa 0.10.44. Nasce da T548 e T545: `dossier T548`, `dossier T545`.
@@ -7073,3 +7073,4 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: suite intera e typecheck coi turni; i test della copertura (T545) e del rientro e delle strade (T548) verdi; `tests/documenti.test.ts` verde.
 - Browser: sì, breve: preview su una copia di `neapolis` `?offline`, una strada col cordolo e un terreno con la copertura nello stesso luogo, nessun errore in console.
 - Quando è fatto: commit su `task/T555`; poi l'orchestratore integra T555, e `integra T548` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
+- Esito: T548 fuso dopo T545: `TerrainDef` con `cover` e `inset`, il validatore con i due controlli, la palette di `ChunkInput` con la copertura quinta e il rientro sesto (corretto `inputSource`, che git aveva fuso leggendo il rientro dal posto della copertura), le istanze di copertura sulla cima rientrata; AGENTS.md, dettagli, glossario e indice degli ADR con le due voci (ADR-0269 copertura, ADR-0270 rientro e strade larghe), nessun rimando di T548 ad ADR-0269, censimento rigenerato; kernel 0.10.44; impronta del seme uguale al base (`9afb6ebffa73d7f7`); suite intera 323/323 file e typecheck verdi coi turni; non provati il multigiocatore e la copertura scritta dal Cartografo vero; sicurezza: nessuna superficie nuova.

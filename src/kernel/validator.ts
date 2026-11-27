@@ -30,6 +30,8 @@ import { strataErrors, strataPalette, strataProgramErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
 import { grainErrors } from './grain';
 import { coverErrors } from './cover';
+import { insetErrors } from './inset';
+import { streetErrors } from './streets';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
@@ -429,6 +431,8 @@ export class Validator {
         if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
         // Its cover (T545, ADR-0269): only how it looks, but at most three kinds, each a program's id and a density within the range.
         if (t && typeof t === 'object') for (const e of coverErrors(code, t.cover)) errors.push(`${path}: ${e}`);
+        // The inset of its top (T548, ADR-0271): only how it looks, but under a level of the relief.
+        if (t && typeof t === 'object') for (const e of insetErrors(code, t.inset)) errors.push(`${path}: ${e}`);
       }
     }
     if (m.strata !== undefined) for (const e of strataErrors(m.strata)) err(e);
@@ -562,6 +566,9 @@ export class Validator {
     if (!def || typeof def.name !== 'string' || typeof def.description !== 'string') return [`${id}: name e description obbligatori`];
     // The air of its places (T446): only false says.
     if ((def as { air?: unknown }).air !== undefined && (def as { air?: unknown }).air !== false) return [`${id}: air è false (i suoi luoghi non hanno aria) o non c'è`];
+    // Its streets (T548): a width in range and a code; a sidewalk the palette does not have is read as none.
+    const street = streetErrors(id, (def as { street?: unknown }).street);
+    if (street.length) return street;
     try {
       compile(def.program);
     } catch (e) {
