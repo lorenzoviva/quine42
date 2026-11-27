@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { addShade, CARTOON, thingOf, toon } from './cartoon';
 import { CUT_RADIUS, CUT_STRETCH } from '../kernel/underground';
 import { WIND_MAX } from '../kernel/wind';
+import { GRAIN_CELLS, GRAIN_STEP } from '../kernel/grain';
 
 /**
  * The world's wind as the vertex shaders read it (T484, ADR-0255): the coarse view (`Kernel.windView`) in a small texture, east in red
@@ -297,6 +298,64 @@ export function clipped<M extends THREE.Material>(m: M, key: string, sway = fals
   return m;
 }
 
+/**
+ * The grain of the ground (T547, ADR-0266; `src/kernel/grain.ts`): the tops whose `grain` attribute says it (the specks' colour, linear in
+ * 0-255, and a byte with the density in steps and the tile's salt) get specks of one voxel, a cell of 1/`GRAIN_CELLS` of a tile, a hash of
+ * the cell where the vertex stands in its place (the place's own coordinates: small numbers, so a place a million tiles out keeps its
+ * specks) and of the salt. Each speck a little lighter or darker; where a cell is under a pixel the top fades to the specks' mean, so the
+ * carpet's scroll does not make them shimmer. No triangle more: the mesh is the one of before, with one attribute.
+ */
+function addGrain(sh: THREE.WebGLProgramParametersWithUniforms): void {
+  sh.vertexShader = `attribute vec4 grain;
+varying vec4 vGrain;
+varying vec2 vGrainAt;
+${sh.vertexShader}`.replace(
+    '#include <begin_vertex>',
+    `#include <begin_vertex>
+  vGrain = grain;
+  vGrainAt = position.xz;`,
+  );
+  sh.fragmentShader = `varying vec4 vGrain;
+varying vec2 vGrainAt;
+float grainHash(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+${sh.fragmentShader}`.replace(
+    '#include <color_fragment>',
+    `#include <color_fragment>
+  if (vGrain.w > 0.5) {
+    float grainB = floor(vGrain.w + 0.5);
+    float grainLevel = floor(grainB / 16.0);
+    float grainSalt = grainB - grainLevel * 16.0;
+    float grainDensity = grainLevel * ${GRAIN_STEP.toFixed(3)};
+    vec2 grainQ = vGrainAt * ${GRAIN_CELLS.toFixed(1)};
+    vec2 grainCell = floor(grainQ);
+    vec2 grainSeed = grainCell + vec2(grainSalt * 431.0, grainSalt * 197.0);
+    float grainOn = step(grainHash(grainSeed), grainDensity);
+    vec3 grainColour = vGrain.rgb / 255.0 * (0.82 + 0.36 * grainHash(grainSeed + 71.0));
+    vec2 grainW = fwidth(grainQ);
+    float grainSharp = 1.0 - smoothstep(0.45, 0.9, max(grainW.x, grainW.y));
+    vec3 grainFar = mix(diffuseColor.rgb, vGrain.rgb / 255.0, grainDensity);
+    vec3 grainNear = mix(diffuseColor.rgb, grainColour, grainOn);
+    diffuseColor.rgb = mix(grainFar, grainNear, grainSharp);
+  }`,
+  );
+}
+
+/** A clipped material with the grain of the ground (T547): the ground's tops that say one. */
+function grained<M extends THREE.Material>(m: M, key: string): M {
+  const before = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, r) => {
+    addGrain(sh);
+    before.call(m, sh, r);
+  };
+  m.customProgramCacheKey = () => key;
+  m.userData.clipKey = key;
+  return m;
+}
+
 /** What stands in for each material when the cartoon's ink draws its ids (ADR-0093). */
 const idsCache = new WeakMap<THREE.Material, THREE.Material>();
 
@@ -399,6 +458,8 @@ export const MAT = {
   cut: clipped(lit({ vertexColors: true, clippingPlanes: [CUT] }), 'cut'),
   /** The simulation: ground, things, people. */
   world: clipped(lit({ vertexColors: true }), 'world'),
+  /** The ground of a place whose tops have a grain (T547): `world` with the specks. */
+  ground: grained(clipped(lit({ vertexColors: true }), 'world'), 'ground'),
   /** Vegetation: the wind moves the top (the `sway` attribute). */
   sway: clipped(lit({ vertexColors: true }), 'sway', true),
   /** The corona and the studio: never clipped. */

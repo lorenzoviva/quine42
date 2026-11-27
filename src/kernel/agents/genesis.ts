@@ -14,6 +14,7 @@ import { FORGE_KINDS, type ForgeKind } from './forge';
 import { TIMELESS_LAYOUTS } from '../themes';
 import { CLIMATES, DEPTHS, physicsOf, TERRAIN_LIMITS, WATER_CODES, type Climate, type Crossing, type Geography } from '../nature';
 import { SEED_STRATA, STRATA_DEPTH, STRATA_EXAMPLE, strataErrors, strataPalette, STRATUM_ROLES } from '../strata';
+import { GRAIN_LIMITS, readGrain, type Grain } from '../grain';
 
 /**
  * Codes the procedural draft and the kernel rely on: every palette must define them. Their layer and how a body crosses them (T437,
@@ -119,6 +120,12 @@ const TERRAIN_SCHEMA: Schema = {
           layer: { type: 'STRING', enum: ['ground', 'floor', 'wall', 'door', 'liquid', 'vegetation', 'rock'] },
           solid: { type: 'BOOLEAN' },
           speed: { type: 'NUMBER' },
+          grain: {
+            type: 'OBJECT',
+            description: `only for walkable ground strewn with small loose bits seen from above (gravel, the ballast of a railway, dry leaves): specks of one voxel of colour #rrggbb on density ${GRAIN_LIMITS.density.join('-')} of its top; leave it out otherwise`,
+            properties: { color: { type: 'STRING' }, density: { type: 'NUMBER' } },
+            required: ['color', 'density'],
+          },
         },
         required: ['code', 'name', 'description', 'color', 'layer', 'solid', 'speed'],
       },
@@ -203,6 +210,8 @@ interface RawTerrain {
   layer: TerrainLayer;
   solid: boolean;
   speed: number;
+  /** The specks of its ground (T547, ADR-0266), if the Cartographer said them: read without trusting (`readGrain`). */
+  grain?: unknown;
   /** What the Physicist said of it (T437, ADR-0224): how a body crosses it, how tiring the water is, how deep; whether one breathes on it (T446). */
   cross?: Crossing;
   fatigue?: number;
@@ -235,6 +244,16 @@ export function terrainErrors(terrains: RawTerrain[]): string[] {
   return errors;
 }
 
+/**
+ * The grain the Cartographer said of a terrain (T547, ADR-0266), read without trusting: only of the ground one walks, none if it is not one.
+ * Unsaid, the terrain takes the one its name says when it is drawn (`grainOf`): nothing is written for it.
+ */
+function grainField(layer: TerrainLayer, raw: unknown): { grain?: Grain } {
+  if (layer !== 'ground') return {};
+  const g = readGrain(raw);
+  return g ? { grain: g } : {};
+}
+
 /** Outdoor floors (bridges, piers, boardwalks): `layer: 'floor'` without `indoor: true`, so `findLots` never turns them into buildings (T505, ADR-0064, ADR-0230). */
 const OUTDOOR_FLOOR_RE = /ponte|levatoi|bridge|passerell|molo|pontil|banchin|tavolat|pier|jetty|dock|boardwalk|wharf|quay/i;
 
@@ -254,7 +273,7 @@ export function toPalette(terrains: RawTerrain[], trueRelief = false): Record<st
       const model = layer === 'vegetation' || layer === 'rock' ? { model: `terreno-${t.name.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || t.code.charCodeAt(0)}` } : {};
       const indoor = base?.indoor || (layer === 'floor' && !OUTDOOR_FLOOR_RE.test(t.name));
       // The air (T446): only the Physicist's false, never of a base code (one breathes over the water and on the ground of every world).
-      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(indoor ? { indoor: true } : {}), ...(!base && t.air === false ? { air: false } : {}) }];
+      return [t.code, { name: t.name, description: t.description, color: t.color.toLowerCase(), ...physics, layer, ...model, ...(indoor ? { indoor: true } : {}), ...(!base && t.air === false ? { air: false } : {}), ...grainField(layer, t.grain) }];
     }),
   );
 }

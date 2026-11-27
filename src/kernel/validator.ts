@@ -28,6 +28,7 @@ import { CAMPAIGN_FILE, readCampaign } from './campaign';
 import { internalCardsIn, internalEffect, internalFields, internalManifest, internalManifest0_5, internalName, italianName, SOLO_BEFORE_0_4 } from './internalNames';
 import { strataErrors, strataPalette, strataProgramErrors } from './strata';
 import { terrainPhysicsErrors } from './nature';
+import { grainErrors } from './grain';
 import { vehicleSpecErrors, type VehicleMedium } from './vehicle';
 import { vehicleClaimErrors } from './vehicleclaim';
 import { worldPartErrors } from './worldparts';
@@ -423,6 +424,8 @@ export class Validator {
         if (t.layer !== undefined && !LAYERS.includes(t.layer)) err(`tile "${code}": layer deve essere uno tra ${LAYERS.join(', ')}`);
         // How a body crosses it (T437, ADR-0224): a crossing of the three, as `solid` says, swum only where it is a liquid, within the limits.
         if (t && typeof t === 'object') for (const e of terrainPhysicsErrors(code, t)) errors.push(`${path}: ${e}`);
+        // The grain of its ground (T547, ADR-0266): only how it looks, but a colour and a density within the range.
+        if (t && typeof t === 'object') for (const e of grainErrors(code, t.grain)) errors.push(`${path}: ${e}`);
       }
     }
     if (m.strata !== undefined) for (const e of strataErrors(m.strata)) err(e);

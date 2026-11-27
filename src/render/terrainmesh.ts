@@ -6,6 +6,7 @@
 
 import type { TileHole } from '../kernel/forms';
 import { hash32 } from '../kernel/rng';
+import { grainByte, grainOf } from '../kernel/grain';
 import { FoamStrips, phaseAttribute, waveAttribute, type FoamArrays } from './seawave';
 
 export const WALL_H = 1.6;
@@ -36,6 +37,11 @@ export interface MeshArrays {
   normal: Float32Array;
   color: Float32Array;
   part: Uint8Array;
+  /**
+   * The grain of the tops (T547, ADR-0266), four bytes a vertex: the specks' colour lit (0-255 of linear) and `grainByte` (the density and
+   * the tile's salt; 0 no grain). Only where a top has one: a mesh without grain has none, as before.
+   */
+  grain?: Uint8Array;
 }
 
 /** Accumulates coloured boxes and quads into the arrays of one mesh (terrain.ts: `Builder`, the same with its geometry). */
@@ -47,6 +53,18 @@ export class MeshBuilder {
   prt: number[] = [];
   /** The part of what comes next (at most 127; the sides of a box are this + 128). Unsaid, a colour is a part: every change of colour gets its line. */
   fixedPart?: number;
+  /** The grain of each vertex (T547), four bytes, from the first grained one on (the ones before get zeros then). */
+  grn?: number[];
+  /** The grain of what comes next (`MeshArrays.grain`), or none. */
+  fixedGrain?: readonly number[];
+
+  /** The grain of the vertices just pushed (`n` of them): only once something has one. */
+  private grained(n: number): void {
+    const g = this.fixedGrain;
+    if (!g && !this.grn) return;
+    this.grn ??= new Array<number>(((this.pos.length / 3) - n) * 4).fill(0);
+    for (let i = 0; i < n; i++) this.grn.push(g?.[0] ?? 0, g?.[1] ?? 0, g?.[2] ?? 0, g?.[3] ?? 0);
+  }
 
   private partOf(rgb: number[], side = false): number {
     if (this.fixedPart !== undefined) return this.fixedPart + (side ? SIDE_PART : 0);
@@ -62,6 +80,7 @@ export class MeshBuilder {
       this.col.push(rgb[0], rgb[1], rgb[2]);
       this.prt.push(part);
     }
+    this.grained(6);
   }
 
   /** An axis-aligned box from (x0, y0, z0) to (x1, y1, z1), the top lit a little more, the bottom omitted. */
@@ -96,6 +115,7 @@ export class MeshBuilder {
           this.col.push(topCol[0], topCol[1], topCol[2]);
           this.prt.push(this.partOf(topCol));
         }
+        this.grained(3);
       }
       if (bottom) {
         for (const v of [[cx, y0, cz], [x1, y0, z1], [x0, y0, z0]]) {
@@ -104,6 +124,7 @@ export class MeshBuilder {
           this.col.push(sideCol[0], sideCol[1], sideCol[2]);
           this.prt.push(this.partOf(sideCol, true));
         }
+        this.grained(3);
       }
     }
   }
@@ -125,13 +146,15 @@ export class MeshBuilder {
 
   /** A flat convex polygon facing up at height y, its corners [x, z] in the order of `quad`. */
   flat(corners: number[][], y: number, rgb: number[]): void {
-    for (let i = 1; i < corners.length - 1; i++)
+    for (let i = 1; i < corners.length - 1; i++) {
       for (const [x, z] of [corners[0], corners[i], corners[i + 1]]) {
         this.pos.push(x, y, z);
         this.nor.push(0, 1, 0);
         this.col.push(rgb[0], rgb[1], rgb[2]);
         this.prt.push(this.partOf(rgb));
       }
+      this.grained(3);
+    }
   }
 
   /**
@@ -145,6 +168,7 @@ export class MeshBuilder {
       normal: new Float32Array(this.nor),
       color: new Float32Array(this.col),
       part: new Uint8Array(this.prt),
+      ...(this.grn ? { grain: new Uint8Array(this.grn) } : {}),
     };
   }
 
@@ -157,6 +181,17 @@ export class MeshBuilder {
 export interface TerrainLook {
   layer?: string;
   color?: string;
+}
+
+/** A terrain's grain as the tops carry it (T547): the specks' colour lit, 0-255 of linear, and the density in steps (1-15). */
+export type GrainLook = readonly [r: number, g: number, b: number, level: number];
+
+/** The grain of a terrain for its tops: its colour lit by `rgb` (`rgbOf`), or none. */
+export function grainLook(t: Parameters<typeof grainOf>[0], rgb: (color: string) => readonly number[]): GrainLook | undefined {
+  const g = grainOf(t);
+  if (!g) return undefined;
+  const [r, gr, b] = rgb(g.color).map((v) => Math.min(255, Math.max(0, Math.round(v * 255))));
+  return [r!, gr!, b!, grainByte(g, 0) >> 4];
 }
 
 /** What the tops of the terrain read: a tile's terrain (`palette[tileAt]`) and its ground (`groundAt`). */
@@ -192,6 +227,8 @@ export interface ChunkSource extends GroundReads {
   isClear?(code: string): boolean;
   /** Lit RGB of the top stratum of the seabed at (x, z) (`Kernel.bedStratumAt`). */
   bedTopRgb?(x: number, z: number): readonly number[];
+  /** The grain of a terrain's tops (T547, ADR-0266), if it has one. */
+  grain?(code: string): GrainLook | undefined;
   /** Number of strata rows at (x, z) (`Kernel.strataRowsAt`). */
   strataRowsAt?(x: number, z: number): number;
   /** Lit RGB of stratum row `row` (0-based from ground down) at (x, z). */
@@ -294,6 +331,14 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
   // Instances of the terrains' models: where, how turned, how big.
   const instances: TileInstance[] = [];
   const ready = new Map<string, boolean>();
+  // The grain of each terrain's tops (T547), asked once a code.
+  const grains = new Map<string, GrainLook | undefined>();
+  const grainAt = (code: string, h: number): readonly number[] | undefined => {
+    if (!src.grain) return undefined;
+    if (!grains.has(code)) grains.set(code, src.grain(code));
+    const g = grains.get(code);
+    return g && [g[0], g[1], g[2], (g[3] << 4) | ((h >>> 20) & 15)];
+  };
   // Where a model has its cellar the terrain goes down to the cellar's bottom (T52b, the hole): its banks are the hole's sides.
   // A tile only partly over the cellar (T415) goes down only on its sub-cells over the hole, with sides where they meet the rest.
   const holeAt = (x: number, z: number) => src.holeAt(x, z);
@@ -364,7 +409,9 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
         ground.quad([x0, y, z0], [x0, y, z1], [x1, y, z1], [x1, y, z0], [0, 1, 0], base);
         s = e;
       }
-    // Between two sub-cells of different heights the higher one has the side.
+    // Between two sub-cells of different heights the higher one has the side: no grain on a side.
+    const grain = ground.fixedGrain;
+    ground.fixedGrain = undefined;
     for (let t = 0; t < N; t++)
       for (let s = 0; s + 1 < N; s++) {
         const a = H(s, t), b = H(s + 1, t), p = x + (s + 1) / N, z0 = z + t / N, z1 = z + (t + 1) / N;
@@ -377,6 +424,7 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
         if (b < a) side(0, 1, p, x0, x1, a, b, earth);
         else if (a < b) side(0, -1, p, x0, x1, b, a, earth);
       }
+    ground.fixedGrain = grain;
   };
   // A terrain is a part (its code), so the ink follows where one meets another and never the tiles of one.
   const terrainPart = new Map(src.codes.map((code, i) => [code, 1 + (i % (SIDE_PART - 1))]));
@@ -414,6 +462,8 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
       solid.fixedPart = undefined;
       const holed = holeAt(x, z);
       const selfClear = isClear(code);
+      // The tops of a grained terrain carry its specks (T547): the sides, the water, the walls none.
+      ground.fixedGrain = t?.layer === 'ground' ? grainAt(code, h) : undefined;
       if (holed?.cover) partTile(x, z, base);
       else if (selfClear) {
         const by = colTop(x, z);
@@ -437,6 +487,7 @@ export function chunkArrays(src: ChunkSource): ChunkArrays {
           if (n && n.layer !== 'liquid' && top(x + dx, z + dz) >= y - 1e-6) foam.edge(x, z, dx, dz, y);
         }
       } else ground.quad([x, y, z], [x, y, z + 1], [x + 1, y, z + 1], [x + 1, y, z], [0, 1, 0], base);
+      ground.fixedGrain = undefined;
       // Sides where this tile is higher than its neighbour: the slope of a hill in its own colour, darker,
       // banks of earth down to the water, and in true-relief worlds strata bands under the water surface (T480).
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -539,7 +590,7 @@ export interface ChunkInput {
   tiles: string;
   cells: number;
   /** The palette in its order: each code with what the mesh reads of its terrain. */
-  palette: Array<[code: string, layer: string | undefined, color: string | undefined]>;
+  palette: Array<[code: string, layer: string | undefined, color: string | undefined, grain?: GrainLook]>;
   /** The colours lit (`rgbOf`), by colour; '' for a terrain without one. */
   rgb: Record<string, number[]>;
   /** The window of tiles around the place (`CHUNK_MARGIN` beyond its edges): its corner, its side, the codes ('' where nothing is loaded) and the ground. */
@@ -569,6 +620,7 @@ export function inputSource(input: ChunkInput): ChunkSource {
   const { x0, z0, w } = input;
   const at = (x: number, z: number) => (x >= x0 && z >= z0 && x < x0 + w && z < z0 + w ? (z - z0) * w + (x - x0) : -1);
   const terrains = new Map<string, TerrainLook>(input.palette.map(([code, layer, color]) => [code, { layer, color }]));
+  const grains = new Map(input.palette.flatMap(([code, , , grain]) => (grain ? [[code, grain] as const] : [])));
   const holes = new Map<number, TileHole>(input.holes.map(([i, depth, cover]) => [i, cover ? { depth, cover } : { depth }]));
   const ready = new Set(input.ready);
   const clearSet = input.clear ? new Set(input.clear) : undefined;
@@ -595,6 +647,7 @@ export function inputSource(input: ChunkInput): ChunkSource {
     },
     ready: (code) => ready.has(code),
     rgb: (color) => input.rgb[color || ''] ?? none,
+    ...(grains.size ? { grain: (code: string) => grains.get(code) } : {}),
     ...(input.hasBed
       ? {
           hasBed: true,
@@ -630,7 +683,7 @@ export function chunkBuffers(a: ChunkArrays): ArrayBuffer[] {
   const add = (...xs: Array<Float32Array | Uint8Array>) => {
     for (const x of xs) out.push(x.buffer as ArrayBuffer);
   };
-  for (const m of [a.ground, a.solid, a.water, a.clearWater]) if (m) add(m.position, m.normal, m.color, m.part);
+  for (const m of [a.ground, a.solid, a.water, a.clearWater]) if (m) add(m.position, m.normal, m.color, m.part, ...(m.grain ? [m.grain] : []));
   if (a.water) add(a.water.wave, a.water.seaPhase);
   if (a.clearWater) add(a.clearWater.wave, a.clearWater.seaPhase, a.clearWater.alpha);
   if (a.foam) add(a.foam.position, a.foam.normal, a.foam.seaPhase, a.foam.foamPhase, a.foam.foam, a.foam.wave, a.foam.glow, a.foam.alpha);
