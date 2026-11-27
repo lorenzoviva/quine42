@@ -37,8 +37,8 @@ describe('il glossario', () => {
   beforeAll(async () => {
     tool = (await import(/* @vite-ignore */ pathToFileURL(path.join(ROOT, 'tools/glossario/glossario.mjs')).href)) as Tool;
     entries = tool.parseGlossary(fs.readFileSync(path.join(ROOT, 'docs/glossario.md'), 'utf8'));
-    // The SoundLab's retouches are a concept with a voice, and the page is where they live (T222); the players' labs live in lab/handmade (T294); the queue paid with the API's credits in tools/abbonamenti (T542).
-    code = codeOf('src') + codeOf('server') + codeOf('site') + codeOf('lab/suono') + codeOf('lab/handmade') + codeOf('tools/abbonamenti');
+    // The SoundLab's retouches are a concept with a voice, and the page is where they live (T222); the players' labs live in lab/handmade (T294); the queue paid with the API's credits in tools/abbonamenti (T542); the levels of the documentation in tools/documenti (T524).
+    code = codeOf('src') + codeOf('server') + codeOf('site') + codeOf('lab/suono') + codeOf('lab/handmade') + codeOf('tools/abbonamenti') + codeOf('tools/documenti');
   });
 
   it('copre i concetti che confondevano', () => {
@@ -58,7 +58,7 @@ describe('il glossario', () => {
     }
   });
 
-  it('i nomi in inglese esistono in src/, server/, site/, lab/suono/, lab/handmade/ o tools/abbonamenti/', () => {
+  it('i nomi in inglese esistono in src/, server/, site/, lab/suono/, lab/handmade/, tools/abbonamenti/ o tools/documenti/', () => {
     const missing: string[] = [];
     for (const e of entries) {
       const names = tool.namesIn(e.fields.Inglese);

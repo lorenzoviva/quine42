@@ -3,6 +3,8 @@
 Benvenuti nella documentazione del progetto **QUINE42** (in precedenza *Rune*, ADR-0062).
 Questo documento fornisce il resoconto completo della struttura delle cartelle, l'evoluzione delle metodologie di sviluppo adottate nel corso del tempo e la tabella di corrispondenza per individuare tutti i file storici archiviati.
 
+> **Il quadro del progetto in due pagine** è [`panoramica.md`](panoramica.md), il livello 1 della documentazione (ADR-0266); i livelli e la mappa dei documenti sono in [`design/documentazione.md`](design/documentazione.md).
+
 ---
 
 ## 1. Evoluzione delle metodologie di sviluppo
@@ -66,6 +68,7 @@ Lo sviluppo di QUINE42 è progredito attraverso quattro metodologie distinte, ri
 ```
 docs/
 ├── README.md                      # Questo resoconto e indice generale
+├── panoramica.md                  # Il quadro in due pagine: livello 1 (ADR-0266)
 ├── design.md                      # Documento di design originale del gioco
 ├── conversazioni.md               # Mappa e schede interazioni Gemini (T67, Fase I)
 │

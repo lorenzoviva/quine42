@@ -6821,13 +6821,14 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Browser: sì (screenshot prima/dopo, `misura-frame.mjs`).
 - Quando è fatto: meno triangoli misurati, aspetto uguale negli screenshot, test verdi.
 
-### T524 · La documentazione a livelli: una panoramica breve sopra i documenti lunghi, e un indice che scala — `da fare`
+### T524 · La documentazione a livelli: una panoramica breve sopra i documenti lunghi, e un indice che scala — `fatto` (`99600ad5`)
 - Pipeline: claude · sforzo extra · stima 3.5% · approvato · priorità 2
 - Contesto: l'autore il 26/11: il progetto è cresciuto, i documenti degli agenti sono dettagliati ma troppo lunghi da verificare a mano; serve una gerarchia (un documento ridotto per la panoramica, poi i dettagli), anche per gli agenti; «perché non usavamo graphify?». Risposta dell'orchestratore: ADR-0045 lo tiene facoltativo e fuori dal progetto (niente skill, MCP né hook) perché allora il repository era piccolo e `Grep` bastava, e sui file dell'universo vede le chiavi JSON, non il significato. ADR-0120 ha già spezzato `AGENTS.md` in nucleo + `architettura-dettagli.md`.
 - Cosa fare: (1) una mappa dei documenti (dimensioni, chi li legge, sovrapposizioni: `AGENTS.md`, `architettura-dettagli.md`, `fasi.md`, backlog, quadro, ADR, glossario, studi); (2) la proposta di gerarchia a tre livelli (una pagina di panoramica per l'autore e per gli agenti, il nucleo, i dettagli per sottosistema) con le regole per tenerla coerente (chi aggiorna cosa, controlli automatici: link, lunghezze, voci del glossario); (3) graphify (o simili) rivalutato oggi, sul codice e sui documenti: cosa dà, costo, se metterlo nel flusso degli agenti; (4) **la panoramica scritta** (`docs/panoramica.md`, al più due pagine) come primo pezzo; il resto della ristrutturazione come catena di task con domande col consiglio. ADR se cambia la regola dei documenti.
 - Test: un test che controlla i link e le lunghezze dei documenti di livello 1, se proposto.
 - Browser: no.
 - Quando è fatto: mappa, proposta, panoramica scritta, valutazione di graphify, catena e domande.
+- Esito: panoramica `docs/panoramica.md` (livello 1, 8,5 mila caratteri, senza versioni né task), studio `docs/design/documentazione.md` (mappa dei documenti, proposta a tre livelli + registri con chi aggiorna cosa, graphify rivalutato, catena P1-P7 ~17 %), ADR-0266, `tools/documenti/` (`DOC_LEVELS`, controlli, mappa) e `tests/documenti.test.ts` (tetto, link e ancore, regole del nucleo, sezioni dei dettagli, livelli dei documenti), rimando in `AGENTS.md`, voce «Panoramica» e omonimo «nucleo» nel glossario; domande D/T524 aperte (7, col consiglio) per la catena; graphify non provato (non installato: serve il permesso dell'autore); il nucleo non è ancora asciugato (P1-P3); un task in volo che aggiunge una regola o una sezione dei dettagli farà fallire `tests/documenti.test.ts` finché non aggiunge la sua riga nella panoramica.
 
 ### T525 · A1-0: le risorse di mxgmn che mancano in testo — `fatto` (`9aa5de02`)
 - Pipeline: hydrogen · sforzo medium · stima 2% · approvato · priorità 2
