@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 26/11/2026, epoca 697 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 700 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,7 +34,8 @@ Aggiornato il 26/11/2026, epoca 697 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- Nessuna domanda aperta: D/T500 chiusa (7 = estratto, T536 approvato), D35 chiusa il 26/11 epoca 678 (D6.2 10 $/giorno, D7.3 via b, «consiglio sì» in blocco; restano D3.4 in Fase VI e V1-V12 prima del lancio).
+- **D/T522** (27/11, epoca 700): 7 domande sulle strutture modulari (T522 integrato `037ea6c5`), tutte col consiglio in `domande/aperte.md`; la catena M1-M8 si pianifica dopo la risposta.
+- Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
 
