@@ -3,7 +3,7 @@
 > La fotografia che l'orchestratore riscrive e che chi lo sostituisce legge per prima (`orchestra.md`, punto 7): sotto le 75 righe, niente diario.
 > Gli eventi sono in [`orchestrazione.md`](orchestrazione.md). Il quadro lungo di prima, con le voci delle epoche 191-219: `git show 940570f:docs/pipeline/quadro.md`.
 
-Aggiornato il 27/11/2026, epoca 715 (claude). Crediti: vedi `stato`.
+Aggiornato il 27/11/2026, epoca 717 (claude). Crediti: vedi `stato`.
 
 ## Stato attuale
 
@@ -34,9 +34,9 @@ Aggiornato il 27/11/2026, epoca 715 (claude). Crediti: vedi `stato`.
 
 ## Attese dall'autore
 
-- **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Da chiedere all'autore alle 13:00 CET.
-- **D/T524** (7 domande col consiglio, catena P1-P7 ~17 %; graphify da installare solo col permesso): da chiedere alle 13:00 CET con D/T543 e D/T516.
-- **D/T516** (Neon esce dalla prova? 3 opzioni, consiglio 1: tetto 2, moltiplicatore 1,25): T516 integrato (`43644a93`, solo lab/ e docs) il 27/11 05:48Z. Da chiedere alle 13:00 CET insieme a D/T543.
+- **D/T543** (7 domande, consiglio A a tutte; catena M1-M6 ~34 %): T543 integrato (`1145a43b`, solo lab/ e docs) il 27/11 04:50Z. Chieste all'autore alle 13:10 CET (epoca 717).
+- **D/T524** (7 domande col consiglio, catena P1-P7 ~17 %; graphify da installare solo col permesso): chieste alle 13:10 CET.
+- **D/T516** (Neon esce dalla prova? 3 opzioni, consiglio 1: tetto 2, moltiplicatore 1,25): T516 integrato (`43644a93`, solo lab/ e docs) il 27/11 05:48Z. Chieste alle 13:10 CET.
 - Restano D3.4 (Fase VI) e V1-V12 di D35 prima del lancio.
 
 ## Regole attive
@@ -57,5 +57,5 @@ Aggiornato il 27/11/2026, epoca 715 (claude). Crediti: vedi `stato`.
 
 ## Ultime 2 epoche
 
+- **717 (claude):** T555 integrato (`6d9f64db`, ADR-0271 rientro e strade larghe, T548 chiuso via T555); kernel alzato a 0.10.45 per il doppione con T552 (`91fe453c`). Chieste D/T543, D/T524, D/T516. In corso T514.
 - **716 (claude):** T552 integrato (`24a792c6`: semi per modello `tileSeeds`, ADR-0270, kernel 0.10.44; non visto nel browser). T555 (merge di T548) prenderà ADR e kernel successivi. In corso T514, T555.
-- **715 (claude):** T548 fatto ma in conflitto con T545 in 7 file → **T555** (claude high, priorità 0).
