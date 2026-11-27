@@ -6962,3 +6962,12 @@ Nasce da T324: `dossier T324`. `integra T324` si è fermato su conflitti in `AGE
 - Test: nessuno nel gioco (prova in `lab/`); `npm test` e `npm run typecheck` verdi.
 - Browser: no (foto dal lab).
 - Quando è fatto: set grande, via A e via B misurate con le foto, studio e catena aggiornati, domande.
+
+### T544 · Integrare T509 nel base (conflitto sulla versione del kernel in `universe/universe.json`) — `da fare`
+- Pipeline: claude · sforzo medium · stima 1% · approvato · priorità 1
+- Step: 45
+- Contesto: `integra T509` (lo studio del terreno ricco, `docs/design/terreno-ricco.md`, `lab/terreno-ricco/`, kernel invariato) si è fermato su un solo conflitto in `universe/universe.json`: T509 ha allineato il seme a `0.10.40`, nel frattempo T531 ha portato il base a `0.10.41`. Vedi `dossier T509`.
+- Cosa fare: nel worktree `git merge task/T509`; in `universe/universe.json` tenere `"kernel": "0.10.41"` del base; controllare che nient'altro di T509 riporti la versione a 0.10.40 (`version.ts`, `package.json`, test sul seme); typecheck e suite intera coi turni.
+- Test: suite intera e typecheck coi turni.
+- Browser: no (solo docs, lab e uno script di misura).
+- Quando è fatto: commit su `task/T544`; poi l'orchestratore integra T544, e `integra T509` toglie worktree e branch. Sicurezza: nessuna superficie nuova.
